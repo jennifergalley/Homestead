@@ -1,0 +1,2 @@
+# Receipts hash exact bytes, so checkout must not rewrite their line endings.
+* -text whitespace=cr-at-eol
