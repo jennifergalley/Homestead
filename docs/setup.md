@@ -74,9 +74,125 @@ The final heroine pipeline remains a separate feasibility/visual approval step.
 6. Review the packaged build, not editor FPS, against the 60 FPS target and
    controller-only playthrough in `game-plan.md`.
 
-## Verification status
+## Isolated human-play preview
 
-**Current packaged MVP:** `Build\Windows\SurvivalGame.exe`.
+`Preview.cmd` requires **PowerShell 7 (`pwsh`)** and launches the exact separate
+candidate selected by the repo-relative `Preview.json`. Keep the entire candidate
+archive, its `acceptance-receipt.json` and `Verification` directory together.
+A build receipt alone is not acceptance. Missing, ambiguous, rejected, unsupported
+or hash-mismatched candidates fail explicitly; no newest-folder fallback exists.
+Neither this launcher nor selecting a candidate rebuilds or promotes `Build\Windows`.
+
+```powershell
+.\Scripts\Start-Preview.ps1 -ValidateOnly
+.\Scripts\Start-Preview.ps1
+.\Scripts\Start-Preview.ps1 -Profile second-review
+```
+
+The first command prints the resolved executable, working directory, checkpoint,
+hash and argument list without launching. A human launch supplies only
+`-HomesteadPreviewProfile=<id>`: normal controller, keyboard/mouse, sound and game
+flow remain enabled. There is no smoke/visual actor, synthetic route, input
+isolation or automatic quit. The existing prototype footer identifies the active
+preview profile. Settings **Save and quit**, F5/F9, autosaves and recovery behave
+normally within that profile.
+
+Profile IDs are **1-32 ASCII lowercase letters, digits or hyphens, starting with
+a letter**. Empty, duplicate, malformed, uppercase, absolute-path and traversal
+arguments are rejected before save access, never converted to an ordinary save.
+The runtime uses the fixed Windows user-settings root:
+`%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-<id>\SaveGames`.
+The `profile-` prefix also avoids Windows reserved device-directory names.
+All manual/rotating-auto/recovery files and their `.bak`/atomic `.tmp` siblings
+stay in that directory. The default selected profile is `jenny-review`.
+
+The same profile persists across relaunches and explicitly selected compatible
+preview packages. A different ID starts a separate preview world; it does not
+copy, reset or migrate any existing world. This isolates game save slots, not
+every Unreal graphics/config/cache file. No save schema was changed.
+Unflagged ordinary launches retain `ProjectSavedDir\SaveGames`; smoke/visual
+modes retain their explicit `SmokeSave` sandbox even with a valid preview flag.
+An invalid preview flag still fails before either route is used.
+The measured `review-01` Development executable resolves its unflagged default
+to `Windows\SurvivalGame\Saved\SaveGames` inside that archive. This is observed
+behavior for that package, not an assumption about every Unreal configuration;
+the explicit user-root preview route is independent of archive location.
+
+Use **`Preview.cmd`**, not a candidate's bare executable, for review. Return to the
+original with **`Play.cmd`**; its executable and personal worlds are not replaced.
+Do not manually copy personal saves into these profiles as part of verification.
+
+The explicit selection binds the candidate and executable SHA-256. Its schema-2
+acceptance receipt must say `verificationStatus: passed`, declare
+`previewSaveRoutingVersion: 1`, identify a privately checkpointed commit, and
+match the executable and proof-index hashes. Old verified packages without this
+runtime capability are deliberately refused. To change selection, first verify
+a separately built compatible candidate and its evidence, then deliberately
+update `Preview.json`; do not point at a rejected trial or edit receipts to
+bypass checks. Local receipts/hashes are integrity checks, not signed distribution.
+
+Focused checks:
+
+```powershell
+.\Tests\PreviewLauncherTests.ps1
+.\Scripts\Test-PreviewSaves.ps1 -Packaged `
+    -PackageDirectory 'Build\Releases\20260920-050723-5cc6c8a5\review-01' `
+    -OutputDirectory 'Saved\Automation\preview-routing-fresh'
+```
+
+Use a new output directory. The runtime suite resolves the real default path
+**read-only** and substitutes a synthetic default root for IO; it never opens
+personal saves. It creates two uniquely named synthetic profiles under the real
+preview root plus a test sandbox, writes all five slots and backups, and reloads
+them in a second process. Copies/hashes remain in the report folder; the two
+owned user-root fixtures are removed after successful verification. A separate
+preview-only startup proves the normal input gate/no automated actors and stays
+alive until the test closes only its own PID. In-process physical-source-style
+events are not a human hardware/controller-comfort test.
+
+Accepted content is relaxed locomotion and generic gathering/watering/weeding/
+hatchet presentation. No target-aware IK or exact contact is claimed; weeds and
+saplings still disappear when the original transaction commits. Rejected face
+shaders and shortened hair are absent; mid-back waves and the blonde-bob request
+remain unmet/deferred. The consolidated candidate's own receipt records its
+functional/native-4K evidence. Do not transfer the older clean-performance
+numbers below to this concurrent-GPU review run.
+
+### Review-01 evidence
+
+The fresh standalone package passed **170 routing writes + 130 separate-process
+reads**, with all **40 save/backup files byte-unchanged** on relaunch, four invalid
+startup cases exiting with status 2, and an actual preview-only process retaining
+normal input/no test actors. Launcher fixtures passed **40 checks**, and existing
+run/path controls passed **21**. The editor also passed the 300 routing checks.
+The real default directory was not opened; only the disclosed synthetic default,
+two fresh actual preview namespaces and the test sandbox were exercised.
+
+All **914** previous assertions passed: 188 clearing, 74 gathering, 181 watering,
+37 weeding and 434 full-loop. The full loop produced actual **3840x2160** captures
+at **render100**; its sampled mean was **59.10 FPS**, p95 **16.90 ms**, p99
+**17.05 ms**, excluding startup/readback. GPU sharing was not ruled out, so these
+are functional-run timings, not a new clean-performance certification.
+
+One final ordinary mapped gather/craft/walk/clear recording contains **84
+1280x720 frames over 40.7483 seconds**, with one clearing presentation, eight
+held-tool samples and a hidden tool/zero action weight afterward. Its actual
+before/swing/recovery sheet was inspected: the existing generic gesture remains,
+without gross new tool/body clipping; the sapling still disappears before the
+swing. No new cosmetic pass, exact-contact or human-feel approval is implied.
+All **124 tracked character/source LFS files** (a broader set than earlier
+72-file acceptance subsets) remained unchanged. Five incidental world-bootstrap
+resaves were restored and hash-checked before checkpointing.
+
+Evidence is indexed in the candidate's `Verification\proof-index.json`, with
+source/executable hashes and the published checkpoint in
+`acceptance-receipt.json`. Original reports remain under
+`Saved\Automation\20260920-050723-5cc6c8a5\review-01-*` and the ordinary recording
+under `Saved\VisualPlaytests\20260920-050723-5cc6c8a5\review-01-packaged`.
+
+## Preserved original verification status
+
+**Preserved original packaged MVP:** `Build\Windows\SurvivalGame.exe`.
 The final standalone native-4K run passed **432 mapped-input steps**, including
 all 18 appearance combinations, both crops, cooking/storage/construction, the
 enclosed doorway, overnight survival, exact persistence, and genuine failure

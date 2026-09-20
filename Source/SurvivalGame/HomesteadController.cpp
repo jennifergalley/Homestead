@@ -10,6 +10,8 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/Engine.h"
 #include "HAL/FileManager.h"
+#include "HAL/PlatformProcess.h"
+#include "HAL/PlatformMisc.h"
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -24,13 +26,6 @@
 namespace
 {
 FString Text(const char* Value) { return UTF8_TO_TCHAR(Value); }
-FString SavePath(const FString& Slot)
-{
-    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
-        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest")))
-        return FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("SmokeSave"), Slot + TEXT(".sav"));
-    return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"), Slot + TEXT(".sav"));
-}
 bool Edible(Homestead::Item Item)
 {
     return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
@@ -51,6 +46,26 @@ AHomesteadController::AHomesteadController()
 void AHomesteadController::BeginPlay()
 {
     Super::BeginPlay();
+    FString RoutingError;
+    bSaveRoutingReady = ResolveHomesteadSaveRoute(FCommandLine::Get(), FPaths::ProjectSavedDir(),
+        FPlatformProcess::UserSettingsDir(), HomesteadTestOutputDirectory(), SaveRoute, RoutingError);
+    if (!bSaveRoutingReady)
+    {
+        UE_LOG(LogTemp, Error, TEXT("SAVE_ROUTING_REJECTED: %s"), *RoutingError);
+        // UE's Windows graceful shutdown can discard the requested code. No save IO has begun.
+        FPlatformMisc::RequestExitWithStatus(true, 2);
+        return;
+    }
+#if !UE_BUILD_SHIPPING
+    bSaveRoutingTestPending = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveRoutingTest"));
+    if (bSaveRoutingTestPending)
+    {
+        UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING_DEFAULT_READ_ONLY: %s"), *SaveRoute.Directory);
+        SaveRoute.Directory = FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("SaveRoutingFixtures"), TEXT("Default"), TEXT("SaveGames"));
+        SaveRoute.Mode = TEXT("routing-fixture");
+        SaveRoute.Profile.Empty();
+    }
+#endif
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -66,9 +81,11 @@ void AHomesteadController::BeginPlay()
     const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
     const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
 #if !UE_BUILD_SHIPPING
-    bAutomatedInputOnly = SmokeTest || VisualPlaytest;
+    bAutomatedInputOnly = SmokeTest || VisualPlaytest || bSaveRoutingTestPending;
 #endif
-    if (SmokeTest || VisualPlaytest || !LoadLatest()) OpenBook(3);
+    UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING version=1 mode=%s profile=%s directory=\"%s\" automation_input=%d smoke_actor=%d visual_actor=%d"),
+        *SaveRoute.Mode, *SaveRoute.Profile, *SaveRoute.Directory, bAutomatedInputOnly, SmokeTest, VisualPlaytest);
+    if (SmokeTest || VisualPlaytest || bSaveRoutingTestPending || !LoadLatest()) OpenBook(3);
     InitializeAudio();
 #if !UE_BUILD_SHIPPING
     if (SmokeTest) GetWorld()->SpawnActor<AHomesteadSmokeTest>();
@@ -149,6 +166,14 @@ void AHomesteadController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (!Landscape) return;
+#if !UE_BUILD_SHIPPING
+    if (bSaveRoutingTestPending && GetPawn())
+    {
+        bSaveRoutingTestPending = false;
+        RunSaveRoutingChecks();
+        return;
+    }
+#endif
     if (bPendingSpawn && GetPawn())
     {
         const float Ground = AHomesteadWorld::GroundHeight(PendingLocation.X, PendingLocation.Y);
@@ -810,6 +835,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 
 bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
 {
+    if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
     if (!Save) { Notify(TEXT("Could not create a save record."), true); return false; }
     Save->WorldId = WorldId;
@@ -899,6 +925,7 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
 
 bool AHomesteadController::LoadLatest(bool RecoveryOnly)
 {
+    if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     const TArray<FString> Slots = RecoveryOnly
         ? TArray<FString>{TEXT("Homestead_Recovery"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Manual")}
         : TArray<FString>{TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
@@ -972,6 +999,16 @@ void AHomesteadController::NewGame()
 }
 void AHomesteadController::QuickSave() { if (!IsFailed()) SaveSlot(TEXT("Homestead_Manual")); }
 void AHomesteadController::QuickLoad() { if (!LoadLatest()) Notify(TEXT("There is no usable save to load yet."), true); }
+
+FString AHomesteadController::SavePath(const FString& Slot) const
+{
+    return FPaths::Combine(SaveRoute.Directory, Slot + TEXT(".sav"));
+}
+
+FString AHomesteadController::PreviewLabel() const
+{
+    return SaveRoute.Mode == TEXT("preview") ? TEXT("Preview: ") + SaveRoute.Profile + TEXT(" (isolated saves)") : FString();
+}
 
 void AHomesteadController::InitializeAudio()
 {

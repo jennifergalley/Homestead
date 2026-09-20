@@ -99,6 +99,39 @@ receipt records the actual package directory. Both test scripts accept the archi
 or exact platform directory and reject ambiguous old/new executable layouts.
 Run `Tests\DevelopmentRunTests.ps1` to check lifecycle and package-path controls.
 
+### Explicit human review without promotion
+
+`Preview.cmd` / `Scripts\Start-Preview.ps1` is separate from `Play.cmd`. The tracked
+`Preview.json` names one repo-relative reviewed candidate and persistent profile,
+bound to an executable SHA-256. Selection is deliberate, never newest-folder
+discovery. The resolver checks archive/platform ambiguity, rejection markers in
+both platform and ancestors, reparse points, a passed schema-2 acceptance receipt,
+preview-routing version, checkpoint, executable and proof-index hashes. Earlier
+packages without the new save-routing capability must not be selected.
+
+Human preview passes only `-HomesteadPreviewProfile=<limited-id>`; never reuse
+smoke/visual flags to achieve save isolation. It keeps physical input, sound and
+ordinary play, without synthetic actors or automatic exit. Saves persist under
+the fixed user-settings `SurvivalGame\PreviewProfiles\profile-<id>\SaveGames`
+namespace, including manual/auto/recovery/backup slots. Invalid IDs fail before
+save IO. No copying, reset or migration of personal worlds is automatic.
+`Play.cmd`, the original package and all prior candidates remain untouched.
+See `setup.md` for exact profile rules and launch commands.
+
+Preview acceptance needs focused launcher and actual save-backend isolation
+checks, including a separate-process reload. Use only synthetic fixtures: inspect
+the normal default path without opening it; create fresh uniquely named test profiles,
+copy their proof and remove only their owned files/directories. A short
+preview-only validation process has no automation flags and is stopped only by
+its owned PID; do not detach it or affect Jenny's other games. Retain the existing
+914 action/full-loop checks and the new candidate's native-4K/render100 evidence.
+Sampled action images and concurrent-GPU timings are not clean-performance,
+precise-contact, controller-comfort or aesthetic approval.
+
+This entry point exposes accepted locomotion and contextual actions only.
+Rejected face/hair trials stay rejected; requested mid-back waves, blonde bob,
+book/UI changes and broader roadmap work are not silently marked complete.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run
@@ -135,8 +168,9 @@ The first movement worker reproduced a menu failure with a diagnostic trace:
 a non-simulated physical A-button press arrived during the scripted outfit
 change, advancing the choice twice. Physical stick events also entered the
 offscreen game. Jenny confirmed she was using that controller in another game.
-Automation now rejects physical-source events only when the smoke/visual flag
-is present; ordinary player input remains enabled. Tests must coexist with her
+Automation now rejects physical-source events only in development-only
+smoke/visual/routing-test modes; a preview profile alone leaves ordinary player
+input enabled. Tests must coexist with her
 other applications, not ask her to stop playing. Performance captured while
 another game is active is concurrent-load evidence, not clean performance
 acceptance. Berry maturity must be established separately rather than assumed

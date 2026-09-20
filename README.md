@@ -18,7 +18,7 @@ Unreal 5.8.2 is installed at `E:\Program Files\UE_5.8`. The native editor module
 content bootstrap, and initial engine gameplay smoke scenario now run successfully.
 A standalone Windows technical build has also been produced at
 `Build\Windows\SurvivalGame.exe`; keep the entire `Build\Windows` directory together.
-The standalone package has passed the complete homestead and recovery route at
+That preserved original package passed the complete homestead and recovery route at
 native 3840x2160, averaging about 59 FPS on the target PC.
 Use its build receipt when comparing newer source changes. Controls are exercised
 through real engine input events; physical-controller feel and listening review
@@ -26,9 +26,29 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-To play the latest packaged prototype, double-click **`Play.cmd`** in this folder
+To play the preserved original prototype, double-click **`Play.cmd`** in this folder
 or `Build\Windows\SurvivalGame.exe`. The packaged game does not need the editor
 open. In-game Settings includes **Save and quit**.
+
+To review the separately verified movement and action improvements, double-click
+**`Preview.cmd`** (requires PowerShell 7). It selects only the explicit candidate
+in `Preview.json`, checks its acceptance receipt/executable hash, and uses the
+persistent **`jenny-review`** save profile. It does not replace `Play.cmd`, import
+your original world, run automated inputs, or quit automatically.
+
+Preview saves live in
+`%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-jenny-review\SaveGames`.
+Manual saves, all three autosaves, recovery and backups stay there. Relaunch
+`Preview.cmd` to continue; use `Play.cmd` to return to the untouched original.
+**Do not launch the candidate executable directly:** the preview-profile argument,
+not its package folder, selects this isolated save namespace.
+
+The review candidate retains the accepted relaxed locomotion and generic
+gathering, watering, weeding and sapling-hatchet feedback. These are technical
+improvements, not Jenny's aesthetic approval or precise hand/tool-contact IK.
+Rejected facial-shader and shortened-wave trials are not included. The requested
+mid-back wavy length and Melinoe-inspired blonde bob remain unmet/deferred.
+See `docs\setup.md` for profile selection, verification and known limits.
 
 From this directory in PowerShell:
 

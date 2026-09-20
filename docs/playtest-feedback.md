@@ -6,6 +6,15 @@ Character appearance and robotic movement need an observed gameplay diagnosis
 first. MetaHuman is not a settled next step. Use the current build's normal
 movement and interaction recordings as a basis for improvements.
 
+## Safe review entry point (2026-09-20)
+
+`Preview.cmd` exposes the separately verified movement/action candidate with
+persistent isolated preview saves, rather than replacing `Play.cmd` or copying
+Jenny's original world. `Preview.json` explicitly selects the reviewed package.
+This is launch/save-safety integration, not another visual redesign or approval
+of the heroine. The rejected face/hair trials remain excluded; mid-back waves,
+the blonde-bob request and the UI feedback below remain unmet/deferred.
+
 ## Wild gathering - first motion slice (2026-09-20)
 
 The separately packaged `gathering-01` adds a short restrained reach/pick/recover

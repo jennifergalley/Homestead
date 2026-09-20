@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "HomesteadAppearance.h"
+#include "HomesteadSaveRouting.h"
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
@@ -47,6 +48,7 @@ public:
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
     FString PlacementLabel() const;
+    FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
     void NudgePlacement(FVector2D Axis);
@@ -102,6 +104,9 @@ private:
     bool bToastError = false;
     FString SessionCheckpoint;
     FString WorldId;
+    FHomesteadSaveRoute SaveRoute;
+    bool bSaveRoutingReady = false;
+    bool bSaveRoutingTestPending = false;
     FVector PendingLocation = FVector(-1000, 0, 180);
     FRotator PendingRotation = FRotator(-15, 15, 0);
 
@@ -132,6 +137,8 @@ private:
     void RetryCheckpoint();
     void NewGame();
     bool SaveSlot(const FString& Slot, bool Quiet = false);
+    FString SavePath(const FString& Slot) const;
+    void RunSaveRoutingChecks();
     bool LoadLatest(bool RecoveryOnly = false);
     UHomesteadSave* ReadSave(const FString& Filename) const;
     void ApplySave(const UHomesteadSave& Save);
