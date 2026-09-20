@@ -61,6 +61,7 @@ void AHomesteadController::BeginPlay()
         FPlatformMisc::RequestExitWithStatus(true, 2);
         return;
     }
+    if (!PrepareStartupProbe()) return;
 #if !UE_BUILD_SHIPPING
     bSaveRoutingTestPending = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveRoutingTest"));
     if (bSaveRoutingTestPending)
@@ -88,9 +89,12 @@ void AHomesteadController::BeginPlay()
 #if !UE_BUILD_SHIPPING
     bAutomatedInputOnly = SmokeTest || VisualPlaytest || bSaveRoutingTestPending;
 #endif
+    bAutomatedInputOnly |= !StartupProbeDirectory.IsEmpty();
     UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING version=1 mode=%s profile=%s directory=\"%s\" automation_input=%d smoke_actor=%d visual_actor=%d"),
         *SaveRoute.Mode, *SaveRoute.Profile, *SaveRoute.Directory, bAutomatedInputOnly, SmokeTest, VisualPlaytest);
-    if (SmokeTest || VisualPlaytest || bSaveRoutingTestPending || !LoadLatest()) OpenBook(3);
+    const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
+    if (!Loaded) OpenBook(3);
+    if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();
 #if !UE_BUILD_SHIPPING
     if (SmokeTest) GetWorld()->SpawnActor<AHomesteadSmokeTest>();
@@ -100,7 +104,6 @@ void AHomesteadController::BeginPlay()
 
 bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
 {
-#if !UE_BUILD_SHIPPING
     if (bAutomatedInputOnly && !Params.IsSimulatedInput())
     {
         ++IgnoredExternalInputs;
@@ -111,7 +114,6 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         }
         return true;
     }
-#endif
     FInputAxisProperties AxisProperties;
     const bool HasAxisProperties = Params.Key.IsGamepadKey() && Params.Key.IsAnalog() && PlayerInput
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
@@ -171,6 +173,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (!Landscape) return;
+    if (!StartupProbeDirectory.IsEmpty()) TickStartupProbe();
 #if !UE_BUILD_SHIPPING
     if (bSaveRoutingTestPending && GetPawn())
     {
@@ -1080,6 +1083,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     if (Best)
     {
         ApplySave(*Best);
+        if (!StartupProbeDirectory.IsEmpty()) StartupProbeLoadedState = UTF8_TO_TCHAR(Sim.Serialize().c_str());
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveAudit")) && GEngine && GEngine->GameViewport)
             UE_LOG(LogTemp, Display, TEXT("SAVE_LOAD_AUDIT world=%s simulation_md5=%s look=%d,%d,%d,%d,%d,%d,%d view_mode=%d shader_complexity=%d"),
                 *WorldId, *FMD5::HashAnsiString(UTF8_TO_TCHAR(Sim.Serialize().c_str())),

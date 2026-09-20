@@ -5,6 +5,9 @@
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
 #include "HomesteadSave.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/PlayerInput.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformMemory.h"
@@ -29,6 +32,28 @@ bool ReadObject(const FString& Path, TSharedPtr<FJsonObject>& Object)
     FString Text;
     return FFileHelper::LoadFileToString(Text, *Path)
         && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Object) && Object.IsValid();
+}
+
+bool IsNormalLit()
+{
+    const auto* Viewport = GEngine ? GEngine->GameViewport.Get() : nullptr;
+    return Viewport && Viewport->ViewModeIndex == VMI_Lit
+        && Viewport->EngineShowFlags.Lighting && !Viewport->EngineShowFlags.ShaderComplexity;
+}
+
+TSharedRef<FJsonObject> EndurancePresentation()
+{
+    auto Object = MakeShared<FJsonObject>();
+    const auto* Viewport = GEngine ? GEngine->GameViewport.Get() : nullptr;
+    Object->SetBoolField(TEXT("available"), Viewport != nullptr);
+    if (Viewport)
+    {
+        Object->SetNumberField(TEXT("viewMode"), Viewport->ViewModeIndex);
+        Object->SetBoolField(TEXT("lighting"), Viewport->EngineShowFlags.Lighting);
+        Object->SetBoolField(TEXT("shaderComplexity"), Viewport->EngineShowFlags.ShaderComplexity);
+        Object->SetStringField(TEXT("showFlags"), Viewport->EngineShowFlags.ToString());
+    }
+    return Object;
 }
 }
 
@@ -67,8 +92,37 @@ void AHomesteadVisualPlaytest::PrepareEndurance()
     if (!Seed) { FinishEndurance(TEXT("failed"), TEXT("Disclosed fixture is missing or corrupt.")); return; }
     E.WorldId = Seed->WorldId;
     E.SavedState = Seed->SimulationData;
+    if (!GEngine || !GEngine->GameViewport || !PC->PlayerInput
+        || !FPaths::IsUnderDirectory(FPaths::ConvertRelativePathToFull(FPaths::ScreenShotDir()), OutputDirectory))
+    { FinishEndurance(TEXT("failed"), TEXT("Missing viewport/input or non-isolated screenshot directory.")); return; }
+    E.StartupViewMode = GEngine->GameViewport->ViewModeIndex;
+    E.StartupLighting = GEngine->GameViewport->EngineShowFlags.Lighting;
+    E.StartupShaderComplexity = GEngine->GameViewport->EngineShowFlags.ShaderComplexity;
+    E.StartupShowFlags = GEngine->GameViewport->EngineShowFlags.ToString();
+#if !UE_BUILD_SHIPPING
+    E.F5Binding = PC->PlayerInput->GetBind(EKeys::F5);
+    E.F9Binding = PC->PlayerInput->GetBind(EKeys::F9);
+#else
+    FinishEndurance(TEXT("failed"), TEXT("Endurance binding evidence requires the Development build.")); return;
+#endif
+    if (!E.F5Binding.IsEmpty() || !E.F9Binding.IsEmpty())
+    { FinishEndurance(TEXT("failed"), TEXT("Conflicting effective F5/F9 debug bindings remain.")); return; }
+    if (!IsNormalLit())
+    { FinishEndurance(TEXT("failed"), TEXT("Endurance requires normal Lit/lighting without ShaderComplexity.")); return; }
     RecordPresentationSettings(TEXT("start"));
     EnduranceEvent(TEXT("Prepared existing test-world fixture; mapped travel/actions only; no retries or direct simulation edits."));
+}
+
+bool AHomesteadVisualPlaytest::TapEnduranceLoad()
+{
+    const bool Before = FScreenshotRequest::IsScreenshotRequested();
+    Tap(EKeys::F9);
+    const bool After = FScreenshotRequest::IsScreenshotRequested();
+    EnduranceEvent(FString::Printf(TEXT("F9 screenshot request before=%d after=%d"), Before, After));
+    if (Before || After)
+    { FinishEndurance(TEXT("failed"), TEXT("Unexpected screenshot request around mapped F9.")); return false; }
+    ++Endurance.F9ScreenshotChecks;
+    return true;
 }
 
 bool AHomesteadVisualPlaytest::InspectEnduranceSaves()
@@ -102,6 +156,16 @@ bool AHomesteadVisualPlaytest::WriteEnduranceProgress(const FString& Status, con
     auto Object = MakeShared<FJsonObject>();
     Object->SetStringField(TEXT("status"), Status);
     Object->SetStringField(TEXT("reason"), Reason);
+    Object->SetNumberField(TEXT("litGuardVersion"), 1);
+    Object->SetNumberField(TEXT("litGuardTicks"), E.LitGuardTicks);
+    Object->SetNumberField(TEXT("startupViewMode"), E.StartupViewMode);
+    Object->SetBoolField(TEXT("startupLighting"), E.StartupLighting);
+    Object->SetBoolField(TEXT("startupShaderComplexity"), E.StartupShaderComplexity);
+    Object->SetStringField(TEXT("startupShowFlags"), E.StartupShowFlags);
+    Object->SetStringField(TEXT("effectiveF5DebugBinding"), E.F5Binding);
+    Object->SetStringField(TEXT("effectiveF9DebugBinding"), E.F9Binding);
+    Object->SetNumberField(TEXT("f9NoScreenshotChecks"), E.F9ScreenshotChecks);
+    Object->SetObjectField(TEXT("presentation"), EndurancePresentation());
     Object->SetNumberField(TEXT("pid"), FPlatformProcess::GetCurrentProcessId());
     Object->SetNumberField(TEXT("wallSeconds"), E.Loaded ? FPlatformTime::Seconds() - E.Started : 0);
     Object->SetNumberField(TEXT("targetSeconds"), E.Duration);
@@ -169,6 +233,9 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
     E.LastTick = Now;
     const double Age = Now - E.Started;
     const auto Go = [&E, Now](Phase Next) { E.Step = Next; E.StepStarted = Now; };
+    if (!IsNormalLit())
+    { FinishEndurance(TEXT("failed"), TEXT("Endurance requires normal Lit/lighting without ShaderComplexity.")); return; }
+    ++E.LitGuardTicks;
     if (Now >= E.NextControl)
     {
         E.NextControl = Now + 1;
@@ -232,8 +299,18 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
         if (Age >= E.NextCapture && Age < E.Duration - 5)
         {
             E.NextCapture = Age + 600;
-            FScreenshotRequest::RequestScreenshot(FPaths::Combine(OutputDirectory, TEXT("Frames"),
-                FString::Printf(TEXT("milestone-%02d.png"), CaptureIndex++)), false, false);
+            const FString Base = FPaths::Combine(OutputDirectory, TEXT("Frames"), FString::Printf(TEXT("milestone-%02d"), CaptureIndex));
+            IFileManager::Get().MakeDirectory(*FPaths::GetPath(Base), true);
+            auto Metadata = EndurancePresentation();
+            Metadata->SetNumberField(TEXT("wallSeconds"), Age);
+            Metadata->SetNumberField(TEXT("gameHour"), PC->State().hour);
+            Metadata->SetNumberField(TEXT("litGuardTicks"), E.LitGuardTicks);
+            FString Text;
+            FJsonSerializer::Serialize(Metadata, TJsonWriterFactory<>::Create(&Text));
+            if (!AtomicText(Base + TEXT(".json"), Text))
+            { FinishEndurance(TEXT("failed"), TEXT("Could not persist milestone presentation evidence.")); return; }
+            FScreenshotRequest::RequestScreenshot(Base + TEXT(".png"), false, false);
+            ++CaptureIndex;
             E.CaptureExcludeUntil = Now + 2;
         }
         if (Age >= E.Duration && !E.Finalizing) { E.Finalizing = true; Go(Phase::Save); }
@@ -273,7 +350,8 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
     switch (E.Step)
     {
     case Phase::Load:
-        Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Right); Go(Phase::Settle); break;
+        if (!TapEnduranceLoad()) return;
+        Tap(EKeys::Gamepad_Special_Right); Go(Phase::Settle); break;
     case Phase::Settle:
         if (Now - E.StepStarted < 1) break;
         if (PC->WorldId != E.WorldId || UTF8_TO_TCHAR(PC->Simulation().Serialize().c_str()) != E.SavedState)
@@ -354,7 +432,8 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
         ++E.ManualSaves; EnduranceEvent(TEXT("manual save; no progression rewind"));
         Go(E.RoundTrip ? Phase::Resume : Phase::Reload); break;
     case Phase::Reload:
-        Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Right); ++E.Loads; Go(Phase::Resume); break;
+        if (!TapEnduranceLoad()) return;
+        Tap(EKeys::Gamepad_Special_Right); ++E.Loads; Go(Phase::Resume); break;
     case Phase::Resume:
         if (PC->WorldId != E.WorldId || UTF8_TO_TCHAR(PC->Simulation().Serialize().c_str()) != E.SavedState)
         { FinishEndurance(TEXT("failed"), TEXT("Paused save/load roundtrip changed world/state.")); return; }

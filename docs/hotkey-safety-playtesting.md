@@ -10,9 +10,10 @@ physical input, prompt classification and graphics defaults are unchanged.
 There is no engine edit, broad debug-command disable, forced Lit or ShowFlags
 reset after saving. No art or save-format change is involved.
 
-The accepted video-sync package remains the selected human preview until a
-separate coordinator-reviewed selection. Its existing hotkey collision is not
-changed in place. Settings save/load avoids those keyboard debug bindings.
+During verification the accepted video-sync package remained selected. After
+coordinator review, separate checkpoint `af0c907` selected hotkey-safety-01 with
+the same `jenny-review` profile. The old package's hotkey collision is not changed
+in place; Settings save/load avoids it until that old instance is closed.
 Never remove unidentified historical screenshots or touch a running player.
 
 ## Actual before/after evidence

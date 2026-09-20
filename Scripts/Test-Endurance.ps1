@@ -4,7 +4,9 @@ param(
     [Parameter(Mandatory)][string]$FixtureSave,
     [Parameter(Mandatory)][string]$OutputDirectory,
     [ValidateSet(180,2700)][int]$Seconds=2700,
-    [switch]$CancelProbe
+    [switch]$CancelProbe,
+    [switch]$LitFailureProbe,
+    [DateTimeOffset]$LatestStartUtc = [DateTimeOffset]::MaxValue
 )
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
@@ -13,6 +15,10 @@ if(-not $state.allowWork -or ([DateTimeOffset]$state.deadlineUtc - [DateTimeOffs
     throw 'Run state/deadline does not allow this complete bounded exercise.'
 }
 if($CancelProbe -and $Seconds -ne 180){throw 'Cancellation probe must use the short duration.'}
+if($LitFailureProbe -and ($Seconds -ne 180 -or $CancelProbe)){throw 'Use the separate short Lit failure probe.'}
+if([DateTimeOffset]::UtcNow -ge $LatestStartUtc){
+    throw 'The explicit latest-start limit has passed; do not begin this exercise.'
+}
 $out=[IO.Path]::GetFullPath($OutputDirectory,$root)
 if(Test-Path -LiteralPath $out){throw 'Endurance requires a fresh dedicated output directory.'}
 $working=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
@@ -24,10 +30,12 @@ $ini=Join-Path $out 'Graphics\GameUserSettings.ini'
 Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $ini
 $control=Join-Path $root 'Automation\run.json'
 $args="-HomesteadVisualPlaytest -HomesteadEndurance -HomesteadEnduranceSeconds=$Seconds -HomesteadEnduranceControl=`"$control`" -HomesteadTestOutput=`"$out`" -GameUserSettingsINI=`"$ini`" -UserDir=`"$(Join-Path $out 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1920 -ResY=1080 -nosound -nosplash -abslog=`"$(Join-Path $out 'engine.log')`""
+if($LitFailureProbe){$args+=' -ExecCmds="viewmode shadercomplexity"'}
 $process=Start-Process -FilePath $exe -WorkingDirectory $working -ArgumentList $args -PassThru
 [ordered]@{pid=$process.Id;executable=$exe;executableSha256=(Get-FileHash $exe).Hash
     arguments=$args;workingDirectory=$working;startedUtc=[DateTimeOffset]::UtcNow.ToString('o');runId=$state.id
-    frozenDeadline=$state.deadlineUtc;seconds=$Seconds;cancelProbe=[bool]$CancelProbe
+    frozenDeadline=$state.deadlineUtc;latestStartUtc=$LatestStartUtc.ToString('o');seconds=$Seconds
+    cancelProbe=[bool]$CancelProbe;litFailureProbe=[bool]$LitFailureProbe
     stopMarker=(Join-Path $out 'stop-endurance.txt');progress=(Join-Path $out 'progress.json')
     isolation='Mapped simulated input only; existing visual observer/sandbox. Explicit synthetic graphics INI and UserDir.'
 } | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $out 'launch.json')
@@ -43,9 +51,19 @@ try {
         throw 'Owned endurance process exceeded bounded timeout; run incomplete.'
     }
     $result=Get-Content (Join-Path $out 'progress.json') -Raw | ConvertFrom-Json
-    $expected=if($CancelProbe){'cancelled'}else{'passed'}
-    if($process.ExitCode -ne 0 -or $result.status -ne $expected){throw "Endurance $($result.status): $($result.reason). See $out"}
-    if(-not $CancelProbe){
+    $expected=if($LitFailureProbe){'failed'}elseif($CancelProbe){'cancelled'}else{'passed'}
+    [ordered]@{processExitCode=$process.ExitCode;actualStatus=$result.status;expectedStatus=$expected
+        litFailureProbe=[bool]$LitFailureProbe} | ConvertTo-Json | Set-Content (Join-Path $out 'process-exit.json')
+    # UE's graceful Windows quit may return0 despite RequestExitWithStatus(false,1).
+    $allowedExit=if($LitFailureProbe){@(0,1)}else{@(0)}
+    if($process.ExitCode -notin $allowedExit -or $result.status -ne $expected -or $result.litGuardVersion -ne 1){
+        throw "Endurance $($result.status), exit$($process.ExitCode): $($result.reason). See $out"
+    }
+    if($LitFailureProbe -and ($result.reason -ne 'Endurance requires normal Lit/lighting without ShaderComplexity.' -or
+        $result.presentation.viewMode -ne 8 -or -not $result.presentation.shaderComplexity)){
+        throw 'Negative probe did not observe and reject the deliberate real debug mode.'
+    }
+    if(-not $CancelProbe -and -not $LitFailureProbe){
         python (Join-Path $PSScriptRoot 'Analyze-Endurance.py') $out
         if($LASTEXITCODE -ne 0){throw 'Endurance evidence analysis failed.'}
     }

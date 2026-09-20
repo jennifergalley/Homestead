@@ -117,6 +117,13 @@ private:
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;
     bool bSaveRoutingTestPending = false;
+    FString StartupProbeDirectory, StartupProbeExpectedState, StartupProbeLoadedState, StartupProbeWorld;
+    double StartupProbeNext = 0, StartupProbeDeadline = 0;
+    int32 StartupProbeStep = 0;
+    uint64 StartupProbeLitTicks = 0;
+    bool PrepareStartupProbe();
+    void TickStartupProbe();
+    void FinishStartupProbe(const FString& Error);
     FVector PendingLocation = FVector(-1000, 0, 180);
     FRotator PendingRotation = FRotator(-15, 15, 0);
 

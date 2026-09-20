@@ -96,6 +96,7 @@ private:
     void EnduranceEvent(const FString& Message);
     bool WriteEnduranceProgress(const FString& Status, const FString& Reason);
     bool InspectEnduranceSaves();
+    bool TapEnduranceLoad();
     void FinishEndurance(const FString& Status, const FString& Reason);
     void Tap(FKey Key);
     void ApplyAxes(FVector2D Move, FVector2D Look);

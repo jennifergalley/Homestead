@@ -59,6 +59,12 @@ The final heroine pipeline remains a separate feasibility/visual approval step.
 
 ## Repeatable workflow
 
+**Offline release note:** Development/editor tools can open UE TraceControl
+listeners. The supported Shipping/reused-container path and its deliberately
+limited runtime proof are in `offline-startup.md`. It skips all editor/cook/pak
+runtime launches; the ordinary workflow below does not. Honor the current
+coordinator launch hold before running Development tools.
+
 1. Run `Scripts\Test-Native.ps1` to exercise game rules and persistence.
 2. Run `Scripts\Build-Game.ps1`. It imports only source assets whose expected
    sizes are recorded in `Assets\asset-manifest.json`.
@@ -90,8 +96,12 @@ Neither this launcher nor selecting a candidate rebuilds or promotes `Build\Wind
 ```
 
 The first command prints the resolved executable, working directory, checkpoint,
-hash and argument list without launching. A human launch supplies only
-`-HomesteadPreviewProfile=<id>`: normal controller, keyboard/mouse, sound and game
+hash and argument list without launching. A human launch supplies
+`-HomesteadPreviewProfile=<id>` and `-Res=0x0wf` (native monitor-sized windowed
+fullscreen). Shipping also supplies a candidate-local `-UserDir` to preserve
+the generated-config convention rather than silently switching to AppData.
+`-Windowed` replaces the borderless argument with `-windowed`.
+Normal controller, keyboard/mouse, sound and game
 flow remain enabled. There is no smoke/visual actor, synthetic route, input
 isolation or automatic quit. The existing prototype footer identifies the active
 preview profile. Settings **Save and quit**, F5/F9, autosaves and recovery behave
@@ -117,6 +127,9 @@ The measured `review-01` Development executable resolves its unflagged default
 to `Windows\SurvivalGame\Saved\SaveGames` inside that archive. This is observed
 behavior for that package, not an assumption about every Unreal configuration;
 the explicit user-root preview route is independent of archive location.
+Visible borderless/client-to-monitor behavior still needs a chosen human launch;
+the isolated Shipping proof was deliberately windowed/offscreen to avoid
+activating a window. See `offline-startup.md`, including graphics seed provenance.
 
 Use **`Preview.cmd`**, not a candidate's bare executable, for review. Return to the
 original with **`Play.cmd`**; its executable and personal worlds are not replaced.
@@ -317,7 +330,7 @@ documented transient-heading overlap. Active feedback uses the free upper-right
 band while the book/Look is open; world/planning placement and book geometry stay
 unchanged. The dedicated runner captures real success/error/recovery messages
 while visible, not after expiry. See `feedback-layout-playtesting.md`.
-Accepted `video-sync-01` remains selected until coordinator review.
+The correction is now retained in the reviewed `hotkey-safety-01` selection.
 
 The focused F5 route also exposed an inherited Development-build debug binding:
 F5 saves **and** selects ShaderComplexity; F9 is also bound to `shot showui`.
@@ -329,8 +342,10 @@ inherited debug bindings. Repeated keyboard and Settings actions preserve actual
 viewport mode/full ShowFlags and no longer request screenshots. An intentionally
 chosen supported non-Lit mode also survives saving/loading: there is no forced
 Lit workaround. Normal saved-preview startup remains human-input enabled.
-The accepted older video-sync package is not modified in place; use its Settings
-save/load until a reviewed selection changes it. See
+Selection checkpoint `af0c907` explicitly chooses the accepted hotkey-safe
+package with unchanged `jenny-review`. No old process/package/config is modified
+in place. If an older instance is still running, save and quit through its
+Settings menu, then launch Preview again to use the correction. See
 `hotkey-safety-playtesting.md` for isolated reproduction, the retained Unlit
 fixture-policy failure, fresh Lit guards and exact persistence evidence.
 
@@ -348,8 +363,7 @@ graphics or OS/display settings were changed.
 the D-pad or Up/Down; press **A** or **Enter** to toggle. The existing row identities
 0-10, pages, Back behavior and paused world remain unchanged. Off stays the
 default; opening Settings does not apply or reset any graphics preference.
-The currently selected `book-clarity-01` preview does not contain this option
-until the coordinator accepts and explicitly selects a later candidate.
+The currently selected hotkey-safe preview retains this accepted option.
 
 Vertical sync may reduce screen tearing but can add input delay. It does not
 resolve every flicker. An `active On/Off (override)` label distinguishes a

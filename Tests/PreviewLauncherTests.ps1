@@ -35,7 +35,12 @@ try {
     Write-Fixtures
     $plan = & $launcher -SelectionFile $selectionFile -ValidateOnly
     Assert-True ($plan.Executable -eq $binary -and $plan.WorkingDirectory -eq $platform) 'Archive and spaced path must resolve exactly.'
-    Assert-True ($plan.Arguments.Count -eq 1 -and $plan.Arguments[0] -ceq '-HomesteadPreviewProfile=jenny-review') 'Human preview must have only the validated profile flag.'
+    Assert-True ($plan.Arguments.Count -eq 2 -and $plan.Arguments[0] -ceq '-HomesteadPreviewProfile=jenny-review' -and
+        $plan.Arguments[1] -ceq '-Res=0x0wf') 'Human preview must have the validated profile and native monitor-sized borderless request only.'
+    Assert-True (($plan.Arguments -join ' ') -notmatch 'ResX|ResY|ForceRes|ExecCmds|r\.VSync|r\.ScreenPercentage') 'Window default must not hardcode dimensions or alter other graphics preferences.'
+    $windowed = & $launcher -SelectionFile $selectionFile -Windowed -ValidateOnly
+    Assert-True ($windowed.Arguments.Count -eq 2 -and $windowed.Arguments[1] -ceq '-windowed') 'Explicit windowed opt-out must replace, not compete with, the borderless resolution argument.'
+    Assert-True ($windowed.Profile -ceq 'jenny-review' -and $windowed.Executable -eq $binary) 'Windowed opt-out must preserve the validated profile and candidate.'
     Assert-True (($plan.Arguments -join ' ') -notmatch 'Smoke|Visual|Automat|unattended|quit|ExecCmds') 'No automation/input-isolation/exit flags.'
     foreach($profile in @('a','con','second-profile','abcdefghijklmnopqrstuvwxyz123456')) {
         $p=& $launcher -SelectionFile $selectionFile -Profile $profile -ValidateOnly
@@ -80,6 +85,14 @@ try {
     Remove-Item -LiteralPath $receiptFile
     Assert-Rejected { & $launcher -SelectionFile $selectionFile -ValidateOnly } 'Build receipt alone cannot authorize preview.'
     Write-Fixtures
+    $shippingBinary = Join-Path (Split-Path $binary -Parent) 'SurvivalGame-Win64-Shipping.exe'
+    Copy-Item -LiteralPath $binary -Destination $shippingBinary
+    Assert-Rejected { & $launcher -SelectionFile $selectionFile -ValidateOnly } 'Mixed configuration executables must fail.'
+    Remove-Item -LiteralPath $binary
+    Assert-True ((& $launcher -SelectionFile $selectionFile -ValidateOnly).Executable -eq $shippingBinary) 'Shipping executable must resolve explicitly with the same hash/receipt guards.'
+    $shippingPlan = & $launcher -SelectionFile $selectionFile -ValidateOnly
+    Assert-True ($shippingPlan.Arguments.Count -eq 3 -and $shippingPlan.Arguments[2] -ceq "-UserDir=$(Join-Path $platform 'SurvivalGame')") 'Shipping must retain candidate-local generated config without moving fixed-root preview saves.'
+    Move-Item -LiteralPath $shippingBinary -Destination $binary
     $ambiguous=Join-Path $archive 'SurvivalGame\Binaries\Win64'
     $null=New-Item -ItemType Directory -Path $ambiguous -Force
     Set-Content -LiteralPath (Join-Path $ambiguous 'SurvivalGame.exe') -Value 'Ambiguous stale package.'

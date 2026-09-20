@@ -8,6 +8,16 @@ movement and interaction recordings as a basis for improvements.
 
 ## Safe review entry point (2026-09-20)
 
+Urgent startup feedback: repeated Windows firewall prompts were traced to an
+owned Development process's in-process Unreal TraceControl TCP listener.
+`offline-startup-01` uses supported Shipping engine objects and observed no
+owned TCP/UDP endpoints in its bounded probe. The fresh candidate retains
+normal Lit, mapped save/load and isolated profile behavior. The human launcher
+requests windowed fullscreen, but visible monitor-sized behavior is deliberately
+human-pending; no unattended window activation was attempted. Config effective
+values, not byte-identical normalization, are verified. See `offline-startup.md`.
+No permission dialog, security rule, current player process or save was changed.
+
 `Preview.cmd` exposes the separately verified movement/action candidate with
 persistent isolated preview saves, rather than replacing `Play.cmd` or copying
 Jenny's original world. `Preview.json` explicitly selects the reviewed package.
@@ -222,8 +232,20 @@ and the corrected save/load-only behavior, including errors, repeat actions,
 exact saved-world/appearance reload and normal human-preview startup. Supported
 deliberate non-Lit choices remain intact; no forced Lit conceals the collision.
 Fresh4K full-homestead verification stays Lit throughout13,210 observed ticks.
-See `hotkey-safety-playtesting.md`. The older selected video-sync package remains
-unchanged until review; no tearing, appearance or broad performance fix is claimed.
+See `hotkey-safety-playtesting.md`. After coordinator review, checkpoint `af0c907`
+explicitly selected the accepted package with unchanged `jenny-review`; no running
+instance or old package/config/save was altered. No tearing, appearance or broad
+performance fix is claimed.
+
+## Normal-Lit endurance - separately authorized confirmation (2026-09-20)
+
+The original45-minute endurance keeps its valid state/save evidence and explicit
+mixed-rendering qualification. The coordinator authorized exactly one corrected
+normal-Lit confirmation, with the identical prepared-fixture hash, frozen2700s
+criteria, circuit and default graphics. The opt-in observer fails on unexpected
+mode/lighting/ShaderComplexity instead of resetting rendering. This is bounded
+validation, not another feature or new acceptance of appearance/tearing/performance.
+See `endurance-lit-playtesting.md`; the human preview remains accepted hotkey-safe.
 
 ## Deferred feedback - 2026-09-19
 

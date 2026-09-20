@@ -49,6 +49,20 @@ def analyze(directory):
                        "netChange": values[-1] - values[0]}
     frames = sorted((root / "Frames").glob("*.png"))
     assert len(frames) == result["captures"] and len(frames) <= 5
+    if "litGuardVersion" in result:
+        assert result["litGuardVersion"] == 1 and result["litGuardTicks"] > 0
+        assert result["startupViewMode"] == 3 and result["startupLighting"] and not result["startupShaderComplexity"]
+        assert result["effectiveF5DebugBinding"] == result["effectiveF9DebugBinding"] == ""
+        assert result["f9NoScreenshotChecks"] == 2
+        assert re.findall(r"F9 screenshot request before=(\d) after=(\d)", events) == [("0", "0"), ("0", "0")]
+        assert not list((root / "EngineUser").rglob("*.png")), "Unsolicited engine screenshot files"
+        presentations = [result["presentation"]]
+        presentations += [json.loads(frame.with_suffix(".json").read_text(encoding="utf-8-sig")) for frame in frames]
+        for presentation in presentations:
+            assert presentation["available"] and presentation["viewMode"] == 3
+            assert presentation["lighting"] and not presentation["shaderComplexity"]
+            flags = dict(part.split("=", 1) for part in presentation["showFlags"].split(","))
+            assert flags["Lighting"] == "1" and flags["ShaderComplexity"] == "0"
     analysis = {"result": result, "postWarmupTrends": trends, "validSaveEnvelopes": saves,
                 "distinctAutosaveTransitions": writes, "actualFrames": len(frames),
                 "naturalHoursFromEngineDeltaAtFixture60MinuteDay": result["engineUnpausedSeconds"] / 150,

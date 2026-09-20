@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$SelectionFile = 'Preview.json', [AllowEmptyString()][string]$Profile)
+param([string]$SelectionFile = 'Preview.json', [AllowEmptyString()][string]$Profile, [switch]$Windowed)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $root = Split-Path $PSScriptRoot -Parent
@@ -51,6 +51,9 @@ if (-not $archive.StartsWith($releases + '\', [StringComparison]::OrdinalIgnoreC
 Reject-Links $archive
 $platform = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive
 $executable = Join-Path $platform 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+if (-not (Test-Path -LiteralPath $executable)) {
+    $executable = Join-Path $platform 'SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe'
+}
 Reject-Links $executable
 $cursor = $platform
 while ($cursor.Length -ge $releases.Length) {
@@ -84,10 +87,15 @@ Reject-Links $proof
 if ((Get-FileHash -LiteralPath $proof -Algorithm SHA256).Hash -ne $receipt.proofIndexSha256) {
     throw 'Preview acceptance proof index does not match its receipt.'
 }
+$arguments = @("-HomesteadPreviewProfile=$chosenProfile", $(if ($Windowed) { '-windowed' } else { '-Res=0x0wf' }))
+if ([IO.Path]::GetFileName($executable) -ceq 'SurvivalGame-Win64-Shipping.exe') {
+    # Shipping otherwise changes the generated-config root to AppData; retain candidate-local preferences.
+    $arguments += "-UserDir=$(Join-Path $platform 'SurvivalGame')"
+}
 [pscustomobject]@{
     Executable = $executable
     WorkingDirectory = $platform
-    Arguments = @("-HomesteadPreviewProfile=$chosenProfile")
+    Arguments = $arguments
     Profile = $chosenProfile
     Candidate = $selection.candidateDirectory
     Checkpoint = $receipt.checkpoint

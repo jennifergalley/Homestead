@@ -76,6 +76,13 @@ persistent power settings. Closing its process also releases the OS thread reque
 
 ## Candidate builds
 
+The urgent offline startup correction uses a supported Shipping-only
+`-ReuseCooked` / `-ReusePakDirectory` path, documented in `offline-startup.md`.
+It does not launch editor/bootstrap/import/cooker/UnrealPak. The ordinary
+Development commands below do not have that guarantee and remain subject to
+the coordinator's current launch hold. Do not change security rules or consume
+permission prompts to keep an autonomous run going.
+
 Keep `Play.cmd` and `Build\Windows` as the known-good player build. The worker uses
 a fresh candidate directory and fresh evidence directories:
 
@@ -190,6 +197,14 @@ No engine edit, forced Lit, blanket debug-command suppression, art changes or
 automatic preview selection is allowed. Jenny may now be playing independently;
 never manipulate her process/config/save to satisfy a protection check. Parent's
 desktop shortcut is outside worker scope. Return after this bounded correction.
+
+The coordinator accepted that correction and separately selected it in `af0c907`,
+then authorized one final `endurance-lit-01` confirmation. Reuse the original
+`D07D8406...` prepared fixture and frozen2700s criteria without navigation,
+survival-rule or graphics changes. Startup/every-tick Lit/lighting guards only
+observe and fail; they never repair renderer state. Start before11:00Arizona,
+retain noon's hard stop, cancellation and one-owned-engine rule. Do not promote
+this diagnostic or start more work afterward. See `endurance-lit-playtesting.md`.
 
 ## Starting a fresh run (coordinator)
 

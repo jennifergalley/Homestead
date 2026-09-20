@@ -1,7 +1,8 @@
 [CmdletBinding()]
-param([string]$SelectionFile = 'Preview.json', [AllowEmptyString()][string]$Profile, [switch]$ValidateOnly)
+param([string]$SelectionFile = 'Preview.json', [AllowEmptyString()][string]$Profile, [switch]$ValidateOnly, [switch]$Windowed)
 $ErrorActionPreference = 'Stop'
 $parameters = @{ SelectionFile = $SelectionFile }
+if ($Windowed) { $parameters.Windowed = $true }
 if ($PSBoundParameters.ContainsKey('Profile')) { $parameters.Profile = $Profile }
 $plan = & (Join-Path $PSScriptRoot 'Resolve-Preview.ps1') @parameters
 if ($ValidateOnly) { return $plan }

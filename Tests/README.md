@@ -22,6 +22,16 @@ build-native\HomesteadSimulationTests.exe
 
 ## Integration rules
 
+`Test-OfflineStartup.ps1` is a separately authorized, opt-in Shipping probe:
+one fresh isolated preview/config/user root, mapped Tab/F5/F9, observational
+Lit guard and owned TCP/UDP sampling. It does not reuse Development-only smoke
+actors or claim their914 checks. `Analyze-OfflineStartup.ps1` checks existing
+raw evidence without launching anything. `Compare-GraphicsDefaults.ps1` and
+`GraphicsDefaultsTests.ps1` distinguish UE's inherited-default INI normalization
+from an actual changed preference; byte identity is reported separately.
+The current launch hold still requires coordinator authorization for any new
+runtime probe. Human preview never supplies the startup-probe flag.
+
 `Scripts\Test-HotkeySafety.ps1` exercises exact F5/F9 callback, viewport/full
 ShowFlags and screenshot-request behavior, real save errors, repeated actions,
 synthetic preview-profile persistence and a normal unautomated saved-preview
@@ -38,6 +48,17 @@ smoke and visual runs accept only `FInputKeyEventArgs::IsSimulatedInput()` event
 normal gameplay still passes physical events through the same controller input
 handler. This prevents another game using the same controller from changing a
 test's menu selection or walking away from its resource target.
+
+The opt-in endurance observer also requires Lit/LightingOn/ShaderComplexityOff
+every tick, records full flags with each sparse frame and rejects F9 screenshot
+side effects. `Test-Endurance.ps1 -Seconds 180 -LitFailureProbe` deliberately
+requests ShaderComplexity in that isolated process and must observe explicit
+failure, never a forced Lit reset. The wrapper records Windows exit status
+separately: graceful UE shutdown may return0 for an explicit native failure.
+Normal acceptance still requires passed progress and all original frozen criteria.
+`Tests\EnduranceEvidenceTests.py <successful-sanity-output> <scratch-directory>`
+checks renderer/request evidence rejection using temporary copies, never
+rewriting the original proof. See `docs\endurance-lit-playtesting.md`.
 
 The smoke route includes deliberate physical-source keyboard/gamepad rejection
 probes, followed by the real mapped synthetic controls. It checks the runtime

@@ -36,6 +36,14 @@ in `Preview.json`, checks its acceptance receipt/executable hash, and uses the
 persistent **`jenny-review`** save profile. It does not replace `Play.cmd`, import
 your original world, run automated inputs, or quit automatically.
 
+Human preview now requests monitor-sized **windowed fullscreen** through the
+native startup argument; `Scripts\Start-Preview.ps1 -Windowed` opts out.
+Visible fullscreen confirmation is still a human check. The separate
+`offline-startup-01` Shipping candidate removes the observed Development
+TraceControl listener at compile time and has one isolated startup/save/socket
+proof; it is not selected until coordinator review. See
+`docs\offline-startup.md` for evidence, preserved preferences and limitations.
+
 Preview saves live in
 `%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-jenny-review\SaveGames`.
 Manual saves, all three autosaves, recovery and backups stay there. Relaunch
@@ -63,8 +71,8 @@ Read-only diagnostics found a reported 4K/30Hz desktop mode and a VSync-off,
 observe physical scanout. See `docs\presentation-diagnostics.md` for exact runtime
 settings, capture limits and the next human check. No graphics defaults changed.
 
-The accepted **`video-sync-01`**, now explicitly selected by `Preview.json`,
-adds **Settings > Vertical sync**, a
+The selected **`hotkey-safety-01`** retains the accepted `video-sync-01`
+**Settings > Vertical sync** control, a
 reversible On/Off toggle for later human comparison. Default remains Off;
 tearing is still unresolved. The persistent `jenny-review` save profile is unchanged.
 Graphics preferences are shared within that game's Unreal config, not isolated
@@ -98,6 +106,9 @@ for listening. `-FullLoop` adds the extended homestead scenario.
 `Build-Game.ps1` fetches the licensed source assets, compiles the native editor
 module, generates the materials/map/audio assets in the editor, and optionally
 cooks/packages the game. Failed steps stop with an explicit error.
+That ordinary Development workflow can open Unreal trace listeners; it is not
+the offline Shipping/reused-container path. Honor the current launch hold and
+use the explicit procedure in `docs\offline-startup.md` for this release.
 
 ## Controls
 
@@ -117,10 +128,10 @@ cooks/packages the game. Failed steps stop with an explicit error.
 | Rotate placement | RB or X | R or F |
 | Save / load | Field book Settings | Settings or F5 / F9 |
 
-The separately verified `hotkey-safety-01` candidate removes inherited engine
+The accepted, explicitly selected `hotkey-safety-01` removes inherited engine
 debug commands from F5/F9 without changing their save/load actions. It does not
 force a graphics mode after saving. See `docs\hotkey-safety-playtesting.md`;
-the selected older video-sync preview remains unchanged pending review.
+selection checkpoint `af0c907` keeps the same `jenny-review` save profile.
 
 The field book and construction preview pause simulation. Near a storage chest,
 the Pack page supports storing with X/F and taking stored materials with Y/G.
@@ -174,6 +185,10 @@ route in a disclosed copied test homestead with isolated saves/graphics. The fir
 run passed fixed participation/action/save criteria across a natural night and
 morning. See `docs\endurance-playtesting.md` for exact results and limitations;
 this diagnostic package does not replace the selected human preview.
+Its post-F5 rendering was later identified as ShaderComplexity. The separately
+authorized normal-Lit confirmation is documented in
+`docs\endurance-lit-playtesting.md`; it preserves the original frozen criteria,
+observes actual render flags every tick and never forces Lit.
 The separate targeted `Scripts\Test-ForageRenewal.ps1` covers selected wild-resource
 renewal through normal sleep and save/load; `docs\forage-renewal-playtesting.md`
 records actual component/HUD/frame evidence and the distinction from elapsed-time
@@ -181,7 +196,8 @@ endurance. No game rules or selected preview were changed.
 
 The bounded `feedback-layout-01` candidate keeps active success/error feedback
 away from book headings without moving rows or changing controls.
-See `docs\feedback-layout-playtesting.md`. It is not selected automatically.
+See `docs\feedback-layout-playtesting.md`. That correction is retained in the
+explicitly reviewed hotkey-safe selection.
 Read `docs\debug-hotkey-evidence.md` for the newly confirmed inherited F5/F9
 debug-command conflict and appended qualifications to earlier rendering evidence;
 the input-conflict fix is a separate follow-up, not part of this UI change.

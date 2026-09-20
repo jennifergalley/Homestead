@@ -153,3 +153,8 @@ and all postwarmup timing/memory samples follow that transition. The retained
 measurements describe this actual process, not normal-Lit gameplay performance;
 wall time, simulation/actions/save integrity and bounded stability remain
 observed. Original sealed proofs are unchanged. See `debug-hotkey-evidence.md`.
+
+**Subsequent confirmation:** after accepting and explicitly selecting
+`hotkey-safety-01` in `af0c907`, the coordinator authorized one normal-Lit run
+using this exact fixture/criteria. See `endurance-lit-playtesting.md`. It is new
+separate evidence, not an overwrite or reinterpretation of these sealed results.

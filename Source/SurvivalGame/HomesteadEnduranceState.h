@@ -13,6 +13,10 @@ struct FHomesteadEnduranceState
     double ProgressAt = 0, ProgressDistance = 0;
     double FrameSum = 0, FrameMaximum = 0;
     uint64 FrameCount = 0;
+    uint64 LitGuardTicks = 0;
+    int32 StartupViewMode = -1, F9ScreenshotChecks = 0;
+    bool StartupLighting = false, StartupShaderComplexity = false;
+    FString StartupShowFlags, F5Binding, F9Binding;
     TArray<uint64> FrameHistogram;
     TArray<FString> Samples, Events;
     TMap<FString, int64> SaveStamps;

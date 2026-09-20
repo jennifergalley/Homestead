@@ -12,11 +12,13 @@
     "Accepted prompts-01: stable controller/keyboard prompt intent; explicitly selected for isolated human preview",
     "Accepted book-clarity-01: limited carried possessions versus recipes/plans clarity; explicitly selected for isolated preview",
     "Presentation-diagnostics-01: investigated movement tearing/flicker; unresolved, diagnostic-only package",
-    "Video-sync-01: accepted optional VSync control, selected for jenny-review; default unchanged, tearing unresolved",
+    "Video-sync-01: accepted optional VSync control retained in the hotkey-safe preview; default unchanged, tearing unresolved",
     "Endurance-01: completed one diagnostic-only 45-minute real-game exercise; fixed criteria passed, no preview promotion",
     "Forage-renewal-01: targeted24h/36h wild renewal through normal bedrest/save/load passed; diagnostic-only, no production fix or preview promotion",
     "Feedback-layout-01: bounded active-toast/book-heading correction verified; video-sync preview unchanged; inherited F5/F9 collision documented separately",
-    "Hotkey-safety-01: separately authorized exact F5/F9 inherited debug-binding correction, actual save/renderer/screenshot and Lit homestead proof; no automatic preview selection"
+    "Hotkey-safety-01: accepted exact F5/F9 correction and explicitly selected inaf0c907 with unchangedjenny-review; no player instance or old package changed",
+    "Endurance-lit-01: coordinator-cancelled after465.462s for TraceControl listener investigation; short guard/sanity and partial evidence retained, no45-minute pass or retry",
+    "Offline-startup-01: supported Shipping trace-disabled release candidate, one isolated startup/save/socket proof; human borderless argument added, visible fullscreen verification pending; no selection before coordinator review"
   ],
   "deferred": [
     "MetaHuman or another wholesale character-pipeline replacement",
