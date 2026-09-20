@@ -5,11 +5,24 @@ Completed proposal/spec/design research is not implementation progress.
 Do not apply this change during the environment run or infer tool permission
 from OpenSpec's artifact-complete status.
 
-Work in heading order. Sections 2 and 3 establish durable ownership before
-rendering/UI integration; section 4 proves real garments before equipping can
-be presented as complete. All sections depend on 1.1. The coordinator, not this
-planning session, assigns the later implementer/run. Keep the environment
-change's progress untouched.
+Follow the dependency lanes below rather than treating heading order as a
+global barrier. All lanes require completed section 1, including accepted
+environment work and a fresh UI apply authorization. The coordinator, not this
+planning session, assigns the later implementer/run. Keep environment progress
+untouched.
+
+| Milestone lane | Existing tasks and prerequisites | Verification/completion boundary |
+| --- | --- | --- |
+| Early discoverable exit | After section 1, develop 5.1/5.2, the Settings/navigation/pause portions of 5.3/5.6/5.7, then 6.1-6.5 using the existing protected save representation | Verify the pinned exit, save failure/retry, explicit unsaved exit and recovery route before wardrobe work finishes; recheck them against the upgraded saves later |
+| Early existing-item inventory | After the shell/input foundation above, develop existing-item/tab icons from 4.5 and carried/chest grid, navigation and hover/focus details portions of 5.3/5.4/5.7 | Verify current item counts, 120-unit capacity, supported existing actions, device parity and pause at 720p/4K; retain existing authority/save semantics, not temporary wardrobe or persistent split/reorder data |
+| Owned wardrobe and integration | Sections 2 and 3 establish ownership/persistence; 4.1/4.2 establish safe modular assets before functional equipment presentation in 4.3/4.4 and completion of 5.4/5.5/5.6 | Equip/craft/store/dye and persistent layout require their real transactions, migration and admitted rendering; early UI must not present cosmetic toggles or placeholders as owned clothing |
+| Whole-change acceptance | Complete all remaining behavior and sections 7/8 after the lanes converge | All original tests, both save generations' exit checks and the existing two-set visual/performance limits still apply; no early milestone is whole-change acceptance or automatic promotion |
+
+These lanes introduce no new tasks or authorization. Mixed-scope tasks remain
+unchecked until their entire description and verification pass; record partial
+milestone evidence separately. Early screenshots count within Set A's existing
+budget, not an extra art-review cycle. Persistent grouping/splitting waits for
+2.5 and section 3; clothing preview/equipment waits for the wardrobe lane.
 
 ## 1. Accepted prerequisite and frozen evidence
 

@@ -531,10 +531,14 @@ Shipping-safe observer. A blocked tool is a stop, not grounds to omit evidence.
 
 ### 9. Acceptance and bounded evidence budget
 
-First finish functional correctness and complete icon/garment assets; this is
-not permission for endless styling. Exactly two matched visual sets at most:
+Verify each milestone's available behavior as it is built, without waiting for
+wardrobe assets to prove exit and existing-item navigation. Whole-change visual
+acceptance still requires functional correctness and complete icon/garment
+assets. Exactly two matched visual sets at most:
 
-- **Set A:** registered baseline plus first complete candidate, same synthetic
+- **Set A:** registered baseline plus first complete version of each surface,
+  collected incrementally for the early lane and completed when wardrobe is
+  integrated, using the same synthetic
   world/camera/time/weather/settled exposure and physical output sizes. Inspect
   Inventory equipped/base-only, hovered/focused material and clothing details,
   nearby/full/empty storage, quantity dialog, Craft, Build, Guidebook, Settings
@@ -608,16 +612,28 @@ claim from offscreen frames. No exposure changes to hide garment defects.
 
 ## Migration Plan
 
+The dependency table in `tasks.md` permits an early visible lane after section 1:
+build and verify the minimal native Settings shell/discoverable exit, then
+existing-item grids and hover/focus details against current item/save authority.
+Do not wait for all ownership, migration and modular garment work to show those
+improvements. No early equipment claim, fake wardrobe, temporary save schema or
+extra art-review cycle is permitted. Early captures belong to Set A's existing
+budget; mixed-scope tasks stay unchecked until fully complete. Sections 2/3 and
+compatible garment assets remain prerequisites for functional equipment and
+whole-change completion, and exit tests run again with the migrated schema.
+
 1. After environment acceptance and new apply authorization, record the accepted
    source/package, approved exact tools, branch/worktree and save isolation.
    No automatic schedule follows from artifact completion.
-2. Create synthetic old-save fixtures before changing serializers. Implement
-   portable ownership/migration and conservation tests independent of rendering.
+2. Create synthetic old-save fixtures before changing serializers. The early
+   visible lane can proceed independently of portable ownership/migration and
+   conservation work after section 1; preserve existing saves in that lane.
 3. Prove the modular base/garment asset spike through the approved pipeline;
    reject/stop if it cannot preserve supported adult presets and coverage.
-4. Integrate C++ menu shell, exit and focus behind candidate-only switch, then
-   all pages, renderables and typed transaction actions. Remove old free outfit
-   writers and dependent assertions only when replacement behavior is tested.
+4. Complete the early shell/exit/focus with all pages, renderables and typed
+   transaction actions once their ownership/persistence/asset prerequisites pass.
+   Remove old free outfit writers and dependent assertions only when replacement
+   behavior is tested.
 5. Run the focused regression matrix and two bounded review sets; package to a
    fresh candidate directory with proper receipts. Leave `Preview.json`, the
    active player process and all personal/accepted profiles untouched.
