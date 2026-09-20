@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260920-050723-5cc6c8a5\\hotkey-safety-01",
+  "candidateDirectory": "Build\\Releases\\20260920-050723-5cc6c8a5\\offline-startup-01",
   "profile": "jenny-review",
-  "executableSha256": "747501167355103485FE91F35B274F70414CA85DDC8A4D3BC1128E22F8C5E394"
+  "executableSha256": "CE5C9A262394E0B63E1105D71D4EBFB82CB61D4041FDC994618665F6FF29E634"
 }
