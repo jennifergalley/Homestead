@@ -51,6 +51,13 @@ does not clear new content authoring. No firewall rule, elevation workaround,
 account action or use of a Development executable as a shortcut is permitted.
 If that gate remains shut, stop before engine execution and report the blocker.
 
+Current preflight status (2026-09-20,14:05 Arizona onward): explicit approval
+now covers the reviewed bounded TraceControl exception, not additional services.
+Read-only inspection identified pre-main CrashReportClientEditor startup outside
+the proposed INI controls. Task1.3 is still unproven; no new engine was launched.
+See `authoring-preflight-result.md`. This updates the current blocker, not the
+normative privacy, runtime QA or quality requirements below.
+
 Dependency refinement authorized by the coordinator on 2026-09-20: completion
 of tasks1.1/1.2 permits a separately assigned no-engine preparation lane for
 tasks2.1/2.2 and the source-only portion of2.3 while1.3 remains blocked. This

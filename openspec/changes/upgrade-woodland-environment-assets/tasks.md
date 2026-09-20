@@ -1,14 +1,21 @@
 # Tasks
 
 Apply preflight was explicitly authorized on 2026-09-20. Only completed
-authorization/baseline work is checked below. The 12:32 Arizona coordinator
+authorization/baseline and completed source preparation are checked below.
+At14:05 Arizona Jenny explicitly approved the bounded TraceControl exception;
+the coordinator authorized controlled task1.3 preflight, not asset import.
+Pre-launch inspection identified the excluded startup crash-reporter child.
+Task1.3 remains unchecked and blocked on that additional policy conflict, not
+on missing TraceControl consent. See `authoring-preflight-result.md`.
+
+The 12:32 Arizona coordinator
 assignment authorized a planning-only dependency refinement. The separate12:39
 continuation now authorizes only2.1/2.2 and source-only2.3 preparation.
 Research/source-inspection results live in the linked dossier, not in checked
 implementation boxes. Work proceeds in heading order except for the explicit
 preparation dependency below, one engine writer, with bounded run controls.
 Palette design questions are empirical spike outcomes with explicit fallback
-rules. The separate authoring-authorization gate in task1.3 remains unresolved.
+rules. The separate authoring-workflow verification gate in task1.3 is unresolved.
 
 ## Preparation dependency and current hold
 
@@ -175,3 +182,46 @@ See design decision1 for data-only inspection and conditional Blender safeguards
   ValidateOnly still resolves the accepted Shipping binary/profile/arguments.
   No Blender/UE/game execution or visual Batch A occurred. Runtime-dependent2.3
   remains unchecked and1.3 remains blocked.
+
+## Explicit approval and pre-launch blocker (2026-09-20, 14:05-14:19 Arizona)
+
+- Jenny's direct Hermes reply, "I approve - please proceed", authorizes the
+  exact reviewed bounded TraceControl exception. Live run
+  `20260920-182217-d1f84e39` is resumed with its original7:22pm Arizona deadline.
+  Approval references original proposal SHA256
+  `EA25571F37A6F3109BEECCA56B54E56006D8F61F0C0B07A95BA5DE077DB0DBCC`;
+  byte-exact original is preserved in the linked preflight evidence directory.
+  Earlier unavailable/autonomy responses remain historical non-approvals.
+- Current assignment permits bounded guards/settings/child/Shipping-QA
+  preflight first. Only known TraceControl for the approved Editor-Cmd/Pak
+  and verified ShaderCompileWorker children are admitted; crash reporters,
+  recovery services, unexpected sockets/children and engine edits remain excluded.
+- Read-only startup tracing found the Editor's pre-main crash-monitor constructor,
+  outside the proposed INI/privacy controls. Installed Core/reporter identities
+  and valid Epic signatures were recorded. A retained older Python-commandlet
+  log confirms a historical CrashReportClient launch, not a new controlled test.
+  The worker stopped before launching the known excluded child.
+- `authoring-preflight-result.md` and
+  `docs\research\environment-assets\authoring-preflight-01\receipt.json`
+  distinguish source/binary-data/history from unperformed runtime evidence.
+  All seven original tool/module hashes still match; current rules/profile are
+  recorded read-only.234 protected source/asset/config/launcher hashes and the
+  real-root selected Shipping executable/profile/arguments still match.
+- No runtime supervisor, stop observer, controlled settings/child/cook/Pak
+  probe or new Shipping QA was implemented/executed past this blocker.
+  Primary fraction, GPU timing and resident GPU memory remain unmeasured.
+  No environment code, materials, imports, world images or preview promotion.
+  Four completed tasks remain1.1/1.2/2.1/2.2; runtime2.3 remains partial.
+- Coordinator must resolve the additional startup-child policy or establish a
+  supported prevention mechanism under unchanged constraints before further
+  execution. Approval alone never checks task1.3; actual workflow proof is required.
+- A separately requested bounded read-only continuation distinguishes anonymous
+  monitor pipes from networking and finds no basis to assert active Concert from
+  its argument alone: recovery plugin is disabled/EditorNoCommandlet and disables
+  CRC hosting. The installed reporter is Shipping; main/respawn source is absent.
+  Parent privacy context and existing global no-unattended-report marker are
+  real partial protections. Missing child UserDir/INI/NoAnalytics propagation,
+  compiled telemetry alternatives and the parent's global marker write attempt
+  prevent endorsing a fully isolated/no-upload workflow. See the complete
+  supported-controls/unknowns/ownership table in `authoring-preflight-result.md`;
+  no runtime proof or additional service permission is inferred.

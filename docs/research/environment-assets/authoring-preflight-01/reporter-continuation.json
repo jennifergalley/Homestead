@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-09-20T21:27:49.0100163+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "assignment": "One bounded read-only continuation on the same crash-monitor startup trace.",
+  "result": "blocked-no-runtime-permission-inferred",
+  "newEngineLaunches": 0,
+  "runtimeNetworkSamples": 0,
+  "priorReceiptSha256": "A71393C6C1421B29BF8BEFE9AED30BC1FC22CBDD5E4F3E1DDE394E29CE9BF4AD",
+  "tool": {
+    "targetName": "CrashReportClientEditor",
+    "configuration": "Shipping",
+    "targetType": "Program",
+    "launch": "$(EngineDir)/Binaries/Win64/CrashReportClientEditor.exe",
+    "version": {
+      "MajorVersion": 5,
+      "MinorVersion": 8,
+      "PatchVersion": 2,
+      "Changelist": 56702186,
+      "CompatibleChangelist": 55116800,
+      "IsLicenseeVersion": 0,
+      "IsPromotedBuild": 1,
+      "BranchName": "++UE5+Release-5.8",
+      "BuildId": "55116800"
+    },
+    "sha256": "94F11E2B0DB157FDBBA604FB49EAB94EB00E80951BDB94A8288FFA34546A7B57"
+  },
+  "sourceFiles": [
+    {
+      "relativePath": "Binaries\\Win64\\CrashReportClientEditor.exe",
+      "bytes": 23462328,
+      "sha256": "94F11E2B0DB157FDBBA604FB49EAB94EB00E80951BDB94A8288FFA34546A7B57"
+    },
+    {
+      "relativePath": "Binaries\\Win64\\CrashReportClientEditor-Win64-Shipping.target",
+      "bytes": 85993,
+      "sha256": "8570FED22B3D0556A98D97BA3A70B26AACF1107D8555DC4D7A1666A8AAABD43F"
+    },
+    {
+      "relativePath": "Programs\\CrashReportClient\\Config\\DefaultEngine.ini",
+      "bytes": 328,
+      "sha256": "C97C831EBA198D6CA5142D6EBCA87DEEE9705B7241FA5FF57722DB3622DFF9B6"
+    },
+    {
+      "relativePath": "Config\\BaseEngine.ini",
+      "bytes": 265467,
+      "sha256": "04BBB301BE5C344F5387F15C1B543778A8DE5F13F36F8F77273528F49AF0E36D"
+    },
+    {
+      "relativePath": "Config\\BaseEditorSettings.ini",
+      "bytes": 4476,
+      "sha256": "5272509E0B672E5BF9930A8162AF9707C47DD913E8149627D48EAC086C092C26"
+    },
+    {
+      "relativePath": "Source\\Runtime\\Core\\Private\\Windows\\WindowsPlatformCrashContext.cpp",
+      "bytes": 82752,
+      "sha256": "934C14186B79F19C2E283D8E5F678ED1326151238C0573C2E229E0D45D558CAE"
+    },
+    {
+      "relativePath": "Source\\Runtime\\Core\\Private\\Windows\\WindowsPlatformProcess.cpp",
+      "bytes": 90026,
+      "sha256": "F39E3E71AB2746653FBE620F0F2B166743561DF13E4FB5B9022670D36C008962"
+    },
+    {
+      "relativePath": "Source\\Runtime\\Core\\Private\\GenericPlatform\\GenericPlatformCrashContext.cpp",
+      "bytes": 79212,
+      "sha256": "E97DA8E87E563253A43E70BC3E589B26315A99550ACBAD546758CDCD8BF9883E"
+    },
+    {
+      "relativePath": "Source\\Runtime\\Core\\Public\\GenericPlatform\\GenericPlatformCrashContext.h",
+      "bytes": 39410,
+      "sha256": "C685AD1BBB4F0D364B77B13709B51747C121B5AD5DC38D6A17EFEADDA2070965"
+    },
+    {
+      "relativePath": "Source\\Runtime\\Core\\Public\\GenericPlatform\\GenericPlatformProcess.h",
+      "bytes": 36779,
+      "sha256": "11823D39D13396F4CE10235343DD8985689B87BF5490CAC39C9EDC6B4582C82A"
+    },
+    {
+      "relativePath": "Source\\Runtime\\Core\\Public\\HAL\\PlatformProcess.h",
+      "bytes": 4860,
+      "sha256": "4848211E98A947DF78F6BFED04AB3D32960998F7F35ED9B62DD731AB3DC387B1"
+    },
+    {
+      "relativePath": "Source\\Runtime\\CrashReportCore\\Private\\CrashReportCoreConfig.cpp",
+      "bytes": 8246,
+      "sha256": "1FD97475D4CFA91C171BDC339B8711D75DB648D9F580BB92AC28161B2DFAE324"
+    },
+    {
+      "relativePath": "Source\\Runtime\\CrashReportCore\\Private\\CrashReportAnalytics.cpp",
+      "bytes": 3043,
+      "sha256": "178025444CB77634B74B59A2DE8E0D46863B199A425AC4390598D8128AB1B818"
+    },
+    {
+      "relativePath": "Source\\Runtime\\CrashReportCore\\Private\\CrashReportCoreUnattended.cpp",
+      "bytes": 2317,
+      "sha256": "D0F15E3EA0B98DFD09D54EAE8892B0A015F1E5F0AB15F2AEE30E427D99213DAE"
+    },
+    {
+      "relativePath": "Plugins\\Developer\\Concert\\ConcertApp\\DisasterRecoveryClient\\DisasterRecoveryClient.uplugin",
+      "bytes": 764,
+      "sha256": "B393688CBA255494F6EAEEBAD7492CC389FBE080A7D95B58FC53A62A7729D5AF"
+    },
+    {
+      "relativePath": "Plugins\\Developer\\Concert\\ConcertApp\\DisasterRecoveryClient\\Source\\DisasterRecoveryClient\\Private\\DisasterRecoveryClientModule.cpp",
+      "bytes": 20869,
+      "sha256": "008F304A65733DCCDE1D231C647213E6A02A11DA41714DD1F5CC21E2E1A7D7A0"
+    }
+  ],
+  "coverage": {
+    "reporterMainSourcePresent": false,
+    "reporterPdbPresent": false,
+    "markerPath": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "markerExists": true,
+    "markerInspection": "Existence only; no file opened/written or permission changed.",
+    "crashClientDefaultIniEffectiveSelection": "Unverified; shipped file inspected, not runtime configuration."
+  },
+  "recoveryPlugin": {
+    "enabledByDefault": false,
+    "modules": [
+      {
+        "Name": "DisasterRecoveryClient",
+        "Type": "EditorNoCommandlet",
+        "LoadingPhase": "Default"
+      }
+    ],
+    "sourceHostingFunction": "IsRecoveryServiceHostedInCrashReporter returns false in installed source."
+  },
+  "binaryData": [
+    {
+      "text": "ConcertServer",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "ConcertSyncServer",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "UnrealRecoverySvc",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "UdpMessaging",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "DisasterRecovery",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "NoAnalytics",
+      "ascii": false,
+      "utf16": true
+    },
+    {
+      "text": "MONITOR=",
+      "ascii": false,
+      "utf16": true
+    },
+    {
+      "text": "READ=",
+      "ascii": false,
+      "utf16": true
+    },
+    {
+      "text": "WRITE=",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "Respawned",
+      "ascii": true,
+      "utf16": true
+    },
+    {
+      "text": "UserDir",
+      "ascii": false,
+      "utf16": true
+    },
+    {
+      "text": "UE_CRC_TELEMETRY_URL",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "UE_CRC_TELEMETRY_KEY",
+      "ascii": false,
+      "utf16": false
+    },
+    {
+      "text": "https://datarouter.ol.epicgames.com/",
+      "ascii": false,
+      "utf16": true
+    },
+    {
+      "text": "https://datarouter.ol.epicgames.com/datarouter/api/v1/public/data",
+      "ascii": false,
+      "utf16": true
+    }
+  ],
+  "findings": {
+    "monitorIpc": "Anonymous inherited handles, not a network listener.",
+    "forwarded": "READ/WRITE/MONITOR/ProcessGroupId; optional crash log; nullrhi/unattended/CleanCrashReports/low-integrity expectation; ConcertServer argument.",
+    "notForwarded": "Parent UserDir/INI/NoAnalytics/DisablePlugins/DDC/trace-server arguments are not forwarded in the startup constructor.",
+    "inheritedEnvironment": "CreateProcess lpEnvironment is null; initial child inherits environment. Final respawn behavior not source-verified.",
+    "globalWriteRisk": "Parent privacy false causes an OpenWrite attempt on existing ProgramData Epic no-unattended-report marker; no candidate UserDir redirection in that path.",
+    "privacyProtection": "Existing marker blocks the inspected pre-config unattended static-init report path; later parent context carries privacy false.",
+    "analyticsLimit": "Source permits compiled telemetry overrides; environment clearing alone is not established as a universal off switch.",
+    "concertLimit": "Argument/default INI alone do not prove active Concert/UDP; disabled EditorNoCommandlet recovery plugin and absent binary identifiers are supporting static distinctions only.",
+    "stopLimit": "Detached respawn; parent destructor closes handle, no verified cooperative child exit. PID/path/starttime and both generations needed before any future ownership proof."
+  },
+  "forbiddenWorkPerformed": false
+}

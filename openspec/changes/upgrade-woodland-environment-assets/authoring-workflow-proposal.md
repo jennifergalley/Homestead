@@ -1,6 +1,23 @@
 # Authoring workflow approval proposal
 
-**Task1.3: BLOCKED / NOT APPROVED / NOT EXECUTED.** Static inspection on
+**Current task1.3: PREFLIGHT APPROVED / BLOCKED BEFORE EXECUTION.** Jenny explicitly
+approved the bounded TraceControl exception at14:05 Arizona on2026-09-20.
+The live run records her direct reply and the original proposal SHA256
+`EA25571F37A6F3109BEECCA56B54E56006D8F61F0C0B07A95BA5DE077DB0DBCC`.
+Exact approved bytes are preserved in
+`docs\research\environment-assets\authoring-preflight-01\approved-proposal.md`.
+The12:32 owned-UnrealPak hard-stop decision also remains in force.
+
+Pre-launch inspection then identified the excluded CrashReportClientEditor
+startup path, before the proposed process INI controls. No new engine process
+was launched. See `authoring-preflight-result.md` for static/historical evidence,
+the additional decision needed and all still-unproven runtime requirements.
+Task1.3 remains unchecked; actual progress is4/29. This supersedes the former
+missing-permission status, not the execution or quality requirements.
+
+## Historical proposal as originally reviewed
+
+**Original task1.3: BLOCKED / NOT APPROVED / NOT EXECUTED.** Static inspection on
 2026-09-20, after accepted Shipping selection66066a1. This is not listener-free
 authoring proof or permission to start import. Tasks1.1/1.2 are recorded in
 `tasks.md`; all later tasks remain unchecked.
