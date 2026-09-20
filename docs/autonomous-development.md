@@ -1,0 +1,132 @@
+# Autonomous development
+
+One coding worker, one coordinator, bounded runs, and evidence from the real game.
+This is an app-session workflow, not an unattended executable that can operate
+after the Copilot app is closed or the machine is unavailable.
+
+## Run contract
+
+The default run is eight hours with a coordinator check-in every five minutes.
+`Automation\config.json` records scope and priorities; `Automation\run.json` is
+the local control record. The coding worker checks `allowWork` using
+`Scripts\Development-Run.ps1 -Action Status` before each new phase, build or
+delegation. The fixed deadline is never extended by resume or a scheduled tick.
+Finish an in-flight safe operation when stopping; do not start another iteration.
+The deadline is a cooperative stop, not a destructive mid-save process kill.
+
+The coordinator owns run state and scheduling. The worker owns game changes,
+candidate builds, and `Scripts\Update-DevelopmentStatus.ps1` reports. Use one
+coding writer and one Unreal build/import/test process at a time, even when Git
+worktrees exist. A branch-backed session shares the folder: do not mistake it for
+an isolated checkout. Coordinator changes to tracked files must finish before
+the worker starts. No automatic merge, force push or baseline package promotion.
+
+## One iteration
+
+1. Read the approved plan and feedback. Choose one bounded, reversible improvement.
+2. Observe the actual problem in normal play; use the existing evidence when still
+   applicable. State a concrete improvement target and failure/regression risks.
+3. Implement it, using at most one bounded read-only specialist if genuinely useful.
+   Do not create extra writers/editors for the same task.
+4. Run the smallest relevant native/build checks, then actual-game tests and an
+   ordinary-movement visual capture. Inspect the evidence, not just exit codes.
+   Functional teleport-assisted smoke checks and sampled-motion footage prove
+   different things; neither certifies physical controller comfort.
+5. Fix concrete regressions. Limit subjective cosmetic work to two review passes
+   per slice rather than endless resculpting. Preserve useful partial work honestly.
+6. Package separately, exercise that executable, and commit a verified checkpoint.
+   Report paths, evidence, shortcomings, and suggested next slice to the coordinator.
+   Wait for the next bounded assignment; do not silently expand into deferred work.
+
+The first priorities are current-pipeline movement/posture, one appealing heroine,
+then gathering motion. MetaHuman, other recorded UI feedback, and larger roadmap
+features remain deferred unless Jenny or a later explicit task changes the scope.
+Liking the heroine remains Jenny's subjective gate; do not call it approved for her.
+
+## Visibility and control
+
+`docs\development-status.md` is a generated, local latest-status report. Its
+timestamp and evidence distinguish fresh results from a long operation. It is
+opened in an editor panel; reload if that panel has not refreshed the file.
+`Automation\status.json` is the machine-readable equivalent.
+
+The coordinator uses the app's live session status, not absence of commits, to
+detect whether the worker is busy or awaiting input. Roughly every five minutes,
+post a short chat update: current work, last actual result, and a real blocker or
+uncertainty. A long tool call or closed app can delay a check-in. Do not invent
+progress, repeatedly poll an unchanged blocker, or send the worker duplicate jobs.
+
+Ask in chat to **pause**, **resume**, **stop**, or **run for N hours**. The coordinator
+updates state and messages the worker immediately. Local controls also exist:
+
+```powershell
+.\Scripts\Development-Run.ps1 -Action Status
+.\Scripts\Development-Run.ps1 -Action Pause -Reason 'Jenny requested a pause.'
+.\Scripts\Development-Run.ps1 -Action Resume
+.\Scripts\Development-Run.ps1 -Action Stop -Reason 'Stopping with a handoff.'
+```
+
+These file controls do not forcibly interrupt an in-flight tool call. Pause keeps
+the original deadline; after stop or expiry, a new run needs new authorization.
+The coordinator clears its session automation when stopped, records a concise
+handoff and project-journal entry, and releases its temporary awake process.
+`Hold-DevelopmentAwake.ps1` independently releases on stop/deadline within 15 seconds,
+and while paused. It holds only system sleep, not the display, and changes no
+persistent power settings. Closing its process also releases the OS thread request.
+
+## Candidate builds
+
+Keep `Play.cmd` and `Build\Windows` as the known-good player build. The worker uses
+a fresh candidate directory and fresh evidence directories:
+
+```powershell
+$candidate = 'Build\Releases\<run-id>\movement-01'
+.\Scripts\Build-Game.ps1 -Package -ArchiveDirectory $candidate
+.\Scripts\Test-Game.ps1 -Packaged -FullLoop -PackageDirectory $candidate `
+    -OutputDirectory 'Saved\Automation\<run-id>\movement-01'
+.\Scripts\Playtest-Visual.ps1 -Packaged -PackageDirectory $candidate `
+    -OutputDirectory 'Saved\VisualPlaytests\<run-id>\movement-01'
+```
+
+An older package cannot verify newer source. Keep licenses/provenance with assets,
+private portrait and personal saves out of Git, and recordings local. No purchases,
+credential work, account changes, or bypassing login/license/elevation prompts.
+Free assets/tools and reversible art decisions are permitted. Stop on human-only
+blockers rather than treating spare credits as a requirement to consume them.
+
+Unreal may append a `Windows` platform folder to an archive directory. The build
+receipt records the actual package directory. Both test scripts accept the archive
+or exact platform directory and reject ambiguous old/new executable layouts.
+Run `Tests\DevelopmentRunTests.ps1` to check lifecycle and package-path controls.
+
+## Starting a fresh run (coordinator)
+
+Confirm no old worker/build is active; explicitly stop and hand off an old run
+before replacing it. Create the run with `Development-Run.ps1 -Action Start -Hours N
+-CoordinatorSessionId <id>`, open a single app-native worker session, and assign
+its ID with `-Action AssignWorker -WorkerSessionId <id>`. Persist a five-minute
+session automation here, launch the bounded awake helper, and verify all three.
+The scheduler prompt must read this contract and run state, inspect the actual
+worker, enforce stop conditions, send meaningful updates, and dispatch only one
+bounded task at a time. Reuse that worker for sequential slices.
+
+## Setup evidence, 2026-09-20
+
+Lifecycle and package-path tests pass 20 checks. A separate Unreal package was
+built at `Build\Releases\automation-setup\Windows`; its ordinary-control route
+recorded 302 correctly sized frames and reached/gathered a plant. The original
+`Build\Windows` package was not rebuilt or replaced.
+
+Do not describe the new candidate as functionally clean. Its extended smoke run
+failed when node 22 gathered stones instead of expected branches; a separate
+basic run failed changing appearance color row 1. A comparison against the
+untouched original package also failed, later at berry maturation after six
+rests. These runs used 1920x1080, unlike the earlier successful 4K acceptance run.
+The differing failures need diagnosis; neither a game regression nor test
+nondeterminism has yet been proved. Do not weaken assertions or repeatedly rerun
+until a lucky pass. The first worker must investigate this evidence alongside
+the movement slice so autonomous quality gates become reliable.
+
+Reports remain local under `Saved\Automation\automation-setup`,
+`automation-setup-basic`, and `automation-original-comparison`.
+The actual-motion recording is `Saved\VisualPlaytests\automation-setup`.

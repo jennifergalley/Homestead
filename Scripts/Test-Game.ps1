@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop,
+    [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200)
@@ -9,7 +10,8 @@ $root = Split-Path $PSScriptRoot -Parent
 $project = Join-Path $root 'SurvivalGame.uproject'
 $output = Join-Path $root 'Saved\Automation'
 if ($Packaged) {
-    $executable = Join-Path $root 'Build\Windows\SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+    $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
+    $executable = Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
     if (-not (Test-Path -LiteralPath $executable)) { throw 'Package the Windows game before running packaged integration tests.' }
     $output = Join-Path $output 'Packaged'
     $prefix = ''
@@ -20,6 +22,7 @@ if ($Packaged) {
     $executable = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
     $prefix = "`"$project`" /Game/SurvivalGame/Maps/Homestead -game "
 }
+if ($OutputDirectory) { $output = [IO.Path]::GetFullPath($OutputDirectory, $root) }
 $null = New-Item -ItemType Directory -Path $output -Force
 $report = Join-Path $output 'smoke-result.txt'
 $captures = @('clearing.png', 'field-book.png', 'first-foundation.png', 'heroine-long.png', 'heroine-bob.png', 'heroine-colors.png', 'heroine-ponytail.png', 'heroine-apron.png', 'heroine-willow.png', 'heroine-hazel.png')

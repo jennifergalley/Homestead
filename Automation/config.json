@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "defaultHours": 8,
+  "checkInMinutes": 5,
+  "maxCodingWorkers": 1,
+  "candidateRoot": "Build\\Releases",
+  "promoteAutomatically": false,
+  "priorities": [
+    "Evidence-backed posture and locomotion improvements in the current heroine pipeline",
+    "One appealing heroine: face, eyes, hair and clothing presentation in actual gameplay",
+    "Responsive gathering motion after ordinary movement is credible"
+  ],
+  "deferred": [
+    "MetaHuman or another wholesale character-pipeline replacement",
+    "Horizontal tearing and controller prompt switching",
+    "Field-book redesign and gradual recipe learning",
+    "Companions, scavenging, winter expansion, village, hunting and romance"
+  ]
+}

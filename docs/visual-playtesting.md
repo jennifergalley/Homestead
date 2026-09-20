@@ -27,6 +27,11 @@ It runs offscreen with separate saves and does not commandeer the player's open
 game or send mouse/keyboard input to other applications. It does not update the
 packaged build or overwrite a player's session.
 
+To observe a separate standalone candidate, pass `-Packaged -PackageDirectory
+'Build\Releases\<candidate>'`. `-OutputDirectory` selects a fresh recording folder;
+existing telemetry is rejected rather than overwritten. The script verifies
+process exit and every frame's requested dimensions, not just file presence.
+
 ## Evidence and limits
 
 - `Frames`: actual screenshots sampled at approximately 8 Hz.

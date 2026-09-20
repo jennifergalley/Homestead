@@ -3,6 +3,9 @@
 A Windows-native, offline, controller-first survival and homesteading game.
 The design and roadmap are in `docs\game-plan.md`.
 
+Bounded autonomous development, status updates, pause/stop controls and protected
+candidate builds are described in `docs\autonomous-development.md`.
+
 ## Current state
 
 This is a **playable homestead prototype**, not the finished game. It has three

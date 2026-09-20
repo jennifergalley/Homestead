@@ -67,6 +67,10 @@ The final heroine pipeline remains a separate feasibility/visual approval step.
    rather than normal saves; previous reports/images are archived before a run.
 4. Run `Scripts\Start-Game.ps1` for standalone gameplay through the engine.
 5. Run `Scripts\Build-Game.ps1 -Package` for a standalone Windows distribution.
+   For autonomous work, use `-ArchiveDirectory 'Build\Releases\<candidate>'` to
+   preserve the known-good player build. Test it with `Test-Game.ps1 -Packaged
+   -PackageDirectory 'Build\Releases\<candidate>' -OutputDirectory
+   'Saved\Automation\<candidate>'`. See `autonomous-development.md` for run controls.
 6. Review the packaged build, not editor FPS, against the 60 FPS target and
    controller-only playthrough in `game-plan.md`.
 

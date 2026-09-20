@@ -27,5 +27,9 @@ Assets/Characters/Reference/
 *.blend2
 Automation/run.json
 Automation/status.json
+Automation/awake.json
+Automation/*.lock
+Automation/*.tmp
 Automation/history/
 docs/development-status.md
+docs/development-status.md.tmp

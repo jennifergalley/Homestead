@@ -1,7 +1,17 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Package, [switch]$SkipAssets)
+param([string]$EngineRoot, [switch]$Package, [switch]$SkipAssets,
+    [string]$ArchiveDirectory = 'Build\Windows')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+$archive = [IO.Path]::GetFullPath($ArchiveDirectory, $root)
+if ($Package) {
+    $archivePrefix = $archive.TrimEnd('\') + '\'
+    $running = @(Get-Process -Name SurvivalGame -ErrorAction SilentlyContinue |
+        Where-Object { $_.Path -and $_.Path.StartsWith($archivePrefix, [StringComparison]::OrdinalIgnoreCase) })
+    if ($running.Count) {
+        throw "A player is running from $archive (PID $($running.Id -join ', ')). Use a separate -ArchiveDirectory."
+    }
+}
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $project = Join-Path $root 'SurvivalGame.uproject'
@@ -25,18 +35,23 @@ if (-not (Test-Path -LiteralPath $map)) { throw 'Content bootstrap did not produ
 & (Join-Path $PSScriptRoot 'Import-Characters.ps1') -EngineRoot $engine
 if ($Package) {
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
-    $archive = Join-Path $root 'Build\Windows'
     & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output
     if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE)." }
-    $credits = Join-Path $archive 'asset-credits.md'
+    $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive
+    $credits = Join-Path $packageRoot 'asset-credits.md'
     Copy-Item -LiteralPath (Join-Path $root 'docs\asset-credits.md') -Destination $credits -Force
     [ordered]@{
         packagedUtc = [DateTimeOffset]::UtcNow.ToString('o')
         engineRoot = $engine
         configuration = 'Development'
+        archiveDirectory = $archive
+        packageDirectory = $packageRoot
         status = 'Prototype build; play and visual acceptance are separate.'
     } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $archive 'build-receipt.json') -Encoding utf8
-    Write-Host "Packaged game: $archive. Credits are included."
+    if ($packageRoot -ne $archive) {
+        Copy-Item -LiteralPath (Join-Path $archive 'build-receipt.json') -Destination (Join-Path $packageRoot 'build-receipt.json') -Force
+    }
+    Write-Host "Packaged game: $packageRoot. Credits are included."
 }
 else {
     Write-Host 'Editor target and content are built. Run Scripts\Start-Game.ps1.'

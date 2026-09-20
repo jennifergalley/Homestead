@@ -2,6 +2,7 @@
 
 The project uses Git, with Git LFS for Unreal assets, FBX exports, Blender sources,
 textures and audio. Keep LFS installed when cloning or switching revisions.
+The private remote is `https://github.com/jennifergalley/SurvivalGame`.
 
 Tracked content includes source, configuration, scripts, design documents,
 licensed authored/imported assets, and provenance. Build outputs, saved games,
