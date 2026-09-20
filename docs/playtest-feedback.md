@@ -139,6 +139,22 @@ the heading; stable captures wait for its expiry while the world stays paused.
 This does not resolve every source of field-book overwhelm, introduce gradual
 recipe knowledge, or claim Jenny's comprehension/comfort approval.
 
+## Movement tearing/flicker - investigated, unresolved (2026-09-20)
+
+The coordinator explicitly scheduled investigation only as
+`presentation-diagnostics-01`, distinct from the rejected facial-presentation
+experiment. Two offscreen game-only motion batches record live renderer/settings,
+screenshot-free tick timing, and sampled frames. They do not observe physical
+scanout, actual DXGI Present calls, DWM composition or VRR engagement.
+
+Read-only Windows queries independently report 3840x2160 at 30Hz; the diagnostic
+runtime reports D3D12, TSR, VSync off and a 60fps cap. These are facts to investigate,
+not a proven tearing cause. No repeatable whole-frame horizontal discontinuity
+was isolated in the inspected sampled frames; sparse captures cannot rule out
+brief GPU-rendered flicker. No graphics, exposure, shadow, AA or OS setting was
+changed. Full evidence and the bounded human follow-up are documented in
+`presentation-diagnostics.md`. Accepted `book-clarity-01` remains selected.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction
@@ -146,7 +162,6 @@ to change these systems immediately.
 
 | Area | Report | Follow-up when scheduled |
 | --- | --- | --- |
-| Rendering | Screen tearing / horizontal flickers while moving. | Reproduce and capture the artifact; distinguish presentation tearing from temporal/rendering artifacts before choosing a fix. Do not assume a VSync diagnosis from the description alone. |
 | Music and ambience | "Great." | Preserve this as a successful baseline; avoid unnecessary replacement or remixing during unrelated work. |
 | Field book / recipes | The book feels overwhelming; learning recipes gradually might be better than exposing all recipes immediately. | Explore progressive disclosure or a learn/unlock flow. This is a proposal, not a confirmed progression design; essential opening-survival actions must remain attainable. |
 | Bob hairstyle | The intended straight blonde bob is closer to Melinoe's haircut in Hades II, not the current "karen hairstyle." | Deferred visual direction for that alternative only; preserve the long brown-haired default. Inspect the reference before specifying cut details. Author an original interpretation, not a copy or import of game assets. |

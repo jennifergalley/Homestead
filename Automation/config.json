@@ -10,11 +10,12 @@
     "Long-term appealing heroine goal; further cosmetic experiments are deferred for this run",
     "Responsive gathering motion after ordinary movement is credible",
     "Accepted prompts-01: stable controller/keyboard prompt intent; explicitly selected for isolated human preview",
-    "Implemented book-clarity-01: carried possessions versus recipes/plans; technically verified candidate awaits coordinator review and selection"
+    "Accepted book-clarity-01: limited carried possessions versus recipes/plans clarity; explicitly selected for isolated preview",
+    "Presentation-diagnostics-01: investigate movement tearing/flicker only; unresolved, no graphics-setting fix authorized"
   ],
   "deferred": [
     "MetaHuman or another wholesale character-pipeline replacement",
-    "Horizontal tearing",
+    "Graphics/presentation fixes or new options until the tearing/flicker cause is established and a fix is explicitly scoped",
     "Broader field-book/inventory redesign and gradual recipe learning; ownership-versus-recipe clarity is implemented separately",
     "Further face/skin/eye/hair experiments; requested mid-back waves and blonde bob remain unmet",
     "Companions, scavenging, winter expansion, village, hunting and romance"

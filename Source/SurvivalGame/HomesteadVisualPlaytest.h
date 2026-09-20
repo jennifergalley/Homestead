@@ -46,6 +46,10 @@ private:
     int32 HerbBefore = 0;
     double LastWallTime = 0;
     FString OutputDirectory;
+    bool bPresentationDiagnostics = false;
+    TArray<FString> PresentationTimings;
+    TArray<FString> PresentationSettings;
+    void RecordPresentationSettings(const TCHAR* Phase);
     bool bWaterRoute = false;
     bool bClearRoute = false;
     bool bCleared = false;

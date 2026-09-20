@@ -5,6 +5,11 @@
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
 #include "HomesteadTestPaths.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/GameUserSettings.h"
+#include "HAL/IConsoleManager.h"
+#include "HardwareInfo.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
@@ -41,6 +46,45 @@ void AHomesteadVisualPlaytest::ApplyAxes(FVector2D Move, FVector2D Look)
     PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_RightY, IE_Axis, Look.Y, 1));
 }
 
+void AHomesteadVisualPlaytest::RecordPresentationSettings(const TCHAR* Phase)
+{
+    PresentationSettings.Add(FString::Printf(TEXT("[%s] rhi=%s render_offscreen=%d forced_windowed=%d"),
+        Phase, *FHardwareInfo::GetHardwareInfo(NAME_RHI),
+        FParse::Param(FCommandLine::Get(), TEXT("RenderOffscreen")),
+        FParse::Param(FCommandLine::Get(), TEXT("windowed"))));
+    if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
+    {
+        const FViewport* Viewport = GEngine->GameViewport->Viewport;
+        const FIntPoint Size = Viewport->GetSizeXY(), Target = Viewport->GetRenderTargetTextureSizeXY();
+        PresentationSettings.Add(FString::Printf(TEXT("actual_viewport=%d,%d output_target=%d,%d actual_window_mode=%d (0=exclusive,1=borderless,2=windowed)"),
+            Size.X, Size.Y, Target.X, Target.Y, static_cast<int32>(Viewport->GetWindowMode())));
+    }
+    else PresentationSettings.Add(TEXT("actual_viewport=unavailable"));
+    if (const auto* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
+    {
+        float Normalized = 0, Scale = 0, Minimum = 0, Maximum = 0;
+        Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
+        const FIntPoint Resolution = Settings->GetScreenResolution();
+        PresentationSettings.Add(FString::Printf(TEXT("user_settings_resolution=%d,%d user_settings_mode=%d user_settings_vsync=%d user_settings_dynamic_resolution=%d user_settings_frame_limit=%.3f user_settings_scale=%.3f"),
+            Resolution.X, Resolution.Y, static_cast<int32>(Settings->GetFullscreenMode()),
+            Settings->IsVSyncEnabled(), Settings->IsDynamicResolutionEnabled(), Settings->GetFrameRateLimit(), Scale));
+    }
+    else PresentationSettings.Add(TEXT("user_settings=unavailable"));
+    for (const TCHAR* Name : {TEXT("r.VSync"), TEXT("t.MaxFPS"), TEXT("r.FullScreenMode"),
+        TEXT("r.ScreenPercentage"), TEXT("r.ScreenPercentage.Default"), TEXT("r.ScreenPercentage.Default.Desktop.Mode"),
+        TEXT("r.DynamicRes.OperationMode"), TEXT("r.AntiAliasingMethod"), TEXT("sg.AntiAliasingQuality"),
+        TEXT("r.TemporalAA.Upsampling"), TEXT("r.TSR.History.ScreenPercentage"),
+        TEXT("r.DefaultFeature.MotionBlur"), TEXT("r.MotionBlurQuality"), TEXT("r.Shadow.Virtual.Enable"),
+        TEXT("r.DynamicGlobalIlluminationMethod"), TEXT("r.ReflectionMethod"),
+        TEXT("rhi.SyncInterval"), TEXT("r.D3D12.UseAllowTearing")})
+    {
+        const auto* Variable = IConsoleManager::Get().FindConsoleVariable(Name);
+        PresentationSettings.Add(Variable
+            ? FString::Printf(TEXT("cvar %s=%s flags=0x%08x"), Name, *Variable->GetString(), Variable->GetFlags())
+            : FString::Printf(TEXT("cvar %s=unregistered"), Name));
+    }
+}
+
 void AHomesteadVisualPlaytest::Prepare()
 {
     OutputDirectory = HomesteadTestOutputDirectory();
@@ -55,6 +99,13 @@ void AHomesteadVisualPlaytest::Prepare()
     bClearRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingPlaytest"));
     Telemetry[0] += TEXT(",clear_weight,clear_phase,clear_starts,hatchet_visible,hatchet_pitch,hatchet_scale,hatchet_radius,hatchet_x,hatchet_y,hatchet_z,branch_stock,fiber_stock,resource_cleared,energy");
     bWeedRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingPlaytest"));
+    bPresentationDiagnostics = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationDiagnostics"));
+    if (bPresentationDiagnostics && (bWaterRoute || bClearRoute || bWeedRoute))
+    {
+        Observations.Add(TEXT("FAILED Presentation diagnostics cannot be combined with an action route."));
+        Finish();
+        return;
+    }
     Observations.Add(bWeedRoute
         ? TEXT("Weeding uses an explicitly copied preexisting functional-test save, including saved appearance/location. Prior setup used fixture teleports and ordinary sleep. After F9 loading, this recorded approach/action uses normal mapped controls, no debug teleport/time/state edits. See fixture.json for source and hash.")
         : TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
@@ -95,6 +146,28 @@ void AHomesteadVisualPlaytest::Prepare()
             {TEXT("weed"), 3.5f, {}, {}, EKeys::Gamepad_FaceButton_Left},
             {TEXT("after-weed"), 2}
         };
+    if (bPresentationDiagnostics)
+    {
+        Passes = {
+            {TEXT("close-notes"), 1, {}, {}, EKeys::Gamepad_Special_Right},
+            {TEXT("warm-up-no-capture"), 3},
+            {TEXT("timing-idle"), 2},
+            {TEXT("timing-walk"), 6, FVector2D(0, 0.6f)},
+            {TEXT("timing-turn"), 6, FVector2D(0.5f, 0.6f), FVector2D(0.35f, 0)},
+            {TEXT("timing-sweep"), 6, {}, FVector2D(0.65f, 0)},
+            {TEXT("capture-idle"), 2},
+            {TEXT("capture-walk"), 4, FVector2D(0, 0.6f)},
+            {TEXT("capture-turn"), 4, FVector2D(0.5f, 0.6f), FVector2D(0.35f, 0)},
+            {TEXT("capture-sweep"), 6, {}, FVector2D(0.65f, 0)}
+        };
+        PresentationTimings.Reserve(4096);
+        PresentationTimings.Add(TEXT("seconds,pass,wall_frame_ms,engine_delta_ms,captures_requested_before_tick,capture_requested_this_tick,x,y,speed,view_yaw"));
+        PresentationSettings.Add(TEXT("Opt-in observer only. Normal mapped game inputs; fresh test-sandbox world, no save injection, teleports or time edits."));
+        PresentationSettings.Add(TEXT("Output is GPU-rendered game framebuffer, NOT physical scanout. Actual DXGI Present flags/interval, DWM composition and VRR engagement are not observed."));
+        PresentationSettings.Add(TEXT("Timing records instrumented actor-tick wall intervals, NOT GPU duration or present timestamps. Only timing-* precedes all screenshot requests; capture-* is readback-disturbed and visits different positions, not a controlled performance A/B."));
+        PresentationSettings.Add(TEXT("Runtime CVars and user settings are recorded separately. output_target is not the internal temporal-upscaler input resolution; auto/default resolution policy may require further evidence."));
+        RecordPresentationSettings(TEXT("start"));
+    }
     LastWallTime = FPlatformTime::Seconds();
 }
 
@@ -170,10 +243,12 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
 #endif
         bReady = true;
         Prepare();
+        if (bFinished) return;
         Elapsed = 0;
     }
     const double Now = FPlatformTime::Seconds();
-    const float WallDelta = FMath::Min(static_cast<float>(Now - LastWallTime), 1.0f);
+    const double RawWallDelta = Now - LastWallTime;
+    const float WallDelta = FMath::Min(static_cast<float>(RawWallDelta), 1.0f);
     LastWallTime = Now;
     Elapsed += WallDelta;
     if (bWeedRoute) { TickWeeding(WallDelta); return; }
@@ -238,7 +313,17 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     ApplyAxes(Move, Look);
     PassElapsed += WallDelta;
     CaptureElapsed += WallDelta;
-    if (CaptureElapsed >= 0.125f)
+    const bool RequestCapture = CaptureElapsed >= 0.125f
+        && (!bPresentationDiagnostics || Pass.Label.StartsWith(TEXT("capture-")));
+    if (bPresentationDiagnostics)
+    {
+        const FVector Position = PC->GetPawn()->GetActorLocation();
+        PresentationTimings.Add(FString::Printf(TEXT("%.6f,%s,%.6f,%.6f,%d,%d,%.3f,%.3f,%.3f,%.3f"),
+            Elapsed, *Pass.Label, RawWallDelta * 1000, DeltaSeconds * 1000,
+            CaptureIndex, RequestCapture, Position.X, Position.Y, PC->GetPawn()->GetVelocity().Size2D(),
+            PC->GetControlRotation().Yaw));
+    }
+    if (RequestCapture)
     {
         Capture(Pass.Label);
         CaptureElapsed = 0;
@@ -258,7 +343,10 @@ void AHomesteadVisualPlaytest::Finish()
     ApplyAxes({}, {});
     const bool Gathered = PC->Simulation().Count(Homestead::Item::Berries) > FoodBefore
         || PC->Simulation().Count(Homestead::Item::Flowers) > HerbBefore;
-    if (bClearRoute)
+    if (bPresentationDiagnostics)
+        Observations.Add(FString::Printf(TEXT("Presentation diagnostic route completed=%d; captured frames=%d; physical scanout not observed"),
+            PassIndex >= Passes.Num() && !Passes.IsEmpty(), CaptureIndex));
+    else if (bClearRoute)
         Observations.Add(FString::Printf(TEXT("Cleared actual sapling=%d; action observed=%d; swung hatchet observed=%d; recovered and hidden=%d"),
             bCleared, bObservedClear, bObservedHatchet, bClearRecovered));
     else if (bWeedRoute)
@@ -277,8 +365,18 @@ void AHomesteadVisualPlaytest::Finish()
         *FPaths::Combine(OutputDirectory, TEXT("telemetry.csv")));
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
+    if (bPresentationDiagnostics)
+    {
+        RecordPresentationSettings(TEXT("end"));
+        Saved = FFileHelper::SaveStringToFile(FString::Join(PresentationTimings, TEXT("\n")) + TEXT("\n"),
+            *FPaths::Combine(OutputDirectory, TEXT("presentation-timings.csv"))) && Saved;
+        Saved = FFileHelper::SaveStringToFile(FString::Join(PresentationSettings, TEXT("\n")) + TEXT("\n"),
+            *FPaths::Combine(OutputDirectory, TEXT("presentation-settings.txt"))) && Saved;
+    }
+    if (!Saved) UE_LOG(LogTemp, Error, TEXT("Visual playtest could not persist all evidence files."));
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    const bool Complete = bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered
+    const bool Complete = bPresentationDiagnostics ? PassIndex >= Passes.Num() && !Passes.IsEmpty() && CaptureIndex > 0
+        : bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered
         : bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
         : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
         : bReachedForage && Gathered && bObservedGather && bGatherRecovered;

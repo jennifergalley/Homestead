@@ -1,9 +1,11 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [ValidateRange(720,2160)][int]$Height=720,
-    [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
+    [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [switch]$PresentationDiagnostics,
+    [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
     [string]$OutputDirectory)
 $ErrorActionPreference='Stop'
+if($PresentationDiagnostics -and ($Watering -or $Weeding -or $Clearing)) { throw 'Presentation diagnostics require a separate motion route.' }
 if($Watering -and $Weeding) { throw 'Choose one ordinary action route.' }
 if($Clearing -and ($Watering -or $Weeding)) { throw 'Choose one ordinary action route.' }
 if([bool]$Weeding -ne [bool]$FixtureSave) { throw 'Use -Weeding together with its explicit -FixtureSave.' }
@@ -21,10 +23,12 @@ if($Packaged) {
     $packageRoot=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
     $executable=Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
     $prefix=''
+    $workingDirectory=$packageRoot
 } else {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $executable=Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
     $prefix="`"$project`" /Game/SurvivalGame/Maps/Homestead -game "
+    $workingDirectory=$root
 }
 if(-not (Test-Path -LiteralPath $executable)) { throw "Missing game executable: $executable" }
 $log=Join-Path $output 'engine.log'
@@ -32,7 +36,18 @@ $arguments=$prefix+"-HomesteadVisualPlaytest -HomesteadTestOutput=`"$output`" -u
 if($Watering) { $arguments += ' -HomesteadWateringPlaytest' }
 if($Weeding) { $arguments += ' -HomesteadWeedingPlaytest' }
 if($Clearing) { $arguments += ' -HomesteadClearingPlaytest' }
-$process=Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
+if($PresentationDiagnostics) {
+    $arguments += ' -HomesteadPresentationDiagnostics'
+    & (Join-Path $PSScriptRoot 'Read-DisplayMode.ps1') | ConvertTo-Json -Depth 6 |
+        Set-Content -LiteralPath (Join-Path $output 'display-mode-before.json')
+    [ordered]@{
+        executable=$executable; executableSha256=(Get-FileHash -LiteralPath $executable).Hash
+        arguments=$arguments; workingDirectory=$workingDirectory
+        setup='Fresh test-sandbox world; ordinary mapped input, no teleport/state/time edits.'
+        pipeline='Offscreen game framebuffer only; no desktop capture, physical scanout or DXGI Present tracing.'
+    } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'diagnostic-launch.json')
+}
+$process=Start-Process -FilePath $executable -WorkingDirectory $workingDirectory -ArgumentList $arguments -PassThru
 Write-Host "Isolated visual playtest PID=$($process.Id); output=$output"
 if(-not $process.WaitForExit(600000)) {
     Stop-Process -Id $process.Id
@@ -44,7 +59,9 @@ if($process.ExitCode -ne 0 -or -not (Test-Path $telemetry) -or -not (Test-Path $
     throw "Playtest did not finish its capture. See $log."
 }
 $outcome=Get-Content -LiteralPath $observations -Raw
-$required=if($Clearing) {
+$required=if($PresentationDiagnostics) {
+    'Presentation diagnostic route completed=1;'
+} elseif($Clearing) {
     'Cleared actual sapling=1; action observed=1; swung hatchet observed=1; recovered and hidden=1'
 } elseif($Weeding) {
     'Weeded existing planted plot=1; action observed=1; recovered to idle=1'
@@ -70,4 +87,10 @@ foreach($row in $rows) {
     } finally { $image.Dispose() }
 }
 Get-Content -LiteralPath $observations
+if($PresentationDiagnostics) {
+    & (Join-Path $PSScriptRoot 'Read-DisplayMode.ps1') | ConvertTo-Json -Depth 6 |
+        Set-Content -LiteralPath (Join-Path $output 'display-mode-after.json')
+    python (Join-Path $PSScriptRoot 'Analyze-PresentationDiagnostics.py') $output
+    if($LASTEXITCODE -ne 0) { throw 'Presentation diagnostic evidence validation failed.' }
+}
 Write-Host "Recorded $($rows.Count) frames. Review the frames/telemetry; completion is not visual approval."

@@ -258,9 +258,10 @@ of accepted `prompts-01`. Five incidental world resaves were restored.
 
 ## Inventory versus recipe clarity candidate
 
-`book-clarity-01` is a separate, technically verified candidate. **The human
-launcher remains on parent-reviewed `prompts-01` with `jenny-review`.** No
-default-game promotion, profile copying or save migration occurs.
+`book-clarity-01` is technically verified and parent-reviewed. **The human
+launcher now selects it with the unchanged `jenny-review` profile**, through the
+separate `7051fc3` selection checkpoint. No default-game promotion, profile copying
+or save migration occurs.
 
 The existing Pack/Craft/Build tabs, IDs, item order and controller navigation
 remain. Their headings now distinguish **Your pack**, **Crafting recipes** and
@@ -308,6 +309,20 @@ and the candidate's `Verification` directory/acceptance receipt. Final sheets:
 source LFS files and protected original/selected-preview files match their
 baseline hashes; exactly five incidental bootstrap world resaves were restored.
 No new art or third-party assets were authored or acquired.
+
+## Movement presentation investigation
+
+`presentation-diagnostics-01` is diagnostic-only and remains **unresolved**, not a
+player improvement or replacement preview. See `presentation-diagnostics.md` for
+the opt-in command, live CVar/window observations, reported 4K/30Hz desktop mode,
+separate screenshot-free timing, and physical-scanout limits. No production
+graphics or OS/display settings were changed.
+
+Earlier explicit render100 full-loop logs confirm execution of
+`r.ScreenPercentage = "100"` as well as their requested output dimensions.
+This is runtime CVar evidence, not continuous internal view/effect-buffer
+instrumentation. The new diagnostic deliberately omits that override and records
+the default automatic scale policy instead; do not conflate the two.
 
 ## Preserved original verification status
 

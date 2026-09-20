@@ -142,6 +142,15 @@ profile. Preserve `Preview.json`
 on the reviewed candidate until the coordinator explicitly reviews and selects
 a replacement; a newer source checkpoint is not automatic launcher promotion.
 
+The coordinator subsequently selected accepted `book-clarity-01` in `7051fc3`
+and scheduled `presentation-diagnostics-01` as investigation only. It is not the
+rejected face experiment and must not be selected as a player improvement.
+Keep the accepted book preview while recording game-only evidence. Separate
+screenshot-free timing from readback-disturbed capture, distinguish output pixels
+from internal render scale, and never call an offscreen framebuffer a scanout
+measurement. The current finding is investigated/unresolved; no renderer/OS
+settings changes or further scope are authorized. See `presentation-diagnostics.md`.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run

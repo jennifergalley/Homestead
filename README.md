@@ -50,13 +50,18 @@ Rejected facial-shader and shortened-wave trials are not included. The requested
 mid-back wavy length and Melinoe-inspired blonde bob remain unmet/deferred.
 See `docs\setup.md` for profile selection, verification and known limits.
 
-Controller prompt stability is technically verified and parent-reviewed in
-`prompts-01`, now explicitly selected by **`Preview.json`**. It does not redesign
-the field book or change controls. The separate `book-clarity-01` work does not
-change that selection until coordinator review. That candidate distinguishes
+Controller prompt stability and limited book clarity are included in the
+parent-reviewed **`book-clarity-01`**, now explicitly selected by `Preview.json`.
+That candidate distinguishes
 **Your pack**, **Crafting recipes** and **Building plans**, labels carried/chest
 counts separately from required materials, and names actual eat/take/craft/plan
 actions. It adds no recipe learning, unlocks, inventory expansion or new navigation.
+
+The movement tearing/flicker report is **investigated, unresolved**, not fixed.
+Read-only diagnostics found a reported 4K/30Hz desktop mode and a VSync-off,
+60fps-capped diagnostic runtime; neither alone proves tearing. Offscreen game frames do not
+observe physical scanout. See `docs\presentation-diagnostics.md` for exact runtime
+settings, capture limits and the next human check. No graphics defaults changed.
 
 From this directory in PowerShell:
 
