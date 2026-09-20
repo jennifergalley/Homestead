@@ -22,6 +22,17 @@ build-native\HomesteadSimulationTests.exe
 
 ## Integration rules
 
+`Scripts\Test-HotkeySafety.ps1` exercises exact F5/F9 callback, viewport/full
+ShowFlags and screenshot-request behavior, real save errors, repeated actions,
+synthetic preview-profile persistence and a normal unautomated saved-preview
+startup. Use a fresh output; see `docs\hotkey-safety-playtesting.md` for scope,
+isolated destinations and the engine's deliberate non-Lit mode policy.
+`Test-Game.ps1 -RequireLit` and `Test-FeedbackLayout.ps1 -RequireLit` observe
+every active smoke tick and reject an unexpected mode/ShaderComplexity flag or
+missing guard report. They do not set Lit. Do not use that guard with the focused
+hotkey fixture's intentional non-Lit preservation step. The hotkey test flag
+alone does not spawn a test actor or change normal physical-input policy.
+
 The actual-engine smoke route is separate from this portable target. Automated
 smoke and visual runs accept only `FInputKeyEventArgs::IsSimulatedInput()` events;
 normal gameplay still passes physical events through the same controller input
@@ -48,6 +59,8 @@ scatter and wet-eye parameters. This covers material binding during all wardrobe
 changes and after save/load, rather than checking only stored menu indices.
 These expectations deliberately describe the restored baseline, not acceptance
 of the visually rejected subsurface/clear-coat experiment.
+Material-shading-model checks do not by themselves establish the viewport's
+render mode; use the separate `-RequireLit` guard for that assertion.
 
 For a controlled material comparison, use `Test-Game.ps1 -Presentation` with
 fresh `-OutputDirectory` values and matching `-Width 1920 -Height 1080`.

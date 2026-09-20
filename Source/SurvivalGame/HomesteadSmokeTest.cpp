@@ -12,6 +12,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/PlayerInput.h"
+#include "HAL/IConsoleManager.h"
 #include "HAL/PlatformMisc.h"
 #include "HAL/FileManager.h"
 #include "InputKeyEventArgs.h"
@@ -51,6 +55,20 @@ void AHomesteadSmokeTest::Tap(FKey Key)
 
 void AHomesteadSmokeTest::TraceState(const FString& Label)
 {
+    if (Label == TEXT("INPUT F5") || Label == TEXT("INPUT F9")) PresentationTraceStep = StepIndex;
+    if (PresentationTraceStep == StepIndex && GEngine && GEngine->GameViewport)
+    {
+        const auto* Viewport = GEngine->GameViewport.Get();
+        UE_LOG(LogTemp, Display, TEXT("Presentation trace: step=%d %s mode=%d lit_enum=%d shader_complexity_enum=%d shot_requested=%d flags=%s"),
+            StepIndex, *Label, Viewport->ViewModeIndex, static_cast<int32>(VMI_Lit),
+            static_cast<int32>(VMI_ShaderComplexity), FScreenshotRequest::IsScreenshotRequested(),
+            *Viewport->EngineShowFlags.ToString());
+#if !UE_BUILD_SHIPPING
+        if (Label.StartsWith(TEXT("INPUT")) && Controller->PlayerInput)
+            UE_LOG(LogTemp, Display, TEXT("Effective debug bindings: F5=%s F9=%s"),
+                *Controller->PlayerInput->GetBind(EKeys::F5), *Controller->PlayerInput->GetBind(EKeys::F9));
+#endif
+    }
     const auto& Look = Controller->GetAppearance();
     FString Line = FString::Printf(TEXT("step=%d %s actor=%s velocity=%s focus=%s page=%d row=%d look=%d,%d,%d,%d,%d,%d,%d hour=%.6f"),
         StepIndex, *Label, *Controller->GetPawn()->GetActorLocation().ToString(),
@@ -109,6 +127,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
         *Controller->GetPawn()->GetActorLocation().ToString(), *CameraLocation.ToString(),
         *CameraRotation.ToString(), Controller->BookPage());
     Framing += FString::Printf(TEXT("prompts_gamepad=%d\nfocus_actions=%s\n"), Controller->UsesGamepad(), *Controller->FocusActions());
+    if (GEngine && GEngine->GameViewport)
+        Framing += FString::Printf(TEXT("view_mode=%d\nlit_mode=%d\nshow_flags=%s\nrender_percentage=%s\n"),
+            GEngine->GameViewport->ViewModeIndex, static_cast<int32>(VMI_Lit),
+            *GEngine->GameViewport->EngineShowFlags.ToString(),
+            *IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"))->GetString());
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest")))
     {
@@ -145,6 +168,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")))
+    {
+        PrepareHotkeyChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest")))
     {
         PrepareFeedbackChecks();
@@ -642,6 +670,16 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         Prepare();
     }
     if (bFinished) return;
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadRequireLit")))
+    {
+        if (!GEngine || !GEngine->GameViewport || GEngine->GameViewport->ViewModeIndex != VMI_Lit
+            || GEngine->GameViewport->EngineShowFlags.ShaderComplexity)
+        {
+            Finish(false, TEXT("Sustained normal-Lit viewport requirement violated."));
+            return;
+        }
+        ++LitGuardSamples;
+    }
     const double Now = FPlatformTime::Seconds();
     if (LastFrameWallTime >= IgnoreProfileUntil && Now > LastFrameWallTime)
         FrameMilliseconds.Add((Now - LastFrameWallTime) * 1000.0);
@@ -773,7 +811,10 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest"))
-            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")) ? 0 : 4;
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));
     }
@@ -788,6 +829,10 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             FrameMilliseconds[FMath::FloorToInt(Last * 0.95)],
             FrameMilliseconds[FMath::FloorToInt(Last * 0.99)], FrameMilliseconds.Num()));
     }
+    if (LitGuardSamples)
+        Results.Add(FString::Printf(TEXT("LIT_GUARD samples=%llu final_mode=%d shader_complexity=%d render_percentage=%s"),
+            LitGuardSamples, GEngine->GameViewport->ViewModeIndex, static_cast<int32>(GEngine->GameViewport->EngineShowFlags.ShaderComplexity),
+            *IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"))->GetString()));
     Results.Add((Success ? TEXT("SUCCESS ") : TEXT("FAILURE ")) + Reason);
     const FString Directory = HomesteadTestOutputDirectory();
     IFileManager::Get().MakeDirectory(*Directory, true);

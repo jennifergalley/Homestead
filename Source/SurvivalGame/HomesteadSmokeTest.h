@@ -30,6 +30,8 @@ private:
     TArray<FStep> Steps;
     TArray<FString> Results;
     int32 StepIndex = 0;
+    int32 PresentationTraceStep = -1;
+    uint64 LitGuardSamples = 0;
     bool bStarted = false;
     bool bActed = false;
     bool bFinished = false;
@@ -65,6 +67,7 @@ private:
     void PreparePromptChecks();
     void PrepareVideoSyncChecks();
     void PrepareFeedbackChecks();
+    void PrepareHotkeyChecks();
     void PrepareBookClarityChecks();
     void PrepareBookStorageChecks();
     void QueueBookCapture(const FString& Name);

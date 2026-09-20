@@ -324,6 +324,16 @@ F5 saves **and** selects ShaderComplexity; F9 is also bound to `shot showui`.
 No workaround or binding change was smuggled into this layout slice.
 See `debug-hotkey-evidence.md` for exact evidence and historical qualifications.
 
+The separately authorized `hotkey-safety-01` fixes only those two project-level
+inherited debug bindings. Repeated keyboard and Settings actions preserve actual
+viewport mode/full ShowFlags and no longer request screenshots. An intentionally
+chosen supported non-Lit mode also survives saving/loading: there is no forced
+Lit workaround. Normal saved-preview startup remains human-input enabled.
+The accepted older video-sync package is not modified in place; use its Settings
+save/load until a reviewed selection changes it. See
+`hotkey-safety-playtesting.md` for isolated reproduction, the retained Unlit
+fixture-policy failure, fresh Lit guards and exact persistence evidence.
+
 ## Movement presentation investigation
 
 `presentation-diagnostics-01` is diagnostic-only and remains **unresolved**, not a

@@ -2,6 +2,8 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
 #include "HomesteadSave.h"
+#include "Engine/GameViewportClient.h"
+#include "Misc/SecureHash.h"
 #include "HomesteadSmokeTest.h"
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadTestPaths.h"
@@ -1078,6 +1080,12 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     if (Best)
     {
         ApplySave(*Best);
+        if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveAudit")) && GEngine && GEngine->GameViewport)
+            UE_LOG(LogTemp, Display, TEXT("SAVE_LOAD_AUDIT world=%s simulation_md5=%s look=%d,%d,%d,%d,%d,%d,%d view_mode=%d shader_complexity=%d"),
+                *WorldId, *FMD5::HashAnsiString(UTF8_TO_TCHAR(Sim.Serialize().c_str())),
+                Appearance.HairStyle, Appearance.HairColor, Appearance.SkinTone, Appearance.EyeColor,
+                Appearance.TunicColor, Appearance.Outfit, Appearance.BodyPreset,
+                GEngine->GameViewport->ViewModeIndex, static_cast<int32>(GEngine->GameViewport->EngineShowFlags.ShaderComplexity));
         Notify(Corrupt ? TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.") : TEXT("Welcome back to your homestead."), Corrupt);
         return true;
     }
@@ -1114,8 +1122,16 @@ void AHomesteadController::NewGame()
     OpenBook(3);
     Notify(TEXT("A new clearing. Previous save files are still available."));
 }
-void AHomesteadController::QuickSave() { if (!IsFailed()) SaveSlot(TEXT("Homestead_Manual")); }
-void AHomesteadController::QuickLoad() { if (!LoadLatest()) Notify(TEXT("There is no usable save to load yet."), true); }
+void AHomesteadController::QuickSave()
+{
+    if (bAutomatedInputOnly) ++TestQuickSaves;
+    if (!IsFailed()) SaveSlot(TEXT("Homestead_Manual"));
+}
+void AHomesteadController::QuickLoad()
+{
+    if (bAutomatedInputOnly) ++TestQuickLoads;
+    if (!LoadLatest()) Notify(TEXT("There is no usable save to load yet."), true);
+}
 
 FString AHomesteadController::SavePath(const FString& Slot) const
 {

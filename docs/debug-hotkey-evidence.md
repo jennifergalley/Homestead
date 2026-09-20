@@ -20,7 +20,8 @@ Engine `UPlayerInput::InputKey` records key state/events and, in non-Shipping
 builds, resolves `GetBind` and executes inherited debug commands. The inherited
 debug-command path can therefore run as well as the mapped game action.
 `UGameViewportClient::HandleViewModeCommand` sets the requested mode and logs
-the observed transition. The current packaged Development game is affected.
+the observed transition. Packages through `feedback-layout-01` are affected. The separate
+`hotkey-safety-01` correction is documented below.
 
 Current direct proof:
 `Saved\Automation\20260920-050723-5cc6c8a5\feedback-layout-final\720\engine.log`,
@@ -69,3 +70,24 @@ explanation for prior defects.
 Audit proof:
 `Saved\Automation\20260920-050723-5cc6c8a5\feedback-layout-binding-audit\historical-log-audit-scoped.json`.
 The earlier unscoped exploratory report is not the final frame-association proof.
+
+## Subsequent hotkey-safety runtime confirmation
+
+The separate `hotkey-safety-01` baseline now observes the exact immediate and
+delayed state: F5 changes actual mode3 to8 and three ShowFlags while saving once;
+F9 requests and writes a screenshot while loading once, even on missing-save
+error. The fixed project removes only the two conflicting inherited entries.
+Actual bindings F2/F3 remain unchanged, F5/F9 debug bindings become empty, and
+repeated keyboard/controller save/load preserve full flags with zero screenshots.
+
+The first fixed fixture deliberately requested Unlit, which this engine build
+rejects without `AllowDebugViewmodes()`. The strict assertion failed and remains
+preserved. `HandleViewModeCommand` logs its request before `SetViewMode` applies
+policy, so a requested-mode log alone is not final-mode proof. The corrected
+witness explicitly chooses supported ShaderComplexity and requires that mode
+and full flags survive saves/loads; no graphics policy is changed.
+
+Fresh-process saved-profile loading and the fresh4K homestead start and remain
+Lit as observed directly. See `hotkey-safety-playtesting.md` for reproduction and
+limits. This new evidence does not alter any historical capture, sealed receipt,
+timing result or qualification above, and is not a new endurance run.

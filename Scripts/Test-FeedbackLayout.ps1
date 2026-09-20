@@ -4,7 +4,8 @@ param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [ValidateSet(1280,3840)][int]$Width = 1280,
     [ValidateSet(720,2160)][int]$Height = 720,
-    [switch]$Baseline
+    [switch]$Baseline,
+    [switch]$RequireLit
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -18,13 +19,17 @@ $null = New-Item -ItemType Directory -Path (Join-Path $output 'Graphics')
 $config = Join-Path $output 'Graphics\GameUserSettings.ini'
 Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $config
 $baselineFlag = if ($Baseline) { '-HomesteadFeedbackBaseline' } else { '' }
-$arguments = "-HomesteadSmokeTest -HomesteadFeedbackTest $baselineFlag -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$config`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$(Join-Path $output 'engine.log')`""
+$litFlag = if ($RequireLit) { '-HomesteadRequireLit' } else { '' }
+$arguments = "-HomesteadSmokeTest -HomesteadFeedbackTest $baselineFlag $litFlag -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$config`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$(Join-Path $output 'engine.log')`""
 $process = Start-Process -FilePath $exe -WorkingDirectory $package -ArgumentList $arguments -PassThru
 Write-Host "Owned feedback fixture PID$($process.Id): $output"
 try {
     if (-not $process.WaitForExit(300000)) { throw 'Feedback fixture exceeded its five-minute bound.' }
     $result = Get-Content (Join-Path $output 'smoke-result.txt') -Raw
     if ($process.ExitCode -ne 0 -or $result -notmatch '(?m)^SUCCESS ') { throw "Feedback fixture failed: $output" }
+    if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mode=3 shader_complexity=0 ') {
+        throw 'The requested sustained Lit guard did not produce successful runtime evidence.'
+    }
     $actual = ([regex]::Match($result, '(?m)^GRAPHICS_CONFIG=([^\r\n]+)')).Groups[1].Value
     if ([IO.Path]::GetFullPath($actual) -ne $config) { throw 'Graphics config destination was not isolated.' }
     $expected = if ($Baseline) { 2 } else { 13 }

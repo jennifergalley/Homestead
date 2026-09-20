@@ -213,6 +213,18 @@ proofs or invalidating unrelated state/geometry results. Dedicated face/hair and
 ordinary-motion runs without logged transitions are explicitly distinguished.
 The binding fix is separate; no renderer state or installed engine was changed.
 
+## Save/load changes rendering - concrete hotkey correction (2026-09-20)
+
+The separately authorized `hotkey-safety-01` removes only inherited F5
+ShaderComplexity and F9 screenshot debug commands at the project-config layer.
+Actual before/after instrumentation confirms the baseline's duplicate meanings
+and the corrected save/load-only behavior, including errors, repeat actions,
+exact saved-world/appearance reload and normal human-preview startup. Supported
+deliberate non-Lit choices remain intact; no forced Lit conceals the collision.
+Fresh4K full-homestead verification stays Lit throughout13,210 observed ticks.
+See `hotkey-safety-playtesting.md`. The older selected video-sync package remains
+unchanged until review; no tearing, appearance or broad performance fix is claimed.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction

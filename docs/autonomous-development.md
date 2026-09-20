@@ -182,6 +182,15 @@ and the project-level binding fix belong to the next separately authorized slice
 The accepted video-sync preview stays selected. See
 `feedback-layout-playtesting.md` and `debug-hotkey-evidence.md`.
 
+The separate authorized `hotkey-safety-01` corrects exactly the F5/F9 inherited
+debug commands in project config, retaining game actions and unrelated bindings.
+It requires exact callback/renderer/request traces, synthetic saved-profile
+relaunch and fresh4K/render100 full homestead with an observational Lit guard.
+No engine edit, forced Lit, blanket debug-command suppression, art changes or
+automatic preview selection is allowed. Jenny may now be playing independently;
+never manipulate her process/config/save to satisfy a protection check. Parent's
+desktop shortcut is outside worker scope. Return after this bounded correction.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run

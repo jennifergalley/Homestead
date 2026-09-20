@@ -15,7 +15,8 @@
     "Video-sync-01: accepted optional VSync control, selected for jenny-review; default unchanged, tearing unresolved",
     "Endurance-01: completed one diagnostic-only 45-minute real-game exercise; fixed criteria passed, no preview promotion",
     "Forage-renewal-01: targeted24h/36h wild renewal through normal bedrest/save/load passed; diagnostic-only, no production fix or preview promotion",
-    "Feedback-layout-01: bounded active-toast/book-heading correction verified; video-sync preview unchanged; inherited F5/F9 collision documented for separate follow-up"
+    "Feedback-layout-01: bounded active-toast/book-heading correction verified; video-sync preview unchanged; inherited F5/F9 collision documented separately",
+    "Hotkey-safety-01: separately authorized exact F5/F9 inherited debug-binding correction, actual save/renderer/screenshot and Lit homestead proof; no automatic preview selection"
   ],
   "deferred": [
     "MetaHuman or another wholesale character-pipeline replacement",

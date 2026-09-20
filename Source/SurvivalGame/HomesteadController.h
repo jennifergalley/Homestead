@@ -67,6 +67,7 @@ public:
 
 private:
     friend class AHomesteadVisualPlaytest;
+    friend class AHomesteadSmokeTest;
     enum class EFocus { None, Resource, Plot, Fire, Bed, Chest, Water };
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
@@ -82,6 +83,7 @@ private:
     bool bAutomatedInputOnly = false;
     bool bLoggedExternalInput = false;
     uint32 IgnoredExternalInputs = 0;
+    uint32 TestQuickSaves = 0, TestQuickLoads = 0;
     bool bAlternateStep = false;
     FVector LastStepPosition = FVector::ZeroVector;
     float StepDistance = 0;

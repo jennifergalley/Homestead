@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [switch]$BookClarity, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [switch]$BookClarity, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
@@ -104,6 +104,7 @@ if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
+if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
@@ -119,6 +120,9 @@ $result = Get-Content -LiteralPath $report -Raw
 Write-Output $result
 if ($process.ExitCode -ne 0 -or $result -notmatch '(?m)^SUCCESS ') {
     throw "Game smoke test failed (exit $($process.ExitCode)). See $output."
+}
+if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mode=3 shader_complexity=0 ') {
+    throw 'The requested sustained Lit guard did not produce successful runtime evidence.'
 }
 foreach ($name in $captures) {
     $image = Join-Path $output $name

@@ -117,6 +117,11 @@ cooks/packages the game. Failed steps stop with an explicit error.
 | Rotate placement | RB or X | R or F |
 | Save / load | Field book Settings | Settings or F5 / F9 |
 
+The separately verified `hotkey-safety-01` candidate removes inherited engine
+debug commands from F5/F9 without changing their save/load actions. It does not
+force a graphics mode after saving. See `docs\hotkey-safety-playtesting.md`;
+the selected older video-sync preview remains unchanged pending review.
+
 The field book and construction preview pause simulation. Near a storage chest,
 the Pack page supports storing with X/F and taking stored materials with Y/G.
 Food selections consume one item; core actions explain unmet requirements.
