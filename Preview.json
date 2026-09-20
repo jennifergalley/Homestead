@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260920-050723-5cc6c8a5\\review-01",
+  "candidateDirectory": "Build\\Releases\\20260920-050723-5cc6c8a5\\prompts-01",
   "profile": "jenny-review",
-  "executableSha256": "F7AC29C3FCB3F3D1B72D0FAFB348678D08ABA41CF8FF8288E62A35BE18558F0F"
+  "executableSha256": "D7161E2C85105D2115E3A048C4BF04BC3DBAA55226944277461CB36DA54C45CF"
 }
