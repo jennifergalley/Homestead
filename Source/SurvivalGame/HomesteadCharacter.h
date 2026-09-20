@@ -31,6 +31,8 @@ public:
     bool HasHeroine() const { return bHeroineReady; }
     void SetAppearancePreview(bool Enabled);
     FRotator GameplayViewRotation() const;
+    UAnimSequence* GetIdleAnimation() const { return IdleAnimation; }
+    UAnimSequence* GetWalkAnimation() const { return WalkAnimation; }
 
 private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<USpringArmComponent> CameraArm;
@@ -49,7 +51,6 @@ private:
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
     bool bPlanning = false;
     bool bHeroineReady = false;
-    bool bWalkingAnimation = false;
     bool bAttemptedAssetLoad = false;
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;

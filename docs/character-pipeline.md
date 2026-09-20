@@ -58,6 +58,45 @@ actual engine asset paths.
 - Python syntax, PowerShell syntax and the idempotent installed-tool setup path
   have been checked. The official retained asset catalog marks all entries CC0.
 
+## Locomotion slice (2026-09-20)
+
+The runtime now uses animation-only `AN_Heroine_RelaxedIdle` and
+`AN_Heroine_GroundedWalk` clips with the existing 18 wardrobe meshes and shared
+skeleton. `build_locomotion.py` starts from the retained `Heroine.blend`, solves
+the leg chain to a narrower stance and a linear planted-foot trajectory, and
+authors relaxed arms, modest counter-swing, breathing and finger flexion.
+It does not rebuild or import wardrobe geometry.
+
+The one-second walk has a 60 cm stance traverse per half-cycle: 120 cm/s at
+unit play rate. The native `UHomesteadAnimInstance` scales cadence by actual
+horizontal velocity, preserves clip phase, and blends idle/walk over 0.20 s
+instead of calling `PlayAnimation` whenever speed crosses a threshold.
+Maximum walking speed remains 180 cm/s; acceleration is 700 cm/s2, braking
+900 cm/s2, and movement-facing rotation 300 degrees/s.
+
+Run the two Blender scripts with the existing isolated authoring profile:
+
+```powershell
+$env:BLENDER_USER_RESOURCES = 'E:\Tools\BlenderCharacterUser'
+& 'E:\Tools\blender-4.5.14-windows-x64\blender.exe' -b --python '.\Scripts\Characters\build_locomotion.py'
+& 'E:\Tools\blender-4.5.14-windows-x64\blender.exe' -b --python '.\Scripts\Characters\verify_locomotion.py'
+.\Scripts\Import-Locomotion.ps1 -EngineRoot 'E:\Program Files\UE_5.8'
+```
+
+The importer targets only these two clip packages, retains original idle/walk
+assets, checks source hashes, and verifies persisted skeleton/duration in a
+fresh editor process. `Build-Game.ps1` includes it. FBX round-trip checks compare
+every bind matrix against the original exported mesh, loop endpoints, stance
+width, foot height and stance velocity. Evidence goes under
+`Build\CharacterPreview\locomotion-*`; the small source contract is retained
+with the new FBXs in `Assets\Characters\Heroine\Locomotion`.
+
+This remains an authored in-place gait, not motion capture or a terrain-aware
+foot-IK system. Stops crossfade rather than choosing a planted stopping step;
+turns can still slide. Face, hair, fabric, gathering motion and subjective
+character approval are separate work. Actual-game evidence is recorded in
+`docs\visual-playtesting.md`.
+
 ## Acquisition, rights and privacy
 
 The existing PATH and usual Blender installation locations were checked before

@@ -1,0 +1,16 @@
+{
+  "AN_Heroine_RelaxedIdle": {
+    "duration_seconds": 3,
+    "fps": 60,
+    "loop_error_m": 0.0,
+    "toe_separation_cm": 17.33507364988327
+  },
+  "AN_Heroine_GroundedWalk": {
+    "duration_seconds": 1,
+    "fps": 60,
+    "loop_error_m": 0.0,
+    "toe_separation_cm": 17.33507364988327,
+    "stance_speed_cm_s": 120.00000887903674,
+    "stance_speed_max_error_cm_s": 0.0003325939178466797
+  }
+}

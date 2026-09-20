@@ -96,7 +96,10 @@ void AHomesteadSmokeTest::QueueGatherTo(Homestead::Item Item, int32 TargetCount)
                 *Before = Controller->Simulation().Count(Item);
                 Teleport(Position);
             },
-            [this]() { return !Controller->IsBookOpen() && !Controller->IsPlanning(); }, 0.65f);
+            [this, Id]()
+            {
+                return !Controller->IsBookOpen() && !Controller->IsPlanning() && Controller->IsResourceFocused(Id);
+            }, 0.65f);
         Steps.Last().Skip = Skip;
         Add(FString::Printf(TEXT("Gather node %d toward %d %s"), Id, TargetCount, UTF8_TO_TCHAR(Homestead::ItemName(Item))),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },

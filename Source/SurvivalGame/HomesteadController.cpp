@@ -65,6 +65,9 @@ void AHomesteadController::BeginPlay()
     SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
     const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
     const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
+#if !UE_BUILD_SHIPPING
+    bAutomatedInputOnly = SmokeTest || VisualPlaytest;
+#endif
     if (SmokeTest || VisualPlaytest || !LoadLatest()) OpenBook(3);
     InitializeAudio();
 #if !UE_BUILD_SHIPPING
@@ -75,6 +78,19 @@ void AHomesteadController::BeginPlay()
 
 bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
 {
+#if !UE_BUILD_SHIPPING
+    if (bAutomatedInputOnly && !Params.IsSimulatedInput())
+    {
+        ++IgnoredExternalInputs;
+        if (!bLoggedExternalInput && (Params.Event == IE_Pressed || FMath::Abs(Params.AmountDepressed) > 0.15f))
+        {
+            UE_LOG(LogTemp, Display, TEXT("Automation ignored external input: %s event=%d amount=%.3f"),
+                *Params.Key.ToString(), static_cast<int32>(Params.Event), Params.AmountDepressed);
+            bLoggedExternalInput = true;
+        }
+        return true;
+    }
+#endif
     if (Params.Event == IE_Pressed)
     {
         bGamepad = Params.Key.IsGamepadKey();

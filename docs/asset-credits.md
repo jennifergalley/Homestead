@@ -25,7 +25,9 @@ includes this credit. Include this document in any distributed build.
 ## Character prototype
 
 The clothed heroine prototype uses MakeHuman Community / MPFB CC0 graphical
-assets and an original procedural tunic and idle/walk clips. Full provenance,
+assets and an original procedural tunic and idle/walk clips. The relaxed idle
+and grounded walk revision is also project-authored on that same rig; no
+motion-capture service or replacement character asset was used. Full provenance,
 tool-license distinctions, source URLs, and modifications are recorded in
 `Assets\Characters\provenance.json` and `docs\character-pipeline.md`. The GPL
 authoring tools are separate from the exported CC0 graphical assets.

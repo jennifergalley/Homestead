@@ -1,6 +1,7 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadAnimInstance.h"
 #include "HomesteadTestPaths.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "InputKeyEventArgs.h"
@@ -40,7 +41,7 @@ void AHomesteadVisualPlaytest::Prepare()
 {
     OutputDirectory = HomesteadTestOutputDirectory();
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
-    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z"));
+    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase"));
     Observations.Add(TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
     Observations.Add(TEXT("Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark."));
     Passes = {
@@ -71,10 +72,16 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
     const FVector Position = Avatar->GetActorLocation();
     const FVector Left = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l"));
     const FVector Right = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
-    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f"),
+    const FVector LeftHand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_l"));
+    const FVector RightHand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
+    const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
+    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f"),
         CaptureIndex, Elapsed, *Label, Position.X, Position.Y, Position.Z, Avatar->GetVelocity().Size2D(),
         Avatar->GetActorRotation().Yaw, PC->GetControlRotation().Yaw,
-        Left.X, Left.Y, Left.Z, Right.X, Right.Y, Right.Z));
+        Left.X, Left.Y, Left.Z, Right.X, Right.Y, Right.Z,
+        Animation ? Animation->WalkWeight() : -1, Animation ? Animation->GaitRate() : -1,
+        LeftHand.X, LeftHand.Y, LeftHand.Z, RightHand.X, RightHand.Y, RightHand.Z,
+        Animation ? Animation->WalkPhase() : -1));
     const FString Name = FString::Printf(TEXT("frame-%05d.png"), CaptureIndex++);
     FScreenshotRequest::RequestScreenshot(FPaths::Combine(OutputDirectory, TEXT("Frames"), Name), false, false);
 }
@@ -125,10 +132,11 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             }
             FoodBefore = PC->Simulation().Count(Homestead::Item::Berries);
             HerbBefore = PC->Simulation().Count(Homestead::Item::Flowers);
+            Observations.Add(FString::Printf(TEXT("Forage target id=%d position=%s"), ForageId, *ForageTarget.ToString()));
         }
         if (Pass.Label == TEXT("gather"))
         {
-            if (bReachedForage) Tap(EKeys::Gamepad_FaceButton_Bottom);
+            if (bReachedForage && PC->IsResourceFocused(ForageId)) Tap(EKeys::Gamepad_FaceButton_Bottom);
             else Observations.Add(TEXT("Forage approach did not reach its target in time; gather was not faked."));
         }
         Observations.Add(FString::Printf(TEXT("BEGIN %.2fs %s: %s"), Elapsed, *Pass.Label, *PC->FocusTitle()));
@@ -142,12 +150,15 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         const float DesiredYaw = FMath::RadiansToDegrees(FMath::Atan2(Offset.Y, Offset.X));
         const float Difference = FMath::FindDeltaAngleDegrees(static_cast<float>(PC->GetControlRotation().Yaw), DesiredYaw);
         Look.X = FMath::Clamp(Difference / 45.0f, -0.7f, 0.7f);
-        Move.Y = FMath::Abs(Difference) < 40 ? 0.6f : 0;
-        if (Offset.Size() < 55)
+        Move.Y = FMath::Abs(Difference) < 40 ? (Offset.Size() < 90 ? 0.4f : 0.6f) : 0;
+        if (Offset.Size() < 25)
         {
             Move = Look = FVector2D::ZeroVector;
-            bReachedForage = true;
-            PassElapsed = Pass.Duration;
+            if (PC->IsResourceFocused(ForageId))
+            {
+                bReachedForage = true;
+                PassElapsed = Pass.Duration;
+            }
         }
     }
     ApplyAxes(Move, Look);
@@ -180,5 +191,5 @@ void AHomesteadVisualPlaytest::Finish()
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    FPlatformMisc::RequestExitWithStatus(false, Saved ? 0 : 1);
+    FPlatformMisc::RequestExitWithStatus(false, Saved && bReachedForage && Gathered ? 0 : 1);
 }

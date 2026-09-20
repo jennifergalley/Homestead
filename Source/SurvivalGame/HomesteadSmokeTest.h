@@ -67,5 +67,6 @@ private:
     void Teleport(Homestead::Point Position);
     void QueueHarvest(int32 ResourceId, Homestead::Item ExpectedItem);
     void Screenshot(const FString& Name);
+    void TraceState(const FString& Label);
     void Finish(bool Success, const FString& Reason);
 };

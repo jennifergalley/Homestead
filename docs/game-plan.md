@@ -158,8 +158,17 @@ dress in Hades 2 as a reference. Use an original design informed by the desired
 silhouette rather than copying that costume.
 
 Long, wavy brown hair is the default and the starting point for the first
-character preview. A short, straight brown bob is an explicitly requested
-alternative. The homestead MVP should offer a small curated hairstyle selection;
+character preview. Jenny clarified its desired length as approximately mid-back:
+the current wavy hairstyle is too long. Retain the brunette waves and shorten
+them when the later hair slice is authorized; this is deferred feedback, not a
+change to the current movement slice.
+Jenny clarified the alternative as a short, straight blonde
+bob, with Melinoe's haircut in Hades II as the visual reference, rather than the
+current prototype's "karen hairstyle." This is deferred feedback, not approval
+of the current bob or authorization to copy game assets. Inspect the reference
+when that work is scheduled before specifying technical cut details; create an
+original interpretation. It does not replace the long brown-haired default.
+The homestead MVP should offer a small curated hairstyle selection;
 target three distinct styles, with the third selected from suitable free assets
 and reviewed in the character preview. Brown is the preferred default color, not
 the only available color. Keep preview-stage scope distinct from the MVP:

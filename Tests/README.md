@@ -22,6 +22,25 @@ build-native\HomesteadSimulationTests.exe
 
 ## Integration rules
 
+The actual-engine smoke route is separate from this portable target. Automated
+smoke and visual runs accept only `FInputKeyEventArgs::IsSimulatedInput()` events;
+normal gameplay still passes physical events through the same controller input
+handler. This prevents another game using the same controller from changing a
+test's menu selection or walking away from its resource target.
+
+The smoke route includes deliberate physical-source keyboard/gamepad rejection
+probes, followed by the real mapped synthetic controls. It checks the runtime
+animation instance, relaxed stance width, speed-calibrated walking, return to
+idle, and exact resource focus before gathering. Per-step engine-log traces
+include position, velocity, focus, appearance values, cumulative game time and
+crop growth/moisture/weeds. Assertions are not retried until lucky or weakened
+to accommodate physical-input interference.
+
+`Scripts\Characters\verify_locomotion.py` checks the exported animation files
+with Blender; `Scripts\Import-Locomotion.ps1` verifies their persisted Unreal
+references in a fresh editor process. Neither replaces ordinary-play image
+review. See `docs\visual-playtesting.md` for evidence and sampling limits.
+
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including
   tool/fire/foundation prerequisites. HUD callers need not duplicate cost tables.

@@ -1,6 +1,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
 #include "HomesteadWorld.h"
+#include "HomesteadAnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -23,10 +24,11 @@ AHomesteadCharacter::AHomesteadCharacter()
     GetCapsuleComponent()->InitCapsuleSize(32.0f, 86.0f);
     bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = true;
-    GetCharacterMovement()->RotationRate = FRotator(0, 460, 0);
+    GetCharacterMovement()->RotationRate = FRotator(0, 300, 0);
     GetCharacterMovement()->MaxWalkSpeed = 180.0f;
+    GetCharacterMovement()->MaxAcceleration = 700.0f;
     GetCharacterMovement()->MaxStepHeight = 42.0f;
-    GetCharacterMovement()->BrakingDecelerationWalking = 1400.0f;
+    GetCharacterMovement()->BrakingDecelerationWalking = 900.0f;
 
     CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraArm"));
     CameraArm->SetupAttachment(RootComponent);
@@ -77,8 +79,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     bAttemptedAssetLoad = true;
     LongHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave.SK_Heroine_LongWave"));
     BobHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob.SK_Heroine_Bob"));
-    IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Idle.AN_Heroine_Idle"));
-    WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Walk.AN_Heroine_Walk"));
+    IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle"));
+    WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
     if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation)
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine assets are missing. Run Scripts/Characters/import_unreal.py; the labeled stand-in remains visible."));
@@ -211,8 +213,7 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
         VisualMesh->SetRelativeRotation(FRotator(0, InferMeshYaw(*Desired), 0));
         VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         VisualMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-        VisualMesh->PlayAnimation(IdleAnimation, true);
-        bWalkingAnimation = false;
+        VisualMesh->SetAnimInstanceClass(UHomesteadAnimInstance::StaticClass());
         AppearanceMaterials.Reset();
         for (int32 Index = 0; Index < VisualMesh->GetNumMaterials(); ++Index)
             AppearanceMaterials.Add(VisualMesh->CreateDynamicMaterialInstance(Index));
@@ -245,17 +246,6 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bAppearancePreview) UpdateAppearanceFraming();
-    if (!bHeroineReady) return;
-    const auto* PC = Cast<AHomesteadController>(Controller);
-    const float Speed = GetVelocity().Size2D();
-    const bool Moving = PC && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
-        && Speed > (bWalkingAnimation ? 4.0f : 12.0f);
-    if (Moving != bWalkingAnimation)
-    {
-        GetMesh()->PlayAnimation(Moving ? WalkAnimation.Get() : IdleAnimation.Get(), true);
-        bWalkingAnimation = Moving;
-    }
-    GetMesh()->SetPlayRate(Moving ? FMath::Clamp(Speed / 140.0f, 0.35f, 1.5f) : 1.0f);
 }
 
 void AHomesteadCharacter::CreateMappings()

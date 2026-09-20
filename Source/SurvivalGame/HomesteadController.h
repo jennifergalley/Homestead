@@ -33,6 +33,7 @@ public:
     bool IsFailed() const { return Sim.GetState().failed; }
     bool IsPlanning() const { return bPlanning; }
     bool UsesGamepad() const { return bGamepad; }
+    uint32 IgnoredExternalInputCount() const { return IgnoredExternalInputs; }
     void NoteInputDevice(bool Gamepad) { bGamepad = Gamepad; }
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
@@ -43,6 +44,7 @@ public:
     TArray<FHomesteadRow> Rows() const;
     FString FocusTitle() const;
     FString FocusActions() const;
+    bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
     FString PlacementLabel() const;
     bool ToastIsError() const { return bToastError; }
@@ -68,6 +70,9 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
     UPROPERTY() TObjectPtr<USoundBase> UIClick;
     bool bAudioEnabled = true;
+    bool bAutomatedInputOnly = false;
+    bool bLoggedExternalInput = false;
+    uint32 IgnoredExternalInputs = 0;
     bool bAlternateStep = false;
     FVector LastStepPosition = FVector::ZeroVector;
     float StepDistance = 0;

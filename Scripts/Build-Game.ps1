@@ -33,6 +33,7 @@ if ($LASTEXITCODE -ne 0) {
 $map = Join-Path $root 'Content\SurvivalGame\Maps\Homestead.umap'
 if (-not (Test-Path -LiteralPath $map)) { throw 'Content bootstrap did not produce the playable map.' }
 & (Join-Path $PSScriptRoot 'Import-Characters.ps1') -EngineRoot $engine
+& (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine
 if ($Package) {
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
     & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output

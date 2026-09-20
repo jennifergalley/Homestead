@@ -2,6 +2,7 @@
 #include "HomesteadController.h"
 #include "HomesteadWorld.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadAnimInstance.h"
 #include "HomesteadTestPaths.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
@@ -40,8 +41,23 @@ void AHomesteadSmokeTest::Add(const FString& Name, TFunction<void()> Action, TFu
 
 void AHomesteadSmokeTest::Tap(FKey Key)
 {
+    TraceState(TEXT("INPUT ") + Key.ToString());
     Controller->InputKey(FInputKeyEventArgs::CreateSimulated(Key, IE_Pressed, 1));
     Controller->InputKey(FInputKeyEventArgs::CreateSimulated(Key, IE_Released, 0));
+}
+
+void AHomesteadSmokeTest::TraceState(const FString& Label)
+{
+    const auto& Look = Controller->GetAppearance();
+    FString Line = FString::Printf(TEXT("step=%d %s actor=%s velocity=%s focus=%s page=%d row=%d look=%d,%d,%d,%d,%d,%d,%d hour=%.6f"),
+        StepIndex, *Label, *Controller->GetPawn()->GetActorLocation().ToString(),
+        *Controller->GetPawn()->GetVelocity().ToString(), *Controller->FocusTitle(),
+        Controller->BookPage(), Controller->SelectedRow(), Look.BodyPreset, Look.HairStyle,
+        Look.HairColor, Look.SkinTone, Look.EyeColor, Look.TunicColor, Look.Outfit, Controller->State().hour);
+    for (const auto& Plot : Controller->State().plots)
+        Line += FString::Printf(TEXT(" plot=%d:kind=%d,growth=%.9f,water=%.6f,weeds=%.6f"),
+            Plot.id, static_cast<int32>(Plot.kind), Plot.growth, Plot.moisture, Plot.weeds);
+    UE_LOG(LogTemp, Display, TEXT("Smoke trace: %s"), *Line);
 }
 
 void AHomesteadSmokeTest::Axis(FKey Key, float Value)
@@ -69,7 +85,7 @@ void AHomesteadSmokeTest::QueueHarvest(int32 ResourceId, Homestead::Item Expecte
             *Before = Controller->Simulation().Count(ExpectedItem);
             Teleport(Position);
         },
-        []() { return true; }, 0.65f);
+        [this, ResourceId]() { return Controller->IsResourceFocused(ResourceId); }, 0.65f);
     Add(FString::Printf(TEXT("Gather resource %d through gamepad A"), ResourceId),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before, ExpectedItem]() { return Controller->Simulation().Count(ExpectedItem) > *Before; });
@@ -116,22 +132,54 @@ void AHomesteadSmokeTest::Prepare()
     }
     Add(TEXT("Clothed heroine and compatible animations are loaded"),
         []() {},
-        [this]() { return Controller->HasHeroine(); });
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            if (!Avatar || !Controller->HasHeroine()) return false;
+            const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
+            const float Width = FVector::Dist2D(Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l")),
+                Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r")));
+            return Animation && Animation->WalkWeight() < 0.01f && Width > 12 && Width < 24;
+        });
     Add(TEXT("Initial notes page is open"),
         []() {},
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
+    Add(TEXT("Automation ignores physical-source menu input"),
+        [this]()
+        {
+            for (const FKey Key : {EKeys::Gamepad_Special_Right, EKeys::Escape})
+            {
+                Controller->InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key,
+                    IE_Pressed, 1, false, FPlatformTime::Cycles64()));
+                Controller->InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key,
+                    IE_Released, 0, false, FPlatformTime::Cycles64()));
+            }
+        },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
     Add(TEXT("Gamepad closes the field book"),
         [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return !Controller->IsBookOpen(); });
     Add(TEXT("Gamepad movement reaches the character"),
         [this]() { MovementStart = Controller->GetPawn()->GetActorLocation(); },
-        [this]() { return FVector::Dist2D(MovementStart, Controller->GetPawn()->GetActorLocation()) > 30; }, 0.8f);
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            return Animation && Animation->WalkWeight() > 0.99f
+                && FMath::Abs(Animation->GaitRate() - Avatar->GetVelocity().Size2D() / 120.0f) < 0.03f
+                && FVector::Dist2D(MovementStart, Avatar->GetActorLocation()) > 30;
+        }, 0.8f);
     Add(TEXT("Gamepad look rotates the camera"),
         [this]() { Axis(EKeys::Gamepad_LeftY, 0); CameraStart = Controller->GetControlRotation().Yaw; },
         [this]() { return FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) > 3; }, 0.6f);
     Add(TEXT("Capture the actual clearing"),
         [this]() { Axis(EKeys::Gamepad_RightX, 0); },
-        []() { return true; }, 2.5f);
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            return Animation && Animation->WalkWeight() < 0.01f && Animation->GaitRate() < 0.01f;
+        }, 2.5f);
     Add(TEXT("Capture the settled clearing exposure"),
         [this]() { Screenshot(TEXT("clearing")); },
         []() { return true; }, 1.0f);
@@ -495,6 +543,7 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     {
         if (Step.Skip && Step.Skip()) { ++StepIndex; return; }
         Step.Action();
+        TraceState(TEXT("BEGIN ") + Step.Name);
         bActed = true;
         StepElapsed = 0;
         LastNavigationAt = -1;
@@ -518,10 +567,12 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     if (StepElapsed < Step.Wait && !(NavigationComplete && StepElapsed >= 0.25f)) return;
     if (!Step.Check())
     {
+        TraceState(TEXT("FAIL ") + Step.Name);
         Finish(false, Step.Name + TEXT(" | ") + Controller->Toast());
         return;
     }
     Results.Add(TEXT("PASS ") + Step.Name);
+    TraceState(TEXT("PASS ") + Step.Name);
     UE_LOG(LogTemp, Display, TEXT("Homestead smoke PASS: %s"), *Step.Name);
     ++StepIndex;
     bActed = false;
@@ -549,6 +600,8 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
     {
         Axis(EKeys::Gamepad_LeftY, 0);
         Axis(EKeys::Gamepad_RightX, 0);
+        Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes four deliberate rejection probes)"),
+            Controller->IgnoredExternalInputCount()));
     }
     if (FrameMilliseconds.Num() >= 60)
     {

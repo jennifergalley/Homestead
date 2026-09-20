@@ -29,6 +29,16 @@ def main():
         "duration_seconds": frames[-1]["t"],
         "motion": {},
     }
+    idle = [r for r in rows if r["pass"] == "idle"]
+    diagnostics["idle_toe_separation_cm"] = statistics.median(
+        math.hypot(float(r["left_toe_x"]) - float(r["right_toe_x"]),
+                   float(r["left_toe_y"]) - float(r["right_toe_y"])) for r in idle)
+    if "walk_weight" in rows[0]:
+        diagnostics["blend_samples"] = [
+            {"t": float(r["seconds"]), "pass": r["pass"], "speed": float(r["speed"]),
+             "weight": float(r["walk_weight"]), "rate": float(r["gait_rate"])}
+            for r in rows if 0.001 < float(r["walk_weight"]) < 0.999
+        ]
     for label in ("slow-walk", "full-walk", "turn-while-moving"):
         group = [row for row in rows if row["pass"] == label]
         result = {"median_actor_speed_cm_s": statistics.median(float(row["speed"]) for row in group)}
@@ -47,6 +57,21 @@ def main():
                     velocities.append(math.hypot(dx, dy) / dt)
             result[f"{side}_low_toe_samples"] = len(velocities)
             result[f"{side}_low_toe_median_world_speed_cm_s"] = statistics.median(velocities) if velocities else None
+            if "walk_phase" in rows[0]:
+                planted = []
+                offset = 0 if side == "left" else 0.5
+                for previous, current in zip(group, group[1:]):
+                    a = (float(previous["walk_phase"]) + offset) % 1
+                    b = (float(current["walk_phase"]) + offset) % 1
+                    dt = float(current["seconds"]) - float(previous["seconds"])
+                    if (dt <= 0 or not 0.04 <= a < b <= 0.46
+                            or min(float(r["walk_weight"]) for r in (previous, current)) < 0.999):
+                        continue
+                    planted.append(math.hypot(
+                        float(current[f"{side}_toe_x"]) - float(previous[f"{side}_toe_x"]),
+                        float(current[f"{side}_toe_y"]) - float(previous[f"{side}_toe_y"])) / dt)
+                result[f"{side}_authored_stance_samples"] = len(planted)
+                result[f"{side}_authored_stance_median_world_speed_cm_s"] = statistics.median(planted) if planted else None
         diagnostics["motion"][label] = result
     diagnostics["interpretation_limit"] = (
         "Low-toe filtering is a stance approximation, not a collision/foot-contact detector. "

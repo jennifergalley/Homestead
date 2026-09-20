@@ -130,3 +130,14 @@ the movement slice so autonomous quality gates become reliable.
 Reports remain local under `Saved\Automation\automation-setup`,
 `automation-setup-basic`, and `automation-original-comparison`.
 The actual-motion recording is `Saved\VisualPlaytests\automation-setup`.
+
+The first movement worker reproduced a menu failure with a diagnostic trace:
+a non-simulated physical A-button press arrived during the scripted outfit
+change, advancing the choice twice. Physical stick events also entered the
+offscreen game. Jenny confirmed she was using that controller in another game.
+Automation now rejects physical-source events only when the smoke/visual flag
+is present; ordinary player input remains enabled. Tests must coexist with her
+other applications, not ask her to stop playing. Performance captured while
+another game is active is concurrent-load evidence, not clean performance
+acceptance. Berry maturity must be established separately rather than assumed
+to share this cause.
