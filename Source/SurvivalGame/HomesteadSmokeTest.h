@@ -33,6 +33,7 @@ private:
     bool bActed = false;
     bool bFinished = false;
     bool bFullLoopPrepared = false;
+    bool bWeedingPrepared = false;
     bool bAudioCapture = false;
     bool bCompletionPending = false;
     bool bPendingSuccess = false;
@@ -57,6 +58,7 @@ private:
     void PreparePresentation();
     void PrepareGatheringChecks();
     void PrepareWateringChecks();
+    void PrepareWeedingChecks();
     bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
     void QueueSelectRow(int32 Id);

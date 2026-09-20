@@ -29,6 +29,18 @@ original wood/fiber presentation matching the existing recipe, not a new tool
 or inventory rule. This does not complete the other interaction gestures or
 resolve any deferred cosmetic/UI feedback.
 
+## Weeding - reused motion feedback (2026-09-20)
+
+The separately scheduled `weeding-01` slice reuses the accepted picking clip
+after successful planted-plot X/F weeding. Actual walking and interaction were
+recorded from a clearly disclosed copy of an existing test-world save; the
+prior setup used functional teleports and ordinary sleep to grow weeds.
+The final footage shows a gentle dip/pull and return to idle rather than a
+static transaction. No new clip, prop, appearance edit or gardening rule was
+added. This is generic feedback above the plot, not hand-to-ground contact:
+weeds disappear at the existing immediate transaction. It is not Jenny's
+approval or a fix for the remaining cosmetic/UI requests.
+
 ## Wavy length - attempted and reverted (2026-09-20)
 
 Jenny's wavy-hair length feedback was scheduled as its own bounded slice:

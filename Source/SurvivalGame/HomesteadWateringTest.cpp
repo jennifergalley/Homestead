@@ -3,6 +3,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "HomesteadActionTestState.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -35,16 +36,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     auto Probe = MakeShared<FWaterProbe>();
     auto Matches = [this, Probe]()
     {
-        auto Expected = Probe->Expected;
-        Expected.AdvanceGameHours(Controller->State().hour - Probe->Hour, Controller->PlayerPoint());
-        const auto& A = Controller->State();
-        const auto& B = Expected.GetState();
-        if (A.inventory != B.inventory || A.plots.size() != B.plots.size()) return false;
-        for (size_t I = 0; I < A.plots.size(); ++I)
-            if (A.plots[I].id != B.plots[I].id || A.plots[I].planted != B.plots[I].planted
-                || A.plots[I].kind != B.plots[I].kind || FMath::Abs(A.plots[I].moisture - B.plots[I].moisture) > 0.000001
-                || FMath::Abs(A.plots[I].growth - B.plots[I].growth) > 0.000001) return false;
-        return true;
+        return MatchesActionState(*Controller, Probe->Expected, Probe->Hour);
     };
     auto Approach = [this, Garden, Hidden]()
     {

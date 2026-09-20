@@ -1,4 +1,4 @@
-"""Review real ordinary-control setup and watering; never infer performance or exact contact."""
+"""Review watering or fixture-disclosed weeding; never infer performance or exact contact."""
 import argparse
 import csv
 import json
@@ -11,31 +11,36 @@ from PIL import Image, ImageDraw
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", type=Path)
+    parser.add_argument("--weeding", action="store_true")
     args = parser.parse_args()
     folder = args.directory
     rows = list(csv.DictReader((folder / "telemetry.csv").open(encoding="utf-8-sig")))
-    before = [r for r in rows if r["pass"] == "before-water"]
-    action = [r for r in rows if r["pass"] == "water"]
-    after = [r for r in rows if r["pass"] == "after-water"]
+    verb = "weed" if args.weeding else "water"
+    pose = "gather" if args.weeding else "water"
+    before = [r for r in rows if r["pass"] == "before-" + verb]
+    action = [r for r in rows if r["pass"] == verb]
+    after = [r for r in rows if r["pass"] == "after-" + verb]
     if not before or not action or not after:
-        raise ValueError("Missing before, action or recovered watering evidence.")
+        raise ValueError("Missing before, action or recovered evidence.")
     anchor = before[-1]
-    visible = [r for r in action if int(r["tool_visible"])]
+    visible = [r for r in action if float(r[pose + "_weight"]) > .5] if args.weeding else [r for r in action if int(r["tool_visible"])]
     if not visible:
-        raise ValueError("No hand-held tool was actually observed.")
+        raise ValueError("No requested hand action was actually observed.")
 
     def distance(a, b, prefix):
         return math.sqrt(sum((float(a[prefix + axis]) - float(b[prefix + axis])) ** 2 for axis in "xyz"))
 
     report = {
         "frames": len(rows), "duration_seconds": float(rows[-1]["seconds"]),
-        "setup": "Fresh ordinary clearing, mapped gathering/crafting/refill/till/plant; no injected save, teleport or debug time/state edit.",
-        "tool_samples": len(visible),
+        "setup": json.loads((folder / "fixture.json").read_text(encoding="utf-8-sig"))["setup"] if args.weeding
+        else "Fresh ordinary clearing, mapped gathering/crafting/refill/till/plant; no injected save, teleport or debug time/state edit.",
+        "action_samples": len(visible),
+        "tool_samples": sum(int(r["tool_visible"]) for r in action),
         "water_debit": int(anchor["water_stock"]) - int(after[-1]["water_stock"]),
         "moisture_before": float(anchor["plot_moisture"]),
         "moisture_after": float(after[-1]["plot_moisture"]),
-        "action_starts": int(after[-1]["water_starts"]) - int(anchor["water_starts"]),
-        "final_weight": float(after[-1]["water_weight"]),
+        "action_starts": int(after[-1][pose + "_starts"]) - int(anchor[pose + "_starts"]),
+        "final_weight": float(after[-1][pose + "_weight"]),
         "final_tool_visible": bool(int(after[-1]["tool_visible"])),
         "peak_tilt_degrees": max(-float(r["can_pitch"]) for r in visible),
         "maximum_tool_world_radius_cm": max(float(r["tool_radius"]) for r in visible) if "tool_radius" in rows[0] else None,
@@ -43,9 +48,16 @@ def main():
         "wrist_travel_cm": max(distance(r, anchor, "right_hand_") for r in action),
         "actor_travel_cm": max(distance(r, anchor, "") for r in action),
         "toe_travel_cm": {s: max(distance(r, anchor, s + "_toe_") for r in action) for s in ("left", "right")},
-        "limits": "Sparse sampled images, not FPS/smoothness/controller comfort. Generic forward pour, no target/terrain IK or exact ground contact.",
+        "limits": "Sparse sampled images, not FPS/smoothness/controller comfort. Generic hand gesture, no target/terrain IK or exact ground contact.",
     }
-    selected = [anchor] + [min(action, key=lambda r: abs(float(r["water_phase"]) - phase)) for phase in (.4, .75, 1.1, 1.55)] + [after[-1]]
+    if args.weeding:
+        report.update(weeds_before=float(anchor["plot_weeds"]), weeds_after=float(after[-1]["plot_weeds"]))
+        if report["weeds_before"] < .125 or report["weeds_after"] >= .001 or report["water_debit"] or report["tool_samples"]:
+            raise ValueError("Weeding lacks visible starting weeds, successful removal, or an unchanged hidden can.")
+    if report["action_starts"] != 1 or report["final_weight"] != 0 or report["final_tool_visible"]:
+        raise ValueError("Action did not start exactly once and recover with its prop hidden.")
+    phases = (.3, .55, .9, 1.35) if args.weeding else (.4, .75, 1.1, 1.55)
+    selected = [anchor] + [min(action, key=lambda r: abs(float(r[pose + "_phase"]) - phase)) for phase in phases] + [after[-1]]
     sheet = Image.new("RGB", (1280, 1626), "#101b16")
     draw = ImageDraw.Draw(sheet)
     for index, row in enumerate(selected):
@@ -54,9 +66,10 @@ def main():
             crop = image.crop((round(w * .2), round(h * .25), round(w * .75), h)).resize((640, 510))
             x, y = index % 2 * 640, index // 2 * 542
             sheet.paste(crop, (x, y + 32))
-            draw.text((x + 8, y + 8), f"{row['seconds']}s {row['pass']} phase={row['water_phase']} tool={row['tool_visible']}", fill="white")
-    sheet.save(folder / "watering-sheet.png")
-    (folder / "watering-review.json").write_text(json.dumps(report, indent=2) + "\n")
+            draw.text((x + 8, y + 8), f"{row['seconds']}s {row['pass']} phase={row[pose + '_phase']} tool={row['tool_visible']}", fill="white")
+    name = "weeding" if args.weeding else "watering"
+    sheet.save(folder / f"{name}-sheet.png")
+    (folder / f"{name}-review.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
 
 

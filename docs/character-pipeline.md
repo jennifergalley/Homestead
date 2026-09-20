@@ -171,6 +171,27 @@ it. It appears/disappears without a holster/equip animation; no water stream or
 fluid system is added. This is a readable generic forward pour, not target/
 terrain-aware IK or a claim of exact ground contact.
 
+## Reused weeding feedback (2026-09-20)
+
+Planted-plot X/F requests the existing `AN_Heroine_Gather` only after a successful
+`Sim.Weed`. This is a reuse of the accepted 1.6-second pick/recover, not a new
+clip, retuned pose, prop, rig, material or character import. Bare-plot berry
+planting, resource clearing, fueling and tilling keep their existing dispatch
+and do not request the gesture. Weed reduction, inventory, water, moisture and
+time remain simulation-owned. There is no reward/contact notify.
+
+Weeding uses the identical gather cancellation and single-action arbitration.
+Valid transactions during another hand action still happen once, but their
+presentation requests coalesce rather than stacking or replaying later. A can
+can remain visible only while its already-active watering pose is eligible;
+there is never a weeding-specific prop. Movement, book/Look/planning, load/retry
+and appearance changes retain the common cancellation behavior.
+
+The reused motion is a gentle generic dip/hand pull above the plot, not a hand
+reaching actual ground weeds. Existing weed visuals disappear at transaction
+success, before the hand gesture finishes. Exact plant/terrain contact, finger
+grasping and a crouching/kneeling gardening system are not implemented.
+
 ## Rejected face-material hypothesis (2026-09-20)
 
 The source skin shader includes a Blender subsurface weight of 0.07, which the

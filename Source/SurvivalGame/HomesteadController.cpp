@@ -421,8 +421,12 @@ void AHomesteadController::Secondary()
         for (const auto& Plot : State().plots)
         {
             if (Plot.id != FocusId) continue;
-            Notify(Plot.planted ? Sim.Weed(FocusId, PlayerPoint())
-                : Sim.Plant(FocusId, PlayerPoint(), Homestead::CropKind::Berries), GrassStepA);
+            const bool Planted = Plot.planted;
+            const auto Result = Planted ? Sim.Weed(FocusId, PlayerPoint())
+                : Sim.Plant(FocusId, PlayerPoint(), Homestead::CropKind::Berries);
+            Notify(Result, GrassStepA);
+            if (Result.ok && Planted)
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
             break;
         }
     }

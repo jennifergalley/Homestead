@@ -346,12 +346,15 @@ Recommended sequence, not authorization for purchases or a new pipeline commitme
    and use the cookfire, with responsive transitions and synchronized feedback.
    Do not increase animation complexity before ordinary walking looks credible.
 
-Bounded technical progress on 2026-09-20: the separate movement, wild gathering
-and `watering-01` candidates now cover relaxed locomotion, picking and a short
-watering-can gesture. Watering was observed after an actual fresh-start
-gather/craft/refill/till/plant route. These are not Jenny's aesthetic/comfort
-approval or completion of every interaction: chopping, weeding, cooking and
-refill gestures remain outside these slices. See `docs\visual-playtesting.md`.
+Bounded technical progress on 2026-09-20: separate movement, wild gathering,
+`watering-01` and `weeding-01` candidates now cover relaxed locomotion, picking,
+a short watering-can gesture and a reused gentle hand-pull for planted-plot
+weeding. Watering was observed after an actual fresh-start gather/craft/refill/
+till/plant route. Weeding was observed after ordinary walking from a disclosed
+copy of an existing test-world save with naturally grown weeds, not a fresh-start
+setup. These are not Jenny's aesthetic/comfort approval or completion of every
+interaction: chopping, cooking and refill gestures remain outside these slices.
+Ground-level weed contact is not implemented. See `docs\visual-playtesting.md`.
 
 The next playable review should be a character-quality slice in the existing
 clearing: standing, close inspection, walking slowly, turning, stopping, walking

@@ -46,6 +46,8 @@ private:
     double LastWallTime = 0;
     FString OutputDirectory;
     bool bWaterRoute = false;
+    bool bWeedRoute = false;
+    bool bWeeded = false;
     bool bWatered = false;
     bool bObservedWater = false;
     bool bObservedTool = false;
@@ -69,5 +71,6 @@ private:
     void Capture(const FString& Label);
     void Finish();
     void TickWatering(float WallDelta);
+    void TickWeeding(float WallDelta);
     bool WalkWaterTarget(FVector2D Target, float Tolerance, float Delta, FVector2D& Move, FVector2D& Look);
 };

@@ -304,6 +304,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { Axis(EKeys::Gamepad_LeftY, 0); },
         [this]() { return Controller->Simulation().IsSheltered(Controller->PlayerPoint()); });
 
+    auto PickingStarts = [this]()
+    {
+        const auto* Avatar = CastChecked<AHomesteadCharacter>(Controller->GetPawn());
+        return CastChecked<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance())->GatherStarts();
+    };
+    const auto SecondaryStarts = MakeShared<uint32>(0);
     Add(TEXT("Approach the outdoor cookfire"),
         [this, Fire]() { Teleport(Fire); },
         [this]() { return Controller->FocusTitle() == TEXT("Cookfire"); }, 0.65f);
@@ -312,19 +318,21 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         const auto FuelBefore = MakeShared<double>(0);
         const auto BranchesBefore = MakeShared<int32>(0);
         Add(FString::Printf(TEXT("Fuel the individual cookfire with branch %d"), Branch + 1),
-            [this, FuelBefore, BranchesBefore]()
+            [this, FuelBefore, BranchesBefore, SecondaryStarts, PickingStarts]()
             {
                 const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Fire, -3, -2);
                 *FuelBefore = Piece ? Piece->fuelHours : -100;
                 *BranchesBefore = Controller->Simulation().Count(Homestead::Item::Branch);
+                *SecondaryStarts = PickingStarts();
                 Tap(EKeys::Gamepad_FaceButton_Left);
             },
-            [this, FuelBefore, BranchesBefore, Fire]()
+            [this, FuelBefore, BranchesBefore, Fire, SecondaryStarts, PickingStarts]()
             {
                 const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Fire, -3, -2);
                 return Piece && Piece->fuelHours > *FuelBefore + 3.9
                     && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchesBefore - 1
-                    && Controller->Simulation().IsNearFire(Fire) && !Controller->ToastIsError();
+                    && Controller->Simulation().IsNearFire(Fire) && !Controller->ToastIsError()
+                    && PickingStarts() == *SecondaryStarts;
             }, 0.2f);
     }
     QueueCraft(Homestead::Recipe::RoastedRoots);
@@ -413,14 +421,14 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         },
         [this]() { return Controller->FocusTitle() == TEXT("The clearing"); }, 0.65f);
     Add(TEXT("Till the second food plot through gamepad X"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
-        [this, BerryPlotId]()
+        [this, SecondaryStarts, PickingStarts]() { *SecondaryStarts = PickingStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
+        [this, BerryPlotId, SecondaryStarts, PickingStarts]()
         {
             for (const auto& Plot : Controller->State().plots)
                 if (Plot.cellX == -3 && Plot.cellY == 0 && !Plot.planted)
                 {
                     *BerryPlotId = Plot.id;
-                    return Plot.id != GardenPlotId && !Controller->ToastIsError();
+                    return Plot.id != GardenPlotId && !Controller->ToastIsError() && PickingStarts() == *SecondaryStarts;
                 }
             return false;
         });
@@ -430,19 +438,21 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     const auto FruitBefore = MakeShared<int32>(0);
     const auto BerrySeedStock = MakeShared<int32>(0);
     Add(TEXT("Plant seeds from a foraged berry with gamepad X rather than the root action"),
-        [this, FruitBefore, BerrySeedStock]()
+        [this, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
             *FruitBefore = Controller->Simulation().Count(Homestead::Item::Berries);
             *BerrySeedStock = Controller->Simulation().Count(Homestead::Item::Seeds);
+            *SecondaryStarts = PickingStarts();
             Tap(EKeys::Gamepad_FaceButton_Left);
         },
-        [this, BerryPlotId, FruitBefore, BerrySeedStock]()
+        [this, BerryPlotId, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries
                 && Controller->Simulation().Count(Homestead::Item::Berries) == *FruitBefore - 1
                 && Controller->Simulation().Count(Homestead::Item::Seeds) == *BerrySeedStock
-                && Controller->FocusTitle().StartsWith(TEXT("Berries")) && !Controller->ToastIsError();
+                && Controller->FocusTitle().StartsWith(TEXT("Berries")) && !Controller->ToastIsError()
+                && PickingStarts() == *SecondaryStarts;
         });
     Add(TEXT("Walk to an unobstructed stream bank"),
         [this, Stream]() { Teleport(Stream); },

@@ -93,7 +93,7 @@
       "Light-wave deformation, torso clearance and chestnut recoloring of the CC0 hair meshes",
       "Three-second idle and one-second in-place walk prototype animations",
       "Animation-only relaxed idle and grounded walk: analytical leg placement, relaxed hands and 120 cm/s calibrated stance; same existing bind rig",
-      "Animation-only 1.6-second wild gathering reach/pick/recover: planted feet and unscaled analytical reach on the existing bind; Scripts\\Characters\\build_gathering.py",
+      "Animation-only 1.6-second reach/pick/recover for wild gathering and, reused unchanged, planted-plot weeding: planted feet and unscaled analytical reach on the existing bind; Scripts\\Characters\\build_gathering.py",
       "Animation-only 2.2-second watering lift/tilt/recover on the unchanged bind; Scripts\\Characters\\build_watering.py",
       "Original procedural wood/fiber-bound watering can, shaped and attached in Source\\SurvivalGame\\HomesteadWateringTool.cpp; existing project field material, no acquired prop asset",
       "Lighting, preview scenes and rendered review sheets"

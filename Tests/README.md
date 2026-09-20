@@ -114,6 +114,35 @@ The observer verifies queued inputs after processing, not in the submitting
 tick; the launch script also checks the recorded gameplay outcome independently
 of process exit. Actual raw dimensions are verified before accepting evidence.
 
+`Test-Game.ps1 -Weeding -FixtureSave <dedicated-test-save>` adds 37 focused
+checks using the existing step runner. `Initialize-TestWorldFixture.ps1` accepts
+only a saved envelope under `Saved\Automation`, copies it byte-for-byte into an
+empty output `SmokeSave`, and records the source/hash/setup in `fixture.json`.
+Engine loading still performs the real checksum/schema validation. Never use a
+player save or describe this as a fresh-start setup. Functional travel is
+explicitly test-only teleporting.
+
+The weeding fixture requires an immature planted plot with weeds >= 0.125,
+plus existing water/tool stock and an available berry patch for alternation.
+It checks X/F, same-frame already-clean rejection, exactly the expected weed
+reduction without inventory/water/moisture/resource mutation, visible motion,
+normal recovery, movement, paused book/Look, planning, appearance and save/load.
+Real water/weed and gather/clear transactions exercise arbitration, not merely
+direct animation requests. Watering and weeding share the clock-adjusted
+expected-state helper; it now also checks weeds and resource state. The existing
+full loop additionally rejects pick starts during berry planting, tilling and
+fueling. Existing failure/retry and all-appearance assertions are retained.
+
+`Playtest-Visual.ps1 -Weeding -FixtureSave <dedicated-test-save>` loads the same
+explicit fixture, then walks to a visibly weedy plot and interacts through
+mapped X. It makes no debug position/time/state changes after loading. The
+recording includes saved test appearance/location; source setup used functional
+teleports and ordinary sleep. Review with
+`Review-Watering.py <capture-folder> --weeding` (shared action review tooling).
+Approach sampling is requested at 2 Hz, action at 8 Hz; neither is game FPS.
+The script requires real weed removal, one visible action, recovery and no can
+or water debit. Functional fixtures and visual recordings use separate outputs.
+
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including
   tool/fire/foundation prerequisites. HUD callers need not duplicate cost tables.

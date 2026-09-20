@@ -576,3 +576,90 @@ upload or promotion occurred.
 This is verified technical/action-presentation progress, not Jenny's aesthetic
 approval. Sparse screenshots and concurrent-load timings do not certify
 continuous smoothness, controller comfort, listening quality or clean performance.
+
+## Weeding feedback using the existing pick (2026-09-20)
+
+Candidate: `Build\Releases\20260920-050723-5cc6c8a5\weeding-01\Windows`.
+Successful planted-plot X/F now requests the accepted gathering clip. No new
+animation, prop, mesh, material, simulation rule, interaction radius, forced
+turn or camera behavior was introduced. Other secondary-input contexts remain
+separate; a failed weed transaction requests no presentation.
+
+### Explicit setup and two review sets
+
+Visible weeds grow at 0.009 per game hour, with the first rendered weed at
+0.125. Rather than silently advancing time or waiting hours, both recordings
+load a byte-identical copy of
+`Saved\Automation\20260920-050723-5cc6c8a5\watering-01-full-loop\SmokeSave\Homestead_Auto_0.sav.bak`.
+This dedicated functional-world checkpoint has two planted plots at about
+0.29 weeds, game hour 88.17 (16:10), and healthy enough vitals for the approach.
+Its prior setup used functional teleports and repeated ordinary sleep, not a
+fresh ordinary-play route. It also contains the test's saved Willow/bob/apron
+appearance and colors; those are not new art choices or Jenny's preference.
+The source is never overwritten. Each output's `fixture.json` records its
+source, SHA-256 and setup boundary.
+
+After mapped F9 loading, the observer walks from the saved bedroll through a
+staging position to plot 108, settles, orbits/zooms using mapped controls, and
+presses gamepad X. There are **no debug position/time/state edits during this
+recorded approach/action**. Engine lifecycle tests use explicit teleport setup
+separately; do not pass those off as ordinary movement footage.
+
+The initial set is `Saved\VisualPlaytests\20260920-050723-5cc6c8a5\weeding-initial`
+(119 actual 1280x720 frames / 42.9939s). The second and final set is
+`...\weeding-01-packaged` (119 actual 1280x720 frames / 42.7352s).
+Both use the same copied world, saved appearance and mapped camera route.
+Only these two quality sets were reviewed; no clip/art retuning was attempted.
+
+```powershell
+.\Scripts\Playtest-Visual.ps1 -Packaged `
+  -PackageDirectory 'Build\Releases\20260920-050723-5cc6c8a5\weeding-01' `
+  -Weeding -FixtureSave 'Saved\Automation\20260920-050723-5cc6c8a5\watering-01-full-loop\SmokeSave\Homestead_Auto_0.sav.bak' `
+  -Width 1280 -Height 720 -OutputDirectory 'Saved\VisualPlaytests\weeding-new-review'
+python .\Scripts\Review-Watering.py 'Saved\VisualPlaytests\weeding-new-review' --weeding
+```
+
+| Final recorded measurement | Result |
+| --- | --- |
+| Pick starts / active samples | 1 / 9 |
+| Weeds before / after ordinary progression | 0.292319 / 0.000314 |
+| Water debit / visible can samples | 0 / 0 |
+| Final action weight | 0 |
+| Right wrist displacement | 25.84cm |
+| Actor displacement during action | 0cm |
+| Left / right toe displacement | 0.368 / 0.414cm |
+
+The inspected `weeding-sheet.png` shows the visible weed props before X, a
+gentle dip/forward hand-pull, and upright recovery without a can or gross new
+body/garment penetration. It is **not ground-level weeding contact**: the hand
+gestures above the soil, weeds disappear on the immediate transaction rather
+than a hand contact, and close standing can overlap the fixed crop decorations.
+The underlying rigid clothing, fixed face and existing hair limitations remain.
+Approach sampling is requested at 2 Hz and action sampling at 8 Hz, not game FPS
+or a proof of smoothness/controller comfort. Timings are concurrent-load only.
+
+### Functional and preservation evidence
+
+The fresh package passed **37 weeding, 74 gathering, 181 watering and 434
+full-loop checks**, under
+`Saved\Automation\20260920-050723-5cc6c8a5\weeding-01-{weeding,gathering,watering,full-loop}`.
+The same 37 weeding checks passed in editor before packaging. Expected state
+uses one real `Weed` on a simulation copy and normal clock advancement:
+inventory, water, moisture and resource state must otherwise match. Mapped X/F,
+same-frame already-clean rejection, real water/weed/gather/clear alternation,
+movement, book/Look/pause/planning, appearance and save/load are covered.
+Existing all-appearance and real failure/retry checks remain intact. Full-loop
+assertions additionally reject pick starts during fueling, tilling and bare-plot
+berry planting. Seven copy/argument guards verify fixture isolation and source
+preservation. Portable simulation code did not change; its suite was not rerun
+unnecessarily for this presentation-only hook.
+
+All **70** existing character/source LFS assets match `27f83af`; no new
+export/import was authored. The build reverified the existing animation sets.
+Five known incidental world-bootstrap resaves were restored with hash proof.
+Receipts under `Build\CharacterPreview\weeding-*`, packaged reports and the
+final sheet are copied into candidate `Verification`; `acceptance-receipt.json`
+ties the executable, source, fixture and observations together.
+Original `Build\Windows`, `Play.cmd`, player saves and earlier candidates remain
+untouched. This is technical feedback, not Jenny's aesthetic approval or an
+authorization to resume the deferred face/hair/UI experiments.

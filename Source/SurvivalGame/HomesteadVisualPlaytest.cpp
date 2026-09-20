@@ -46,9 +46,12 @@ void AHomesteadVisualPlaytest::Prepare()
     if (const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
         AddTickPrerequisiteComponent(Avatar->GetWateringTool());
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
-    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius"));
+    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius,plot_weeds"));
     bWaterRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringPlaytest"));
-    Observations.Add(TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
+    bWeedRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingPlaytest"));
+    Observations.Add(bWeedRoute
+        ? TEXT("Weeding uses an explicitly copied preexisting functional-test save, including saved appearance/location. Prior setup used fixture teleports and ordinary sleep. After F9 loading, this recorded approach/action uses normal mapped controls, no debug teleport/time/state edits. See fixture.json for source and hash.")
+        : TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
     Observations.Add(TEXT("Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark."));
     if (bWaterRoute)
         Observations.Add(TEXT("Watering starts from the normal new clearing: mapped gathering, crafting, stream refill, tilling and planting. No fixture/save injection. Ordinary crafting still advances its existing game time. Setup is sampled at 1 Hz; final action at requested 8 Hz."));
@@ -73,6 +76,17 @@ void AHomesteadVisualPlaytest::Prepare()
         {TEXT("gather"), 3},
         {TEXT("after-gather"), 2}
     };
+    if (bWeedRoute)
+        Passes = {
+            {TEXT("load-disclosed-test-world"), 1, {}, {}, EKeys::F9},
+            {TEXT("walk-to-garden-staging"), 90},
+            {TEXT("approach-weedy-plot"), 30},
+            {TEXT("settle-weed"), 0.8f},
+            {TEXT("view-weeding-side"), 1.15f, {}, FVector2D(-0.65f, 0)},
+            {TEXT("before-weed"), 1},
+            {TEXT("weed"), 3.5f, {}, {}, EKeys::Gamepad_FaceButton_Left},
+            {TEXT("after-weed"), 2}
+        };
     LastWallTime = FPlatformTime::Seconds();
 }
 
@@ -88,9 +102,9 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
     const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
     const auto* Tool = Avatar->GetWateringTool();
     const FVector Grip = Tool->GripPosition();
-    double Moisture = -1;
-    for (const auto& Plot : PC->State().plots) if (Plot.id == WaterPlotId) Moisture = Plot.moisture;
-    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f,%.4f,%.4f,%u,%d,%.3f,%.3f,%.3f,%.3f,%d,%.6f,%.3f,%.3f"),
+    double Moisture = -1, Weeds = -1;
+    for (const auto& Plot : PC->State().plots) if (Plot.id == WaterPlotId) { Moisture = Plot.moisture; Weeds = Plot.weeds; }
+    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f,%.4f,%.4f,%u,%d,%.3f,%.3f,%.3f,%.3f,%d,%.6f,%.3f,%.3f,%.6f"),
         CaptureIndex, Elapsed, *Label, Position.X, Position.Y, Position.Z, Avatar->GetVelocity().Size2D(),
         Avatar->GetActorRotation().Yaw, PC->GetControlRotation().Yaw,
         Left.X, Left.Y, Left.Z, Right.X, Right.Y, Right.Z,
@@ -102,8 +116,9 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
         Animation ? Animation->WaterWeight() : 0, Animation ? Animation->WaterPhase() : 0,
         Animation ? Animation->WaterStarts() : 0, Tool->IsPresented(), Grip.X, Grip.Y, Grip.Z,
         Tool->GetComponentRotation().Pitch, PC->Simulation().Count(Homestead::Item::Water), Moisture,
-        Tool->GetComponentScale().X, Tool->Bounds.SphereRadius));
-    if (Animation && (Label == TEXT("gather") || Label == TEXT("after-gather")))
+        Tool->GetComponentScale().X, Tool->Bounds.SphereRadius, Weeds));
+    if (Animation && (Label == TEXT("gather") || Label == TEXT("after-gather")
+        || Label == TEXT("weed") || Label == TEXT("after-weed")))
     {
         bObservedGather |= Animation->GatherWeight() > 0.5f;
         bGatherRecovered |= bObservedGather && Animation->GatherWeight() < 0.001f && Animation->GatherPhase() >= 1.59f;
@@ -138,6 +153,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     const float WallDelta = FMath::Min(static_cast<float>(Now - LastWallTime), 1.0f);
     LastWallTime = Now;
     Elapsed += WallDelta;
+    if (bWeedRoute) { TickWeeding(WallDelta); return; }
     if (bWaterRoute) { TickWatering(WallDelta); return; }
     if (!Passes.IsValidIndex(PassIndex) || Elapsed > 100) { Finish(); return; }
     FPass& Pass = Passes[PassIndex];
@@ -219,7 +235,10 @@ void AHomesteadVisualPlaytest::Finish()
     ApplyAxes({}, {});
     const bool Gathered = PC->Simulation().Count(Homestead::Item::Berries) > FoodBefore
         || PC->Simulation().Count(Homestead::Item::Flowers) > HerbBefore;
-    if (bWaterRoute)
+    if (bWeedRoute)
+        Observations.Add(FString::Printf(TEXT("Weeded existing planted plot=%d; action observed=%d; recovered to idle=%d"),
+            bWeeded, bObservedGather, bGatherRecovered));
+    else if (bWaterRoute)
         Observations.Add(FString::Printf(TEXT("Watered real planted plot=%d; action observed=%d; tilted tool observed=%d; recovered and hidden=%d"),
             bWatered, bObservedWater, bObservedTool, bWaterRecovered));
     else
@@ -233,7 +252,8 @@ void AHomesteadVisualPlaytest::Finish()
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    const bool Complete = bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
+    const bool Complete = bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
+        : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
         : bReachedForage && Gathered && bObservedGather && bGatherRecovered;
     FPlatformMisc::RequestExitWithStatus(false, Saved && Complete ? 0 : 1);
 }

@@ -136,6 +136,28 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")))
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof")))
+        {
+            Finish(false, TEXT("Weeding requires its own disclosed fixture run."));
+            return;
+        }
+        Add(TEXT("Load explicitly copied existing test-world save, not a fresh-play setup"),
+            [this]() { Tap(EKeys::F9); },
+            [this]()
+            {
+                if (Controller->IsBookOpen() || Controller->ToastIsError() || Controller->IsFailed()) return false;
+                for (const auto& Plot : Controller->State().plots)
+                    if (Plot.planted && Plot.weeds >= 0.125 && Plot.growth < 1) return true;
+                return false;
+            }, 1.0f);
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest")))
     {
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
@@ -580,7 +602,13 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     LastFrameWallTime = Now;
     if (!Steps.IsValidIndex(StepIndex))
     {
-        if (!bFullLoopPrepared && FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop")))
+        if (!bWeedingPrepared && FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")))
+        {
+            bWeedingPrepared = true;
+            PrepareWeedingChecks();
+            if (bFinished) return;
+        }
+        else if (!bFullLoopPrepared && FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop")))
         {
             bFullLoopPrepared = true;
             PrepareFullLoop();
@@ -681,7 +709,8 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
         Axis(EKeys::Gamepad_RightX, 0);
         const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
-            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest")) ? 0 : 4;
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));
     }
