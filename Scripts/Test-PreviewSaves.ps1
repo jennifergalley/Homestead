@@ -6,6 +6,10 @@ $root=Split-Path $PSScriptRoot -Parent
 $output=[IO.Path]::GetFullPath($OutputDirectory,$root)
 if(Test-Path -LiteralPath $output){throw 'Use a fresh output directory for isolated routing fixtures.'}
 $null=New-Item -ItemType Directory -Path $output
+$null=New-Item -ItemType Directory -Path (Join-Path $output 'Graphics')
+$graphics=Join-Path $output 'Graphics\GameUserSettings.ini'
+Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $graphics
+$graphicsArguments="-GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`""
 if($Packaged) {
     $working=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
     $executable=Join-Path $working 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
@@ -18,7 +22,7 @@ if($Packaged) {
 }
 function Invoke-RoutingProcess([string]$Name,[string]$Flags,[int]$ExpectedExit=0) {
     $log=Join-Path $output "$Name.log"
-    $arguments=$prefix+"$Flags -HomesteadTestOutput=`"$output`" -nullrhi -nosound -unattended -abslog=`"$log`""
+    $arguments=$prefix+"$Flags -HomesteadTestOutput=`"$output`" $graphicsArguments -nullrhi -nosound -unattended -abslog=`"$log`""
     $process=Start-Process -FilePath $executable -WorkingDirectory $working -ArgumentList $arguments -PassThru
     try {
         if(-not $process.WaitForExit($TimeoutSeconds*1000)){throw "Routing validation timed out: $Name (PID $($process.Id))."}
@@ -60,7 +64,7 @@ if(Test-Path -LiteralPath (Join-Path $previewRoot "profile-$probe")){
     throw 'Refusing to use an existing profile for the unautomated startup probe.'
 }
 $probeLog=Join-Path $output 'normal-preview.log'
-$arguments=$prefix+"-HomesteadPreviewProfile=$probe -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -abslog=`"$probeLog`""
+$arguments=$prefix+"-HomesteadPreviewProfile=$probe $graphicsArguments -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -abslog=`"$probeLog`""
 $process=Start-Process -FilePath $executable -WorkingDirectory $working -ArgumentList $arguments -PassThru
 try {
     $ready=$false
@@ -109,6 +113,7 @@ foreach($directory in $cleanup) {
     relaunchReadChecks=([regex]::Match($read,'SUCCESS (\d+)').Groups[1].Value -as [int])
     unchangedSaveFiles=$before.Count; invalidStartupCases=$invalid.Count
     fixtureDirectories=$directories; realDefaultAccess='Path resolution only; default IO used a separate synthetic root.'
+    graphicsConfig=$graphics
     previewFixtures='Two fresh known-root preview profiles; actual slots/backups reloaded by a second process, copied, then removed.'
     normalInputProbe=@{profile=$probe; pid=$probePid; automationFlags=$false; stayedAlive=$true; stoppedOnlyOwnedPid=$true}
     limits='Physical-source-style in-process input probes plus real unautomated startup, not a human controller comfort claim.'

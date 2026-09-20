@@ -173,6 +173,15 @@ fix. Two short test-driver failures and an unrun superseded build remain preserv
 Do not promote the diagnostic or treat sleep advancement as a second45-minute soak.
 See `forage-renewal-playtesting.md`; return after this slice without new scope.
 
+The next explicit `feedback-layout-01` assignment corrects active transient
+feedback covering the book heading, retaining the native panels/input/lifetimes.
+It requires real immediate success/error captures at720p/4K and retained gates,
+not another broad UI or graphics pass. Its discovered inherited F5/F9 debug
+collision is documented and historically qualified only; exact viewport tracing
+and the project-level binding fix belong to the next separately authorized slice.
+The accepted video-sync preview stays selected. See
+`feedback-layout-playtesting.md` and `debug-hotkey-evidence.md`.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run

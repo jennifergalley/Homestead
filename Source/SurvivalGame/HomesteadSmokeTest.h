@@ -64,6 +64,7 @@ private:
     void PrepareClearingChecks();
     void PreparePromptChecks();
     void PrepareVideoSyncChecks();
+    void PrepareFeedbackChecks();
     void PrepareBookClarityChecks();
     void PrepareBookStorageChecks();
     void QueueBookCapture(const FString& Name);

@@ -113,6 +113,12 @@ cycle and production lighting lower direct sunlight/increase fog during that rai
 The visibly flatter later shading is retained as captured, not an art/lighting
 acceptance or a reason to reopen cosmetic/presentation work.
 
+**Appended qualification,2026-09-20:** subsequent read-only log review found
+F5 also selected inherited `ShaderComplexity` before images03-09. Their flatter
+shading must **not** be attributed solely to weather/production lighting.
+Actual day/rain changes and component/state/persistence checks remain recorded;
+sealed images/proofs are unchanged. See `debug-hotkey-evidence.md`.
+
 ### Harness corrections and dispatch evidence
 
 Two unsuccessful short attempts are retained, not hidden:

@@ -191,6 +191,28 @@ only diagnostic-driver issues were corrected. See `forage-renewal-playtesting.md
 for the retained failed attempts, actual images and limits. The selected human
 preview remains video-sync-01; broader feedback is not implicitly resolved.
 
+## Active toast versus book heading - bounded correction (2026-09-20)
+
+The coordinator scheduled the specific transient overlap documented during
+book/VSync verification. Real F5 success and craft rejection reproduced covered
+headings at720p/4K before editing. `feedback-layout-01` moves the existing feedback
+affordance into the free upper-right band while the book/Look is open, without
+moving tabs/rows/footer or changing fonts, messages, colors, input or lifetime.
+World/planning placement remains unchanged; feedback draws complete wrapped lines.
+
+The fresh candidate passes49 focused checks at each size with26 actual active
+frames, including real graphics-write failure, actual backup-recovery feedback,
+replacement and normal expiry while menus pause simulation.
+This is not broad field-book-overwhelm resolution or progressive recipe learning.
+See `feedback-layout-playtesting.md`; preview selection awaits coordinator review.
+
+These baseline/final captures also expose a pre-existing F5/debug-render collision.
+`debug-hotkey-evidence.md` appends precise qualifications to prior endurance,
+renewal and full-loop rendering/performance evidence without changing sealed
+proofs or invalidating unrelated state/geometry results. Dedicated face/hair and
+ordinary-motion runs without logged transitions are explicitly distinguished.
+The binding fix is separate; no renderer state or installed engine was changed.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction

@@ -20,6 +20,14 @@ void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLi
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Font) return;
     const float Height = FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
+    if (bMeasureFeedback)
+    {
+        float W = 0, H = 0;
+        Canvas->StrLen(Font, Text, W, H);
+        const FBox2D Bounds(FVector2D(X, Y) * UiScale, FVector2D(X + W * Size / Height, Y + H * Size / Height) * UiScale);
+        if (bDrawingToast) { ToastLines.Add(Text); ToastTextBounds.Add(Bounds); ToastColor = Color; }
+        else if (!Text.IsEmpty()) FeedbackProtected.Emplace(Text, Bounds);
+    }
     DrawText(Text, Color, X * UiScale, Y * UiScale, Font, Size / Height * UiScale, false);
 }
 
@@ -28,14 +36,14 @@ void AHomesteadHUD::Panel(float X, float Y, float Width, float Height, FLinearCo
     DrawRect(Color, X * UiScale, Y * UiScale, Width * UiScale, Height * UiScale);
 }
 
-void AHomesteadHUD::Wrap(const FString& Text, float X, float Y, float Width, float Size, FLinearColor Color, int MaxLines)
+TArray<FString> AHomesteadHUD::WrappedLines(const FString& Text, float Width, float Size)
 {
+    TArray<FString> Lines;
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
-    if (!Font) return;
+    if (!Font) return Lines;
     TArray<FString> Words;
     Text.ParseIntoArrayWS(Words);
     FString Line;
-    int Lines = 0;
     const float FontScale = Size / FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
     for (const FString& Word : Words)
     {
@@ -44,18 +52,26 @@ void AHomesteadHUD::Wrap(const FString& Text, float X, float Y, float Width, flo
         Canvas->StrLen(Font, Candidate, W, H);
         if (!Line.IsEmpty() && W * FontScale > Width)
         {
-            Write(Line, X, Y + Lines * (Size + 7), Size, Color);
-            if (++Lines >= MaxLines) return;
+            Lines.Add(Line);
             Line = Word;
         }
         else Line = Candidate;
     }
-    if (!Line.IsEmpty() && Lines < MaxLines) Write(Line, X, Y + Lines * (Size + 7), Size, Color);
+    if (!Line.IsEmpty()) Lines.Add(Line);
+    return Lines;
+}
+
+void AHomesteadHUD::Wrap(const FString& Text, float X, float Y, float Width, float Size, FLinearColor Color, int MaxLines)
+{
+    const auto Lines = WrappedLines(Text, Width, Size);
+    for (int32 Index = 0; Index < FMath::Min(Lines.Num(), MaxLines); ++Index)
+        Write(Lines[Index], X, Y + Index * (Size + 7), Size, Color);
 }
 
 void AHomesteadHUD::Meter(const FString& Label, double Value, float X, float Y, FLinearColor Color)
 {
     Panel(X - 12, Y - 8, 200, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
+    ProtectFeedback(TEXT("need-meter"), X - 12, Y - 8, 200, 55);
     Write(Label, X, Y, 19, Ink);
     Write(FString::Printf(TEXT("%.0f"), Value), X + 143, Y, 19, Value < 25 ? Warning : Muted);
     Panel(X, Y + 29, 174, 5, FLinearColor(0.2f, 0.25f, 0.2f, 1));
@@ -71,11 +87,21 @@ void AHomesteadHUD::DrawHUD()
     UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 3.0f);
     ViewWidth = Canvas->ClipX / UiScale;
     ViewHeight = Canvas->ClipY / UiScale;
+    static const bool MeasureFeedback = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
+        && FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"));
+    bMeasureFeedback = MeasureFeedback;
+    if (bMeasureFeedback)
+    {
+        FeedbackViewport = FVector2D(Canvas->ClipX, Canvas->ClipY);
+        ToastSource.Reset(); ToastLines.Reset(); ToastTextBounds.Reset(); FeedbackProtected.Reset();
+        ToastBounds = FBox2D(ForceInit);
+    }
     const auto& State = PC->State();
     const double Hour = FMath::Fmod(State.hour, 24.0);
     const int H = FMath::FloorToInt(Hour);
     const int M = FMath::FloorToInt((Hour - H) * 60);
     Panel(30, 26, 460, 73, Pine);
+    ProtectFeedback(TEXT("calendar-panel"), 30, 26, 460, 73);
     Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(PC->Simulation().SeasonName()), PC->Simulation().DayNumber()), 48, 38, 24, Ink);
     Write(FString::Printf(TEXT("%02d:%02d   %s%s"), H, M, PC->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear"),
         PC->IsPlanning() || PC->IsBookOpen() ? TEXT("   -   time paused") : TEXT("")), 48, 72, 18, Muted);
@@ -105,6 +131,7 @@ void AHomesteadHUD::DrawHUD()
         if (PC->IsPlanning())
         {
             Panel(X, ViewHeight - 230, Width, 100, Pine);
+            ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 230, Width, 100);
             Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 217, Width - 44, 24, Ink, 2);
             Write(PC->UsesGamepad() ? TEXT("Left stick: position   RB: rotate   A: place   B: done")
                 : TEXT("WASD: position   R: rotate   E: place   Esc: done"), X + 22, ViewHeight - 157, 20, Gold);
@@ -114,6 +141,7 @@ void AHomesteadHUD::DrawHUD()
             const float ContextWidth = FMath::Min(650.0f, ViewWidth * 0.38f);
             const float ContextX = ViewWidth - ContextWidth - 32;
             Panel(ContextX, ViewHeight - 225, ContextWidth, 105, Pine);
+            ProtectFeedback(TEXT("context-panel"), ContextX, ViewHeight - 225, ContextWidth, 105);
             Wrap(PC->FocusTitle(), ContextX + 22, ViewHeight - 213, ContextWidth - 44, 21, Ink, 2);
             Write(PC->FocusActions(), ContextX + 22, ViewHeight - 153, 20, Gold);
         }
@@ -129,10 +157,22 @@ void AHomesteadHUD::DrawHUD()
     const FString Toast = PC->Toast();
     if (!Toast.IsEmpty())
     {
-        const float Width = FMath::Min(900.0f, ViewWidth - 80);
-        const float X = (ViewWidth - Width) * 0.5f;
-        Panel(X, 113, Width, 92, Pine);
-        Wrap(Toast, X + 22, 128, Width - 44, 23, PC->ToastIsError() ? Warning : Ink, 2);
+        const bool InBook = PC->IsBookOpen();
+        const float Width = FMath::Min(900.0f, FMath::Max(80.0f, ViewWidth - (InBook ? 540 : 80)));
+        const auto Lines = WrappedLines(Toast, Width - 44, 23);
+        const float Height = FMath::Max(92.0f, 53.0f + (Lines.Num() - 1) * 30);
+        const float X = InBook ? ViewWidth - Width - 30 : (ViewWidth - Width) * 0.5f;
+        const float Y = InBook ? 26 : 113;
+        bDrawingToast = true;
+        if (bMeasureFeedback)
+        {
+            ToastSource = Toast;
+            ToastBounds = FBox2D(FVector2D(X, Y) * UiScale, FVector2D(X + Width, Y + Height) * UiScale);
+        }
+        Panel(X, Y, Width, Height, Pine);
+        for (int32 Index = 0; Index < Lines.Num(); ++Index)
+            Write(Lines[Index], X + 22, Y + 15 + Index * 30, 23, PC->ToastIsError() ? Warning : Ink);
+        bDrawingToast = false;
     }
 }
 
@@ -168,6 +208,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     BookMeasurements.Reset();
     MeasureBookLine(PC.BookTitle(), Width - 423, 38, TEXT("title"));
     Panel(X, Y, Width, Height, Pine);
+    ProtectFeedback(TEXT("book-panel"), X, Y, Width, Height);
     Write(PC.BookTitle(), X + 34, Y + 24, 38, Ink);
     const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), Homestead::InventoryCapacity);
     MeasureBookLine(Capacity, 331, 19, TEXT("capacity"));
@@ -207,7 +248,11 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
         MeasureBookLine(Rows[Index].Label, Width - 80, 24, TEXT("row-label"));
         MeasureBookLine(Rows[Index].Detail, Width - 80, 18, TEXT("row-detail"));
         if (RowY + 54 > Y + Height - 91) BookTextOverflow += TEXT("Row overlaps footer area; ");
-        if (Selected) Panel(X + 23, RowY - 5, Width - 46, RowHeight - 5, FLinearColor(0.09f, 0.14f, 0.105f, 1));
+        if (Selected)
+        {
+            Panel(X + 23, RowY - 5, Width - 46, RowHeight - 5, FLinearColor(0.09f, 0.14f, 0.105f, 1));
+            ProtectFeedback(TEXT("selected-row"), X + 23, RowY - 5, Width - 46, RowHeight - 5);
+        }
         Write(Rows[Index].Label, X + 40, RowY + 3, 24, Selected ? Gold : Ink);
         Wrap(Rows[Index].Detail, X + 40, RowY + 36, Width - 80, 18, Muted, 1);
     }
@@ -226,6 +271,7 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
     const float Width = FMath::Min(500.0f, ViewWidth * 0.35f);
     const float Height = FMath::Min(790.0f, ViewHeight - Y - 35);
     Panel(X, Y, Width, Height, Pine);
+    ProtectFeedback(TEXT("look-panel"), X, Y, Width, Height);
     Write(TEXT("Your look"), X + 28, Y + 24, 35, Ink);
     Write(PC.HasHeroine() ? TEXT("An early, editable heroine") : TEXT("Character assets unavailable"),
         X + 28, Y + 74, 18, PC.HasHeroine() ? Muted : Warning);
@@ -237,7 +283,10 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
     {
         const float RowY = Y + 122 + (Index - First) * RowHeight;
         if (Index == PC.SelectedRow())
+        {
             Panel(X + 15, RowY - 7, Width - 30, RowHeight - 6, FLinearColor(0.09f, 0.14f, 0.105f, 1));
+            ProtectFeedback(TEXT("selected-look-row"), X + 15, RowY - 7, Width - 30, RowHeight - 6);
+        }
         Write(Options[Index].Label, X + 28, RowY, 22, Index == PC.SelectedRow() ? Gold : Ink);
         Wrap(Options[Index].Detail, X + 28, RowY + 31, Width - 56, 16, Muted, 2);
     }

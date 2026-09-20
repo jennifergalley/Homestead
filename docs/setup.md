@@ -310,6 +310,20 @@ source LFS files and protected original/selected-preview files match their
 baseline hashes; exactly five incidental bootstrap world resaves were restored.
 No new art or third-party assets were authored or acquired.
 
+### Active feedback follow-up
+
+The separately scheduled `feedback-layout-01` candidate corrects the previously
+documented transient-heading overlap. Active feedback uses the free upper-right
+band while the book/Look is open; world/planning placement and book geometry stay
+unchanged. The dedicated runner captures real success/error/recovery messages
+while visible, not after expiry. See `feedback-layout-playtesting.md`.
+Accepted `video-sync-01` remains selected until coordinator review.
+
+The focused F5 route also exposed an inherited Development-build debug binding:
+F5 saves **and** selects ShaderComplexity; F9 is also bound to `shot showui`.
+No workaround or binding change was smuggled into this layout slice.
+See `debug-hotkey-evidence.md` for exact evidence and historical qualifications.
+
 ## Movement presentation investigation
 
 `presentation-diagnostics-01` is diagnostic-only and remains **unresolved**, not a

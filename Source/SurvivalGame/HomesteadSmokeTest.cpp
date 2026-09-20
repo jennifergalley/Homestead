@@ -145,6 +145,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest")))
+    {
+        PrepareFeedbackChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest")))
     {
         PrepareVideoSyncChecks();

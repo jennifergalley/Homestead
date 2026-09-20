@@ -89,6 +89,11 @@ if ($previous) {
     }
 }
 $log = Join-Path $output 'engine.log'
+$graphics = Join-Path $output 'Graphics\GameUserSettings.ini'
+$null = New-Item -ItemType Directory -Path (Split-Path $graphics -Parent) -Force
+if (-not (Test-Path -LiteralPath $graphics)) {
+    Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $graphics
+}
 $audioArguments = if ($WithAudio) { '-HomesteadAudioProof' } else { '-nosound' }
 $loopArguments = if ($FullLoop) { '-HomesteadFullLoop' } else { '' }
 if ($Presentation) { $loopArguments = '-HomesteadPresentationTest' }
@@ -99,7 +104,7 @@ if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
-$arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
+$arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
 Write-Host "Requested output: ${Width}x${Height}; 3D screen percentage: $RenderScale."

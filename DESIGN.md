@@ -38,7 +38,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - Native Canvas text uses `GEngine->GetMediumFont()` throughout; there is no authored font pairing or separate bold-weight system.
 - Sizes are virtual-screen units: book title 38, Look title 35, recovery title 43; row/main labels 21–24; details and hints 16–20.
 - `Write` scales against the font's maximum character height and HUD scale.
-- Wrapping is word-based, with line advance `size + 7`; individual calls cap lines. It is not automatic reflow of the entire interface.
+- Wrapping is word-based, with line advance `size + 7`; book/context calls retain their line caps. Transient feedback draws its complete wrapped lines and sizes its backing to them. It is not automatic reflow of the entire interface.
 - Preserve concise action copy and explicit device bindings; long translations/labels require checking for truncation.
 
 ## Layout
@@ -47,7 +47,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - Calendar/weather occupies the upper left `(30,26)`, size `460×73`. Current-device book/camera hints have upper-right Pine backing.
 - Food, Energy, Warmth occupy the lower left in three 200-wide backed meters; numeric values accompany 174×5 bars.
 - Normal focus/action context sits lower right: width `min(650, 38% of virtual width)`, right inset 32, top at `height−225`.
-- Planning instead uses a lower centered panel up to 880 wide. Toasts appear centered below the top band, up to 900 wide.
+- Planning instead uses a lower centered panel up to 880 wide. World/planning toasts remain centered below the top band, up to 900 wide. While the book or Look is open, feedback moves to the free upper-right band at Y26/right inset30, beside the calendar rather than across the book heading. The existing 92-high backing grows if measured lines require it; book rows and footer never move with feedback.
 - Field book is centered, up to `1180×810`, with seven tabs, 74-high rows, a selected-row-following visible window, and a footer. Pack/Craft/Build use purpose-specific titles and a short scope line at panel Y+144; their rows start at Y+180 rather than Y+148. Both supported 16:9 verification sizes still show seven rows. Font sizes and tab/selection behavior are unchanged.
 - Look uses a left sidebar at `(32,156)`, width `min(500, 35% of virtual width)`, up to 790 high; its scene preview remains visible rather than receiving the normal full-screen book scrim.
 - Most panel contents use 22–40-unit insets. Panels are plain rectangles, separators are thin rules, and a selected tab has a 3-unit underline.

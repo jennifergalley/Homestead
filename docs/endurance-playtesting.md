@@ -146,3 +146,10 @@ physical input comfort, leaks over indefinite play and horizontal tearing remain
 outside this evidence. No game rules, production graphics or art were changed.
 The diagnostic package is not eligible for preview selection; accepted video-sync
 and the persistent `jenny-review` profile remain selected.
+
+**Appended qualification,2026-09-20:** the first F5 also selected inherited
+`ShaderComplexity`, logged about35seconds after milestone00. Milestones01-04
+and all postwarmup timing/memory samples follow that transition. The retained
+measurements describe this actual process, not normal-Lit gameplay performance;
+wall time, simulation/actions/save integrity and bounded stability remain
+observed. Original sealed proofs are unchanged. See `debug-hotkey-evidence.md`.

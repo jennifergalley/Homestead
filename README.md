@@ -174,6 +174,13 @@ renewal through normal sleep and save/load; `docs\forage-renewal-playtesting.md`
 records actual component/HUD/frame evidence and the distinction from elapsed-time
 endurance. No game rules or selected preview were changed.
 
+The bounded `feedback-layout-01` candidate keeps active success/error feedback
+away from book headings without moving rows or changing controls.
+See `docs\feedback-layout-playtesting.md`. It is not selected automatically.
+Read `docs\debug-hotkey-evidence.md` for the newly confirmed inherited F5/F9
+debug-command conflict and appended qualifications to earlier rendering evidence;
+the input-conflict fix is a separate follow-up, not part of this UI change.
+
 Prototype meshes are original; selected landscape/audio assets are licensed
 separately. See `docs\asset-credits.md`. No game assets from the inspiration titles
 are used, and the supplied portrait must remain a local reference.
