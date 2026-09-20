@@ -1,0 +1,69 @@
+{
+  "utc": "2026-09-20T23:03:45.6314429+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "status": "blocked-before-engine-probe",
+  "openSpecComplete": 4,
+  "openSpecTotal": 29,
+  "nativeModuleBuilt": false,
+  "engineAttemptConsumed": false,
+  "globalMarkerReadLocked": false,
+  "runControlTests": 23,
+  "policyCases": 18,
+  "sources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "941A9B3D56FA1F0E243D1CE10E25491553075A0BCCA146DED13FA0FE90CFCF23"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "D7DAA0CC9DF9264717F87858767D87501ED6F0343B2F136BC9177728272D01DE"
+    },
+    {
+      "path": "Scripts\\Build-AuthoringProbe.ps1",
+      "sha256": "1BDF774BECB45B6ED64549ED798DEE98AB6478060C468CF4B713CA39F13E1992"
+    },
+    {
+      "path": "Scripts\\Test-AuthoringSettings.ps1",
+      "sha256": "189B14E35385A4A26CF41F479C4D8A7C3D003E8071C7450B8E8FAC5AE9299F35"
+    }
+  ],
+  "evidence": [
+    {
+      "file": "build-contention-failure.json",
+      "bytes": 3674,
+      "sha256": "4893E277426A04C1C2708BCF6AE489D9A4E135566B97DA145D97C0E2B01CA60D"
+    },
+    {
+      "file": "build-plan-result.json",
+      "bytes": 2496,
+      "sha256": "BCE128FB3298C5EFDE1A3A9DDA395B68B9A3435C1C98121D69D28C9D35FD304F"
+    },
+    {
+      "file": "build-uploader-failure.json",
+      "bytes": 5291,
+      "sha256": "3A3F9CABBCB646E3D93C4FA045AF3A5A698440799BF31F30A906591B81D853EB"
+    },
+    {
+      "file": "build-uploader-stdout.log",
+      "bytes": 1197,
+      "sha256": "CFBE514AD60CB1399DAB36FC73379FFDC934EFC98A95D2505E596D425FD81B90"
+    },
+    {
+      "file": "watchdog-result.json",
+      "bytes": 29706,
+      "sha256": "F5D6FA8DD56035E959C8179F0215529A01A40EA3A1749491065FC110262378F0"
+    }
+  ],
+  "protectedFiles": 234,
+  "authorizedProtectedChanges": [
+    "Source\\SurvivalGameEditor.Target.cs"
+  ],
+  "uploader": {
+    "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\VCTIP.EXE",
+    "sha256": "D591358C6AEE4B673562CA3B3A15C250E612708394FE3B44A7A7EDA2470570A5",
+    "observedPid": 48668,
+    "creationTimePersisted": false,
+    "networkBehaviorEstablished": false
+  },
+  "limitations": "Source-only native implementation. Build is blocked on an unadmitted telemetry child. Existing five zero-endpoint samples precede rejection; no uploader network-safety claim."
+}

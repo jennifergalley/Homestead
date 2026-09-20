@@ -1,3 +1,4 @@
 WindowsContainmentProbe.cpp -text whitespace=cr-at-eol
 AuthoringGuardSubject.cpp -text whitespace=cr-at-eol
 Test-AuthoringLeafGuard.ps1 -text whitespace=cr-at-eol
+Test-AuthoringProbePolicy.ps1 -text whitespace=cr-at-eol

@@ -1,1 +1,4 @@
 AuthoringLeafGuard.cs -text whitespace=cr-at-eol
+AuthoringProbePolicy.ps1 -text whitespace=cr-at-eol
+Build-AuthoringProbe.ps1 -text whitespace=cr-at-eol
+Test-AuthoringSettings.ps1 -text whitespace=cr-at-eol

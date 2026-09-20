@@ -1,5 +1,28 @@
 # Authoring workflow approval proposal
 
+**Current hold,16:00 Arizona:** the native commandlet/wrapper exist in source,
+but the local compiler spawned an unadmitted Microsoft telemetry uploader,
+`VCTIP.EXE`. The observed owned build processes were stopped. No further
+compiler or engine launch is admitted without a verified suppression route or
+explicit coordinator decision. No real marker lock/probe attempt occurred;
+task1.3 remains unchecked. See `native-preflight-result.md`.
+
+**Current approach,15:32 Arizona:** the coordinator explicitly selected and
+authorized a minimal project-owned **Editor-only native commandlet** and its
+necessary direct installed UBT/UHT/local-compiler build. Python is disabled as a
+plugin and with `-DisablePython`; the probe is not PythonScriptCommandlet.
+The approved single120-second conditional no-asset-write probe, tested leaf job,
+inherited read-only marker, exact network/identity/competition/config/output
+conditions and no-worker in-process compilation policy are unchanged.
+The local build uses source-supported NoUBA/NoXGE/NoFASTBuild/NoSNDBS/
+NoArtifactReads/NoArtifactWrites and NoEngineChanges; it is not a one-process
+leaf job. Inspect exported actions and capture tool identities/output first.
+In this installed5.8 source, NoUBA disables detouring; ExecutorFactory still
+uses its local UBA executor. It must not be described as eliminating local UBA.
+No Build-Game bootstrap, UAT, cooker, Pak, import or Shipping-QA is authorized.
+The new module is Editor-only, performs no map/asset/material operations, and
+does nothing on normal gameplay startup. Task1.3 remains unchecked,4/29.
+
 **Current task1.3: PREFLIGHT APPROVED / PARTIAL GUARD IMPLEMENTATION.** Jenny explicitly
 approved the bounded TraceControl exception at14:05 Arizona on2026-09-20.
 The live run records her direct reply and the original proposal SHA256

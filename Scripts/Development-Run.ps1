@@ -11,7 +11,15 @@ param(
 $ErrorActionPreference = 'Stop'
 $null = New-Item -ItemType Directory -Path $StateDirectory -Force
 $path = Join-Path $StateDirectory 'run.json'
-$lock = [IO.File]::Open((Join-Path $StateDirectory 'run.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+$lock = $null
+$lockWait = [Diagnostics.Stopwatch]::StartNew()
+while (-not $lock) {
+    try { $lock = [IO.File]::Open((Join-Path $StateDirectory 'run.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
+    catch [IO.IOException] {
+        if (($_.Exception.HResult -band 0xffff) -notin @(32,33) -or $lockWait.Elapsed.TotalSeconds -ge 2) { throw }
+        Start-Sleep -Milliseconds 10
+    }
+}
 try {
     $now = [DateTimeOffset]::UtcNow
     $run = if (Test-Path -LiteralPath $path) { Get-Content -LiteralPath $path -Raw | ConvertFrom-Json } else { $null }

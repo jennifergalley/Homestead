@@ -4,7 +4,8 @@
   "Category": "Games",
   "Description": "Controller-first offline homestead survival prototype.",
   "Modules": [
-    { "Name": "SurvivalGame", "Type": "Runtime", "LoadingPhase": "Default" }
+    { "Name": "SurvivalGame", "Type": "Runtime", "LoadingPhase": "Default" },
+    { "Name": "SurvivalGameEditor", "Type": "Editor", "LoadingPhase": "Default" }
   ],
   "Plugins": [
     { "Name": "EnhancedInput", "Enabled": true },

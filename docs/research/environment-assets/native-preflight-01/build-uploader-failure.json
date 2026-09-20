@@ -1,0 +1,123 @@
+{
+  "status": "failed",
+  "error": "Unadmitted local-build child PID48668:E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\VCTIP.EXE",
+  "exitCode": -1,
+  "elapsedSeconds": 5.4773003,
+  "observedChildren": [
+    {
+      "startUtc": "2026-09-20T22:54:40.8956514Z",
+      "parentPid": 44336,
+      "pid": 43324,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8533713Z",
+      "parentPid": 44336,
+      "pid": 49328,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/HomesteadAuthoringProbeCommandlet.cpp.obj.rsp\" ",
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8540974Z",
+      "parentPid": 44336,
+      "pid": 49344,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/Module.SurvivalGameEditor.gen.cpp.obj.rsp\" ",
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8541383Z",
+      "parentPid": 44336,
+      "pid": 49356,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/PerModuleInline.gen.cpp.obj.rsp\" ",
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8544969Z",
+      "parentPid": 44336,
+      "pid": 49364,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/SurvivalGameEditor.cpp.obj.rsp\" ",
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8549471Z",
+      "parentPid": 44336,
+      "pid": 49372,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGame/Module.SurvivalGame.cpp.obj.rsp\" ",
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8691273Z",
+      "parentPid": 49372,
+      "pid": 49380,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8723537Z",
+      "parentPid": 49344,
+      "pid": 49396,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8734252Z",
+      "parentPid": 49356,
+      "pid": 49404,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8745553Z",
+      "parentPid": 49328,
+      "pid": 49412,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    },
+    {
+      "startUtc": "2026-09-20T22:54:42.8847452Z",
+      "parentPid": 49364,
+      "pid": 49444,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 835.3192,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 1810.7175,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 2773.859,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 3733.0997,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 4910.5577,
+      "udp": [],
+      "tcp": []
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+* -text whitespace=cr-at-eol
+build-uploader-stdout.log -whitespace

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Homestead.Authoring
 {
@@ -30,6 +31,11 @@ namespace Homestead.Authoring
         const uint Limits = 0x2008, ObjectSignaled = 0, Timeout = 258;
         static readonly IntPtr Invalid = new IntPtr(-1);
         IntPtr marker, job, process, thread, input, output;
+        readonly object lifetime = new object();
+        Timer softDeadline, hardDeadline;
+        public bool DeadlineStopRequested { get; private set; }
+        public bool DeadlineHardStop { get; private set; }
+        public string DeadlineError { get; private set; }
         public uint ProcessId { get; private set; }
         public ulong ProcessCreationTime { get; private set; }
         public string ImagePath { get; private set; }
@@ -278,16 +284,66 @@ namespace Homestead.Authoring
         }
         public void HardStop(uint code)
         {
-            if (Wait(0)) return;
-            Check(TerminateJobObject(job, code), "owned-job hard termination");
-            HardTerminated = true;
-            Check(Wait(5000), "hard-terminated process exit");
+            lock (lifetime)
+            {
+                if (Wait(0)) return;
+                Check(TerminateJobObject(job, code), "owned-job hard termination");
+                HardTerminated = true;
+                Check(Wait(5000), "hard-terminated process exit");
+            }
+        }
+        public void ArmDeadline(int softMilliseconds, int hardMilliseconds, string stopPath)
+        {
+            lock (lifetime)
+            {
+                if (Resumed || softDeadline != null || softMilliseconds < 1 ||
+                    hardMilliseconds <= softMilliseconds || hardMilliseconds > 110000)
+                    throw new InvalidOperationException("Deadline must be armed once before resume, within 110 seconds.");
+                OrdinaryPath(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(stopPath)));
+                if (File.Exists(stopPath)) throw new InvalidOperationException("Fresh deadline stop path required.");
+                softDeadline = new Timer(_ =>
+                {
+                    lock (lifetime)
+                    {
+                        if (!Valid(process)) return;
+                        try
+                        {
+                            if (Wait(0)) return;
+                            DeadlineStopRequested = true;
+                            using (var file = new FileStream(stopPath, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                            {
+                                byte[] text = Encoding.UTF8.GetBytes("watchdog deadline");
+                                file.Write(text, 0, text.Length);
+                            }
+                        }
+                        catch (Exception error) { DeadlineError = "Deadline stop request failed: " + error; }
+                    }
+                }, null, softMilliseconds, System.Threading.Timeout.Infinite);
+                hardDeadline = new Timer(_ =>
+                {
+                    lock (lifetime)
+                    {
+                        if (!Valid(process)) return;
+                        try
+                        {
+                            if (Wait(0)) return;
+                            DeadlineHardStop = true;
+                            HardStop(95);
+                        }
+                        catch (Exception error) { DeadlineError = "Deadline hard stop failed: " + error; }
+                    }
+                }, null, hardMilliseconds, System.Threading.Timeout.Infinite);
+            }
         }
         public void Dispose()
         {
-            if (Valid(process) && !Wait(0)) throw new InvalidOperationException("Must verify process death before releasing guard.");
-            Close(ref thread); Close(ref process); Close(ref job);
-            Close(ref input); Close(ref output); Close(ref marker);
+            lock (lifetime)
+            {
+                if (Valid(process) && !Wait(0)) throw new InvalidOperationException("Must verify process death before releasing guard.");
+                softDeadline?.Dispose(); hardDeadline?.Dispose();
+                Close(ref thread); Close(ref process); Close(ref job);
+                Close(ref input); Close(ref output); Close(ref marker);
+            }
         }
     }
 }

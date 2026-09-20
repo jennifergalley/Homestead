@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory)][string]$Root,
     [Parameter(Mandatory)][string]$Subject,
     [ValidateSet('Observer','Controller')][string]$Role = 'Observer',
-    [ValidateSet('normal','pause','deadline','timeout','controller-failure')][string]$Case = 'normal'
+    [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal'
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -82,7 +82,7 @@ public static class GuardFixtureNative {
         $identity = [GuardFixtureNative]::InheritableCanary($handle)
         $environment = [Collections.Generic.Dictionary[string,string]]::new()
         $environment['HOMESTEAD_GUARD_TEST_ROOT'] = $Root
-        $environment['HOMESTEAD_GUARD_TEST_CASE'] = if ($Case -in @('timeout','controller-failure')) { 'ignore-stop' } else { 'normal' }
+        $environment['HOMESTEAD_GUARD_TEST_CASE'] = if ($Case -in @('timeout','controller-failure','watchdog')) { 'ignore-stop' } else { 'normal' }
         $environment['HOMESTEAD_TEST_CANARY_HANDLE'] = $handle.ToInt64().ToString()
         $environment['HOMESTEAD_TEST_CANARY_HIGH'] = $identity.IndexHigh.ToString()
         $environment['HOMESTEAD_TEST_CANARY_LOW'] = $identity.IndexLow.ToString()
@@ -93,7 +93,9 @@ public static class GuardFixtureNative {
             marker = $guard.MarkerBefore; job = $guard.LastVerifiedJob; explicitHandles = $guard.WhitelistedHandleCount
             resumed = $guard.Resumed
         })
+        if ($Case -eq 'watchdog') { $guard.ArmDeadline(300, 800, (Join-Path $Root 'stop.txt')) }
         $guard.Resume()
+        if ($Case -eq 'watchdog') { [Threading.Thread]::Sleep(1200) }
         $timer = [Diagnostics.Stopwatch]::StartNew()
         $stopRequested = $false
         $reason = ''
@@ -120,8 +122,12 @@ public static class GuardFixtureNative {
         $after = $guard.VerifyMarker()
         $exitCode = $guard.ExitCode
         $hard = $guard.HardTerminated
+        if ($Case -eq 'watchdog') {
+            Assert ($guard.DeadlineStopRequested -and $guard.DeadlineHardStop -and -not $guard.DeadlineError) 'Independent watchdog failed.'
+            $stopRequested = $true; $reason = 'watchdog'
+        }
         Assert $stopRequested 'Subject exited without an observed stop request.'
-        Assert ($exitCode -eq $(if ($hard) { 92 } else { 0 })) "Unexpected subject exit: $exitCode"
+        Assert ($exitCode -eq $(if ($Case -eq 'watchdog') { 95 } elseif ($hard) { 92 } else { 0 })) "Unexpected subject exit: $exitCode"
         $guard.Dispose(); $guard = $null
         Write-NewJson (Join-Path $Root 'outcome.json') ([ordered]@{
             outcome = if ($hard) { 'cancelled-hard-stop' } elseif ($reason -in @('pause','deadline','live-run-stop')) { 'cancelled-cooperative' } else { 'passed-cooperative' }
@@ -179,7 +185,7 @@ foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupie
     $rejections.Add(@{ case = $invalid; rejected = $true; guardReleased = $true; error = $failure })
 }
 $results = [Collections.Generic.List[object]]::new()
-foreach ($scenario in @('normal','pause','deadline','timeout','controller-failure')) {
+foreach ($scenario in @('normal','pause','deadline','timeout','controller-failure','watchdog')) {
     $live = & (Join-Path $repo 'Scripts\Development-Run.ps1') -Action Status
     Assert $live.allowWork 'Run stopped between disposable cases.'
     $directory = Join-Path $Root $scenario

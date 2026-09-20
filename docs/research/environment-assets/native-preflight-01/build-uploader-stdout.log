@@ -1,0 +1,16 @@
+Log file: E:\Repos\SurvivalGame\Saved\Automation\20260920-182217-d1f84e39\native-build-02\ubt.log
+Determining max actions to execute in parallel (8 physical cores, 16 logical cores)
+  Executing up to 8 processes, one per physical core
+  Requested 1.5 GB memory per action, 8.94 GB available: limiting max parallel actions to 5
+Using 'git status' to determine working set for adaptive non-unity build (E:\Repos\SurvivalGame).
+UbaSessionServer - Disable remote execution (remote sessions will finish current processes)
+Building SurvivalGameEditor...
+===== Toolchain Information =====
+Using ISPC compiler (E:\Program Files\UE_5.8\Engine\Source\ThirdParty\Intel\ISPC\bin\Windows\ispc.exe)
+  Intel(r) Implicit SPMD Program Compiler (Intel(r) ISPC), 1.24.0 (build commit  @ 20250404, LLVM 18.1.2) 
+Using Visual Studio 14.44.35229 toolchain (E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207) and Windows 10.0.26100.0 SDK (C:\Program Files (x86)\Windows Kits\10).
+=================================
+Using Unreal Build Accelerator local executor to run 10 action(s)
+  CPU 8 physical cores, 16 logical cores
+  Memory 31.91 GB physical, 39.24 GB/63.91 GB committed
+  UBA Storage capacity 40 GB

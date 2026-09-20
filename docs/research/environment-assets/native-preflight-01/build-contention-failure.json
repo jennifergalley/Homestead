@@ -1,0 +1,78 @@
+{
+  "status": "failed",
+  "error": "Exception calling \"Open\" with \"4\" argument(s): \"The process cannot access the file 'E:\\Repos\\SurvivalGame\\Automation\\run.lock' because it is being used by another process.\"",
+  "exitCode": -1,
+  "elapsedSeconds": 2.9368871,
+  "observedChildren": [
+    {
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "pid": 45968,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "startUtc": "2026-09-20T22:51:39.8699254Z",
+      "parentPid": 42192
+    },
+    {
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+      "pid": 11156,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/HomesteadAuthoringProbeCommandlet.cpp.obj.rsp\" ",
+      "startUtc": "2026-09-20T22:51:41.6806075Z",
+      "parentPid": 42192
+    },
+    {
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+      "pid": 44856,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/Module.SurvivalGameEditor.gen.cpp.obj.rsp\" ",
+      "startUtc": "2026-09-20T22:51:41.6809900Z",
+      "parentPid": 42192
+    },
+    {
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+      "pid": 900,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/PerModuleInline.gen.cpp.obj.rsp\" ",
+      "startUtc": "2026-09-20T22:51:41.6815379Z",
+      "parentPid": 42192
+    },
+    {
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+      "pid": 10576,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/SurvivalGameEditor.cpp.obj.rsp\" ",
+      "startUtc": "2026-09-20T22:51:41.6817439Z",
+      "parentPid": 42192
+    },
+    {
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+      "pid": 22924,
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "arguments": "\"E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe\" @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGame/Module.SurvivalGame.cpp.obj.rsp\" ",
+      "startUtc": "2026-09-20T22:51:41.6823957Z",
+      "parentPid": 42192
+    }
+  ],
+  "samples": [
+    {
+      "udp": [],
+      "elapsedMs": 625.284,
+      "tcp": []
+    },
+    {
+      "udp": [],
+      "elapsedMs": 1381.2686,
+      "tcp": []
+    },
+    {
+      "udp": [],
+      "elapsedMs": 2091.8834,
+      "tcp": []
+    },
+    {
+      "udp": [],
+      "elapsedMs": 2745.2817,
+      "tcp": []
+    }
+  ]
+}

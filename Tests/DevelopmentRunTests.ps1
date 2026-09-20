@@ -20,6 +20,26 @@ try {
     Assert-Throws { & $control -StateDirectory $directory } 'Missing run must be explicit.'
     $run = & $control -Action Start -Hours 8 -CoordinatorSessionId 'test-coordinator' -StateDirectory $directory
     Assert-True $run.allowWork 'Fresh run should allow work.'
+    Add-Type -TypeDefinition @'
+using System;
+using System.Threading.Tasks;
+public static class RunControlFixtureRelease {
+    public static async Task After(IDisposable handle) {
+        await Task.Delay(250);
+        handle.Dispose();
+    }
+}
+'@
+    $contended = [IO.File]::Open((Join-Path $directory 'run.lock'), 'Open', 'ReadWrite', 'None')
+    $release = [RunControlFixtureRelease]::After($contended)
+    $wait = [Diagnostics.Stopwatch]::StartNew()
+    $afterContention = & $control -Action Status -StateDirectory $directory
+    $null = $release.GetAwaiter().GetResult()
+    Assert-True ($afterContention.allowWork -and $wait.ElapsedMilliseconds -ge 100) 'Status must wait for short legitimate lock contention.'
+    $held = [IO.File]::Open((Join-Path $directory 'run.lock'), 'Open', 'ReadWrite', 'None')
+    try {
+        Assert-Throws { & $control -Action Status -StateDirectory $directory } 'Persistent lock contention must fail closed within the bound.'
+    } finally { $held.Dispose() }
     $duration = [DateTimeOffset]::Parse($run.deadlineUtc) - [DateTimeOffset]::Parse($run.startedUtc)
     Assert-True ($duration.TotalHours -eq 8) 'Deadline must be exactly eight hours from activation.'
     Assert-Throws { & $control -Action Start -CoordinatorSessionId 'duplicate' -StateDirectory $directory } 'Duplicate run must fail.'

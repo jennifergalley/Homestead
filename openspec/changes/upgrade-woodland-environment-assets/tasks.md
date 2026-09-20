@@ -7,9 +7,11 @@ the coordinator authorized controlled task1.3 preflight, not asset import.
 Pre-launch inspection identified the excluded startup crash-reporter child.
 Task1.3 remains unchecked. The15:02 continuation conditionally admits one
 no-write probe after direct-leaf/inherited-marker and complete policy conditions
-pass. The guard's disposable tests pass; production admission/monitor and
-effective-settings export remain unfinished, so no real lock or engine probe
-occurred. See `leaf-guard-result.md` and the historical
+pass. The guard's disposable tests pass. The15:32 native-route continuation
+implemented an Editor-only commandlet and production wrapper, but compilation
+stopped on an unadmitted compiler telemetry uploader. Neither a real marker
+lock nor the single engine-probe attempt has occurred. See
+`native-preflight-result.md`, `leaf-guard-result.md` and the historical
 `authoring-preflight-result.md`. Progress remains4/29, not a visual upgrade.
 
 The 12:32 Arizona coordinator

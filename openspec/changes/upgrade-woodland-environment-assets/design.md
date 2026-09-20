@@ -75,6 +75,23 @@ in-process shader compilation. Its inherited read handle is the lifetime
 mechanism, not a filesystem/network sandbox. Task1.3 remains unchecked; these
 results do not clear UAT/cook/Pak/import/Shipping-QA or weaken their requirements.
 
+At15:32 the coordinator approved the safer native probe route after the Python
+startup/pip trace. Add only an Editor-only UCommandlet module and necessary
+descriptor/Editor-target wiring; do not add a native asset importer. Disable
+Python completely rather than relying on late script settings. Direct local
+UBT/UHT/compiler orchestration is separately observed with NoRemote flags and
+reviewed outputs, never put inside the leaf's one-process job. Its eventual
+Editor-Cmd launch retains every conditional guard requirement above and the
+same single120-second attempt limit. Native configuration/DDC/privacy exports
+are settings evidence, not shader workload, rendering or gameplay proof.
+
+The16:00 implementation checkpoint is blocked before runtime: the installed
+compiler spawned an unadmitted VCTIP telemetry uploader. The observed owned
+build was stopped; the native module has not compiled and no real marker lock
+or settings-probe attempt occurred. `native-preflight-result.md` records the
+watchdog/control/policy tests and distinct executable decision. Ordinary
+diagnostic/cache consent does not authorize telemetry uploaders.
+
 Dependency refinement authorized by the coordinator on 2026-09-20: completion
 of tasks1.1/1.2 permits a separately assigned no-engine preparation lane for
 tasks2.1/2.2 and the source-only portion of2.3 while1.3 remains blocked. This
