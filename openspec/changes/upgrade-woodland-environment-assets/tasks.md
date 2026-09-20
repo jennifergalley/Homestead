@@ -2,7 +2,8 @@
 
 Apply preflight was explicitly authorized on 2026-09-20. Only completed
 authorization/baseline work is checked below. The 12:32 Arizona coordinator
-assignment authorizes a planning-only dependency refinement, not acquisition.
+assignment authorized a planning-only dependency refinement. The separate12:39
+continuation now authorizes only2.1/2.2 and source-only2.3 preparation.
 Research/source-inspection results live in the linked dossier, not in checked
 implementation boxes. Work proceeds in heading order except for the explicit
 preparation dependency below, one engine writer, with bounded run controls.
@@ -22,8 +23,8 @@ Only2.1/2.2 and the source-only portion of2.3 may run out of heading order.
 Keep2.3 unchecked while any runtime-dependent inventory requirement is pending;
 record partial source facts separately without substituting them for imported
 mesh/runtime measurements. All other tasks retain their existing dependencies.
-The current planning-only update launches no engine or asset-inspection process
-and acquires no assets.
+The12:32 planning-only update acquired nothing. The12:39 continuation permits
+the specified acquisition/data-inspection helpers and their tests, not engines.
 See design decision1 for data-only inspection and conditional Blender safeguards.
 
 ## 1. Authorization and accepted baseline
@@ -35,8 +36,8 @@ See design decision1 for data-only inspection and conditional Blender safeguards
 
 ## 2. Admit and acquire the bounded palette
 
-- [ ] 2.1 Refresh the selected publisher pages/manifests and CC0/access evidence; verify exact authors, free status, format dependencies and permitted redistribution, and record any human-only blockers without account/claim actions.
-- [ ] 2.2 Acquire only the primary representative tree, fern, grass and ground files at the planned resolutions; verify actual bytes/SHA-256/license receipts and preserve mismatch failures in the existing acquisition convention.
+- [x] 2.1 Refresh the selected publisher pages/manifests and CC0/access evidence; verify exact authors, free status, format dependencies and permitted redistribution, and record any human-only blockers without account/claim actions.
+- [x] 2.2 Acquire only the primary representative tree, fern, grass and ground files at the planned resolutions; verify actual bytes/SHA-256/license receipts and preserve mismatch failures in the existing acquisition convention.
 - [ ] 2.3 Inspect source hierarchy, slots, units, root pivots, alpha maps and any LOD/wind data; deliver a measured inventory distinguishing aggregate source polycounts from each exported mesh's runtime triangles.
 - [ ] 2.4 If the primary tree fails the documented complexity/material gate, admit the distinct fallback within the representative batch; verify its own source/license receipts and record the artistic tradeoff, or stop without claiming a complete woodland upgrade.
 
@@ -137,3 +138,40 @@ See design decision1 for data-only inspection and conditional Blender safeguards
 - Parent reviews this refinement before assigning preparation. The selected
   Shipping preview, saves, current run deadline and parent-owned one-shot
   scheduling remain unchanged.
+
+## Limited source preparation (2026-09-20, authorized12:39 Arizona)
+
+- Reviewed preflight/dependency documents checkpointed and privately pushed as
+  `ba091b6c3c13992185b7ce5a419e34b8823dfb3b`; remote identity verified.
+- Task2.1 complete: refreshed the exact four publisher pages and eight info/file
+  API responses, plus publisher CC0/redistribution policy. Author roles,
+  source-version identifiers, URLs, sizes and publisher MD5 values are frozen in
+  `Assets\Environment\woodland-preparation-01\asset-manifest.json`. Raw page/
+  metadata evidence remains hashed in the isolated ignored source area.
+- Current API terms permit free asset retrieval without a key/account, with an
+  identified User-Agent. No account, checkout, entitlement or paid source used.
+  Website/previews are not treated as CC0 source assets. Only30 selected files
+  totaling248625234 publisher-declared bytes are admitted for acquisition:
+  2K tree/ground and1K understory; no blend/scatter/archive/extra-resolution files.
+- FBX-linked GL/EXR dependencies are recorded, not automatically followed.
+  Explicit DX/PNG material inputs are selected for later reviewed wiring; no
+  material conversion/import is performed and source files remain original.
+- Acquisition and source inventory receipts will record actual verification;
+  source-only2.3 remains partial/unchecked and task1.3 remains blocked.
+- Task2.2 complete: all30 originals downloaded,248625234 actual bytes, every
+  publisher MD5 matched and every SHA256 recorded in the adjacent
+  `download-receipt.json`. No mismatch was concealed, receipt overwritten,
+  raw source committed, dependency auto-fetched, or retained asset reacquired.
+- Source-only2.3 findings are in `source-inventory.json` beside those receipts
+  and `docs\research\environment-assets\diffs\2026-09-20-delta.md`. Tree exports
+  one LOD0 model (2062487 fan-triangle estimate); fern4 clumps (6232 total);
+  grass17 separate LOD0-named clumps (24730 total). This is not Unreal triangle/
+  performance evidence or fallback admission. Per-geometry counts, slots,
+  raw transforms/units, local bounds, LOD/wind indicators and27 image headers/
+  channels are recorded. Absolute/relative texture references were not followed.
+- 19 helper tests passed; inspection exactly reproduced the preserved inventory.
+  All30 receipt hashes reverified with no downloads;234 preexisting tracked
+  source/config/content/asset/launcher hashes unchanged; real-root preview
+  ValidateOnly still resolves the accepted Shipping binary/profile/arguments.
+  No Blender/UE/game execution or visual Batch A occurred. Runtime-dependent2.3
+  remains unchecked and1.3 remains blocked.

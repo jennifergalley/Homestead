@@ -1,0 +1,3553 @@
+{
+  "scope": "SOURCE ONLY; task1.3 blocked; no Blender/UE/external lookups",
+  "files": [
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_2k.fbx",
+      "sha256": "14D6D0754B79A442254795663C4E5FFA1F679E54562F48B21AB0BBC78858724D",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 522,
+        "decodedArrayBytes": 64186424,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 1,
+          "Model": 1,
+          "Material": 3,
+          "Texture": 10,
+          "Video": 10
+        },
+        "geometries": [
+          {
+            "id": 43359812,
+            "name": "BezierCurve.002",
+            "vertices": 1755568,
+            "faces": 1150237,
+            "faceVertexHistogram": {
+              "4": 912250,
+              "3": 237987
+            },
+            "fanTriangleEstimate": 2062487,
+            "localBounds": {
+              "min": [
+                -1.3089934587478638,
+                -2.9098503589630127,
+                -0.02410384640097618
+              ],
+              "max": [
+                1.6077065467834473,
+                1.3826267719268799,
+                4.532637119293213
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 47407,
+                  "1": 1074537,
+                  "2": 28293
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 873041982,
+            "name": "tree_small_02_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              43359812
+            ],
+            "materialSlotsInConnectionOrder": [
+              "tree_small_02_branches",
+              "tree_small_02_leaves",
+              "tree_small_02_trunk"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "200466622": "tree_small_02_branches",
+          "948892618": "tree_small_02_leaves",
+          "504097605": "tree_small_02_trunk"
+        },
+        "uniqueGeometryFaces": 1150237,
+        "uniqueGeometryFanTriangles": 2062487,
+        "geometryModelBindings": 1,
+        "modelBoundFanTriangles": 2062487,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "tree_small_02_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_branch_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_branch_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_branch_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_branch_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_branch_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_branch_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_alpha_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_alpha_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_diff_2k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_diff_2k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_nor_gl_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_nor_gl_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_rough_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_rough_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_branch_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_branch_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_branch_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_branch_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_branch_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_branch_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_diff_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_alpha_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_alpha_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_nor_gl_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_leaves_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_leaves_rough_2k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_diff_2k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_diff_2k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_nor_gl_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_nor_gl_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\tree_small_02\\textures\\tree_small_02_rough_2k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\tree_small_02_rough_2k.exr"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_diff_2k.jpg",
+      "sha256": "4AB3210B6EC6BB1181145500BCA71D1C1F81EAD6BAAA8600F5979C2CEC50C6A4",
+      "sourceInspection": {
+        "format": "JPEG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            3,
+            242
+          ],
+          [
+            2,
+            235
+          ],
+          [
+            0,
+            229
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": null,
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_nor_dx_2k.png",
+      "sha256": "38351077D965820EACA9D5E80A13F939A353235CB55FBB4FCEF8C7BCF2F62658",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            10,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_rough_2k.png",
+      "sha256": "C1A7C3453DE0E57545459C5BABB94331225059484B8160C2AC313EE96EEC3D27",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          30214,
+          53617
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_ao_2k.png",
+      "sha256": "60DB6F895CA27C824DDD1C1F15674C8C743196C887DE48DB1FD64FD75B7D1C79",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          417,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_diff_2k.png",
+      "sha256": "553D0CDBC12B63BE3BD85756713F95BEC5CDF8CC57DAE74D3F19D8DF13AC126C",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            46,
+            200
+          ],
+          [
+            36,
+            177
+          ],
+          [
+            31,
+            152
+          ],
+          [
+            237,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 8,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_nor_dx_2k.png",
+      "sha256": "F733B70D60C5785FD853C8154578BD17D484A20D48B2D92B1D0CB8F1D4CEC40B",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            15,
+            232
+          ],
+          [
+            22,
+            225
+          ],
+          [
+            184,
+            255
+          ],
+          [
+            238,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_rough_2k.png",
+      "sha256": "2ACFC7EBD7269E65917D0535C463BCF4ADF44627B3C34F528E2B1623CB2A5B9C",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            180,
+            236
+          ],
+          [
+            180,
+            236
+          ],
+          [
+            180,
+            236
+          ],
+          [
+            237,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 8,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_ao_2k.png",
+      "sha256": "33CFDAF253D01841F1D237AA5CFCFB10594F9CC5DA001069A4B92410BF45C7A5",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            121,
+            255
+          ],
+          [
+            121,
+            255
+          ],
+          [
+            121,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_diff_2k.png",
+      "sha256": "DA46F05805BBC3B608051B66EE9E2B3705108DE3C897EA998AB98E0360DC2B72",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_nor_dx_2k.png",
+      "sha256": "B30515235D44AB58004A9DED02F614DEDA6358AC19FAB7D04C8FDEF6BF6B2D09",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            4,
+            253
+          ],
+          [
+            54,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_rough_2k.png",
+      "sha256": "5E7FEE2EB56AFA1265178BB2BF9267DBA12C95149D9E2068ADFC1EBF2D44D082",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          13750,
+          54998
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_ao_2k.png",
+      "sha256": "CFFDFE4F55FA39A93F98C20DCCC60FD00E91521CBCBD8523CFC2E9B504521DAE",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          17621,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_alpha_2k.png",
+      "sha256": "566484C7047CE67AF5A4435C1E4DA2B773578D73F83AE45DFAD0FD442DF7B9D5",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fern_02",
+      "file": "fern_02_1k.fbx",
+      "sha256": "6D8238B9CC1BBB5F5766396C2DB26F2219C0D0E5CA226FB81DCC44BDB35045E8",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 410,
+        "decodedArrayBytes": 149712,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 4,
+          "Model": 4,
+          "Material": 1
+        },
+        "geometries": [
+          {
+            "id": 802914469,
+            "name": "Plane.024",
+            "vertices": 1590,
+            "faces": 1192,
+            "faceVertexHistogram": {
+              "4": 1192
+            },
+            "fanTriangleEstimate": 2384,
+            "localBounds": {
+              "min": [
+                -0.5281425714492798,
+                -0.4718152582645416,
+                -0.030510280281305313
+              ],
+              "max": [
+                0.4616048336029053,
+                0.421874463558197,
+                0.39718443155288696
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 387442062,
+            "name": "Plane.044",
+            "vertices": 1500,
+            "faces": 1124,
+            "faceVertexHistogram": {
+              "4": 1124
+            },
+            "fanTriangleEstimate": 2248,
+            "localBounds": {
+              "min": [
+                -0.4299395680427551,
+                -0.34794387221336365,
+                -0.028773672878742218
+              ],
+              "max": [
+                0.44438624382019043,
+                0.4172818064689636,
+                0.32024669647216797
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 812885519,
+            "name": "Plane.006",
+            "vertices": 525,
+            "faces": 392,
+            "faceVertexHistogram": {
+              "4": 392
+            },
+            "fanTriangleEstimate": 784,
+            "localBounds": {
+              "min": [
+                -0.2976571321487427,
+                -0.3021530210971832,
+                -0.028773518279194832
+              ],
+              "max": [
+                0.25428348779678345,
+                0.31126806139945984,
+                0.2580300271511078
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 7844172,
+            "name": "Plane.059",
+            "vertices": 545,
+            "faces": 408,
+            "faceVertexHistogram": {
+              "4": 408
+            },
+            "fanTriangleEstimate": 816,
+            "localBounds": {
+              "min": [
+                -0.2907802164554596,
+                -0.2411416471004486,
+                -0.013578944839537144
+              ],
+              "max": [
+                0.28200197219848633,
+                0.35213664174079895,
+                0.19950860738754272
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 314288041,
+            "name": "fern_02_b",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              802914469
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fern_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -4.76837158203125e-05,
+                0.0,
+                -5.9604644775390625e-05
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 297642122,
+            "name": "fern_02_c",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              387442062
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fern_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                100.00009155273438,
+                0.0,
+                -1.1920928955078125e-05
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 902801568,
+            "name": "fern_02_a",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              812885519
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fern_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -1.1920928955078125e-05,
+                0.0,
+                100.00001525878906
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 546770539,
+            "name": "fern_02_d",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              7844172
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fern_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                100.0,
+                0.0,
+                99.99996185302734
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "70674754": "fern_02"
+        },
+        "uniqueGeometryFaces": 3116,
+        "uniqueGeometryFanTriangles": 6232,
+        "geometryModelBindings": 4,
+        "modelBoundFanTriangles": 6232,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof."
+      }
+    },
+    {
+      "asset": "fern_02",
+      "file": "fern_02_diff_1k.png",
+      "sha256": "F8F504BCE117647F1DF386CD7BC99A79C664BB49F82D1DD6412C83A700C48E94",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            21,
+            136
+          ],
+          [
+            31,
+            140
+          ],
+          [
+            0,
+            103
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fern_02",
+      "file": "fern_02_nor_dx_1k.png",
+      "sha256": "864CAE047B66A8FF2DDF77D27BBE75EEB7538217675560DFC7E4C0767050D4D3",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            11,
+            249
+          ],
+          [
+            38,
+            245
+          ],
+          [
+            152,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fern_02",
+      "file": "fern_02_rough_1k.png",
+      "sha256": "1485A265BCD40E5D9362C0ED56F9024DF3AB5241DC9F83C8011165D2223C5D20",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          19613,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fern_02",
+      "file": "fern_02_ao_1k.png",
+      "sha256": "C31A5E1C543491816B7D84301BF9A358786DE8CFF417F481E294070BB1E356C0",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          47092,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fern_02",
+      "file": "fern_02_alpha_1k.png",
+      "sha256": "EA3C64284C7EBDEEDF484D2D816EAE92825EC526140C3BB83859DDC7A64001F9",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_1k.fbx",
+      "sha256": "EF823EBA5C7114B98FB544A85AB7B17DD1C2DDD6F3E785CD232029B980AE7C44",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 1203,
+        "decodedArrayBytes": 844028,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 17,
+          "Model": 17,
+          "Material": 1,
+          "Texture": 4,
+          "Video": 4
+        },
+        "geometries": [
+          {
+            "id": 735032559,
+            "name": "Plane.051",
+            "vertices": 7044,
+            "faces": 3277,
+            "faceVertexHistogram": {
+              "4": 3145,
+              "3": 132
+            },
+            "fanTriangleEstimate": 6422,
+            "localBounds": {
+              "min": [
+                -0.15279462933540344,
+                -0.16885031759738922,
+                -0.007504553068429232
+              ],
+              "max": [
+                0.1642143875360489,
+                0.15770849585533142,
+                0.13918423652648926
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 744324008,
+            "name": "Plane.038",
+            "vertices": 4823,
+            "faces": 2399,
+            "faceVertexHistogram": {
+              "4": 2227,
+              "3": 172
+            },
+            "fanTriangleEstimate": 4626,
+            "localBounds": {
+              "min": [
+                -0.14600969851016998,
+                -0.1419035643339157,
+                -0.025613101199269295
+              ],
+              "max": [
+                0.13808774948120117,
+                0.1338363140821457,
+                0.14364951848983765
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 280736634,
+            "name": "Plane.053",
+            "vertices": 6405,
+            "faces": 3048,
+            "faceVertexHistogram": {
+              "4": 2897,
+              "3": 151
+            },
+            "fanTriangleEstimate": 5945,
+            "localBounds": {
+              "min": [
+                -0.14519789814949036,
+                -0.11970172822475433,
+                -0.021477332338690758
+              ],
+              "max": [
+                0.13359317183494568,
+                0.13536815345287323,
+                0.12087008357048035
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 349008543,
+            "name": "Plane.050",
+            "vertices": 2593,
+            "faces": 1148,
+            "faceVertexHistogram": {
+              "4": 1139,
+              "3": 9
+            },
+            "fanTriangleEstimate": 2287,
+            "localBounds": {
+              "min": [
+                -0.11184881627559662,
+                -0.10901965200901031,
+                -0.02293974906206131
+              ],
+              "max": [
+                0.10376648604869843,
+                0.1123582273721695,
+                0.19480454921722412
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 34972056,
+            "name": "Plane.039",
+            "vertices": 1386,
+            "faces": 637,
+            "faceVertexHistogram": {
+              "4": 620,
+              "3": 17
+            },
+            "fanTriangleEstimate": 1257,
+            "localBounds": {
+              "min": [
+                -0.07645512372255325,
+                -0.11334384977817535,
+                -0.003344380995258689
+              ],
+              "max": [
+                0.1113336980342865,
+                0.0876847505569458,
+                0.1743771880865097
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 239812747,
+            "name": "Plane.048",
+            "vertices": 1580,
+            "faces": 752,
+            "faceVertexHistogram": {
+              "4": 714,
+              "3": 38
+            },
+            "fanTriangleEstimate": 1466,
+            "localBounds": {
+              "min": [
+                -0.08015616983175278,
+                -0.09483355283737183,
+                -0.02140900306403637
+              ],
+              "max": [
+                0.11217431724071503,
+                0.10802191495895386,
+                0.12322665750980377
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 288737650,
+            "name": "Plane.037",
+            "vertices": 888,
+            "faces": 433,
+            "faceVertexHistogram": {
+              "4": 400,
+              "3": 33
+            },
+            "fanTriangleEstimate": 833,
+            "localBounds": {
+              "min": [
+                -0.07992804050445557,
+                -0.07973111420869827,
+                -0.0024811276234686375
+              ],
+              "max": [
+                0.10491206496953964,
+                0.08258192986249924,
+                0.13794554769992828
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 556848324,
+            "name": "Plane.047",
+            "vertices": 700,
+            "faces": 338,
+            "faceVertexHistogram": {
+              "4": 315,
+              "3": 23
+            },
+            "fanTriangleEstimate": 653,
+            "localBounds": {
+              "min": [
+                -0.09215594828128815,
+                -0.09204978495836258,
+                -0.007656285539269447
+              ],
+              "max": [
+                0.07380075007677078,
+                0.09784233570098877,
+                0.09223899245262146
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 425513347,
+            "name": "Plane.043",
+            "vertices": 330,
+            "faces": 147,
+            "faceVertexHistogram": {
+              "4": 143,
+              "3": 4
+            },
+            "fanTriangleEstimate": 290,
+            "localBounds": {
+              "min": [
+                -0.0795840173959732,
+                -0.08402851223945618,
+                -0.005577980075031519
+              ],
+              "max": [
+                0.08137238770723343,
+                0.07450296729803085,
+                0.3169684112071991
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 140198142,
+            "name": "Plane.042",
+            "vertices": 354,
+            "faces": 161,
+            "faceVertexHistogram": {
+              "4": 149,
+              "3": 12
+            },
+            "fanTriangleEstimate": 310,
+            "localBounds": {
+              "min": [
+                -0.08391976356506348,
+                -0.074491485953331,
+                -0.0018983071204274893
+              ],
+              "max": [
+                0.06602869927883148,
+                0.060298189520835876,
+                0.28376469016075134
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 93413432,
+            "name": "Plane.045",
+            "vertices": 394,
+            "faces": 175,
+            "faceVertexHistogram": {
+              "4": 165,
+              "3": 10
+            },
+            "fanTriangleEstimate": 340,
+            "localBounds": {
+              "min": [
+                -0.06662868708372116,
+                -0.07759398221969604,
+                -0.00573160033673048
+              ],
+              "max": [
+                0.08640214055776596,
+                0.050562914460897446,
+                0.23052458465099335
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 697680708,
+            "name": "Plane.055",
+            "vertices": 87,
+            "faces": 40,
+            "faceVertexHistogram": {
+              "4": 39,
+              "3": 1
+            },
+            "fanTriangleEstimate": 79,
+            "localBounds": {
+              "min": [
+                -0.023301100358366966,
+                -0.022762246429920197,
+                -0.0026543086860328913
+              ],
+              "max": [
+                0.044046659022569656,
+                0.051006510853767395,
+                0.10979903489351273
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 433505126,
+            "name": "Plane.056",
+            "vertices": 30,
+            "faces": 15,
+            "faceVertexHistogram": {
+              "4": 13,
+              "3": 2
+            },
+            "fanTriangleEstimate": 28,
+            "localBounds": {
+              "min": [
+                -0.004174281843006611,
+                -0.000264353962847963,
+                -0.002296786056831479
+              ],
+              "max": [
+                0.019395504146814346,
+                0.034134380519390106,
+                0.057911694049835205
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 3411905,
+            "name": "Plane.054",
+            "vertices": 44,
+            "faces": 20,
+            "faceVertexHistogram": {
+              "4": 20
+            },
+            "fanTriangleEstimate": 40,
+            "localBounds": {
+              "min": [
+                -0.0020321784541010857,
+                -0.028342707082629204,
+                -0.0015277046477422118
+              ],
+              "max": [
+                0.013999270275235176,
+                0.0006610661512240767,
+                0.08086099475622177
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 428191887,
+            "name": "Plane.057",
+            "vertices": 36,
+            "faces": 16,
+            "faceVertexHistogram": {
+              "4": 16
+            },
+            "fanTriangleEstimate": 32,
+            "localBounds": {
+              "min": [
+                -0.0009768229210749269,
+                -0.034244898706674576,
+                -0.00266977958381176
+              ],
+              "max": [
+                0.04206297919154167,
+                0.054337579756975174,
+                0.04515690729022026
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 403287865,
+            "name": "Plane.058",
+            "vertices": 66,
+            "faces": 32,
+            "faceVertexHistogram": {
+              "4": 30,
+              "3": 2
+            },
+            "fanTriangleEstimate": 62,
+            "localBounds": {
+              "min": [
+                -0.026754053309559822,
+                -0.051811572164297104,
+                -0.0046236226335167885
+              ],
+              "max": [
+                0.0585113987326622,
+                0.022340359166264534,
+                0.0448271669447422
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 922188436,
+            "name": "Plane.059",
+            "vertices": 60,
+            "faces": 32,
+            "faceVertexHistogram": {
+              "4": 28,
+              "3": 4
+            },
+            "fanTriangleEstimate": 60,
+            "localBounds": {
+              "min": [
+                -0.0030071011278778315,
+                -0.023381344974040985,
+                -0.0029108894523233175
+              ],
+              "max": [
+                0.05218852683901787,
+                0.04550879821181297,
+                0.044163916260004044
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 300667236,
+            "name": "grass_medium_01_large_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              735032559
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -239.99998474121094,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 801257521,
+            "name": "grass_medium_01_large_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              744324008
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -199.99998474121094,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 136170966,
+            "name": "grass_medium_01_large_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              280736634
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -159.99998474121094,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 152151788,
+            "name": "grass_medium_01_mid_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              349008543
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -119.99996948242188,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 9907750,
+            "name": "grass_medium_01_mid_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              34972056
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -79.99996185302734,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 671694990,
+            "name": "grass_medium_01_mid_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              239812747
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -39.999996185302734,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 889539833,
+            "name": "grass_medium_01_small_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              288737650
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                1.4901161193847656e-05,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 854938463,
+            "name": "grass_medium_01_small_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              556848324
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                40.000022888183594,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 515132540,
+            "name": "grass_medium_01_tall_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              425513347
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                79.99998474121094,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 87302574,
+            "name": "grass_medium_01_tall_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              140198142
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                119.99999237060547,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 948234288,
+            "name": "grass_medium_01_tall_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              93413432
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                160.00001525878906,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 99195606,
+            "name": "grass_medium_01_tiny_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              697680708
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                200.0000457763672,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 280443307,
+            "name": "grass_medium_01_tiny_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              433505126
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                220.0000762939453,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 29466506,
+            "name": "grass_medium_01_tiny_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              3411905
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                240.00006103515625,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 419913291,
+            "name": "grass_medium_01_tiny_d_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              428191887
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                260.0000305175781,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 124304742,
+            "name": "grass_medium_01_tiny_e_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              403287865
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                280.0000305175781,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 570172703,
+            "name": "grass_medium_01_tiny_f_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              922188436
+            ],
+            "materialSlotsInConnectionOrder": [
+              "grass_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                300.00006103515625,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "60341713": "grass_medium_01"
+        },
+        "uniqueGeometryFaces": 12670,
+        "uniqueGeometryFanTriangles": 24730,
+        "geometryModelBindings": 17,
+        "modelBoundFanTriangles": 24730,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_large_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_large_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_large_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_mid_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_mid_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_mid_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_small_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_small_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tall_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tall_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tall_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tiny_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tiny_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tiny_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tiny_d_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tiny_e_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "grass_medium_01_tiny_f_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\grass_medium_01\\textures\\grass_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\grass_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_diff_1k.png",
+      "sha256": "420DFD0FE7392244360B6F9AE1ADA8893512941F73091D94718C8409E8658106",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_dry_diff_1k.png",
+      "sha256": "DA85639D6EB8F029B50E7920AAF7E649940541BB24FE6AD239DBAE7400AF2EB2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_nor_dx_1k.png",
+      "sha256": "291CD782F20EE3D2DA84FF5F541DDDAA5075580062803697E139705FB8FD7FB4",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            12,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_rough_1k.png",
+      "sha256": "F3DAF51E960F8A5D253D4DD01904922EE73AE9A26F3A80F87646EA6C278942EC",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          63788
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_ao_1k.png",
+      "sha256": "2368D17A323ED65998D0266C903F7EBB668CC9CAB970DC235CF490E257395967",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_medium_01",
+      "file": "grass_medium_01_alpha_1k.png",
+      "sha256": "711A8E49AF758D6A6CE1F610DB858899A27BE19DA6D1866BD35C13BC7B8FFEFF",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_ground",
+      "file": "grass_ground_diff_2k.png",
+      "sha256": "711341BCEF8C1E7317A70E6BB39E1E63878E3946E26C93B78E3835F26BD26620",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            43,
+            210
+          ],
+          [
+            38,
+            188
+          ],
+          [
+            11,
+            170
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_ground",
+      "file": "grass_ground_nor_dx_2k.png",
+      "sha256": "E313FBB0C55ED5C8891AC94B3E3057B3A893626848FE93F07F86036D0D27A6E3",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            6,
+            250
+          ],
+          [
+            4,
+            250
+          ],
+          [
+            151,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "grass_ground",
+      "file": "grass_ground_rough_2k.png",
+      "sha256": "4BB2ECCA7BCA7AA8A84A8B4FC604ABAD633E7D1B73C0BF62C3279A2F28554DA2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          2048,
+          2048
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          56815,
+          63540
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 2048,
+          "height": 2048,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    }
+  ]
+}

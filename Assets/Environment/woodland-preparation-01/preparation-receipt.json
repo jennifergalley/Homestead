@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "runId": "20260920-182217-d1f84e39",
+  "recordedUtc": "2026-09-20T19:56:06.2835180+00:00",
+  "scope": "Source-only preparation; no engine/Blender/import/render/build/game execution",
+  "sourceBaseCheckpoint": "ba091b6c3c13992185b7ce5a419e34b8823dfb3b",
+  "openSpecProgress": {
+    "total": 29,
+    "complete": 4,
+    "remaining": 25
+  },
+  "blockedTasks": [
+    "1.3 authoring/network approval",
+    "2.3 runtime-dependent evidence"
+  ],
+  "payloadFiles": 30,
+  "payloadBytes": 248625234,
+  "allPublisherMd5Matched": true,
+  "receiptReverifiedWithoutDownloads": true,
+  "inventoryExactlyReproduced": true,
+  "protectedTrackedFilesUnchanged": 234,
+  "helperTestsPassed": 19,
+  "helperTestCommand": "python -m unittest discover -s .\\Tests -p 'Woodland*Tests.py' -v",
+  "parserEnvironment": {
+    "pillow": "12.1.0",
+    "python": "3.13.3",
+    "pythonExeSha256": "D87063E5597F257004C731B66C59C56C91038861C6877B1A3DCA6B8C4E919125"
+  },
+  "selectedShippingExeSha256": "CE5C9A262394E0B63E1105D71D4EBFB82CB61D4041FDC994618665F6FF29E634",
+  "previewProfile": "jenny-review",
+  "runtimeMeasurements": "Unmeasured; no GPU/VRAM/FPS/imported mesh/appearance conclusions",
+  "proofs": [
+    {
+      "path": "Scripts\\prepare_woodland_sources.py",
+      "bytes": 15033,
+      "sha256": "D05096C234D31BFCFE6AFFE7B69FD7C58FF0D90E191C0722D8D858A14B3F2FCA"
+    },
+    {
+      "path": "Scripts\\inspect_woodland_sources.py",
+      "bytes": 15127,
+      "sha256": "FE2D9FBC43AC56F810F7E70912F9C606EE9F5B144CB73E8D2AB348B71E6AA7DE"
+    },
+    {
+      "path": "Tests\\WoodlandSourceTests.py",
+      "bytes": 5194,
+      "sha256": "BA9731ECFA13553DD67EF6D1CAF28FD047AE1BA3D7BCF7F3264C8337B9C4D3CE"
+    },
+    {
+      "path": "Tests\\WoodlandInspectionTests.py",
+      "bytes": 7977,
+      "sha256": "FAE4A00C2D2CC179C51D83ED86B5DAE799F111EF053A17512645D66D45BCD836"
+    },
+    {
+      "path": "Assets\\Environment\\woodland-preparation-01\\asset-manifest.json",
+      "bytes": 17437,
+      "sha256": "1B9E480C8B3B6D1D18A568351164F9A10731B71A54F19B3FCD0684E40924BC26"
+    },
+    {
+      "path": "Assets\\Environment\\woodland-preparation-01\\download-receipt.json",
+      "bytes": 13785,
+      "sha256": "AACF677F7B8CA07A5656842EA80AFEDC80845E509AFE8731F198DA973F339ECF"
+    },
+    {
+      "path": "Assets\\Environment\\woodland-preparation-01\\source-inventory.json",
+      "bytes": 94605,
+      "sha256": "B38DCE70440F97817B3A8C8372D25EFC6B72BEE47E7078FC1D8ED207C1C0AAF4"
+    },
+    {
+      "path": "Assets\\Environment\\woodland-preparation-01\\protected-before.json",
+      "bytes": 39510,
+      "sha256": "37D61B871BB0E3ADC24E7314E8E4C7DE980D6517DFD833A7D6039633572F91B0"
+    },
+    {
+      "path": "Assets\\Environment\\woodland-preparation-01\\helper-tests.txt",
+      "bytes": 2280,
+      "sha256": "EBE0C89C9265AB1E666B5549B38AC69120361E3B903054CD792D5869829793DC"
+    },
+    {
+      "path": "Assets\\Environment\\woodland-preparation-01\\README.md",
+      "bytes": 5698,
+      "sha256": "BD512344C684F1489179241C10716891819B312C6FDA8B0926020694FC3C02D5"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\diffs\\2026-09-20-delta.md",
+      "bytes": 7337,
+      "sha256": "313E78E787C5930738C684A4CBAB1BCD6E10F7BF5426B9CE5526A318A71B8655"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\2026-09-20-decision.md",
+      "bytes": 13838,
+      "sha256": "6AA19CEC53EBD0BF2739C6C596DD164B26B12F773F605D2729A59F66C03C4228"
+    },
+    {
+      "path": "openspec\\changes\\upgrade-woodland-environment-assets\\design.md",
+      "bytes": 19810,
+      "sha256": "BF0ED5418AFB3BC0D9C51B970570A18037C495004E0564E6DCF6197F54228FC5"
+    },
+    {
+      "path": "openspec\\changes\\upgrade-woodland-environment-assets\\tasks.md",
+      "bytes": 16715,
+      "sha256": "4E3D509DCB19256D30C4B272006828EBF19EB45A6947811EC27B7051CE4F572F"
+    }
+  ]
+}

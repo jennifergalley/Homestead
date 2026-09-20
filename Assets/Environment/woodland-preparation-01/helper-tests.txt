@@ -1,0 +1,24 @@
+test_array_bomb_wrong_encoding_and_raw_length (WoodlandInspectionTests.InspectionTests.test_array_bomb_wrong_encoding_and_raw_length) ... ok
+test_bad_end_offset (WoodlandInspectionTests.InspectionTests.test_bad_end_offset) ... ok
+test_depth_limit (WoodlandInspectionTests.InspectionTests.test_depth_limit) ... ok
+test_geometry_index_and_finite_checks (WoodlandInspectionTests.InspectionTests.test_geometry_index_and_finite_checks) ... ok
+test_known_geometry_instances_materials_transforms_units_and_no_external_read (WoodlandInspectionTests.InspectionTests.test_known_geometry_instances_materials_transforms_units_and_no_external_read) ... ok
+test_mislabeled_image (WoodlandInspectionTests.InspectionTests.test_mislabeled_image) ... ok
+test_png_alpha_and_invalid_header (WoodlandInspectionTests.InspectionTests.test_png_alpha_and_invalid_header) ... ok
+test_property_length_and_count (WoodlandInspectionTests.InspectionTests.test_property_length_and_count) ... ok
+test_wrong_header_version_and_truncation (WoodlandInspectionTests.InspectionTests.test_wrong_header_version_and_truncation) ... ok
+test_admitted_file (WoodlandSourceTests.AcquisitionTests.test_admitted_file) ... ok
+test_existing_file_never_replaced_or_refetched (WoodlandSourceTests.AcquisitionTests.test_existing_file_never_replaced_or_refetched) ... ok
+test_http_length_failure_retains_partial (WoodlandSourceTests.AcquisitionTests.test_http_length_failure_retains_partial) ... ok
+test_no_escape (WoodlandSourceTests.AcquisitionTests.test_no_escape) ... ok
+test_receipt_no_overwrite (WoodlandSourceTests.AcquisitionTests.test_receipt_no_overwrite) ... ok
+test_redirect_rejected (WoodlandSourceTests.AcquisitionTests.test_redirect_rejected) ... ok
+test_size_and_md5_mismatches_preserve_bytes (WoodlandSourceTests.AcquisitionTests.test_size_and_md5_mismatches_preserve_bytes) ... ok
+test_unapproved_urls (WoodlandSourceTests.AcquisitionTests.test_unapproved_urls) ... ok
+test_unsafe_names (WoodlandSourceTests.AcquisitionTests.test_unsafe_names) ... ok
+test_wrong_size_resolution_type_asset_checksum (WoodlandSourceTests.AcquisitionTests.test_wrong_size_resolution_type_asset_checksum) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.078s
+
+OK

@@ -55,8 +55,8 @@ Dependency refinement authorized by the coordinator on 2026-09-20: completion
 of tasks1.1/1.2 permits a separately assigned no-engine preparation lane for
 tasks2.1/2.2 and the source-only portion of2.3 while1.3 remains blocked. This
 changes ordering, not the offline/privacy requirements or import authorization.
-The current assignment revises planning only; acquisition awaits coordinator
-review and a separate apply continuation.
+That refinement revised planning only; the subsequent separately authorized
+preparation continuation is recorded in tasks.md and does not clear task1.3.
 
 That lane is limited to the selected CC0 publisher manifests/files, exact
 admission and acquisition receipts, and data-only source inspection. No
