@@ -51,6 +51,29 @@ does not clear new content authoring. No firewall rule, elevation workaround,
 account action or use of a Development executable as a shortcut is permitted.
 If that gate remains shut, stop before engine execution and report the blocker.
 
+Dependency refinement authorized by the coordinator on 2026-09-20: completion
+of tasks1.1/1.2 permits a separately assigned no-engine preparation lane for
+tasks2.1/2.2 and the source-only portion of2.3 while1.3 remains blocked. This
+changes ordering, not the offline/privacy requirements or import authorization.
+The current assignment revises planning only; acquisition awaits coordinator
+review and a separate apply continuation.
+
+That lane is limited to the selected CC0 publisher manifests/files, exact
+admission and acquisition receipts, and data-only source inspection. No
+accounts, claims, paid content or broader research expansion. Never execute
+untrusted blend files or supplied Python. Prefer data-only FBX parsing; any
+later Blender inspection requires separate coordinator tool approval of the
+official existing binary with factory startup, auto-execution disabled and
+offline mode, without external texture paths or scripts. No Blender launch is
+authorized by this refinement.
+
+Source/exported-mesh counts, hierarchy, units, slots and maps must be labeled as
+such; they are not imported Unreal triangles, renderability, material correctness
+or runtime cost. Task2.3 retains its runtime-dependent evidence requirement and
+stays unchecked until all of it is met. All engine/import/cook/pak/build/test
+execution and environment game/material implementation remain blocked until
+task1.3 is approved and proven. No other task receives an ordering exception.
+
 Keep acquisition in a candidate-owned source folder, with exact publisher/license
 links, date, chosen source version, bytes, SHA-256 and conversion notes. Extend
 the existing manifest/receipt conventions only after files are acquired. Never
@@ -250,15 +273,22 @@ physical 60 Hz or fix the previously observed 30 Hz/tearing issue.
   A/B, no experimental pipeline adoption in this change.
 - Dynamic clouds consume effort with little ground-view benefit -> optional
   independent gate; keeping the existing sky is an explicit valid outcome.
-- Import gate remains blocked -> report a ready plan, not a runnable overnight
-  promise; no engine invocation until coordinator-approved.
+- Import gate remains blocked -> report only actual separately authorized
+  no-engine preparation, not a runnable overnight promise; no engine invocation
+  or environment implementation until the workflow is approved and proven.
 
 ## Migration Plan
 
 1. Obtain a new apply request; coordinator establishes bounded run, accepted
-   offline/fullscreen baseline, single engine writer and approved import method.
-2. Refresh/admit exact sources, acquire only approved files, record receipts.
-3. Build isolated namespace and representative spike; complete Batch A.
+   offline/fullscreen baseline and single engine writer (tasks1.1/1.2).
+2. With a separate preparation assignment, refresh/admit exact sources, acquire
+   only approved files and record receipts; inspect source data without engine
+   execution. Tasks2.1/2.2 and source-only2.3 may precede the blocked1.3 gate;
+   runtime-dependent2.3 evidence remains pending.
+3. Obtain and prove the exact task1.3 authoring workflow approval, then register
+   the task1.4 matched baseline before engine-dependent work. Complete remaining
+   admission evidence, build the isolated namespace/representative spike and
+   complete Batch A. Preparation alone never authorizes this step.
 4. Integrate only the admitted palette, preserve state/terrain, run targeted
    checks and screenshot-free timing; complete Batch B.
 5. Package in a fresh candidate directory with source/content/executable hashes,

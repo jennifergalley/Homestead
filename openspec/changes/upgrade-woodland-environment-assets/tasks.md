@@ -1,16 +1,35 @@
 # Tasks
 
-Planning only. None of the implementation tasks below has been performed.
+Apply preflight was explicitly authorized on 2026-09-20. Only completed
+authorization/baseline work is checked below. The 12:32 Arizona coordinator
+assignment authorizes a planning-only dependency refinement, not acquisition.
 Research/source-inspection results live in the linked dossier, not in checked
-implementation boxes. A new explicit apply request is required. Work proceeds
-in heading order, one engine writer, with the coordinator's bounded run controls.
-Design open questions are empirical spike outcomes with explicit fallback rules,
-not unresolved authorization to acquire assets or launch an editor.
+implementation boxes. Work proceeds in heading order except for the explicit
+preparation dependency below, one engine writer, with bounded run controls.
+Palette design questions are empirical spike outcomes with explicit fallback
+rules. The separate authoring-authorization gate in task1.3 remains unresolved.
+
+## Preparation dependency and current hold
+
+| Work | Prerequisites | Evidence/completion boundary |
+| --- | --- | --- |
+| 2.1 admission refresh | Completed1.1/1.2 plus separate coordinator apply continuation after review of this refinement | Selected CC0 sources only; no new research scope/accounts/claims |
+| 2.2 acquisition | That continuation plus actual2.1 admission | Exact HTTP files and byte/hash/license receipts; isolated source files only |
+| Source-only portion of2.3 | That continuation plus verified2.2 files | Data-only source/exported-mesh facts, not Unreal/runtime evidence |
+| Runtime-dependent2.3, engine/import/cook/pak/build/test execution and environment game/material implementation | Exact1.3 workflow approved and proven, plus relevant baseline/admission prerequisites | No execution/implementation permitted by the preparation exception |
+
+Only2.1/2.2 and the source-only portion of2.3 may run out of heading order.
+Keep2.3 unchecked while any runtime-dependent inventory requirement is pending;
+record partial source facts separately without substituting them for imported
+mesh/runtime measurements. All other tasks retain their existing dependencies.
+The current planning-only update launches no engine or asset-inspection process
+and acquires no assets.
+See design decision1 for data-only inspection and conditional Blender safeguards.
 
 ## 1. Authorization and accepted baseline
 
-- [ ] 1.1 Record the new implementation authorization, run deadline, coordinator and single engine writer; verify the run-control record permits work before starting each phase.
-- [ ] 1.2 Record the parent's accepted offline-startup/fullscreen checkpoint and package identity, then re-read changed world/import/diagnostic contracts; verify the candidate starts from that accepted baseline without merging unrelated in-flight work.
+- [x] 1.1 Record the new implementation authorization, run deadline, coordinator and single engine writer; verify the run-control record permits work before starting each phase.
+- [x] 1.2 Record the parent's accepted offline-startup/fullscreen checkpoint and package identity, then re-read changed world/import/diagnostic contracts; verify the candidate starts from that accepted baseline without merging unrelated in-flight work.
 - [ ] 1.3 Obtain coordinator approval for the exact offline-safe editor/import/build/test workflow; verify executable/launch evidence covers those tools rather than only Shipping gameplay, or stop with a blocked report and no engine launch.
 - [ ] 1.4 Register matched baseline cameras, synthetic save fixtures, times/weather, normal-control route and design timing/memory limits; verify no personal saves, accepted package or preview selection are modified.
 
@@ -53,3 +72,68 @@ not unresolved authorization to acquire assets or launch an editor.
 - [ ] 6.2 Package only to a fresh candidate directory and checkpoint its verified source/content; verify executable and proof-index hashes, explicit pass/fail/unmeasured gates and preserved personal/preview saves.
 - [ ] 6.3 Hand the candidate, two visual review batches, performance report, license receipts and unresolved shortcomings to the coordinator; verify accepted preview selection remains unchanged until explicit parent review and Jenny's subjective approval is not claimed.
 - [ ] 6.4 Record the rollback path to the prior accepted candidate; verify rejection or deadline leaves that package, selection and save profile intact, then stop rather than starting another art pass or automation.
+
+## Preflight execution record (2026-09-20)
+
+- Authorization: coordinator's 11:59 Arizona apply-preflight assignment under
+  Jenny's implementation authorization, not permission to launch engine tools.
+  Run `20260920-182217-d1f84e39`, deadline
+  `2026-09-21T02:22:17.1884351Z` (September 20, 7:22pm Arizona).
+  Live run record reported `running`, `allowWork=true`; check again before each phase.
+- Coordinator: `70592af5-9ceb-4df5-b0cf-975cd6f7e1da`. Sole coding/engine worker:
+  project session `f5fb754c-ec6e-4fc0-94f0-d05c59ae3014`, CLI session
+  `e3bd3b49-7c3c-4b43-b375-f82746eea547` (the live run's workerSessionId).
+  Planner remains read-only; scheduling belongs to the coordinator.
+- Branch: `autonomous/woodland-environment-assets-20260920`, created from clean
+  accepted selection `66066a1a6e14e67e29c0937e87624e200d8f6fdf`.
+  Inspected all47 planner-commit paths: only `openspec` and environment research
+  documentation. Cherry-picked `def62d1996ded1f6843cd777e14ab316d2792ac1`
+  as `0bc3efc7144758b00e1d2ec9aced41f12e3966db`; old branch/history preserved.
+  No unrelated code/content was merged.
+- Actual `openspec list/context/status/instructions apply` resolve
+  `E:\Repos\SurvivalGame`; schema `spec-driven`, initial apply ready0/29,
+  strict validation passed. Planning `isComplete=true` did not mean implementation.
+- Accepted release source `80a5fb623267c21ee6294b328fc7bdd91e86422d`,
+  package `Build\Releases\20260920-050723-5cc6c8a5\offline-startup-01`,
+  actual Shipping SHA256
+  `CE5C9A262394E0B63E1105D71D4EBFB82CB61D4041FDC994618665F6FF29E634`.
+  Real root ValidateOnly still resolves that receipt/binary, `jenny-review`,
+  `-Res=0x0wf` and candidate-local UserDir; no probe/automatic-quit flags.
+  Visible borderless remains human-pending.
+- Re-read both specs, proposal, design, tasks, dossier and source integration
+  evidence. Re-inspected material/decoration/exclusion/resource-refresh helpers,
+  FBX material/combine policy and renewal3/15/8 assertions. Those world/import/
+  renewal files did not change from planner source `af0c907` to accepted `66066a1`.
+  Rechecked changed build/launcher/controller/diagnostic contracts: Shipping
+  reuse-cook path cannot validate new content, normal Shipping does not spawn
+  existing smoke/visual actors, their constructors disable ticking in Shipping,
+  and `GetBind`/log/console-dependent checks need truthful project-QA adaptation.
+- Task1.3 remains **unchecked and blocked**. See `authoring-workflow-proposal.md`
+  for exact static evidence, proposed process settings, residual listener exposure,
+  cancellation limitations and the decisions needed before any controlled probe.
+  No engine/build/import/cook/pak/game process, asset acquisition or environment
+  implementation was started by this preflight.
+
+## Coordinator decision and dependency update (2026-09-20, 12:32 Arizona)
+
+- Network exception **not approved**. An unavailable/general-autonomy response
+  is not explicit approval for all-interface TraceControl exposure. Existing
+  Allow rules remain observations, not offline proof. Task1.3 stays unchecked;
+  no Editor/Cook/Pak/Development launch, firewall/admin action or engine edit.
+- Future owned-UnrealPak hard-stop fallback is approved **in principle only**:
+  attempt verified cooperative exit where available first, then a bounded
+  fallback restricted to the recorded PID/path/start time and verified owned
+  children. Only fresh isolated candidate/staging outputs may be affected.
+  Retain logs and mark partial outputs failed; never promote/reuse partial
+  cook/paks, affect player/accepted/source projects, or kill by process name.
+  This is hard termination, not graceful, and grants no launch/network approval.
+- This decision supersedes the cancellation-approval request in the dated
+  `authoring-workflow-proposal.md`; its static evidence and unresolved workflow/
+  runtime-verification limits remain. The network gate is still blocked.
+- Only dependency planning changed:1.1/1.2 can feed the independent2.1/2.2/
+  source-only2.3 lane after a separate apply continuation. No completed boxes
+  were added, normative specifications or quality gates weakened, source facts
+  relabeled as runtime proof, or acquisition/inspection execution begun.
+- Parent reviews this refinement before assigning preparation. The selected
+  Shipping preview, saves, current run deadline and parent-owned one-shot
+  scheduling remain unchanged.
