@@ -15,6 +15,11 @@ $lock = [IO.File]::Open((Join-Path $StateDirectory 'run.lock'), 'OpenOrCreate', 
 try {
     $now = [DateTimeOffset]::UtcNow
     $run = if (Test-Path -LiteralPath $path) { Get-Content -LiteralPath $path -Raw | ConvertFrom-Json } else { $null }
+    if ($run) {
+        foreach ($field in @('startedUtc','deadlineUtc','updatedUtc')) {
+            $run.$field = ([DateTimeOffset]$run.$field).ToUniversalTime().ToString('o')
+        }
+    }
     if ($Action -eq 'Start') {
         if ($run -and $run.state -ne 'stopped') { throw 'Stop the previous run explicitly before starting another.' }
         if (-not $CoordinatorSessionId) { throw 'Start requires -CoordinatorSessionId.' }

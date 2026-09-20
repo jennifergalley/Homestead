@@ -18,7 +18,8 @@ $holding = $false
 try {
     while ($true) {
         $run = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
-        $remaining = ([DateTimeOffset]::Parse($run.deadlineUtc) - [DateTimeOffset]::UtcNow).TotalSeconds
+        $deadline = ([DateTimeOffset]$run.deadlineUtc).ToUniversalTime()
+        $remaining = ($deadline - [DateTimeOffset]::UtcNow).TotalSeconds
         if ($run.id -ne $RunId -or $run.state -eq 'stopped' -or $remaining -le 0) { break }
         $holding = $run.state -eq 'running'
         $flags = if ($holding) { [uint32]2147483649 } else { [uint32]2147483648 }
@@ -27,7 +28,7 @@ try {
         }
         [ordered]@{
             runId = $RunId; pid = $PID; holding = $holding
-            updatedUtc = [DateTimeOffset]::UtcNow.ToString('o'); deadlineUtc = $run.deadlineUtc
+            updatedUtc = [DateTimeOffset]::UtcNow.ToString('o'); deadlineUtc = $deadline.ToString('o')
         } | ConvertTo-Json | Set-Content -LiteralPath $receipt -Encoding utf8
         Start-Sleep -Milliseconds ([int][Math]::Max(1, [Math]::Min(15000, $remaining * 1000)))
     }

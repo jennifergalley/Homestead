@@ -25,6 +25,7 @@ try {
     Assert-Throws { & $control -Action Start -CoordinatorSessionId 'duplicate' -StateDirectory $directory } 'Duplicate run must fail.'
     $assigned = & $control -Action AssignWorker -WorkerSessionId 'test-worker' -StateDirectory $directory
     Assert-True ($assigned.workerSessionId -eq 'test-worker') 'Worker assignment must persist.'
+    Assert-True ($assigned.deadlineUtc.EndsWith('+00:00')) 'Read and rewrite must retain explicit UTC timestamps.'
     $paused = & $control -Action Pause -StateDirectory $directory
     Assert-True (-not $paused.allowWork) 'Paused run must refuse work.'
     $resumed = & $control -Action Resume -StateDirectory $directory

@@ -112,7 +112,7 @@ bounded task at a time. Reuse that worker for sequential slices.
 
 ## Setup evidence, 2026-09-20
 
-Lifecycle and package-path tests pass 20 checks. A separate Unreal package was
+Lifecycle and package-path tests pass 21 checks. A separate Unreal package was
 built at `Build\Releases\automation-setup\Windows`; its ordinary-control route
 recorded 302 correctly sized frames and reached/gathered a plant. The original
 `Build\Windows` package was not rebuilt or replaced.
