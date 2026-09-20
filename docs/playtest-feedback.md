@@ -155,6 +155,19 @@ brief GPU-rendered flicker. No graphics, exposure, shadow, AA or OS setting was
 changed. Full evidence and the bounded human follow-up are documented in
 `presentation-diagnostics.md`. Accepted `book-clarity-01` remains selected.
 
+## Optional vertical sync - option added, tearing unresolved (2026-09-20)
+
+The coordinator separately authorized `video-sync-01`: one controller/keyboard
+toggle at the end of Settings. Existing Off preferences/defaults stay Off.
+The copy explains that sync may reduce tearing but can add input delay and does
+not fix every flicker. It reports an engine override instead of pretending the
+requested preference is active. This is a reversible comparison aid, not a
+rendering fix, display-mode change, or human scanout acceptance.
+
+The selected preview remains accepted `book-clarity-01` until separate review.
+Graphics settings belong to the game's Unreal configuration, not individual
+preview save profiles. See `setup.md` for operation and isolated verification.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction

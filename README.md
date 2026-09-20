@@ -63,6 +63,12 @@ Read-only diagnostics found a reported 4K/30Hz desktop mode and a VSync-off,
 observe physical scanout. See `docs\presentation-diagnostics.md` for exact runtime
 settings, capture limits and the next human check. No graphics defaults changed.
 
+The separate `video-sync-01` candidate adds **Settings > Vertical sync**, a
+reversible On/Off toggle for later human comparison. Default remains Off;
+tearing is still unresolved. It is **not yet selected by Preview.cmd**.
+Graphics preferences are shared within that game's Unreal config, not isolated
+per preview-save profile. See `docs\setup.md` for controls and override behavior.
+
 From this directory in PowerShell:
 
 ```powershell

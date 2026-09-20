@@ -318,6 +318,72 @@ the opt-in command, live CVar/window observations, reported 4K/30Hz desktop mode
 separate screenshot-free timing, and physical-scanout limits. No production
 graphics or OS/display settings were changed.
 
+## Optional vertical sync
+
+`video-sync-01` adds one final Settings row: **Vertical sync**. Scroll down with
+the D-pad or Up/Down; press **A** or **Enter** to toggle. The existing row identities
+0-10, pages, Back behavior and paused world remain unchanged. Off stays the
+default; opening Settings does not apply or reset any graphics preference.
+The currently selected `book-clarity-01` preview does not contain this option
+until the coordinator accepts and explicitly selects a later candidate.
+
+Vertical sync may reduce screen tearing but can add input delay. It does not
+resolve every flicker. An `active On/Off (override)` label distinguishes a
+conflicting engine value from the saved preference; a matching higher-priority
+value is labeled `engine override`. A blocked change gives an error and leaves
+the previous preference untouched. A failed save reports failure and restores
+the previous preference. These checks cannot detect external driver/VRR behavior.
+
+The choice uses Unreal's existing `UGameUserSettings.bUseVSync`, the same property
+loaded at startup. Application writes only `r.VSync` at game-setting priority;
+persistence saves only that property, rather than reapplying all non-resolution
+settings or scalability. Resolution, window/fullscreen policy, frame cap,
+render scale, AA and other graphics values are not intentionally changed.
+
+**Preview profiles isolate game saves, not graphics settings.** Relaunching the
+same package/profile retains its graphics choice; another preview profile using
+that package uses the same graphics config. Normal Development packages on this
+machine use `<package>\SurvivalGame\Saved\Config\Windows\GameUserSettings.ini`;
+engine/user-directory overrides can change that destination. Returning to
+`Play.cmd` uses the untouched original build; no preference or save is migrated.
+
+Focused verification uses `Scripts\Test-VideoSync.ps1` with fresh output and
+explicit synthetic `-GameUserSettingsINI` and `-UserDir` paths. The native fixture
+checks the actual resolved write destination before any toggle, then exercises
+both mapped devices, a second process, retained settings, pause and an engine
+override. It does not write Jenny's normal or selected-preview configuration.
+Offscreen Settings images prove UI/runtime behavior, **not reduced physical
+tearing**. See the candidate receipt for completed gates and evidence.
+
+The final focused package completes **56 checks at 1280x720 and 56 at
+3840x2160**, including four separate processes per size. Ten native Settings
+frames show controller/keyboard On/Off and a conflicting override; Canvas
+measurements and the inspected comparison sheet show no text overflow.
+Synthetic preferences deliberately use 1600x900/windowed, a 57fps cap, stored
+scale 73 and an explicit runtime screen-percentage override of 85, so a broad
+apply/reset would be detected. These are fixture conditions, not new defaults.
+Both sizes preserve those values, other stored preferences, camera and simulation
+state. Tests also exercise a read-only-file persistence failure and rollback.
+
+The initial package failed the strict config-preservation assertion: even a
+property-filtered UObject `SaveConfig` flushed unrelated pending engine values.
+That attempt is retained as `video-sync-01-initial\REJECTED.json`; the final
+implementation uses Unreal's single-property file writer and explicit disk
+readback. One wrapper-only correction recognizes that normal Unreal shutdown
+omits default-valued `False` keys. A subsequent native process confirms Off;
+the successful native checks/captures were not repeated to obtain a lucky pass.
+Graphics files outside the disclosed synthetic roots were not used for toggles.
+
+On the same final executable, the retained gates pass: **106 book-clarity,
+70 prompt, 914 action/full-homestead and 308 save-routing/input checks**, plus
+40 launcher guards and two new wrapper guards. The native 4K/full-loop run
+requests and confirms `r.ScreenPercentage=100`: mean 59.12fps, p95 16.90ms,
+p99 17.09ms after startup/readback exclusions. Concurrent GPU use was not ruled
+out; this is not a clean-performance or physical-presentation certification.
+All 124 character/source-art files match prior hashes; the five owned bootstrap
+world resaves were restored. Original and selected-book executables/configs,
+root selection and player save namespaces remain untouched.
+
 Earlier explicit render100 full-loop logs confirm execution of
 `r.ScreenPercentage = "100"` as well as their requested output dimensions.
 This is runtime CVar evidence, not continuous internal view/effect-buffer

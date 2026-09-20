@@ -149,7 +149,14 @@ Keep the accepted book preview while recording game-only evidence. Separate
 screenshot-free timing from readback-disturbed capture, distinguish output pixels
 from internal render scale, and never call an offscreen framebuffer a scanout
 measurement. The current finding is investigated/unresolved; no renderer/OS
-settings changes or further scope are authorized. See `presentation-diagnostics.md`.
+settings changes were authorized by that diagnostic task. See `presentation-diagnostics.md`.
+
+The subsequent explicit `video-sync-01` assignment permits one reversible Settings
+toggle using the canonical Unreal VSync preference, not an automatic fix or a new
+graphics default. Keep the accepted book preview selected pending coordinator
+review. Validate requested/applied state and persistence in synthetic graphics
+config roots; preview save profiles do not independently isolate graphics settings.
+No OS/driver/display comparison or additional renderer option is authorized.
 
 ## Starting a fresh run (coordinator)
 

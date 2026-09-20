@@ -27,7 +27,9 @@ coordinator explicitly scheduled only controller prompt stability as `prompts-01
 on 2026-09-20, then scheduled `book-clarity-01` only for carried possessions versus
 recipes/building plans. The subsequent `presentation-diagnostics-01` task
 investigates tearing/flicker only; it remains unresolved and does not authorize
-graphics-setting fixes. Broader inventory/book redesign and gradual recipe
+graphics-setting fixes. The later explicit `video-sync-01` slice adds only an
+optional, reversible VSync control with unchanged defaults, not a claimed cure.
+Broader inventory/book redesign and gradual recipe
 learning remain deferred; recipe unlocks are not an approved design.
 
 The project folder is E:\Repos\SurvivalGame. It now contains the Unreal project,

@@ -8,6 +8,8 @@
 #include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameUserSettings.h"
+#include "HAL/IConsoleManager.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Engine/Engine.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
@@ -628,6 +630,15 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
             Result.Add({10, FString::Printf(TEXT("3D resolution scale: %.0f%%"), Scale),
                 TEXT("Cycle 100 / 85 / 70 percent. UI stays sharp; TSR upscales the scene.")});
+            const auto* VSync = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VSync"));
+            const bool Requested = Settings->IsVSyncEnabled();
+            FString Label = FString::Printf(TEXT("Vertical sync: %s"), Requested ? TEXT("On") : TEXT("Off"));
+            if (!VSync) Label += TEXT(" (unavailable)");
+            else if ((VSync->GetInt() != 0) != Requested)
+                Label += FString::Printf(TEXT(" | active %s (override)"), VSync->GetInt() ? TEXT("On") : TEXT("Off"));
+            else if ((VSync->GetFlags() & ECVF_SetByMask) > ECVF_SetByGameSetting)
+                Label += TEXT(" (engine override)");
+            Result.Add({11, Label, TEXT("May reduce tearing, but can add input delay. Does not fix every flicker.")});
         }
     }
     else if (Page == 6)
@@ -683,6 +694,9 @@ FString AHomesteadController::BookFooter() const
     if (Page == 3 || Page == 5)
         return bGamepad ? TEXT("D-pad: scroll   LB / RB: pages   B: close")
             : TEXT("Up / Down: scroll   Left / Right: pages   Esc: close");
+    if (Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 11)
+        return bGamepad ? TEXT("D-pad: select   LB / RB: pages   A: toggle   B: close")
+            : TEXT("Up / Down: select   Left / Right: pages   Enter: toggle   Esc: close");
     if (Page > 2)
         return bGamepad ? TEXT("D-pad: select   LB / RB: pages   A: use   B: close")
             : TEXT("Up / Down: select   Left / Right: pages   Enter: use   Esc: close");
@@ -789,9 +803,58 @@ void AHomesteadController::ActivateRow()
             }
             else Notify(TEXT("Video settings are unavailable in this session."), true);
             break;
+        case 11: ToggleVerticalSync(); break;
         default: break;
         }
     }
+}
+
+void AHomesteadController::ToggleVerticalSync()
+{
+    auto* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+    auto* VSync = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VSync"));
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    if (!Settings || !VSync || !Branch)
+    {
+        Notify(TEXT("Vertical sync settings are unavailable in this session."), true);
+        UE_LOG(LogTemp, Error, TEXT("VSYNC_SETTING unavailable"));
+        return;
+    }
+    const bool Previous = Settings->IsVSyncEnabled();
+    const int32 PreviousRuntime = VSync->GetInt();
+    const bool Requested = !Previous;
+    VSync->Set(Requested ? 1 : 0, ECVF_SetByGameSetting);
+    if ((VSync->GetInt() != 0) != Requested)
+    {
+        Notify(TEXT("An engine override controls vertical sync. Your preference was not changed."), true);
+        UE_LOG(LogTemp, Warning, TEXT("VSYNC_SETTING blocked requested=%d applied=%d priority=%u"),
+            Requested, VSync->GetInt(), VSync->GetFlags() & ECVF_SetByMask);
+        return;
+    }
+    Settings->SetVSyncEnabled(Requested);
+    // Avoid reapplying other video settings or flushing unrelated pending config changes.
+    const FString Section = Settings->GetClass()->GetPathName();
+    FConfigFile Property;
+    Property.SetBool(*Section, TEXT("bUseVSync"), Settings->IsVSyncEnabled());
+    const bool Saved = Property.UpdateSinglePropertyInSection(*Branch->IniPath, TEXT("bUseVSync"), *Section);
+    FConfigFile Disk;
+    bool Persisted = false;
+    const bool Read = Saved && Disk.Combine(Branch->IniPath)
+        && Disk.GetBool(*Section, TEXT("bUseVSync"), Persisted);
+    if (!Read || Persisted != Requested)
+    {
+        Settings->SetVSyncEnabled(Previous);
+        VSync->Set(PreviousRuntime, ECVF_SetByGameSetting);
+        Notify(TEXT("Could not save vertical sync. Your previous preference was restored."), true);
+        UE_LOG(LogTemp, Error, TEXT("VSYNC_SETTING persistence failed file=%s requested=%d applied=%d"),
+            *Branch->IniPath, Requested, VSync->GetInt());
+        return;
+    }
+    GConfig->SetBool(*Section, TEXT("bUseVSync"), Requested, GGameUserSettingsIni);
+    UE_LOG(LogTemp, Display, TEXT("VSYNC_SETTING saved requested=%d applied=%d priority=%u file=%s"),
+        Requested, VSync->GetInt(), VSync->GetFlags() & ECVF_SetByMask, *Branch->IniPath);
+    Notify(Requested ? TEXT("Vertical sync On. Choice saved for this game's graphics settings.")
+        : TEXT("Vertical sync Off. Choice saved for this game's graphics settings."));
 }
 
 void AHomesteadController::BeginPlacement(Homestead::Piece Kind)

@@ -134,6 +134,7 @@ private:
     void QuickSave();
     void QuickLoad();
     void ActivateRow();
+    void ToggleVerticalSync();
     void OpenBook(int32 TargetPage);
     void CloseBook();
     void UpdateFocus();

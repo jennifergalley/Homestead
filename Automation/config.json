@@ -11,11 +11,12 @@
     "Responsive gathering motion after ordinary movement is credible",
     "Accepted prompts-01: stable controller/keyboard prompt intent; explicitly selected for isolated human preview",
     "Accepted book-clarity-01: limited carried possessions versus recipes/plans clarity; explicitly selected for isolated preview",
-    "Presentation-diagnostics-01: investigate movement tearing/flicker only; unresolved, no graphics-setting fix authorized"
+    "Presentation-diagnostics-01: investigated movement tearing/flicker; unresolved, diagnostic-only package",
+    "Video-sync-01: explicitly scheduled reversible in-game VSync option; default unchanged, not a tearing cure"
   ],
   "deferred": [
     "MetaHuman or another wholesale character-pipeline replacement",
-    "Graphics/presentation fixes or new options until the tearing/flicker cause is established and a fix is explicitly scoped",
+    "Graphics/presentation fixes and other video options; only the separate optional VSync control is scheduled",
     "Broader field-book/inventory redesign and gradual recipe learning; ownership-versus-recipe clarity is implemented separately",
     "Further face/skin/eye/hair experiments; requested mid-back waves and blonde bob remain unmet",
     "Companions, scavenging, winter expansion, village, hunting and romance"

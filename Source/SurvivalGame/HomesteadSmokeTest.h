@@ -63,6 +63,7 @@ private:
     void PrepareWeedingChecks();
     void PrepareClearingChecks();
     void PreparePromptChecks();
+    void PrepareVideoSyncChecks();
     void PrepareBookClarityChecks();
     void PrepareBookStorageChecks();
     void QueueBookCapture(const FString& Name);

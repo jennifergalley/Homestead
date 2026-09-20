@@ -138,7 +138,8 @@ void AHomesteadHUD::DrawHUD()
 
 void AHomesteadHUD::MeasureBookLine(const FString& Text, float Width, float Size, const TCHAR* TextRole)
 {
-    static const bool Enabled = FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"));
+    static const bool Enabled = FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
+        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest"));
     if (!Enabled) return;
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Canvas || !Font) { BookTextOverflow += TEXT("Missing native font or canvas; "); return; }

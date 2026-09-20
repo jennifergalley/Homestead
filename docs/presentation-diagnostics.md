@@ -131,3 +131,16 @@ not claimed as new diagnostic-package verification.
 4. Report those observations before any coordinator-scoped single-variable
    comparison or renderer change. Do not silently turn on VSync or change AA,
    exposure, shadows, driver settings or the display mode.
+
+### Separately authorized comparison control
+
+The later `video-sync-01` feature adds an optional in-game vertical-sync toggle;
+it does not revise the diagnostic findings or make that diagnostic package
+eligible for preview. Once the coordinator reviews/selects the feature candidate,
+Jenny can compare **Settings > Vertical sync** Off/On during the same repeatable
+pan, leaving resolution, frame cap, camera route and other settings unchanged.
+Record both the perceived seam/flicker and any input-delay difference, then return
+to the preferred choice. No actual monitor comparison was performed by the agent.
+Driver/VRR/compositor behavior remains outside the runtime-CVar proof. Monitor
+recordings can introduce their own rolling-shutter/refresh artifacts and are not
+conclusive alone. The existing default is unchanged and tearing remains unresolved.

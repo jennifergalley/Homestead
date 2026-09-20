@@ -109,7 +109,8 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
         *Controller->GetPawn()->GetActorLocation().ToString(), *CameraLocation.ToString(),
         *CameraRotation.ToString(), Controller->BookPage());
     Framing += FString::Printf(TEXT("prompts_gamepad=%d\nfocus_actions=%s\n"), Controller->UsesGamepad(), *Controller->FocusActions());
-    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")))
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
+        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest")))
     {
         if (const auto* HUD = Controller->GetHUD<AHomesteadHUD>())
             Framing += FString::Printf(TEXT("book_text_fits=%d\n%s"), HUD->BookTextFits(Controller->BookPage()), *HUD->BookTextMeasurements());
@@ -144,6 +145,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest")))
+    {
+        PrepareVideoSyncChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")))
     {
         for (const TCHAR* Other : {TEXT("HomesteadPromptTest"), TEXT("HomesteadClearingTest"),
