@@ -1,5 +1,6 @@
 #include "HomesteadSmokeTest.h"
 #include "HomesteadController.h"
+#include "HomesteadHUD.h"
 #include "HomesteadWorld.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
@@ -108,6 +109,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
         *Controller->GetPawn()->GetActorLocation().ToString(), *CameraLocation.ToString(),
         *CameraRotation.ToString(), Controller->BookPage());
     Framing += FString::Printf(TEXT("prompts_gamepad=%d\nfocus_actions=%s\n"), Controller->UsesGamepad(), *Controller->FocusActions());
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")))
+    {
+        if (const auto* HUD = Controller->GetHUD<AHomesteadHUD>())
+            Framing += FString::Printf(TEXT("book_text_fits=%d\n%s"), HUD->BookTextFits(Controller->BookPage()), *HUD->BookTextMeasurements());
+    }
     if (const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn()))
     {
         const USkeletalMeshComponent* Visual = Avatar->GetMesh();
@@ -138,6 +144,16 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")))
+    {
+        for (const TCHAR* Other : {TEXT("HomesteadPromptTest"), TEXT("HomesteadClearingTest"),
+            TEXT("HomesteadWeedingTest"), TEXT("HomesteadWateringTest"), TEXT("HomesteadGatheringTest"),
+            TEXT("HomesteadPresentationTest"), TEXT("HomesteadFullLoop"), TEXT("HomesteadAudioProof")})
+            if (FParse::Param(FCommandLine::Get(), Other))
+            { Finish(false, TEXT("Book clarity requires its own isolated run.")); return; }
+        PrepareBookClarityChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest")))
     {
         PreparePromptChecks();
@@ -621,7 +637,12 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     LastFrameWallTime = Now;
     if (!Steps.IsValidIndex(StepIndex))
     {
-        if (!bWeedingPrepared && FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")))
+        if (!bBookStoragePrepared && FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")))
+        {
+            bBookStoragePrepared = true;
+            PrepareBookStorageChecks();
+        }
+        else if (!bWeedingPrepared && FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")))
         {
             bWeedingPrepared = true;
             PrepareWeedingChecks();
@@ -740,7 +761,8 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest"))
-            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest")) ? 0 : 4;
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));
     }

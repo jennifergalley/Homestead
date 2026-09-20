@@ -48,7 +48,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - Food, Energy, Warmth occupy the lower left in three 200-wide backed meters; numeric values accompany 174×5 bars.
 - Normal focus/action context sits lower right: width `min(650, 38% of virtual width)`, right inset 32, top at `height−225`.
 - Planning instead uses a lower centered panel up to 880 wide. Toasts appear centered below the top band, up to 900 wide.
-- Field book is centered, up to `1180×810`, with seven tabs, 74-high rows, a selected-row-following visible window, and a footer.
+- Field book is centered, up to `1180×810`, with seven tabs, 74-high rows, a selected-row-following visible window, and a footer. Pack/Craft/Build use purpose-specific titles and a short scope line at panel Y+144; their rows start at Y+180 rather than Y+148. Both supported 16:9 verification sizes still show seven rows. Font sizes and tab/selection behavior are unchanged.
 - Look uses a left sidebar at `(32,156)`, width `min(500, 35% of virtual width)`, up to 790 high; its scene preview remains visible rather than receiving the normal full-screen book scrim.
 - Most panel contents use 22–40-unit insets. Panels are plain rectangles, separators are thin rules, and a selected tab has a 3-unit underline.
 
@@ -86,7 +86,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - **Crops:** nine small soil tiles follow the ground. Moisture darkens soil and lowers roughness; staged growth scales plants; mature roots become visible; weeds add separate yellow-green shoots.
 - **Shelter:** foundation, wall, doorway, roof, fire, bedroll, and chest have separate shapes. Fire, bed, and chest use different within-cell offsets to preserve a central route.
 - Wall orientation is `0 north (+Y), 1 east (+X), 2 south, 3 west`. Preview uses the same geometry, pale neutral tint, no collision/shadow, and no red/green validity promise; controller feedback explains rejection.
-- **Field book:** Pack, Craft, Build, Notes, Settings, Credits, Look. Selected labels are Gold on a darker opaque row; active tabs also have an underline.
+- **Field book:** Pack, Craft, Build, Notes, Settings, Credits, Look. Selected labels are Gold on a darker opaque row; active tabs also have an underline. The first three page titles are "Your pack", "Crafting recipes" and "Building plans". Pack rows label Carried and nearby Chest quantities separately; recipes/plans label authoritative costs "Needs". The selected footer names eat/take/craft/plan, with store/take hints only when stock exists. Inert tools/materials advertise no primary pack action. Empty Pack copy describes the actual empty state, not missing recipe knowledge. No unlocks, new screens or item reordering are implied.
 - **State/input:** menus and construction planning pause simulation and expose that state in text. Movement is blocked in the book; camera orbit remains enabled specifically in Look. Hints switch between gamepad and keyboard/mouse bindings.
 - **Feedback:** errors use warning text and explanatory messages, not color alone. Need bars retain labels/numbers. Recovery provides explicit checkpoint retry copy. Key hints and the prototype label have their own backing.
 - **Heroine:** runtime supports long-wave/bob skeletal variants, shared idle/walk clips, and material-based appearance changes. Missing required assets keep an explicitly labeled cylinder; the HUD calls a loaded heroine a character prototype.

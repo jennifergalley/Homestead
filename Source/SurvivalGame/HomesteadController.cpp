@@ -570,11 +570,15 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             const int InPack = Sim.Count(Item);
             const int InChest = Chest ? Chest->storage[Index] : 0;
             if (!InPack && !InChest) continue;
-            FString Detail = Edible(Item) ? TEXT("Select to eat one") : TEXT("A useful material or tool");
-            if (!InPack && InChest) Detail = TEXT("Select to take one from storage");
-            if (Chest) Detail += FString::Printf(TEXT("  |  Chest: %d  |  %s"), InChest,
-                bGamepad ? TEXT("X stores / Y takes") : TEXT("F stores / G takes"));
-            Result.Add({ Index, FString::Printf(TEXT("%s  x%d"), *Text(Homestead::ItemName(Item)), InPack), Detail });
+            const FString Action = InPack && Edible(Item) ? TEXT("eat 1")
+                : InChest ? TEXT("take 1") : TEXT("");
+            const FString Detail = !InPack ? TEXT("Stored nearby, not carried. Take one into your pack.")
+                : Edible(Item) ? TEXT("Food - eat one from your pack.")
+                : TEXT("Used in the world or in recipes.");
+            const FString Label = Chest
+                ? FString::Printf(TEXT("%s  |  Carried: %d  |  Chest: %d"), *Text(Homestead::ItemName(Item)), InPack, InChest)
+                : FString::Printf(TEXT("%s  |  Carried: %d"), *Text(Homestead::ItemName(Item)), InPack);
+            Result.Add({ Index, Label, Detail, Action, Chest && InPack > 0, InChest > 0 });
         }
     }
     else if (Page == 1)
@@ -582,7 +586,8 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         for (int Index = 0; Index < static_cast<int>(Homestead::Recipe::Count); ++Index)
         {
             const auto Recipe = static_cast<Homestead::Recipe>(Index);
-            Result.Add({ Index, Text(Homestead::RecipeName(Recipe)), Text(Homestead::RecipeRequirements(Recipe)) });
+            Result.Add({ Index, Text(Homestead::RecipeName(Recipe)),
+                FString::Printf(TEXT("Needs: %s"), *Text(Homestead::RecipeRequirements(Recipe))), TEXT("craft") });
         }
     }
     else if (Page == 2)
@@ -590,7 +595,8 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         for (int Index = 0; Index < static_cast<int>(Homestead::Piece::Count); ++Index)
         {
             const auto Piece = static_cast<Homestead::Piece>(Index);
-            Result.Add({ Index, Text(Homestead::PieceName(Piece)), Text(Homestead::PieceRequirements(Piece)) });
+            Result.Add({ Index, Text(Homestead::PieceName(Piece)),
+                FString::Printf(TEXT("Needs: %s"), *Text(Homestead::PieceRequirements(Piece))), TEXT("plan") });
         }
     }
     else if (Page == 3)
@@ -650,6 +656,53 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     return Result;
 }
 
+FString AHomesteadController::BookTitle() const
+{
+    switch (Page)
+    {
+    case 0: return TEXT("Your pack");
+    case 1: return TEXT("Crafting recipes");
+    case 2: return TEXT("Building plans");
+    default: return TEXT("Field book");
+    }
+}
+
+FString AHomesteadController::BookSummary() const
+{
+    switch (Page)
+    {
+    case 0: return TEXT("Carried counts are in your pack; Chest counts are in nearby storage.");
+    case 1: return TEXT("Recipes show what you can make, not what you carry.");
+    case 2: return TEXT("Choose a plan to preview placement. Materials are spent when you place it.");
+    default: return {};
+    }
+}
+
+FString AHomesteadController::BookFooter() const
+{
+    if (Page == 3 || Page == 5)
+        return bGamepad ? TEXT("D-pad: scroll   LB / RB: pages   B: close")
+            : TEXT("Up / Down: scroll   Left / Right: pages   Esc: close");
+    if (Page > 2)
+        return bGamepad ? TEXT("D-pad: select   LB / RB: pages   A: use   B: close")
+            : TEXT("Up / Down: select   Left / Right: pages   Enter: use   Esc: close");
+    const auto Items = Rows();
+    FString Footer = Items.IsEmpty()
+        ? (bGamepad ? TEXT("LB/RB: pages") : TEXT("Left / Right: pages"))
+        : (bGamepad ? TEXT("D-pad: select   LB/RB: pages") : TEXT("Arrows: select/pages"));
+    if (Items.IsValidIndex(Selection))
+    {
+        const auto& Row = Items[Selection];
+        if (!Row.Action.IsEmpty())
+            Footer += FString::Printf(TEXT("   %s: %s"), bGamepad ? TEXT("A") : TEXT("Enter"), *Row.Action);
+        if (Row.CanStore) Footer += bGamepad ? TEXT("   X: store 1") : TEXT("   F: store 1");
+        if (Row.CanTake)
+            Footer += bGamepad ? TEXT("   Y: take 1") : TEXT("   G: take 1");
+    }
+    Footer += bGamepad ? TEXT("   B: close") : TEXT("   Esc: close");
+    return Footer;
+}
+
 void AHomesteadController::ActivateRow()
 {
     const auto Items = Rows();
@@ -667,9 +720,9 @@ void AHomesteadController::ActivateRow()
             for (const auto& Structure : State().structures)
                 if (Structure.id == ChestId && Structure.storage[Id] > 0) Stored = true;
             if (Stored) Notify(Sim.Transfer(ChestId, Item, -1, PlayerPoint()));
-            else Notify(TEXT("This is a tool or material, not something to eat."));
+            else Notify(TEXT("This tool or material is used in the world or in recipes."));
         }
-        else Notify(TEXT("This is a tool or material, not something to eat."));
+        else Notify(TEXT("This tool or material is used in the world or in recipes."));
         Selection = FMath::Clamp(Selection, 0, FMath::Max(0, Rows().Num() - 1));
     }
     else if (Page == 1)

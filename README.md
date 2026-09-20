@@ -50,9 +50,13 @@ Rejected facial-shader and shortened-wave trials are not included. The requested
 mid-back wavy length and Melinoe-inspired blonde bob remain unmet/deferred.
 See `docs\setup.md` for profile selection, verification and known limits.
 
-Controller prompt stability is separately technically verified in `prompts-01`;
-it does not redesign the field book or change controls. **`Preview.json` remains
-on reviewed `review-01` until the coordinator reviews the newer candidate.**
+Controller prompt stability is technically verified and parent-reviewed in
+`prompts-01`, now explicitly selected by **`Preview.json`**. It does not redesign
+the field book or change controls. The separate `book-clarity-01` work does not
+change that selection until coordinator review. That candidate distinguishes
+**Your pack**, **Crafting recipes** and **Building plans**, labels carried/chest
+counts separately from required materials, and names actual eat/take/craft/plan
+actions. It adds no recipe learning, unlocks, inventory expansion or new navigation.
 
 From this directory in PowerShell:
 

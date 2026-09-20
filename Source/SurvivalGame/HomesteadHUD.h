@@ -12,8 +12,14 @@ class SURVIVALGAME_API AHomesteadHUD : public AHUD
     GENERATED_BODY()
 public:
     virtual void DrawHUD() override;
+    bool BookTextFits(int32 Page) const { return RenderedBookPage == Page && !BookMeasurements.IsEmpty() && BookTextOverflow.IsEmpty(); }
+    FString BookTextMeasurements() const { return BookMeasurements; }
 
 private:
+    int32 RenderedBookPage = -1;
+    FString BookTextOverflow;
+    FString BookMeasurements;
+    void MeasureBookLine(const FString& Text, float Width, float Size, const TCHAR* TextRole);
     float UiScale = 1;
     float ViewWidth = 1920;
     float ViewHeight = 1080;

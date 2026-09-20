@@ -1,11 +1,14 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [switch]$BookClarity, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200)
 $ErrorActionPreference = 'Stop'
+if ($BookClarity -and ($Prompts -or $Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
+    throw 'Book clarity fixtures run separately from other acceptance modes.'
+}
 if ($Prompts -and ($Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Prompt-intent fixtures run separately from other acceptance modes.'
 }
@@ -70,6 +73,10 @@ if ($Prompts) {
         foreach ($device in @('gamepad','keyboard')) { $captures += "prompts-$surface-$device.png" }
     }
 }
+if ($BookClarity) {
+    $captures = @('book-pack-tool.png','book-recipes-missing.png','book-plans.png','book-pack-food.png','book-recipes-supplied.png',
+        'book-recipes-keyboard.png','book-plans-keyboard.png','book-storage-only.png','book-storage-carried.png','book-pack-empty.png')
+}
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -91,6 +98,7 @@ if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
 if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
+if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"

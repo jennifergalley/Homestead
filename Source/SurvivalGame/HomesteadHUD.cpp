@@ -3,6 +3,8 @@
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 namespace
 {
@@ -134,6 +136,20 @@ void AHomesteadHUD::DrawHUD()
     }
 }
 
+void AHomesteadHUD::MeasureBookLine(const FString& Text, float Width, float Size, const TCHAR* TextRole)
+{
+    static const bool Enabled = FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"));
+    if (!Enabled) return;
+    UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
+    if (!Canvas || !Font) { BookTextOverflow += TEXT("Missing native font or canvas; "); return; }
+    float W = 0, H = 0;
+    Canvas->StrLen(Font, Text, W, H);
+    const float Measured = W * Size / FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
+    if (Measured > Width) BookTextOverflow += FString::Printf(TEXT("%s overflows; "), TextRole);
+    BookMeasurements += FString::Printf(TEXT("%s: pixels=%.2f available=%.2f text=%s\n"),
+        TextRole, Measured * UiScale, Width * UiScale, *Text);
+}
+
 void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
 {
     if (PC.BookPage() == 6)
@@ -146,9 +162,15 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     const float Height = FMath::Min(810.0f, ViewHeight - 120);
     const float X = (ViewWidth - Width) * 0.5f;
     const float Y = (ViewHeight - Height) * 0.5f;
+    RenderedBookPage = PC.BookPage();
+    BookTextOverflow.Reset();
+    BookMeasurements.Reset();
+    MeasureBookLine(PC.BookTitle(), Width - 423, 38, TEXT("title"));
     Panel(X, Y, Width, Height, Pine);
-    Write(TEXT("Field book"), X + 34, Y + 24, 38, Ink);
-    Write(FString::Printf(TEXT("Pack %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), Homestead::InventoryCapacity),
+    Write(PC.BookTitle(), X + 34, Y + 24, 38, Ink);
+    const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), Homestead::InventoryCapacity);
+    MeasureBookLine(Capacity, 331, 19, TEXT("capacity"));
+    Write(Capacity,
         X + Width - 365, Y + 37, 19, Muted);
     const TCHAR* Tabs[] = { TEXT("Pack"), TEXT("Craft"), TEXT("Build"), TEXT("Notes"), TEXT("Settings"), TEXT("Credits"), TEXT("Look") };
     const float TabWidth = (Width - 68) / 7;
@@ -160,34 +182,39 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     }
 
     const auto Rows = PC.Rows();
+    const FString Summary = PC.BookSummary();
+    const float RowTop = Summary.IsEmpty() ? 148 : 180;
+    MeasureBookLine(Summary, Width - 80, 18, TEXT("summary"));
+    if (!Summary.IsEmpty()) Wrap(Summary, X + 40, Y + 144, Width - 80, 18, Muted, 1);
     const float RowHeight = 74;
-    const int Visible = FMath::Max(1, FMath::FloorToInt((Height - 220) / RowHeight));
+    const int Visible = FMath::Max(1, FMath::FloorToInt((Height - RowTop - 72) / RowHeight));
     const int First = FMath::Clamp(PC.SelectedRow() - Visible + 1, 0, FMath::Max(0, Rows.Num() - Visible));
     if (Rows.Num() == 0)
     {
-        Write(TEXT("Nothing here yet."), X + 40, Y + 167, 25, Ink);
-        Wrap(TEXT("A walk through the clearing will give you a useful beginning."), X + 40, Y + 210, Width - 80, 22, Muted);
+        const FString EmptyTitle = TEXT("Your pack is empty.");
+        const FString EmptyDetail = TEXT("Gather supplies in the clearing, or take items from a nearby chest.");
+        MeasureBookLine(EmptyTitle, Width - 80, 25, TEXT("empty-title"));
+        MeasureBookLine(EmptyDetail, Width - 80, 22, TEXT("empty-detail"));
+        Write(EmptyTitle, X + 40, Y + RowTop + 19, 25, Ink);
+        Wrap(EmptyDetail,
+            X + 40, Y + RowTop + 62, Width - 80, 22, Muted);
     }
     for (int Index = First; Index < FMath::Min(Rows.Num(), First + Visible); ++Index)
     {
-        const float RowY = Y + 148 + (Index - First) * RowHeight;
+        const float RowY = Y + RowTop + (Index - First) * RowHeight;
         const bool Selected = Index == PC.SelectedRow();
+        MeasureBookLine(Rows[Index].Label, Width - 80, 24, TEXT("row-label"));
+        MeasureBookLine(Rows[Index].Detail, Width - 80, 18, TEXT("row-detail"));
+        if (RowY + 54 > Y + Height - 91) BookTextOverflow += TEXT("Row overlaps footer area; ");
         if (Selected) Panel(X + 23, RowY - 5, Width - 46, RowHeight - 5, FLinearColor(0.09f, 0.14f, 0.105f, 1));
         Write(Rows[Index].Label, X + 40, RowY + 3, 24, Selected ? Gold : Ink);
         Wrap(Rows[Index].Detail, X + 40, RowY + 36, Width - 80, 18, Muted, 1);
     }
     if (Rows.Num() > Visible)
-        Write(FString::Printf(TEXT("%d / %d"), PC.SelectedRow() + 1, Rows.Num()), X + Width - 108, Y + Height - 77, 18, Muted);
+        Write(FString::Printf(TEXT("%d / %d"), PC.SelectedRow() + 1, Rows.Num()), X + Width - 108, Y + Height - 91, 18, Muted);
     Panel(X + 30, Y + Height - 64, Width - 60, 1, FLinearColor(0.28f, 0.35f, 0.29f, 1));
-    const FString Footer = PC.BookPage() == 3 || PC.BookPage() == 5
-        ? (PC.UsesGamepad() ? TEXT("D-pad: scroll   LB / RB: pages   B: close")
-            : TEXT("Up / Down: scroll   Left / Right: pages   Esc: close"))
-        : PC.BookPage() == 0
-        ? (PC.UsesGamepad() ? TEXT("D-pad: select   LB/RB: pages   A: use   X: store   Y: take   B: close")
-            : TEXT("Arrows: select/pages   Enter: use   F: store   G: take   Esc: close"))
-        : (PC.UsesGamepad() ? TEXT("D-pad: select   LB / RB: pages   A: use   B: close")
-            : TEXT("Up / Down: select   Left / Right: pages   Enter: use   Esc: close"));
-    Write(Footer,
+    MeasureBookLine(PC.BookFooter(), Width - 72, 19, TEXT("footer"));
+    Write(PC.BookFooter(),
         X + 36, Y + Height - 43, 19, Muted);
 }
 

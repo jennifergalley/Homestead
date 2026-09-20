@@ -18,6 +18,9 @@ struct FHomesteadRow
     int32 Id = 0;
     FString Label;
     FString Detail;
+    FString Action;
+    bool CanStore = false;
+    bool CanTake = false;
 };
 
 UCLASS()
@@ -43,6 +46,9 @@ public:
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }
     TArray<FHomesteadRow> Rows() const;
+    FString BookTitle() const;
+    FString BookSummary() const;
+    FString BookFooter() const;
     FString FocusTitle() const;
     FString FocusActions() const;
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }

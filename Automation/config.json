@@ -9,12 +9,13 @@
     "Evidence-backed posture and locomotion improvements in the current heroine pipeline",
     "Long-term appealing heroine goal; further cosmetic experiments are deferred for this run",
     "Responsive gathering motion after ordinary movement is credible",
-    "Implemented prompts-01: stable controller/keyboard prompt intent; candidate awaits coordinator review before launcher selection"
+    "Accepted prompts-01: stable controller/keyboard prompt intent; explicitly selected for isolated human preview",
+    "Implemented book-clarity-01: carried possessions versus recipes/plans; technically verified candidate awaits coordinator review and selection"
   ],
   "deferred": [
     "MetaHuman or another wholesale character-pipeline replacement",
     "Horizontal tearing",
-    "Field-book/inventory redesign and gradual recipe learning",
+    "Broader field-book/inventory redesign and gradual recipe learning; ownership-versus-recipe clarity is implemented separately",
     "Further face/skin/eye/hair experiments; requested mid-back waves and blonde bob remain unmet",
     "Companions, scavenging, winter expansion, village, hunting and romance"
   ]

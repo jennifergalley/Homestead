@@ -108,9 +108,36 @@ same previously failing sequence and actual fine camera response. The final
 rendered comparison was inspected: Notes/context/Settings/Look/planning hints
 agree with deliberate use of both devices. All 914 previous action/full-loop
 assertions, 308 save/normal-input checks and 40 launcher guards pass. `Preview.json`
-intentionally stays on parent-reviewed `review-01` pending coordinator selection.
+was kept on `review-01` during that work; the coordinator subsequently accepted
+and explicitly selected `prompts-01` in separate checkpoint `455c906`.
 This reproduces and fixes a concrete cause, not every possible hardware/driver/
 large-cursor-warp case or Jenny's physical-controller review.
+
+## Inventory versus recipe clarity - implemented and technically verified (2026-09-20)
+
+Jenny reported that it is difficult to tell what is actually carried versus what
+belongs to the field book. The coordinator scheduled only this distinction as
+`book-clarity-01`, not gradual recipe learning or a navigation/inventory redesign.
+Original native Pack/Craft/Build captures at 1280x720 and 3840x2160 show identical
+item-style rows, a generic "Field book" title and "use" action even for an inert
+carried knife. The bounded correction labels carried/chest counts, required
+materials, page purpose and actual eat/take/craft/plan actions in existing panels.
+All recipes remain available; no learning/unlock claim or economy change is made.
+The accepted `prompts-01` preview selection stays unchanged during this work.
+
+The editor and fresh candidate pass 106 focused checks; the packaged fixture
+passes independently at both 1280x720 and 3840x2160/render100. It verifies actual
+counts, complete authoritative requirements, failed/successful crafting, menu
+pause, keyboard/controller navigation and food/storage actions, and a genuinely
+empty pack after transferring everything into a crafted chest. Functional setup
+uses disclosed test teleports, not injected inventory or ordinary-play claims.
+All 70 prompt, 914 action/full-loop, 308 save-routing/input, 40 launcher and 21
+run/path guards remain intact and pass. Two visual-review sets only: original
+baseline and final native book states; 20 final frames fit measured Canvas text
+bounds without observed clipping. The existing transient toast can briefly cover
+the heading; stable captures wait for its expiry while the world stays paused.
+This does not resolve every source of field-book overwhelm, introduce gradual
+recipe knowledge, or claim Jenny's comprehension/comfort approval.
 
 ## Deferred feedback - 2026-09-19
 
@@ -122,7 +149,6 @@ to change these systems immediately.
 | Rendering | Screen tearing / horizontal flickers while moving. | Reproduce and capture the artifact; distinguish presentation tearing from temporal/rendering artifacts before choosing a fix. Do not assume a VSync diagnosis from the description alone. |
 | Music and ambience | "Great." | Preserve this as a successful baseline; avoid unnecessary replacement or remixing during unrelated work. |
 | Field book / recipes | The book feels overwhelming; learning recipes gradually might be better than exposing all recipes immediately. | Explore progressive disclosure or a learn/unlock flow. This is a proposal, not a confirmed progression design; essential opening-survival actions must remain attainable. |
-| Inventory / field book | It is difficult to tell what is actually in inventory versus what belongs to the field book. | Make carried possessions distinct from knowledge, recipes and guidance, with clear entry points, labels and quantities. Evaluate the interaction model, not only visual styling. |
 | Bob hairstyle | The intended straight blonde bob is closer to Melinoe's haircut in Hades II, not the current "karen hairstyle." | Deferred visual direction for that alternative only; preserve the long brown-haired default. Inspect the reference before specifying cut details. Author an original interpretation, not a copy or import of game assets. |
 
 The remaining table entries are still deferred; the attempted wavy-length

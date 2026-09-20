@@ -134,7 +134,11 @@ book/UI changes and broader roadmap work are not silently marked complete.
 
 The coordinator subsequently scheduled only controller prompt stability as
 `prompts-01`. Its isolated accepted-event fixture and hint-only classifier do not
-authorize the remaining UI/recipe/inventory/tearing work. Preserve `Preview.json`
+authorize the remaining UI/recipe/inventory/tearing work. The later explicit
+`book-clarity-01` assignment schedules only carried-possession versus recipe/plan
+labels, quantities and action copy, not learning/unlocks or navigation redesign.
+Accepted `prompts-01` was separately selected for the persistent `jenny-review`
+profile. Preserve `Preview.json`
 on the reviewed candidate until the coordinator explicitly reviews and selects
 a replacement; a newer source checkpoint is not automatic launcher promotion.
 

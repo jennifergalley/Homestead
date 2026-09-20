@@ -24,7 +24,9 @@ are the next priority, ahead of adding more gameplay systems.
 Additional playtest notes are tracked in docs\playtest-feedback.md. Jenny
 initially deferred rendering/prompt and inventory/field-book feedback. The
 coordinator explicitly scheduled only controller prompt stability as `prompts-01`
-on 2026-09-20; tearing and inventory/field-book/recipe redesign remain deferred.
+on 2026-09-20, then scheduled `book-clarity-01` only for carried possessions versus
+recipes/building plans. Tearing, broader inventory/book redesign and gradual
+recipe learning remain deferred; recipe unlocks are not an approved design.
 
 The project folder is E:\Repos\SurvivalGame. It now contains the Unreal project,
 source code, licensed source assets, scripts, and documentation; there is no git

@@ -35,6 +35,7 @@ private:
     bool bFinished = false;
     bool bFullLoopPrepared = false;
     bool bWeedingPrepared = false;
+    bool bBookStoragePrepared = false;
     bool bAudioCapture = false;
     bool bCompletionPending = false;
     bool bPendingSuccess = false;
@@ -62,6 +63,9 @@ private:
     void PrepareWeedingChecks();
     void PrepareClearingChecks();
     void PreparePromptChecks();
+    void PrepareBookClarityChecks();
+    void PrepareBookStorageChecks();
+    void QueueBookCapture(const FString& Name);
     bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
     void QueueSelectRow(int32 Id);

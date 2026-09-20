@@ -192,8 +192,8 @@ under `Saved\VisualPlaytests\20260920-050723-5cc6c8a5\review-01-packaged`.
 
 ## Controller prompt stability candidate
 
-`prompts-01` is separate from the currently selected `review-01`. Do not change
-`Preview.json` until the coordinator has reviewed that candidate. This slice
+`prompts-01` was reviewed by the coordinator and explicitly selected in
+`Preview.json` by checkpoint `455c906`, keeping the `jenny-review` profile. This slice
 schedules only the previously deferred input-prompt report, not book/recipe/
 inventory redesign, tearing or more face/hair work.
 
@@ -252,8 +252,62 @@ tested surfaces. Original screenshots and the comparison sheet remain in
 `Saved\Automation\20260920-050723-5cc6c8a5\prompts-01-focused`; copied source/exe/
 test proof is indexed under the separate candidate's `Verification` directory.
 Intermediate editor diagnostics were functional checks, not extra visual tuning
-passes. All 124 character/source LFS files, the active `review-01` executable and
-its launcher selection are unchanged; five incidental world resaves were restored.
+passes. All 124 character/source LFS files and the `review-01` executable were
+unchanged; its launcher selection was retained until the later explicit selection
+of accepted `prompts-01`. Five incidental world resaves were restored.
+
+## Inventory versus recipe clarity candidate
+
+`book-clarity-01` is a separate, technically verified candidate. **The human
+launcher remains on parent-reviewed `prompts-01` with `jenny-review`.** No
+default-game promotion, profile copying or save migration occurs.
+
+The existing Pack/Craft/Build tabs, IDs, item order and controller navigation
+remain. Their headings now distinguish **Your pack**, **Crafting recipes** and
+**Building plans**. Pack rows label **Carried** and nearby **Chest** counts
+separately; recipes and plans retain every authoritative requirement under
+**Needs**. Selected actions say **eat 1**, **take 1**, **craft** or **plan**.
+Tools/materials without a direct pack action no longer advertise "use"; existing
+world interactions and all crafting/building rules are unchanged. All recipes
+remain visible: this is not learning/unlocks, inventory expansion or a full
+field-book redesign.
+
+Run the isolated native fixture against a fresh evidence directory:
+
+```powershell
+.\Scripts\Test-Game.ps1 -Packaged -BookClarity `
+    -PackageDirectory 'Build\Releases\20260920-050723-5cc6c8a5\book-clarity-01' `
+    -OutputDirectory 'Saved\Automation\book-clarity-fresh-720' `
+    -Width 1280 -Height 720
+```
+
+Repeat with a different output directory and `-Width 3840 -Height 2160` for native
+4K. This fixture uses mapped game inputs, existing transactions and disclosed
+functional teleports. It gathers supplies, crafts a hatchet/chest, transfers
+actual inventory and moves outside storage reach to create a genuinely empty
+pack. It is not ordinary walking footage or a personal-save test.
+
+Verification: 106 editor checks and 106 packaged checks at each resolution;
+70 retained prompt checks; 914 action/full-loop checks; 308 actual save-routing/
+normal-input checks; 40 launcher and 21 run/path guards. The full homestead pass
+also ran at native 3840x2160/render100: 59.13 FPS mean, 16.89ms p95 and 17.12ms p99,
+excluding startup/readback. Concurrent GPU use was not ruled out; this is not
+clean-performance certification.
+
+The two bounded visual-review sets are original baseline and final candidate.
+All 20 final native captures include actual Canvas width measurements, with no
+observed clipping at either supported 16:9 size. Existing fonts, palette and
+seven-row window remain; this is not universal localization/aspect-ratio or
+human readability certification. Existing transient toasts can briefly overlap
+the heading; stable comparison captures wait for them to expire without advancing
+the paused world. No further cosmetic/UI polish pass was performed.
+
+Evidence lives under `Saved\Automation\20260920-050723-5cc6c8a5\book-clarity-*`
+and the candidate's `Verification` directory/acceptance receipt. Final sheets:
+`book-clarity-final-sheet.png` and `book-clarity-4k-sheet.png`. All 124 character/
+source LFS files and protected original/selected-preview files match their
+baseline hashes; exactly five incidental bootstrap world resaves were restored.
+No new art or third-party assets were authored or acquired.
 
 ## Preserved original verification status
 
