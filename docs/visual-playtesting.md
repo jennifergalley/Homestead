@@ -295,3 +295,92 @@ remained at the known-good checkpoint. Five incidental world-bootstrap resaves
 were restored afterward as well; no content assets are changed by the diagnostic
 checkpoint. Experimental shader parameters, material graphs and profile assets
 are not retained in production. The heroine's baseline facial limitations remain.
+
+## Rejected wavy-length trial (2026-09-20)
+
+**Requested mid-back length remains unmet.** `hair-length-01` is rejected, not
+an accepted shorter hairstyle. Only this length correction was scheduled;
+the blonde-bob redesign, additional face experiments and other feedback stayed
+out of scope. The original player package and previous accepted candidates were
+not overwritten.
+
+### Baseline, target and technical evidence
+
+`Test-Game.ps1 -HairLength -Width 1920 -Height 1080` captures all six long-wave
+body/outfit combinations from back and three-quarter views at noon. It reuses
+the isolated fixture, freezes the existing idle at time zero and uses a 260cm
+camera distance/FOV40, targeting 22cm below the head. It asserts the exact mesh
+selected for each case and records actor/camera/head/mesh framing. This is
+not ordinary gameplay; lighting/exposure and player saves are unchanged.
+
+Baseline: `Saved\Automation\20260920-050723-5cc6c8a5\hair-length-before`.
+Final trial: `Saved\Automation\20260920-050723-5cc6c8a5\hair-length-01-portraits`.
+Each has twelve actual 1920x1080 captures. All recorded numeric comparison
+coordinates match exactly; signed zero is treated numerically, not as a false
+camera difference. `Comparison\overview.png` and per-combination sheets are
+explicitly labeled **REJECTED**. These sheets are cropped/scaled; originals are
+retained. No private reference is included.
+
+Authoring shoulder/waist landmarks were 126.03/96.07cm; the trial's midpoint target
+was 111.05cm. Evaluated original hair tips were 89.15-89.29cm. A monotonic
+lower-length remap below the 134.60cm neck anchor preserved crown/fringe and
+front framing, width, source topology/UVs/weights, bind and all non-hair geometry.
+Pure vertical shortening penetrated the wider upper back, so lower rear cards
+received a bounded clearance fit of at most 4.11cm. Across eight idle/walk
+samples per combination, maximum radial penetration improved from 7.75 to 4.23mm
+(preferred), 7.32 to 4.73mm (Willow), and 9.55 to 6.71mm (Hazel). This was a diagnostic,
+not proof of exhaustive collision freedom.
+
+Only six existing Unreal meshes were refreshed. Actual geometry exported after
+fresh Unreal reload confirmed 111.05cm tips and unchanged crown/width, oriented
+UV boundaries, non-hair face surfaces and shared references. The other 44
+character assets were hash-identical. UE's deformed-quad triangulation and
+tangent splitting changed Willow's render vertex count by four; all meshes
+retained 16,432 hair triangles, and source quads/UVs remained identical.
+The experiment did not rewrite the general character-import cache.
+
+### Failed visual gate and recovery
+
+The final packaged back/three-quarter comparison shows obvious **accordion-like
+horizontal ridges** in the compressed lower waves, ending in a blunt/frayed
+shelf. It reaches the numerical length but does not preserve the established
+wave silhouette well enough. The coordinator independently inspected
+`Comparison\preferred-tunic.png` and agreed. No third sculpt/review pass was
+attempted, and technical checks were not substituted for visual acceptance.
+
+The rejected package passed **152 appearance/save/movement integration checks**
+with four deliberate external-input rejection probes. Its separate normal-control
+route recorded **144 actual 1920x1080 frames over 41.6769 seconds** and reached/
+gathered berry bush 52. Idle toe span was 17.50cm. Sampling was sparse
+(about 3.46 frames/second), with no sampled fractional blend values or fast-walk
+stance pairs, so this does not establish continuous smoothness or controller
+comfort. Timings are concurrent-load only. No simulation rules changed.
+
+Production FBXs, all six imported meshes, manifests, provenance and export/build
+wiring were restored to `5947edf`. Experimental scripts and the active contract
+were removed. `Build\CharacterPreview\HairLength\recovery-hashes.json` proves
+the original SHA-256 for all 50 character assets and the six source FBXs.
+Rejected source/scripts/contracts, authoring and native-import measurements,
+clearance diagnostics and receipts remain local under
+`Build\CharacterPreview\HairLength`; copied scripts in `RejectedSource` are
+forensic snapshots, not runnable in-place tooling. The discarded package has
+`REJECTED.txt` at its archive root and inside `Windows`.
+
+The retained changes are diagnostic: the fixed hair fixture, exact selected-mesh
+assertions, additional framing landmarks and `Review-HairLength.py`.
+The separate `hair-length-recovery` package verifies this diagnostic source with
+baseline art; it is not another hairstyle hypothesis or a length improvement.
+
+Recovery package:
+`Build\Releases\20260920-050723-5cc6c8a5\hair-length-recovery\Windows`.
+Its **152 packaged checks passed**, including all 18 wardrobe combinations,
+editable colors/material bindings, appearance save/load, native locomotion,
+gathering/building and four deliberate input-rejection probes. Evidence:
+`Saved\Automation\20260920-050723-5cc6c8a5\hair-length-recovery\smoke-result.txt`.
+The recovery build retained the restored character assets without reimporting
+them. Its five incidental world-bootstrap resaves were restored afterward.
+The final checkpoint contains no art/content or production movement changes.
+Run/path controls passed 21 checks; the simulation suite was not repeated
+because no simulation rules changed. Recovery captures were not used for a third
+cosmetic review. No purchases, new assets, private-reference uploads or package
+promotion occurred.

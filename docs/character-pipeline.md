@@ -133,6 +133,37 @@ The deterministic daytime/firelight comparison fixture is separate from
 ordinary play; see `docs\visual-playtesting.md`. Its close camera, frozen pose
 and copied visual world state are test-only, not runtime presentation hacks.
 
+## Rejected mid-back length experiment (2026-09-20)
+
+`hair-length-01` shortened only the six existing long-wave exports, preserving
+the authoring scenes, crown/framing, width, UVs, weights, bind and non-hair
+surfaces. Its trial target was **111.05cm**, midway between the shoulder joint
+(`upperarm_l`, 126.03cm) and waist landmark (`spine_02`, 96.07cm), compared with
+original evaluated tips at 89.15-89.29cm. Actual reloaded Unreal geometry reached
+the target, and packaged appearance/save/movement checks passed.
+
+**It nevertheless failed visual review.** Compressing lower lengths into this
+span bunched the waves into obvious horizontal accordion-like ridges and a
+blunt/frayed shelf. The coordinator independently agreed. Baseline source FBXs,
+Unreal meshes, manifests, provenance and export/build wiring were restored;
+the experimental authoring/import scripts and active contract were removed.
+The requested shorter hairstyle remains unmet. There was no third cosmetic pass.
+
+Only the isolated `Test-Game.ps1 -HairLength` back/three-quarter fixture and
+`Review-HairLength.py` comparison tool remain, alongside honest rejection
+documentation. Local rejected source/measurements are preserved under
+`Build\CharacterPreview\HairLength`; the discarded package is explicitly marked
+rejected. No production hair, face, material, rig or animation change survives.
+See `docs\visual-playtesting.md` for exact evidence and recovery verification.
+
+Useful import lessons: native Unreal skeletal-FBX export needs
+`-AllowCommandletRendering -RenderOffscreen`; null-RHI export asserts without a
+rendering mesh object. UE also re-triangulates deformed quads and splits tangent
+vertices. The trial's Willow meshes gained four render vertices with unchanged
+16,432 hair triangles, original source quads and UV coverage. Comparing oriented
+UV boundaries and non-hair face surfaces distinguishes this from lost geometry;
+raw render vertex-count equality alone is not a valid topology gate.
+
 ## Acquisition, rights and privacy
 
 The existing PATH and usual Blender installation locations were checked before

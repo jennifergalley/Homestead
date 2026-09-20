@@ -160,8 +160,11 @@ silhouette rather than copying that costume.
 Long, wavy brown hair is the default and the starting point for the first
 character preview. Jenny clarified its desired length as approximately mid-back:
 the current wavy hairstyle is too long. Retain the brunette waves and shorten
-them when the later hair slice is authorized; this is deferred feedback, not a
-change to the current movement slice.
+them only in a separately authorized slice across all three bodies and both
+outfits. The 2026-09-20 `hair-length-01` attempt reached its measured length but
+bunched the waves into accordion-like ridges; it was rejected and restored.
+**The requested mid-back length is still unmet.** No further hair/face attempt
+is authorized by that rejected slice, and the blonde-bob redesign remains deferred.
 Jenny clarified the alternative as a short, straight blonde
 bob, with Melinoe's haircut in Hades II as the visual reference, rather than the
 current prototype's "karen hairstyle." This is deferred feedback, not approval

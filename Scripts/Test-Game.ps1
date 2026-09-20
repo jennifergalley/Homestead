@@ -1,10 +1,12 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation,
+param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200)
 $ErrorActionPreference = 'Stop'
+if ($HairLength -and $Presentation) { throw 'Choose either the hair-length or face-presentation fixture.' }
+if ($HairLength) { $Presentation = $true }
 if ($Presentation -and ($FullLoop -or $WithAudio)) {
     throw 'Presentation fixtures are separate from full-loop and audio acceptance.'
 }
@@ -33,6 +35,13 @@ if ($FullLoop) { $captures += @('garden.png', 'shelter-night.png', 'failure-retr
 if ($Presentation) {
     $captures = @('face-day-front.png','face-day-angle.png','face-night-front.png','face-night-angle.png','face-day-colors.png')
 }
+if ($HairLength) {
+    $captures = foreach ($body in @('preferred','willow','hazel')) {
+        foreach ($outfit in @('tunic','apron')) {
+            foreach ($view in @('back','angle')) { "hair-$body-$outfit-$view.png" }
+        }
+    }
+}
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -48,6 +57,7 @@ $log = Join-Path $output 'engine.log'
 $audioArguments = if ($WithAudio) { '-HomesteadAudioProof' } else { '-nosound' }
 $loopArguments = if ($FullLoop) { '-HomesteadFullLoop' } else { '' }
 if ($Presentation) { $loopArguments = '-HomesteadPresentationTest' }
+if ($HairLength) { $loopArguments += ' -HomesteadHairLengthTest' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"

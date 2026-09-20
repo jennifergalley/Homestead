@@ -59,6 +59,19 @@ settles for 18 seconds. It is explicitly **not** ordinary-play, full-loop or
 human visual approval. `-Presentation` cannot be combined with `-FullLoop` or
 `-WithAudio`. Run full-loop and normal visual routes separately.
 
+`Test-Game.ps1 -HairLength` reuses that isolated fixture for all six long-wave
+body/outfit combinations at noon, with full-upper-body back and three-quarter
+views (1920x1080). It asserts the exact selected skeletal mesh. Do not combine it
+with `-Presentation`, `-FullLoop` or `-WithAudio`.
+`Review-HairLength.py BASELINE --candidate CANDIDATE --output REVIEW` verifies
+matching actor/camera/mesh/head framing before making labeled local sheets.
+Original captures retain their requested dimensions; review sheets are cropped
+and scaled, never evidence of native frame rate.
+
+The first length experiment passed authoring/import/functional checks but failed
+visual review and was restored. Its local diagnostic evidence is described in
+`docs\visual-playtesting.md`; no experimental export/import wiring is retained.
+
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including
   tool/fire/foundation prerequisites. HUD callers need not duplicate cost tables.

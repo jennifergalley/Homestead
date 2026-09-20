@@ -116,6 +116,17 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
             *Visual->GetComponentLocation().ToString(), *Visual->GetComponentRotation().ToString(),
             *Visual->Bounds.Origin.ToString(), *Visual->Bounds.BoxExtent.ToString(),
             CenterVisible, CenterPixel.X, CenterPixel.Y, *Head.ToString(), HeadVisible, HeadPixel.X, HeadPixel.Y);
+        const auto* SkeletalAsset = Visual->GetSkeletalMeshAsset();
+        Framing += TEXT("mesh_asset=") + (SkeletalAsset ? SkeletalAsset->GetName() : FString(TEXT("none"))) + TEXT("\n");
+        for (const FName Bone : {FName(TEXT("neck_01")), FName(TEXT("spine_01")),
+            FName(TEXT("upperarm_l")), FName(TEXT("spine_02"))})
+        {
+            const FVector Point = Visual->GetBoneLocation(Bone);
+            FVector2D Pixel;
+            const bool Visible = Controller->ProjectWorldLocationToScreen(Point, Pixel);
+            Framing += FString::Printf(TEXT("%s=%s\n%s_projected=%d %.1f %.1f\n"),
+                *Bone.ToString(), *Point.ToString(), *Bone.ToString(), Visible, Pixel.X, Pixel.Y);
+        }
     }
     if (!FFileHelper::SaveStringToFile(Framing, *FPaths::Combine(Directory, Name + TEXT(".frame.txt"))))
         UE_LOG(LogTemp, Error, TEXT("Could not write screenshot framing evidence."));
