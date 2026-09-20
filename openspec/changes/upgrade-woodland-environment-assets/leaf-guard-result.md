@@ -137,3 +137,45 @@ This bounded checkpoint returns the proven mechanism rather than extending the
 assignment into an unreviewed supervisor framework or rushing a real launch.
 The accepted Shipping preview, selected source assets, existing gameplay and
 saves remain untouched. The coordinator owns the next continuation and schedule.
+
+## Bounded follow-through: startup admission findings
+
+A continuation reminder prompted a read-only trace of the remaining admission
+gap before the original approximately30-minute boundary. No additional process
+fixture, real marker lock or Unreal probe was started.
+`docs\research\environment-assets\leaf-guard-01\startup-admission.json` records
+the inspected source identities. The existing final-test receipt is unchanged.
+
+- `PythonScriptPlugin.cpp:1326-1368` schedules `InitPipInstall` before checking
+  `bRunPipInstallOnStartup`. Consequently that flag is not a blanket no-pip-
+  initialization or no-project-output guarantee.
+- `PipInstall.cpp:28-80` validates the environment, writes plugin/requirement
+  listings, checks old packaged dependencies and, if requirements exist, calls
+  environment setup and dependency detection. The no-requirements branch avoids
+  that setup, but must be established for the admitted plugin set, not assumed.
+  Lines183-198 provide the supported child-only `UE_PIPINSTALL_PATH` override.
+  A fresh isolated override must be part of the final reviewed launch; default
+  project Intermediate/PipInstall is not an isolated disposable probe output.
+- Installed ControlRig and IKRig descriptors are both enabled by default and
+  contain content. Their `Content\Python\init_unreal.py` files are not empty:
+  ControlRig imports five RigHierarchy modules and calls their `run()` functions,
+  then conditionally imports/registers multiple workflows; IKRig imports and
+  registers another ControlRig workflow. These are source-observed potential
+  pre-commandlet executions, not proof of a runtime plugin inventory or of
+  their transitive scripts' safety. They were not executed or admitted.
+- `PythonScriptPlugin.cpp:101-102,1328,1352,1650-1672` exposes
+  `Engine.Python.IsPythonInRestrictiveMode`; its own help calls it work in
+  progress. It bypasses pip initialization/registration but filters startup
+  files through combined folder permissions rather than universally disabling
+  them. It is not adopted here as a guessed sandbox or substitute for admission.
+- Lines1141-1178 explicitly disable Python environment-variable processing in
+  isolated mode. Environment-only `PYTHONDONTWRITEBYTECODE` therefore cannot be
+  asserted to suppress early imports' cache writes. Pre-start bytecode/output
+  behavior remains unverified; no installed-engine change is authorized.
+
+These concrete admission gaps reinforce the existing stop: the previously
+listed common arguments alone do not satisfy the no-unreviewed-startup and
+fresh-output conditions. A focused continuation must finish the supported
+child-only controls and exact startup inventory before attempting the one
+conditional probe. This is not a request to permit arbitrary startup scripts,
+install dependencies, disable interpreter isolation, or expand network access.

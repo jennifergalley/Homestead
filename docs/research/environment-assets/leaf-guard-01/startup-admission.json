@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-09-20T22:26:19.4932654+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "sourceFiles": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PythonScriptPlugin\\Source\\PythonScriptPlugin\\Private\\PythonScriptPlugin.cpp",
+      "bytes": 73760,
+      "sha256": "BD2EB72879B145ECD3C53B196D5C3C8C47B970FBE65E38A61CA16F0254180AAA"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PythonScriptPlugin\\Source\\PythonScriptPlugin\\Private\\PipInstall.cpp",
+      "bytes": 27448,
+      "sha256": "6116AC71E33C313ACC7EC3978C3A77501E53369C5E3D54EE3D911EAAD3C8F348"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PythonScriptPlugin\\Source\\PythonScriptPlugin\\Private\\PythonScriptPluginSettings.h",
+      "bytes": 9250,
+      "sha256": "6C5F68A3945759234A9B38A98AC7D1369A91982F9D36C433EB2E518E79EBB5F2"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\ControlRig\\ControlRig.uplugin",
+      "bytes": 1088,
+      "sha256": "A5470E0AA54D21F3226CB086E017AD6376414167F3D897E0A39FECD2729F6FBF"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\ControlRig\\Content\\Python\\init_unreal.py",
+      "bytes": 1911,
+      "sha256": "821BAE42A85FB092A2839560F0153494836BB280918452F3D80F84F7A5B647E7"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\IKRig\\IKRig.uplugin",
+      "bytes": 1090,
+      "sha256": "3BD4D9AF1082D24913CD7272F38826896789E5C188B2CF9FEC1F55694524A962"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\IKRig\\Content\\Python\\init_unreal.py",
+      "bytes": 371,
+      "sha256": "8D05C68ED3F2C29F711F624031B378BDAD9550912DE0139C28054151856732BB"
+    }
+  ],
+  "unrealExecuted": false,
+  "realMarkerReadLocked": false,
+  "runtimePluginInventoryVerified": false,
+  "transitiveStartupScriptsAdmitted": false,
+  "conclusion": "Launch admission remains blocked: reviewed common arguments do not suppress all pip initialization, isolate its default outputs, or admit default-enabled plugin startup scripts. Restrictive-mode CVar is not adopted as a guessed blanket script blocker.",
+  "supportedAdditionalControl": "PipInstall.cpp183-198 reads child-only UE_PIPINSTALL_PATH; must use a fresh isolated path in final launch.",
+  "bytecodeLimitation": "Isolated mode explicitly disables Python environment-variable processing; environment-only bytecode suppression is not proven."
+}
