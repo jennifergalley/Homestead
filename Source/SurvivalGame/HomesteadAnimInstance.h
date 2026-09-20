@@ -12,6 +12,11 @@ public:
     float WalkWeight() const;
     float GaitRate() const;
     float WalkPhase() const;
+    void RequestGather();
+    void CancelGather();
+    float GatherWeight() const;
+    float GatherPhase() const;
+    uint32 GatherStarts() const;
 
 protected:
     virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

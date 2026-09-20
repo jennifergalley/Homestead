@@ -81,14 +81,16 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     BobHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob.SK_Heroine_Bob"));
     IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle"));
     WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
-    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation)
+    GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
+    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation)
     {
-        UE_LOG(LogTemp, Error, TEXT("Heroine assets are missing. Run Scripts/Characters/import_unreal.py; the labeled stand-in remains visible."));
+        UE_LOG(LogTemp, Error, TEXT("Heroine mesh or motion assets are missing. Run Scripts/Build-Game.ps1; the labeled stand-in remains visible."));
         return false;
     }
     if (!LongHairMesh->GetSkeleton() || LongHairMesh->GetSkeleton() != BobHairMesh->GetSkeleton()
         || IdleAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
-        || WalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
+        || WalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
+        || GatherAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine meshes and clips do not share a skeleton."));
         return false;
@@ -204,6 +206,7 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
             }
         }
     }
+    CancelGather();
     USkeletalMeshComponent* VisualMesh = GetMesh();
     if (VisualMesh->GetSkeletalMeshAsset() != Desired)
     {
@@ -246,6 +249,20 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bAppearancePreview) UpdateAppearanceFraming();
+}
+
+void AHomesteadCharacter::PlayGather()
+{
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->RequestGather();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Gather succeeded but the heroine gathering animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::CancelGather()
+{
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->CancelGather();
 }
 
 void AHomesteadCharacter::CreateMappings()
@@ -309,6 +326,7 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
     if (!PC || PC->IsBookOpen() || PC->IsFailed()) return;
     const FVector2D Axis = Value.Get<FVector2D>();
+    if (!Axis.IsNearlyZero()) CancelGather();
     PC->NoteInputDevice(FMath::Abs(PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX)) > 0.15
         || FMath::Abs(PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY)) > 0.15);
     if (bPlanning)
@@ -344,7 +362,11 @@ void AHomesteadCharacter::StickLook(const FInputActionValue& Value)
 void AHomesteadCharacter::SetPlanning(bool Enabled)
 {
     bPlanning = Enabled;
-    if (Enabled) GetCharacterMovement()->StopMovementImmediately();
+    if (Enabled)
+    {
+        CancelGather();
+        GetCharacterMovement()->StopMovementImmediately();
+    }
 }
 
 void AHomesteadCharacter::Zoom(float Amount)

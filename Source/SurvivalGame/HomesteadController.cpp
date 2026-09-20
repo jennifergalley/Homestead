@@ -354,7 +354,17 @@ void AHomesteadController::Interact()
     UpdateFocus();
     switch (Focus)
     {
-    case EFocus::Resource: Notify(Sim.Harvest(FocusId, Position), GrassStepA); break;
+    case EFocus::Resource:
+    {
+        bool Forage = false;
+        for (const auto& Node : State().resources)
+            if (Node.id == FocusId) { Forage = Node.kind != Homestead::ResourceKind::Sapling; break; }
+        const auto Result = Sim.Harvest(FocusId, Position);
+        Notify(Result, GrassStepA);
+        if (Result.ok && Forage)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
+        break;
+    }
     case EFocus::Plot:
         for (const auto& Plot : State().plots)
         {
@@ -434,6 +444,7 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
+        Avatar->CancelGather();
         Avatar->GetCharacterMovement()->StopMovementImmediately();
         Avatar->SetAppearancePreview(Page == 6);
     }
@@ -844,6 +855,7 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
 {
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
     if (!Result) { Notify(Result); return; }
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelGather();
     WorldId = Save.WorldId;
     Appearance.HairStyle = Save.HairStyle;
     Appearance.HairColor = Save.HairColor;
@@ -918,6 +930,7 @@ void AHomesteadController::RetryCheckpoint()
     if (LoadLatest(true)) return;
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*SessionCheckpoint));
     if (!Result) { Notify(Result); return; }
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelGather();
     PendingLocation = FVector(-1000, 0, 180);
     bPendingSpawn = true;
     bWasFailed = false;

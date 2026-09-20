@@ -1,4 +1,4 @@
-"""Import only the two authored locomotion clips; never reimport a mesh or skeleton."""
+"""Import authored motion clips only; never reimport a mesh or skeleton."""
 import hashlib
 import json
 import sys
@@ -15,18 +15,21 @@ RECEIPT = ROOT / "Build" / "CharacterPreview" / "locomotion-import.json"
 
 
 def main():
+    gathering = "-GatheringAnimations" in unreal.SystemLibrary.get_command_line()
+    source = SOURCE.parent / "Gathering" if gathering else SOURCE
+    receipt = RECEIPT.with_name("gathering-import.json") if gathering else RECEIPT
     unreal.SystemLibrary.execute_console_command(None, "Interchange.FeatureFlags.Import.FBX 0")
-    contract = json.loads((SOURCE / "locomotion-contract.json").read_text())
+    contract = json.loads((source / ("gathering-contract.json" if gathering else "locomotion-contract.json")).read_text())
     mesh = LIB.load_asset(DEST + "/SK_Heroine_LongWave")
     if not mesh:
         raise RuntimeError("Import the existing heroine first")
     skeleton = mesh.get_editor_property("skeleton")
-    prior = json.loads(RECEIPT.read_text()) if RECEIPT.exists() else {}
+    prior = json.loads(receipt.read_text()) if receipt.exists() else {}
     report = {}
     verify_only = "-LocomotionVerifyOnly" in unreal.SystemLibrary.get_command_line()
     for name, expected in contract.items():
         path = DEST + "/Animations/" + name
-        digest = hashlib.sha256((SOURCE / (name + ".fbx")).read_bytes()).hexdigest()
+        digest = hashlib.sha256((source / (name + ".fbx")).read_bytes()).hexdigest()
         clip = LIB.load_asset(path) if LIB.does_asset_exist(path) else None
         if not verify_only and (clip is None or prior.get(name, {}).get("sha256") != digest):
             if clip:
@@ -34,7 +37,7 @@ def main():
                 data.set_editor_property("convert_scene", True)
                 data.set_editor_property("convert_scene_unit", True)
                 data.set_editor_property("import_uniform_scale", 1.0)
-            import_task(SOURCE / (name + ".fbx"), DEST + "/Animations", name,
+            import_task(source / (name + ".fbx"), DEST + "/Animations", name,
                         fbx_options(skeleton, animation=True))
             clip = LIB.load_asset(path)
         if not clip or clip.get_editor_property("skeleton") != skeleton:
@@ -42,14 +45,19 @@ def main():
         duration = clip.get_play_length()
         if abs(duration - expected["duration_seconds"]) > 0.001:
             raise RuntimeError(f"Wrong duration: {name} {duration}")
+        root_motion = clip.get_editor_property("enable_root_motion")
+        notify_count = len(unreal.AnimationLibrary.get_animation_notify_events(clip))
+        if gathering and (root_motion or notify_count):
+            raise RuntimeError("Gathering must not extract root motion or carry animation notifies")
         if not verify_only:
             save_checked(clip)
         report[name] = {"sha256": digest, "asset": clip.get_path_name(),
-                        "skeleton": skeleton.get_path_name(), "duration_seconds": duration}
-    RECEIPT.parent.mkdir(parents=True, exist_ok=True)
-    target = RECEIPT.with_name("locomotion-reload.json") if verify_only else RECEIPT
+                        "skeleton": skeleton.get_path_name(), "duration_seconds": duration,
+                        "root_motion_enabled": root_motion, "notify_count": notify_count}
+    receipt.parent.mkdir(parents=True, exist_ok=True)
+    target = receipt.with_name("gathering-reload.json" if gathering else "locomotion-reload.json") if verify_only else receipt
     target.write_text(json.dumps(report, indent=2) + "\n")
-    unreal.log("LOCOMOTION_VERIFIED " + str(target))
+    unreal.log(("GATHERING_VERIFIED " if gathering else "LOCOMOTION_VERIFIED ") + str(target))
 
 
 if __name__ == "__main__":

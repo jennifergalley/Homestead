@@ -5,6 +5,8 @@
 #include "Animation/AnimNode_SequencePlayer.h"
 #include "Animation/AnimSequence.h"
 #include "AnimNodes/AnimNode_TwoWayBlend.h"
+#include "AnimNodes/AnimNode_SequenceEvaluator.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 namespace
 {
@@ -13,20 +15,35 @@ struct FLocomotionBlend : FAnimNode_TwoWayBlend
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
 };
 
+struct FGatherPose : FAnimNode_SequenceEvaluator_Standalone
+{
+    virtual bool IsLooping() const override { return false; }
+};
+
 struct FHomesteadAnimProxy : FAnimInstanceProxy
 {
     explicit FHomesteadAnimProxy(UAnimInstance* Instance) : FAnimInstanceProxy(Instance)
     {
         Blend.A.SetLinkNode(&Idle);
         Blend.B.SetLinkNode(&Walk);
+        ActionBlend.A.SetLinkNode(&Blend);
+        ActionBlend.B.SetLinkNode(&Gather);
+        Gather.SetTeleportToExplicitTime(true);
     }
 
     FAnimNode_SequencePlayer_Standalone Idle;
     FAnimNode_SequencePlayer_Standalone Walk;
     FLocomotionBlend Blend;
+    FLocomotionBlend ActionBlend;
+    FGatherPose Gather;
     float Rate = 0;
+    float GatherTime = 0;
+    uint32 Started = 0;
+    bool bRequested = false;
+    bool bCancelled = false;
+    bool bGathering = false;
 
-    virtual FAnimNode_Base* GetCustomRootNode() override { return &Blend; }
+    virtual FAnimNode_Base* GetCustomRootNode() override { return &ActionBlend; }
 
     virtual void Initialize(UAnimInstance* Instance) override
     {
@@ -35,6 +52,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         {
             Idle.SetSequence(Avatar->GetIdleAnimation());
             Walk.SetSequence(Avatar->GetWalkAnimation());
+            Gather.SetSequence(Avatar->GetGatherAnimation());
         }
     }
 
@@ -50,6 +68,30 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         Walk.SetPlayRate(Rate);
         const float Target = FMath::Clamp(Speed / 35.0f, 0.0f, 1.0f);
         Blend.Alpha = FMath::FInterpConstantTo(Blend.Alpha, Target, DeltaSeconds, 1.0f / 0.20f);
+        const bool Blocked = !Avatar || !PC || PC->IsBookOpen() || PC->IsPlanning() || PC->IsFailed()
+            || Avatar->GetVelocity().Size2D() > 5
+            || !Avatar->GetCharacterMovement()->IsMovingOnGround()
+            || !Avatar->GetPendingMovementInputVector().IsNearlyZero()
+            || Avatar->GetCharacterMovement()->GetCurrentAcceleration().Size2D() > 1;
+        const auto* Clip = Gather.GetSequence();
+        if (Blocked || bCancelled) bGathering = false;
+        if (bRequested && !Blocked && !bCancelled && Clip && !bGathering && ActionBlend.Alpha <= 0.001f)
+        {
+            GatherTime = 0;
+            bGathering = true;
+            ++Started;
+        }
+        bRequested = bCancelled = false;
+        if (bGathering)
+        {
+            GatherTime = FMath::Min(GatherTime + DeltaSeconds, Clip->GetPlayLength());
+            if (GatherTime >= Clip->GetPlayLength()) bGathering = false;
+        }
+        const float ActionTarget = bGathering && GatherTime < Clip->GetPlayLength() - 0.16f ? 1.0f : 0.0f;
+        ActionBlend.Alpha = FMath::FInterpConstantTo(ActionBlend.Alpha, ActionTarget, DeltaSeconds,
+            ActionTarget > ActionBlend.Alpha ? 1.0f / 0.12f : 1.0f / 0.16f);
+        // A cancelled pose stays at its current phase while blending out; no restart snap.
+        Gather.SetExplicitTime(GatherTime);
     }
 };
 }
@@ -77,4 +119,31 @@ float UHomesteadAnimInstance::GaitRate() const
 float UHomesteadAnimInstance::WalkPhase() const
 {
     return GetProxyOnGameThread<FHomesteadAnimProxy>().Walk.GetCurrentAssetTime();
+}
+
+void UHomesteadAnimInstance::RequestGather()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().bRequested = true;
+}
+
+void UHomesteadAnimInstance::CancelGather()
+{
+    auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    Proxy.bRequested = false;
+    Proxy.bCancelled = true;
+}
+
+float UHomesteadAnimInstance::GatherWeight() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().ActionBlend.Alpha;
+}
+
+float UHomesteadAnimInstance::GatherPhase() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().GatherTime;
+}
+
+uint32 UHomesteadAnimInstance::GatherStarts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().Started;
 }

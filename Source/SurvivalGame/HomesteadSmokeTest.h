@@ -55,6 +55,7 @@ private:
 
     void Prepare();
     void PreparePresentation();
+    void PrepareGatheringChecks();
     bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
     void QueueSelectRow(int32 Id);

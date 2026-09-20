@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$EngineRoot)
+param([string]$EngineRoot, [ValidateSet('Locomotion','Gathering')][string]$AnimationSet='Locomotion')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
@@ -7,13 +7,15 @@ $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRo
 $editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 $script = Join-Path $root 'Scripts\Characters\import_locomotion.py'
 foreach ($verify in @($false, $true)) {
-    $name = if ($verify) { 'locomotion-reload' } else { 'locomotion-import' }
+    $name = $AnimationSet.ToLower() + $(if ($verify) { '-reload' } else { '-import' })
     $log = Join-Path $root "Build\Logs\$name.log"
     [string[]]$extra = @()
     if ($verify) { $extra = @('-LocomotionVerifyOnly') }
+    if ($AnimationSet -eq 'Gathering') { $extra += '-GatheringAnimations' }
     & $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$script" `
         -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput @extra *> $log
-    if ($LASTEXITCODE -ne 0 -or -not (Select-String -LiteralPath $log -Pattern 'LOCOMOTION_VERIFIED' -Quiet)) {
+    $marker = $AnimationSet.ToUpper() + '_VERIFIED'
+    if ($LASTEXITCODE -ne 0 -or -not (Select-String -LiteralPath $log -Pattern $marker -Quiet)) {
         Get-Content -LiteralPath $log -Tail 70 | Write-Output
         throw "Locomotion import/reload failed. See $log."
     }

@@ -72,6 +72,25 @@ The first length experiment passed authoring/import/functional checks but failed
 visual review and was restored. Its local diagnostic evidence is described in
 `docs\visual-playtesting.md`; no experimental export/import wiring is retained.
 
+`Test-Game.ps1 -Gathering` runs the picking lifecycle separately from full-loop,
+presentation and audio fixtures. It uses mapped A/E controls and isolated
+teleport setup, not ordinary walking evidence. Expected inventory/resource
+state comes from exactly one harvest on a simulation copy; only real mapped
+interactions mutate the running game. It checks visible hand travel, planted
+toes, unchanged actor/camera, natural recovery, depleted rapid input, stick
+interruption, paused menus/Look/planning, saving during action, load cancellation,
+color-only and mesh swaps, and range/full-pack rejection. Its pack is filled by
+actual mapped gathering, not a mutable-state test backdoor.
+
+All smoke modes additionally reject an active picking pose after settled menu,
+planning or failure steps. Keep the existing full-loop route intact and run it
+against the same fresh package. `verify_gathering.py` independently checks the
+FBX bind, idle seams, duration, planted toes and absence of bone scaling.
+The ordinary visual route settles after approaching an actual berry/flower,
+orbits through mapped camera controls, records a picking dwell and recovery,
+and fails unless gathering, action presentation and recovery are all observed.
+These tests do not certify exact contact, human comfort or full-motion quality.
+
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including
   tool/fire/foundation prerequisites. HUD callers need not duplicate cost tables.

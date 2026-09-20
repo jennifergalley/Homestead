@@ -93,6 +93,7 @@
       "Light-wave deformation, torso clearance and chestnut recoloring of the CC0 hair meshes",
       "Three-second idle and one-second in-place walk prototype animations",
       "Animation-only relaxed idle and grounded walk: analytical leg placement, relaxed hands and 120 cm/s calibrated stance; same existing bind rig",
+      "Animation-only 1.6-second wild gathering reach/pick/recover: planted feet and unscaled analytical reach on the existing bind; Scripts\\Characters\\build_gathering.py",
       "Lighting, preview scenes and rendered review sheets"
     ],
     "rights": "Project-authored output; underlying MakeHuman geometry remains CC0. No game-reference assets or third-party character-generation output used.",

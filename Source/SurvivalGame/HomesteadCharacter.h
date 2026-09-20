@@ -33,6 +33,9 @@ public:
     FRotator GameplayViewRotation() const;
     UAnimSequence* GetIdleAnimation() const { return IdleAnimation; }
     UAnimSequence* GetWalkAnimation() const { return WalkAnimation; }
+    UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
+    void PlayGather();
+    void CancelGather();
 
 private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<USpringArmComponent> CameraArm;
@@ -48,6 +51,7 @@ private:
     UPROPERTY() TArray<TObjectPtr<USkeletalMesh>> WardrobeMeshes;
     UPROPERTY() TObjectPtr<UAnimSequence> IdleAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> WalkAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> GatherAnimation;
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
     bool bPlanning = false;
     bool bHeroineReady = false;

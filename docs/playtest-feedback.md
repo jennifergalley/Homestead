@@ -6,6 +6,20 @@ Character appearance and robotic movement need an observed gameplay diagnosis
 first. MetaHuman is not a settled next step. Use the current build's normal
 movement and interaction recordings as a basis for improvements.
 
+## Wild gathering - first motion slice (2026-09-20)
+
+The separately packaged `gathering-01` adds a short restrained reach/pick/recover
+after successful wild gathering, with movement interruption and clean recovery.
+Actual ordinary berry gathering now visibly changes pose instead of remaining
+static. This is technical/action-presentation progress, not Jenny's approval:
+the gesture is generic, exact fingertip contact is not proven, and rigid hair,
+fixed face and close-fitting clothes remain. See `docs\visual-playtesting.md`
+for the two-pass review and packaged lifecycle/full-loop evidence.
+
+No further cosmetic experiment was folded into this slice. Both requested
+mid-back wavy length and the blonde-bob redesign remain unmet/deferred, as do
+the UI/rendering feedback entries below.
+
 ## Wavy length - attempted and reverted (2026-09-20)
 
 Jenny's wavy-hair length feedback was scheduled as its own bounded slice:

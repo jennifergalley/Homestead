@@ -129,8 +129,7 @@ def animate(rig, mesh, name, seconds, walk):
     return result
 
 
-def main():
-    OUT.mkdir(exist_ok=True)
+def prepare_reference():
     bpy.ops.wm.open_mainfile(filepath=str(SOURCE / "Heroine.blend"))
     rig = bpy.data.objects["Heroine_Rig"]
     reset(rig)
@@ -150,6 +149,12 @@ def main():
     bpy.ops.object.join()
     mesh = bpy.context.object
     mesh.name = "LocomotionReference"
+    return rig, mesh
+
+
+def main():
+    OUT.mkdir(exist_ok=True)
+    rig, mesh = prepare_reference()
     report = {}
     for name, seconds, walk in (("AN_Heroine_RelaxedIdle", 3, False), ("AN_Heroine_GroundedWalk", 1, True)):
         report[name] = animate(rig, mesh, name, seconds, walk)

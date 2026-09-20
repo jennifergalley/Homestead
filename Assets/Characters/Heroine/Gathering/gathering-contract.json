@@ -1,0 +1,10 @@
+{
+  "AN_Heroine_Gather": {
+    "duration_seconds": 1.6,
+    "fps": 60,
+    "frames": 97,
+    "rig": "Unchanged shared heroine bind; animation-only import",
+    "contact": "Generic stationary forward picking gesture, not target-aware IK; low ground items and distant/behind targets may not contact",
+    "reward": "None; presentation only after the controller's successful non-sapling wild harvest"
+  }
+}

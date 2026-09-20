@@ -20,7 +20,9 @@ it is a review artifact, not a browser version of the game.
 
 The route closes the opening notes, idles, walks slowly and at full speed, turns,
 stops, orbits the camera, inspects the face, and walks to an actual forage target
-before gathering it. It sends ordinary mapped input events rather than calling
+before gathering it. The picking segment settles, uses mapped camera orbit/
+distance controls for a side view, then dwells through reach and recovery.
+It sends ordinary mapped input events rather than calling
 simulation actions directly. There are no teleports or time skips.
 
 It runs offscreen with separate saves and does not commandeer the player's open
@@ -41,6 +43,8 @@ process exit and every frame's requested dimensions, not just file presence.
   approaches rather than silently moving past them.
 - `motion-review.json`: limited stance/foot-speed diagnostics, not an authoritative
   foot-contact detector or a substitute for visible evidence.
+- `gathering-sheet.png`: cropped/scaled before, reach, pick and recovery frames
+  when gathering telemetry is present; full original frames remain in `Frames`.
 - `review.html`: timestamped playback and frame stepping.
 
 Screenshot readback can disturb pacing. This route is for pose, movement,
@@ -384,3 +388,84 @@ Run/path controls passed 21 checks; the simulation suite was not repeated
 because no simulation rules changed. Recovery captures were not used for a third
 cosmetic review. No purchases, new assets, private-reference uploads or package
 promotion occurred.
+
+## Responsive wild gathering (2026-09-20)
+
+Candidate: `Build\Releases\20260920-050723-5cc6c8a5\gathering-01\Windows`.
+This is a small technical/action-presentation improvement, not Jenny's aesthetic
+approval. The original player build, accepted movement and both recovery
+candidates remain untouched; there is no automatic promotion.
+
+### Two bounded visual reviews
+
+The existing `movement-01-packaged` baseline's berry-gather frames (including
+`frame-00268.png` and `frame-00286.png`) show the heroine upright with her hands
+at rest while the resource renews. Source likewise had no gathering action.
+
+Final evidence:
+`Saved\VisualPlaytests\20260920-050723-5cc6c8a5\gathering-01-packaged`.
+The route recorded **283 actual 1280x720 frames over 43.4895 seconds**, normally
+walked to berry bush 52, gathered once, and observed both the action and recovery.
+There were no teleports, state edits or time skips. The route may now stop
+within 55cm **only when the intended resource is actually focused**, otherwise
+it continues the approach. This is observation navigation, not an automatic
+approach or changed reach/focus rule in gameplay. Actual final distance was
+about 34.9cm. Settling avoids intentionally interrupting the gesture with
+residual movement; mapped camera controls expose the picking arm.
+
+The inspected `gathering-sheet.png` shows a small knee/torso dip, right-arm
+reach and return to the relaxed stance instead of an unchanged upright pose.
+It reads as a generic scooping/picking gesture, not a precise finger pluck.
+The hand reaches near the foliage, but exact fingertip contact is not established.
+Walking frames retain the accepted gait; the action layer stays at zero during
+the walk/turn segments. No further animation tuning followed this final pass.
+
+| Measured final observation | Result |
+| --- | --- |
+| Active action samples / action starts | 8 / 1 |
+| Final action weight | 0 |
+| Maximum right-wrist displacement | 26.77cm |
+| Actor displacement during picking | 0cm |
+| Maximum left/right toe displacement | 0.258 / 0.232cm |
+| Closest wrist-to-target XY distance | 5.54cm; not a contact/IK proof |
+| Idle toe span | 17.50cm |
+| Slow walk / full walk actor speed | 67.5 / 180cm/s |
+| Slow-walk authored-stance foot speed, left/right | 4.40 / 4.58cm/s (9/8 samples) |
+| Full-walk authored-stance foot speed, left/right | 10.73 / 9.65cm/s (3/3 samples) |
+
+Residual walking slip is still present, not fixed by the picking clip. Hair
+remains rigid and the tunic close-fitting; foliage partly obscures lower-body/
+garment contact in the gather view. One forward gesture cannot contact all
+low, distant or behind-body resources, and there is no target-aware or terrain
+IK. The simulation reward and existing sound occur immediately on success;
+the pose does not delay/duplicate them. Moving can suppress or interrupt the
+pose without suppressing an otherwise valid harvest.
+
+### Independent technical acceptance
+
+- Exported FBX: 97 samples over 1.6s, 53 original bones, identical bind,
+  idle endpoint matrix error 2.38e-7, toe drift 0.0000543cm, bone-scale error
+  6.56e-7, wrist travel 26.81cm. See
+  `Build\CharacterPreview\gathering-export-validation.json`.
+- Fresh Unreal reload: original shared skeleton, duration 1.600000024s,
+  root motion disabled and zero notifies. See `gathering-reload.json`.
+- **74 editor and 74 packaged focused gathering checks** passed. Packaged
+  evidence is `Saved\Automation\20260920-050723-5cc6c8a5\gathering-01-lifecycle`.
+  These use isolated teleport setup, unlike the ordinary route, and cover
+  exact reward/regrowth deltas, A/E, failures, movement, pause, load and appearance.
+- **434 packaged full-loop checks** passed, including all appearance controls,
+  saves, crafting/building/gardening, berry maturation, failure and same-world
+  retry. Evidence is the sibling `gathering-01-full-loop` folder. Four deliberate
+  external-input probes were rejected. No existing assertion was weakened.
+- Native simulation: **16 scenarios / 986 checks**; run/path controls: **21**.
+
+All 50 baseline character content assets and 16 tracked character-source LFS
+assets remain hash-identical to `7748763`; only the new gathering clip is added.
+`gathering-baseline-preservation.json` records the hashes. Five incidental
+world-bootstrap resaves were restored and verified in
+`gathering-world-preservation.json`. No mesh/material import, external asset
+acquisition, private-reference upload or face/hair experiment was involved.
+
+Both recorded gameplay and smoke timing remain concurrent-load observations.
+Requested 8Hz capture is not game FPS or proof of continuous smoothness,
+controller comfort, listening quality or Jenny's approval.

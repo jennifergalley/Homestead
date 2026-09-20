@@ -77,6 +77,50 @@ def main():
         "Low-toe filtering is a stance approximation, not a collision/foot-contact detector. "
         "Use it with the recorded frames; do not call every toe movement a defect."
     )
+    if "gather_weight" in rows[0]:
+        before = [r for r in rows if r["pass"] == "before-pick"]
+        action = [r for r in rows if r["pass"] == "gather"]
+        after = [r for r in rows if r["pass"] == "after-gather"]
+        if not before or not action or not after:
+            raise ValueError("Gathering observation is missing its before/action/recovery segments.")
+        anchor = before[-1]
+        active = [r for r in action if float(r["gather_weight"]) > 0.5]
+        if not active:
+            raise ValueError("No visible gathering phase was sampled.")
+
+        def displacement(row, prefix):
+            return math.sqrt(sum((float(row[prefix + axis]) - float(anchor[prefix + axis])) ** 2
+                                 for axis in ("x", "y", "z")))
+
+        diagnostics["gathering"] = {
+            "active_samples": len(active),
+            "action_starts": int(after[-1]["gather_starts"]) - int(anchor["gather_starts"]),
+            "final_weight": float(after[-1]["gather_weight"]),
+            "maximum_wrist_travel_cm": max(displacement(r, "right_hand_") for r in action),
+            "maximum_actor_travel_cm": max(displacement(r, "") for r in action),
+            "maximum_toe_travel_cm": {side: max(displacement(r, side + "_toe_") for r in action)
+                                      for side in ("left", "right")},
+            "closest_wrist_to_target_xy_cm": min(math.hypot(
+                float(r["right_hand_x"]) - float(r["forage_x"]),
+                float(r["right_hand_y"]) - float(r["forage_y"])) for r in active),
+            "contact_limit": "Wrist-to-target XY is not fingertip/foliage contact or target-aware IK.",
+        }
+        from PIL import Image, ImageDraw
+        selected = [anchor] + [min(action, key=lambda r: abs(float(r["gather_phase"]) - phase))
+                               for phase in (0.3, 0.55, 0.8, 1.2)] + [after[-1]]
+        sheet = Image.new("RGB", (1200, 1596), "#101b16")
+        draw = ImageDraw.Draw(sheet)
+        for index, row in enumerate(selected):
+            with Image.open(directory / "Frames" / f"frame-{int(row['frame']):05d}.png") as image:
+                width, height = image.size
+                crop = image.crop((int(width * .234375), int(height * .277778),
+                                   int(width * .703125), int(height * .972222))).resize((600, 500))
+                x, y = index % 2 * 600, index // 2 * 532
+                sheet.paste(crop, (x, y + 32))
+                draw.text((x + 8, y + 8),
+                          f"{row['seconds']}s {row['pass']} | phase {row['gather_phase']} weight {row['gather_weight']}",
+                          fill="#eeeeee")
+        sheet.save(directory / "gathering-sheet.png")
     (directory / "motion-review.json").write_text(json.dumps(diagnostics, indent=2), encoding="utf-8")
     data = json.dumps(frames)
     report = html.escape(json.dumps(diagnostics, indent=2))

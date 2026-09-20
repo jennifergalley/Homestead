@@ -97,6 +97,44 @@ turns can still slide. Face, hair, fabric, gathering motion and subjective
 character approval are separate work. Actual-game evidence is recorded in
 `docs\visual-playtesting.md`.
 
+## Wild gathering gesture (2026-09-20)
+
+`AN_Heroine_Gather` is one 1.6-second, 60 FPS reach/pick/recover clip on the
+unchanged shared rig. It starts and ends in the accepted relaxed idle pose,
+uses a 12cm pelvis dip with a restrained forward reach, and keeps the authored
+feet planted. The analytical arm solve rejects unreachable targets rather than
+stretching bones. No body, hair, wardrobe, material or accepted motion asset is
+regenerated. The source is `Scripts\Characters\build_gathering.py`; its FBX and
+small contract live in `Assets\Characters\Heroine\Gathering`.
+
+```powershell
+$env:BLENDER_USER_RESOURCES = 'E:\Tools\BlenderCharacterUser'
+& 'E:\Tools\blender-4.5.14-windows-x64\blender.exe' -b --python-exit-code 1 --python '.\Scripts\Characters\build_gathering.py'
+& 'E:\Tools\blender-4.5.14-windows-x64\blender.exe' -b --python-exit-code 1 --python '.\Scripts\Characters\verify_gathering.py'
+.\Scripts\Import-Locomotion.ps1 -EngineRoot 'E:\Program Files\UE_5.8' -AnimationSet Gathering
+```
+
+The animation-only importer checks duration, skeleton, disabled root motion and
+zero notify events, including a fresh-process reload. `Build-Game.ps1` includes
+this separate set. `Build\CharacterPreview\gathering-*` retains source/export
+and engine receipts. UE5.8 exposes notify events through
+`AnimationLibrary.get_animation_notify_events`, not the protected `notifies`
+property.
+
+The controller's existing successful non-sapling `Sim.Harvest` result requests
+presentation; simulation still owns the single reward/regrowth transaction.
+No animation notify grants items or advances survival time. An explicit-time,
+non-looping evaluator blends over the existing locomotion graph (0.12s in,
+0.16s out). Moving, leaving the ground, menus/planning, failure, successful
+load/retry and appearance application cancel it. Repeated requests coalesce;
+an interrupted gesture cannot queue itself for later. Moving gathers retain
+their existing reward behavior but do not force a stationary picking pose.
+
+This is a generic forward gesture, not target-aware IK. Distant, behind-body or
+ground-level resources can lack hand contact; terrain, close-fitting clothes
+and rigid hair remain prototype limitations. There is no forced facing,
+camera movement, automatic approach or changed interaction radius in gameplay.
+
 ## Rejected face-material hypothesis (2026-09-20)
 
 The source skin shader includes a Blender subsurface weight of 0.07, which the

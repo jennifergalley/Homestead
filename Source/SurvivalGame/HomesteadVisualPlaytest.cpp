@@ -41,7 +41,7 @@ void AHomesteadVisualPlaytest::Prepare()
 {
     OutputDirectory = HomesteadTestOutputDirectory();
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
-    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase"));
+    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y"));
     Observations.Add(TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
     Observations.Add(TEXT("Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark."));
     Passes = {
@@ -59,6 +59,9 @@ void AHomesteadVisualPlaytest::Prepare()
         {TEXT("portrait-orbit"), 4, {}, FVector2D(0.45f, 0)},
         {TEXT("return-to-world"), 1, {}, {}, EKeys::Gamepad_FaceButton_Right},
         {TEXT("walk-to-forage"), 30, {}, {}, FKey(), true},
+        {TEXT("settle-forage"), 0.65f},
+        {TEXT("view-picking-side"), 1.15f, {}, FVector2D(-0.65f, 0)},
+        {TEXT("before-pick"), 0.8f},
         {TEXT("gather"), 3},
         {TEXT("after-gather"), 2}
     };
@@ -75,13 +78,20 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
     const FVector LeftHand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_l"));
     const FVector RightHand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
     const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
-    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f"),
+    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f"),
         CaptureIndex, Elapsed, *Label, Position.X, Position.Y, Position.Z, Avatar->GetVelocity().Size2D(),
         Avatar->GetActorRotation().Yaw, PC->GetControlRotation().Yaw,
         Left.X, Left.Y, Left.Z, Right.X, Right.Y, Right.Z,
         Animation ? Animation->WalkWeight() : -1, Animation ? Animation->GaitRate() : -1,
         LeftHand.X, LeftHand.Y, LeftHand.Z, RightHand.X, RightHand.Y, RightHand.Z,
-        Animation ? Animation->WalkPhase() : -1));
+        Animation ? Animation->WalkPhase() : -1,
+        Animation ? Animation->GatherWeight() : -1, Animation ? Animation->GatherPhase() : -1,
+        Animation ? Animation->GatherStarts() : 0, ForageTarget.X, ForageTarget.Y));
+    if (Animation && (Label == TEXT("gather") || Label == TEXT("after-gather")))
+    {
+        bObservedGather |= Animation->GatherWeight() > 0.5f;
+        bGatherRecovered |= bObservedGather && Animation->GatherWeight() < 0.001f && Animation->GatherPhase() >= 1.59f;
+    }
     const FString Name = FString::Printf(TEXT("frame-%05d.png"), CaptureIndex++);
     FScreenshotRequest::RequestScreenshot(FPaths::Combine(OutputDirectory, TEXT("Frames"), Name), false, false);
 }
@@ -139,6 +149,11 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             if (bReachedForage && PC->IsResourceFocused(ForageId)) Tap(EKeys::Gamepad_FaceButton_Bottom);
             else Observations.Add(TEXT("Forage approach did not reach its target in time; gather was not faked."));
         }
+        if (Pass.Label == TEXT("settle-forage"))
+        {
+            Tap(EKeys::Gamepad_RightThumbstick);
+            Tap(EKeys::Gamepad_RightThumbstick);
+        }
         Observations.Add(FString::Printf(TEXT("BEGIN %.2fs %s: %s"), Elapsed, *Pass.Label, *PC->FocusTitle()));
     }
     FVector2D Move = Pass.Move;
@@ -151,14 +166,11 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         const float Difference = FMath::FindDeltaAngleDegrees(static_cast<float>(PC->GetControlRotation().Yaw), DesiredYaw);
         Look.X = FMath::Clamp(Difference / 45.0f, -0.7f, 0.7f);
         Move.Y = FMath::Abs(Difference) < 40 ? (Offset.Size() < 90 ? 0.4f : 0.6f) : 0;
-        if (Offset.Size() < 25)
+        if (Offset.Size() < 55 && PC->IsResourceFocused(ForageId))
         {
             Move = Look = FVector2D::ZeroVector;
-            if (PC->IsResourceFocused(ForageId))
-            {
-                bReachedForage = true;
-                PassElapsed = Pass.Duration;
-            }
+            bReachedForage = true;
+            PassElapsed = Pass.Duration;
         }
     }
     ApplyAxes(Move, Look);
@@ -185,11 +197,12 @@ void AHomesteadVisualPlaytest::Finish()
     const bool Gathered = PC->Simulation().Count(Homestead::Item::Berries) > FoodBefore
         || PC->Simulation().Count(Homestead::Item::Flowers) > HerbBefore;
     Observations.Add(FString::Printf(TEXT("Forage target reached=%d; resources actually gathered=%d"), bReachedForage, Gathered));
+    Observations.Add(FString::Printf(TEXT("Picking action observed=%d; recovered to idle=%d"), bObservedGather, bGatherRecovered));
     Observations.Add(TEXT("This observational capture is not a visual-quality pass or a replacement for human feel/listening review."));
     bool Saved = FFileHelper::SaveStringToFile(FString::Join(Telemetry, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("telemetry.csv")));
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    FPlatformMisc::RequestExitWithStatus(false, Saved && bReachedForage && Gathered ? 0 : 1);
+    FPlatformMisc::RequestExitWithStatus(false, Saved && bReachedForage && Gathered && bObservedGather && bGatherRecovered ? 0 : 1);
 }

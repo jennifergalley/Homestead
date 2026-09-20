@@ -135,6 +135,18 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest")))
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof")))
+        {
+            Finish(false, TEXT("Gathering lifecycle checks require their own isolated run."));
+            return;
+        }
+        PrepareGatheringChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")))
     {
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop"))
@@ -599,6 +611,16 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     {
         TraceState(TEXT("FAIL ") + Step.Name);
         Finish(false, Step.Name + TEXT(" | ") + Controller->Toast());
+        return;
+    }
+    const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+    const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    if (StepElapsed >= 0.3f && Animation
+        && (Controller->IsBookOpen() || Controller->IsPlanning() || Controller->IsFailed())
+        && Animation->GatherWeight() > 0.001f)
+    {
+        TraceState(TEXT("ACTION FAIL ") + Step.Name);
+        Finish(false, Step.Name + TEXT(" | Picking pose remained active during a menu, planning or failure."));
         return;
     }
     if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")) && !VerifyPresentationMaterials())

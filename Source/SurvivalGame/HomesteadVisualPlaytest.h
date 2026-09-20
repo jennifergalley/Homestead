@@ -32,6 +32,8 @@ private:
     bool bEntered = false;
     bool bFinished = false;
     bool bReachedForage = false;
+    bool bObservedGather = false;
+    bool bGatherRecovered = false;
     float Elapsed = 0;
     float PassElapsed = 0;
     float CaptureElapsed = 0;
