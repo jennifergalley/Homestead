@@ -1,0 +1,5 @@
+{
+  "exitCode": 91,
+  "cleanup": "kill-on-job-close, not graceful",
+  "outcome": "failed-controller"
+}

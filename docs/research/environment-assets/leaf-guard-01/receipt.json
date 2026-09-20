@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-09-20T22:20:48.9255474+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "deadlineUtc": "2026-09-21T02:22:17.1884351+00:00",
+  "outcome": "synthetic-guard-verified-real-probe-held",
+  "sourceFiles": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\AuthoringLeafGuard.cs",
+      "bytes": 20921,
+      "sha256": "A1948F0565B90A900EC229D393157D820BF5BFC8A66C5D3A012B32F89E2A742A"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Tests\\AuthoringGuardSubject.cpp",
+      "bytes": 5933,
+      "sha256": "7E90FDB4CAC6B97BDCC1C8A50E75EE5228351A63C0D5230F4E809AC3315EAC10"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Tests\\Test-AuthoringLeafGuard.ps1",
+      "bytes": 16613,
+      "sha256": "F8D8BA56C43E26809C268B825AB4D77AF26F59CB977F2B9A2D2344A4685532F8"
+    }
+  ],
+  "fixtureBinary": {
+    "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+    "bytes": 168960,
+    "sha256": "64C17468C34F18E7CB9EACA8B399E1E6B7B1C7777A7C11E0FFAA722C31BCCFA0"
+  },
+  "installedEngineIdentityReadOnly": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+      "bytes": 512952,
+      "sha256": "AE92F55952A3C9A7DEF90983FCF5AEDCE52D8EE8E4565FBD923985E9D9D3E05E"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Core.dll",
+      "bytes": 22326712,
+      "sha256": "3EAF66A3AA55FEB0BEEF9BD88411A577A0589AFADB60724F3D6651D2E46632DB"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-TraceLog.dll",
+      "bytes": 161720,
+      "sha256": "0759373042151249445A0260039DFA61E502DACD0E9347CDEFB26A0B6743160C"
+    }
+  ],
+  "copiedEvidence": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\leaf-guard-01-compile.log",
+      "bytes": 309,
+      "sha256": "08161E4D03ADB90367A1C9F1E5391363A01A03F324751A2270776BD646351E28"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\leaf-guard-02-compile.log",
+      "bytes": 129,
+      "sha256": "D4E41653E9C47F88046C9B3E99759F5910FBCB419DBB31A12DC780DF3FD9C52A"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\leaf-guard-02-cases-result.json",
+      "bytes": 11920,
+      "sha256": "B00F0C5AA67209918DCF2F3F8B4F592C3FC77E3CB2B2766C72797F2ACFF514B6"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\leaf-guard-03-pause-observer-error.json",
+      "bytes": 245,
+      "sha256": "149B7CCBC03F01FC0CBC39BA16B1F53213562648E06289D54C2496D6EE3FA39A"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\leaf-guard-04-result.json",
+      "bytes": 24883,
+      "sha256": "3838D89EDE629EAE11C3DE8433425D7519000E0D0C0AAE03F9CE4523621A0C54"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\leaf-guard-05-result.json",
+      "bytes": 25742,
+      "sha256": "A3C6722DB4525AF849ADAE34EFA4556F991929BAC53FBD01BDC8698B4EC751E9"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-normal-cooperative.json",
+      "bytes": 27,
+      "sha256": "0DA78AE0F37F218CFF32A7B7C560C894FEC1BC903D4DD358580BC2557ED2E361"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-normal-launch.json",
+      "bytes": 920,
+      "sha256": "5FD235DBD219507507F6842C23544F2B057A0AB5E34A737DC5A43A3885EA2972"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-normal-outcome.json",
+      "bytes": 623,
+      "sha256": "4EBD9AA229E5E45F5332CE542D374CED671C58F0A4BFB66101221B31EC6B4D56"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-normal-ready.json",
+      "bytes": 157,
+      "sha256": "722366313AB619D0A4BCCFEF336D6B893FACBFBD73216F4AA463A9D64F3B2242"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-normal-stop.txt",
+      "bytes": 26,
+      "sha256": "E07632EFAB378786A05239000C25191ECF10BD450B8ADC3FDCFFB3C08FF3D810"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-normal-subject.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-pause-cooperative.json",
+      "bytes": 27,
+      "sha256": "0DA78AE0F37F218CFF32A7B7C560C894FEC1BC903D4DD358580BC2557ED2E361"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-pause-launch.json",
+      "bytes": 919,
+      "sha256": "CCEAE0A9D38A548E88DB71A8B808EC62D7E97192B9AEEF5E11741CA9259941BB"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-pause-outcome.json",
+      "bytes": 624,
+      "sha256": "39288CF359EAB442CE795C102D19F041BE4B174E41758BC7B62CC93465C90908"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-pause-ready.json",
+      "bytes": 157,
+      "sha256": "99E1AC9D0264D20ADB670B5DD0FD9A6EE3FD0D54C2FC4B00D2DFFBC3A32B4629"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-pause-stop.txt",
+      "bytes": 25,
+      "sha256": "E351E6DBE1D9F059AA87E5FEAC570D0C511D18F7741F3DA5621DA0364D78F96E"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-pause-subject.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-deadline-cooperative.json",
+      "bytes": 27,
+      "sha256": "0DA78AE0F37F218CFF32A7B7C560C894FEC1BC903D4DD358580BC2557ED2E361"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-deadline-launch.json",
+      "bytes": 922,
+      "sha256": "19A2E9756E9F841F9C5C47CB1ACF08D54C8C6A47CC17CD47FEE76ABBA225025A"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-deadline-outcome.json",
+      "bytes": 630,
+      "sha256": "F39A611F026A057197F3CDCAA7F23977B7DE0CC23E7868066F0BD59D71310C8E"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-deadline-ready.json",
+      "bytes": 157,
+      "sha256": "4FB871305D34F260D98C9EAD9A94A7FB34465EF30C5E5B7D7BFFF15654FDB23A"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-deadline-stop.txt",
+      "bytes": 28,
+      "sha256": "200396DC49BF0AA5D74677661443F5FA046A4570A56C84D5B9D03D3EB4C83A3C"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-deadline-subject.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-timeout-launch.json",
+      "bytes": 921,
+      "sha256": "61E79366B4D383FF04CAE00923F7C89DF22D5AD81142B874715C1F9338EA7327"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-timeout-outcome.json",
+      "bytes": 626,
+      "sha256": "9BFC7D85A44CB7441724C9822E624E3A10CB73A8DF377B572A4DA65DF2D0E4F3"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-timeout-ready.json",
+      "bytes": 157,
+      "sha256": "6C57868F6670CD265E9D4929A6BEA17916A99E344FF7B18DA593B3FCA783E89F"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-timeout-stop.txt",
+      "bytes": 27,
+      "sha256": "9A3A624C125EB2D6CB8B2294E493C4905983AFFC06A0602606BC2C3D10E9A698"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-timeout-subject.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-controller-failure-controller-exit.json",
+      "bytes": 106,
+      "sha256": "1026EFF4CB3AF7D2E3B7218EDA51B2C25E4EE07A4E59AE6E95F155C57CE5B94F"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-controller-failure-launch.json",
+      "bytes": 932,
+      "sha256": "E142232995195D1FFD016A2FE67FA4A10CF5C327F94078F77B3A5A3FE0A6B7C4"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-controller-failure-ready.json",
+      "bytes": 157,
+      "sha256": "2733EB81BD96F4CB5845B0D085CB5D5C636B2798495E8EC2F44E891527730340"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-controller-failure-stop.txt",
+      "bytes": 38,
+      "sha256": "8550D20FB5C4BDD2066473BADE45CB3145061BBE8FC1D36AE14552E0B97C5BF0"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\docs\\research\\environment-assets\\leaf-guard-01\\final-controller-failure-subject.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    }
+  ],
+  "protectedFilesVerified": 234,
+  "syntheticCases": 5,
+  "rejectionCases": 6,
+  "deniedStaticChildren": 20,
+  "sharingObservations": 85.0,
+  "maximumObservationGapMs": 36.60239999999999,
+  "unrealExecuted": false,
+  "realGlobalMarkerReadLocked": false,
+  "realProbeAttempts": 0,
+  "remainingFixtureOrAuthoringProcesses": [],
+  "openSpecProgress": {
+    "complete": 4,
+    "task13": "unchecked",
+    "total": 29
+  },
+  "limits": [
+    "Native primitive is not a complete authoring admission/monitor wrapper.",
+    "Effective settings, startup-hook admission and DDC export remain unfinished.",
+    "Sampled checks are not continuous tracing or an atomic rundown proof.",
+    "Jobs are not network/filesystem/broker sandboxes.",
+    "Controller-failure exit0 of the subject is hard termination, not graceful success.",
+    "Earlier compiler/harness failures are retained; final evidence identifies final sources."
+  ]
+}

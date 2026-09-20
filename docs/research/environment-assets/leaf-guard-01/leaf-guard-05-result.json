@@ -1,0 +1,489 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "case": "normal",
+      "passed": true,
+      "observations": 10,
+      "maximumObservationGapMs": 36.60239999999999,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 41880,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741606,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 41880,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344162637215359,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741606,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162629037613,
+          "LastWriteTime": 134344162629037613,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "passed-cooperative",
+        "reason": "normal",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741606,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162629037613,
+          "LastWriteTime": 134344162629037613,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\normal\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741606,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162629037613,
+        "LastWriteTime": 134344162629037613,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\normal\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741606,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162629037613,
+        "LastWriteTime": 134344162629037613,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "pause",
+      "passed": true,
+      "observations": 12,
+      "maximumObservationGapMs": 16.356400000000008,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 46740,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741619,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 46740,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344162649546804,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\pause\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741619,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162641581802,
+          "LastWriteTime": 134344162641581802,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "cancelled-cooperative",
+        "reason": "pause",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\pause\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741619,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162641581802,
+          "LastWriteTime": 134344162641581802,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\pause\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741619,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162641581802,
+        "LastWriteTime": 134344162641581802,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\pause\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741619,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162641581802,
+        "LastWriteTime": 134344162641581802,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "deadline",
+      "passed": true,
+      "observations": 13,
+      "maximumObservationGapMs": 26.795799999999986,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 42188,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741631,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 42188,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344162661344963,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\deadline\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741631,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162653251352,
+          "LastWriteTime": 134344162653251352,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "cancelled-cooperative",
+        "reason": "deadline",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\deadline\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741631,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162653251352,
+          "LastWriteTime": 134344162653251352,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\deadline\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741631,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162653251352,
+        "LastWriteTime": 134344162653251352,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\deadline\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741631,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162653251352,
+        "LastWriteTime": 134344162653251352,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "timeout",
+      "passed": true,
+      "observations": 35,
+      "maximumObservationGapMs": 31.484100000000126,
+      "subjectExitCode": 92,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 44220,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741643,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 44220,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344162673078493,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\timeout\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741643,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162665187388,
+          "LastWriteTime": 134344162665187388,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "cancelled-hard-stop",
+        "reason": "timeout",
+        "exitCode": 92,
+        "hardTerminated": true,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\timeout\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741643,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162665187388,
+          "LastWriteTime": 134344162665187388,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\timeout\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741643,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162665187388,
+        "LastWriteTime": 134344162665187388,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\timeout\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741643,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162665187388,
+        "LastWriteTime": 134344162665187388,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "controller-failure",
+      "passed": true,
+      "observations": 15,
+      "maximumObservationGapMs": 31.98090000000002,
+      "subjectExitCode": 0,
+      "controllerExitCode": 91,
+      "ready": {
+        "pid": 33156,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741655,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 33156,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344162689981583,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\controller-failure\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741655,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344162681668178,
+          "LastWriteTime": 134344162681668178,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "exitCode": 91,
+        "cleanup": "kill-on-job-close, not graceful",
+        "outcome": "failed-controller"
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\controller-failure\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741655,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162681668178,
+        "LastWriteTime": 134344162681668178,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\controller-failure\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 741655,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344162681668178,
+        "LastWriteTime": 134344162681668178,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    }
+  ],
+  "rejections": [
+    {
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"7\" argument(s): \"Executable hash differs.\"\r\n ---> System.InvalidOperationException: Executable hash differs.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides)\r\n   at CallSite.Target(Closure, CallSite, Type, String, Object, Object, Object, Object, Object, Object)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "wrong-hash",
+      "guardReleased": true,
+      "rejected": true
+    },
+    {
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"7\" argument(s): \"Marker must be an existing empty ordinary file.\"\r\n ---> System.InvalidOperationException: Marker must be an existing empty ordinary file.\r\n   at Homestead.Authoring.LeafGuard.Snapshot(IntPtr handle, String path)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides)\r\n   at CallSite.Target(Closure, CallSite, Type, String, Object, Object, Object, Object, Object, Object)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "nonempty-marker",
+      "guardReleased": true,
+      "rejected": true
+    },
+    {
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"7\" argument(s): \"acquire existing read-only marker guard\"\r\n ---> System.ComponentModel.Win32Exception (32): acquire existing read-only marker guard\r\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides)\r\n   at CallSite.Target(Closure, CallSite, Type, String, Object, Object, Object, Object, Object, Object)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "existing-writer",
+      "guardReleased": true,
+      "rejected": true
+    },
+    {
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"7\" argument(s): \"isolated standard handles\"\r\n ---> System.ComponentModel.Win32Exception (80): isolated standard handles\r\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides)\r\n   at CallSite.Target(Closure, CallSite, Type, String, Object, Object, Object, Object, Object, Object)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "occupied-stdout",
+      "guardReleased": true,
+      "rejected": true
+    },
+    {
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"7\" argument(s): \"Invalid process argument.\"\r\n ---> System.ArgumentException: Invalid process argument.\r\n   at Homestead.Authoring.LeafGuard.Quote(String value)\r\n   at System.Linq.Enumerable.SelectArrayIterator`2.MoveNext()\r\n   at System.String.Join(String separator, IEnumerable`1 values)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides)\r\n   at CallSite.Target(Closure, CallSite, Type, String, Object, Object, Object, Object, Object, Object)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "nul-argument",
+      "guardReleased": true,
+      "rejected": true
+    },
+    {
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"7\" argument(s): \"Invalid environment override.\"\r\n ---> System.InvalidOperationException: Invalid environment override.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides)\r\n   at CallSite.Target(Closure, CallSite, Type, String, Object, Object, Object, Object, Object, Object)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "invalid-environment",
+      "guardReleased": true,
+      "rejected": true
+    }
+  ],
+  "guardSha256": "A1948F0565B90A900EC229D393157D820BF5BFC8A66C5D3A012B32F89E2A742A",
+  "subjectSha256": "64C17468C34F18E7CB9EACA8B399E1E6B7B1C7777A7C11E0FFAA722C31BCCFA0",
+  "unrealExecuted": false,
+  "realMarkerAccessed": false
+}

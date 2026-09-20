@@ -1,0 +1,27 @@
+{
+  "pid": 44220,
+  "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+  "creationTime": 134344162673078493,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\timeout\\marker",
+    "Volume": 3222469187,
+    "IndexHigh": 131072,
+    "IndexLow": 741643,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344162665187388,
+    "LastWriteTime": 134344162665187388,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "explicitHandles": 3,
+  "resumed": false
+}

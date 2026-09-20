@@ -1,0 +1,18 @@
+{
+  "outcome": "cancelled-cooperative",
+  "reason": "deadline",
+  "exitCode": 0,
+  "hardTerminated": false,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-05\\deadline\\marker",
+    "Volume": 3222469187,
+    "IndexHigh": 131072,
+    "IndexLow": 741631,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344162653251352,
+    "LastWriteTime": 134344162653251352,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  }
+}

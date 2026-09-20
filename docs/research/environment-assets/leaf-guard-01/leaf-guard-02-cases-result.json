@@ -1,0 +1,301 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "case": "normal",
+      "passed": true,
+      "observations": 12,
+      "maximumObservationGapMs": 35.16859999999997,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 37484,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741400,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 37484,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344159832449500,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741400,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159821543607,
+          "LastWriteTime": 134344159821543607,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "jobFlags": 8200,
+        "processLimit": 1,
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "passed-cooperative",
+        "reason": "normal",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741400,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159821543607,
+          "LastWriteTime": 134344159821543607,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "pause",
+      "passed": true,
+      "observations": 12,
+      "maximumObservationGapMs": 31.36200000000008,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 33860,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741413,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 33860,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344159845233265,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\pause\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741413,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159837157257,
+          "LastWriteTime": 134344159837157257,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "jobFlags": 8200,
+        "processLimit": 1,
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "cancelled-cooperative",
+        "reason": "pause",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\pause\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741413,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159837157257,
+          "LastWriteTime": 134344159837157257,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "deadline",
+      "passed": true,
+      "observations": 11,
+      "maximumObservationGapMs": 30.101699999999937,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 2972,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741425,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 2972,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344159858058954,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\deadline\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741425,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159849798691,
+          "LastWriteTime": 134344159849798691,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "jobFlags": 8200,
+        "processLimit": 1,
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "cancelled-cooperative",
+        "reason": "deadline",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\deadline\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741425,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159849798691,
+          "LastWriteTime": 134344159849798691,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "timeout",
+      "passed": true,
+      "observations": 43,
+      "maximumObservationGapMs": 27.621200000000044,
+      "subjectExitCode": 92,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 36396,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741437,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 36396,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344159869818006,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\timeout\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741437,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159861957084,
+          "LastWriteTime": 134344159861957084,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "jobFlags": 8200,
+        "processLimit": 1,
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "outcome": "cancelled-hard-stop",
+        "reason": "timeout",
+        "exitCode": 92,
+        "hardTerminated": true,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\timeout\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741437,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159861957084,
+          "LastWriteTime": 134344159861957084,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        }
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    },
+    {
+      "case": "controller-failure",
+      "passed": true,
+      "observations": 15,
+      "maximumObservationGapMs": 30.829700000000003,
+      "subjectExitCode": 0,
+      "controllerExitCode": 91,
+      "ready": {
+        "pid": 33072,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 741449,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 33072,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344159886123470,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\cases\\controller-failure\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 741449,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344159878292812,
+          "LastWriteTime": 134344159878292812,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "jobFlags": 8200,
+        "processLimit": 1,
+        "explicitHandles": 3,
+        "resumed": false
+      },
+      "outcome": {
+        "cleanup": "kill-on-job-close, not graceful",
+        "exitCode": 91,
+        "outcome": "failed-controller"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism."
+    }
+  ],
+  "guardSha256": "C381995F975C5D4EE5A93FF176FFDD9E7A3F0874BF7C4AC1A21200618DFA9DDA",
+  "subjectSha256": "64C17468C34F18E7CB9EACA8B399E1E6B7B1C7777A7C11E0FFAA722C31BCCFA0",
+  "unrealExecuted": false,
+  "realMarkerAccessed": false
+}

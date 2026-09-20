@@ -65,6 +65,16 @@ in-process shader compilation and the separate UAT/Pak boundary. This is a
 possible direct-leaf control, not a filesystem/network sandbox or permission to
 launch Unreal/lock the global marker. Task1.3 and all runtime gates stay open.
 
+The15:02 continuation conditionally permits one120-second no-write Editor-Cmd
+probe only after the direct-leaf guard, inherited marker lifetime, exact
+admission/settings and observation prerequisites pass. The implemented primitive
+and disposable tests are documented in `leaf-guard-result.md`; the production
+admission/monitor and effective-settings export are unfinished, so no real lock
+or engine launch occurred. The probe's job admits no children and uses supported
+in-process shader compilation. Its inherited read handle is the lifetime
+mechanism, not a filesystem/network sandbox. Task1.3 remains unchecked; these
+results do not clear UAT/cook/Pak/import/Shipping-QA or weaken their requirements.
+
 Dependency refinement authorized by the coordinator on 2026-09-20: completion
 of tasks1.1/1.2 permits a separately assigned no-engine preparation lane for
 tasks2.1/2.2 and the source-only portion of2.3 while1.3 remains blocked. This

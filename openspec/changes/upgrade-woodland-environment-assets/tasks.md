@@ -5,8 +5,12 @@ authorization/baseline and completed source preparation are checked below.
 At14:05 Arizona Jenny explicitly approved the bounded TraceControl exception;
 the coordinator authorized controlled task1.3 preflight, not asset import.
 Pre-launch inspection identified the excluded startup crash-reporter child.
-Task1.3 remains unchecked and blocked on that additional policy conflict, not
-on missing TraceControl consent. See `authoring-preflight-result.md`.
+Task1.3 remains unchecked. The15:02 continuation conditionally admits one
+no-write probe after direct-leaf/inherited-marker and complete policy conditions
+pass. The guard's disposable tests pass; production admission/monitor and
+effective-settings export remain unfinished, so no real lock or engine probe
+occurred. See `leaf-guard-result.md` and the historical
+`authoring-preflight-result.md`. Progress remains4/29, not a visual upgrade.
 
 The 12:32 Arizona coordinator
 assignment authorized a planning-only dependency refinement. The separate12:39

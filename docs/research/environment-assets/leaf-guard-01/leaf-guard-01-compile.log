@@ -1,0 +1,5 @@
+'vswhere.exe' is not recognized as an internal or external command,
+operable program or batch file.
+AuthoringGuardSubject.cpp
+Tests\AuthoringGuardSubject.cpp(89): error C2220: the following warning is treated as an error
+Tests\AuthoringGuardSubject.cpp(89): warning C4389: '==': signed/unsigned mismatch

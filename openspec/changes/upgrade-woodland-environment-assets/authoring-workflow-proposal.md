@@ -1,6 +1,6 @@
 # Authoring workflow approval proposal
 
-**Current task1.3: PREFLIGHT APPROVED / BLOCKED BEFORE EXECUTION.** Jenny explicitly
+**Current task1.3: PREFLIGHT APPROVED / PARTIAL GUARD IMPLEMENTATION.** Jenny explicitly
 approved the bounded TraceControl exception at14:05 Arizona on2026-09-20.
 The live run records her direct reply and the original proposal SHA256
 `EA25571F37A6F3109BEECCA56B54E56006D8F61F0C0B07A95BA5DE077DB0DBCC`.
@@ -21,6 +21,18 @@ pre-resume Job Object and disposable file-sharing mechanisms, supported
 `-noshaderworker`, real-marker interference/lifetime limits and unproven UAT/Pak
 orchestration. No Unreal/global-marker lock is authorized by those results;
 the original approved proposal snapshot remains unchanged.
+
+The15:02 coordinator assignment subsequently authorized a direct-leaf guard,
+disposable inherited-handle lifetime tests and, only after every prerequisite
+passes, one120-second no-write Editor-Cmd probe with a bounded read-only lock of
+the existing global denial marker. `leaf-guard-result.md` records the tested
+primitive, explicit handle whitelist, five lifetime/stop cases and six rejection
+cases. No real lock or engine probe occurred: the complete authoring admission/
+monitor and effective-settings export remain unfinished. Current direct-leaf
+policy allows no executed children, including shader workers; use supported
+in-process compilation. This supersedes the earlier worker allowance only for
+the conditional probe, not the preserved original proposal bytes. No cook,
+pack, import or Shipping-QA gate is cleared. Task1.3 remains unchecked,4/29.
 
 ## Historical proposal as originally reviewed
 
