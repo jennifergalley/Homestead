@@ -16,7 +16,7 @@ RECEIPT = ROOT / "Build" / "CharacterPreview" / "locomotion-import.json"
 
 def main():
     command = unreal.SystemLibrary.get_command_line()
-    group = "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
+    group = "Clearing" if "-ClearingAnimations" in command else "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
     source = SOURCE.parent / group
     receipt = RECEIPT.with_name(group.lower() + "-import.json")
     unreal.SystemLibrary.execute_console_command(None, "Interchange.FeatureFlags.Import.FBX 0")

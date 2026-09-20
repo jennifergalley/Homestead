@@ -307,7 +307,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     auto PickingStarts = [this]()
     {
         const auto* Avatar = CastChecked<AHomesteadCharacter>(Controller->GetPawn());
-        return CastChecked<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance())->GatherStarts();
+        const auto* Animation = CastChecked<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
+        return Animation->GatherStarts() + Animation->ClearStarts();
     };
     const auto SecondaryStarts = MakeShared<uint32>(0);
     Add(TEXT("Approach the outdoor cookfire"),

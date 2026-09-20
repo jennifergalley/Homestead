@@ -14,14 +14,17 @@ SOURCE = ROOT / "Assets" / "Characters" / "Heroine"
 
 def main():
     watering = "--watering" in sys.argv
-    group = "Watering" if watering else "Gathering"
-    duration = 2.2 if watering else 1.6
+    clearing = "--clearing" in sys.argv
+    if clearing and watering:
+        raise ValueError("Choose one action to verify")
+    group = "Clearing" if clearing else "Watering" if watering else "Gathering"
+    duration = 2.0 if clearing else 2.2 if watering else 1.6
     rig = load(SOURCE / "SK_Heroine_LongWave.fbx")
     bind = {b.name: (b.parent.name if b.parent else None, b.matrix_local.copy()) for b in rig.data.bones}
     idle = load(SOURCE / "Locomotion" / "AN_Heroine_RelaxedIdle.fbx")
     bpy.context.scene.frame_set(1)
     idle_pose = {b.name: b.matrix.copy() for b in idle.pose.bones}
-    rig = load(SOURCE / group / ("AN_Heroine_Water.fbx" if watering else "AN_Heroine_Gather.fbx"))
+    rig = load(SOURCE / group / ("AN_Heroine_Clear.fbx" if clearing else "AN_Heroine_Water.fbx" if watering else "AN_Heroine_Gather.fbx"))
     if set(bind) != set(rig.data.bones.keys()):
         raise RuntimeError("Gather changed shared bone names")
     bind_error = 0

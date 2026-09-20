@@ -59,6 +59,7 @@ private:
     void PrepareGatheringChecks();
     void PrepareWateringChecks();
     void PrepareWeedingChecks();
+    void PrepareClearingChecks();
     bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
     void QueueSelectRow(int32 Id);

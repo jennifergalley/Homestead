@@ -143,6 +143,36 @@ Approach sampling is requested at 2 Hz, action at 8 Hz; neither is game FPS.
 The script requires real weed removal, one visible action, recovery and no can
 or water debit. Functional fixtures and visual recordings use separate outputs.
 
+`Test-Game.ps1 -Clearing` uses fresh mapped gather/craft setup with explicit
+functional-only teleport travel. Its 188 checks cover the real hatchet
+requirement, X/F, single clear/yield/resource-ID and normal energy progression,
+rapid E/F/F branch harvest/clear followed by sapling clear, repeats, movement,
+paused book/Look/planning, save/load and all 18 appearance scale/grip/hide/tint
+cases. It fills the pack through real gathering: a ready sapling rejects an
+unaffordable ten-item yield, while a depleted sapling legitimately clears for
+zero yield. Do not invent a depleted/full-pack rejection that the rules lack.
+Sapling A/E harvesting remains distinct and does not swing the contextual tool.
+The shared expected-state helper also preserves `nextId`, failure state and
+energy after ordinary clock advancement. All smoke modes reject orphaned
+hatchets, ownership failures and simultaneous can/hatchet visibility.
+
+Existing 181 watering checks additionally challenge an active watering action
+with a pending clear request; no competing hatchet or lost/double transaction is
+allowed. Full-loop no-pick checks for berry planting/tilling/fueling also count
+clearing starts. Existing failure/retry, crop, save and color assertions remain.
+
+`Playtest-Visual.ps1 -Clearing` is a different, fresh-start ordinary route:
+walk to three supply patches, gather, craft a real hatchet, stage/approach an
+actual sapling, orbit/zoom with mapped controls and press X. It shares the
+existing supply/craft/walking observer rather than a second runner. No injected
+save or debug position/time/state changes are used; normal crafting retains its
+existing time cost. Review with
+`Review-Watering.py <capture-folder> --clearing`. The review requires one action,
+actual permanent clearance and eight-branch/two-fiber yield, world scale one,
+bounded tool size, no water/can side effect and recovered hidden tool. Sampling
+and an immediately disappearing sapling do not establish impact synchronization
+or continuous smoothness.
+
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including
   tool/fire/foundation prerequisites. HUD callers need not duplicate cost tables.

@@ -3,6 +3,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "HomesteadHatchet.h"
 #include "HomesteadTestPaths.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "InputKeyEventArgs.h"
@@ -44,10 +45,15 @@ void AHomesteadVisualPlaytest::Prepare()
 {
     OutputDirectory = HomesteadTestOutputDirectory();
     if (const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
+    {
         AddTickPrerequisiteComponent(Avatar->GetWateringTool());
+        AddTickPrerequisiteComponent(Avatar->GetHatchet());
+    }
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
     Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius,plot_weeds"));
     bWaterRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringPlaytest"));
+    bClearRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingPlaytest"));
+    Telemetry[0] += TEXT(",clear_weight,clear_phase,clear_starts,hatchet_visible,hatchet_pitch,hatchet_scale,hatchet_radius,hatchet_x,hatchet_y,hatchet_z,branch_stock,fiber_stock,resource_cleared,energy");
     bWeedRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingPlaytest"));
     Observations.Add(bWeedRoute
         ? TEXT("Weeding uses an explicitly copied preexisting functional-test save, including saved appearance/location. Prior setup used fixture teleports and ordinary sleep. After F9 loading, this recorded approach/action uses normal mapped controls, no debug teleport/time/state edits. See fixture.json for source and hash.")
@@ -55,6 +61,8 @@ void AHomesteadVisualPlaytest::Prepare()
     Observations.Add(TEXT("Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark."));
     if (bWaterRoute)
         Observations.Add(TEXT("Watering starts from the normal new clearing: mapped gathering, crafting, stream refill, tilling and planting. No fixture/save injection. Ordinary crafting still advances its existing game time. Setup is sampled at 1 Hz; final action at requested 8 Hz."));
+    if (bClearRoute)
+        Observations.Add(TEXT("Sapling clearing starts from the normal new clearing: mapped supply gathering, hatchet crafting, walking and X. No injected save, teleport or debug state/time edit; ordinary crafting retains its existing time cost. Setup sampled at1 Hz, action at requested8 Hz."));
     Passes = {
         {TEXT("close-notes"), 1, {}, {}, EKeys::Gamepad_Special_Right},
         {TEXT("idle"), 3},
@@ -117,6 +125,21 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
         Animation ? Animation->WaterStarts() : 0, Tool->IsPresented(), Grip.X, Grip.Y, Grip.Z,
         Tool->GetComponentRotation().Pitch, PC->Simulation().Count(Homestead::Item::Water), Moisture,
         Tool->GetComponentScale().X, Tool->Bounds.SphereRadius, Weeds));
+    const auto* Hatchet = Avatar->GetHatchet();
+    const FVector HatchetGrip = Hatchet->GripPosition();
+    int32 Cleared = -1;
+    for (const auto& Node : PC->State().resources) if (Node.id == ForageId) Cleared = Node.cleared;
+    Telemetry.Last() += FString::Printf(TEXT(",%.4f,%.4f,%u,%d,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%.6f"),
+        Animation ? Animation->ClearWeight() : 0, Animation ? Animation->ClearPhase() : 0, Animation ? Animation->ClearStarts() : 0,
+        Hatchet->IsPresented(), Hatchet->GetComponentRotation().Pitch, Hatchet->GetComponentScale().X, Hatchet->Bounds.SphereRadius,
+        HatchetGrip.X, HatchetGrip.Y, HatchetGrip.Z, PC->Simulation().Count(Homestead::Item::Branch),
+        PC->Simulation().Count(Homestead::Item::Fiber), Cleared, PC->State().energy);
+    if (Animation && bClearRoute && (Label == TEXT("clear") || Label == TEXT("after-clear")))
+    {
+        bObservedClear |= Animation->ClearWeight() > 0.5f;
+        bObservedHatchet |= Hatchet->IsPresented() && Hatchet->GetComponentRotation().Pitch < -30;
+        bClearRecovered |= bObservedClear && Animation->ClearWeight() < 0.001f && !Hatchet->IsPresented();
+    }
     if (Animation && (Label == TEXT("gather") || Label == TEXT("after-gather")
         || Label == TEXT("weed") || Label == TEXT("after-weed")))
     {
@@ -154,7 +177,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     LastWallTime = Now;
     Elapsed += WallDelta;
     if (bWeedRoute) { TickWeeding(WallDelta); return; }
-    if (bWaterRoute) { TickWatering(WallDelta); return; }
+    if (bWaterRoute || bClearRoute) { TickWatering(WallDelta); return; }
     if (!Passes.IsValidIndex(PassIndex) || Elapsed > 100) { Finish(); return; }
     FPass& Pass = Passes[PassIndex];
     if (!bEntered)
@@ -235,7 +258,10 @@ void AHomesteadVisualPlaytest::Finish()
     ApplyAxes({}, {});
     const bool Gathered = PC->Simulation().Count(Homestead::Item::Berries) > FoodBefore
         || PC->Simulation().Count(Homestead::Item::Flowers) > HerbBefore;
-    if (bWeedRoute)
+    if (bClearRoute)
+        Observations.Add(FString::Printf(TEXT("Cleared actual sapling=%d; action observed=%d; swung hatchet observed=%d; recovered and hidden=%d"),
+            bCleared, bObservedClear, bObservedHatchet, bClearRecovered));
+    else if (bWeedRoute)
         Observations.Add(FString::Printf(TEXT("Weeded existing planted plot=%d; action observed=%d; recovered to idle=%d"),
             bWeeded, bObservedGather, bGatherRecovered));
     else if (bWaterRoute)
@@ -252,7 +278,8 @@ void AHomesteadVisualPlaytest::Finish()
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    const bool Complete = bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
+    const bool Complete = bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered
+        : bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
         : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
         : bReachedForage && Gathered && bObservedGather && bGatherRecovered;
     FPlatformMisc::RequestExitWithStatus(false, Saved && Complete ? 0 : 1);

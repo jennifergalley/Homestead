@@ -1,10 +1,11 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [ValidateRange(720,2160)][int]$Height=720,
-    [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
+    [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
     [string]$OutputDirectory)
 $ErrorActionPreference='Stop'
 if($Watering -and $Weeding) { throw 'Choose one ordinary action route.' }
+if($Clearing -and ($Watering -or $Weeding)) { throw 'Choose one ordinary action route.' }
 if([bool]$Weeding -ne [bool]$FixtureSave) { throw 'Use -Weeding together with its explicit -FixtureSave.' }
 $root=Split-Path $PSScriptRoot -Parent
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
@@ -30,6 +31,7 @@ $log=Join-Path $output 'engine.log'
 $arguments=$prefix+"-HomesteadVisualPlaytest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$log`""
 if($Watering) { $arguments += ' -HomesteadWateringPlaytest' }
 if($Weeding) { $arguments += ' -HomesteadWeedingPlaytest' }
+if($Clearing) { $arguments += ' -HomesteadClearingPlaytest' }
 $process=Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Isolated visual playtest PID=$($process.Id); output=$output"
 if(-not $process.WaitForExit(600000)) {
@@ -42,7 +44,9 @@ if($process.ExitCode -ne 0 -or -not (Test-Path $telemetry) -or -not (Test-Path $
     throw "Playtest did not finish its capture. See $log."
 }
 $outcome=Get-Content -LiteralPath $observations -Raw
-$required=if($Weeding) {
+$required=if($Clearing) {
+    'Cleared actual sapling=1; action observed=1; swung hatchet observed=1; recovered and hidden=1'
+} elseif($Weeding) {
     'Weeded existing planted plot=1; action observed=1; recovered to idle=1'
 } elseif($Watering) {
     'Watered real planted plot=1; action observed=1; tilted tool observed=1; recovered and hidden=1'

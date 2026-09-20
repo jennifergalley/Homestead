@@ -1,0 +1,11 @@
+{
+  "AN_Heroine_Clear": {
+    "duration_seconds": 2.0,
+    "fps": 60,
+    "frames": 121,
+    "rig": "Unchanged shared heroine bind; animation-only import",
+    "tool": "Original wood/stone/fiber hatchet, hand_r grip, 60-degree restrained authored forward swing; absolute world scale 1",
+    "reward": "None; presentation only after the existing successful permanent sapling Clear transaction",
+    "contact": "Generic clearing gesture after immediate sapling disappearance; no impact, target IK or tree-felling simulation"
+  }
+}

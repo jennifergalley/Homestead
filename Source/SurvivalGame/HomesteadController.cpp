@@ -415,7 +415,16 @@ void AHomesteadController::Secondary()
     }
     if (bPlanning) { RotatePlacement(); return; }
     UpdateFocus();
-    if (Focus == EFocus::Resource) Notify(Sim.Clear(FocusId, PlayerPoint()), WoodTapB);
+    if (Focus == EFocus::Resource)
+    {
+        bool Sapling = false;
+        for (const auto& Node : State().resources)
+            if (Node.id == FocusId) { Sapling = Node.kind == Homestead::ResourceKind::Sapling; break; }
+        const auto Result = Sim.Clear(FocusId, PlayerPoint());
+        Notify(Result, WoodTapB);
+        if (Result.ok && Sapling)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear();
+    }
     else if (Focus == EFocus::Plot)
     {
         for (const auto& Plot : State().plots)

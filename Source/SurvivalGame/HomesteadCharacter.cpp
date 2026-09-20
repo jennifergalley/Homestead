@@ -3,6 +3,7 @@
 #include "HomesteadWorld.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "HomesteadHatchet.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -56,6 +57,8 @@ AHomesteadCharacter::AHomesteadCharacter()
     StandIn->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     WateringTool = CreateDefaultSubobject<UHomesteadWateringTool>(TEXT("ContextualWateringCan"));
     WateringTool->SetupAttachment(GetMesh(), TEXT("hand_r"));
+    Hatchet = CreateDefaultSubobject<UHomesteadHatchet>(TEXT("ContextualHatchet"));
+    Hatchet->SetupAttachment(GetMesh(), TEXT("hand_r"));
 }
 
 void AHomesteadCharacter::BeginPlay()
@@ -86,7 +89,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
     GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
     WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Water.AN_Heroine_Water"));
-    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation)
+    ClearAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Clear.AN_Heroine_Clear"));
+    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation || !ClearAnimation)
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine mesh or motion assets are missing. Run Scripts/Build-Game.ps1; the labeled stand-in remains visible."));
         return false;
@@ -95,7 +99,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
         || IdleAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || WalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || GatherAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
-        || WaterAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
+        || WaterAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
+        || ClearAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine meshes and clips do not share a skeleton."));
         return false;
@@ -277,6 +282,15 @@ void AHomesteadCharacter::CancelAction()
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->CancelAction();
     WateringTool->SetHiddenInGame(true, true);
+    Hatchet->SetHiddenInGame(true, true);
+}
+
+void AHomesteadCharacter::PlayClear()
+{
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->RequestClear();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Sapling clearing succeeded but its animation instance is unavailable."));
 }
 
 void AHomesteadCharacter::CreateMappings()

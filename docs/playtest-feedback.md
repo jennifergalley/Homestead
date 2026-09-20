@@ -41,6 +41,18 @@ added. This is generic feedback above the plot, not hand-to-ground contact:
 weeds disappear at the existing immediate transaction. It is not Jenny's
 approval or a fix for the remaining cosmetic/UI requests.
 
+## Sapling clearing - contextual hatchet feedback (2026-09-20)
+
+The separate `clearing-01` slice adds one restrained lift/swing/recover and a
+small original wood/stone/fiber hatchet only after successful permanent sapling
+clearing. Fresh ordinary controls gathered supplies, crafted the existing
+hatchet and approached/cleared an actual sapling. The final full-body recording
+shows the tool arc and recovery without gross new clipping. This remains a
+generic gesture after immediate sapling disappearance, not synchronized impact,
+realistic tree felling, combat or exact hand/tool contact. Other clearing/input
+contexts and all gameplay costs/rewards remain unchanged. Existing cosmetic/UI
+feedback is still unresolved; this is not Jenny's aesthetic approval.
+
 ## Wavy length - attempted and reverted (2026-09-20)
 
 Jenny's wavy-hair length feedback was scheduled as its own bounded slice:

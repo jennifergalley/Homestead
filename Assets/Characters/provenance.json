@@ -96,6 +96,8 @@
       "Animation-only 1.6-second reach/pick/recover for wild gathering and, reused unchanged, planted-plot weeding: planted feet and unscaled analytical reach on the existing bind; Scripts\\Characters\\build_gathering.py",
       "Animation-only 2.2-second watering lift/tilt/recover on the unchanged bind; Scripts\\Characters\\build_watering.py",
       "Original procedural wood/fiber-bound watering can, shaped and attached in Source\\SurvivalGame\\HomesteadWateringTool.cpp; existing project field material, no acquired prop asset",
+      "Animation-only 2-second restrained sapling-clearing lift/swing/recover on the unchanged bind; Scripts\\Characters\\build_clearing.py",
+      "Original procedural wood/stone/fiber hatchet in Source\\SurvivalGame\\HomesteadHatchet.cpp; unchanged shared surface/grip helpers and existing field material, no acquired prop asset",
       "Lighting, preview scenes and rendered review sheets"
     ],
     "rights": "Project-authored output; underlying MakeHuman geometry remains CC0. No game-reference assets or third-party character-generation output used.",

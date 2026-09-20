@@ -192,6 +192,39 @@ reaching actual ground weeds. Existing weed visuals disappear at transaction
 success, before the hand gesture finishes. Exact plant/terrain contact, finger
 grasping and a crouching/kneeling gardening system are not implemented.
 
+## Contextual sapling-clearing hatchet (2026-09-20)
+
+`AN_Heroine_Clear` is one original 2-second planted-foot lift/swing/recover,
+authored by `build_clearing.py` on the existing bind. It uses the accepted
+analytical arm/leg helpers, idle endpoints and unscaled bones; it is not
+root-motion travel, target IK, combat or a tree-felling simulation.
+`verify_gathering.py --clearing` checks the exported FBX independently.
+`Import-Locomotion.ps1 -AnimationSet Clearing` imports/reloads only the new clip;
+the normal build verifies this fourth animation set too.
+
+The existing hatchet recipe costs four branches, three stones and two fiber.
+The contextual prop is original centimeter-scale geometry: a short wooden haft,
+stone wedge and two fiber bindings, using the existing field material with
+fixed tints. Watering and clearing reuse unchanged surface-building and
+hand/middle-finger grip helpers; their independent props share the single
+action evaluator, not competing pose layers. Both use absolute world scale one.
+The hatchet has no collision, overlap or navigation effect and appears only
+inside the clearing phase with a hatchet actually owned.
+
+Only successful permanent **sapling** `Sim.Clear` requests the new action.
+Sapling harvesting A/E, clearing herbs/stones and all other X/F contexts do not.
+The existing simulation commits clearance/yield immediately; no notify or tool
+collision grants rewards, changes energy or advances time. Ready saplings
+require space for eight branches/two fiber. A depleted sapling can still clear
+successfully with zero yield, even when that ready yield would not fit.
+Busy requests coalesce, and movement, menu/Look/planning, load/retry, failure
+and appearance changes retain the common cancel/hide path.
+
+This is a contained generic tool gesture after the sapling disappears, not a
+synchronized impact. The stone/fiber head is deliberately simple, the prop has
+contextual pop-in/out rather than an equip/holster animation, and exact finger,
+trunk or terrain contact is not established. No other character art is changed.
+
 ## Rejected face-material hypothesis (2026-09-20)
 
 The source skin shader includes a Blender subsurface weight of 0.07, which the

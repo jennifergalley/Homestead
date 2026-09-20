@@ -1,6 +1,7 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadActionTestState.h"
 
 bool AHomesteadVisualPlaytest::WalkWaterTarget(FVector2D Target, float Tolerance, float Delta, FVector2D& Move, FVector2D& Look)
 {
@@ -24,9 +25,11 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
     static const TCHAR* Labels[] = {TEXT("close-notes"), TEXT("gather-supplies"), TEXT("craft-digging-stick"),
         TEXT("craft-watering-can"), TEXT("walk-to-stream"), TEXT("refill"), TEXT("walk-to-garden"),
         TEXT("approach-tilling-position"), TEXT("till"), TEXT("approach-plot"), TEXT("plant"),
-        TEXT("settle-water"), TEXT("view-watering-side"), TEXT("before-water"), TEXT("water"), TEXT("after-water")};
+        TEXT("settle-water"), TEXT("view-watering-side"), TEXT("before-water"), TEXT("water"), TEXT("after-water"),
+        TEXT("walk-to-sapling-staging"), TEXT("approach-sapling"), TEXT("settle-clear"),
+        TEXT("view-clearing-side"), TEXT("before-clear"), TEXT("clear"), TEXT("after-clear")};
     if (Elapsed > 360 || PC->IsFailed() || WaterStage >= UE_ARRAY_COUNT(Labels)) { Finish(); return; }
-    const FString Label = Labels[WaterStage];
+    const FString Label = bClearRoute && WaterStage == 2 ? TEXT("craft-hatchet") : Labels[WaterStage];
     const bool Entered = PreviousWaterStage != WaterStage;
     if (Entered)
     {
@@ -40,7 +43,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
     FVector2D Move = FVector2D::ZeroVector, Look = FVector2D::ZeroVector;
     auto Fail = [this](const FString& Reason)
     {
-        Observations.Add(TEXT("FAILED ordinary watering setup/action: ")
+        Observations.Add(TEXT("FAILED ordinary hand-action setup/action: ")
             + (Reason.IsEmpty() ? FString(TEXT("Mapped input did not produce its expected transaction.")) : Reason));
         Finish();
     };
@@ -70,10 +73,10 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         }
         Homestead::ResourceKind Kind = Homestead::ResourceKind::Count;
         Homestead::Item Item = Homestead::Item::Count;
-        if (PC->Simulation().Count(Homestead::Item::Branch) < 6) { Kind = Homestead::ResourceKind::Branches; Item = Homestead::Item::Branch; }
-        else if (PC->Simulation().Count(Homestead::Item::Stone) < 1) { Kind = Homestead::ResourceKind::Stones; Item = Homestead::Item::Stone; }
+        if (PC->Simulation().Count(Homestead::Item::Branch) < (bClearRoute ? 4 : 6)) { Kind = Homestead::ResourceKind::Branches; Item = Homestead::Item::Branch; }
+        else if (PC->Simulation().Count(Homestead::Item::Stone) < (bClearRoute ? 3 : 1)) { Kind = Homestead::ResourceKind::Stones; Item = Homestead::Item::Stone; }
         else if (PC->Simulation().Count(Homestead::Item::Fiber) < 2) { Kind = Homestead::ResourceKind::Reeds; Item = Homestead::Item::Fiber; }
-        else if (PC->Simulation().Count(Homestead::Item::Seeds) < 1) { Kind = Homestead::ResourceKind::Roots; Item = Homestead::Item::Seeds; }
+        else if (!bClearRoute && PC->Simulation().Count(Homestead::Item::Seeds) < 1) { Kind = Homestead::ResourceKind::Roots; Item = Homestead::Item::Seeds; }
         if (Kind == Homestead::ResourceKind::Count) { ++WaterStage; break; }
         if (ForageId < 0)
         {
@@ -106,17 +109,18 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
     case 3:
     {
         const bool Digging = WaterStage == 2;
-        const int32 Recipe = static_cast<int32>(Digging ? Homestead::Recipe::DiggingStick : Homestead::Recipe::WateringCan);
+        const int32 Recipe = static_cast<int32>(bClearRoute ? Homestead::Recipe::Hatchet : Digging ? Homestead::Recipe::DiggingStick : Homestead::Recipe::WateringCan);
         if (bWaterInputPending)
         {
             if (WaterStageElapsed < 0.3f) break;
-            if (PC->ToastIsError() || PC->Simulation().Count(Digging ? Homestead::Item::DiggingStick : Homestead::Item::WateringCan) != 1)
+            if (PC->ToastIsError() || PC->Simulation().Count(bClearRoute ? Homestead::Item::Hatchet : Digging ? Homestead::Item::DiggingStick : Homestead::Item::WateringCan) != 1)
             { Fail(PC->Toast()); return; }
             Observations.Add(FString::Printf(TEXT("Crafted %s through mapped recipe selection; current hour %.6f."),
-                Digging ? TEXT("digging stick") : TEXT("wood/fiber watering can"), PC->State().hour));
-            if (!Digging) Tap(EKeys::Gamepad_FaceButton_Right);
+                bClearRoute ? TEXT("wood/stone/fiber hatchet") : Digging ? TEXT("digging stick") : TEXT("wood/fiber watering can"), PC->State().hour));
+            if (!Digging || bClearRoute) Tap(EKeys::Gamepad_FaceButton_Right);
             bWaterInputPending = false;
             ++WaterStage;
+            if (bClearRoute) { WaterStage = 16; ForageId = -1; }
             break;
         }
         if (Entered && !PC->IsBookOpen()) Tap(EKeys::C);
@@ -255,13 +259,65 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         if (WaterStageElapsed > 3.5f) ++WaterStage;
         break;
     case 15:
-        if (WaterStageElapsed > 2) ++WaterStage;
+        if (WaterStageElapsed > 2) { Finish(); return; }
+        break;
+    case 16:
+        if (ForageId < 0)
+        {
+            float Best = TNumericLimits<float>::Max();
+            const auto Position = PC->PlayerPoint();
+            for (const auto& Node : PC->State().resources)
+            {
+                if (Node.kind != Homestead::ResourceKind::Sapling || !PC->Simulation().CanHarvest(Node.id)) continue;
+                const FVector2D Target(Node.position.x, Node.position.y);
+                const float Distance = FVector2D::Distance(Target, FVector2D(Position.x, Position.y));
+                if (Distance < Best) { Best = Distance; ForageId = Node.id; ForageTarget = Target; }
+            }
+            if (ForageId < 0) { Fail(TEXT("No ready actual sapling to approach.")); return; }
+        }
+        if (WalkWaterTarget(ForageTarget + FVector2D(0, -420), 15, WallDelta, Move, Look)) ++WaterStage;
+        break;
+    case 17:
+        if (WalkWaterTarget(ForageTarget + FVector2D(0, -110), 15, WallDelta, Move, Look))
+        {
+            if (!PC->IsResourceFocused(ForageId)) { Fail(TEXT("Approached focus is not the selected sapling.")); return; }
+            ++WaterStage;
+        }
+        break;
+    case 18:
+        if (Entered) { Tap(EKeys::Gamepad_RightThumbstick); Tap(EKeys::Gamepad_RightThumbstick); }
+        if (WaterStageElapsed > 0.65f) ++WaterStage;
+        break;
+    case 19:
+        Look.X = -0.65f;
+        if (WaterStageElapsed > 1.15f) { Look.X = 0; ++WaterStage; }
+        break;
+    case 20:
+        if (WaterStageElapsed > 0.8f) ++WaterStage;
+        break;
+    case 21:
+        if (Entered)
+        {
+            ClearingExpected = PC->Simulation(); ClearingHour = PC->State().hour;
+            if (!PC->IsResourceFocused(ForageId) || !ClearingExpected.Clear(ForageId, PC->PlayerPoint()).ok)
+            { Fail(TEXT("Actual sapling transaction not available.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Left);
+        }
+        if (WaterStageElapsed > 0.3f)
+        {
+            bCleared = MatchesActionState(*PC, ClearingExpected, ClearingHour);
+            if (PC->ToastIsError() || !bCleared) { Fail(TEXT("Mapped clear differs from the single expected transaction.")); return; }
+        }
+        if (WaterStageElapsed > 3.5f) ++WaterStage;
+        break;
+    case 22:
+        if (WaterStageElapsed > 2) { Finish(); return; }
         break;
     }
     if (WaterStageElapsed > 90) { Fail(TEXT("Bounded ordinary approach timed out; no teleport fallback.")); return; }
     ApplyAxes(Move, Look);
     CaptureElapsed += WallDelta;
-    if (CaptureElapsed >= (WaterStage >= 11 ? 0.125f : 1.0f))
+    if (CaptureElapsed >= ((bClearRoute ? WaterStage >= 18 : WaterStage >= 11) ? 0.125f : 1.0f))
     {
         Capture(Label);
         CaptureElapsed = 0;

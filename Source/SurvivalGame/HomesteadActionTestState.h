@@ -9,7 +9,8 @@ inline bool MatchesActionState(const AHomesteadController& Controller, const Hom
     const auto& A = Controller.State();
     const auto& B = Expected.GetState();
     if (A.inventory != B.inventory || A.plots.size() != B.plots.size()
-        || A.resources.size() != B.resources.size()) return false;
+        || A.resources.size() != B.resources.size() || A.nextId != B.nextId || A.failed != B.failed
+        || FMath::Abs(A.energy - B.energy) > 0.000001) return false;
     for (size_t I = 0; I < A.plots.size(); ++I)
         if (A.plots[I].id != B.plots[I].id || A.plots[I].planted != B.plots[I].planted
             || A.plots[I].kind != B.plots[I].kind

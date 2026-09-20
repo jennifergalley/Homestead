@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Simulation/HomesteadSimulation.h"
 #include "HomesteadVisualPlaytest.generated.h"
 
 class AHomesteadController;
@@ -46,6 +47,13 @@ private:
     double LastWallTime = 0;
     FString OutputDirectory;
     bool bWaterRoute = false;
+    bool bClearRoute = false;
+    bool bCleared = false;
+    bool bObservedClear = false;
+    bool bObservedHatchet = false;
+    bool bClearRecovered = false;
+    Homestead::Simulation ClearingExpected;
+    double ClearingHour = 0;
     bool bWeedRoute = false;
     bool bWeeded = false;
     bool bWatered = false;

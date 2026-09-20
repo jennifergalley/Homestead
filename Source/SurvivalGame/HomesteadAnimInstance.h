@@ -14,6 +14,7 @@ public:
     float WalkPhase() const;
     void RequestGather();
     void RequestWater();
+    void RequestClear();
     void CancelAction();
     float GatherWeight() const;
     float GatherPhase() const;
@@ -22,6 +23,10 @@ public:
     float WaterPhase() const;
     uint32 WaterStarts() const;
     bool IsWatering() const;
+    float ClearWeight() const;
+    float ClearPhase() const;
+    uint32 ClearStarts() const;
+    bool IsClearing() const;
     float ActionWeight() const;
 
 protected:

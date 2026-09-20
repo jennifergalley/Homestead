@@ -663,3 +663,99 @@ ties the executable, source, fixture and observations together.
 Original `Build\Windows`, `Play.cmd`, player saves and earlier candidates remain
 untouched. This is technical feedback, not Jenny's aesthetic approval or an
 authorization to resume the deferred face/hair/UI experiments.
+
+## Sapling clearing and contextual hatchet (2026-09-20)
+
+Candidate: `Build\Releases\20260920-050723-5cc6c8a5\clearing-01\Windows`.
+Only a successful permanent sapling `Sim.Clear` requests the new 2-second
+restrained lift/swing/recover. Its original small wooden haft, stone wedge and
+fiber bindings fit the existing four-branch/three-stone/two-fiber recipe. The
+tool has no collision/navigation/overlap, uses absolute world scale one, and
+attaches to the right-hand grip. No body/hair/wardrobe/material replacement or
+new sound, simulation, reach, camera, facing or root-motion behavior is added.
+
+### Actual ordinary-control evidence
+
+Both sets start from a fresh default clearing and preferred heroine. Mapped
+controls walk to resource nodes 1, 2 and 6, gather supplies, craft the existing
+hatchet, walk through a staging point to the actual sapling at (-700,-600), settle,
+orbit/zoom and press X. There is no injected save, debug teleport or live
+time/state rewrite. Normal crafting keeps its existing 0.05-hour cost.
+Setup sampling is requested at 1 Hz and action at 8 Hz, not actual game FPS.
+
+The initial set is
+`Saved\VisualPlaytests\20260920-050723-5cc6c8a5\clearing-initial`
+(81 actual 1280x720 frames / 41.2424s). The second/final packaged set is
+`...\clearing-01-packaged` (85 actual 1280x720 frames / 40.8266s).
+Only these two quality sets were used. The clip/prop was not retuned between
+them; an additional real rapid-input test was added before packaging.
+
+```powershell
+.\Scripts\Playtest-Visual.ps1 -Packaged `
+  -PackageDirectory 'Build\Releases\20260920-050723-5cc6c8a5\clearing-01' `
+  -Clearing -Width 1280 -Height 720 `
+  -OutputDirectory 'Saved\VisualPlaytests\clearing-new-review'
+python .\Scripts\Review-Watering.py 'Saved\VisualPlaytests\clearing-new-review' --clearing
+```
+
+| Final recorded measurement | Result |
+| --- | --- |
+| Clearing starts / held-tool samples | 1 / 8 |
+| Branch / fiber yield | 8 / 2 |
+| Sapling cleared flag before / after | 0 / 1 |
+| Water debit / visible watering-can samples | 0 / 0 |
+| Final action weight / tool visible | 0 / false |
+| Tool world scale / bounding radius | 1 / 19.607cm |
+| Maximum forward tool tilt | 60 degrees |
+| Wrist / actor displacement during action | 55.59cm / 0cm |
+| Left / right toe displacement | 0.244 / 0.245cm |
+| Energy change across the sampled action/recovery | -0.085844, ordinary clock progression |
+
+The inspected final `clearing-sheet.png` shows the sapling before X, a modest
+held hatchet lifting and moving forward/down, and upright idle recovery with
+the prop hidden. No gross new body/tool/garment penetration is visible in these
+frames. **The sapling disappears when the simulation commits, before the swing.**
+This is generic clearing feedback, not impact synchronization, exact finger/
+trunk/terrain contact or realistic tree felling. The blocky stone/fiber head and
+contextual pop-in/out remain prototype limitations. Existing character-art
+limitations remain unchanged. Sparse images and concurrent-load timings do not
+establish continuous smoothness, controller comfort, audio quality or clean FPS.
+
+### Transaction, lifecycle and asset proof
+
+The final editor route passed **188 clearing checks**. The fresh package passed
+the same **188**, plus the preserved **74 gathering, 181 watering, 37 weeding
+and 434 full-loop checks**: **914 packaged checks** in
+`Saved\Automation\20260920-050723-5cc6c8a5\clearing-01-{clearing,gathering,watering,weeding,full-loop}`.
+Expected-state copies check exact inventory/yield, resource IDs, cleared flags,
+regrowth timestamps, next ID and ordinary energy progression. Mapped X/F,
+no-hatchet/capacity/range rejection, repeat input, real rapid branch harvest/
+clear followed by sapling clear, movement, book/Look/pause/planning, all 18
+appearance grip/scale/hide/tint cases and save/load are covered. Existing real
+failure/retry, garden, storage and color/save assertions remain intact.
+
+Rules were not rewritten for the tests: a ready sapling needs room for ten
+yield items; an already-depleted sapling can still clear permanently with zero
+yield even when the ready yield would not fit. Already-cleared nodes remain
+cleared and subsequent input follows whatever new context is actually focused.
+Sapling A/E harvest and non-sapling clearing do not request a hatchet pose.
+Active requests coalesce rather than queue, and the watering test now also
+challenges its active pose with a clear request. No simultaneous contextual
+tools are permitted. Portable simulation code is unchanged and its suite was
+not unnecessarily rerun.
+
+The exported clip has 121 samples over 2s and all 53 original binds unchanged:
+idle seam error 3.58e-7, toe drift 0.0000558cm, maximum bone-scale error 7.15e-7.
+Fresh Unreal reload proves the existing shared skeleton, 2s duration, disabled
+root motion and zero notifies. All **70** prior character/source LFS assets
+match `42241c5`; only the new clearing FBX and animation uasset are added.
+Five known incidental world-bootstrap resaves are restored with hash proof.
+The shared review utility reproduces prior water/weed numeric reports with its
+writes intercepted, so older evidence is untouched.
+
+Authoring/import/preservation reports, all final frames, source hashes and
+functional results are persisted under candidate `Verification`;
+`acceptance-receipt.json` links them to the executable and private checkpoint.
+Original `Build\Windows`, `Play.cmd`, player saves and all earlier candidates
+remain untouched. This is technical/action feedback, not Jenny's aesthetic
+approval or a completion claim for general chopping or deferred cosmetics/UI.

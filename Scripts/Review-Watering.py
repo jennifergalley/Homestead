@@ -1,4 +1,4 @@
-"""Review watering or fixture-disclosed weeding; never infer performance or exact contact."""
+"""Review contextual hand actions; never infer performance or exact contact."""
 import argparse
 import csv
 import json
@@ -11,19 +11,22 @@ from PIL import Image, ImageDraw
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", type=Path)
-    parser.add_argument("--weeding", action="store_true")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--weeding", action="store_true")
+    modes.add_argument("--clearing", action="store_true")
     args = parser.parse_args()
     folder = args.directory
     rows = list(csv.DictReader((folder / "telemetry.csv").open(encoding="utf-8-sig")))
-    verb = "weed" if args.weeding else "water"
-    pose = "gather" if args.weeding else "water"
+    verb = "clear" if args.clearing else "weed" if args.weeding else "water"
+    pose = "clear" if args.clearing else "gather" if args.weeding else "water"
+    tool = "hatchet" if args.clearing else "tool"
     before = [r for r in rows if r["pass"] == "before-" + verb]
     action = [r for r in rows if r["pass"] == verb]
     after = [r for r in rows if r["pass"] == "after-" + verb]
     if not before or not action or not after:
         raise ValueError("Missing before, action or recovered evidence.")
     anchor = before[-1]
-    visible = [r for r in action if float(r[pose + "_weight"]) > .5] if args.weeding else [r for r in action if int(r["tool_visible"])]
+    visible = [r for r in action if float(r[pose + "_weight"]) > .5] if args.weeding else [r for r in action if int(r[tool + "_visible"])]
     if not visible:
         raise ValueError("No requested hand action was actually observed.")
 
@@ -33,18 +36,19 @@ def main():
     report = {
         "frames": len(rows), "duration_seconds": float(rows[-1]["seconds"]),
         "setup": json.loads((folder / "fixture.json").read_text(encoding="utf-8-sig"))["setup"] if args.weeding
+        else "Fresh ordinary clearing, mapped supply gathering/hatchet crafting/walking/X; no injected save, teleport or debug time/state edit." if args.clearing
         else "Fresh ordinary clearing, mapped gathering/crafting/refill/till/plant; no injected save, teleport or debug time/state edit.",
         "action_samples": len(visible),
-        "tool_samples": sum(int(r["tool_visible"]) for r in action),
+        "tool_samples": sum(int(r[tool + "_visible"]) for r in action),
         "water_debit": int(anchor["water_stock"]) - int(after[-1]["water_stock"]),
         "moisture_before": float(anchor["plot_moisture"]),
         "moisture_after": float(after[-1]["plot_moisture"]),
         "action_starts": int(after[-1][pose + "_starts"]) - int(anchor[pose + "_starts"]),
         "final_weight": float(after[-1][pose + "_weight"]),
-        "final_tool_visible": bool(int(after[-1]["tool_visible"])),
-        "peak_tilt_degrees": max(-float(r["can_pitch"]) for r in visible),
-        "maximum_tool_world_radius_cm": max(float(r["tool_radius"]) for r in visible) if "tool_radius" in rows[0] else None,
-        "tool_world_scale": sorted(set(float(r["tool_scale"]) for r in visible)) if "tool_scale" in rows[0] else None,
+        "final_tool_visible": bool(int(after[-1][tool + "_visible"])),
+        "peak_tilt_degrees": max(-float(r["hatchet_pitch" if args.clearing else "can_pitch"]) for r in visible),
+        "maximum_tool_world_radius_cm": max(float(r[tool + "_radius"]) for r in visible) if tool + "_radius" in rows[0] else None,
+        "tool_world_scale": sorted(set(float(r[tool + "_scale"]) for r in visible)) if tool + "_scale" in rows[0] else None,
         "wrist_travel_cm": max(distance(r, anchor, "right_hand_") for r in action),
         "actor_travel_cm": max(distance(r, anchor, "") for r in action),
         "toe_travel_cm": {s: max(distance(r, anchor, s + "_toe_") for r in action) for s in ("left", "right")},
@@ -54,9 +58,19 @@ def main():
         report.update(weeds_before=float(anchor["plot_weeds"]), weeds_after=float(after[-1]["plot_weeds"]))
         if report["weeds_before"] < .125 or report["weeds_after"] >= .001 or report["water_debit"] or report["tool_samples"]:
             raise ValueError("Weeding lacks visible starting weeds, successful removal, or an unchanged hidden can.")
+    if args.clearing:
+        report.update(branch_yield=int(after[-1]["branch_stock"]) - int(anchor["branch_stock"]),
+                      fiber_yield=int(after[-1]["fiber_stock"]) - int(anchor["fiber_stock"]),
+                      cleared_before=int(anchor["resource_cleared"]), cleared_after=int(after[-1]["resource_cleared"]),
+                      watering_tool_samples=sum(int(r["tool_visible"]) for r in action),
+                      energy_change=float(after[-1]["energy"]) - float(anchor["energy"]))
+        if (report["branch_yield"], report["fiber_yield"], report["cleared_before"], report["cleared_after"]) != (8, 2, 0, 1):
+            raise ValueError("Ordinary ready-sapling route lacks the exact existing yield/permanent clear.")
+        if report["water_debit"] or report["watering_tool_samples"] or report["tool_world_scale"] != [1.0] or not 10 < report["maximum_tool_world_radius_cm"] < 35:
+            raise ValueError("Clearing tool size/arbitration or water inventory changed.")
     if report["action_starts"] != 1 or report["final_weight"] != 0 or report["final_tool_visible"]:
         raise ValueError("Action did not start exactly once and recover with its prop hidden.")
-    phases = (.3, .55, .9, 1.35) if args.weeding else (.4, .75, 1.1, 1.55)
+    phases = (.4, .7, .95, 1.45) if args.clearing else (.3, .55, .9, 1.35) if args.weeding else (.4, .75, 1.1, 1.55)
     selected = [anchor] + [min(action, key=lambda r: abs(float(r[pose + "_phase"]) - phase)) for phase in phases] + [after[-1]]
     sheet = Image.new("RGB", (1280, 1626), "#101b16")
     draw = ImageDraw.Draw(sheet)
@@ -66,8 +80,8 @@ def main():
             crop = image.crop((round(w * .2), round(h * .25), round(w * .75), h)).resize((640, 510))
             x, y = index % 2 * 640, index // 2 * 542
             sheet.paste(crop, (x, y + 32))
-            draw.text((x + 8, y + 8), f"{row['seconds']}s {row['pass']} phase={row[pose + '_phase']} tool={row['tool_visible']}", fill="white")
-    name = "weeding" if args.weeding else "watering"
+            draw.text((x + 8, y + 8), f"{row['seconds']}s {row['pass']} phase={row[pose + '_phase']} tool={row[tool + '_visible']}", fill="white")
+    name = "clearing" if args.clearing else "weeding" if args.weeding else "watering"
     sheet.save(folder / f"{name}-sheet.png")
     (folder / f"{name}-review.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))

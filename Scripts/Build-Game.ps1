@@ -36,6 +36,7 @@ if (-not (Test-Path -LiteralPath $map)) { throw 'Content bootstrap did not produ
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Gathering
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Watering
+& (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Clearing
 if ($Package) {
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
     & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output

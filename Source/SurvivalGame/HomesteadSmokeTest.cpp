@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "HomesteadHatchet.h"
 #include "HomesteadTestPaths.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
@@ -136,6 +137,18 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest")))
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof")))
+        { Finish(false, TEXT("Clearing requires its own isolated run.")); return; }
+        PrepareClearingChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")))
     {
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
@@ -678,6 +691,14 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         Finish(false, Step.Name + TEXT(" | Contextual watering tool remained visible without its valid action."));
         return;
     }
+    if (Avatar && Avatar->GetHatchet()->IsPresented()
+        && (!Animation || !Animation->IsClearing() || Avatar->GetWateringTool()->IsPresented()
+            || Controller->IsBookOpen() || Controller->IsPlanning() || Controller->IsFailed()
+            || Controller->Simulation().Count(Homestead::Item::Hatchet) == 0))
+    {
+        Finish(false, Step.Name + TEXT(" | Contextual hatchet was orphaned or competed with another tool."));
+        return;
+    }
     Results.Add(TEXT("PASS ") + Step.Name);
     TraceState(TEXT("PASS ") + Step.Name);
     UE_LOG(LogTemp, Display, TEXT("Homestead smoke PASS: %s"), *Step.Name);
@@ -710,7 +731,8 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
         const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
-            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest")) ? 0 : 4;
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));
     }

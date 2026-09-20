@@ -3,6 +3,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "HomesteadHatchet.h"
 #include "HomesteadActionTestState.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -15,6 +16,7 @@ struct FWaterProbe
     double Hour = 0;
     uint32 Starts = 0;
     uint32 GatherStarts = 0;
+    uint32 ClearStarts = 0;
     bool Ready = false;
     FVector Actor, Hand, Toe;
     FRotator View;
@@ -30,7 +32,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         return;
     }
     auto Animation = [Avatar]() { return Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()); };
-    auto Hidden = [Avatar, Animation]() { return Animation() && Animation()->WaterWeight() < 0.001f && !Avatar->GetWateringTool()->IsPresented(); };
+    auto Hidden = [Avatar, Animation]() { return Animation() && Animation()->WaterWeight() < 0.001f
+        && !Avatar->GetWateringTool()->IsPresented() && !Avatar->GetHatchet()->IsPresented(); };
     const Homestead::Point Garden = Homestead::CellCenter(-5, 0);
     const Homestead::Point Stream{Homestead::StreamX(2700) - 40, 2700};
     auto Probe = MakeShared<FWaterProbe>();
@@ -62,6 +65,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
                 Probe->Starts = Animation()->WaterStarts();
                 Probe->GatherStarts = Animation()->GatherStarts();
+                Probe->ClearStarts = Animation()->ClearStarts();
                 Probe->Actor = Avatar->GetActorLocation();
                 Probe->Hand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
                 Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
@@ -74,6 +78,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 const auto* Tool = Avatar->GetWateringTool();
                 return Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap
                     && Animation()->WaterStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
+                    && Animation()->ClearStarts() == Probe->ClearStarts && !Avatar->GetHatchet()->IsPresented()
                     && Animation()->WaterWeight() > 0.99f && Animation()->GatherWeight() < 0.001f && Tool->IsPresented()
                     && Tool->GetAttachParent() == Avatar->GetMesh() && Tool->GetAttachSocketName() == TEXT("hand_r")
                     && Tool->GetCollisionEnabled() == ECollisionEnabled::NoCollision && Tool->GetNumSections() == 2
@@ -136,9 +141,10 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     Add(TEXT("Capture watering with the real hand-held tool"), [this]() { Screenshot(TEXT("watering-pour")); },
         [Avatar, Animation]() { return Animation()->WaterWeight() > 0.99f && Avatar->GetWateringTool()->IsPresented(); }, 0.12f);
     Add(TEXT("Alternating presentation requests cannot compete or grant rewards"),
-        [Animation]() { Animation()->RequestGather(); Animation()->RequestWater(); },
+        [Animation]() { Animation()->RequestGather(); Animation()->RequestWater(); Animation()->RequestClear(); },
         [Probe, Animation, Matches]() { return Matches() && Animation()->WaterStarts() == Probe->Starts + 1
-            && Animation()->GatherStarts() == Probe->GatherStarts && Animation()->GatherWeight() < 0.001f; }, 0.12f);
+            && Animation()->GatherStarts() == Probe->GatherStarts && Animation()->GatherWeight() < 0.001f
+            && Animation()->ClearStarts() == Probe->ClearStarts; }, 0.12f);
     Add(TEXT("Natural recovery hides the tool without a second debit"), []() {},
         [Hidden, Matches]() { return Hidden() && Matches(); }, 2.0f);
     Add(TEXT("Capture watering recovery"), [this]() { Screenshot(TEXT("watering-recovered")); }, Hidden);
