@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "new_body_presets": 0,
+  "original_files_unchanged": true,
+  "original_sha256": {
+    "Assets\\Characters\\Heroine\\AN_Heroine_Idle.fbx": "118206c8b1ef12af9289bbb37d3dd23725b688ae7d01a83df53775365282114a",
+    "Assets\\Characters\\Heroine\\AN_Heroine_Walk.fbx": "12e9c9af5b61bfd0a0f0e17ba63344200c4f3d0d8a34d8e89de14dc39180bc3c",
+    "Assets\\Characters\\Heroine\\appearance-contract.json": "c8ad90ec95552b427384e543b440d4e0d26af07a935060f8b645052dd5f80756",
+    "Assets\\Characters\\Heroine\\Heroine.blend": "6dd180b3fe20b8d3f92ccb4e17f097a4dbf77b09ea0302b6c25918f2102f0fbf",
+    "Assets\\Characters\\Heroine\\materials.json": "0a078d5a8ff91807a68defc2bb1434cce4b2b8a5ea7cbcf07908e751957e7b9e",
+    "Assets\\Characters\\Heroine\\mpfb-authoring-preset.json": "a245032a4657a3e09c1be25108f7b6ee29787f196cb3bb3494e31ba40ff06d44",
+    "Assets\\Characters\\Heroine\\recipe.json": "5a0b323002ce11ec455dfe38a3de4b5e03ebb9c2920c0090f57ad522b872b2df",
+    "Assets\\Characters\\Heroine\\SK_Heroine_Bob.fbx": "de9677bce06cd6cb10a9bcf42e6f6a13078803a431de5881ecbf5c9a4cd0a9bf",
+    "Assets\\Characters\\Heroine\\SK_Heroine_LongWave.fbx": "acd73a31538262256720ff1610c2fae7c04e1d2f8ab5e7de1ce44b0ef57d818e",
+    "Assets\\Characters\\Heroine\\Textures\\blue_eye.png": "572ddc93ab3e177100619ec7c00b2574540cfb382805afc2e450788117f6140c",
+    "Assets\\Characters\\Heroine\\Textures\\eyebrow001.png": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b",
+    "Assets\\Characters\\Heroine\\Textures\\eyelashes01.png": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35",
+    "Assets\\Characters\\Heroine\\Textures\\shoes01_diffuse.png": "50c9a406a7f1cb6aa7b42912348e78f09d0252aa3963c8229cf18dfe8353cdbf",
+    "Assets\\Characters\\Heroine\\Textures\\teeth.png": "d0afb57869c6fbb56b98f5efc4aec629ee7593e70d8dd2bfb9de923acfb65f43",
+    "Assets\\Characters\\Heroine\\Textures\\tongue01_diffuse.png": "3150be398e48e8ba1feac164c3143c16c0b2e959d9ffb6155f0171f59cfb4ea9",
+    "Assets\\Characters\\Heroine\\Textures\\T_Bob_Chestnut.png": "e953d110d4c42fb2fec458176898baa6871917790c1ffbd90c396509dbeb7f4a",
+    "Assets\\Characters\\Heroine\\Textures\\T_Long_Chestnut.png": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2",
+    "Assets\\Characters\\Heroine\\Textures\\young_lightskinned_female_diffuse.png": "b2a6ac8cd4f9febdb447368e29c76cd68410bb66e46d9dcfa2d5f75126eea8fc",
+    "Scripts\\Characters\\build_heroine.py": "d76a4a2114898327a4b9bee001ea6f647615c89d06347d5c63ffd0cb1a258272",
+    "Scripts\\Characters\\export_heroine.py": "2a78b9fa30431e8a470bd3e0d9a289ec359410cb1ab7a3de192a045d5d01478d",
+    "Scripts\\Characters\\import_unreal.py": "1b1a6dc8bbc1c1bb0dd4a5c518db5ea8e1df94774ed26ff96eb7466f1f460c29",
+    "docs\\character-pipeline.md": "1b9880cd107bd7ac42e5b6d0d9761f57a7ae4396c77909ffc886267fd49b0ee5"
+  },
+  "hair_fitting": {
+    "method": "Exact saved macro/detail recipe, ephemeral donor only; existing body and rig retained",
+    "crown_samples": 240,
+    "maximum_crown_match_error_m": 0.0,
+    "normalization_factor": 1.0324802785065903
+  },
+  "variants": {
+    "SK_Heroine_Ponytail": {
+      "fbx": "SK_Heroine_Ponytail.fbx",
+      "hair": "Ponytail",
+      "outfit": "Tunic",
+      "sha256": "e5db34a9f0ea2a23c35565d4c8b3d31eeb46d3dfac6dd8d99ea23d90d20ee088",
+      "validation": {
+        "vertices": 68138,
+        "triangles": 130030,
+        "bones": 53,
+        "max_influences": 4,
+        "material_slots": 12,
+        "round_trip": {
+          "vertices": 68138,
+          "triangles": 130030,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": [
+            "M_Heroine_Brass",
+            "M_Heroine_Skin",
+            "M_Heroine_LightEyes",
+            "M_Heroine_Eyebrows",
+            "M_Heroine_Eyelashes",
+            "M_Heroine_Teeth",
+            "M_Heroine_Tongue",
+            "M_Heroine_LeatherShoes",
+            "M_Heroine_MossLinen",
+            "M_Heroine_LinenTrim",
+            "M_Heroine_ChestnutLeather",
+            "M_Heroine_Hair_ponytail01"
+          ],
+          "maximum_bind_matrix_error": 0.0,
+          "height_m": 1.6052823872305453,
+          "verified_clips": [
+            "AN_Heroine_Idle",
+            "AN_Heroine_Walk"
+          ],
+          "walk_review_frames": [
+            9,
+            24
+          ]
+        }
+      }
+    },
+    "SK_Heroine_LongWave_Apron": {
+      "fbx": "SK_Heroine_LongWave_Apron.fbx",
+      "hair": "LongWave",
+      "outfit": "Apron",
+      "sha256": "f22a28a153932f3b52fb4dd5a3d816cb837a91a397b3676873ca49618aeb5f70",
+      "validation": {
+        "vertices": 67986,
+        "triangles": 128590,
+        "bones": 53,
+        "max_influences": 4,
+        "material_slots": 14,
+        "round_trip": {
+          "vertices": 67986,
+          "triangles": 128590,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": [
+            "M_Heroine_ApronTrim",
+            "M_Heroine_Skin",
+            "M_Heroine_LightEyes",
+            "M_Heroine_Eyebrows",
+            "M_Heroine_Eyelashes",
+            "M_Heroine_Teeth",
+            "M_Heroine_Tongue",
+            "M_Heroine_Hair_long01",
+            "M_Heroine_LeatherShoes",
+            "M_Heroine_MossLinen",
+            "M_Heroine_LinenTrim",
+            "M_Heroine_ChestnutLeather",
+            "M_Heroine_Brass",
+            "M_Heroine_ApronLinen"
+          ],
+          "maximum_bind_matrix_error": 0.0,
+          "height_m": 1.6063109249807894,
+          "apron_clearance": {
+            "idle": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": 0.00025302974972873926,
+              "samples_behind_nearest_tunic_surface": 0,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            },
+            "walk_9": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": -0.001677927328273654,
+              "samples_behind_nearest_tunic_surface": 1,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            },
+            "walk_24": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": -0.0003284409176558256,
+              "samples_behind_nearest_tunic_surface": 0,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            }
+          },
+          "verified_clips": [
+            "AN_Heroine_Idle",
+            "AN_Heroine_Walk"
+          ],
+          "walk_review_frames": [
+            9,
+            24
+          ]
+        }
+      }
+    },
+    "SK_Heroine_Bob_Apron": {
+      "fbx": "SK_Heroine_Bob_Apron.fbx",
+      "hair": "Bob",
+      "outfit": "Apron",
+      "sha256": "b8684dd6c4b22a19397cbcbe098006d9b44f0d7530a5695d068daa380dd729ee",
+      "validation": {
+        "vertices": 76276,
+        "triangles": 146054,
+        "bones": 53,
+        "max_influences": 4,
+        "material_slots": 14,
+        "round_trip": {
+          "vertices": 76276,
+          "triangles": 146054,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": [
+            "M_Heroine_ApronTrim",
+            "M_Heroine_Skin",
+            "M_Heroine_LightEyes",
+            "M_Heroine_Eyebrows",
+            "M_Heroine_Eyelashes",
+            "M_Heroine_Teeth",
+            "M_Heroine_Tongue",
+            "M_Heroine_Hair_bob01",
+            "M_Heroine_LeatherShoes",
+            "M_Heroine_MossLinen",
+            "M_Heroine_LinenTrim",
+            "M_Heroine_ChestnutLeather",
+            "M_Heroine_Brass",
+            "M_Heroine_ApronLinen"
+          ],
+          "maximum_bind_matrix_error": 0.0,
+          "height_m": 1.6178986639715731,
+          "apron_clearance": {
+            "idle": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": 0.00025302974972873926,
+              "samples_behind_nearest_tunic_surface": 0,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            },
+            "walk_9": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": -0.001677927328273654,
+              "samples_behind_nearest_tunic_surface": 1,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            },
+            "walk_24": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": -0.0003284409176558256,
+              "samples_behind_nearest_tunic_surface": 0,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            }
+          },
+          "verified_clips": [
+            "AN_Heroine_Idle",
+            "AN_Heroine_Walk"
+          ],
+          "walk_review_frames": [
+            9,
+            24
+          ]
+        }
+      }
+    },
+    "SK_Heroine_Ponytail_Apron": {
+      "fbx": "SK_Heroine_Ponytail_Apron.fbx",
+      "hair": "Ponytail",
+      "outfit": "Apron",
+      "sha256": "82c6c9bcd9fae420ea2066b47d88584505d9d5c8b5aead9da76a5f43b66e49b1",
+      "validation": {
+        "vertices": 70161,
+        "triangles": 133566,
+        "bones": 53,
+        "max_influences": 4,
+        "material_slots": 14,
+        "round_trip": {
+          "vertices": 70161,
+          "triangles": 133566,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": [
+            "M_Heroine_ApronTrim",
+            "M_Heroine_Skin",
+            "M_Heroine_LightEyes",
+            "M_Heroine_Eyebrows",
+            "M_Heroine_Eyelashes",
+            "M_Heroine_Teeth",
+            "M_Heroine_Tongue",
+            "M_Heroine_LeatherShoes",
+            "M_Heroine_MossLinen",
+            "M_Heroine_LinenTrim",
+            "M_Heroine_ChestnutLeather",
+            "M_Heroine_Brass",
+            "M_Heroine_Hair_ponytail01",
+            "M_Heroine_ApronLinen"
+          ],
+          "maximum_bind_matrix_error": 0.0,
+          "height_m": 1.6052823872305453,
+          "apron_clearance": {
+            "idle": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": 0.00025302974972873926,
+              "samples_behind_nearest_tunic_surface": 0,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            },
+            "walk_9": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": -0.001677927328273654,
+              "samples_behind_nearest_tunic_surface": 1,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            },
+            "walk_24": {
+              "front_vertex_samples": 1845,
+              "minimum_signed_distance_m": -0.0003284409176558256,
+              "samples_behind_nearest_tunic_surface": 0,
+              "low_apron_nonfront_vertices": 0,
+              "note": "Nearest-normal vertex diagnostic on the original tunic shell, not a full triangle/self-collision or cloth simulation test."
+            }
+          },
+          "verified_clips": [
+            "AN_Heroine_Idle",
+            "AN_Heroine_Walk"
+          ],
+          "walk_review_frames": [
+            9,
+            24
+          ]
+        }
+      }
+    }
+  },
+  "materials": "materials.json",
+  "source_blend": "Heroine_Variants.blend",
+  "animation_sources": "Assets\\Characters\\Heroine",
+  "import_status": "Offline Blender export only; not imported into Unreal",
+  "rig_contract": "Same 53 authoring bones and bind matrices as original FBX; existing Unreal imports use 54 including Heroine_Rig wrapper",
+  "coverage": "Original clothed body mask and tunic retained for every export. Apron is additive; no extra skin is exposed.",
+  "limits": [
+    "Ponytail is rigidly weighted to head, with no hair physics.",
+    "Apron uses approximate pelvis/thigh skinning, not cloth simulation.",
+    "Apron variants have different material slot ordering; bind colors by slot/material name, not original indices.",
+    "Only rest, idle and two existing walk poses rendered; crouching, tool swings and extreme poses are untested.",
+    "Hair/cloth intersections and card silhouettes require gameplay review; no high-fidelity claim.",
+    "New hair/apron materials require explicit skeletal usage and the declared neutral ColorTint when later imported."
+  ]
+}

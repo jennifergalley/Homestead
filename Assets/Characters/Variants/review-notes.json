@@ -1,0 +1,36 @@
+{
+  "status": "Verified offline prototype; no Unreal import or game integration performed",
+  "variant_set": [
+    "SK_Heroine_Ponytail.fbx",
+    "SK_Heroine_LongWave_Apron.fbx",
+    "SK_Heroine_Bob_Apron.fbx",
+    "SK_Heroine_Ponytail_Apron.fbx"
+  ],
+  "preservation": "22 original source/export/material/recipe/script/document files match their captured SHA256 hashes. Original body vertices and rig were reused, not replaced.",
+  "hair_fit": "The ephemeral fitting donor matched 240 original crown vertices exactly (maximum error 0 m). Only the new bundled CC0 ponytail was fitted.",
+  "rig": "All 53 authoring bone names, parents, object transform and bind matrices match the original FBX exactly after reimport. Existing idle and walk clips were actually applied and rendered. No extra bones.",
+  "materials": {
+    "M_Heroine_Hair_ponytail01": "New CC0-derived chestnut hair texture, alpha mask, hair appearance group",
+    "M_Heroine_ApronLinen": "Original generated linen texture, opaque, tunic/apron appearance group",
+    "M_Heroine_ApronTrim": "Original solid linen trim, opaque, tunic/apron appearance group"
+  },
+  "future_import": {
+    "reuse_existing_skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton",
+    "reuse_original_animations": [
+      "/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Idle",
+      "/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Walk"
+    ],
+    "new_material_requirements": "Explicit used_with_skeletal_mesh=True; ColorTint vector default white; retain hair alpha. Reuse existing materials by name where possible.",
+    "slot_warning": "Ponytail base uses 12 slots; apron variants use 14. Apron additions change ordering: do not reuse the original numeric color-slot indices blindly."
+  },
+  "visual_review": "Ponytail front/three-quarter/back and apron front/three-quarter/back plus both sampled walk extremes were rendered from actual reimported FBXs. A visible apron fold through the asymmetric hem was caught and corrected before delivery.",
+  "coverage_and_limits": [
+    "The existing tunic and original under-clothes body mask remain in every full-mesh export. Apron is an additional front panel, waistband, hem and back ties; no original skin is newly exposed.",
+    "Nearest-normal sampling in the final walk frame 9 flags one possible approximately 1.7 mm intrusion into the tunic among 1845 front garment vertices. This is retained as an honest diagnostic, not claimed collision-free.",
+    "Idle sampled vertices are outside the nearest tunic surface. No lower front-panel vertices fold behind the character in the checked poses.",
+    "The diagnostic samples vertices; it is not a full triangle/self-collision proof. Extreme bends, crouches, tool swings and the complete animation continuum are not validated.",
+    "The ponytail is head-rigid hair-card geometry. Apron deformation is a simple pelvis/thigh-weight approximation. Neither has simulation, and no high-fidelity claim is made."
+  ],
+  "preview_directory": "Build\\CharacterPreview\\Variants",
+  "rebuild_script": "Scripts\\Characters\\extend_variants.py"
+}

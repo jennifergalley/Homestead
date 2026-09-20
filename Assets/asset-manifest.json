@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "forest-ground",
+      "author": "Rob Tuytel",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/brown_mud_leaves_01",
+      "licenseUrl": "https://polyhaven.com/license",
+      "files": [
+        { "name": "GroundColor.jpg", "bytes": 4539452, "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_leaves_01/brown_mud_leaves_01_diff_2k.jpg" },
+        { "name": "GroundNormal.jpg", "bytes": 5723577, "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_leaves_01/brown_mud_leaves_01_nor_dx_2k.jpg" },
+        { "name": "GroundRoughness.jpg", "bytes": 2421908, "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_leaves_01/brown_mud_leaves_01_rough_2k.jpg" }
+      ]
+    },
+    {
+      "id": "moss-rocks",
+      "author": "Kless Gyzen",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/rock_moss_set_02",
+      "licenseUrl": "https://polyhaven.com/license",
+      "files": [
+        { "name": "MossRocks.fbx", "bytes": 2106892, "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/rock_moss_set_02/rock_moss_set_02_1k.fbx" },
+        { "name": "RockColor.jpg", "bytes": 194307, "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_diff_1k.jpg" },
+        { "name": "RockNormal.jpg", "bytes": 273940, "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_nor_dx_1k.jpg" },
+        { "name": "RockRoughness.jpg", "bytes": 146226, "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_rough_1k.jpg" }
+      ]
+    },
+    {
+      "id": "evening-harp",
+      "author": "Kevin MacLeod (incompetech.com)",
+      "title": "Evening Fall (Harp)",
+      "license": "CC-BY-4.0",
+      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100236",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": "Evening Fall (Harp) by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades applied.",
+      "files": [
+        { "name": "EveningHarp.mp3", "bytes": 4759305, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Evening%20Fall%20-%20Harp.mp3" }
+      ]
+    },
+    {
+      "id": "forest-ambience",
+      "author": "TinyWorlds",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/forest-ambience",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "files": [
+        { "name": "ForestAmbience.mp3", "bytes": 716670, "url": "https://opengameart.org/sites/default/files/Forest_Ambience.mp3" }
+      ]
+    },
+    {
+      "id": "kenney-impact",
+      "author": "Kenney",
+      "license": "CC0-1.0",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "files": [
+        {
+          "name": "impact-sounds.zip",
+          "bytes": 800850,
+          "url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+          "extract": [
+            { "member": "License.txt", "name": "License.txt" },
+            { "member": "Audio/footstep_grass_000.ogg", "name": "GrassStepA.ogg" },
+            { "member": "Audio/footstep_grass_001.ogg", "name": "GrassStepB.ogg" },
+            { "member": "Audio/impactWood_light_000.ogg", "name": "WoodTapA.ogg" },
+            { "member": "Audio/impactWood_light_001.ogg", "name": "WoodTapB.ogg" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kenney-interface",
+      "author": "Kenney",
+      "license": "CC0-1.0",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "files": [
+        {
+          "name": "interface-sounds.zip",
+          "bytes": 834536,
+          "url": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+          "extract": [
+            { "member": "License.txt", "name": "License.txt" },
+            { "member": "Audio/click_002.ogg", "name": "UIClick.ogg" }
+          ]
+        }
+      ]
+    }
+  ]
+}

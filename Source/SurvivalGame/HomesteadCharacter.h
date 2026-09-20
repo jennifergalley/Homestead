@@ -1,0 +1,68 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "InputActionValue.h"
+#include "HomesteadAppearance.h"
+#include "HomesteadCharacter.generated.h"
+
+class UCameraComponent;
+class USpringArmComponent;
+class UInputMappingContext;
+class UInputAction;
+class UStaticMeshComponent;
+class USkeletalMesh;
+class UAnimSequence;
+class UMaterialInstanceDynamic;
+
+UCLASS()
+class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
+{
+    GENERATED_BODY()
+public:
+    AHomesteadCharacter();
+    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    void SetPlanning(bool Enabled);
+    void Zoom(float Amount);
+    void CycleZoom();
+    bool ApplyAppearance(const FHomesteadAppearance& Appearance);
+    bool HasHeroine() const { return bHeroineReady; }
+    void SetAppearancePreview(bool Enabled);
+    FRotator GameplayViewRotation() const;
+
+private:
+    UPROPERTY(VisibleAnywhere) TObjectPtr<USpringArmComponent> CameraArm;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UCameraComponent> Camera;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> StandIn;
+    UPROPERTY() TObjectPtr<UInputMappingContext> Mapping;
+    UPROPERTY() TObjectPtr<UInputAction> MoveAction;
+    UPROPERTY() TObjectPtr<UInputAction> MouseLookAction;
+    UPROPERTY() TObjectPtr<UInputAction> StickLookAction;
+    UPROPERTY() TObjectPtr<UInputAction> ZoomAction;
+    UPROPERTY() TObjectPtr<USkeletalMesh> LongHairMesh;
+    UPROPERTY() TObjectPtr<USkeletalMesh> BobHairMesh;
+    UPROPERTY() TArray<TObjectPtr<USkeletalMesh>> WardrobeMeshes;
+    UPROPERTY() TObjectPtr<UAnimSequence> IdleAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> WalkAnimation;
+    UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
+    bool bPlanning = false;
+    bool bHeroineReady = false;
+    bool bWalkingAnimation = false;
+    bool bAttemptedAssetLoad = false;
+    bool bHeroineAssetsValid = false;
+    bool bAppearancePreview = false;
+    float SavedCameraDistance = 470;
+    FRotator SavedViewRotation = FRotator::ZeroRotator;
+
+    bool LoadHeroineAssets();
+    float InferMeshYaw(const USkeletalMesh& Asset) const;
+    void UpdateAppearanceFraming();
+    void Move(const FInputActionValue& Value);
+    void MouseLook(const FInputActionValue& Value);
+    void StickLook(const FInputActionValue& Value);
+    void ZoomInput(const FInputActionValue& Value);
+    void ApplyLook(FVector2D Value, float Scale);
+    void CreateMappings();
+};

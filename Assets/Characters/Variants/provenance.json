@@ -1,0 +1,27 @@
+{
+  "source_pack": "../Source/SystemAssets",
+  "inherited_rights": "../provenance.json",
+  "new_external_asset": {
+    "name": "ponytail01",
+    "author": "MakeHuman Team / makehuman_system",
+    "copyright_holders": [
+      "Data Collection AB",
+      "Joel Palmius",
+      "Jonas Hauquier"
+    ],
+    "license": "CC0-1.0",
+    "source": "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+    "local_mhclo": "Assets\\Characters\\Source\\SystemAssets\\hair\\ponytail01\\ponytail01.mhclo",
+    "modification": "Fit to unchanged saved adult phenotype; chestnut recolor retaining alpha",
+    "acquisition": "Existing offline official system pack; no new download"
+  },
+  "original_work": {
+    "author": "Procedural authoring by GitHub Copilot for Jenny's project",
+    "assets": [
+      "Half-apron panel, waistband, hem and ties",
+      "Generated linen texture"
+    ],
+    "source": "Scripts\\Characters\\extend_variants.py"
+  },
+  "private_reference": "Not copied, embedded or uploaded by this task"
+}

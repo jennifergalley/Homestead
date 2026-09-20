@@ -1,0 +1,146 @@
+[
+  {
+    "asset": "forest-ground",
+    "file": "GroundColor.jpg",
+    "bytes": 4539452,
+    "sha256": "29C997D77F56E4EA16D3E998A306BE0C17FDDB28AB4822657C7CD8249040FFDA",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_leaves_01/brown_mud_leaves_01_diff_2k.jpg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "forest-ground",
+    "file": "GroundNormal.jpg",
+    "bytes": 5723577,
+    "sha256": "0B12D1CBF3FA12CF292D77034672F91ABA0366C6739DD2973E083AC6BC857E0D",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_leaves_01/brown_mud_leaves_01_nor_dx_2k.jpg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "forest-ground",
+    "file": "GroundRoughness.jpg",
+    "bytes": 2421908,
+    "sha256": "9556215F5FEF905C37CDF19C77AEF7822F124890F8FB7DCCE65D57C5EAFC0CA5",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_mud_leaves_01/brown_mud_leaves_01_rough_2k.jpg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "moss-rocks",
+    "file": "MossRocks.fbx",
+    "bytes": 2106892,
+    "sha256": "249BF02EB4C521887A47165D0E3279FD895785ADDB43CFDF9938F921E6884FC3",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/rock_moss_set_02/rock_moss_set_02_1k.fbx",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "moss-rocks",
+    "file": "RockColor.jpg",
+    "bytes": 194307,
+    "sha256": "91DD2CC77D5198B067D77E5BDB3FA8EE7B8950AEFF5AEC2C1CCADDB76DCCA481",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_diff_1k.jpg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "moss-rocks",
+    "file": "RockNormal.jpg",
+    "bytes": 273940,
+    "sha256": "4E4DAA925B0E5DE37A107F44AE83A953F45843F2A6044460F0CCB83FCCDD7F99",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_nor_dx_1k.jpg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "moss-rocks",
+    "file": "RockRoughness.jpg",
+    "bytes": 146226,
+    "sha256": "12252219A98A560940359973E83AF831ABDCFAB0EAD3F0A2A7B135A0143105F1",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_rough_1k.jpg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "evening-harp",
+    "file": "EveningHarp.mp3",
+    "bytes": 4759305,
+    "sha256": "7899334B322D0B651801C3F2F0C70ADB4704871863CA6FA2DE1F0D84F593EE65",
+    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Evening%20Fall%20-%20Harp.mp3",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "asset": "forest-ambience",
+    "file": "ForestAmbience.mp3",
+    "bytes": 716670,
+    "sha256": "9850AA1D0D5D66BD9C5DAF8BB77C6D852E01F2F4DE22F283BD5621E8BED13B75",
+    "source": "https://opengameart.org/sites/default/files/Forest_Ambience.mp3",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "impact-sounds.zip",
+    "bytes": 800850,
+    "sha256": "029D734AF1582474EDF3A694D1B0CEBC97C1C152F2F39FA34D4C2BAFC5DE77F8",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "License.txt",
+    "bytes": 608,
+    "sha256": "B49AA9C56B04528B95913DE13E506A0F7C5E807B9925DB9BFEF86AF1F91120DB",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#License.txt",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "GrassStepA.ogg",
+    "bytes": 8290,
+    "sha256": "9D49497777405D78D7CF7F2888E28277F3A23192300CFD1D79D54876B20F479F",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/footstep_grass_000.ogg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "GrassStepB.ogg",
+    "bytes": 8313,
+    "sha256": "FB28781BD22B2EEFDC14077F1ADF5C94D7FE9C3A130194633B55F3E0D39D9F04",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/footstep_grass_001.ogg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "WoodTapA.ogg",
+    "bytes": 6343,
+    "sha256": "EB45E35B4BED784D3F120DE4AFEC4B0D6AC09D9E143CCE8CFCB7D739E1B1F3C3",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/impactWood_light_000.ogg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "WoodTapB.ogg",
+    "bytes": 6373,
+    "sha256": "4B76BF3CCC8E60D19188F3165B778A7817786FAA6887C55D9049BCBEEF3B425F",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/impactWood_light_001.ogg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-interface",
+    "file": "interface-sounds.zip",
+    "bytes": 834536,
+    "sha256": "F2193D072726D6758A5F7871B2DCC54DCCE0D5C35C6F0A62F92549B327C81232",
+    "source": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-interface",
+    "file": "License.txt",
+    "bytes": 574,
+    "sha256": "F7966C773BBED0ECA6A9C75081C44A178B38EAE112724DBB5FDFBD4192D118A9",
+    "source": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip#License.txt",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-interface",
+    "file": "UIClick.ogg",
+    "bytes": 4275,
+    "sha256": "ADCD1F4ADC35F1B41BC1B5BBEFEFF7AA44F2F3F0D96D3199B544140C7C1E761C",
+    "source": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip#Audio/click_002.ogg",
+    "license": "CC0-1.0"
+  }
+]

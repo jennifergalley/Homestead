@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "scope": "Character authoring prototype, not full appearance MVP",
+  "acquired_utc": "2026-09-19",
+  "reference": {
+    "path": "Assets\\Characters\\Reference\\private-direction.png",
+    "rights": "User-supplied private visual direction only; not redistributable source art",
+    "handling": "Kept local, ignored by nested .gitignore, not embedded in meshes/textures/Blender scene, never uploaded"
+  },
+  "tools": [
+    {
+      "name": "Blender",
+      "version": "4.5.14 LTS",
+      "author": "Blender Foundation and contributors",
+      "license": "GPL-3.0-or-later; dependencies have separate licenses retained in portable distribution",
+      "source": "https://download.blender.org/release/Blender4.5/",
+      "archive": "https://download.blender.org/release/Blender4.5/blender-4.5.14-windows-x64.zip",
+      "official_checksum_source": "https://download.blender.org/release/Blender4.5/blender-4.5.14.sha256",
+      "sha256": "b9533d2397ac1984db4466fb23a7a4649391cca93f6e84209f9bcc60d071c8b9",
+      "official_checksum_verified_before_execution": true,
+      "install": "E:\\Tools\\blender-4.5.14-windows-x64"
+    },
+    {
+      "name": "MPFB",
+      "version": "2.0.17",
+      "author": "Joel Palmius / MakeHuman Community and contributors",
+      "license": "Software GPL-3.0-or-later, graphical assets and output CC0",
+      "source": "https://extensions.blender.org/add-ons/mpfb/",
+      "official_checksum_source": "https://extensions.blender.org/api/v1/extensions/ (Accept: application/json)",
+      "sha256": "4f0a879d64a39bf646fbf5f53601ac678855da329d650617dca5737548239a87",
+      "official_checksum_verified_before_execution": true,
+      "source_tag": "https://github.com/makehumancommunity/mpfb2/tree/v2.0.17",
+      "inspected_source_commit": "80919fa4682335c41847f761a4d79dcad4124732",
+      "license_evidence": "Assets\\Characters\\Source\\Licenses\\LICENSE.md",
+      "profile": "E:\\Tools\\BlenderCharacterUser",
+      "network": "Blender online access remains disabled; no MakeHuman socket server required"
+    }
+  ],
+  "asset_collections": [
+    {
+      "name": "Official MakeHuman system assets",
+      "author": "MakeHuman Team / makehuman_system",
+      "copyright_holders_in_asset_headers": [
+        "Data Collection AB",
+        "Joel Palmius",
+        "Jonas Hauquier"
+      ],
+      "license": "CC0-1.0",
+      "source": "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+      "archive": "https://files2.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+      "sha256": "b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107",
+      "checksum_note": "Locally recorded digest of official HTTPS data archive, not a publisher checksum/signature; no separate publisher digest was advertised",
+      "full_per_asset_catalog": "Assets\\Characters\\Source\\SystemAssets\\packs\\makehuman_system_assets.json",
+      "license_evidence": [
+        "Assets\\Characters\\Source\\Licenses\\MAKEHUMAN-LICENSE.md",
+        "Assets\\Characters\\Source\\Licenses\\MAKEHUMAN-CC0.md",
+        "Each .mhclo and .mhmat retains its original CC0 header"
+      ],
+      "used_assets": [
+        "skins/young_caucasian_female",
+        "eyes/high-poly",
+        "eyes/materials/blue",
+        "eyebrows/eyebrow001",
+        "eyelashes/eyelashes01",
+        "teeth/teeth_base",
+        "tongue/tongue01",
+        "clothes/shoes01 (brown leather lace-up shoes and socks)",
+        "hair/long01 (fitted, lightly waved and recolored chestnut)",
+        "hair/bob01"
+      ],
+      "unused_assets": "Other bundled pack entries are retained source data only, not included in playable exports."
+    },
+    {
+      "name": "MPFB bundled anatomical mesh, morph targets, game_engine skeleton and weights",
+      "author": "MakeHuman Team and contributors",
+      "license": "CC0-1.0",
+      "source": "https://github.com/makehumancommunity/mpfb2/tree/v2.0.17/src/mpfb/data",
+      "license_evidence": "Assets\\Characters\\Source\\Licenses\\LICENSE.md sections C-D",
+      "used_assets": [
+        "data/3dobjs/base.obj",
+        "data/rigs/standard/rig.game_engine.json",
+        "data/rigs/standard/weights.game_engine.json",
+        "Bundled phenotype targets and explicit sculpt targets listed in Heroine/recipe.json"
+      ]
+    }
+  ],
+  "original_authored_elements": {
+    "author": "Procedural authoring by GitHub Copilot for Jenny's SurvivalGame project",
+    "source": "Scripts\\Characters\\build_heroine.py",
+    "elements": [
+      "Petite adult heroine proportions and facial target recipe",
+      "Moss linen scoop-neck wrap tunic, shoulder straps, leather belt and brass buckle",
+      "Light-wave deformation, torso clearance and chestnut recoloring of the CC0 hair meshes",
+      "Three-second idle and one-second in-place walk prototype animations",
+      "Lighting, preview scenes and rendered review sheets"
+    ],
+    "rights": "Project-authored output; underlying MakeHuman geometry remains CC0. No game-reference assets or third-party character-generation output used.",
+    "third_party_cost": 0
+  },
+  "derived_textures": {
+    "Heroine\\Textures\\T_Bob_Chestnut.png": {
+      "source": "Source\\SystemAssets\\hair\\bob01\\bob01_diffuse.png",
+      "author": "MakeHuman Team; recolored by project recipe",
+      "license": "CC0-1.0",
+      "modification": "Deterministic chestnut recolor preserving the original alpha"
+    },
+    "Heroine\\Textures\\T_Long_Chestnut.png": {
+      "source": "Source\\SystemAssets\\hair\\long01\\long01_diffuse.png",
+      "author": "MakeHuman Team; recolored by project recipe",
+      "license": "CC0-1.0",
+      "modification": "Deterministic chestnut recolor preserving the original alpha"
+    }
+  },
+  "output_evidence": [
+    "Assets\\Characters\\Heroine\\Heroine.blend",
+    "Assets\\Characters\\Heroine\\recipe.json",
+    "Assets\\Characters\\Heroine\\materials.json",
+    "Build\\CharacterPreview\\export-validation.json",
+    "Build\\CharacterPreview\\authoring-report.json"
+  ]
+}

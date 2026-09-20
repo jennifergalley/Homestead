@@ -1,0 +1,126 @@
+# Homestead
+
+A Windows-native, offline, controller-first survival and homesteading game.
+The design and roadmap are in `docs\game-plan.md`.
+
+## Current state
+
+This is a **playable homestead prototype**, not the finished game. It has three
+complete adult character presets, long waves/bob/ponytail, two cosmetic outfits,
+skin/hair/iris/tunic colors, and a saved, orbitable Look preview. It includes
+foraging, tool crafting, modular shelter, storage, roots and regrowing berry crops,
+watering/weeding, basic cooking, day/night needs, sleep, and checkpoint recovery.
+
+Unreal 5.8.2 is installed at `E:\Program Files\UE_5.8`. The native editor module,
+content bootstrap, and initial engine gameplay smoke scenario now run successfully.
+A standalone Windows technical build has also been produced at
+`Build\Windows\SurvivalGame.exe`; keep the entire `Build\Windows` directory together.
+The standalone package has passed the complete homestead and recovery route at
+native 3840x2160, averaging about 59 FPS on the target PC.
+Use its build receipt when comparing newer source changes. Controls are exercised
+through real engine input events; physical-controller feel and listening review
+remain human checks. See `docs\setup.md` for precise verification limits.
+
+## Build and run
+
+To play the latest packaged prototype, double-click **`Play.cmd`** in this folder
+or `Build\Windows\SurvivalGame.exe`. The packaged game does not need the editor
+open. In-game Settings includes **Save and quit**.
+
+From this directory in PowerShell:
+
+```powershell
+.\Scripts\Test-Native.ps1
+.\Scripts\Build-Game.ps1
+.\Scripts\Test-Game.ps1
+.\Scripts\Start-Game.ps1
+```
+
+The first command tests the portable simulation without Unreal. `Test-Game.ps1`
+runs the actual game's synthetic controller/keyboard smoke checks and captures
+rendered frames, using a separate save sandbox. It does not replace visual,
+audio, or physical-controller review. The other commands
+require **Unreal Engine 5.8**. If needed, pass `-EngineRoot 'E:\Tools\UE_5.8'` to
+the game build/start scripts. To create a standalone Windows build:
+
+```powershell
+.\Scripts\Build-Game.ps1 -Package
+.\Scripts\Test-Game.ps1 -Packaged -FullLoop -WithAudio
+```
+
+`-WithAudio` records only the game's own output submix for silence/clipping
+analysis, never the microphone or other applications. This is not a substitute
+for listening. `-FullLoop` adds the extended homestead scenario.
+
+`Build-Game.ps1` fetches the licensed source assets, compiles the native editor
+module, generates the materials/map/audio assets in the editor, and optionally
+cooks/packages the game. Failed steps stop with an explicit error.
+
+## Controls
+
+| Action | Xbox controller | Mouse and keyboard |
+| --- | --- | --- |
+| Walk / camera | Left / right stick | WASD / mouse |
+| Contextual interaction | A | E or Enter |
+| Clear / weed / fuel / till | X | F |
+| Field book | Menu | I or Tab |
+| Notes | View | H |
+| Craft / build pages | D-pad left / right | C / B |
+| Book selection | D-pad up / down | Up / down |
+| Book pages | LB / RB | Left / right |
+| Back / pause menu | B | Escape |
+| Camera distance | Right stick click | Mouse wheel |
+| Placement position | Left stick | WASD |
+| Rotate placement | RB or X | R or F |
+| Save / load | Field book Settings | Settings or F5 / F9 |
+
+The field book and construction preview pause simulation. Near a storage chest,
+the Pack page supports storing with X/F and taking stored materials with Y/G.
+Food selections consume one item; core actions explain unmet requirements.
+Settings also offers 100/85/70-percent 3D resolution scaling; the UI remains sharp
+while TSR upscales the world.
+
+## First session
+
+Gather berries and eat them from the Pack page. Gather branches, stones, and
+fiber from reeds. Make a hatchet, a digging stick, and a watering can. Clear a
+small patch, build a floor/walls/doorway/roof, and add a bedroll, chest, and fire.
+Collect planting stock from wild roots, till a plot, and plant it. Refill the can
+at the stream; water and weed as needed. Fuel the fire with branches and prepare
+the simple root recipes. Food and warmth matter while time passes.
+
+On a bare plot, **A/E plants roots using seeds**; **X/F plants berry seeds using
+one foraged berry**. Once planted, X/F weeds. Mature roots produce roots and seeds,
+then leave the plot available for replanting; mature berry plants give six berries
+and remain in place to regrow. The Look page changes appearance without making a
+cosmetic apron into free winter insulation.
+
+## Prototype limits
+
+- Character hair/cloth motion and lighting are provisional; small garment overlap
+  can occur in some poses. Fine-grained face/body sliders are a later feature.
+- Construction is a small snapping kit, not voxel terrain editing or a full
+  furnishing catalog. The landscape is a compact authored clearing, not the
+  eventual river/lake/waterfall world.
+- Villagers, romance, companions, carcass scavenging, hunting/predators, and a
+  complete winter economy are roadmap features, not hidden unfinished buttons.
+- Save before experimenting. Test saves/captures are isolated from normal play.
+
+## Architecture
+
+- `Source\SurvivalGame\Simulation`: portable C++ state and rules, independent of
+  Unreal, rendering, wall-clock time, and input.
+- `Source\SurvivalGame`: Unreal world, character/camera, input, field book,
+  audio playback, and recoverable save integration.
+- `Tests`: native simulation tests.
+- `Scripts`: asset acquisition, editor content generation, building, and launch.
+- `Assets`: source/license manifest and downloaded asset receipts.
+
+Normal-movement visual review is separate from functional smoke tests:
+`Scripts\Playtest-Visual.ps1` records an isolated game session without teleport
+travel, and `Scripts\Review-VisualPlaytest.py` creates a timestamped local viewer.
+See `docs\visual-playtesting.md` for evidence, sampling limits and findings.
+
+Prototype meshes are original; selected landscape/audio assets are licensed
+separately. See `docs\asset-credits.md`. No game assets from the inspiration titles
+are used, and the supplied portrait must remain a local reference.

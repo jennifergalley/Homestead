@@ -1,0 +1,79 @@
+{
+    "clothes": [
+        "shoes01/shoes01.mhclo"
+    ],
+    "clothes_material_type": "GAMEENGINE",
+    "color_adjustments": {},
+    "expressions": [],
+    "eyebrows": "eyebrow001/eyebrow001.mhclo",
+    "eyelashes": "eyelashes01/eyelashes01.mhclo",
+    "eyes": "high-poly/high-poly.mhclo",
+    "eyes_material_settings": {},
+    "eyes_material_type": "GAMEENGINE",
+    "hair": "bob01/bob01.mhclo",
+    "makeup": [],
+    "phenotype": {
+        "age": 0.5,
+        "cupsize": 0.6200000047683716,
+        "firmness": 0.550000011920929,
+        "gender": 0.0,
+        "height": 0.4000000059604645,
+        "muscle": 0.3799999952316284,
+        "proportions": 0.6499999761581421,
+        "race": {
+            "african": 0.0,
+            "asian": 0.0,
+            "caucasian": 1.0
+        },
+        "weight": 0.3799999952316284
+    },
+    "proxy": "",
+    "rig": "game_engine",
+    "skin_material_settings": {},
+    "skin_material_type": "GAMEENGINE",
+    "skin_mhmat": "",
+    "targets": [
+        {
+            "target": "head-oval",
+            "value": 0.25
+        },
+        {
+            "target": "chin-width-decr",
+            "value": 0.18000000715255737
+        },
+        {
+            "target": "mouth-upperlip-volume-incr",
+            "value": 0.30000001192092896
+        },
+        {
+            "target": "mouth-lowerlip-volume-incr",
+            "value": 0.30000001192092896
+        },
+        {
+            "target": "mouth-scale-horiz-incr",
+            "value": 0.10000000149011612
+        },
+        {
+            "target": "nose-scale-horiz-decr",
+            "value": 0.1599999964237213
+        },
+        {
+            "target": "l-eye-scale-incr",
+            "value": 0.07999999821186066
+        },
+        {
+            "target": "r-eye-scale-incr",
+            "value": 0.07999999821186066
+        },
+        {
+            "target": "l-cheek-bones-incr",
+            "value": 0.14000000059604645
+        },
+        {
+            "target": "r-cheek-bones-incr",
+            "value": 0.14000000059604645
+        }
+    ],
+    "teeth": "teeth_base/teeth_base.mhclo",
+    "tongue": "tongue01/tongue01.mhclo"
+}

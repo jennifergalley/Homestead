@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "inherited_asset_rights": [
+    "Assets\\Characters\\provenance.json",
+    "Assets\\Characters\\Variants\\provenance.json"
+  ],
+  "third_party_assets": "Only the existing official CC0 MakeHuman/MPFB mesh, actual bundled morph targets, game_engine weights, skin, eyes, brows, lashes, teeth, tongue, shoes and long01/bob01/ponytail01 hair.",
+  "author": "MakeHuman Team and contributors for CC0 inputs; new preset recipes and regenerated original garments authored by GitHub Copilot for Jenny's project",
+  "new_work": [
+    "Willow: leaner, more athletic soft-tissue proportions and more defined facial structure",
+    "Hazel: softer, fuller soft-tissue proportions and rounder facial structure",
+    "Tunic and apron refitted independently to each new body through the existing procedural garment helpers"
+  ],
+  "method": "HumanService.create_human, actual TargetService.load_target files and HumanService.add_mhclo_asset; no arbitrary vertex warping to fabricate another face",
+  "rig_policy": "Fitted anatomical joint endpoint differences were measured first: Willow <=3.262 mm, Hazel <=3.458 mm. Both retain the original unmodified bind skeleton and reuse the existing idle/walk clips.",
+  "demographic_scope": "Original adult age anchor 0.5 and original race/skin/eye/hair-color choices retained. These are subtle shape alternatives, not demographic or personality assignments.",
+  "recipes": [
+    "Willow\\recipe.json",
+    "Hazel\\recipe.json",
+    "Scripts\\Characters\\build_body_presets.py"
+  ],
+  "verification_manifest": "body-preset-manifest.json",
+  "privacy": "No portrait upload, new external download, account, purchase or Unreal/editor/build invocation.",
+  "coverage_and_limits": [
+    "All three existing hairstyles and both existing outfit choices are delivered for each body: twelve complete clothed meshes.",
+    "Original tunic coverage and under-clothing body masking are retained. Matching garment geometry was regenerated for each body.",
+    "Actual FBX round trips retain 53 authoring bones with zero preferred bind-matrix error; original clips were applied and rendered.",
+    "Apron nearest-normal diagnostics flag one possible ~1.8 mm overlap for Willow and two samples up to ~3.1 mm for Hazel in the sampled walk pose. These diagnostics are not a full collision proof.",
+    "No cloth/hair physics, facial animation, extreme-pose validation, independent runtime face/body sliders or high-fidelity approval.",
+    "New meshes remain offline assets until the parent imports and tests them. This delivery is not a claim that the full appearance MVP is integrated."
+  ]
+}

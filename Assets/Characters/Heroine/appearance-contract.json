@@ -1,0 +1,506 @@
+{
+  "schema": 1,
+  "material_defaults_verified": true,
+  "used_with_skeletal_mesh": true,
+  "meshes": {
+    "LongWave": {
+      "asset": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave.SK_Heroine_LongWave",
+      "slots": [
+        {
+          "index": 0,
+          "slot_name": "M_Heroine_Brass",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 1,
+          "slot_name": "M_Heroine_Skin",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin",
+          "role": "skin",
+          "alpha_mask": false,
+          "appearance_group": "skin",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 2,
+          "slot_name": "M_Heroine_LightEyes",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes",
+          "role": "eyes",
+          "alpha_mask": true,
+          "appearance_group": "eyes",
+          "parameters": [
+            "IrisColor",
+            "IrisMix"
+          ]
+        },
+        {
+          "index": 3,
+          "slot_name": "M_Heroine_Eyebrows",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows",
+          "role": "brows",
+          "alpha_mask": true,
+          "appearance_group": "hair",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 4,
+          "slot_name": "M_Heroine_Eyelashes",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes",
+          "role": "fixed",
+          "alpha_mask": true,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 5,
+          "slot_name": "M_Heroine_Teeth",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 6,
+          "slot_name": "M_Heroine_Tongue",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 7,
+          "slot_name": "M_Heroine_Hair_long01",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Hair_long01.M_Heroine_Hair_long01",
+          "role": "hair",
+          "alpha_mask": true,
+          "appearance_group": "hair",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 8,
+          "slot_name": "M_Heroine_LeatherShoes",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 9,
+          "slot_name": "M_Heroine_MossLinen",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen",
+          "role": "tunic",
+          "alpha_mask": false,
+          "appearance_group": "tunic",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 10,
+          "slot_name": "M_Heroine_LinenTrim",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim",
+          "role": "tunic_trim",
+          "alpha_mask": false,
+          "appearance_group": "tunic",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 11,
+          "slot_name": "M_Heroine_ChestnutLeather",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        }
+      ],
+      "bone_names": [
+        "Heroine_Rig",
+        "Root",
+        "pelvis",
+        "spine_01",
+        "spine_02",
+        "spine_03",
+        "clavicle_l",
+        "upperarm_l",
+        "lowerarm_l",
+        "hand_l",
+        "index_01_l",
+        "index_02_l",
+        "index_03_l",
+        "middle_01_l",
+        "middle_02_l",
+        "middle_03_l",
+        "pinky_01_l",
+        "pinky_02_l",
+        "pinky_03_l",
+        "ring_01_l",
+        "ring_02_l",
+        "ring_03_l",
+        "thumb_01_l",
+        "thumb_02_l",
+        "thumb_03_l",
+        "clavicle_r",
+        "upperarm_r",
+        "lowerarm_r",
+        "hand_r",
+        "index_01_r",
+        "index_02_r",
+        "index_03_r",
+        "middle_01_r",
+        "middle_02_r",
+        "middle_03_r",
+        "pinky_01_r",
+        "pinky_02_r",
+        "pinky_03_r",
+        "ring_01_r",
+        "ring_02_r",
+        "ring_03_r",
+        "thumb_01_r",
+        "thumb_02_r",
+        "thumb_03_r",
+        "neck_01",
+        "head",
+        "thigh_l",
+        "calf_l",
+        "foot_l",
+        "ball_l",
+        "thigh_r",
+        "calf_r",
+        "foot_r",
+        "ball_r"
+      ],
+      "facing_inference_bones": {
+        "left_ankle": "foot_l",
+        "left_toe": "ball_l",
+        "right_ankle": "foot_r",
+        "right_toe": "ball_r",
+        "head": "head"
+      },
+      "facing": {
+        "reference_positions_cm": {
+          "Root": [
+            0.0,
+            6.298297705598088e-06,
+            0.03471198433544487
+          ],
+          "head": [
+            0.0,
+            4.157729500507709,
+            146.02604860338872
+          ],
+          "foot_l": [
+            16.62615335129437,
+            2.77383136659593,
+            6.861795368757761
+          ],
+          "foot_r": [
+            -16.62615335129437,
+            2.77383136659593,
+            6.861795368757761
+          ],
+          "ball_l": [
+            17.29368758231861,
+            13.686929946029602,
+            1.0875771701507442
+          ],
+          "ball_r": [
+            -17.29368758231861,
+            13.686929946029602,
+            1.0875771701507442
+          ]
+        },
+        "component_space_forward": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "yaw_degrees_from_positive_x": 90.0,
+        "mesh_yaw_to_face_positive_x": -90.0,
+        "method": "Reference local transforms composed through all parents; average ball-minus-foot projected onto XY"
+      }
+    },
+    "Bob": {
+      "asset": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob.SK_Heroine_Bob",
+      "slots": [
+        {
+          "index": 0,
+          "slot_name": "M_Heroine_Brass",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 1,
+          "slot_name": "M_Heroine_Skin",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin",
+          "role": "skin",
+          "alpha_mask": false,
+          "appearance_group": "skin",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 2,
+          "slot_name": "M_Heroine_LightEyes",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes",
+          "role": "eyes",
+          "alpha_mask": true,
+          "appearance_group": "eyes",
+          "parameters": [
+            "IrisColor",
+            "IrisMix"
+          ]
+        },
+        {
+          "index": 3,
+          "slot_name": "M_Heroine_Eyebrows",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows",
+          "role": "brows",
+          "alpha_mask": true,
+          "appearance_group": "hair",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 4,
+          "slot_name": "M_Heroine_Eyelashes",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes",
+          "role": "fixed",
+          "alpha_mask": true,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 5,
+          "slot_name": "M_Heroine_Teeth",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 6,
+          "slot_name": "M_Heroine_Tongue",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 7,
+          "slot_name": "M_Heroine_Hair_bob01",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Hair_bob01.M_Heroine_Hair_bob01",
+          "role": "hair",
+          "alpha_mask": true,
+          "appearance_group": "hair",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 8,
+          "slot_name": "M_Heroine_LeatherShoes",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        },
+        {
+          "index": 9,
+          "slot_name": "M_Heroine_MossLinen",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen",
+          "role": "tunic",
+          "alpha_mask": false,
+          "appearance_group": "tunic",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 10,
+          "slot_name": "M_Heroine_LinenTrim",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim",
+          "role": "tunic_trim",
+          "alpha_mask": false,
+          "appearance_group": "tunic",
+          "parameters": [
+            "ColorTint"
+          ]
+        },
+        {
+          "index": 11,
+          "slot_name": "M_Heroine_ChestnutLeather",
+          "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather",
+          "role": "fixed",
+          "alpha_mask": false,
+          "appearance_group": "fixed",
+          "parameters": []
+        }
+      ],
+      "bone_names": [
+        "Heroine_Rig",
+        "Root",
+        "pelvis",
+        "spine_01",
+        "spine_02",
+        "spine_03",
+        "clavicle_l",
+        "upperarm_l",
+        "lowerarm_l",
+        "hand_l",
+        "index_01_l",
+        "index_02_l",
+        "index_03_l",
+        "middle_01_l",
+        "middle_02_l",
+        "middle_03_l",
+        "pinky_01_l",
+        "pinky_02_l",
+        "pinky_03_l",
+        "ring_01_l",
+        "ring_02_l",
+        "ring_03_l",
+        "thumb_01_l",
+        "thumb_02_l",
+        "thumb_03_l",
+        "clavicle_r",
+        "upperarm_r",
+        "lowerarm_r",
+        "hand_r",
+        "index_01_r",
+        "index_02_r",
+        "index_03_r",
+        "middle_01_r",
+        "middle_02_r",
+        "middle_03_r",
+        "pinky_01_r",
+        "pinky_02_r",
+        "pinky_03_r",
+        "ring_01_r",
+        "ring_02_r",
+        "ring_03_r",
+        "thumb_01_r",
+        "thumb_02_r",
+        "thumb_03_r",
+        "neck_01",
+        "head",
+        "thigh_l",
+        "calf_l",
+        "foot_l",
+        "ball_l",
+        "thigh_r",
+        "calf_r",
+        "foot_r",
+        "ball_r"
+      ],
+      "facing_inference_bones": {
+        "left_ankle": "foot_l",
+        "left_toe": "ball_l",
+        "right_ankle": "foot_r",
+        "right_toe": "ball_r",
+        "head": "head"
+      },
+      "facing": {
+        "reference_positions_cm": {
+          "Root": [
+            0.0,
+            6.298297705598088e-06,
+            0.03471198433544487
+          ],
+          "head": [
+            0.0,
+            4.157729500507709,
+            146.02604860338872
+          ],
+          "foot_l": [
+            16.62615335129437,
+            2.77383136659593,
+            6.861795368757761
+          ],
+          "foot_r": [
+            -16.62615335129437,
+            2.77383136659593,
+            6.861795368757761
+          ],
+          "ball_l": [
+            17.29368758231861,
+            13.686929946029602,
+            1.0875771701507442
+          ],
+          "ball_r": [
+            -17.29368758231861,
+            13.686929946029602,
+            1.0875771701507442
+          ]
+        },
+        "component_space_forward": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "yaw_degrees_from_positive_x": 90.0,
+        "mesh_yaw_to_face_positive_x": -90.0,
+        "method": "Reference local transforms composed through all parents; average ball-minus-foot projected onto XY"
+      }
+    }
+  },
+  "parameters": {
+    "ColorTint": {
+      "type": "vector",
+      "default": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "operation": "authored RGB multiplied by tint; alpha unchanged"
+    },
+    "IrisColor": {
+      "type": "vector",
+      "default": [
+        0.15,
+        0.4,
+        0.55,
+        1
+      ],
+      "operation": "brightness-shaded iris target"
+    },
+    "IrisMix": {
+      "type": "scalar",
+      "default": 0,
+      "range": [
+        0,
+        1
+      ],
+      "operation": "masked iris interpolation; zero preserves original RGB"
+    }
+  },
+  "iris_mask": "saturate(8*(maxRGB-minRGB-.08))*saturate(8*(maxRGB-.08))*saturate(8*(.90-maxRGB))",
+  "limits": [
+    "Multiplicative tint is not absolute color replacement and cannot brighten black texels.",
+    "Iris recolor is a blue-atlas chroma/brightness heuristic, not a semantic iris segmentation.",
+    "Sclera whites and pupil blacks are protected by the mask; alpha remains the source texture alpha."
+  ]
+}

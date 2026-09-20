@@ -1,0 +1,147 @@
+{
+  "description": "Slightly leaner, more athletic build; wider mouth and more defined cheek/jaw structure",
+  "macro": {
+    "gender": 0.0,
+    "age": 0.5,
+    "muscle": 0.5,
+    "weight": 0.33,
+    "proportions": 0.65,
+    "height": 0.4,
+    "cupsize": 0.54,
+    "firmness": 0.55,
+    "race": {
+      "caucasian": 1.0,
+      "asian": 0.0,
+      "african": 0.0
+    }
+  },
+  "targets": {
+    "head/head-oval": 0.1,
+    "chin/chin-width-decr": 0.06,
+    "mouth/mouth-upperlip-volume-incr": 0.2,
+    "mouth/mouth-lowerlip-volume-incr": 0.24,
+    "mouth/mouth-scale-horiz-incr": 0.18,
+    "nose/nose-scale-horiz-decr": 0.06,
+    "eyes/l-eye-scale-incr": 0.08,
+    "eyes/r-eye-scale-incr": 0.08,
+    "cheek/l-cheek-bones-incr": 0.26,
+    "cheek/r-cheek-bones-incr": 0.26,
+    "head/head-diamond": 0.14
+  },
+  "height_m": 1.6,
+  "same_demographic_anchors_as_preferred": true,
+  "adult_age_anchor": 0.5,
+  "maximum_fitted_joint_delta_m": 0.003261084980864329,
+  "fitted_joint_deltas_m": {
+    "Root": 0.00011804477187070788,
+    "pelvis": 0.0009531385548511477,
+    "spine_01": 0.0010552644584679667,
+    "spine_02": 0.0010552644584679667,
+    "spine_03": 0.0009887365543545957,
+    "clavicle_l": 0.0009721780645371496,
+    "upperarm_l": 0.0010114666859719172,
+    "lowerarm_l": 0.0010114666859719172,
+    "hand_l": 0.0008435323839354848,
+    "index_01_l": 0.0008691691260577438,
+    "index_02_l": 0.0008689726553509888,
+    "index_03_l": 0.0008613564535960841,
+    "middle_01_l": 0.0008882990086638143,
+    "middle_02_l": 0.0008806053418209882,
+    "middle_03_l": 0.0008737098664511188,
+    "pinky_01_l": 0.0008707185849036325,
+    "pinky_02_l": 0.0008657232140710705,
+    "pinky_03_l": 0.0008585619744000753,
+    "ring_01_l": 0.0008857324819391803,
+    "ring_02_l": 0.0008805705958791146,
+    "ring_03_l": 0.0008752843717769819,
+    "thumb_01_l": 0.0008392974741594965,
+    "thumb_02_l": 0.0008039413680438304,
+    "thumb_03_l": 0.0007884001356377293,
+    "clavicle_r": 0.0009721780645371496,
+    "upperarm_r": 0.0010114666859719172,
+    "lowerarm_r": 0.0010114666859719172,
+    "hand_r": 0.0008435323839354848,
+    "index_01_r": 0.0008691691260577438,
+    "index_02_r": 0.0008689726553509888,
+    "index_03_r": 0.0008613564535960841,
+    "middle_01_r": 0.0008882990086638143,
+    "middle_02_r": 0.0008806053418209882,
+    "middle_03_r": 0.0008737098664511188,
+    "pinky_01_r": 0.0008707185849036325,
+    "pinky_02_r": 0.0008657232140710705,
+    "pinky_03_r": 0.0008585619744000753,
+    "ring_01_r": 0.0008857324819391803,
+    "ring_02_r": 0.0008805705958791146,
+    "ring_03_r": 0.0008752843717769819,
+    "thumb_01_r": 0.0008392974741594965,
+    "thumb_02_r": 0.0008039413680438304,
+    "thumb_03_r": 0.0007884001356377293,
+    "neck_01": 0.0013891984945988574,
+    "head": 0.0016263371584572142,
+    "thigh_l": 0.003261084980864329,
+    "calf_l": 0.0011619744971463589,
+    "foot_l": 0.0004363993581637763,
+    "ball_l": 0.0005169472079606672,
+    "thigh_r": 0.003261084980864329,
+    "calf_r": 0.0011619744971463589,
+    "foot_r": 0.0004363993581637763,
+    "ball_r": 0.0005169472079606672
+  },
+  "shared_preferred_bind": true,
+  "shape_comparison_to_preferred": {
+    "vertices": 11134,
+    "rms_displacement_m": 0.0021090542795028024,
+    "maximum_displacement_m": 0.01575901595728668,
+    "best_uniform_scale": 1.0008496419713901,
+    "rms_after_best_uniform_scale_m": 0.001840610444393915,
+    "face_rms_displacement_m": 0.0015684464467752397,
+    "torso_rms_displacement_m": 0.004601601934316375
+  },
+  "macro_target_stack": [
+    [
+      "macrodetails/caucasian-female-young",
+      0.9902
+    ],
+    [
+      "macrodetails/universal-female-young-averagemuscle-minweight",
+      0.33003365999999995
+    ],
+    [
+      "macrodetails/universal-female-young-averagemuscle-averageweight",
+      0.66016634
+    ],
+    [
+      "macrodetails/height/female-young-averagemuscle-minweight-minheight",
+      0.05940605879999999
+    ],
+    [
+      "macrodetails/height/female-young-averagemuscle-averageweight-minheight",
+      0.11882994119999998
+    ],
+    [
+      "breast/female-young-averagemuscle-minweight-averagecup-maxfirmness",
+      0.030164023295999997
+    ],
+    [
+      "breast/female-young-averagemuscle-minweight-maxcup-averagefirmness",
+      0.023564683296000002
+    ],
+    [
+      "breast/female-young-averagemuscle-averageweight-averagecup-maxfirmness",
+      0.060337096704
+    ],
+    [
+      "breast/female-young-averagemuscle-averageweight-maxcup-averagefirmness",
+      0.047136436703999994
+    ],
+    [
+      "macrodetails/proportions/female-young-averagemuscle-minweight-idealproportions",
+      0.09706289940599998
+    ],
+    [
+      "macrodetails/proportions/female-young-averagemuscle-averageweight-idealproportions",
+      0.19415492059399997
+    ]
+  ],
+  "exports": {}
+}

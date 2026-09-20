@@ -1,0 +1,264 @@
+{
+  "M_Heroine_Brass": {
+    "base_color": [
+      0.30000001192092896,
+      0.1899999976158142,
+      0.06499999761581421,
+      1.0
+    ],
+    "roughness": 0.3199999928474426,
+    "metallic": 0.75,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": null
+  },
+  "M_Heroine_Skin": {
+    "base_color": [
+      0.6600000262260437,
+      0.4300000071525574,
+      0.3199999928474426,
+      1.0
+    ],
+    "roughness": 0.47999998927116394,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": "Textures\\young_lightskinned_female_diffuse.png",
+    "sha256": "b2a6ac8cd4f9febdb447368e29c76cd68410bb66e46d9dcfa2d5f75126eea8fc"
+  },
+  "M_Heroine_Eyebrows": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\eyebrow001.png",
+    "sha256": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b"
+  },
+  "M_Heroine_Eyelashes": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\eyelashes01.png",
+    "sha256": "4b69c0fff2648874460e9caf80c31413c444218a5c50afebc425aeaa65484a35"
+  },
+  "M_Heroine_LightEyes": {
+    "base_color": [
+      0.25,
+      0.4699999988079071,
+      0.5299999713897705,
+      1.0
+    ],
+    "roughness": 0.2199999988079071,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\blue_eye.png",
+    "sha256": "572ddc93ab3e177100619ec7c00b2574540cfb382805afc2e450788117f6140c"
+  },
+  "M_Heroine_Hair_ponytail01": {
+    "base_color": [
+      0.11999999731779099,
+      0.04800000041723251,
+      0.020999999716877937,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.10000000149011612,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\T_Ponytail_Chestnut.png",
+    "sha256": "1d12cabbab25c6084f5ce6f7d46382fa8e626c24476407f9aad4015d73219bbf",
+    "role": "hair",
+    "appearance_group": "hair",
+    "runtime_parameter": "ColorTint",
+    "runtime_default": [
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "M_Heroine_LinenTrim": {
+    "base_color": [
+      0.4399999976158142,
+      0.4000000059604645,
+      0.23999999463558197,
+      1.0
+    ],
+    "roughness": 0.800000011920929,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": null
+  },
+  "M_Heroine_LeatherShoes": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": "Textures\\shoes01_diffuse.png",
+    "sha256": "50c9a406a7f1cb6aa7b42912348e78f09d0252aa3963c8229cf18dfe8353cdbf"
+  },
+  "M_Heroine_ChestnutLeather": {
+    "base_color": [
+      0.0949999988079071,
+      0.03700000047683716,
+      0.01600000075995922,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": null
+  },
+  "M_Heroine_MossLinen": {
+    "base_color": [
+      0.20000000298023224,
+      0.27000001072883606,
+      0.11500000208616257,
+      1.0
+    ],
+    "roughness": 0.8700000047683716,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": null
+  },
+  "M_Heroine_Teeth": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": "Textures\\teeth.png",
+    "sha256": "d0afb57869c6fbb56b98f5efc4aec629ee7593e70d8dd2bfb9de923acfb65f43"
+  },
+  "M_Heroine_Tongue": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": "Textures\\tongue01_diffuse.png",
+    "sha256": "3150be398e48e8ba1feac164c3143c16c0b2e959d9ffb6155f0171f59cfb4ea9"
+  },
+  "M_Heroine_ApronTrim": {
+    "base_color": [
+      0.7400000095367432,
+      0.6700000166893005,
+      0.5299999713897705,
+      1.0
+    ],
+    "roughness": 0.8600000143051147,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": null,
+    "role": "apron",
+    "appearance_group": "tunic",
+    "runtime_parameter": "ColorTint",
+    "runtime_default": [
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "M_Heroine_ApronLinen": {
+    "base_color": [
+      0.6700000166893005,
+      0.6000000238418579,
+      0.46000000834465027,
+      1.0
+    ],
+    "roughness": 0.9200000166893005,
+    "metallic": 0.0,
+    "specular": 0.25,
+    "two_sided": true,
+    "alpha_mask": false,
+    "texture": "Textures\\T_ApronLinen.png",
+    "sha256": "e3676eeb6e14d8811d3ae67fd996600d02b21038d1c111b4612c00ee68e0ea8f",
+    "role": "apron",
+    "appearance_group": "tunic",
+    "runtime_parameter": "ColorTint",
+    "runtime_default": [
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "M_Heroine_Hair_long01": {
+    "base_color": [
+      0.11999999731779099,
+      0.04800000041723251,
+      0.020999999716877937,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.10000000149011612,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\T_Long_Chestnut.png",
+    "sha256": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2"
+  },
+  "M_Heroine_Hair_bob01": {
+    "base_color": [
+      0.11999999731779099,
+      0.04800000041723251,
+      0.020999999716877937,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.10000000149011612,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\T_Bob_Chestnut.png",
+    "sha256": "e953d110d4c42fb2fec458176898baa6871917790c1ffbd90c396509dbeb7f4a"
+  }
+}

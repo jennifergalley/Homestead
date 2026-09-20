@@ -1,0 +1,113 @@
+{
+  "macro": {
+    "gender": 0.0,
+    "age": 0.5,
+    "muscle": 0.38,
+    "weight": 0.38,
+    "proportions": 0.65,
+    "height": 0.4,
+    "cupsize": 0.62,
+    "firmness": 0.55,
+    "race": {
+      "caucasian": 1.0,
+      "asian": 0.0,
+      "african": 0.0
+    }
+  },
+  "targets": {
+    "head/head-oval": 0.25,
+    "chin/chin-width-decr": 0.18,
+    "mouth/mouth-upperlip-volume-incr": 0.3,
+    "mouth/mouth-lowerlip-volume-incr": 0.3,
+    "mouth/mouth-scale-horiz-incr": 0.1,
+    "nose/nose-scale-horiz-decr": 0.16,
+    "eyes/l-eye-scale-incr": 0.08,
+    "eyes/r-eye-scale-incr": 0.08,
+    "cheek/l-cheek-bones-incr": 0.14,
+    "cheek/r-cheek-bones-incr": 0.14
+  },
+  "height_m": 1.6,
+  "age_anchor": "MPFB young adult (.5), no child/baby target contribution",
+  "macro_target_stack": [
+    [
+      "macrodetails/caucasian-female-young",
+      0.9902
+    ],
+    [
+      "macrodetails/universal-female-young-minmuscle-minweight",
+      0.054823502318000004
+    ],
+    [
+      "macrodetails/universal-female-young-minmuscle-averageweight",
+      0.17817055768200002
+    ],
+    [
+      "macrodetails/universal-female-young-averagemuscle-minweight",
+      0.17817055768200002
+    ],
+    [
+      "macrodetails/universal-female-young-averagemuscle-averageweight",
+      0.5790353823180001
+    ],
+    [
+      "macrodetails/height/female-young-minmuscle-averageweight-minheight",
+      0.032070700382760005
+    ],
+    [
+      "macrodetails/height/female-young-averagemuscle-minweight-minheight",
+      0.032070700382760005
+    ],
+    [
+      "macrodetails/height/female-young-averagemuscle-averageweight-minheight",
+      0.10422636881724001
+    ],
+    [
+      "breast/female-young-minmuscle-minweight-maxcup-averagefirmness",
+      0.011748326633058602
+    ],
+    [
+      "breast/female-young-minmuscle-averageweight-averagecup-maxfirmness",
+      0.013511874267941404
+    ],
+    [
+      "breast/female-young-minmuscle-averageweight-maxcup-averagefirmness",
+      0.03818081332894141
+    ],
+    [
+      "breast/female-young-averagemuscle-minweight-averagecup-maxfirmness",
+      0.013511874267941404
+    ],
+    [
+      "breast/female-young-averagemuscle-minweight-maxcup-averagefirmness",
+      0.03818081332894141
+    ],
+    [
+      "breast/female-young-averagemuscle-averageweight-averagecup-maxfirmness",
+      0.0439121557700586
+    ],
+    [
+      "breast/female-young-averagemuscle-averageweight-maxcup-averagefirmness",
+      0.12408358670905861
+    ],
+    [
+      "breast/female-young-averagemuscle-averageweight-maxcup-maxfirmness",
+      0.0135118742679414
+    ],
+    [
+      "macrodetails/proportions/female-young-minmuscle-minweight-idealproportions",
+      0.0161235920317238
+    ],
+    [
+      "macrodetails/proportions/female-young-minmuscle-averageweight-idealproportions",
+      0.0523999610142762
+    ],
+    [
+      "macrodetails/proportions/female-young-averagemuscle-minweight-idealproportions",
+      0.0523999610142762
+    ],
+    [
+      "macrodetails/proportions/female-young-averagemuscle-averageweight-idealproportions",
+      0.1702943059397238
+    ]
+  ]
+}

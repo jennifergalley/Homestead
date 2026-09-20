@@ -1,0 +1,25 @@
+{
+  "id": "mpfb",
+  "schema_version": "1.0.0",
+  "name": "MPFB",
+  "version": "2.0.17",
+  "tagline": "Human character generator and editor",
+  "archive_hash": "sha256:4f0a879d64a39bf646fbf5f53601ac678855da329d650617dca5737548239a87",
+  "archive_size": 45031536,
+  "archive_url": "https://extensions.blender.org/download/sha256:4f0a879d64a39bf646fbf5f53601ac678855da329d650617dca5737548239a87/add-on-mpfb-v2.0.17.zip",
+  "type": "add-on",
+  "blender_version_min": "4.2.0",
+  "website": "https://extensions.blender.org/add-ons/mpfb/",
+  "maintainer": "Joel-Palmius",
+  "license": [
+    "SPDX:GPL-3.0-or-later"
+  ],
+  "permissions": {
+    "files": "Load and save data",
+    "network": "(optional) Interact with local instance of MakeHuman"
+  },
+  "tags": [
+    "Add Mesh",
+    "Rigging"
+  ]
+}
