@@ -3,6 +3,7 @@
 #include "HomesteadWorld.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
+#include "HomesteadWateringTool.h"
 #include "HomesteadTestPaths.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
@@ -135,6 +136,19 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest")))
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof")))
+        {
+            Finish(false, TEXT("Watering lifecycle requires its own isolated run."));
+            return;
+        }
+        PrepareWateringChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest")))
     {
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
@@ -617,16 +631,23 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     if (StepElapsed >= 0.3f && Animation
         && (Controller->IsBookOpen() || Controller->IsPlanning() || Controller->IsFailed())
-        && Animation->GatherWeight() > 0.001f)
+        && Animation->ActionWeight() > 0.001f)
     {
         TraceState(TEXT("ACTION FAIL ") + Step.Name);
-        Finish(false, Step.Name + TEXT(" | Picking pose remained active during a menu, planning or failure."));
+        Finish(false, Step.Name + TEXT(" | Hand-action pose remained active during a menu, planning or failure."));
         return;
     }
     if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")) && !VerifyPresentationMaterials())
     {
         TraceState(TEXT("MATERIAL FAIL ") + Step.Name);
         Finish(false, Step.Name + TEXT(" | Skin/eye material or saved color contract failed."));
+        return;
+    }
+    if (Avatar && Avatar->GetWateringTool()->IsPresented()
+        && (!Animation || !Animation->IsWatering() || Controller->IsBookOpen() || Controller->IsPlanning()
+            || Controller->IsFailed() || Controller->Simulation().Count(Homestead::Item::WateringCan) == 0))
+    {
+        Finish(false, Step.Name + TEXT(" | Contextual watering tool remained visible without its valid action."));
         return;
     }
     Results.Add(TEXT("PASS ") + Step.Name);
@@ -658,7 +679,9 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
     {
         Axis(EKeys::Gamepad_LeftY, 0);
         Axis(EKeys::Gamepad_RightX, 0);
-        const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")) ? 0 : 4;
+        const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));
     }

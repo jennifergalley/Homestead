@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [ValidateRange(720,2160)][int]$Height=720,
-    [switch]$Packaged, [string]$PackageDirectory='Build\Windows',
+    [switch]$Packaged, [switch]$Watering, [string]$PackageDirectory='Build\Windows',
     [string]$OutputDirectory)
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
@@ -25,6 +25,7 @@ if($Packaged) {
 if(-not (Test-Path -LiteralPath $executable)) { throw "Missing game executable: $executable" }
 $log=Join-Path $output 'engine.log'
 $arguments=$prefix+"-HomesteadVisualPlaytest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$log`""
+if($Watering) { $arguments += ' -HomesteadWateringPlaytest' }
 $process=Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Isolated visual playtest PID=$($process.Id); output=$output"
 if(-not $process.WaitForExit(600000)) {
@@ -35,6 +36,15 @@ $telemetry=Join-Path $output 'telemetry.csv'
 $observations=Join-Path $output 'observations.txt'
 if($process.ExitCode -ne 0 -or -not (Test-Path $telemetry) -or -not (Test-Path $observations)) {
     throw "Playtest did not finish its capture. See $log."
+}
+$outcome=Get-Content -LiteralPath $observations -Raw
+$required=if($Watering) {
+    'Watered real planted plot=1; action observed=1; tilted tool observed=1; recovered and hidden=1'
+} else {
+    'Forage target reached=1; resources actually gathered=1'
+}
+if($outcome.Contains('FAILED ') -or -not $outcome.Contains($required)) {
+    throw "Recorded route did not meet its actual gameplay outcome. See $observations."
 }
 $rows=Import-Csv -LiteralPath $telemetry
 if(-not $rows.Count) { throw "Visual playtest produced no telemetry: $telemetry" }

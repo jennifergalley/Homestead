@@ -1,0 +1,11 @@
+{
+  "AN_Heroine_Water": {
+    "duration_seconds": 2.2,
+    "fps": 60,
+    "frames": 133,
+    "rig": "Unchanged shared heroine bind; animation-only import",
+    "tool": "Original procedural wood/fiber can; hand_r grip, 32-degree authored pour tilt; centimeter geometry with absolute world scale 1",
+    "reward": "None; contextual presentation after the existing successful plot-water transaction",
+    "contact": "Generic forward watering, not target/terrain IK or precise ground contact"
+  }
+}

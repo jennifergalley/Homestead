@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [ValidateSet('Locomotion','Gathering')][string]$AnimationSet='Locomotion')
+param([string]$EngineRoot, [ValidateSet('Locomotion','Gathering','Watering')][string]$AnimationSet='Locomotion')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
@@ -12,6 +12,7 @@ foreach ($verify in @($false, $true)) {
     [string[]]$extra = @()
     if ($verify) { $extra = @('-LocomotionVerifyOnly') }
     if ($AnimationSet -eq 'Gathering') { $extra += '-GatheringAnimations' }
+    if ($AnimationSet -eq 'Watering') { $extra += '-WateringAnimations' }
     & $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$script" `
         -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput @extra *> $log
     $marker = $AnimationSet.ToUpper() + '_VERIFIED'

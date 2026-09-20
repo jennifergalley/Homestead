@@ -371,8 +371,11 @@ void AHomesteadController::Interact()
             if (Plot.id != FocusId) continue;
             const bool Planted = Plot.planted;
             const bool Mature = Plot.growth >= 1;
-            Notify(!Planted ? Sim.Plant(FocusId, Position) :
-                Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position), GrassStepB);
+            const auto Result = !Planted ? Sim.Plant(FocusId, Position) :
+                Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
+            Notify(Result, GrassStepB);
+            if (Result.ok && Planted && !Mature)
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayWater();
             break;
         }
         break;
@@ -444,7 +447,7 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
-        Avatar->CancelGather();
+        Avatar->CancelAction();
         Avatar->GetCharacterMovement()->StopMovementImmediately();
         Avatar->SetAppearancePreview(Page == 6);
     }
@@ -855,7 +858,7 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
 {
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
     if (!Result) { Notify(Result); return; }
-    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelGather();
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
     WorldId = Save.WorldId;
     Appearance.HairStyle = Save.HairStyle;
     Appearance.HairColor = Save.HairColor;
@@ -930,7 +933,7 @@ void AHomesteadController::RetryCheckpoint()
     if (LoadLatest(true)) return;
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*SessionCheckpoint));
     if (!Result) { Notify(Result); return; }
-    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelGather();
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
     PendingLocation = FVector(-1000, 0, 180);
     bPendingSpawn = true;
     bWasFailed = false;

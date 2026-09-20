@@ -469,3 +469,110 @@ acquisition, private-reference upload or face/hair experiment was involved.
 Both recorded gameplay and smoke timing remain concurrent-load observations.
 Requested 8Hz capture is not game FPS or proof of continuous smoothness,
 controller comfort, listening quality or Jenny's approval.
+
+## Watering action and contextual tool (2026-09-20)
+
+Candidate: `Build\Releases\20260920-050723-5cc6c8a5\watering-01\Windows`.
+It adds one 2.2-second lift/tilt/recover and a small original wood/fiber-bound
+watering vessel with a spout and loop handle. The existing three-branch/two-fiber
+recipe and all simulation rules remain unchanged. No player build, previous
+candidate or normal save was replaced.
+
+### Initial observation and concrete correction
+
+The initial actual-game review at
+`Saved\VisualPlaytests\20260920-050723-5cc6c8a5\watering-initial-02`
+exposed an enormous held prop: the hand socket's inherited FBX unit-conversion
+scale multiplied geometry already authored in centimeters. Correct grip position
+and lifecycle checks had not caught size. The correction gives the prop absolute
+world scale and adds actual scale/bounds assertions across all 18 appearances.
+There was no arm-angle or clip redesign after this initial review.
+
+An earlier six-frame setup diagnostic (`watering-initial`) failed before reaching
+the action because the new observer checked queued input in its submitting tick.
+The route now checks actual transaction results after input processing. Its
+PowerShell launcher also rejects failed recorded outcomes independently of exit
+status; the editor had exited zero despite the failed route. That diagnostic
+was not a completed action-quality review and was not discarded or called a pass.
+
+### Final ordinary-control evidence
+
+```powershell
+.\Scripts\Playtest-Visual.ps1 -Packaged `
+  -PackageDirectory 'Build\Releases\20260920-050723-5cc6c8a5\watering-01' `
+  -Watering -Width 1280 -Height 720 -OutputDirectory '<fresh-folder>'
+python .\Scripts\Review-Watering.py '<fresh-folder>'
+```
+
+Final capture:
+`Saved\VisualPlaytests\20260920-050723-5cc6c8a5\watering-01-packaged`.
+It contains **122 actual 1280x720 frames over 72.9212 seconds**. Starting from the
+normal clearing, the heroine walks to five supply patches, gathers branches/
+stone/fiber/seeds, crafts a digging stick and can through the book, walks to the
+stream, fills six portions, approaches clear soil, tills, plants and waters a
+real root plot at cell `(3,-3)`. All mutations use mapped controls. There is no
+injected setup save, teleport or debug time/state edit; ordinary crafting keeps
+its existing time cost. Garden feasibility is checked on a simulation copy,
+never by creating a plot in the live state.
+
+Setup is sampled at 1 Hz; the final full-body/tool segment requests 8 Hz.
+The inspected `watering-sheet.png` shows a hand-sized handle and modest wooden
+can in front of the body, a downward tilt, return upright and disappearance
+before the relaxed idle resumes. No gross body/tool penetration is visible in
+these preferred-heroine frames. Functional attachment/scale/hide checks cover
+all presets; this is not an exhaustive visual clearance proof for every mesh,
+camera and terrain slope. The final correction is retained; no third visual
+tuning pass followed it.
+
+| Final ordinary watering measurement | Result |
+| --- | --- |
+| Real water debit / new action starts | 1 / 1 |
+| Moisture before / after recovery | 0.348782 / 0.999069 (normal drying continues) |
+| Held-tool samples / peak tilt | 10 / 32 degrees |
+| Tool world scale / bounding-sphere radius | 1 / 28.924cm |
+| Maximum wrist / actor displacement | 39.47cm / 0cm |
+| Maximum left/right toe displacement | 0.371 / 0.324cm |
+| Final action weight / tool visible | 0 / false |
+
+The can appears and disappears contextually; there is no holster/equip animation
+or visible water stream. It is a generic forward pour, not precise soil contact,
+target-aware IK or a fluid simulation. The water/moisture transaction and existing
+sound/toast happen immediately on success, not at an animation notify.
+Movement can suppress/cancel the pose without undoing a legitimate transaction.
+Repeated/alternating presentation requests never create competing pose layers
+or delayed actions; separate valid watering inputs still consume their normal
+water portions. Hair, face, clothing and residual gait limitations are unchanged.
+
+### Packaged regressions and preservation
+
+`Saved\Automation\20260920-050723-5cc6c8a5\watering-01-lifecycle` passed
+**181 watering checks**, including the corrected world scale/bounds, exact
+inventory/moisture/growth effects, A/E, failures, repeats, movement, pause,
+save/load and all 18 appearances. Its setup uses explicitly test-only teleport
+travel but real gather/craft/till/plant transactions, unlike the ordinary route.
+
+The sibling `watering-01-gathering` and `watering-01-full-loop` folders passed
+**74 gathering** and **434 full-loop checks**. Mature berry/root harvests now
+explicitly prove no water debit or new watering action. Existing crop maturation,
+appearance/colors/saves and real failed-vitals/same-world retry assertions remain
+intact. The standard full loop rejected four deliberate external-input probes;
+dedicated action modes correctly report zero such probes.
+Native rules passed **16 scenarios / 986 checks**, run controls **21**.
+
+The independently reloaded FBX has 133 samples, duration 2.2s, all 53 original
+binds unchanged, idle seam error 3.58e-7, toe drift 0.0000573cm and bone-scale
+error 7.15e-7. Fresh Unreal reload proves the shared skeleton, duration
+2.200000048s, disabled root motion and zero notifies. Receipts are under
+`Build\CharacterPreview\watering-*` and copied into the candidate's
+`Verification` directory.
+
+All **68** baseline character/source LFS assets remain byte-identical to
+`08810ef`: the original 66 plus the two accepted gathering assets. Only the new
+watering animation is imported; the prop is original runtime geometry using
+an existing material. Five incidental world-bootstrap resaves were restored
+with hash proof. No body/hair/material reimport, new purchase, private-reference
+upload or promotion occurred.
+
+This is verified technical/action-presentation progress, not Jenny's aesthetic
+approval. Sparse screenshots and concurrent-load timings do not certify
+continuous smoothness, controller comfort, listening quality or clean performance.

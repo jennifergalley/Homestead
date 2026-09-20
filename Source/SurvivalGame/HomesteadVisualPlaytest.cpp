@@ -2,6 +2,7 @@
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
+#include "HomesteadWateringTool.h"
 #include "HomesteadTestPaths.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "InputKeyEventArgs.h"
@@ -9,6 +10,8 @@
 #include "HAL/FileManager.h"
 #include "HAL/PlatformMisc.h"
 #include "Misc/FileHelper.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "UnrealClient.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
@@ -40,10 +43,15 @@ void AHomesteadVisualPlaytest::ApplyAxes(FVector2D Move, FVector2D Look)
 void AHomesteadVisualPlaytest::Prepare()
 {
     OutputDirectory = HomesteadTestOutputDirectory();
+    if (const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
+        AddTickPrerequisiteComponent(Avatar->GetWateringTool());
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
-    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y"));
+    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius"));
+    bWaterRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringPlaytest"));
     Observations.Add(TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
     Observations.Add(TEXT("Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark."));
+    if (bWaterRoute)
+        Observations.Add(TEXT("Watering starts from the normal new clearing: mapped gathering, crafting, stream refill, tilling and planting. No fixture/save injection. Ordinary crafting still advances its existing game time. Setup is sampled at 1 Hz; final action at requested 8 Hz."));
     Passes = {
         {TEXT("close-notes"), 1, {}, {}, EKeys::Gamepad_Special_Right},
         {TEXT("idle"), 3},
@@ -78,7 +86,11 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
     const FVector LeftHand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_l"));
     const FVector RightHand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
     const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
-    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f"),
+    const auto* Tool = Avatar->GetWateringTool();
+    const FVector Grip = Tool->GripPosition();
+    double Moisture = -1;
+    for (const auto& Plot : PC->State().plots) if (Plot.id == WaterPlotId) Moisture = Plot.moisture;
+    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f,%.4f,%.4f,%u,%d,%.3f,%.3f,%.3f,%.3f,%d,%.6f,%.3f,%.3f"),
         CaptureIndex, Elapsed, *Label, Position.X, Position.Y, Position.Z, Avatar->GetVelocity().Size2D(),
         Avatar->GetActorRotation().Yaw, PC->GetControlRotation().Yaw,
         Left.X, Left.Y, Left.Z, Right.X, Right.Y, Right.Z,
@@ -86,11 +98,21 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
         LeftHand.X, LeftHand.Y, LeftHand.Z, RightHand.X, RightHand.Y, RightHand.Z,
         Animation ? Animation->WalkPhase() : -1,
         Animation ? Animation->GatherWeight() : -1, Animation ? Animation->GatherPhase() : -1,
-        Animation ? Animation->GatherStarts() : 0, ForageTarget.X, ForageTarget.Y));
+        Animation ? Animation->GatherStarts() : 0, ForageTarget.X, ForageTarget.Y,
+        Animation ? Animation->WaterWeight() : 0, Animation ? Animation->WaterPhase() : 0,
+        Animation ? Animation->WaterStarts() : 0, Tool->IsPresented(), Grip.X, Grip.Y, Grip.Z,
+        Tool->GetComponentRotation().Pitch, PC->Simulation().Count(Homestead::Item::Water), Moisture,
+        Tool->GetComponentScale().X, Tool->Bounds.SphereRadius));
     if (Animation && (Label == TEXT("gather") || Label == TEXT("after-gather")))
     {
         bObservedGather |= Animation->GatherWeight() > 0.5f;
         bGatherRecovered |= bObservedGather && Animation->GatherWeight() < 0.001f && Animation->GatherPhase() >= 1.59f;
+    }
+    if (Animation && bWaterRoute && (Label == TEXT("water") || Label == TEXT("after-water")))
+    {
+        bObservedWater |= Animation->WaterWeight() > 0.5f;
+        bObservedTool |= Tool->IsPresented() && Tool->GetComponentRotation().Pitch < -20;
+        bWaterRecovered |= bObservedWater && Animation->WaterWeight() < 0.001f && !Tool->IsPresented();
     }
     const FString Name = FString::Printf(TEXT("frame-%05d.png"), CaptureIndex++);
     FScreenshotRequest::RequestScreenshot(FPaths::Combine(OutputDirectory, TEXT("Frames"), Name), false, false);
@@ -116,6 +138,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     const float WallDelta = FMath::Min(static_cast<float>(Now - LastWallTime), 1.0f);
     LastWallTime = Now;
     Elapsed += WallDelta;
+    if (bWaterRoute) { TickWatering(WallDelta); return; }
     if (!Passes.IsValidIndex(PassIndex) || Elapsed > 100) { Finish(); return; }
     FPass& Pass = Passes[PassIndex];
     if (!bEntered)
@@ -196,13 +219,21 @@ void AHomesteadVisualPlaytest::Finish()
     ApplyAxes({}, {});
     const bool Gathered = PC->Simulation().Count(Homestead::Item::Berries) > FoodBefore
         || PC->Simulation().Count(Homestead::Item::Flowers) > HerbBefore;
-    Observations.Add(FString::Printf(TEXT("Forage target reached=%d; resources actually gathered=%d"), bReachedForage, Gathered));
-    Observations.Add(FString::Printf(TEXT("Picking action observed=%d; recovered to idle=%d"), bObservedGather, bGatherRecovered));
+    if (bWaterRoute)
+        Observations.Add(FString::Printf(TEXT("Watered real planted plot=%d; action observed=%d; tilted tool observed=%d; recovered and hidden=%d"),
+            bWatered, bObservedWater, bObservedTool, bWaterRecovered));
+    else
+    {
+        Observations.Add(FString::Printf(TEXT("Forage target reached=%d; resources actually gathered=%d"), bReachedForage, Gathered));
+        Observations.Add(FString::Printf(TEXT("Picking action observed=%d; recovered to idle=%d"), bObservedGather, bGatherRecovered));
+    }
     Observations.Add(TEXT("This observational capture is not a visual-quality pass or a replacement for human feel/listening review."));
     bool Saved = FFileHelper::SaveStringToFile(FString::Join(Telemetry, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("telemetry.csv")));
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    FPlatformMisc::RequestExitWithStatus(false, Saved && bReachedForage && Gathered && bObservedGather && bGatherRecovered ? 0 : 1);
+    const bool Complete = bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
+        : bReachedForage && Gathered && bObservedGather && bGatherRecovered;
+    FPlatformMisc::RequestExitWithStatus(false, Saved && Complete ? 0 : 1);
 }

@@ -14,6 +14,7 @@ class UStaticMeshComponent;
 class USkeletalMesh;
 class UAnimSequence;
 class UMaterialInstanceDynamic;
+class UHomesteadWateringTool;
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -34,8 +35,11 @@ public:
     UAnimSequence* GetIdleAnimation() const { return IdleAnimation; }
     UAnimSequence* GetWalkAnimation() const { return WalkAnimation; }
     UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
+    UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
+    UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
     void PlayGather();
-    void CancelGather();
+    void PlayWater();
+    void CancelAction();
 
 private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<USpringArmComponent> CameraArm;
@@ -52,6 +56,8 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> IdleAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> WalkAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
     bool bPlanning = false;
     bool bHeroineReady = false;

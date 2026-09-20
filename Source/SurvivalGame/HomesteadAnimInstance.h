@@ -13,10 +13,16 @@ public:
     float GaitRate() const;
     float WalkPhase() const;
     void RequestGather();
-    void CancelGather();
+    void RequestWater();
+    void CancelAction();
     float GatherWeight() const;
     float GatherPhase() const;
     uint32 GatherStarts() const;
+    float WaterWeight() const;
+    float WaterPhase() const;
+    uint32 WaterStarts() const;
+    bool IsWatering() const;
+    float ActionWeight() const;
 
 protected:
     virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

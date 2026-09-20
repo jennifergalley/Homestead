@@ -1,6 +1,10 @@
 #include "HomesteadSmokeTest.h"
 
 #include "HomesteadController.h"
+#include "HomesteadCharacter.h"
+#include "HomesteadAnimInstance.h"
+#include "HomesteadWateringTool.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Pawn.h"
 #include "InputCoreTypes.h"
 
@@ -652,21 +656,32 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, BerryGarden]() { Teleport(BerryGarden); },
         [this]() { return Controller->FocusTitle().StartsWith(TEXT("Berries")) && Controller->FocusActions().Contains(TEXT("Harvest")); }, 0.65f);
     const auto BerryHarvestRoots = MakeShared<int32>(0);
+    const auto WaterBefore = MakeShared<int32>(0);
+    const auto CropWaterStarts = MakeShared<uint32>(0);
+    auto WaterStarts = [this]()
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+        return Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance())->WaterStarts();
+    };
     Add(TEXT("Harvest six berries through gamepad A while retaining the planted bush"),
-        [this, FruitBefore, BerrySeedStock, BerryHarvestRoots]()
+        [this, FruitBefore, BerrySeedStock, BerryHarvestRoots, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             *FruitBefore = Controller->Simulation().Count(Homestead::Item::Berries);
             *BerrySeedStock = Controller->Simulation().Count(Homestead::Item::Seeds);
             *BerryHarvestRoots = Controller->Simulation().Count(Homestead::Item::Roots);
+            *WaterBefore = Controller->Simulation().Count(Homestead::Item::Water);
+            *CropWaterStarts = WaterStarts();
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, BerryPlotId, FruitBefore, BerrySeedStock, BerryHarvestRoots]()
+        [this, BerryPlotId, FruitBefore, BerrySeedStock, BerryHarvestRoots, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries && Plot->growth < 0.001
                 && Controller->Simulation().Count(Homestead::Item::Berries) == *FruitBefore + 6
                 && Controller->Simulation().Count(Homestead::Item::Seeds) == *BerrySeedStock
                 && Controller->Simulation().Count(Homestead::Item::Roots) == *BerryHarvestRoots
+                && Controller->Simulation().Count(Homestead::Item::Water) == *WaterBefore
+                && WaterStarts() == *CropWaterStarts
                 && !Controller->ToastIsError();
         });
     Add(TEXT("Return to the cabin to checkpoint actual berry regrowth"),
@@ -727,18 +742,22 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { return Controller->FocusActions().Contains(TEXT("Harvest")); }, 0.65f);
     const auto RootsBefore = MakeShared<int32>(0);
     Add(TEXT("Harvest mature roots and renewable seeds through gamepad A"),
-        [this, RootsBefore, SeedsBefore]()
+        [this, RootsBefore, SeedsBefore, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             *RootsBefore = Controller->Simulation().Count(Homestead::Item::Roots);
             *SeedsBefore = Controller->Simulation().Count(Homestead::Item::Seeds);
+            *WaterBefore = Controller->Simulation().Count(Homestead::Item::Water);
+            *CropWaterStarts = WaterStarts();
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, RootsBefore, SeedsBefore]()
+        [this, RootsBefore, SeedsBefore, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
             return Plot && !Plot->planted && Plot->growth == 0
                 && Controller->Simulation().Count(Homestead::Item::Roots) == *RootsBefore + 4
                 && Controller->Simulation().Count(Homestead::Item::Seeds) == *SeedsBefore + 2
+                && Controller->Simulation().Count(Homestead::Item::Water) == *WaterBefore
+                && WaterStarts() == *CropWaterStarts
                 && !Controller->ToastIsError();
         });
 

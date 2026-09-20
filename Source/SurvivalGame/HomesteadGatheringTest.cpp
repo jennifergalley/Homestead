@@ -51,7 +51,7 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         Add(TEXT("Approach fresh gathering fixture ") + FString::FromInt(Node.id),
             [this, Avatar, Probe, Node]()
             {
-                Avatar->CancelGather();
+                Avatar->CancelAction();
                 Probe->Id = Node.id;
                 Teleport(Node.position);
             },

@@ -15,11 +15,12 @@ RECEIPT = ROOT / "Build" / "CharacterPreview" / "locomotion-import.json"
 
 
 def main():
-    gathering = "-GatheringAnimations" in unreal.SystemLibrary.get_command_line()
-    source = SOURCE.parent / "Gathering" if gathering else SOURCE
-    receipt = RECEIPT.with_name("gathering-import.json") if gathering else RECEIPT
+    command = unreal.SystemLibrary.get_command_line()
+    group = "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
+    source = SOURCE.parent / group
+    receipt = RECEIPT.with_name(group.lower() + "-import.json")
     unreal.SystemLibrary.execute_console_command(None, "Interchange.FeatureFlags.Import.FBX 0")
-    contract = json.loads((source / ("gathering-contract.json" if gathering else "locomotion-contract.json")).read_text())
+    contract = json.loads((source / (group.lower() + "-contract.json")).read_text())
     mesh = LIB.load_asset(DEST + "/SK_Heroine_LongWave")
     if not mesh:
         raise RuntimeError("Import the existing heroine first")
@@ -47,17 +48,17 @@ def main():
             raise RuntimeError(f"Wrong duration: {name} {duration}")
         root_motion = clip.get_editor_property("enable_root_motion")
         notify_count = len(unreal.AnimationLibrary.get_animation_notify_events(clip))
-        if gathering and (root_motion or notify_count):
-            raise RuntimeError("Gathering must not extract root motion or carry animation notifies")
+        if group != "Locomotion" and (root_motion or notify_count):
+            raise RuntimeError(group + " must not extract root motion or carry animation notifies")
         if not verify_only:
             save_checked(clip)
         report[name] = {"sha256": digest, "asset": clip.get_path_name(),
                         "skeleton": skeleton.get_path_name(), "duration_seconds": duration,
                         "root_motion_enabled": root_motion, "notify_count": notify_count}
     receipt.parent.mkdir(parents=True, exist_ok=True)
-    target = receipt.with_name("gathering-reload.json" if gathering else "locomotion-reload.json") if verify_only else receipt
+    target = receipt.with_name(group.lower() + "-reload.json") if verify_only else receipt
     target.write_text(json.dumps(report, indent=2) + "\n")
-    unreal.log(("GATHERING_VERIFIED " if gathering else "LOCOMOTION_VERIFIED ") + str(target))
+    unreal.log(group.upper() + "_VERIFIED " + str(target))
 
 
 if __name__ == "__main__":

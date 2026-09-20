@@ -13,12 +13,15 @@ SOURCE = ROOT / "Assets" / "Characters" / "Heroine"
 
 
 def main():
+    watering = "--watering" in sys.argv
+    group = "Watering" if watering else "Gathering"
+    duration = 2.2 if watering else 1.6
     rig = load(SOURCE / "SK_Heroine_LongWave.fbx")
     bind = {b.name: (b.parent.name if b.parent else None, b.matrix_local.copy()) for b in rig.data.bones}
     idle = load(SOURCE / "Locomotion" / "AN_Heroine_RelaxedIdle.fbx")
     bpy.context.scene.frame_set(1)
     idle_pose = {b.name: b.matrix.copy() for b in idle.pose.bones}
-    rig = load(SOURCE / "Gathering" / "AN_Heroine_Gather.fbx")
+    rig = load(SOURCE / group / ("AN_Heroine_Water.fbx" if watering else "AN_Heroine_Gather.fbx"))
     if set(bind) != set(rig.data.bones.keys()):
         raise RuntimeError("Gather changed shared bone names")
     bind_error = 0
@@ -31,7 +34,7 @@ def main():
         raise RuntimeError("Gather changed the bind matrices")
     action = rig.animation_data.action
     start, end = action.frame_range
-    if abs((end - start) / 60 - 1.6) > 0.001:
+    if abs((end - start) / 60 - duration) > 0.001:
         raise RuntimeError("Unexpected gathering duration")
     samples, endpoint_error, maximum_scale_error = [], 0, 0
     for frame in range(int(start), int(end) + 1):
@@ -50,7 +53,7 @@ def main():
     if endpoint_error > 0.001 or foot_drift > 0.001 or maximum_scale_error > 0.0001 or hand_travel < 0.20:
         raise RuntimeError(f"Gather pose contract failed: seam={endpoint_error}, feet={foot_drift}, scale={maximum_scale_error}, hand={hand_travel}")
     report = {
-        "duration_seconds": 1.6, "sampled_frames": len(samples), "bones": len(bind),
+        "duration_seconds": duration, "sampled_frames": len(samples), "bones": len(bind),
         "maximum_bind_error": bind_error, "idle_endpoint_matrix_error": endpoint_error,
         "foot_drift_cm": foot_drift * 100, "maximum_bone_scale_error": maximum_scale_error,
         "right_wrist_travel_cm": hand_travel * 100,
@@ -58,9 +61,9 @@ def main():
         "right_wrist_forward_cm": [-max(s["hand_r"].y for s in samples) * 100, -min(s["hand_r"].y for s in samples) * 100],
         "limits": "Planted on a flat authored plane; no terrain/target-aware IK, root-motion movement or reward notifies.",
     }
-    path = ROOT / "Build" / "CharacterPreview" / "gathering-export-validation.json"
+    path = ROOT / "Build" / "CharacterPreview" / (group.lower() + "-export-validation.json")
     path.write_text(json.dumps(report, indent=2) + "\n")
-    print("GATHERING_EXPORT_VERIFIED", json.dumps(report))
+    print(group.upper() + "_EXPORT_VERIFIED", json.dumps(report))
 
 
 if __name__ == "__main__":

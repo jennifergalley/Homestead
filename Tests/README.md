@@ -82,7 +82,7 @@ interruption, paused menus/Look/planning, saving during action, load cancellatio
 color-only and mesh swaps, and range/full-pack rejection. Its pack is filled by
 actual mapped gathering, not a mutable-state test backdoor.
 
-All smoke modes additionally reject an active picking pose after settled menu,
+All smoke modes additionally reject an active hand-action pose after settled menu,
 planning or failure steps. Keep the existing full-loop route intact and run it
 against the same fresh package. `verify_gathering.py` independently checks the
 FBX bind, idle seams, duration, planted toes and absence of bone scaling.
@@ -90,6 +90,29 @@ The ordinary visual route settles after approaching an actual berry/flower,
 orbits through mapped camera controls, records a picking dwell and recovery,
 and fails unless gathering, action presentation and recovery are all observed.
 These tests do not certify exact contact, human comfort or full-motion quality.
+
+`Test-Game.ps1 -Watering` runs 181 focused checks on a separate fresh test save.
+Setup gathers/crafts/tills/plants through real mapped transactions, with clearly
+test-only teleport travel. It checks A/E, a same-frame fully-wet rejection,
+no-can/empty/exhausted/range rejection, exactly one water debit and expected
+moisture/growth after normal clock advancement, coalesced action requests,
+movement, paused book/Look/planning, save/load and all 18 appearance combinations.
+The attached prop must be collision-free, hand-bound, world scale one and
+bounded in actual world units; checking only socket position missed an initial
+oversized-prop defect. Color changes must not recolor the prop, and cancellation
+must hide it. The full-loop route additionally checks that mature crop harvests
+consume no water and start no watering action; its existing failure/retry
+assertions remain intact. Action fixtures cannot be mixed with other modes.
+
+`Playtest-Visual.ps1 -Watering` is different: it starts from the normal clearing,
+walks to five supply patches, crafts both tools, refills at the stream, tills,
+plants and waters using mapped controls. There is no injected save or live
+state/time edit. Ordinary crafting retains its existing time cost. Setup
+screenshots are sampled at 1 Hz, final full-body/tool action at requested 8 Hz.
+Run `Review-Watering.py <capture-folder>` for the local sheet and measurements.
+The observer verifies queued inputs after processing, not in the submitting
+tick; the launch script also checks the recorded gameplay outcome independently
+of process exit. Actual raw dimensions are verified before accepting evidence.
 
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including

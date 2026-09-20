@@ -2,6 +2,7 @@
 #include "HomesteadController.h"
 #include "HomesteadWorld.h"
 #include "HomesteadAnimInstance.h"
+#include "HomesteadWateringTool.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -53,6 +54,8 @@ AHomesteadCharacter::AHomesteadCharacter()
     StandIn->SetRelativeScale3D(FVector(0.42, 0.42, 1.55));
     StandIn->SetRelativeLocation(FVector(0, 0, -8));
     StandIn->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WateringTool = CreateDefaultSubobject<UHomesteadWateringTool>(TEXT("ContextualWateringCan"));
+    WateringTool->SetupAttachment(GetMesh(), TEXT("hand_r"));
 }
 
 void AHomesteadCharacter::BeginPlay()
@@ -82,7 +85,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle"));
     WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
     GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
-    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation)
+    WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Water.AN_Heroine_Water"));
+    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation)
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine mesh or motion assets are missing. Run Scripts/Build-Game.ps1; the labeled stand-in remains visible."));
         return false;
@@ -90,7 +94,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     if (!LongHairMesh->GetSkeleton() || LongHairMesh->GetSkeleton() != BobHairMesh->GetSkeleton()
         || IdleAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || WalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
-        || GatherAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
+        || GatherAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
+        || WaterAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine meshes and clips do not share a skeleton."));
         return false;
@@ -206,7 +211,7 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
             }
         }
     }
-    CancelGather();
+    CancelAction();
     USkeletalMeshComponent* VisualMesh = GetMesh();
     if (VisualMesh->GetSkeletalMeshAsset() != Desired)
     {
@@ -259,10 +264,19 @@ void AHomesteadCharacter::PlayGather()
         UE_LOG(LogTemp, Error, TEXT("Gather succeeded but the heroine gathering animation instance is unavailable."));
 }
 
-void AHomesteadCharacter::CancelGather()
+void AHomesteadCharacter::PlayWater()
 {
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
-        Animation->CancelGather();
+        Animation->RequestWater();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Watering succeeded but its animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::CancelAction()
+{
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->CancelAction();
+    WateringTool->SetHiddenInGame(true, true);
 }
 
 void AHomesteadCharacter::CreateMappings()
@@ -326,7 +340,7 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
     if (!PC || PC->IsBookOpen() || PC->IsFailed()) return;
     const FVector2D Axis = Value.Get<FVector2D>();
-    if (!Axis.IsNearlyZero()) CancelGather();
+    if (!Axis.IsNearlyZero()) CancelAction();
     PC->NoteInputDevice(FMath::Abs(PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX)) > 0.15
         || FMath::Abs(PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY)) > 0.15);
     if (bPlanning)
@@ -364,7 +378,7 @@ void AHomesteadCharacter::SetPlanning(bool Enabled)
     bPlanning = Enabled;
     if (Enabled)
     {
-        CancelGather();
+        CancelAction();
         GetCharacterMovement()->StopMovementImmediately();
     }
 }

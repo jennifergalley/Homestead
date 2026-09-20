@@ -10,6 +10,7 @@
 
 namespace
 {
+enum class EHandAction { None, Gather, Water };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
@@ -39,7 +40,9 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     float Rate = 0;
     float GatherTime = 0;
     uint32 Started = 0;
-    bool bRequested = false;
+    uint32 WaterStarted = 0;
+    EHandAction Requested = EHandAction::None;
+    EHandAction Active = EHandAction::Gather;
     bool bCancelled = false;
     bool bGathering = false;
 
@@ -73,15 +76,22 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             || !Avatar->GetCharacterMovement()->IsMovingOnGround()
             || !Avatar->GetPendingMovementInputVector().IsNearlyZero()
             || Avatar->GetCharacterMovement()->GetCurrentAcceleration().Size2D() > 1;
+        if (Requested != EHandAction::None && !Blocked && !bCancelled && !bGathering && ActionBlend.Alpha <= 0.001f)
+        {
+            Active = Requested;
+            Gather.SetSequence(Active == EHandAction::Water ? Avatar->GetWaterAnimation() : Avatar->GetGatherAnimation());
+        }
         const auto* Clip = Gather.GetSequence();
         if (Blocked || bCancelled) bGathering = false;
-        if (bRequested && !Blocked && !bCancelled && Clip && !bGathering && ActionBlend.Alpha <= 0.001f)
+        if (Requested != EHandAction::None && !Blocked && !bCancelled && Clip && !bGathering && ActionBlend.Alpha <= 0.001f)
         {
             GatherTime = 0;
             bGathering = true;
-            ++Started;
+            if (Active == EHandAction::Water) ++WaterStarted;
+            else ++Started;
         }
-        bRequested = bCancelled = false;
+        Requested = EHandAction::None;
+        bCancelled = false;
         if (bGathering)
         {
             GatherTime = FMath::Min(GatherTime + DeltaSeconds, Clip->GetPlayLength());
@@ -123,27 +133,62 @@ float UHomesteadAnimInstance::WalkPhase() const
 
 void UHomesteadAnimInstance::RequestGather()
 {
-    GetProxyOnGameThread<FHomesteadAnimProxy>().bRequested = true;
+    GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Gather;
 }
 
-void UHomesteadAnimInstance::CancelGather()
+void UHomesteadAnimInstance::RequestWater()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Water;
+}
+
+void UHomesteadAnimInstance::CancelAction()
 {
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
-    Proxy.bRequested = false;
+    Proxy.Requested = EHandAction::None;
     Proxy.bCancelled = true;
 }
 
 float UHomesteadAnimInstance::GatherWeight() const
 {
-    return GetProxyOnGameThread<FHomesteadAnimProxy>().ActionBlend.Alpha;
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Gather ? Proxy.ActionBlend.Alpha : 0;
 }
 
 float UHomesteadAnimInstance::GatherPhase() const
 {
-    return GetProxyOnGameThread<FHomesteadAnimProxy>().GatherTime;
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Gather ? Proxy.GatherTime : 0;
 }
 
 uint32 UHomesteadAnimInstance::GatherStarts() const
 {
     return GetProxyOnGameThread<FHomesteadAnimProxy>().Started;
+}
+
+float UHomesteadAnimInstance::WaterWeight() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Water ? Proxy.ActionBlend.Alpha : 0;
+}
+
+float UHomesteadAnimInstance::WaterPhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Water ? Proxy.GatherTime : 0;
+}
+
+uint32 UHomesteadAnimInstance::WaterStarts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().WaterStarted;
+}
+
+bool UHomesteadAnimInstance::IsWatering() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Water && Proxy.bGathering && !Proxy.bCancelled;
+}
+
+float UHomesteadAnimInstance::ActionWeight() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().ActionBlend.Alpha;
 }

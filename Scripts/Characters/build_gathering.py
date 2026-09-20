@@ -27,12 +27,13 @@ def reach_amount(t):
     return smooth(t / 0.5) if t < 0.5 else 1 - smooth((t - 0.85) / 0.75)
 
 
-def reach_arm(rig, amount, pick):
+def reach_arm(rig, amount, pick, target_position=None):
     upper = rig.pose.bones["upperarm_r"]
     lower = rig.pose.bones["lowerarm_r"]
     base_upper, base_lower = upper.rotation_quaternion.copy(), lower.rotation_quaternion.copy()
     shoulder = upper.head.copy()
-    target = rig.pose.bones["hand_r"].head.lerp(Vector((-0.16, -0.32 + 0.035 * pick, 0.81 + 0.025 * pick)), amount)
+    destination = target_position if target_position is not None else Vector((-0.16, -0.32 + 0.035 * pick, 0.81 + 0.025 * pick))
+    target = rig.pose.bones["hand_r"].head.lerp(destination, amount)
     delta = target - shoulder
     distance = delta.length
     a, b = upper.bone.length, lower.bone.length

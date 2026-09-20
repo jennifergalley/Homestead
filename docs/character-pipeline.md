@@ -135,6 +135,42 @@ ground-level resources can lack hand contact; terrain, close-fitting clothes
 and rigid hair remain prototype limitations. There is no forced facing,
 camera movement, automatic approach or changed interaction radius in gameplay.
 
+## Contextual watering tool and motion (2026-09-20)
+
+`AN_Heroine_Water` adds one 2.2-second lift/tilt/recover, keeping the accepted
+idle endpoints, bind and planted feet. `build_watering.py` reuses the existing
+analytical arm/leg helpers rather than rebuilding character geometry.
+Running Blender with `--python Scripts\Characters\verify_gathering.py -- --watering`
+selects its independent FBX check;
+`Import-Locomotion.ps1 -AnimationSet Watering` imports/reloads only this clip.
+`Build-Game.ps1` includes the set. Receipts use `watering-*` under
+`Build\CharacterPreview`; the source contract/FBX live in
+`Assets\Characters\Heroine\Watering`.
+
+The existing can costs three branches and two fiber. The original
+`UHomesteadWateringTool` therefore builds a small open wooden vessel, spout,
+binding hoops and loop handle, using the existing project field material with
+fixed wood/fiber tints. It adds no purchased/downloaded asset or material edit.
+It has no collision, overlaps or navigation effect. The grip attaches to
+`hand_r`, offset toward the first middle-finger joint. Its centimeters must use
+**absolute world scale**: inheriting the FBX socket's unit-conversion scale made
+the initial can enormous. Actual world-size assertions now cover all presets.
+It uses the clip's same 32-degree tilt and ticks after the skeletal pose.
+
+Gathering and watering share one action evaluator and cancellation lifecycle,
+not two competing pose layers. Active requests coalesce; no interrupted action
+queues itself for later. The controller requests watering only after the
+existing successful immature-planted-plot `Sim.Water` transaction. Bare plots
+still plant, mature plots still harvest, and refill remains a separate unchanged
+transaction without a new gesture. Water, moisture, inventory and game time
+remain simulation-owned; there are no root-motion or reward notifies.
+
+The prop exists only during its contextual action with a can actually owned.
+Movement, menus/planning, load/retry, failure and appearance changes cancel/hide
+it. It appears/disappears without a holster/equip animation; no water stream or
+fluid system is added. This is a readable generic forward pour, not target/
+terrain-aware IK or a claim of exact ground contact.
+
 ## Rejected face-material hypothesis (2026-09-20)
 
 The source skin shader includes a Blender subsurface weight of 0.07, which the

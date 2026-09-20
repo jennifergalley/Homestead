@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering,
+param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
@@ -9,6 +9,9 @@ if ($HairLength -and $Presentation) { throw 'Choose either the hair-length or fa
 if ($HairLength) { $Presentation = $true }
 if ($Gathering -and ($Presentation -or $FullLoop -or $WithAudio)) {
     throw 'Gathering lifecycle checks run separately from presentation, full-loop and audio acceptance.'
+}
+if ($Watering -and ($Gathering -or $Presentation -or $FullLoop -or $WithAudio)) {
+    throw 'Watering lifecycle checks run separately from other acceptance modes.'
 }
 if ($Presentation -and ($FullLoop -or $WithAudio)) {
     throw 'Presentation fixtures are separate from full-loop and audio acceptance.'
@@ -46,6 +49,7 @@ if ($HairLength) {
     }
 }
 if ($Gathering) { $captures = @('gather-reach.png','gather-recovered.png') }
+if ($Watering) { $captures = @('watering-pour.png','watering-recovered.png') }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -63,6 +67,7 @@ $loopArguments = if ($FullLoop) { '-HomesteadFullLoop' } else { '' }
 if ($Presentation) { $loopArguments = '-HomesteadPresentationTest' }
 if ($HairLength) { $loopArguments += ' -HomesteadHairLengthTest' }
 if ($Gathering) { $loopArguments = '-HomesteadGatheringTest' }
+if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"

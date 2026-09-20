@@ -20,6 +20,15 @@ No further cosmetic experiment was folded into this slice. Both requested
 mid-back wavy length and the blonde-bob redesign remain unmet/deferred, as do
 the UI/rendering feedback entries below.
 
+## Watering - first motion slice (2026-09-20)
+
+The separately scheduled `watering-01` slice adds one contextual can lift/tilt/
+recover after a successful watering transaction. Its fresh-start ordinary route
+and packaged checks are documented in `docs\visual-playtesting.md`. The can is
+original wood/fiber presentation matching the existing recipe, not a new tool
+or inventory rule. This does not complete the other interaction gestures or
+resolve any deferred cosmetic/UI feedback.
+
 ## Wavy length - attempted and reverted (2026-09-20)
 
 Jenny's wavy-hair length feedback was scheduled as its own bounded slice:
