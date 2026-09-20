@@ -169,6 +169,10 @@ route in a disclosed copied test homestead with isolated saves/graphics. The fir
 run passed fixed participation/action/save criteria across a natural night and
 morning. See `docs\endurance-playtesting.md` for exact results and limitations;
 this diagnostic package does not replace the selected human preview.
+The separate targeted `Scripts\Test-ForageRenewal.ps1` covers selected wild-resource
+renewal through normal sleep and save/load; `docs\forage-renewal-playtesting.md`
+records actual component/HUD/frame evidence and the distinction from elapsed-time
+endurance. No game rules or selected preview were changed.
 
 Prototype meshes are original; selected landscape/audio assets are licensed
 separately. See `docs\asset-credits.md`. No game assets from the inspiration titles

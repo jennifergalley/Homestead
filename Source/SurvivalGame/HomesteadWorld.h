@@ -41,6 +41,7 @@ public:
     static float GroundHeight(float X, float Y);
 
 private:
+    friend class AHomesteadVisualPlaytest;
     UPROPERTY()
     TObjectPtr<UStaticMesh> Cube;
     UPROPERTY()

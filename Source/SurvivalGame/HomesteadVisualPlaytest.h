@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "HomesteadEnduranceState.h"
+#include "HomesteadRenewalState.h"
 #include "HomesteadVisualPlaytest.generated.h"
 
 class AHomesteadController;
@@ -79,6 +80,15 @@ private:
     int32 WaterSupplyBefore = 0;
 
     void Prepare();
+    bool bForageRenewal = false;
+    FHomesteadRenewalState Renewal;
+    void PrepareRenewal();
+    void TickRenewal(float Delta);
+    bool RenewalCheck(bool Condition, const FString& Message);
+    bool RenewalVisuals(int32 Id, bool Ready, bool Focused, const FString& Label, bool Screenshot);
+    void RenewalEvent(const FString& Message);
+    bool WriteRenewal(const FString& Status, const FString& Reason);
+    void FinishRenewal(const FString& Status, const FString& Reason);
     bool bEndurance = false;
     FHomesteadEnduranceState Endurance;
     void PrepareEndurance();

@@ -166,6 +166,13 @@ atomic progress, graceful cancellation and timing limits are in
 `endurance-playtesting.md`. Do not promote this test package or start another task
 after its handoff. The selected human preview remains video-sync-01.
 
+The later explicit `forage-renewal-01` assignment is a targeted extension of
+coverage only: selected24h/36h wild renewals through normal bedrest and exact
+save/load. It passed with actual same-node mesh/HUD/frame evidence and no production
+fix. Two short test-driver failures and an unrun superseded build remain preserved.
+Do not promote the diagnostic or treat sleep advancement as a second45-minute soak.
+See `forage-renewal-playtesting.md`; return after this slice without new scope.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run

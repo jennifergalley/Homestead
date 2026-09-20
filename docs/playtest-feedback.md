@@ -182,6 +182,15 @@ were used. See `endurance-playtesting.md` for fixed criteria, actual memory/timi
 ranges and limits. Resource regrowth, indefinite stability and physical tearing
 were not proven; no gameplay/art/graphics changes or preview promotion followed.
 
+The subsequent explicitly scheduled `forage-renewal-01` closes the selected wild
+forage coverage gap through three normal8-hour bedrests, not hidden time edits.
+Actual branch8/flower12/berry10 produce and cooldown hints renew, give one correct
+reward and deplete again; exact save/load and another process retain cooldowns.
+Cleared sapling14 remains absent/nonblocking. Existing game behavior passed;
+only diagnostic-driver issues were corrected. See `forage-renewal-playtesting.md`
+for the retained failed attempts, actual images and limits. The selected human
+preview remains video-sync-01; broader feedback is not implicitly resolved.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction

@@ -94,6 +94,8 @@ void AHomesteadVisualPlaytest::Prepare()
         AddTickPrerequisiteComponent(Avatar->GetHatchet());
     }
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
+    bForageRenewal = FParse::Param(FCommandLine::Get(), TEXT("HomesteadForageRenewal"));
+    if (bForageRenewal) { PrepareRenewal(); return; }
     bEndurance = FParse::Param(FCommandLine::Get(), TEXT("HomesteadEndurance"));
     if (bEndurance) { PrepareEndurance(); return; }
     Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius,plot_weeds"));
@@ -248,6 +250,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         if (bFinished) return;
         Elapsed = 0;
     }
+    if (bForageRenewal) { TickRenewal(DeltaSeconds); return; }
     if (bEndurance) { TickEndurance(DeltaSeconds); return; }
     const double Now = FPlatformTime::Seconds();
     const double RawWallDelta = Now - LastWallTime;

@@ -4,10 +4,11 @@ param([Parameter(Mandatory)][string]$SourceSave,
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $source = [IO.Path]::GetFullPath($SourceSave, $root)
-$testRoot = (Join-Path $root 'Saved\Automation') + '\'
-if (-not $source.StartsWith($testRoot, [StringComparison]::OrdinalIgnoreCase) -or
+$testRoots = @('Saved\Automation','Saved\VisualPlaytests') | ForEach-Object { (Join-Path $root $_) + '\' }
+$inTestRoot = @($testRoots | Where-Object { $source.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) }).Count -gt 0
+if (-not $inTestRoot -or
     -not (Test-Path -LiteralPath $source -PathType Leaf)) {
-    throw 'The disclosed fixture must be an existing dedicated save under Saved\Automation, never a player save.'
+    throw 'The disclosed fixture must be an existing dedicated save under Saved\Automation or Saved\VisualPlaytests, never a player save.'
 }
 $bytes = [IO.File]::ReadAllBytes($source)
 if ($bytes.Length -lt 16 -or [Text.Encoding]::ASCII.GetString($bytes, 0, 8) -ne 'HOMESAV1') {
