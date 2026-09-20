@@ -22,8 +22,9 @@ robotic movement do not meet the brief. Character presentation and locomotion
 are the next priority, ahead of adding more gameplay systems.
 
 Additional playtest notes are tracked in docs\playtest-feedback.md. Jenny
-explicitly deferred the rendering/prompt and inventory/field-book feedback;
-recording it is not authorization to interrupt the current visual-playtest work.
+initially deferred rendering/prompt and inventory/field-book feedback. The
+coordinator explicitly scheduled only controller prompt stability as `prompts-01`
+on 2026-09-20; tearing and inventory/field-book/recipe redesign remain deferred.
 
 The project folder is E:\Repos\SurvivalGame. It now contains the Unreal project,
 source code, licensed source assets, scripts, and documentation; there is no git

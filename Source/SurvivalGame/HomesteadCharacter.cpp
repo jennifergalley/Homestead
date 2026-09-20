@@ -355,8 +355,6 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     if (!PC || PC->IsBookOpen() || PC->IsFailed()) return;
     const FVector2D Axis = Value.Get<FVector2D>();
     if (!Axis.IsNearlyZero()) CancelAction();
-    PC->NoteInputDevice(FMath::Abs(PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX)) > 0.15
-        || FMath::Abs(PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY)) > 0.15);
     if (bPlanning)
     {
         PC->NudgePlacement(Axis);
@@ -377,13 +375,11 @@ void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)
 
 void AHomesteadCharacter::MouseLook(const FInputActionValue& Value)
 {
-    if (auto* PC = Cast<AHomesteadController>(Controller)) PC->NoteInputDevice(false);
     ApplyLook(Value.Get<FVector2D>(), 0.6f);
 }
 
 void AHomesteadCharacter::StickLook(const FInputActionValue& Value)
 {
-    if (auto* PC = Cast<AHomesteadController>(Controller)) PC->NoteInputDevice(true);
     ApplyLook(Value.Get<FVector2D>(), GetWorld()->GetDeltaSeconds() * 95.0f);
 }
 

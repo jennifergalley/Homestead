@@ -13,6 +13,7 @@
 #include "HAL/PlatformProcess.h"
 #include "HAL/PlatformMisc.h"
 #include "InputKeyEventArgs.h"
+#include "GameFramework/PlayerInput.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/FileHelper.h"
@@ -101,17 +102,17 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         ++IgnoredExternalInputs;
         if (!bLoggedExternalInput && (Params.Event == IE_Pressed || FMath::Abs(Params.AmountDepressed) > 0.15f))
         {
-            UE_LOG(LogTemp, Display, TEXT("Automation ignored external input: %s event=%d amount=%.3f"),
-                *Params.Key.ToString(), static_cast<int32>(Params.Event), Params.AmountDepressed);
+            UE_LOG(LogTemp, Display, TEXT("Automation ignored external input (test-mode isolation; no key contents recorded)."));
             bLoggedExternalInput = true;
         }
         return true;
     }
 #endif
-    if (Params.Event == IE_Pressed)
-    {
-        bGamepad = Params.Key.IsGamepadKey();
-    }
+    FInputAxisProperties AxisProperties;
+    const bool HasAxisProperties = Params.Key.IsGamepadKey() && Params.Key.IsAnalog() && PlayerInput
+        && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
+    const EHomesteadPromptDevice Intent = PromptIntent.Classify(Params, FPlatformTime::Seconds(), HasAxisProperties ? &AxisProperties : nullptr);
+    if (Intent != EHomesteadPromptDevice::None) bGamepad = Intent == EHomesteadPromptDevice::Gamepad;
     return Super::InputKey(Params);
 }
 

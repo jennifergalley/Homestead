@@ -22,6 +22,7 @@ private:
         TFunction<void()> Action;
         TFunction<bool()> Check;
         TFunction<bool()> Skip;
+        TFunction<void()> Repeat;
         float Wait = 0.35f;
         int32 NavigateToId = -1;
     };
@@ -60,6 +61,7 @@ private:
     void PrepareWateringChecks();
     void PrepareWeedingChecks();
     void PrepareClearingChecks();
+    void PreparePromptChecks();
     bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
     void QueueSelectRow(int32 Id);

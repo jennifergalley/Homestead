@@ -132,6 +132,12 @@ This entry point exposes accepted locomotion and contextual actions only.
 Rejected face/hair trials stay rejected; requested mid-back waves, blonde bob,
 book/UI changes and broader roadmap work are not silently marked complete.
 
+The coordinator subsequently scheduled only controller prompt stability as
+`prompts-01`. Its isolated accepted-event fixture and hint-only classifier do not
+authorize the remaining UI/recipe/inventory/tearing work. Preserve `Preview.json`
+on the reviewed candidate until the coordinator explicitly reviews and selects
+a replacement; a newer source checkpoint is not automatic launcher promotion.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run

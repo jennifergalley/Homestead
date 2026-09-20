@@ -50,6 +50,10 @@ Rejected facial-shader and shortened-wave trials are not included. The requested
 mid-back wavy length and Melinoe-inspired blonde bob remain unmet/deferred.
 See `docs\setup.md` for profile selection, verification and known limits.
 
+Controller prompt stability is separately technically verified in `prompts-01`;
+it does not redesign the field book or change controls. **`Preview.json` remains
+on reviewed `review-01` until the coordinator reviews the newer candidate.**
+
 From this directory in PowerShell:
 
 ```powershell

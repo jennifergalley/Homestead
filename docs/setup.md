@@ -190,6 +190,71 @@ source/executable hashes and the published checkpoint in
 `Saved\Automation\20260920-050723-5cc6c8a5\review-01-*` and the ordinary recording
 under `Saved\VisualPlaytests\20260920-050723-5cc6c8a5\review-01-packaged`.
 
+## Controller prompt stability candidate
+
+`prompts-01` is separate from the currently selected `review-01`. Do not change
+`Preview.json` until the coordinator has reviewed that candidate. This slice
+schedules only the previously deferred input-prompt report, not book/recipe/
+inventory redesign, tearing or more face/hair work.
+
+The isolated baseline failed a concrete accepted-event sequence: a `0.01`
+mouse-X sample changed the paused Notes footer to keyboard hints. Its
+`MouseLook` callback wrote the device flag even when camera motion was blocked.
+The corrected build removes callback-based writes and uses one typed classifier
+before unchanged input dispatch. Every context/book/Look/Settings/planning hint
+continues to read the same controller state; layout and text are unchanged.
+
+The hint-only policy honors inherited gamepad axis shaping (including the
+current 0.25 axial deadzone) before the existing 0.2 radial modifier. Mouse
+intent is one raw input unit of signed travel within 120ms, so fractional motion
+can accumulate while idle jitter cannot accumulate indefinitely. Digital
+presses and newly engaged controller gestures switch immediately. Previously
+held analog controls cannot undo deliberate keyboard/mouse intent for 200ms;
+continuing actual controller input can take over afterward. Releases, repeats,
+zero values and subthreshold noise do not select a new hint device.
+No game input is dropped or delayed by this policy.
+
+The camera-response fixture uses unchanged inherited mouse sensitivity 0.07:
+`0.25` raw input produces a measured `0.0105`-degree yaw change even below the
+hint threshold. An initial new fixture incorrectly demanded a greater rotation
+from `0.01` input; its probe was calibrated, not the game's response or the old
+regression assertions. Control deadzones, camera/movement scale and audio remain
+unchanged. External-event rejection still applies only in test modes; its log
+records the rejection count, not real key contents.
+
+```powershell
+.\Scripts\Test-Game.ps1 -Packaged -Prompts `
+    -PackageDirectory 'Build\Releases\20260920-050723-5cc6c8a5\prompts-01' `
+    -OutputDirectory 'Saved\Automation\prompts-focused-fresh'
+```
+
+The focused scenario exercises accepted mapped inputs, noise and mixed-device
+sequences, real walking/fine camera movement, pause, and both devices' actual
+rendered hints. Separate preview-routing checks additionally exercise constructed
+physical-source-style analog events with the automation guard disabled, plus
+a real preview-only process. No global OS input injection or recording of
+Jenny's keystrokes is used. These fixtures do not establish every hardware/driver
+or large cursor-warp case, or replace human-controller review.
+
+The fresh package and editor each passed **70 focused checks** and **308
+save/normal-input routing checks** (the previous 300 plus eight physical-source-
+style prompt assertions across write/read runs). All **914** prior gameplay/
+action checks passed unchanged, plus **40** launcher and **21** run/path guards.
+The full loop and 11 final prompt images are actual **1920x1080/render100**
+evidence; no new 4K or clean-performance certification is claimed. Full-loop
+timings were 59.76 FPS mean, 16.89ms p95 and 17.07ms p99, excluding startup/readback,
+with concurrent GPU use not ruled out.
+
+The two inspected visual sets are the failing baseline and final packaged label
+comparison. The latter visibly preserves controller hints after the original
+noise sequence and shows intentional keyboard/controller hints across all five
+tested surfaces. Original screenshots and the comparison sheet remain in
+`Saved\Automation\20260920-050723-5cc6c8a5\prompts-01-focused`; copied source/exe/
+test proof is indexed under the separate candidate's `Verification` directory.
+Intermediate editor diagnostics were functional checks, not extra visual tuning
+passes. All 124 character/source LFS files, the active `review-01` executable and
+its launcher selection are unchanged; five incidental world resaves were restored.
+
 ## Preserved original verification status
 
 **Preserved original packaged MVP:** `Build\Windows\SurvivalGame.exe`.

@@ -5,6 +5,7 @@
 #include "Simulation/HomesteadSimulation.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
+#include "HomesteadPromptIntent.h"
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
@@ -35,7 +36,6 @@ public:
     bool IsPlanning() const { return bPlanning; }
     bool UsesGamepad() const { return bGamepad; }
     uint32 IgnoredExternalInputCount() const { return IgnoredExternalInputs; }
-    void NoteInputDevice(bool Gamepad) { bGamepad = Gamepad; }
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
     const Homestead::State& State() const { return Sim.GetState(); }
@@ -81,6 +81,7 @@ private:
     bool bBookOpen = false;
     bool bPlanning = false;
     bool bGamepad = true;
+    FHomesteadPromptIntent PromptIntent;
     bool bPendingSpawn = true;
     bool bConfirmRestart = false;
     bool bMusicFading = false;

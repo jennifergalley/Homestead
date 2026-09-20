@@ -107,6 +107,7 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
         Width, Height,
         *Controller->GetPawn()->GetActorLocation().ToString(), *CameraLocation.ToString(),
         *CameraRotation.ToString(), Controller->BookPage());
+    Framing += FString::Printf(TEXT("prompts_gamepad=%d\nfocus_actions=%s\n"), Controller->UsesGamepad(), *Controller->FocusActions());
     if (const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn()))
     {
         const USkeletalMeshComponent* Visual = Avatar->GetMesh();
@@ -137,6 +138,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest")))
+    {
+        PreparePromptChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest")))
     {
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
@@ -646,6 +652,7 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         LastNavigationAt = -1;
     }
     if (Step.Name == TEXT("Gamepad movement reaches the character")) Axis(EKeys::Gamepad_LeftY, 1);
+    if (Step.Repeat) Step.Repeat();
     if (Step.Name == TEXT("Gamepad look rotates the camera")) Axis(EKeys::Gamepad_RightX, 0.65f);
     if (Step.Name == TEXT("Walk through the cabin doorway")) Axis(EKeys::Gamepad_LeftY, 1);
     StepElapsed += DeltaSeconds;
@@ -732,7 +739,8 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
-            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest")) ? 0 : 4;
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));
     }

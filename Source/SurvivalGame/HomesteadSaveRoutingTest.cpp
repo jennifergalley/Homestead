@@ -160,6 +160,17 @@ void AHomesteadController::RunSaveRoutingChecks()
                 TEXT("Normal input handler accepts physical-source-style ") + Key.ToString());
             InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key, IE_Released, 0, false, FPlatformTime::Cycles64()));
         }
+        const auto RawAxis = [this, &Check, IgnoredBefore](FKey Key, float Value, bool Gamepad, const FString& Label)
+        {
+            const FInputKeyEventArgs Event(nullptr, INPUTDEVICEID_NONE, Key, Value, 1.0f / 60.0f, 1, FPlatformTime::Cycles64());
+            InputKey(Event);
+            Check(!Event.IsSimulatedInput() && !bAutomatedInputOnly && SaveRoute.Mode == TEXT("preview")
+                && bGamepad == Gamepad && IgnoredExternalInputs == IgnoredBefore, Label);
+        };
+        RawAxis(EKeys::Gamepad_LeftY, 0.8f, true, TEXT("Normal preview accepts physical-source-style stick intent"));
+        RawAxis(EKeys::MouseX, 0.01f, true, TEXT("Normal preview noise does not steal prompts; input is not rejected"));
+        RawAxis(EKeys::MouseX, 4, false, TEXT("Normal preview deliberate mouse switches prompts without automation"));
+        RawAxis(EKeys::Gamepad_LeftY, 0.8f, false, TEXT("Normal preview held stick respects deliberate mouse grace"));
         bAutomatedInputOnly = true;
         Check(!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
             && !FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest")),

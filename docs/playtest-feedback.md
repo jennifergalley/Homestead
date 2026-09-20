@@ -76,8 +76,41 @@ The coordinator independently inspected the comparison and agreed to recovery.
 request remains unmet.** No third sculpt/review pass was attempted. Only useful
 back/three-quarter diagnostics are retained; brunette color, crown/framing,
 other styles, face, materials, rig and locomotion remain at the accepted baseline.
-The blonde-bob redesign and all other deferred entries below remain deferred.
+The blonde-bob redesign and other remaining deferred entries below remain deferred.
 See `docs\visual-playtesting.md` for rejection and recovery evidence.
+
+## Controller prompt switching - implemented and technically verified (2026-09-20)
+
+The coordinator has explicitly scheduled only this later-feedback item as
+`prompts-01`: interaction labels revert to keyboard/mouse while using a controller.
+Investigate accepted engine events and shared device-intent state, preserving
+actual input, existing layout/text/mappings and the working `review-01` launcher
+selection. This does not schedule tearing, book/recipe/inventory redesign or
+further cosmetic work.
+
+An isolated engine fixture reproduced the bug on the unchanged runtime:
+accepted mouse-X input of `0.01` changed the paused Notes footer from controller
+to keyboard labels. `MouseLook` wrote the device flag before checking whether
+that screen allowed camera motion; movement and stick-look callbacks also
+overwrote the same state. This is distinct from test-only physical-input isolation.
+
+The fix uses one typed accepted-event classifier for the existing shared flag.
+Buttons and fresh controller gestures switch immediately; releases/repeats and
+zero/noise axes do not. Stick intent honors the inherited per-axis shaping and
+existing radial modifier. Mouse intent uses one raw input unit of signed travel
+within 120ms, allowing fine fractional motion without accumulating idle noise
+forever. Already-held sticks cannot undo deliberate keyboard/mouse intent for
+200ms. These rules affect hints only: input dispatch, movement/camera scales,
+control deadzones, mappings, layout and glyph text are unchanged.
+
+Both editor and fresh `prompts-01` package pass 70 focused checks, including the
+same previously failing sequence and actual fine camera response. The final
+rendered comparison was inspected: Notes/context/Settings/Look/planning hints
+agree with deliberate use of both devices. All 914 previous action/full-loop
+assertions, 308 save/normal-input checks and 40 launcher guards pass. `Preview.json`
+intentionally stays on parent-reviewed `review-01` pending coordinator selection.
+This reproduces and fixes a concrete cause, not every possible hardware/driver/
+large-cursor-warp case or Jenny's physical-controller review.
 
 ## Deferred feedback - 2026-09-19
 
@@ -87,7 +120,6 @@ to change these systems immediately.
 | Area | Report | Follow-up when scheduled |
 | --- | --- | --- |
 | Rendering | Screen tearing / horizontal flickers while moving. | Reproduce and capture the artifact; distinguish presentation tearing from temporal/rendering artifacts before choosing a fix. Do not assume a VSync diagnosis from the description alone. |
-| Input prompts | Interaction labels revert to keyboard/mouse even while playing with a controller. | Check device-switching thresholds and incidental input events; retain controller prompts during genuine controller play. |
 | Music and ambience | "Great." | Preserve this as a successful baseline; avoid unnecessary replacement or remixing during unrelated work. |
 | Field book / recipes | The book feels overwhelming; learning recipes gradually might be better than exposing all recipes immediately. | Explore progressive disclosure or a learn/unlock flow. This is a proposal, not a confirmed progression design; essential opening-survival actions must remain attainable. |
 | Inventory / field book | It is difficult to tell what is actually in inventory versus what belongs to the field book. | Make carried possessions distinct from knowledge, recipes and guidance, with clear entry points, labels and quantities. Evaluate the interaction model, not only visual styling. |

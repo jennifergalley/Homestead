@@ -1,11 +1,14 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200)
 $ErrorActionPreference = 'Stop'
+if ($Prompts -and ($Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
+    throw 'Prompt-intent fixtures run separately from other acceptance modes.'
+}
 if ($Clearing -and ($Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Clearing lifecycle checks run separately from other acceptance modes.'
 }
@@ -61,6 +64,12 @@ if ($Gathering) { $captures = @('gather-reach.png','gather-recovered.png') }
 if ($Watering) { $captures = @('watering-pour.png','watering-recovered.png') }
 if ($Weeding) { $captures = @('weeding-pull.png','weeding-recovered.png') }
 if ($Clearing) { $captures = @('clearing-swing.png','clearing-recovered.png') }
+if ($Prompts) {
+    $captures = @('prompts-book-before.png','prompts-book-after.png','prompts-book-keyboard.png')
+    foreach ($surface in @('context','settings','look','planning')) {
+        foreach ($device in @('gamepad','keyboard')) { $captures += "prompts-$surface-$device.png" }
+    }
+}
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -81,6 +90,7 @@ if ($Gathering) { $loopArguments = '-HomesteadGatheringTest' }
 if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
 if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
+if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
