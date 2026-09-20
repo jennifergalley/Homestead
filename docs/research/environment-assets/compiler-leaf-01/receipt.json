@@ -1,0 +1,94 @@
+{
+  "utc": "2026-09-20T23:44:08.2659384+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "status": "bounded-diagnosis-complete-no-project-build-admission",
+  "compilerRuns": 1,
+  "compilerOutputValid": true,
+  "compilerOriginalOverallPassWithdrawn": true,
+  "originalCompilerMemberIdentityNotCaptured": true,
+  "dummyExtraMemberIdentified": true,
+  "extraMember": {
+    "signature": "Valid",
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "thumbprint": "BAC13DF18B37E808208A39D3A54CCE975FAC8C1D",
+    "image": "C:\\Windows\\System32\\conhost.exe",
+    "scope": "existing build-only exception; not Editor"
+  },
+  "jobPolicyNegativeCases": 4,
+  "coffNegativeCases": 5,
+  "openSpecComplete": 4,
+  "openSpecTotal": 29,
+  "engineRuns": 0,
+  "realMarkerAccessed": false,
+  "newFiveCompileActionsExecuted": false,
+  "sources": [
+    {
+      "sha256": "8F602038CC2E008EAC3369639D8766E436446A457500146D38D6FB2BD2289A5D",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    },
+    {
+      "sha256": "A57E5912FEB4C7D2035C2A814D97EA199D046ED4D0FE3DAA9805A32DE1A5C7A6",
+      "path": "Scripts\\CompilerLeafEvidence.ps1"
+    },
+    {
+      "sha256": "B4C68B68AEEBBDFC26801D6929E3FBE87D5FF1849D3C17A25B417C7C47EBABA0",
+      "path": "Tests\\Test-CompilerLeaf.ps1"
+    },
+    {
+      "sha256": "E28FC09F68046CFFAC8C5450D6D91A6E25FD795E5789F2C533C58A8BCBA33BF8",
+      "path": "Tests\\Test-AuthoringLeafGuard.ps1"
+    },
+    {
+      "sha256": "788AA707C0D8C0ADA5BC35D4BD77F5B886958541FFFCF0CEED0DD6E912F3398A",
+      "path": "Tests\\CompilerLeafFixture.cpp"
+    }
+  ],
+  "files": [
+    {
+      "file": "accounting-diagnostic-result.json",
+      "bytes": 39830,
+      "sha256": "879A9D4C7B2CA20544C9F48F734F98833F9D3AF2AB80077A1746563686EC4BA9"
+    },
+    {
+      "file": "accounting-strict-failure.json",
+      "bytes": 174,
+      "sha256": "5EB805A809184D3A6F89228DBC24CA25038179F1D639EF3D1B95590FC3B960D5"
+    },
+    {
+      "file": "compiler-diagnostics.txt",
+      "bytes": 13,
+      "sha256": "DEBB4918FAFCB38564E4E6272AF8699B8E610FF4E67DD3D845DDF5E3508244C6"
+    },
+    {
+      "file": "compiler-launch.json",
+      "bytes": 1449,
+      "sha256": "59E72A0766304617E60247A8866208C6057E01CFF241012850C0353D7E454050"
+    },
+    {
+      "file": "compiler-original-result.json",
+      "bytes": 2388,
+      "sha256": "560B2D39C141493626BE290700A45980CA40BD110D7BD6932E94F5782B46CD98"
+    },
+    {
+      "file": "first-strict-failure.json",
+      "bytes": 104,
+      "sha256": "F4FE41E50612CB43719345BE8F3ABD3762E68EC77454B83FA18F3AC6D9FB340C"
+    },
+    {
+      "file": "fixture.coff",
+      "bytes": 1818,
+      "sha256": "F6602A4184ADC1602147F43A63E3F8BF39CFA03628B31DAC982E7D4499505311"
+    },
+    {
+      "file": "member-diagnostic-01.json",
+      "bytes": 20475,
+      "sha256": "17AB558C4E5C9251EFEF50BA8500E3C4ADC6013CF4A534B03650A88BF7D6FC86"
+    },
+    {
+      "file": "member-diagnostic-02.json",
+      "bytes": 20507,
+      "sha256": "DD338CE5BD7666C5AFA8D83D15A76EEA3F0F38B6F11EA8CB40E2CC0449C44A83"
+    }
+  ],
+  "limitations": "Dummy job PID/image evidence identifies the exact approved console host. It does not retroactively identify the original compiler member or establish console-host network absence. No extra compiler run followed the correction."
+}

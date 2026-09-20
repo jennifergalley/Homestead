@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.7712303,
+  "samples": [
+    {
+      "tcp": [],
+      "children": [],
+      "elapsedMs": 698.0433,
+      "udp": [],
+      "uploaders": []
+    }
+  ],
+  "maximumSampleGapMs": 698.0433,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 2,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "coff": {
+    "machine": "AMD64",
+    "bytes": 1818,
+    "sections": [
+      {
+        "name": ".drectve",
+        "bytes": 47,
+        "offset": 260,
+        "flags": 1051136
+      },
+      {
+        "name": ".debug$S",
+        "bytes": 400,
+        "offset": 307,
+        "flags": 1108344896
+      },
+      {
+        "name": ".text$mn",
+        "bytes": 6,
+        "offset": 707,
+        "flags": 1615859744
+      },
+      {
+        "name": ".debug$S",
+        "bytes": 172,
+        "offset": 713,
+        "flags": 1108348992
+      },
+      {
+        "name": ".debug$T",
+        "bytes": 524,
+        "offset": 925,
+        "flags": 1108344896
+      },
+      {
+        "name": ".chks64",
+        "bytes": 48,
+        "offset": 1449,
+        "flags": 2560
+      }
+    ],
+    "symbolCount": 16,
+    "function": {
+      "symbol": "HomesteadCompilerLeafFixture",
+      "section": ".text$mn",
+      "offset": 0,
+      "machineCode": "B8DF9B5713C3",
+      "returnValue": 324508639
+    },
+    "codeExecuted": false
+  },
+  "malformedCoffCases": 5,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\compiler-leaf-01\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 742820,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344207949238401,
+    "LastWriteTime": 134344207949238401,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "objectSha256": "F6602A4184ADC1602147F43A63E3F8BF39CFA03628B31DAC982E7D4499505311",
+  "limits": "One guarded compile-only fixture. No link/UBT/Editor/global marker. Sampled endpoints are not continuous tracing; job policy denies children before execution. Denied targets are not identified by job counters."
+}

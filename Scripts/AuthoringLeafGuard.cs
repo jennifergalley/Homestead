@@ -22,13 +22,21 @@ namespace Homestead.Authoring
         public uint Flags, ProcessLimit, ActiveProcesses, TotalProcesses, TerminatedForLimits;
         public bool HeldProcessIsMember;
     }
+    public sealed class JobMemberEvidence
+    {
+        public uint Pid;
+        public string Image, Error;
+        public ulong CreationTime;
+        public bool Member, Exited;
+        public uint ExitCode;
+    }
 
     // Native process primitive only. Approval, socket policy and run controls belong to its caller.
     public sealed class LeafGuard : IDisposable
     {
         const uint Read = 0x80000000, Write = 0x40000000, ShareRead = 1;
         const uint Inherit = 1, Suspended = 4, ExtendedStartup = 0x80000, UnicodeEnvironment = 0x400;
-        const uint Limits = 0x2008, ObjectSignaled = 0, Timeout = 258;
+        const uint Limits = 0x2008, ObjectSignaled = 0, Timeout = 258, CreateNoWindow = 0x08000000;
         static readonly IntPtr Invalid = new IntPtr(-1);
         IntPtr marker, job, process, thread, input, output;
         readonly object lifetime = new object();
@@ -89,6 +97,8 @@ namespace Homestead.Authoring
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int kind, ref ExtendedLimits limits, uint size);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, out ExtendedLimits limits, uint size, IntPtr returned);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, out Accounting accounting, uint size, IntPtr returned);
+        [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, IntPtr data, uint size, out uint returned);
+        [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool IsProcessInJob(IntPtr process, IntPtr job, out bool member);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool InitializeProcThreadAttributeList(IntPtr list, int count, uint flags, ref IntPtr size);
@@ -216,7 +226,7 @@ namespace Homestead.Authoring
                 ulong earliest = (ulong)DateTime.UtcNow.AddSeconds(-1).ToFileTimeUtc();
                 ProcessInfo created;
                 Check(CreateProcessW(executable, command, IntPtr.Zero, IntPtr.Zero, true,
-                    Suspended | ExtendedStartup | UnicodeEnvironment, environment, directory, ref startup, out created), "suspended leaf");
+                    Suspended | ExtendedStartup | UnicodeEnvironment | CreateNoWindow, environment, directory, ref startup, out created), "suspended no-window leaf");
                 process = created.Process; thread = created.Thread; ProcessId = created.Id;
                 Check(AssignProcessToJobObject(job, process), "pre-resume job assignment");
                 var path = new StringBuilder(32768); uint length = (uint)path.Capacity;
@@ -254,15 +264,26 @@ namespace Homestead.Authoring
         }
         public void VerifyJob(uint active)
         {
+            JobEvidence observed = ObserveJobPolicy();
+            if (observed.ActiveProcesses != active)
+                throw new InvalidOperationException("Job count differs: active=" + observed.ActiveProcesses +
+                    ", expected=" + active + ", total=" + observed.TotalProcesses +
+                    ", limitTerminated=" + observed.TerminatedForLimits);
+        }
+        public JobEvidence ObserveJobPolicy()
+        {
             ExtendedLimits limits; Accounting counts; bool member;
             Check(IsProcessInJob(process, job, out member) && member, "held process job identity");
             Check(QueryInformationJobObject(job, 9, out limits, (uint)Marshal.SizeOf<ExtendedLimits>(), IntPtr.Zero), "job policy");
             Check(QueryInformationJobObject(job, 1, out counts, (uint)Marshal.SizeOf<Accounting>(), IntPtr.Zero), "job accounting");
-            if (limits.Basic.Flags != Limits || limits.Basic.Active != 1 || counts.Active != active)
-                throw new InvalidOperationException("Job policy/count differs.");
             LastVerifiedJob = new JobEvidence { Flags = limits.Basic.Flags, ProcessLimit = limits.Basic.Active,
                 ActiveProcesses = counts.Active, TotalProcesses = counts.Total, TerminatedForLimits = counts.Terminated,
                 HeldProcessIsMember = member };
+            if (limits.Basic.Flags != Limits || limits.Basic.Active != 1)
+                throw new InvalidOperationException("Job policy/count differs: flags=" + limits.Basic.Flags +
+                    ", limit=" + limits.Basic.Active + ", active=" + counts.Active +
+                    ", total=" + counts.Total + ", limitTerminated=" + counts.Terminated);
+            return LastVerifiedJob;
         }
         public void Resume()
         {
@@ -270,6 +291,60 @@ namespace Homestead.Authoring
             VerifyJob(1); VerifyMarker();
             Check(ResumeThread(thread) == 1, "first thread resume");
             Resumed = true;
+        }
+        public JobEvidence CaptureExitedJob()
+        {
+            if (!Wait(0)) throw new InvalidOperationException("Exit accounting requires observed process death.");
+            ExtendedLimits limits; Accounting counts; bool member;
+            Check(QueryInformationJobObject(job, 9, out limits, (uint)Marshal.SizeOf<ExtendedLimits>(), IntPtr.Zero), "exited job policy");
+            Check(QueryInformationJobObject(job, 1, out counts, (uint)Marshal.SizeOf<Accounting>(), IntPtr.Zero), "exited job accounting");
+            Check(IsProcessInJob(process, job, out member), "exited held-process membership");
+            if (limits.Basic.Flags != Limits || limits.Basic.Active != 1 || counts.Active != 0)
+                throw new InvalidOperationException("Exited job policy/count differs.");
+            return new JobEvidence { Flags = limits.Basic.Flags, ProcessLimit = limits.Basic.Active,
+                ActiveProcesses = counts.Active, TotalProcesses = counts.Total, TerminatedForLimits = counts.Terminated,
+                HeldProcessIsMember = member };
+        }
+        public JobMemberEvidence[] ObserveJobMembers()
+        {
+            int size = 8 + 64 * IntPtr.Size;
+            IntPtr buffer = Marshal.AllocHGlobal(size);
+            try
+            {
+                uint returned;
+                Check(QueryInformationJobObject(job, 3, buffer, (uint)size, out returned), "job process list");
+                uint assigned = (uint)Marshal.ReadInt32(buffer, 0), count = (uint)Marshal.ReadInt32(buffer, 4);
+                if (count > 64 || count > assigned) throw new InvalidOperationException("Invalid job member count.");
+                var result = new List<JobMemberEvidence>();
+                for (int index = 0; index < count; index++)
+                {
+                    uint pid = checked((uint)Marshal.ReadIntPtr(buffer, 8 + index * IntPtr.Size).ToInt64());
+                    var item = new JobMemberEvidence { Pid = pid };
+                    IntPtr held = OpenProcess(0x00101000, false, pid);
+                    try
+                    {
+                        Check(Valid(held), "open listed job member");
+                        bool member; Check(IsProcessInJob(held, job, out member) && member, "listed member association");
+                        item.Member = member;
+                        var image = new StringBuilder(32768); uint length = (uint)image.Capacity;
+                        Check(QueryFullProcessImageNameW(held, 0, image, ref length), "listed member image");
+                        item.Image = image.ToString();
+                        Time created, exit, kernel, user;
+                        Check(GetProcessTimes(held, out created, out exit, out kernel, out user), "listed member creation");
+                        item.CreationTime = created.Value;
+                        uint state = WaitForSingleObject(held, 0);
+                        Check(state == ObjectSignaled || state == Timeout, "listed member exit state");
+                        item.Exited = state == ObjectSignaled;
+                        uint code; Check(GetExitCodeProcess(held, out code), "listed member exit code");
+                        item.ExitCode = code;
+                    }
+                    catch (Exception error) { item.Error = error.ToString(); }
+                    finally { Close(ref held); }
+                    result.Add(item);
+                }
+                return result.ToArray();
+            }
+            finally { Marshal.FreeHGlobal(buffer); }
         }
         public bool Wait(uint milliseconds)
         {

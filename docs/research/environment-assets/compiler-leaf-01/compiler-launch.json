@@ -1,0 +1,38 @@
+{
+  "pid": 48316,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+  "creationTime": 134344207952654188,
+  "executableSha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+  "arguments": [
+    "/nologo",
+    "/c",
+    "/Z7",
+    "/O2",
+    "/FoE:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\compiler-leaf-01\\fixture.obj",
+    "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\compiler-leaf-01\\fixture.cpp"
+  ],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\compiler-leaf-01\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 742820,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344207949238401,
+    "LastWriteTime": 134344207949238401,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "788AA707C0D8C0ADA5BC35D4BD77F5B886958541FFFCF0CEED0DD6E912F3398A",
+  "guardSha256": "D60CFCC531415A60A1F666BF7F14B85B4BC6AD179C22C0E426EF4C853D7D2048"
+}

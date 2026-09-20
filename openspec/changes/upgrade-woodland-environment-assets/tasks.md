@@ -1,5 +1,11 @@
 # Tasks
 
+Latest bounded preflight: `compiler-leaf-result.md` records one valid
+compile-only object and identifies the dummy's extra job member as the exact
+signed build-only console host. That does not retroactively identify the
+earlier compiler member or admit Editor helpers; no five-action build or engine
+probe followed. Progress is4/29.
+
 Apply preflight was explicitly authorized on 2026-09-20. Only completed
 authorization/baseline and completed source preparation are checked below.
 At14:05 Arizona Jenny explicitly approved the bounded TraceControl exception;

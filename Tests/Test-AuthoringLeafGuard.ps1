@@ -3,7 +3,10 @@ param(
     [Parameter(Mandatory)][string]$Root,
     [Parameter(Mandatory)][string]$Subject,
     [ValidateSet('Observer','Controller')][string]$Role = 'Observer',
-    [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal'
+    [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal',
+    [switch]$ObserveAccountingOnly,
+    [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')]
+    [string[]]$Scenarios = @('normal','pause','deadline','timeout','controller-failure','watchdog')
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -91,6 +94,7 @@ public static class GuardFixtureNative {
         Write-NewJson (Join-Path $Root 'launch.json') ([ordered]@{
             pid = $guard.ProcessId; image = $guard.ImagePath; creationTime = $guard.ProcessCreationTime
             marker = $guard.MarkerBefore; job = $guard.LastVerifiedJob; explicitHandles = $guard.WhitelistedHandleCount
+            jobMembers = $guard.ObserveJobMembers()
             resumed = $guard.Resumed
         })
         if ($Case -eq 'watchdog') { $guard.ArmDeadline(300, 800, (Join-Path $Root 'stop.txt')) }
@@ -99,9 +103,13 @@ public static class GuardFixtureNative {
         $timer = [Diagnostics.Stopwatch]::StartNew()
         $stopRequested = $false
         $reason = ''
+        $jobSamples = [Collections.Generic.List[object]]::new()
+        $memberSamples = [Collections.Generic.List[object]]::new()
         while (-not $guard.Wait(0)) {
             Assert ($timer.Elapsed.TotalSeconds -lt 15) 'Controller test ceiling.'
-            $guard.VerifyJob(1)
+            $jobSamples.Add($guard.ObserveJobPolicy())
+            $memberSamples.Add(@{elapsedMs=$timer.Elapsed.TotalMilliseconds;members=$guard.ObserveJobMembers()})
+            if (-not $ObserveAccountingOnly) { $guard.VerifyJob(1) }
             $null = $guard.VerifyMarker()
             $state = & (Join-Path $repo 'Scripts\Development-Run.ps1') -Action Status -StateDirectory (Join-Path $Root 'state')
             $actual = & (Join-Path $repo 'Scripts\Development-Run.ps1') -Action Status
@@ -120,6 +128,9 @@ public static class GuardFixtureNative {
             Start-Sleep -Milliseconds 5
         }
         $after = $guard.VerifyMarker()
+        $exitedJob = $guard.CaptureExitedJob()
+        $exitedMembers = $guard.ObserveJobMembers()
+        if (-not $ObserveAccountingOnly) { Assert ($exitedJob.TotalProcesses -eq 1) 'Unclassified extra job member.' }
         $exitCode = $guard.ExitCode
         $hard = $guard.HardTerminated
         if ($Case -eq 'watchdog') {
@@ -132,6 +143,9 @@ public static class GuardFixtureNative {
         Write-NewJson (Join-Path $Root 'outcome.json') ([ordered]@{
             outcome = if ($hard) { 'cancelled-hard-stop' } elseif ($reason -in @('pause','deadline','live-run-stop')) { 'cancelled-cooperative' } else { 'passed-cooperative' }
             reason = $reason; exitCode = $exitCode; hardTerminated = $hard; markerAfter = $after
+            liveJobAccounting = $jobSamples; exitedJob = $exitedJob
+            liveJobMembers = $memberSamples
+            exitedJobMembers = $exitedMembers
         })
     } catch {
         Write-NewJson (Join-Path $Root 'controller-error.json') @{ error = $_.ToString() }
@@ -185,7 +199,7 @@ foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupie
     $rejections.Add(@{ case = $invalid; rejected = $true; guardReleased = $true; error = $failure })
 }
 $results = [Collections.Generic.List[object]]::new()
-foreach ($scenario in @('normal','pause','deadline','timeout','controller-failure','watchdog')) {
+foreach ($scenario in $Scenarios) {
     $live = & (Join-Path $repo 'Scripts\Development-Run.ps1') -Action Status
     Assert $live.allowWork 'Run stopped between disposable cases.'
     $directory = Join-Path $Root $scenario
@@ -211,6 +225,7 @@ foreach ($scenario in @('normal','pause','deadline','timeout','controller-failur
     foreach ($argument in @('-NoProfile','-NonInteractive','-File',$PSCommandPath,'-Role','Controller','-Root',$directory,'-Subject',$Subject,'-Case',$scenario)) {
         $start.ArgumentList.Add($argument)
     }
+    if ($ObserveAccountingOnly) { $start.ArgumentList.Add('-ObserveAccountingOnly') }
     $controller = [Diagnostics.Process]::Start($start)
     $subjectProcess = $null
     $samples = 0; $maxGapMs = 0.0; $lastSample = $null; $requested = $false
@@ -292,7 +307,8 @@ foreach ($scenario in @('normal','pause','deadline','timeout','controller-failur
     }
 }
 Write-NewJson (Join-Path $Root 'result.json') ([ordered]@{
-    passed = $true; cases = $results; rejections = $rejections
+    passed = (-not $ObserveAccountingOnly); diagnosticChecksPassed = $true
+    observeAccountingOnly = [bool]$ObserveAccountingOnly; cases = $results; rejections = $rejections
     guardSha256 = (Get-FileHash -LiteralPath (Join-Path $repo 'Scripts\AuthoringLeafGuard.cs')).Hash
     subjectSha256 = (Get-FileHash -LiteralPath $Subject).Hash; unrealExecuted = $false; realMarkerAccessed = $false
 })

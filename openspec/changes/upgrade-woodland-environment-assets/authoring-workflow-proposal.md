@@ -1,5 +1,13 @@
 # Authoring workflow approval proposal
 
+**Latest,16:42 Arizona:** direct held-job PID queries identified the dummy's
+persistent extra member as the exact signed Windows console host already
+allowed for builds. The compiler-only leaf produced valid COFF, but its own
+missing member identity is not retroactively proved. The initial
+overall-pass/transient-accounting interpretation was withdrawn. See
+`compiler-leaf-result.md`; the build-only exception is not an Editor allowance
+and no further compiler, link, UBT or Editor launch is authorized by this report.
+
 **Current hold,16:00 Arizona:** the native commandlet/wrapper exist in source,
 but the local compiler spawned an unadmitted Microsoft telemetry uploader,
 `VCTIP.EXE`. The observed owned build processes were stopped. No further
