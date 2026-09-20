@@ -392,6 +392,13 @@ the default automatic scale policy instead; do not conflate the two.
 
 ## Preserved original verification status
 
+After coordinator review, `video-sync-01` was explicitly selected in `d7d0a02`,
+with the same `jenny-review` profile and unchanged defaultOff. No original/book
+graphics or personal saves were altered. The subsequent `endurance-01` package
+is diagnostic-only and must not be selected. Its opt-in runner, copied-test-world
+provenance, graceful cancellation and45-minute outcome are in
+`endurance-playtesting.md`; it never activates in normal human preview.
+
 **Preserved original packaged MVP:** `Build\Windows\SurvivalGame.exe`.
 The final standalone native-4K run passed **432 mapped-input steps**, including
 all 18 appearance combinations, both crops, cooking/storage/construction, the

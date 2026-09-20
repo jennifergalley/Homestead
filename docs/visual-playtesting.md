@@ -7,6 +7,11 @@ pipeline before inspecting the current game in motion.
 
 ## Repeatable observational route
 
+For the separate opt-in45-minute stability exercise, see
+`endurance-playtesting.md` and `Scripts\Test-Endurance.ps1`. Its sparse milestone
+frames and actual sustained progression are distinct from the short pose route.
+It uses a disclosed copied test homestead, fixed criteria and isolated graphics/saves.
+
 Build the editor target, then run:
 
 ```powershell

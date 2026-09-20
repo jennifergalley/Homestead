@@ -50,9 +50,9 @@ Rejected facial-shader and shortened-wave trials are not included. The requested
 mid-back wavy length and Melinoe-inspired blonde bob remain unmet/deferred.
 See `docs\setup.md` for profile selection, verification and known limits.
 
-Controller prompt stability and limited book clarity are included in the
-parent-reviewed **`book-clarity-01`**, now explicitly selected by `Preview.json`.
-That candidate distinguishes
+Controller prompt stability and the limited clarity introduced in
+parent-reviewed **`book-clarity-01`** are retained in the selected preview.
+The book distinguishes
 **Your pack**, **Crafting recipes** and **Building plans**, labels carried/chest
 counts separately from required materials, and names actual eat/take/craft/plan
 actions. It adds no recipe learning, unlocks, inventory expansion or new navigation.
@@ -63,9 +63,10 @@ Read-only diagnostics found a reported 4K/30Hz desktop mode and a VSync-off,
 observe physical scanout. See `docs\presentation-diagnostics.md` for exact runtime
 settings, capture limits and the next human check. No graphics defaults changed.
 
-The separate `video-sync-01` candidate adds **Settings > Vertical sync**, a
+The accepted **`video-sync-01`**, now explicitly selected by `Preview.json`,
+adds **Settings > Vertical sync**, a
 reversible On/Off toggle for later human comparison. Default remains Off;
-tearing is still unresolved. It is **not yet selected by Preview.cmd**.
+tearing is still unresolved. The persistent `jenny-review` save profile is unchanged.
 Graphics preferences are shared within that game's Unreal config, not isolated
 per preview-save profile. See `docs\setup.md` for controls and override behavior.
 
@@ -162,6 +163,12 @@ Normal-movement visual review is separate from functional smoke tests:
 `Scripts\Playtest-Visual.ps1` records an isolated game session without teleport
 travel, and `Scripts\Review-VisualPlaytest.py` creates a timestamped local viewer.
 See `docs\visual-playtesting.md` for evidence, sampling limits and findings.
+
+The opt-in `Scripts\Test-Endurance.ps1` exercises one continuous45-minute mapped
+route in a disclosed copied test homestead with isolated saves/graphics. The first
+run passed fixed participation/action/save criteria across a natural night and
+morning. See `docs\endurance-playtesting.md` for exact results and limitations;
+this diagnostic package does not replace the selected human preview.
 
 Prototype meshes are original; selected landscape/audio assets are licensed
 separately. See `docs\asset-credits.md`. No game assets from the inspiration titles

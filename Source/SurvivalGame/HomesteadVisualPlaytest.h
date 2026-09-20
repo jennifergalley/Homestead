@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "HomesteadEnduranceState.h"
 #include "HomesteadVisualPlaytest.generated.h"
 
 class AHomesteadController;
@@ -78,6 +79,14 @@ private:
     int32 WaterSupplyBefore = 0;
 
     void Prepare();
+    bool bEndurance = false;
+    FHomesteadEnduranceState Endurance;
+    void PrepareEndurance();
+    void TickEndurance(float EngineDelta);
+    void EnduranceEvent(const FString& Message);
+    bool WriteEnduranceProgress(const FString& Status, const FString& Reason);
+    bool InspectEnduranceSaves();
+    void FinishEndurance(const FString& Status, const FString& Reason);
     void Tap(FKey Key);
     void ApplyAxes(FVector2D Move, FVector2D Look);
     void Capture(const FString& Label);

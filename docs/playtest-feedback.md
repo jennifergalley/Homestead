@@ -164,9 +164,23 @@ not fix every flicker. It reports an engine override instead of pretending the
 requested preference is active. This is a reversible comparison aid, not a
 rendering fix, display-mode change, or human scanout acceptance.
 
-The selected preview remains accepted `book-clarity-01` until separate review.
+The coordinator subsequently accepted and explicitly selected `video-sync-01`
+in `d7d0a02`, keeping `jenny-review` and Off. This accepts the optional control,
+not a tearing cure.
 Graphics settings belong to the game's Unreal configuration, not individual
 preview save profiles. See `setup.md` for operation and isolated verification.
+
+## Sustained autonomous testing - bounded evidence (2026-09-20)
+
+The explicitly scheduled `endurance-01` diagnostic completed one45-minute
+ordinary-control exercise after short sanity/cancellation checks. It was99.62%
+unpaused, advanced17.93natural game hours through night/morning, completed
+5gathers/4eats/402waypoints and verified manual/load/autosave integrity without
+navigation failures. It used a disclosed prepared test-world copy, not a fresh
+start or personal save. No time/needs/inventory resets or compressed simulation
+were used. See `endurance-playtesting.md` for fixed criteria, actual memory/timing
+ranges and limits. Resource regrowth, indefinite stability and physical tearing
+were not proven; no gameplay/art/graphics changes or preview promotion followed.
 
 ## Deferred feedback - 2026-09-19
 

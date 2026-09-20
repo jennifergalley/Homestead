@@ -158,6 +158,14 @@ review. Validate requested/applied state and persistence in synthetic graphics
 config roots; preview save profiles do not independently isolate graphics settings.
 No OS/driver/display comparison or additional renderer option is authorized.
 
+Accepted `video-sync-01` was explicitly selected in `d7d0a02`, preserving
+`jenny-review` and the existing Off preference. The next bounded assignment is
+diagnostic-only `endurance-01`: one45-minute ordinary-control exercise after short
+sanity/cancellation checks. Its prepared test-world provenance, fixed pass criteria,
+atomic progress, graceful cancellation and timing limits are in
+`endurance-playtesting.md`. Do not promote this test package or start another task
+after its handoff. The selected human preview remains video-sync-01.
+
 ## Starting a fresh run (coordinator)
 
 Confirm no old worker/build is active; explicitly stop and hand off an old run

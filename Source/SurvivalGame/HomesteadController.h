@@ -66,6 +66,7 @@ public:
     float EffectsVolume = 0.8f;
 
 private:
+    friend class AHomesteadVisualPlaytest;
     enum class EFocus { None, Resource, Plot, Fire, Bed, Chest, Water };
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
