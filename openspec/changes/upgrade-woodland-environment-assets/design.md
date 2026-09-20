@@ -58,6 +58,13 @@ the proposed INI controls. Task1.3 is still unproven; no new engine was launched
 See `authoring-preflight-result.md`. This updates the current blocker, not the
 normative privacy, runtime QA or quality requirements below.
 
+The14:41 separately authorized feasibility study subsequently proved synthetic
+pre-resume one-process/no-breakaway Job containment and disposable read-sharing
+semantics. `containment-feasibility.md` records exact tests, source-supported
+in-process shader compilation and the separate UAT/Pak boundary. This is a
+possible direct-leaf control, not a filesystem/network sandbox or permission to
+launch Unreal/lock the global marker. Task1.3 and all runtime gates stay open.
+
 Dependency refinement authorized by the coordinator on 2026-09-20: completion
 of tasks1.1/1.2 permits a separately assigned no-engine preparation lane for
 tasks2.1/2.2 and the source-only portion of2.3 while1.3 remains blocked. This

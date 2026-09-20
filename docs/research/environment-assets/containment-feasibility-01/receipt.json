@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-09-20T21:53:10.1861136+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "deadlineUtc": "2026-09-21T02:22:17.1884351+00:00",
+  "result": "synthetic-mechanisms-passed-engine-workflow-unproven",
+  "openSpecProgress": "4/29",
+  "sourcePath": "Tests\\WindowsContainmentProbe.cpp",
+  "sourceSha256": "92BF723B2D822E7913ABE31C4C752F5CBC12569336104267C1BA86E650BD1F65",
+  "initialFailedSourceSha256": "D1DA661629C945093F6B1CFE403F1D3623258CCE5D21129FF9505124B59EC5DE",
+  "compilerPath": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+  "compilerVersion": "19.44.35229.0",
+  "compilerFlags": "/std:c++17 /EHsc /W4 /WX /MT /O2; Shell32.lib Advapi32.lib",
+  "engineLaunches": 0,
+  "globalMarkerOpenedOrLocked": false,
+  "firewallRegistryAclChanges": false,
+  "networkTestListeners": 0,
+  "containedAttempts": 8,
+  "executedChildInitializers": 0,
+  "positiveNormalDetachedWitnesses": 4,
+  "baselineBreakawayPositiveControl": "Unavailable: inherited no-breakaway job flags8192 denies CreateProcess with error5; explicitly recorded, not treated as positive execution.",
+  "assignedJobFlags": 8200,
+  "activeProcessLimit": 1,
+  "assignment": "CREATE_SUSPENDED then assign/query before ResumeThread",
+  "sharing": "Empty and sentinel fixtures: compatible reader, cross-process OpenWrite and same-process write/append/delete/rename denial; bytes/size/write-time/DACL preserved; release and preexisting-writer conflict checked.",
+  "initialFailure": "Run01 incorrectly required baseline breakaway success. Run02 explicitly measured host job; Run03 added separate-process file-write attempt. All runs retained.",
+  "globalMarkerMetadata": {
+    "path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "length": 0,
+    "attributes": "Archive, NotContentIndexed",
+    "lastWriteTimeUtc": "2026-09-20T17:58:14.8837203Z",
+    "readableAndLockable": "Unverified; metadata only"
+  },
+  "runtimeLimitations": [
+    "No Unreal compatibility, shader/cook/Pak or stop proof.",
+    "No network/filesystem sandbox; broker-created processes are outside ordinary job inheritance.",
+    "Global read lock can interfere with other authoring writers; not authorized or acquired.",
+    "Supervisor-failure lock lifetime not proven; job-close termination is hard, not graceful.",
+    "Stock UAT child launch is not pre-resume guarded; separate orchestration remains required."
+  ],
+  "sourceEvidence": [
+    {
+      "engineRelativePath": "Source\\Runtime\\Core\\Private\\Windows\\WindowsPlatformProcess.cpp",
+      "sha256": "F39E3E71AB2746653FBE620F0F2B166743561DF13E4FB5B9022670D36C008962"
+    },
+    {
+      "engineRelativePath": "Source\\Runtime\\Core\\Private\\Windows\\WindowsPlatformCrashContext.cpp",
+      "sha256": "934C14186B79F19C2E283D8E5F678ED1326151238C0573C2E229E0D45D558CAE"
+    },
+    {
+      "engineRelativePath": "Source\\Runtime\\Core\\Private\\Windows\\WindowsPlatformFile.cpp",
+      "sha256": "B961E22F4713DF6692246CA5FCA3BB6D8C7D8EEE51F6F15AF911931A20F10165"
+    },
+    {
+      "engineRelativePath": "Source\\Runtime\\Core\\Private\\GenericPlatform\\GenericPlatformCrashContext.cpp",
+      "sha256": "E97DA8E87E563253A43E70BC3E589B26315A99550ACBAD546758CDCD8BF9883E"
+    },
+    {
+      "engineRelativePath": "Source\\Runtime\\Engine\\Private\\ShaderCompiler\\ShaderCompiler.cpp",
+      "sha256": "01CF29F3E0F8894F50D63DBD5FFEBCC8216702EA2F08F1C46787037782D0056F"
+    },
+    {
+      "engineRelativePath": "Source\\Runtime\\Engine\\Private\\ShaderCompiler\\ShaderCompilerThreadRunnable.cpp",
+      "sha256": "086AE113379BE8D70609EF9B4161AF660CF24A3CBB7BE56BEFDD85223FF78FBB"
+    },
+    {
+      "engineRelativePath": "Source\\Runtime\\Engine\\Private\\ShaderCompiler\\ShaderCompilerPrivate.h",
+      "sha256": "9C76BBD8EBDE1026F4A79E9AC5118BFA15B5B871E359980217567ACA3A8CEFFE"
+    },
+    {
+      "engineRelativePath": "Source\\Programs\\AutomationTool\\Scripts\\CopyBuildToStagingDirectory.Automation.cs",
+      "sha256": "F4BE917D19E160D2DCF6A24EF9F460D04AC4692A82081617880DC83383FDB4FA"
+    }
+  ],
+  "proofs": [
+    {
+      "path": "run-01-compile.txt",
+      "bytes": 131,
+      "sha256": "1156B54B75BE95E09D8D8B98655E2975F732A049A97FA63811288162DEB25CE8"
+    },
+    {
+      "path": "run-01-result.txt",
+      "bytes": 33,
+      "sha256": "7519E429C55DA57C514DF754A57B06C81F376A51FE22F4E350DBD13EDD2FF00E"
+    },
+    {
+      "path": "run-01-control-attempts.tsv",
+      "bytes": 502,
+      "sha256": "6F7F394707809AB989616747115866870ECB0F960A9E5EB73EDDA3FDD8AA25D9"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\containment-feasibility-01\\WindowsContainmentProbe.exe",
+      "bytes": 173568,
+      "sha256": "8896B11B3739B28C510EA8CB73176E87EF9531BE26C5B91FE9C6F8C6DF262C0A",
+      "tracked": false
+    },
+    {
+      "path": "run-02-compile.txt",
+      "bytes": 131,
+      "sha256": "1156B54B75BE95E09D8D8B98655E2975F732A049A97FA63811288162DEB25CE8"
+    },
+    {
+      "path": "run-02-result.txt",
+      "bytes": 671,
+      "sha256": "0EB21DB03676074A30DD848347102153243358D8B82AA806762B968FE3BD72C4"
+    },
+    {
+      "path": "run-02-control-attempts.tsv",
+      "bytes": 982,
+      "sha256": "E1459C8D89C2F2E0629DE7B99E221E3C6393B2E5CFB5C626A6FBC3BCD7CBF30A"
+    },
+    {
+      "path": "run-02-contained-attempts.tsv",
+      "bytes": 1002,
+      "sha256": "5A4237D4DB1E107BD226CCDEA034F6B12B541A90F3E08C273237DE372C7AD10B"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\containment-feasibility-02\\WindowsContainmentProbe.exe",
+      "bytes": 175104,
+      "sha256": "CEDBA680D6B6406EE7D95B19DC53426C135E9870653CC890509D4B53022B4935",
+      "tracked": false
+    },
+    {
+      "path": "run-03-compile.txt",
+      "bytes": 131,
+      "sha256": "1156B54B75BE95E09D8D8B98655E2975F732A049A97FA63811288162DEB25CE8"
+    },
+    {
+      "path": "run-03-result.txt",
+      "bytes": 730,
+      "sha256": "C9D19098AFC767CA16E8D547E5930596B81E76D4AD1A59AB1021B921BD6B32DA"
+    },
+    {
+      "path": "run-03-control-attempts.tsv",
+      "bytes": 982,
+      "sha256": "E1459C8D89C2F2E0629DE7B99E221E3C6393B2E5CFB5C626A6FBC3BCD7CBF30A"
+    },
+    {
+      "path": "run-03-contained-attempts.tsv",
+      "bytes": 1002,
+      "sha256": "5A4237D4DB1E107BD226CCDEA034F6B12B541A90F3E08C273237DE372C7AD10B"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\containment-feasibility-03\\WindowsContainmentProbe.exe",
+      "bytes": 176640,
+      "sha256": "7C14D95BD353D61A01A166F4169F69BE141D534CD0CC8CFE164DBACC03FB6A3E",
+      "tracked": false
+    }
+  ],
+  "preserved": {
+    "protectedHashes": 234,
+    "previewProfile": "jenny-review",
+    "previewExecutable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260920-050723-5cc6c8a5\\offline-startup-01\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "previewSha256": "CE5C9A262394E0B63E1105D71D4EBFB82CB61D4041FDC994618665F6FF29E634",
+    "previewArguments": [
+      "-HomesteadPreviewProfile=jenny-review",
+      "-Res=0x0wf",
+      "-UserDir=E:\\Repos\\SurvivalGame\\Build\\Releases\\20260920-050723-5cc6c8a5\\offline-startup-01\\Windows\\SurvivalGame"
+    ]
+  }
+}

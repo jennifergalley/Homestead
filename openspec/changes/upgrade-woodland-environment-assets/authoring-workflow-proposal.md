@@ -15,6 +15,13 @@ the additional decision needed and all still-unproven runtime requirements.
 Task1.3 remains unchecked; actual progress is4/29. This supersedes the former
 missing-permission status, not the execution or quality requirements.
 
+Subsequent14:41 authorization allowed only a bounded alternative-containment
+study and harmless synthetic tests. `containment-feasibility.md` records passed
+pre-resume Job Object and disposable file-sharing mechanisms, supported
+`-noshaderworker`, real-marker interference/lifetime limits and unproven UAT/Pak
+orchestration. No Unreal/global-marker lock is authorized by those results;
+the original approved proposal snapshot remains unchanged.
+
 ## Historical proposal as originally reviewed
 
 **Original task1.3: BLOCKED / NOT APPROVED / NOT EXECUTED.** Static inspection on

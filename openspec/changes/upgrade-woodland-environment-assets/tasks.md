@@ -225,3 +225,25 @@ See design decision1 for data-only inspection and conditional Blender safeguards
   prevent endorsing a fully isolated/no-upload workflow. See the complete
   supported-controls/unknowns/ownership table in `authoring-preflight-result.md`;
   no runtime proof or additional service permission is inferred.
+
+## Alternative containment feasibility (2026-09-20, authorized14:41 Arizona)
+
+- Coordinator authorized one bounded study plus disposable native mechanism
+  tests only, with no Unreal/asset import, global marker lock, engine/OS rule
+  modification, elevation or VM activation.
+- `Tests\WindowsContainmentProbe.cpp` assigns a one-process/no-breakaway Job
+  before resuming the subject's first thread. All8 static/runtime direct-child
+  attempts are denied with no child initializer witnesses. Actual normal and
+  detached positive controls execute. The host already denies breakaway; the
+  initial fixture's incorrect positive-breakaway assumption and its correction
+  are preserved and explicitly qualified, not counted as a positive control.
+- Disposable empty/sentinel read-sharing tests also deny a separate process's
+  Core-style OpenWrite, preserve bytes/write-time/DACL, permit readers and restore
+  write access on release. The real marker was inspected only for metadata;
+  it is present/empty but readability and lock compatibility remain unverified.
+- `containment-feasibility.md` records supported in-process shader compilation,
+  Core's nonfatal denied-create/write paths, global sharing interference,
+  untested supervisor-failure lock lifetime, and the independent UAT/Pak/build
+  orchestration boundary. A Job is not network/filesystem isolation.
+- No additional completed task:4/29,1.3 unchecked, source-only2.3 still partial.
+  Return for coordinator review before any real engine probe or marker lock.

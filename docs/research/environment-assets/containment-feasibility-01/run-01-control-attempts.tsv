@@ -1,0 +1,8 @@
+static	normal	created=1	error=0	exit=0	marker=1	passed=1
+static	detached	created=1	error=0	exit=0	marker=1	passed=1
+static	breakaway	created=0	error=5	exit=259	marker=0	passed=0
+static	detached-breakaway	created=0	error=5	exit=259	marker=0	passed=0
+runtime	normal	created=1	error=0	exit=0	marker=1	passed=1
+runtime	detached	created=1	error=0	exit=0	marker=1	passed=1
+runtime	breakaway	created=0	error=5	exit=259	marker=0	passed=0
+runtime	detached-breakaway	created=0	error=5	exit=259	marker=0	passed=0

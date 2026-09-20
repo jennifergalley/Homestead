@@ -1,0 +1,7 @@
+controller pid=48000 inheritedJob=1
+baseline-control static/runtime assertions passed (baseline breakaway eligibility recorded separately)
+job pid=24872 flags=8200 activeLimit=1 activeBeforeResume=1 noEarlyMarker=1
+contained static/runtime assertions passed (baseline breakaway eligibility recorded separately)
+dummy-file bytes=0 readers=allowed otherProcessOpenWrite=denied write/append/delete/rename=denied bytes/time/DACL=preserved release=restored conflict=denied
+dummy-file bytes=9 readers=allowed otherProcessOpenWrite=denied write/append/delete/rename=denied bytes/time/DACL=preserved release=restored conflict=denied
+PASS synthetic containment and disposable-file sharing only; no Unreal/global marker/network used
