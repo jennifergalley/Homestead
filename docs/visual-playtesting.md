@@ -193,3 +193,105 @@ foot locking or continuous smoothness. Packaged functional timing was 59.72 mean
 FPS, 16.94 ms p95 and 17.24 ms p99 after startup/screenshot exclusions, under
 concurrent load; it is not clean performance acceptance. Human feel, listening
 and Jenny's visual approval remain separate. The candidate is not promoted.
+
+## Face presentation slice: rejected hypothesis and diagnostics
+
+The next bounded slice inspected actual close portraits, source smooth shading,
+texture color space and the existing rig. The imported skin used Default Lit,
+despite the Blender source having a 0.07 subsurface weight; the masked eye atlas
+used one uniform surface response. This motivated a **hypothesis**, not proof
+that adding subsurface scattering would improve this particular heroine.
+The source has no eye/lid/jaw bones or retained shape keys, so no blinking,
+eye scaling, facial resculpting or new facial-animation infrastructure was added.
+Hair, world lighting/exposure, audio and locomotion were outside this slice.
+
+### Controlled comparison protocol
+
+`Test-Game.ps1 -Presentation -Width 1920 -Height 1080` captures five actual-engine
+images: front and three-quarter at noon, front and three-quarter at 22:00 near
+an ordinary fueled fire, and alternate skin/eye colors at noon. Use fresh output
+folders for each run. `-Packaged -PackageDirectory <candidate>` selects a separate
+package, as for other integration tests.
+
+This is explicitly a **fixed visual fixture, not ordinary gameplay**. It disables
+controller simulation ticking, supplies a copied world-visual state, samples the
+existing relaxed idle at time zero, hides the HUD and uses a fixed test camera.
+The real runtime meshes/materials, world lights and automatic exposure are used;
+there are no added portrait lights or production camera changes. Frame metadata
+and `presentation-fixture.txt` record the setup. The normal-input route remains
+separate and still prohibits teleports, time skips and state edits.
+
+The first setup capture (`presentation-before`) was rejected as a night
+comparison: six seconds did not allow the existing 1 EV/s dark adaptation to
+settle, and the fire was behind the heroine. The corrected fixture waits 18
+seconds on the day-to-night transition and places the ordinary fire in front.
+Exposure itself was not changed. This was a fixture correction before material
+editing, not cosmetic tuning of the heroine.
+
+### Outcome: do not promote presentation-01
+
+The settled before evidence is
+`Saved\Automation\20260920-050723-5cc6c8a5\presentation-before-settled`.
+The experimental packaged evidence is
+`Saved\Automation\20260920-050723-5cc6c8a5\presentation-01-portraits`.
+All five originals are 1920x1080. Actor, camera, mesh and head transforms match
+exactly in the recorded metadata; rounded projected bounds differ by at most
+0.1 pixel. Native-resolution face crops are retained as
+`face-*-comparison.png`, before on the left and rejected candidate on the right.
+No private reference image appears in these comparisons.
+
+The candidate's Subsurface Profile produced visibly red, noisy eye-socket,
+nose and neck shadows in daylight. Firelight lost nose/lip definition rather
+than gaining convincing skin response. Eye highlights became more distinct,
+but that did not justify accepting the experiment. The coordinator independently
+inspected the front comparison and agreed with rejection. Both experimental
+skin and eye graphs were restored; no third cosmetic iteration or eye-only
+candidate was authorized.
+
+The rejected package remains at
+`Build\Releases\20260920-050723-5cc6c8a5\presentation-01`, with a `REJECTED.txt`
+marker. It passed 434 functional checks, including actual material bindings,
+all 18 wardrobe combinations, editable color controls and save/load, but **functional success did not
+override visual failure**. Its separate normal-control route reached and
+gathered berry bush 52: 148 actual 1920x1080 frames over 42.8792 seconds.
+This recording is unusually sparse (about 3.45 captured frames/second), contains
+no sampled fractional blend weights and insufficient fast-walk stance pairs;
+it cannot establish continuous smoothness or a fast-gait regression.
+The native stance/cadence/stop assertions still passed. No production animation code or
+locomotion assets were changed in this slice.
+
+### Recovery and retained diagnostics
+
+All 50 assets changed by the experiment/import/bootstrap were restored to
+checkpoint `132898f`, with SHA-256 proof in
+`Build\CharacterPreview\presentation-recovery-hashes.json`. The rejected
+profile, configuration and production import wiring were removed. Only the
+fixed comparison fixture, stronger baseline runtime material/color checks and
+documentation are retained. The restored checks explicitly expect Default Lit
+skin/eyes, the original masked eye surface and matching current skin/iris color
+parameters after every successful smoke step, including wardrobe changes and
+save/load. They also reject the discarded experiment's shader parameters.
+
+The separate `presentation-recovery` package is for diagnostic recovery
+verification, not a new visual hypothesis or a facial-quality success.
+Neither the original player build nor `movement-01` was replaced.
+
+Recovery verification completed against
+`Build\Releases\20260920-050723-5cc6c8a5\presentation-recovery\Windows`:
+**152 packaged checks passed**, covering native movement/cadence/stopping, all
+18 wardrobe meshes, editable colors, appearance save/load, gathering and
+building. Actual Default Lit/material color checks ran after every successful
+step. Captures were verified as 1920x1080; they were not used for a third cosmetic
+review. See
+`Saved\Automation\20260920-050723-5cc6c8a5\presentation-recovery\smoke-result.txt`.
+The larger full loop was not repeated during recovery: this was the smallest
+existing runtime route covering the retained diagnostics, and all production
+character assets were restored exactly. Native rules also passed 16 scenarios /
+986 checks, and run/path controls passed 21 checks.
+
+The recovery build log confirms unchanged character sources/importer and no
+character reimport during packaging. All character material/mesh/texture hashes
+remained at the known-good checkpoint. Five incidental world-bootstrap resaves
+were restored afterward as well; no content assets are changed by the diagnostic
+checkpoint. Experimental shader parameters, material graphs and profile assets
+are not retained in production. The heroine's baseline facial limitations remain.

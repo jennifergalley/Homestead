@@ -124,6 +124,17 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")))
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadFullLoop"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof")))
+        {
+            Finish(false, TEXT("Presentation fixtures cannot be combined with full-loop or audio acceptance."));
+            return;
+        }
+        PreparePresentation();
+        return;
+    }
     bAudioCapture = FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof"));
     if (bAudioCapture)
     {
@@ -141,6 +152,8 @@ void AHomesteadSmokeTest::Prepare()
                 Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r")));
             return Animation && Animation->WalkWeight() < 0.01f && Width > 12 && Width < 24;
         });
+    Add(TEXT("Baseline skin and eyes retain Default Lit shading and saved color controls"),
+        []() {}, [this]() { return VerifyPresentationMaterials(); });
     Add(TEXT("Initial notes page is open"),
         []() {},
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
@@ -535,7 +548,13 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
             bFullLoopPrepared = true;
             PrepareFullLoop();
         }
-        else { Finish(true, TEXT("All engine integration steps passed.")); return; }
+        else
+        {
+            Finish(true, FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+                ? TEXT("Fixed presentation fixture completed; not ordinary-play acceptance.")
+                : TEXT("All engine integration steps passed."));
+            return;
+        }
     }
     if (!Steps.IsValidIndex(StepIndex)) { Finish(false, TEXT("Full-loop scenario did not queue any steps.")); return; }
     FStep& Step = Steps[StepIndex];
@@ -571,6 +590,12 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         Finish(false, Step.Name + TEXT(" | ") + Controller->Toast());
         return;
     }
+    if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")) && !VerifyPresentationMaterials())
+    {
+        TraceState(TEXT("MATERIAL FAIL ") + Step.Name);
+        Finish(false, Step.Name + TEXT(" | Skin/eye material or saved color contract failed."));
+        return;
+    }
     Results.Add(TEXT("PASS ") + Step.Name);
     TraceState(TEXT("PASS ") + Step.Name);
     UE_LOG(LogTemp, Display, TEXT("Homestead smoke PASS: %s"), *Step.Name);
@@ -600,8 +625,9 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
     {
         Axis(EKeys::Gamepad_LeftY, 0);
         Axis(EKeys::Gamepad_RightX, 0);
-        Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes four deliberate rejection probes)"),
-            Controller->IgnoredExternalInputCount()));
+        const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")) ? 0 : 4;
+        Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
+            Controller->IgnoredExternalInputCount(), Probes));
     }
     if (FrameMilliseconds.Num() >= 60)
     {

@@ -1,10 +1,13 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop,
+param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200)
 $ErrorActionPreference = 'Stop'
+if ($Presentation -and ($FullLoop -or $WithAudio)) {
+    throw 'Presentation fixtures are separate from full-loop and audio acceptance.'
+}
 $root = Split-Path $PSScriptRoot -Parent
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $project = Join-Path $root 'SurvivalGame.uproject'
@@ -27,6 +30,9 @@ $null = New-Item -ItemType Directory -Path $output -Force
 $report = Join-Path $output 'smoke-result.txt'
 $captures = @('clearing.png', 'field-book.png', 'first-foundation.png', 'heroine-long.png', 'heroine-bob.png', 'heroine-colors.png', 'heroine-ponytail.png', 'heroine-apron.png', 'heroine-willow.png', 'heroine-hazel.png')
 if ($FullLoop) { $captures += @('garden.png', 'shelter-night.png', 'failure-retry.png') }
+if ($Presentation) {
+    $captures = @('face-day-front.png','face-day-angle.png','face-night-front.png','face-night-angle.png','face-day-colors.png')
+}
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -41,6 +47,7 @@ if ($previous) {
 $log = Join-Path $output 'engine.log'
 $audioArguments = if ($WithAudio) { '-HomesteadAudioProof' } else { '-nosound' }
 $loopArguments = if ($FullLoop) { '-HomesteadFullLoop' } else { '' }
+if ($Presentation) { $loopArguments = '-HomesteadPresentationTest' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
 Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
@@ -78,4 +85,8 @@ if ($WithAudio) {
     python (Join-Path $PSScriptRoot 'analyze_audio.py') $recording
     if ($LASTEXITCODE -ne 0) { throw 'Game audio waveform validation failed.' }
 }
-Write-Host "Game integration smoke test passed. Captures: $output. Visual and audio review are separate."
+if ($Presentation) {
+    Write-Host "Fixed presentation fixture captured: $output. This is not ordinary-play or full-loop acceptance."
+} else {
+    Write-Host "Game integration smoke test passed. Captures: $output. Visual and audio review are separate."
+}

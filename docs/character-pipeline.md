@@ -97,6 +97,42 @@ turns can still slide. Face, hair, fabric, gathering motion and subjective
 character approval are separate work. Actual-game evidence is recorded in
 `docs\visual-playtesting.md`.
 
+## Rejected face-material hypothesis (2026-09-20)
+
+The source skin shader includes a Blender subsurface weight of 0.07, which the
+original portable manifest/importer did not transfer. Unreal therefore used
+uniform Default Lit skin. The eye atlas also had one uniform roughness response,
+without a separate wet reflection layer. These are the two targets of this
+material-only experiment; no facial geometry or expression was changed.
+
+The separate `presentation-01` candidate tried a Subsurface Profile with a 0.35
+scatter mask and the existing albedo/tint, plus Clear Coat eyes with 0.06 wet-layer
+roughness over 0.32 underlying roughness. **The visual gate rejected it.**
+Matching noon portraits showed red, noisy orbital/nose/neck shadows; firelight
+lost nose/lip definition. More distinct eye highlights did not justify keeping
+either material experiment. Technical import/full-loop success was not treated
+as evidence of better facial presentation.
+
+Both production graphs and all generated asset resaves were restored exactly
+to movement checkpoint `132898f`, with SHA-256 evidence under
+`Build\CharacterPreview\presentation-recovery-hashes.json`. The experimental
+profile, configuration and production-import wiring were removed. The separate
+rejected package and comparison captures remain local and labeled as rejected;
+they are not promoted. No third cosmetic iteration was authorized.
+
+Source inspection confirms smooth-shaded body/eye polygons, but no eye, eyelid
+or jaw bones and no retained facial shape keys. Eyes, brows, lashes and teeth
+are head-weighted. Credible blinking or facial repose changes would require
+additional facial authoring; none was faked through eye scaling or added here.
+There are no retained new textures, acquired assets, hair edits, wardrobe
+geometry reimports, or changes to world lights/exposure. The fixed-angle fixture
+and stronger baseline shading/color/slot/save checks are retained as diagnostics,
+not a claim of facial-quality improvement.
+
+The deterministic daytime/firelight comparison fixture is separate from
+ordinary play; see `docs\visual-playtesting.md`. Its close camera, frozen pose
+and copied visual world state are test-only, not runtime presentation hacks.
+
 ## Acquisition, rights and privacy
 
 The existing PATH and usual Blender installation locations were checked before

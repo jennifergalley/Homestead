@@ -41,6 +41,24 @@ with Blender; `Scripts\Import-Locomotion.ps1` verifies their persisted Unreal
 references in a fresh editor process. Neither replaces ordinary-play image
 review. See `docs\visual-playtesting.md` for evidence and sampling limits.
 
+The smoke route checks the restored baseline's actual runtime Default Lit
+skin/eye shading, masked eye blend mode and current skin/iris color parameters
+after every successful step. It also rejects the removed experimental skin
+scatter and wet-eye parameters. This covers material binding during all wardrobe
+changes and after save/load, rather than checking only stored menu indices.
+These expectations deliberately describe the restored baseline, not acceptance
+of the visually rejected subsurface/clear-coat experiment.
+
+For a controlled material comparison, use `Test-Game.ps1 -Presentation` with
+fresh `-OutputDirectory` values and matching `-Width 1920 -Height 1080`.
+It captures fixed front/three-quarter noon and 22:00 firelight views plus an
+alternate skin/eye color. This fixture disables controller simulation ticking,
+uses a copied visual state, freezes the existing idle clip at time zero, and
+uses a test camera without custom lights/exposure. Day-to-night adaptation
+settles for 18 seconds. It is explicitly **not** ordinary-play, full-loop or
+human visual approval. `-Presentation` cannot be combined with `-FullLoop` or
+`-WithAudio`. Run full-loop and normal visual routes separately.
+
 - `RecipeRequirements` and `PieceRequirements` return stable `const char*`
   descriptions generated from the same costs used by transactions, including
   tool/fire/foundation prerequisites. HUD callers need not duplicate cost tables.

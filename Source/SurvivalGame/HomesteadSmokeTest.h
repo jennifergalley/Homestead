@@ -54,6 +54,8 @@ private:
     int32 GardenPlotId = -1;
 
     void Prepare();
+    void PreparePresentation();
+    bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
     void QueueSelectRow(int32 Id);
     void QueueGatherTo(Homestead::Item Item, int32 TargetCount);
