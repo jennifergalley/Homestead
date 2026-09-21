@@ -69,7 +69,7 @@ function Get-FernProbeArguments([string]$Project,[string]$Output,[string]$Ddc,$C
     return [string[]]$tokens
 }
 
-function Assert-HomesteadCookOutput($Value,[string]$Output) {
+function Assert-HomesteadCookOutput($Value,[string]$Output,[string[]]$AdditionalPackages=@()) {
     $cooked=Join-Path $Output 'Cooked'
     if(-not $Value.passed -or $Value.exitCode -ne 0 -or $Value.cancelled -or @($Value.errors).Count -or
         $Value.targetPlatform -cne 'Windows' -or -not $Value.cookByTheBook -or $Value.cookProcessCount -ne 1 -or
@@ -81,8 +81,10 @@ function Assert-HomesteadCookOutput($Value,[string]$Output) {
     $registries=@(Get-ChildItem $cooked -Recurse -File -Filter 'DevelopmentAssetRegistry.bin')
     if($registries.Count -ne 1){throw 'Cook requires one actual development asset registry.'}
     $gameRoot=Split-Path (Split-Path $registries[0].FullName -Parent) -Parent
-    foreach($relative in @('Metadata\CookMetadata.ucookmeta','Content\SurvivalGame\Maps\Homestead.umap') +
-        @(Get-FernPackageStems|ForEach-Object {"Content\Trials\Fern02_20260920_01\$_.uasset"})) {
+    $requiredPackages=@('Metadata\CookMetadata.ucookmeta','Content\SurvivalGame\Maps\Homestead.umap') +
+        @(Get-FernPackageStems|ForEach-Object {"Content\Trials\Fern02_20260920_01\$_.uasset"})
+    if($AdditionalPackages){$requiredPackages+=$AdditionalPackages}
+    foreach($relative in $requiredPackages) {
         $file=Join-Path $gameRoot $relative
         if(-not(Test-Path $file -PathType Leaf) -or (Get-Item $file).Length -eq 0){throw "Missing real cooked output:$relative"}
     }

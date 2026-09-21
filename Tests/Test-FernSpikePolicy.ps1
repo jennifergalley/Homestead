@@ -121,6 +121,18 @@ foreach($relative in @('Metadata\DevelopmentAssetRegistry.bin','Metadata\CookMet
 $cook=@{passed=$true;exitCode=0;cancelled=$false;errors=@();targetPlatform='Windows';cookByTheBook=$true;
     cookProcessCount=1;outputDirectory=$cooked;skipZenStore=$true;arguments='-SkipZenStore'}
 Assert-HomesteadCookOutput $cook $cookOutput
+Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages $null
+. (Join-Path $root 'Scripts\HairWavePolicy.ps1')
+$hairPackages=@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})
+Reject 'missing-cooked-hair-packages' {Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages $hairPackages}
+foreach($relative in $hairPackages) {
+    $file=Join-Path $gameRoot $relative
+    $null=New-Item -ItemType Directory -Path (Split-Path $file -Parent) -Force
+    [IO.File]::WriteAllBytes($file,[byte[]]@(1))
+}
+Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages $hairPackages
+[IO.File]::WriteAllBytes((Join-Path $gameRoot $hairPackages[0]),[byte[]]@())
+Reject 'empty-cooked-hair-package' {Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages $hairPackages}
 foreach($field in @('passed','cookByTheBook','skipZenStore')) {
     $cook[$field]=$false
     Reject "cook-$field-false" {Assert-HomesteadCookOutput $cook $cookOutput}

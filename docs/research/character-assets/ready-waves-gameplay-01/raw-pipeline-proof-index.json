@@ -1,0 +1,32 @@
+[
+  {
+    "sha256": "B98814D6E825F635F4E788B881FEC36CAE5435B2088AF3E4AC2339DCB735C29A",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-cook-01\\probe-result.json",
+    "status": "passed"
+  },
+  {
+    "sha256": "19E23F7F5DBEACDE3FD292BA521B22875B28EEC16A72C2E84C6D86959CA24A03",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-stage-01\\result.json",
+    "status": "passed"
+  },
+  {
+    "sha256": "4A1D8778535CF876A61C02E297A33632E89A3B900ECE6A1FFEDEE92EB03754F7",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-shipping-build-01\\compile0\\result.json",
+    "status": "passed"
+  },
+  {
+    "sha256": "48C2FAC552DEA571A68A973008EBF3D9682CE3D6A7F90CDFD9D9FBC0627CBA53",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-shipping-build-01\\link1\\result.json",
+    "status": "passed"
+  },
+  {
+    "sha256": "17967F563AB0F1EC1CA1EC526811B86DBCCC45088E3F4264D002C60A6D6904EB",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-shipping-build-01\\manifest-01\\result.json",
+    "status": "passed"
+  },
+  {
+    "sha256": "94710FD607487BBADA7FEC5FEE5897149AD3D8015699062BBCBE1852AF1401C5",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-shipping-build-01\\metadata\\result.json",
+    "status": "passed"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "exe": {
+    "bytes": 166599680,
+    "path": "Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "sha256": "B90F52C1FC77F31AD0D7B24734017FE067B1648D2EE7BE881151011C03E369AB"
+  },
+  "pdb": {
+    "bytes": 239439872,
+    "path": "Binaries\\Win64\\SurvivalGame-Win64-Shipping.pdb",
+    "sha256": "5E3E133AA60146114FE0BBDA8A5C499BEE08962960630406519DC9DBF1D53DC4"
+  }
+}

@@ -11,12 +11,15 @@ param(
     [switch]$ShippingActions,
     [switch]$SplitShippingManifest,
     [switch]$EmbedShippingManifest,
-    [switch]$StageCooked
+    [switch]$StageCooked,
+    [switch]$HairWaveCandidate
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 $root=Split-Path $PSScriptRoot -Parent
 $authorityRoot=$root
+if($HairWaveCandidate -and -not $ShippingActions){throw 'Hair-wave candidate applies only to the established Shipping leaves.'}
+$shippingBuildName=if($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
 if($UiActions) {
     if($FernActions -or $ShippingActions -or $CompileActionId -notin @(0,6) -or $ResourceLinkActionId -ne -1 -or
@@ -98,15 +101,20 @@ if($StageCooked) {
     . (Join-Path $authorityRoot 'Scripts\FernSpikePolicy.ps1')
     $source='E:\Program Files\UE_5.8\Engine\Binaries\DotNET\AutomationTool\AutomationTool.dll'
     if((Get-FileHash $source).Hash -cne 'DBE23866969B66071B7035E8D4B262ED3B646A67883442748652BA89B98DA2FD'){throw 'Installed AutomationTool identity differs.'}
-    $cookOutput=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-cook-02'
+    $cookOutput=Join-Path $root ("Saved\Automation\20260921-033354-2d257ba0\"+$(if($HairWaveCandidate){'hair-cook-01'}else{'clearing-cook-02'}))
     $cookProof=Get-Content (Join-Path $cookOutput 'probe-result.json') -Raw|ConvertFrom-Json
     if($cookProof.status -cne 'passed' -or -not $cookProof.subjectExited -or $cookProof.hardTerminated -or
         -not $cookProof.guardDisposed -or @($cookProof.cleanupErrors).Count -or -not $cookProof.markerAfterRelease) {
         throw 'A genuinely completed protected cook with verified cleanup is required.'
     }
-    Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput
+    $additional=@()
+    if($HairWaveCandidate) {
+        . (Join-Path $authorityRoot 'Scripts\HairWavePolicy.ps1')
+        $additional=@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})
+    }
+    Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root "Build\Releases\$($run.id)\clearing-02"
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -115,15 +123,15 @@ if($StageCooked) {
     foreach($pin in $stageCookPins) {
         if((Get-FileHash (Join-Path $clone $pin.path)).Hash -cne $pin.sha256){throw 'Fresh platform-layout cook copy differs.'}
     }
-    $native=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\final-native-product.json') -Raw|ConvertFrom-Json
-    $meta=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\metadata\result.json') -Raw|ConvertFrom-Json
+    $native=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\final-native-product.json") -Raw|ConvertFrom-Json
+    $meta=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\metadata\result.json") -Raw|ConvertFrom-Json
     if($meta.status -cne 'passed'){throw 'Genuine Shipping metadata is missing.'}
     foreach($product in @($native.exe,$native.pdb)) {
         if((Get-FileHash (Join-Path $root $product.path)).Hash -cne $product.sha256){throw 'Verified Shipping product changed.'}
     }
     foreach($path in @($source,(Join-Path $cookOutput 'probe-result.json'),(Join-Path $cookOutput 'cook-result.json'),
-        (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\final-native-product.json'),
-        (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\metadata\result.json'),
+        (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\final-native-product.json"),
+        (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\metadata\result.json"),
         (Join-Path $root $native.exe.path),(Join-Path $root $native.pdb.path),
         (Join-Path $root 'Binaries\Win64\SurvivalGame-Win64-Shipping.target'),(Join-Path $root 'docs\asset-credits.md'),
         (Join-Path $root 'SurvivalGame.uproject')) + @(Get-ChildItem (Join-Path $root 'Config') -File -Recurse|ForEach-Object FullName)) {
@@ -140,7 +148,7 @@ if($StageCooked) {
 } elseif($EmbedShippingManifest) {
     $source='E:\Program Files\UE_5.8\Engine\Build\Windows\Resources\Default-Win64.manifest'
     if((Get-FileHash $source).Hash -cne '7AD30B1F5464A075878727EA8C19B0B355D4237E6A057C45FACBE47E1764EB0E'){throw 'Engine manifest changed.'}
-    $linkOutput=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\link1'
+    $linkOutput=Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\link1"
     $linked=Get-Content (Join-Path $linkOutput 'result.json') -Raw|ConvertFrom-Json
     if($linked.status -cne 'passed' -or -not $linked.generatedManifest){throw 'Successful separate-manifest link required.'}
     foreach($product in $linked.producedItems) {

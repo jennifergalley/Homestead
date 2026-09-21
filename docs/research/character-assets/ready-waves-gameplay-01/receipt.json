@@ -1,0 +1,20 @@
+{
+  "status": "passed-default-wave-gameplay",
+  "sourceCheckpoint": "7865137ff80e9acb4f16531b6ee51d9911f3b9f9",
+  "executableSha256": "B90F52C1FC77F31AD0D7B24734017FE067B1648D2EE7BE881151011C03E369AB",
+  "frames": 308,
+  "sampledDurationSeconds": 43.3957,
+  "guardElapsedSeconds": 57.0351339,
+  "maxSampleGapMs": 835.19,
+  "endpointSamples": 186,
+  "ownedEndpoints": 0,
+  "selection": "Normal Preferred/LongWave/tunic at scale1 with neutral slot7 base material, recorded start/end",
+  "scope": "Ordinary controls: walk/turn/stop/orbit/Look/actual gather/recovery. Fresh sandbox, no teleports/time/state edits.1280x720 sampled frames, not FPS or physical scanout.",
+  "deliveryDecision": "Coordinator inspected actual comparison and approved disclosed rough playable increment, not final art approval.",
+  "limits": [
+    "Five other variants have import/reload only, not game-camera coverage",
+    "Broad card locks and scalloped/sawtoothed tips remain",
+    "Bob and modular/UI are not updated",
+    "No new functional-suite/save-migration/human-feel/4K/performance claim"
+  ]
+}

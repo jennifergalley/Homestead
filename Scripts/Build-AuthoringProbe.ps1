@@ -4,10 +4,14 @@ param(
     [switch]$ExportActions,
     [switch]$WriteMetadataOnly,
     [string]$ProjectDirectory = (Split-Path $PSScriptRoot -Parent),
-    [switch]$ShippingActions
+    [switch]$ShippingActions,
+    [switch]$HairWaveCandidate
 )
 $ErrorActionPreference = 'Stop'
 $authorityRoot = Split-Path $PSScriptRoot -Parent
+if($HairWaveCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly)){throw 'Hair-wave metadata requires the genuine Shipping metadata path.'}
+$shippingBuildName=if($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$manifestAttempt=if($HairWaveCandidate){'manifest-01'}else{'manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')
 if ($root -ine $authorityRoot -and
     (-not $ExportActions -or $WriteMetadataOnly -or
@@ -85,9 +89,9 @@ if ($WriteMetadataOnly) {
         $inspectionArgs=@($dll,$pdb)
         if($ShippingActions) {
             $inspectionArgs+=@('--executable','--manifest-input',
-                (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\link1\link-generated.manifest'),
+                (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\link1\link-generated.manifest"),
                 '--manifest-input',(Join-Path $engine 'Engine\Build\Windows\Resources\Default-Win64.manifest'))
-            $embedded=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-build-03\manifest-02\result.json') -Raw|ConvertFrom-Json
+            $embedded=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\$manifestAttempt\result.json") -Raw|ConvertFrom-Json
             if($embedded.status -cne 'passed' -or (Get-FileHash $dll).Hash -cne $embedded.objectSha256){throw 'Successful genuine manifest embedding is missing.'}
         }
         $inspection = & python (Join-Path $PSScriptRoot 'Inspect-NativeModule.py') @inspectionArgs

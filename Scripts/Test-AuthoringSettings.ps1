@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [switch]$ValidateOnly,
     [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify')][string]$Mode='Settings',
-    [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard'
+    [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard',
+    [ValidateSet('Clearing','HairWaves')][string]$CookCandidate='Clearing'
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -14,6 +15,8 @@ Add-Type -Path (Join-Path $PSScriptRoot 'AuthoringLeafGuard.cs')
 $operationPolicy=Get-FernOperationPolicy -Mode $Mode -RenderProfile $RenderProfile
 $completionDriven=$RenderProfile -eq 'CompletionDriven'
 $hairMode=$Mode -in @('HairImport','HairVerify')
+$hairCook=$CookCandidate -eq 'HairWaves'
+if($hairCook -and $Mode -ne 'Cook'){throw 'HairWaves cook selection requires actual Cook mode.'}
 $retainedRender=$RenderProfile -ne 'Standard' -or $hairMode
 $softSeconds=$operationPolicy.softSeconds
 $hardSeconds=$operationPolicy.hardSeconds
@@ -54,10 +57,13 @@ if($Mode -eq 'Cook') {
 if($hairMode) {
     $supersession['currentApproval']='Coordinator approved frozen six-wave native integration into eight fresh trial packages and normal LongWave binding, explicitly completion-driven rather than inheriting arbitrary fern import timers. Existing stop/pause and policy-failure cancellation, retained local cache, root-only/marker/Python/endpoint controls remain; prior selected Shipping preview unchanged.'
 }
+if($hairCook) {
+    $supersession['currentApproval']='Cook the actually imported/fresh-process-verified frozen six-wave set for ordinary Shipping game-camera acceptance. Native Mode remains installed standard Windows Cook with SkipZenStore. No UI/Bob/modular expansion, no accepted candidate overwrite; existing completion-driven controls retained.'
+}
 function Assert-NamedSupersession {
     $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
     if($run.id -cne $expectedRun -or
-        $output -ine (Join-Path $runRoot $(if($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
+        $output -ine (Join-Path $runRoot $(if($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
@@ -109,7 +115,16 @@ function Assert-NamedSupersession {
     }
 }
 Assert-NamedSupersession
-$attempt = Join-Path $runRoot $(if($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
+if($hairCook) {
+    foreach($pin in @(
+        @{path='clearing-cook-02\probe-result.json';sha256='42186AEDD5099F4497CB986CF440D38D9DA8F7C56AED5467B45DCB81ACF77739'},
+        @{path='hair-verify-01\probe-result.json';sha256='6FA45F7737D75A9AA4C2959AA73A5DC55D4F6398E7B7FF010CBABAD9029A7F34'},
+        @{path='hair-import-01\asset-admission.json';sha256='83E0A36CFCB56C1C68BB11655300D3D4158D6500E3441A9F388AA4A355F04F8B'}
+    )) {
+        if((Get-FileHash (Join-Path $runRoot $pin.path)).Hash -cne $pin.sha256){throw 'Accepted hair/cook prerequisite changed.'}
+    }
+}
+$attempt = Join-Path $runRoot $(if($hairCook){'hair-cook-attempt-01.json'}elseif($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -139,7 +154,7 @@ if($Mode -eq 'Cook') {
     $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\clearing-build-02\receipt.json'
     $buildReceiptHash='C6FC72993EB2BA1BDCF5C38EDD1512312AE9CAA9504D87C8D874A50462659632'
 }
-if($hairMode) {
+if($hairMode -or $hairCook) {
     $buildReceiptPath=Join-Path $root 'docs\research\character-assets\hair-native-build-01\receipt.json'
     $buildReceiptHash='950B1A51C800A87F60B5E4B3861AA817C70E2ADE304E11580935B67EC2F8FE74'
 }
@@ -168,6 +183,10 @@ if($Mode -ne 'Settings') {
     if($hairMode) {
         $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\hair-supervisor-01\receipt.json'
         $supervisorReceiptHash='57B5B1CB196DDF7599429EFC6720A5E2092CADB1DD92BB8E2C4F56F7A3B2BDA1'
+    }
+    if($hairCook) {
+        $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\hair-cook-policy-01\receipt.json'
+        $supervisorReceiptHash='CD7817D3AD8B87332F05CD27B6F4FDDF9682C152D1E4D6343D0CC99EE9AC3DBA'
     }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
@@ -276,6 +295,13 @@ if($hairMode) {
         Assert-FernPackagePins @($assetAdmission.packages) $trialBefore
     }
 }
+if($hairCook) {
+    $hairAdmission=Get-Content (Join-Path $runRoot 'hair-import-01\asset-admission.json') -Raw|ConvertFrom-Json
+    $hairTrial=Join-Path $root 'Content\Trials\HeroineWave_20260921_01'
+    Assert-HairWaveNativeInventory $hairAdmission.inventory
+    Assert-FernDirectoryIdentity $hairAdmission.directoryIdentity $hairTrial
+    Assert-FernPackagePins @($hairAdmission.packages) @(Get-FernPackageFiles $hairTrial -Complete -Stems @(Get-HairWavePackageStems))
+}
 $baseline = Get-Content -LiteralPath (Join-Path $root 'docs\research\environment-assets\authoring-preflight-01\receipt.json') -Raw | ConvertFrom-Json
 $expectedRules = @($baseline.existingInboundAllowRules | Where-Object { $_.program -ieq $exe })
 function Assert-ExistingNetworkPermission {
@@ -317,9 +343,9 @@ if (@(Get-AuthoringProcesses).Count) { throw 'Another authoring process prevents
 $protected = @(Get-Content -LiteralPath (Join-Path $root 'Assets\Environment\woodland-preparation-01\protected-before.json') -Raw | ConvertFrom-Json)
 $before = @($protected | ForEach-Object {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root $_.path)).Hash
-    $selectedPreview=$hairMode -and $_.path -ceq 'Preview.json' -and
+    $selectedPreview=($hairMode -or $hairCook) -and $_.path -ceq 'Preview.json' -and
         $hash -ceq '737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'
-    if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not($hairMode -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
+    if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not(($hairMode -or $hairCook) -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
         'Scripts\Development-Run.ps1','Tests\DevelopmentRunTests.ps1',
         'Source\SurvivalGame\HomesteadWorld.cpp','Config\DefaultGame.ini')) {
         throw "Unrelated protected input changed:$($_.path)"
@@ -509,7 +535,8 @@ try {
         }
         if($Mode -eq 'Cook' -and -not $fernResult -and (Test-Path (Join-Path $output 'cook-result.json'))) {
             $fernResult=Get-Content (Join-Path $output 'cook-result.json') -Raw|ConvertFrom-Json
-            Assert-HomesteadCookOutput $fernResult $output
+            $additional=if($hairCook){@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})}else{@()}
+            Assert-HomesteadCookOutput $fernResult $output -AdditionalPackages $additional
         }
         if($hairMode -and -not $fernResult -and (Test-Path (Join-Path $output 'hair-wave-result.json'))) {
             $fernResult=Get-Content (Join-Path $output 'hair-wave-result.json') -Raw|ConvertFrom-Json

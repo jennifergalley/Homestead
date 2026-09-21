@@ -21,3 +21,7 @@ Main integration evidence: `docs/research/character-assets/ready-waves-01.md`.
 The exact frozen six-wave set passed actual native import and a separate
 fresh-process persisted-package verification. This justifies source/export
 task1.2, not the still-pending cooked visual acceptance in1.3 or finish in1.1.
+The default Preferred/tunic selection now also has a real308-frame ordinary
+Shipping route with actual runtime mesh/material identities. The five other
+variants lack gameplay selector coverage and the sawtoothed wave end remains
+unaccepted;1.3/1.1 stay open and the incumbent preview stays selected.

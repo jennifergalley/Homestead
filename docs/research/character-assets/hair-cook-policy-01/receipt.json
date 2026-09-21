@@ -1,0 +1,47 @@
+{
+  "status": "passed-targeted-policy",
+  "createdUtc": "2026-09-21T09:08:38.7065985+00:00",
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "AE75D920C0471DFA9FBC1EA87C986B1C8C43A328B34F6AEC4352751E465014BA"
+    },
+    {
+      "path": "Scripts\\HairWavePolicy.ps1",
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3"
+    },
+    {
+      "path": "Scripts\\Development-Run.ps1",
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755"
+    },
+    {
+      "path": "Tests\\Test-FernSpikePolicy.ps1",
+      "sha256": "BEE1785056FA3014DED8EC30723970DFD20B87BA3E94648CD4785895887F7159"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-02\\probe-result.json",
+      "sha256": "42186AEDD5099F4497CB986CF440D38D9DA8F7C56AED5467B45DCB81ACF77739"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\asset-admission.json",
+      "sha256": "83E0A36CFCB56C1C68BB11655300D3D4158D6500E3441A9F388AA4A355F04F8B"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\probe-result.json",
+      "sha256": "6FA45F7737D75A9AA4C2959AA73A5DC55D4F6398E7B7FF010CBABAD9029A7F34"
+    }
+  ],
+  "nativeReceiptSha256": "950B1A51C800A87F60B5E4B3861AA817C70E2ADE304E11580935B67EC2F8FE74",
+  "negativeCases": 36,
+  "scope": "Exact real Windows Cook/SkipZenStore; newly imported/fresh-process-verified eight wave packages additionally required, accepted fern outputs retained. Completion-driven root-only primitive, original privacy/Python/DDC/network/manual-stop guards. No UI/Bob/modular changes or preview promotion."
+}

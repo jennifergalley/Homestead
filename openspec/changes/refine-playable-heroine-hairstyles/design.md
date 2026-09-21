@@ -61,6 +61,16 @@ measured units/bounds and unchanged reference bone names/parents/transforms;
 save only the eight named packages, then verify them in a fresh process.
 Keep all incumbent packages and already-selected Shipping builds intact.
 
+After the actual import and fresh-process reload passed, the next bounded
+feature slice is a separate `hair-cook-01` / `hair-waves-01` Shipping candidate.
+Use the same installed standard Windows Cook with `SkipZenStore`, verify
+all eight new cooked packages in addition to the accepted fern outputs, and
+stage fresh loose content with the genuine new Shipping executable/manifest.
+Exercise the existing ordinary-control route before changing selection.
+UI integration waits until its modular dependencies exist: its menu-only
+smoke can pass without proving normal current-save resume, which is required
+for the later coherent wardrobe/menu candidate.
+
 The normal candidate's existing LongWave ID/body/outfit mapping will resolve
 the new trial meshes directly; no QA-only hairstyle override or new preset.
 Record actual runtime mesh/material identities with ordinary back/side/action
