@@ -239,6 +239,8 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
         const FString Name = Names[Index].ToString();
         if (Name == TEXT("M_Heroine_Skin"))
             Material->SetVectorParameterValue(TEXT("ColorTint"), HomesteadLook::SkinTint(Appearance.SkinTone));
+        else if (Name == TEXT("M_Heroine_Hair_long01_Neutral") || Name == TEXT("M_Heroine_Hair_bob01_Neutral"))
+            Material->SetVectorParameterValue(TEXT("ColorTint"), HomesteadLook::NeutralHairTint(Appearance.HairColor));
         else if (Name.StartsWith(TEXT("M_Heroine_Hair_")) || Name == TEXT("M_Heroine_Eyebrows"))
             Material->SetVectorParameterValue(TEXT("ColorTint"), HomesteadLook::HairTint(Appearance.HairColor));
         else if (Name == TEXT("M_Heroine_MossLinen"))
