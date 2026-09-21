@@ -1,0 +1,48 @@
+{
+  "pid": 47168,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+  "creationTime": 134344231777138614,
+  "executableSha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\guarded-link-01\\action-7\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 743161,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344231774022937,
+    "LastWriteTime": 134344231774022937,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "22B9DFAFD9921B918465D22032902CE89BA54C97FCF402F3A04E80D7AB7944A6",
+  "guardSha256": "85A348168305B2E59060B5B036185FFB5EAE8ED48E35C6AE2BD357C903D58981",
+  "allowedBuildOnlyConsole": {
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "signature": "Valid",
+    "path": "C:\\Windows\\System32\\conhost.exe"
+  },
+  "compileActionId": -1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\UnrealEditor-SurvivalGame.lib.rsp",
+      "sha256": "22B9DFAFD9921B918465D22032902CE89BA54C97FCF402F3A04E80D7AB7944A6"
+    }
+  ],
+  "expectedProducedItems": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\UnrealEditor-SurvivalGame.lib",
+  "resourceLinkActionId": 7,
+  "exactReviewedArguments": "/LIB @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGame/UnrealEditor-SurvivalGame.lib.rsp\"",
+  "previousProductBackups": []
+}

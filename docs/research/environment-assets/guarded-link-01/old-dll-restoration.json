@@ -1,0 +1,11 @@
+{
+  "status": "restored-prior-editor-binary-not-new-link",
+  "restored": [
+    {
+      "source": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\guarded-link-01\\action-6\\before-products\\UnrealEditor-SurvivalGame.dll",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "sha256": "FCDB6F323CEB4875EB95773B414EA8E3F1DA1CDFFD9CFEE261DAC559BE1CC1AF"
+    }
+  ],
+  "utc": "2026-09-21T00:15:40.9415855+00:00"
+}

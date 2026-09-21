@@ -1,0 +1,186 @@
+{
+  "utc": "2026-09-21T00:32:48.3496304+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "status": "native-products-and-metadata-verified-runtime-unproven",
+  "products": [
+    {
+      "bytes": 2093056,
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "bytes": 90222592,
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "bytes": 138240,
+      "sha256": "A945DC9EF20A325B22419D3BF8D04BCC1DDD8A6A62CAEDAE06BC2C7F6CBCE125",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "bytes": 9457664,
+      "sha256": "DFB12BE0009BBD6CA9A842DAC30EA429BB5287ECDC055B62FFAA8A4023A2935C",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "bytes": 166,
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "bytes": 945032,
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "openSpecComplete": 4,
+  "openSpecTotal": 29,
+  "editorRuns": 0,
+  "realMarkerLocks": 0,
+  "files": [
+    {
+      "sha256": "5997BEEE9F11933E5CA9C3C54BA83E4DC91E25C51D5DC494083CD96EB816880C",
+      "file": "converter-01-unadmitted-launch.json",
+      "bytes": 2372
+    },
+    {
+      "sha256": "01CC8E85C7EEC059C48D3141B834D697B903DE27E0C07A521F2CFBAC01BA83E4",
+      "file": "converter-01-unadmitted-result.json",
+      "bytes": 3363
+    },
+    {
+      "sha256": "65FB4800105591F6EAD16E2DF00A765C3BF67B99303084E5835ADAB8EC94AF7F",
+      "file": "converter-02-game-launch.json",
+      "bytes": 2428
+    },
+    {
+      "sha256": "7438D1DE769D8728586F9B0D4E6070015F1DFE9D46D10A6262966193E9DCFDF4",
+      "file": "converter-02-game-result.json",
+      "bytes": 3313
+    },
+    {
+      "sha256": "3189E0079003CBB55F54EA129C829AC66F5EEDA958FE8BD137775BE100FDD028",
+      "file": "converter-02-probe-launch.json",
+      "bytes": 2445
+    },
+    {
+      "sha256": "B40224236B59F11C45F3DEFE4D37FC2FEAFA6E79F3EB530554BDD7AE0C95A5E7",
+      "file": "converter-02-probe-result.json",
+      "bytes": 3305
+    },
+    {
+      "sha256": "B303A26E5FCDABC0D0CBBD7C08DEB27B870362AA9CECFDF78599F9C1DE6C99DF",
+      "file": "derived-link-6-qualified-launch.json",
+      "bytes": 3571
+    },
+    {
+      "sha256": "51EDE56AA1BE4DB223DFBC7A9E66091685F39115170690D0BE9363CAA15DE484",
+      "file": "derived-link-6-qualified-result.json",
+      "bytes": 58335
+    },
+    {
+      "sha256": "5F6830E9168CA8EA141577BABCFEA4C3DD2D7E5D92B8AFC4E776C4C2FD0E3F92",
+      "file": "derived-link-9-launch.json",
+      "bytes": 2871
+    },
+    {
+      "sha256": "54E3A4ADCF8EAC2CC2771A6B6B0B184563E45FB9C941779F4BF66F8EC36D9461",
+      "file": "derived-link-9-result.json",
+      "bytes": 7964
+    },
+    {
+      "sha256": "BF7E376820E6519D340323322ACEDFEE891E0785DDC99CEEEA410010771ADAA7",
+      "file": "derived-recipes.json",
+      "bytes": 1919
+    },
+    {
+      "sha256": "823356932C719E9E6E21C031A7838E5A1C419D4BCD68C95C6F6271C7F8A8FFF1",
+      "file": "detached-lifetime.json",
+      "bytes": 69334
+    },
+    {
+      "sha256": "FBD52CDA624E6F369B8A1877B23B1DFF09EF92C75FEFD94B33C40B8C5D17E5EE",
+      "file": "metadata-launch.json",
+      "bytes": 1320
+    },
+    {
+      "sha256": "820FA9110241990507AFFC61B78864450E9CECDA17EB2A1BD7ADF77A604064BB",
+      "file": "metadata-products.json",
+      "bytes": 536
+    },
+    {
+      "sha256": "C92D64B7A0DFF289340394FFC7BFDD298F863561E87EF11FAB387828F1E688CE",
+      "file": "metadata-result.json",
+      "bytes": 571
+    },
+    {
+      "sha256": "00691B5F925D10C073F06A7571D2B817656B148C315DDE155C24AC89C24E2BCF",
+      "file": "metadata-stdout.txt",
+      "bytes": 195
+    },
+    {
+      "sha256": "19E90D724909FF864CA3E88AC0A9030E7FB03324EDCFA358CD28956183431CE5",
+      "file": "native-products.json",
+      "bytes": 1752
+    },
+    {
+      "sha256": "E718BD7E6EFCB86C8E753BC98201C6B8BDF92D92301B262F971C183223A29C9B",
+      "file": "old-dll-restoration.json",
+      "bytes": 485
+    },
+    {
+      "sha256": "96008F390851A769C9A813CC437E9A9197B563514BFDE1A4B29019BA44212161",
+      "file": "operation-index.json",
+      "bytes": 3050
+    },
+    {
+      "sha256": "A1495FC45F82D8824690BA08297CA613C6258FBBEFFF980A63A845CCD8AD0B01",
+      "file": "original-library-4-launch.json",
+      "bytes": 2180
+    },
+    {
+      "sha256": "95EB678BDC28AB7DFEB0572C75FDF21430FDEF2BAFC06B7E8D6291E7EAC96D28",
+      "file": "original-library-4-result.json",
+      "bytes": 3796
+    },
+    {
+      "sha256": "F8A1CDB888CDD6EBBBC471F656DB8790413D8C201E4E8F19B80EF26B03A97D6C",
+      "file": "original-library-7-launch.json",
+      "bytes": 2144
+    },
+    {
+      "sha256": "555F6A712EA7ADFEB3DA4157F38E4A742A901080E87B24724DF5DEFE4078E15B",
+      "file": "original-library-7-result.json",
+      "bytes": 3785
+    },
+    {
+      "sha256": "A74E00EE4F502901676962BFBA43C82AB1680EE4932B4D6C756028DE5A53DED9",
+      "file": "original-link-6-failed-launch.json",
+      "bytes": 2530
+    },
+    {
+      "sha256": "5F7B93D840AA017077BF725EC778D6D255CBD1E9EC9AE1A9352FB3281D18CB20",
+      "file": "original-link-6-failed-result.json",
+      "bytes": 65862
+    },
+    {
+      "sha256": "1813A57AE38BD8DC803A11CD409C8AA71760EC4DA574858A74441B576831F4AD",
+      "file": "original-link-failure.txt",
+      "bytes": 117
+    },
+    {
+      "sha256": "2B3BD8B566CD1926C0ECFC97B1D85379AEC2CFFCF24AB2E5FAD59B084DB7510D",
+      "file": "original-resource-8-launch.json",
+      "bytes": 4832
+    },
+    {
+      "sha256": "61E16AAB16055C082CDE4341D66273F6207164B4D9E96822D4C9BC6F2DF9548D",
+      "file": "original-resource-8-result.json",
+      "bytes": 3759
+    }
+  ],
+  "guardSha256": "F81B4FBB50EADA4FB533689D16C8C03FA3CC08D41B8EEBF18D5C4951B936C2D1",
+  "commandletSha256": "5902060B8378EF689645A730DE228BCFC987DE18D923D90FFD55EC4FCCFB7B4B",
+  "qualification": "Compile5 and derived game-link6 monitoring failures remain failed. Real products verified separately. Build-only detached mode is not Editor approval. Empty finite endpoint observations are not continuous absence."
+}

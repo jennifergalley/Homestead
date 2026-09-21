@@ -58,6 +58,7 @@ namespace Homestead.Authoring
         public long MarkerHandle { get { return marker.ToInt64(); } }
         public long JobHandle { get { return job.ToInt64(); } }
         public bool Resumed { get; private set; }
+        public uint CreationFlags { get; private set; }
         public bool HardTerminated { get; private set; }
         public uint WhitelistedHandleCount { get { return 3; } }
 
@@ -183,6 +184,12 @@ namespace Homestead.Authoring
         }
         public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
             string markerPath, string stdoutPath, IDictionary<string, string> overrides)
+            : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, null) { }
+        public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
+            string markerPath, string stdoutPath, IDictionary<string, string> overrides, string exactArgumentLine)
+            : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, exactArgumentLine, false) { }
+        public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
+            string markerPath, string stdoutPath, IDictionary<string, string> overrides, string exactArgumentLine, bool detachedConsole)
         {
             IntPtr attributes = IntPtr.Zero, handles = IntPtr.Zero, environment = IntPtr.Zero;
             bool initializedAttributes = false;
@@ -230,11 +237,15 @@ namespace Homestead.Authoring
                 var startup = new StartupEx(); startup.Startup.Size = (uint)Marshal.SizeOf<StartupEx>();
                 startup.Startup.Flags = 0x100; startup.Startup.Input = input;
                 startup.Startup.Output = output; startup.Startup.Error = output; startup.Attributes = attributes;
-                var command = new StringBuilder(Quote(executable) + " " + string.Join(" ", arguments.Select(Quote)));
+                if (exactArgumentLine != null && (arguments.Length != 0 || exactArgumentLine.IndexOf('\0') >= 0))
+                    throw new InvalidOperationException("Exact argument line cannot be combined with arguments or contain NUL.");
+                var command = new StringBuilder(Quote(executable) + " " +
+                    (exactArgumentLine ?? string.Join(" ", arguments.Select(Quote))));
                 ulong earliest = (ulong)DateTime.UtcNow.AddSeconds(-1).ToFileTimeUtc();
                 ProcessInfo created;
+                CreationFlags = Suspended | ExtendedStartup | UnicodeEnvironment | (detachedConsole ? 8u : CreateNoWindow);
                 Check(CreateProcessW(executable, command, IntPtr.Zero, IntPtr.Zero, true,
-                    Suspended | ExtendedStartup | UnicodeEnvironment | CreateNoWindow, environment, directory, ref startup, out created), "suspended no-window leaf");
+                    CreationFlags, environment, directory, ref startup, out created), "suspended leaf");
                 process = created.Process; thread = created.Thread; ProcessId = created.Id;
                 Check(AssignProcessToJobObject(job, process), "pre-resume job assignment");
                 var path = new StringBuilder(32768); uint length = (uint)path.Capacity;

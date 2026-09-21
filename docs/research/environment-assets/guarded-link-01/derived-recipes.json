@@ -1,0 +1,24 @@
+[
+  {
+    "newToken": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\resource-conversion-02\\game-resource.obj\"",
+    "replacementCount": 1,
+    "derivedSha256": "C5E503F7D4376029B3E92687F9C7A3009E31CCC8EF8F73FAC0B71D81E590C9F8",
+    "originalSha256": "CBD068CCAE1CC39513BE9387BDD694D00BFF327A8C5676978A094497545498EA",
+    "oldToken": "\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGame/Default.rc2.res\"",
+    "derived": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\resource-conversion-02\\game-link.rsp",
+    "original": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\UnrealEditor-SurvivalGame.dll.rsp",
+    "convertedSha256": "28B840812BCF270ADC177D943909AA0AF155D0903BC4F16B1D3E621329F9CF95",
+    "resourceSha256": "6D828337158C19C252836D9549BC41A1578DFD616844AB3D715EC95EB9C97143"
+  },
+  {
+    "newToken": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\resource-conversion-02\\probe-resource.obj\"",
+    "replacementCount": 1,
+    "derivedSha256": "B5672BC4BCE03654D396B812D67D8F9D51C3EB3D157808849397C163605AC4C1",
+    "originalSha256": "3998DE2A597016D902A4ADEDE794A3606BF37A599F538B656138A8708CAF0419",
+    "oldToken": "\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/Default.rc2.res\"",
+    "derived": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\resource-conversion-02\\probe-link.rsp",
+    "original": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\UnrealEditor-SurvivalGameEditor.dll.rsp",
+    "convertedSha256": "4C2AEDD7E841B423529C770DA98BD55C33C0857E7401A3C626BDC4ACEE5ABA16",
+    "resourceSha256": "12892448A0741ED905D26B26CABB30A92F0C7AB3DD0C5C4D36AD086B26D08F27"
+  }
+]

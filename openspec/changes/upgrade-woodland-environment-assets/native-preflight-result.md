@@ -1,4 +1,15 @@
-# Native settings preflight: build held
+# Native settings preflight: built, runtime admission pending
+
+**Current,17:30 Arizona:** the guarded compile/resource/derived-link route has
+produced both real AMD64 module DLLs and matching full PDBs. Direct supported
+UBT WriteMetadata passed and wrote the project manifest/receipt with
+BuildId55116800; installed engine version bytes are unchanged.
+See `native-build-result.md` and the hashed `guarded-link-01` evidence.
+The five-object action5 and derived game-link shutdown monitoring failures
+remain explicit; neither was rerun or rewritten as clean monitoring.
+The native commandlet is compiled/linked, **not runtime verified**. The real
+marker has not been locked, the conditional Editor attempt is unconsumed,
+and task1.3 remains unchecked at4/29. The following16:00 report is historical.
 
 2026-09-20,16:00 Arizona. Run `20260920-182217-d1f84e39`; original
 7:22pm deadline unchanged. Implementation progress remains **4/29**.
@@ -17,7 +28,8 @@ only this Editor module; normal Shipping startup has no new module behavior.
 The native exporter covers actual cached crash-privacy booleans, isolated
 config paths, disabled Python/messaging, no-worker settings, DDC store paths,
 inherited marker identity and actual job/accounting/creation identity.
-**It is not compiled or runtime verified.**
+**At16:00 it was not compiled or runtime verified; the build milestone above
+supersedes only the uncompiled status.**
 
 `Scripts\Test-AuthoringSettings.ps1` implements the guarded single-attempt
 admission/monitor, existing-rule/profile checks, explicit disabled Python,
@@ -90,7 +102,7 @@ Compiler binary strings confirm a VCTIP launch/named-pipe path and SQM registry
 keys. No UBT suppression setting was found. No registry/security setting was
 changed and no guessed telemetry environment variable was presented as proof.
 
-## Required continuation
+## Historical16:00 required continuation
 
 Keep compiler and engine execution held pending a verified process-local
 suppression route or explicit coordinator decision on this distinct executable.

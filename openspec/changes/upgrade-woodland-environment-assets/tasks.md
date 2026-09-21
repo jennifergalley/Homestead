@@ -1,5 +1,16 @@
 # Tasks
 
+Current17:30 build milestone: both native DLL/PDB pairs and actual UBT metadata
+exist and have verified identities. `native-build-result.md` preserves the
+game-link shutdown monitoring gap. Editor settings/marker/runtime admission
+is still pending; no real attempt or environment import occurred. Task1.3
+remains unchecked,4/29. Subsequent paragraphs preserve historical milestones.
+
+RC8 and import-library4/7 subsequently passed; DLL link6 stopped on denied
+cvtres, and the prior project Editor DLL was restored. See
+`resource-conversion-proposal.md`. No metadata/Editor/import followed;
+task1.3 remains unchecked and progress remains4/29.
+
 Latest native progress: all five reviewed compile-only actions produced fresh
 objects. Four monitors passed; the fifth compiler exited0 with a preserved
 shutdown-monitor failure. `native-link-proposal.md` separates that evidence and

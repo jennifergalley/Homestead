@@ -1,0 +1,31 @@
+{
+  "runId": "20260920-182217-d1f84e39",
+  "rootPid": 16256,
+  "startedUtc": "2026-09-21T00:29:49.5361990Z",
+  "arguments": [
+    "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.dll",
+    "-Mode=WriteMetadata",
+    "-Input=E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\SurvivalGameEditor\\Development\\TargetMetadata.json",
+    "-Version=2",
+    "-Log=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\native-metadata-01\\ubt.log"
+  ],
+  "identities": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+      "sha256": "0AF909A3DB0C02BD736F3008E2A9B20E7BA4E87EF27DD35619A7A9EC588191A8",
+      "bytes": 178400
+    },
+    {
+      "path": "C:\\WINDOWS\\System32\\conhost.exe",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "bytes": 1003520
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.dll",
+      "sha256": "A513EE9E22291D8827C5390C1ED5BBAD7AC564DA6CF82F3BD57B4E27509E7182",
+      "bytes": 3211704
+    }
+  ],
+  "leafJobApplied": false,
+  "limitation": "Sampled local build orchestration; no engine runtime or remote executor is authorized."
+}

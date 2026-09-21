@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
-    [switch]$ExportActions
+    [switch]$ExportActions,
+    [switch]$WriteMetadataOnly
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -21,6 +22,51 @@ $compiler = 'E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64'
 $sdk = 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64'
 $allowed = @($dotnet, "$compiler\cl.exe", "$compiler\link.exe", "$compiler\cvtres.exe",
     "$compiler\mspdbsrv.exe", "$sdk\rc.exe", "$env:SystemRoot\System32\cmd.exe", "$env:SystemRoot\System32\conhost.exe")
+if ($WriteMetadataOnly) {
+    if ($ExportActions) { throw 'Metadata and build-export modes are exclusive.' }
+    $allowed = @($dotnet, "$env:SystemRoot\System32\conhost.exe")
+    $metadataPath = Join-Path $root 'Intermediate\Build\Win64\x64\SurvivalGameEditor\Development\TargetMetadata.json'
+    $metadataHash = '2550557136B7AE6F947A2746AFFBE1FEC6538735D296EB7E342B549120294924'
+    if ((Get-FileHash $metadataPath).Hash -cne $metadataHash -or
+        (Get-FileHash $dotnet).Hash -cne '0AF909A3DB0C02BD736F3008E2A9B20E7BA4E87EF27DD35619A7A9EC588191A8' -or
+        (Get-FileHash $ubt).Hash -cne 'A513EE9E22291D8827C5390C1ED5BBAD7AC564DA6CF82F3BD57B4E27509E7182') {
+        throw 'Approved metadata input/tool identity differs.'
+    }
+    $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
+    $versionPath = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.version'
+    $versionHash = '2C94D8C30DF424622504FF9CBEBB1A6DE62E3083BEE0910394DDF4BDE0A3840F'
+    $manifestPath = Join-Path $root 'Binaries\Win64\UnrealEditor.modules'
+    $receiptPath = Join-Path $root 'Binaries\Win64\SurvivalGameEditor.target'
+    if ($null -ne $metadata.Version -or $metadata.VersionFile -cne $versionPath -or
+        $metadata.ReceiptFile -cne $receiptPath -or (Get-FileHash $versionPath).Hash -cne $versionHash -or
+        $metadata.Receipt.Version.BuildId -cne '55116800' -or
+        @($metadata.FileToManifest.PSObject.Properties).Count -ne 1 -or
+        @($metadata.FileToManifest.PSObject.Properties)[0].Name -cne $manifestPath -or
+        @($metadata.FileToLoadOrderManifest.PSObject.Properties).Count -ne 0) {
+        throw 'Metadata engine-version or project-only write-map condition differs.'
+    }
+    $products = @()
+    foreach ($module in @('SurvivalGame','SurvivalGameEditor')) {
+        $dll = Join-Path $root "Binaries\Win64\UnrealEditor-$module.dll"
+        $pdb = [IO.Path]::ChangeExtension($dll, '.pdb')
+        $inspection = & python (Join-Path $PSScriptRoot 'Inspect-NativeModule.py') $dll $pdb
+        if ($LASTEXITCODE -ne 0) { throw "Native module/PDB verification failed:$module" }
+        $product = $inspection | ConvertFrom-Json
+        if ($product.moduleName -cne [IO.Path]::GetFileName($dll) -or
+            ($module -eq 'SurvivalGameEditor' -and @($product.probeExports).Count -ne 1)) {
+            throw 'Linked module identity or commandlet export differs.'
+        }
+        $products += $product
+        $library = Join-Path $root "Intermediate\Build\Win64\x64\UnrealEditor\Development\$module\UnrealEditor-$module.lib"
+        $stream = [IO.File]::OpenRead($library)
+        try { $header = [byte[]]::new(8); $stream.ReadExactly($header) } finally { $stream.Dispose() }
+        if ([Text.Encoding]::ASCII.GetString($header) -cne "!<arch>`n") { throw 'Invalid actual import library.' }
+    }
+    $products | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $output 'native-products.json')
+    foreach ($path in @($receiptPath,$manifestPath)) {
+        if (Test-Path -LiteralPath $path) { Copy-Item -LiteralPath $path -Destination (Join-Path $output ([IO.Path]::GetFileName($path)+'.before')) }
+    }
+}
 if ((Get-FileHash "$env:SystemRoot\System32\conhost.exe").Hash -cne 'E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5' -or
     (Get-AuthenticodeSignature "$env:SystemRoot\System32\conhost.exe").Status -ne 'Valid') {
     throw 'The separately approved build-only console-host identity differs.'
@@ -33,6 +79,9 @@ $arguments = @($ubt,'SurvivalGameEditor','Win64','Development',"-Project=$(Join-
     '-WaitMutex','-NoHotReloadFromIDE','-NoUBA','-NoXGE','-NoFASTBuild','-NoSNDBS','-NoArtifactReads',
     '-NoArtifactWrites','-NoEngineChanges',"-Log=$(Join-Path $output 'ubt.log')")
 if ($ExportActions) { $arguments += "-WriteOutdatedActions=$(Join-Path $output 'actions.json')" }
+if ($WriteMetadataOnly) {
+    $arguments = @($ubt,'-Mode=WriteMetadata',"-Input=$metadataPath",'-Version=2',"-Log=$(Join-Path $output 'ubt.log')")
+}
 $null = Get-CimInstance -Namespace root\StandardCimv2 -ClassName MSFT_NetTCPConnection -Filter "OwningProcess=$PID"
 $null = Get-CimInstance -Namespace root\StandardCimv2 -ClassName MSFT_NetUDPEndpoint -Filter "OwningProcess=$PID"
 $start = [Diagnostics.ProcessStartInfo]::new($dotnet)
@@ -108,6 +157,26 @@ try {
     }
     $process.WaitForExit()
     if ($process.ExitCode -ne 0) { throw "Direct local UBT failed:$($process.ExitCode)" }
+    if ($WriteMetadataOnly) {
+        if ((Get-FileHash $metadataPath).Hash -cne $metadataHash -or (Get-FileHash $versionPath).Hash -cne $versionHash) {
+            throw 'Metadata input or installed engine version changed.'
+        }
+        $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+        $receipt = Get-Content $receiptPath -Raw | ConvertFrom-Json
+        if ($manifest.BuildId -cne '55116800' -or $receipt.Version.BuildId -cne '55116800' -or
+            $manifest.Modules.SurvivalGame -cne 'UnrealEditor-SurvivalGame.dll' -or
+            $manifest.Modules.SurvivalGameEditor -cne 'UnrealEditor-SurvivalGameEditor.dll') {
+            throw 'Actual UBT manifest/receipt differs from the linked module contract.'
+        }
+        foreach ($product in $products) {
+            foreach ($file in @($product.dll,$product.pdb)) {
+                if ((Get-FileHash $file.path).Hash -cne $file.sha256) { throw 'Linked product changed during metadata.' }
+            }
+        }
+        @($receiptPath,$manifestPath,$versionPath) | ForEach-Object {
+            @{path=$_;sha256=(Get-FileHash $_).Hash}
+        } | ConvertTo-Json | Set-Content (Join-Path $output 'metadata-products.json')
+    }
 } catch {
     $failure = $_.ToString()
     throw

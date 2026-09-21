@@ -1,0 +1,123 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.3226678,
+  "samples": [
+    {
+      "endpoints": [],
+      "queriedPids": [
+        18216
+      ],
+      "elapsedMs": 72.3774
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        18216,
+        2872
+      ],
+      "elapsedMs": 102.1778
+    }
+  ],
+  "maximumSampleGapMs": 220.46160000000003,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 2,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T00:12:55.7500471+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 18216,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\rc.exe",
+          "Error": null,
+          "CreationTime": 134344231757315298,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T00:12:55.7783783+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 18216,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\rc.exe",
+          "Error": null,
+          "CreationTime": 134344231757315298,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T00:12:55.8151754+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 18216,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\rc.exe",
+          "Error": null,
+          "CreationTime": 134344231757315298,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        },
+        {
+          "Pid": 2872,
+          "NativeError": 0,
+          "Image": "C:\\Windows\\System32\\conhost.exe",
+          "Error": null,
+          "CreationTime": 134344231757806845,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": false,
+          "ExitCode": 259
+        }
+      ]
+    }
+  ],
+  "coff": null,
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\guarded-link-01\\action-8\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 743147,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344231753638437,
+    "LastWriteTime": 134344231753638437,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": 8,
+  "producedItems": [
+    {
+      "bytes": 25004,
+      "lastWriteUtc": "2026-09-21T00:12:55.8191104Z",
+      "sha256": "12892448A0741ED905D26B26CABB30A92F0C7AB3DD0C5C4D36AD086B26D08F27",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\Default.rc2.res"
+    }
+  ],
+  "previousProductBackups": [],
+  "objectSha256": "12892448A0741ED905D26B26CABB30A92F0C7AB3DD0C5C4D36AD086B26D08F27",
+  "limits": "One explicitly selected guarded build leaf with exact approved Windows console host. No application helpers/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}

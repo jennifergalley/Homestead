@@ -5,6 +5,7 @@ param(
     [ValidateSet('Observer','Controller')][string]$Role = 'Observer',
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal',
     [switch]$ObserveAccountingOnly,
+    [switch]$DetachedConsole,
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')]
     [string[]]$Scenarios = @('normal','pause','deadline','timeout','controller-failure','watchdog')
 )
@@ -90,11 +91,12 @@ public static class GuardFixtureNative {
         $environment['HOMESTEAD_TEST_CANARY_HIGH'] = $identity.IndexHigh.ToString()
         $environment['HOMESTEAD_TEST_CANARY_LOW'] = $identity.IndexLow.ToString()
         $guard = [Homestead.Authoring.LeafGuard]::new($Subject, (Get-FileHash -LiteralPath $Subject).Hash,
-            [string[]]@(), $Root, (Join-Path $Root 'marker'), (Join-Path $Root 'subject.log'), $environment)
+            [string[]]@(), $Root, (Join-Path $Root 'marker'), (Join-Path $Root 'subject.log'), $environment, $null, [bool]$DetachedConsole)
         Write-NewJson (Join-Path $Root 'launch.json') ([ordered]@{
             pid = $guard.ProcessId; image = $guard.ImagePath; creationTime = $guard.ProcessCreationTime
             marker = $guard.MarkerBefore; job = $guard.LastVerifiedJob; explicitHandles = $guard.WhitelistedHandleCount
             jobMembers = $guard.ObserveJobMembers()
+            creationFlags = $guard.CreationFlags
             resumed = $guard.Resumed
         })
         if ($Case -eq 'watchdog') { $guard.ArmDeadline(300, 800, (Join-Path $Root 'stop.txt')) }
@@ -230,6 +232,7 @@ foreach ($scenario in $Scenarios) {
         $start.ArgumentList.Add($argument)
     }
     if ($ObserveAccountingOnly) { $start.ArgumentList.Add('-ObserveAccountingOnly') }
+    if ($DetachedConsole) { $start.ArgumentList.Add('-DetachedConsole') }
     $controller = [Diagnostics.Process]::Start($start)
     $subjectProcess = $null
     $samples = 0; $maxGapMs = 0.0; $lastSample = $null; $requested = $false

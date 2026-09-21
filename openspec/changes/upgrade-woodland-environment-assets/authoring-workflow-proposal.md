@@ -1,5 +1,22 @@
 # Authoring workflow approval proposal
 
+**Latest,17:30 Arizona:** the separately approved standalone-resource and
+derived-link route produced both real DLL/PDB pairs. The probe link passed
+with explicitly approved **build-only** DETACHED_PROCESS. The game link
+exited0 but retained its identified-conhost shutdown monitoring failure.
+Supported direct WriteMetadata passed with the approved project-only map,
+Version=null, omitted stale Session and unchanged engine-version hash.
+`native-build-result.md` records identities and finite observation limits.
+No Editor or global-marker operation occurred; Editor launch mode has not
+inherited the build-only adjustment. Task1.3 remains unchecked,4/29.
+
+**Latest,17:15 Arizona:** approved RC8 and import-library4/7 passed. Unchanged
+DLL link6 stopped with LNK1158 because its cvtres application child was denied.
+The old project Editor DLL was restored from its verified backup; no new DLL
+or metadata is claimed. `resource-conversion-proposal.md` requests only a
+guarded standalone converter and explicitly derived resource-input link
+responses. No further helper, Editor or import execution is authorized yet.
+
 **Latest,17:04 Arizona:** the confirmed compiler route executed all five
 reviewed compile actions and produced fresh AMD64 objects. Four supervisors
 passed; the fifth compiler exited0 but retained a root-shutdown observation

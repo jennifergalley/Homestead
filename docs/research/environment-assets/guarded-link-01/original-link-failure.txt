@@ -1,0 +1,1 @@
+LINK : fatal error LNK1158: cannot run 'E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cvtres.exe'

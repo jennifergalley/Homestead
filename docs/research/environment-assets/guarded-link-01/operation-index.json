@@ -1,0 +1,102 @@
+[
+  {
+    "originalDirectory": "guarded-link-01\\action-8",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "original-resource-8",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.3226678,
+    "sampleCount": 2
+  },
+  {
+    "originalDirectory": "guarded-link-01\\action-4",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "original-library-4",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.2458358,
+    "sampleCount": 2
+  },
+  {
+    "originalDirectory": "guarded-link-01\\action-7",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "original-library-7",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.2413855,
+    "sampleCount": 2
+  },
+  {
+    "originalDirectory": "guarded-link-01\\action-6",
+    "status": "failed",
+    "actualEndpointCount": 0,
+    "label": "original-link-6-failed",
+    "error": "Compiler fixture failed:1158",
+    "exitCode": 1158,
+    "elapsedSeconds": 1.3048427,
+    "sampleCount": 67
+  },
+  {
+    "originalDirectory": "resource-conversion-01\\game",
+    "status": "failed",
+    "actualEndpointCount": 0,
+    "label": "converter-01-unadmitted",
+    "error": "A job member was not identified during its lifetime.",
+    "exitCode": 0,
+    "elapsedSeconds": 0.3351627,
+    "sampleCount": 1
+  },
+  {
+    "originalDirectory": "resource-conversion-02\\game",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "converter-02-game",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.2999942,
+    "sampleCount": 1
+  },
+  {
+    "originalDirectory": "resource-conversion-02\\probe",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "converter-02-probe",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.1915689,
+    "sampleCount": 1
+  },
+  {
+    "originalDirectory": "guarded-derived-link-01\\action-6",
+    "status": "failed",
+    "actualEndpointCount": 0,
+    "label": "derived-link-6-qualified",
+    "error": "Unexpected or unidentified live job member:{\"Pid\":19284,\"NativeError\":0,\"Image\":null,\"Error\":\"System.ComponentModel.Win32Exception (5): listed member image\\r\\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\\r\\n   at Homestead.Authoring.LeafGuard.ObserveJobMembers()\",\"CreationTime\":0,\"Member\":false,\"Exited\":false,\"IdentityFromHeldRoot\":false,\"ExitCode\":0}",
+    "exitCode": 0,
+    "elapsedSeconds": 1.2764105,
+    "sampleCount": 58
+  },
+  {
+    "originalDirectory": "guarded-derived-link-01\\action-9",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "derived-link-9",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.5069997,
+    "sampleCount": 9
+  },
+  {
+    "originalDirectory": "native-metadata-01",
+    "status": "passed",
+    "actualEndpointCount": 0,
+    "label": "metadata",
+    "error": null,
+    "exitCode": 0,
+    "elapsedSeconds": 0.8611896,
+    "sampleCount": 1
+  }
+]

@@ -25,6 +25,26 @@ function Assert-CompilerLeafAccounting($Job, [array]$Samples, [uint32]$RootPid, 
     }
 }
 
+function Read-ResourceCoff([string]$Path) {
+    $file=Get-Item -LiteralPath $Path
+    if($file.Length -lt 60 -or $file.Length -gt 16MB){throw 'Resource COFF size outside bounds.'}
+    $bytes=[IO.File]::ReadAllBytes($Path)
+    $count=[BitConverter]::ToUInt16($bytes,2)
+    if([BitConverter]::ToUInt16($bytes,0) -ne 0x8664 -or $count -lt 1 -or $count -gt 32 -or
+        20+40*$count -gt $bytes.Length -or [BitConverter]::ToUInt16($bytes,16) -ne 0){throw 'Invalid AMD64 resource COFF header.'}
+    $sections=@()
+    for($i=0;$i -lt $count;$i++) {
+        $at=20+40*$i;$name=[Text.Encoding]::ASCII.GetString($bytes,$at,8).TrimEnd([char]0)
+        $size=[uint64][BitConverter]::ToUInt32($bytes,$at+16);$offset=[uint64][BitConverter]::ToUInt32($bytes,$at+20)
+        $flags=[BitConverter]::ToUInt32($bytes,$at+36)
+        if($size -and ($offset -lt 20+40*$count -or $offset+$size -gt $bytes.Length)){throw 'Resource section exceeds object bounds.'}
+        if($name.StartsWith('.rsrc') -and (($flags -band 0x40000000) -eq 0 -or ($flags -band 0x80000000L) -ne 0)){throw 'Resource section is not read-only.'}
+        $sections+=@{name=$name;bytes=$size;flags=$flags}
+    }
+    if(-not @($sections|Where-Object name -Like '.rsrc*').Count){throw 'No actual resource section found.'}
+    [pscustomobject]@{machine='AMD64';bytes=$bytes.Length;sections=$sections;sha256=(Get-FileHash $Path).Hash;codeExecuted=$false}
+}
+
 function Read-CompilerLeafCoff([byte[]]$Bytes) {
     if ($Bytes.Length -lt 20 -or $Bytes.Length -gt 1MB) { throw 'COFF size outside fixture bounds.' }
     $machine = [BitConverter]::ToUInt16($Bytes,0)

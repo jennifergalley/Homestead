@@ -31,3 +31,32 @@ foreach($invalid in @('unknown-image','missing-member','changed-creation','bad-p
 $coff=Read-CompilerLeafCoff ([IO.File]::ReadAllBytes((Join-Path $evidence 'fixture.coff')))
 if($coff.bytes -ne 1818 -or $coff.function.machineCode -cne 'B8DF9B5713C3') { throw 'Recorded COFF proof differs.' }
 'Three actual-data positive checks and five negative policy cases passed; no tool/process launched.'
+$resourcePath=Join-Path ([IO.Path]::GetTempPath()) ("homestead-resource-"+[guid]::NewGuid().ToString('N')+'.obj')
+try {
+    $resource=[byte[]]::new(64)
+    [Array]::Copy([BitConverter]::GetBytes([uint16]0x8664),0,$resource,0,2)
+    [Array]::Copy([BitConverter]::GetBytes([uint16]1),0,$resource,2,2)
+    [Array]::Copy([Text.Encoding]::ASCII.GetBytes('.rsrc$01'),0,$resource,20,8)
+    [Array]::Copy([BitConverter]::GetBytes([uint32]4),0,$resource,36,4)
+    [Array]::Copy([BitConverter]::GetBytes([uint32]60),0,$resource,40,4)
+    [Array]::Copy([BitConverter]::GetBytes([uint32]0x40000040),0,$resource,56,4)
+    [IO.File]::WriteAllBytes($resourcePath,$resource)
+    $null=Read-ResourceCoff $resourcePath
+    foreach($invalid in @('truncated','wrong-machine','bad-extent','writable','no-resource')) {
+        $bad=[byte[]]$resource.Clone()
+        switch($invalid) {
+            'truncated' {$bad=[byte[]]@(0,1)}
+            'wrong-machine' {$bad[0]=0}
+            'bad-extent' {$bad[40]=255}
+            'writable' {$bad[59]=0xC0}
+            'no-resource' {$bad[21]=[byte][char]'x'}
+        }
+        [IO.File]::WriteAllBytes($resourcePath,$bad)
+        $rejected=$false
+        try {$null=Read-ResourceCoff $resourcePath} catch {$rejected=$true}
+        if(-not $rejected){throw "Invalid resource COFF accepted:$invalid"}
+    }
+} finally {
+    if(Test-Path -LiteralPath $resourcePath){Remove-Item -LiteralPath $resourcePath}
+}
+'Resource COFF: one known read-only fixture and five malformed cases passed.'
