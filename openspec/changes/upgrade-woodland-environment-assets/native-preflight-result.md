@@ -11,6 +11,10 @@ The native commandlet is compiled/linked, **not runtime verified**. The real
 marker has not been locked, the conditional Editor attempt is unconsumed,
 and task1.3 remains unchecked at4/29. The following16:00 report is historical.
 
+`native-probe-readiness.md` is the subsequent bounded read-only check: actual
+product pins, Editor-specific console mode, empty-enumeration handling and
+existing job-observation wiring must be resolved before the one real attempt.
+
 2026-09-20,16:00 Arizona. Run `20260920-182217-d1f84e39`; original
 7:22pm deadline unchanged. Implementation progress remains **4/29**.
 Task1.3 is unchecked. There is no new environment import, render or screenshot.
