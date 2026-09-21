@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,42 @@ enum class CropKind : int { Roots, Berries, Count };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
 constexpr int InventoryCapacity = 120;
+constexpr int SimulationSaveVersion = 4;
+constexpr double ChestReach = 280.0;
+
+enum class WearableDefinition : int { LinenTunic, LinenApron, LeatherShoes, WovenFootwraps, Count };
+enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Count };
+enum class WearableOwner : int { Carried, Chest, Equipped };
+enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable };
+constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
+
+struct WearableDefinitionInfo
+{
+    WearableDefinition id;
+    const char* key;
+    const char* name;
+    unsigned slots;
+    bool dyeable;
+    int fiberCost; // Zero means starter-only, not a free recipe.
+};
+
+struct WearableInstance
+{
+    int id = 0;
+    WearableDefinition definition = WearableDefinition::LinenTunic;
+    int dye = 0;
+    WearableOwner owner = WearableOwner::Carried;
+    int chestId = 0;
+};
+
+struct LayoutEntry
+{
+    int groupId = 0;
+    Item item = Item::Knife;
+    int quantity = 0;
+    int wearableId = 0;
+};
+using InventoryLayout = std::vector<LayoutEntry>;
 
 struct Point { double x = 0.0; double y = 0.0; };
 using Inventory = std::array<int, ItemCount>;
@@ -27,6 +64,8 @@ struct Result
 {
     bool ok = false;
     std::string message;
+    ResultCode code = ResultCode::None;
+    std::uint64_t revision = 0;
     explicit operator bool() const { return ok; }
 };
 
@@ -48,6 +87,7 @@ struct Structure
     int rotation = 0; // Quarter turns: 0=north (+Y), 1=east (+X), 2=south, 3=west.
     double fuelHours = 0.0;
     Inventory storage{};
+    InventoryLayout layout;
 };
 
 struct Plot
@@ -76,8 +116,18 @@ struct State
     std::vector<ResourceNode> resources;
     std::vector<Structure> structures;
     std::vector<Plot> plots;
+    int nextWearableId = 3;
+    int nextGroupId = 1;
+    std::vector<WearableInstance> wearables;
+    std::array<int, EquipmentSlotCount> equipment{};
+    InventoryLayout inventoryLayout;
 };
 
+const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
+const char* WearableName(WearableDefinition definition);
+const char* WearableDescription(WearableDefinition definition);
+const char* DyeName(int dye);
+const char* GarmentRequirements(WearableDefinition definition);
 const char* ItemName(Item item);
 const char* ResourceName(ResourceKind kind);
 const char* RecipeName(Recipe recipe);
@@ -97,6 +147,10 @@ public:
     void NewGame();
     int Count(Item item) const;
     int UsedCapacity() const;
+    int ChestUsedCapacity(int chestId) const;
+    std::uint64_t GetRevision() const { return revision_; }
+    const WearableInstance* GetWearable(int id) const;
+    const InventoryLayout* GetLayout(int containerId) const;
     bool IsRaining() const;
     bool IsNight() const;
     int DayNumber() const;
@@ -121,6 +175,17 @@ public:
     Result FillWater(Point player);
     Result AddFuel(int structureId, Point player);
     Result Transfer(int chestId, Item item, int amount, Point player);
+    Result EquipWearable(int id, std::uint64_t expectedRevision);
+    Result UnequipWearable(int id, std::uint64_t expectedRevision);
+    Result MoveWearable(int id, int destinationChestId, Point player, std::uint64_t expectedRevision);
+    Result CraftGarment(WearableDefinition definition, Point player, std::uint64_t expectedRevision);
+    Result RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision);
+    Result TransferGroup(int chestId, int groupId, int amount, bool toChest, Point player,
+        std::uint64_t expectedRevision);
+    Result SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision);
+    Result MergeGroups(int containerId, int sourceGroupId, int targetGroupId, Point player,
+        std::uint64_t expectedRevision);
+    Result ReorderEntry(int containerId, int index, int targetIndex, Point player, std::uint64_t expectedRevision);
     Result Sleep(double hours, Point player);
     Result SetDayMinutes(double minutes);
     void SetWarmOutfit(bool enabled);
@@ -132,7 +197,10 @@ public:
 
 private:
     State state_;
+    std::uint64_t revision_ = 0;
     bool TryAdjust(const Inventory& change);
+    Result CheckRevision(std::uint64_t expectedRevision) const;
+    Result CommitInventory(State&& candidate, const char* message);
     void Step(double hours, Point player, bool sleeping);
 };
 }
