@@ -1,0 +1,78 @@
+[
+  {
+    "slot": 0,
+    "name": "tree_small_02_branches",
+    "blend": "Opaque",
+    "twoSided": false,
+    "channels": {
+      "baseColor": {
+        "file": "Textures/tree_small_02_branch_diff_2k.png",
+        "sRGB": true
+      },
+      "normalDirectX": {
+        "file": "Textures/tree_small_02_branch_nor_dx_2k.png",
+        "sRGB": false
+      },
+      "roughness": {
+        "file": "Textures/tree_small_02_branch_rough_2k.png",
+        "sRGB": false
+      },
+      "ambientOcclusion": {
+        "file": "Textures/tree_small_02_branch_ao_2k.png",
+        "sRGB": false
+      }
+    }
+  },
+  {
+    "slot": 1,
+    "name": "tree_small_02_leaves",
+    "blend": "Masked",
+    "twoSided": true,
+    "channels": {
+      "baseColor": {
+        "file": "Textures/tree_small_02_leaves_diff_2k.png",
+        "sRGB": true
+      },
+      "normalDirectX": {
+        "file": "Textures/tree_small_02_leaves_nor_dx_2k.png",
+        "sRGB": false
+      },
+      "roughness": {
+        "file": "Textures/tree_small_02_leaves_rough_2k.png",
+        "sRGB": false
+      },
+      "ambientOcclusion": {
+        "file": "Textures/tree_small_02_leaves_ao_2k.png",
+        "sRGB": false
+      },
+      "opacityMask": {
+        "file": "Textures/tree_small_02_leaves_alpha_2k.png",
+        "sRGB": false
+      }
+    }
+  },
+  {
+    "slot": 2,
+    "name": "tree_small_02_trunk",
+    "blend": "Opaque",
+    "twoSided": false,
+    "channels": {
+      "baseColor": {
+        "file": "Textures/tree_small_02_diff_2k.jpg",
+        "sRGB": true
+      },
+      "normalDirectX": {
+        "file": "Textures/tree_small_02_nor_dx_2k.png",
+        "sRGB": false
+      },
+      "roughness": {
+        "file": "Textures/tree_small_02_rough_2k.png",
+        "sRGB": false
+      },
+      "ambientOcclusion": {
+        "file": "Textures/tree_small_02_ao_2k.png",
+        "sRGB": false
+      }
+    }
+  }
+]

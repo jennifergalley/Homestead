@@ -1,0 +1,26 @@
+{
+  "verifiedWith": "Blender 4.5.14 bundled FBX parser and importer",
+  "appliesTo": [
+    "TreeSmall02_SourceLOD0.fbx",
+    "TreeSmall02_LOD1.fbx",
+    "TreeSmall02_LOD2.fbx",
+    "TreeSmall02_LOD3.fbx"
+  ],
+  "globalSettings": {
+    "UnitScaleFactor": 100.0,
+    "OriginalUnitScaleFactor": 100.0,
+    "UpAxis": 2,
+    "UpAxisSign": 1,
+    "FrontAxis": 1,
+    "FrontAxisSign": 1,
+    "CoordAxis": 0,
+    "CoordAxisSign": -1
+  },
+  "uvActiveIndex": 0,
+  "uvLayers": [
+    {"name": "UVMap", "activeRender": true},
+    {"name": "UV_map_01", "activeRender": false}
+  ],
+  "imagesReferenced": [],
+  "unrealVerification": "Not performed; main owns actual axis/unit conversion and material import checks."
+}

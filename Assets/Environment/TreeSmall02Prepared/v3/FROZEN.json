@@ -1,0 +1,19 @@
+{
+  "state": "frozen-source-handoff",
+  "version": "v3",
+  "frozenDate": "2026-09-21",
+  "sourceOnly": true,
+  "unrealImported": false,
+  "firstIntegrationCandidate": "TreeSmall02_LOD2.fbx",
+  "rule": "Do not mutate this directory during main import. Further experiments require a new version.",
+  "sha256": {
+    "TreeSmall02_SourceLOD0.fbx": "3a5d8f100b40ebfd357af2867a539ca4159fd4e20fd8d6d00805e26f88db886a",
+    "TreeSmall02_LOD1.fbx": "4f5db47d8caf731b8a2693455b1102288a2c35e76394bfe983081bd1b928abd9",
+    "TreeSmall02_LOD2.fbx": "03365d16ad77535e28c8f3b7243a8183d30768af3c719589cef58a44ed12e283",
+    "TreeSmall02_LOD3.fbx": "dee2fbf309bb4d027b079c41a3abfc0cee61317b47091f209c694dc5e77d0796",
+    "provenance.json": "40c9de4999133e746743425fdacd7a5dbdc94141cfbb2be7d2cec025e3a10112",
+    "materials.json": "c32f00f59e1fcf96b4c17488d42ef9019971aaf4383b0701e2fbbd9921d00d69",
+    "roundtrip.json": "f077283b4851da0d3bdd013510ee94edfa4f1fd7e9cb78a1aee696bd3c6807ca",
+    "Comparison/metrics.json": "e0dc7764a0068fe3d3b54aaf2f4ca844eb787f54055b87d002e7e81484a79b6b"
+  }
+}

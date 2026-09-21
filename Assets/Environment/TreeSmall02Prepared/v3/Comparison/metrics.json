@@ -1,0 +1,72 @@
+{
+  "kind": "Internal CPU unlit albedo/alpha orthographic diagnostics, not game acceptance",
+  "resolutionPerView": [
+    512,
+    512
+  ],
+  "samples": 8,
+  "columnOrder": [
+    "SourceLOD0",
+    "LOD1",
+    "LOD2",
+    "LOD3"
+  ],
+  "results": [
+    {
+      "view": "front",
+      "level": "SourceLOD0",
+      "coveredPixels": 39170,
+      "coverageRatioToSource": 1.0,
+      "silhouetteIntersectionOverUnion": 1.0
+    },
+    {
+      "view": "front",
+      "level": "LOD1",
+      "coveredPixels": 38833,
+      "coverageRatioToSource": 0.9913964768955833,
+      "silhouetteIntersectionOverUnion": 0.9581523785615664
+    },
+    {
+      "view": "front",
+      "level": "LOD2",
+      "coveredPixels": 37433,
+      "coverageRatioToSource": 0.9556548378861374,
+      "silhouetteIntersectionOverUnion": 0.9194417299356035
+    },
+    {
+      "view": "front",
+      "level": "LOD3",
+      "coveredPixels": 35993,
+      "coverageRatioToSource": 0.9188920091907071,
+      "silhouetteIntersectionOverUnion": 0.8843039434430545
+    },
+    {
+      "view": "side",
+      "level": "SourceLOD0",
+      "coveredPixels": 50925,
+      "coverageRatioToSource": 1.0,
+      "silhouetteIntersectionOverUnion": 1.0
+    },
+    {
+      "view": "side",
+      "level": "LOD1",
+      "coveredPixels": 50301,
+      "coverageRatioToSource": 0.9877466863033874,
+      "silhouetteIntersectionOverUnion": 0.9387497127097219
+    },
+    {
+      "view": "side",
+      "level": "LOD2",
+      "coveredPixels": 47499,
+      "coverageRatioToSource": 0.9327245949926363,
+      "silhouetteIntersectionOverUnion": 0.8798273425264524
+    },
+    {
+      "view": "side",
+      "level": "LOD3",
+      "coveredPixels": 44724,
+      "coverageRatioToSource": 0.8782326951399116,
+      "silhouetteIntersectionOverUnion": 0.8304627396945689
+    }
+  ]
+}
