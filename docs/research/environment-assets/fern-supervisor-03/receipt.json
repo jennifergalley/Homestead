@@ -1,0 +1,114 @@
+{
+  "status": "passed-long-startup-supervisor-fixtures",
+  "createdUtc": "2026-09-21T03:42:25.3273027+00:00",
+  "runId": "20260921-033354-2d257ba0",
+  "nativeBuildReceiptSha256": "86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F",
+  "nativeProductsUnchanged": true,
+  "priorSupervisorReceiptSha256": "7D930D038282AB18A14855EDA4E798B2847CC1DEAF7723F69B46B87099E9C761",
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "B8AB3059A9718AEEFC7B38F14111291F808D5E619368709DB9C148950FA9E94A"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "3AB27ADD95DDE9005184034B5451F22B1D9020CF74C50BCADC729F2968A612B3"
+    },
+    {
+      "path": "Tests\\Test-AuthoringLeafGuard.ps1",
+      "sha256": "B9198B2B9CDD8EC0AC19AB9547B8E23CBF4AC1243AD366D5858E1F3AE6AC0DB5"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "bytes": 47190,
+      "sha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\probe-result.json"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stdout.log"
+    },
+    {
+      "bytes": 9,
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stop-probe.txt"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Editor.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Engine.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Game.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\GameUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Input.ini"
+    }
+  ],
+  "fixtures": [
+    {
+      "negativeCases": 25,
+      "passed": true,
+      "sha256": "CF5D08A0738C4791D65759B48AB5B85A23F1C58872FF0BAA2930A0ABE00A8589",
+      "name": "long-deadline-03"
+    },
+    {
+      "negativeCases": 25,
+      "passed": true,
+      "sha256": "D2B3308499BE4322443D1C4B77AC23A0EF4B0417C4C508B0D78E7EBE4F883089",
+      "name": "legacy-default-01"
+    },
+    {
+      "negativeCases": 25,
+      "passed": true,
+      "sha256": "C688E82123465839E6FAABE04B5E798373706B4FED782FBD46E028696093CD77",
+      "name": "legacy-render-01"
+    },
+    {
+      "negativeCases": 19,
+      "passed": true,
+      "sha256": "F6411E12B3DACFBE67EEB56E0C144383C16A1D4A5044B87F17D2AC6769DE788B",
+      "name": "fern-policy-01"
+    }
+  ],
+  "profile": {
+    "hardMs": 3300000,
+    "name": "RenderLongStartup",
+    "softMs": 3240000,
+    "supervisorSeconds": 3360,
+    "captureHardMs": 600000,
+    "captureSoftMs": 540000,
+    "startupSeconds": 2700
+  },
+  "qualification": "Same production token-array builder/mode selector/deadline guard exercised with existing disposable subject. Long timers armed then promptly finished; no45-minute wait claimed. Whole watchdog scaled-default regression and controller-failure lifetime passed. Initial pre-subject C# syntax and fixture Case parameter-collision errors corrected; long-deadline-01 retained. No native rebuild/engine process/real-marker lock or images in this receipt."
+}

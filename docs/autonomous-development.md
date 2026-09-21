@@ -1,6 +1,6 @@
 # Autonomous development
 
-One coding worker, one coordinator, bounded runs, and evidence from the real game.
+One coding worker, one coordinator, explicit run policy, and evidence from the real game.
 This is an app-session workflow, not an unattended executable that can operate
 after the Copilot app is closed or the machine is unavailable.
 
@@ -13,6 +13,21 @@ the local control record. The coding worker checks `allowWork` using
 delegation. The fixed deadline is never extended by resume or a scheduled tick.
 Finish an in-flight safe operation when stopping; do not start another iteration.
 The deadline is a cooperative stop, not a destructive mid-save process kill.
+
+Jenny may explicitly authorize `completionPolicy: "until-complete"`. This is
+a separate policy, not a renewed duration: the stored `deadlineUtc` is retained
+as history, while `allowWork` depends on running/paused/stopped state rather
+than that timestamp. Absent policy means the original bounded behavior;
+unknown policy fails closed. Start supports `-CompletionPolicy until-complete`;
+Resume never changes the policy or stored date. The coordinator owns any
+explicitly authorized policy change to an existing run.
+
+Until-complete does not remove manual stop/pause, identity/network/privacy
+guards, supervisor-failure containment, or genuine-error handling. It does
+not broaden approved tools, assets, helpers or network access. A live operation
+whose fixed timers cannot be safely changed finishes under its existing
+controls; only after verified death/cleanup may a separately verified
+completion-driven operation start. Never patch a live process to evade guards.
 
 The coordinator owns run state and scheduling. The worker owns game changes,
 candidate builds, and `Scripts\Update-DevelopmentStatus.ps1` reports. Use one
@@ -73,6 +88,11 @@ handoff and project-journal entry, and releases its temporary awake process.
 `Hold-DevelopmentAwake.ps1` independently releases on stop/deadline within 15 seconds,
 and while paused. It holds only system sleep, not the display, and changes no
 persistent power settings. Closing its process also releases the OS thread request.
+Under explicit until-complete policy it ignores the historical deadline but
+still releases on stop, changed run identity, or policy/read failure, and
+releases the hold while paused. `-ValidateOnly` exercises the same decision
+without setting a sleep hold or writing an awake receipt. The coordinator
+alone owns launching/restarting the actual awake process.
 
 ## Candidate builds
 

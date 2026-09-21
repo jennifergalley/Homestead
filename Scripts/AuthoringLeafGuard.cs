@@ -53,6 +53,10 @@ namespace Homestead.Authoring
         IntPtr marker, job, process, thread, input, output;
         readonly object lifetime = new object();
         Timer softDeadline, hardDeadline;
+        readonly System.Diagnostics.Stopwatch deadlineClock = new System.Diagnostics.Stopwatch();
+        public bool CaptureDeadlineArmed { get; private set; }
+        public int CaptureSoftMilliseconds { get; private set; }
+        public int CaptureHardMilliseconds { get; private set; }
         public bool DeadlineStopRequested { get; private set; }
         public bool DeadlineHardStop { get; private set; }
         public string DeadlineError { get; private set; }
@@ -479,10 +483,17 @@ namespace Homestead.Authoring
         }
         public static void ValidateDeadlineProfile(int softMilliseconds, int hardMilliseconds, string profile)
         {
+            if (profile == "RenderCompletionDriven")
+            {
+                if (softMilliseconds != 0 || hardMilliseconds != 0)
+                    throw new InvalidOperationException("Completion-driven rendering has no synthetic time limit.");
+                return;
+            }
             bool admitted = profile == "Default" && hardMilliseconds <= 110000
                 || profile == "Import" && softMilliseconds == 150000 && hardMilliseconds == 180000
-                || profile == "Render" && softMilliseconds == 480000 && hardMilliseconds == 510000;
-            if (!admitted || softMilliseconds < 1 || hardMilliseconds <= softMilliseconds || hardMilliseconds > 510000)
+                || profile == "Render" && softMilliseconds == 480000 && hardMilliseconds == 510000
+                || profile == "RenderLongStartup" && softMilliseconds == 3240000 && hardMilliseconds == 3300000;
+            if (!admitted || softMilliseconds < 1 || hardMilliseconds <= softMilliseconds || hardMilliseconds > 3300000)
                 throw new InvalidOperationException("Deadline pair is outside the exact approved profile.");
         }
         public void ArmDeadline(int softMilliseconds, int hardMilliseconds, string stopPath)
@@ -494,13 +505,15 @@ namespace Homestead.Authoring
             ValidateDeadlineProfile(softMilliseconds, hardMilliseconds, profile);
             lock (lifetime)
             {
-                if (Resumed || softDeadline != null)
+                if (Resumed || DeadlineProfile != null)
                     throw new InvalidOperationException("Deadline must be armed once before resume.");
                 OrdinaryPath(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(stopPath)));
                 if (File.Exists(stopPath)) throw new InvalidOperationException("Fresh deadline stop path required.");
                 DeadlineProfile = profile;
                 SoftDeadlineMilliseconds = softMilliseconds;
                 HardDeadlineMilliseconds = hardMilliseconds;
+                if (profile == "RenderCompletionDriven") return;
+                deadlineClock.Start();
                 softDeadline = new Timer(_ =>
                 {
                     lock (lifetime)
@@ -533,6 +546,25 @@ namespace Homestead.Authoring
                         catch (Exception error) { DeadlineError = "Deadline hard stop failed: " + error; }
                     }
                 }, null, hardMilliseconds, System.Threading.Timeout.Infinite);
+            }
+        }
+        public void ConstrainCaptureDeadline()
+        {
+            lock (lifetime)
+            {
+                if (DeadlineProfile != "RenderLongStartup" || !Resumed || CaptureDeadlineArmed || softDeadline == null ||
+                    DeadlineStopRequested || DeadlineHardStop || Wait(0))
+                    throw new InvalidOperationException("Capture deadline requires one live admitted long-startup render.");
+                long elapsed = deadlineClock.ElapsedMilliseconds;
+                if (elapsed >= 2700000)
+                    throw new InvalidOperationException("Native entry exceeded the startup admission boundary.");
+                CaptureSoftMilliseconds = (int)Math.Min(540000, SoftDeadlineMilliseconds - elapsed);
+                CaptureHardMilliseconds = (int)Math.Min(600000, HardDeadlineMilliseconds - elapsed);
+                if (CaptureSoftMilliseconds < 1 || CaptureHardMilliseconds <= CaptureSoftMilliseconds)
+                    throw new InvalidOperationException("No bounded capture budget remains.");
+                softDeadline.Change(CaptureSoftMilliseconds, System.Threading.Timeout.Infinite);
+                hardDeadline.Change(CaptureHardMilliseconds, System.Threading.Timeout.Infinite);
+                CaptureDeadlineArmed = true;
             }
         }
         public void Dispose()

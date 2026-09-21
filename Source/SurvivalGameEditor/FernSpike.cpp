@@ -84,11 +84,16 @@ class FStopFeedback : public FFeedbackContext
     FFeedbackContext* Previous;
     FString StopPath;
     FDateTime Deadline;
+    bool bCompletionDriven;
 public:
-    FStopFeedback(const FString& Output, const FDateTime& InDeadline)
-        : Previous(GWarn), StopPath(FPaths::Combine(Output, TEXT("stop-probe.txt"))), Deadline(InDeadline) { GWarn = this; }
+    FStopFeedback(const FString& Output, const FDateTime& InDeadline, bool bInCompletionDriven)
+        : Previous(GWarn), StopPath(FPaths::Combine(Output, TEXT("stop-probe.txt"))), Deadline(InDeadline),
+          bCompletionDriven(bInCompletionDriven) { GWarn = this; }
     ~FStopFeedback() override { GWarn = Previous; }
-    bool ReceivedUserCancel() override { return FDateTime::UtcNow() >= Deadline || IFileManager::Get().FileExists(*StopPath); }
+    bool ReceivedUserCancel() override
+    {
+        return (!bCompletionDriven && FDateTime::UtcNow() >= Deadline) || IFileManager::Get().FileExists(*StopPath);
+    }
     void Serialize(const TCHAR* Text, ELogVerbosity::Type Verbosity, const FName& Category) override
     {
         Previous->Serialize(Text, Verbosity, Category);
@@ -356,6 +361,12 @@ bool Import(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
 
 bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
 {
+    const double Started = FPlatformTime::Seconds();
+    const auto Phase = [Started](const TCHAR* Name)
+    {
+        UE_LOG(LogFernSpike, Display, TEXT("Render phase at %.3fs: %s"), FPlatformTime::Seconds() - Started, Name);
+    };
+    Phase(TEXT("asset reload/inventory begin"));
     Result->SetStringField(TEXT("stage"), TEXT("trial-reload-and-inventory"));
     if (!FParse::Param(FCommandLine::Get(), TEXT("RenderOffScreen"))
         || !FParse::Param(FCommandLine::Get(), TEXT("AllowCommandletRendering"))
@@ -372,9 +383,11 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
         Textures.Add(LoadObject<UTexture2D>(nullptr, *(Trial + TEXT("/Textures/") + Map.Name + TEXT(".") + Map.Name)));
     auto* Material = LoadObject<UMaterial>(nullptr, *(Trial + TEXT("/Materials/M_Fern02.M_Fern02")));
     if (!Inventory(Meshes, Textures, Material, Result) || Feedback.ReceivedUserCancel()) return false;
+    Phase(TEXT("asset inventory complete; transient preview scene begin"));
     FPreviewScene Scene(FPreviewScene::ConstructionValues().SetCreatePhysicsScene(false)
         .AllowAudioPlayback(false).SetTransactional(false).SetLightBrightness(3.0f).SetSkyBrightness(0));
     if (!Scene.IsInitialized()) return false;
+    Phase(TEXT("transient preview scene initialized; components/render target begin"));
     Scene.SkyLight->SetVisibility(false);
     Scene.SetLightDirection(FRotator(-45, -45, 0));
     auto* Fern = NewObject<UStaticMeshComponent>();
@@ -415,9 +428,12 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
     Capture->ShowFlags.SetMotionBlur(false);
     Capture->ShowFlags.SetScreenPercentage(false);
     Scene.AddComponent(Capture, FTransform::Identity);
+    Phase(TEXT("scene/components complete; FinishAllCompilation begin"));
     FAssetCompilingManager::Get().FinishAllCompilation();
+    Phase(TEXT("FinishAllCompilation returned; material PostEditChange begin"));
     Result->SetStringField(TEXT("stage"), TEXT("real-shader-readiness"));
     Material->PostEditChange();
+    Phase(TEXT("material PostEditChange returned; shader readiness begin"));
     FMaterialResource* Resource = Material->GetMaterialResource(GMaxRHIShaderPlatform);
     while (Resource && (!Resource->IsCompilationFinished() || GShaderCompilingManager->GetNumRemainingJobs() > 0))
     {
@@ -427,7 +443,9 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
     }
     if (!Resource || !Resource->IsGameThreadShaderMapComplete() || Resource->GetCompileErrors().Num()
         || Feedback.ReceivedUserCancel()) return false;
+    Phase(TEXT("shader map complete; render-command flush begin"));
     FlushRenderingCommands();
+    Phase(TEXT("readiness flush complete"));
     TArray<TSharedPtr<FJsonValue>> Views;
     Result->SetStringField(TEXT("stage"), TEXT("two-native-offscreen-views"));
     for (int32 Index = 0; Index < 2; ++Index)
@@ -436,8 +454,10 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
         const FVector Position = Center + FVector(0, (Index == 0 ? -1 : 1) * Radius * 3.5, Radius * 1.25);
         const FRotator Rotation = (Center - Position).Rotation();
         Capture->SetWorldLocationAndRotation(Position, Rotation);
+        Phase(Index == 0 ? TEXT("front capture begin") : TEXT("back capture begin"));
         Capture->CaptureScene();
         FlushRenderingCommands();
+        Phase(Index == 0 ? TEXT("front capture flush complete; readback begin") : TEXT("back capture flush complete; readback begin"));
         const FString Name = Index == 0 ? TEXT("fern-a-front.png") : TEXT("fern-a-back.png");
         const FString Path = FPaths::Combine(Output, Name);
         if (IFileManager::Get().FileExists(*Path)) return false;
@@ -445,6 +465,7 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
         TArray<FColor> Pixels;
         if (!Writer || !Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels)
             || Pixels.Num() != 1280 * 720) return false;
+        Phase(Index == 0 ? TEXT("front readback complete; pixel validation/PNG encoding begin") : TEXT("back readback complete; pixel validation/PNG encoding begin"));
         int32 GreenPixels = 0;
         for (FColor& Pixel : Pixels)
         {
@@ -455,9 +476,11 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
         TArray64<uint8> Png;
         FImageUtils::PNGCompressImageArray(1280, 720, Pixels, Png);
         if (Png.IsEmpty()) return false;
+        Phase(Index == 0 ? TEXT("front PNG write begin") : TEXT("back PNG write begin"));
         Writer->Serialize(Png.GetData(), Png.Num());
         if (!Writer->Close() || Writer->IsError()) return false;
         Writer.Reset();
+        Phase(Index == 0 ? TEXT("front PNG write complete") : TEXT("back PNG write complete"));
         auto View = MakeShared<FJsonObject>();
         View->SetStringField(TEXT("image"), Name);
         View->SetArrayField(TEXT("cameraCm"), Vector(Position));
@@ -485,9 +508,9 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
 }
 }
 
-bool RunFernSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline)
+bool RunFernSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven)
 {
-    FStopFeedback Feedback(Output, Deadline);
+    FStopFeedback Feedback(Output, Deadline, bCompletionDriven);
     auto Result = MakeShared<FJsonObject>();
     Result->SetStringField(TEXT("mode"), Mode);
     Result->SetStringField(TEXT("namespace"), Trial);

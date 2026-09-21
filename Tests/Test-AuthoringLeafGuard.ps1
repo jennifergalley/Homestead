@@ -6,7 +6,7 @@ param(
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal',
     [switch]$ObserveAccountingOnly,
     [switch]$DetachedConsole,
-    [ValidateSet('Default','Import','Render')][string]$DeadlineProfile='Default',
+    [ValidateSet('Default','Import','Render','RenderLongStartup','RenderCompletionDriven')][string]$DeadlineProfile='Default',
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')]
     [string[]]$Scenarios = @('normal','pause','deadline','timeout','controller-failure','watchdog')
 )
@@ -59,6 +59,7 @@ $live = & (Join-Path $repo 'Scripts\Development-Run.ps1') -Action Status
 Assert $live.allowWork 'Live run does not permit this synthetic operation.'
 Assert ([IO.Path]::IsPathFullyQualified($Root) -and [IO.Path]::IsPathFullyQualified($Subject)) 'Absolute fixture paths required.'
 Add-Type -Path (Join-Path $repo 'Scripts\AuthoringLeafGuard.cs')
+. (Join-Path $repo 'Scripts\FernSpikePolicy.ps1')
 Add-Type -TypeDefinition @'
 using System;
 using System.ComponentModel;
@@ -124,6 +125,16 @@ public static class GuardFixtureNative {
         $environment['HOMESTEAD_TEST_CANARY_HIGH'] = $identity.IndexHigh.ToString()
         $environment['HOMESTEAD_TEST_CANARY_LOW'] = $identity.IndexLow.ToString()
         $fixtureArguments=[string[]]@('--token-fixture','argument with spaces','embedded"quote','E:\fixture path\')
+        if($DeadlineProfile -in @('RenderLongStartup','RenderCompletionDriven')) {
+            $configs=[ordered]@{}
+            foreach($name in @('Engine','Editor','EditorSettings','EditorPerProjectUserSettings','GameUserSettings','Game','Input')) {
+                $configs[$name]=Join-Path $Root "Config\$name.ini"
+            }
+            $fixtureArguments=[string[]]@(Get-FernProbeArguments (Join-Path $Root 'project with spaces.uproject') $Root (Join-Path $Root 'retained cache') $configs 'Render')
+            Assert ('-FernMode=Render' -cin $fixtureArguments -and '-RenderOffScreen' -cin $fixtureArguments -and
+                '-AllowCommandletRendering' -cin $fixtureArguments -and '-nullrhi' -cnotin $fixtureArguments -and
+                '-noshaderworker' -cin $fixtureArguments -and '-DisablePython' -cin $fixtureArguments) 'Production render tokens differ.'
+        }
         $guard = [Homestead.Authoring.LeafGuard]::new($Subject, (Get-FileHash -LiteralPath $Subject).Hash,
             $fixtureArguments, $Root, (Join-Path $Root 'marker'), (Join-Path $Root 'subject.log'), $environment, [bool]$DetachedConsole)
         $actualLine=(Get-CimInstance Win32_Process -Filter "ProcessId=$($guard.ProcessId)").CommandLine
@@ -135,8 +146,10 @@ public static class GuardFixtureNative {
         Assert ($guard.CreationFlags -eq $(if($DetachedConsole){0x0008040C}else{0x08080404})) 'Actual creation flags differ.'
         $doubleArmRejected=$null
         if($DeadlineProfile -ne 'Default') {
-            $softSeconds=if($DeadlineProfile -eq 'Import'){150}else{480}
-            $hardSeconds=if($DeadlineProfile -eq 'Import'){180}else{510}
+            $policy=Get-FernOperationPolicy -Mode $(if($DeadlineProfile -eq 'Import'){'Import'}else{'Render'}) `
+                -RenderProfile $(if($DeadlineProfile -eq 'RenderCompletionDriven'){'CompletionDriven'}elseif($DeadlineProfile -eq 'RenderLongStartup'){'LongStartup'}else{'Standard'})
+            $softSeconds=$policy.softSeconds
+            $hardSeconds=$policy.hardSeconds
             [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($softSeconds*1000,$hardSeconds*1000,$DeadlineProfile)
             $guard.ArmDeadline($softSeconds*1000,$hardSeconds*1000,(Join-Path $Root 'stop.txt'),$DeadlineProfile)
             Assert ($guard.DeadlineProfile -ceq $DeadlineProfile -and $guard.SoftDeadlineMilliseconds -eq $softSeconds*1000 -and
@@ -156,7 +169,24 @@ public static class GuardFixtureNative {
             deadlineProfile=$guard.DeadlineProfile;softMilliseconds=$guard.SoftDeadlineMilliseconds
             hardMilliseconds=$guard.HardDeadlineMilliseconds;doubleArmRejected=$doubleArmRejected
         })
+        $captureBeforeResumeRejected=$false
+        try{$guard.ConstrainCaptureDeadline()}catch{$captureBeforeResumeRejected=$true}
+        Assert $captureBeforeResumeRejected 'Capture timer admitted before resume.'
         $guard.Resume()
+        if($DeadlineProfile -eq 'RenderLongStartup') {
+            $guard.ConstrainCaptureDeadline()
+            Assert ($guard.CaptureDeadlineArmed -and $guard.CaptureSoftMilliseconds -eq 540000 -and
+                $guard.CaptureHardMilliseconds -eq 600000) 'Actual capture timer did not constrain the whole-operation timer.'
+            $captureDoubleArmRejected=$false
+            try{$guard.ConstrainCaptureDeadline()}catch{$captureDoubleArmRejected=$true}
+            Assert $captureDoubleArmRejected 'Repeated capture timer admitted.'
+        } else {
+            $captureOtherProfileRejected=$false
+            try{$guard.ConstrainCaptureDeadline()}catch{$captureOtherProfileRejected=$true}
+            Assert $captureOtherProfileRejected 'Capture timer admitted for a legacy profile.'
+        }
+        $captureTimer=@{armed=$guard.CaptureDeadlineArmed;softMilliseconds=$guard.CaptureSoftMilliseconds;
+            hardMilliseconds=$guard.CaptureHardMilliseconds}
         $postResumeRejected=$false
         try {$guard.ArmDeadline(100000,110000,(Join-Path $Root 'stop.txt'),'Default')}
         catch {$postResumeRejected=$true}
@@ -213,6 +243,9 @@ public static class GuardFixtureNative {
             exitedJobMembers = $exitedMembers
             exitedRoot = $rootAfter
             postResumeArmRejected=$postResumeRejected
+            captureBeforeResumeRejected=$captureBeforeResumeRejected
+            captureProfile=$DeadlineProfile
+            captureTimer=$captureTimer
         })
     } catch {
         Write-NewJson (Join-Path $Root 'controller-error.json') @{ error = $_.ToString() }
@@ -239,11 +272,49 @@ foreach($pair in @(
     @{name='wrong-import-pair';soft=150000;hard=179999;profile='Import'},
     @{name='wrong-render-pair';soft=479000;hard=510000;profile='Render'},
     @{name='over-absolute-maximum';soft=480000;hard=510001;profile='Render'},
+    @{name='wrong-long-soft';soft=3240001;hard=3300000;profile='RenderLongStartup'},
+    @{name='wrong-long-hard';soft=3240000;hard=3300001;profile='RenderLongStartup'},
+    @{name='long-pair-legacy-profile';soft=3240000;hard=3300000;profile='Render'},
+    @{name='long-profile-short-pair';soft=480000;hard=510000;profile='RenderLongStartup'},
+    @{name='completion-soft-limit';soft=1;hard=0;profile='RenderCompletionDriven'},
+    @{name='completion-hard-limit';soft=0;hard=1;profile='RenderCompletionDriven'},
+    @{name='legacy-no-timer';soft=0;hard=0;profile='Render'},
     @{name='unknown-profile';soft=1;hard=2;profile='Unlimited'})) {
     $rejected=$false
     try {[Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($pair.soft,$pair.hard,$pair.profile)}catch{$rejected=$true}
     Assert $rejected "Invalid deadline admitted:$($pair.name)"
     $rejections.Add(@{case=$pair.name;rejected=$true;noProcessConstructed=$true})
+}
+$longPolicy=Get-FernOperationPolicy -Mode Render -RenderProfile LongStartup
+$completionPolicy=Get-FernOperationPolicy -Mode Render -RenderProfile CompletionDriven
+Assert ($completionPolicy.softSeconds -eq 0 -and $completionPolicy.hardSeconds -eq 0 -and
+    $completionPolicy.ceilingSeconds -eq 0) 'Completion-driven policy has a hidden timer.'
+Assert-FernStageBudget $completionPolicy 100000000 $null
+Assert-FernStageBudget $completionPolicy 100000001 1
+Assert ($longPolicy.startupSeconds -eq 2700 -and $longPolicy.captureSeconds -eq 600 -and
+    $longPolicy.ceilingSeconds -eq 3360) 'Production stage policy differs.'
+Assert-FernStageBudget $longPolicy 2699 $null
+Assert-FernStageBudget $longPolicy 650 100
+foreach($stageCase in @(
+    @{name='startup-boundary';elapsed=2700;entry=$null},
+    @{name='late-entry';elapsed=2701;entry=2700},
+    @{name='capture-boundary';elapsed=700;entry=100},
+    @{name='future-entry';elapsed=1;entry=2},
+    @{name='negative-time';elapsed=-1;entry=$null})) {
+    $rejected=$false
+    try{Assert-FernStageBudget $longPolicy $stageCase.elapsed $stageCase.entry}catch{$rejected=$true}
+    Assert $rejected "Production stage budget admitted:$($stageCase.name)"
+    $rejections.Add(@{case=$stageCase.name;rejected=$true;noProcessConstructed=$true})
+}
+foreach($mode in @('Settings','Import')) {
+    $rejected=$false
+    try{Get-FernOperationPolicy -Mode $mode -RenderProfile LongStartup}catch{$rejected=$true}
+    Assert $rejected 'Long startup admitted for a non-render mode.'
+    $rejections.Add(@{case="long-startup-$mode";rejected=$true;noProcessConstructed=$true})
+    $rejected=$false
+    try{Get-FernOperationPolicy -Mode $mode -RenderProfile CompletionDriven}catch{$rejected=$true}
+    Assert $rejected 'Completion-driven policy admitted for a non-render mode.'
+    $rejections.Add(@{case="completion-driven-$mode";rejected=$true;noProcessConstructed=$true})
 }
 foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupied-stdout','nul-argument','invalid-environment','conflicting-arguments')) {
     $directory = Join-Path $negative $invalid

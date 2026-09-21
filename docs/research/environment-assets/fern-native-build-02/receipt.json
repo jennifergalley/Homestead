@@ -1,0 +1,105 @@
+{
+  "status": "passed-targeted-completion-native-build",
+  "createdUtc": "2026-09-21T04:41:53.6640018+00:00",
+  "products": [
+    {
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2093056
+    },
+    {
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90222592
+    },
+    {
+      "sha256": "19009CD2BDD686C80345D14C60D96714386265F3302D9F2CF2AD951F82126C66",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 233472
+    },
+    {
+      "sha256": "0E3D83A843B53F069D736B35EDE6372DE62E7E248F7E5AB080E8C8290B73DB63",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 25161728
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "1C61D86CF3B2397A38E1F1420118CDA5CD792AE59DE5304916B3349A6041F37C",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp"
+    },
+    {
+      "sha256": "51B5AD34A7D790489690FCA7E596D6AF8CD7844FE9269417E5C1D76835FD3993",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h"
+    },
+    {
+      "sha256": "A9A1B90292C232ECCFD703B925BC3653774851CC129860764534294BEEB16E88",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "FA84CF8ACC7CD6D84766D8BF29E3979FF78489F0E2700944A289DE2C7A7B2BE5",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "B437AD46A7869DDC865D67F5EC583963079F6C35161762634A2E3AD4C77B0999",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    }
+  ],
+  "steps": [
+    {
+      "qualification": "Guarded compiler/link/resource leaves; metadata uses separately approved dotnet/conhost sampled boundary, not pre-start child containment.",
+      "resultSha256": "1FFBB5A30A0C8EF9A92BAB89A278785D3A331A8FB148B286E8E20C9E56D3854E",
+      "exitCode": 0,
+      "status": "passed",
+      "step": "completion-build-01\\compile0"
+    },
+    {
+      "qualification": "Guarded compiler/link/resource leaves; metadata uses separately approved dotnet/conhost sampled boundary, not pre-start child containment.",
+      "resultSha256": "2BDA5E73DA8E271424244ABECA8BB05FF74F19513DE58808D757F844EF4E443C",
+      "exitCode": 0,
+      "status": "passed",
+      "step": "completion-build-01\\compile1"
+    },
+    {
+      "qualification": "Guarded compiler/link/resource leaves; metadata uses separately approved dotnet/conhost sampled boundary, not pre-start child containment.",
+      "resultSha256": "BFD40074E06204A53FC5EF3A3733376C0A3C429B8904016DB153861BDAACBFEB",
+      "exitCode": 0,
+      "status": "passed",
+      "step": "completion-build-01\\library3"
+    },
+    {
+      "qualification": "Guarded compiler/link/resource leaves; metadata uses separately approved dotnet/conhost sampled boundary, not pre-start child containment.",
+      "resultSha256": "DDE2AA4CCED4D7746D30155747D31BFCFE168E5FAAB960205E3ECD6BD1AFDA5A",
+      "exitCode": 0,
+      "status": "passed",
+      "step": "resource-conversion-01\\probe"
+    },
+    {
+      "qualification": "Guarded compiler/link/resource leaves; metadata uses separately approved dotnet/conhost sampled boundary, not pre-start child containment.",
+      "resultSha256": "1DCE27163D07B323D00BA83373B481E3E8A030002B11968C098082A7354F56FC",
+      "exitCode": 0,
+      "status": "passed",
+      "step": "completion-build-01\\link2"
+    },
+    {
+      "qualification": "Guarded compiler/link/resource leaves; metadata uses separately approved dotnet/conhost sampled boundary, not pre-start child containment.",
+      "resultSha256": "01591C0E822CF2C11CF27BD2036A648134886B5A7753B72C204F665F13594EE1",
+      "exitCode": 0,
+      "status": "passed",
+      "step": "completion-build-01\\metadata"
+    }
+  ],
+  "priorReceiptSha256": "86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F",
+  "exportActionsSha256": "612841C7EF24A780D6C89A6873A0812E4E48E4207ACE86EC9343E46C3762DA36",
+  "qualification": "Only two probe sources rebuilt for explicit until-complete render and phase logs. Game DLL/PDB unchanged, historical game-link shutdown-monitor qualification retained. Original export04 missed an ISPC version-query in finite sampling; no export/ISPC execution in this rebuild. Genuine guarded compile/resource/library/DLL and approved metadata route passed; no renderer runtime success claimed."
+}

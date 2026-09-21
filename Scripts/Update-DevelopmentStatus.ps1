@@ -14,6 +14,9 @@ $ErrorActionPreference = 'Stop'
 $run = Get-Content -LiteralPath (Join-Path $StateDirectory 'run.json') -Raw | ConvertFrom-Json
 if ($run.id -ne $RunId) { throw 'Status update belongs to a different run.' }
 $deadline = ([DateTimeOffset]$run.deadlineUtc).ToUniversalTime().ToString('o')
+$deadlineLabel=if($run.PSObject.Properties.Name -contains 'completionPolicy' -and $run.completionPolicy -ceq 'until-complete'){
+    'Historical deadline (UTC; not an active cutoff under explicit until-complete policy)'
+}else{'Deadline (UTC)'}
 $now = [DateTimeOffset]::UtcNow.ToString('o')
 $status = [ordered]@{
     runId = $RunId; updatedUtc = $now; task = $Task; phase = $Phase
@@ -40,7 +43,7 @@ $proof
 
 **Candidate:** $Candidate
 
-Run: $RunId. Deadline (UTC): $deadline.
+Run: $RunId. ${deadlineLabel}: $deadline.
 Worker session: $($run.workerSessionId).
 This is the latest worker report, not a live process monitor.
 Control state and permission to continue: Scripts\Development-Run.ps1 -Action Status.

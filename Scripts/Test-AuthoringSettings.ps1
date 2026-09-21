@@ -2,65 +2,91 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [switch]$ValidateOnly,
-    [ValidateSet('Settings','Import','Render')][string]$Mode='Settings'
+    [ValidateSet('Settings','Import','Render')][string]$Mode='Settings',
+    [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard'
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'AuthoringProbePolicy.ps1')
 . (Join-Path $PSScriptRoot 'FernSpikePolicy.ps1')
-$softSeconds=if($Mode -eq 'Import'){150}elseif($Mode -eq 'Render'){480}else{100}
-$hardSeconds=if($Mode -eq 'Import'){180}elseif($Mode -eq 'Render'){510}else{110}
-$ceilingSeconds=if($Mode -eq 'Import'){210}elseif($Mode -eq 'Render'){540}else{120}
+Add-Type -Path (Join-Path $PSScriptRoot 'AuthoringLeafGuard.cs')
+$operationPolicy=Get-FernOperationPolicy -Mode $Mode -RenderProfile $RenderProfile
+$completionDriven=$RenderProfile -eq 'CompletionDriven'
+$retainedRender=$RenderProfile -ne 'Standard'
+$softSeconds=$operationPolicy.softSeconds
+$hardSeconds=$operationPolicy.hardSeconds
+$ceilingSeconds=$operationPolicy.ceilingSeconds
 $root = Split-Path $PSScriptRoot -Parent
 $run = & (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
-if (-not $run.allowWork -or [DateTimeOffset]::UtcNow.AddSeconds($ceilingSeconds+60) -ge [DateTimeOffset]$run.deadlineUtc -or
+if (-not $run.allowWork -or ($completionDriven -and $run.completionPolicy -cne 'until-complete') -or
+    (-not $completionDriven -and [DateTimeOffset]::UtcNow.AddSeconds($ceilingSeconds+60) -ge [DateTimeOffset]$run.deadlineUtc) -or
     $run.authoringApproval.proposalSha256 -cne 'EA25571F37A6F3109BEECCA56B54E56006D8F61F0C0B07A95BA5DE077DB0DBCC') {
     throw 'Live run/approval/deadline does not admit the conditional settings probe.'
 }
-Add-Type -Path (Join-Path $PSScriptRoot 'AuthoringLeafGuard.cs')
-$deadlineProfile=if($Mode -eq 'Settings'){'Default'}else{$Mode}
+$deadlineProfile=$operationPolicy.profile
 [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($softSeconds*1000,$hardSeconds*1000,$deadlineProfile)
 $wrapperHash=(Get-FileHash $PSCommandPath).Hash
 $output = [IO.Path]::GetFullPath($OutputDirectory, $root)
 $runRoot = Join-Path $root "Saved\Automation\$($run.id)"
+$longStartup=$RenderProfile -eq 'LongStartup'
+$evidenceRunRoot=if($retainedRender){Join-Path $root 'Saved\Automation\20260920-182217-d1f84e39'}else{$runRoot}
 if (-not $output.StartsWith($runRoot + '\', [StringComparison]::OrdinalIgnoreCase) -or (Test-Path -LiteralPath $output)) {
     throw 'Fresh current-run probe output required.'
 }
-$priorReservation=Join-Path $runRoot 'native-settings-attempt.json'
-$priorResult=Join-Path $runRoot 'native-settings-01\probe-result.json'
+$priorReservation=Join-Path $evidenceRunRoot 'native-settings-attempt.json'
+$priorResult=Join-Path $evidenceRunRoot 'native-settings-01\probe-result.json'
 $supersession=@{approval='Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass'
     reservationSha256='733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A'
     resultSha256='F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7'
     secondReservationSha256='D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A'
     secondResultSha256='A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7'}
+if($retainedRender) {
+    $supersession['currentApproval']='Jenny explicitly authorized fresh90-minute run20260921-033354-2d257ba0 at20:33AZ; one long-startup render only. Earlier fields describe preserved historical settings attempts.'
+}
+if($completionDriven) {
+    $supersession['currentApproval']='Jenny explicitly authorized until-complete environment then inventory work at21:19AZ. Preserve both failed render attempts; completion-driven rendering removes guessed timers, not stop/pause or safety gates.'
+}
 function Assert-NamedSupersession {
-    if($run.id -cne '20260920-182217-d1f84e39' -or
-        $output -ine (Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}else{'fern-render-01'})) -or
+    $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
+    if($run.id -cne $expectedRun -or
+        $output -ine (Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($completionDriven){'fern-render-02'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
-        (Get-FileHash (Join-Path $runRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
-        (Get-FileHash (Join-Path $runRoot 'native-settings-02\probe-result.json')).Hash -cne $supersession.secondResultSha256) {
+        (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-02\probe-result.json')).Hash -cne $supersession.secondResultSha256) {
         throw 'Only the explicitly authorized third attempt with both prior failures preserved is admitted.'
     }
     if($Mode -ne 'Settings' -and (
-        (Get-FileHash (Join-Path $runRoot 'native-settings-attempt-03.json')).Hash -cne 'F45A17352F06F0F029090C3ACAE9A4043F58E8EA1C0642B581B30337E96C2046' -or
-        (Get-FileHash (Join-Path $runRoot 'native-settings-03\probe-result.json')).Hash -cne 'FB6E92F924EBD7F841D52B6FF408B4ED708B49AFB3569595E32B7A8228EB5D7C')) {
+        (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-03.json')).Hash -cne 'F45A17352F06F0F029090C3ACAE9A4043F58E8EA1C0642B581B30337E96C2046' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-03\probe-result.json')).Hash -cne 'FB6E92F924EBD7F841D52B6FF408B4ED708B49AFB3569595E32B7A8228EB5D7C')) {
         throw 'Accepted settings subgate changed.'
     }
     if($Mode -ne 'Settings' -and (
-        (Get-FileHash (Join-Path $runRoot 'fern-import-attempt-01.json')).Hash -cne '3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2' -or
-        (Get-FileHash (Join-Path $runRoot 'fern-import-01\probe-result.json')).Hash -cne '6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910')) {
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-attempt-01.json')).Hash -cne '3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-01\probe-result.json')).Hash -cne '6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910')) {
         throw 'Original pre-resume fern failure changed.'
     }
     if($Mode -eq 'Render' -and (
-        (Get-FileHash (Join-Path $runRoot 'fern-import-02\probe-result.json')).Hash -cne '31477873B75CC0BD90C7557E0A96D21BC474BE87D278D7787143D55A66720624' -or
-        (Get-FileHash (Join-Path $runRoot 'fern-import-02\asset-admission.json')).Hash -cne 'C818E55DBD142CA6AA28D26CEB9BA42E6ECAEBD81F2A5FDDD04D7C64B2846B33' -or
-        (Get-FileHash (Join-Path $runRoot 'fern-import-attempt-02.json')).Hash -cne 'B3955E859FEEE605CF10248F3B5808B55925FB3FF8BED7454C1CC1C394CADA52')) {
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-02\probe-result.json')).Hash -cne '31477873B75CC0BD90C7557E0A96D21BC474BE87D278D7787143D55A66720624' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-02\asset-admission.json')).Hash -cne 'C818E55DBD142CA6AA28D26CEB9BA42E6ECAEBD81F2A5FDDD04D7C64B2846B33' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-02\effective-settings.json')).Hash -cne 'C7CDD1D6653F17DE5F9B5800EA62F042059DABB95CAE549BE872F6E3D06EED2D' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-attempt-02.json')).Hash -cne 'B3955E859FEEE605CF10248F3B5808B55925FB3FF8BED7454C1CC1C394CADA52')) {
         throw 'Actual successful import evidence changed.'
+    }
+    if($retainedRender -and (
+        $run.authoringApproval.baselineCheckpoint -cne '2cc51202266ab77718e9f70d539794f79e68b421' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-render-attempt-01.json')).Hash -cne 'DA6060A37CC6D29CFFD354A7A07B88873484895DBA17021DAE48A2DBFD79B283' -or
+        (Get-FileHash (Join-Path $evidenceRunRoot 'fern-render-01\probe-result.json')).Hash -cne '4158EE119137E1C62AED0D6B5667D116295CD880C0D4470AA6FFC5AA5195F065')) {
+        throw 'New-run authorization or immutable failed render changed.'
+    }
+    if($completionDriven -and (
+        $run.continuationApproval.userReply -cne "Don't worry about a time limit, please just continue until the work is done. When you're done with the environment upgrade, please work on implementing the inventory redesign plan you specced out earlier autonomously, running overnight." -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-01\probe-result.json')).Hash -cne '55900C2F05D1A44B6BB28C9C127513DB1EC9874C96A664535B87EACD9CCC5109')) {
+        throw 'Explicit completion continuation or preserved capture-timeout changed.'
     }
 }
 Assert-NamedSupersession
-$attempt = Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}else{'fern-render-attempt-01.json'})
+$attempt = Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-02.json'}else{'fern-render-attempt-01.json'})
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -82,6 +108,10 @@ if($Mode -ne 'Settings') {
     $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-native-build-01\receipt.json'
     $buildReceiptHash='86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F'
 }
+if($completionDriven) {
+    $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-native-build-02\receipt.json'
+    $buildReceiptHash='94744E78B33C28AE538A34432E7E39AF3F90F480AA5E2942C4993B64339E0DC8'
+}
 $pythonPins = @{
     'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
     'python311.dll'='3E5A5C012CDDB3D156D147ACAD59BB489C0716B87DAD274CB5BF20EEC3B68192'
@@ -92,6 +122,14 @@ $supervisorReceipt=$null;$supervisorReceiptHash=$null
 if($Mode -ne 'Settings') {
     $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-supervisor-02\receipt.json'
     $supervisorReceiptHash='7D930D038282AB18A14855EDA4E798B2847CC1DEAF7723F69B46B87099E9C761'
+    if($longStartup) {
+        $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-supervisor-03\receipt.json'
+        $supervisorReceiptHash='B3ECE28794C53FC783E4A0BECB71CD8C5101E53F7451E447F835B326241EEDFE'
+    }
+    if($completionDriven) {
+        $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-supervisor-04\receipt.json'
+        $supervisorReceiptHash='06FA6AB5280FCC98D765ECD1C4A05510E61B20723F85EE889D5BA0B21BA77A6B'
+    }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
 }
@@ -164,8 +202,8 @@ if($Mode -ne 'Settings') {
         Assert-FernDirectoryIdentity $failed.trialIdentity $quarantine
         if(@(Get-ChildItem $quarantine -Force).Count){throw 'Only the verifiably empty original trial may be replaced.'}
     } else {
-        $priorImport=Get-Content (Join-Path $runRoot 'fern-import-02\probe-result.json') -Raw|ConvertFrom-Json
-        $assetAdmission=Get-Content (Join-Path $runRoot 'fern-import-02\asset-admission.json') -Raw|ConvertFrom-Json
+        $priorImport=Get-Content (Join-Path $evidenceRunRoot 'fern-import-02\probe-result.json') -Raw|ConvertFrom-Json
+        $assetAdmission=Get-Content (Join-Path $evidenceRunRoot 'fern-import-02\asset-admission.json') -Raw|ConvertFrom-Json
         if($priorImport.status -cne 'passed' -or -not $priorImport.subjectExited -or $priorImport.hardTerminated){throw 'Render requires passed actual import.'}
         Assert-FernNativeInventory $assetAdmission.inventory $fernSourceInventory
         $trialIdentity=$assetAdmission.directoryIdentity
@@ -229,26 +267,20 @@ foreach ($name in @('Engine','Editor','EditorSettings','EditorPerProjectUserSett
     $configs[$name] = Join-Path $output "Config\$name.ini"
 }
 $ddc = Join-Path $output 'DDC'
-if($Mode -eq 'Render'){$ddc=Join-Path $runRoot 'fern-import-02\DDC';Assert-FernOrdinaryTree $ddc}
-$arguments = @((Join-Path $root 'SurvivalGame.uproject'),'-run=HomesteadAuthoringProbe',"-EvidenceDirectory=$output",
-    '-notraceserver','-traceautostart=0','-unattended','-nop4','-nosplash','-nullrhi','-stdout','-FullStdOutLogOutput',
-    '-DisablePython','-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging',
-    '-noshaderworker',"-UserDir=$(Join-Path $output 'EngineUser')","-abslog=$(Join-Path $output 'editor.log')",
-    "-DDC=(Local=(Type=FileSystem,Path=$ddc,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
-    '-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False',
-    '-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False',
-    '-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False',
-    '-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False',
-    '-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False',
-    '-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False',
-    '-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True',
-    '-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False',
-    '-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0',
-    '-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False',
-    '-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False')
-foreach ($name in $configs.Keys) { $arguments += "-${name}INI=$($configs[$name])" }
-if($Mode -ne 'Settings'){$arguments+="-FernMode=$Mode"}
-if($Mode -eq 'Render'){$arguments=@($arguments|Where-Object {$_ -cne '-nullrhi'})+@('-AllowCommandletRendering','-RenderOffScreen')}
+$ddcIdentity=$null
+$retainedFiles=@();$ddcBefore=@()
+if($Mode -eq 'Render') {
+    $ddc=Join-Path $evidenceRunRoot 'fern-import-02\DDC'
+    Assert-FernOrdinaryTree $ddc
+    $ddcIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($ddc)
+    $importSettings=Get-Content (Join-Path $evidenceRunRoot 'fern-import-02\effective-settings.json') -Raw|ConvertFrom-Json
+    Assert-AuthoringDdc $importSettings.ddcStores $ddc
+    if($retainedRender) {
+        $ddcBefore=@(Get-FernRetainedFiles $ddc)
+        $retainedFiles=@(Get-FernRetainedFiles $evidenceRunRoot $ddc)
+    }
+}
+$arguments=@(Get-FernProbeArguments (Join-Path $root 'SurvivalGame.uproject') $output $ddc $configs $Mode)
 $environment = [Collections.Generic.Dictionary[string,string]]::new()
 $environment['TEMP'] = Join-Path $output 'Temp'
 $environment['TMP'] = Join-Path $output 'Temp'
@@ -257,7 +289,8 @@ $environment['UE_PIPINSTALL_PATH'] = Join-Path $output 'PipMustRemainAbsent'
 $environment['UE_SKIP_UBT_SDK_SETUP'] = '1'
 $environment['UE-LocalDataCachePath'] = $ddc
 $environment['HOMESTEAD_PROBE_OUTPUT'] = $output
-$environment['HOMESTEAD_PROBE_DEADLINE'] = [DateTimeOffset]::UtcNow.AddSeconds($hardSeconds).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+$environment['HOMESTEAD_PROBE_COMPLETION_POLICY']=if($completionDriven){'until-complete'}else{'bounded'}
+$environment['HOMESTEAD_PROBE_DEADLINE'] = if($completionDriven){$null}else{[DateTimeOffset]::UtcNow.AddSeconds($hardSeconds).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}
 if(($Mode -eq 'Render' -and ('-nullrhi' -in $arguments -or '-AllowCommandletRendering' -notin $arguments -or '-RenderOffScreen' -notin $arguments)) -or
     ($Mode -ne 'Render' -and '-nullrhi' -notin $arguments) -or '-DisablePython' -notin $arguments -or
     '-noshaderworker' -notin $arguments -or $configs.Count -ne 7 -or
@@ -267,12 +300,20 @@ if ($ValidateOnly) {
         supervisorReceiptSha256=$supervisorReceiptHash;creationFlags=0x0008040C;mode=$Mode;deadlineProfile=$deadlineProfile
         softMilliseconds=$softSeconds*1000;hardMilliseconds=$hardSeconds*1000;ceilingSeconds=$ceilingSeconds
         nativeAbsoluteDeadline=$environment['HOMESTEAD_PROBE_DEADLINE'];ddc=$ddc;arguments=$arguments
+        startupSeconds=$operationPolicy.startupSeconds;captureSeconds=$operationPolicy.captureSeconds;ddcIdentity=$ddcIdentity
+        retainedOldRunFiles=$retainedFiles.Count;retainedCacheFiles=$ddcBefore.Count
+        completionDriven=$completionDriven
         output=$output;globalMarkerReadLocked=$false;runtimeVerified=$false;attemptConsumed=$false}
     return
 }
 $null=New-Item -ItemType Directory -Path $output,(Join-Path $output 'Config'),(Join-Path $output 'Temp'),
     (Join-Path $output 'EngineUser'),(Join-Path $output 'DDC')
 foreach($name in $configs.Keys){[IO.File]::WriteAllText($configs[$name],'')}
+if($retainedRender) {
+    @{oldRunRoot=$evidenceRunRoot;immutableFiles=$retainedFiles;mutableCache=$ddc;cacheIdentity=$ddcIdentity;
+        cacheBefore=$ddcBefore;permission='Only this exact retained candidate filesystem DDC is admitted old-run input/output.'} |
+        ConvertTo-Json -Depth 8 | Set-Content (Join-Path $output 'retained-inputs.json')
+}
 $null = Get-CimInstance -Namespace root\StandardCimv2 -ClassName MSFT_NetTCPConnection -Filter "OwningProcess=$PID"
 $null = Get-CimInstance -Namespace root\StandardCimv2 -ClassName MSFT_NetUDPEndpoint -Filter "OwningProcess=$PID"
 $guard = $null
@@ -298,10 +339,16 @@ function Read-ProbeJob([string]$Phase, [switch]$Final) {
 try {
     $state = & (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
     if (-not $state.allowWork -or $state.id -ne $run.id -or @(Get-AuthoringProcesses).Count -or
-        [DateTimeOffset]::UtcNow.AddSeconds($ceilingSeconds+60) -ge [DateTimeOffset]$state.deadlineUtc) { throw 'Admission changed before guard construction.' }
+        ($completionDriven -and $state.completionPolicy -cne 'until-complete') -or
+        (-not $completionDriven -and [DateTimeOffset]::UtcNow.AddSeconds($ceilingSeconds+60) -ge [DateTimeOffset]$state.deadlineUtc)) { throw 'Admission changed before guard construction.' }
     Assert-ExistingNetworkPermission
     Assert-AcceptedNativeProducts
     Assert-NamedSupersession
+    if($retainedRender) {
+        Assert-FernDirectoryIdentity $ddcIdentity $ddc
+        if((@(Get-FernRetainedFiles $evidenceRunRoot $ddc)|ConvertTo-Json -Depth 5 -Compress) -cne
+            ($retainedFiles|ConvertTo-Json -Depth 5 -Compress)){throw 'Old-run immutable files changed before launch.'}
+    }
     [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($softSeconds*1000,$hardSeconds*1000,$deadlineProfile)
     $reservation = [IO.File]::Open($attempt,'CreateNew','Write','Read')
     try {
@@ -309,7 +356,7 @@ try {
             mode=$Mode;supervisorReceiptSha256=$supervisorReceiptHash
             priorFernReservationSha256='3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2'
             priorFernResultSha256='6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910'
-            approval='Coordinator explicit replacement import02 after exact deadline-profile regression; original failed-before-resume attempt immutable. Conditional single render reads import02.'}|ConvertTo-Json))
+            approval=$(if($completionDriven){'Explicit21:19 until-complete continuation; preserve bounded capture-timeout; no synthetic deadline; manual stop and genuine failures remain.'}elseif($longStartup){'Explicit fresh90-minute run20260921-033354-2d257ba0; one longer-startup render; old import02 DDC admitted input/output only; no retry.'}else{'Coordinator explicit replacement import02; original failure immutable; conditional render reads import02.'})}|ConvertTo-Json))
         $reservation.Write($bytes)
     } finally { $reservation.Dispose() }
     if($Mode -eq 'Import') {
@@ -317,7 +364,7 @@ try {
         $null=New-Item -ItemType Directory -Path $trial
         $trialIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($trial)
     }
-    $environment['HOMESTEAD_PROBE_DEADLINE']=[DateTimeOffset]::UtcNow.AddSeconds($hardSeconds).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+    $environment['HOMESTEAD_PROBE_DEADLINE']=if($completionDriven){$null}else{[DateTimeOffset]::UtcNow.AddSeconds($hardSeconds).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}
     $guard = [Homestead.Authoring.LeafGuard]::new($exe,$approved['UnrealEditor-Cmd.exe'],[string[]]$arguments,
         $root,$markerPath,(Join-Path $output 'stdout.log'),$environment,$true)
     if ($guard.CreationFlags -ne 0x0008040C -or $guard.WhitelistedHandleCount -ne 3) {
@@ -335,11 +382,14 @@ try {
         buildMonitoringQualification=$acceptedBuild.qualification
         mode=$Mode;softSeconds=$softSeconds;hardSeconds=$hardSeconds;ceilingSeconds=$ceilingSeconds;trialIdentity=$trialIdentity
         deadlineProfile=$guard.DeadlineProfile;supervisorReceiptSha256=$supervisorReceiptHash;wrapperSha256=$wrapperHash
+        startupSeconds=$operationPolicy.startupSeconds;captureSeconds=$operationPolicy.captureSeconds;ddc=$ddc;ddcIdentity=$ddcIdentity
+        completionDriven=$completionDriven
     } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $output 'launch.json')
     $guard.Resume()
     $readyAt = $null
     $lastPermission = 0.0
     while (-not $guard.Wait(0)) {
+        Assert-FernStageBudget $operationPolicy $clock.Elapsed.TotalSeconds $readyAt
         if (Read-ProbeJob 'live') { break }
         $null = $guard.VerifyMarker()
         $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$($guard.ProcessId)" |
@@ -353,7 +403,8 @@ try {
         Assert-AuthoringEndpoints $tcp $udp $guard.ProcessId
         if ($children.Count -or $other.Count) { throw 'Executed child or competing authoring process observed.' }
         $state = & (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
-        if (-not $state.allowWork -or $state.id -ne $run.id) { throw 'Run pause/stop/deadline observed.' }
+        if (-not $state.allowWork -or $state.id -ne $run.id -or
+            ($completionDriven -and $state.completionPolicy -cne 'until-complete')) { throw 'Run pause/stop/deadline/policy change observed.' }
         if ($clock.Elapsed.TotalSeconds - $lastPermission -gt 3) {
             Assert-ExistingNetworkPermission
             $lastPermission = $clock.Elapsed.TotalSeconds
@@ -372,11 +423,18 @@ try {
             Assert-AuthoringDdc $native.ddcStores $ddc
             Assert-AuthoringConfigBranches $native.configBranches $output
             Assert-AuthoringPythonState $native.pythonEntry
-            $priorPlugins = (Get-Content (Join-Path $runRoot 'native-settings-02\effective-settings.json') -Raw | ConvertFrom-Json).enabledPlugins
+            if($completionDriven -and -not $native.completionDriven){throw 'Native completion policy differs.'}
+            $priorPlugins = (Get-Content (Join-Path $evidenceRunRoot 'native-settings-02\effective-settings.json') -Raw | ConvertFrom-Json).enabledPlugins
             if (@($native.enabledPlugins | Where-Object { $_ -cnotin $priorPlugins }).Count) {
                 throw 'An additional unreviewed plugin became enabled.'
             }
             $readyAt = $clock.Elapsed.TotalSeconds
+            Assert-FernStageBudget $operationPolicy $readyAt $readyAt
+            if($longStartup){$guard.ConstrainCaptureDeadline()}
+            @{marker='effective-settings.json';observedElapsedSeconds=$readyAt;observedUtc=[DateTimeOffset]::UtcNow.ToString('o');
+                captureTimerArmed=$guard.CaptureDeadlineArmed;softMilliseconds=$guard.CaptureSoftMilliseconds;
+                hardMilliseconds=$guard.CaptureHardMilliseconds;limit='Native Main/settings export, not first instruction; observation includes sampling delay.'} |
+                ConvertTo-Json | Set-Content (Join-Path $output 'entry-observed.json')
             if($Mode -ne 'Settings') {
                 Assert-FernDirectoryIdentity $trialIdentity $trial
                 [IO.File]::WriteAllText((Join-Path $output 'operation-admitted.txt'),$Mode)
@@ -392,7 +450,7 @@ try {
             ($Mode -ne 'Settings' -and $fernResult))) {
             Request-ProbeStop 'complete'
         }
-        if ($clock.Elapsed.TotalSeconds -gt $softSeconds+5) { throw 'Bounded authoring operation timeout.' }
+        Assert-FernStageBudget $operationPolicy $clock.Elapsed.TotalSeconds $readyAt
         Start-Sleep -Milliseconds 100
     }
     if (-not $native -or $guard.ExitCode -ne 0 -or $guard.HardTerminated -or $guard.DeadlineError) { throw 'Native settings probe failed or was hard-terminated.' }
@@ -444,6 +502,17 @@ try {
     }
     try { Assert-AcceptedNativeProducts } catch { $cleanupErrors.Add("Accepted build changed:$_") }
     try { Assert-NamedSupersession } catch { $cleanupErrors.Add("Original failed attempt changed:$_") }
+    if($ddcIdentity) {
+        try{Assert-FernDirectoryIdentity $ddcIdentity $ddc}catch{$cleanupErrors.Add("Retained cache identity changed:$_")}
+    }
+    if($retainedRender) {
+        try {
+            if((@(Get-FernRetainedFiles $evidenceRunRoot $ddc)|ConvertTo-Json -Depth 5 -Compress) -cne
+                ($retainedFiles|ConvertTo-Json -Depth 5 -Compress)){throw 'An old-run file outside the admitted cache changed.'}
+            @{cacheAfter=@(Get-FernRetainedFiles $ddc);unchangedOldRunFiles=$retainedFiles.Count} |
+                ConvertTo-Json -Depth 8 | Set-Content (Join-Path $output 'retained-output-check.json')
+        } catch {$cleanupErrors.Add("Retained old-run protection failed:$_")}
+    }
     if($Mode -ne 'Settings') {
         try {
             foreach($inputFile in $fernInputs) {
@@ -502,6 +571,7 @@ try {
         buildMonitoringQualification=$acceptedBuild.qualification;approvedCreationFlags=0x0008040C
         mode=$Mode;fernInventory=$fernResult;trialIdentity=$trialIdentity;softSeconds=$softSeconds;hardSeconds=$hardSeconds
         supervisorReceiptSha256=$supervisorReceiptHash;wrapperSha256=$wrapperHash
+        operationPolicy=$operationPolicy;ddc=$ddc;ddcIdentity=$ddcIdentity
         limits='One specifically reserved settings/import/offscreen-render operation. Sampled endpoints/processes, not continuous tracing or filesystem/network isolation. No cook/Pak/Shipping/4K/performance proof. Never click security Allow.'
     } | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath (Join-Path $output 'probe-result.json')
 }

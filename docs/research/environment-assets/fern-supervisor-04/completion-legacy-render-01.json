@@ -1,0 +1,541 @@
+{
+  "passed": true,
+  "diagnosticChecksPassed": true,
+  "observeAccountingOnly": false,
+  "cases": [
+    {
+      "case": "normal",
+      "passed": true,
+      "observations": 11,
+      "maximumObservationGapMs": 33.38460000000009,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 50900,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 749685,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 50900,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344393151507377,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\completion-legacy-render-01\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 749685,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344393139634851,
+          "LastWriteTime": 134344393139634851,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "jobMembers": [
+          {
+            "Pid": 50900,
+            "NativeError": 0,
+            "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+            "Error": null,
+            "CreationTime": 134344393151507377,
+            "Member": true,
+            "Exited": false,
+            "IdentityFromHeldRoot": true,
+            "ExitCode": 259
+          }
+        ],
+        "creationFlags": 525324,
+        "argumentTokens": [
+          "--token-fixture",
+          "argument with spaces",
+          "embedded\"quote",
+          "E:\\fixture path\\"
+        ],
+        "actualCommandLine": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe\" \"--token-fixture\" \"argument with spaces\" \"embedded\\\"quote\" \"E:\\fixture path\\\\\"",
+        "windowsParsedArguments": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "--token-fixture",
+          "argument with spaces",
+          "embedded\"quote",
+          "E:\\fixture path\\"
+        ],
+        "resumed": false,
+        "deadlineProfile": "Render",
+        "softMilliseconds": 480000,
+        "hardMilliseconds": 510000,
+        "doubleArmRejected": true
+      },
+      "outcome": {
+        "outcome": "passed-cooperative",
+        "reason": "normal",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\completion-legacy-render-01\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 749685,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344393139634851,
+          "LastWriteTime": 134344393139634851,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "liveJobAccounting": [
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          }
+        ],
+        "exitedJob": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 0,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "liveJobMembers": [
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 6.4291
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 46.6803
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 77.5741
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 109.0026
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 140.2632
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 171.3244
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 203.0138
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 234.1699
+          },
+          {
+            "members": [
+              {
+                "Pid": 50900,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344393151507377,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 269.2589
+          }
+        ],
+        "exitedJobMembers": [],
+        "exitedRoot": {
+          "Pid": 50900,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "Error": null,
+          "CreationTime": 134344393151507377,
+          "Member": true,
+          "Exited": true,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        },
+        "postResumeArmRejected": true,
+        "captureBeforeResumeRejected": true,
+        "captureProfile": "Render",
+        "captureTimer": {
+          "softMilliseconds": 0,
+          "hardMilliseconds": 0,
+          "armed": false
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\completion-legacy-render-01\\normal\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 749685,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344393139634851,
+        "LastWriteTime": 134344393139634851,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\completion-legacy-render-01\\normal\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 749685,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344393139634851,
+        "LastWriteTime": 134344393139634851,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled checks are not continuous tracing. Delete/rename negative checks test required DELETE access without mutating after racing death; actual rename/delete positive controls run before lifetime, write/rename after release. Inherited handle identity and job-close semantics provide lifetime protection."
+    }
+  ],
+  "rejections": [
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "zero-soft"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "invalid-order"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "legacy-over110"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "wrong-import-pair"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "wrong-render-pair"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "over-absolute-maximum"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "wrong-long-soft"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "wrong-long-hard"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "long-pair-legacy-profile"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "long-profile-short-pair"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "completion-soft-limit"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "completion-hard-limit"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "legacy-no-timer"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "unknown-profile"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "startup-boundary"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "late-entry"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "capture-boundary"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "future-entry"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "negative-time"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "long-startup-Settings"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "completion-driven-Settings"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "long-startup-Import"
+    },
+    {
+      "rejected": true,
+      "noProcessConstructed": true,
+      "case": "completion-driven-Import"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Executable hash differs.\"\r\n ---> System.InvalidOperationException: Executable hash differs.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "wrong-hash"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Marker must be an existing empty ordinary file.\"\r\n ---> System.InvalidOperationException: Marker must be an existing empty ordinary file.\r\n   at Homestead.Authoring.LeafGuard.Snapshot(IntPtr handle, String path)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "nonempty-marker"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"acquire existing read-only marker guard\"\r\n ---> System.ComponentModel.Win32Exception (32): acquire existing read-only marker guard\r\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "existing-writer"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"isolated standard handles\"\r\n ---> System.ComponentModel.Win32Exception (80): isolated standard handles\r\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "occupied-stdout"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Invalid process argument.\"\r\n ---> System.ArgumentException: Invalid process argument.\r\n   at Homestead.Authoring.LeafGuard.Quote(String value)\r\n   at System.Linq.Enumerable.SelectArrayIterator`2.MoveNext()\r\n   at System.String.Join(String separator, IEnumerable`1 values)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "nul-argument"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Invalid environment override.\"\r\n ---> System.InvalidOperationException: Invalid environment override.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "invalid-environment"
+    },
+    {
+      "guardReleased": true,
+      "rejected": true,
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"9\" argument(s): \"Exact argument line cannot be combined with arguments or contain NUL.\"\r\n ---> System.InvalidOperationException: Exact argument line cannot be combined with arguments or contain NUL.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, String, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)",
+      "case": "conflicting-arguments"
+    }
+  ],
+  "guardSha256": "B437AD46A7869DDC865D67F5EC583963079F6C35161762634A2E3AD4C77B0999",
+  "subjectSha256": "64C17468C34F18E7CB9EACA8B399E1E6B7B1C7777A7C11E0FFAA722C31BCCFA0",
+  "unrealExecuted": false,
+  "realMarkerAccessed": false
+}

@@ -7,7 +7,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $run = & (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
-if (-not $run.allowWork -or [DateTimeOffset]::UtcNow.AddMinutes(12) -ge [DateTimeOffset]$run.deadlineUtc) {
+if (-not $run.allowWork -or ($run.completionPolicy -ne 'until-complete' -and
+    [DateTimeOffset]::UtcNow.AddMinutes(12) -ge [DateTimeOffset]$run.deadlineUtc)) {
     throw 'Run does not permit a bounded local Editor-module build.'
 }
 $output = [IO.Path]::GetFullPath($OutputDirectory, $root)

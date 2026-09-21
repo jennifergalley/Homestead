@@ -1,0 +1,61 @@
+{
+  "pid": 52192,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+  "creationTime": 134344390576787583,
+  "executableSha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\completion-build-01\\compile0\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 749578,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344390573159830,
+    "LastWriteTime": 134344390573159830,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "1C61D86CF3B2397A38E1F1420118CDA5CD792AE59DE5304916B3349A6041F37C",
+  "guardSha256": "B437AD46A7869DDC865D67F5EC583963079F6C35161762634A2E3AD4C77B0999",
+  "allowedBuildOnlyConsole": {
+    "signature": "Valid",
+    "path": "C:\\Windows\\System32\\conhost.exe",
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+  },
+  "compileActionId": 0,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\FernSpike.cpp.obj.rsp",
+      "sha256": "B57B76FE3163082B2462B90BBAFDDC1DEE9053927AC6E26718025D91CB890F1B"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\SurvivalGameEditor.Shared.rsp",
+      "sha256": "6EB0ED3808F77D6C0675B647A639DBA7734C2B23C20EDF7604687E4310EEF045"
+    }
+  ],
+  "expectedProducedItems": [
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\FernSpike.cpp.obj",
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\FernSpike.cpp.sarif",
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\FernSpike.cpp.dep.json"
+  ],
+  "resourceLinkActionId": -1,
+  "exactReviewedArguments": "@\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/FernSpike.cpp.obj.rsp\" ",
+  "previousProductBackups": [],
+  "resourceConversion": "",
+  "derivedDllResponse": "",
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": true
+}

@@ -1,0 +1,32 @@
+{
+  "positiveCases": [
+    "directory-identity-across-writes-and-move",
+    "ten-dummy-package-file-gate",
+    "order-independent-package-pins",
+    "source-sized-native-inventory",
+    "image-header-and-RHI-gates"
+  ],
+  "limit": "Disposable mechanism/data tests only; dummy bytes are not real Unreal packages or decoded PNGs.",
+  "status": "passed",
+  "negativeCases": [
+    "replacement-directory",
+    "incomplete-package-set",
+    "unexpected-package-file",
+    "package-content-pin",
+    "duplicate-package-path",
+    "invalid-package-tag",
+    "wrong-node",
+    "wrong-triangles",
+    "double-scale",
+    "wrong-slot",
+    "pivot-claim",
+    "wrong-alpha-channel",
+    "map-colorspace",
+    "missing-map",
+    "wrong-namespace",
+    "failed-native",
+    "fallback-material",
+    "no-fern-pixels",
+    "wrong-native-image-dimensions"
+  ]
+}

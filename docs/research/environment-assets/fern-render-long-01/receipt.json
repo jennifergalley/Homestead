@@ -1,0 +1,71 @@
+{
+  "status": "failed-capture-timeout-after-valid-native-entry",
+  "files": [
+    {
+      "file": "editor.log",
+      "sha256": "C7E96E29F545C0628F3AD82F5F5C4A61AC0DA982189B871F6F84EA7DC68B45B2",
+      "bytes": 271042
+    },
+    {
+      "file": "effective-settings.json",
+      "sha256": "E7E5BDA6A9E0AE76E817A7D483E66C25DBD79604C50D62391DE8378B3A71CB95",
+      "bytes": 15830
+    },
+    {
+      "file": "entry-observed.json",
+      "sha256": "2659FCCADD200FDA47D8B41E82819111852C068D0E3EB6A763D9425253BB2A72",
+      "bytes": 339
+    },
+    {
+      "file": "launch.json",
+      "sha256": "B30A83E87824C0C72FE8CEE56A7B03B48E0E4FBF5F59EA9A2183E10A2C14F5F7",
+      "bytes": 8915
+    },
+    {
+      "file": "probe-result.json",
+      "sha256": "55900C2F05D1A44B6BB28C9C127513DB1EC9874C96A664535B87EACD9CCC5109",
+      "bytes": 2170284
+    },
+    {
+      "file": "reservation.json",
+      "sha256": "AD41357502673ADBCC5DB93A393CBA0B295F55C1DE8E1A0A093D8E0200FFD854",
+      "bytes": 1454
+    },
+    {
+      "file": "retained-inputs.json",
+      "sha256": "D5F48377CC56D6B219D713D73354E02195D0717E8A104AAD34C82B2A0FF9029C",
+      "bytes": 394230
+    },
+    {
+      "file": "retained-output-check.json",
+      "sha256": "AAA9204479914AAE4A64C0368DDB9B78CAA09EE53C5A17A041DB1040249BD83A",
+      "bytes": 437629
+    },
+    {
+      "file": "stdout.log",
+      "sha256": "CF7D3B456FF6DD831F2FFC0DB38F9CD0F2DD70B69B2699EFCBC4196B2FFAE767",
+      "bytes": 271008
+    },
+    {
+      "file": "stop-probe.txt",
+      "sha256": "A5BD4BBE1F9D842661F9BE2381E659349D5343225093CAFFAB6D69C658920518",
+      "bytes": 17
+    }
+  ],
+  "elapsedSeconds": 2768.2604901,
+  "exitCode": 95,
+  "hardTerminated": true,
+  "nativeEntryValid": true,
+  "nativeExitSnapshotPresent": false,
+  "images": 0,
+  "samples": 1435,
+  "maximumSampleGapMs": 30300.87260000035,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "cleanupErrors": [],
+  "unchangedOldRunFiles": 1388,
+  "cacheFilesAfter": 1577,
+  "nativeBuildReceiptSha256": "86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F",
+  "supervisorReceiptSha256": "B3ECE28794C53FC783E4A0BECB71CD8C5101E53F7451E447F835B326241EEDFE",
+  "qualification": "Valid Main/settings entry after2138.6945735s, then existing9/10-minute capture watchdog. Hard exit95, not graceful.21:19 continuation could not safely mutate immutable live timers. All original failures preserved; no image or world-upgrade claim."
+}

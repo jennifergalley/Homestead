@@ -1,0 +1,9 @@
+{
+  "captureTimerArmed": true,
+  "marker": "effective-settings.json",
+  "observedUtc": "2026-09-21T04:19:57.9382519+00:00",
+  "softMilliseconds": 540000,
+  "hardMilliseconds": 600000,
+  "limit": "Native Main/settings export, not first instruction; observation includes sampling delay.",
+  "observedElapsedSeconds": 2138.6945735
+}

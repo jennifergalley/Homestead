@@ -13,7 +13,8 @@ Set-StrictMode -Version Latest
 $root=Split-Path $PSScriptRoot -Parent
 . (Join-Path $root 'Scripts\CompilerLeafEvidence.ps1')
 $run=& (Join-Path $root 'Scripts\Development-Run.ps1') -Action Status
-if (-not $run.allowWork -or [DateTimeOffset]::UtcNow.AddMinutes(2) -ge [DateTimeOffset]$run.deadlineUtc) { throw 'Live run does not admit fixture.' }
+if (-not $run.allowWork -or ($run.completionPolicy -ne 'until-complete' -and
+    [DateTimeOffset]::UtcNow.AddMinutes(2) -ge [DateTimeOffset]$run.deadlineUtc)) { throw 'Live run does not admit fixture.' }
 $output=[IO.Path]::GetFullPath($OutputDirectory,$root)
 if (-not $output.StartsWith((Join-Path $root "Saved\Automation\$($run.id)")+'\',[StringComparison]::OrdinalIgnoreCase) -or
     (Test-Path -LiteralPath $output)) { throw 'Fresh current-run fixture directory required.' }

@@ -144,6 +144,18 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     {
         if (!Condition) { UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("%s"), Message); Valid = false; }
     };
+    const FString CompletionPolicy = FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_COMPLETION_POLICY"));
+    const bool bCompletionDriven = CompletionPolicy == TEXT("until-complete");
+    FString FernMode;
+    FParse::Value(*Params, TEXT("FernMode="), FernMode);
+    Require(CompletionPolicy.IsEmpty() || CompletionPolicy == TEXT("bounded") || bCompletionDriven,
+        TEXT("Unknown native completion policy."));
+    Require(!bCompletionDriven || (FernMode == TEXT("Render")
+        && FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")).IsEmpty()),
+        TEXT("Completion-driven mode must be render-only without a synthetic deadline."));
+    Result->SetBoolField(TEXT("completionDriven"), bCompletionDriven);
+    UE_LOG(LogHomesteadAuthoringProbe, Display, TEXT("Native Main entry: completionDriven=%s"),
+        bCompletionDriven ? TEXT("true") : TEXT("false"));
     auto PythonEntry = MakeShared<FJsonObject>();
     Require(CapturePython(PythonEntry), TEXT("Python execution is not proved disabled at entry."));
     Result->SetObjectField(TEXT("pythonEntry"), PythonEntry);
@@ -292,36 +304,38 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Effective settings or guard admission failed."));
         return 4;
     }
-    FString FernMode;
-    FParse::Value(*Params, TEXT("FernMode="), FernMode);
     if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render")) return 8;
     const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510 : FernMode == TEXT("Import") ? 180 : 90);
     FDateTime RunDeadline;
-    if (!FDateTime::ParseIso8601(*FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")), RunDeadline))
+    if (!bCompletionDriven && !FDateTime::ParseIso8601(*FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")), RunDeadline))
     {
         UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Missing native deadline."));
         return 5;
     }
+    const auto MayContinue = [&]()
+    {
+        return bCompletionDriven || (FPlatformTime::Seconds() < Deadline && FDateTime::UtcNow() < RunDeadline);
+    };
     FString Stop;
     if (!FernMode.IsEmpty())
     {
         const FString AdmitPath = FPaths::Combine(Output, TEXT("operation-admitted.txt"));
         const FString StopPath = FPaths::Combine(Output, TEXT("stop-probe.txt"));
         while (!IFileManager::Get().FileExists(*AdmitPath) && !IFileManager::Get().FileExists(*StopPath)
-            && FPlatformTime::Seconds() < Deadline && FDateTime::UtcNow() < RunDeadline)
+            && MayContinue())
         {
             FPlatformProcess::SleepNoStats(0.02f);
         }
         FString Admission;
         if (!FFileHelper::LoadFileToString(Admission, *AdmitPath) || Admission != FernMode
-            || IFileManager::Get().FileExists(*StopPath) || FDateTime::UtcNow() >= RunDeadline
-            || !RunFernSpike(FernMode, Output, RunDeadline))
+            || IFileManager::Get().FileExists(*StopPath) || !MayContinue()
+            || !RunFernSpike(FernMode, Output, RunDeadline, bCompletionDriven))
         {
             Valid = false;
             Stop = TEXT("fern-operation-failed");
         }
     }
-    while (Stop.IsEmpty() && FPlatformTime::Seconds() < Deadline && FDateTime::UtcNow() < RunDeadline)
+    while (Stop.IsEmpty() && MayContinue())
     {
         if (IFileManager::Get().FileExists(*FPaths::Combine(Output, TEXT("stop-probe.txt"))))
         {

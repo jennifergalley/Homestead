@@ -1,5 +1,18 @@
 # Tasks
 
+Current21:19 authorization: explicit until-complete continuation supersedes
+the overall90-minute cutoff. Environment precedes inventory; permissions do
+not expand. The live bounded render reached valid Main but later hit its
+immutable capture timer, with no PNG. After verified cleanup, explicit
+completion-driven controls/native phase logging are being implemented.
+Historical evidence and4/29 remain unchanged.
+
+Current20:33 authorization: one fresh90-minute fern-image run is admitted
+under `fern-long-startup-run.md`. Existing import and old failed render stay
+immutable; only the retained candidate DDC is admitted old-run input/output.
+Separate longer-startup supervisor proof precedes the one new render.
+No image or additional checked task is claimed; progress remains4/29.
+
 Current19:07: import02 is a verified ten-package/6232-triangle isolated
 candidate. The ONE conditional real-RHI render failed during cold engine
 shader startup before commandlet entry, with no PNG. Owned hard cancellation

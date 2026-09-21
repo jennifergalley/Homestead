@@ -1,7 +1,78 @@
+function Get-FernOperationPolicy {
+    param(
+        [ValidateSet('Settings','Import','Render')][string]$Mode,
+        [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard'
+    )
+    if($RenderProfile -ne 'Standard' -and $Mode -ne 'Render'){throw 'Extended profiles are render-only.'}
+    $policy=switch($Mode) {
+        'Settings' {@{profile='Default';softSeconds=100;hardSeconds=110;ceilingSeconds=120;startupSeconds=0;captureSeconds=0}}
+        'Import' {@{profile='Import';softSeconds=150;hardSeconds=180;ceilingSeconds=210;startupSeconds=0;captureSeconds=0}}
+        'Render' {
+            if($RenderProfile -eq 'CompletionDriven') {
+                @{profile='RenderCompletionDriven';softSeconds=0;hardSeconds=0;ceilingSeconds=0;startupSeconds=0;captureSeconds=0}
+            } elseif($RenderProfile -eq 'LongStartup') {
+                @{profile='RenderLongStartup';softSeconds=3240;hardSeconds=3300;ceilingSeconds=3360;startupSeconds=2700;captureSeconds=600}
+            } else {@{profile='Render';softSeconds=480;hardSeconds=510;ceilingSeconds=540;startupSeconds=0;captureSeconds=0}}
+        }
+    }
+    [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($policy.softSeconds*1000,$policy.hardSeconds*1000,$policy.profile)
+    return $policy
+}
+
+function Assert-FernStageBudget($Policy,[double]$ElapsedSeconds,$EntrySeconds) {
+    if(-not [double]::IsFinite($ElapsedSeconds) -or $ElapsedSeconds -lt 0){throw 'Invalid elapsed budget.'}
+    if($Policy.profile -eq 'RenderCompletionDriven'){return}
+    if($Policy.profile -eq 'RenderLongStartup') {
+        if($null -eq $EntrySeconds) {
+            if($ElapsedSeconds -ge $Policy.startupSeconds){throw '45-minute native entry boundary exceeded.'}
+        } elseif(-not [double]::IsFinite([double]$EntrySeconds) -or $EntrySeconds -lt 0 -or
+            $EntrySeconds -ge $Policy.startupSeconds -or $EntrySeconds -gt $ElapsedSeconds -or
+            $ElapsedSeconds-$EntrySeconds -ge $Policy.captureSeconds) {
+            throw 'Bounded capture/exit stage exceeded or invalid entry marker time.'
+        }
+    }
+    if($ElapsedSeconds -gt $Policy.softSeconds+5){throw 'Bounded authoring operation timeout.'}
+}
+
+function Get-FernProbeArguments([string]$Project,[string]$Output,[string]$Ddc,$Configs,[string]$Mode) {
+    if($Mode -cnotin @('Settings','Import','Render') -or $Configs.Count -ne 7){throw 'Invalid native mode/config map.'}
+    $tokens=@($Project,'-run=HomesteadAuthoringProbe',"-EvidenceDirectory=$Output",
+        '-notraceserver','-traceautostart=0','-unattended','-nop4','-nosplash','-stdout','-FullStdOutLogOutput',
+        '-DisablePython','-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging',
+        '-noshaderworker',"-UserDir=$(Join-Path $Output 'EngineUser')","-abslog=$(Join-Path $Output 'editor.log')",
+        "-DDC=(Local=(Type=FileSystem,Path=$Ddc,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+        '-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False',
+        '-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False',
+        '-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False',
+        '-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False',
+        '-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False',
+        '-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False',
+        '-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True',
+        '-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False',
+        '-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0',
+        '-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False',
+        '-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False')
+    foreach($name in $Configs.Keys){$tokens+="-${name}INI=$($Configs[$name])"}
+    if($Mode -ne 'Settings'){$tokens+="-FernMode=$Mode"}
+    if($Mode -eq 'Render'){$tokens+=@('-AllowCommandletRendering','-RenderOffScreen')}
+    else{$tokens+='-nullrhi'}
+    return [string[]]$tokens
+}
+
 function Get-FernPackageStems {
     @('Meshes\SM_Fern02_a','Meshes\SM_Fern02_b','Meshes\SM_Fern02_c','Meshes\SM_Fern02_d',
         'Textures\T_Fern02_Diff','Textures\T_Fern02_NormalDX','Textures\T_Fern02_Roughness',
         'Textures\T_Fern02_AO','Textures\T_Fern02_Alpha','Materials\M_Fern02')
+}
+
+function Get-FernRetainedFiles([string]$Directory,[string]$ExceptDirectory='') {
+    Assert-FernOrdinaryTree $Directory
+    @(Get-ChildItem -LiteralPath $Directory -File -Recurse -Force |
+        Where-Object {-not $ExceptDirectory -or -not $_.FullName.StartsWith($ExceptDirectory+'\',[StringComparison]::OrdinalIgnoreCase)} |
+        Sort-Object FullName | ForEach-Object {
+            [ordered]@{path=[IO.Path]::GetRelativePath($Directory,$_.FullName);bytes=$_.Length;
+                sha256=(Get-FileHash $_.FullName).Hash;lastWriteUtcTicks=$_.LastWriteTimeUtc.Ticks;attributes=[int]$_.Attributes}
+        })
 }
 
 function Assert-FernOrdinaryTree([string]$Path) {
