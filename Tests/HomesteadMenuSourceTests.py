@@ -33,7 +33,8 @@ class MenuSourceContracts(unittest.TestCase):
     def test_exit_gated_on_real_save(self):
         body = function_body(CONTROLLER, "void AHomesteadController::MenuSaveAndQuit(")
         self.assertIn('SaveSlot(TEXT("Homestead_Manual"))', body)
-        self.assertIn("if (Saved) UKismetSystemLibrary::QuitGame", body)
+        self.assertIn("if (Saved)", body)
+        self.assertLess(body.index("if (Saved)"), body.index("UKismetSystemLibrary::QuitGame"))
         self.assertIn("ShowSaveFailure(ToastText)", body)
         self.assertIn("if (IsFailed())", body)
 
@@ -96,6 +97,12 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertLess(adapter.index("Avatar->PrepareEquipment("), adapter.index("Result = Transaction(Sim)"))
         self.assertLess(adapter.index("Result = Transaction(Sim)"), adapter.index("Avatar->ApplyPreparedEquipment("))
         self.assertIn("Sim.EatGroup(Row.SubjectId, ExpectedRevision)", adapter)
+
+    def test_world_and_graphics_errors_are_distinct(self):
+        body = function_body(CONTROLLER, "void AHomesteadController::MenuSaveAndQuit(")
+        self.assertIn("PendingResolutionScale.IsSet()", body)
+        self.assertIn("ShowGraphicsSaveFailure(GraphicsSaveError)", body)
+        self.assertIn("World saved; video preference not confirmed", MENU)
 
     def test_portrait_reuses_shared_presentation(self):
         portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()

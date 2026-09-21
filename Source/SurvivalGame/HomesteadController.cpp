@@ -315,7 +315,15 @@ void AHomesteadController::MenuSaveAndQuit()
     bMenuSaveInProgress = true;
     const bool Saved = SaveSlot(TEXT("Homestead_Manual"));
     bMenuSaveInProgress = false;
-    if (Saved) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+    if (Saved)
+    {
+        if (PendingResolutionScale.IsSet() && !PersistResolutionScale(PendingResolutionScale.GetValue()))
+        {
+            if (NativeMenu.IsValid()) NativeMenu->ShowGraphicsSaveFailure(GraphicsSaveError);
+            return;
+        }
+        UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+    }
     else if (NativeMenu.IsValid()) NativeMenu->ShowSaveFailure(ToastText);
 }
 void AHomesteadController::MenuQuitWithoutSaving()
@@ -1019,23 +1027,7 @@ void AHomesteadController::ActivateRow()
             {
                 float Normalized = 0, Scale = 100, Minimum = 0, Maximum = 100;
                 Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
-                Settings->SetResolutionScaleValueEx(Scale > 99 ? 85 : Scale > 84 ? 70 : 100);
-                Settings->ApplyNonResolutionSettings();
-                if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest")))
-                {
-                    Settings->SaveSettings();
-                    FConfigFile Disk;
-                    float Persisted = -1;
-                    const float Requested = Scale > 99 ? 85 : Scale > 84 ? 70 : 100;
-                    if (!Disk.Combine(GGameUserSettingsIni)
-                        || !Disk.GetFloat(TEXT("ScalabilityGroups"), TEXT("sg.ResolutionQuality"), Persisted)
-                        || !FMath::IsNearlyEqual(Persisted, Requested, 0.1f))
-                    {
-                        Settings->SetResolutionScaleValueEx(Scale);
-                        Settings->ApplyNonResolutionSettings();
-                        Notify(TEXT("Could not save 3D resolution scale. The previous preference was restored."), true);
-                    }
-                }
+                PersistResolutionScale(Scale > 99 ? 85 : Scale > 84 ? 70 : 100);
             }
             else Notify(TEXT("Video settings are unavailable in this session."), true);
             break;
@@ -1043,6 +1035,42 @@ void AHomesteadController::ActivateRow()
         default: break;
         }
     }
+}
+
+bool AHomesteadController::PersistResolutionScale(float Requested)
+{
+    auto* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+    if (!Settings)
+    {
+        PendingResolutionScale = Requested;
+        GraphicsSaveError = TEXT("Video settings are unavailable; the requested 3D resolution scale was not saved.");
+        Notify(GraphicsSaveError, true);
+        return false;
+    }
+    float Normalized = 0, Previous = 100, Minimum = 0, Maximum = 100;
+    Settings->GetResolutionScaleInformationEx(Normalized, Previous, Minimum, Maximum);
+    Settings->SetResolutionScaleValueEx(Requested);
+    Settings->ApplyNonResolutionSettings();
+    if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest")))
+    {
+        Settings->SaveSettings();
+        FConfigFile Disk;
+        float Persisted = -1;
+        if (!Disk.Combine(GGameUserSettingsIni)
+            || !Disk.GetFloat(TEXT("ScalabilityGroups"), TEXT("sg.ResolutionQuality"), Persisted)
+            || !FMath::IsNearlyEqual(Persisted, Requested, 0.1f))
+        {
+            Settings->SetResolutionScaleValueEx(Previous);
+            Settings->ApplyNonResolutionSettings();
+            PendingResolutionScale = Requested;
+            GraphicsSaveError = TEXT("Could not verify the saved 3D resolution scale. The previous runtime scale was restored; the disk preference is unverified.");
+            Notify(GraphicsSaveError, true);
+            return false;
+        }
+    }
+    PendingResolutionScale.Reset();
+    GraphicsSaveError.Reset();
+    return true;
 }
 
 void AHomesteadController::ToggleVerticalSync()

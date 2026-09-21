@@ -174,6 +174,9 @@ private:
     FSlateBrush PortraitBrush;
     bool bMenuSaveInProgress = false;
     FDateTime LastSuccessfulSave;
+    TOptional<float> PendingResolutionScale;
+    FString GraphicsSaveError;
+    bool PersistResolutionScale(float Requested);
     void ShowNativeMenu();
     void HideNativeMenu();
     FHomesteadSaveRoute SaveRoute;

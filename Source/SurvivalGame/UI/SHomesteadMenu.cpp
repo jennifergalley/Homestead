@@ -683,6 +683,10 @@ void SHomesteadMenu::ShowSaveFailure(const FString& Error)
 {
     bSaving = false; DialogError = Error; SetDialog(EDialog::SaveFailed);
 }
+void SHomesteadMenu::ShowGraphicsSaveFailure(const FString& Error)
+{
+    bSaving = false; DialogError = Error; SetDialog(EDialog::GraphicsFailed);
+}
 void SHomesteadMenu::SetDialog(EDialog Value)
 {
     Dialog = Value; DialogSelection = 0;
@@ -692,7 +696,7 @@ int32 SHomesteadMenu::DialogCount() const
 {
     if (Dialog == EDialog::Amount) return 4;
     if (Dialog == EDialog::Merge) return MergeTargets.Num() + 1;
-    return Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed ? 3 : 2;
+    return Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed || Dialog == EDialog::GraphicsFailed ? 3 : 2;
 }
 void SHomesteadMenu::BuildDialog()
 {
@@ -732,6 +736,12 @@ void SHomesteadMenu::BuildDialog()
         Title = TEXT("Your progress was not saved");
         Description = DialogError + TEXT("\n\nThe game is still paused. Retry or choose what to do next.");
         Labels = {TEXT("Return to Settings"), TEXT("Retry save and quit"), TEXT("Quit without saving...")};
+    }
+    else if (Dialog == EDialog::GraphicsFailed)
+    {
+        Title = TEXT("World saved; video preference not confirmed");
+        Description = DialogError + TEXT("\n\nYour homestead was saved successfully. You can retry the preference or explicitly leave it unsaved.");
+        Labels = {TEXT("Return to Settings"), TEXT("Retry and quit"), TEXT("Quit with video preference unverified")};
     }
     else if (Dialog == EDialog::Unsaved)
     {
@@ -794,9 +804,10 @@ void SHomesteadMenu::DialogAction(int32 Index)
         SetDialog(EDialog::None); Refresh(); return;
     }
     if ((Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed) && Index == 2) { SetDialog(EDialog::Unsaved); return; }
+    if (Dialog == EDialog::GraphicsFailed && Index == 2) { Controller->MenuQuitWithoutSaving(); return; }
     if (Dialog == EDialog::Unsaved) Controller->MenuQuitWithoutSaving();
     else if (Dialog == EDialog::Restart || Dialog == EDialog::TestReset) { SetDialog(EDialog::None); Controller->MenuRestart(); }
-    else if (Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed)
+    else if (Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed || Dialog == EDialog::GraphicsFailed)
     {
         bSaving = true;
         Controller->MenuSaveAndQuit();

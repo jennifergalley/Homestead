@@ -27,13 +27,14 @@ public:
     void ChangePage(int32 Page);
     void RequestExit();
     void ShowSaveFailure(const FString& Error);
+    void ShowGraphicsSaveFailure(const FString& Error);
     void Back();
     void Refresh();
     bool PrepareQuickAction();
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Details, Actions };
-    enum class EDialog { None, Exit, SaveFailed, Unsaved, Restart, TestReset, Amount, Merge };
+    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
     TSharedPtr<SBox> ContentHost;
