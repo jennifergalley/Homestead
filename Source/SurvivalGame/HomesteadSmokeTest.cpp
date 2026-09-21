@@ -169,6 +169,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadDirectionalNavigationTest")))
+    {
+        PrepareDirectionalNavigationChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest")))
     {
         PrepareNativeMenuChecks();

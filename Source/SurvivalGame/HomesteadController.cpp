@@ -204,8 +204,11 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
 
 bool AHomesteadController::MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount)
 {
-    InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key, Event, Amount, false, FPlatformTime::Cycles64()));
-    return !bAutomatedInputOnly;
+    if (bAutomatedInputOnly && bSimulatedMenuEvent)
+        InputKey(FInputKeyEventArgs::CreateSimulated(Key, Event, Amount));
+    else
+        InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key, Event, Amount, false, FPlatformTime::Cycles64()));
+    return MenuAcceptsPhysicalInput();
 }
 
 bool AHomesteadController::MenuPointerIntent(float X, float Y)
@@ -889,6 +892,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill a watering can at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Fuel a cookfire with branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is owned and crafted.")});
+        Result.Add({8, TEXT("Move naturally through the menu"), TEXT("Use the D-pad, left stick, or arrow keys within lists and across their edges to nearby sections. A/Enter activates; B/Esc backs out. LB/RB change tabs. Triggers or Tab are optional section shortcuts. Choose Amount and activate it before editing a quantity.")});
     }
     else if (Page == 4)
     {

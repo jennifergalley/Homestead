@@ -15,11 +15,37 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Images/SImage.h"
 #include "Brushes/SlateColorBrush.h"
+#include "Input/NavigationReply.h"
+#include "Layout/WidgetPath.h"
 
 namespace HomesteadMenus
 {
 namespace
 {
+class SMenuFocusAnchor : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS(SMenuFocusAnchor) {}
+        SLATE_DEFAULT_SLOT(FArguments, Content)
+        SLATE_EVENT(FSimpleDelegate, OnFocused)
+    SLATE_END_ARGS()
+    void Construct(const FArguments& Args)
+    {
+        Focused = Args._OnFocused;
+        ChildSlot
+        [
+            SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
+            .BorderBackgroundColor_Lambda([this]() { return HasKeyboardFocus()
+                ? FLinearColor(0.92f, 0.74f, 0.43f, 1) : FLinearColor::Transparent; })
+            [Args._Content.Widget]
+        ];
+    }
+    virtual bool SupportsKeyboardFocus() const override { return true; }
+    virtual FReply OnFocusReceived(const FGeometry&, const FFocusEvent&) override
+    { Focused.ExecuteIfBound(); return FReply::Handled(); }
+private:
+    FSimpleDelegate Focused;
+};
 const FLinearColor Ink(0.93f, 0.93f, 0.84f);
 const FLinearColor Muted(0.71f, 0.77f, 0.69f);
 const FLinearColor Gold(0.92f, 0.74f, 0.43f);
@@ -59,10 +85,10 @@ TSharedRef<SWidget> SHomesteadMenu::Text(const FString& Value, int32 Size) const
         .Font(FCoreStyle::GetDefaultFontStyle("Regular", Size)).AutoWrapText(true);
 }
 
-TSharedRef<SWidget> SHomesteadMenu::MakeButton(const FString& Label, TFunction<void()> Action,
+TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<void()> Action,
     TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding)
 {
-    return SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(Padding)
+    return SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(Padding)
         .ButtonColorAndOpacity(Color).ToolTipText(FText::FromString(AccessibleLabel.IsEmpty() ? Label : AccessibleLabel))
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
@@ -70,6 +96,137 @@ TSharedRef<SWidget> SHomesteadMenu::MakeButton(const FString& Label, TFunction<v
             .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
             .ColorAndOpacity_Lambda([Color]() { return Color.Get().GetSpecifiedColor() == Gold ? FSlateColor(Pine) : FSlateColor(Ink); })
         ];
+}
+
+TSharedRef<SButton> SHomesteadMenu::RegisterButton(TSharedRef<SButton> Button, ERegion TargetRegion, int32 Index)
+{
+    Button->SetIsFocusable(true);
+    Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, TargetRegion, Index]() { AdoptFocus(TargetRegion, Index); }));
+    FocusTargets.Add({TargetRegion, Index, Button});
+    return Button;
+}
+
+TSharedRef<SWidget> SHomesteadMenu::FocusAnchor(TSharedRef<SWidget> Content, ERegion TargetRegion, int32 Index)
+{
+    auto Anchor = SNew(SMenuFocusAnchor)
+        .OnFocused_Lambda([this, TargetRegion, Index]() { AdoptFocus(TargetRegion, Index); })[Content];
+    FocusTargets.Add({TargetRegion, Index, Anchor});
+    return Anchor;
+}
+
+void SHomesteadMenu::AdoptFocus(ERegion TargetRegion, int32 Index)
+{
+    if (bSynchronizingFocus || Dialog != EDialog::None) return;
+    const bool ChangedSubject = TargetRegion == ERegion::Content && (Region != TargetRegion || ContentSelection != Index);
+    Region = TargetRegion;
+    Hover = INDEX_NONE;
+    switch (TargetRegion)
+    {
+    case ERegion::Tabs: FocusedTab = Index; break;
+    case ERegion::Session: SessionSelection = Index; break;
+    case ERegion::Inventory: InventorySelection = Index; break;
+    case ERegion::Portrait: PortraitSelection = Index; break;
+    case ERegion::Equipment: EquipmentSelection = Index; break;
+    case ERegion::Actions: ActionSelection = Index; ScrollActionIntoView(); break;
+    case ERegion::Recovery: RecoverySelection = Index; break;
+    case ERegion::Details: DetailsSelection = Index; break;
+    case ERegion::Content: if (ChangedSubject && Index >= 0) Select(Index); break;
+    default: break;
+    }
+}
+
+TSharedPtr<SWidget> SHomesteadMenu::FocusWidget() const
+{
+    if (Dialog != EDialog::None)
+        return DialogSelection < 0 ? AmountControl : DialogButtons.IsValidIndex(DialogSelection) ? DialogButtons[DialogSelection] : nullptr;
+    int32 Index = 0;
+    switch (Region)
+    {
+    case ERegion::Tabs: Index = FocusedTab; break;
+    case ERegion::Session: Index = SessionSelection; break;
+    case ERegion::Inventory: Index = InventorySelection; break;
+    case ERegion::Portrait: Index = PortraitSelection; break;
+    case ERegion::Content: Index = Entries.IsEmpty() ? -1 : ContentSelection; break;
+    case ERegion::Equipment: Index = EquipmentSelection; break;
+    case ERegion::Actions: Index = ActionSelection; break;
+    case ERegion::Recovery: Index = RecoverySelection; break;
+    case ERegion::Details: Index = DetailsSelection; break;
+    default: break;
+    }
+    for (const auto& Target : FocusTargets)
+        if (Target.region == Region && Target.index == Index) return Target.widget.Pin();
+    return nullptr;
+}
+
+void SHomesteadMenu::SynchronizeFocus()
+{
+    auto Target = FocusWidget();
+    if (!Target || !Target->IsEnabled() || !Target->GetVisibility().IsVisible())
+    {
+        if (Dialog != EDialog::None)
+        {
+            DialogSelection = 0;
+            bEditingAmount = false;
+            Target = DialogButtons.IsEmpty() ? nullptr : DialogButtons[0];
+        }
+        else
+        {
+            for (const auto& Candidate : FocusTargets)
+                if (IsTargetAvailable(Candidate.region, Candidate.index))
+                {
+                    const auto NewTarget = Candidate.widget.Pin();
+                    const auto NewRegion = Candidate.region;
+                    const int32 NewIndex = Candidate.index;
+                    AdoptFocus(NewRegion, NewIndex);
+                    Target = NewTarget;
+                    break;
+                }
+        }
+    }
+    if (!Target) return;
+    TGuardValue<bool> Guard(bSynchronizingFocus, true);
+    FSlateApplication::Get().SetKeyboardFocus(Target, EFocusCause::Navigation);
+    bFocusPending = FSlateApplication::Get().GetKeyboardFocusedWidget() != Target;
+    if (Dialog != EDialog::None && DialogScroll) DialogScroll->ScrollDescendantIntoView(Target, false);
+    ScrollActionIntoView();
+}
+
+bool SHomesteadMenu::IsTargetAvailable(ERegion TargetRegion, int32 Index) const
+{
+    for (const auto& Target : FocusTargets)
+        if (Target.region == TargetRegion && Target.index == Index)
+        {
+            const auto Widget = Target.widget.Pin();
+            return Widget && Widget->IsEnabled() && Widget->GetVisibility().IsVisible();
+        }
+    return false;
+}
+
+bool SHomesteadMenu::HasSynchronizedFocus() const
+{
+    return FocusWidget().IsValid() && FSlateApplication::Get().GetKeyboardFocusedWidget() == FocusWidget();
+}
+
+bool SHomesteadMenu::IsFocusedControlVisible() const
+{
+    const auto Target = FocusWidget();
+    if (!Target) return false;
+    const auto Container = Dialog != EDialog::None ? StaticCastSharedPtr<SWidget>(DialogScroll)
+        : Region == ERegion::Content ? StaticCastSharedPtr<SWidget>(Scroll)
+        : Region == ERegion::Actions ? StaticCastSharedPtr<SWidget>(DetailsScroll) : TSharedPtr<SWidget>();
+    const FGeometry Bounds = Container ? Container->GetCachedGeometry() : GetCachedGeometry();
+    const auto Geometry = Target->GetCachedGeometry();
+    const FVector2D Min = Bounds.GetAbsolutePosition(), Max = Min + Bounds.GetAbsoluteSize();
+    const FVector2D A = Geometry.GetAbsolutePosition(), B = A + Geometry.GetAbsoluteSize();
+    return A.X >= Min.X - 1 && A.Y >= Min.Y - 1 && B.X <= Max.X + 1 && B.Y <= Max.Y + 1;
+}
+
+FString SHomesteadMenu::GetFocusedRegionName() const
+{
+    if (Dialog != EDialog::None) return bEditingAmount ? TEXT("AmountEdit") : TEXT("Dialog");
+    const TCHAR* Names[] = {TEXT("Tabs"), TEXT("Session"), TEXT("Inventory"), TEXT("Portrait"),
+        TEXT("Content"), TEXT("Equipment"), TEXT("Details"), TEXT("Actions"), TEXT("Recovery")};
+    return Names[static_cast<int32>(Region)];
 }
 
 void SHomesteadMenu::Construct(const FArguments& Args)
@@ -136,7 +293,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     {
         TabBar->AddSlot().FillWidth(1).Padding(3, 0)
         [
-            SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(4, 7))
+            RegisterButton(SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(4, 7))
             .ButtonColorAndOpacity_Lambda([this, Page]() { return SeenPage == Page ? Selected
                 : Region == ERegion::Tabs && FocusedTab == Page ? Selected : Pine; })
             .ToolTipText(FText::FromString(Tabs[Page]))
@@ -158,7 +315,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                         .BorderBackgroundColor_Lambda([this, Page]() { return SeenPage == Page ? Gold
                             : Region == ERegion::Tabs && FocusedTab == Page ? Gold : FLinearColor::Transparent; }) ]
                 ]
-            ]
+            ], ERegion::Tabs, Page)
         ];
     }
     TabBar->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)
@@ -194,6 +351,15 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     { bResetPromptShown = true; SetDialog(EDialog::TestReset); }
     if (!Controller->MenuNeedsTestReset()) bResetPromptShown = false;
     if (Controller->UsesGamepad()) Hover = INDEX_NONE;
+    if (bFocusPending) SynchronizeFocus();
+    if (PendingDirection.Any())
+    {
+        const auto Direction = PendingDirection;
+        PendingDirection = {};
+        NavigateDirection(Direction);
+    }
+    const auto Direction = LeftStick.Poll(FPlatformTime::Seconds());
+    if (Direction.Any() && Controller->UsesGamepad() && !bSaving) NavigateDirection(Direction);
 }
 
 int32 SHomesteadMenu::Columns() const
@@ -212,6 +378,7 @@ void SHomesteadMenu::Refresh()
     SeenPage = Controller->BookPage();
     Controller->RefreshMenuPortrait();
     Entries.Reset(); RowIndices.Reset(); Cells.Reset();
+    FocusTargets.RemoveAll([](const FFocusTarget& Target) { return Target.region != ERegion::Tabs; });
     const auto Rows = Controller->MenuRows();
     const auto LegacyRows = Controller->Rows();
     for (int32 Index = 0; Index < Rows.Num(); ++Index)
@@ -228,11 +395,13 @@ void SHomesteadMenu::Refresh()
     if (OldPage != SeenPage || WasRecovery != bRecovery)
     {
         FocusedTab = SeenPage;
-        Region = SeenPage == 4 ? ERegion::Session : ERegion::Content;
+        Region = bRecovery ? ERegion::Recovery : SeenPage == 4 ? ERegion::Session : ERegion::Content;
         SessionSelection = 0;
+        RecoverySelection = 0;
     }
     ContentHost->SetContent(BuildBody());
     Select(ContentSelection);
+    bFocusPending = true;
 }
 
 TSharedRef<SWidget> SHomesteadMenu::BuildBody()
@@ -244,9 +413,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             + SVerticalBox::Slot().FillHeight(1).Padding(24)
             [ Text(TEXT("You ran out of warmth, food, or energy.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
-            [ MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }) ]
+            [ RegisterButton(MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
-            [ MakeButton(TEXT("Settings / Quit  [Y / G]"), [this]() { ChangePage(4); }) ];
+            [ RegisterButton(MakeButton(TEXT("Settings / Quit  [Y / G]"), [this]() { ChangePage(4); }), ERegion::Recovery, 1) ];
     }
     TSharedPtr<SVerticalBox> Body;
     TSharedPtr<SUniformGridPanel> Grid;
@@ -261,11 +430,11 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         [
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 8, 0)
-            [ MakeButton(Controller->IsFailed() ? TEXT("Return to recovery") : TEXT("Resume"),
-                [this]() { Back(); }, TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Session && SessionSelection == 0 ? Gold : Pine; })) ]
+            [ RegisterButton(MakeButton(Controller->IsFailed() ? TEXT("Return to recovery") : TEXT("Resume"),
+                [this]() { Back(); }, TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Session && SessionSelection == 0 ? Gold : Pine; })), ERegion::Session, 0) ]
             + SHorizontalBox::Slot().FillWidth(1)
-            [ MakeButton(Controller->IsFailed() ? TEXT("Quit to desktop") : TEXT("Save and quit to desktop"),
-                [this]() { RequestExit(); }, TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Session && SessionSelection == 1 ? Gold : Pine; })) ]
+            [ RegisterButton(MakeButton(Controller->IsFailed() ? TEXT("Quit to desktop") : TEXT("Save and quit to desktop"),
+                [this]() { RequestExit(); }, TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Session && SessionSelection == 1 ? Gold : Pine; })), ERegion::Session, 1) ]
         ];
     }
     TSharedPtr<SHorizontalBox> ColumnsBox;
@@ -282,8 +451,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     SNew(SVerticalBox)
                     + SVerticalBox::Slot().FillHeight(1)
                     [
-                        SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
-                        [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ]
+                        FocusAnchor(SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
+                        [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ], ERegion::Portrait, -1)
                     ]
                     + SVerticalBox::Slot().AutoHeight().Padding(8)
                     [
@@ -297,14 +466,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         [
                             SNew(SHorizontalBox)
                             + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 4, 0)
-                            [ MakeButton(TEXT("<"), [this]() { Controller->OrbitMenuPortrait(-20); }, Pine,
-                                TEXT("Turn character left"), FMargin(8)) ]
+                            [ RegisterButton(MakeButton(TEXT("<"), [this]() { Controller->OrbitMenuPortrait(-20); },
+                                TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Portrait && PortraitSelection == 0 ? Gold : Pine; }),
+                                TEXT("Turn character left"), FMargin(8)), ERegion::Portrait, 0) ]
                             + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 4, 0)
-                            [ MakeButton(TEXT(">"), [this]() { Controller->OrbitMenuPortrait(20); }, Pine,
-                                TEXT("Turn character right"), FMargin(8)) ]
+                            [ RegisterButton(MakeButton(TEXT(">"), [this]() { Controller->OrbitMenuPortrait(20); },
+                                TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Portrait && PortraitSelection == 1 ? Gold : Pine; }),
+                                TEXT("Turn character right"), FMargin(8)), ERegion::Portrait, 1) ]
                             + SHorizontalBox::Slot().FillWidth(1)
-                            [ MakeButton(TEXT("Zoom"), [this]() { Controller->ZoomMenuPortrait(); }, Pine,
-                                TEXT("Toggle close-up and full-body view"), FMargin(8)) ]
+                            [ RegisterButton(MakeButton(TEXT("Zoom"), [this]() { Controller->ZoomMenuPortrait(); },
+                                TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Portrait && PortraitSelection == 2 ? Gold : Pine; }),
+                                TEXT("Toggle close-up and full-body view"), FMargin(8)), ERegion::Portrait, 2) ]
                         ]
                     ]
                 ]
@@ -331,9 +503,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         const TCHAR* Names[] = {TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")};
         for (int32 View = 0; View < 3; ++View)
             Views->AddSlot().FillWidth(1).Padding(0, 0, View < 2 ? 6 : 0, 0)
-            [ MakeButton(Names[View], [this, View]() { ChangeInventoryView(View); },
+            [ RegisterButton(MakeButton(Names[View], [this, View]() { ChangeInventoryView(View); },
                 TAttribute<FSlateColor>::CreateLambda([this, View]()
-                { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })) ];
+                { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })), ERegion::Inventory, View) ];
     }
     InventoryColumn->AddSlot().FillHeight(1)
     [
@@ -349,9 +521,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         for (int32 Index = 0; Index < 3; ++Index)
             EquipmentBar->AddSlot().FillWidth(1).Padding(3, 0)
             [
-                MakeButton(EquipmentLabel(Index), [this, Index]() { FocusEquipment(Index); },
+                RegisterButton(MakeButton(EquipmentLabel(Index), [this, Index]() { FocusEquipment(Index); },
                     TAttribute<FSlateColor>::CreateLambda([this, Index]()
-                        { return Region == ERegion::Equipment && EquipmentSelection == Index ? Gold : Selected; }))
+                        { return Region == ERegion::Equipment && EquipmentSelection == Index ? Gold : Selected; })), ERegion::Equipment, Index)
             ];
     }
     ColumnsBox->AddSlot().AutoWidth()
@@ -367,17 +539,20 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             ]
         ];
     if (Entries.IsEmpty())
-        Grid->AddSlot(0, 0)[ Text(SeenPage == 0 && Controller->InventoryView() == 1
+        Grid->AddSlot(0, 0)[ FocusAnchor(SNew(SBox).WidthOverride_Lambda([this]()
+            { return FMath::Max(ItemCellWidth, Scroll->GetCachedGeometry().GetLocalSize().X > 0
+                ? static_cast<float>(Scroll->GetCachedGeometry().GetLocalSize().X) - 24.0f : 480.0f); })
+            [Text(SeenPage == 0 && Controller->InventoryView() == 1
             ? TEXT("No items in reachable storage.\nStand near a chest to manage its contents.")
             : SeenPage == 0 && Controller->InventoryView() == 2 ? TEXT("No removable clothing is equipped.")
-            : TEXT("Your pack is empty.\nGather supplies or take an item from a nearby chest.")) ];
+            : TEXT("Your pack is empty.\nGather supplies or take an item from a nearby chest."))], ERegion::Content, -1) ];
     for (int32 Index = 0; Index < Entries.Num(); ++Index)
     {
         const auto& Row = Entries[Index];
         const FString Name = EntryName(Row);
         TSharedPtr<SWidget> Cell;
         TSharedPtr<SVerticalBox> Contents;
-        auto Button = SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(7)
+        auto Button = RegisterButton(SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(7)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return CellColor(Index); })
             .ToolTipText(FText::FromString(Name + TEXT("\n") + Row.Detail))
             .OnHovered_Lambda([this, Index]() { if (Controller.IsValid() && !Controller->UsesGamepad()) Hover = Index; })
@@ -387,7 +562,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 if (PointerAction() && Dialog == EDialog::None) { Region = ERegion::Content; Select(Index); }
                 return FReply::Handled();
             })
-            [ SAssignNew(Contents, SVerticalBox) ];
+            [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
         if (SeenPage <= 2)
         {
             Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
@@ -414,11 +589,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
 
 TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
 {
+    FocusTargets.RemoveAll([](const FFocusTarget& Target) { return Target.region == ERegion::Details || Target.region == ERegion::Actions; });
     TSharedPtr<SVerticalBox> DetailsContent;
     auto Result = SNew(SVerticalBox)
         + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 12)
         [
-            SNew(SHorizontalBox)
+            FocusAnchor(SNew(SHorizontalBox)
             + SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 12, 0)
             [
                 SNew(SBox).WidthOverride(48).HeightOverride(48)
@@ -460,7 +636,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                         return FText::FromString(Row.Quantity > 0 ? FString::Printf(TEXT("%s: %d"), *Row.Location, Row.Quantity) : Row.Location);
                     })
                 ]
-            ]
+            ], ERegion::Details, 0)
         ]
         + SVerticalBox::Slot().FillHeight(1)
         [
@@ -470,9 +646,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 SAssignNew(DetailsContent, SVerticalBox)
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)
                 [
-                    SNew(STextBlock).WrapTextAt(DetailsWidth - 56).ColorAndOpacity(Ink)
+                    FocusAnchor(SNew(STextBlock).WrapTextAt(DetailsWidth - 56).ColorAndOpacity(Ink)
                     .Font(FCoreStyle::GetDefaultFontStyle("Regular", 18))
-                    .Text_Lambda([this]() { return FText::FromString(DetailsBodyText()); })
+                    .Text_Lambda([this]() { return FText::FromString(DetailsBodyText()); }), ERegion::Details, 1)
                 ]
             ]
         ];
@@ -501,15 +677,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
         { Actions.Add(EHomesteadItemAction::MoveEarlier); Actions.Add(EHomesteadItemAction::MoveLater); }
     }
     ActionSelection = FMath::Clamp(ActionSelection, 0, FMath::Max(0, Actions.Num() - 1));
+    if (Actions.IsEmpty() && Region == ERegion::Actions) Region = ERegion::Details;
     TSharedPtr<SUniformGridPanel> ActionGrid;
     DetailsContent->AddSlot().AutoHeight().Padding(0, 4, 0, 0)
     [ SAssignNew(ActionGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ];
     for (int32 Index = 0; Index < Actions.Num(); ++Index)
     {
         const auto Action = Actions[Index];
-        TSharedRef<SWidget> Button = SNew(SBox).WidthOverride(136).MinDesiredHeight(44)
-        [
-            SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(8)
+        auto ActionButton = RegisterButton(SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(8)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? Gold : Selected; })
             .OnClicked_Lambda([this, Action]() { if (PointerAction()) RunAction(Action); return FReply::Handled(); })
             [
@@ -520,8 +695,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 {
                     return FText::FromString(ActionLabel(Action));
                 })
-            ]
-        ];
+            ], ERegion::Actions, Index);
+        TSharedRef<SWidget> Button = SNew(SBox).WidthOverride(136).MinDesiredHeight(44)[ActionButton];
         ActionButtons.Add(Button);
         ActionGrid->AddSlot(Index % 2, Index / 2)[ Button ];
     }
@@ -572,19 +747,19 @@ void SHomesteadMenu::ScrollActionIntoView()
 FString SHomesteadMenu::Footer() const
 {
     if (!Controller.IsValid()) return {};
-    if (bRecovery) return Controller->UsesGamepad() ? TEXT("A  Retry checkpoint    Y  Settings / Quit")
-        : TEXT("Enter  Retry checkpoint    G  Settings / Quit");
+    if (bRecovery) return Controller->UsesGamepad() ? TEXT("D-pad / Left stick  Select    A  Activate    Y  Settings / Quit")
+        : TEXT("Arrows  Select    Enter  Activate    G  Settings / Quit");
     const bool Pad = Controller->UsesGamepad();
-    FString Hint = Pad ? TEXT("LB/RB  Tabs    LT/RT  Regions    D-pad  Navigate    A  Activate")
-        : TEXT("Ctrl+Tab  Tabs    Tab  Regions    Arrows  Navigate    Enter  Activate");
-    if (SeenPage == 0 && Entries.IsValidIndex(ContentSelection))
+    FString Hint = Pad ? TEXT("D-pad / Left stick  Move between sections    A  Activate    LB/RB  Tabs")
+        : TEXT("Arrows  Move between sections    Enter  Activate    Ctrl+Tab  Tabs");
+    if (SeenPage == 0 && GetSelectedSubject())
     {
         const auto& Row = Entries[ContentSelection];
         if (Row.CanStore || Row.CanTake) Hint += Pad ? TEXT("    X  Transfer") : TEXT("    F  Transfer");
         if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Quantity > 1)
             Hint += Pad ? TEXT("    Y  Split") : TEXT("    G  Split");
     }
-    if (Region == ERegion::Portrait) Hint += Pad ? TEXT("    Right stick  Turn    R3  Zoom") : TEXT("    Left/Right  Turn    Z  Zoom");
+    if (Region == ERegion::Portrait) Hint += Pad ? TEXT("    Right stick  Turn    R3  Zoom") : TEXT("    Z  Zoom");
     if (Region == ERegion::Details) Hint += TEXT("    Up/Down  Scroll details");
     return Hint + (Pad ? TEXT("    B  Back") : TEXT("    Esc  Back"));
 }
@@ -705,13 +880,26 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
 }
 void SHomesteadMenu::Activate()
 {
+    if (Dialog == EDialog::Amount && DialogSelection < 0)
+    { bEditingAmount = !bEditingAmount; BuildDialog(); return; }
     if (Dialog != EDialog::None) { DialogAction(DialogSelection); return; }
     if (Region == ERegion::Tabs) ChangePage(FocusedTab);
     else if (Region == ERegion::Inventory) ChangeInventoryView(InventorySelection);
     else if (Region == ERegion::Equipment) FocusEquipment(EquipmentSelection);
     else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else RequestExit(); }
+    else if (Region == ERegion::Recovery) { if (RecoverySelection == 0) Controller->MenuRetry(); else ChangePage(4); }
+    else if (Region == ERegion::Portrait)
+    {
+        if (PortraitSelection < 0) { PortraitSelection = 0; bFocusPending = true; SynchronizeFocus(); }
+        else if (PortraitSelection < 2) Controller->OrbitMenuPortrait(PortraitSelection == 0 ? -20 : 20);
+        else Controller->ZoomMenuPortrait();
+    }
     else if (Region == ERegion::Actions && Actions.IsValidIndex(ActionSelection)) RunAction(Actions[ActionSelection]);
-    else { Region = ERegion::Actions; ActionSelection = 0; ScrollActionIntoView(); }
+    else
+    {
+        Region = Actions.IsEmpty() ? ERegion::Details : ERegion::Actions;
+        ActionSelection = 0; bFocusPending = true; SynchronizeFocus();
+    }
 }
 void SHomesteadMenu::ChangePage(int32 Page)
 {
@@ -727,6 +915,7 @@ bool SHomesteadMenu::FocusLegacySubject(int32 Id)
     Region = ERegion::Content;
     Hover = INDEX_NONE;
     Select(Index);
+    bFocusPending = true;
     return true;
 }
 void SHomesteadMenu::CycleRegion(int32 Direction)
@@ -737,11 +926,137 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     if (Controller->MenuPortraitBrush()) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
-    Regions.Add(ERegion::Details); Regions.Add(ERegion::Actions);
+    Regions.Add(ERegion::Details);
+    if (!Actions.IsEmpty()) Regions.Add(ERegion::Actions);
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
     ScrollActionIntoView();
+    bFocusPending = true;
+    SynchronizeFocus();
 }
+
+bool SHomesteadMenu::MoveWithin(int32& Index, int32 Count, int32 ColumnCount,
+    HomesteadMenuNavigation::Direction Direction, int32 Desired)
+{
+    int32 Candidate = Index;
+    for (int32 Attempt = 0; Attempt < Count; ++Attempt)
+    {
+        const auto Result = HomesteadMenuNavigation::Move(Candidate, Count, ColumnCount, Direction,
+            Desired < 0 ? Candidate % FMath::Max(1, ColumnCount) : Desired);
+        if (Result.boundary || Result.index < 0) return false;
+        Candidate = Result.index;
+        if (IsTargetAvailable(Region, Candidate)) { Index = Candidate; return true; }
+    }
+    return false;
+}
+
+void SHomesteadMenu::NavigateSpatial(HomesteadMenuNavigation::Direction Direction)
+{
+    const auto Target = FocusWidget();
+    if (!Target || Target->GetCachedGeometry().GetLocalSize().IsNearlyZero())
+    {
+        bFocusPending = true;
+        PendingDirection = Direction;
+        return;
+    }
+    SynchronizeFocus();
+    FWidgetPath Path;
+    auto& Slate = FSlateApplication::Get();
+    if (!Slate.GeneratePathToWidgetUnchecked(Target.ToSharedRef(), Path)) return;
+    const EUINavigation Navigation = Direction.x < 0 ? EUINavigation::Left : Direction.x > 0 ? EUINavigation::Right
+        : Direction.y < 0 ? EUINavigation::Up : EUINavigation::Down;
+    Slate.ProcessReply(Path, FReply::Handled().SetNavigation(Navigation, ENavigationGenesis::User), nullptr, nullptr, 0);
+}
+
+void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direction)
+{
+    if (!Direction.Any() || bSaving) return;
+    Hover = INDEX_NONE;
+    if (Dialog != EDialog::None) { NavigateDialog(Direction); return; }
+    bool Moved = false;
+    switch (Region)
+    {
+    case ERegion::Content:
+    {
+        int32 Next = ContentSelection;
+        if (MoveWithin(Next, Entries.Num(), Columns(), Direction, DesiredColumn))
+        { Select(Next, Direction.y != 0); Moved = true; }
+        break;
+    }
+    case ERegion::Tabs: Moved = MoveWithin(FocusedTab, 7, 7, Direction); break;
+    case ERegion::Session: Moved = MoveWithin(SessionSelection, 2, 2, Direction); break;
+    case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
+    case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, 3, 3, Direction); break;
+    case ERegion::Portrait:
+        if (PortraitSelection >= 0) Moved = MoveWithin(PortraitSelection, 3, 3, Direction);
+        break;
+    case ERegion::Recovery: Moved = MoveWithin(RecoverySelection, 2, 1, Direction); break;
+    case ERegion::Actions:
+        Moved = MoveWithin(ActionSelection, Actions.Num(), 2, Direction);
+        if (!Moved && Direction.y < 0 && ActionSelection < 2)
+        {
+            Region = ERegion::Details;
+            DetailsSelection = 1;
+            if (DetailsScroll) DetailsScroll->ScrollToStart();
+            Moved = true;
+        }
+        break;
+    case ERegion::Details:
+        if (Direction.y && DetailsScroll)
+        {
+            const float Before = DetailsScroll->GetScrollOffset();
+            const float End = DetailsScroll->GetScrollOffsetOfEnd();
+            if (Direction.y > 0 && !ActionButtons.IsEmpty())
+            {
+                const auto View = DetailsScroll->GetCachedGeometry();
+                const auto First = ActionButtons[0]->GetCachedGeometry();
+                const bool ActionVisible = First.GetAbsolutePosition().Y < View.GetAbsolutePosition().Y + View.GetAbsoluteSize().Y
+                    && First.GetAbsolutePosition().Y + First.GetAbsoluteSize().Y > View.GetAbsolutePosition().Y;
+                if (ActionVisible || Before >= End - 1)
+                { Region = ERegion::Actions; ActionSelection = 0; Moved = true; }
+            }
+            if (!Moved)
+            {
+                const float Next = FMath::Clamp(Before + Direction.y * 48, 0.0f, End);
+                if (!FMath::IsNearlyEqual(Before, Next))
+                { DetailsScroll->SetScrollOffset(Next); return; }
+            }
+        }
+        break;
+    }
+    if (Moved)
+    {
+        bFocusPending = true;
+        SynchronizeFocus();
+    }
+    else NavigateSpatial(Direction);
+}
+
+void SHomesteadMenu::NavigateDialog(HomesteadMenuNavigation::Direction Direction)
+{
+    if (Dialog == EDialog::Amount && bEditingAmount)
+    {
+        if (Direction.x) Amount = FMath::Clamp(Amount + Direction.x, 1, MaximumAmount);
+        else { bEditingAmount = false; DialogSelection = 0; }
+        BuildDialog();
+        return;
+    }
+    const int32 Delta = Direction.y ? Direction.y : Direction.x;
+    if (!Delta) return;
+    if (Dialog == EDialog::Amount && DialogSelection == 0 && Direction.y < 0) DialogSelection = -1;
+    else if (DialogSelection < 0) DialogSelection = 0;
+    else DialogSelection = FMath::Clamp(DialogSelection + Delta, 0, DialogCount() - 1);
+    if (DialogScroll && DialogButtons.IsValidIndex(DialogSelection))
+        DialogScroll->ScrollDescendantIntoView(DialogButtons[DialogSelection], false);
+    bFocusPending = true;
+    SynchronizeFocus();
+}
+
+FNavigationReply SHomesteadMenu::OnNavigation(const FGeometry&, const FNavigationEvent&)
+{
+    return FNavigationReply::Stop();
+}
+
 bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
 {
     if (Key == EKeys::LeftControl || Key == EKeys::RightControl) bControl = Event != IE_Released;
@@ -753,12 +1068,9 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
             if (FMath::Abs(InputAmount) > 0.3f) Controller->OrbitMenuPortrait(InputAmount * 1.5f);
             return true;
         }
-        if (FMath::Abs(InputAmount) < 0.55f || FPlatformTime::Seconds() < NextAxisMove) return true;
-        if (Key == EKeys::Gamepad_LeftX) Key = InputAmount > 0 ? EKeys::Right : EKeys::Left;
-        else if (Key == EKeys::Gamepad_LeftY) Key = InputAmount > 0 ? EKeys::Up : EKeys::Down;
-        else return true;
-        NextAxisMove = FPlatformTime::Seconds() + 0.18;
-        Event = IE_Pressed;
+        if (Key == EKeys::Gamepad_LeftX) LeftStick.Sample(true, InputAmount, FPlatformTime::Seconds());
+        else if (Key == EKeys::Gamepad_LeftY) LeftStick.Sample(false, -InputAmount, FPlatformTime::Seconds());
+        return true;
     }
     if (Event == IE_Repeat && (Key == EKeys::Left || Key == EKeys::Right || Key == EKeys::Up || Key == EKeys::Down
         || Key == EKeys::Gamepad_DPad_Left || Key == EKeys::Gamepad_DPad_Right || Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_DPad_Down))
@@ -768,12 +1080,12 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     if (Region == ERegion::Portrait && Dialog == EDialog::None
         && (Key == EKeys::Z || Key == EKeys::Gamepad_RightThumbstick))
     { Controller->ZoomMenuPortrait(); return true; }
-    if (bRecovery)
+    if (bRecovery && Dialog == EDialog::None)
     {
-        if (Key == EKeys::Enter || Key == EKeys::E || Key == EKeys::Gamepad_FaceButton_Bottom) Controller->MenuRetry();
-        else if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top || Key == EKeys::Escape
+        if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top || Key == EKeys::Escape
             || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right) ChangePage(4);
-        return true;
+        if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top || Key == EKeys::Escape
+            || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right) return true;
     }
     if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::I || Key == EKeys::Gamepad_Special_Right) { Back(); return true; }
     if (Key == EKeys::Enter || Key == EKeys::E || Key == EKeys::Gamepad_FaceButton_Bottom) { Activate(); return true; }
@@ -783,15 +1095,11 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     {
         if (Dialog == EDialog::Amount)
         {
-            const int32 Delta = Dx ? Dx : Key == EKeys::Gamepad_RightShoulder ? 10 : Key == EKeys::Gamepad_LeftShoulder ? -10 : 0;
-            if (Delta) { Amount = FMath::Clamp(Amount + Delta, 1, MaximumAmount); BuildDialog(); return true; }
+            const int32 Delta = Key == EKeys::Gamepad_RightShoulder ? 10 : Key == EKeys::Gamepad_LeftShoulder ? -10 : 0;
+            if (Delta && bEditingAmount) { Amount = FMath::Clamp(Amount + Delta, 1, MaximumAmount); BuildDialog(); return true; }
         }
-        if (Dx || Dy)
-        {
-            DialogSelection = HomesteadMenuNavigation::Cycle(DialogSelection, DialogCount(), Dx ? Dx : Dy);
-            if (DialogScroll && DialogButtons.IsValidIndex(DialogSelection))
-                DialogScroll->ScrollDescendantIntoView(DialogButtons[DialogSelection], false);
-        }
+        if (Dx || Dy) NavigateDialog({Dx, Dy});
+        if (Key == EKeys::Tab) NavigateDialog({0, bShift ? -1 : 1});
         return true;
     }
     if (Key == EKeys::Gamepad_LeftShoulder) { ChangePage((SeenPage + 6) % 7); return true; }
@@ -804,34 +1112,16 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     }
     if (Key == EKeys::Gamepad_LeftTrigger) { CycleRegion(-1); return true; }
     if (Key == EKeys::Gamepad_RightTrigger) { CycleRegion(1); return true; }
-    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left) { if (SeenPage == 0) RunAction(EHomesteadItemAction::Transfer); return true; }
-    if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0) RunAction(EHomesteadItemAction::Split); return true; }
-    if (Dx || Dy)
-    {
-        Hover = INDEX_NONE;
-        if (Region == ERegion::Tabs) FocusedTab = HomesteadMenuNavigation::Cycle(FocusedTab, 7, Dx ? Dx : Dy);
-        else if (Region == ERegion::Inventory) InventorySelection = FMath::Clamp(InventorySelection + (Dx ? Dx : Dy), 0, 2);
-        else if (Region == ERegion::Equipment) EquipmentSelection = FMath::Clamp(EquipmentSelection + (Dx ? Dx : Dy), 0, 2);
-        else if (Region == ERegion::Portrait) Controller->OrbitMenuPortrait((Dx ? Dx : Dy) * 15);
-        else if (Region == ERegion::Session) SessionSelection = FMath::Clamp(SessionSelection + (Dx ? Dx : Dy), 0, 1);
-        else if (Region == ERegion::Details && DetailsScroll)
-            DetailsScroll->SetScrollOffset(FMath::Max(0.0f, DetailsScroll->GetScrollOffset() + (Dy ? Dy : Dx) * 48));
-        else if (Region == ERegion::Actions)
-        {
-            ActionSelection = FMath::Max(0, HomesteadMenuNavigation::Step(ActionSelection, Actions.Num(), 2, Dx, Dy));
-            ScrollActionIntoView();
-        }
-        else
-        {
-            int32 Next = HomesteadMenuNavigation::Step(ContentSelection, Entries.Num(), Columns(), Dx, Dy);
-            if (Dy && Next >= 0 && Next / Columns() != ContentSelection / Columns())
-                Next = FMath::Min(Next / Columns() * Columns() + DesiredColumn, Entries.Num() - 1);
-            Select(Next, Dy != 0);
-        }
-    }
+    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left) { if (SeenPage == 0 && GetSelectedSubject()) RunAction(EHomesteadItemAction::Transfer); return true; }
+    if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0 && GetSelectedSubject()) RunAction(EHomesteadItemAction::Split); return true; }
+    if (Dx || Dy) { LeftStick.Reset(); NavigateDirection({Dx, Dy}); }
     return true;
 }
 FReply SHomesteadMenu::OnKeyDown(const FGeometry&, const FKeyEvent& Event)
+{
+    return FReply::Handled();
+}
+FReply SHomesteadMenu::OnPreviewKeyDown(const FGeometry&, const FKeyEvent& Event)
 {
     bControl = Event.IsControlDown(); bShift = Event.IsShiftDown();
     if (Controller.IsValid()) Controller->MenuPhysicalInput(Event.GetKey(), Event.IsRepeat() ? IE_Repeat : IE_Pressed);
@@ -861,6 +1151,7 @@ FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event
 void SHomesteadMenu::Back()
 {
     if (bSaving) return;
+    if (Dialog == EDialog::Amount && bEditingAmount) { bEditingAmount = false; BuildDialog(); return; }
     if (Dialog != EDialog::None) { SetDialog(EDialog::None); return; }
     if (Controller.IsValid()) Controller->MenuBack();
 }
@@ -885,7 +1176,12 @@ void SHomesteadMenu::ShowGraphicsSaveFailure(const FString& Error)
 void SHomesteadMenu::SetDialog(EDialog Value)
 {
     Dialog = Value; DialogSelection = 0;
+    bEditingAmount = false;
+    LeftStick.Reset();
+    PendingDirection = {};
+    if (Root) Root->SetEnabled(Value == EDialog::None);
     BuildDialog();
+    bFocusPending = true;
 }
 int32 SHomesteadMenu::DialogCount() const
 {
@@ -895,7 +1191,7 @@ int32 SHomesteadMenu::DialogCount() const
 }
 void SHomesteadMenu::BuildDialog()
 {
-    if (Dialog == EDialog::None) { ModalHost->SetVisibility(EVisibility::Collapsed); return; }
+    if (Dialog == EDialog::None) { ModalHost->SetVisibility(EVisibility::Collapsed); AmountControl.Reset(); return; }
     FString Title, Description;
     TArray<FString> Labels;
     if (Dialog == EDialog::Amount)
@@ -903,7 +1199,7 @@ void SHomesteadMenu::BuildDialog()
         Title = PendingAction == EHomesteadItemAction::Split ? TEXT("Split stack") : TEXT("Transfer items");
         const FString Destination = PendingAction == EHomesteadItemAction::Split ? TEXT("A new stack in the same container")
             : PendingRow.ContainerId > 0 ? TEXT("Your pack") : FString::Printf(TEXT("Chest %d"), PendingRow.DestinationId);
-        Description = FString::Printf(TEXT("%s\nFrom: %s\nTo: %s\n\nAmount: %d / %d\nLeft / Right: one   LB / RB: ten\nUp / Down: choose a button"),
+        Description = FString::Printf(TEXT("%s\nFrom: %s\nTo: %s\n\nAmount: %d / %d\nChoose Amount and activate to edit. While editing: Left/Right one, LB/RB ten; Back finishes editing."),
             *PendingRow.Name, *PendingRow.Location, *Destination, Amount, MaximumAmount);
         Labels = {TEXT("Cancel"), TEXT("Confirm"), TEXT("One"), TEXT("All available")};
     }
@@ -958,6 +1254,7 @@ void SHomesteadMenu::BuildDialog()
     }
     TSharedPtr<SVerticalBox> Choices;
     DialogButtons.Reset();
+    AmountControl.Reset();
     ModalHost->SetVisibility(EVisibility::Visible);
     ModalHost->SetContent(
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
@@ -973,13 +1270,27 @@ void SHomesteadMenu::BuildDialog()
                 [ SAssignNew(DialogScroll, SScrollBox) + SScrollBox::Slot()[ SAssignNew(Choices, SVerticalBox) ] ]
             ]
         ]);
+    if (Dialog == EDialog::Amount)
+    {
+        auto Editor = MakeButton(FString::Printf(TEXT("Amount: %d%s"), Amount,
+            bEditingAmount ? TEXT("  (editing)") : TEXT("  - activate to edit")),
+            [this]() { DialogSelection = -1; bEditingAmount = true; BuildDialog(); },
+            TAttribute<FSlateColor>::CreateLambda([this]() { return DialogSelection < 0 ? Gold : Selected; }));
+        Editor->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this]()
+            { if (!bSynchronizingFocus) DialogSelection = -1; }));
+        AmountControl = Editor;
+        Choices->AddSlot().AutoHeight().Padding(0, 6)[Editor];
+    }
     for (int32 Index = 0; Index < Labels.Num(); ++Index)
     {
         auto Button = MakeButton(Labels[Index], [this, Index]() { DialogAction(Index); },
             TAttribute<FSlateColor>::CreateLambda([this, Index]() { return DialogSelection == Index ? Gold : Selected; }));
+        Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, Index]()
+            { if (!bSynchronizingFocus) { DialogSelection = Index; bEditingAmount = false; } }));
         DialogButtons.Add(Button);
         Choices->AddSlot().AutoHeight().Padding(0, 6)[ Button ];
     }
+    bFocusPending = true;
 }
 void SHomesteadMenu::DialogAction(int32 Index)
 {

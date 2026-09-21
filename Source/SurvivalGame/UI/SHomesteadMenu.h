@@ -3,11 +3,13 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "../HomesteadController.h"
+#include "HomesteadMenuNavigation.h"
 
 class SScrollBox;
 class SVerticalBox;
 class SHorizontalBox;
 class SBox;
+class SButton;
 
 namespace HomesteadMenus
 {
@@ -21,6 +23,8 @@ public:
     virtual bool SupportsKeyboardFocus() const override { return true; }
     virtual void Tick(const FGeometry& Geometry, double Time, float Delta) override;
     virtual FReply OnKeyDown(const FGeometry&, const FKeyEvent& Event) override;
+    virtual FReply OnPreviewKeyDown(const FGeometry&, const FKeyEvent& Event) override;
+    virtual FNavigationReply OnNavigation(const FGeometry&, const FNavigationEvent&) override;
     virtual FReply OnKeyUp(const FGeometry&, const FKeyEvent& Event) override;
     virtual FReply OnAnalogValueChanged(const FGeometry&, const FAnalogInputEvent& Event) override;
     virtual FReply OnMouseMove(const FGeometry&, const FPointerEvent& Event) override;
@@ -38,11 +42,22 @@ public:
     bool IsExitPrompt() const { return Dialog == EDialog::Exit; }
     bool IsSaveError() const { return Dialog == EDialog::SaveFailed; }
     bool IsUnsavedPrompt() const { return Dialog == EDialog::Unsaved; }
-    const FHomesteadRow* GetSelectedSubject() const { return Entries.IsValidIndex(ContentSelection) ? &Entries[ContentSelection] : nullptr; }
+    const FHomesteadRow* GetSelectedSubject() const
+    {
+        const bool SubjectFocused = Region == ERegion::Content || Region == ERegion::Details || Region == ERegion::Actions;
+        return Dialog == EDialog::None && SubjectFocused && Entries.IsValidIndex(ContentSelection) ? &Entries[ContentSelection] : nullptr;
+    }
     FString GetDisplayedDetails() const { return DetailsText(); }
+    FString GetFocusedRegionName() const;
+    bool HasSynchronizedFocus() const;
+    bool IsFocusedControlVisible() const;
+    int32 GetSelectedContentIndex() const { return ContentSelection; }
+    int32 GetContentColumnCount() const { return Columns(); }
+    bool IsEditingQuantity() const { return bEditingAmount; }
+    int32 GetDraftQuantity() const { return Amount; }
 
 private:
-    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions };
+    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
     enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
@@ -58,6 +73,14 @@ private:
     TArray<FHomesteadRow> Entries;
     TArray<int32> RowIndices;
     TArray<EHomesteadItemAction> Actions;
+    struct FFocusTarget
+    {
+        ERegion region;
+        int32 index;
+        TWeakPtr<SWidget> widget;
+    };
+    TArray<FFocusTarget> FocusTargets;
+    TSharedPtr<SWidget> AmountControl;
     int32 SeenPage = -1;
     int32 Hover = INDEX_NONE;
     int32 ContentSelection = 0;
@@ -69,6 +92,9 @@ private:
     FString RememberedKeys[7];
     int32 InventorySelection = 0;
     int32 EquipmentSelection = 0;
+    int32 PortraitSelection = -1;
+    int32 RecoverySelection = 0;
+    int32 DetailsSelection = 0;
     ERegion Region = ERegion::Content;
     EDialog Dialog = EDialog::None;
     FString DialogError;
@@ -78,7 +104,11 @@ private:
     bool bSaving = false;
     bool bRecovery = false;
     bool bResetPromptShown = false;
-    double NextAxisMove = 0;
+    HomesteadMenuNavigation::StickNavigation LeftStick;
+    HomesteadMenuNavigation::Direction PendingDirection;
+    bool bFocusPending = false;
+    bool bSynchronizingFocus = false;
+    bool bEditingAmount = false;
     FHomesteadRow PendingRow;
     EHomesteadItemAction PendingAction = EHomesteadItemAction::Primary;
     uint64 PendingRevision = 0;
@@ -87,7 +117,7 @@ private:
 
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();
-    TSharedRef<SWidget> MakeButton(const FString& Label, TFunction<void()> Action,
+    TSharedRef<SButton> MakeButton(const FString& Label, TFunction<void()> Action,
         TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.97f)),
         const FString& AccessibleLabel = FString(), FMargin Padding = FMargin(14, 10));
     TSharedRef<SWidget> Text(const FString& Value, int32 Size = 18) const;
@@ -114,5 +144,15 @@ private:
     void DialogAction(int32 Index);
     int32 DialogCount() const;
     bool PointerAction();
+    TSharedRef<SButton> RegisterButton(TSharedRef<SButton> Button, ERegion TargetRegion, int32 Index);
+    TSharedRef<SWidget> FocusAnchor(TSharedRef<SWidget> Content, ERegion TargetRegion, int32 Index);
+    void AdoptFocus(ERegion TargetRegion, int32 Index);
+    TSharedPtr<SWidget> FocusWidget() const;
+    bool IsTargetAvailable(ERegion TargetRegion, int32 Index) const;
+    void SynchronizeFocus();
+    void NavigateDirection(HomesteadMenuNavigation::Direction Direction);
+    void NavigateSpatial(HomesteadMenuNavigation::Direction Direction);
+    void NavigateDialog(HomesteadMenuNavigation::Direction Direction);
+    bool MoveWithin(int32& Index, int32 Count, int32 Columns, HomesteadMenuNavigation::Direction Direction, int32 Desired = -1);
 };
 }

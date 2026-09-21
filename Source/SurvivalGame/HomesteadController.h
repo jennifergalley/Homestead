@@ -94,7 +94,7 @@ public:
     void MenuRetry();
     bool MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount = 1);
     bool MenuPointerIntent(float X, float Y);
-    bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly; }
+    bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly || bSimulatedMenuEvent; }
     FString MenuSaveStatus() const;
     FString MenuLastError() const { return ToastText; }
     bool MenuNeedsTestReset() const { return bTestResetRequired; }
@@ -128,6 +128,7 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> UIClick;
     bool bAudioEnabled = true;
     bool bAutomatedInputOnly = false;
+    bool bSimulatedMenuEvent = false;
     bool bLoggedExternalInput = false;
     uint32 IgnoredExternalInputs = 0;
     uint32 TestQuickSaves = 0, TestQuickLoads = 0;
