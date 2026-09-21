@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "HomesteadAppearance.h"
+#include "HomesteadWardrobePresentation.h"
 #include "HomesteadCharacter.generated.h"
 
 class UCameraComponent;
@@ -30,6 +31,15 @@ public:
     void Zoom(float Amount);
     void CycleZoom();
     bool ApplyAppearance(const FHomesteadAppearance& Appearance);
+    bool PrepareEquipment(const Homestead::State& CandidateState,
+        const FHomesteadAppearance& Look, FString& Error);
+    bool ApplyPreparedEquipment(FString& Error);
+    void ClearPreparedEquipment();
+    bool IsEquipmentPresentationReady() const { return ActiveEquipment.Ready; }
+    const FHomesteadEquipmentPresentation* GetEquipmentPresentation() const
+    {
+        return ActiveEquipment.Ready ? &ActiveEquipment : nullptr;
+    }
     bool HasHeroine() const { return bHeroineReady; }
     void SetAppearancePreview(bool Enabled);
     FRotator GameplayViewRotation() const;
@@ -65,6 +75,9 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
+    UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> GarmentComponents;
+    UPROPERTY() FHomesteadEquipmentPresentation PreparedEquipment;
+    UPROPERTY() FHomesteadEquipmentPresentation ActiveEquipment;
     bool bPlanning = false;
     bool bHeroineReady = false;
     bool bAttemptedAssetLoad = false;

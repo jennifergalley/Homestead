@@ -59,6 +59,17 @@ AHomesteadCharacter::AHomesteadCharacter()
     WateringTool->SetupAttachment(GetMesh(), TEXT("hand_r"));
     Hatchet = CreateDefaultSubobject<UHomesteadHatchet>(TEXT("ContextualHatchet"));
     Hatchet->SetupAttachment(GetMesh(), TEXT("hand_r"));
+    const FName GarmentNames[] = {TEXT("EquippedTunic"), TEXT("EquippedApron"), TEXT("EquippedFootwear")};
+    for (FName Name : GarmentNames)
+    {
+        auto* Garment = CreateDefaultSubobject<USkeletalMeshComponent>(Name);
+        Garment->SetupAttachment(GetMesh());
+        Garment->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Garment->SetGenerateOverlapEvents(false);
+        Garment->bUseAttachParentBound = true;
+        Garment->SetVisibility(false);
+        GarmentComponents.Add(Garment);
+    }
 }
 
 void AHomesteadCharacter::BeginPlay()
@@ -178,6 +189,11 @@ float AHomesteadCharacter::InferMeshYaw(const USkeletalMesh& Asset) const
 
 bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance)
 {
+    if (ActiveEquipment.Ready)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Owned wardrobe appearance requires PrepareEquipment with authoritative state."));
+        return false;
+    }
     if (!Appearance.IsValid() || !LoadHeroineAssets())
     {
         UE_LOG(LogTemp, Error, TEXT("Appearance change rejected: invalid selection or unavailable assets."));
@@ -249,6 +265,71 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
             Material->SetScalarParameterValue(TEXT("IrisMix"), Appearance.EyeColor == 0 ? 0.0f : 1.0f);
         }
     }
+    StandIn->SetVisibility(false);
+    VisualMesh->SetVisibility(true);
+    bHeroineReady = true;
+    return true;
+}
+
+bool AHomesteadCharacter::PrepareEquipment(const Homestead::State& CandidateState,
+    const FHomesteadAppearance& Look, FString& Error)
+{
+    ClearPreparedEquipment();
+    if (!LoadHeroineAssets())
+    {
+        Error = TEXT("Original heroine skeleton or animations are unavailable.");
+        UE_LOG(LogTemp, Error, TEXT("Wardrobe preparation failed: %s"), *Error);
+        return false;
+    }
+    return HomesteadWardrobePresentation::Prepare(this, CandidateState, Look,
+        *LongHairMesh, PreparedEquipment, Error);
+}
+
+void AHomesteadCharacter::ClearPreparedEquipment()
+{
+    PreparedEquipment = {};
+}
+
+bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
+{
+    Error.Reset();
+    if (!IsInGameThread() || !PreparedEquipment.Ready)
+    {
+        Error = TEXT("No retained wardrobe presentation is ready to apply.");
+        UE_LOG(LogTemp, Error, TEXT("Wardrobe apply rejected: %s"), *Error);
+        return false;
+    }
+    USkeletalMeshComponent* VisualMesh = GetMesh();
+    HomesteadWardrobePresentation::ApplySurface(PreparedEquipment.Base, *VisualMesh);
+    VisualMesh->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+    VisualMesh->SetRelativeRotation(FRotator(0, InferMeshYaw(*PreparedEquipment.Base.Mesh), 0));
+    VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    VisualMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+    if (!VisualMesh->GetAnimInstance() || VisualMesh->GetAnimInstance()->GetClass() != UHomesteadAnimInstance::StaticClass())
+        VisualMesh->SetAnimInstanceClass(UHomesteadAnimInstance::StaticClass());
+    const int32 Slots[] = {0, 2, 3};
+    for (int32 Index = 0; Index < GarmentComponents.Num(); ++Index)
+    {
+        USkeletalMeshComponent* Component = GarmentComponents[Index];
+        const auto* Surface = PreparedEquipment.Garments.FindByPredicate(
+            [Slot = Slots[Index]](const FHomesteadEquipmentSurface& Item) { return Item.Slot == Slot; });
+        if (Surface)
+        {
+            HomesteadWardrobePresentation::ApplySurface(*Surface, *Component);
+            Component->SetLeaderPoseComponent(VisualMesh, true, false);
+            Component->SetVisibility(true);
+        }
+        else
+        {
+            Component->SetVisibility(false);
+            Component->SetLeaderPoseComponent(nullptr);
+            Component->EmptyOverrideMaterials();
+            Component->SetSkeletalMesh(nullptr);
+        }
+    }
+    AppearanceMaterials.Reset();
+    ActiveEquipment = MoveTemp(PreparedEquipment);
+    ClearPreparedEquipment();
     StandIn->SetVisibility(false);
     VisualMesh->SetVisibility(true);
     bHeroineReady = true;
