@@ -15,7 +15,7 @@
 ## 3. Modular parity and handoff
 
 - [x] 3.1 Apply identical new hair to the corresponding six modular base variants; verify complete permanent coverage, rig and material contract while ponytail/garment hashes remain unchanged.
-- [ ] 3.2 Commit source/provenance/hash/import records and report exact source versus cooked acceptance status; verify private branch push and main-owned integration handoff without automatic promotion.
+- [x] 3.2 Commit source/provenance/hash/import records and report exact source versus cooked acceptance status; verify private branch push and main-owned integration handoff without automatic promotion.
 
 ## Main integration
 Main integration evidence: `docs/research/character-assets/ready-waves-01.md`.
@@ -78,3 +78,11 @@ new shaping or rewriting waves/palette. `final-bundle.json` and full hashes are
 the final handoff; a3a6dee stays immutable and explicitly different. Parent will
 make the one final commit after source completion; no source-lane commit or
 runtime/gameplay/visual acceptance is claimed.
+
+Coordinator-lane publication is now persistent: updated waves `79c3e79`,
+remaining canonical stock-bob/modular bundle `a37e24d`, and archived-reference
+Windows line-ending protection `3a75556` are privately pushed. The source
+author's earlier "no commit/push" statements describe that subagent's boundary,
+not the final published handoff. All 18 canonical source FBXs and receipts pass
+the final checker; original modular clothing remains unchanged. This completes
+3.2, not the open wave-quality or in-game acceptance tasks.
