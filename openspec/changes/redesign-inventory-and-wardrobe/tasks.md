@@ -20,16 +20,16 @@ All engine execution belongs to the coordinator's single approved lane.
 
 ## 2. Portable item authority and conservation
 
-- [ ] 2.1 Add wearable definitions/instances, single owners, slot references and stable IDs; verify duplicate/invalid owner and definition rejection.
-- [ ] 2.2 Extend pack/chest capacity to count carried/stored garments as one and equipped as zero; verify 120-unit limits without slot economy.
-- [ ] 2.3 Implement atomic equip/replace/unequip and dependent apron rules; verify full-pack swap and failed displacement preserve possessions.
-- [ ] 2.4 Add garment and amount chest transfers with existing reach; verify full/unreachable/stale/duplicate requests do not lose items.
-- [ ] 2.5 Add stable ordered groups and split/merge/reorder with reconciliation for quantity mutations; verify exact count partition and no extra capacity cost.
-- [ ] 2.6 Add real-cost garment recipes and per-instance cosmetic dye; verify correct costs, prerequisites, output and no invented warmth effects.
+- [x] 2.1 Add wearable definitions/instances, single owners, slot references and stable IDs; verify duplicate/invalid owner and definition rejection.
+- [x] 2.2 Extend pack/chest capacity to count carried/stored garments as one and equipped as zero; verify 120-unit limits without slot economy.
+- [x] 2.3 Implement atomic equip/replace/unequip and dependent apron rules; verify full-pack swap and failed displacement preserve possessions.
+- [x] 2.4 Add garment and amount chest transfers with existing reach; verify full/unreachable/stale/duplicate requests do not lose items.
+- [x] 2.5 Add stable ordered groups and split/merge/reorder with reconciliation for quantity mutations; verify exact count partition and no extra capacity cost.
+- [x] 2.6 Add real-cost garment recipes and per-instance cosmetic dye; verify correct costs, prerequisites, output and no invented warmth effects.
 
 ## 3. Current-version saves and explicit test reset
 
-- [ ] 3.1 Encode/decode current portable wardrobe and layout state with integrity/bounds; verify valid roundtrip and corrupt/future schema rejection.
+- [x] 3.1 Encode/decode current portable wardrobe and layout state with integrity/bounds; verify valid roundtrip and corrupt/future schema rejection.
 - [ ] 3.2 Update UE wrapper for current wardrobe data; verify incompatible disposable tests show explicit reset rather than fabricated migration.
 - [ ] 3.3 Validate whole save before live mutation; verify invalid IDs/owners/slots/layout leave live state unchanged.
 - [ ] 3.4 Keep current manual/auto/recovery/session snapshots coherent; verify same-world recovery replaces rather than merges possessions.
@@ -87,3 +87,10 @@ shell, original icons, current-item grid/details and explicit exit flow are
 source work in the isolated UI branch. Python source-contract checks are not
 C++ compilation or visual proof. Shared engine compile/controller/720p/4K review
 remain pending; relevant mixed-source/runtime tasks remain unchecked.
+
+Backend authority commits `e8068cb`/`c11317a`, integrated here as `1a972ce`/
+`e2f55b4`, passed the owner's guarded portable compile/link/test run: 22 scenarios,
+1714 checks. That evidence completes portable authority tasks 2.1-2.6 and 3.1,
+not rendered equipment, Controller IO or native-menu runtime acceptance.
+`cf4bc38` adds UI authority adapters and current-save/reset handling; its 11
+Python source-contract checks are deliberately labeled source-only.

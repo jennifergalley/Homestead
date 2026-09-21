@@ -194,10 +194,12 @@ Controller startup/load/reset adapter is coordinated with backend owner.
 
 ### Garment and icon presentation
 
-Character lane must reconstruct a permanent modest base with complete geometry
+Character lane must reconstruct a permanent modest base consisting of separate
+bra and briefs visual pieces, per Jenny's direct feedback, with complete geometry
 from licensed source, not hide materials on the joined/deleted body. Preserve
 adult phenotype, face/hair direction, rig, skin/eye contracts and movement.
-Separate fitted tunic/apron/footwear components follow current pose with
+The bra and briefs are nontradeable and nonremovable, not equipment slots or
+inventory items. Separate fitted tunic/apron/footwear components follow current pose with
 no extra world collision/physics. Validate base-only and all supported fits
 through idle/walk/gather/water/weed/clear. Resolve renderables before equip commit;
 missing content is a visible error, not silent item loss/substitution.
