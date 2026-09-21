@@ -134,6 +134,42 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("Controller->HasNativeMenu(), false", smoke)
         self.assertIn("Shipping QA cancelled", smoke)
 
+    def test_native_menu_requires_real_modular_presentation(self):
+        fixture = (SOURCE / "UI" / "HomesteadNativeMenuTest.cpp").read_text()
+        verify = function_body(fixture, "bool AHomesteadSmokeTest::VerifyNativeMenuPresentation(")
+        self.assertIn("if (!Presentation || !Presentation->Ready", verify)
+        self.assertNotIn("Prototype", verify)
+        self.assertIn("Owned->owner != Homestead::WearableOwner::Equipped", verify)
+        self.assertIn("Surface.Dye != Owned->dye", verify)
+        self.assertIn("VisibleComponents != Presentation->Garments.Num() + 1", verify)
+        self.assertIn("HomesteadLook::TunicTint(Owned->dye)", verify)
+
+    def test_native_wardrobe_checks_use_ui_and_real_save_keys(self):
+        fixture = (SOURCE / "UI" / "HomesteadNativeMenuTest.cpp").read_text()
+        route = function_body(fixture, "void AHomesteadSmokeTest::PrepareNativeWardrobeChecks(")
+        for operation in ("Expected->UnequipWearable", "Expected->EquipWearable", "Expected->RecolorWearable"):
+            self.assertIn(operation, route)
+        self.assertIn("Tap(EKeys::F5)", route)
+        self.assertIn("Tap(EKeys::F9)", route)
+        self.assertIn("Controller->TestQuickLoads == *LoadCalls", route)
+        self.assertNotIn("Controller->Sim.", route)
+        self.assertIn("Controller->Simulation().Serialize().c_str())) == Saved->Simulation", route)
+
+    def test_resume_is_distinct_pinned_nonreparse_and_uses_f9(self):
+        fixture = (SOURCE / "UI" / "HomesteadNativeMenuTest.cpp").read_text()
+        self.assertIn("FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DEVICE", fixture)
+        self.assertIn("GetDriveTypeW(*Root) != DRIVE_FIXED", fixture)
+        self.assertIn('const FString Segment(TEXT("/Saved/Automation/"))', fixture)
+        self.assertIn("static_cast<uint32>(Process) == FPlatformProcess::GetCurrentProcessId()", fixture)
+        route = function_body(fixture, "void AHomesteadSmokeTest::PrepareNativeResumeChecks(")
+        self.assertIn('Controller->SaveRoute.Mode != TEXT("test-sandbox")', route)
+        self.assertIn("Tap(EKeys::F9)", route)
+        self.assertIn("FMD5::HashBytes(Copied.GetData(), Copied.Num()) != Expected->Fingerprint", route)
+        self.assertIn("Controller->WorldId != Expected->World", route)
+        self.assertIn("Controller->WorldId == Expected->World", route)
+        self.assertNotIn("Controller->ApplySave(", route)
+        self.assertNotIn("Controller->Sim.Deserialize(", route)
+
     def test_portrait_reuses_shared_presentation(self):
         portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()
         self.assertIn("Character.GetEquipmentPresentation()", portrait)

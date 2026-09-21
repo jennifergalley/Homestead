@@ -60,6 +60,8 @@ private:
 
     void Prepare();
     void PrepareNativeMenuChecks();
+    void PrepareNativeWardrobeChecks();
+    void PrepareNativeResumeChecks(const FString& ProducerOutput);
     bool VerifyNativeMenuPresentation() const;
     void PreparePresentation();
     void PrepareGatheringChecks();
