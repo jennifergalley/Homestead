@@ -1,0 +1,16 @@
+{
+  "status": "promoted-qualified-restrained-grass-ground-increment",
+  "createdUtc": "2026-09-21T16:29:10.1611861+00:00",
+  "authority": "Live completion-driven latestPlayableBuildFirst policy and explicit request to complete delivery autonomously; no added art-approval gate.",
+  "sourceCheckpoint": "63960605eb823448fdb59f5480d12bea7ff8e223",
+  "deliveryCheckpoint": "abd1f8895e50aaf526012663023d59124c93904d",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01",
+  "profile": "jenny-review-v5",
+  "executableSha256": "9F741A1F6AAD7102656DA366BD39153406C9F9EB702CC663B86382AC245806EE",
+  "selectedPreviewSha256": "9E72E101D0995CCDA67CAD1740C9AE4670AD4CE3AFE6A3F0CD269250B854F2EC",
+  "normalLaunchValidated": true,
+  "humanGameLaunched": false,
+  "savesReadOrReset": false,
+  "previousCandidateRetained": "clearing-grove-03",
+  "scope": "Sparse grass/ground increment; original tree import03 FAILED/12 corners retained, no full woodland/art/GPU-performance approval. OpenSpec6/29."
+}

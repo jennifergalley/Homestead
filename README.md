@@ -26,25 +26,30 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-The selected **qualified provisional sparse-grove increment** is
-`Build\Releases\20260921-033354-2d257ba0\clearing-grove-03\Windows`.
+The selected **qualified restrained grass/ground increment** is
+`Build\Releases\20260921-033354-2d257ba0\grass-ground-01\Windows`.
 It replaces the purely decorative placeholder tree groups with15 reduced,
 textured Tree Small02 instances while retaining interactive resource plants,
-rocks and grass. Actual ordinary gameplay verified gathering, whole-crown
+rocks and outer-meadow grass. The clearing now adds512 native-scale authored
+grass clumps (297633 triangles) and a textured ground blend; all terrain
+positions, topology, normals, UVs and collision remain unchanged.
+Actual ordinary gameplay verified gathering, whole-crown
 framing, specific-tree inward blocking with natural sliding, and retreat.
-Existing dawn is very bright/golden; grass, ground and resource silhouettes
-remain unfinished. Original import03 remains **FAILED**:
+Existing dawn is very bright/golden, the vegetation is sparse, and resource
+silhouettes remain unfinished. Original tree import03 remains **FAILED**:
 twelve branch source-description tangent/binormal corners are explicitly
 qualified, not recast as a clean mesh or full woodland/performance/art approval.
-See `docs\research\environment-assets\tree-grove-delivery-01`.
-Prior grove01/02 have separate60-capped,720p-output screenshot-free timing;
-that is not a GPU/4K/headroom claim or an exact grove03 timing measurement.
+See `docs\research\environment-assets\grass-delivery-01`.
+Fresh matched grass01/grove03 screenshot-free routes measured approximately
+60 actor ticks/second at a60 cap and720p output, with no intervals over33.33ms;
+this is not GPU/Present timing,4K performance or uncapped-headroom evidence.
+Grove03 and all earlier candidates remain available.
 
 The candidate retains the native inventory/wardrobe integration from
 `wardrobe-ui-02`, which remains available for rollback. Its prior720p/4K
 menu/equipment/dye/save, separate-process reload and save-and-quit evidence is
 in `docs\research\character-assets\wardrobe-shipping-02\receipt.json`; that full
-matrix was not rerun for this tree increment. Compact item cards, readable
+matrix was not rerun for this environment increment. Compact item cards, readable
 selection/details and the larger portrait remain; lower-body portrait lighting
 is provisional. `Preview.json` is the authority for the human build.
 

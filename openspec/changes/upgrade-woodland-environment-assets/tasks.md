@@ -222,8 +222,10 @@ interval above33.33ms. End process physical memory was1001316352 versus
 959627264 bytes. These are single short runs and start/end snapshots, not
 GPU/Present timings, peak memory, uncapped headroom or a4K claim. Actual
 grass-ground images remain intensely golden under unchanged dawn lighting;
-the patch is sparse rather than lush. Selected candidate remains grove03
-until explicit delivery verification.
+the patch is sparse rather than lush. After normal-launch validation, the
+latest-verified-playable run policy selects grass-ground-01 with the samev5
+profile and byte-identical graphics preferences. Grove03 remains available;
+this qualified promotion does not assert coordinator/Jenny art approval.
 
 The added native-grass prerequisite check was found nested beneath the
 mutually exclusive tree branch after the native build. Actual sealing had
