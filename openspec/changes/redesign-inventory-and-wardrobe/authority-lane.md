@@ -114,10 +114,19 @@ confirmation, full hunger, invalid/nonfood/stored-only groups and failed state.
 This is the existing plan's explicit-source-first reconciliation contract, not
 a new food mechanic. Schema and prior published APIs remain unchanged.
 
-- [ ] Implement, verify and privately checkpoint selected-group eating.
+- [x] Implement, verify and privately checkpoint selected-group eating.
 
-Source and focused checks are implemented. The follow-up has not yet been
-compiled/executed: the coordinator paused new compiler admission to attribute
-an unexpected VCTIP process outside this lane's recorded launches. No new tool
-launch or unowned-process stop was attempted here. This source checkpoint does
-not inherit the earlier 22-scenario pass as proof of the new action.
+Source and focused checks were checkpointed as
+`5c75ea3ebf64454ab62ffce5909af4f5db287e6f` while the coordinator's compiler
+hold was active, explicitly without claiming verification. After the
+coordinator resolved the unrelated uploader and released admission, the main
+worker granted the short portable slot. The unchanged guarded adapter compiled,
+linked and ran that exact source successfully: **23 scenarios / 1882 checks**.
+No schema or existing API changes beyond adding `EatGroup`.
+
+Evidence: the same session's `files\native-tests-03`, with four independent
+`result.json`/`stdout.log` pairs. Compile simulation PID 37148, compile tests
+PID 47568, link PID 11644, test PID 53004 all exited 0, each with one total
+process, zero active at completion, verified dummy marker and zero observed
+owned endpoints. Compiler slot was released immediately afterward. Neither
+an engine nor any unowned process was started/stopped by this lane.
