@@ -101,3 +101,23 @@ UI/controller integration:
   wardrobe ownership. This lane does not edit Controller or its save routing.
 - The central plan remains owned by the UI lane. Its mixed persistence/UI/art
   tasks cannot be checked complete from this source-only test result.
+
+## Selected food group follow-up (2026-09-20)
+
+UI integration identified one missing selected-source operation: aggregate
+`Eat(Item)` consumes fungible groups in display order rather than the selected
+split stack. Add `EatGroup(groupId, expectedRevision)` for carried food only,
+sharing the existing food effects, preserving zero-time semantics, and staging
+the chosen group's debit with hunger and aggregate stock in one transaction.
+Test all three foods, selected non-first and one-unit groups, repeated/stale
+confirmation, full hunger, invalid/nonfood/stored-only groups and failed state.
+This is the existing plan's explicit-source-first reconciliation contract, not
+a new food mechanic. Schema and prior published APIs remain unchanged.
+
+- [ ] Implement, verify and privately checkpoint selected-group eating.
+
+Source and focused checks are implemented. The follow-up has not yet been
+compiled/executed: the coordinator paused new compiler admission to attribute
+an unexpected VCTIP process outside this lane's recorded launches. No new tool
+launch or unowned-process stop was attempted here. This source checkpoint does
+not inherit the earlier 22-scenario pass as proof of the new action.

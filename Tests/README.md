@@ -8,7 +8,9 @@ The wardrobe authority scenarios cover independent garment IDs, tunic/apron
 dependencies, footwear slots, 120-unit pack/chest capacity, full-pack swaps,
 280 cm chest reach, exact 12/6/8-Fiber recipes with the existing knife, per-item
 dye, stable split/merge/reorder groups, stale confirmations, and atomic save
-rejection. Existing gathering/crafting/building/gardening/storage checks continue
+rejection. `EatGroup` checks preserve the selected carried food stack, all three
+existing food effects, zero-time semantics and unchanged rejected/stale actions.
+Existing gathering/crafting/building/gardening/storage checks continue
 to exercise the same quantity authority and current-schema round trips.
 
 Portable saves now write/read `HOMESTEAD 4`; Unreal wrappers use version 5.

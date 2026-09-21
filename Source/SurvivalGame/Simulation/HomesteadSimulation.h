@@ -165,6 +165,7 @@ public:
     Result Harvest(int nodeId, Point player);
     Result Clear(int nodeId, Point player);
     Result Eat(Item item);
+    Result EatGroup(int groupId, std::uint64_t expectedRevision);
     Result Craft(Recipe recipe, Point player);
     Result Place(Piece kind, int cellX, int cellY, int rotation, Point player);
     Result Till(int cellX, int cellY, Point player);
