@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "phase": "exact four-asset acquisition approved; no source preparation or Unreal execution",
+  "provider": "Poly Haven",
+  "refreshedDate": "2026-09-21",
+  "runId": "20260921-033354-2d257ba0",
+  "sourceRoot": "Assets\\Source\\woodland-resources-20260921",
+  "assets": [
+    {
+      "id": "shrub_04",
+      "name": "Shrub 04",
+      "authors": {"Rico Cilliers": "All"},
+      "role": "leafy berry-bush base; source contains no berries",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/shrub_04",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "publisherLicenseUrl": "https://polyhaven.com/license",
+      "resolution": "1k",
+      "publisherAggregatePolycount": 47813,
+      "publisherLods": true,
+      "publisherAggregateDimensionsMm": [746.7864416539669, 186.9201734662056, 280.6698549538851],
+      "preview": "https://cdn.polyhaven.com/asset_img/thumbs/shrub_04.png?width=630&quality=95&v=8bfaf1f2",
+      "files": [
+        {"name": "shrub_04_1k.fbx", "bytes": 852540, "publisherMd5": "3b313098938fa2c6bbef69761685da05", "channel": "fbx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/shrub_04/shrub_04_1k.fbx"},
+        {"name": "shrub_04_diff_1k.png", "bytes": 1594051, "publisherMd5": "d5346901a01e78deb990c0770b644118", "channel": "Diffuse", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_04/shrub_04_diff_1k.png"},
+        {"name": "shrub_04_nor_dx_1k.png", "bytes": 1613982, "publisherMd5": "3a2a89661798b1d7d538fc6d4644071f", "channel": "nor_dx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_04/shrub_04_nor_dx_1k.png"},
+        {"name": "shrub_04_rough_1k.png", "bytes": 508074, "publisherMd5": "b9ba8768eec91fa9eb0a7754c0116812", "channel": "Rough", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_04/shrub_04_rough_1k.png"},
+        {"name": "shrub_04_ao_1k.png", "bytes": 348734, "publisherMd5": "807c78883b89139b0b1760b088a3a0a1", "channel": "AO", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_04/shrub_04_ao_1k.png"},
+        {"name": "shrub_04_alpha_1k.png", "bytes": 42906, "publisherMd5": "c899653f9884941bdb2ada187809f4c8", "channel": "Alpha", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_04/shrub_04_alpha_1k.png"},
+        {"name": "shrub_04_mask_1k.png", "bytes": 9682, "publisherMd5": "71e10fbe2c9062dc90f3541879f9a975", "channel": "Mask", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_04/shrub_04_mask_1k.png"}
+      ]
+    },
+    {
+      "id": "dry_branches_medium_01",
+      "name": "Dry Branches Medium 01",
+      "authors": {"Rico Cilliers": "All"},
+      "role": "three gatherable branch produce pieces",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/dry_branches_medium_01",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "publisherLicenseUrl": "https://polyhaven.com/license",
+      "resolution": "1k",
+      "publisherAggregatePolycount": 16803,
+      "publisherLods": null,
+      "publisherAggregateDimensionsMm": [1059.486210346222, 1299.152910709381, 340.9853130578995],
+      "preview": "https://cdn.polyhaven.com/asset_img/thumbs/dry_branches_medium_01.png?width=630&quality=95&v=5fecfa26",
+      "files": [
+        {"name": "dry_branches_medium_01_1k.fbx", "bytes": 699532, "publisherMd5": "ea1bc65806c3d8b43fceb5e21bedc65b", "channel": "fbx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/dry_branches_medium_01/dry_branches_medium_01_1k.fbx"},
+        {"name": "dry_branches_medium_01_diff_1k.jpg", "bytes": 778799, "publisherMd5": "2b01d9d1613c88496250f64828566f7c", "channel": "Diffuse", "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dry_branches_medium_01/dry_branches_medium_01_diff_1k.jpg"},
+        {"name": "dry_branches_medium_01_nor_dx_1k.png", "bytes": 5461006, "publisherMd5": "6f989a773f63764dd8229fefd23deb3c", "channel": "nor_dx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/dry_branches_medium_01/dry_branches_medium_01_nor_dx_1k.png"},
+        {"name": "dry_branches_medium_01_rough_1k.png", "bytes": 1702509, "publisherMd5": "edf4b02197772f969adbc34f5939bc06", "channel": "Rough", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/dry_branches_medium_01/dry_branches_medium_01_rough_1k.png"},
+        {"name": "dry_branches_medium_01_ao_1k.png", "bytes": 1604113, "publisherMd5": "1162fc1985a255e00bc5c24b8510adbf", "channel": "AO", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/dry_branches_medium_01/dry_branches_medium_01_ao_1k.png"}
+      ]
+    },
+    {
+      "id": "fir_sapling",
+      "name": "Fir Sapling",
+      "authors": {"Rob Tuytel": "photography", "Rico Cilliers": "modeling"},
+      "role": "small gatherable conifer, not mature canopy",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/fir_sapling",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "publisherLicenseUrl": "https://polyhaven.com/license",
+      "resolution": "1k",
+      "publisherAggregatePolycount": 433021,
+      "publisherLods": null,
+      "publisherAggregateDimensionsMm": [2742.7279949188232, 826.4130651950836, 1300.737977027893],
+      "preview": "https://cdn.polyhaven.com/asset_img/thumbs/fir_sapling.png?width=630&quality=95&v=bb4db69e",
+      "files": [
+        {"name": "fir_sapling_1k.fbx", "bytes": 19037468, "publisherMd5": "e89019c6c0e26796f36370603a34a4f1", "channel": "fbx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/fir_sapling/fir_sapling_1k.fbx"},
+        {"name": "fir_sapling_branches_diff_1k.png", "bytes": 5653081, "publisherMd5": "581f84d82d30f11b5f6104112a761cf9", "channel": "branches_diff", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_branches_diff_1k.png"},
+        {"name": "fir_sapling_branches_nor_dx_1k.png", "bytes": 5778902, "publisherMd5": "9dd4099b8789142780bd2d73d79d7ca8", "channel": "branches_nor_dx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_branches_nor_dx_1k.png"},
+        {"name": "fir_sapling_branches_rough_1k.png", "bytes": 1778567, "publisherMd5": "95642ea15e5161dc24093ce102c2d640", "channel": "branches_rough", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_branches_rough_1k.png"},
+        {"name": "fir_sapling_branches_ao_1k.png", "bytes": 1905510, "publisherMd5": "04a88b96e9d4904d642bf8840a3a2612", "channel": "branches_ao", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_branches_ao_1k.png"},
+        {"name": "fir_sapling_twigs_diff_1k.png", "bytes": 1400815, "publisherMd5": "5a6cd6fdb24a0af4c3ef48db3f7fb636", "channel": "twigs_diff", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_twigs_diff_1k.png"},
+        {"name": "fir_sapling_twigs_nor_dx_1k.png", "bytes": 1549276, "publisherMd5": "c450a1f9e65fb04b51706899eb7d3472", "channel": "twigs_nor_dx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_twigs_nor_dx_1k.png"},
+        {"name": "fir_sapling_twigs_rough_1k.png", "bytes": 431383, "publisherMd5": "0501710d2be754a4ffcda238ed18dcaf", "channel": "twigs_rough", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_twigs_rough_1k.png"},
+        {"name": "fir_sapling_twigs_ao_1k.png", "bytes": 111627, "publisherMd5": "3b9e778d9c2a05ea29d410ef9cd31238", "channel": "twigs_ao", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_twigs_ao_1k.png"},
+        {"name": "fir_sapling_twigs_alpha_1k.png", "bytes": 107682, "publisherMd5": "177123c2b5eaeee068be559ff78e54d0", "channel": "twigs_alpha", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_twigs_alpha_1k.png"},
+        {"name": "fir_sapling_twigs_mask_1k.png", "bytes": 114448, "publisherMd5": "1ec469407e655a646bd08d99b6eb824b", "channel": "twigs_mask", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_sapling/fir_sapling_twigs_mask_1k.png"}
+      ]
+    },
+    {
+      "id": "flower_empodium",
+      "name": "Flower Empodium",
+      "authors": {"Jenelle van Heerden": "photography", "Rico Cilliers": "modeling"},
+      "role": "flower resource with separately represented harvest state",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/flower_empodium",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "publisherLicenseUrl": "https://polyhaven.com/license",
+      "resolution": "1k",
+      "publisherAggregatePolycount": 5820,
+      "publisherLods": true,
+      "publisherAggregateDimensionsMm": [1322.8426575660706, 284.0941548347473, 268.3515117969364],
+      "preview": "https://cdn.polyhaven.com/asset_img/thumbs/flower_empodium.png?width=630&quality=95&v=0ea6897e",
+      "files": [
+        {"name": "flower_empodium_1k.fbx", "bytes": 139500, "publisherMd5": "8bf0a0dd9f232ba3f9008f4f0b8880f0", "channel": "fbx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/flower_empodium/flower_empodium_1k.fbx"},
+        {"name": "flower_empodium_diff_1k.png", "bytes": 1064075, "publisherMd5": "585e75b1c89f0dc01ef0b97cb23feec0", "channel": "Diffuse", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/flower_empodium/flower_empodium_diff_1k.png"},
+        {"name": "flower_empodium_nor_dx_1k.png", "bytes": 3352685, "publisherMd5": "a999ca5adcd511da1bb3aeb7839ba6eb", "channel": "nor_dx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/flower_empodium/flower_empodium_nor_dx_1k.png"},
+        {"name": "flower_empodium_rough_1k.png", "bytes": 4356, "publisherMd5": "61242233ef6582a6be132dd1439f6370", "channel": "Rough", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/flower_empodium/flower_empodium_rough_1k.png"},
+        {"name": "flower_empodium_ao_1k.png", "bytes": 973444, "publisherMd5": "36bc7d842cacc380c214cbc85f5ecb1a", "channel": "AO", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/flower_empodium/flower_empodium_ao_1k.png"},
+        {"name": "flower_empodium_alpha_1k.png", "bytes": 111029, "publisherMd5": "d7dc98ecc635eaca688f8d7214452ccd", "channel": "Alpha", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/flower_empodium/flower_empodium_alpha_1k.png"}
+      ]
+    }
+  ],
+  "notes": [
+    "Publisher-declared sizes/MD5 only; actual SHA256 belongs in the acquisition receipt after download.",
+    "No automatic FBX dependencies, archives, source blend scenes, GL normals, EXR or displacement.",
+    "Preview images are reference-only and not included in acquisition or shipping.",
+    "Actual part dimensions, slots, role-specific UVs/normals, triangle counts and LODs must be inspected."
+  ]
+}
