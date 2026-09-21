@@ -60,7 +60,15 @@ footwear and the permanent base never inherit garment dye.
 - [x] Sample existing movement/action deformation and inexpensive CPU previews;
   document limits rather than claim gameplay or aesthetic acceptance.
 - [x] Record source/license/output hashes, import/material mapping and commands.
-- [ ] Commit via existing LFS rules, verify private remote and push this branch.
+- [x] Commit via existing LFS rules, verify private remote and push this branch.
+
+Source delivery: `1425aff5ca585d2cc3d9d366922201784ffdfe5b`; runtime API
+delivery: `11ba95c`. Both are on the verified private branch. The source commit
+contains all three packed scenes, nine bra/briefs bases, twelve garments and
+three CPU review sheets. Its 35 new LFS objects uploaded successfully. All 21
+FBX round trips and 75 sampled body/action states passed; the read-only
+`check_modular_manifest.py` hash/coverage/catalog check passes against the
+persistent files. This records source delivery only, not Unreal acceptance.
 
 ## Added presentation-source ownership
 
