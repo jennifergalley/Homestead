@@ -26,8 +26,8 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-The selected **qualified restrained grass/ground increment** is
-`Build\Releases\20260921-033354-2d257ba0\grass-ground-01\Windows`.
+The selected **qualified camera/readability increment** is
+`Build\Releases\20260921-033354-2d257ba0\clearing-readability-02\Windows`.
 It replaces the purely decorative placeholder tree groups with15 reduced,
 textured Tree Small02 instances while retaining interactive resource plants,
 rocks and outer-meadow grass. The clearing now adds512 native-scale authored
@@ -39,11 +39,19 @@ Existing dawn is very bright/golden, the vegetation is sparse, and resource
 silhouettes remain unfinished. Original tree import03 remains **FAILED**:
 twelve branch source-description tangent/binormal corners are explicitly
 qualified, not recast as a clean mesh or full woodland/performance/art approval.
-See `docs\research\environment-assets\grass-delivery-01`.
+The sapling canopy now participates in the existing camera sweep without blocking
+the player. Actual settled-camera evidence removes the confirmed foreground
+occluder; an early-orbit near-side surface remains, so this is not all-angle
+camera completion. A controlled29-step harvest/clear/save/reload route verifies
+visible canopy and query lifetime. A70-minute fresh-world route passed27.95
+natural game hours, four actual harvested-node renewals and daylight/night/Rain
+observation without time edits. Night heroine/near-ground darkness remains.
+See `docs\research\environment-assets\readability-delivery-01` and
+`docs\endurance-playtesting.md` for actual evidence and timing/memory limits.
 Fresh matched grass01/grove03 screenshot-free routes measured approximately
 60 actor ticks/second at a60 cap and720p output, with no intervals over33.33ms;
 this is not GPU/Present timing,4K performance or uncapped-headroom evidence.
-Grove03 and all earlier candidates remain available.
+Grass01, grove03 and all earlier candidates remain available.
 
 The candidate retains the native inventory/wardrobe integration from
 `wardrobe-ui-02`, which remains available for rollback. Its prior720p/4K
@@ -68,7 +76,7 @@ open. In-game Settings includes **Save and quit**.
 To review the separately verified movement and action improvements, double-click
 **`Preview.cmd`** (requires PowerShell 7). It selects only the explicit candidate
 in `Preview.json`, checks its acceptance receipt/executable hash, and uses the
-persistent **`jenny-review-v5`** save profile. The tree promotion keeps this
+persistent **`jenny-review-v5`** save profile. This promotion keeps this
 existing profile and its progress; no reset or migration was performed. It uses
 UE save schema5 / portable4; old `jenny-review` progress remains
 untouched rather than being migrated or silently reset. It does not replace `Play.cmd`, import

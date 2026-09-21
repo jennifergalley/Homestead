@@ -702,3 +702,14 @@ Task5.4 is now complete from actual integrated measurements, not a clean-FPS/
 Navigation's guarded portable compile slot was released only after this cleanup;
 normal launcher verification and camera-candidate selection are the next delivery
 step. The live run has not been stopped.
+
+### Camera increment delivery
+
+Source/evidence checkpoint `3f4c5599914e0a4e700c7d30832a8d6858219bd7`
+was privately pushed and remote-verified. `clearing-readability-02` is now
+selected after both prospective and actual normal-launch ValidateOnly passes.
+Executable `BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F`;
+samev5 profile, byte-identical prior graphics preferences, no human launch/save
+read/reset. Grass01 and previous builds remain available. Historical pending
+receipts remain unchanged; new disposition is `readability-delivery-01`.
+Navigation is a separate next increment, not claimed in this executable.

@@ -2,41 +2,25 @@
 
 ## Current state and next visible goal
 
-Selected: qualified `grass-ground-01`, promotion `415878c3`; samev5 profile,
-earlier builds retained. Coordinator acceptance is recorded in
-`grass-delivery-01/coordinator-review.json`. Fourteen of29 top-level tasks are
-complete; tree import03 remains FAILED with twelve qualified branch basis
-corners. Detailed prior execution narrative is in `execution-history.md`.
+Selected: qualified `clearing-readability-02`, samev5 profile; grass01 and earlier
+builds retained. Normal-launch validation/promotion:
+`readability-delivery-01/promotion.json`. Fourteen of29 tasks complete.
+Tree import03 remains FAILED with twelve qualified branch basis corners;
+prior execution narrative is retained in `execution-history.md`.
 
-Confirmed attribution: resource21 sapling produce cones occupy the near-camera
-view and ignored the existing ECC_Camera spring-arm sweep. Camera-only queries
-are verified in the settled original frame438 and matching runtime sweep.
-The focused controlled clearing fixture passed29 steps, including harvest,
-restore, permanent clear and cleared-save reload. Early orbit frame425 can still
-show a near-side surface; this is not all-angle camera-quality completion.
-Do not blame new grass, tint the inherently
-patchy ground diffuse, or infer a lighting bug from golden6am screenshots.
+Camera-only sapling queries remove the confirmed settled-view obstruction.
+The controlled29-step harvest/clear/save/reload fixture passed. Natural70min
+play passed27.94646 game hours, four harvested-node renewals and actual daylight/
+night/Rain observation, with timing/memory limits disclosed. Evidence:
+`readability-camera-01` and `readability-endurance-01`. No silent time edits.
 
-Reuse the ordinary/endurance/smoke routes for useful natural dawn-to-daylight
-play and later night/weather when reached, plus one build/farm/resource-regrowth
-regression. The existing fresh-world endurance route now also supports a70-minute
-observation, needed to reach actual24-hour branch regrowth and the next natural
-morning; this is a finite gameplay route, not an external timed kill. The180s
-fresh Shipping route and70min `readability-endurance-long-01` passed.
-Completed camera/build evidence is sealed in `readability-camera-01/receipt.json`;
-the natural result is in `readability-endurance-01/receipt.json`:27.94646 natural
-hours, four actual harvested-node renewals, daylight/night/Rain frames and actual
-timing/memory limits. Promotion remains pending. Disclose the controlled fixture;
-no silent time/lighting edits.
-Update only demonstrably obsolete UI/free-outfit/quantity assumptions. Reuse
-existing input/cache/tool/root-only controls and completion-driven cancellation;
-no new timeout/kill framework or historical-tool recertification round.
-
-Next visible result: readable mapped-control clearing/tree encounters in the
-actual game, with confirmed camera correction and one relevant gameplay result.
-Resource silhouettes, foliage motion, construction/time/weather and broader
-render/performance coverage remain explicit gaps. Native clouds are optional.
-Parent owns the separate read-only UI evidence/task reconciliation.
+Next visible goal: integrate Jenny's natural directional-menu navigation through
+the existing helpers, then verify returning to ordinary world interactions.
+The parallel UI owner owns that source; shared engine work is serialized.
+Early-orbit near-side surface, dark night heroine/ground, pale outer terrain,
+resource proxies, foliage motion and constructed-house/plot/broader render
+coverage remain open. Do not tint patchy ground or diagnose lighting from golden
+dawn alone; no blanket historical recertification or new test framework.
 
 ## 1. Authorization and baseline
 

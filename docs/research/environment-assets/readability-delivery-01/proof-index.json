@@ -1,0 +1,136 @@
+{
+  "status": "passed-qualified-camera-natural-play-increment",
+  "evidence": [
+    {
+      "sha256": "DD7C515BD0BE92CAC77A4FEBA48D10563C484DD3CB1468EE2393E7E25E114E4A",
+      "historicalStatusPreserved": true,
+      "path": "camera-evidence.json"
+    },
+    {
+      "sha256": "31B7CB81F9FC07A6F93B41D8E392342AC24783FAB134F0A8E621808093FCDF56",
+      "historicalStatusPreserved": true,
+      "path": "natural-play-evidence.json"
+    }
+  ],
+  "checkpoint": "3f4c5599914e0a4e700c7d30832a8d6858219bd7",
+  "executableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "actualNaturalRuntime": {
+    "status": "passed",
+    "reason": "Fixed duration/participation/action/save criteria evaluated.",
+    "freshWorld": true,
+    "completionDriven": true,
+    "debugBindingQueryAvailable": false,
+    "dayMinutes": 60,
+    "raining": true,
+    "night": false,
+    "litGuardVersion": 1,
+    "litGuardTicks": 251934,
+    "startupViewMode": 3,
+    "startupLighting": true,
+    "startupShaderComplexity": false,
+    "startupShowFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1",
+    "effectiveF5DebugBinding": "",
+    "effectiveF9DebugBinding": "",
+    "f9NoScreenshotChecks": 1,
+    "presentation": {
+      "available": true,
+      "viewMode": 3,
+      "lighting": true,
+      "shaderComplexity": false,
+      "showFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1"
+    },
+    "pid": 45380,
+    "wallSeconds": 4200.2634942010045,
+    "targetSeconds": 4200,
+    "pausedSeconds": 8.291388094425201,
+    "unpausedSeconds": 4191.967790104449,
+    "engineUnpausedSeconds": 4191.968417882919,
+    "movingSeconds": 3346.9753918088973,
+    "distanceCm": 367834.5718027734,
+    "initialHour": 6,
+    "hour": 33.94645611913294,
+    "actionHours": 0,
+    "naturalGameHours": 27.94645611913294,
+    "gathers": 8,
+    "eats": 4,
+    "waypoints": 628,
+    "manualSaves": 15,
+    "loads": 1,
+    "exactSameWorldRoundTrip": true,
+    "autosaveSlots": 3,
+    "autosaveWrites": 17,
+    "resourceRefreshes": 4,
+    "verifiedHarvestedResourceRegrowth": 4,
+    "navigationFailures": 0,
+    "recoveryAttempts": 0,
+    "captures": 8,
+    "timedFrames": 247556,
+    "meanTickMs": 16.66823037859385,
+    "maxTickMs": 41.85179993510246,
+    "p95TickMs": 16.900000000000002,
+    "p99TickMs": 17,
+    "timingLimits": "Instrumented actor wall-tick cadence, not GPU/Present/scanout. First60s and capture+2s excluded;1000ms histogram overflow bin."
+  },
+  "memoryTrends": {
+    "physical_bytes": {
+      "first": 1005182976.0,
+      "last": 344141824.0,
+      "min": 340344832.0,
+      "max": 1050480640.0,
+      "netChange": -661041152.0
+    },
+    "virtual_bytes": {
+      "first": 1977700352.0,
+      "last": 1941598208.0,
+      "min": 1936986112.0,
+      "max": 2043858944.0,
+      "netChange": -36102144.0
+    },
+    "object_slots_in_use": {
+      "first": 35150.0,
+      "last": 35143.0,
+      "min": 35108.0,
+      "max": 35170.0,
+      "netChange": -7.0
+    },
+    "resources": {
+      "first": 98.0,
+      "last": 98.0,
+      "min": 98.0,
+      "max": 98.0,
+      "netChange": 0.0
+    },
+    "structures": {
+      "first": 0.0,
+      "last": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "netChange": 0.0
+    },
+    "plots": {
+      "first": 0.0,
+      "last": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "netChange": 0.0
+    }
+  },
+  "profile": "jenny-review-v5",
+  "saveDisposition": "Same profile; no save read/reset/migration/deletion.",
+  "graphics": {
+    "sha256": "00F9289D8B5F3F16A386B0C83CBAA9C55E7EAF9DFFD7113614EC33A4B4A7852C",
+    "sourceUnchanged": true,
+    "source": "Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini",
+    "destination": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini"
+  },
+  "knownLimitations": [
+    "Qualified settled sapling-camera obstruction fix, not all-angle camera completion; a near-side surface remains during early orbit settling.",
+    "Natural daylight/night/Rain observed without clock edits. Night heroine/hair/near ground remains dark; pale bare outer terrain and primitive resources remain.",
+    "Controlled29-step camera lifecycle proves actual harvest/clear/save/reload queries, not168-hour natural sapling renewal.",
+    "70min actual1080p-output/60-capped actor cadence and sampled memory, not GPU/Present/4K/uncapped headroom/peak memory/leak freedom; internal temporal input resolution unmeasured.",
+    "No constructed-house/plot scenario or complete UI/save/retry/reset/input-device matrix. Requested natural directional-menu navigation is not included yet.",
+    "Original tree-import03 remains FAILED with exactly12 qualified branch source-description tangent/binormal corners; prior build-monitor qualifications remain.",
+    "Samev5 profile; no human save read/reset/migration. Original player/launcher, music, accepted assets and all previous candidates retained.",
+    "Environment14/29, wardrobe19/44: no full woodland, performance or Jenny art-acceptance claim."
+  ]
+}

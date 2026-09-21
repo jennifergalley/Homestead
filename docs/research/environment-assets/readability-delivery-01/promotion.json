@@ -1,0 +1,15 @@
+{
+  "status": "promoted-qualified-camera-natural-play-increment",
+  "createdUtc": "2026-09-21T18:58:06.1059991+00:00",
+  "authority": "Standing completion-driven latestPlayableBuildFirst policy; verified camera/regrowth increment, no new art-approval gate.",
+  "sourceCheckpoint": "3f4c5599914e0a4e700c7d30832a8d6858219bd7",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02",
+  "profile": "jenny-review-v5",
+  "executableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "selectedPreviewSha256": "D8F2E6F2A1A2D6172851BE7C342F977A3D4B0A3C9CA42D71AAB44F7E017FCB2C",
+  "normalLaunchValidated": true,
+  "humanGameLaunched": false,
+  "savesReadOrReset": false,
+  "previousCandidateRetained": "grass-ground-01",
+  "scope": "Settled sapling-camera correction, controlled harvest/clear/reload lifecycle,70min natural play/regrowth. Earlier-orbit surface/night darkness/proxies/full woodland/GPU-performance remain qualified. Environment14/29."
+}

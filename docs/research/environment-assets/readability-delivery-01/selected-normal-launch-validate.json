@@ -1,0 +1,14 @@
+{
+  "Executable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "WorkingDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\Windows",
+  "Arguments": [
+    "-HomesteadPreviewProfile=jenny-review-v5",
+    "-Res=0x0wf",
+    "-UserDir=E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\Windows\\SurvivalGame"
+  ],
+  "Profile": "jenny-review-v5",
+  "Candidate": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02",
+  "Checkpoint": "3f4c5599914e0a4e700c7d30832a8d6858219bd7",
+  "ExecutableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "Receipt": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\acceptance-receipt.json"
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "previewSaveRoutingVersion": 1,
+  "executableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "checkpoint": "3f4c5599914e0a4e700c7d30832a8d6858219bd7",
+  "privateRemoteVerified": true,
+  "proofIndex": "Verification\\proof-index.json",
+  "proofIndexSha256": "3F6BC087D93406248F0F68D2CBE8904B02AB3646E79D6F3CBF9DFA384A133EE4",
+  "scope": "Qualified sapling-camera fix and actual natural day-cycle/resource renewal; not full environment or UI acceptance.",
+  "knownLimitations": [
+    "Qualified settled sapling-camera obstruction fix, not all-angle camera completion; a near-side surface remains during early orbit settling.",
+    "Natural daylight/night/Rain observed without clock edits. Night heroine/hair/near ground remains dark; pale bare outer terrain and primitive resources remain.",
+    "Controlled29-step camera lifecycle proves actual harvest/clear/save/reload queries, not168-hour natural sapling renewal.",
+    "70min actual1080p-output/60-capped actor cadence and sampled memory, not GPU/Present/4K/uncapped headroom/peak memory/leak freedom; internal temporal input resolution unmeasured.",
+    "No constructed-house/plot scenario or complete UI/save/retry/reset/input-device matrix. Requested natural directional-menu navigation is not included yet.",
+    "Original tree-import03 remains FAILED with exactly12 qualified branch source-description tangent/binormal corners; prior build-monitor qualifications remain.",
+    "Samev5 profile; no human save read/reset/migration. Original player/launcher, music, accepted assets and all previous candidates retained.",
+    "Environment14/29, wardrobe19/44: no full woodland, performance or Jenny art-acceptance claim."
+  ],
+  "previousSelection": "previous-preview.json",
+  "testSaves": "Same jenny-review-v5; existing saves untouched.",
+  "normalLaunch": "QA-off/native-borderless; no automated controls/mute/quit. ValidateOnly, no human launch.",
+  "graphicsPreferencesSha256": "00F9289D8B5F3F16A386B0C83CBAA9C55E7EAF9DFFD7113614EC33A4B4A7852C"
+}
