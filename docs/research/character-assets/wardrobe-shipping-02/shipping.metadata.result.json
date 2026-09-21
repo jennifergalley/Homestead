@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 1.1372222,
+  "observedChildren": [
+    {
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "pid": 39780,
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "parentPid": 45300,
+      "startUtc": "2026-09-21T11:29:05.1451738Z",
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "admitted": true
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 490.4254,
+      "tcp": [],
+      "udp": []
+    }
+  ],
+  "exportCorroboration": null
+}

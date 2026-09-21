@@ -46,7 +46,7 @@ All engine execution belongs to the coordinator's single approved lane.
 
 ## 5. Native shell, input and page integration
 
-- [ ] 5.1 Add narrow native UMG/Slate shell and dependencies; verify shared build succeeds and no duplicate Canvas menu drawing.
+- [x] 5.1 Add narrow native UMG/Slate shell and dependencies; verify shared build succeeds and no duplicate Canvas menu drawing.
 - [ ] 5.2 Route accepted menu input once through existing prompt classifier; verify noise/held-stick stability, deliberate switching and test input isolation.
 - [ ] 5.3 Implement labeled icon tabs, regions and four-way grid navigation; verify scroll/partial rows/empty states/focus restoration on controller and keyboard.
 - [ ] 5.4 Build real carried/chest grids and hover/focus details, then equipment/preview; verify truthful counts/capacity and no hover mutation.
@@ -131,3 +131,15 @@ separate quit attempt failed its entry sequence; wrapper exit0 is not a
 native-test pass. Its fixture correction awaits rebuilt runtime verification.
 Ordinary mapped walk/turn/stop/orbit/gather recorded306 real frames over43.7133s,
 not a performance or all-combination coverage pass. OpenSpec remains10/44.
+
+Corrected candidate02: frozen UI5d238f5 integrated as0067821, then both genuine
+Shipping compiles/link/manifest/metadata and fresh staging passed, reusing the
+unchanged cook. Actual720p/4K43-step producers, both separate-process consumers,
+and corrected real save-and-quit passed with clean guarded termination.
+Firsthand720p review confirms the native shell without duplicate Canvas drawing,
+compact inventory card, readable selected tab, real details, contained scrolling
+actions and clear portrait controls. This completes5.1 (now11/44), not all
+navigation/visual/coverage/delivery tasks. The larger portrait retains dark
+lower-body/shoe lighting; human aesthetic/controller approval is not claimed.
+Corrected ordinary play records302 frames over43.0953s with actual berry harvest.
+The native StartupProbe observations compile but were not separately run.

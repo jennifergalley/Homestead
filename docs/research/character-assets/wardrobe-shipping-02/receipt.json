@@ -1,0 +1,400 @@
+{
+  "status": "corrected-functional-and-basic-layout-evidence-not-full-project-acceptance",
+  "createdUtc": "2026-09-21T11:36:16.4117273+00:00",
+  "uiSourceCommit": "5d238f55dd28ecfc3ef79355dc7b70526fe2c574",
+  "integrationCommit": "006782178b79df71a2e1a6188fe3231e65b6b306",
+  "compiledUncommittedChanges": "Shared explicit quit entry and small existing StartupProbe observations, pinned below.",
+  "executableSha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+  "cook": "Unchanged verified wardrobe-cook-01 reused; no recook.",
+  "results": [
+    {
+      "native": "passed",
+      "guard": "passed",
+      "case": "wardrobe-menu-720-02",
+      "passedSteps": 43
+    },
+    {
+      "native": "passed",
+      "guard": "passed",
+      "case": "wardrobe-menu-4k-02",
+      "passedSteps": 43
+    },
+    {
+      "native": "passed",
+      "guard": "passed",
+      "case": "wardrobe-resume-720-02",
+      "passedSteps": 4
+    },
+    {
+      "native": "passed",
+      "guard": "passed",
+      "case": "wardrobe-resume-4k-02",
+      "passedSteps": 4
+    },
+    {
+      "native": "passed",
+      "guard": "passed",
+      "case": "wardrobe-quit-02",
+      "passedSteps": 4
+    }
+  ],
+  "ordinary": {
+    "sampleHz": 8,
+    "actualGathering": true,
+    "frames": 302,
+    "durationSeconds": 43.0953,
+    "nativeMenuTestFlag": false
+  },
+  "firsthand720pReview": "Compact Knife card, readable selected Carried label, actual item details, contained scrolling actions and clear orbit controls. Portrait is substantially larger and no longer blown out; lower-body/shoe lighting remains dark.",
+  "limitations": [
+    "Basic usability evidence is not human aesthetic/controller approval or all44 OpenSpec tasks.",
+    "4K captures are real; independent coordinator image review remains separate.",
+    "Native StartupProbe observations compile, but historical offline-startup wrapper was not launched; default-selection evidence is unconditional source and ordinary non-NativeMenuTest QA route.",
+    "Sampled ordinary frames are not an FPS test; menu timing excludes startup/readback.",
+    "Candidate01 and failed quit01 remain preserved; no retroactive pass.",
+    "Source/cook/guard ownership and selected preview remain unchanged at sealing; selection is a separate delivery action."
+  ],
+  "selectedPreviewSha256": "C1262ACE336ABDEFD3A564046DD4F233A4AFDA19B9E6C2460886ACD263820904",
+  "sourcePins": [
+    {
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.cpp",
+      "sha256": "182A6DD1E0E2DE1B8CF8F97D6F941E6BECDD25B21CDBDC858060674DE4F18FAE"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.h",
+      "sha256": "02F44916734E0C0FA52678F2C7D63263E7530526C767B3DAD6C45AA1386590AF"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.cpp",
+      "sha256": "FB286AA1D89EE02373A87606880E10AC601729829372F0B33C6728E5B74A7146"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.h",
+      "sha256": "95536A0CAB9AF545069DE1ADCB2E0FDF96C50E964B4CA6735377C4A0FBF897AF"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadNativeMenuTest.cpp",
+      "sha256": "641B7F0A5A511220F660D7E826B3D0B18A11208C3B21A1F71A2EEC46104FEC19"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadStartupProbe.cpp",
+      "sha256": "24F7F33A5E5B99A86C1F6B87261A23F111E9AD1539D529DFF8E4C614BC546577"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadController.h",
+      "sha256": "B677BE355FF448582413E039E6CB08ADD4637DBC0D95CDED372385706A48150F"
+    },
+    {
+      "path": "Tests\\Test-CompilerLeaf.ps1",
+      "sha256": "ADB24AD5A137A8C1DFAD912D258F1A73E21D2B9ACC89FFFDE41966BE12B1A01A"
+    },
+    {
+      "path": "Scripts\\Build-AuthoringProbe.ps1",
+      "sha256": "98344EBDB070B8D6EEA128EA1534278186DCEA646DC0A876FFF4F5219A0CA6D8"
+    },
+    {
+      "path": "Scripts\\Invoke-ShippingQA.ps1",
+      "sha256": "B1019E6502BC9530C28FF393EC30B8016620257D864C3032F24836A3F818CB29"
+    },
+    {
+      "path": "Scripts\\Test-Game.ps1",
+      "sha256": "EDA0E6070908AB96B85A85805234EEE6F659F4678A117F315B56EA5123F39473"
+    }
+  ],
+  "files": [
+    {
+      "sha256": "4F2104B00DAC0895651E598D679E6AB4A6B21BB51366BC7190E51593CFB7B033",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\qa-guard-result.json",
+      "bytes": 167895,
+      "copy": "wardrobe-menu-720-02.qa-guard-result.json"
+    },
+    {
+      "sha256": "0AD682F3A76D0694C1D8660A17A1E271F2047CA0320D8B030BB12B7F9F3036AA",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\qa-launch.json",
+      "bytes": 2005,
+      "copy": "wardrobe-menu-720-02.qa-launch.json"
+    },
+    {
+      "sha256": "806713AE707BDAD83C3AD441ED0E35BE6F8E627E4BD5FD7795EE639FCA915047",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\smoke-result.txt",
+      "bytes": 2816,
+      "copy": "wardrobe-menu-720-02.smoke-result.txt"
+    },
+    {
+      "sha256": "A1646E1987E6B198493A2D3CEBDB9DE21285CF5E6DFE0F6731921E2DD9397E85",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\qa-guard-result.json",
+      "bytes": 165387,
+      "copy": "wardrobe-menu-4k-02.qa-guard-result.json"
+    },
+    {
+      "sha256": "654DC749A6807C4A763000165AACDEF8F32C88A71AACDA01DCBE46601834B5DF",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\qa-launch.json",
+      "bytes": 2002,
+      "copy": "wardrobe-menu-4k-02.qa-launch.json"
+    },
+    {
+      "sha256": "AF537C8BAC67CD1973CAB74FFC12DDDE14214FC731B7593771FF008B19EF9C8A",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\smoke-result.txt",
+      "bytes": 2816,
+      "copy": "wardrobe-menu-4k-02.smoke-result.txt"
+    },
+    {
+      "sha256": "81EBB4847D123E71A88F3F3081F8E1FB43A6BA88CADA18FD1DD8EE4773D378E7",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-02\\qa-guard-result.json",
+      "bytes": 60413,
+      "copy": "wardrobe-resume-720-02.qa-guard-result.json"
+    },
+    {
+      "sha256": "05050CFDB4F26C3D4110A1D2D5D7ADE369C6649F7AA4AB52318C5FFE5D5BB6B9",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-02\\qa-launch.json",
+      "bytes": 2613,
+      "copy": "wardrobe-resume-720-02.qa-launch.json"
+    },
+    {
+      "sha256": "58160094FA4FED253E10B1ED423CBBE29EC0A82DDD45EC5D80401A47F60B5721",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-02\\smoke-result.txt",
+      "bytes": 781,
+      "copy": "wardrobe-resume-720-02.smoke-result.txt"
+    },
+    {
+      "sha256": "E16DBA1771D04F8597987EBF95E32D966B7787F1C291D9E9F92CB7637F4D136B",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-4k-02\\qa-guard-result.json",
+      "bytes": 60322,
+      "copy": "wardrobe-resume-4k-02.qa-guard-result.json"
+    },
+    {
+      "sha256": "B6961CE683EDFBFC774DB0F24B443DB3076BEA70ACB4F804684461E914C75DCC",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-4k-02\\qa-launch.json",
+      "bytes": 2606,
+      "copy": "wardrobe-resume-4k-02.qa-launch.json"
+    },
+    {
+      "sha256": "58E27AF13C2DF19A54606DE2EF4C38341F05D760B6919D662542EE93F0DA09C8",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-4k-02\\smoke-result.txt",
+      "bytes": 780,
+      "copy": "wardrobe-resume-4k-02.smoke-result.txt"
+    },
+    {
+      "sha256": "F7399DA0234EC86891C2FA518E9FBA606FBB1B674CB5F12682D08CF9A172055F",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-quit-02\\qa-guard-result.json",
+      "bytes": 56660,
+      "copy": "wardrobe-quit-02.qa-guard-result.json"
+    },
+    {
+      "sha256": "DF215847B4DB9041594EF641A0F45F4AC477E28D09D0CC896EE42446C9C6C619",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-quit-02\\qa-launch.json",
+      "bytes": 2014,
+      "copy": "wardrobe-quit-02.qa-launch.json"
+    },
+    {
+      "sha256": "8F493CF9B2B67852496AB2662DD9C4E784FE5253FD7B859C0276BCE30C95E978",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-quit-02\\smoke-result.txt",
+      "bytes": 574,
+      "copy": "wardrobe-quit-02.smoke-result.txt"
+    },
+    {
+      "sha256": "505B9F044E846B6FFCB2824AFC1EB27CDD98BAD8B7253AF0080B33742429B25D",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-inventory.png",
+      "bytes": 410142,
+      "copy": "wardrobe-menu-720-02.native-inventory.png"
+    },
+    {
+      "sha256": "0FD8BEE04090E0D5AC4A2E4F50FA17E7EEF13E5181490E9A68C89D4F56BB0EDE",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-inventory.frame.txt",
+      "bytes": 5583,
+      "copy": "wardrobe-menu-720-02.native-inventory.frame.txt"
+    },
+    {
+      "sha256": "47CF53617188BB870EA1CA5620F49BCFB5A38F2BCDB4CB9F1CC348437E98F449",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-wardrobe-restored.png",
+      "bytes": 424893,
+      "copy": "wardrobe-menu-720-02.native-wardrobe-restored.png"
+    },
+    {
+      "sha256": "812D995665E3113D00044B30F2731CB200387600F2B19E167E47A90D29494B73",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-wardrobe-restored.frame.txt",
+      "bytes": 5572,
+      "copy": "wardrobe-menu-720-02.native-wardrobe-restored.frame.txt"
+    },
+    {
+      "sha256": "D904EBFF9CF5E5538E78AF1A9B144E84C4FC9712E1514602495D78A120B118D8",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-settings.png",
+      "bytes": 335284,
+      "copy": "wardrobe-menu-720-02.native-settings.png"
+    },
+    {
+      "sha256": "7255AE98720E31C714BB066D4B0683B6AF3632CF91F978B928ABB81A8355CE40",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-save-error.png",
+      "bytes": 144151,
+      "copy": "wardrobe-menu-720-02.native-save-error.png"
+    },
+    {
+      "sha256": "FEB5EF8C6445AFB8F1865CE86A97521B857D7FCE2217CFBFE40C50374D648DA0",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-wardrobe-fixture.json",
+      "bytes": 2515,
+      "copy": "wardrobe-menu-720-02.native-wardrobe-fixture.json"
+    },
+    {
+      "sha256": "549369330795D269D14E16A31E4436F8D34A2B610351F5A6548D43A87399DA44",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-02\\native-wardrobe-fixture.sav",
+      "bytes": 4650,
+      "copy": "wardrobe-menu-720-02.native-wardrobe-fixture.sav"
+    },
+    {
+      "sha256": "9745DE1EE81B48EFF77049834EA7C3441CEC235851DAF3691424E1A69C1578C3",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-inventory.png",
+      "bytes": 2821487,
+      "copy": "wardrobe-menu-4k-02.native-inventory.png"
+    },
+    {
+      "sha256": "80986C195755602C02D43FD67CB4136C3C3818277B5A1AC0CD7B2FB30CD3F91B",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-inventory.frame.txt",
+      "bytes": 5596,
+      "copy": "wardrobe-menu-4k-02.native-inventory.frame.txt"
+    },
+    {
+      "sha256": "67360CC8480892C7D271FE8F317AA0B466ADDD4659E514309CDAA216328E3D12",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-wardrobe-restored.png",
+      "bytes": 2869485,
+      "copy": "wardrobe-menu-4k-02.native-wardrobe-restored.png"
+    },
+    {
+      "sha256": "5C8C2043D2F1860FBA0DAE03E1CCC78CABA7142E1A7BE315F902993B8F66846D",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-wardrobe-restored.frame.txt",
+      "bytes": 5585,
+      "copy": "wardrobe-menu-4k-02.native-wardrobe-restored.frame.txt"
+    },
+    {
+      "sha256": "EEEB69BAB26B183F0C7E1AF1CB33AD370BBE8BB776A677DACC3A25F120569A17",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-settings.png",
+      "bytes": 2200688,
+      "copy": "wardrobe-menu-4k-02.native-settings.png"
+    },
+    {
+      "sha256": "C293A3474951BEC996A20B8AD07EAD39240AAEDD69E2578A79A9A5A273748E2C",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-save-error.png",
+      "bytes": 678226,
+      "copy": "wardrobe-menu-4k-02.native-save-error.png"
+    },
+    {
+      "sha256": "2B2131D730F6BB6FC9A6F8F9E8BDA356657FD8C62B9FDA2251D356382D15694E",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-wardrobe-fixture.json",
+      "bytes": 2517,
+      "copy": "wardrobe-menu-4k-02.native-wardrobe-fixture.json"
+    },
+    {
+      "sha256": "D47F73C7A4A09D0ED08AEF47C89DE984158D29217F197B62BA93216CDCDDA7CE",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-4k-02\\native-wardrobe-fixture.sav",
+      "bytes": 4652,
+      "copy": "wardrobe-menu-4k-02.native-wardrobe-fixture.sav"
+    },
+    {
+      "sha256": "BC0FC854AB5B0671C2B56CD1CE02C9559A425CEC863FF7691496BE059893949E",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\final-native-product.json",
+      "bytes": 385,
+      "copy": "shipping.final-native-product.json"
+    },
+    {
+      "sha256": "127764147469BD90E1729C32D00BC851A4E0C3E14D7AAA49C9C50216A7337A29",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\metadata\\result.json",
+      "bytes": 603,
+      "copy": "shipping.metadata.result.json"
+    },
+    {
+      "sha256": "99F6F163246CACC549F7FC8ACD22BF6BD058BBB3E0C6B9DA2EC360EA1AC3D8B6",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\metadata\\native-products.json",
+      "bytes": 1210,
+      "copy": "shipping.metadata.native-products.json"
+    },
+    {
+      "sha256": "0FAFBEA080B02ABBF858563E3BF7C82EFD441AF45E71BBB55865026F60B62232",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\compile0\\result.json",
+      "bytes": 1052484,
+      "copy": "shipping.compile0.result.json"
+    },
+    {
+      "sha256": "CE4AC3B098B91FAFB5F5BEE5EB1B51131395976C739203DC9A49CD9F9B973F79",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\compile1\\result.json",
+      "bytes": 1082977,
+      "copy": "shipping.compile1.result.json"
+    },
+    {
+      "sha256": "6DE9EFD5307EA5BF0C1FBEE78945DD0134C14B008876A57257517CFC31BD46D9",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\link2\\result.json",
+      "bytes": 564308,
+      "copy": "shipping.link2.result.json"
+    },
+    {
+      "sha256": "8325F0186F53DA1A0FF88880F4D083C14909443F7C91C79C3AE2065C32E2F9FB",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-build-02\\manifest-01\\result.json",
+      "bytes": 35437,
+      "copy": "shipping.manifest-01.result.json"
+    },
+    {
+      "sha256": "D8358D20EA7F29D79B1BBA78EF5A34C5568D9A5CF6EE4EF0022FDA8940AF0A02",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-plan-02\\actions.json",
+      "bytes": 148417,
+      "copy": "shipping.actions.json"
+    },
+    {
+      "sha256": "A6205C9318AE48192AEAF58E8D53D4903D9755CA60E0E8CC7B3464980CB1D41E",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-shipping-plan-02\\result.json",
+      "bytes": 1505,
+      "copy": "shipping.export-result.json"
+    },
+    {
+      "sha256": "5A613F6E3AFC8275A927C7C2198644CA9015750AE34BD4DDEA613B55CDF7964E",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-08\\game\\result.json",
+      "bytes": 3399,
+      "copy": "shipping.resource-result.json"
+    },
+    {
+      "sha256": "57D39BE81DF89CC361BEF72A48AC1ABFBD1AAC563C57B026B3CC6FD8C2593945",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-stage-02\\result.json",
+      "bytes": 184261,
+      "copy": "stage.result.json"
+    },
+    {
+      "sha256": "448669DAC1764A8D18DACBB5DDF3EB59EB27BBBEB80641021992837B87D64B13",
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\build-receipt.json",
+      "bytes": 686,
+      "copy": "stage.build-receipt.json"
+    },
+    {
+      "sha256": "C7FEDF280B0E1C9340A4C70B54B5D14C2A259043C9EF1F7404575CAB302B4B9A",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\wardrobe-walk-02\\observations.txt",
+      "bytes": 1245,
+      "copy": "ordinary.observations.txt"
+    },
+    {
+      "sha256": "986AA7B0461A580B2352FB1D3F51FA35FAA81362E987606CA229233B387824D7",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\wardrobe-walk-02\\telemetry.csv",
+      "bytes": 113135,
+      "copy": "ordinary.telemetry.csv"
+    },
+    {
+      "sha256": "E3FF19E4453E3D118B072EE443B1E1B973E07B6C89A8AB44832BC3AAF280B46A",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\wardrobe-walk-02\\motion-review.json",
+      "bytes": 3243,
+      "copy": "ordinary.motion-review.json"
+    },
+    {
+      "sha256": "F468D179ABDD1E807EBB7A7E97422B81054F294C5DA67C4E7A89FEC4A5E487AB",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\wardrobe-walk-02\\presentation-settings.txt",
+      "bytes": 7172,
+      "copy": "ordinary.presentation-settings.txt"
+    },
+    {
+      "sha256": "524389497A10C2F6317FF2951D085E12D18CDAECBAA4FBE0808C1271BB819533",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\wardrobe-walk-02\\qa-guard-result.json",
+      "bytes": 231625,
+      "copy": "ordinary.qa-guard-result.json"
+    },
+    {
+      "sha256": "0D282FA19828B115C24FE332849572E54A685B9940A10A94C6D80DFFFB209300",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\wardrobe-walk-02\\qa-launch.json",
+      "bytes": 1946,
+      "copy": "ordinary.qa-launch.json"
+    }
+  ]
+}

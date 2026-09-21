@@ -135,4 +135,19 @@ try {
     Remove-Item -LiteralPath $producer
     Remove-Item -LiteralPath $scratch
 }
-"PASS:27 exact fit mappings,33 pinned source files,34 packages, production mode/tokens; $negative negative cases."
+$menuSource=Get-Content (Join-Path $root 'Source\SurvivalGame\UI\HomesteadNativeMenuTest.cpp') -Raw
+$menuBody=$menuSource.Substring($menuSource.IndexOf('void AHomesteadSmokeTest::PrepareNativeMenuChecks()'))
+$quit=$menuBody.IndexOf("`n    if (FParse::Param(FCommandLine::Get(), TEXT(`"HomesteadNativeQuitTest`")))")
+if($quit -lt 0){throw 'Top-level quit branch is missing.'}
+foreach($step in @('Close initial guide through mapped Back','First exit-path press opens Settings')){
+    $position=$menuBody.IndexOf($step)
+    if($position -lt 0 -or $position -gt $quit -or [regex]::Matches($menuBody,[regex]::Escape($step)).Count -ne 1){
+        throw 'Producer and quit must share separately asserted initial-state transitions.'
+    }
+}
+$quitBody=$menuBody.Substring($quit,$menuBody.IndexOf('auto Capture =')-$quit)
+if($quitBody.Contains('Tap(EKeys::Escape)') -or -not $quitBody.Contains('ReadSave(') -or
+    -not $quitBody.Contains('IsEngineExitRequested()')){
+    throw 'Quit must retain actual save/exit verification without repeated inline Escape taps.'
+}
+"PASS:27 exact fit mappings,33 pinned source files,34 packages, production mode/tokens, shared quit-entry source contract; $negative negative cases."

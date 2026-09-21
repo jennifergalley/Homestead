@@ -33,6 +33,20 @@ it drives the real confirmation, verifies the saved current state and actual
 engine exit request, then writes the result before shutdown. The existing
 wrapper must also observe process termination. It does not use a mocked Quit
 callback and has no screenshot requirement.
+Producer and quit routes share separately asserted mapped Back / closed guide /
+Escape / Settings entry steps. Do not replace those with repeated Escape taps
+in one action: `wardrobe-quit-01` retained a real confirmation-entry failure
+despite exit0 and clean supervisor shutdown. Native assertions and observed
+process termination must both pass in the rebuilt candidate.
+
+Normal feature selection is not enabled by the menu-test flag: production
+`OpenBook` unconditionally creates the native shell, and normal character
+preparation selects the real owned wardrobe. The ordinary visual route also
+records modular base/material paths without `HomesteadNativeMenuTest`.
+This source/non-menu-route evidence is not a separate pure-normal-process
+startup pass. Small observations in the existing native StartupProbe record
+native-menu creation and post-F9 modular readiness/path; its historical offline
+wrapper must not bypass the current supervisor or reuse an obsolete save fixture.
 
 For separate-process current-save verification, use a new output and
 `-NativeMenu -NativeResumeFrom "<absolute successful producer output>"`.

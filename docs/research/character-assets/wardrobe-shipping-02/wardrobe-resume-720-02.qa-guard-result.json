@@ -1,0 +1,1884 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 14.6884881,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "hardTerminated": false,
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344171775529435,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "markerAfterRelease": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344171775529435,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "cleanupErrors": [],
+  "finalJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobSamples": [
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 415.0636,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 586.5283,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 877.9249,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 1176.1413,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 1469.3822,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 1783.5684,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 2143.4401,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 2451.6062,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 2746.6629,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 3046.9449,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 3358.5054,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 3670.9398,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 3985.0663,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 4294.5363,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 4607.7394,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 4920.0162,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 5232.8892,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 5548.5453,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 5856.976,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 6171.759,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 6487.221,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 6784.5191,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 7096.2662,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 7408.5189,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 7720.9164,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 8033.194,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 8346.7841,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 8661.8468,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 8972.3885,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 9312.1256,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 9638.6951,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 9969.4988,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 10281.6366,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 10594.7307,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 10906.691,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 11218.1092,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 11528.3768,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 11841.1214,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 12154.5222,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 12466.5956,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 12775.2981,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 13081.0174,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 13394.7166,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 13677.0462,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 13956.4671,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 14250.9555,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 0
+      },
+      "members": [
+        {
+          "Pid": 46736,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+          "Error": null,
+          "CreationTime": 134344639326308591,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 14504.998,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": true,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 0
+      },
+      "members": []
+    },
+    {
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "elapsedMs": 14687.534,
+      "heldRoot": {
+        "Pid": 46736,
+        "NativeError": 0,
+        "Image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "Error": null,
+        "CreationTime": 134344639326308591,
+        "Member": true,
+        "Exited": true,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 0
+      },
+      "members": []
+    }
+  ],
+  "endpointSamples": [
+    {
+      "elapsedMs": 587.7555,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 879.2755,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 1177.4526,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 1470.6277,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 1786.7084,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 2145.2199,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 2453.045,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 2747.9758,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 3048.2059,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 3359.7629,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 3672.2457,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 3986.7519,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 4295.8606,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 4609.0112,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 4921.3427,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 5234.455,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 5549.7956,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 5858.1916,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 6172.9712,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 6488.5502,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 6786.263,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 7097.7186,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 7409.7299,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 7722.1573,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 8034.7728,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 8348.1063,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 8663.1636,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 8973.7064,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 9313.4626,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 9639.9467,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 9970.8713,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 10282.8568,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 10596.0234,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 10908.1337,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 11219.5444,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 11529.6892,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 11842.3814,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 12155.8754,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 12467.9146,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 12776.6857,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 13082.3305,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 13396.0504,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 13678.2946,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 13958.0477,
+      "endpoints": []
+    },
+    {
+      "elapsedMs": 14252.4042,
+      "endpoints": []
+    }
+  ],
+  "maximumSampleGapMs": 587.7555,
+  "limits": "One root-only short Shipping QA case. Finite process/endpoint samples, not continuous history or a filesystem/network sandbox. Runtime route/image checks remain the caller responsibility."
+}

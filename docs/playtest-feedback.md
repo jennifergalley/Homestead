@@ -247,6 +247,31 @@ mode/lighting/ShaderComplexity instead of resetting rendering. This is bounded
 validation, not another feature or new acceptance of appearance/tearing/performance.
 See `endurance-lit-playtesting.md`; the human preview remains accepted hotkey-safe.
 
+## Native inventory and wardrobe - corrected integration candidate (2026-09-21)
+
+`wardrobe-ui-01` passed functional menu/current-save assertions but failed basic
+image review: tiny bright portrait, stretched single-item card, clipped controls,
+dark selected tab, missing useful details and actions overlapping the footer.
+Those actual frames and the separate failed quit entry remain preserved.
+
+The bounded correction in `wardrobe-ui-02` was genuinely compiled and freshly
+staged from unchanged cooked content. Actual720p/4K menu producers, independent
+current-save consumers at both resolutions, and real saved-state/process exit
+all pass. Firsthand720p review finds a substantially larger, no-longer-blown-out
+portrait, compact Knife card, readable selection/details and contained scrolling
+actions. Lower-body/shoe preview lighting is still dark; this is not final art
+or human controller approval. A fresh ordinary mapped route captured302 frames
+over43.0953s with walking/turning/stopping/orbit and actual berry gathering.
+Eight-Hz captures do not establish game FPS or continuous garment coverage.
+Menu timing excludes startup/readback (means59.91/60.04FPS at720p/4K).
+
+Normal native-menu and owned-wardrobe selection are unconditional source paths;
+the ordinary route records modular meshes without the NativeMenuTest flag.
+That is not a claimed separate pure-normal-process startup pass. No old
+offline-startup harness or obsolete save fixture was launched as a shortcut.
+Music, world lighting, normal player processes/saves and prior candidates remain
+untouched. Full OpenSpec coverage and final visual acceptance remain separate.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction

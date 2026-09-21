@@ -1,0 +1,9 @@
+PASS Required modular content is actually prepared and rendered; no prototype fallback
+PASS Admit pinned producer bytes into a fresh test sandbox after Shipping QA admission
+NATIVE_RESUME producer_pid=53044 consumer_pid=46736 saved_bytes_md5=6530961934f36a608ceb1569b0d131d8
+PASS Separate process genuinely resumes producer ownership, quantities, equipment, look and rendered identities via F9
+PASS Resume leaves the external producer fixture byte-identical
+INPUT_ISOLATION ignored_external_events=0 (includes 0 deliberate rejection probes)
+PERFORMANCE mean_fps=60.46 p95_frame_ms=16.88 p99_frame_ms=16.93 samples=118 exclusions=startup_and_screenshot_readback
+LIT_GUARD samples=137 final_mode=3 shader_complexity=0 render_percentage=0
+SUCCESS All engine integration steps passed.

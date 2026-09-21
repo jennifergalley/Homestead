@@ -26,6 +26,24 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
+The native inventory/wardrobe integration candidate is
+`Build\Releases\20260921-033354-2d257ba0\wardrobe-ui-02\Windows`.
+It has real720p/4K menu/equipment/dye/save checks, separate-process current-save
+reloads, and verified save-and-quit. The corrected UI has compact item cards,
+readable selection/details and a larger character preview; its lower-body
+preview lighting is still provisional. `Preview.json` remains the authority
+for the separately selected human build; this candidate is not automatically
+selected by being built. See the wardrobe OpenSpec and
+`docs\research\character-assets\wardrobe-shipping-02\receipt.json`.
+
+In the native menu, LB/RB or Ctrl+Tab/Ctrl+Shift+Tab changes tabs; LT/RT or
+Tab/Shift+Tab changes regions; D-pad/arrows navigate; A/Enter activates and
+B/Escape cancels/closes. Inventory clothing actions operate on real owned
+garments; Appearance changes body/hair/skin/eyes, not free outfits. Item details
+and actions scroll inside their pane. From gameplay, Escape/B, Right, Activate
+reaches a cancel-default save-and-quit confirmation. The preserved original
+prototype below retains its older field-book controls.
+
 To play the preserved original prototype, double-click **`Play.cmd`** in this folder
 or `Build\Windows\SurvivalGame.exe`. The packaged game does not need the editor
 open. In-game Settings includes **Save and quit**.

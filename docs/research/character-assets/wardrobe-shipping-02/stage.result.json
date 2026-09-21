@@ -1,0 +1,7098 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 14.3012633,
+  "samples": [
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 47.6995
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 70.7505
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 98.7075
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 125.7491
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 150.0079
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 177.8281
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 203.9883
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 232.1769
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 247.3369
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 262.5418
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 288.3351
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 304.946
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 331.0459
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 356.6207
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 385.1259
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 413.3604
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 429.9953
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 457.6639
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 473.2542
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 502.3608
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 517.4445
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 542.4272
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 568.6835
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 584.6893
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 609.7731
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 625.3623
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 640.7969
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 655.6428
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 670.8636
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 697.1652
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 722.0008
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 751.3383
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 779.3413
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 807.9392
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 823.8521
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 848.3283
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 873.9712
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 898.5022
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 911.2866
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 935.9687
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 950.1232
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 965.0178
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 979.3429
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 994.1413
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1008.4075
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1021.5658
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1048.9341
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1063.2395
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1075.6152
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1101.0241
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1126.2791
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1142.6916
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1157.3262
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1171.5139
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1201.5932
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1226.8078
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1251.9103
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1275.9706
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1301.3513
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1314.0268
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1343.9453
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1359.0561
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1374.6092
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1391.359
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1416.8028
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1441.9713
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1466.3129
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1480.4309
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1494.9369
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1507.6837
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1520.2051
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1533.8784
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1549.4131
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1561.656
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1574.7379
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1591.3977
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1617.9076
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1642.2457
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1658.5717
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1671.4585
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1684.3197
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1698.0972
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1712.3794
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1729.1364
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1742.3528
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1769.3765
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1784.2262
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1799.5124
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1815.0382
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1830.9159
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1846.6284
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1861.6036
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1874.054
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1889.2397
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1905.3505
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1920.2582
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1934.8098
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1950.201
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 1975.5752
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2000.0282
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2012.5589
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2029.0621
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2041.6068
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2057.4585
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2069.7652
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2084.1388
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2100.3581
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2115.9966
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2132.1479
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2145.1689
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2172.4208
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2187.4107
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2201.6794
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2226.6979
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2253.54
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2279.7567
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2295.7378
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2321.4459
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2350.6391
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2363.7343
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2390.9874
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2425.7247
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2447.0558
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2461.8083
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2487.2844
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2501.2758
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2526.5338
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2541.1998
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2554.31
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2568.6681
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2585.351
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2610.222
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2641.2172
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2656.7705
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2671.7995
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2696.541
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2721.7761
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2750.3793
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2763.6658
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2789.2635
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2814.7023
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2831.1276
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2855.5975
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2871.571
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2885.5305
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2900.2565
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2925.4651
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2939.4065
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2965.6765
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 2990.8148
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3007.4363
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3035.2454
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3049.3313
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3074.0622
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3103.0726
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3118.131
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3135.208
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3151.5336
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3176.0563
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3190.6239
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3207.0941
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3223.8162
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3248.2968
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3264.1204
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3288.526
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3313.7765
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3340.4376
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3355.4089
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3380.5566
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3396.8476
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3413.5951
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3437.9953
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3468.0089
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3496.8984
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3512.7046
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3537.7888
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3562.4179
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3587.8123
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3613.0139
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3638.1354
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3667.5603
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3682.8598
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3708.202
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3721.3693
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3736.693
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3750.6841
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3775.8244
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3791.6138
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3807.3177
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3823.4955
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3838.9077
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3853.8667
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3878.6964
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3904.1246
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3932.5406
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3958.3156
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 3975.0506
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4000.2978
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4028.9064
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4045.1954
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4071.7723
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4085.9646
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4101.689
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4117.2418
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4142.0229
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4167.2444
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4193.3658
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4221.3449
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4246.3924
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4271.7241
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4296.2854
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4313.0748
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4338.1768
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4364.021
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4391.9087
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4421.7957
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4449.5343
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4463.4447
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4490.9644
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4507.5114
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4533.8096
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4559.6551
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4588.2441
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4614.5354
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4644.5261
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4660.3957
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4675.2999
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4701.7203
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4717.4094
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4742.1634
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4758.791
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4775.8515
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4801.0395
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4817.261
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4842.9659
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4868.238
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4885.159
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4910.3655
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4927.1493
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4952.2629
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 4977.9652
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5002.4989
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5027.3471
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5052.5005
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5077.3508
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5102.6779
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5127.1489
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5151.6818
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5177.6471
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5205.8918
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5231.0703
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5255.8687
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5281.7286
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5297.3783
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5322.1807
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5350.3801
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5365.0489
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5381.1893
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5405.5708
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5429.78
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5454.4683
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5480.8551
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5506.1592
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5522.8009
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5550.5855
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5575.7404
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5600.8002
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5625.8028
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5654.6002
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5679.7862
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5709.259
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5734.551
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5762.9562
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5779.0378
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5794.7653
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5811.5392
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5826.6013
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5842.3474
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5857.6006
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5882.8741
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5907.8012
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5933.3268
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5958.5669
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 5974.812
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6001.1932
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6026.455
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6050.6875
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6067.3793
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6096.5471
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6124.6607
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6151.9541
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6167.1341
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        49204
+      ],
+      "elapsedMs": 6179.646
+    }
+  ],
+  "maximumSampleGapMs": 8121.588000000001,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T11:30:02.0425997+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.0536555+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.0835577+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.1117320+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.1386574+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.1628133+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.1910430+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.2168878+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.2451043+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.2602804+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.2756269+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.3013215+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.3179026+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.3436714+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.3689914+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.3973577+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.4262816+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.4426187+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.4705224+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.4860668+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.5151691+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.5302119+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.5553066+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.5814727+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.5974766+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.6228810+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.6385353+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.6536472+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.6687443+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.6838158+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.7099340+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.7350244+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.7641426+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.7920406+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.8208547+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.8366638+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.8610666+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.8869258+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.9114131+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.9240949+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.9490609+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.9631875+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.9779006+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:02.9924532+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.0072881+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.0214298+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.0347876+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.0622046+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.0763160+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.0887615+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.1140362+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.1394028+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.1556963+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.1703083+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.1843441+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.2146071+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.2397921+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.2649542+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.2891413+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.3143711+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.3266403+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.3567471+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.3719724+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.3877584+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.4041042+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.4297044+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.4548434+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.4794174+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.4934176+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5080162+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5207935+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5333521+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5470712+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5623521+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5747848+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.5877583+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.6042694+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.6308312+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.6554148+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.6716954+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.6846738+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.6973164+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.7111992+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.7253138+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.7418331+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.7553962+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.7825726+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.7972939+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.8124378+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.8283660+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.8440912+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.8598076+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.8747440+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.8872198+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.9021972+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.9184718+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.9334496+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.9478789+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.9632967+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:03.9887061+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0131237+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0256538+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0422128+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0546353+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0704266+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0827659+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.0973702+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.1136280+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.1290887+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.1452311+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.1581765+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.1854302+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.2004691+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.2145146+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.2396005+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.2666605+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.2927901+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.3086696+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.3345041+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.3634369+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.3768594+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.4039879+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.4352958+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.4598821+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.4746456+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5001267+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5142625+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5396211+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5543332+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5674314+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5818158+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.5984016+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.6233641+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.6539672+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.6698067+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.6847454+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.7093301+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.7347462+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.7636844+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.7768479+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.8021878+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.8274604+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.8441928+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.8685350+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.8846221+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.8985965+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.9133210+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.9383182+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.9525571+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:04.9787230+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.0037821+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.0204361+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.0481223+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.0623564+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.0869662+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.1159222+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.1311894+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.1483819+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.1644662+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.1891479+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.2037143+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.2202944+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.2366505+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.2611886+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.2769462+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.3015641+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.3268930+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.3533522+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.3684057+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.3935482+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.4096519+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.4264369+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.4510033+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.4807733+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.5095963+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.5256681+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.5508670+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.5754808+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.6008261+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.6259757+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.6510422+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.6804220+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.6957446+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.7212455+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.7341848+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.7495654+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.7638562+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.7888288+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.8044576+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.8204779+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.8363440+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.8518991+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.8667769+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.8916771+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.9172127+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.9453549+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.9712602+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:05.9878252+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.0133722+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.0418911+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.0581666+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.0848004+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.0990986+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.1149910+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.1302201+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.1548968+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.1802419+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.2062421+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.2344042+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.2590152+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.2847484+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.3094015+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.3260615+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.3511781+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.3768394+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.4047403+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.4345147+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.4624908+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.4766689+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.5039167+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.5205932+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.5468276+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.5725414+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.6010922+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.6273743+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.6574063+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.6731890+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.6881746+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.7144918+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.7303287+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.7550666+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.7718864+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.7887500+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.8139421+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.8303488+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.8561629+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.8813927+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.8981693+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.9232758+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.9400622+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.9652013+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:06.9908724+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.0154149+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.0404186+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.0656717+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.0904963+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.1155753+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.1401788+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.1645514+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.1904714+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.2186924+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.2441060+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.2686933+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.2945348+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.3103424+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.3350889+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.3633122+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.3779722+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.3939986+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.4186556+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.4427484+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.4674930+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.4937301+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.5191493+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.5356435+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.5634971+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.5887192+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.6138945+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.6387813+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.6676866+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.6927664+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.7222188+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.7475121+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.7758065+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.7920550+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.8078414+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.8244131+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.8396494+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.8552493+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.8707368+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.8958462+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.9208120+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.9462658+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.9715724+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:07.9878191+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.0138907+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.0394912+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.0637776+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.0803122+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.1094912+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.1377711+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.1651621+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.1804119+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T11:30:08.1927652+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 49204,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+          "Error": null,
+          "CreationTime": 134344638020328799,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    }
+  ],
+  "coff": null,
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-stage-02\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 810893,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344638017121012,
+    "LastWriteTime": 134344638017121012,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": -1,
+  "producedItems": [
+    {
+      "bytes": 166872576,
+      "sha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+      "lastWriteUtc": "2026-09-21T11:29:03.3177288Z",
+      "path": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe"
+    }
+  ],
+  "previousProductBackups": [],
+  "objectSha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+  "generatedManifest": null,
+  "stageCandidate": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02",
+  "stageCookFileCount": 1326,
+  "limits": "Standard managed UAT loose-file staging under the existing root-only guard; no compiler/cook/Pak/game or extra child admitted. No real global marker. Finite endpoint/member samples, not continuous tracing."
+}

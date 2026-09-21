@@ -1,5 +1,8 @@
 #include "HomesteadController.h"
+#include "HomesteadCharacter.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
+#include "Engine/SkeletalMesh.h"
 #include "Engine/GameViewportClient.h"
 #include "GameFramework/GameUserSettings.h"
 #include "HAL/FileManager.h"
@@ -60,6 +63,9 @@ void AHomesteadController::TickStartupProbe()
         break;
     case 1:
         if (!bBookOpen) { FinishStartupProbe(TEXT("Mapped Tab failed to open the paused book.")); return; }
+        StartupProbeNativeMenuObserved = NativeMenu.IsValid();
+        if (!StartupProbeNativeMenuObserved)
+        { FinishStartupProbe(TEXT("Normal startup did not create the native menu.")); return; }
         StartupProbeExpectedState = UTF8_TO_TCHAR(Sim.Serialize().c_str());
         Tap(EKeys::F5);
         break;
@@ -76,6 +82,10 @@ void AHomesteadController::TickStartupProbe()
         StartupProbeNext = Now + 10;
         break;
     case 4:
+        if (const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+            !Avatar || !Avatar->IsEquipmentPresentationReady() || !Avatar->GetMesh()->IsVisible()
+            || Avatar->GetMesh()->GetSkeletalMeshAsset() != Avatar->GetEquipmentPresentation()->Base.Mesh)
+        { FinishStartupProbe(TEXT("Normal startup did not retain rendered modular equipment after F9.")); return; }
         FinishStartupProbe(FString());
         break;
     }
@@ -99,6 +109,13 @@ void AHomesteadController::FinishStartupProbe(const FString& Error)
     Result->SetStringField(TEXT("savedSimulationMd5"), FMD5::HashAnsiString(*StartupProbeExpectedState));
     Result->SetStringField(TEXT("loadedSimulationMd5"), FMD5::HashAnsiString(*StartupProbeLoadedState));
     Result->SetBoolField(TEXT("heroinePresent"), HasHeroine());
+    Result->SetBoolField(TEXT("nativeMenuObserved"), StartupProbeNativeMenuObserved);
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    Result->SetBoolField(TEXT("modularEquipmentReady"), Avatar && Avatar->IsEquipmentPresentationReady());
+    Result->SetStringField(TEXT("renderedBaseMesh"), Avatar && Avatar->GetMesh()->GetSkeletalMeshAsset()
+        ? Avatar->GetMesh()->GetSkeletalMeshAsset()->GetPathName() : TEXT("missing"));
+    Result->SetBoolField(TEXT("shippingQAMode"), FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA")));
+    Result->SetBoolField(TEXT("nativeMenuTestMode"), FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest")));
     Result->SetBoolField(TEXT("pausedBook"), bBookOpen);
     Result->SetBoolField(TEXT("probeOnlySimulatedInput"), bAutomatedInputOnly);
     Result->SetNumberField(TEXT("saveDispatches"), TestQuickSaves);

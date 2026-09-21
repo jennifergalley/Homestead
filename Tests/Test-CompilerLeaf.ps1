@@ -16,7 +16,8 @@ param(
     [switch]$EmbedShippingManifest,
     [switch]$StageCooked,
     [switch]$HairWaveCandidate,
-    [switch]$WardrobeCandidate
+    [switch]$WardrobeCandidate,
+    [switch]$WardrobeVisualCorrection
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -24,7 +25,8 @@ $root=Split-Path $PSScriptRoot -Parent
 $authorityRoot=$root
 if($HairWaveCandidate -and -not $ShippingActions){throw 'Hair-wave candidate applies only to the established Shipping leaves.'}
 if($WardrobeCandidate -and (-not $ShippingActions -or $HairWaveCandidate)){throw 'Wardrobe candidate requires exclusive Shipping selection.'}
-$shippingBuildName=if($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+if($WardrobeVisualCorrection -and -not $WardrobeCandidate){throw 'Visual correction requires the explicit wardrobe Shipping candidate.'}
+$shippingBuildName=if($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 $shippingLinkAction=if($WardrobeCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
 $shippingCompiles=if($WardrobeCandidate){@(-1,0,1)}else{@(-1,0)}
@@ -139,7 +141,7 @@ if($StageCooked) {
     }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -221,6 +223,10 @@ if($StageCooked) {
     if($WardrobeCandidate){
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-shipping-plan-01\actions.json'
         $planHash='8455A3EFDC9E9F0BD7ECB69EB52B8B793C5A51677A190CF969512F00B95A6B17'
+    }
+    if($WardrobeVisualCorrection){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-shipping-plan-02\actions.json'
+        $planHash='D8358D20EA7F29D79B1BBA78EF5A34C5568D9A5CF6EE4EF0022FDA8940AF0A02'
     }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'

@@ -277,13 +277,17 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         PrepareNativeResumeChecks(ProducerOutput);
         return;
     }
+    Add(TEXT("Close initial guide through mapped Back"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this]() { return !Controller->IsBookOpen(); });
+    Add(TEXT("First exit-path press opens Settings"),
+        [this]() { Tap(EKeys::Escape); PausedHour = Controller->State().hour; },
+        [this]() { return Controller->HasNativeMenu() && Controller->BookPage() == 4; });
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeQuitTest")))
     {
         Add(TEXT("Reach the real save-and-quit confirmation"),
             [this]()
             {
-                Tap(EKeys::Escape);
-                Tap(EKeys::Escape);
                 Tap(EKeys::Right);
                 Tap(EKeys::Enter);
             },
@@ -308,12 +312,6 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         Add(TEXT("Capture native Slate menu: ") + Name, [this, Name]() { Screenshot(Name); },
             [this]() { return Controller->NativeMenu.IsValid(); }, 0.8f);
     };
-    Add(TEXT("Close initial guide through mapped Back"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
-        [this]() { return !Controller->IsBookOpen(); });
-    Add(TEXT("First exit-path press opens Settings"),
-        [this]() { Tap(EKeys::Escape); PausedHour = Controller->State().hour; },
-        [this]() { return Controller->HasNativeMenu() && Controller->BookPage() == 4; });
     Capture(TEXT("native-settings"));
     Add(TEXT("Second and third exit-path presses reach confirmation"),
         [this]() { Tap(EKeys::Right); Tap(EKeys::Enter); },

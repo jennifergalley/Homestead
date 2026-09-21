@@ -385,6 +385,38 @@ continuous collision/garment-coverage proof. The inspected world view shows
 the prepared tunic/shoes and retained rough waves; all presets/combinations,
 preview usability and final integrated acceptance remain separate gates.
 
+The next correction batch is limited to the demonstrated native shell/portrait
+defects and the shared quit-fixture entry sequence. Build a distinct
+`wardrobe-ui-02` Shipping executable through the existing exact local leaves,
+then stage against unchanged, verified `wardrobe-cook-01` data. Do not recook
+unchanged content, overwrite candidate01, or turn obsolete free-outfit/Canvas
+test assumptions into a universal first-delivery gate. Preserve gameplay and
+inventory-conservation coverage when adapting affected fixtures.
+
+Normal menu/equipment selection is unconditional production behavior, not a
+NativeMenuTest enablement override; the ordinary route already records the
+actual modular path without that flag. Small observations in the existing
+StartupProbe distinguish native-menu creation and post-F9 modular rendering
+from QA feature flags. They are instrumentation, not a separate successful
+normal-launch run; the historical unguarded/off-schema startup wrapper is not
+admitted as a shortcut. Review fresh720p/4K images, real quit and current saves
+before promotion, preserving the observed claim limits.
+
+That batch is now implemented and exercised: UI source5d238f5 integrated as
+0067821; real Shipping executable SHA256
+`241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD`.
+Both720p/4K43-step producers and distinct-process consumers passed. The corrected
+quit fixture passed its separately observed transitions, actual saved state and
+engine exit request, followed by clean supervised process death. Candidate01's
+failed quit and rejected-layout evidence remain unchanged. A fresh ordinary
+route captured302 frames over43.0953s, including actual berry gathering.
+Firsthand720p inspection confirms substantially enlarged, non-blown-out portrait,
+compact Knife card, readable Carried selection, actual details and contained
+scrolling controls; lower-body/shoe lighting remains dark. This is a usable-layout
+milestone, not all-presets visual approval or completed OpenSpec acceptance.
+`docs/research/character-assets/wardrobe-shipping-02/receipt.json` seals the exact
+build, source pins, actual images, state/save/quit and ordinary-route evidence.
+
 Deliver UI and content together. Extend existing smoke fixtures for actual
 equip/unequip/dye and current-version save/load/resume with owned IDs, material
 presentation and quantities preserved. A menu-only pass or provisional joined

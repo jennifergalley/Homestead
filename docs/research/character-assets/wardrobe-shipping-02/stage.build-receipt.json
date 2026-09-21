@@ -1,0 +1,11 @@
+{
+  "configuration": "Shipping",
+  "packageDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows",
+  "archiveDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02",
+  "executable": "SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "status": "Genuine loose-file stage; runtime acceptance pending",
+  "cookedInput": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-cook-01\\Cooked",
+  "nativeExecutableSha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+  "containersUsed": false,
+  "runtimeVerified": false
+}

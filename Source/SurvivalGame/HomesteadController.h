@@ -189,6 +189,7 @@ private:
     double StartupProbeNext = 0, StartupProbeDeadline = 0;
     int32 StartupProbeStep = 0;
     uint64 StartupProbeLitTicks = 0;
+    bool StartupProbeNativeMenuObserved = false;
     bool PrepareStartupProbe();
     void TickStartupProbe();
     void FinishStartupProbe(const FString& Error);
