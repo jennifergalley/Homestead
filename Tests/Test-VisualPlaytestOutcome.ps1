@@ -21,7 +21,7 @@ foreach($outcome in $bad){
     try{Assert-VisualPlaytestOutcome $outcome $forage -RequireTree}catch{$rejected=$true}
     if(-not $rejected){throw "Invalid route outcome accepted:$outcome"}
 }
-$actual=Get-Content (Join-Path $root 'Saved\VisualPlaytests\20260921-033354-2d257ba0\tree-diagnostic-01\observations.txt') -Raw
+$actual=Get-Content (Join-Path $root 'docs\research\environment-assets\tree-diagnostic-01\ordinary.observations.txt') -Raw
 $rejected=$false
 try{Assert-VisualPlaytestOutcome $actual $forage}catch{$rejected=$true}
 if(-not $rejected){throw 'Actual failed tree contact capture was accepted.'}
