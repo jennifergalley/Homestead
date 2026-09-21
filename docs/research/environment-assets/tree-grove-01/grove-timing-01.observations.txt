@@ -1,0 +1,15 @@
+Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips.
+Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark.
+Grove inventory: trees=15 triangles=3476775 valid=1; shared qualified LOD2, not a whole-scene GPU cost.
+BEGIN 0.00s close-notes: The clearing
+BEGIN 1.03s warm-up-no-capture: The clearing
+BEGIN 4.03s timing-idle: The clearing
+BEGIN 6.03s timing-walk: The clearing
+BEGIN 12.05s timing-turn: Sapling  (renewing)
+BEGIN 18.05s timing-sweep: The clearing
+BEGIN 24.05s capture-idle: The clearing
+BEGIN 26.15s capture-walk: The clearing
+BEGIN 30.31s capture-turn: The clearing
+BEGIN 34.33s capture-sweep: The clearing
+Presentation diagnostic route completed=1; captured frames=114; physical scanout not observed
+This observational capture is not a visual-quality pass or a replacement for human feel/listening review.

@@ -9,7 +9,8 @@ param(
     [switch]$WardrobeCandidate,
     [switch]$WardrobeVisualCorrection,
     [switch]$TreeDiagnosticCandidate,
-    [switch]$TreeContactCorrection
+    [switch]$TreeContactCorrection,
+    [switch]$GroveCandidate
 )
 $ErrorActionPreference = 'Stop'
 $authorityRoot = Split-Path $PSScriptRoot -Parent
@@ -18,7 +19,8 @@ if($WardrobeCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly -o
 if($WardrobeVisualCorrection -and -not $WardrobeCandidate){throw 'Visual correction requires explicit wardrobe Shipping metadata.'}
 if($TreeDiagnosticCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly -or $HairWaveCandidate -or $WardrobeCandidate)){throw 'Tree diagnostic requires exclusive genuine Shipping metadata mode.'}
 if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires explicit tree diagnostic metadata.'}
-$shippingBuildName=if($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+if($GroveCandidate -and (-not $TreeDiagnosticCandidate -or $TreeContactCorrection)){throw 'Grove requires exclusive qualified tree Shipping metadata.'}
+$shippingBuildName=if($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 $shippingLinkFolder=if($TreeContactCorrection){'link1'}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){'link2'}else{'link1'}
 $manifestAttempt=if($HairWaveCandidate -or $WardrobeCandidate -or $TreeDiagnosticCandidate){'manifest-01'}else{'manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')

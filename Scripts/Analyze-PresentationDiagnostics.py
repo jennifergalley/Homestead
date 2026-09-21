@@ -57,9 +57,23 @@ def analyze(directory):
     settings = (directory / "presentation-settings.txt").read_text(encoding="utf-8-sig")
     if "[start]" not in settings or "[end]" not in settings or "actual_viewport=" not in settings:
         raise ValueError("Missing active runtime settings snapshots.")
-    log = (directory / "engine.log").read_text(encoding="utf-8-sig", errors="replace")
-    if "mode=test-sandbox" not in log or "automation_input=1 smoke_actor=0 visual_actor=1" not in log:
-        raise ValueError("The actual process did not confirm isolated saves/input and the single observer.")
+    admission = directory / "qa-admission.txt"
+    if admission.exists():
+        entries = [line.split("=", 1) for line in admission.read_text(encoding="utf-8-sig").splitlines()]
+        if any(len(entry) != 2 for entry in entries) or len({entry[0] for entry in entries}) != len(entries):
+            raise ValueError("Malformed Shipping QA admission.")
+        values = dict(entries)
+        if (values.get("version") != "1" or values.get("shipping") != "1"
+                or values.get("trace_compiled") != "0" or values.get("route") != "visual"
+                or Path(values.get("save_directory", "")).resolve() != (directory / "SmokeSave").resolve()
+                or Path(values.get("project_saved_directory", "")).resolve() != (directory / "EngineUser" / "Saved").resolve()):
+            raise ValueError("Shipping QA did not confirm the isolated visual route and backing directories.")
+        admission_source = "qa-admission.txt (native Shipping QA; no Development log is assumed)"
+    else:
+        log = (directory / "engine.log").read_text(encoding="utf-8-sig", errors="replace")
+        if "mode=test-sandbox" not in log or "automation_input=1 smoke_actor=0 visual_actor=1" not in log:
+            raise ValueError("The actual process did not confirm isolated saves/input and the single observer.")
+        admission_source = "engine.log (native Development sandbox and observer)"
     report = {
         "status": "diagnostic-tooling-verified; symptom-unresolved",
         "screenshot_free_timing": groups, "captured_frames": len(captures),
@@ -71,6 +85,7 @@ def analyze(directory):
             "ticks_exceeding_legacy_one_second_route_clock_cap": sum(float(r["wall_frame_ms"]) > 1000 for r in rows),
         },
         "settings": "presentation-settings.txt (start/end runtime queries; no CVar writes)",
+        "admission": admission_source,
         "pipeline": "Offscreen rendered game framebuffer; not physical display/scanout.",
         "limits": [
             "Instrumented game-thread tick intervals are not GPU or DXGI Present measurements.",

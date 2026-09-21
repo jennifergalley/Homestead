@@ -1,0 +1,8 @@
+{
+  "executable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "executableSha256": "304D679C7A902711575D7BD33712A722EC116DE4EC7F4D0EA074109099A373C0",
+  "arguments": "-HomesteadVisualPlaytest -HomesteadTestOutput=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -nosplash -abslog=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\engine.log\" -HomesteadShippingQA -GameUserSettingsINI=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\Graphics\\GameUserSettings.ini\" -UserDir=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\EngineUser\" -HomesteadPresentationDiagnostics",
+  "workingDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows",
+  "setup": "Fresh test-sandbox world; ordinary mapped input, no teleport/state/time edits.",
+  "pipeline": "Offscreen game framebuffer only; no desktop capture, physical scanout or DXGI Present tracing."
+}

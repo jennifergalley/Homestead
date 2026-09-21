@@ -18,12 +18,14 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/StaticMesh.h"
+#include "StaticMeshResources.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "MaterialShared.h"
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformMisc.h"
+#include "HAL/PlatformMemory.h"
 #include "Misc/FileHelper.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -55,6 +57,8 @@ void AHomesteadVisualPlaytest::ApplyAxes(FVector2D Move, FVector2D Look)
 
 void AHomesteadVisualPlaytest::RecordPresentationSettings(const TCHAR* Phase)
 {
+    PresentationSettings.Add(FString::Printf(TEXT("process_used_physical_bytes[%s]=%llu"),
+        Phase, static_cast<unsigned long long>(FPlatformMemory::GetStats().UsedPhysical)));
     PresentationSettings.Add(FString::Printf(TEXT("[%s] rhi=%s render_offscreen=%d forced_windowed=%d"),
         Phase, *FHardwareInfo::GetHardwareInfo(NAME_RHI),
         FParse::Param(FCommandLine::Get(), TEXT("RenderOffscreen")),
@@ -190,8 +194,89 @@ void AHomesteadVisualPlaytest::Prepare()
     }
     bTreeRoute = !bWaterRoute && !bClearRoute && !bWeedRoute && !bPresentationDiagnostics;
     if (bTreeRoute) PrepareTreeEncounter();
+    if (bTreeRoute || bPresentationDiagnostics) RecordGroveInventory();
     RecordPresentationSettings(TEXT("start"));
     LastWallTime = FPlatformTime::Seconds();
+}
+
+void AHomesteadVisualPlaytest::RecordGroveInventory()
+{
+    TArray<UStaticMeshComponent*> Parts;
+    if (PC->Landscape) PC->Landscape->GetComponents(Parts);
+    TArray<UStaticMeshComponent*> Trees;
+    for (auto* Part : Parts)
+        if (Part->ComponentHasTag(TEXT("AuthoredTreeSmall02Grove"))) Trees.Add(Part);
+    TArray<FString> Rows;
+    Rows.Add(TEXT("component,x,y,z,yaw,triangles,slots,scale_error,ground_error_cm,canopy_radius_cm,home_margin_cm,resource_margin_cm,structure_margin_cm,plot_margin_cm,stream_margin_cm,tree_spacing_margin_cm,materials_ready,collision_ready,encounter"));
+    bool Valid = Trees.Num() >= 8 && Trees.Num() <= 16;
+    int64 TotalTriangles = 0;
+    for (auto* Tree : Trees)
+    {
+        UStaticMesh* Mesh = Tree->GetStaticMesh();
+        const auto* Data = Mesh ? Mesh->GetRenderData() : nullptr;
+        const int32 Triangles = Data && Data->LODResources.Num() ? Data->LODResources[0].GetNumTriangles() : 0;
+        const FBox Bounds = Mesh ? Mesh->GetBoundingBox() : FBox(ForceInit);
+        const double Radius = FVector2D(FMath::Max(FMath::Abs(Bounds.Min.X), FMath::Abs(Bounds.Max.X)),
+            FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size();
+        const FVector Root = Tree->GetComponentLocation();
+        const FVector2D Position(Root);
+        const double HomeMargin = FVector2D::Distance(Position, FVector2D(-1000, 0)) - Radius - 650;
+        const double StreamMargin = FMath::Abs(Root.X - Homestead::StreamX(Root.Y)) - Radius - 120;
+        double ResourceMargin = 1e9, StructureMargin = 1e9, PlotMargin = 1e9, SpacingMargin = 1e9;
+        for (const auto& Node : PC->State().resources)
+            ResourceMargin = FMath::Min(ResourceMargin,
+                FVector2D::Distance(Position, FVector2D(Node.position.x, Node.position.y)) - Radius - 130);
+        for (const auto& Structure : PC->State().structures)
+        {
+            const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+            StructureMargin = FMath::Min(StructureMargin,
+                FVector2D::Distance(Position, FVector2D(Center.x, Center.y)) - Radius - 225);
+        }
+        for (const auto& Plot : PC->State().plots)
+        {
+            const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+            PlotMargin = FMath::Min(PlotMargin,
+                FVector2D::Distance(Position, FVector2D(Center.x, Center.y)) - Radius - 175);
+        }
+        for (const auto* Other : Trees)
+            if (Other != Tree)
+                SpacingMargin = FMath::Min(SpacingMargin,
+                    FVector2D::Distance(Position, FVector2D(Other->GetComponentLocation())) - 2 * Radius);
+        const double ScaleError = (Tree->GetComponentScale() - FVector::OneVector).Size();
+        const double GroundError = Root.Z - AHomesteadWorld::GroundHeight(Root.X, Root.Y);
+        const auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
+        const bool CollisionReady = Body && Body->AggGeom.SphylElems.Num() == 1
+            && Body->AggGeom.GetElementCount() == 1 && Body->CollisionTraceFlag == CTF_UseSimpleAsComplex
+            && Tree->IsQueryCollisionEnabled() && Tree->GetOwner()->GetActorEnableCollision()
+            && Tree->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block;
+        bool MaterialsReady = Mesh && Mesh->GetStaticMaterials().Num() == 3;
+        for (int32 Slot = 0; Mesh && Slot < Mesh->GetStaticMaterials().Num(); ++Slot)
+        {
+            const auto* Interface = Tree->GetMaterial(Slot);
+            auto* Material = Interface ? Interface->GetMaterial() : nullptr;
+            auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+            MaterialsReady &= Material && Material->GetPathName().StartsWith(TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/"))
+                && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
+        }
+        Valid &= Triangles == 231785 && Mesh
+            && Mesh->GetPathName() == TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2")
+            && ScaleError < 0.001 && FMath::Abs(GroundError) < 0.1
+            && HomeMargin >= -0.1 && ResourceMargin >= -0.1 && StructureMargin >= -0.1
+            && PlotMargin >= -0.1 && StreamMargin >= -0.1 && SpacingMargin >= -0.1
+            && FVector2D::Distance(Position, FVector2D(-1000, 0)) <= 3000.1
+            && MaterialsReady && CollisionReady;
+        TotalTriangles += Triangles;
+        Rows.Add(FString::Printf(TEXT("%s,%.6f,%.6f,%.6f,%.6f,%d,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d,%d"),
+            *Tree->GetPathName(), Root.X, Root.Y, Root.Z, Tree->GetComponentRotation().Yaw, Triangles,
+            Mesh ? Mesh->GetStaticMaterials().Num() : 0, ScaleError, GroundError, Radius, HomeMargin,
+            ResourceMargin, StructureMargin, PlotMargin, StreamMargin, SpacingMargin, MaterialsReady, CollisionReady,
+            Tree->ComponentHasTag(TEXT("AuthoredTreeSmall02"))));
+    }
+    Valid &= TotalTriangles <= 3708560;
+    if (!FFileHelper::SaveStringArrayToFile(Rows, *FPaths::Combine(OutputDirectory, TEXT("grove-inventory.csv"))))
+        Valid = false;
+    Observations.Add(FString::Printf(TEXT("%sGrove inventory: trees=%d triangles=%lld valid=%d; shared qualified LOD2, not a whole-scene GPU cost."),
+        Valid ? TEXT("") : TEXT("FAILED "), Trees.Num(), static_cast<long long>(TotalTriangles), Valid));
 }
 
 void AHomesteadVisualPlaytest::PrepareTreeEncounter()

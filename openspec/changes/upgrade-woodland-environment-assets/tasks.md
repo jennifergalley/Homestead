@@ -14,18 +14,18 @@ failed attempts remain failed. `docs/research/environment-assets/clearing-playab
 records the usable increment and limitations. Trees/grass/lighting/old hair
 still dominate the view; this is not full woodland or appearance acceptance.
 
-**Next visible delivery:** integrate one frozen reduced TreeSmall02 LOD2 with
+**Previous tree increment (now delivered):** integrate one frozen reduced TreeSmall02 LOD2 with
 its thirteen maps, three authored materials and measured lower-trunk collision.
 Import and separately reload exactly seventeen new packages before real-world
 placement/cook/Shipping evidence. The existing fern is already integrated;
-wardrobe-ui-02 remains selected until a newer usable candidate is verified.
+wardrobe-ui-02 remained selected until a newer usable candidate was verified.
 Do not mass-place the original two-million-triangle mesh or start another UI
 cosmetic batch. See the current tree increment in `design.md`.
 
 Tree diagnostic01 now has a genuine fresh cook/Shipping stage and521 ordinary
 720p frames, but its strict trunk-contact/dependent-retreat assertions did not
 pass. The twelve-corner tangent qualification remains explicit; import03 stays
-failed. Keep wardrobe-ui-02 selected. This partial diagnostic evidence checks
+failed. Wardrobe-ui-02 stayed selected at that stage. This partial diagnostic evidence checks
 no additional top-level task; see `docs/research/environment-assets/tree-diagnostic-01/receipt.json`.
 
 Subsequent scenario02 fixed crown framing/independent retreat but exposed a
@@ -33,7 +33,7 @@ component-sweep API-contract mistake. Corrected scenario03 passed all requested
 ordinary outcomes with501 real720p frames and exact-component/query-response
 contact evidence. Both failures remain failed; twelve source-description basis
 corners remain a separate qualification. This does not complete the broader
-tasks below or select the candidate; current evidence is
+tasks below or itself select the candidate; that scenario evidence is
 `docs/research/environment-assets/tree-diagnostic-03/receipt.json`.
 
 Coordinator-reviewed diagnostic03 is now selected as a **qualified single-tree
@@ -42,6 +42,44 @@ v5 profile. Prior wardrobe-ui-02 is retained; no human process was launched and
 no save reset occurred. Import03 remains FAILED with the explicit twelve-corner
 qualification. The full forest/understory/ground/performance tasks below remain
 open; this delivery does not manufacture additional top-level completion.
+
+**Current next increment: restrained clearing grove.** Reuse the existing
+231,785-triangle LOD2 and its exact qualification, not the 2,062,487-triangle
+source. Replace at most sixteen seeded primitive trees, retaining the original
+encounter tree and selecting additional safe sites nearest the clearing within
+30m. Maximum authored tree geometry is 3,708,560 triangles before visibility
+culling; geometry is shared, not duplicated asset data. Preserve authored scale,
+materials, root placement and simple trunk collision; require full canopy-radius
+home/resource/structure/plot/stream exclusions and deterministic spacing.
+Keep distant proxies for this bounded batch, not as the final woodland design.
+No new import/cook or asset mutation is needed for this code-only placement
+increment; reuse qualified cook02 with genuine fresh Shipping products.
+
+Record actual placement/material/collision/triangle inventory, ordinary
+gather/tree-contact/retreat images, and separate screenshot-free timing on the
+selected baseline and candidate at matching settings. Report actor-tick timing
+as such, not GPU/Present/4K performance. Reject geometry/placement violations or
+materially worse measured pacing before promotion. Ground/grass remains open:
+the actual grass FBX has17 distinct clumps totaling24,730 source fan-triangles
+(individual clumps28..6,422), not17 LODs. The publisher aggregate1,606,633 is
+polygon metadata, not this FBX's triangle count; the earlier phase statement
+misclassified it. Reuse the existing source inventory for a small clump import,
+then measure actual imported units/UVs/triangles. Frozen tree LOD3 is170,289
+triangles, not an assumed cheap billboard. This phase does not reopen tangent diagnosis or modify
+terrain, lighting, character, music, UI, controls or saves.
+
+Grove01 now has genuine fresh Shipping products and unchanged qualified cook02.
+Actual initial placement is15 trees/3,476,775 triangles, with complete
+material/capsule/scale/root/exclusion/spacing checks. Its492-frame ordinary
+route passed gathering and the original tree's approach/block/retreat; both
+builds' separate1,201-tick,60-capped timing routes had no intervals over33.33ms.
+This is matched720p-output actor-tick evidence, not uncapped/GPU/4K performance;
+screen percentage remains auto0/default100 and internal input resolution is
+unmeasured. Two candidate process-physical-memory snapshots were approximately
+963MB and999MB, not a peak or baseline comparison. Broad forest/proxy removal,
+grass, ground and broader construction/performance checks remain open.
+`docs/research/environment-assets/tree-grove-01/receipt.json` preserves exact
+outputs; single-tree03 remains selected while grove visual disposition is pending.
 
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns

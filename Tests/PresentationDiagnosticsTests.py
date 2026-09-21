@@ -73,6 +73,36 @@ class PresentationDiagnosticsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "isolated"):
             self.run_analysis()
 
+    def shipping_admission(self, **overrides):
+        values = dict(version="1", shipping="1", trace_compiled="0", route="visual",
+                      save_directory=str(self.root / "SmokeSave"),
+                      project_saved_directory=str(self.root / "EngineUser" / "Saved"))
+        values.update(overrides)
+        (self.root / "qa-admission.txt").write_text("".join(f"{key}={value}\n" for key, value in values.items()))
+
+    def test_shipping_without_development_log(self):
+        (self.root / "engine.log").unlink()
+        self.shipping_admission()
+        self.assertIn("Shipping QA", self.run_analysis()["admission"])
+
+    def test_rejects_shipping_wrong_directory_or_route(self):
+        for overrides in (dict(save_directory=str(self.root.parent / "SmokeSave")),
+                          dict(project_saved_directory=str(self.root / "Saved")),
+                          dict(route="smoke"), dict(trace_compiled="1"),
+                          dict(shipping="0"), dict(version="2")):
+            with self.subTest(overrides=overrides):
+                self.shipping_admission(**overrides)
+                with self.assertRaisesRegex(ValueError, "isolated"):
+                    self.run_analysis()
+
+    def test_rejects_ambiguous_shipping_admission(self):
+        for suffix in ("route=visual\n", "broken\n"):
+            self.shipping_admission()
+            with (self.root / "qa-admission.txt").open("a") as target:
+                target.write(suffix)
+            with self.assertRaisesRegex(ValueError, "Malformed"):
+                self.run_analysis()
+
 
 if __name__ == "__main__":
     unittest.main()

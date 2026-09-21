@@ -12,6 +12,7 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/Engine.h"
 #include "Engine/StaticMesh.h"
+#include "StaticMeshResources.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "ProceduralMeshComponent.h"
@@ -348,11 +349,12 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
 {
     const FName FernTag(TEXT("AuthoredFern02"));
     const FName TreeTag(TEXT("AuthoredTreeSmall02"));
+    const FName GroveTag(TEXT("AuthoredTreeSmall02Grove"));
     TArray<UStaticMeshComponent*> PreviousParts;
     GetComponents(PreviousParts);
     for (UStaticMeshComponent* Part : PreviousParts)
     {
-        if (Part->ComponentHasTag(FernTag) || Part->ComponentHasTag(TreeTag))
+        if (Part->ComponentHasTag(FernTag) || Part->ComponentHasTag(TreeTag) || Part->ComponentHasTag(GroveTag))
         {
             RemoveInstanceComponent(Part);
             Part->DestroyComponent();
@@ -449,14 +451,18 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     auto* AuthoredTree = LoadObject<UStaticMesh>(nullptr,
         TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2"));
     int32 TreeIndex = INDEX_NONE;
+    TSet<int32> GroveIndices;
     if (AuthoredTree && AuthoredTree->GetStaticMaterials().Num() == 3 && AuthoredTree->GetBodySetup()
         && AuthoredTree->GetBodySetup()->AggGeom.SphylElems.Num() == 1
-        && AuthoredTree->GetBodySetup()->AggGeom.GetElementCount() == 1)
+        && AuthoredTree->GetBodySetup()->AggGeom.GetElementCount() == 1
+        && AuthoredTree->GetRenderData() && AuthoredTree->GetRenderData()->LODResources.Num() > 0
+        && AuthoredTree->GetRenderData()->LODResources[0].GetNumTriangles() == 231785)
     {
         const FBox Bounds = AuthoredTree->GetBoundingBox();
         const float Radius = FVector2D(FMath::Max(FMath::Abs(Bounds.Min.X), FMath::Abs(Bounds.Max.X)),
             FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size();
         float Nearest = TNumericLimits<float>::Max();
+        TArray<TPair<int32, FVector2D>> Sites;
         for (int32 Index = 0; Index < 430; ++Index)
         {
             FRandomStream Candidate(817391 + Index * 179);
@@ -468,10 +474,37 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
                 || (Edge < 2650 && (Cluster < 0.45f || Candidate.FRand() < 0.68f)))
                 continue;
             if (Reserved(X, Y, Radius) || FMath::Abs(X - Homestead::StreamX(Y)) < Radius + 120
-                || FVector2D(X + 1000, Y).Size() > 1900)
+                || FVector2D(X + 1000, Y).Size() > 3000)
                 continue;
+            Sites.Emplace(Index, FVector2D(X, Y));
             const float Distance = FVector2D(X - 250, Y + 650).SizeSquared();
-            if (Distance < Nearest) { TreeIndex = Index; Nearest = Distance; }
+            if (FVector2D(X + 1000, Y).Size() <= 1900 && Distance < Nearest)
+            {
+                TreeIndex = Index;
+                Nearest = Distance;
+            }
+        }
+        TArray<FVector2D> SelectedSites;
+        for (const auto& Site : Sites)
+            if (Site.Key == TreeIndex)
+            {
+                GroveIndices.Add(Site.Key);
+                SelectedSites.Add(Site.Value);
+            }
+        Sites.Sort([](const auto& A, const auto& B)
+        {
+            const double ADistance = (A.Value + FVector2D(1000, 0)).SizeSquared();
+            const double BDistance = (B.Value + FVector2D(1000, 0)).SizeSquared();
+            return ADistance == BDistance ? A.Key < B.Key : ADistance < BDistance;
+        });
+        for (const auto& Site : Sites)
+        {
+            if (GroveIndices.Num() >= 16) break;
+            if (SelectedSites.ContainsByPredicate([&](const FVector2D& Other)
+                { return FVector2D::Distance(Other, Site.Value) < 2 * Radius; }))
+                continue;
+            GroveIndices.Add(Site.Key);
+            SelectedSites.Add(Site.Value);
         }
     }
     else
@@ -496,11 +529,12 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
         const float Width = Random.FRandRange(34, 58);
         const FVector Base = AtGround(X, Y);
         const float Yaw = Random.FRandRange(0, 360);
-        if (Index == TreeIndex)
+        if (GroveIndices.Contains(Index))
         {
             auto* Part = NewObject<UStaticMeshComponent>(this);
             AddInstanceComponent(Part);
-            Part->ComponentTags.Add(TreeTag);
+            Part->ComponentTags.Add(GroveTag);
+            if (Index == TreeIndex) Part->ComponentTags.Add(TreeTag);
             Part->SetupAttachment(GetRootComponent());
             Part->SetMobility(EComponentMobility::Static);
             Part->SetStaticMesh(AuthoredTree);

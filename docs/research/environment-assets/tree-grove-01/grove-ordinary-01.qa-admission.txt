@@ -1,0 +1,6 @@
+version=1
+shipping=1
+trace_compiled=0
+route=visual
+save_directory=E:/Repos/SurvivalGame/Saved/VisualPlaytests/20260921-033354-2d257ba0/grove-ordinary-01/SmokeSave
+project_saved_directory=E:/Repos/SurvivalGame/Saved/VisualPlaytests/20260921-033354-2d257ba0/grove-ordinary-01/EngineUser/Saved/
