@@ -1,0 +1,33 @@
+Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips.
+Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark.
+Ordinary tree encounter: root=X=-273.948 Y=-1705.551 Z=-24.615 trunk_center_xy=X=-273.908 Y=-1736.465 radius_cm=40.460087 capsule_cylinder_cm=121.416397
+BEGIN 0.00s close-notes: The clearing
+BEGIN 1.22s idle: The clearing
+BEGIN 4.33s slow-walk: The clearing
+BEGIN 8.34s stop-from-slow-walk: The clearing
+BEGIN 10.45s full-walk: The clearing
+BEGIN 13.56s turn-while-moving: Sapling  (renewing)
+BEGIN 16.60s stop-from-turn: Berry bush
+BEGIN 18.71s orbit-standing-character: Stream reeds
+BEGIN 22.74s open-pack: Stream reeds
+BEGIN 23.40s open-look: Stream reeds
+BEGIN 26.47s portrait-idle: Stream reeds
+BEGIN 29.54s portrait-orbit: Stream reeds
+BEGIN 33.66s return-to-world: Stream reeds
+Forage target id=52 position=X=-100.000 Y=550.000
+BEGIN 34.66s walk-to-forage: Stream reeds
+BEGIN 35.67s settle-forage: Berry bush
+BEGIN 36.40s view-picking-side: Berry bush
+BEGIN 37.68s before-pick: Berry bush
+BEGIN 38.53s gather: Berry bush
+BEGIN 41.60s after-gather: Berry bush  (renewing)
+BEGIN 43.71s walk-to-authored-tree: Berry bush  (renewing)
+BEGIN 58.99s view-authored-tree: The clearing
+Tree bounds inside viewport=1; screen_min=X=337.973 Y=77.271; screen_max=X=789.914 Y=493.394; viewport=1280,720; camera_pitch=0.131048
+BEGIN 62.09s walk-into-authored-trunk: The clearing
+BEGIN 71.12s retreat-from-authored-trunk: The clearing
+Forage target reached=1; resources actually gathered=1
+Picking action observed=1; recovered to idle=1
+Tree ready=1; ordinary approach=1; actual trunk blocked walking=0; ordinary retreat=1
+Tree retreat displacement_cm=289.857094; retreat_start=X=-203.251 Y=-1719.814; completed_passes=23; planned_passes=23
+This observational capture is not a visual-quality pass or a replacement for human feel/listening review.

@@ -56,10 +56,15 @@ private:
     TWeakObjectPtr<UStaticMeshComponent> ObservedTree;
     FVector2D TreeCenter = FVector2D::ZeroVector;
     FVector2D TreeStaging = FVector2D::ZeroVector;
-    FVector2D TreeContact = FVector2D::ZeroVector;
+    FVector2D TreeRetreatStart = FVector2D::ZeroVector;
+    TArray<FString> TreeContactSamples;
+    double PreviousTreeDistance = 0;
+    bool bHaveTreeDistance = false;
+    double TreeRetreatDistance = 0;
     bool bTreeRoute = false;
     bool bTreeReady = false;
     bool bReachedTree = false;
+    bool bTreeFramed = false;
     bool bTreeBlocked = false;
     bool bTreeRetreated = false;
     float TreeBlockedSeconds = 0;

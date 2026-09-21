@@ -1,0 +1,204 @@
+{
+  "status": "failed-contact-oracle-api-mismatch-unselected",
+  "createdUtc": "2026-09-21T13:54:59.7585143+00:00",
+  "earlierReceiptSha256": "5F47A0FB68B1A9C57C6A9AA932F1566461328F978AD3E21508ADD8F584A827BF",
+  "sourceCheckpoint": "b478a460aa8bfe5a19cbea9befa26fe69c73623f",
+  "build": "Genuine graph03; failed compile1 shadowed-variable error retained; corrected compile1-correction01, link/manifest/metadata/stage passed.",
+  "earlierBuild": "Build02 compiles succeeded before the coordinator framing request; never linked or launched.",
+  "cook": "Unchanged qualified tree-diagnostic-cook-02 reused; original17 packages and physics unchanged.",
+  "qualification": "Original import03 remains FAILED. Exactly12 branch source-description tangent/binormal corners remain a separate diagnostic qualification.",
+  "route": {
+    "retreat": true,
+    "retreatDistanceCm": 289.857094,
+    "contact": false,
+    "approach": true,
+    "componentHitCount": 19,
+    "plannedPasses": 23,
+    "frames": 519,
+    "lastHit": {
+      "seconds": "70.973465",
+      "x": "-204.031074",
+      "y": "-1716.837749",
+      "distance_cm": "72.581299",
+      "input_x": "-0.520913",
+      "input_y": "-0.345361",
+      "inward_intent": "0.594897",
+      "inward_velocity_cm_s": "-0.211269",
+      "radial_progress_cm_s": "0.028826",
+      "total_speed_cm_s": "21.768993",
+      "hit_component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482339",
+      "blocking_hit": "0",
+      "start_penetrating": "0",
+      "hit_distance_cm": "0.121216",
+      "blocked_seconds": "0.000000"
+    },
+    "forage": true,
+    "durationSeconds": 74.0708,
+    "completedPasses": 23,
+    "wholeBoundsInViewport": true,
+    "readiness": true
+  },
+  "oracleFailure": "Specific-component SweepComponent uses a geometric overlap-all query. It returns true and identifies the actual tree body, but its bBlockingHit flag is false by design. Requiring that flag was an observer API-contract error.",
+  "sourceEvidence": {
+    "proposedCorrection": "Require component sweep success and exact identity plus query-enabled reciprocal Pawn/tree Block responses. Retain actual inward input, low radial velocity/progress and sustained duration. No collider/gameplay change.",
+    "lines": "1003-1111; BuildOverlapAll at1083, ConvertQueryImpactHit and bSweepHit=true at1102-1103.",
+    "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Runtime\\Engine\\Private\\PhysicsEngine\\Experimental\\PhysInterface_Chaos.cpp",
+    "sha256": "3DFED84FA226872771CE57E6D94F11DDBA9BFAFBC5FC2F1FE4832796F4FDF8C1"
+  },
+  "limits": [
+    "Second scenario remains failed; correct wrapper rejected it despite OS exit0.",
+    "No third game launch at sealing.",
+    "No retrospective collision pass from interpreting this failed capture.",
+    "Frame432 is real; numeric bounds fully inside viewport. Direct image review remains coordinator-owned due worker image quota.",
+    "Selected wardrobe-ui-02 unchanged; no task-count advance or performance/subjective approval."
+  ],
+  "sourcePins": [
+    {
+      "sha256": "44F5ED93F2301DB5B8653BCDF361EC48BC6C1A9763952B3D297066BE41B514C6",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp"
+    },
+    {
+      "sha256": "AD76D98822D5D03052DEE7E62AA99A4B20D3995E8DA2127076B187A2EB5CFB6A",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h"
+    },
+    {
+      "sha256": "8729D3B85750D69B966995457C94FBD0EFAB1E45F34273A8E77D4C6E562C8E18",
+      "path": "Scripts\\Playtest-Visual.ps1"
+    },
+    {
+      "sha256": "95BB9146429518B5DCB77890892A93898F2D69E5F74F6F1097F58CB9AD4BE2C8",
+      "path": "Scripts\\Build-AuthoringProbe.ps1"
+    },
+    {
+      "sha256": "D7280BE9CD6CD8C9F241EE0017176F9E8921B9BCD039434829622A64FA3D4805",
+      "path": "Tests\\Test-CompilerLeaf.ps1"
+    }
+  ],
+  "files": [
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\observations.txt",
+      "copy": "ordinary.observations.txt",
+      "sha256": "05F59A59033817D06E635E4E12C62BA36BEB58445C5DCB0AE355C265E7AA2C98"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\telemetry.csv",
+      "copy": "ordinary.telemetry.csv",
+      "sha256": "8991647D72F46E07FD671315F32002F31DF12252252CF5A69AA626973BB8659F"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\tree-contact.csv",
+      "copy": "ordinary.tree-contact.csv",
+      "sha256": "6D7813C3913BDD0B1AB0AF74C01E04008A5D3AE65F9050E7D08B2AE57A712684"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\motion-review.json",
+      "copy": "ordinary.motion-review.json",
+      "sha256": "9B7823623AC77E99C1E8EB7A67B95E62AF4CEFF81626B0982B183D6887CEC09A"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\presentation-settings.txt",
+      "copy": "ordinary.presentation-settings.txt",
+      "sha256": "C49EF3BD5991FCF97FDE2F18B3CCD43D25559400B22D0F468D7A31D2273BFA1D"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\qa-guard-result.json",
+      "copy": "ordinary.qa-guard-result.json",
+      "sha256": "8E3C7B78C77F8EC2DF71EADF9860A8B492623665F37894E4115537F9A9187D2A"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\qa-launch.json",
+      "copy": "ordinary.qa-launch.json",
+      "sha256": "984B636C594ECB8CCE684ABF22AACE1B79AFAFF7720C8623E90ED89B83BDA200"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\tree-diagnostic-02\\Frames\\frame-00432.png",
+      "copy": "frame-00432.png",
+      "sha256": "DE7F6FB3285D9DB57D987EBF3344AE53D541F938BA0BC12A14C049EA76089D11"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\compile0\\result.json",
+      "copy": "shipping.compile0.result.json",
+      "sha256": "B90661B526EAF5C2F54A69620672B59B3A1DED0AF0B0697DB6D556F0D86DEBFC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\compile1\\result.json",
+      "copy": "shipping.compile1.result.json",
+      "sha256": "8A067FB41D6B37F4088E4DB75CA52C24E53ED737C1EF4421AD426D978A105C8E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\compile1\\compiler.log",
+      "copy": "shipping.compile1.compiler.log",
+      "sha256": "3CF296D6BADA6C87D92F9AACD25C970DB45A0D602CCDCD7BAD5F8378CAB1D051"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\compile1-correction01\\result.json",
+      "copy": "shipping.compile1-correction01.result.json",
+      "sha256": "ACBB3857BE4EA4FA76C96F2FEFA7695B91714B4EE5978F4A14D8812CD4FF38A4"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\link2\\result.json",
+      "copy": "shipping.link2.result.json",
+      "sha256": "D0575D6C47D72AC0046AC7F4AB77B05821FB3B0B027D199C10B64E43714EC1A9"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\manifest-01\\result.json",
+      "copy": "shipping.manifest-01.result.json",
+      "sha256": "C7D421249042D0DE70FD37F8C9B9F032E5254F936E0ACF90AFED963BD2D2F5FD"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\metadata\\result.json",
+      "copy": "shipping.metadata.result.json",
+      "sha256": "7A8024B39F64D2396E6AE6543A3C5A760DC11A02F43DE1AEF6D737EE2DE16A81"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\metadata\\native-products.json",
+      "copy": "shipping.metadata.native-products.json",
+      "sha256": "2C8A6AB75B7FE58A1E48CE8CED5C0CFF0E482B4993B7D3D9081DDB2C8DAE9BF9"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-03\\final-native-product.json",
+      "copy": "shipping.final-native-product.json",
+      "sha256": "5105058D406B0208AFDFC574F75F5D38C020411F74E63A2306B9B07BA0DA5514"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-02\\compile0\\result.json",
+      "copy": "pre-framing.compile0.result.json",
+      "sha256": "09C4B7A3B98CCD63DA148DD4A3C01D9E9115EB7EC20BFC4594EAC0BD039784DB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-build-02\\compile1\\result.json",
+      "copy": "pre-framing.compile1.result.json",
+      "sha256": "6643A4C7F19D0F641A65481B3588A19A567BD6759F59CED29ED00B669DBBA2BB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-plan-03\\actions.json",
+      "copy": "export.actions.json",
+      "sha256": "F01BF1E83DBB67EE504F7030B4204AB4363FDE57A1904E5D46DEEAAA1FE0CEA1"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-plan-03\\result.json",
+      "copy": "export.result.json",
+      "sha256": "F3CFB2F449B515E325D27B349776F21E1197C5442C5F9438A061A46BC08FE14D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-shipping-plan-03\\launch.json",
+      "copy": "export.launch.json",
+      "sha256": "C9EB331C171E36555BA2B6E13B5C50D099516EF96EEE1E23F77DCB6EB6593333"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-11\\game\\result.json",
+      "copy": "resource.result.json",
+      "sha256": "7FCDEE9D128553995FFE88114A550AF84E28A72FBB238D12778F8A2090E9050F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-stage-02\\result.json",
+      "copy": "stage.result.json",
+      "sha256": "65F31A7776DBA27EEBC1A7A269BEA3E8FD5B38DBE63CDD44E95A400CE7CFBF65"
+    },
+    {
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-02\\build-receipt.json",
+      "copy": "stage.build-receipt.json",
+      "sha256": "045E249AF7A18C9B29FD9B7EE93A1D31FCC73C2669BDD0FB8F70BE38BCB848B5"
+    }
+  ]
+}

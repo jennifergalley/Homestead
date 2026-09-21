@@ -8,7 +8,8 @@ param(
     [switch]$HairWaveCandidate,
     [switch]$WardrobeCandidate,
     [switch]$WardrobeVisualCorrection,
-    [switch]$TreeDiagnosticCandidate
+    [switch]$TreeDiagnosticCandidate,
+    [switch]$TreeContactCorrection
 )
 $ErrorActionPreference = 'Stop'
 $authorityRoot = Split-Path $PSScriptRoot -Parent
@@ -16,8 +17,9 @@ if($HairWaveCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly)){
 if($WardrobeCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly -or $HairWaveCandidate)){throw 'Wardrobe metadata requires exclusive genuine Shipping metadata mode.'}
 if($WardrobeVisualCorrection -and -not $WardrobeCandidate){throw 'Visual correction requires explicit wardrobe Shipping metadata.'}
 if($TreeDiagnosticCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly -or $HairWaveCandidate -or $WardrobeCandidate)){throw 'Tree diagnostic requires exclusive genuine Shipping metadata mode.'}
-$shippingBuildName=if($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$shippingLinkFolder=if($WardrobeCandidate -or $TreeDiagnosticCandidate){'link2'}else{'link1'}
+if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires explicit tree diagnostic metadata.'}
+$shippingBuildName=if($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkFolder=if($TreeContactCorrection){'link1'}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){'link2'}else{'link1'}
 $manifestAttempt=if($HairWaveCandidate -or $WardrobeCandidate -or $TreeDiagnosticCandidate){'manifest-01'}else{'manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')
 if ($root -ine $authorityRoot -and

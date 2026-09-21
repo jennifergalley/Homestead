@@ -130,6 +130,38 @@ Frame520 was directly inspected as recognizable textured tree geometry; quota
 blocked full-view424/contact480 inspection. These originals are retained for
 coordinator review. No second launch or selected-preview change at this checkpoint.
 
+The coordinator then reviewed actual contact frame480 and authorized correcting
+the observer, not gameplay physics: use actual consumed inward movement input,
+small radial velocity/progress and a supported sweep against the specific tree
+component. Permit tangential CharacterMovement sliding. Record contact samples
+and retreat displacement independently from contact success; retain every
+planned stage and the existing guard deadlines. A distinct genuine Shipping
+build/stage02 may reuse unchanged cook02, then run one corrected ordinary route.
+Original diagnostic01 remains incomplete; no promotion before real outcome.
+
+Actual diagnostic02 included the whole crown (projected bounds entirely inside
+1280x720), independent289.86cm retreat and all23 stages, but contact still failed.
+The retained per-tick CSV identified the exact tree with near-zero radial motion.
+Installed `FPhysInterface_Chaos::Sweep_Geom` uses `BuildOverlapAll` and returns
+geometric-hit success; its false `bBlockingHit` is not channel-blocking policy.
+That unsupported observer predicate was corrected under explicit coordinator
+approval: require geometric hit and exact component, actor/component query
+enablement and reciprocal Pawn/tree `ECR_Block` responses. Keep the raw
+overlap-classified flag in evidence, never assign it true. No physics, asset or
+tolerance change; preserve failed01/02.
+
+Diagnostic03 then passed the actual ordinary tree scenario:501 real720p frames,
+71.80s route, all23 stages, genuine forage, crown framing, inward trunk contact
+and independent286.64cm retreat. Six successive contact samples accumulated
+0.832s with all actual query/response conditions satisfied while tangential slide
+continued. Guard exit/release completed without hard stop or cleanup errors.
+`docs/research/environment-assets/tree-diagnostic-03/receipt.json` seals the
+actual images and evidence. This is qualified ordinary-play evidence, not clean
+source-basis acceptance, full woodland/performance approval or promotion.
+wardrobe-ui-02 remains selected pending coordinator disposition. Future Editor
+authoring must genuinely refresh changed native source/product pins; this
+observer correction rebuilt Shipping only and reused unchanged cook02.
+
 Bounds compare polygon-referenced LOD2 extrema, not all FBX control points:
 40624 of424817 are unused, changing Y extent by0.4882cm. Transform all eight
 referenced-bound corners through the recorded model rotation, axis/handedness

@@ -28,6 +28,14 @@ pass. The twelve-corner tangent qualification remains explicit; import03 stays
 failed. Keep wardrobe-ui-02 selected. This partial diagnostic evidence checks
 no additional top-level task; see `docs/research/environment-assets/tree-diagnostic-01/receipt.json`.
 
+Subsequent scenario02 fixed crown framing/independent retreat but exposed a
+component-sweep API-contract mistake. Corrected scenario03 passed all requested
+ordinary outcomes with501 real720p frames and exact-component/query-response
+contact evidence. Both failures remain failed; twelve source-description basis
+corners remain a separate qualification. This does not complete the broader
+tasks below or select the candidate; current evidence is
+`docs/research/environment-assets/tree-diagnostic-03/receipt.json`.
+
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns
 environment/engine integration; isolated siblings own UI, wardrobe rules

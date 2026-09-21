@@ -19,7 +19,8 @@ param(
     [switch]$HairWaveCandidate,
     [switch]$WardrobeCandidate,
     [switch]$WardrobeVisualCorrection,
-    [switch]$TreeDiagnosticCandidate
+    [switch]$TreeDiagnosticCandidate,
+    [switch]$TreeContactCorrection
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -29,10 +30,11 @@ if($HairWaveCandidate -and -not $ShippingActions){throw 'Hair-wave candidate app
 if($WardrobeCandidate -and (-not $ShippingActions -or $HairWaveCandidate)){throw 'Wardrobe candidate requires exclusive Shipping selection.'}
 if($WardrobeVisualCorrection -and -not $WardrobeCandidate){throw 'Visual correction requires the explicit wardrobe Shipping candidate.'}
 if($TreeDiagnosticCandidate -and (-not $ShippingActions -or $HairWaveCandidate -or $WardrobeCandidate)){throw 'Tree diagnostic requires exclusive Shipping selection.'}
-$shippingBuildName=if($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$shippingLinkAction=if($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
+if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires the explicit tree diagnostic candidate.'}
+$shippingBuildName=if($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkAction=if($TreeContactCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
-$shippingCompiles=if($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
+$shippingCompiles=if($TreeContactCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
 if($TreeActions -and ($FernActions -or $UiActions -or $WardrobeActions -or $ShippingActions -or -not $DetachedConsole -or
     $CompileActionId -notin @(-1,0) -or $ResourceLinkActionId -notin @(-1,1,2) -or
@@ -159,7 +161,7 @@ if($StageCooked) {
     }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -250,6 +252,10 @@ if($StageCooked) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-shipping-plan-01\actions.json'
         $planHash='D817D090353C850E76F8DC256CC26012D2E6742254A3FFD8EF10F98B2C13EAC9'
     }
+    if($TreeContactCorrection){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-shipping-plan-04\actions.json'
+        $planHash='1A9ED374DB4739BCC2ACFD8AD43490607407BAF165988307813EA2890A3C6D7D'
+    }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'
         $planHash='5A801AC790664B9C17894AB1C730EBEC1DB5E541A8343D9B01E6CF1BE7A3E0AE'
@@ -261,6 +267,13 @@ if($StageCooked) {
     if((Get-FileHash $planPath).Hash -cne $planHash) { throw 'Reviewed action export changed.' }
     $plan=Get-Content $planPath -Raw|ConvertFrom-Json
     $action=@($plan.Actions|Where-Object Id -EQ $selectedId)[0]
+    if($TreeContactCorrection -and $ResourceLinkActionId -eq 1){
+        $retained=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-shipping-build-03\compile0\result.json') -Raw|ConvertFrom-Json
+        if($retained.status -cne 'passed'){throw 'Unchanged first Shipping unity prerequisite is missing.'}
+        foreach($product in $retained.producedItems){
+            if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Unchanged first Shipping unity product differs.'}
+        }
+    }
     if($TreeActions -and $ResourceLinkActionId -in @(1,2)) {
         foreach($leaf in @('compile1')) {
             $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\tree-native-build-01\$leaf\result.json") -Raw|ConvertFrom-Json
@@ -292,7 +305,8 @@ if($StageCooked) {
             }
         }
         if($WardrobeCandidate -or $TreeDiagnosticCandidate){
-            $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\compile$dependency\result.json") -Raw|ConvertFrom-Json
+            $compileFolder="compile$dependency"
+            $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\$compileFolder\result.json") -Raw|ConvertFrom-Json
             if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual selected Shipping compile prerequisite missing.'}
             foreach($product in $proof.producedItems){
                 if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Selected Shipping compile output changed.'}
@@ -434,6 +448,7 @@ try {
         splitShippingManifest=[bool]$SplitShippingManifest;embedShippingManifest=[bool]$EmbedShippingManifest
         stageCooked=[bool]$StageCooked;stageCandidate=$stageCandidate
         treeDiagnosticCandidate=[bool]$TreeDiagnosticCandidate
+        treeContactCorrection=[bool]$TreeContactCorrection
         creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions;treeActions=[bool]$TreeActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()

@@ -238,6 +238,7 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
     }
     ObservedTree = Tree;
     TreeCenter = FVector2D(Tree->GetComponentTransform().TransformPosition(Body->AggGeom.SphylElems[0].Center));
+    TreeContactSamples.Add(TEXT("seconds,x,y,distance_cm,input_x,input_y,inward_intent,inward_velocity_cm_s,radial_progress_cm_s,total_speed_cm_s,hit_component,geometry_blocking_flag,start_penetrating,hit_distance_cm,blocked_seconds,geometry_hit,tree_query,pawn_query,tree_blocks_pawn,pawn_blocks_tree,tree_object_type,pawn_object_type,tree_actor_collision,pawn_actor_collision"));
     Observations.Add(FString::Printf(TEXT("Ordinary tree encounter: root=%s trunk_center_xy=%s radius_cm=%.6f capsule_cylinder_cm=%.6f"),
         *Root.ToString(), *TreeCenter.ToString(), Body->AggGeom.SphylElems[0].Radius, Body->AggGeom.SphylElems[0].Length));
     Passes.Append({
@@ -262,6 +263,41 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
     const float Difference = FMath::FindDeltaAngleDegrees(static_cast<float>(PC->GetControlRotation().Yaw), Yaw);
     Look.X = FMath::Clamp(Difference / 45.0f, -0.7f, 0.7f);
     Move.Y = View ? 0 : Retreat ? -0.65f : FMath::Abs(Difference) < 25 ? 0.7f : 0;
+    if (View && ObservedTree.IsValid())
+    {
+        FVector CameraPosition;
+        FRotator CameraRotation;
+        PC->GetPlayerViewPoint(CameraPosition, CameraRotation);
+        const FVector ToCenter = ObservedTree->Bounds.Origin - CameraPosition;
+        const float DesiredPitch = FMath::RadiansToDegrees(FMath::Atan2(ToCenter.Z, ToCenter.Size2D()));
+        const float PitchError = FMath::FindDeltaAngleDegrees(CameraRotation.Pitch, DesiredPitch);
+        Look.Y = -FMath::Clamp(PitchError / 30.0f, -0.65f, 0.65f) * (PC->bInvertY ? -1.0f : 1.0f);
+        if (PassElapsed + Delta >= Pass.Duration)
+        {
+            int32 Width = 0, Height = 0;
+            PC->GetViewportSize(Width, Height);
+            const FBox Bounds = ObservedTree->Bounds.GetBox();
+            FVector2D Minimum(DBL_MAX, DBL_MAX), Maximum(-DBL_MAX, -DBL_MAX);
+            bTreeFramed = Width > 0 && Height > 0;
+            for (int32 Corner = 0; Corner < 8; ++Corner)
+            {
+                const FVector CornerPoint(Corner & 1 ? Bounds.Max.X : Bounds.Min.X,
+                    Corner & 2 ? Bounds.Max.Y : Bounds.Min.Y, Corner & 4 ? Bounds.Max.Z : Bounds.Min.Z);
+                FVector2D Screen;
+                const bool Projected = PC->ProjectWorldLocationToScreen(CornerPoint, Screen);
+                bTreeFramed &= Projected && Screen.X >= 0 && Screen.X <= Width && Screen.Y >= 0 && Screen.Y <= Height;
+                if (Projected)
+                {
+                    Minimum.X = FMath::Min(Minimum.X, Screen.X);
+                    Minimum.Y = FMath::Min(Minimum.Y, Screen.Y);
+                    Maximum.X = FMath::Max(Maximum.X, Screen.X);
+                    Maximum.Y = FMath::Max(Maximum.Y, Screen.Y);
+                }
+            }
+            Observations.Add(FString::Printf(TEXT("Tree bounds inside viewport=%d; screen_min=%s; screen_max=%s; viewport=%d,%d; camera_pitch=%.6f"),
+                bTreeFramed, *Minimum.ToString(), *Maximum.ToString(), Width, Height, CameraRotation.Pitch));
+        }
+    }
     if (Approach && Offset.Size() < 45)
     {
         bReachedTree = true;
@@ -269,26 +305,52 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
         PassElapsed = Pass.Duration;
     }
     auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn());
-    if (Contact && Avatar && FMath::Abs(Difference) < 10)
+    if (Contact && Avatar && ObservedTree.IsValid())
     {
         const FVector Start = Avatar->GetActorLocation();
         const FVector Direction(Offset.GetSafeNormal(), 0);
+        const FVector Input = Avatar->GetLastMovementInputVector();
+        const double InwardIntent = FVector::DotProduct(Input, Direction);
+        const double InwardVelocity = FVector::DotProduct(Avatar->GetVelocity(), Direction);
+        const double Distance = Offset.Size();
+        const double RadialProgress = bHaveTreeDistance && Delta > 0 ? (PreviousTreeDistance - Distance) / Delta : 0;
         FHitResult Hit;
-        const FCollisionQueryParams Query(SCENE_QUERY_STAT(TreeWalkingContact), false, Avatar);
-        const bool HitTree = GetWorld()->SweepSingleByChannel(Hit, Start, Start + Direction * 15, FQuat::Identity,
-            ECC_Pawn, Avatar->GetCapsuleComponent()->GetCollisionShape(), Query) && Hit.GetComponent() == ObservedTree.Get();
-        TreeBlockedSeconds = HitTree && Avatar->GetVelocity().Size2D() < 5 ? TreeBlockedSeconds + Delta : 0;
+        const auto* PawnCapsule = Avatar->GetCapsuleComponent();
+        const bool GeometryHit = ObservedTree->SweepComponent(Hit, Start, Start + Direction * 15,
+            PawnCapsule->GetComponentQuat(), PawnCapsule->GetCollisionShape());
+        const bool TreeQuery = ObservedTree->IsQueryCollisionEnabled(), PawnQuery = PawnCapsule->IsQueryCollisionEnabled();
+        const bool TreeBlocksPawn = ObservedTree->GetCollisionResponseToChannel(PawnCapsule->GetCollisionObjectType()) == ECR_Block;
+        const bool PawnBlocksTree = PawnCapsule->GetCollisionResponseToChannel(ObservedTree->GetCollisionObjectType()) == ECR_Block;
+        const bool TreeActorCollision = ObservedTree->GetOwner() && ObservedTree->GetOwner()->GetActorEnableCollision();
+        const bool PawnActorCollision = Avatar->GetActorEnableCollision();
+        // Component sweeps use overlap-all filters; check the actual response pair separately.
+        const bool HitTree = GeometryHit && !Hit.bStartPenetrating && Hit.GetComponent() == ObservedTree.Get()
+            && TreeQuery && PawnQuery && TreeBlocksPawn && PawnBlocksTree && TreeActorCollision && PawnActorCollision;
+        const bool RadiallyBlocked = bHaveTreeDistance && HitTree && Move.Y > 0.25 && InwardIntent > 0.25
+            && FMath::Abs(InwardVelocity) < 5 && FMath::Abs(RadialProgress) < 5;
+        TreeBlockedSeconds = RadiallyBlocked ? TreeBlockedSeconds + Delta : 0;
+        TreeContactSamples.Add(FString::Printf(TEXT("%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%s,%d,%d,%.6f,%.6f,%d,%d,%d,%d,%d,%d,%d,%d,%d"),
+            Elapsed, Position.X, Position.Y, Distance, Input.X, Input.Y, InwardIntent, InwardVelocity, RadialProgress,
+            Avatar->GetVelocity().Size2D(), *GetPathNameSafe(Hit.GetComponent()), Hit.bBlockingHit,
+            Hit.bStartPenetrating, Hit.Distance, TreeBlockedSeconds, GeometryHit, TreeQuery, PawnQuery,
+            TreeBlocksPawn, PawnBlocksTree, static_cast<int32>(ObservedTree->GetCollisionObjectType()),
+            static_cast<int32>(PawnCapsule->GetCollisionObjectType()), TreeActorCollision, PawnActorCollision));
+        PreviousTreeDistance = Distance;
+        bHaveTreeDistance = true;
         if (TreeBlockedSeconds >= 0.75f)
         {
             bTreeBlocked = true;
-            TreeContact = Position;
-            Observations.Add(FString::Printf(TEXT("Actual walking blocked at authored trunk: player=%s distance_cm=%.6f sweep_component=%s"),
-                *Position.ToString(), Offset.Size(), *GetPathNameSafe(Hit.GetComponent())));
+            Observations.Add(FString::Printf(TEXT("Actual inward walking blocked at authored trunk: player=%s distance_cm=%.6f inward_intent=%.6f inward_velocity_cm_s=%.6f radial_progress_cm_s=%.6f total_speed_cm_s=%.6f sweep_component=%s"),
+                *Position.ToString(), Distance, InwardIntent, InwardVelocity, RadialProgress,
+                Avatar->GetVelocity().Size2D(), *GetPathNameSafe(Hit.GetComponent())));
             PassElapsed = Pass.Duration;
         }
     }
-    if (Retreat && bTreeBlocked && FVector2D::Distance(Position, TreeContact) > 100)
-        bTreeRetreated = true;
+    if (Retreat)
+    {
+        TreeRetreatDistance = FVector2D::Distance(Position, TreeRetreatStart);
+        bTreeRetreated |= TreeRetreatDistance > 100;
+    }
 }
 
 void AHomesteadVisualPlaytest::Capture(const FString& Label)
@@ -425,6 +487,11 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             const auto Point = PC->PlayerPoint();
             TreeStaging = TreeCenter + (FVector2D(Point.x, Point.y) - TreeCenter).GetSafeNormal() * 750;
         }
+        if (Pass.Label == TEXT("retreat-from-authored-trunk"))
+        {
+            const auto Point = PC->PlayerPoint();
+            TreeRetreatStart = FVector2D(Point.x, Point.y);
+        }
         Observations.Add(FString::Printf(TEXT("BEGIN %.2fs %s: %s"), Elapsed, *Pass.Label, *PC->FocusTitle()));
     }
     FVector2D Move = Pass.Move;
@@ -496,12 +563,19 @@ void AHomesteadVisualPlaytest::Finish()
         Observations.Add(FString::Printf(TEXT("Picking action observed=%d; recovered to idle=%d"), bObservedGather, bGatherRecovered));
         Observations.Add(FString::Printf(TEXT("Tree ready=%d; ordinary approach=%d; actual trunk blocked walking=%d; ordinary retreat=%d"),
             bTreeReady, bReachedTree, bTreeBlocked, bTreeRetreated));
+        Observations.Add(FString::Printf(TEXT("Tree retreat displacement_cm=%.6f; retreat_start=%s; completed_passes=%d; planned_passes=%d"),
+            TreeRetreatDistance, *TreeRetreatStart.ToString(), PassIndex, Passes.Num()));
+        if (bTreeRoute && !bTreeFramed)
+            Observations.Add(TEXT("FAILED full tree bounds were not observed inside the viewport."));
     }
     Observations.Add(TEXT("This observational capture is not a visual-quality pass or a replacement for human feel/listening review."));
     bool Saved = FFileHelper::SaveStringToFile(FString::Join(Telemetry, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("telemetry.csv")));
     Saved = FFileHelper::SaveStringToFile(FString::Join(Observations, TEXT("\n")) + TEXT("\n"),
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
+    if (bTreeRoute)
+        Saved = FFileHelper::SaveStringToFile(FString::Join(TreeContactSamples, TEXT("\n")) + TEXT("\n"),
+            *FPaths::Combine(OutputDirectory, TEXT("tree-contact.csv"))) && Saved;
     if (bPresentationDiagnostics)
     {
         Saved = FFileHelper::SaveStringToFile(FString::Join(PresentationTimings, TEXT("\n")) + TEXT("\n"),
@@ -517,7 +591,7 @@ void AHomesteadVisualPlaytest::Finish()
         : bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
         : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
         : bReachedForage && Gathered && bObservedGather && bGatherRecovered
-            && (!bTreeRoute || (bTreeReady && bReachedTree && bTreeBlocked && bTreeRetreated));
+            && (!bTreeRoute || (bTreeReady && bReachedTree && bTreeFramed && bTreeBlocked && bTreeRetreated));
     const bool Cancelled = FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"))
         && IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-qa.txt")));
     FPlatformMisc::RequestExitWithStatus(false, Saved && Complete && !Cancelled ? 0 : 1);

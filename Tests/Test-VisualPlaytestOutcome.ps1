@@ -21,8 +21,12 @@ foreach($outcome in $bad){
     try{Assert-VisualPlaytestOutcome $outcome $forage -RequireTree}catch{$rejected=$true}
     if(-not $rejected){throw "Invalid route outcome accepted:$outcome"}
 }
-$actual=Get-Content (Join-Path $root 'docs\research\environment-assets\tree-diagnostic-01\ordinary.observations.txt') -Raw
-$rejected=$false
-try{Assert-VisualPlaytestOutcome $actual $forage}catch{$rejected=$true}
-if(-not $rejected){throw 'Actual failed tree contact capture was accepted.'}
-'PASS: two positive controls, eight negative cases and actual failed contact evidence rejected; no game launched.'
+foreach($case in @('01','02')){
+    $actual=Get-Content (Join-Path $root "docs\research\environment-assets\tree-diagnostic-$case\ordinary.observations.txt") -Raw
+    $rejected=$false
+    try{Assert-VisualPlaytestOutcome $actual $forage}catch{$rejected=$true}
+    if(-not $rejected){throw "Actual failed tree contact capture was accepted:$case"}
+}
+$actual=Get-Content (Join-Path $root 'docs\research\environment-assets\tree-diagnostic-03\ordinary.observations.txt') -Raw
+Assert-VisualPlaytestOutcome $actual $forage -RequireTree
+'PASS: two synthetic positives, eight negatives, two real failed scenarios rejected and corrected real scenario accepted; no game launched.'

@@ -1,0 +1,7 @@
+Module.SurvivalGame.2.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(284,31): error C4456: declaration of 'Point' hides previous local declaration
+                const FVector Point(Corner & 1 ? Bounds.Max.X : Bounds.Min.X,
+                              ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(259,16): note: see declaration of 'Point'
+    const auto Point = PC->PlayerPoint();
+               ^
