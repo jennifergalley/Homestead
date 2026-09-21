@@ -1,6 +1,58 @@
 # Cozy Survival Game
 
-## Status
+## Working policy: playable iteration first
+
+Jenny's instructions of 2026-09-20 govern current development and supersede
+older planning constraints that conflict with this section.
+
+- **Playtesting, not a protected playthrough.** Until Jenny says otherwise,
+  existing game saves are disposable test data. Prefer the latest playable
+  version over preserving or migrating old test progress. Reset incompatible
+  test saves when needed and report the reset; do not delete unrelated data.
+  Reliable saving remains a game feature, but legacy test-save migration,
+  profile snapshots and recovery infrastructure are not release prerequisites.
+- **Completion-driven autonomy.** Continue around the clock through agreed
+  scope and plans, working toward the quality and feature completeness of an
+  indie game on Steam. Cost and credit use are not constraints for this project.
+  Do not impose arbitrary time, spending or iteration caps. Honor explicit
+  stops and actual failures; do not confuse a quiet long-running build with
+  a failure or repeat a failed approach without diagnosis.
+- **OpenSpec before each improvement round.** Keep proposal, design and tasks
+  current, including changes to scope or acceptance. Plan enough to implement
+  coherently, not to eliminate all future debugging or refactoring.
+- **Deliver playable features, not an infrastructure project.** Prefer direct
+  integration and frequent playtests to elaborate authoring, testing or proof
+  systems. Build, exercise the changed behavior, inspect actual visuals where
+  relevant, and fix blocking defects. Modest disclosed bugs and later refactors
+  are acceptable. Essential security, licensing and honest error reporting
+  remain required; do not claim untested behavior or failed checks as passing.
+- **Make the latest usable build easy to playtest.** Update the normal preview
+  selection after appropriate build and gameplay checks, with concise notes
+  about changes, known issues and any save reset. Do not require another
+  approval solely to preserve obsolete test progress. Keep cheap code/build
+  rollback where useful, without turning compatibility into the main task.
+- **Parallelize independent work.** Use isolated sub-sessions/worktrees whenever
+  concrete file and artifact ownership makes later integration practical.
+  Agree shared interfaces early, coordinate merges, and serialize only genuinely
+  shared resources such as engine authoring, packaging and final integration.
+  Do not limit useful parallel work merely to save credits or agent count.
+
+The delivery order is the environment upgrade, then
+`redesign-inventory-and-wardrobe`. Independent implementation and asset
+preparation may proceed in parallel branches; integrate and deliver in that
+order. Revise affected OpenSpec prerequisites to distinguish branch work from
+integrated acceptance. The inventory plan prioritizes discoverable Quit,
+the icon-tab overlay and existing-item grids/details before the complete owned
+wardrobe. Jenny will provide further direction as she playtests; do not invent
+unrelated features simply to keep agents occupied.
+
+These preferences do not authorize purchases, account/security/firewall changes,
+private-reference uploads, or interference with unrelated applications.
+Current progress and the latest usable launch path are recorded in
+`docs\development-status.md` and `Preview.cmd`; the prototype snapshot below
+is historical, not the current build/authorization status.
+
+## Historical prototype status
 
 The initial implementation plan has been approved. This is the project-owned
 design and roadmap, with subsequent interview additions incorporated.

@@ -77,13 +77,29 @@ foreach($name in @('wrong-node','wrong-triangles','double-scale','wrong-slot','p
 $images=Join-Path $output 'dummy-image-headers'
 $null=New-Item -ItemType Directory -Path $images
 $render=@{width=1280;height=720;shaderMapComplete=$true;materialFallbackAllowed=$false;adapter='test-only';rhi='D3D12';views=@()}
+$render.sceneState=@{isClient=$true;canEverRender=$true;worldScenePresent=$true;realRenderScene=$true;
+    fernRegistered=$true;fernRenderStateCreated=$true;fernSceneProxyPresent=$true;captureRegistered=$true;captureVisible=$true}
 foreach($name in @('fern-a-front.png','fern-a-back.png')) {
     $header=[Convert]::FromHexString('89504E470D0A1A0A0000000D4948445200000500000002D0')
     $bytes=[byte[]]::new(64);[Array]::Copy($header,$bytes,$header.Length)
     [IO.File]::WriteAllBytes((Join-Path $images $name),$bytes)
-    $render.views+=@{image=$name;greenPixelCount=50;screenPercentageShowFlag=$false;motionBlur=$false}
+    $render.views+=@{image=$name;greenPixelCount=50;screenPercentageShowFlag=$false;motionBlur=$false;
+        captureCallReturned=$true;renderCommandsFlushed=$true;readbackSucceeded=$true;pixelCount=1280*720}
 }
 Assert-FernRenderImages $render $images
+foreach($field in @('realRenderScene','fernRegistered','fernSceneProxyPresent')) {
+    $render.sceneState[$field]=$false
+    Reject "missing-$field" {Assert-FernRenderImages $render $images}
+    $render.sceneState[$field]=$true
+}
+foreach($field in @('captureCallReturned','renderCommandsFlushed','readbackSucceeded')) {
+    $render.views[0][$field]=$false
+    Reject "missing-$field" {Assert-FernRenderImages $render $images}
+    $render.views[0][$field]=$true
+}
+$render.views[0].pixelCount=0
+Reject 'wrong-readback-pixel-count' {Assert-FernRenderImages $render $images}
+$render.views[0].pixelCount=1280*720
 $render.materialFallbackAllowed=$true
 Reject 'fallback-material' {Assert-FernRenderImages $render $images}
 $render.materialFallbackAllowed=$false

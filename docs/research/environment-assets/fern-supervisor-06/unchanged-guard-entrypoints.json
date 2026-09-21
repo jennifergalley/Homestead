@@ -1,0 +1,17 @@
+[
+  {
+    "sha256": "3C2AFB371221B6EFD5FBA60DE97E7BE9860B7DCB60553A9F193F27A13C50F804",
+    "name": "Get-FernOperationPolicy",
+    "unchanged": true
+  },
+  {
+    "sha256": "25D7F1B32984FFBDD93EFC1B5154D033BF4A7FA9EE059658A4E6379CEBD23A72",
+    "name": "Get-FernProbeArguments",
+    "unchanged": true
+  },
+  {
+    "sha256": "648FD96A236534E1108A57B285BBD99FC1C983D7BC661D54DDED047EBF7EE983",
+    "name": "Assert-FernStageBudget",
+    "unchanged": true
+  }
+]

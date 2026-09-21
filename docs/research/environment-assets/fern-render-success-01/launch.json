@@ -1,0 +1,184 @@
+{
+  "pid": 52096,
+  "creationTime": 134344427773722362,
+  "image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+  "executableSha256": "AE92F55952A3C9A7DEF90983FCF5AEDCE52D8EE8E4565FBD923985E9D9D3E05E",
+  "moduleSha256": "8E2B3A3F5228EFB529623A37306A71908E05BE96D096010A3EACF17497E30CB4",
+  "arguments": [
+    "E:\\Repos\\SurvivalGame\\SurvivalGame.uproject",
+    "-run=HomesteadAuthoringProbe",
+    "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05",
+    "-notraceserver",
+    "-traceautostart=0",
+    "-unattended",
+    "-nop4",
+    "-nosplash",
+    "-stdout",
+    "-FullStdOutLogOutput",
+    "-DisablePython",
+    "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+    "-noshaderworker",
+    "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\EngineUser",
+    "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\editor.log",
+    "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+    "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+    "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+    "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+    "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+    "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+    "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\Engine.ini",
+    "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\Editor.ini",
+    "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\EditorSettings.ini",
+    "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\EditorPerProjectUserSettings.ini",
+    "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\GameUserSettings.ini",
+    "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\Game.ini",
+    "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-05\\Config\\Input.ini",
+    "-FernMode=Render",
+    "-AllowCommandletRendering",
+    "-RenderOffScreen"
+  ],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344171775529435,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "explicitInheritedHandles": 3,
+  "expectedRules": [
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "TCP Query User{0A2FC548-73B9-422C-B077-058734737E11}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "TCP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    },
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "UDP Query User{C4984A9B-D060-40FD-8B40-E7089EBA10A5}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "UDP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    }
+  ],
+  "deadlineUtc": "",
+  "creationFlags": 525324,
+  "buildReceiptSha256": "503386DAC6DEE1E8FA42894DEE1542CBED54EAC2AAE27A6673DA2C8D3E00FF36",
+  "productPins": [
+    {
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2093056
+    },
+    {
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90222592
+    },
+    {
+      "sha256": "8E2B3A3F5228EFB529623A37306A71908E05BE96D096010A3EACF17497E30CB4",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 247296
+    },
+    {
+      "sha256": "3E8FE1C5F3573E4CD051F71F61C115943F390D43599DA96000B3AD36CB0F9A23",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 25300992
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032
+    }
+  ],
+  "supersession": {
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "currentApproval": "Jenny explicitly authorized until-complete environment then inventory work at21:19AZ. Coordinator approved diagnosed render-only corrections and separately named unaltered failed-frame diagnostics. Attempt05 corrects capture flags after registration; all prior failures, stop/pause, helpers and safety gates remain preserved.",
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7"
+  },
+  "buildMonitoringQualification": "Only FernSpike.cpp rebuilt to set capture flags after registration; unchanged native04 commandlet object and prior genuine library/resource conversion reused. Fresh guarded DLL/PDB and approved metadata; game products unchanged. Prior game-link/export sampling qualifications and separately approved metadata dotnet/conhost boundary retained. No new helper or security change; final runtime verification pending.",
+  "mode": "Render",
+  "softSeconds": 0,
+  "hardSeconds": 0,
+  "ceilingSeconds": 0,
+  "trialIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\Fern02_20260920_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745031,
+    "Attributes": 16,
+    "CreationTime": 134344292261599283
+  },
+  "deadlineProfile": "RenderCompletionDriven",
+  "supervisorReceiptSha256": "CBE90D873DA1931399402080F190F306177B2B814711673C9AEAB652CB0A12D8",
+  "wrapperSha256": "F80ECDE10B9B254476F16A3DBB25E0E790F2D636C06BA4F9EBD811137EC2ECF6",
+  "startupSeconds": 0,
+  "captureSeconds": 0,
+  "ddc": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+  "ddcIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745022,
+    "Attributes": 16,
+    "CreationTime": 134344292212644463
+  },
+  "completionDriven": true
+}

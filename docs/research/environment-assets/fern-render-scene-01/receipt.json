@@ -1,0 +1,81 @@
+{
+  "status": "failed-component-showflag-policy-real-images-retained",
+  "files": [
+    {
+      "file": "editor.log",
+      "sha256": "22CB041656633C6A19BB22EB2AC6EA609584A7AAAC72B73CC53A386BC41B9C14",
+      "bytes": 231431
+    },
+    {
+      "file": "effective-settings.json",
+      "sha256": "7AD76F7F2AE5EAE67D54928C635DC07D615C5476A13892B7B7462D2DDB3B7F3D",
+      "bytes": 15858
+    },
+    {
+      "file": "entry-observed.json",
+      "sha256": "7A4A87AC3B381733D8C219C3C345640A6511AED903EB9D79D4BE53A7AAFBE870",
+      "bytes": 327
+    },
+    {
+      "file": "fern-a-back.png",
+      "sha256": "0B8E34A1B41657220453E6E7B842F8593BE953FCAB92D19E709AA009875DC8AC",
+      "bytes": 690499
+    },
+    {
+      "file": "fern-a-front.png",
+      "sha256": "83DA7592120374E1412A5126C90F51CDD96B376D8D982C8BA65ABB45D85A80C4",
+      "bytes": 674414
+    },
+    {
+      "file": "fern-result.json",
+      "sha256": "1F229CC402CDF5044945033C64781B8093CE9DCDA41DAF32AC82D75868E37C11",
+      "bytes": 8851
+    },
+    {
+      "file": "launch.json",
+      "sha256": "2426832344E30CA8256378A6A5967A22B203BD7E8D1737D263643A5D8FA3E06F",
+      "bytes": 9061
+    },
+    {
+      "file": "native-exit.json",
+      "sha256": "31C4F0B9CD80E59B574FECF32F1EB40AB093CA38197F67E43C38910E8336ACB6",
+      "bytes": 656
+    },
+    {
+      "file": "probe-result.json",
+      "sha256": "3A4CB3A61E5F2CD3D3E83D5722413E61C19ED4FEEB70D959967808E00F2F4FFE",
+      "bytes": 83720
+    },
+    {
+      "file": "reservation.json",
+      "sha256": "8844543BFEAF507D5EE59AF9FD9732061E1D407A6C6EDCCCA1A62864ED5165BA",
+      "bytes": 1591
+    },
+    {
+      "file": "retained-inputs.json",
+      "sha256": "794FDA9C69FD345B54CAAC8282A922E1E5C8CFB1F50201E113BA46C1D72E247E",
+      "bytes": 885049
+    },
+    {
+      "file": "retained-output-check.json",
+      "sha256": "6DB56F1397C5B0B433F8FE0EBC9DA4EE1CAC3D7EF11D74DAC0D7E2F5B44F42A7",
+      "bytes": 523226
+    },
+    {
+      "file": "stdout.log",
+      "sha256": "04EAA22AF7CBE4A47BB4701E3ED8DF0C56AF441373383BF46BB63ACDF6F35D04",
+      "bytes": 231302
+    }
+  ],
+  "exitCode": 7,
+  "hardTerminated": false,
+  "elapsedSeconds": 54.4611796,
+  "samples": 4,
+  "maximumSampleGapMs": 25895.101099999996,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "cleanupErrors": [],
+  "images": 2,
+  "accepted": false,
+  "qualification": "Actual real-scene shader-ready D3D12 RTX5080 captures completed,921600 pixels/view; green counts9127/36063. Supervisor rejected component ScreenPercentage=true; OnRegister UpdateShowFlags overwrote pre-registration setter. Engine standalone view-family path uses resolution fraction1 independently, but old strict component-state gate is NOT retroactively passed. Native fern-result passed capture; whole operation failed after supervisor stop. Correct setter ordering after registration next."
+}

@@ -1,0 +1,27 @@
+
+Name                           Value
+----                           -----
+eligibleForGuardConstruction   True
+moduleSha256                   002BC4623D733C415826F77115CA1E2AA2AD620E9E515625E43F13661FE12478
+buildReceiptSha256             033BF1725F2B15F1D561EE3470AB8CF0CAE8A1F1A4D67CE98BCE86C0BED71AA3
+supervisorReceiptSha256        5E532EB69AAB087356028BC9E70A1DD857FD54E42316AFFD9B1050E288A955D7
+creationFlags                  525324
+mode                           Render
+deadlineProfile                RenderCompletionDriven
+softMilliseconds               0
+hardMilliseconds               0
+ceilingSeconds                 0
+nativeAbsoluteDeadline         
+ddc                            E:\Repos\SurvivalGame\Saved\Automation\20260920-182217-d1f84e39\fern-import-02\DDC
+arguments                      {E:\Repos\SurvivalGame\SurvivalGame.uproject, -run=HomesteadAuthoringProbe, -EvidenceDir…
+startupSeconds                 0
+captureSeconds                 0
+ddcIdentity                    Homestead.Authoring.DirectoryEvidence
+retainedOldRunFiles            1388
+retainedCacheFiles             1871
+completionDriven               True
+output                         E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\fern-render-04
+globalMarkerReadLocked         False
+runtimeVerified                False
+attemptConsumed                False
+

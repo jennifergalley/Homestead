@@ -1,0 +1,95 @@
+{
+  "status": "failed-content-after-verified-material-readiness",
+  "files": [
+    {
+      "bytes": 229094,
+      "file": "editor.log",
+      "sha256": "281DF1565B395F2D5EDDFCBA0A064451E32D403FEE404B6AC5FFDE8F5EC94C31"
+    },
+    {
+      "bytes": 15858,
+      "file": "effective-settings.json",
+      "sha256": "632AF2790E2628AED7E5F74C9708F60C83C6697837B649AB87D886D2C531C45F"
+    },
+    {
+      "bytes": 328,
+      "file": "entry-observed.json",
+      "sha256": "29F690DE7AC0B4DC9738264DD8CCBEA0BE453E0D67C10F4C7158D923C4CEBD5F"
+    },
+    {
+      "bytes": 6260,
+      "file": "fern-result.json",
+      "sha256": "8C62CD306E79826B68FCE419315BA89D3CFEA3C4E9D45CA534D099595E002E2F"
+    },
+    {
+      "bytes": 8979,
+      "file": "launch.json",
+      "sha256": "F0CFDCCB87021438F9255804C96AC2D1FAEF4F514BFD62023C3F300E1D68A72C"
+    },
+    {
+      "bytes": 668,
+      "file": "native-exit.json",
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681"
+    },
+    {
+      "bytes": 80600,
+      "file": "probe-result.json",
+      "sha256": "0770F06DD440070475B97C3FEDBD6164AE01B23BC2E5FC56BADE9BEAE84D0963"
+    },
+    {
+      "bytes": 1575,
+      "file": "reservation.json",
+      "sha256": "66AC7789E75346355232E7762338E1A7BC2C8F8E6912F6548DBDE886C4EBB3E8"
+    },
+    {
+      "bytes": 885049,
+      "file": "retained-inputs.json",
+      "sha256": "B175A35F6948B514015961B145DF7EE34EE105AD8C8D1CBBA93C0E4B32BE5B60"
+    },
+    {
+      "bytes": 519541,
+      "file": "retained-output-check.json",
+      "sha256": "7947890775A9C8C19339E449A04E9B716A11C501E891A2027C2A6CFF17A00855"
+    },
+    {
+      "bytes": 228965,
+      "file": "stdout.log",
+      "sha256": "D5DC9D47B62CABF08EC6D2499C8D79F451FF02518D906CD82DEDC28956BD3430"
+    }
+  ],
+  "exitCode": 7,
+  "hardTerminated": false,
+  "elapsedSeconds": 53.1234297,
+  "samples": 4,
+  "maximumSampleGapMs": 24962.761700000003,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "cleanupErrors": [],
+  "readinessBefore": {
+    "shaderPlatform": 0,
+    "featureLevel": 3,
+    "resourcePresent": true,
+    "shaderMapPresent": true,
+    "shaderMapComplete": true,
+    "compilationFinished": true,
+    "remainingGlobalJobs": 0,
+    "compileErrors": []
+  },
+  "readinessAfter": {
+    "shaderPlatform": 0,
+    "featureLevel": 3,
+    "resourcePresent": true,
+    "shaderMapPresent": true,
+    "shaderMapComplete": true,
+    "compilationFinished": true,
+    "remainingGlobalJobs": 0,
+    "compileErrors": []
+  },
+  "images": 0,
+  "partialImage": {
+    "bytes": 0,
+    "path": "discarded-images\\fern-a-front.png",
+    "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+  },
+  "qualification": "Readiness ordering fix verified with complete actual map/no errors/no jobs. Capture call/flush/readback returned but green-pixel gate failed. No encoded PNG; zero-byte placeholder retained in quarantine. Exact engine source shows IsClient=false causes dummy preview scene despite actual D3D RHI. Next correction enables render-only client role and rejects dummy scenes, preserving failed-content diagnostics atomically."
+}

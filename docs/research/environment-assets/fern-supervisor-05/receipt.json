@@ -1,0 +1,125 @@
+{
+  "status": "passed-unchanged-supervisor-fixtures-and-readiness-wrapper-policy",
+  "createdUtc": "2026-09-21T05:20:08.7108442+00:00",
+  "runId": "20260921-033354-2d257ba0",
+  "nativeBuildReceiptSha256": "AF4A4AA135AB723A20D986BA7D655CA9F2B170DBDF35B3A236A3AC488E86556D",
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "B437AD46A7869DDC865D67F5EC583963079F6C35161762634A2E3AD4C77B0999"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "2ADF97B6EF9EDD5611159141BCDDB0D966AD81C7EBBFFC5F20E9DE259A2BC8F1"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0"
+    },
+    {
+      "path": "Scripts\\Development-Run.ps1",
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755"
+    },
+    {
+      "path": "Scripts\\Hold-DevelopmentAwake.ps1",
+      "sha256": "416169040462F0818AE420489FF7F51196EEEFE593B0F499138296130DBDEBC5"
+    },
+    {
+      "path": "Tests\\Test-AuthoringLeafGuard.ps1",
+      "sha256": "B4E471221C15691287C7666E341BCABBC3F5AD8C4CA9F2C57757E04453C6C77C"
+    },
+    {
+      "path": "Tests\\DevelopmentRunTests.ps1",
+      "sha256": "B564801275D0B11FA6D583BAE0ABD7F0511CF1F58189842FBA879BD6B4A4DF3F"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "bytes": 47190,
+      "sha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\probe-result.json"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stdout.log"
+    },
+    {
+      "bytes": 9,
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stop-probe.txt"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Editor.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Engine.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Game.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\GameUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Input.ini"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "completion-guard-01",
+      "sha256": "ECC0834CEEF3BD2CC71353F68BEAE0448801E9F525D84B187529EF80D5C3E4B1",
+      "passed": true
+    },
+    {
+      "name": "completion-legacy-01",
+      "sha256": "3BB1A4DC7880D0D47A94FEBD24BF7161BAD80F26EB7937C351883C38455EEF42",
+      "passed": true
+    },
+    {
+      "name": "completion-legacy-render-01",
+      "sha256": "71E8AC75A79C8374ADAAED389D28CEC38688D1AD3A7BEC4A1A9758362D3797A1",
+      "passed": true
+    },
+    {
+      "name": "completion-legacy-import-01",
+      "sha256": "5A5C52298081B13A20DE74A728DBD7699F07CB09B00B4AD21DC6F039CEB02337",
+      "passed": true
+    },
+    {
+      "name": "completion-policy-01",
+      "sha256": "A6CEC45D254050EEA614B1A93C1D7744F81EA4B599F50085426FD5433736B263",
+      "passed": true
+    }
+  ],
+  "runControlTestOutputSha256": "856AEC518C9AE5FB589D3FABE931478A586DC8F4E59D89D9F282171C0F2FCC9D",
+  "profile": {
+    "timerCreated": false,
+    "softMs": 0,
+    "name": "RenderCompletionDriven",
+    "hardMs": 0
+  },
+  "qualification": "Unchanged guard/production-token/run-control source pins verified against supervisor04 and its passed fixtures. Fresh19 fern policy negatives and wrapper syntax check passed. Only wrapper attempt03 selection, prior failure pins, new genuine build pins and explicit native failure diagnostics changed. Actual ValidateOnly and render still pending. No timer/helper/security-policy change.",
+  "priorReceiptSha256": "06FA6AB5280FCC98D765ECD1C4A05510E61B20723F85EE889D5BA0B21BA77A6B",
+  "readinessPolicySha256": "7EA23DCE96B78D6A9581C334F06A61B13DE63DF1A44A8447956C275F1FD73840"
+}

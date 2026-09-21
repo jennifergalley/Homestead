@@ -1,0 +1,34 @@
+[
+  {
+    "image": "fern-a-front.png",
+    "decoded": true,
+    "size": [
+      1280,
+      720
+    ],
+    "pixels": 921600,
+    "greenPixels": 9127,
+    "opaque": true,
+    "allEightTransformedBoundsCornersInsideFrustum": true,
+    "cornerDepthRangeCm": [
+      128.63046873060512,
+      196.04515109030362
+    ]
+  },
+  {
+    "image": "fern-a-back.png",
+    "decoded": true,
+    "size": [
+      1280,
+      720
+    ],
+    "pixels": 921600,
+    "greenPixels": 36063,
+    "opaque": true,
+    "allEightTransformedBoundsCornersInsideFrustum": true,
+    "cornerDepthRangeCm": [
+      128.63046873060512,
+      196.04515109030362
+    ]
+  }
+]

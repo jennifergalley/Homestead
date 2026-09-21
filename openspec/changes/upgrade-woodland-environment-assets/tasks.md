@@ -1,6 +1,17 @@
 # Tasks
 
-Current21:19 authorization: explicit until-complete continuation supersedes
+Current22:40: actual `fern-render-05` PASSED with two real1280x720 PNGs,
+RTX5080/D3D12, complete fern shaders, real scene/proxy, native readback and
+correct post-registration capture flags. Cooperative exit0, no hard stop,
+unchanged marker release and package/input protection passed. Evidence:
+`fern-render-success-01`; both views inspected. Dark undersides/soft surface
+detail remain visible in this no-sky test setup: pipeline/representative
+proof, not polished world art, Batch A, packaged4K or full1.3 approval.
+No complete top-level task is newly satisfied; progress remains4/29.
+Environment integration precedes coordinated sibling UI/backend/clothing
+integration. New disposable-test-save/delivery policy is in `docs/game-plan.md`.
+
+Historical21:19 authorization: explicit until-complete continuation supersedes
 the overall90-minute cutoff. Environment precedes inventory; permissions do
 not expand. The live bounded render reached valid Main but later hit its
 immutable capture timer, with no PNG. After verified cleanup, explicit

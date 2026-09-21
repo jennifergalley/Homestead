@@ -44,12 +44,12 @@ if($retainedRender) {
     $supersession['currentApproval']='Jenny explicitly authorized fresh90-minute run20260921-033354-2d257ba0 at20:33AZ; one long-startup render only. Earlier fields describe preserved historical settings attempts.'
 }
 if($completionDriven) {
-    $supersession['currentApproval']='Jenny explicitly authorized until-complete environment then inventory work at21:19AZ. Preserve both failed render attempts; completion-driven rendering removes guessed timers, not stop/pause or safety gates.'
+    $supersession['currentApproval']='Jenny explicitly authorized until-complete environment then inventory work at21:19AZ. Coordinator approved diagnosed render-only corrections and separately named unaltered failed-frame diagnostics. Attempt05 corrects capture flags after registration; all prior failures, stop/pause, helpers and safety gates remain preserved.'
 }
 function Assert-NamedSupersession {
     $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
     if($run.id -cne $expectedRun -or
-        $output -ine (Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($completionDriven){'fern-render-02'}else{'fern-render-01'})) -or
+        $output -ine (Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
@@ -81,12 +81,18 @@ function Assert-NamedSupersession {
     }
     if($completionDriven -and (
         $run.continuationApproval.userReply -cne "Don't worry about a time limit, please just continue until the work is done. When you're done with the environment upgrade, please work on implementing the inventory redesign plan you specced out earlier autonomously, running overnight." -or
-        (Get-FileHash (Join-Path $runRoot 'fern-render-01\probe-result.json')).Hash -cne '55900C2F05D1A44B6BB28C9C127513DB1EC9874C96A664535B87EACD9CCC5109')) {
-        throw 'Explicit completion continuation or preserved capture-timeout changed.'
+        (Get-FileHash (Join-Path $runRoot 'fern-render-01\probe-result.json')).Hash -cne '55900C2F05D1A44B6BB28C9C127513DB1EC9874C96A664535B87EACD9CCC5109' -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-02\probe-result.json')).Hash -cne 'A2E96E304CD51465C1F21A310A683E2AA1223779D6425AFCFEB6D1861BED3827' -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-attempt-02.json')).Hash -cne 'D681297F480DD200D93141EF2AC747A200400A3A70316D92923B40F2376D8E6B' -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-03\probe-result.json')).Hash -cne '0770F06DD440070475B97C3FEDBD6164AE01B23BC2E5FC56BADE9BEAE84D0963' -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-attempt-03.json')).Hash -cne '66AC7789E75346355232E7762338E1A7BC2C8F8E6912F6548DBDE886C4EBB3E8' -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-04\probe-result.json')).Hash -cne '3A4CB3A61E5F2CD3D3E83D5722413E61C19ED4FEEB70D959967808E00F2F4FFE' -or
+        (Get-FileHash (Join-Path $runRoot 'fern-render-attempt-04.json')).Hash -cne '8844543BFEAF507D5EE59AF9FD9732061E1D407A6C6EDCCCA1A62864ED5165BA')) {
+        throw 'Explicit completion continuation or preserved render failure changed.'
     }
 }
 Assert-NamedSupersession
-$attempt = Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-02.json'}else{'fern-render-attempt-01.json'})
+$attempt = Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -109,8 +115,8 @@ if($Mode -ne 'Settings') {
     $buildReceiptHash='86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F'
 }
 if($completionDriven) {
-    $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-native-build-02\receipt.json'
-    $buildReceiptHash='94744E78B33C28AE538A34432E7E39AF3F90F480AA5E2942C4993B64339E0DC8'
+    $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-native-build-05\receipt.json'
+    $buildReceiptHash='503386DAC6DEE1E8FA42894DEE1542CBED54EAC2AAE27A6673DA2C8D3E00FF36'
 }
 $pythonPins = @{
     'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
@@ -127,8 +133,8 @@ if($Mode -ne 'Settings') {
         $supervisorReceiptHash='B3ECE28794C53FC783E4A0BECB71CD8C5101E53F7451E447F835B326241EEDFE'
     }
     if($completionDriven) {
-        $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-supervisor-04\receipt.json'
-        $supervisorReceiptHash='06FA6AB5280FCC98D765ECD1C4A05510E61B20723F85EE889D5BA0B21BA77A6B'
+        $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-supervisor-07\receipt.json'
+        $supervisorReceiptHash='CBE90D873DA1931399402080F190F306177B2B814711673C9AEAB652CB0A12D8'
     }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
@@ -442,6 +448,10 @@ try {
         }
         if($Mode -ne 'Settings' -and -not $fernResult -and (Test-Path (Join-Path $output 'fern-result.json'))) {
             $fernResult=Get-Content (Join-Path $output 'fern-result.json') -Raw|ConvertFrom-Json
+            if(-not $fernResult.passed) {
+                $detail=if($fernResult.PSObject.Properties['failure']){$fernResult.failure}else{'See native log and readiness evidence.'}
+                throw "Native fern operation failed at $($fernResult.stage): $detail"
+            }
             Assert-FernNativeInventory $fernResult $fernSourceInventory
             if($Mode -eq 'Import'){$null=Get-FernPackageFiles $trial -Complete}
             else{Assert-FernRenderImages $fernResult $output}
@@ -547,7 +557,8 @@ try {
     }
     if($Mode -eq 'Render' -and $failure -and ($subjectExited -or -not $guard)) {
         try {
-            foreach($name in @('fern-a-front.png','fern-a-back.png')) {
+            foreach($name in @('fern-a-front.png','fern-a-back.png','fern-a-front.png.tmp','fern-a-back.png.tmp',
+                'diagnostic-front-failed.png.tmp','diagnostic-back-failed.png.tmp')) {
                 $image=Join-Path $output $name
                 if(Test-Path -LiteralPath $image) {
                     Assert-FernOrdinaryTree $output

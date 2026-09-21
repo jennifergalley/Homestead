@@ -1,0 +1,355 @@
+{
+  "status": "passed-native-fern-preview-and-stop",
+  "files": [
+    {
+      "file": "decoded-image-checks.json",
+      "bytes": 671,
+      "sha256": "225EB49708D2D9F8E13730EEEE8AC6441D471D8E9D2332BFAB7C077D44895C27"
+    },
+    {
+      "file": "editor.log",
+      "bytes": 229722,
+      "sha256": "F3ABA8F088EAB245FBE9EA96804C2A22D7DB04E858512B14265D6963CABF3679"
+    },
+    {
+      "file": "effective-settings.json",
+      "bytes": 15858,
+      "sha256": "761B60FF6F9BDBDF2F8C4D9D0A3C03B68F80892963A513E1C00BA551B8487F07"
+    },
+    {
+      "file": "entry-observed.json",
+      "bytes": 328,
+      "sha256": "0B4650CDA0CC6359D8B61831138567CAA27CD8F6DFE0010A405A095DFE4265C0"
+    },
+    {
+      "file": "fern-a-back.png",
+      "bytes": 690499,
+      "sha256": "0B8E34A1B41657220453E6E7B842F8593BE953FCAB92D19E709AA009875DC8AC"
+    },
+    {
+      "file": "fern-a-front.png",
+      "bytes": 674414,
+      "sha256": "83DA7592120374E1412A5126C90F51CDD96B376D8D982C8BA65ABB45D85A80C4"
+    },
+    {
+      "file": "fern-result.json",
+      "bytes": 8853,
+      "sha256": "5CFC2B084D1EE757B5DBC6ECB4F00FBA54FB55FAF013D6F94A0169C384F3AD51"
+    },
+    {
+      "file": "launch.json",
+      "bytes": 8987,
+      "sha256": "C815B8623674092D7A64F1D7C76C3FC853E99E0DC75E27A58840BD1B52129EBA"
+    },
+    {
+      "file": "native-exit.json",
+      "bytes": 654,
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A"
+    },
+    {
+      "file": "probe-result.json",
+      "bytes": 85078,
+      "sha256": "5C87CEE4653F2DBB26CCE99D7D062A2F21078E65D6C19D8A9E68EA8AF44627AD"
+    },
+    {
+      "file": "reservation.json",
+      "bytes": 1610,
+      "sha256": "74D358F9C3CCACD42CD46A2652A2FECDE589670ACFAC65E7A1EED53A00261999"
+    },
+    {
+      "file": "retained-inputs.json",
+      "bytes": 888734,
+      "sha256": "F1811976C54244F4AA8CD84EB1A6A2B37BEAE6F4984B245BC356D522381B3AE3"
+    },
+    {
+      "file": "retained-output-check.json",
+      "bytes": 523226,
+      "sha256": "6DB56F1397C5B0B433F8FE0EBC9DA4EE1CAC3D7EF11D74DAC0D7E2F5B44F42A7"
+    },
+    {
+      "file": "stdout.log",
+      "bytes": 229623,
+      "sha256": "08EE518BEC78DDF3BE8CCDE24F5735A78F805470D2D7DBA925115A7346B7DDFC"
+    }
+  ],
+  "exitCode": 0,
+  "hardTerminated": false,
+  "elapsedSeconds": 65.723035,
+  "samples": 5,
+  "maximumSampleGapMs": 33146.00630000001,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "cleanupErrors": [],
+  "nativeExit": {
+    "pythonExit": {
+      "moduleLoaded": true,
+      "configured": true,
+      "available": false,
+      "initialized": false,
+      "librariesEnumerated": true,
+      "runtimeLibraryLoaded": true,
+      "libraries": [
+        {
+          "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python3.dll",
+          "queryAvailable": false,
+          "interpreterInitialized": -1
+        },
+        {
+          "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python311.dll",
+          "queryAvailable": true,
+          "interpreterInitialized": 0
+        }
+      ],
+      "valid": true
+    },
+    "stopReason": "complete",
+    "cooperative": true,
+    "passed": true
+  },
+  "nativeBuildReceiptSha256": "503386DAC6DEE1E8FA42894DEE1542CBED54EAC2AAE27A6673DA2C8D3E00FF36",
+  "supervisorReceiptSha256": "CBE90D873DA1931399402080F190F306177B2B814711673C9AEAB652CB0A12D8",
+  "jobSamples": [
+    {
+      "members": [
+        {
+          "Pid": 52096,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344427773722362,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:37.3953116-07:00",
+      "phase": "suspended-before-resume"
+    },
+    {
+      "members": [
+        {
+          "Pid": 52096,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344427773722362,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:37.4287422-07:00",
+      "phase": "live"
+    },
+    {
+      "members": [
+        {
+          "Pid": 52096,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344427773722362,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:45.7500043-07:00",
+      "phase": "live"
+    },
+    {
+      "members": [
+        {
+          "Pid": 52096,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344427773722362,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:46.6795873-07:00",
+      "phase": "live"
+    },
+    {
+      "members": [
+        {
+          "Pid": 52096,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344427773722362,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:47.6642103-07:00",
+      "phase": "live"
+    },
+    {
+      "members": [
+        {
+          "Pid": 52096,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344427773722362,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:48.5794622-07:00",
+      "phase": "live"
+    },
+    {
+      "members": [],
+      "heldRoot": {
+        "Pid": 52096,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344427773722362,
+        "Member": true,
+        "Exited": true,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 0
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "utc": "2026-09-20T22:39:54.3541351-07:00",
+      "phase": "after-observed-death"
+    }
+  ],
+  "images": 2,
+  "qualification": "Two actual native1280x720 frames decoded/visually inspected, pixel counts independently confirmed; all eight transformed bounds corners inside both declared frusta. Real D3D12 RTX5080 scene/proxy/map/readback, no fallback. Front dark undersides and soft surface detail in no-sky DefaultLit preview remain; not polished world-art/packaged/performance/BatchA approval. Five finite samples/maxgap33.146s, not continuous endpoint proof or a network/filesystem sandbox. All prior failures remain failed; full OpenSpec4/29."
+}

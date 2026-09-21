@@ -136,6 +136,10 @@ function Assert-FernRenderImages($Value,[string]$Directory) {
         -not $Value.shaderMapComplete -or $Value.materialFallbackAllowed -or
         [string]::IsNullOrWhiteSpace($Value.adapter) -or [string]::IsNullOrWhiteSpace($Value.rhi) -or
         $Value.rhi -match 'Null' -or @($Value.views).Count -ne 2){throw 'Incomplete actual RHI/image/readiness evidence.'}
+    foreach($field in @('isClient','canEverRender','worldScenePresent','realRenderScene','fernRegistered',
+        'fernRenderStateCreated','fernSceneProxyPresent','captureRegistered','captureVisible')) {
+        if($Value.sceneState.$field -ne $true){throw "Missing actual renderer scene/component state:$field"}
+    }
     $names=@('fern-a-front.png','fern-a-back.png')
     $files=@(Get-ChildItem -LiteralPath $Directory -File -Filter '*.png')
     if($files.Count -ne 2 -or @($files|Where-Object Name -CNotIn $names).Count){throw 'Unexpected preview image set.'}
@@ -143,6 +147,10 @@ function Assert-FernRenderImages($Value,[string]$Directory) {
         $view=@($Value.views|Where-Object image -CEQ $name)
         if($view.Count -ne 1 -or $view[0].greenPixelCount -lt 50 -or $view[0].screenPercentageShowFlag -or $view[0].motionBlur) {
             throw 'Missing actual fern-view evidence.'
+        }
+        if(-not $view[0].captureCallReturned -or -not $view[0].renderCommandsFlushed -or
+            -not $view[0].readbackSucceeded -or $view[0].pixelCount -ne 1280*720) {
+            throw 'Missing actual capture/flush/native readback evidence.'
         }
         $image=Get-Item -LiteralPath (Join-Path $Directory $name)
         if(($image.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $image.Length -lt 64){throw 'Invalid ordinary preview image.'}

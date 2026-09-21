@@ -1,0 +1,75 @@
+{
+  "pid": 52900,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+  "creationTime": 134344426050048864,
+  "executableSha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\capture-flags-build-01\\link2\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 750989,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344426046856058,
+    "LastWriteTime": 134344426046856058,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "9DE3CD1086EB718A2993E18BD2F136AD9328B5F26B577A0C4EE39F6F164FB309",
+  "guardSha256": "B437AD46A7869DDC865D67F5EC583963079F6C35161762634A2E3AD4C77B0999",
+  "allowedBuildOnlyConsole": {
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "path": "C:\\Windows\\System32\\conhost.exe",
+    "signature": "Valid"
+  },
+  "compileActionId": -1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "sha256": "9DE3CD1086EB718A2993E18BD2F136AD9328B5F26B577A0C4EE39F6F164FB309",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\UnrealEditor-SurvivalGameEditor.dll.rsp"
+    },
+    {
+      "sha256": "E146F3E19E4E51C41D55C46ACC1024BC56AE74B20C38C283EF6BA196A9EB686F",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-01\\probe-link.rsp"
+    },
+    {
+      "sha256": "FFF8BDF079D591D9F2FD4060105AD203D85D618FB8CE609C7F18C94CEE06CDB4",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-01\\probe-resource.obj"
+    }
+  ],
+  "expectedProducedItems": [
+    "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+    "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+  ],
+  "resourceLinkActionId": 2,
+  "exactReviewedArguments": "@\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-01\\probe-link.rsp\"",
+  "previousProductBackups": [
+    {
+      "sha256": "002BC4623D733C415826F77115CA1E2AA2AD620E9E515625E43F13661FE12478",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "backup": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\capture-flags-build-01\\link2\\before-products\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "sha256": "6730235216B1A9C6E1DCD1D1DC7656CD4458D9E9833D51351C24F3589F120D75",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "backup": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\capture-flags-build-01\\link2\\before-products\\UnrealEditor-SurvivalGameEditor.pdb"
+    }
+  ],
+  "resourceConversion": "",
+  "derivedDllResponse": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-01\\probe-link.rsp",
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": true
+}

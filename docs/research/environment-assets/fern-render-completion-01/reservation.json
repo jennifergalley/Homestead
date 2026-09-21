@@ -1,0 +1,18 @@
+{
+  "mode": "Render",
+  "utc": "2026-09-21T04:44:39.3209910+00:00",
+  "approval": "Explicit21:19 until-complete continuation; preserve bounded capture-timeout; no synthetic deadline; manual stop and genuine failures remain.",
+  "priorFernResultSha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+  "priorFernReservationSha256": "3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2",
+  "output": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\fern-render-02",
+  "supersession": {
+    "currentApproval": "Jenny explicitly authorized until-complete environment then inventory work at21:19AZ. Preserve both failed render attempts; completion-driven rendering removes guessed timers, not stop/pause or safety gates.",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A"
+  },
+  "runId": "20260921-033354-2d257ba0",
+  "supervisorReceiptSha256": "06FA6AB5280FCC98D765ECD1C4A05510E61B20723F85EE889D5BA0B21BA77A6B"
+}

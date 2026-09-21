@@ -1,0 +1,48 @@
+[
+  {
+    "dll": {
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2093056,
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A"
+    },
+    "pdb": {
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90222592,
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367"
+    },
+    "machine": "AMD64",
+    "isDll": true,
+    "moduleName": "UnrealEditor-SurvivalGame.dll",
+    "moduleMarker": "ThisIsAnUnrealEngineModule",
+    "exportCount": 396,
+    "probeExports": [],
+    "debugGuid": "edb807fb-181c-4b0f-8825-84f936ad7a3f",
+    "debugAge": 2,
+    "recordedPdb": "UnrealEditor-SurvivalGame.pdb",
+    "codeLoaded": false
+  },
+  {
+    "dll": {
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 247296,
+      "sha256": "8E2B3A3F5228EFB529623A37306A71908E05BE96D096010A3EACF17497E30CB4"
+    },
+    "pdb": {
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 25300992,
+      "sha256": "3E8FE1C5F3573E4CD051F71F61C115943F390D43599DA96000B3AD36CB0F9A23"
+    },
+    "machine": "AMD64",
+    "isDll": true,
+    "moduleName": "UnrealEditor-SurvivalGameEditor.dll",
+    "moduleMarker": "ThisIsAnUnrealEngineModule",
+    "exportCount": 2,
+    "probeExports": [
+      "?Z_Construct_UClass_UHomesteadAuthoringProbeCommandlet@@YAPEAVUClass@@W4ETypeConstructPhase@@@Z"
+    ],
+    "debugGuid": "6baf2855-5a95-4064-949a-3821c6822119",
+    "debugAge": 6,
+    "recordedPdb": "UnrealEditor-SurvivalGameEditor.pdb",
+    "codeLoaded": false
+  }
+]

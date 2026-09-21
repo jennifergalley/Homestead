@@ -1,0 +1,88 @@
+{
+  "status": "passed-targeted-readiness-native-build",
+  "createdUtc": "2026-09-21T05:20:08.6827321+00:00",
+  "products": [
+    {
+      "bytes": 2093056,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A"
+    },
+    {
+      "bytes": 90222592,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367"
+    },
+    {
+      "bytes": 237568,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "sha256": "476A66B9E209E64B47A79C8FADB59BA82943B6FF2B49F52576FEC808D47D22FB"
+    },
+    {
+      "bytes": 25178112,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "sha256": "2D0956C43022C9E5E7D30C585421C80635A91CE25D4CB7B6BA45A6F56A8F75F0"
+    },
+    {
+      "bytes": 166,
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A"
+    },
+    {
+      "bytes": 945032,
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1"
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "87E2D7A4A36D006FDFC75F6A4217D60771DB49CE16FC2889B116AC70C3D6EBC5",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp"
+    },
+    {
+      "sha256": "51B5AD34A7D790489690FCA7E596D6AF8CD7844FE9269417E5C1D76835FD3993",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h"
+    },
+    {
+      "sha256": "A9A1B90292C232ECCFD703B925BC3653774851CC129860764534294BEEB16E88",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "FA84CF8ACC7CD6D84766D8BF29E3979FF78489F0E2700944A289DE2C7A7B2BE5",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "B437AD46A7869DDC865D67F5EC583963079F6C35161762634A2E3AD4C77B0999",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    }
+  ],
+  "steps": [
+    {
+      "resultSha256": "794B4C434AE39EA91A2A35C28FA52E84868338E2B6DE9C58FF4E64732716A9ED",
+      "status": "passed",
+      "step": "readiness-build-01\\compile0",
+      "exitCode": 0
+    },
+    {
+      "resultSha256": "0EE52E407136028B2EC1A161F0CED813CB2858439161CC3CD31AB0B5008EBBB2",
+      "status": "passed",
+      "step": "readiness-build-01\\link2",
+      "exitCode": 0
+    },
+    {
+      "resultSha256": "4F9F3C3FCEC23E8E4F20EBA797138D4982417CF8F079DED38368073476A1AE3A",
+      "status": "passed",
+      "step": "readiness-build-01\\metadata",
+      "exitCode": 0
+    }
+  ],
+  "priorReceiptSha256": "94744E78B33C28AE538A34432E7E39AF3F90F480AA5E2942C4993B64339E0DC8",
+  "exportActionsSha256": "612841C7EF24A780D6C89A6873A0812E4E48E4207ACE86EC9343E46C3762DA36",
+  "reusedInputs": {
+    "commandletObjectBuild": "completion-build-01\\compile1",
+    "derivedResponseSha256": "E146F3E19E4E51C41D55C46ACC1024BC56AE74B20C38C283EF6BA196A9EB686F",
+    "libraryBuild": "completion-build-01\\library3",
+    "resourceObjectSha256": "FFF8BDF079D591D9F2FD4060105AD203D85D618FB8CE609C7F18C94CEE06CDB4",
+    "resourceConversion": "resource-conversion-01\\probe"
+  },
+  "qualification": "Only FernSpike.cpp rebuilt. Unchanged genuine commandlet object/import library/resource conversion reused from prior native02 build; fresh guarded DLL/PDB and approved metadata. Game DLL/PDB unchanged. Prior game-link shutdown-monitor and export sampling qualifications retained; no new export/ISPC/helpers. Metadata remains separately approved dotnet/conhost sampled boundary, not pre-start root-only containment. Render not yet verified."
+}

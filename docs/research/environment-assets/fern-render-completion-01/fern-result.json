@@ -1,0 +1,232 @@
+{
+	"mode": "Render",
+	"namespace": "/Game/Trials/Fern02_20260920_01",
+	"stage": "real-shader-readiness",
+	"meshes": [
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a.SM_Fern02_a",
+			"triangles": 784,
+			"sourceModelId": 902801568,
+			"sourceGeometryId": 812885519,
+			"sourceNode": "fern_02_a",
+			"slot": "fern_02",
+			"importedSlot": "fern_02",
+			"boundsMinCm": [
+				-29.765724182128906,
+				68.873207092285156,
+				-2.8773519992828369
+			],
+			"boundsMaxCm": [
+				25.428337097167969,
+				130.21531677246094,
+				25.803001403808594
+			],
+			"sizeCm": [
+				55.194061279296875,
+				61.342109680175781,
+				28.680353403091431
+			],
+			"sourceDimensionsTimes100Cm": [
+				55.194062000000002,
+				61.342108000000003,
+				28.680354999999999
+			],
+			"axisIndependentSizeToleranceCm": 0.10000000000000001,
+			"assetOrigin": [
+				0,
+				0,
+				0
+			],
+			"transformVertexToAbsolute": true,
+			"localPivotPreserved": false,
+			"importUniformScale": 1,
+			"nanite": false
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_b.SM_Fern02_b",
+			"triangles": 2384,
+			"sourceModelId": 314288041,
+			"sourceGeometryId": 802914469,
+			"sourceNode": "fern_02_b",
+			"slot": "fern_02",
+			"importedSlot": "fern_02",
+			"boundsMinCm": [
+				-52.814304351806641,
+				-42.187507629394531,
+				-3.0510280132293701
+			],
+			"boundsMaxCm": [
+				46.160434722900391,
+				47.181465148925781,
+				39.718441009521484
+			],
+			"sizeCm": [
+				98.974739074707031,
+				89.368972778320312,
+				42.769469022750854
+			],
+			"sourceDimensionsTimes100Cm": [
+				98.974740999999995,
+				89.368971999999999,
+				42.769471000000003
+			],
+			"axisIndependentSizeToleranceCm": 0.10000000000000001,
+			"assetOrigin": [
+				0,
+				0,
+				0
+			],
+			"transformVertexToAbsolute": true,
+			"localPivotPreserved": false,
+			"importUniformScale": 1,
+			"nanite": false
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_c.SM_Fern02_c",
+			"triangles": 2248,
+			"sourceModelId": 297642122,
+			"sourceGeometryId": 387442062,
+			"sourceNode": "fern_02_c",
+			"slot": "fern_02",
+			"importedSlot": "fern_02",
+			"boundsMinCm": [
+				57.006134033203125,
+				-41.728191375732422,
+				-2.8773674964904785
+			],
+			"boundsMaxCm": [
+				144.438720703125,
+				34.794376373291016,
+				32.024669647216797
+			],
+			"sizeCm": [
+				87.432586669921875,
+				76.522567749023438,
+				34.902037143707275
+			],
+			"sourceDimensionsTimes100Cm": [
+				87.432580999999999,
+				76.522568000000007,
+				34.902037
+			],
+			"axisIndependentSizeToleranceCm": 0.10000000000000001,
+			"assetOrigin": [
+				0,
+				0,
+				0
+			],
+			"transformVertexToAbsolute": true,
+			"localPivotPreserved": false,
+			"importUniformScale": 1,
+			"nanite": false
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_d.SM_Fern02_d",
+			"triangles": 816,
+			"sourceModelId": 546770539,
+			"sourceGeometryId": 7844172,
+			"sourceNode": "fern_02_d",
+			"slot": "fern_02",
+			"importedSlot": "fern_02",
+			"boundsMinCm": [
+				70.921981811523438,
+				64.786300659179688,
+				-1.3578944206237793
+			],
+			"boundsMaxCm": [
+				128.2001953125,
+				124.11412811279297,
+				19.950860977172852
+			],
+			"sizeCm": [
+				57.278213500976562,
+				59.327827453613281,
+				21.308755397796631
+			],
+			"sourceDimensionsTimes100Cm": [
+				57.278219,
+				59.327829000000001,
+				21.308755000000001
+			],
+			"axisIndependentSizeToleranceCm": 0.10000000000000001,
+			"assetOrigin": [
+				0,
+				0,
+				0
+			],
+			"transformVertexToAbsolute": true,
+			"localPivotPreserved": false,
+			"importUniformScale": 1,
+			"nanite": false
+		}
+	],
+	"textures": [
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Textures/T_Fern02_Diff.T_Fern02_Diff",
+			"source": "fern_02_diff_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"sourceFormat": 4,
+			"compression": 0,
+			"materialProperty": 5,
+			"srgb": true,
+			"flipGreen": false,
+			"connectedOutputIndex": 0
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Textures/T_Fern02_NormalDX.T_Fern02_NormalDX",
+			"source": "fern_02_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"sourceFormat": 4,
+			"compression": 1,
+			"materialProperty": 10,
+			"srgb": false,
+			"flipGreen": false,
+			"connectedOutputIndex": 0
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Textures/T_Fern02_Roughness.T_Fern02_Roughness",
+			"source": "fern_02_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialProperty": 8,
+			"srgb": false,
+			"flipGreen": false,
+			"connectedOutputIndex": 1
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Textures/T_Fern02_AO.T_Fern02_AO",
+			"source": "fern_02_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialProperty": 18,
+			"srgb": false,
+			"flipGreen": false,
+			"connectedOutputIndex": 1
+		},
+		{
+			"object": "/Game/Trials/Fern02_20260920_01/Textures/T_Fern02_Alpha.T_Fern02_Alpha",
+			"source": "fern_02_alpha_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialProperty": 2,
+			"srgb": false,
+			"flipGreen": false,
+			"connectedOutputIndex": 1
+		}
+	],
+	"material": "/Game/Trials/Fern02_20260920_01/Materials/M_Fern02.M_Fern02",
+	"shadingModel": "DefaultLit",
+	"twoSided": true,
+	"opacityClip": 0.33300000429153442,
+	"transformPolicy": "FBX scene/unit conversion once; absolute transform bake; no extra scale, rotation or vertex recentering.",
+	"passed": false,
+	"cancelledAtPollingBoundary": false
+}

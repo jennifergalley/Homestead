@@ -121,7 +121,12 @@ void CaptureDdc(const FDerivedDataCacheStatsNode& Node, int32 Parent, TArray<TSh
 
 UHomesteadAuthoringProbeCommandlet::UHomesteadAuthoringProbeCommandlet()
 {
-    IsClient = false;
+    FString FernMode;
+    FParse::Value(FCommandLine::Get(), TEXT("FernMode="), FernMode);
+    // AllocateScene otherwise creates a dummy scene even with a real RHI.
+    IsClient = FernMode == TEXT("Render")
+        && FParse::Param(FCommandLine::Get(), TEXT("AllowCommandletRendering"))
+        && FParse::Param(FCommandLine::Get(), TEXT("RenderOffScreen"));
     IsServer = false;
     IsEditor = true;
     LogToConsole = true;

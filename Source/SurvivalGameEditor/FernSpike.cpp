@@ -9,6 +9,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/World.h"
 #include "Factories/FbxFactory.h"
 #include "Factories/FbxImportUI.h"
 #include "Factories/FbxStaticMeshImportData.h"
@@ -22,6 +23,7 @@
 #include "MaterialShared.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
+#include "Misc/App.h"
 #include "Misc/FeedbackContext.h"
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
@@ -29,6 +31,7 @@
 #include "Misc/Paths.h"
 #include "PreviewScene.h"
 #include "RenderingThread.h"
+#include "SceneInterface.h"
 #include "Serialization/JsonSerializer.h"
 #include "ShaderCompiler.h"
 #include "StaticMeshCompiler.h"
@@ -77,6 +80,21 @@ bool WriteJson(const FString& Path, const TSharedRef<FJsonObject>& Value)
         && FJsonSerializer::Serialize(Value, TJsonWriterFactory<>::Create(&Text))
         && FFileHelper::SaveStringToFile(Text, *(Path + TEXT(".tmp")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM)
         && IFileManager::Get().Move(*Path, *(Path + TEXT(".tmp")), false, false);
+}
+
+bool WritePng(const FString& Path, const TArray<FColor>& Pixels)
+{
+    const FString Temp = Path + TEXT(".tmp");
+    if (IFileManager::Get().FileExists(*Path) || IFileManager::Get().FileExists(*Temp)) return false;
+    TArray64<uint8> Png;
+    FImageUtils::PNGCompressImageArray(1280, 720, Pixels, Png);
+    if (Png.IsEmpty()) return false;
+    TUniquePtr<FArchive> Writer(IFileManager::Get().CreateFileWriter(*Temp, FILEWRITE_NoReplaceExisting));
+    if (!Writer) return false;
+    Writer->Serialize(Png.GetData(), Png.Num());
+    if (!Writer->Close() || Writer->IsError()) return false;
+    Writer.Reset();
+    return IFileManager::Get().Move(*Path, *Temp, false, false);
 }
 
 class FStopFeedback : public FFeedbackContext
@@ -387,6 +405,20 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
     FPreviewScene Scene(FPreviewScene::ConstructionValues().SetCreatePhysicsScene(false)
         .AllowAudioPlayback(false).SetTransactional(false).SetLightBrightness(3.0f).SetSkyBrightness(0));
     if (!Scene.IsInitialized()) return false;
+    UWorld* World = Scene.GetWorld();
+    auto SceneState = MakeShared<FJsonObject>();
+    SceneState->SetBoolField(TEXT("isClient"), GIsClient);
+    SceneState->SetBoolField(TEXT("canEverRender"), FApp::CanEverRender());
+    SceneState->SetBoolField(TEXT("worldScenePresent"), World && World->Scene);
+    const bool RealScene = World && World->Scene && World->Scene->GetRenderScene();
+    SceneState->SetBoolField(TEXT("realRenderScene"), RealScene);
+    Result->SetObjectField(TEXT("sceneState"), SceneState);
+    if (!RealScene)
+    {
+        Result->SetStringField(TEXT("failure"), TEXT("Preview world has no real renderer scene; dummy commandlet scene is not accepted."));
+        UE_LOG(LogFernSpike, Error, TEXT("Preview world has no real renderer scene (GIsClient=%d)."), GIsClient);
+        return false;
+    }
     Phase(TEXT("transient preview scene initialized; components/render target begin"));
     Scene.SkyLight->SetVisibility(false);
     Scene.SetLightDirection(FRotator(-45, -45, 0));
@@ -425,27 +457,83 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
     Capture->PostProcessSettings.AutoExposureBias = 0;
     Capture->PostProcessSettings.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
     Capture->PostProcessSettings.AutoExposureApplyPhysicalCameraExposure = false;
+    Scene.AddComponent(Capture, FTransform::Identity);
     Capture->ShowFlags.SetMotionBlur(false);
     Capture->ShowFlags.SetScreenPercentage(false);
-    Scene.AddComponent(Capture, FTransform::Identity);
     Phase(TEXT("scene/components complete; FinishAllCompilation begin"));
     FAssetCompilingManager::Get().FinishAllCompilation();
-    Phase(TEXT("FinishAllCompilation returned; material PostEditChange begin"));
+    Phase(TEXT("FinishAllCompilation returned; unchanged fern resource readiness begin"));
     Result->SetStringField(TEXT("stage"), TEXT("real-shader-readiness"));
-    Material->PostEditChange();
-    Phase(TEXT("material PostEditChange returned; shader readiness begin"));
     FMaterialResource* Resource = Material->GetMaterialResource(GMaxRHIShaderPlatform);
+    const auto Readiness = [&]()
+    {
+        auto State = MakeShared<FJsonObject>();
+        State->SetNumberField(TEXT("shaderPlatform"), static_cast<int32>(GMaxRHIShaderPlatform));
+        State->SetNumberField(TEXT("featureLevel"), static_cast<int32>(GMaxRHIFeatureLevel));
+        State->SetBoolField(TEXT("resourcePresent"), Resource != nullptr);
+        State->SetBoolField(TEXT("shaderMapPresent"), Resource && Resource->GetGameThreadShaderMap());
+        State->SetBoolField(TEXT("shaderMapComplete"), Resource && Resource->IsGameThreadShaderMapComplete());
+        State->SetBoolField(TEXT("compilationFinished"), Resource && Resource->IsCompilationFinished());
+        State->SetNumberField(TEXT("remainingGlobalJobs"), GShaderCompilingManager->GetNumRemainingJobs());
+        TArray<TSharedPtr<FJsonValue>> Errors;
+        if (Resource)
+            for (const FString& Error : Resource->GetCompileErrors()) Errors.Add(MakeShared<FJsonValueString>(Error));
+        State->SetArrayField(TEXT("compileErrors"), Errors);
+        return State;
+    };
+    Result->SetObjectField(TEXT("fernReadinessBefore"), Readiness());
+    if (!Resource)
+    {
+        Result->SetStringField(TEXT("failure"), TEXT("No fern material resource for the actual shader platform."));
+        UE_LOG(LogFernSpike, Error, TEXT("No fern material resource for shader platform %d."), static_cast<int32>(GMaxRHIShaderPlatform));
+        return false;
+    }
+    if (!Resource->IsGameThreadShaderMapComplete())
+        Resource->SubmitCompileJobs_GameThread(EShaderCompileJobPriority::High);
+    Phase(TEXT("fern resource FinishCompilation begin"));
+    Resource->FinishCompilation();
+    Phase(TEXT("fern resource FinishCompilation returned; final shader readiness begin"));
     while (Resource && (!Resource->IsCompilationFinished() || GShaderCompilingManager->GetNumRemainingJobs() > 0))
     {
         if (Feedback.ReceivedUserCancel()) { Material->CancelOutstandingCompilation(); return false; }
         GShaderCompilingManager->ProcessAsyncResults(0.01f, false);
         FPlatformProcess::SleepNoStats(0.01f);
     }
-    if (!Resource || !Resource->IsGameThreadShaderMapComplete() || Resource->GetCompileErrors().Num()
-        || Feedback.ReceivedUserCancel()) return false;
+    Result->SetObjectField(TEXT("fernReadinessAfter"), Readiness());
+    if (!Resource->IsGameThreadShaderMapComplete() || Resource->GetCompileErrors().Num() || Feedback.ReceivedUserCancel())
+    {
+        Result->SetStringField(TEXT("failure"), TEXT("Fern shader map is incomplete, has direct compile errors, or cancellation was requested."));
+        UE_LOG(LogFernSpike, Error, TEXT("Fern readiness failed: mapComplete=%d errors=%d cancelled=%d."),
+            Resource->IsGameThreadShaderMapComplete(), Resource->GetCompileErrors().Num(), Feedback.ReceivedUserCancel());
+        for (const FString& Error : Resource->GetCompileErrors()) UE_LOG(LogFernSpike, Error, TEXT("Fern shader: %s"), *Error);
+        return false;
+    }
     Phase(TEXT("shader map complete; render-command flush begin"));
     FlushRenderingCommands();
     Phase(TEXT("readiness flush complete"));
+    SceneState->SetBoolField(TEXT("fernRegistered"), Fern->IsRegistered());
+    SceneState->SetBoolField(TEXT("fernRenderStateCreated"), Fern->IsRenderStateCreated());
+    SceneState->SetBoolField(TEXT("fernSceneProxyPresent"), Fern->GetSceneProxy() != nullptr);
+    SceneState->SetBoolField(TEXT("captureRegistered"), Capture->IsRegistered());
+    SceneState->SetBoolField(TEXT("captureVisible"), Capture->IsVisible());
+    SceneState->SetArrayField(TEXT("fernWorldBoundsOriginCm"), Vector(Fern->Bounds.Origin));
+    SceneState->SetArrayField(TEXT("fernWorldBoundsExtentCm"), Vector(Fern->Bounds.BoxExtent));
+    if (!Fern->IsRegistered() || !Fern->IsRenderStateCreated() || !Fern->GetSceneProxy()
+        || !Capture->IsRegistered() || !Capture->IsVisible())
+    {
+        Result->SetStringField(TEXT("failure"), TEXT("Fern/capture registration or actual fern render state is missing."));
+        UE_LOG(LogFernSpike, Error, TEXT("Fern/capture registration or actual fern render state is missing."));
+        return false;
+    }
+    Result->SetStringField(TEXT("rhi"), GDynamicRHI->GetName());
+    Result->SetStringField(TEXT("adapter"), GRHIAdapterName);
+    Result->SetStringField(TEXT("driver"), GRHIAdapterInternalDriverVersion);
+    Result->SetNumberField(TEXT("width"), 1280);
+    Result->SetNumberField(TEXT("height"), 720);
+    Result->SetNumberField(TEXT("targetFormat"), static_cast<int32>(Target->RenderTargetFormat));
+    Result->SetNumberField(TEXT("pixelFormat"), static_cast<int32>(Target->GetFormat()));
+    Result->SetBoolField(TEXT("shaderMapComplete"), Resource->IsGameThreadShaderMapComplete());
+    Result->SetBoolField(TEXT("materialFallbackAllowed"), false);
     TArray<TSharedPtr<FJsonValue>> Views;
     Result->SetStringField(TEXT("stage"), TEXT("two-native-offscreen-views"));
     for (int32 Index = 0; Index < 2; ++Index)
@@ -454,53 +542,83 @@ bool Render(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
         const FVector Position = Center + FVector(0, (Index == 0 ? -1 : 1) * Radius * 3.5, Radius * 1.25);
         const FRotator Rotation = (Center - Position).Rotation();
         Capture->SetWorldLocationAndRotation(Position, Rotation);
+        auto View = MakeShared<FJsonObject>();
+        Views.Add(MakeShared<FJsonValueObject>(View));
+        Result->SetArrayField(TEXT("views"), Views);
+        View->SetArrayField(TEXT("cameraCm"), Vector(Capture->GetComponentLocation()));
+        View->SetStringField(TEXT("rotation"), Capture->GetComponentRotation().ToString());
+        View->SetNumberField(TEXT("fovDegrees"), Capture->FOVAngle);
+        View->SetNumberField(TEXT("nearClipCm"), GNearClippingPlane);
+        View->SetArrayField(TEXT("lookAtCm"), Vector(Center));
+        View->SetBoolField(TEXT("screenPercentageShowFlag"), Capture->ShowFlags.ScreenPercentage);
+        View->SetBoolField(TEXT("motionBlur"), Capture->ShowFlags.MotionBlur);
+        View->SetStringField(TEXT("exposure"), TEXT("Manual, compensation 0, physical camera exposure disabled"));
         Phase(Index == 0 ? TEXT("front capture begin") : TEXT("back capture begin"));
         Capture->CaptureScene();
+        View->SetBoolField(TEXT("captureCallReturned"), true);
         FlushRenderingCommands();
+        View->SetBoolField(TEXT("renderCommandsFlushed"), true);
         Phase(Index == 0 ? TEXT("front capture flush complete; readback begin") : TEXT("back capture flush complete; readback begin"));
         const FString Name = Index == 0 ? TEXT("fern-a-front.png") : TEXT("fern-a-back.png");
         const FString Path = FPaths::Combine(Output, Name);
-        if (IFileManager::Get().FileExists(*Path)) return false;
-        TUniquePtr<FArchive> Writer(IFileManager::Get().CreateFileWriter(*Path, FILEWRITE_NoReplaceExisting));
         TArray<FColor> Pixels;
-        if (!Writer || !Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels)
-            || Pixels.Num() != 1280 * 720) return false;
+        const bool ReadbackSucceeded = Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels);
+        View->SetBoolField(TEXT("readbackSucceeded"), ReadbackSucceeded);
+        View->SetNumberField(TEXT("pixelCount"), Pixels.Num());
+        if (!ReadbackSucceeded || Pixels.Num() != 1280 * 720)
+        {
+            Result->SetStringField(TEXT("failure"), TEXT("Native render-target readback failed or returned an unexpected pixel count."));
+            UE_LOG(LogFernSpike, Error, TEXT("Readback failed: success=%d pixels=%d."), ReadbackSucceeded, Pixels.Num());
+            return false;
+        }
         Phase(Index == 0 ? TEXT("front readback complete; pixel validation/PNG encoding begin") : TEXT("back readback complete; pixel validation/PNG encoding begin"));
         int32 GreenPixels = 0;
-        for (FColor& Pixel : Pixels)
+        uint8 Minimum[4] = {255, 255, 255, 255};
+        uint8 Maximum[4] = {};
+        for (const FColor& Pixel : Pixels)
         {
             if (int32(Pixel.G) > int32(Pixel.R) + 8 && int32(Pixel.G) > int32(Pixel.B) + 4) ++GreenPixels;
-            Pixel.A = 255;
+            const uint8 Channels[] = {Pixel.R, Pixel.G, Pixel.B, Pixel.A};
+            for (int32 Channel = 0; Channel < 4; ++Channel)
+            {
+                Minimum[Channel] = FMath::Min(Minimum[Channel], Channels[Channel]);
+                Maximum[Channel] = FMath::Max(Maximum[Channel], Channels[Channel]);
+            }
         }
-        if (GreenPixels < 50) return false;
-        TArray64<uint8> Png;
-        FImageUtils::PNGCompressImageArray(1280, 720, Pixels, Png);
-        if (Png.IsEmpty()) return false;
-        Phase(Index == 0 ? TEXT("front PNG write begin") : TEXT("back PNG write begin"));
-        Writer->Serialize(Png.GetData(), Png.Num());
-        if (!Writer->Close() || Writer->IsError()) return false;
-        Writer.Reset();
-        Phase(Index == 0 ? TEXT("front PNG write complete") : TEXT("back PNG write complete"));
-        auto View = MakeShared<FJsonObject>();
-        View->SetStringField(TEXT("image"), Name);
-        View->SetArrayField(TEXT("cameraCm"), Vector(Position));
-        View->SetStringField(TEXT("rotation"), Rotation.ToString());
-        View->SetNumberField(TEXT("fovDegrees"), Capture->FOVAngle);
+        TArray<TSharedPtr<FJsonValue>> Minima, Maxima;
+        for (int32 Channel = 0; Channel < 4; ++Channel)
+        {
+            Minima.Add(MakeShared<FJsonValueNumber>(Minimum[Channel]));
+            Maxima.Add(MakeShared<FJsonValueNumber>(Maximum[Channel]));
+        }
+        View->SetArrayField(TEXT("readbackRgbaMinimum"), Minima);
+        View->SetArrayField(TEXT("readbackRgbaMaximum"), Maxima);
         View->SetNumberField(TEXT("greenPixelCount"), GreenPixels);
-        View->SetBoolField(TEXT("screenPercentageShowFlag"), Capture->ShowFlags.ScreenPercentage);
-        View->SetBoolField(TEXT("motionBlur"), Capture->ShowFlags.MotionBlur);
+        if (GreenPixels < 50)
+        {
+            const FString Diagnostic = Index == 0 ? TEXT("diagnostic-front-failed.png") : TEXT("diagnostic-back-failed.png");
+            const bool Written = WritePng(FPaths::Combine(Output, Diagnostic), Pixels);
+            View->SetBoolField(TEXT("diagnosticWritten"), Written);
+            if (Written) View->SetStringField(TEXT("diagnosticImage"), Diagnostic);
+            View->SetStringField(TEXT("readback"), TEXT("Failed diagnostic preserves every readback RGBA byte; not an accepted fern capture"));
+            Result->SetStringField(TEXT("failure"), Written ? TEXT("Fern content gate failed; unaltered diagnostic PNG retained.")
+                : TEXT("Fern content gate failed and diagnostic PNG could not be written."));
+            UE_LOG(LogFernSpike, Error, TEXT("Fern content gate failed: greenPixels=%d diagnosticWritten=%d."), GreenPixels, Written);
+            return false;
+        }
+        for (FColor& Pixel : Pixels) Pixel.A = 255;
+        Phase(Index == 0 ? TEXT("front PNG write begin") : TEXT("back PNG write begin"));
+        if (!WritePng(Path, Pixels))
+        {
+            Result->SetStringField(TEXT("failure"), TEXT("Accepted-view PNG atomic write failed."));
+            UE_LOG(LogFernSpike, Error, TEXT("PNG atomic write failed: %s"), *Path);
+            return false;
+        }
+        Phase(Index == 0 ? TEXT("front PNG write complete") : TEXT("back PNG write complete"));
+        View->SetStringField(TEXT("image"), Name);
         View->SetStringField(TEXT("readback"), TEXT("Native LDR RGB unchanged; PNG alpha explicitly opaque"));
-        View->SetStringField(TEXT("exposure"), TEXT("Manual, compensation 0, physical camera exposure disabled"));
-        Views.Add(MakeShared<FJsonValueObject>(View));
     }
     Result->SetArrayField(TEXT("views"), Views);
-    Result->SetStringField(TEXT("rhi"), GDynamicRHI->GetName());
-    Result->SetStringField(TEXT("adapter"), GRHIAdapterName);
-    Result->SetStringField(TEXT("driver"), GRHIAdapterInternalDriverVersion);
-    Result->SetNumberField(TEXT("width"), 1280);
-    Result->SetNumberField(TEXT("height"), 720);
-    Result->SetBoolField(TEXT("shaderMapComplete"), Resource->IsGameThreadShaderMapComplete());
-    Result->SetBoolField(TEXT("materialFallbackAllowed"), false);
     Result->SetStringField(TEXT("fernTransform"), TEXT("Identity; camera framing only"));
     Result->SetStringField(TEXT("scope"), TEXT("Transient offscreen Editor preview, not packaged, gameplay, 4K or performance proof"));
     Result->SetStringField(TEXT("stage"), TEXT("render-complete"));

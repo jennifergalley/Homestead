@@ -1,0 +1,71 @@
+{
+  "status": "failed-native-shader-readiness-after-compilation",
+  "files": [
+    {
+      "file": "editor.log",
+      "bytes": 261724,
+      "sha256": "0AE2F89DD1BC055E57DAA4C215B2B081BDD837DCD16EF7B8E96CFCA754C70616"
+    },
+    {
+      "file": "effective-settings.json",
+      "bytes": 15858,
+      "sha256": "237CAA8617284145A60239E02EA404E6C593B0B0B190D8F5A9A205E71CB262E8"
+    },
+    {
+      "file": "entry-observed.json",
+      "bytes": 328,
+      "sha256": "1E0B6FB5BFCD8FAA94D62B464418F7348ABF1B764B2750B43FA0FD8F45293314"
+    },
+    {
+      "file": "fern-result.json",
+      "bytes": 5754,
+      "sha256": "D9C1468110E14E05D598BC9BE86D169D5E7956712DF75F1360CCFE99C8128264"
+    },
+    {
+      "file": "launch.json",
+      "bytes": 8851,
+      "sha256": "BC050BE263D657738D1ECF73AD2B7CC073762566652E4B25598490A3C421F883"
+    },
+    {
+      "file": "native-exit.json",
+      "bytes": 668,
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681"
+    },
+    {
+      "file": "probe-result.json",
+      "bytes": 1360278,
+      "sha256": "A2E96E304CD51465C1F21A310A683E2AA1223779D6425AFCFEB6D1861BED3827"
+    },
+    {
+      "file": "reservation.json",
+      "bytes": 1492,
+      "sha256": "D681297F480DD200D93141EF2AC747A200400A3A70316D92923B40F2376D8E6B"
+    },
+    {
+      "file": "retained-inputs.json",
+      "bytes": 803137,
+      "sha256": "22E01179DD0EBBA743B5E93E371FDC7D8D571A83535D864ABA6A3F263DC24319"
+    },
+    {
+      "file": "retained-output-check.json",
+      "bytes": 519541,
+      "sha256": "883C764D10954C74774F83AA6EEEA3366B02F3D54ECA6BE303218433ABD461ED"
+    },
+    {
+      "file": "stdout.log",
+      "bytes": 261595,
+      "sha256": "1018B1D6B6BCD03357FBF0FDC9AEAADEB489BAA20180611077D2A636DAE8DD71"
+    }
+  ],
+  "exitCode": 7,
+  "hardTerminated": false,
+  "elapsedSeconds": 1733.5203548,
+  "samples": 878,
+  "maximumSampleGapMs": 29082.34990000003,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "cleanupErrors": [],
+  "images": 0,
+  "entryAndExitPythonDisabled": true,
+  "qualification": "Completion-driven render genuinely completed global asset compilation after1656s, then failed readiness after unnecessary PostEditChange. Native exit7 cooperative failure, no timer stop. Engine debug-material/Niagara diagnostics retained, not attributed to fern. Imported packages/cache preserved; exact platform API is correct."
+}
