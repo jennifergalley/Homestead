@@ -1,0 +1,33 @@
+{
+  "exe": {
+    "path": "Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "bytes": 166991872,
+    "sha256": "9EFB0133C07F6F5B41484E81ADD33FF4EF3787A7C6DFE79FAE2C45343C79C70F"
+  },
+  "pdb": {
+    "path": "Binaries\\Win64\\SurvivalGame-Win64-Shipping.pdb",
+    "bytes": 238301184,
+    "sha256": "BAD03B82B133CFC6879C4813BC8002A507DC6FB122FB316E0EC3C3A06E2C26A4"
+  },
+  "machine": "AMD64",
+  "isDll": false,
+  "moduleName": "SurvivalGame-Win64-Shipping.exe",
+  "manifest": {
+    "resourceType": 24,
+    "resourceId": 1,
+    "language": 1033,
+    "bytes": 1135,
+    "sha256": "BF5DCA0FE1C186D6C72539906FA23D85221ACB3F420DD096A4AE284849741BB6",
+    "verifiedInputs": [
+      "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\link3\\link-generated.manifest",
+      "E:\\Program Files\\UE_5.8\\Engine\\Build\\Windows\\Resources\\Default-Win64.manifest"
+    ]
+  },
+  "moduleMarker": null,
+  "exportCount": 0,
+  "probeExports": [],
+  "debugGuid": "7eaa8ee7-1e5c-9daf-7e1a-e030764e4193",
+  "debugAge": 1,
+  "recordedPdb": "SurvivalGame-Win64-Shipping.pdb",
+  "codeLoaded": false
+}

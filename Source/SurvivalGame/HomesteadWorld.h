@@ -88,6 +88,7 @@ private:
 
     bool bInitialized = false;
     FString ResourceLayoutSignature;
+    double DecorationBuildMilliseconds = 0;
 
     UMaterialInterface* Material(FLinearColor Color, float Roughness = 0.85f, float Glow = 0.0f);
     UStaticMeshComponent* AddPart(FHomesteadWorldVisual& Visual, UStaticMesh* Mesh,
@@ -107,4 +108,8 @@ private:
     static void ClearVisual(FHomesteadWorldVisual& Visual);
     static float CellBase(int CellX, int CellY);
     static float GrassGroundWeight(float X, float Y);
+    static float WoodlandBedWeight(float X, float Y);
+    static float LowCoverDensity(float X, float Y);
+    static bool IsDecorationReserved(const Homestead::State& State, float X, float Y,
+        float FootprintRadius, float CanopyRadius = 0, bool bLowCover = false);
 };

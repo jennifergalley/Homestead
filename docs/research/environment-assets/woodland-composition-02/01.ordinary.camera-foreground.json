@@ -1,0 +1,18 @@
+{
+	"camera": "X=63.974 Y=150.910 Z=152.175",
+	"rotation": "P=-1.229809 Y=-58.458436 R=-0.000000",
+	"gameHour": 6.299594560861606,
+	"width": 1280,
+	"height": 720,
+	"limits": "Actual spring-arm state and independent matching camera-channel sweep; bounds and complex-collision ray counts are not pixel coverage. Inspect the real frame for surface visibility.",
+	"cameraCollisionTest": true,
+	"probeChannel": 4,
+	"probeRadius": 12,
+	"collisionFixApplied": false,
+	"unfixedCamera": "X=63.974 Y=150.910 Z=152.175",
+	"matchingCameraSweepBlocked": false,
+	"sweepComponent": "",
+	"sweepLocation": "X=0.000 Y=0.000 Z=0.000",
+	"sweepStartPenetrating": false,
+	"nearbyVisibleResourceBounds": []
+}

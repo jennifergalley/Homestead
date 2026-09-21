@@ -7,6 +7,7 @@
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
 #include "HomesteadTestPaths.h"
+#include "UI/SHomesteadMenu.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -747,12 +748,34 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     bool NavigationComplete = false;
     if (Step.NavigateToId >= 0)
     {
-        const auto Rows = Controller->Rows();
-        NavigationComplete = Rows.IsValidIndex(Controller->SelectedRow())
-            && Rows[Controller->SelectedRow()].Id == Step.NavigateToId;
+        const bool Native = Controller->HasNativeMenu();
+        const auto Rows = Native ? Controller->MenuRows() : Controller->Rows();
+        const int32 Current = Native ? Controller->NativeMenu->GetSelectedContentIndex() : Controller->SelectedRow();
+        const int32 Target = Rows.IndexOfByPredicate([&Step](const FHomesteadRow& Row)
+            { return Row.Id == Step.NavigateToId && Row.Subject != EHomesteadMenuSubject::GarmentRecipe; });
+        if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
+            || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
+        {
+            Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
+            return;
+        }
+        NavigationComplete = Current == Target && Target != INDEX_NONE;
         if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
         {
-            Tap(EKeys::Gamepad_DPad_Down);
+            if (Native)
+            {
+                const int32 Columns = Controller->NativeMenu->GetContentColumnCount();
+                if (Columns <= 0)
+                {
+                    Finish(false, Step.Name + TEXT(" | Native content grid has no columns."));
+                    return;
+                }
+                if (Target / Columns != Current / Columns)
+                    Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
+                else
+                    Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+            }
+            else Tap(EKeys::Gamepad_DPad_Down);
             LastNavigationAt = StepElapsed;
         }
     }

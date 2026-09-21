@@ -1,0 +1,106 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 13.8039787,
+  "observedChildren": [
+    {
+      "startUtc": "2026-09-21T21:41:45.5501591Z",
+      "admitted": true,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "pid": 55588,
+      "parentPid": 54796,
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 621.7583,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 1382.9418,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 2054.2194,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 2740.3455,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 3341.6954,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 4000.5398,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 4679.5314,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 5987.3728,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 7098.1546,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 8116.7958,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 9105.8677,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 10089.3507,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 11080.9381,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 11944.5787,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 13037.642,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 13670.477,
+      "udp": [],
+      "tcp": []
+    }
+  ],
+  "exportCorroboration": {
+    "source": "ISPCToolChain.cs233-247 invokes --version through a process-local Lazy cache",
+    "observation": "A log-confirmed brief version-query child may be absent from process samples; no retroactive identity/endpoint claim.",
+    "versionQueryReported": true,
+    "sampledIsNotCompleteHistory": true,
+    "version": "1.24.0"
+  }
+}

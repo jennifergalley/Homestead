@@ -33,6 +33,23 @@ const FLinearColor Stone(0.32f, 0.36f, 0.34f);
 const FLinearColor Soil(0.16f, 0.085f, 0.039f);
 const FLinearColor Cloth(0.55f, 0.43f, 0.25f);
 const FLinearColor PreviewColor(0.65f, 0.79f, 0.77f);
+const FVector2D WoodlandBeds[] = {
+    {-2900, -2900}, {-1800, -2600}, {-500, -3000}, {650, -2600},
+    {2800, -2800}, {3200, -1300}, {3100, 400}, {2800, 2400},
+    {1500, 3000}, {100, 2800}, {-1300, 2800}, {-2700, 2400},
+    {-3100, 950}, {-2900, -500}, {-1500, -1350}, {250, 1250}
+};
+
+FVector2D CoverSite(FRandomStream& Random, bool bClearingEdge)
+{
+    const float Angle = Random.FRandRange(0, 2 * PI);
+    const float Radius = bClearingEdge
+        ? FMath::Sqrt(Random.FRandRange(300 * 300, 1100 * 1100))
+        : 550 * FMath::Sqrt(Random.FRand());
+    const FVector2D Center = bClearingEdge ? FVector2D(-1000, 0)
+        : WoodlandBeds[Random.RandRange(0, UE_ARRAY_COUNT(WoodlandBeds) - 1)];
+    return Center + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius;
+}
 
 FName MaterialKey(const FLinearColor& Color, float Roughness, float Glow)
 {
@@ -208,10 +225,31 @@ void AHomesteadWorld::AddDecoration(UStaticMesh* Mesh, const FVector& Position, 
 
 float AHomesteadWorld::GrassGroundWeight(float X, float Y)
 {
-    const float Home = FMath::SmoothStep(650.0, 1000.0, FVector2D(X + 1000, Y).Size());
+    const float Home = FMath::SmoothStep(300.0, 650.0, FVector2D(X + 1000, Y).Size());
     const float Bank = FMath::SmoothStep(195.0, 350.0, FMath::Abs(X - Homestead::StreamX(Y)));
     const float Patch = 0.5f + 0.5f * FMath::Sin(X * 0.0021f) * FMath::Cos(Y * 0.0017f);
-    return Home * Bank * FMath::Lerp(0.45f, 0.88f, Patch);
+    return Home * Bank * FMath::Lerp(0.15f, 0.45f, Patch)
+        * FMath::Lerp(1.0f, 0.2f, WoodlandBedWeight(X, Y));
+}
+
+float AHomesteadWorld::WoodlandBedWeight(float X, float Y)
+{
+    float Weight = 0;
+    for (const auto& Center : WoodlandBeds)
+    {
+        const float Bed = 1.0f - FMath::SmoothStep(250.0, 650.0, FVector2D::Distance(FVector2D(X, Y), Center));
+        Weight = FMath::Max(Weight, Bed);
+    }
+    return Weight;
+}
+
+float AHomesteadWorld::LowCoverDensity(float X, float Y)
+{
+    const float Home = FMath::SmoothStep(320.0, 600.0, FVector2D(X + 1000, Y).Size());
+    const float PathY = 75 * FMath::Sin((X + 1000) / 600.0f);
+    const float Path = X >= -1000 && X <= Homestead::StreamX(Y)
+        ? FMath::SmoothStep(90.0f, 220.0f, FMath::Abs(Y - PathY)) : 1.0f;
+    return Home * Path;
 }
 
 void AHomesteadWorld::BuildTerrain()
@@ -355,16 +393,57 @@ void AHomesteadWorld::BuildLighting()
     Fog->RegisterComponent();
 }
 
+bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float X, float Y,
+    float FootprintRadius, float CanopyRadius, bool bLowCover)
+{
+    if (FVector2D(X + 1000, Y).Size() < (bLowCover ? 300.0f : 650.0f) + FootprintRadius)
+        return true;
+    if (bLowCover && LowCoverDensity(X, Y) <= 0) return true;
+    const float OccupiedRadius = FMath::Max(FootprintRadius, CanopyRadius);
+    for (const auto& Node : State.resources)
+    {
+        if (FVector2D(X - Node.position.x, Y - Node.position.y).Size()
+            < FootprintRadius + (bLowCover ? 35.0f : 130.0f))
+            return true;
+        if (Node.cleared)
+        {
+            const auto Center = Homestead::CellCenter(
+                FMath::FloorToInt(Node.position.x / Homestead::CellSize),
+                FMath::FloorToInt(Node.position.y / Homestead::CellSize));
+            const float DX = FMath::Max(0.0, FMath::Abs(X - Center.x) - Homestead::CellSize * 0.5);
+            const float DY = FMath::Max(0.0, FMath::Abs(Y - Center.y) - Homestead::CellSize * 0.5);
+            if (DX * DX + DY * DY <= OccupiedRadius * OccupiedRadius)
+                return true;
+        }
+    }
+    for (const auto& Structure : State.structures)
+    {
+        const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+        if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 225.0f)
+            return true;
+    }
+    for (const auto& Plot : State.plots)
+    {
+        const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+        if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 175.0f)
+            return true;
+    }
+    return false;
+}
+
 void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
 {
+    const double Started = FPlatformTime::Seconds();
     const FName FernTag(TEXT("AuthoredFern02"));
     const FName TreeTag(TEXT("AuthoredTreeSmall02"));
     const FName GroveTag(TEXT("AuthoredTreeSmall02Grove"));
+    const FName FirTag(TEXT("AuthoredFirUnderstory"));
     TArray<UStaticMeshComponent*> PreviousParts;
     GetComponents(PreviousParts);
     for (UStaticMeshComponent* Part : PreviousParts)
     {
-        if (Part->ComponentHasTag(FernTag) || Part->ComponentHasTag(TreeTag) || Part->ComponentHasTag(GroveTag))
+        if (Part->ComponentHasTag(FernTag) || Part->ComponentHasTag(TreeTag)
+            || Part->ComponentHasTag(GroveTag) || Part->ComponentHasTag(FirTag))
         {
             RemoveInstanceComponent(Part);
             Part->DestroyComponent();
@@ -377,34 +456,7 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     FRandomStream Random(817391);
     auto Reserved = [&](float X, float Y, float Radius)
     {
-        if (FVector2D(X + 1000, Y).Size() < 650.0f + Radius)
-        {
-            return true;
-        }
-        for (const auto& Node : State.resources)
-        {
-            if (FVector2D(X - Node.position.x, Y - Node.position.y).Size() < Radius + 130.0f)
-            {
-                return true;
-            }
-        }
-        for (const auto& Structure : State.structures)
-        {
-            const Homestead::Point Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
-            if (FVector2D(X - Center.x, Y - Center.y).Size() < Radius + 225.0f)
-            {
-                return true;
-            }
-        }
-        for (const auto& Plot : State.plots)
-        {
-            const Homestead::Point Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
-            if (FVector2D(X - Center.x, Y - Center.y).Size() < Radius + 175.0f)
-            {
-                return true;
-            }
-        }
-        return false;
+        return IsDecorationReserved(State, X, Y, Radius);
     };
 
     TArray<UStaticMesh*> FernMeshes;
@@ -424,14 +476,14 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     int32 FernCount = 0;
     if (FernMeshes.Num() == 4)
     {
-        for (int32 Index = 0; Index < 32; ++Index)
+        for (int32 Index = 0; Index < 10000 && FernCount < 768; ++Index)
         {
             FRandomStream FernRandom(63017 + Index * 211);
-            const float Angle = Index * 2.39996323f;
-            const float Radius = FernRandom.FRandRange(820.0f, 1250.0f);
-            const float X = -1000.0f + FMath::Cos(Angle) * Radius;
-            const float Y = FMath::Sin(Angle) * Radius;
-            if (Reserved(X, Y, 75.0f) || FMath::Abs(X - Homestead::StreamX(Y)) < 270.0f)
+            const FVector2D Site = CoverSite(FernRandom, Index % 3 == 0);
+            const float X = Site.X, Y = Site.Y;
+            if (IsDecorationReserved(State, X, Y, 75, 0, true)
+                || FMath::Abs(X - Homestead::StreamX(Y)) < 270.0f
+                || FernRandom.FRand() > LowCoverDensity(X, Y))
             {
                 continue;
             }
@@ -458,132 +510,136 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     }
     UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing fern patch: %d noncolliding plants; native materials and scale."), FernCount);
 
+    TArray<FVector2D> FirSites;
+    for (int32 Index = 0; Index < 2400 && FirSites.Num() < 96; ++Index)
+    {
+        FRandomStream FirRandom(51317 + Index * 199);
+        const FVector2D Site = CoverSite(FirRandom, Index % 4 == 0);
+        if (Reserved(Site.X, Site.Y, 90)
+            || LowCoverDensity(Site.X, Site.Y) <= 0
+            || FMath::Abs(Site.X - Homestead::StreamX(Site.Y)) < 285
+            || FirSites.ContainsByPredicate([&](const FVector2D& Other)
+                { return FVector2D::Distance(Other, Site) < 130; }))
+            continue;
+        const TCHAR* Name = Index % 2 ? TEXT("SM_FirSapling_a") : TEXT("SM_FirSapling_c");
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *FString::Printf(
+            TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/%s.%s"), Name, Name));
+        if (!Mesh || Mesh->GetStaticMaterials().Num() != 2 || !Mesh->GetMaterial(0) || !Mesh->GetMaterial(1)
+            || !Mesh->GetBodySetup() || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 2)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Authored fir understory is unavailable: %s"), Name);
+            break;
+        }
+        const FBox Bounds = Mesh->GetBoundingBox();
+        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+        const FRotator Rotation(0, FirRandom.FRandRange(0, 360), 0);
+        auto* Part = NewObject<UStaticMeshComponent>(this);
+        AddInstanceComponent(Part);
+        Part->ComponentTags.Add(FirTag);
+        Part->SetupAttachment(GetRootComponent());
+        Part->SetMobility(EComponentMobility::Static);
+        Part->SetStaticMesh(Mesh);
+        Part->SetRelativeTransform(FTransform(Rotation,
+            AtGround(Site.X, Site.Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+        Part->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        Part->SetCollisionResponseToAllChannels(ECR_Ignore);
+        Part->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
+        Part->SetGenerateOverlapEvents(false);
+        Part->SetCanEverAffectNavigation(false);
+        Part->SetCullDistance(5000);
+        Part->RegisterComponent();
+        FirSites.Add(Site);
+    }
+
     auto* AuthoredTree = LoadObject<UStaticMesh>(nullptr,
-        TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2"));
+        TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"));
+    struct FCanopySite
+    {
+        int32 Seed;
+        FVector2D Position;
+        float Yaw, Scale, Radius;
+    };
+    TArray<FCanopySite> Sites;
+    TArray<FCanopySite> SelectedSites;
     int32 TreeIndex = INDEX_NONE;
-    TSet<int32> GroveIndices;
     if (AuthoredTree && AuthoredTree->GetStaticMaterials().Num() == 3 && AuthoredTree->GetBodySetup()
         && AuthoredTree->GetBodySetup()->AggGeom.SphylElems.Num() == 1
         && AuthoredTree->GetBodySetup()->AggGeom.GetElementCount() == 1
-        && AuthoredTree->GetRenderData() && AuthoredTree->GetRenderData()->LODResources.Num() > 0
-        && AuthoredTree->GetRenderData()->LODResources[0].GetNumTriangles() == 231785)
+        && AuthoredTree->GetRenderData() && AuthoredTree->GetRenderData()->LODResources.Num() == 3
+        && AuthoredTree->GetRenderData()->LODResources[0].GetNumTriangles() == 231785
+        && AuthoredTree->GetRenderData()->LODResources[1].GetNumTriangles() > 0
+        && AuthoredTree->GetRenderData()->LODResources[1].GetNumTriangles() <= 65000
+        && AuthoredTree->GetRenderData()->LODResources[2].GetNumTriangles() > 0
+        && AuthoredTree->GetRenderData()->LODResources[2].GetNumTriangles() <= 18000)
     {
         const FBox Bounds = AuthoredTree->GetBoundingBox();
         const float Radius = FVector2D(FMath::Max(FMath::Abs(Bounds.Min.X), FMath::Abs(Bounds.Max.X)),
             FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size();
         float Nearest = TNumericLimits<float>::Max();
-        TArray<TPair<int32, FVector2D>> Sites;
-        for (int32 Index = 0; Index < 430; ++Index)
+        for (int32 Index = 0; Index < 7200; ++Index)
         {
             FRandomStream Candidate(817391 + Index * 179);
-            const float X = Candidate.FRandRange(-3850, 3850);
-            const float Y = Candidate.FRandRange(-3850, 3850);
+            const FVector2D Position = CoverSite(Candidate, false);
+            const float X = Position.X, Y = Position.Y;
+            const float Yaw = Candidate.FRandRange(0, 360);
+            const float Scale = Candidate.FRandRange(0.9f, 1.1f);
             const float Edge = FMath::Max(FMath::Abs(X), FMath::Abs(Y));
-            const float Cluster = FMath::Sin(X / 480) * FMath::Cos(Y / 620);
-            if (Reserved(X, Y, 90) || FMath::Abs(X - Homestead::StreamX(Y)) < 280
-                || (Edge < 2650 && (Cluster < 0.45f || Candidate.FRand() < 0.68f)))
+            if (IsDecorationReserved(State, X, Y, 90 * Scale, Radius * Scale)
+                || FMath::Abs(X - Homestead::StreamX(Y)) < 195 + 90 * Scale
+                || Edge > 3850 || Candidate.FRand() > WoodlandBedWeight(X, Y))
                 continue;
-            if (Reserved(X, Y, Radius) || FMath::Abs(X - Homestead::StreamX(Y)) < Radius + 120
-                || FVector2D(X + 1000, Y).Size() > 3000)
-                continue;
-            Sites.Emplace(Index, FVector2D(X, Y));
+            Sites.Add({Index, FVector2D(X, Y), Yaw, Scale, Radius * Scale});
             const float Distance = FVector2D(X - 250, Y + 650).SizeSquared();
-            if (FVector2D(X + 1000, Y).Size() <= 1900 && Distance < Nearest)
+            if (FVector2D(X + 1000, Y).Size() <= 1900 && Distance < Nearest
+                && !IsDecorationReserved(State, X, Y, 90, Radius)
+                && FMath::Abs(X - Homestead::StreamX(Y)) >= 285)
             {
                 TreeIndex = Index;
                 Nearest = Distance;
             }
         }
-        TArray<FVector2D> SelectedSites;
         for (const auto& Site : Sites)
-            if (Site.Key == TreeIndex)
+            if (Site.Seed == TreeIndex)
             {
-                GroveIndices.Add(Site.Key);
-                SelectedSites.Add(Site.Value);
+                auto Focal = Site;
+                Focal.Scale = 1;
+                Focal.Radius = Radius;
+                SelectedSites.Add(Focal);
             }
-        Sites.Sort([](const auto& A, const auto& B)
-        {
-            const double ADistance = (A.Value + FVector2D(1000, 0)).SizeSquared();
-            const double BDistance = (B.Value + FVector2D(1000, 0)).SizeSquared();
-            return ADistance == BDistance ? A.Key < B.Key : ADistance < BDistance;
-        });
         for (const auto& Site : Sites)
         {
-            if (GroveIndices.Num() >= 16) break;
-            if (SelectedSites.ContainsByPredicate([&](const FVector2D& Other)
-                { return FVector2D::Distance(Other, Site.Value) < 2 * Radius; }))
+            if (SelectedSites.Num() >= 192) break;
+            if (SelectedSites.ContainsByPredicate([&](const FCanopySite& Other)
+                { return FVector2D::Distance(Other.Position, Site.Position) < 115 * (Other.Scale + Site.Scale); }))
                 continue;
-            GroveIndices.Add(Site.Key);
-            SelectedSites.Add(Site.Value);
+            SelectedSites.Add(Site);
         }
     }
     else
     {
-        UE_LOG(LogHomesteadWorld, Error, TEXT("Authored reduced tree or its measured simple trunk collision is unavailable."));
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Woodland canopy LODs or measured trunk collision are unavailable; no primitive substitute."));
     }
-    if (AuthoredTree && TreeIndex == INDEX_NONE)
-        UE_LOG(LogHomesteadWorld, Warning, TEXT("No safe seeded clearing tree site in this world state; keeping existing primitive decorations."));
-    for (int Index = 0; Index < 430; ++Index)
+    if (SelectedSites.IsEmpty())
+        UE_LOG(LogHomesteadWorld, Warning, TEXT("No admitted woodland canopy sites in this world state."));
+    for (const FCanopySite& Site : SelectedSites)
     {
-        Random.Initialize(817391 + Index * 179);
-        const float X = Random.FRandRange(-3850, 3850);
-        const float Y = Random.FRandRange(-3850, 3850);
-        const float Edge = FMath::Max(FMath::Abs(X), FMath::Abs(Y));
-        const float Cluster = FMath::Sin(X / 480) * FMath::Cos(Y / 620);
-        if (Reserved(X, Y, 90) || FMath::Abs(X - Homestead::StreamX(Y)) < 280
-            || (Edge < 2650 && (Cluster < 0.45f || Random.FRand() < 0.68f)))
-        {
-            continue;
-        }
-        const float Height = Random.FRandRange(440, 800);
-        const float Width = Random.FRandRange(34, 58);
-        const FVector Base = AtGround(X, Y);
-        const float Yaw = Random.FRandRange(0, 360);
-        if (GroveIndices.Contains(Index))
-        {
-            auto* Part = NewObject<UStaticMeshComponent>(this);
-            AddInstanceComponent(Part);
-            Part->ComponentTags.Add(GroveTag);
-            if (Index == TreeIndex) Part->ComponentTags.Add(TreeTag);
-            Part->SetupAttachment(GetRootComponent());
-            Part->SetMobility(EComponentMobility::Static);
-            Part->SetStaticMesh(AuthoredTree);
-            Part->SetRelativeTransform(FTransform(FRotator(0, Yaw, 0), Base, FVector::OneVector));
-            Part->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
-            Part->SetGenerateOverlapEvents(false);
-            Part->SetCullDistance(5000.0f);
-            Part->RegisterComponent();
-            UE_LOG(LogHomesteadWorld, Display,
-                TEXT("Authored reduced tree: seedIndex=%d root=%s yaw=%.6f scale=1; native three-role materials/simple trunk capsule."),
-                Index, *Base.ToString(), Yaw);
-            continue;
-        }
-        // The upgraded clearing is a sparse real grove, not real trees hidden among taller proxies.
-        if (GroveIndices.Num() > 0)
-            continue;
-        AddDecoration(Cylinder, Base + FVector(0, 0, Height * 0.47f),
-            FVector(Width, Width, Height * 0.94f), Bark, true);
-        if (Index % 3 == 0)
-        {
-            for (int Tier = 0; Tier < 3; ++Tier)
-            {
-                const float Span = (340.0f - Tier * 65.0f) * Height / 620.0f;
-                AddDecoration(Cone, Base + FVector(0, 0, Height * (0.52f + Tier * 0.2f)),
-                    FVector(Span, Span, Height * 0.6f), Tier == 1 ? Leaf : LightLeaf, false, FRotator(0, Yaw, 0));
-            }
-        }
-        else
-        {
-            for (int Crown = 0; Crown < 4; ++Crown)
-            {
-                const float Angle = Crown * 2.399f + Yaw;
-                AddDecoration(Sphere, Base + FVector(FMath::Cos(Angle) * 90, FMath::Sin(Angle) * 90,
-                    Height * 0.77f + Crown * 32),
-                    FVector(340, 290, 290) * Height / 620.0f,
-                    Crown % 2 ? Leaf : LightLeaf, false, FRotator(0, Yaw, 0));
-            }
-        }
+        const FVector Base = AtGround(Site.Position.X, Site.Position.Y);
+        auto* Part = NewObject<UStaticMeshComponent>(this);
+        AddInstanceComponent(Part);
+        Part->ComponentTags.Add(GroveTag);
+        if (Site.Seed == TreeIndex) Part->ComponentTags.Add(TreeTag);
+        Part->SetupAttachment(GetRootComponent());
+        Part->SetMobility(EComponentMobility::Static);
+        Part->SetStaticMesh(AuthoredTree);
+        Part->SetRelativeTransform(FTransform(FRotator(0, Site.Yaw, 0), Base, FVector(Site.Scale)));
+        Part->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+        Part->SetGenerateOverlapEvents(false);
+        Part->SetCullDistance(0);
+        Part->RegisterComponent();
     }
+    UE_LOG(LogHomesteadWorld, Display,
+        TEXT("Woodland canopy: %d trees, three distance LODs, overlapping crowns with separate trunk/site buffers."),
+        SelectedSites.Num());
 
     for (int Index = 0; Index < 140; ++Index)
     {
@@ -648,18 +704,19 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     int32 GrassTriangleCount = 0;
     if (GrassMeshes.Num() == 4)
     {
-        for (int32 Attempt = 0; Attempt < 2048 && GrassCount < 512; ++Attempt)
+        for (int32 Attempt = 0; Attempt < 64000 && GrassCount < 16000; ++Attempt)
         {
             FRandomStream GrassRandom(71039 + Attempt * 233);
-            const float Radius = FMath::Sqrt((Attempt + 0.5f) / 2048.0f) * 2600.0f;
-            const float Angle = Attempt * 2.39996323f;
-            const float X = -1000 + FMath::Cos(Angle) * Radius;
-            const float Y = FMath::Sin(Angle) * Radius;
-            if (Reserved(X, Y, 20) || GrassGroundWeight(X, Y) < 0.4f)
+            const FVector2D Site = CoverSite(GrassRandom, Attempt % 4 == 0);
+            const float X = Site.X, Y = Site.Y;
+            if (IsDecorationReserved(State, X, Y, 20, 0, true)
+                || FMath::Abs(X - Homestead::StreamX(Y)) < 215
+                || GrassRandom.FRand() > LowCoverDensity(X, Y))
             {
                 continue;
             }
-            const int32 Index = Attempt % 4;
+            const int32 Variety = Attempt % 16;
+            const int32 Index = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
             UStaticMesh* Mesh = GrassMeshes[Index];
             const FName Key(*FString::Printf(TEXT("AuthoredGrass_%s"), GrassNames[Index]));
             UHierarchicalInstancedStaticMeshComponent* Batch = nullptr;
@@ -677,7 +734,7 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
                 Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
                 Batch->SetGenerateOverlapEvents(false);
                 Batch->SetCanEverAffectNavigation(false);
-                Batch->SetCullDistances(2500, 3500);
+                Batch->SetCullDistances(3500, 5000);
                 Batch->bAutoRebuildTreeOnInstanceChanges = false;
                 Batch->RegisterComponent();
                 DecorationBatches.Add(Key, Batch);
@@ -693,37 +750,6 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing grass: %d nonblocking clumps, %d triangles, native scale/material."),
         GrassCount, GrassTriangleCount);
 
-    // Retain outer meadow and flower-stem proxies outside the replaced clearing grass.
-    for (int Patch = 0; Patch < 1150; ++Patch)
-    {
-        Random.Initialize(19271 + Patch * 199);
-        const float X = Random.FRandRange(-3900, 3900);
-        const float Y = Random.FRandRange(-3900, 3900);
-        if (Reserved(X, Y, 0) || FMath::Abs(X - Homestead::StreamX(Y)) < 195)
-        {
-            continue;
-        }
-        const bool bFlowers = Patch % 7 == 0;
-        if (!bFlowers && GrassCount > 0 && FVector2D(X + 1000, Y).Size() < 2600.0f)
-        {
-            continue;
-        }
-        const FLinearColor FlowerColor = Patch % 3 == 0 ? FLinearColor(0.7f, 0.56f, 0.1f)
-            : Patch % 3 == 1 ? FLinearColor(0.48f, 0.23f, 0.54f) : FLinearColor(0.83f, 0.79f, 0.59f);
-        for (int Blade = 0; Blade < 3; ++Blade)
-        {
-            const float PX = X + Random.FRandRange(-25, 25);
-            const float PY = Y + Random.FRandRange(-25, 25);
-            const float Height = Random.FRandRange(18, 43);
-            AddDecoration(Cone, AtGround(PX, PY, Height * 0.5f), FVector(9, 7, Height),
-                Patch % 2 ? Leaf : LightLeaf, false, FRotator(0, Random.FRandRange(0, 360), 8));
-            if (bFlowers)
-            {
-                AddDecoration(Sphere, AtGround(PX, PY, Height), FVector(10, 10, 5), FlowerColor);
-            }
-        }
-    }
-
     // Invisible edge rails prevent falling off the finite collision mesh.
     for (int Side = 0; Side < 4; ++Side)
     {
@@ -737,6 +763,9 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     {
         Entry.Value->BuildTreeIfOutdated(false, true);
     }
+    DecorationBuildMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Woodland decoration refresh: trees=%d ferns=%d firs=%d grass=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
+        SelectedSites.Num(), FernCount, FirSites.Num(), GrassCount, DecorationBuildMilliseconds);
 }
 
 void AHomesteadWorld::ClearVisual(FHomesteadWorldVisual& Visual)
@@ -765,14 +794,48 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     {
         if (bProduce == bProduceOnly)
         {
-            auto* Component = AddPart(Visual, Mesh, Base + Offset, Size, Color, false, Rotation);
-            if (Component && bProduce && Node.kind == Homestead::ResourceKind::Sapling && Mesh == Cone)
-            {
-                Component->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-                Component->SetCollisionResponseToAllChannels(ECR_Ignore);
-                Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
-            }
+            AddPart(Visual, Mesh, Base + Offset, Size, Color, false, Rotation);
         }
+    };
+    auto LoadResource = [&](const TCHAR* Name, bool bGrass = false)
+    {
+        const FString Path = FString(bGrass ? TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/")
+            : TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/")) + Name;
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
+        if (!Mesh) UE_LOG(LogHomesteadWorld, Error, TEXT("Resource %d is missing authored mesh %s"), Node.id, *Path);
+        return Mesh;
+    };
+    auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f)
+    {
+        if (bProduce != bProduceOnly || !Mesh) return;
+        const FBox Bounds = Mesh->GetBoundingBox();
+        if (!Bounds.IsValid || Bounds.Min.ContainsNaN() || Bounds.Max.ContainsNaN())
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Resource %d has invalid authored bounds: %s"), Node.id, *Mesh->GetPathName());
+            return;
+        }
+        const FRotator Rotation(0, Yaw, 0);
+        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+        const FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y);
+        auto* Component = NewObject<UStaticMeshComponent>(this);
+        Component->SetupAttachment(GetRootComponent());
+        Component->SetMobility(EComponentMobility::Movable);
+        Component->SetStaticMesh(Mesh);
+        Component->SetRelativeTransform(FTransform(Rotation, Ground - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
+        Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Component->SetCollisionResponseToAllChannels(ECR_Ignore);
+        if (bProduce && Node.kind == Homestead::ResourceKind::Sapling)
+        {
+            Component->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+            Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
+        }
+        if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial)
+            Component->SetMaterial(0, RockMaterial);
+        Component->SetGenerateOverlapEvents(false);
+        Component->SetCanEverAffectNavigation(false);
+        Component->ComponentTags.Append({TEXT("AuthoredResource"), bProduce ? TEXT("ResourceProduce") : TEXT("ResourceBase")});
+        Component->RegisterComponent();
+        Visual.Components.Add(Component);
     };
 
     switch (Node.kind)
@@ -782,8 +845,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         {
             for (int I = 0; I < 3; ++I)
             {
-                Part(Cylinder, FVector(I * 9 - 9, 0, 6 + I * 3), FVector(7, 7, 65),
-                    Bark, FRotator(82, I * 35 + 20, 0), true);
+                const TCHAR* Names[] = {TEXT("SM_DryBranchesMedium01_a"), TEXT("SM_DryBranchesMedium01_b"), TEXT("SM_DryBranchesMedium01_c")};
+                Authored(LoadResource(Names[I]), FVector2D(I * 9 - 9, I * 7 - 7), I * 35 + 20, true);
             }
         }
         break;
@@ -792,36 +855,33 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         {
             for (int I = 0; I < 3; ++I)
             {
-                Part(Sphere, FVector(I * 17 - 17, I % 2 * 14, 10), FVector(28, 24, 20), Stone,
-                    FRotator::ZeroRotator, true);
+                if (ImportedRock && ImportedRock->GetBoundingBox().GetSize().GetMax() > 0)
+                    Authored(ImportedRock, FVector2D(I * 17 - 17, I % 2 * 14), I * 79, true,
+                        (24.0f + I * 4.0f) / ImportedRock->GetBoundingBox().GetSize().GetMax());
+                else UE_LOG(LogHomesteadWorld, Error, TEXT("Stone resource %d is missing admitted rock geometry."), Node.id);
             }
         }
         break;
     case Homestead::ResourceKind::BerryBush:
-        Part(Cylinder, FVector(0, 0, 24), FVector(9, 9, 48), Bark);
         for (int I = 0; I < 3; ++I)
         {
-            Part(Sphere, FVector((I - 1) * 26, I % 2 * 18, 46 + I % 2 * 10),
-                FVector(60, 52, 52), I % 2 ? Leaf : LightLeaf);
+            Authored(LoadResource(I == 1 ? TEXT("SM_Shrub04_a") : TEXT("SM_Shrub04_c")),
+                FVector2D((I - 1) * 10, I % 2 * 10 - 5), I * 113, false);
         }
         if (bProduceOnly)
         {
             for (int I = 0; I < 8; ++I)
             {
                 const float Angle = I * 2.399f;
-                Part(Sphere, FVector(FMath::Cos(Angle) * 42, FMath::Sin(Angle) * 33, 54 + I % 3 * 9),
-                    FVector(10), FLinearColor(0.42f, 0.025f, 0.055f), FRotator::ZeroRotator, true);
+                Part(Sphere, FVector(FMath::Cos(Angle) * 15, FMath::Sin(Angle) * 11, 16 + I % 3 * 4),
+                    FVector(3.8f), FLinearColor(0.42f, 0.025f, 0.055f), FRotator::ZeroRotator, true);
             }
         }
         break;
     case Homestead::ResourceKind::Roots:
-        Part(Sphere, FVector(0, 0, 1), FVector(66, 56, 5), Soil);
-        for (int I = 0; I < 5; ++I)
+        for (int I = 0; I < 3; ++I)
         {
-            const float Angle = I * 72.0f;
-            Part(Sphere, FVector(FMath::Cos(FMath::DegreesToRadians(Angle)) * 14,
-                FMath::Sin(FMath::DegreesToRadians(Angle)) * 14, 7),
-                FVector(28, 12, 5), Leaf, FRotator(20, Angle, 0));
+            Authored(LoadResource(TEXT("SM_Shrub04_a")), FVector2D(I * 8 - 8, I % 2 * 9), I * 120, false);
         }
         if (bProduceOnly)
         {
@@ -830,48 +890,26 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         break;
     case Homestead::ResourceKind::Flowers:
-        for (int I = 0; I < 5; ++I)
+        for (int I = 0; I < 2; ++I)
         {
-            const float X = Random.FRandRange(-23, 23);
-            const float Y = Random.FRandRange(-23, 23);
-            const float Height = Random.FRandRange(25, 45);
-            Part(Cone, FVector(X, Y, Height * 0.4f), FVector(16, 12, Height * 0.8f), Leaf);
-            if (bProduceOnly)
-            {
-                Part(Cylinder, FVector(X, Y, Height * 0.5f), FVector(2, 2, Height), Leaf,
-                    FRotator::ZeroRotator, true);
-                Part(Sphere, FVector(X, Y, Height), FVector(19, 19, 6),
-                    Node.id % 2 ? FLinearColor(0.65f, 0.32f, 0.61f) : FLinearColor(0.88f, 0.72f, 0.2f),
-                    FRotator::ZeroRotator, true);
-                Part(Sphere, FVector(X, Y, Height + 3), FVector(6, 6, 4), FLinearColor(0.48f, 0.25f, 0.02f),
-                    FRotator::ZeroRotator, true);
-            }
+            const FVector2D Offset(I * 18 - 9, I * 6 - 3);
+            Authored(LoadResource(TEXT("SM_GrassMedium01_tiny_a"), true), Offset, I * 137, false);
+            Authored(LoadResource(I ? TEXT("SM_FlowerEmpodium_b") : TEXT("SM_FlowerEmpodium_a")),
+                Offset, I * 137, true);
         }
         break;
     case Homestead::ResourceKind::Reeds:
-        for (int I = 0; I < 7; ++I)
+        for (int I = 0; I < 5; ++I)
         {
-            const float X = Random.FRandRange(-24, 24);
-            const float Y = Random.FRandRange(-24, 24);
-            const float Height = Random.FRandRange(65, 110);
-            Part(Cone, FVector(X, Y, 12), FVector(8, 8, 24), Leaf);
-            if (bProduceOnly)
-            {
-                Part(Cylinder, FVector(X, Y, Height * 0.5f), FVector(3, 3, Height), LightLeaf,
-                    FRotator(0, I * 49, 7), true);
-                Part(Sphere, FVector(X + 5, Y, Height), FVector(7, 7, 21), Bark,
-                    FRotator::ZeroRotator, true);
-            }
+            const FVector2D Offset(Random.FRandRange(-18, 18), Random.FRandRange(-18, 18));
+            if (I < 2) Authored(LoadResource(TEXT("SM_GrassMedium01_tiny_a"), true), Offset, I * 49, false);
+            Authored(LoadResource(TEXT("SM_GrassMedium01_mid_b"), true), Offset, I * 49, true);
         }
         break;
     case Homestead::ResourceKind::Sapling:
-        Part(Cylinder, FVector(0, 0, 18), FVector(12, 12, 36), Bark);
-        if (bProduceOnly)
-        {
-            Part(Cylinder, FVector(0, 0, 87), FVector(12, 12, 104), Bark, FRotator::ZeroRotator, true);
-            Part(Cone, FVector(0, 0, 108), FVector(105, 105, 150), Leaf, FRotator::ZeroRotator, true);
-            Part(Cone, FVector(0, 0, 158), FVector(72, 72, 115), LightLeaf, FRotator::ZeroRotator, true);
-        }
+        Authored(LoadResource(TEXT("SM_GrassMedium01_tiny_a"), true), FVector2D::ZeroVector, Node.id * 37, false);
+        Authored(LoadResource(Node.id % 2 ? TEXT("SM_FirSapling_a") : TEXT("SM_FirSapling_c")),
+            FVector2D::ZeroVector, Node.id * 37, true);
         break;
     default:
         break;
@@ -1112,7 +1150,7 @@ void AHomesteadWorld::Refresh(const Homestead::State& State)
     FString Layout;
     for (const auto& Node : State.resources)
     {
-        Layout += FString::Printf(TEXT("%d:%.3f:%.3f;"), Node.id, Node.position.x, Node.position.y);
+        Layout += FString::Printf(TEXT("%d:%.3f:%.3f:%d;"), Node.id, Node.position.x, Node.position.y, Node.cleared);
     }
     for (const auto& Structure : State.structures)
     {

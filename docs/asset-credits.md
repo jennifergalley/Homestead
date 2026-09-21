@@ -22,6 +22,10 @@ includes this credit. Include this document in any distributed build.
 | Tree Small 02 (qualified provisional grove) | Rico Cilliers | https://polyhaven.com/a/tree_small_02 | CC0 |
 | Grass Medium 01 (four selected clumps) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/grass_medium_01 | CC0 |
 | Grass Ground (ground blend) | Charlotte Baglioni | https://polyhaven.com/a/grass_ground | CC0 |
+| Shrub 04 (two selected shoots) | Rico Cilliers | https://polyhaven.com/a/shrub_04 | CC0 |
+| Dry Branches Medium 01 (three pieces) | Rico Cilliers | https://polyhaven.com/a/dry_branches_medium_01 | CC0 |
+| Fir Sapling (two small conifers) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/fir_sapling | CC0 |
+| Flower Empodium (two clumps) | Jenelle van Heerden (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/flower_empodium | CC0 |
 | Forest Ambience | TinyWorlds | https://opengameart.org/content/forest-ambience | CC0 |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
@@ -55,6 +59,18 @@ changing terrain positions, topology, normals, UVs or collision. Actual import
 and separate reload evidence is in
 `docs\research\environment-assets\grass-assets-01`. There is no authored wind
 or claim that this restrained clearing patch is a complete woodland.
+
+The woodland resource candidate selects nine meshes from the four additional
+CC0 sets above, using23 unchanged1K maps and five project-wired materials.
+Reference-free preparation preserves source geometry, normals, UVs, transforms
+and ordered material bindings; native import bakes scene/unit conversion once.
+Fir distance LODs and the separately derived Tree Small02 distance LODs are
+project-generated, not publisher-authored chains. Provenance is in
+`Assets\Environment\WoodlandResources\candidate01`; actual38-package import and
+independent reload are sealed in
+`docs\research\environment-assets\woodland-assets-01`. Shrub04 contains no fruit:
+separate prototype berries remain gameplay produce. Fir is a small conifer,
+not a mature canopy tree. Visual woodland acceptance remains separate.
 
 ## Character prototype
 

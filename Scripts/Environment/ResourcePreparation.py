@@ -6,12 +6,17 @@ import os
 from pathlib import Path
 import sys
 
-from ResourceAcquisition import ASSETS, contained, digest, run_guard, validate_manifest, write_new
+_spec = importlib.util.spec_from_file_location("resource_acquisition", Path(__file__).with_name("ResourceAcquisition.py"))
+_acquisition = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_acquisition)
+ASSETS = _acquisition.ASSETS
+contained, digest, run_guard = _acquisition.contained, _acquisition.digest, _acquisition.run_guard
+validate_manifest, write_new = _acquisition.validate_manifest, _acquisition.write_new
 
 
 def ordinary_ancestors(path):
     for part in (path, *path.parents):
-        if part.is_symlink() or part.is_junction():
+        if _acquisition.is_reparse_path(part):
             raise ValueError("Source/preparation path contains a link or junction.")
 
 
@@ -118,6 +123,9 @@ def verify_retained(helper, source, prepared, models=None):
     if version != actual_version or len(retained) != len(new_objects) or not all(
             identical(a, b) for a, b in zip(retained, new_objects)):
         raise ValueError("Prepared FBX changed retained geometry/model/material data.")
+    if not identical(next(node for node in before.elems if node.id == b"GlobalSettings"),
+                     next(node for node in after.elems if node.id == b"GlobalSettings")):
+        raise ValueError("Prepared FBX changed source unit/axis settings.")
     connections = next(node for node in before.elems if node.id == b"Connections").elems
     expected = [node for node in connections if not (
         node.id == b"C" and any(value in removed for value in node.props[1:3]))]

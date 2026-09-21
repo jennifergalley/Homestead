@@ -731,3 +731,64 @@ is retained as rollback. Delivery/evidence and image-quota qualifications live
 under `docs\research\character-assets\directional-navigation*`. Native failures
 01-05 stay failed. Environment14/29 and wardrobe19/44 are unchanged; remaining
 navigation transaction/mouse/removal-focus/upper-boundary clauses remain open.
+
+### Woodland candidates01/02: technical results, visual rejection
+
+The nine exact prepared resource models and derived canopy imported as38
+packages and passed a separate native reload. Native triangle/slot/map/unit
+inventory is sealed in `woodland-assets-01`; original tree import03 stays FAILED
+with its twelve qualified branch source-description basis corners.
+
+Candidate01 (`9EFB0133...`) genuinely compiled, cooked and staged. Its460-frame
+ordinary route and controlled camera/clear/reload passed. Main/coordinator
+rejected the orchard-like composition. Natural `woodland-daylight-01` reached
+09:59 at600s with6 gathers,1 eat and no navigation failures; the supported
+cooperative stop afterwards is CANCELLED, not passed45-minute endurance.
+Its original milestone remains the pre-correction daylight baseline.
+
+Measured grass bounds explain a real placement issue: native summed rectangles
+350.289m2 across6084m2 (not rendered coverage), nearest clump826.343cm from home.
+Nonblocking plants inherited solid access radii and a terrain-material threshold.
+The actual material uses Brown Mud Leaves in A, GrassGround in B: outer
+45-88% GrassGround weighting, not a missing new-material application.
+
+Candidate02 (`468C5506D3970F9FBB1021E68D142A739E40851B3C3043548F84FE87CF4B3BCD`)
+separates low-cover reservations, preserves full cleared/build/plot/stream
+protection, groups canopy/understory beds and rebalances existing ground-map
+weights without changing geometry, UVs, PBR graphs, maps or lighting.
+Actual inventory:192 trees,16000 grass clumps/5,384,599 triangles,768 native
+ferns and96 native firs; all recorded scale/material/site/terrain checks pass.
+Its490-frame ordinary route passed actual harvest, correct-component trunk block
+and retreat. Controlled camera harvest/restoration/permanent-clear/save/reload
+and cleared-corner access passed. Latest decoration rebuild measured168.806ms
+CPU wall time. Actor cadence59.87fps/p95 16.87ms at1920x1080 under the60fps cap
+is not GPU/Present/headroom proof.
+
+The first02 compile1 failed on an implicit TObjectPtr accessor deduction; the
+explicit UStaticMesh pointer correction passed as compile1-02. Original failure
+is retained. A previously unreachable Woodland graph selection was found nested
+inside exclusive Navigation selection:01 actually used the earlier grass graph.
+Its compile/link actions0-3 have identical tools, arguments, outputs and
+dependencies to the genuine woodland01 export. This qualification is retained,
+not retroactively called a correctly selected graph.02 selects its own genuine
+two-unity graph and checks the unchanged third unity before linking.
+
+Coordinator personally inspected02 wide149; Main's149 request was quota-blocked,
+but Main directly inspected original425 at06:19. Close grouping/fern detail and
+floor improved; broad bare areas and continuous under-crown sky remain.
+Prototype orange root/exposed berry beads remain a coordinator-observed gap.
+Neither candidate is accepted/promoted as lush woodland. Source-derived canopy
+LODs231785/57947/13908 and thresholds1/.35/.12 are known; actual selected render
+LOD/alpha coverage is not recorded. Do not blame the far tier from counts alone.
+Planner773 is researching one substantial native leafy bush; Main retains sole
+import/engine ownership. Environment remains14/29; navigation06 remains selected.
+
+Daylight02 reached actual hour9.988059 at600.028s,6 gathers/1 eat/79 waypoints
+and zero navigation failures. Its supported early stop returned CANCELLED;
+the lifetime guard separately passed observed death/disposal without hard stop
+or cleanup errors. Main/coordinator inspected that exact original and confirmed
+the ruler-straight end of the320x320-cell playable terrain. Separate background
+scenery and a multi-depth forest belt are now explicitly in next scope; original
+playable topology/collision/stream/save coordinates remain protected.
+Technical evidence receipt `woodland-composition-02`:
+`E27E145E86990F67D3E3EEBC9DF3E72ACB94B6F8BF2A66D94EF628B6D3ED2274`.

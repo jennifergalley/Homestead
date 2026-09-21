@@ -12,6 +12,10 @@ without replacing the landscape or expanding gameplay.
 - Replace dominant decorative tree and understory primitives with a cohesive
   licensed set, preserving open foreground, resource legibility, stream access,
   construction clearance and deterministic placement.
+- Following Jenny's September21 rejection of the sparse visual result, compose
+  a lush surrounding woodland and replace primitive interactive resource
+  silhouettes as one coherent visible increment. Denser decoration alone is
+  insufficient while gatherable bushes, sticks, flowers and saplings remain proxies.
 - Preserve imported bark/leaf/PBR material slots and authored proportions rather
   than routing natural assets through flat prototype tint overrides.
 - Complement the existing CC0 forest-floor and moss-rock assets with restrained
@@ -54,6 +58,9 @@ disposable test data under current user policy: report necessary resets rather
 than delaying features for migration. The latest basically verified usable
 candidate may become the normal preview, retaining cheap rollback.
 
-No terrain replacement, new biome/actor framework, character/animation/tools,
-building-piece packs, audio changes, gameplay rules, recipe progression,
-firewall changes, purchases, automation or PR is included.
+Deliberate palette, ground coverage and lighting refinement is now in scope,
+judged in actual daylight rather than inferred from warm dawn. The existing
+time/weather owner remains authoritative. No terrain replacement, new biome/
+actor framework, character/animation/tools, building-piece packs, audio changes,
+gameplay rules, recipe progression, firewall changes, purchases, automation or PR
+is included.

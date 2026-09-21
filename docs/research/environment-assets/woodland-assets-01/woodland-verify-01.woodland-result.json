@@ -1,0 +1,889 @@
+{
+	"mode": "WoodlandVerify",
+	"namespace": "/Game/Trials/WoodlandResources_20260921_01",
+	"stage": "persisted-inventory",
+	"canopy":
+	{
+		"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland",
+		"source": "/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2",
+		"lods": [
+			{
+				"lod": 0,
+				"triangles": 231785,
+				"vertices": 442562,
+				"screenSize": 1,
+				"reductionFraction": 1,
+				"baseLod": 0
+			},
+			{
+				"lod": 1,
+				"triangles": 57947,
+				"vertices": 113918,
+				"screenSize": 0.34999999403953552,
+				"reductionFraction": 0.25,
+				"baseLod": 0
+			},
+			{
+				"lod": 2,
+				"triangles": 13908,
+				"vertices": 27210,
+				"screenSize": 0.11999999731779099,
+				"reductionFraction": 0.059999998658895493,
+				"baseLod": 0
+			}
+		],
+		"boundsMinCm": [
+			-131.07242584228516,
+			-138.3023681640625,
+			-2.41943359375
+		],
+		"boundsMaxCm": [
+			161.07106781005859,
+			290.76226806640625,
+			453.98434448242188
+		],
+		"qualification": "Retained qualified TreeSmall02 near source, including twelve known branch source-description basis corners; original import03 remains FAILED. Reduced canopy appearance requires in-game review."
+	},
+	"materials": [
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+			"sourceRole": "shrub_04",
+			"masked": true,
+			"twoSided": true,
+			"opacityClip": 0.33300000429153442
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+			"sourceRole": "dry_branches_medium_01",
+			"masked": false,
+			"twoSided": false,
+			"opacityClip": 0.33300000429153442
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+			"sourceRole": "fir_sapling_branches",
+			"masked": false,
+			"twoSided": false,
+			"opacityClip": 0.33300000429153442
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+			"sourceRole": "fir_sapling_twigs",
+			"masked": true,
+			"twoSided": true,
+			"opacityClip": 0.33300000429153442
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+			"sourceRole": "flower_empodium",
+			"masked": true,
+			"twoSided": true,
+			"opacityClip": 0.33300000429153442
+		}
+	],
+	"textures": [
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Diff.T_Shrub04_Diff",
+			"source": "shrub_04/shrub_04_diff_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_NormalDX.T_Shrub04_NormalDX",
+			"source": "shrub_04/shrub_04_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Roughness.T_Shrub04_Roughness",
+			"source": "shrub_04/shrub_04_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_AO.T_Shrub04_AO",
+			"source": "shrub_04/shrub_04_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Alpha.T_Shrub04_Alpha",
+			"source": "shrub_04/shrub_04_alpha_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Diff.T_DryBranchesMedium01_Diff",
+			"source": "dry_branches_medium_01/dry_branches_medium_01_diff_1k.jpg",
+			"width": 1024,
+			"height": 1024,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_NormalDX.T_DryBranchesMedium01_NormalDX",
+			"source": "dry_branches_medium_01/dry_branches_medium_01_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Roughness.T_DryBranchesMedium01_Roughness",
+			"source": "dry_branches_medium_01/dry_branches_medium_01_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_AO.T_DryBranchesMedium01_AO",
+			"source": "dry_branches_medium_01/dry_branches_medium_01_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Diff.T_FirSapling_Branches_Diff",
+			"source": "fir_sapling/fir_sapling_branches_diff_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_NormalDX.T_FirSapling_Branches_NormalDX",
+			"source": "fir_sapling/fir_sapling_branches_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Roughness.T_FirSapling_Branches_Roughness",
+			"source": "fir_sapling/fir_sapling_branches_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_AO.T_FirSapling_Branches_AO",
+			"source": "fir_sapling/fir_sapling_branches_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Diff.T_FirSapling_Twigs_Diff",
+			"source": "fir_sapling/fir_sapling_twigs_diff_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_NormalDX.T_FirSapling_Twigs_NormalDX",
+			"source": "fir_sapling/fir_sapling_twigs_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Roughness.T_FirSapling_Twigs_Roughness",
+			"source": "fir_sapling/fir_sapling_twigs_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_AO.T_FirSapling_Twigs_AO",
+			"source": "fir_sapling/fir_sapling_twigs_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Alpha.T_FirSapling_Twigs_Alpha",
+			"source": "fir_sapling/fir_sapling_twigs_alpha_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Diff.T_FlowerEmpodium_Diff",
+			"source": "flower_empodium/flower_empodium_diff_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_NormalDX.T_FlowerEmpodium_NormalDX",
+			"source": "flower_empodium/flower_empodium_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Roughness.T_FlowerEmpodium_Roughness",
+			"source": "flower_empodium/flower_empodium_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_AO.T_FlowerEmpodium_AO",
+			"source": "flower_empodium/flower_empodium_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Alpha.T_FlowerEmpodium_Alpha",
+			"source": "flower_empodium/flower_empodium_alpha_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		}
+	],
+	"resources": [
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a",
+			"sourceNode": "shrub_04_a_LOD0",
+			"sourceModelId": 902364038,
+			"sourceGeometryId": 635192995,
+			"sourceTriangles": 3726,
+			"boundsMinCm": [
+				-3.1277623176574707,
+				-3.8760566711425781,
+				-0.33911979198455811
+			],
+			"boundsMaxCm": [
+				10.458744049072266,
+				6.98394775390625,
+				19.165779113769531
+			],
+			"sourceDimensionsTimes100Cm": [
+				13.586506999999999,
+				10.860004,
+				19.504898000000001
+			],
+			"placementGroundAnchorCm": [
+				3.6654908657073975,
+				1.5539455413818359,
+				-0.33911979198455811
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "shrub_04",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+					"triangles": 3726,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 3726,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_c.SM_Shrub04_c",
+			"sourceNode": "shrub_04_c_LOD0",
+			"sourceModelId": 93264763,
+			"sourceGeometryId": 427213477,
+			"sourceTriangles": 6177,
+			"boundsMinCm": [
+				34.362571716308594,
+				-9.4448232650756836,
+				-0.75962412357330322
+			],
+			"boundsMaxCm": [
+				49.9776611328125,
+				7.4121689796447754,
+				27.2852783203125
+			],
+			"sourceDimensionsTimes100Cm": [
+				15.61509,
+				16.856992000000002,
+				28.044902
+			],
+			"placementGroundAnchorCm": [
+				42.170116424560547,
+				-1.0163271427154541,
+				-0.75962412357330322
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "shrub_04",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+					"triangles": 6177,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 6177,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_a.SM_DryBranchesMedium01_a",
+			"sourceNode": "dry_branches_medium_01_a",
+			"sourceModelId": 482288108,
+			"sourceGeometryId": 712888422,
+			"sourceTriangles": 5933,
+			"boundsMinCm": [
+				-54.743770599365234,
+				-68.983062744140625,
+				-1.6527701616287231
+			],
+			"boundsMaxCm": [
+				-22.437397003173828,
+				60.932228088378906,
+				32.445758819580078
+			],
+			"sourceDimensionsTimes100Cm": [
+				32.306373000000001,
+				129.915291,
+				34.098531000000001
+			],
+			"placementGroundAnchorCm": [
+				-38.590583801269531,
+				-4.0254173278808594,
+				-1.6527701616287231
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "dry_branches_medium_01",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+					"triangles": 5933,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 5933,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b",
+			"sourceNode": "dry_branches_medium_01_b",
+			"sourceModelId": 250011136,
+			"sourceGeometryId": 949666676,
+			"sourceTriangles": 5254,
+			"boundsMinCm": [
+				-4.2603030204772949,
+				-51.707061767578125,
+				-0.17915913462638855
+			],
+			"boundsMaxCm": [
+				10.856076240539551,
+				52.143318176269531,
+				14.009576797485352
+			],
+			"sourceDimensionsTimes100Cm": [
+				15.116379,
+				103.85038,
+				14.188739999999999
+			],
+			"placementGroundAnchorCm": [
+				3.2978866100311279,
+				0.21812820434570312,
+				-0.17915913462638855
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "dry_branches_medium_01",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+					"triangles": 5254,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 5254,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_c.SM_DryBranchesMedium01_c",
+			"sourceNode": "dry_branches_medium_01_c",
+			"sourceModelId": 424157413,
+			"sourceGeometryId": 711997973,
+			"sourceTriangles": 5616,
+			"boundsMinCm": [
+				38.147953033447266,
+				-45.561138153076172,
+				-0.46198570728302002
+			],
+			"boundsMaxCm": [
+				51.204849243164062,
+				32.151447296142578,
+				13.863993644714355
+			],
+			"sourceDimensionsTimes100Cm": [
+				13.056898,
+				77.712586999999999,
+				14.325982
+			],
+			"placementGroundAnchorCm": [
+				44.676401138305664,
+				-6.7048454284667969,
+				-0.46198570728302002
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "dry_branches_medium_01",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+					"triangles": 5616,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 5616,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a",
+			"sourceNode": "fir_sapling_a",
+			"sourceModelId": 985243675,
+			"sourceGeometryId": 390441697,
+			"sourceTriangles": 157402,
+			"boundsMinCm": [
+				-43.695686340332031,
+				-42.620567321777344,
+				-0.79017877578735352
+			],
+			"boundsMaxCm": [
+				42.418964385986328,
+				39.603042602539062,
+				129.28361511230469
+			],
+			"sourceDimensionsTimes100Cm": [
+				86.114654000000002,
+				82.223612000000003,
+				130.07379800000001
+			],
+			"placementGroundAnchorCm": [
+				-0.63836097717285156,
+				-1.5087623596191406,
+				-0.79017877578735352
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "fir_sapling_branches",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+					"triangles": 546,
+					"activeUvChannel": 0
+				},
+				{
+					"slot": 1,
+					"role": "fir_sapling_twigs",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+					"triangles": 156856,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 157402,
+					"screenSize": 1
+				},
+				{
+					"lod": 1,
+					"triangles": 39351,
+					"screenSize": 0.34999999403953552
+				}
+			],
+			"cameraOnlyCrownCollision": true
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c",
+			"sourceNode": "fir_sapling_c",
+			"sourceModelId": 593523097,
+			"sourceGeometryId": 52513824,
+			"sourceTriangles": 124743,
+			"boundsMinCm": [
+				168.35816955566406,
+				-31.993345260620117,
+				-0.007270855363458395
+			],
+			"boundsMaxCm": [
+				230.57711791992188,
+				31.407176971435547,
+				73.562728881835938
+			],
+			"sourceDimensionsTimes100Cm": [
+				62.218940000000003,
+				63.400522000000002,
+				73.569999999999993
+			],
+			"placementGroundAnchorCm": [
+				199.46764373779297,
+				-0.29308414459228516,
+				-0.007270855363458395
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "fir_sapling_branches",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+					"triangles": 384,
+					"activeUvChannel": 0
+				},
+				{
+					"slot": 1,
+					"role": "fir_sapling_twigs",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+					"triangles": 124359,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 124743,
+					"screenSize": 1
+				},
+				{
+					"lod": 1,
+					"triangles": 31185,
+					"screenSize": 0.34999999403953552
+				}
+			],
+			"cameraOnlyCrownCollision": true
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a",
+			"sourceNode": "flower_empodium_a_LOD0",
+			"sourceModelId": 302411512,
+			"sourceGeometryId": 28790185,
+			"sourceTriangles": 758,
+			"boundsMinCm": [
+				-68.34124755859375,
+				-17.697847366333008,
+				-0.22940149903297424
+			],
+			"boundsMaxCm": [
+				-46.604881286621094,
+				7.378718376159668,
+				26.477787017822266
+			],
+			"sourceDimensionsTimes100Cm": [
+				21.736366,
+				25.076567000000001,
+				26.707187999999999
+			],
+			"placementGroundAnchorCm": [
+				-57.473064422607422,
+				-5.1595644950866699,
+				-0.22940149903297424
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "flower_empodium",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+					"triangles": 758,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 758,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		},
+		{
+			"object": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b",
+			"sourceNode": "flower_empodium_b_LOD0",
+			"sourceModelId": 777242687,
+			"sourceGeometryId": 160722651,
+			"sourceTriangles": 758,
+			"boundsMinCm": [
+				-38.657405853271484,
+				-10.24057674407959,
+				-0.33441731333732605
+			],
+			"boundsMaxCm": [
+				-20.505620956420898,
+				10.225963592529297,
+				18.717342376708984
+			],
+			"sourceDimensionsTimes100Cm": [
+				18.151786000000001,
+				20.466540999999999,
+				19.051760000000002
+			],
+			"placementGroundAnchorCm": [
+				-29.581513404846191,
+				-0.0073065757751464844,
+				-0.33441731333732605
+			],
+			"slots": [
+				{
+					"slot": 0,
+					"role": "flower_empodium",
+					"material": "/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+					"triangles": 758,
+					"activeUvChannel": 0
+				}
+			],
+			"lods": [
+				{
+					"lod": 0,
+					"triangles": 758,
+					"screenSize": 2
+				}
+			],
+			"cameraOnlyCrownCollision": false
+		}
+	],
+	"packages": 38,
+	"transformPolicy": "Source scale100 and rotation retained; native scene/unit bake once at uniformScale1. Placement subtracts measured native XY-center/minZ, including source layout translations; no UV clamping or source-geometry scale edits.",
+	"persistentObjectReferences": [
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium:M_FlowerEmpodiumEditorOnlyData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Diff.T_FlowerEmpodium_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_NormalDX.T_FlowerEmpodium_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Roughness.T_FlowerEmpodium_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_AO.T_FlowerEmpodium_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Alpha.T_FlowerEmpodium_Alpha",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Alpha.T_FlowerEmpodium_Alpha:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_AO.T_FlowerEmpodium_AO:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Roughness.T_FlowerEmpodium_Roughness:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_NormalDX.T_FlowerEmpodium_NormalDX:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Diff.T_FlowerEmpodium_Diff:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium:MaterialExpressionTextureSample_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium:MaterialExpressionTextureSample_2",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium:MaterialExpressionTextureSample_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium:MaterialExpressionTextureSample_4",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium:MaterialExpressionTextureSample_3",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_AO.T_FlowerEmpodium_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Alpha.T_FlowerEmpodium_Alpha",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_NormalDX.T_FlowerEmpodium_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Roughness.T_FlowerEmpodium_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FlowerEmpodium_Diff.T_FlowerEmpodium_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c:StaticMeshDescriptionBulkData_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs:M_FirSapling_TwigsEditorOnlyData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Diff.T_FirSapling_Twigs_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_NormalDX.T_FirSapling_Twigs_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Roughness.T_FirSapling_Twigs_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_AO.T_FirSapling_Twigs_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Alpha.T_FirSapling_Twigs_Alpha",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Alpha.T_FirSapling_Twigs_Alpha:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_AO.T_FirSapling_Twigs_AO:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Roughness.T_FirSapling_Twigs_Roughness:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_NormalDX.T_FirSapling_Twigs_NormalDX:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Diff.T_FirSapling_Twigs_Diff:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs:MaterialExpressionTextureSample_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs:MaterialExpressionTextureSample_2",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs:MaterialExpressionTextureSample_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs:MaterialExpressionTextureSample_4",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs:MaterialExpressionTextureSample_3",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_AO.T_FirSapling_Twigs_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Alpha.T_FirSapling_Twigs_Alpha",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_NormalDX.T_FirSapling_Twigs_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Roughness.T_FirSapling_Twigs_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Twigs_Diff.T_FirSapling_Twigs_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches:M_FirSapling_BranchesEditorOnlyData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Diff.T_FirSapling_Branches_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_NormalDX.T_FirSapling_Branches_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Roughness.T_FirSapling_Branches_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_AO.T_FirSapling_Branches_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_AO.T_FirSapling_Branches_AO:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Roughness.T_FirSapling_Branches_Roughness:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_NormalDX.T_FirSapling_Branches_NormalDX:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Diff.T_FirSapling_Branches_Diff:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches:MaterialExpressionTextureSample_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches:MaterialExpressionTextureSample_2",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches:MaterialExpressionTextureSample_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches:MaterialExpressionTextureSample_3",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_AO.T_FirSapling_Branches_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_NormalDX.T_FirSapling_Branches_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Roughness.T_FirSapling_Branches_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_FirSapling_Branches_Diff.T_FirSapling_Branches_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a:StaticMeshDescriptionBulkData_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Branches.M_FirSapling_Branches",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_FirSapling_Twigs.M_FirSapling_Twigs",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_c.SM_DryBranchesMedium01_c:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_c.SM_DryBranchesMedium01_c:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_c.SM_DryBranchesMedium01_c:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01:M_DryBranchesMedium01EditorOnlyData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Diff.T_DryBranchesMedium01_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_NormalDX.T_DryBranchesMedium01_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Roughness.T_DryBranchesMedium01_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_AO.T_DryBranchesMedium01_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_AO.T_DryBranchesMedium01_AO:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Roughness.T_DryBranchesMedium01_Roughness:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_NormalDX.T_DryBranchesMedium01_NormalDX:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Diff.T_DryBranchesMedium01_Diff:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01:MaterialExpressionTextureSample_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01:MaterialExpressionTextureSample_2",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01:MaterialExpressionTextureSample_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01:MaterialExpressionTextureSample_3",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_AO.T_DryBranchesMedium01_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_NormalDX.T_DryBranchesMedium01_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Roughness.T_DryBranchesMedium01_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_DryBranchesMedium01_Diff.T_DryBranchesMedium01_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_a.SM_DryBranchesMedium01_a:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_a.SM_DryBranchesMedium01_a:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_DryBranchesMedium01.M_DryBranchesMedium01",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_a.SM_DryBranchesMedium01_a:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_c.SM_Shrub04_c:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_c.SM_Shrub04_c:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_c.SM_Shrub04_c:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04:M_Shrub04EditorOnlyData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Diff.T_Shrub04_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_NormalDX.T_Shrub04_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Roughness.T_Shrub04_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_AO.T_Shrub04_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Alpha.T_Shrub04_Alpha",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Alpha.T_Shrub04_Alpha:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_AO.T_Shrub04_AO:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Roughness.T_Shrub04_Roughness:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_NormalDX.T_Shrub04_NormalDX:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Diff.T_Shrub04_Diff:AssetImportData",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04:MaterialExpressionTextureSample_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04:MaterialExpressionTextureSample_2",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04:MaterialExpressionTextureSample_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04:MaterialExpressionTextureSample_4",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04:MaterialExpressionTextureSample_3",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_AO.T_Shrub04_AO",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Alpha.T_Shrub04_Alpha",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_NormalDX.T_Shrub04_NormalDX",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Roughness.T_Shrub04_Roughness",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Textures/T_Shrub04_Diff.T_Shrub04_Diff",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a:HiResMeshDescription",
+		"/Game/Trials/WoodlandResources_20260921_01/Materials/M_Shrub04.M_Shrub04",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a:FbxStaticMeshImportData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland:StaticMeshDescriptionBulkData_1",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland:StaticMeshDescriptionBulkData_2",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland:HiResMeshDescription",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+		"/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland:FbxStaticMeshImportData_0"
+	],
+	"passed": true,
+	"cancelledAtPollingBoundary": false
+}

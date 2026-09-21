@@ -6,11 +6,15 @@
 #include "HomesteadSave.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
+#include "MaterialShared.h"
+#include "Materials/Material.h"
 #include "Serialization/JsonSerializer.h"
+#include "UI/SHomesteadMenu.h"
 #include "UnrealClient.h"
 
 namespace
@@ -61,11 +65,15 @@ void AHomesteadVisualPlaytest::PrepareRenewal()
         TEXT("HomesteadWateringPlaytest"), TEXT("HomesteadWeedingPlaytest"), TEXT("HomesteadClearingPlaytest")})
         if (!RenewalCheck(!FParse::Param(FCommandLine::Get(), Flag), TEXT("Overlapping automation modes rejected."))) return;
     TSharedPtr<FJsonObject> Control;
-    FString State, Deadline;
+    FString State, Deadline, Policy;
     if (!RenewalCheck(RenewalObject(R.ControlPath, Control) && Control->TryGetStringField(TEXT("id"), R.RunId)
         && Control->TryGetStringField(TEXT("state"), State) && State == TEXT("running")
+        && Control->TryGetStringField(TEXT("completionPolicy"), Policy)
+        && (Policy == TEXT("bounded") || Policy == TEXT("until-complete"))
         && Control->TryGetStringField(TEXT("deadlineUtc"), Deadline) && FDateTime::ParseIso8601(*Deadline, R.Deadline)
-        && (R.Deadline - FDateTime::UtcNow()).GetTotalSeconds() > 960, TEXT("Run control cannot admit bounded route."))) return;
+        && (Policy == TEXT("until-complete") || (R.Deadline - FDateTime::UtcNow()).GetTotalSeconds() > 960),
+        TEXT("Run control cannot admit renewal route."))) return;
+    R.CompletionDriven = Policy == TEXT("until-complete");
     const auto* Save = PC->ReadSave(PC->SavePath(TEXT("Homestead_Manual")));
     if (!RenewalCheck(Save != nullptr, TEXT("Copied test-world save missing/invalid."))) return;
     R.WorldId = Save->WorldId; R.SavedState = Save->SimulationData;
@@ -107,8 +115,8 @@ bool AHomesteadVisualPlaytest::RenewalVisuals(int32 Id, bool Ready, bool Focused
         TEXT("Resource readiness/cleared state disagrees."))) return false;
     const auto* Base = PC->Landscape->ResourceVisuals.Find(Id);
     const auto* Produce = PC->Landscape->ResourceProduceVisuals.Find(Id);
-    const int32 BaseCount = Id == 8 || Cleared ? 0 : Id == 12 ? 5 : 4;
-    const int32 ProduceCount = !Ready || Cleared ? 0 : Id == 8 ? 3 : Id == 12 ? 15 : 8;
+    const int32 BaseCount = Id == 8 || Cleared ? 0 : Id == 12 ? 2 : 3;
+    const int32 ProduceCount = !Ready || Cleared ? 0 : Id == 8 ? 3 : Id == 12 ? 2 : 8;
     if (!RenewalCheck(Base && Produce && Base->Components.Num() == BaseCount && Produce->Components.Num() == ProduceCount,
         FString::Printf(TEXT("Actual resource%d component count did not refresh."), Id))) return false;
     for (const auto* Visual : {Base, Produce})
@@ -117,6 +125,26 @@ bool AHomesteadVisualPlaytest::RenewalVisuals(int32 Id, bool Ready, bool Focused
             const auto* Mesh = Cast<UStaticMeshComponent>(Component);
             if (!RenewalCheck(Mesh && Mesh->IsRegistered() && Mesh->IsVisible() && !Mesh->bHiddenInGame
                 && Mesh->GetStaticMesh() && Mesh->IsRenderStateCreated(), TEXT("Resource mesh is not registered/visible/render-state-ready."))) return false;
+            const FString Path = Mesh->GetStaticMesh()->GetPathName();
+            const bool BerryProduce = Id == 10 && Visual == Produce;
+            const bool FlowerBase = Id == 12 && Visual == Base;
+            const FString Expected = FlowerBase ? TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.")
+                : Id == 8 ? TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_")
+                : Id == 12 ? TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_")
+                : TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_");
+            if (!RenewalCheck((BerryProduce ? Path == TEXT("/Engine/BasicShapes/Sphere.Sphere")
+                    : Mesh->ComponentHasTag(TEXT("AuthoredResource")) && Path.StartsWith(Expected))
+                && Mesh->GetCollisionEnabled() == ECollisionEnabled::NoCollision,
+                TEXT("Expected authored resource role or separately removable berry produce differs."))) return false;
+            for (int32 Slot = 0; Slot < Mesh->GetNumMaterials(); ++Slot)
+            {
+                const auto* Interface = Mesh->GetMaterial(Slot);
+                auto* Material = Interface ? Interface->GetMaterial() : nullptr;
+                auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+                if (!RenewalCheck(Material && Material->GetPathName().StartsWith(TEXT("/Game/"))
+                    && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete(),
+                    TEXT("Resource material is missing, default or not shader-ready."))) return false;
+            }
         }
     if (Cleared)
     {
@@ -199,11 +227,14 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
     if (Now >= R.NextControl)
     {
         R.NextControl = Now + 1;
-        TSharedPtr<FJsonObject> Control; FString Id, State, Deadline; FDateTime Limit;
+        TSharedPtr<FJsonObject> Control; FString Id, State, Deadline, Policy; FDateTime Limit;
         if (!RenewalCheck(RenewalObject(R.ControlPath, Control) && Control->TryGetStringField(TEXT("id"), Id)
             && Control->TryGetStringField(TEXT("state"), State) && Control->TryGetStringField(TEXT("deadlineUtc"), Deadline)
+            && Control->TryGetStringField(TEXT("completionPolicy"), Policy)
+            && Policy == (R.CompletionDriven ? TEXT("until-complete") : TEXT("bounded"))
             && FDateTime::ParseIso8601(*Deadline, Limit), TEXT("Run control invalid/unreadable."))) return;
-        if (Id != R.RunId || State != TEXT("running") || FDateTime::UtcNow() >= Limit || FDateTime::UtcNow() >= R.Deadline
+        if (Id != R.RunId || State != TEXT("running")
+            || (!R.CompletionDriven && (FDateTime::UtcNow() >= Limit || FDateTime::UtcNow() >= R.Deadline))
             || IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-renewal.txt"))))
         { FinishRenewal(TEXT("cancelled"), TEXT("Run state/deadline/stop marker; incomplete.")); return; }
     }
@@ -367,7 +398,37 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         }
         if (!R.FoodOpen) { Tap(EKeys::Gamepad_Special_Right); R.FoodOpen = true; break; }
         if (!RenewalCheck(PC->IsBookOpen() && PC->BookPage() == 0, TEXT("Food-menu open did not dispatch."))) return;
-        if (PC->Rows().IsValidIndex(PC->SelectedRow()) && PC->Rows()[PC->SelectedRow()].Id == static_cast<int32>(Homestead::Item::Berries))
+        if (PC->HasNativeMenu())
+        {
+            const auto* Subject = PC->NativeMenu->GetSelectedSubject();
+            const FString Region = PC->NativeMenu->GetFocusedRegionName();
+            const int32 FoodId = static_cast<int32>(Homestead::Item::Berries);
+            if (!RenewalCheck(Subject && (Region == TEXT("Content") || Region == TEXT("Actions")),
+                TEXT("Native food subject/focus unavailable."))) return;
+            if (Subject->Subject == EHomesteadMenuSubject::ItemGroup && Subject->Id == FoodId)
+            {
+                if (Region == TEXT("Content")) Tap(EKeys::Gamepad_FaceButton_Bottom);
+                else
+                {
+                    R.FoodBefore = PC->Simulation().Count(Homestead::Item::Berries);
+                    Tap(EKeys::Gamepad_FaceButton_Bottom); R.FoodPending = true;
+                }
+            }
+            else
+            {
+                const auto Rows = PC->MenuRows();
+                const int32 Target = Rows.IndexOfByPredicate([FoodId](const FHomesteadRow& Row)
+                    { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == FoodId; });
+                const int32 Current = PC->NativeMenu->GetSelectedContentIndex();
+                const int32 Columns = PC->NativeMenu->GetContentColumnCount();
+                if (!RenewalCheck(Region == TEXT("Content") && Target != INDEX_NONE && Rows.IsValidIndex(Current) && Columns > 0,
+                    TEXT("Native food grid target unavailable."))) return;
+                if (Target / Columns != Current / Columns)
+                    Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
+                else Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+            }
+        }
+        else if (PC->Rows().IsValidIndex(PC->SelectedRow()) && PC->Rows()[PC->SelectedRow()].Id == static_cast<int32>(Homestead::Item::Berries))
         {
             R.FoodBefore = PC->Simulation().Count(Homestead::Item::Berries);
             Tap(EKeys::Gamepad_FaceButton_Bottom); R.FoodPending = true;

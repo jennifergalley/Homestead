@@ -1,0 +1,37 @@
+Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips.
+Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark.
+Ordinary tree encounter: root=X=-960.692 Y=-1246.582 Z=-28.956 trunk_center_xy=X=-938.598 Y=-1268.204 radius_cm=40.460087 capsule_cylinder_cm=121.416397
+Grove inventory: trees=192 all_near_triangles=44502720 all_far_triangles=2670336 valid=1; shared qualified near mesh plus native distance LODs, not actual rendered triangles or GPU cost.
+Grass/ground inventory: clumps=16000 triangles=5384599 batches=4 placement_valid=1 terrain_valid=1; current actor/mesh/material observations, not GPU timing.
+Understory inventory: ferns=768 firs=96 valid=1 decoration_build_ms=168.806; latest synchronous decoration build CPU wall time, not GPU cost.
+BEGIN 0.00s close-notes: The clearing
+BEGIN 1.11s idle: The clearing
+BEGIN 4.25s slow-walk: The clearing
+BEGIN 8.38s stop-from-slow-walk: The clearing
+BEGIN 10.49s full-walk: The clearing
+BEGIN 13.50s turn-while-moving: Sapling  (renewing)
+BEGIN 16.63s stop-from-turn: Berry bush
+BEGIN 18.58s orbit-standing-character: Stream reeds
+BEGIN 22.87s open-pack: Stream reeds
+BEGIN 23.47s open-look: Stream reeds
+BEGIN 26.58s portrait-idle: Stream reeds
+BEGIN 29.57s portrait-orbit: Stream reeds
+BEGIN 33.64s return-to-world: Stream reeds
+Forage target id=52 position=X=-100.000 Y=550.000
+BEGIN 34.74s walk-to-forage: Stream reeds
+BEGIN 35.92s settle-forage: Berry bush
+BEGIN 36.63s view-picking-side: Berry bush
+BEGIN 37.82s before-pick: Berry bush
+BEGIN 38.64s gather: Berry bush
+BEGIN 41.64s after-gather: Berry bush  (renewing)
+BEGIN 43.68s walk-to-authored-tree: Berry bush  (renewing)
+BEGIN 55.80s view-authored-tree: Sapling  (renewing)
+Tree bounds inside viewport=1; screen_min=X=364.409 Y=86.950; screen_max=X=753.314 Y=501.124; viewport=1280,720; camera_pitch=-0.818159
+BEGIN 58.85s walk-into-authored-trunk: Sapling  (renewing)
+Actual inward walking blocked at authored trunk: player=X=-871.647 Y=-1240.228 distance_cm=72.561224 inward_intent=0.592756 inward_velocity_cm_s=-0.211265 radial_progress_cm_s=0.004085 total_speed_cm_s=23.040056 sweep_component=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147481507
+BEGIN 66.28s retreat-from-authored-trunk: The clearing
+Forage target reached=1; resources actually gathered=1
+Picking action observed=1; recovered to idle=1
+Tree ready=1; ordinary approach=1; actual trunk blocked walking=1; ordinary retreat=1
+Tree retreat displacement_cm=284.697276; retreat_start=X=-870.515 Y=-1243.074; completed_passes=23; planned_passes=23
+This observational capture is not a visual-quality pass or a replacement for human feel/listening review.

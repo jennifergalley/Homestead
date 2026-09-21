@@ -1,0 +1,81 @@
+{
+  "pid": 25428,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+  "creationTime": 134345008022763653,
+  "executableSha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-native-build-01\\compile1\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 912121,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134345008019254527,
+    "LastWriteTime": 134345008019254527,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "192900EC0EB4B44A72E9D4CF6DE557E47F4EB310C5ED1A4B62EFDA8FDE0413F4",
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "allowedBuildOnlyConsole": {
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "signature": "Valid",
+    "path": "C:\\Windows\\System32\\conhost.exe"
+  },
+  "compileActionId": 1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "sha256": "281BA939780E14EB53E20AF93D7E51E6362555982AB6B532145425C9DA24A5D0",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.obj.rsp"
+    },
+    {
+      "sha256": "6EB0ED3808F77D6C0675B647A639DBA7734C2B23C20EDF7604687E4310EEF045",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\SurvivalGameEditor.Shared.rsp"
+    }
+  ],
+  "expectedProducedItems": [
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.obj",
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.sarif",
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.dep.json"
+  ],
+  "resourceLinkActionId": -1,
+  "exactReviewedArguments": "@\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGameEditor/HomesteadAuthoringProbeCommandlet.cpp.obj.rsp\" ",
+  "previousProductBackups": [],
+  "resourceConversion": "",
+  "derivedDllResponse": "",
+  "splitShippingManifest": false,
+  "embedShippingManifest": false,
+  "stageCooked": false,
+  "stageCandidate": null,
+  "treeDiagnosticCandidate": false,
+  "treeContactCorrection": false,
+  "groveCandidate": false,
+  "groveProxyCorrection": false,
+  "grassGroundCandidate": false,
+  "readabilityDiagnostic": false,
+  "readabilityCorrection": false,
+  "readabilityLifecycle": false,
+  "navigationCandidate": false,
+  "woodlandActions": true,
+  "navigationRevision": 1,
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": false,
+  "uiActions": false,
+  "shippingActions": false,
+  "wardrobeActions": false,
+  "treeActions": false,
+  "grassActions": false
+}

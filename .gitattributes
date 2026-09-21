@@ -15,4 +15,5 @@
 docs/research/environment-assets/tree-*/** -text -whitespace
 docs/research/environment-assets/grass-*/** -text -whitespace
 docs/research/environment-assets/readability-*/** -text -whitespace
+docs/research/environment-assets/woodland-*/** -text -whitespace
 Assets/Environment/GrassMedium01Prepared/** -text -whitespace

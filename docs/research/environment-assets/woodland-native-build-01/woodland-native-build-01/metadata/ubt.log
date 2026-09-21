@@ -1,0 +1,13 @@
+Setting temp directory to 'E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\woodland-native-build-01\metadata\Temp\UnrealBuildTool\863af17b'
+WriteFileIfChanged() wrote 0 changed files of 0 requested writes.
+
+Timeline:
+[  0.000]  +0.103 Main
+   0.047          [  0.047]  +0.045 AddTelemetry
+   0.103          [  0.102]  +0.000 RegisterPlatforms
+[  0.103]  +0.237 <unknown>
+[  0.341]  +0.004 TelemetryService.FlushEvents
+[  0.351]
+
+Result: Succeeded
+Total execution time: 0.35 seconds

@@ -1,0 +1,427 @@
+{
+  "status": "passed-targeted-woodland-policy",
+  "nativeReceiptSha256": "06946B18EA06D1BC06BDFF05D6BBC4F87A978AB9DCA207BEE9675C8C9EDA29BA",
+  "createdUtc": "2026-09-21T21:51:15.4076579+00:00",
+  "supervisorSources": [
+    {
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    },
+    {
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+      "path": "Scripts\\AuthoringProbePolicy.ps1"
+    },
+    {
+      "sha256": "D8C23A4D4312B1D1FF126D9844FAD0B81FED885D69E583D21BC788263350EEA0",
+      "path": "Scripts\\FernSpikePolicy.ps1"
+    },
+    {
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3",
+      "path": "Scripts\\HairWavePolicy.ps1"
+    },
+    {
+      "sha256": "5EB3BA2C1454882CDFFA0288D98F6C87B234F277F044AFEC1CD16473BBC4B23F",
+      "path": "Scripts\\WardrobePolicy.ps1"
+    },
+    {
+      "sha256": "E6528DD5AC03AC4B8C604AF44B1D41BFAC4E7876F9F88B58F364882ABCF653E7",
+      "path": "Scripts\\TreeSpikePolicy.ps1"
+    },
+    {
+      "sha256": "2BA1916BF4D57CEB78556B0C833EBBB1636EECFB50567644B001AD3D80D95791",
+      "path": "Scripts\\GrassGroundPolicy.ps1"
+    },
+    {
+      "sha256": "0704E8BF723BEAE4D33FB1371C38A4488E91EED9AA2C6B9634845648A4C5C8FF",
+      "path": "Scripts\\WoodlandResourcePolicy.ps1"
+    },
+    {
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755",
+      "path": "Scripts\\Development-Run.ps1"
+    },
+    {
+      "sha256": "7F84974999184BF60F7FE6EAE09DEDF071FDE7A25AC2AE0E31D420496935F9D4",
+      "path": "Tests\\Test-WoodlandResourcePolicy.ps1"
+    },
+    {
+      "sha256": "69819949E65F327A26BCBEBB6D99D277F5F8A24E322E6CDB030992B2F1E97DF9",
+      "path": "Tests\\Test-FernSpikePolicy.ps1"
+    },
+    {
+      "sha256": "B219C9C72C4F768FEB2EC7F5C2E294CD6044741DE8F4A7070F6891437F016059",
+      "path": "Tests\\Test-GrassGroundPolicy.ps1"
+    },
+    {
+      "sha256": "6F5061F7976B8F9FA0623F0231C8392392E40F51FA3A70ACA1EBEF23553BAA0F",
+      "path": "Tests\\Test-TreeSpikePolicy.ps1"
+    },
+    {
+      "sha256": "0D110F4C7D8B3D47E9CE2F64E9CFB2D6C682434D5F1A3926CF5DEB2229E77104",
+      "path": "Config\\DefaultGame.ini"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "sha256": "501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-attempt-01.json"
+    },
+    {
+      "sha256": "0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "0B16BCBE1DA08D406BB8BFE913B0065E2A6FE989892CD85092106AB622BADCFA",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\wardrobe-result.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "3B9898BF0344512EED3ABCBAF3BD5E3995C921E82E193708245E6CC245612F1B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\probe-result.json"
+    },
+    {
+      "sha256": "6263C0C1AA3F62EF1A42BE7123AAC7ED66243BE405A49A3D599C2E3371FC4591",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\asset-admission.json"
+    },
+    {
+      "sha256": "4504EA31EBBA1DA6DA80A1CBFC827120DFB7CBEE410F48C7FF441FD63AA90AD3",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-verify-01\\probe-result.json"
+    },
+    {
+      "sha256": "5A178FD9830F963DD56DAE520555D99DFD85FE998B3E01B0E4E8C392C642B1E9",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\editor.log"
+    },
+    {
+      "sha256": "2957FF55ED7E638B17EDC958B668E623F2D366307DF2B4457D1CFB33DABDF430",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\effective-settings.json"
+    },
+    {
+      "sha256": "A4C32A9BD6498D396866A5CDF0F4FC1E3948E1EF03525D6C0C9B12BB1D210FB9",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\entry-observed.json"
+    },
+    {
+      "sha256": "0012318136D730D98EA89131BEF746E7744D3F657AD229101148D2C808AB41AC",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\launch.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "7F5805D4FD53D4E3F37CE2208550F848F96E04E025F13027268799CE6975B789",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\operation-admitted.txt"
+    },
+    {
+      "sha256": "377B6A6CDEAA110C90BF99D4A3717F0D15C35F4E4F0A474BECFE5EF8FAA0186C",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "32A43E2883126C28E3D3FB21030F7792B3EEF55702C12C4D671628F04147F668",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\retained-inputs.json"
+    },
+    {
+      "sha256": "72354E545A0D00FEB7AB71D0A99D6EAF47C93BFCCD9D5A63F49C82F3394E43B2",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\retained-output-check.json"
+    },
+    {
+      "sha256": "018869AC602BA3495C95C6A3FEA01B37E6542F74E2BD36199E3CA86510754C18",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\stdout.log"
+    },
+    {
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\stop-probe.txt"
+    },
+    {
+      "sha256": "955795F156214808843EB6EAF4554EC989102F24492F1CD2387A7E1AEAB9E176",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\tree-result.json"
+    },
+    {
+      "sha256": "0F6E5F6EE35D1D08016AA73927D665B380165B85189CB086957465D6A40923C6",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\Editor.ini"
+    },
+    {
+      "sha256": "1C21ABFFCDA53B9B7772539CE387B3B7CBDCE03B48A174A8447CD6485E237052",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "sha256": "FC8C816C341836A68DD1443DF5C753DDEB82F747F751B62D2C204E37B6C2835B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\EditorSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\Game.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\GameUserSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\Input.ini"
+    },
+    {
+      "sha256": "9973F6C0CB1635144A0331316016061736C58778F04CCCABB4D89C05026AF02A",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM5\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "61B2B1EFDD8B416773330D36DBB7AB8B9CA3C13CD3D9DAD1BF9BE661B5DC30D2",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM6\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "CE69D7E7BBD1A64729BD4D5724F3C1EFC47C6C3D555DA9D2C6AD741EDDC3D893",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\EngineUser\\Saved\\Config\\CrashReportClient\\UECC-Windows-2B647D1043DD75D32E50D4B23CFA693C\\CrashReportClient.ini"
+    },
+    {
+      "sha256": "A3415A967E94AC5861CC7CE1476C81FAD92E1369D2860A6A304CD32303981E62",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-attempt-01.json"
+    },
+    {
+      "sha256": "A0BDCF21B5E55CC5873203DAEE1D0582E6B5A63ED529864F36E230CA514D18AC",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\editor.log"
+    },
+    {
+      "sha256": "802FC8543021E04EE5B825DBF96027CF223906C302B4BF75D59FB526288F36B9",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\effective-settings.json"
+    },
+    {
+      "sha256": "58286B571471088DBAC6290B2E315F6E1C8C28247870D66E4B219CB92944FF30",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\entry-observed.json"
+    },
+    {
+      "sha256": "A61A52E4C608AFF25E403811CEBE234B0649A7D209D2298CA870E60DA4213F74",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\launch.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\native-exit.json"
+    },
+    {
+      "sha256": "7F5805D4FD53D4E3F37CE2208550F848F96E04E025F13027268799CE6975B789",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\operation-admitted.txt"
+    },
+    {
+      "sha256": "A5338D955B09046EC0B16F3A9625B7955C763AAE07DC722E474E6078745F932F",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\partial-content.json"
+    },
+    {
+      "sha256": "405E75148269BC380520F26DC773B74A9773DEC790BD683F6765C60E52041B82",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\probe-result.json"
+    },
+    {
+      "sha256": "2A235A6823619457410E57E965E58BE613526642A061E0DE00A68DE393A2682D",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\retained-inputs.json"
+    },
+    {
+      "sha256": "6A1A675EDE608532DF4660BDB46DABC12F7891B30FD6858E946E5224EBA993A8",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\retained-output-check.json"
+    },
+    {
+      "sha256": "38BF8FE828AEAFA37B82F52CEEFD47642AC1FC62A6CDEBAE850A6972D96CAB0B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\stdout.log"
+    },
+    {
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\stop-probe.txt"
+    },
+    {
+      "sha256": "698CFD4823542DC629ED29613DBD2DB20734726256272B182A7448F755AB3B17",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\tree-result.json"
+    },
+    {
+      "sha256": "0F6E5F6EE35D1D08016AA73927D665B380165B85189CB086957465D6A40923C6",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\Config\\Editor.ini"
+    },
+    {
+      "sha256": "390FFF6C0CC3090BDCAC69E76CAC8913A27F1B730219D525ACD5B53A5444B894",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "sha256": "A1B27EC94938C8F7054DB5F078068A4D9B1ABDD8B2E595DC463BE64C8CCAB44A",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\Config\\EditorSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\Config\\Game.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\Config\\GameUserSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\Config\\Input.ini"
+    },
+    {
+      "sha256": "9973F6C0CB1635144A0331316016061736C58778F04CCCABB4D89C05026AF02A",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM5\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "61B2B1EFDD8B416773330D36DBB7AB8B9CA3C13CD3D9DAD1BF9BE661B5DC30D2",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM6\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "CE69D7E7BBD1A64729BD4D5724F3C1EFC47C6C3D555DA9D2C6AD741EDDC3D893",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-02\\EngineUser\\Saved\\Config\\CrashReportClient\\UECC-Windows-090F55954904752E6873CABFAC412433\\CrashReportClient.ini"
+    },
+    {
+      "sha256": "3103F180B725580E429BCA8D97044FB5C497CF140D7A1F0B0305558D68884569",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-attempt-02.json"
+    },
+    {
+      "sha256": "9975CFAA46202CB23BAD0D17EF0F75FB3EF176E9DD324BCF8C52874F9C1EECA3",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\editor.log"
+    },
+    {
+      "sha256": "D9930BCAF37903D5B68F9A3547F089F7E3A428CEC60CA6437D7296A96E962DC7",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\effective-settings.json"
+    },
+    {
+      "sha256": "6B4A236B2254B27783D4E7893739335F9D565706EF0745864F61006C5A3F1C66",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\entry-observed.json"
+    },
+    {
+      "sha256": "BDC3BDD9B4E95094B4E004188CA6229C3C40CDF2CCC7E5585690DD94BAB56513",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\launch.json"
+    },
+    {
+      "sha256": "31C4F0B9CD80E59B574FECF32F1EB40AB093CA38197F67E43C38910E8336ACB6",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\native-exit.json"
+    },
+    {
+      "sha256": "7F5805D4FD53D4E3F37CE2208550F848F96E04E025F13027268799CE6975B789",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\operation-admitted.txt"
+    },
+    {
+      "sha256": "B978609E071F42B450C6CADDFBE019C7B2A80B30E0703D60D0BEA10767E77F5B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\partial-content.json"
+    },
+    {
+      "sha256": "EA34CE51CE7A7711E22829894BA055BE670ACA5FD2968413A2D59BE920034A88",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\probe-result.json"
+    },
+    {
+      "sha256": "8956CFD2966D491907C2FCB6DBA2F2418B86817DBF60EB71201ADB551F214020",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\retained-inputs.json"
+    },
+    {
+      "sha256": "77FAFFE500962247C751A9EA9A685693F72DE32801B86D8ADD82A43CB07F003D",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\retained-output-check.json"
+    },
+    {
+      "sha256": "C079738CE187106C2877A451D0EE92A7C2697D3B6700B6963F0971752E1FEECF",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\stdout.log"
+    },
+    {
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\stop-probe.txt"
+    },
+    {
+      "sha256": "55E9877335BA75930DA3ED133959A7B3EA6552E010FD804DF8AC4243D7C27958",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\tree-result.json"
+    },
+    {
+      "sha256": "0F6E5F6EE35D1D08016AA73927D665B380165B85189CB086957465D6A40923C6",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\Config\\Editor.ini"
+    },
+    {
+      "sha256": "412CA8996750C84A52226A2B661A2A0F33A2D9956DAE1E341D6BB909CADFACE5",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "sha256": "1FBF1B5CAD3E230A1441173773CF2488F18CAF1E907FD762C05E8EC77C1CF381",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\Config\\EditorSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\Config\\Game.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\Config\\GameUserSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\Config\\Input.ini"
+    },
+    {
+      "sha256": "9973F6C0CB1635144A0331316016061736C58778F04CCCABB4D89C05026AF02A",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM5\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "61B2B1EFDD8B416773330D36DBB7AB8B9CA3C13CD3D9DAD1BF9BE661B5DC30D2",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM6\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "CE69D7E7BBD1A64729BD4D5724F3C1EFC47C6C3D555DA9D2C6AD741EDDC3D893",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-03\\EngineUser\\Saved\\Config\\CrashReportClient\\UECC-Windows-938B3AF742446350F30C0086560805B9\\CrashReportClient.ini"
+    },
+    {
+      "sha256": "78C88F65117184869C43D58B53E66EB2B93F9138382CAD55CDFF63B760DC1557",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-attempt-03.json"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\cook-invocation.json",
+      "sha256": "993F435D37C183D918BE3D26DE5B974764E3FD6184E9A78ABF8F59000A2BD275"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\cook-result.json",
+      "sha256": "308FC32E70BB2DC013094CFBC8DBDB633389D165BA5A67014E6C2471B8564D77"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\editor.log",
+      "sha256": "B30DB508DD562CE69DA3635F4A62436CEEE3953ACC7CF39BDF1F2D57EBAEB302"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\effective-settings.json",
+      "sha256": "A0FD888B07B6C2198981AFE20EE7EF593D54F103C416CFE197D55927912F39F0"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\entry-observed.json",
+      "sha256": "FAC4D96F845ABA49DB5D6D6CA472253839D1537CEB7593F9CEBBCD659A75A333"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\launch.json",
+      "sha256": "B35F075F8BC535021242063368B8FAA683C342052DA7D7B0AE7B434D4129C21F"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\native-exit.json",
+      "sha256": "31C4F0B9CD80E59B574FECF32F1EB40AB093CA38197F67E43C38910E8336ACB6"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\operation-admitted.txt",
+      "sha256": "7F4A1E5BFF2D56E523EE2A34E1C389956986008E506CA77FADF7047D71C6A63F"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\probe-result.json",
+      "sha256": "BA11AB19CC7669CE655CD4E4776064C4C6F8F7E69C43F836A1C422FCAB9067BE"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\retained-inputs.json",
+      "sha256": "D2D3742ED94099723B9AFF40DC53D51C6FE20C008AFB52C471F74B46F5A5CD7E"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\retained-output-check.json",
+      "sha256": "18D431313A74AD808EC662C7B69F290AA7C71C127EF8BDC7F50554ADD079933B"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\stdout.log",
+      "sha256": "C86C332B8DCA384426A1F17E6ACF59CE6308C0F1D8AEA553E041861CD1EB3506"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-01\\stop-probe.txt",
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-attempt-01.json",
+      "sha256": "2EB65D678AD0C8250E5D9F0E9B529C5CECF28CC730A34F4C94138FE3E4D66DF9"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-native-plan-01\\result.json",
+      "sha256": "79E3C66EC5314F6CD7755619A407C41F9170ABEC780AF7E9C07D0CA74B668579"
+    }
+  ],
+  "tests": "Exact38-package/23-map closure; two exact production mode profiles; native-shaped positive and negative model identity, unit, material, LOD and reference fixtures. Shared fern40/grass39/tree67 rejection cases passed. No actual import acceptance inferred.",
+  "scope": "WoodlandImport/Verify and qualified Woodland cook reuse completion-driven root-only marker/privacy/local-filesystem-DDC/TraceControl controls. Actual source-prep provenance pinned independently. Original tree import03 remains FAILED with12 branch source-description basis corners. Wrapper hash separately captured at admission to avoid self-reference."
+}

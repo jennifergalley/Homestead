@@ -28,4 +28,5 @@ struct FHomesteadRenewalState
     int32 Index = 0, EnteredIndex = -1, Checks = 0, Sleeps = 0, Eats = 0, Rejects = 0, Harvests = 0;
     int32 Walks = 0, Saves = 0, RoundTrips = 0, FoodBefore = 0;
     bool Loaded = false, ReadOnly = false, FoodOpen = false, FoodPending = false, FoodClosing = false;
+    bool CompletionDriven = false;
 };

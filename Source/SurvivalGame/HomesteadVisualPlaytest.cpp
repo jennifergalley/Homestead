@@ -215,25 +215,29 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
     for (auto* Part : Parts)
         if (Part->ComponentHasTag(TEXT("AuthoredTreeSmall02Grove"))) Trees.Add(Part);
     TArray<FString> Rows;
-    Rows.Add(TEXT("component,x,y,z,yaw,triangles,slots,scale_error,ground_error_cm,canopy_radius_cm,home_margin_cm,resource_margin_cm,structure_margin_cm,plot_margin_cm,stream_margin_cm,tree_spacing_margin_cm,materials_ready,collision_ready,encounter"));
-    bool Valid = Trees.Num() >= 8 && Trees.Num() <= 16;
-    int64 TotalTriangles = 0;
+    Rows.Add(TEXT("component,x,y,z,yaw,near_triangles,slots,uniform_scale_error,ground_error_cm,canopy_radius_cm,home_margin_cm,resource_margin_cm,structure_margin_cm,plot_margin_cm,stream_margin_cm,tree_spacing_margin_cm,materials_ready,collision_ready,encounter,scale,mid_triangles,far_triangles"));
+    bool Valid = Trees.Num() == 192;
+    int64 TotalTriangles = 0, TotalFarTriangles = 0;
     for (auto* Tree : Trees)
     {
         UStaticMesh* Mesh = Tree->GetStaticMesh();
         const auto* Data = Mesh ? Mesh->GetRenderData() : nullptr;
         const int32 Triangles = Data && Data->LODResources.Num() ? Data->LODResources[0].GetNumTriangles() : 0;
         const FBox Bounds = Mesh ? Mesh->GetBoundingBox() : FBox(ForceInit);
+        const double Scale = Tree->GetComponentScale().X;
         const double Radius = FVector2D(FMath::Max(FMath::Abs(Bounds.Min.X), FMath::Abs(Bounds.Max.X)),
-            FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size();
+            FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size() * Scale;
+        const double Footprint = 90 * Scale;
+        const int32 MidTriangles = Data && Data->LODResources.Num() == 3 ? Data->LODResources[1].GetNumTriangles() : 0;
+        const int32 FarTriangles = Data && Data->LODResources.Num() == 3 ? Data->LODResources[2].GetNumTriangles() : 0;
         const FVector Root = Tree->GetComponentLocation();
         const FVector2D Position(Root);
-        const double HomeMargin = FVector2D::Distance(Position, FVector2D(-1000, 0)) - Radius - 650;
-        const double StreamMargin = FMath::Abs(Root.X - Homestead::StreamX(Root.Y)) - Radius - 120;
+        const double HomeMargin = FVector2D::Distance(Position, FVector2D(-1000, 0)) - Footprint - 650;
+        const double StreamMargin = FMath::Abs(Root.X - Homestead::StreamX(Root.Y)) - Footprint - 195;
         double ResourceMargin = 1e9, StructureMargin = 1e9, PlotMargin = 1e9, SpacingMargin = 1e9;
         for (const auto& Node : PC->State().resources)
             ResourceMargin = FMath::Min(ResourceMargin,
-                FVector2D::Distance(Position, FVector2D(Node.position.x, Node.position.y)) - Radius - 130);
+                FVector2D::Distance(Position, FVector2D(Node.position.x, Node.position.y)) - Footprint - 130);
         for (const auto& Structure : PC->State().structures)
         {
             const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
@@ -249,8 +253,8 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
         for (const auto* Other : Trees)
             if (Other != Tree)
                 SpacingMargin = FMath::Min(SpacingMargin,
-                    FVector2D::Distance(Position, FVector2D(Other->GetComponentLocation())) - 2 * Radius);
-        const double ScaleError = (Tree->GetComponentScale() - FVector::OneVector).Size();
+                    FVector2D::Distance(Position, FVector2D(Other->GetComponentLocation())) - 115 * (Scale + Other->GetComponentScale().X));
+        const double ScaleError = (Tree->GetComponentScale() - FVector(Scale)).Size();
         const double GroundError = Root.Z - AHomesteadWorld::GroundHeight(Root.X, Root.Y);
         const auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
         const bool CollisionReady = Body && Body->AggGeom.SphylElems.Num() == 1
@@ -267,24 +271,27 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
                 && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
         }
         Valid &= Triangles == 231785 && Mesh
-            && Mesh->GetPathName() == TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2")
-            && ScaleError < 0.001 && FMath::Abs(GroundError) < 0.1
+            && Mesh->GetPathName() == TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland")
+            && MidTriangles > 0 && MidTriangles <= 65000 && FarTriangles > 0 && FarTriangles <= 18000
+            && ScaleError < 0.001 && Scale >= 0.8999 && Scale <= 1.1001 && FMath::Abs(GroundError) < 0.1
             && HomeMargin >= -0.1 && ResourceMargin >= -0.1 && StructureMargin >= -0.1
             && PlotMargin >= -0.1 && StreamMargin >= -0.1 && SpacingMargin >= -0.1
-            && FVector2D::Distance(Position, FVector2D(-1000, 0)) <= 3000.1
+            && FMath::Abs(Root.X) <= 3850.1 && FMath::Abs(Root.Y) <= 3850.1
+            && !AHomesteadWorld::IsDecorationReserved(PC->State(), Root.X, Root.Y, Footprint, Radius)
             && MaterialsReady && CollisionReady;
         TotalTriangles += Triangles;
-        Rows.Add(FString::Printf(TEXT("%s,%.6f,%.6f,%.6f,%.6f,%d,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d,%d"),
+        TotalFarTriangles += FarTriangles;
+        Rows.Add(FString::Printf(TEXT("%s,%.6f,%.6f,%.6f,%.6f,%d,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d,%d,%.6f,%d,%d"),
             *Tree->GetPathName(), Root.X, Root.Y, Root.Z, Tree->GetComponentRotation().Yaw, Triangles,
             Mesh ? Mesh->GetStaticMaterials().Num() : 0, ScaleError, GroundError, Radius, HomeMargin,
             ResourceMargin, StructureMargin, PlotMargin, StreamMargin, SpacingMargin, MaterialsReady, CollisionReady,
-            Tree->ComponentHasTag(TEXT("AuthoredTreeSmall02"))));
+            Tree->ComponentHasTag(TEXT("AuthoredTreeSmall02")), Scale, MidTriangles, FarTriangles));
     }
-    Valid &= TotalTriangles <= 3708560;
+    Valid &= TotalTriangles == 231785LL * 192 && TotalFarTriangles > 0 && TotalFarTriangles <= 18000LL * 192;
     if (!FFileHelper::SaveStringArrayToFile(Rows, *FPaths::Combine(OutputDirectory, TEXT("grove-inventory.csv"))))
         Valid = false;
-    Observations.Add(FString::Printf(TEXT("%sGrove inventory: trees=%d triangles=%lld valid=%d; shared qualified LOD2, not a whole-scene GPU cost."),
-        Valid ? TEXT("") : TEXT("FAILED "), Trees.Num(), static_cast<long long>(TotalTriangles), Valid));
+    Observations.Add(FString::Printf(TEXT("%sGrove inventory: trees=%d all_near_triangles=%lld all_far_triangles=%lld valid=%d; shared qualified near mesh plus native distance LODs, not actual rendered triangles or GPU cost."),
+        Valid ? TEXT("") : TEXT("FAILED "), Trees.Num(), static_cast<long long>(TotalTriangles), static_cast<long long>(TotalFarTriangles), Valid));
 }
 
 void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
@@ -330,11 +337,11 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             const FVector Position = Transform.TransformPosition(Anchor);
             const double ScaleError = (Transform.GetScale3D() - FVector::OneVector).Size();
             const double GroundError = Position.Z - AHomesteadWorld::GroundHeight(Position.X, Position.Y);
-            const double HomeMargin = FVector2D(Position.X + 1000, Position.Y).Size() - 670;
+            const double HomeMargin = FVector2D(Position.X + 1000, Position.Y).Size() - 320;
             double ResourceMargin = 1e9, StructureMargin = 1e9, PlotMargin = 1e9;
             for (const auto& Node : PC->State().resources)
                 ResourceMargin = FMath::Min(ResourceMargin,
-                    FVector2D::Distance(FVector2D(Position), FVector2D(Node.position.x, Node.position.y)) - 150);
+                    FVector2D::Distance(FVector2D(Position), FVector2D(Node.position.x, Node.position.y)) - 55);
             for (const auto& Structure : PC->State().structures)
             {
                 const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
@@ -350,7 +357,10 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             const float Weight = AHomesteadWorld::GrassGroundWeight(Position.X, Position.Y);
             Valid &= ScaleError < 0.001 && FMath::Abs(GroundError) < 0.1 && HomeMargin >= -0.1
                 && ResourceMargin >= -0.1 && StructureMargin >= -0.1 && PlotMargin >= -0.1
-                && Weight >= 0.399 && HomeMargin <= 1930.1;
+                && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= 214.9
+                && AHomesteadWorld::LowCoverDensity(Position.X, Position.Y) > 0
+                && FMath::Abs(Position.X) <= 3900.1 && FMath::Abs(Position.Y) <= 3900.1
+                && !AHomesteadWorld::IsDecorationReserved(PC->State(), Position.X, Position.Y, 20, 0, true);
             ++Clumps; Triangles += Count;
             Rows.Add(FString::Printf(TEXT("%s,%d,%.6f,%.6f,%.6f,%.6f,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d"),
                 Mesh ? *Mesh->GetPathName() : TEXT("missing"), Index, Position.X, Position.Y, Position.Z,
@@ -358,7 +368,7 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
                 StructureMargin, PlotMargin, Weight, Ready, Nonblocking));
         }
     }
-    Valid &= AuthoredBatches == 4 && Clumps == 512 && Triangles > 0 && Triangles <= 650000;
+    Valid &= AuthoredBatches == 4 && Clumps == 16000 && Triangles > 0 && Triangles <= 6500000;
     if (!FFileHelper::SaveStringArrayToFile(Rows, *FPaths::Combine(OutputDirectory, TEXT("grass-inventory.csv")))) Valid = false;
     auto* Ground = PC->Landscape ? PC->Landscape->Ground.Get() : nullptr;
     const auto* Section = Ground ? Ground->GetProcMeshSection(0) : nullptr;
@@ -398,6 +408,70 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
     if (!FFileHelper::SaveStringArrayToFile(GroundRows, *FPaths::Combine(OutputDirectory, TEXT("grass-ground-inventory.csv")))) TerrainValid = false;
     Observations.Add(FString::Printf(TEXT("%sGrass/ground inventory: clumps=%d triangles=%d batches=%d placement_valid=%d terrain_valid=%d; current actor/mesh/material observations, not GPU timing."),
         Valid && TerrainValid ? TEXT("") : TEXT("FAILED "), Clumps, Triangles, AuthoredBatches, Valid, TerrainValid));
+
+    TArray<UStaticMeshComponent*> Parts;
+    if (PC->Landscape) PC->Landscape->GetComponents(Parts);
+    TArray<FString> UnderstoryRows;
+    UnderstoryRows.Add(TEXT("mesh,layer,x,y,z,scale_error,ground_error_cm,height_cm,near_triangles,far_triangles,materials_ready,placement_valid,collision_valid"));
+    int32 Ferns = 0, Firs = 0;
+    bool UnderstoryValid = PC->Landscape != nullptr;
+    for (auto* Part : Parts)
+    {
+        const bool Fir = Part->ComponentHasTag(TEXT("AuthoredFirUnderstory"));
+        if (!Fir && !Part->ComponentHasTag(TEXT("AuthoredFern02"))) continue;
+        if (Fir) ++Firs; else ++Ferns;
+        UStaticMesh* Mesh = Part->GetStaticMesh();
+        const auto* Data = Mesh ? Mesh->GetRenderData() : nullptr;
+        if (!Data || Data->LODResources.Num() != (Fir ? 2 : 1)) { UnderstoryValid = false; continue; }
+        const FBox Bounds = Mesh->GetBoundingBox();
+        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+        const FVector Position = Part->GetComponentTransform().TransformPosition(Anchor);
+        const double ScaleError = (Part->GetComponentScale() - FVector::OneVector).Size();
+        const double GroundError = Position.Z - AHomesteadWorld::GroundHeight(Position.X, Position.Y);
+        const FString Root = Fir ? TEXT("/Game/Trials/WoodlandResources_20260921_01")
+            : TEXT("/Game/Trials/Fern02_20260920_01");
+        bool Known = false;
+        for (const TCHAR* Suffix : {TEXT("a"), TEXT("b"), TEXT("c"), TEXT("d")})
+        {
+            if (Fir && FString(Suffix) != TEXT("a") && FString(Suffix) != TEXT("c")) continue;
+            const FString Name = FString(Fir ? TEXT("SM_FirSapling_") : TEXT("SM_Fern02_")) + Suffix;
+            Known |= Mesh->GetPathName() == Root + TEXT("/Meshes/") + Name + TEXT(".") + Name;
+        }
+        bool Ready = Known && Part->IsRenderStateCreated() && Part->GetNumMaterials() == (Fir ? 2 : 1);
+        for (int32 Slot = 0; Slot < (Fir ? 2 : 1); ++Slot)
+        {
+            auto* Interface = Part->GetMaterial(Slot);
+            auto* Material = Interface ? Interface->GetMaterial() : nullptr;
+            auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+            const FString Name = Fir ? (Slot == 0 ? TEXT("M_FirSapling_Branches") : TEXT("M_FirSapling_Twigs"))
+                : TEXT("M_Fern02");
+            Ready &= Material && Material->GetPathName() == Root + TEXT("/Materials/") + Name + TEXT(".") + Name
+                && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
+        }
+        FCollisionResponseContainer Responses(ECR_Ignore);
+        if (Fir) Responses.SetResponse(ECC_Camera, ECR_Block);
+        const bool CollisionValid = !Part->GetGenerateOverlapEvents() && !Part->CanEverAffectNavigation()
+            && Part->GetCollisionEnabled() == (Fir ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision)
+            && (!Fir || Part->GetCollisionResponseToChannels() == Responses);
+        const bool PlacementValid = !AHomesteadWorld::IsDecorationReserved(PC->State(), Position.X, Position.Y,
+                Fir ? 90 : 75, 0, !Fir)
+            && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= (Fir ? 284.9 : 269.9)
+            && AHomesteadWorld::LowCoverDensity(Position.X, Position.Y) > 0;
+        const int32 Near = Data->LODResources[0].GetNumTriangles();
+        const int32 Far = Data->LODResources.Last().GetNumTriangles();
+        UnderstoryValid &= Ready && CollisionValid && PlacementValid && ScaleError < 0.001
+            && FMath::Abs(GroundError) < 0.1 && Near > 0 && Far > 0
+            && (!Fir || (Near <= 157402 && Far <= 39351));
+        UnderstoryRows.Add(FString::Printf(TEXT("%s,%s,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d,%d,%d,%d"),
+            *Mesh->GetPathName(), Fir ? TEXT("fir") : TEXT("fern"), Position.X, Position.Y, Position.Z,
+            ScaleError, GroundError, Bounds.GetSize().Z, Near, Far, Ready, PlacementValid, CollisionValid));
+    }
+    UnderstoryValid &= Ferns == 768 && Firs == 96;
+    if (!FFileHelper::SaveStringArrayToFile(UnderstoryRows,
+        *FPaths::Combine(OutputDirectory, TEXT("understory-inventory.csv")))) UnderstoryValid = false;
+    Observations.Add(FString::Printf(TEXT("%sUnderstory inventory: ferns=%d firs=%d valid=%d decoration_build_ms=%.3f; latest synchronous decoration build CPU wall time, not GPU cost."),
+        UnderstoryValid ? TEXT("") : TEXT("FAILED "), Ferns, Firs, UnderstoryValid,
+        PC->Landscape ? PC->Landscape->DecorationBuildMilliseconds : -1));
 }
 
 void AHomesteadVisualPlaytest::RecordCameraForeground()
@@ -506,7 +580,7 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
     auto* Tree = Trees[0];
     UStaticMesh* Mesh = Tree->GetStaticMesh();
     auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
-    bTreeReady = Mesh && Mesh->GetPathName() == TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2")
+    bTreeReady = Mesh && Mesh->GetPathName() == TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland")
         && Tree->GetComponentScale().Equals(FVector::OneVector, 0.001)
         && Mesh->GetStaticMaterials().Num() == 3 && Body && Body->AggGeom.SphylElems.Num() == 1
         && Body->AggGeom.GetElementCount() == 1 && Body->CollisionTraceFlag == CTF_UseSimpleAsComplex

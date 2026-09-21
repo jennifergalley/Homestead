@@ -1,0 +1,18 @@
+Log file: E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\woodland-native-plan-01\ubt.log
+Determining max actions to execute in parallel (8 physical cores, 16 logical cores)
+  Executing up to 8 processes, one per physical core
+  Requested 1.5 GB memory per action, 9.57 GB available: limiting max parallel actions to 6
+UbaSessionServer - Disable remote execution (remote sessions will finish current processes)
+Invalidating makefile for SurvivalGameEditor (source file added)
+UHT compiled-in object format Default
+UHT processed SurvivalGameEditor in 8.6973021 seconds (0 generated files written)
+===== Toolchain Information =====
+Using ISPC compiler (E:\Program Files\UE_5.8\Engine\Source\ThirdParty\Intel\ISPC\bin\Windows\ispc.exe)
+  Intel(r) Implicit SPMD Program Compiler (Intel(r) ISPC), 1.24.0 (build commit  @ 20250404, LLVM 18.1.2) 
+Using Visual Studio 14.44.35229 toolchain (E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207) and Windows 10.0.26100.0 SDK (C:\Program Files (x86)\Windows Kits\10).
+=================================
+Exported build actions to E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\woodland-native-plan-01\actions.json
+
+Result: Succeeded
+Total execution time: 13.17 seconds
+Trace written to file C:\Users\Jenny\AppData\Local\UnrealBuildTool\Trace.uba with size 3.7kb

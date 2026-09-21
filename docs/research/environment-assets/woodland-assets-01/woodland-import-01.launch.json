@@ -1,0 +1,213 @@
+{
+  "pid": 52420,
+  "creationTime": 134345012876014137,
+  "image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+  "executableSha256": "AE92F55952A3C9A7DEF90983FCF5AEDCE52D8EE8E4565FBD923985E9D9D3E05E",
+  "moduleSha256": "12B03F561236E640AB54F21C8D7314CE7384BD4DF91DF03C7FE4D0D056458BD6",
+  "arguments": [
+    "E:\\Repos\\SurvivalGame\\SurvivalGame.uproject",
+    "-run=HomesteadAuthoringProbe",
+    "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01",
+    "-notraceserver",
+    "-traceautostart=0",
+    "-unattended",
+    "-nop4",
+    "-nosplash",
+    "-stdout",
+    "-FullStdOutLogOutput",
+    "-DisablePython",
+    "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+    "-noshaderworker",
+    "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\EngineUser",
+    "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\editor.log",
+    "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+    "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+    "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+    "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+    "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+    "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+    "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\Engine.ini",
+    "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\Editor.ini",
+    "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\EditorSettings.ini",
+    "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\EditorPerProjectUserSettings.ini",
+    "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\GameUserSettings.ini",
+    "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\Game.ini",
+    "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-import-01\\Config\\Input.ini",
+    "-FernMode=WoodlandImport",
+    "-nullrhi"
+  ],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344966501770763,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "explicitInheritedHandles": 3,
+  "expectedRules": [
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "TCP Query User{0A2FC548-73B9-422C-B077-058734737E11}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "TCP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    },
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "UDP Query User{C4984A9B-D060-40FD-8B40-E7089EBA10A5}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "UDP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    }
+  ],
+  "deadlineUtc": "",
+  "creationFlags": 525324,
+  "buildReceiptSha256": "06946B18EA06D1BC06BDFF05D6BBC4F87A978AB9DCA207BEE9675C8C9EDA29BA",
+  "productPins": [
+    {
+      "bytes": 2925056,
+      "sha256": "5C312C17D3A9CE4DD4C4A17C30171958E5459586AC95B5840DF5DD013661DCD1",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "bytes": 90714112,
+      "sha256": "A5B6DCD84B7F466C3D3B908CFA6098BB5A6458611D3BAC018ADB3CEECE3D288E",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "bytes": 503296,
+      "sha256": "12B03F561236E640AB54F21C8D7314CE7384BD4DF91DF03C7FE4D0D056458BD6",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "bytes": 30593024,
+      "sha256": "3A4DA3000CBDD000AE9884703532392691FFCEFA705BDA37C23E8C5246AFA2B9",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "bytes": 166,
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "bytes": 945032,
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "supersession": {
+    "sourceQualification": "Canopy derives from the admitted qualified TreeSmall02 near mesh. Its twelve branch source-description basis corners remain disclosed; original tree import03 stays FAILED. New resource inventory and reduced-distance silhouette are separate from visual/performance acceptance.",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "currentApproval": "Jenny prioritized an actual lush woodland and authored interactive resources on September21 at13:39AZ. Nine explicitly selected CC0 source models,23maps,five materials and one derived native-distance-LOD canopy: exactly38 fresh packages. Native-sized resources, preserved terrain/stream/lifecycle and selected navigation06. Existing root-only/marker/execution-disabled-Python/local-DDC/TraceControl controls retained.",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7"
+  },
+  "buildMonitoringQualification": {
+    "limit": "Build/source evidence only. Actual38-package import/reload, cook, gameplay images and performance are unpassed. Selected navigation06 remains unchanged.",
+    "tests": "Woodland native-shaped inventory/token tests and directly shared fern40/grass39/tree67 negative cases passed. First shared-policy invocation omitted a mandatory disposable fixture directory; original transcript retained, corrected invocation is separate. Synthetic inventories are not Unreal asset acceptance.",
+    "links": "Two genuine libraries, two resource conversions and resource-token-only DLL links passed in detached pre-resume limit1/no-breakaway jobs. PE/PDB identity and genuine UBT metadata verified.",
+    "inherited": {
+      "actualExport": "Distinct grass-native-plan-02 passed existing observational allowlist/None working-set controls. ISPC1.24 --version is log/source-corroborated but absent from process samples; no full short-lived-child identity/endpoint-history claim. No new helper allowance.",
+      "links": "Two genuine import libraries, two resource conversions and resource-token-only DLL links passed under detached pre-resume limit1/no-breakaway jobs; no forged produced items. PE/PDB identities and actual UBT metadata verified.",
+      "failedExport": "grass-native-plan-01 FAILED: unidentified exited child20456, path unavailable; no retrospective identity or endpoint claim. Preserved failure is not superseded as a pass.",
+      "limit": "Build/source evidence only. New14-package import/reload, cook and actual ordinary gameplay remain separate unpassed gates. Selected grove03 untouched.",
+      "inherited": {
+        "inherited": {
+          "inherited": {
+            "inherited": "Genuine integrated strict native-menu/equipment/current-save/resume fixture game compile4/library6/DLL5 and metadata passed. Editor importer unchanged from previous genuine receipt. Raw guarded step evidence retained under exact paths/hash. Prior failed import01 and historical compiler/link/monitor qualifications remain unchanged. No new gameplay acceptance inferred from compilation.",
+            "current": "Genuine UBT exports/UHT, exact guarded native compiler/library/DLL leaves, resource-only substitutions, actual PE/PDB checks and real UBT metadata. UBT export/metadata remain sampled observational tools with the previously approved build-only conhost; not root-only leaf proofs. Original failed compiles and missing-RHI-dependency link remain failed. Global marker not used for these compiler leaves.",
+            "correction": "Typed TObjectPtr declarations, genuine UHT refresh after header movement, explicit RHI dependency for installed UE5.8 shader-platform material readiness. An attempted feature-level overload was rejected by the actual compiler and retained, not cast or claimed successful.",
+            "limit": "No tree import, persisted asset, Cook, Shipping or visual/runtime acceptance from this build."
+          },
+          "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+          "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+          "correction": "Importer only: referenced FBX bounds in UE frame; branch-only invertible UV swap; supported Tangents|UseMikkTSpace with exact nonzero-normal preservation; pre/post per-role basis measurements. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and actual metadata succeeded."
+        },
+        "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+        "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+        "correction": "Importer only: distinguish orphan vertex instances from referenced corners; permit only remaining exact-zero single-face referenced corners to use valid engine-computed face normals; regenerate Mikk tangents and compare nonzero normals exactly. Record intermediate/final per-role measurements and pre-adaptation actual bounds. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and metadata succeeded."
+      },
+      "compilers": "Five genuine root-only guarded compile actions passed; action5 first failed on TObjectPtr deduction/mixed SmoothStep types, corrected in source and passed as distinct compile5-02. Actual original failure retained."
+    },
+    "compilers": "Five genuine root-only guarded compile actions passed. First importer compile0 failed on a shadowed role-set name and two signed/unsigned vertex-loop comparisons; surgical type/name corrections passed as distinct compile0-02. Original failure remains failed.",
+    "actualExport": "Genuine woodland-native-plan-01 passed existing observational build allowlist. ISPC1.24 --version is log/source-corroborated but absent from finite process samples; no complete short-lived-child identity/endpoint-history claim or new helper allowance."
+  },
+  "mode": "WoodlandImport",
+  "softSeconds": 0,
+  "hardSeconds": 0,
+  "ceilingSeconds": 0,
+  "trialIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\WoodlandResources_20260921_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 912412,
+    "Attributes": 16,
+    "CreationTime": 134345012875603757
+  },
+  "deadlineProfile": "CookCompletionDriven",
+  "supervisorReceiptSha256": "420E35DFBBDB1EE2DDBD6D3949AEE9D4BB426E9137166CFDF63709B523F2C1A5",
+  "wrapperSha256": "666C680CCEA65F8E4AC7B6769BD0DA1D382314CCA3CD48A03545FBF47B9D4EE0",
+  "startupSeconds": 0,
+  "captureSeconds": 0,
+  "ddc": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+  "ddcIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745022,
+    "Attributes": 16,
+    "CreationTime": 134344292212644463
+  },
+  "completionDriven": true
+}

@@ -1,0 +1,36 @@
+{
+	"camera": "X=-500.844 Y=-200.058 Z=138.017",
+	"rotation": "P=-0.818159 Y=-105.376795 R=0.000000",
+	"gameHour": 6.320490840896972,
+	"width": 1280,
+	"height": 720,
+	"limits": "Actual spring-arm state and independent matching camera-channel sweep; bounds and complex-collision ray counts are not pixel coverage. Inspect the real frame for surface visibility.",
+	"cameraCollisionTest": true,
+	"probeChannel": 4,
+	"probeRadius": 12,
+	"collisionFixApplied": false,
+	"unfixedCamera": "X=-500.844 Y=-200.058 Z=138.017",
+	"matchingCameraSweepBlocked": false,
+	"sweepComponent": "",
+	"sweepLocation": "X=0.000 Y=0.000 Z=0.000",
+	"sweepStartPenetrating": false,
+	"nearbyVisibleResourceBounds": [
+		{
+			"resourceId": 8,
+			"resourceKind": 0,
+			"role": "produce",
+			"component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147481270",
+			"mesh": "/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_a.SM_DryBranchesMedium01_a",
+			"transform": "-574.113487,-390.018588,-3.695492|0.000000,20.000000,-0.000000|1.000000,1.000000,1.000000",
+			"meshBoundsMin": "X=-54.744 Y=-68.983 Z=-1.653",
+			"meshBoundsMax": "X=-22.437 Y=60.932 Z=32.446",
+			"cameraInMeshSpace": "X=133.821 Y=153.445 Z=141.712",
+			"boundsRayHitsOf144": 1,
+			"complexCollisionRayHitsOf144": 0,
+			"queryEnabled": false,
+			"cameraResponse": 0,
+			"pawnResponse": 0,
+			"tint": "unavailable"
+		}
+	]
+}

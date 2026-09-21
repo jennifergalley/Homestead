@@ -4,9 +4,10 @@ Four exact assets: Shrub 04, Dry Branches Medium 01, small Fir Sapling and
 Flower Empodium. See `docs\research\environment-assets\resource-palette-20260921.md`
 for actual game-role mapping, visual selection and qualifications.
 
-**This is a reviewed acquisition input, not an acquired/prepared asset receipt.**
-All 29 declared URL/size/MD5 entries match the live publisher manifests checked
-2026-09-21; declared total is **58,729,776 bytes**. The 1K source palette includes
+**Acquired, inspected, source-prepared and native-imported with independent reload;
+integrated game appearance remains unverified.**
+All 29 originals match the declared bytes/publisher MD5 and receipted SHA256,
+totalling **58,729,776 bytes**. The 1K source palette includes
 the four FBXs and selected PBR/alpha/mask maps, not archives or authoring scenes.
 No publisher preview image is shipped here.
 
@@ -47,11 +48,22 @@ Incomplete `.download` files remain for diagnosis.
 checks for the actual four-asset manifest, unsafe paths/hosts/redirects, size/
 MD5 errors, no-overwrite/partial retention, stop handling and manifest pinning.
 
-Actual acquisition must produce the receipt before geometry/material claims.
-Source inspection and preparation are a separate coordinated increment.
+`download-receipt.json` and `source-inventory.json` contain the actual acquisition
+and read-only inspection. `Prepared\provenance.json` contains the real selected
+outputs, not planned hashes.
 MAIN alone executes admitted authoring and Unreal import at its reserved slot.
 Do not infer mesh count, material slots, active UVs or working LODs from the
 publisher's aggregate labels. Preserve separate berries/flowers/harvest state.
+
+Actual38-package import/reload evidence is sealed in
+`docs\research\environment-assets\woodland-assets-01\receipt.json`. The nine
+resource near meshes retain310367 source triangles in total. Fir a/c measure
+130.07/73.57cm high with actual near/far triangles157402/39351 and124743/31185.
+The separately derived canopy preserves the qualified231785-triangle near mesh
+and has57947/13908-triangle distance LODs. These are measured native results,
+not evidence that reduced silhouettes or the whole woodland look good in play.
+The original tree's twelve branch source-description basis corners remain
+qualified; its failed import03 is not retroactively passed.
 
 ## Read-only source inventory
 
@@ -128,9 +140,18 @@ world-axis conversion, PBR graph creation or render is performed. The previous
 raw files stay byte-identical. Source cancellation is checked before/after each
 asset operation; individual existing parse/encode/reparse calls are not
 interrupted internally. Actual duration and caller containment remain MAIN's
-execution evidence. Offline retained-data and explicit multi-role selection tests
-pass, but this lane has
-not executed the preparation against the newly acquired assets.
+execution evidence. MAIN executed the guarded source-only preparation in
+6.271seconds, exit0, with observed root death and guard release, unchanged
+original pins and no observed endpoint. The four actual FBXs retain23 objects
+across nine models and five shared material roles. Native import is still pending.
+
+MAIN uses an absolute sibling-module import and an `lstat` reparse check compatible
+with the bundled Python, rather than assuming a script search path or Python3.12's
+`Path.is_junction`. Reparse comparison also checks source unit/axis settings.
+The committed/main selection SHA256 is
+`FFE9395858EA7AA81C591CC89AABC2CC3957C6AEBA67DB101C7561F63B25CE64`;
+MAIN verified its working bytes equal the Git blob. The source lane's earlier
+local newline-dependent hash is not the execution pin.
 
 Image-free preparation is not a new mandatory infrastructure gate if MAIN's
 existing native importer can safely use the same receipted originals with
@@ -154,3 +175,36 @@ MAIN plans 23 texture maps and five materials for these resources, plus its
 separate native canopy mesh. Whole flower clumps are removable produce above
 an admitted low-grass base; there is no separate blossom slot/petal-only claim.
 Both real fir heights are retained rather than enlarging the shorter variant.
+
+## Native candidate contract
+
+Fresh namespace: `/Game/Trials/WoodlandResources_20260921_01`, exactly38 packages:
+the nine named source meshes above, `SM_TreeSmall02_Woodland`, five `M_` material
+roles and23 `T_` texture maps enumerated by `WoodlandResourcePolicy.ps1`.
+Only explicit FBX/texture factories and per-package saves are used. Unknown
+objects, slots, persistent references or files fail; no source-image traversal,
+generic SaveAll or accepted-content replacement.
+
+Resources retain full near geometry, authored UV0 and native physical sizes.
+The two firs additionally derive a quarter-triangle distance LOD at screen0.35,
+with both material roles and a measured camera-only crown capsule. Shrub/flower
+alpha and fir twigs use two-sided masked DefaultLit; branch surfaces are opaque.
+DX normal green is unchanged; diffuse alone is sRGB. No tint or UV clamping.
+World placement subtracts measured XY-center/minZ anchors so source layout
+translations do not become gameplay spacing.
+
+The separate canopy duplicates the admitted qualified TreeSmall02 near mesh
+read-only, including its measured trunk capsule and existing material references.
+Near remains231785triangles; native reduction targets25%/6% with hard measured
+caps65000/18000 at screens0.35/0.12. It is not a reimport of the2M source.
+Original tree import03 remains FAILED with twelve branch source-description
+basis corners; deriving LODs does not erase that qualification or establish
+distance-silhouette quality.
+
+Runtime uses compact native shrub shoots with separately removable small berries,
+whole removable flower clumps over low-grass bases, real branch pieces and young
+fir variants. Generic root foliage/bank-grass reuse is not a botanical
+root/cattail claim. Existing admitted rock geometry supplies gatherable stones.
+The192-tree/384-fern/16000-grass candidate limits and actual selected LODs require
+integrated game-camera and lifecycle/performance observations; counts are not
+visual approval. Terrain, stream and source PBR colors remain unchanged.

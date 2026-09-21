@@ -1,0 +1,91 @@
+{
+  "pid": 11952,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+  "creationTime": 134345019315676534,
+  "executableSha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\link3\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 912930,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134345019312428754,
+    "LastWriteTime": 134345019312428754,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "ED53F58C34794B31BF925395CE9DD83A4C2D05272439D9C488ED5898503D2F0F",
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "allowedBuildOnlyConsole": {
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "path": "C:\\Windows\\System32\\conhost.exe",
+    "signature": "Valid"
+  },
+  "compileActionId": -1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\SurvivalGame\\Shipping\\SurvivalGame-Win64-Shipping.exe.rsp",
+      "sha256": "ED53F58C34794B31BF925395CE9DD83A4C2D05272439D9C488ED5898503D2F0F"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-31\\woodland-link.rsp",
+      "sha256": "01349DFC5F30D99EF167514A064486D342B9E10C4EB5D4894D90978A1D153201"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-31\\game-resource.obj",
+      "sha256": "A0EDAC0332D50C757A17A6F7EDD11750CFFF1201B0A43CBD0BB5D1B32008F643"
+    }
+  ],
+  "expectedProducedItems": [
+    "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.pdb"
+  ],
+  "resourceLinkActionId": 3,
+  "exactReviewedArguments": "@\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-31\\woodland-link.rsp\"",
+  "previousProductBackups": [
+    {
+      "sha256": "F3D669EC6B31312B46BEBB109EF5200346B94446C48765386491BD626A093B2F",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+      "backup": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\link3\\before-products\\SurvivalGame-Win64-Shipping.exe"
+    }
+  ],
+  "resourceConversion": "",
+  "derivedDllResponse": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-31\\woodland-link.rsp",
+  "splitShippingManifest": true,
+  "embedShippingManifest": false,
+  "stageCooked": false,
+  "stageCandidate": null,
+  "treeDiagnosticCandidate": true,
+  "treeContactCorrection": false,
+  "groveCandidate": false,
+  "groveProxyCorrection": false,
+  "grassGroundCandidate": true,
+  "readabilityDiagnostic": false,
+  "readabilityCorrection": false,
+  "readabilityLifecycle": false,
+  "navigationCandidate": false,
+  "woodlandActions": false,
+  "woodlandCandidate": true,
+  "navigationRevision": 1,
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": false,
+  "uiActions": false,
+  "shippingActions": true,
+  "wardrobeActions": false,
+  "treeActions": false,
+  "grassActions": false
+}

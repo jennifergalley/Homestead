@@ -1,0 +1,204 @@
+{
+  "pid": 4780,
+  "path": "E:\\Tools\\blender-4.5.14-windows-x64\\blender.exe",
+  "creationTime": 134344995224739274,
+  "executableSha256": "57FA1D294EA76448C3BEC84CA758CAF4629611330ABBA7DCF55BB0C56A0A15AB",
+  "arguments": [
+    "--background",
+    "--factory-startup",
+    "--disable-autoexec",
+    "--python-exit-code",
+    "17",
+    "--python",
+    "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\ResourcePreparation.py",
+    "--",
+    "--manifest",
+    "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\asset-manifest.json",
+    "--receipt",
+    "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\download-receipt.json",
+    "--inventory",
+    "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\source-inventory.json",
+    "--selection",
+    "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\selection.json",
+    "--source-root",
+    "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921",
+    "--output",
+    "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\Prepared",
+    "--helper",
+    "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\TreePreparation.py",
+    "--helper-sha256",
+    "7D5B3F61DD107DE1280B320822572F01E21D10D253F52685258119D43ACF3101",
+    "--control",
+    "E:\\Repos\\SurvivalGame\\Automation\\run.json",
+    "--run-id",
+    "20260921-033354-2d257ba0"
+  ],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "flags": 525324,
+  "handles": 3,
+  "sourcePins": [
+    {
+      "sha256": "7B1B808C0D570A384B98CB28EAA247069DA3DDD64022F742631585C721F45433",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\ResourcePreparation.py"
+    },
+    {
+      "sha256": "7D5B3F61DD107DE1280B320822572F01E21D10D253F52685258119D43ACF3101",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\TreePreparation.py"
+    },
+    {
+      "sha256": "3211F7F3B85550278648655C4F317BC6F86F21310D4E91387AAB01004C4D7EDE",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\ResourceAcquisition.py"
+    },
+    {
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\AuthoringLeafGuard.cs"
+    },
+    {
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\AuthoringProbePolicy.ps1"
+    },
+    {
+      "sha256": "BDB728405F33D82CDE68D27E0F316C3B2988311B74A328CEFCFE46175332BAE5",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\asset-manifest.json"
+    },
+    {
+      "sha256": "F8F97798328C0246099EBE90AA287515FEB925C316DF676AC2524C354005EC9F",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\download-receipt.json"
+    },
+    {
+      "sha256": "DE7F9980E188521FF5634E4AD3D744771A6A74C4F7CFDE6247D0D5862B461A77",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\source-inventory.json"
+    },
+    {
+      "sha256": "FFE9395858EA7AA81C591CC89AABC2CC3957C6AEBA67DB101C7561F63B25CE64",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Environment\\WoodlandResources\\candidate01\\selection.json"
+    },
+    {
+      "sha256": "EBFAF1B728E8C9B8AE62F90DF3A6F1837C233FD736665342391C2F3029F3AD37",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_1k.fbx"
+    },
+    {
+      "sha256": "D098301278A46D618118C95DA476F737AC57ADA38F96D0A354A454CC96133DE8",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_diff_1k.png"
+    },
+    {
+      "sha256": "5F13FF70CDFC3ABEDA98629AB9C6AD15BDE60E29C2879861B2B7671B12D2A9F6",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_nor_dx_1k.png"
+    },
+    {
+      "sha256": "5D8C99953BAEEF78A3D5708217B93F0745A001D0ED45AA7B59A283F045FBD82F",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_rough_1k.png"
+    },
+    {
+      "sha256": "14E7B4B9268FF783B94122D1979758238E02331247B53C99201C8BF5DBB632FA",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_ao_1k.png"
+    },
+    {
+      "sha256": "6DDD60DCDBDCF55D7258AE747866F68F5ACC9D88A7735C9EB05B02D6DEC527E3",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_alpha_1k.png"
+    },
+    {
+      "sha256": "457E06CA26207E27021E8F252BA3E45A30EBDCE0FBCF05D2843E28A9AF75DA90",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\shrub_04\\shrub_04_mask_1k.png"
+    },
+    {
+      "sha256": "3E47B10E0710B7736688521D66B3EB09AAD14CB2DB6179D9758A0FD5716CE639",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\dry_branches_medium_01\\dry_branches_medium_01_1k.fbx"
+    },
+    {
+      "sha256": "1FBAF810A9CA29D2FAF0A179834E8DCE10CF4854BAFE13F63AF111030B3EC660",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\dry_branches_medium_01\\dry_branches_medium_01_diff_1k.jpg"
+    },
+    {
+      "sha256": "6896AB1C3D74C51C2486763AA92486F8A2336E87F15C58AA624462BC9493916E",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\dry_branches_medium_01\\dry_branches_medium_01_nor_dx_1k.png"
+    },
+    {
+      "sha256": "47CD972D7DA0999913323217AF5D16F5FC7272AD6798C84024EA03367C466B1F",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\dry_branches_medium_01\\dry_branches_medium_01_rough_1k.png"
+    },
+    {
+      "sha256": "29A3E274A8AA259781B87CD1645CF1D4F4AB3062683DC08F0FAF350FB6CD8CBD",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\dry_branches_medium_01\\dry_branches_medium_01_ao_1k.png"
+    },
+    {
+      "sha256": "5EAFD5FD2914639960238A6BEEF97C4D64BE9FB0A5B690FD03D13B2291F71DB1",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_1k.fbx"
+    },
+    {
+      "sha256": "8813B75888F3D76AE8581A09B7F9FDB8D2B7B0D3C7977BA32BE1678373EEE657",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_branches_diff_1k.png"
+    },
+    {
+      "sha256": "6FD57E27E9010CFC4AD0CDBFF4142CFA116EE2B33F402EC196EF544C824F6AE8",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_branches_nor_dx_1k.png"
+    },
+    {
+      "sha256": "8D96BD806BD7EBE73B69DDC38516533F0A616C1BFD0E6670FE7A99A34B23E371",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_branches_rough_1k.png"
+    },
+    {
+      "sha256": "B981A4FCCB5AF5FD751FE6D393FCCCBEB600FB4C82810C6D2236FFCCC05B8D00",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_branches_ao_1k.png"
+    },
+    {
+      "sha256": "C29CB18884DC4CD24A72D0E39F01C1BAEADB798D0FE3D196D82B8CB11B18F061",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_twigs_diff_1k.png"
+    },
+    {
+      "sha256": "080CDCCD8A202459FC9F2FAFCA0528C2315B23434A5C48D50F4DB7E479F4F3E4",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_twigs_nor_dx_1k.png"
+    },
+    {
+      "sha256": "64E351910B74D2450029713DC08F7CD1FF0BB0C0C5A17CE271A0C87527E38812",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_twigs_rough_1k.png"
+    },
+    {
+      "sha256": "162810B953EC27496C61B771308528330E34805B1EDF45CB4DADABB9FF8826F6",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_twigs_ao_1k.png"
+    },
+    {
+      "sha256": "91E8A6114E2F180DE3D2FA60D397D69FEE0D3C745A15E012DA705C86CD4DE976",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_twigs_alpha_1k.png"
+    },
+    {
+      "sha256": "E703E1A8BA79A6802E7A79511853148FC80119FDA0AB61E64CF76CA202BAD73C",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\fir_sapling\\fir_sapling_twigs_mask_1k.png"
+    },
+    {
+      "sha256": "D7E38932DC0DE638063777036FB57D6C1205109421FADABBDA24FD9CE83DE8E7",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\flower_empodium\\flower_empodium_1k.fbx"
+    },
+    {
+      "sha256": "0C582F351E08F5BE631269D9E72F1412B7D172AEE6EADD4E3670E72FB4DAC492",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\flower_empodium\\flower_empodium_diff_1k.png"
+    },
+    {
+      "sha256": "2835768DACD377149F018DA3DC21411C57BE58A51364AA1DED87E1D07B647C51",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\flower_empodium\\flower_empodium_nor_dx_1k.png"
+    },
+    {
+      "sha256": "527D80AA22E02DFE39F695859841E9A865C262D7A6650FBC7316D2C846EC6077",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\flower_empodium\\flower_empodium_rough_1k.png"
+    },
+    {
+      "sha256": "FD509942842A0E0F7994DE571475A0D7F31DB65955CDEE30389CF43796025962",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\flower_empodium\\flower_empodium_ao_1k.png"
+    },
+    {
+      "sha256": "41AA40A0F570160CA64E8D99E49B4EECDC852158A6B021545831F0D654B0529E",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-resources-20260921\\flower_empodium\\flower_empodium_alpha_1k.png"
+    }
+  ],
+  "realProgramDataMarkerUsed": false,
+  "softSeconds": 100,
+  "hardSeconds": 110,
+  "scope": "Existing official Blender binary parser/encoder only; nine selected source models, no scene/image import/render. Fresh four-FBX output."
+}

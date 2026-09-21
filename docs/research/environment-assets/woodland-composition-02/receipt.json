@@ -1,0 +1,739 @@
+{
+  "status": "technical-scenarios-passed-both-candidates-visually-rejected-not-promoted",
+  "createdUtc": "2026-09-21T23:02:25.4594428+00:00",
+  "sourceBaseCheckpoint": "cfc22c665fd6ea8f29dd19fa9a7300908da7c42a",
+  "candidate02": "Build\\Releases\\20260921-033354-2d257ba0\\lush-woodland-02",
+  "executableSha256": "468C5506D3970F9FBB1021E68D142A739E40851B3C3043548F84FE87CF4B3BCD",
+  "actual02": {
+    "ordinaryFrames": 490,
+    "ferns": 768,
+    "viewport": [
+      1280,
+      720
+    ],
+    "cameraClearReload": "passed controlled fixture, with disclosed teleports",
+    "firs": 96,
+    "trees": 192,
+    "latestDecorationBuildCpuMs": 168.806,
+    "actorTiming": {
+      "p95Ms": 16.87,
+      "p99Ms": 16.96,
+      "samples": 977,
+      "viewport": [
+        1920,
+        1080
+      ],
+      "cap": 60,
+      "meanFps": 59.87
+    },
+    "grassTriangles": 5384599,
+    "grass": 16000
+  },
+  "visual": "Coordinator firsthand wide149: better tree grouping, ferns and floor but still open orchard/primitive produce. Main149 blocked by image quota; Main directly viewed425 at06:19, confirming dense near crowns but broad bare ground and under-crown sky. No lush/Jenny art acceptance.",
+  "daylight": "Both natural routes deliberately cooperatively stopped after first useful600s milestone. CANCELLED partial observations, not passed45-minute endurance. No time/lighting/state edits.",
+  "buildQualification": "01 selector was accidentally nested under exclusive Navigation and used grass graph instead. Its compile/link0-3 tool/arguments/outputs/dependencies exactly match woodland01. Old evidence unchanged.02 selects genuine graph02; original failed compile1 retained, typed mesh accessor corrected in successful compile1-02.",
+  "sourceQualification": "Original tree import03 remains FAILED with12 qualified branch source-description basis corners. Native Editor build receipt describes its earlier actual source, not current post-composition runtime source.02 reuses unchanged genuinely cooked packages; no Editor rebuild/import/cook was claimed for02.",
+  "limits": [
+    "Actual render LOD/alpha coverage not recorded; no blame from triangle counts alone.",
+    "Timing is actor cadence under a60fps cap, not GPU/Present/4K/headroom; screenshot readback excluded.",
+    "Resource renewal implementation compiled but dedicated renewal route not yet run.",
+    "No construction/weather/full UI recertification or human comfort/visual approval.",
+    "Finite endpoint/process observations and root-only jobs are not sandbox or continuous-history proof."
+  ],
+  "previewSha256": "2FA0530E787B50BC141F42B88E96D82D2A825EB029398D1035BA21DCEFE2CB76",
+  "selectedPreviewUnchanged": true,
+  "packages": [
+    {
+      "sha256": "CC0C1CBE310696EE7AB8542F675A1EB4A77D68CBF43F2C8E662354626D3FCD14",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_TreeSmall02_Woodland.uasset",
+      "bytes": 20791583
+    },
+    {
+      "sha256": "5538E32FCC6DAFF089F6DE79F68B5FFCC8B8452C9FA558312581201BDED243F6",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_Shrub04_a.uasset",
+      "bytes": 148247
+    },
+    {
+      "sha256": "93DCB7CD42ABA312D1DC7837DA40BAFA69E809CB8AE87DBE4F9E950CD2AEC7F0",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_Shrub04_c.uasset",
+      "bytes": 225497
+    },
+    {
+      "sha256": "AA99244F6727560BDABAC50BAB80E35D5C2438F089513B89A2AB6C38EDE5354A",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_DryBranchesMedium01_a.uasset",
+      "bytes": 237248
+    },
+    {
+      "sha256": "88D179A91AC0514BEA5A379BF7E530D7D0FB1F813F95325F0C96C9349717D7A6",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_DryBranchesMedium01_b.uasset",
+      "bytes": 222147
+    },
+    {
+      "sha256": "043F4ECC855EFBD78338029A20E50697D7CFEEC6B650EC3746344775836A6AE4",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_DryBranchesMedium01_c.uasset",
+      "bytes": 270406
+    },
+    {
+      "sha256": "8B4DF6F7C03EABC809A0FAC8E420FAE7CAFF6940085FEC8378C58C59ECDE1626",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_FirSapling_a.uasset",
+      "bytes": 6055798
+    },
+    {
+      "sha256": "6AB10AF849F5E9FC0E4C728A686E9E0BF10B78EFA437B88095BE8274173F2AD7",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_FirSapling_c.uasset",
+      "bytes": 4654599
+    },
+    {
+      "sha256": "4459C90633B9323A089CE4E7D30878C90B454A7BE5111765DFBC551DD6FF4290",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_FlowerEmpodium_a.uasset",
+      "bytes": 45859
+    },
+    {
+      "sha256": "773FAB1F0CA0B118D81BD3B14188F1D1A7ACF733FC7CB654DD8CDAE9A45F76DB",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Meshes\\SM_FlowerEmpodium_b.uasset",
+      "bytes": 45375
+    },
+    {
+      "sha256": "A8A939257EEF5FB34B7DB9735FDA4F82C0CB9CC1E483C3E3C3E312B11A792BD5",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Materials\\M_Shrub04.uasset",
+      "bytes": 7745
+    },
+    {
+      "sha256": "D1B625E9658CC2E5C1817E866E97AFECC2CDEE6FD5A3A24D2A55D8C3E32FF16A",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Materials\\M_DryBranchesMedium01.uasset",
+      "bytes": 7134
+    },
+    {
+      "sha256": "12CA1BCD405CD00495A9ABE37BDE212D19EF2200FEED21836F035A3695CE1AAF",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Materials\\M_FirSapling_Branches.uasset",
+      "bytes": 7134
+    },
+    {
+      "sha256": "F11827EA717669B62056492B5EB94D9A9478510B3068CDB87419F268E9FF0EA7",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Materials\\M_FirSapling_Twigs.uasset",
+      "bytes": 7880
+    },
+    {
+      "sha256": "8CDE8A10BB22F6410BF2AB878804FF4CBE1F7EC11C857C465AEACCF881119CCA",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Materials\\M_FlowerEmpodium.uasset",
+      "bytes": 7850
+    },
+    {
+      "sha256": "FA112DF2841C1DBB7BE8E78E28572E7195BBD65AD67F2954D4FF57A7A1EC686E",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_Shrub04_Diff.uasset",
+      "bytes": 1783175
+    },
+    {
+      "sha256": "B1EB47C2BD62E91F4720AA489FC67CC9D24AE2938C88069B28E8546A5C74AE56",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_Shrub04_NormalDX.uasset",
+      "bytes": 1801226
+    },
+    {
+      "sha256": "77C0746148BDFB2BBED7D94A82623E0F100F63D279DEA92878DDF96342ED6647",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_Shrub04_Roughness.uasset",
+      "bytes": 512720
+    },
+    {
+      "sha256": "E67CD62AC71993BDEF2AC7726AE5B4F107C934EA0C800E9B98EE895721A17503",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_Shrub04_AO.uasset",
+      "bytes": 328440
+    },
+    {
+      "sha256": "0802E457649A554B0110C479B6AFF2092B0676FD35FD1A98472581B7EE66A2EA",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_Shrub04_Alpha.uasset",
+      "bytes": 41466
+    },
+    {
+      "sha256": "35A85CB1FED3BD91D59DB6179CCBCF7F293AC6447C500DC9EF7D8BF4B406C779",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_DryBranchesMedium01_Diff.uasset",
+      "bytes": 782977
+    },
+    {
+      "sha256": "1DC4D097B050E34460B82339CAD04FEBBCABA390A17A44D3FA3C3B0A7B535DE4",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_DryBranchesMedium01_NormalDX.uasset",
+      "bytes": 5689475
+    },
+    {
+      "sha256": "53A2FB178536D360DC96240E0B58409B57869A19CEFC77EA6B246D4F281422D9",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_DryBranchesMedium01_Roughness.uasset",
+      "bytes": 1702620
+    },
+    {
+      "sha256": "FDD26E387D71F75C78B8B3C68BE2A007739E0E50667D8D1B438FA16A93E75E53",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_DryBranchesMedium01_AO.uasset",
+      "bytes": 1581383
+    },
+    {
+      "sha256": "3B08E0BAF91915F6E901607ABE0D07FAFA12C510EF684EF05D792DF3EF54F523",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Branches_Diff.uasset",
+      "bytes": 5847183
+    },
+    {
+      "sha256": "C1E520C301031B70815B3E86210BD6F27CA18ED2F05990FE812A5868820E8381",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Branches_NormalDX.uasset",
+      "bytes": 6128286
+    },
+    {
+      "sha256": "B6FE62BD5FC4E226B0FA857AB982E8F70BDABF1D6CB4B7151A9C74DFE5F44AE7",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Branches_Roughness.uasset",
+      "bytes": 1794102
+    },
+    {
+      "sha256": "D40AAB695540037E5CAE72BC72B8B4ED9A96D5D76CA9FFDDC5417ED676538142",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Branches_AO.uasset",
+      "bytes": 1932675
+    },
+    {
+      "sha256": "2D049F18AE39F7B646F82FBE2DF3A6A02029964C964FD80D557B89CA18D8A61A",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Twigs_Diff.uasset",
+      "bytes": 1230860
+    },
+    {
+      "sha256": "327F0609B622CA32CB0C79A9F2F9B93B08532F653F226FEBCB32E17E65BFF058",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Twigs_NormalDX.uasset",
+      "bytes": 1377394
+    },
+    {
+      "sha256": "77EF704D55EFE1EA1E4576FC9C5E03EC9A0EDFDE99720270082BE9A8F5608B1A",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Twigs_Roughness.uasset",
+      "bytes": 432450
+    },
+    {
+      "sha256": "9C083EB7A6E3956D2CF7C68EAB2ED0D492D15875C484501636E2EF94E83329D3",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Twigs_AO.uasset",
+      "bytes": 98053
+    },
+    {
+      "sha256": "E6F0EA93BE29E23B8E85AFFE1BB07E8D31C0237D6921B32C79C322022A24FE06",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FirSapling_Twigs_Alpha.uasset",
+      "bytes": 96475
+    },
+    {
+      "sha256": "917F5566F2117302B839B725822440AE8A493C4C4A5781193F31D71A9AAA0E6E",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FlowerEmpodium_Diff.uasset",
+      "bytes": 991851
+    },
+    {
+      "sha256": "1173329A2E222024DBA70037D1EE5906D9E4773001CA11678AF68FA97F8DA0CF",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FlowerEmpodium_NormalDX.uasset",
+      "bytes": 3519224
+    },
+    {
+      "sha256": "05DDC9953BB703D49AECE56A46F2C6A3DC6029C24DE9DB592B3E9B3582931164",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FlowerEmpodium_Roughness.uasset",
+      "bytes": 5083
+    },
+    {
+      "sha256": "08EE717CE6D0792ED065E3C483E89A6946D3F2EB409D5E744399F573D02AB0C8",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FlowerEmpodium_AO.uasset",
+      "bytes": 965428
+    },
+    {
+      "sha256": "BB61D41748AF7A58C456A408F1C235010828197F5B559E669A2F2ADCFD73C23F",
+      "path": "Content\\Trials\\WoodlandResources_20260921_01\\Textures\\T_FlowerEmpodium_Alpha.uasset",
+      "bytes": 117038
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "F00962FF390D71472AD11CFD4F5E236BD782B1A33D59BC43B6333828A349F04A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h",
+      "sha256": "09863BD33C3E9275F3B5F46A524EF403F441FFEA909EAB4C587A2A1E83CFF014"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp",
+      "sha256": "D19468508A0DB7BA8E592B37B6AF081CF5F0A0DFCBC72C8722E90E500627A68A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp",
+      "sha256": "AA569D188550A09AA6AFC8C4B36B8270D5336A3DA44321A3CEC80A98A78626AD"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadForageRenewal.cpp",
+      "sha256": "64CE6B346EB66E4662E5465895B89B91E30FB033FE0C20E1197B7F25EE97A556"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadRenewalState.h",
+      "sha256": "E2EBE532F4B052CC59D920E529F16D82C305A7E91F8CA640EA269296F0817A61"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp",
+      "sha256": "B8959594329CAAF80528BDEFB157B1CFD6E38132A79798A5861E8DC9CF6ACDBC"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.cpp",
+      "sha256": "5F0E75C7420F549575020B577EA8BBA9A15AC8C412453B19AAC15E58409F9635"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp",
+      "sha256": "939AC87306CE3A47FF45AD1713BC4FD22322DFF1292B428E87C103AA84B85282"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h",
+      "sha256": "882502A283407DFB441A0884B0186EC7B92ED8DB954103FF2056BA9429B9D98D"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp",
+      "sha256": "192900EC0EB4B44A72E9D4CF6DE557E47F4EB310C5ED1A4B62EFDA8FDE0413F4"
+    },
+    {
+      "path": "Scripts\\Build-AuthoringProbe.ps1",
+      "sha256": "C63BA956E5DA08B220B5AA2CFE3279FDB5AB58E271A3A0E02C1D5654664E4BC3"
+    },
+    {
+      "path": "Scripts\\WoodlandResourcePolicy.ps1",
+      "sha256": "0704E8BF723BEAE4D33FB1371C38A4488E91EED9AA2C6B9634845648A4C5C8FF"
+    },
+    {
+      "path": "Scripts\\Test-AuthoringSettings.ps1",
+      "sha256": "666C680CCEA65F8E4AC7B6769BD0DA1D382314CCA3CD48A03545FBF47B9D4EE0"
+    },
+    {
+      "path": "Tests\\Test-CompilerLeaf.ps1",
+      "sha256": "DB527B576D7CECC8F8429BA5A55F04A6B02DADF265F629AF521527A05F4CA5D5"
+    },
+    {
+      "path": "Tests\\Test-WoodlandResourcePolicy.ps1",
+      "sha256": "7F84974999184BF60F7FE6EAE09DEDF071FDE7A25AC2AE0E31D420496935F9D4"
+    },
+    {
+      "path": "Config\\DefaultGame.ini",
+      "sha256": "0D110F4C7D8B3D47E9CE2F64E9CFB2D6C682434D5F1A3926CF5DEB2229E77104"
+    }
+  ],
+  "files": [
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\observations.txt",
+      "copy": "01.ordinary.observations.txt",
+      "sha256": "F0A3CBCB5A68A92020937D4DB54ECC685910929A52228FBAE1990BB8C5710093"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\telemetry.csv",
+      "copy": "01.ordinary.telemetry.csv",
+      "sha256": "0F79EBA789E16B8A2F3A196141DA0051854E48A71F3BB70A9A6C79BC65F4E200"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\presentation-settings.txt",
+      "copy": "01.ordinary.presentation-settings.txt",
+      "sha256": "7FCCA3B96F2D5CDBCC4A4EC6794B7D89B5C3960095CDFF90E1B40E0456165B25"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\qa-guard-result.json",
+      "copy": "01.ordinary.qa-guard-result.json",
+      "sha256": "0F391BCB0409D0E61176F105354E745B3049D2CE4318B3EB33354C727E720D73"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\qa-launch.json",
+      "copy": "01.ordinary.qa-launch.json",
+      "sha256": "CE8E0EEB3D77951108F4D6A02B203F2BF45A0B5FB756CC08C6251DC9385C5261"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\qa-admission.txt",
+      "copy": "01.ordinary.qa-admission.txt",
+      "sha256": "2B9C1C66EE19042688EF79744F07B04499A8BCB62ED61A727DCFEEE8D879E70F"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\grove-inventory.csv",
+      "copy": "01.ordinary.grove-inventory.csv",
+      "sha256": "972A306F0CE2069F970772C5A50A0B9C805A031D34333F43D6B0D1A25977DB77"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\grass-inventory.csv",
+      "copy": "01.ordinary.grass-inventory.csv",
+      "sha256": "5E1237EE9DC183BCC23CBBD4DB23E2DF5E36B2357762DD379593F2154321A81B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\grass-ground-inventory.csv",
+      "copy": "01.ordinary.grass-ground-inventory.csv",
+      "sha256": "F7C89F6F95803FA08425072FA77C85DEC599F4B52B8D7403F867A0BA681765FB"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\tree-contact.csv",
+      "copy": "01.ordinary.tree-contact.csv",
+      "sha256": "F495F30CFF4E510B69AB7C7594890635ADEF55906BAFA47D82393CC3B93651AF"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\camera-foreground.json",
+      "copy": "01.ordinary.camera-foreground.json",
+      "sha256": "CCD2B75DB7960922CF411A9DA6B7927BDB97D876434D2BD050A0A78B19767212"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-01\\qa-guard-result.json",
+      "copy": "01.clearing.qa-guard-result.json",
+      "sha256": "039D4D02B500C682C7AE6C03DB1614D446C7D78EEC73B1AC67372ECD53E3359B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-01\\qa-launch.json",
+      "copy": "01.clearing.qa-launch.json",
+      "sha256": "083FE9E19EEF5071B8F8457ED816A09501D0BC341A572E840603954B91DE24A3"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-01\\qa-admission.txt",
+      "copy": "01.clearing.qa-admission.txt",
+      "sha256": "F9B4C07C2AA67B50CE3D2FC640D0E5A23FB8107BD7845BE79FF4498C838F4A3B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-01\\smoke-result.txt",
+      "copy": "01.clearing.smoke-result.txt",
+      "sha256": "0987AA42392D4C6A42B0D5926DF1653601570811AD3E5B915249980848403629"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-plan-01\\result.json",
+      "copy": "01.export.result.json",
+      "sha256": "2E832068C20CE427759383947912498023E2F7057E35044887D403845024CCE1"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-plan-01\\actions.json",
+      "copy": "01.export.actions.json",
+      "sha256": "0CBD20A7E449AF1AA04C8EFC692B5ACDB5AA998EACAE971F1BBFDE0097FD3085"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-plan-01\\launch.json",
+      "copy": "01.export.launch.json",
+      "sha256": "176B142BAD9F9C57029873851EED834BD5D8AEED2164EDDE26BAEFA4994CA455"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\compile0\\result.json",
+      "copy": "01.build.compile0.result.json",
+      "sha256": "F3D4117E2B63247D23CBD96BC8FD3FA85B6D736D5F1C6D051841FDC029BFDFE9"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\compile0\\launch.json",
+      "copy": "01.build.compile0.launch.json",
+      "sha256": "81E20FF99B242A826BA8D2B282C45C654E106501208CCC6ECB4FC270873CF6A6"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\compile1\\result.json",
+      "copy": "01.build.compile1.result.json",
+      "sha256": "193EED3ACBD892529FD71E403F88F5328337D6306EF9B035ECED0695C9001C32"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\compile1\\launch.json",
+      "copy": "01.build.compile1.launch.json",
+      "sha256": "6AD5738E644FBB85259F085C9D28A90EE264BE28A77A56A69271C682EA4F82AA"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\compile2\\result.json",
+      "copy": "01.build.compile2.result.json",
+      "sha256": "1BABE3433D68128664DC888618EEF280E1E59BB76FBF3E4F1A763226E81955D9"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\compile2\\launch.json",
+      "copy": "01.build.compile2.launch.json",
+      "sha256": "C7A91DCEEB38C569E3C2121339BD2DDC1265B4C8CB8BD20DBC8750B203244912"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\link3\\result.json",
+      "copy": "01.build.link3.result.json",
+      "sha256": "2834E1D55912FD8B27C662956A9C2D1C580D432B09EDBB1B755CCBA8036435A0"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\link3\\launch.json",
+      "copy": "01.build.link3.launch.json",
+      "sha256": "19C81AB5FA423969A71984A95E729D5FF9C1348584CADA02B21518804BAE8E51"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\manifest-01\\result.json",
+      "copy": "01.build.manifest-01.result.json",
+      "sha256": "2C7235818BA7C4EBAA16918D671E3ED08D89E7AD0F84684DC925F2B5261D9E0F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\manifest-01\\launch.json",
+      "copy": "01.build.manifest-01.launch.json",
+      "sha256": "97D652B4A13E0795A0A36FE4AA832A6EBDB3A33D03D8AB5515C7C40BA2F62260"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\metadata\\result.json",
+      "copy": "01.build.metadata.result.json",
+      "sha256": "2B8E9B83752CCE64D33E4E8E7272D220CBBA70E334B09E2AF2BF327185ECB746"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\metadata\\launch.json",
+      "copy": "01.build.metadata.launch.json",
+      "sha256": "F6A506FA3D84301802678CD4EAD449C71234797DD54F62ED57FC6D962A6AFA9B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\metadata\\native-products.json",
+      "copy": "01.build.metadata.native-products.json",
+      "sha256": "466FC6EA4F759B5198C8E0C85E6C904D616886EEF37E7AF402E21064432377FF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-01\\final-native-product.json",
+      "copy": "01.build.final-native-product.json",
+      "sha256": "018A8CA32AED807A440B5E37DAFB9AB28A97343F68573BE22D03D993FE7A9F3D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-stage-01\\result.json",
+      "copy": "01.stage.result.json",
+      "sha256": "04C85BFFC373E2A22C5F4F6B1E861D8DA2BBF2C890024F767F0E925F539009E7"
+    },
+    {
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\lush-woodland-01\\build-receipt.json",
+      "copy": "01.stage.build-receipt.json",
+      "sha256": "072536F928AE91C619C46F9445B0B2881B2ED94F16DF6C80F3BE499D2AB7F0E4"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\Frames\\frame-00149.png",
+      "copy": "01.frame-00149.png",
+      "sha256": "D5A8D64411E2D78A1EC398C9E8248FA76491D322A3C9D8D1A8C1957BA19D80D0"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-01\\Frames\\frame-00425.png",
+      "copy": "01.frame-00425.png",
+      "sha256": "157674EBD1C95035144A00F3EC23C51913A21DCA7F9EC6E462059F4DC7BFFED9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\observations.txt",
+      "copy": "02.ordinary.observations.txt",
+      "sha256": "C0207BF9D8B97005FDEB9D51F793331AC1410567051D711925675B86B759B11F"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\telemetry.csv",
+      "copy": "02.ordinary.telemetry.csv",
+      "sha256": "29CDF68D99FCE7852B051AD3CB250DDC3EB8EC327832492B4BBC4E9439F20934"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\presentation-settings.txt",
+      "copy": "02.ordinary.presentation-settings.txt",
+      "sha256": "AB1B23B52270740EAA63D7AC71B3E9F31EF4CB6CE99465D0D5F29A35D05C0210"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\qa-guard-result.json",
+      "copy": "02.ordinary.qa-guard-result.json",
+      "sha256": "57C798391F5147EABBB29FE64AEDA65AF6380A6ACC675E719E6D0559CC5FE0B9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\qa-launch.json",
+      "copy": "02.ordinary.qa-launch.json",
+      "sha256": "1631A6F316B3EC902DED5507EBB560AEFAFDA82C2E32AF3737859E94B1A9B0A7"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\qa-admission.txt",
+      "copy": "02.ordinary.qa-admission.txt",
+      "sha256": "3D90DE0FAF8E45550901A160F87C911964F25E93060CF83B2508388D92897D1D"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\grove-inventory.csv",
+      "copy": "02.ordinary.grove-inventory.csv",
+      "sha256": "A8A64797A6AD2B98B7D7A199894E535479BD95D52A2C1BE3B5AC32E82B097CFB"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\grass-inventory.csv",
+      "copy": "02.ordinary.grass-inventory.csv",
+      "sha256": "EE3EEA76E9EFB42A15F8352EAB2C99F0D12E669B8F69EB9E648C6506E327AE2D"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\grass-ground-inventory.csv",
+      "copy": "02.ordinary.grass-ground-inventory.csv",
+      "sha256": "F81C5EDEBF33A8D0EED0086FCD9593A8D0B24D519EF9A27F4D26E30049861545"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\tree-contact.csv",
+      "copy": "02.ordinary.tree-contact.csv",
+      "sha256": "50DA1197F245D3E85A7682D2F7C71D2B215CD603457CC76BBDF207F81AC2777A"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\camera-foreground.json",
+      "copy": "02.ordinary.camera-foreground.json",
+      "sha256": "8B93086CAC30DA2CECDEDD5E21FF9C529A8F69658714BB1F66C2937FE7CCC763"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-02\\qa-guard-result.json",
+      "copy": "02.clearing.qa-guard-result.json",
+      "sha256": "7D9568B81F424A26BEEAE6665EE44903BBD55A9B6DBAE4D8EBF4620F995D7B12"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-02\\qa-launch.json",
+      "copy": "02.clearing.qa-launch.json",
+      "sha256": "6610545DD6CBCE43181C06BCA67B51186EE9881A07A61C3F22AD0A074F8B9855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-02\\qa-admission.txt",
+      "copy": "02.clearing.qa-admission.txt",
+      "sha256": "620D5298E97A5ADEDE0DEE9620CC6CB2B34911B5878F145F27B1B3110DBC388B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-clearing-02\\smoke-result.txt",
+      "copy": "02.clearing.smoke-result.txt",
+      "sha256": "F4538E2CF346A756CEA2EC832DFB586287AE45BA9E492FADA64BFBCA524BE1F3"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-plan-02\\result.json",
+      "copy": "02.export.result.json",
+      "sha256": "696F150E6382F50761069B2F6DE86930A0779D5E59A5235FB1749A9B8470D238"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-plan-02\\actions.json",
+      "copy": "02.export.actions.json",
+      "sha256": "3CE65AA69F3C76076718B6DD159EB0B6AE15F21A16E3A1E3D1BB0D438661C522"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-plan-02\\launch.json",
+      "copy": "02.export.launch.json",
+      "sha256": "00C9321302450980A298B9ED40B187836A3DFA7D81F86A90FA3800E910DF7857"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile0\\result.json",
+      "copy": "02.build.compile0.result.json",
+      "sha256": "B3FF1BC7BF0B7350030D7D444C0973016F83D966D0882258F63C24BB07874E1A"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile0\\launch.json",
+      "copy": "02.build.compile0.launch.json",
+      "sha256": "70ABF43ABAE27E4B98A3CC4B0D51523F4B27B6A07D6F40F3B89C44C69FF29443"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile1-02\\result.json",
+      "copy": "02.build.compile1-02.result.json",
+      "sha256": "632DAC70A7B2210E1E139342828C01A299288458270CADA9E4DA74E44DFBF140"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile1-02\\launch.json",
+      "copy": "02.build.compile1-02.launch.json",
+      "sha256": "7062FE71017A0C1CBB6BB6A23EBF2D406411210F509CBBDE712D5C284DD5ED55"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\link2\\result.json",
+      "copy": "02.build.link2.result.json",
+      "sha256": "C4D729A69409FA0FBF1633DDB9BFDF863DE46D53200D71CE2B0F5F38F9DC8342"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\link2\\launch.json",
+      "copy": "02.build.link2.launch.json",
+      "sha256": "B6963616A307F444FBAA16AD045364CEE76B49DC297B41AB17FDA6E00397A4CC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\manifest-01\\result.json",
+      "copy": "02.build.manifest-01.result.json",
+      "sha256": "0B6795C7A2B510A8A1F3275B2D04409F76A42D4C11ADE9B5D80528D5B6ECBC50"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\manifest-01\\launch.json",
+      "copy": "02.build.manifest-01.launch.json",
+      "sha256": "C3CD5B0861F2A066F9C87FE3142D4BBDF8AAF7F9EACA23CDF55D93D02A708A25"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\metadata\\result.json",
+      "copy": "02.build.metadata.result.json",
+      "sha256": "0E1CD44B749F3EE8042A38F360B2F122BDD4698D702B6C9C86ECF9F14CDEF5E2"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\metadata\\launch.json",
+      "copy": "02.build.metadata.launch.json",
+      "sha256": "090228ECD70295F2E5E5FD8F90047DF8B678BC013171DF17311E0F29870E9470"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\metadata\\native-products.json",
+      "copy": "02.build.metadata.native-products.json",
+      "sha256": "8CDBCE406990952DEAFA24CED80D3F1B8D09599E383EA34C5097BF41AB469E20"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\final-native-product.json",
+      "copy": "02.build.final-native-product.json",
+      "sha256": "FB6529E9F82E6C974C6B7978101993771428496ED0D3619C5EB47060EF421440"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-stage-02\\result.json",
+      "copy": "02.stage.result.json",
+      "sha256": "92BAF58BEEA4234E1F567C36B2425754A6724773F7801D8125BF9384884B5AE9"
+    },
+    {
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\lush-woodland-02\\build-receipt.json",
+      "copy": "02.stage.build-receipt.json",
+      "sha256": "484389C7BCA26A9586FB45786285541F183B6BB1C01309F7B26904633C0C9C25"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\Frames\\frame-00149.png",
+      "copy": "02.frame-00149.png",
+      "sha256": "D328B76BFFABDFEF5AEBBDC94F9693503155DF4FE80543D4377CBFFB69F79A1B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\Frames\\frame-00425.png",
+      "copy": "02.frame-00425.png",
+      "sha256": "EC7A20CA80C3F8B41038FAE0A2EF26FC70CB5EEE3CA889EC186070171CB3DF5E"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-02\\understory-inventory.csv",
+      "copy": "02.understory-inventory.csv",
+      "sha256": "A548048091F8D67E3B4775F8112C62D87CACEA452059EE968DD90BFD4E763F62"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile1\\result.json",
+      "copy": "02.failed-compile1.result.json",
+      "sha256": "B769E4DD3DE7AC853437B7EB258A0F5CCF784BBC30E4187B0C51A19427DFDF33"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile1\\compiler.log",
+      "copy": "02.failed-compile1.compiler.log",
+      "sha256": "A022A7C1615AFB22052AD0C918818F8A48DB315CBADCE3835F827699D5B3D58C"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile1\\launch.json",
+      "copy": "02.failed-compile1.launch.json",
+      "sha256": "69EDA1DB5B8006E6450149EA4A031E03681DD50F8F5A4A75DDD0A2D000F991B8"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-01\\progress.json",
+      "copy": "01.daylight.progress.json",
+      "sha256": "2247EFD62B0AABB37E6535C27AEB8FAB9CF6D06B2020BA5CDE0D801F960F9C7C"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-01\\launch.json",
+      "copy": "01.daylight.launch.json",
+      "sha256": "7F7120676A4DFFDB8A481A02EE4853C090DEE3B727082E766330D053FBDFC1D9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-01\\qa-guard-result.json",
+      "copy": "01.daylight.qa-guard-result.json",
+      "sha256": "5305DE9AA5A5E45C471CF99554A7A119DB80234E284748E6E1FC1C52DDBDD112"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-01\\qa-launch.json",
+      "copy": "01.daylight.qa-launch.json",
+      "sha256": "D318675FFE3AAAE74139B86D9CCCC21D6DA37CA5821EFD0F2BDC6DFA711DE8ED"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-01\\stop-endurance.txt",
+      "copy": "01.daylight.stop-endurance.txt",
+      "sha256": "0BF3989738E2C09F30E98D3152EA6968416A52129FCE8225878E16DEEA2C694D"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-01\\Frames\\milestone-01.png",
+      "copy": "01.daylight.milestone-01.png",
+      "sha256": "F35407A9A037D144B200AE62C41F63C58825EE5B56D8B1DAFC6663D34703F8FE"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-02\\progress.json",
+      "copy": "02.daylight.progress.json",
+      "sha256": "397BE8C7DCC996FD9DDD00C8FE710E39229FF708E42463B7FA99CB5F0BC108E8"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-02\\launch.json",
+      "copy": "02.daylight.launch.json",
+      "sha256": "8821DC791FBC0B2042AAE3DA1CFB10D19128DFD2157256EE4FD7656A3AA6A2C3"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-02\\qa-guard-result.json",
+      "copy": "02.daylight.qa-guard-result.json",
+      "sha256": "02A80DD12308A58412DBC7A0871669293FDA307D53A44FF4E0400E7F6B92015A"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-02\\qa-launch.json",
+      "copy": "02.daylight.qa-launch.json",
+      "sha256": "73E26EF8932C522A62AA9552A83C0A42103F4DA70923BF733B6877A397B8E189"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-02\\stop-endurance.txt",
+      "copy": "02.daylight.stop-endurance.txt",
+      "sha256": "200E0EA7928D709A3EFFFB98F00E2CD1A133A041C54A2F25192F2BA13C433AF2"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\woodland-daylight-02\\Frames\\milestone-01.png",
+      "copy": "02.daylight.milestone-01.png",
+      "sha256": "4034C35A59B0E40A694262CCF2DD8AB5FC535B0AC6A182D86A55D20B3993276B"
+    }
+  ]
+}

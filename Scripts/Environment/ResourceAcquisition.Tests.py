@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -40,6 +41,16 @@ class AcquisitionTests(unittest.TestCase):
                 fetch.validate_url(url)
         with self.assertRaises(ValueError):
             fetch.NoRedirect().redirect_request(None, None, 302, "", {}, "https://other.invalid/x")
+
+    def test_reparse_rejection_without_python312_path_api(self):
+        path = MagicMock()
+        path.lstat.return_value = SimpleNamespace(st_mode=0, st_file_attributes=0x400)
+        with patch.object(fetch.stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400, create=True):
+            self.assertTrue(fetch.is_reparse_path(path))
+            with self.assertRaises(ValueError):
+                fetch.contained(path, "source.fbx")
+        path.lstat.return_value = SimpleNamespace(st_mode=0, st_file_attributes=0)
+        self.assertFalse(fetch.is_reparse_path(path))
 
     def test_file_admission(self):
         fetch.validate_file("shrub_04", self.item())

@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import stat
 import time
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -40,8 +41,17 @@ def leaf_name(name):
     return name
 
 
+def is_reparse_path(path):
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or bool(
+        getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+
+
 def contained(base, *parts):
-    if base.is_symlink() or base.is_junction():
+    if is_reparse_path(base):
         raise ValueError("Source root must not be a link or junction.")
     base = base.resolve()
     path = base.joinpath(*parts)
@@ -50,7 +60,7 @@ def contained(base, *parts):
     current = base
     for part in parts:
         current /= part
-        if current.is_symlink() or current.is_junction():
+        if is_reparse_path(current):
             raise ValueError("Source path contains a link or junction.")
     return path
 

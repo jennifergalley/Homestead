@@ -1,0 +1,617 @@
+{
+  "status": "passed-current-editor-native-build",
+  "createdUtc": "2026-09-21T21:51:14.8447462+00:00",
+  "products": [
+    {
+      "bytes": 2925056,
+      "sha256": "5C312C17D3A9CE4DD4C4A17C30171958E5459586AC95B5840DF5DD013661DCD1",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "bytes": 90714112,
+      "sha256": "A5B6DCD84B7F466C3D3B908CFA6098BB5A6458611D3BAC018ADB3CEECE3D288E",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "bytes": 503296,
+      "sha256": "12B03F561236E640AB54F21C8D7314CE7384BD4DF91DF03C7FE4D0D056458BD6",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "bytes": 30593024,
+      "sha256": "3A4DA3000CBDD000AE9884703532392691FFCEFA705BDA37C23E8C5246AFA2B9",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "bytes": 166,
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "bytes": 945032,
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "25472C1F739C28C801C1431AED26232E751BCC3C65A3553E82D5D3C23204E2C6",
+      "path": "Source\\SurvivalGame.Target.cs"
+    },
+    {
+      "sha256": "44E4A005C17600E77F0189E4A0B6A7609884F74E62DE2000B3F0C43A5C82737A",
+      "path": "Source\\SurvivalGame\\HomesteadActionTestState.h"
+    },
+    {
+      "sha256": "D66C9811BF092ABE3818315D07DC07A89C403862C2E32E6045DD47C34DF1EF0A",
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.cpp"
+    },
+    {
+      "sha256": "E28FE1088E89D9EBCF3C14746392995B5B5CAF2CA33B3B924A0A296F4D9E219B",
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.h"
+    },
+    {
+      "sha256": "116418605A7433E7FBC64442C1D1316B02B81FF9A5D2D8276F7DB2A29064B029",
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.cpp"
+    },
+    {
+      "sha256": "7E77BE0FDD8410EA2AD68805B8902C9F9E83311E8CF85D4D8F469E0FBB093104",
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.h"
+    },
+    {
+      "sha256": "CA2596A09E6FA5A2E3DEB03C17D946C06A522022AC62A5762EFDF702423B54ED",
+      "path": "Source\\SurvivalGame\\HomesteadBookClarityTest.cpp"
+    },
+    {
+      "sha256": "F16752470150401138AC2F7AF1ECBBB0EA0F40C6B8DC7A08338FA5942660078C",
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.cpp"
+    },
+    {
+      "sha256": "25C0E5745B1F983B9B15294AD856D7BE42FD3CE4698CB86DF5E09ED47569E74B",
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.h"
+    },
+    {
+      "sha256": "6381175542552565154024B628F5D7B6792A23AFABDEABD4ED6A2266345BB070",
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp"
+    },
+    {
+      "sha256": "C49C18730C4A83B64ACE6BB90AEDF93E5B4CF9EB1BE7E479E562C1332EE6F1ED",
+      "path": "Source\\SurvivalGame\\HomesteadController.cpp"
+    },
+    {
+      "sha256": "98AF9DEB26C97A4193FB9BD04CE8401693DB9F096029E2D995B13AFCFA751FC7",
+      "path": "Source\\SurvivalGame\\HomesteadController.h"
+    },
+    {
+      "sha256": "629A9DAF266AE251272E068F38C5C5E4ED7C99C4651BD1B22D548F18904B027C",
+      "path": "Source\\SurvivalGame\\HomesteadEndurancePlaytest.cpp"
+    },
+    {
+      "sha256": "0F1D215D4DBD3AA79131FA8E9F11073D0513C993F9F5E7A0EB31D48EA634DE59",
+      "path": "Source\\SurvivalGame\\HomesteadEnduranceState.h"
+    },
+    {
+      "sha256": "AC41A627C3CC4AFF94CF9F214EEBA9E88BDFC67ACA7EF25189EE733DBBC1BFA6",
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackMeasurements.cpp"
+    },
+    {
+      "sha256": "DB4C3EB29DFB3766D31A5E581DA3870344531DF0BC30A8D712ACEB855286FF44",
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackTest.cpp"
+    },
+    {
+      "sha256": "64CE6B346EB66E4662E5465895B89B91E30FB033FE0C20E1197B7F25EE97A556",
+      "path": "Source\\SurvivalGame\\HomesteadForageRenewal.cpp"
+    },
+    {
+      "sha256": "B8959594329CAAF80528BDEFB157B1CFD6E38132A79798A5861E8DC9CF6ACDBC",
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp"
+    },
+    {
+      "sha256": "99AA97162D8F30EFFD763D5ADA97A7FBDA145768D66BEE1AC6C5135078DBFFC6",
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.cpp"
+    },
+    {
+      "sha256": "BEA77510E11770942B0EF253692F39C55E1097AFB1D609AB106687655144AE38",
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.h"
+    },
+    {
+      "sha256": "6F8C8A0338241288538C99081820AB196DD225D73443EFB077211E13182AE9AD",
+      "path": "Source\\SurvivalGame\\HomesteadGatheringTest.cpp"
+    },
+    {
+      "sha256": "33AA1809BCC6F2DB444162BFBA9B09DF90AA022055DFF94C8C062296F9167A19",
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.cpp"
+    },
+    {
+      "sha256": "F6963986887E11D2DF5B76D476E8F29F7525D2792BECE8D1CB10B27F12C5C230",
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.h"
+    },
+    {
+      "sha256": "C05F19BB6D359E769A54E256EFA9A5C39B3FA892ADDC8C6F75D693920C99A413",
+      "path": "Source\\SurvivalGame\\HomesteadHotkeyTest.cpp"
+    },
+    {
+      "sha256": "3FD335630DFC4B727BEAAE617BE40C44111B31AE5AAFEA3C9438141C0B60277C",
+      "path": "Source\\SurvivalGame\\HomesteadHUD.cpp"
+    },
+    {
+      "sha256": "4341DB951DEC95F4876BC559B9041D0856CB8E125173AD57C8C2F103E6A32868",
+      "path": "Source\\SurvivalGame\\HomesteadHUD.h"
+    },
+    {
+      "sha256": "F07EB7E35A7E76BB8F820CD69CF75D5AF8F058B178676E5E975F691871E57A02",
+      "path": "Source\\SurvivalGame\\HomesteadPresentationTest.cpp"
+    },
+    {
+      "sha256": "09CCF9C06E5F9B428083BAC294DFC27ACB845BEF0ACD407F0D10D94625A542A6",
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.cpp"
+    },
+    {
+      "sha256": "B704619EC86B653B1E110A6582370F9F5592BB2175E1BB55010E97D5513961FA",
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.h"
+    },
+    {
+      "sha256": "3B78A2B383AF0E90EEF431928F04A0C568EA118935C5698AE499224991C05659",
+      "path": "Source\\SurvivalGame\\HomesteadPromptTest.cpp"
+    },
+    {
+      "sha256": "E2EBE532F4B052CC59D920E529F16D82C305A7E91F8CA640EA269296F0817A61",
+      "path": "Source\\SurvivalGame\\HomesteadRenewalState.h"
+    },
+    {
+      "sha256": "CDBC705D5772C9690293EC6845DEB15B35B6952C5190F9723B5BFD0FFE2C3F3D",
+      "path": "Source\\SurvivalGame\\HomesteadSave.h"
+    },
+    {
+      "sha256": "9C2ABC921A58E05855C3219BA43ACE1DD79D21E2F9B2E47D8309E4B3E1C9BF8E",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.cpp"
+    },
+    {
+      "sha256": "9597E28AA7F9C7E0448487EFA9DA8CC2A3B5B4B4ECDDEBE8CC35A94F90F8EC76",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.h"
+    },
+    {
+      "sha256": "3A3CB868D064FBE67B875F85B7470A45D1AFC84AEA2B581FF4FE6EA4010646E0",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRoutingTest.cpp"
+    },
+    {
+      "sha256": "5F0E75C7420F549575020B577EA8BBA9A15AC8C412453B19AAC15E58409F9635",
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.cpp"
+    },
+    {
+      "sha256": "EADB437E89B41F8DA243EF1885214E0778A631DCE5E807A2FFF7DFD483A4AC38",
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.h"
+    },
+    {
+      "sha256": "24F7F33A5E5B99A86C1F6B87261A23F111E9AD1539D529DFF8E4C614BC546577",
+      "path": "Source\\SurvivalGame\\HomesteadStartupProbe.cpp"
+    },
+    {
+      "sha256": "B9E9D6A031AE30581C574D25993B71520C502F9B9FC9F949205F8FD0229B0C39",
+      "path": "Source\\SurvivalGame\\HomesteadTestPaths.h"
+    },
+    {
+      "sha256": "3CAFD675BC651886F1CBDF27795B40D9917887DB75A0720F03FBEE3D5310431E",
+      "path": "Source\\SurvivalGame\\HomesteadToolGeometry.h"
+    },
+    {
+      "sha256": "0E89AB603A6BAB0DF1A319E0F8AE7C5648C3E0C9620F03D417DE1F47DDE9EDA9",
+      "path": "Source\\SurvivalGame\\HomesteadVideoSyncTest.cpp"
+    },
+    {
+      "sha256": "50EA1D108801560B6D72B7329DF989A77C4B6834963922D96476395153897516",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp"
+    },
+    {
+      "sha256": "8227A6D7EF83D3CB94B3503DC41484881EFCE495F0C1F14C6DAD68E7A58CD8B0",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h"
+    },
+    {
+      "sha256": "8129C57DFD5031F72DE790C9267DEED403036E86C8F00B12D2C4CA779FB849EC",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.cpp"
+    },
+    {
+      "sha256": "E705F5D49CDF4C605CABD97620E9EDCDD1C4CD05424384C231D9E64E5811FA06",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.h"
+    },
+    {
+      "sha256": "E4FA23EC3514593D90FCC344EBACCCF7BBEF25C120359047A1866C9FF41ADAC0",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobeSelection.h"
+    },
+    {
+      "sha256": "4BB77A6CE984EB0F2AA2DD93DA5B041A2839B4D9BD3D59692AE0E41E355CA5F7",
+      "path": "Source\\SurvivalGame\\HomesteadWateringPlaytest.cpp"
+    },
+    {
+      "sha256": "5EC591C2E5DF7C0265153308118002D01FC457EC024DF4628D422D934BAD5B93",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTest.cpp"
+    },
+    {
+      "sha256": "9C1C58E81E2E89F9AD46673E6E145136576633E65DFFA04A9F5CD89BA2E2C0E0",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.cpp"
+    },
+    {
+      "sha256": "301B4BBC8D00A9F3AC0236BE731D9D87836ACF7B25DFE0D2FBB616692FEDFF64",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.h"
+    },
+    {
+      "sha256": "739D6C3C8DCDC123DE82B36C358B16E02A5ABD123DA50ED685E8DEE5CC2192DE",
+      "path": "Source\\SurvivalGame\\HomesteadWeedingPlaytest.cpp"
+    },
+    {
+      "sha256": "4FFFAE84FF88204D7877BEE8AD8A8642AC3A8A2E6018EDCC6BDADF5FB2125C86",
+      "path": "Source\\SurvivalGame\\HomesteadWeedingTest.cpp"
+    },
+    {
+      "sha256": "21C718F3822002D29B68E0DC398B72E702088C2C73FF9891C1B36D462C8BC801",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp"
+    },
+    {
+      "sha256": "17720FC66529340EDBBA050B8587CDCD0C97A79BF763CF9D5656B61F5EAC8EAF",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h"
+    },
+    {
+      "sha256": "F593880C6C9801F9BAFAB406D36D914B873BCE76E60B9C8C329D6B9B0EDDAA1C",
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.cpp"
+    },
+    {
+      "sha256": "2EEB97DEBCF123D42E2E49AEDA0F5A84C3C8399BA1958C19E138D001B690F6D9",
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.h"
+    },
+    {
+      "sha256": "677C6C15DCD9AF8D67B83B0C76EE712F39F021D71F41A6ED3D8081E294B86D6C",
+      "path": "Source\\SurvivalGame\\SurvivalGame.Build.cs"
+    },
+    {
+      "sha256": "876F67FAE339EB8036B94CA19ADC55CBFAE0A3A3E72B2E1D48D8761BFB911467",
+      "path": "Source\\SurvivalGame\\SurvivalGame.cpp"
+    },
+    {
+      "sha256": "319D13D3AA0229238C85BE82C266F5A663DC82B572C1A82AD80DD7FC9B53ECAF",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadDirectionalNavigationTest.cpp"
+    },
+    {
+      "sha256": "52592BBBA0EAC6ACF65E982BA5FF6A32AED1E33AACE4270603D6F24DE28B7661",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuInventory.cpp"
+    },
+    {
+      "sha256": "7CE11232912570E3AA0D1F2A66EA2936C7E110AAA7EF162C6135DE71A46D9CF7",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuNavigation.h"
+    },
+    {
+      "sha256": "FB286AA1D89EE02373A87606880E10AC601729829372F0B33C6728E5B74A7146",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.cpp"
+    },
+    {
+      "sha256": "95536A0CAB9AF545069DE1ADCB2E0FDF96C50E964B4CA6735377C4A0FBF897AF",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.h"
+    },
+    {
+      "sha256": "43211E5CB1B113A6A564A375FD527E9548CB01800831E35620D8F291EAEDD0A8",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuTests.cpp"
+    },
+    {
+      "sha256": "641B7F0A5A511220F660D7E826B3D0B18A11208C3B21A1F71A2EEC46104FEC19",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadNativeMenuTest.cpp"
+    },
+    {
+      "sha256": "2C0C2C7AD8A90DA07E9D272A89F536BDCD7C451D5660ADDDFA473509F735C78F",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.cpp"
+    },
+    {
+      "sha256": "C32CAE33B0A909D8C65D6EBC9A0CC2FEE3E4E74EF9089B554BE9ADAD238A36B3",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.h"
+    },
+    {
+      "sha256": "DC7CADD4EBD5DD6B91FA07F36A10A7326217691D17934E577F469732823ECA6E",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.cpp"
+    },
+    {
+      "sha256": "B10EA0B056EB21BCFA8048ECAF3677A395AFB60B901F0531681DBB734D2F44A1",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.h"
+    },
+    {
+      "sha256": "1A3BA371827DF9262B7376169F1FE5BFB6372AA53A1D79A0114D6886B5592A05",
+      "path": "Source\\SurvivalGameEditor.Target.cs"
+    },
+    {
+      "sha256": "939AC87306CE3A47FF45AD1713BC4FD22322DFF1292B428E87C103AA84B85282",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp"
+    },
+    {
+      "sha256": "882502A283407DFB441A0884B0186EC7B92ED8DB954103FF2056BA9429B9D98D",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h"
+    },
+    {
+      "sha256": "192900EC0EB4B44A72E9D4CF6DE557E47F4EB310C5ED1A4B62EFDA8FDE0413F4",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "B934F6B7A5D50739D93104117483ABD4C40D464858E8C23C09D0CA688019D875",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.h"
+    },
+    {
+      "sha256": "1C5C12CA144BAB9FDE9580026BCA827168576612C98F5A700EB34CE7890D70E4",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "8F47E9C54BFAA78B79672022472962BD4B6E7548625F57A4409BA5CB09180A86",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.cpp"
+    }
+  ],
+  "evidence": [
+    {
+      "sha256": "F0201517557E2DAC26419EA54767D776213AF6C0ED4000D668279896DACC3CFB",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\actions.json"
+    },
+    {
+      "sha256": "26DDD338864A385CB690EB95A8B07E93C472D5CC2296366EDF32ABFD37DCCAF1",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\launch.json"
+    },
+    {
+      "sha256": "6D19B3FB223956976C774980BC8A4613FC754638F555750D2FA443719461A8CC",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\stderr.log"
+    },
+    {
+      "sha256": "CE620683F817BC7D9C5C00472834D188B68303E15F9117E67D7A161EDA61A65A",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\stdout.log"
+    },
+    {
+      "sha256": "5A2F899F0603FDCA398D86DC62258E1F5057518825751B82D67EB39538BED5B1",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\ubt.json"
+    },
+    {
+      "sha256": "830016233FECA89541F84F4DC69005227BE36A9C2D2CF315D21FA4DA384BFA44",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-plan-01\\ubt.log"
+    },
+    {
+      "sha256": "9721965A603A172DB50EC201C15AD977F6FC6E2CA68EC85BB2AC45FDDD2C03E1",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile0-02\\compiler.log"
+    },
+    {
+      "sha256": "86044CF60D694A2CA3AC8710F9311B5CE28ACE8825241AF4A7683AC3E38D5125",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile0-02\\launch.json"
+    },
+    {
+      "sha256": "A5A17187E2C7D30363E6CA20AA331021D3E04F64B8A555D9EDB6F7EEF588AFC1",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile0-02\\result.json"
+    },
+    {
+      "sha256": "F4F2D76021C439AC1DB0C1A99337C00BC3925200B9CA636EEF4342DD2191FA5D",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile1\\compiler.log"
+    },
+    {
+      "sha256": "5EBEF3B19AF982424AFBF4045643C1D26F1F70E85E57B65E95B8F21F65B2FE9F",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile1\\launch.json"
+    },
+    {
+      "sha256": "B0B9DA8D7B5DEC8933A4338A3F8F6E6A961D5FDF72C962CCB5901F33819D1CEF",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile1\\result.json"
+    },
+    {
+      "sha256": "DCE187B073A026DCAD52E064C1258ABA4135913B58CD1E73F8C8C891DB411CC5",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile4\\compiler.log"
+    },
+    {
+      "sha256": "66D7A217A0AB0D25D5914A4156907C7948412B94FB40069145661DCDCC472F29",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile4\\launch.json"
+    },
+    {
+      "sha256": "B2CEA3CF42F39D437EFFA2B8D2DC72B4804F144A38A02B05620A73BA2482AA0F",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile4\\result.json"
+    },
+    {
+      "sha256": "D9BA7E8EA11BDEF98395655215CD479C8099E41EB24C46B538298E4AE8952088",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile5\\compiler.log"
+    },
+    {
+      "sha256": "405EA618B6D1A030C1923C8B6BF9393FF55E1E12E37F578573752624DF1F7478",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile5\\launch.json"
+    },
+    {
+      "sha256": "8B62DA0AB33D692AFFF86A220531E010E631BCB1D57BD22C110D6F31D1C25B57",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile5\\result.json"
+    },
+    {
+      "sha256": "159751B3B6CDC1CCEE3D5579964200E273CD668C25682B7ABCF617449C10D91C",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile6\\compiler.log"
+    },
+    {
+      "sha256": "EE775D483723F506A7F6C11AE81C3A71549661B7B7992EA1EEE3B910776DD183",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile6\\launch.json"
+    },
+    {
+      "sha256": "6ADBA20617A39FD55D5F9376FB131F2FC42CE53C5C04EA9EEDAB5138CA7B56E1",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile6\\result.json"
+    },
+    {
+      "sha256": "6F66232D0189A0E95A8BB754039B0F816475713A892196E22A3BC0C0027F8A71",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link3\\compiler.log"
+    },
+    {
+      "sha256": "949D3A40EE344A31CACAAA88C3C5DE174C9EF9FDD58FB8FE68E59F2A6142C060",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link3\\launch.json"
+    },
+    {
+      "sha256": "8366BEDF1EF5EDFBF0AC0422222D7CF269BDFBB3C8F53354FD57A88AFBDBEB0A",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link3\\result.json"
+    },
+    {
+      "sha256": "DBB9C042EFF3C4DD8C9F2645BE764D28E267BD062F25C1F5B716378A3A5EE08C",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link8\\compiler.log"
+    },
+    {
+      "sha256": "99EA3A02FA9D060CC1D0C62A59C9D9BBB0267C37432949CB32784884C9A6F991",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link8\\launch.json"
+    },
+    {
+      "sha256": "C2F14850246D7890F3F79BED2D1E60A240DB69BEEFCAD56B0D14A73C272E0A58",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link8\\result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link2\\compiler.log"
+    },
+    {
+      "sha256": "29B7FDBE05BDDE89DFCE31CFEEB39D6223A0E8669B0DC87A4131238EEB4FB5F7",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link2\\launch.json"
+    },
+    {
+      "sha256": "DDEFA9D121C6A747D9E4EC7372BBE86E431C384BC70629F3DE10FFF15C4AB226",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link2\\result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link7\\compiler.log"
+    },
+    {
+      "sha256": "AB754D62348DE1B92D3ADF9B66766BF2C99975A4DA45BE938347763B8538D4DB",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link7\\launch.json"
+    },
+    {
+      "sha256": "EDD90FE84653E07894D2AC7E4E01FF5C37E9099BAD8801EA7EFE9EC65958DE29",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\link7\\result.json"
+    },
+    {
+      "sha256": "EBE07C84E21621222FCBC29504282E1042FC6BECAA306CE5A1B299F5BE91AB0A",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\launch.json"
+    },
+    {
+      "sha256": "820FA9110241990507AFFC61B78864450E9CECDA17EB2A1BD7ADF77A604064BB",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\metadata-products.json"
+    },
+    {
+      "sha256": "3FA734EAD7C527B3EF9446B01980952954989712F74F64D6857D6FCCF20AA044",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\native-products.json"
+    },
+    {
+      "sha256": "B909D4465AF1DB573842F87116602CDB36EC30676C51F9ED4D4750DBB981E886",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\stderr.log"
+    },
+    {
+      "sha256": "B462D0BD7FD381015B41E6AD854FF36781607B043FD15BBC9EF20756B56A081F",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\stdout.log"
+    },
+    {
+      "sha256": "B842A975CD5930B8CC06D1EA303FE3AD90B616DE4CF660A633D945F060328F78",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\ubt.json"
+    },
+    {
+      "sha256": "C7EF6C469644EDE21B3A36E7234ED17B19A488AD87B899BAE97BCEEA9FEC5F16",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\metadata\\ubt.log"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\resource-conversion-30\\game\\compiler.log"
+    },
+    {
+      "sha256": "63379A686E1C8CE7D706862B8BEBFCC7696E9907C5850CD870E590E8A03C05EA",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\resource-conversion-30\\game\\launch.json"
+    },
+    {
+      "sha256": "FE5B0F2B9453794FCFC2C7AA1E7754346E4274FF9BB0458DD03BDCAE1FC4F2EC",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\resource-conversion-30\\game\\result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\resource-conversion-30\\probe\\compiler.log"
+    },
+    {
+      "sha256": "2AF12897679D85648A56EF7B9D8344E3C3460CD2EC2DE11A653C6DAEF481219C",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\resource-conversion-30\\probe\\launch.json"
+    },
+    {
+      "sha256": "EC44CBC7682509D0D661AE7089916850873669597A2586BD46AB2D95A133A7F4",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\resource-conversion-30\\probe\\result.json"
+    },
+    {
+      "sha256": "FC642EF330765874B7A8D3E3E564A2F58F4F8D506D81387B6A8299BCADBE2831",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile0\\compiler.log"
+    },
+    {
+      "sha256": "C33681002C765E1EB5FADAD792942585CCA39BF8BB972CB006691A3706BAE707",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile0\\launch.json"
+    },
+    {
+      "sha256": "CB9C3783D19772D1A998A58D99ECD2FCF710896CB277D526AF780514D203CA9B",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-native-build-01\\compile0\\result.json"
+    },
+    {
+      "sha256": "9C2C55DC3AA835A026D0C2208C0B8B6E6A09AF052517D4C538CADB53371D6144",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-source-prep-01\\launch.json"
+    },
+    {
+      "sha256": "D713E6482944E7424DA770B0C5389E9EE5AA57A69C71030FD97A513E4A0C3BEE",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-source-prep-01\\result.json"
+    },
+    {
+      "sha256": "C715636565F5713707857D61955D349B2F9EDB6F4553D4EC19645BCBE4CB1782",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-source-prep-01\\source.log"
+    },
+    {
+      "sha256": "1E5724389CE54E693FB619D80E7D32AFD0BB135CC675C73671F53072BA0CC638",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-policy-tests-01\\tests.log"
+    },
+    {
+      "sha256": "AC41702DDF926BD7B878BF02C75F7F767BC7C3905C231D057C8433EAAE596B40",
+      "path": "docs\\research\\environment-assets\\woodland-native-build-01\\woodland-policy-tests-02\\tests.log"
+    }
+  ],
+  "actualSuccessfulSteps": [
+    "woodland-native-plan-01",
+    "woodland-native-build-01\\compile0-02",
+    "woodland-native-build-01\\compile1",
+    "woodland-native-build-01\\compile4",
+    "woodland-native-build-01\\compile5",
+    "woodland-native-build-01\\compile6",
+    "woodland-native-build-01\\link3",
+    "woodland-native-build-01\\link8",
+    "woodland-native-build-01\\link2",
+    "woodland-native-build-01\\link7",
+    "woodland-native-build-01\\metadata",
+    "resource-conversion-30\\game",
+    "resource-conversion-30\\probe"
+  ],
+  "previousReceipt": {
+    "sha256": "83558EBBBEF65B17C4EC5F563B98FA0E69D66FE14E0B1520E822422F38CDA30D",
+    "path": "docs\\research\\environment-assets\\grass-native-build-01\\receipt.json"
+  },
+  "qualification": {
+    "limit": "Build/source evidence only. Actual38-package import/reload, cook, gameplay images and performance are unpassed. Selected navigation06 remains unchanged.",
+    "tests": "Woodland native-shaped inventory/token tests and directly shared fern40/grass39/tree67 negative cases passed. First shared-policy invocation omitted a mandatory disposable fixture directory; original transcript retained, corrected invocation is separate. Synthetic inventories are not Unreal asset acceptance.",
+    "links": "Two genuine libraries, two resource conversions and resource-token-only DLL links passed in detached pre-resume limit1/no-breakaway jobs. PE/PDB identity and genuine UBT metadata verified.",
+    "inherited": {
+      "actualExport": "Distinct grass-native-plan-02 passed existing observational allowlist/None working-set controls. ISPC1.24 --version is log/source-corroborated but absent from process samples; no full short-lived-child identity/endpoint-history claim. No new helper allowance.",
+      "links": "Two genuine import libraries, two resource conversions and resource-token-only DLL links passed under detached pre-resume limit1/no-breakaway jobs; no forged produced items. PE/PDB identities and actual UBT metadata verified.",
+      "failedExport": "grass-native-plan-01 FAILED: unidentified exited child20456, path unavailable; no retrospective identity or endpoint claim. Preserved failure is not superseded as a pass.",
+      "limit": "Build/source evidence only. New14-package import/reload, cook and actual ordinary gameplay remain separate unpassed gates. Selected grove03 untouched.",
+      "inherited": {
+        "inherited": {
+          "inherited": {
+            "inherited": "Genuine integrated strict native-menu/equipment/current-save/resume fixture game compile4/library6/DLL5 and metadata passed. Editor importer unchanged from previous genuine receipt. Raw guarded step evidence retained under exact paths/hash. Prior failed import01 and historical compiler/link/monitor qualifications remain unchanged. No new gameplay acceptance inferred from compilation.",
+            "current": "Genuine UBT exports/UHT, exact guarded native compiler/library/DLL leaves, resource-only substitutions, actual PE/PDB checks and real UBT metadata. UBT export/metadata remain sampled observational tools with the previously approved build-only conhost; not root-only leaf proofs. Original failed compiles and missing-RHI-dependency link remain failed. Global marker not used for these compiler leaves.",
+            "correction": "Typed TObjectPtr declarations, genuine UHT refresh after header movement, explicit RHI dependency for installed UE5.8 shader-platform material readiness. An attempted feature-level overload was rejected by the actual compiler and retained, not cast or claimed successful.",
+            "limit": "No tree import, persisted asset, Cook, Shipping or visual/runtime acceptance from this build."
+          },
+          "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+          "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+          "correction": "Importer only: referenced FBX bounds in UE frame; branch-only invertible UV swap; supported Tangents|UseMikkTSpace with exact nonzero-normal preservation; pre/post per-role basis measurements. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and actual metadata succeeded."
+        },
+        "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+        "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+        "correction": "Importer only: distinguish orphan vertex instances from referenced corners; permit only remaining exact-zero single-face referenced corners to use valid engine-computed face normals; regenerate Mikk tangents and compare nonzero normals exactly. Record intermediate/final per-role measurements and pre-adaptation actual bounds. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and metadata succeeded."
+      },
+      "compilers": "Five genuine root-only guarded compile actions passed; action5 first failed on TObjectPtr deduction/mixed SmoothStep types, corrected in source and passed as distinct compile5-02. Actual original failure retained."
+    },
+    "compilers": "Five genuine root-only guarded compile actions passed. First importer compile0 failed on a shadowed role-set name and two signed/unsigned vertex-loop comparisons; surgical type/name corrections passed as distinct compile0-02. Original failure remains failed.",
+    "actualExport": "Genuine woodland-native-plan-01 passed existing observational build allowlist. ISPC1.24 --version is log/source-corroborated but absent from finite process samples; no complete short-lived-child identity/endpoint-history claim or new helper allowance."
+  }
+}

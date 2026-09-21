@@ -1807,6 +1807,517 @@ namespace Grass
     }
 }
 
+namespace Woodland
+{
+    const FString Root = TEXT("/Game/Trials/WoodlandResources_20260921_01");
+    const FString CanopyName = TEXT("SM_TreeSmall02_Woodland");
+    const FString CanopySource = TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2");
+    struct FRole
+    {
+        const TCHAR* Asset;
+        const TCHAR* Slot;
+        const TCHAR* Name;
+        bool Masked;
+    };
+    const FRole Roles[] = {
+        {TEXT("shrub_04"), TEXT("shrub_04"), TEXT("Shrub04"), true},
+        {TEXT("dry_branches_medium_01"), TEXT("dry_branches_medium_01"), TEXT("DryBranchesMedium01"), false},
+        {TEXT("fir_sapling"), TEXT("fir_sapling_branches"), TEXT("FirSapling_Branches"), false},
+        {TEXT("fir_sapling"), TEXT("fir_sapling_twigs"), TEXT("FirSapling_Twigs"), true},
+        {TEXT("flower_empodium"), TEXT("flower_empodium"), TEXT("FlowerEmpodium"), true}
+    };
+    struct FResourceMesh
+    {
+        const TCHAR* Node;
+        const TCHAR* Name;
+        int64 Model;
+        int64 Geometry;
+        int32 FirstRole;
+        int32 Slots;
+        int32 Triangles;
+        int32 FirstRoleTriangles;
+        FVector Size;
+    };
+    const FResourceMesh Resources[] = {
+        {TEXT("shrub_04_a_LOD0"), TEXT("SM_Shrub04_a"), 902364038, 635192995, 0, 1, 3726, 3726, FVector(13.586507,10.860004,19.504898)},
+        {TEXT("shrub_04_c_LOD0"), TEXT("SM_Shrub04_c"), 93264763, 427213477, 0, 1, 6177, 6177, FVector(15.615090,16.856992,28.044902)},
+        {TEXT("dry_branches_medium_01_a"), TEXT("SM_DryBranchesMedium01_a"), 482288108, 712888422, 1, 1, 5933, 5933, FVector(32.306373,129.915291,34.098531)},
+        {TEXT("dry_branches_medium_01_b"), TEXT("SM_DryBranchesMedium01_b"), 250011136, 949666676, 1, 1, 5254, 5254, FVector(15.116379,103.850380,14.188740)},
+        {TEXT("dry_branches_medium_01_c"), TEXT("SM_DryBranchesMedium01_c"), 424157413, 711997973, 1, 1, 5616, 5616, FVector(13.056898,77.712587,14.325982)},
+        {TEXT("fir_sapling_a"), TEXT("SM_FirSapling_a"), 985243675, 390441697, 2, 2, 157402, 546, FVector(86.114654,82.223612,130.073798)},
+        {TEXT("fir_sapling_c"), TEXT("SM_FirSapling_c"), 593523097, 52513824, 2, 2, 124743, 384, FVector(62.218940,63.400522,73.570000)},
+        {TEXT("flower_empodium_a_LOD0"), TEXT("SM_FlowerEmpodium_a"), 302411512, 28790185, 4, 1, 758, 758, FVector(21.736366,25.076567,26.707188)},
+        {TEXT("flower_empodium_b_LOD0"), TEXT("SM_FlowerEmpodium_b"), 777242687, 160722651, 4, 1, 758, 758, FVector(18.151786,20.466541,19.051760)}
+    };
+
+    FString TextureName(int32 Role, int32 Channel)
+    {
+        const TCHAR* Suffix[] = {TEXT("Diff"), TEXT("NormalDX"), TEXT("Roughness"), TEXT("AO"), TEXT("Alpha")};
+        return FString(TEXT("T_")) + Roles[Role].Name + TEXT("_") + Suffix[Channel];
+    }
+
+    FString TextureFile(int32 Role, int32 Channel)
+    {
+        const TCHAR* Suffix[] = {TEXT("diff"), TEXT("nor_dx"), TEXT("rough"), TEXT("ao"), TEXT("alpha")};
+        return FString(Roles[Role].Slot) + TEXT("_") + Suffix[Channel]
+            + (Role == 1 && Channel == 0 ? TEXT("_1k.jpg") : TEXT("_1k.png"));
+    }
+
+    TArray<FString> Packages()
+    {
+        TArray<FString> Value = {Root + TEXT("/Meshes/") + CanopyName};
+        for (const auto& Resource : Resources) Value.Add(Root + TEXT("/Meshes/") + Resource.Name);
+        for (int32 Role = 0; Role < UE_ARRAY_COUNT(Roles); ++Role)
+        {
+            Value.Add(Root + TEXT("/Materials/M_") + Roles[Role].Name);
+            for (int32 Channel = 0; Channel < (Roles[Role].Masked ? 5 : 4); ++Channel)
+                Value.Add(Root + TEXT("/Textures/") + TextureName(Role, Channel));
+        }
+        return Value;
+    }
+
+    FKSphylElem SaplingCameraCapsule(const FBox& Bounds)
+    {
+        FKSphylElem Value;
+        Value.Center = Bounds.GetCenter();
+        Value.Radius = FMath::Min(Bounds.GetExtent().Z, FMath::Max(Bounds.GetExtent().X, Bounds.GetExtent().Y));
+        Value.Length = FMath::Max(0.0, Bounds.GetSize().Z - 2 * Value.Radius);
+        return Value;
+    }
+
+    bool Reject(const TSharedRef<FJsonObject>& Result, const FString& Reason)
+    {
+        Result->SetStringField(TEXT("failure"), Reason);
+        UE_LOG(LogFernSpike, Error, TEXT("Woodland resources: %s"), *Reason);
+        return false;
+    }
+
+    bool CanopyInventory(UStaticMesh* Mesh, const TSharedRef<FJsonObject>& Result)
+    {
+        auto* Source = LoadObject<UStaticMesh>(nullptr, *CanopySource);
+        if (!Source || !Mesh) return Reject(Result, TEXT("Missing source or derived woodland canopy."));
+        FStaticMeshCompilingManager::Get().FinishCompilation({ Source, Mesh });
+        const auto* Description = Mesh->GetMeshDescription(0);
+        const auto* Render = Mesh->GetRenderData();
+        const auto* Body = Mesh->GetBodySetup();
+        const auto* SourceBody = Source->GetBodySetup();
+        if (!Description || Description->Triangles().Num() != 231785
+            || Mesh->GetNumSourceModels() != 3 || !Render || Render->LODResources.Num() != 3
+            || Mesh->GetStaticMaterials().Num() != 3 || Mesh->GetNaniteSettings().bEnabled
+            || Mesh->GetAutoComputeLODScreenSize()
+            || !Body || !SourceBody || Body == SourceBody
+            || Body->AggGeom.GetElementCount() != 1 || Body->AggGeom.SphylElems.Num() != 1
+            || SourceBody->AggGeom.SphylElems.Num() != 1 || Body->CollisionTraceFlag != CTF_UseSimpleAsComplex)
+            return Reject(Result, TEXT("Derived canopy source/LOD/body contract differs."));
+        const auto& Capsule = Body->AggGeom.SphylElems[0];
+        const auto& OriginalCapsule = SourceBody->AggGeom.SphylElems[0];
+        if (!Capsule.Center.Equals(OriginalCapsule.Center, 0.001)
+            || Capsule.Radius != OriginalCapsule.Radius || Capsule.Length != OriginalCapsule.Length
+            || !Capsule.Rotation.Equals(OriginalCapsule.Rotation, 0.001))
+            return Reject(Result, TEXT("Derived canopy changed measured trunk collision."));
+        const FBox Bounds = Mesh->GetBoundingBox(), SourceBounds = Source->GetBoundingBox();
+        if (!Bounds.Min.Equals(SourceBounds.Min, 0.1) || !Bounds.Max.Equals(SourceBounds.Max, 0.1))
+            return Reject(Result, TEXT("Derived canopy changed native root/bounds."));
+        for (int32 Slot = 0; Slot < 3; ++Slot)
+            if (Mesh->GetMaterial(Slot) != Source->GetMaterial(Slot)
+                || Mesh->GetStaticMaterials()[Slot].ImportedMaterialSlotName != Source->GetStaticMaterials()[Slot].ImportedMaterialSlotName)
+                return Reject(Result, TEXT("Derived canopy changed retained material roles."));
+        TArray<TSharedPtr<FJsonValue>> Lods;
+        const float Screens[] = {1.0f, 0.35f, 0.12f};
+        const int32 Limits[] = {231785, 65000, 18000};
+        for (int32 Index = 0; Index < 3; ++Index)
+        {
+            const auto& Lod = Render->LODResources[Index];
+            const int32 Triangles = Lod.GetNumTriangles();
+            const auto& Model = Mesh->GetSourceModel(Index);
+            if (Triangles <= 0 || Triangles > Limits[Index] || (Index == 0 && Triangles != 231785)
+                || !FMath::IsNearlyEqual(Model.ScreenSize.Default, Screens[Index])
+                || !FMath::IsNearlyEqual(Render->ScreenSize[Index].Default, Screens[Index])
+                || Lod.Sections.Num() != 3 || Lod.VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords() != 2)
+                return Reject(Result, FString::Printf(TEXT("Canopy LOD%d geometry/screen/UV contract differs."), Index));
+            int32 SectionTriangles = 0;
+            TSet<int32> SeenMaterialRoles;
+            for (const auto& Section : Lod.Sections)
+            {
+                if (Section.MaterialIndex < 0 || Section.MaterialIndex >= 3 || Section.NumTriangles == 0
+                    || SeenMaterialRoles.Contains(Section.MaterialIndex))
+                    return Reject(Result, TEXT("Canopy reduction lost or duplicated a surface role."));
+                SeenMaterialRoles.Add(Section.MaterialIndex);
+                SectionTriangles += Section.NumTriangles;
+            }
+            if (SectionTriangles != Triangles) return Reject(Result, TEXT("Canopy section accounting differs."));
+            for (int32 Vertex = 0; Vertex < Lod.GetNumVertices(); ++Vertex)
+            {
+                const auto Normal = Lod.VertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(Vertex);
+                if (Lod.VertexBuffers.PositionVertexBuffer.VertexPosition(Vertex).ContainsNaN()
+                    || FVector3f(Normal.X, Normal.Y, Normal.Z).ContainsNaN()
+                    || FVector3f(Normal.X, Normal.Y, Normal.Z).SizeSquared() < 0.5f
+                    || Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(Vertex, 0).ContainsNaN())
+                    return Reject(Result, TEXT("Canopy render geometry has invalid position/normal/UV."));
+            }
+            auto Record = MakeShared<FJsonObject>();
+            Record->SetNumberField(TEXT("lod"), Index);
+            Record->SetNumberField(TEXT("triangles"), Triangles);
+            Record->SetNumberField(TEXT("vertices"), Lod.GetNumVertices());
+            Record->SetNumberField(TEXT("screenSize"), Screens[Index]);
+            Record->SetNumberField(TEXT("reductionFraction"), Model.ReductionSettings.PercentTriangles);
+            Record->SetNumberField(TEXT("baseLod"), Model.ReductionSettings.BaseLODModel);
+            Lods.Add(MakeShared<FJsonValueObject>(Record));
+        }
+        auto Record = MakeShared<FJsonObject>();
+        Record->SetStringField(TEXT("object"), Mesh->GetPathName());
+        Record->SetStringField(TEXT("source"), Source->GetPathName());
+        Record->SetArrayField(TEXT("lods"), Lods);
+        Record->SetArrayField(TEXT("boundsMinCm"), Vector(Bounds.Min));
+        Record->SetArrayField(TEXT("boundsMaxCm"), Vector(Bounds.Max));
+        Record->SetStringField(TEXT("qualification"),
+            TEXT("Retained qualified TreeSmall02 near source, including twelve known branch source-description basis corners; original import03 remains FAILED. Reduced canopy appearance requires in-game review."));
+        Result->SetObjectField(TEXT("canopy"), Record);
+        return true;
+    }
+
+    UStaticMesh* CreateCanopy(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+    {
+        Result->SetStringField(TEXT("stage"), TEXT("native-canopy-distance-lods"));
+        auto* Source = LoadObject<UStaticMesh>(nullptr, *CanopySource);
+        if (!Source || Feedback.ReceivedUserCancel())
+        {
+            Reject(Result, TEXT("Missing admitted canopy source or cancelled."));
+            return nullptr;
+        }
+        FStaticMeshCompilingManager::Get().FinishCompilation({ Source });
+        if (Source->GetNumSourceModels() != 1 || !Source->GetMeshDescription(0)
+            || Source->GetMeshDescription(0)->Triangles().Num() != 231785)
+        {
+            Reject(Result, TEXT("Canopy derivation source differs."));
+            return nullptr;
+        }
+        auto* Mesh = DuplicateObject<UStaticMesh>(Source,
+            CreatePackage(*(Root + TEXT("/Meshes/") + CanopyName)), *CanopyName);
+        if (!Mesh)
+        {
+            Reject(Result, TEXT("Canopy duplication failed."));
+            return nullptr;
+        }
+        Mesh->SetFlags(RF_Public | RF_Standalone);
+        Mesh->SetNumSourceModels(3);
+        Mesh->SetAutoComputeLODScreenSize(false);
+        Mesh->GetSourceModel(0).ScreenSize.Default = 1.0f;
+        const float Fractions[] = {1.0f, 0.25f, 0.06f};
+        const float Screens[] = {1.0f, 0.35f, 0.12f};
+        for (int32 Index = 1; Index < 3; ++Index)
+        {
+            auto& Model = Mesh->GetSourceModel(Index);
+            Model.BuildSettings = Mesh->GetSourceModel(0).BuildSettings;
+            Model.ReductionSettings = FMeshReductionSettings();
+            Model.ReductionSettings.BaseLODModel = 0;
+            Model.ReductionSettings.PercentTriangles = Fractions[Index];
+            Model.ReductionSettings.TerminationCriterion = EStaticMeshReductionTerimationCriterion::Triangles;
+            Model.ReductionSettings.SilhouetteImportance = EMeshFeatureImportance::Highest;
+            Model.ReductionSettings.TextureImportance = EMeshFeatureImportance::High;
+            Model.ScreenSize.Default = Screens[Index];
+        }
+        Mesh->PostEditChange();
+        FStaticMeshCompilingManager::Get().FinishCompilation({ Mesh });
+        return !Feedback.ReceivedUserCancel() && CanopyInventory(Mesh, Result) ? Mesh : nullptr;
+    }
+
+    bool Inventory(TArray<UObject*>& Assets, const TSharedRef<FJsonObject>& Result)
+    {
+        auto* Canopy = LoadObject<UStaticMesh>(nullptr, *(Root + TEXT("/Meshes/") + CanopyName));
+        if (!CanopyInventory(Canopy, Result)) return false;
+        Assets.Add(Canopy);
+        TArray<UMaterial*> Materials;
+        TArray<TSharedPtr<FJsonValue>> MaterialRecords, TextureRecords, MeshRecords;
+        for (int32 Role = 0; Role < UE_ARRAY_COUNT(Roles); ++Role)
+        {
+            const auto& Expected = Roles[Role];
+            auto* Material = LoadObject<UMaterial>(nullptr, *(Root + TEXT("/Materials/M_") + Expected.Name));
+            const int32 Channels = Expected.Masked ? 5 : 4;
+            if (!Material || Material->BlendMode != (Expected.Masked ? BLEND_Masked : BLEND_Opaque)
+                || Material->TwoSided != Expected.Masked || Material->OpacityMaskClipValue != 0.333f
+                || !Material->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit)
+                || Material->GetExpressions().Num() != Channels)
+                return Reject(Result, FString(TEXT("Resource material graph/state differs: ")) + Expected.Name);
+            Materials.Add(Material);
+            Assets.Add(Material);
+            auto MaterialRecord = MakeShared<FJsonObject>();
+            MaterialRecord->SetStringField(TEXT("object"), Material->GetPathName());
+            MaterialRecord->SetStringField(TEXT("sourceRole"), Expected.Slot);
+            MaterialRecord->SetBoolField(TEXT("masked"), Expected.Masked);
+            MaterialRecord->SetBoolField(TEXT("twoSided"), Material->TwoSided);
+            MaterialRecord->SetNumberField(TEXT("opacityClip"), Material->OpacityMaskClipValue);
+            MaterialRecords.Add(MakeShared<FJsonValueObject>(MaterialRecord));
+            for (int32 Channel = 0; Channel < Channels; ++Channel)
+            {
+                const FString Name = TextureName(Role, Channel), File = TextureFile(Role, Channel);
+                FMap Map = Maps[Channel]; Map.Name = *Name; Map.File = *File;
+                auto* Texture = LoadObject<UTexture2D>(nullptr, *(Root + TEXT("/Textures/") + Name));
+                if (!Texture || Texture->Source.GetSizeX() != 1024 || Texture->Source.GetSizeY() != 1024
+                    || Texture->SRGB != Map.Srgb || Texture->CompressionSettings != Map.Compression || Texture->bFlipGreenChannel
+                    || !Grass::SampleMatches(Material->GetExpressionInputForProperty(Map.Property), Texture, Map))
+                    return Reject(Result, TEXT("Resource texture/source graph differs: ") + Name);
+                Assets.Add(Texture);
+                auto Record = MakeShared<FJsonObject>();
+                Record->SetStringField(TEXT("object"), Texture->GetPathName());
+                Record->SetStringField(TEXT("source"), FString(Expected.Asset) + TEXT("/") + File);
+                Record->SetNumberField(TEXT("width"), Texture->Source.GetSizeX());
+                Record->SetNumberField(TEXT("height"), Texture->Source.GetSizeY());
+                Record->SetNumberField(TEXT("compression"), Texture->CompressionSettings);
+                Record->SetBoolField(TEXT("srgb"), Texture->SRGB);
+                Record->SetBoolField(TEXT("flipGreen"), Texture->bFlipGreenChannel);
+                TextureRecords.Add(MakeShared<FJsonValueObject>(Record));
+            }
+        }
+        for (const auto& Expected : Resources)
+        {
+            auto* Mesh = LoadObject<UStaticMesh>(nullptr, *(Root + TEXT("/Meshes/") + Expected.Name));
+            if (!Mesh) return Reject(Result, FString(TEXT("Missing selected resource: ")) + Expected.Name);
+            FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+            const auto* Description = Mesh->GetMeshDescription(0);
+            const auto* Render = Mesh->GetRenderData();
+            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->AssetImportData);
+            const bool Sapling = Expected.Slots == 2;
+            const int32 LodCount = Sapling ? 2 : 1;
+            if (!Description || Description->Triangles().Num() != Expected.Triangles
+                || Mesh->GetNumSourceModels() != LodCount || !Render || Render->LODResources.Num() != LodCount
+                || Mesh->GetStaticMaterials().Num() != Expected.Slots || Mesh->GetNaniteSettings().bEnabled
+                || !Data || Data->ImportUniformScale != 1 || !Data->ImportTranslation.IsZero() || !Data->ImportRotation.IsZero()
+                || !Data->bConvertScene || !Data->bConvertSceneUnit || !Data->bTransformVertexToAbsolute
+                || Data->bBakePivotInVertex || Data->bAutoGenerateCollision)
+                return Reject(Result, FString(TEXT("Resource topology/import policy differs: ")) + Expected.Name);
+            const FBox Bounds = Mesh->GetBoundingBox();
+            const FVector Size = Bounds.GetSize();
+            if (!Bounds.IsValid || Bounds.Min.ContainsNaN() || Bounds.Max.ContainsNaN()
+                || !FMath::IsNearlyEqual(Size.Z, Expected.Size.Z, 0.15)
+                || !FMath::IsNearlyEqual(FMath::Min(Size.X, Size.Y), FMath::Min(Expected.Size.X, Expected.Size.Y), 0.15)
+                || !FMath::IsNearlyEqual(FMath::Max(Size.X, Size.Y), FMath::Max(Expected.Size.X, Expected.Size.Y), 0.15))
+                return Reject(Result, FString(TEXT("Resource measured units/axis/bounds differ: ")) + Expected.Name);
+            const auto* Body = Mesh->GetBodySetup();
+            if (Sapling)
+            {
+                const FKSphylElem Capsule = SaplingCameraCapsule(Bounds);
+                if (!Body || Body->CollisionTraceFlag != CTF_UseSimpleAsComplex || Body->AggGeom.GetElementCount() != 1
+                    || Body->AggGeom.SphylElems.Num() != 1 || !Body->AggGeom.SphylElems[0].Center.Equals(Capsule.Center, 0.01)
+                    || !Body->AggGeom.SphylElems[0].Rotation.IsZero()
+                    || !FMath::IsNearlyEqual(Body->AggGeom.SphylElems[0].Radius, Capsule.Radius, 0.01f)
+                    || !FMath::IsNearlyEqual(Body->AggGeom.SphylElems[0].Length, Capsule.Length, 0.01f)
+                    || Mesh->GetAutoComputeLODScreenSize())
+                    return Reject(Result, TEXT("Sapling camera-only crown shape/LOD policy differs."));
+            }
+            else if (Body && Body->AggGeom.GetElementCount()) return Reject(Result, TEXT("Unexpected resource collision."));
+            const FStaticMeshConstAttributes Attributes(*Description);
+            const auto UVs = Attributes.GetVertexInstanceUVs();
+            const auto Normals = Attributes.GetVertexInstanceNormals();
+            const auto Slots = Attributes.GetPolygonGroupMaterialSlotNames();
+            if (UVs.GetNumChannels() != 1) return Reject(Result, TEXT("Expected exactly one retained resource UV channel."));
+            int32 RoleTriangles[2] = {};
+            for (FVertexInstanceID Corner : Description->VertexInstances().GetElementIDs())
+                if (Normals[Corner].ContainsNaN() || Normals[Corner].SizeSquared() < 0.5f || UVs.Get(Corner, 0).ContainsNaN())
+                    return Reject(Result, TEXT("Invalid resource source-description normal/UV."));
+            for (FTriangleID Triangle : Description->Triangles().GetElementIDs())
+            {
+                const FName Slot = Slots[Description->GetTrianglePolygonGroup(Triangle)];
+                int32 Found = INDEX_NONE;
+                for (int32 Index = 0; Index < Expected.Slots; ++Index)
+                    if (Slot == Roles[Expected.FirstRole + Index].Slot) Found = Index;
+                if (Found == INDEX_NONE) return Reject(Result, TEXT("Unexpected resource polygon material identity."));
+                ++RoleTriangles[Found];
+            }
+            TArray<TSharedPtr<FJsonValue>> SlotRecords, LodRecords;
+            for (int32 Slot = 0; Slot < Expected.Slots; ++Slot)
+            {
+                const int32 Role = Expected.FirstRole + Slot;
+                const int32 Count = Slot == 0 ? Expected.FirstRoleTriangles : Expected.Triangles - Expected.FirstRoleTriangles;
+                if (Mesh->GetStaticMaterials()[Slot].ImportedMaterialSlotName != Roles[Role].Slot
+                    || Mesh->GetMaterial(Slot) != Materials[Role] || RoleTriangles[Slot] != Count)
+                    return Reject(Result, TEXT("Resource ordered material binding/triangle count differs."));
+                auto Record = MakeShared<FJsonObject>();
+                Record->SetNumberField(TEXT("slot"), Slot);
+                Record->SetStringField(TEXT("role"), Roles[Role].Slot);
+                Record->SetStringField(TEXT("material"), Materials[Role]->GetPathName());
+                Record->SetNumberField(TEXT("triangles"), Count);
+                Record->SetNumberField(TEXT("activeUvChannel"), 0);
+                SlotRecords.Add(MakeShared<FJsonValueObject>(Record));
+            }
+            for (int32 Index = 0; Index < LodCount; ++Index)
+            {
+                const auto& Lod = Render->LODResources[Index];
+                const int32 Triangles = Lod.GetNumTriangles();
+                if ((Index == 0 && Triangles != Expected.Triangles)
+                    || (Index > 0 && (Triangles <= 0 || Triangles > FMath::CeilToInt(Expected.Triangles * 0.26)))
+                    || Lod.Sections.Num() != Expected.Slots || Lod.VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords() != 1
+                    || (Sapling && (!FMath::IsNearlyEqual(Render->ScreenSize[Index].Default, Index == 0 ? 1.0f : 0.35f)
+                        || !FMath::IsNearlyEqual(Mesh->GetSourceModel(Index).ScreenSize.Default, Index == 0 ? 1.0f : 0.35f))))
+                    return Reject(Result, TEXT("Resource distance LOD/render contract differs."));
+                TSet<int32> SeenRoles;
+                int32 SectionTriangles = 0;
+                for (const auto& Section : Lod.Sections)
+                {
+                    if (Section.MaterialIndex < 0 || Section.MaterialIndex >= Expected.Slots || Section.NumTriangles == 0
+                        || SeenRoles.Contains(Section.MaterialIndex))
+                        return Reject(Result, TEXT("Resource LOD lost/duplicated a material section."));
+                    SeenRoles.Add(Section.MaterialIndex);
+                    SectionTriangles += Section.NumTriangles;
+                }
+                if (SectionTriangles != Triangles) return Reject(Result, TEXT("Resource LOD section accounting differs."));
+                for (int32 Vertex = 0; Vertex < Lod.GetNumVertices(); ++Vertex)
+                {
+                    const auto Normal = Lod.VertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(Vertex);
+                    if (Lod.VertexBuffers.PositionVertexBuffer.VertexPosition(Vertex).ContainsNaN()
+                        || FVector3f(Normal.X, Normal.Y, Normal.Z).ContainsNaN()
+                        || FVector3f(Normal.X, Normal.Y, Normal.Z).SizeSquared() < 0.5f
+                        || Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(Vertex, 0).ContainsNaN())
+                        return Reject(Result, TEXT("Resource render data has invalid position/normal/UV."));
+                }
+                auto Record = MakeShared<FJsonObject>();
+                Record->SetNumberField(TEXT("lod"), Index);
+                Record->SetNumberField(TEXT("triangles"), Triangles);
+                Record->SetNumberField(TEXT("screenSize"), Render->ScreenSize[Index].Default);
+                LodRecords.Add(MakeShared<FJsonValueObject>(Record));
+            }
+            auto Record = MakeShared<FJsonObject>();
+            Record->SetStringField(TEXT("object"), Mesh->GetPathName());
+            Record->SetStringField(TEXT("sourceNode"), Expected.Node);
+            Record->SetNumberField(TEXT("sourceModelId"), Expected.Model);
+            Record->SetNumberField(TEXT("sourceGeometryId"), Expected.Geometry);
+            Record->SetNumberField(TEXT("sourceTriangles"), Expected.Triangles);
+            Record->SetArrayField(TEXT("boundsMinCm"), Vector(Bounds.Min));
+            Record->SetArrayField(TEXT("boundsMaxCm"), Vector(Bounds.Max));
+            Record->SetArrayField(TEXT("sourceDimensionsTimes100Cm"), Vector(Expected.Size));
+            Record->SetArrayField(TEXT("placementGroundAnchorCm"), Vector(FVector(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z)));
+            Record->SetArrayField(TEXT("slots"), SlotRecords);
+            Record->SetArrayField(TEXT("lods"), LodRecords);
+            Record->SetBoolField(TEXT("cameraOnlyCrownCollision"), Sapling);
+            MeshRecords.Add(MakeShared<FJsonValueObject>(Record));
+            Assets.Add(Mesh);
+        }
+        Result->SetArrayField(TEXT("materials"), MaterialRecords);
+        Result->SetArrayField(TEXT("textures"), TextureRecords);
+        Result->SetArrayField(TEXT("resources"), MeshRecords);
+        Result->SetNumberField(TEXT("packages"), Assets.Num());
+        Result->SetStringField(TEXT("transformPolicy"), TEXT("Source scale100 and rotation retained; native scene/unit bake once at uniformScale1. Placement subtracts measured native XY-center/minZ, including source layout translations; no UV clamping or source-geometry scale edits."));
+        TSet<FString> External;
+        for (const FString& Package : Tree::Packages()) External.Add(Package);
+        return Assets.Num() == 38 && AuditAssetReferences(Root, Assets, External, Result);
+    }
+
+    bool Import(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+    {
+        for (const FString& Package : Packages())
+            if (FindPackage(nullptr, *Package) || FPackageName::DoesPackageExist(Package))
+                return Reject(Result, TEXT("Fresh woodland package required: ") + Package);
+        TArray<UMaterial*> Materials;
+        Result->SetStringField(TEXT("stage"), TEXT("twenty-three-textures-five-materials"));
+        for (int32 Role = 0; Role < UE_ARRAY_COUNT(Roles); ++Role)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            const auto& Expected = Roles[Role];
+            const FString Name = FString(TEXT("M_")) + Expected.Name;
+            auto* Material = NewObject<UMaterial>(CreatePackage(*(Root + TEXT("/Materials/") + Name)), *Name, RF_Public | RF_Standalone);
+            Material->BlendMode = Expected.Masked ? BLEND_Masked : BLEND_Opaque;
+            Material->TwoSided = Expected.Masked;
+            Material->OpacityMaskClipValue = 0.333f;
+            Material->SetShadingModel(MSM_DefaultLit);
+            for (int32 Channel = 0; Channel < (Expected.Masked ? 5 : 4); ++Channel)
+            {
+                const FString Texture = TextureName(Role, Channel), File = TextureFile(Role, Channel);
+                FMap Map = Maps[Channel]; Map.Name = *Texture; Map.File = *File;
+                auto* Imported = ImportMappedTexture(Map, FPaths::Combine(FPaths::ProjectDir(),
+                    TEXT("Assets/Source/woodland-resources-20260921"), Expected.Asset), Root, Feedback);
+                auto* Sample = Grass::Expression<UMaterialExpressionTextureSample>(Material);
+                if (!Imported || !Sample) return Reject(Result, TEXT("Cannot import/connect resource texture: ") + Texture);
+                Sample->Texture = Imported;
+                Sample->SamplerType = Map.Sampler;
+                Material->GetExpressionInputForProperty(Map.Property)->Connect(Channel < 2 ? 0 : 1, Sample);
+            }
+            Material->PostEditChange();
+            Materials.Add(Material);
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("nine-selected-resource-models"));
+        for (const TCHAR* Asset : {TEXT("shrub_04"), TEXT("dry_branches_medium_01"), TEXT("fir_sapling"), TEXT("flower_empodium")})
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            auto* Factory = StaticMeshFactory(false);
+            bool Cancelled = false;
+            UObject* Imported = Factory->ImportObject(UStaticMesh::StaticClass(),
+                CreatePackage(*(Root + TEXT("/Unsaved/") + Asset)), Asset, RF_Public | RF_Standalone,
+                FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Environment/WoodlandResources/candidate01/Prepared"),
+                    FString(Asset) + TEXT("_selected.fbx")), nullptr, Cancelled);
+            if (!Imported || Cancelled) return Reject(Result, FString(TEXT("Selected resource FBX failed: ")) + Asset);
+            TArray<UObject*> Objects = Factory->GetAdditionalImportedObjects();
+            Objects.AddUnique(Imported);
+            int32 ExpectedCount = 0;
+            for (const auto& Expected : Resources) ExpectedCount += FString(Roles[Expected.FirstRole].Asset) == Asset ? 1 : 0;
+            if (Objects.Num() != ExpectedCount) return Reject(Result, TEXT("Selected FBX returned unexpected object count."));
+            for (const auto& Expected : Resources)
+            {
+                if (FString(Roles[Expected.FirstRole].Asset) != Asset) continue;
+                UStaticMesh* Match = nullptr;
+                for (UObject* Object : Objects)
+                    if (Object->GetName().EndsWith(Expected.Node))
+                    {
+                        if (Match || !Cast<UStaticMesh>(Object)) return Reject(Result, TEXT("Ambiguous/nonstatic selected resource."));
+                        Match = Cast<UStaticMesh>(Object);
+                    }
+                if (!Match || !Match->Rename(Expected.Name, CreatePackage(*(Root + TEXT("/Meshes/") + Expected.Name)),
+                    REN_DontCreateRedirectors | REN_NonTransactional))
+                    return Reject(Result, FString(TEXT("Cannot identify/name selected resource: ")) + Expected.Node);
+                FStaticMeshCompilingManager::Get().FinishCompilation({Match});
+                if (Match->GetStaticMaterials().Num() != Expected.Slots) return Reject(Result, TEXT("Resource source slots differ."));
+                for (int32 Slot = 0; Slot < Expected.Slots; ++Slot)
+                {
+                    if (Match->GetStaticMaterials()[Slot].ImportedMaterialSlotName != Roles[Expected.FirstRole + Slot].Slot)
+                        return Reject(Result, TEXT("Resource source material connection order differs."));
+                    Match->SetMaterial(Slot, Materials[Expected.FirstRole + Slot]);
+                }
+                if (Expected.Slots == 2)
+                {
+                    Match->CreateBodySetup();
+                    auto* Body = Match->GetBodySetup();
+                    if (!Body || Body->AggGeom.GetElementCount()) return Reject(Result, TEXT("Unexpected imported sapling collision."));
+                    Body->CollisionTraceFlag = CTF_UseSimpleAsComplex;
+                    Body->AggGeom.SphylElems.Add(SaplingCameraCapsule(Match->GetBoundingBox()));
+                    Body->InvalidatePhysicsData();
+                    Body->CreatePhysicsMeshes();
+                    Match->SetNumSourceModels(2);
+                    Match->SetAutoComputeLODScreenSize(false);
+                    Match->GetSourceModel(0).ScreenSize.Default = 1;
+                    auto& Lod = Match->GetSourceModel(1);
+                    Lod.BuildSettings = Match->GetSourceModel(0).BuildSettings;
+                    Lod.ReductionSettings = FMeshReductionSettings();
+                    Lod.ReductionSettings.BaseLODModel = 0;
+                    Lod.ReductionSettings.PercentTriangles = 0.25f;
+                    Lod.ReductionSettings.TerminationCriterion = EStaticMeshReductionTerimationCriterion::Triangles;
+                    Lod.ReductionSettings.SilhouetteImportance = EMeshFeatureImportance::Highest;
+                    Lod.ReductionSettings.TextureImportance = EMeshFeatureImportance::High;
+                    Lod.ScreenSize.Default = 0.35f;
+                }
+                Match->PostEditChange();
+            }
+        }
+        if (!CreateCanopy(Feedback, Result)) return false;
+        Result->SetStringField(TEXT("stage"), TEXT("inventory-and-reference-audit"));
+        TArray<UObject*> Assets;
+        if (!Inventory(Assets, Result) || Feedback.ReceivedUserCancel()) return false;
+        Result->SetStringField(TEXT("stage"), TEXT("thirty-eight-explicit-package-saves"));
+        for (UObject* Asset : Assets)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            auto* Package = Asset->GetOutermost();
+            const FString File = FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension());
+            if (IFileManager::Get().FileExists(*File)) return Reject(Result, TEXT("Package output already exists: ") + File);
+            FSavePackageArgs Args;
+            Args.TopLevelFlags = RF_Public | RF_Standalone;
+            Args.Error = GWarn;
+            if (!UPackage::SavePackage(Package, Asset, *File, Args) || Feedback.ReceivedUserCancel())
+                return Reject(Result, TEXT("Resource package save failed/cancelled: ") + File);
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("import-complete"));
+        return true;
+    }
+}
+
 bool Import(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
 {
     Result->SetStringField(TEXT("stage"), TEXT("explicit-texture-import"));
@@ -2282,4 +2793,25 @@ bool RunGrassSpike(const FString& Mode, const FString& Output, const FDateTime& 
     if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Grass %s failed at %s; retain partial outputs."),
         *Mode, *Result->GetStringField(TEXT("stage")));
     return WriteJson(FPaths::Combine(Output, TEXT("grass-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
+}
+
+bool RunWoodlandSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven)
+{
+    FStopFeedback Feedback(Output, Deadline, bCompletionDriven);
+    auto Result = MakeShared<FJsonObject>();
+    Result->SetStringField(TEXT("mode"), Mode);
+    Result->SetStringField(TEXT("namespace"), Woodland::Root);
+    Result->SetStringField(TEXT("stage"), TEXT("persisted-inventory"));
+    bool Passed = false;
+    if (Mode == TEXT("WoodlandImport")) Passed = Woodland::Import(Feedback, Result);
+    else if (Mode == TEXT("WoodlandVerify"))
+    {
+        TArray<UObject*> Assets;
+        Passed = Woodland::Inventory(Assets, Result);
+    }
+    Result->SetBoolField(TEXT("passed"), Passed);
+    Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
+    if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Woodland %s failed at %s; retain partial outputs."),
+        *Mode, *Result->GetStringField(TEXT("stage")));
+    return WriteJson(FPaths::Combine(Output, TEXT("woodland-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
 }

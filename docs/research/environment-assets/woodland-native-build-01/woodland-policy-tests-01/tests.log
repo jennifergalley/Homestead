@@ -1,0 +1,35 @@
+**********************
+PowerShell transcript start
+Start time: 20260921145001
+**********************
+Transcript started, output file is Saved\Automation\20260921-033354-2d257ba0\woodland-policy-tests-01\tests.log
+PS>TerminatingError(): "Targeted asset work requires explicit completion-driven policy."
+>> TerminatingError(): "Targeted asset work requires explicit completion-driven policy."
+PS>TerminatingError(): "Targeted asset work requires explicit completion-driven policy."
+>> TerminatingError(): "Targeted asset work requires explicit completion-driven policy."
+PS>TerminatingError(): "Invalid native mode/config map."
+>> TerminatingError(): "Invalid native mode/config map."
+PS>TerminatingError(): "Woodland native inventory scope differs."
+>> TerminatingError(): "Woodland native inventory scope differs."
+PS>TerminatingError(): "Resource identity/geometry differs:SM_Shrub04_a"
+>> TerminatingError(): "Resource identity/geometry differs:SM_Shrub04_a"
+PS>TerminatingError(): "Resource ordered material/UV binding differs."
+>> TerminatingError(): "Resource ordered material/UV binding differs."
+PS>TerminatingError(): "Native resource height/units differ."
+>> TerminatingError(): "Native resource height/units differ."
+PS>TerminatingError(): "Native ground anchor differs."
+>> TerminatingError(): "Native ground anchor differs."
+PS>TerminatingError(): "Canopy distance LOD contract differs."
+>> TerminatingError(): "Canopy distance LOD contract differs."
+PS>TerminatingError(): "Resource texture/PBR identity differs."
+>> TerminatingError(): "Resource texture/PBR identity differs."
+PS>TerminatingError(): "Resource material role/alpha policy differs."
+>> TerminatingError(): "Resource material role/alpha policy differs."
+PS>TerminatingError(): "Unexpected woodland persistent reference."
+>> TerminatingError(): "Unexpected woodland persistent reference."
+Woodland offline package, production-mode token, measured-unit/material/LOD and negative inventory checks passed; synthetic data is not a native import.
+PS>TerminatingError(Test-FernSpikePolicy.ps1): "Cannot process command because of one or more missing mandatory parameters: OutputDirectory."
+**********************
+PowerShell transcript end
+End time: 20260921145002
+**********************

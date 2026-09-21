@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "UI/SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Pawn.h"
 #include "InputCoreTypes.h"
@@ -73,6 +74,14 @@ void AHomesteadSmokeTest::QueueSelectRow(int32 Id)
         []() {},
         [this, Id]()
         {
+            if (Controller->HasNativeMenu())
+            {
+                const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+                return Controller->IsBookOpen() && Subject && Subject->Id == Id
+                    && Subject->Subject != EHomesteadMenuSubject::GarmentRecipe
+                    && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")
+                    && Controller->NativeMenu->HasSynchronizedFocus();
+            }
             const auto Rows = Controller->Rows();
             return Controller->IsBookOpen() && Rows.IsValidIndex(Controller->SelectedRow())
                 && Rows[Controller->SelectedRow()].Id == Id;
@@ -128,11 +137,14 @@ void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
         [this]() { Tap(EKeys::C); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 1; });
     QueueSelectRow(static_cast<int32>(Recipe));
+    Add(TEXT("Enter the selected recipe's native actions"),
+        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return !Controller->HasNativeMenu()
+            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(FString::Printf(TEXT("Craft %s using gamepad A"), UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))),
         [this, Before, Item]()
         {
             *Before = Controller->Simulation().Count(Item);
-            if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, Before, Item]()
@@ -160,6 +172,10 @@ void AHomesteadSmokeTest::QueuePlace(Homestead::Piece Kind, int32 CellX, int32 C
         [this]() { Tap(EKeys::B); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 2; });
     QueueSelectRow(static_cast<int32>(Kind));
+    Add(TEXT("Enter the selected building piece's native actions"),
+        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return !Controller->HasNativeMenu()
+            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(TEXT("Enter the selected building preview"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && !Controller->IsBookOpen(); });
@@ -198,7 +214,8 @@ void AHomesteadSmokeTest::QueueClearCell(int32 CellX, int32 CellY)
         auto Skip = [this, Id]() { return IsCleared(Controller->State(), Id); };
         Add(FString::Printf(TEXT("Approach node %d obstructing cell (%d,%d)"), Id, CellX, CellY),
             [this, Position]() { Teleport(Position); },
-            [this]() { return !Controller->IsBookOpen() && !Controller->IsPlanning(); }, 0.65f);
+            [this, Id]() { return !Controller->IsBookOpen() && !Controller->IsPlanning()
+                && Controller->IsResourceFocused(Id); }, 0.65f);
         Steps.Last().Skip = Skip;
         Add(FString::Printf(TEXT("Permanently clear site node %d with gamepad X"), Id),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
@@ -224,6 +241,10 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
         [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     QueueSelectRow(static_cast<int32>(Item));
+    Add(TEXT("Enter the selected food's native actions"),
+        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return !Controller->HasNativeMenu()
+            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(FString::Printf(TEXT("Eat %s through the pack menu"), UTF8_TO_TCHAR(Homestead::ItemName(Item))),
         [this, Before, Hunger, Item]()
         {

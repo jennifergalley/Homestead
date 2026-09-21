@@ -1,0 +1,83 @@
+{
+  "pid": 52288,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+  "creationTime": 134345041049184947,
+  "executableSha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-shipping-build-02\\compile1\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 921149,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134345041045983894,
+    "LastWriteTime": 134345041045983894,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "82FDB5635152213B3AE43734C5F4190800A62ADD66E71E91FDC2D5B3FC542D5A",
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "allowedBuildOnlyConsole": {
+    "signature": "Valid",
+    "path": "C:\\Windows\\System32\\conhost.exe",
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+  },
+  "compileActionId": 1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "sha256": "60285790B93BE7A52994F117DB11C576C064BEBFF7468B35A3ED853455F48BCE",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\SurvivalGame\\Module.SurvivalGame.2.cpp.obj.rsp"
+    },
+    {
+      "sha256": "1A34C3980FBE5989115F80C44B1C753EB160A608BFDE8C827769ABE793AB9CD2",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\SurvivalGame\\SurvivalGame.Shared.rsp"
+    }
+  ],
+  "expectedProducedItems": [
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\SurvivalGame\\Module.SurvivalGame.2.cpp.obj",
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\SurvivalGame\\Module.SurvivalGame.2.cpp.sarif",
+    "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\SurvivalGame\\Module.SurvivalGame.2.cpp.dep.json"
+  ],
+  "resourceLinkActionId": -1,
+  "exactReviewedArguments": "@\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealGame/Shipping/SurvivalGame/Module.SurvivalGame.2.cpp.obj.rsp\" ",
+  "previousProductBackups": [],
+  "resourceConversion": "",
+  "derivedDllResponse": "",
+  "splitShippingManifest": false,
+  "embedShippingManifest": false,
+  "stageCooked": false,
+  "stageCandidate": null,
+  "treeDiagnosticCandidate": true,
+  "treeContactCorrection": false,
+  "groveCandidate": false,
+  "groveProxyCorrection": false,
+  "grassGroundCandidate": true,
+  "readabilityDiagnostic": false,
+  "readabilityCorrection": false,
+  "readabilityLifecycle": false,
+  "navigationCandidate": false,
+  "woodlandActions": false,
+  "woodlandCandidate": true,
+  "woodlandRevision": 2,
+  "navigationRevision": 1,
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": false,
+  "uiActions": false,
+  "shippingActions": true,
+  "wardrobeActions": false,
+  "treeActions": false,
+  "grassActions": false
+}

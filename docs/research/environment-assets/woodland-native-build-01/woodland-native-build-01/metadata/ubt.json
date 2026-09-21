@@ -1,0 +1,13 @@
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"Setting temp directory to \u0027E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-native-build-01\\metadata\\Temp\\UnrealBuildTool\\863af17b\u0027","format":"Setting temp directory to \u0027{Path}\u0027","properties":{"Path":"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-native-build-01\\metadata\\Temp\\UnrealBuildTool\\863af17b"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"WriteFileIfChanged() wrote 0 changed files of 0 requested writes.","format":"WriteFileIfChanged() wrote {TotalWrites} changed files of {TotalRequests} requested writes.","properties":{"TotalWrites":0,"TotalRequests":0}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"","format":"","properties":{}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"Timeline:","format":"Timeline:","properties":{}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"[  0.000]  \u002B0.103 Main","format":"{Prefix} {Label}","properties":{"Prefix":"[  0.000]  \u002B0.103","Label":"Main"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"   0.047          [  0.047]  \u002B0.045 AddTelemetry","format":"{Prefix} {Label}","properties":{"Prefix":"   0.047          [  0.047]  \u002B0.045","Label":"AddTelemetry"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"   0.103          [  0.102]  \u002B0.000 RegisterPlatforms","format":"{Prefix} {Label}","properties":{"Prefix":"   0.103          [  0.102]  \u002B0.000","Label":"RegisterPlatforms"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"[  0.103]  \u002B0.237 \u003Cunknown\u003E","format":"{Prefix} {Label}","properties":{"Prefix":"[  0.103]  \u002B0.237","Label":"\u003Cunknown\u003E"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"[  0.341]  \u002B0.004 TelemetryService.FlushEvents","format":"{Prefix} {Label}","properties":{"Prefix":"[  0.341]  \u002B0.004","Label":"TelemetryService.FlushEvents"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"[  0.351]","format":"[{Time,7}]","properties":{"Time":"0.351"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"","format":"","properties":{}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"Result: Succeeded","format":"Result: {ApplicationResult}","properties":{"ApplicationResult":"Succeeded"}}
+{"time":"2026-09-21T21:48:50","level":"Debug","message":"Total execution time: 0.35 seconds","format":"Total execution time: {Time:0.00} seconds","properties":{"Time":0.3518757}}

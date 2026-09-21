@@ -1,0 +1,33 @@
+Module.SurvivalGame.2.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(423,20): error C3535: cannot deduce type for 'auto *' from 'TObjectPtr<UStaticMesh>'
+        auto* Mesh = Part->GetStaticMesh();
+                   ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(423,20): error C2440: 'initializing': cannot convert from 'TObjectPtr<UStaticMesh>' to '<error type> *'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(423,20): note: No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(425,14): error C3536: 'Data': cannot be used before it is initialized
+        if (!Data || Data->LODResources.Num() != (Fir ? 2 : 1)) { UnderstoryValid = false; continue; }
+             ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(460,21): error C2737: 'Near': const object must be initialized
+        const int32 Near = Data->LODResources[0].GetNumTriangles();
+                    ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(461,21): error C2737: 'Far': const object must be initialized
+        const int32 Far = Data->LODResources.Last().GetNumTriangles();
+                    ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(465,44): error C7595: 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,double,double,double,double,double,double,int,int,bool,bool,bool>::TCheckedFormatStringPrivate': call to immediate function is not a constant expression
+        UnderstoryRows.Add(FString::Printf(TEXT("%s,%s,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d,%d,%d,%d"),
+                                           ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: failure was caused by call of undefined function or one not declared 'constexpr'
+X(SNeedsWideCharPtrArg, "'%s' expects `TCHAR*`.")
+^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: see usage of 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,double,double,double,double,double,double,int,int,bool,bool,bool>::PRINTF_FORMAT_STRING_ERROR'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(465,44): note: the call stack of the evaluation (the oldest call first) is
+        UnderstoryRows.Add(FString::Printf(TEXT("%s,%s,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d,%d,%d,%d"),
+                                           ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(465,44): note: while evaluating function 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,double,double,double,double,double,double,int,int,bool,bool,bool>::TCheckedFormatStringPrivate<51>(const CharType (&)[51])'
+        with
+        [
+            CharType=FString::FmtCharType
+        ]
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: while evaluating function 'void UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,double,double,double,double,double,double,int,int,bool,bool,bool>::PRINTF_FORMAT_STRING_ERROR(const char *)'
+X(SNeedsWideCharPtrArg, "'%s' expects `TCHAR*`.")
+^

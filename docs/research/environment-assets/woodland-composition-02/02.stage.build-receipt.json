@@ -1,0 +1,14 @@
+{
+  "configuration": "Shipping",
+  "packageDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\lush-woodland-02\\Windows",
+  "archiveDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\lush-woodland-02",
+  "executable": "SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "status": "Genuine loose-file stage; runtime acceptance pending",
+  "cookedInput": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\woodland-cook-01\\Cooked",
+  "nativeExecutableSha256": "468C5506D3970F9FBB1021E68D142A739E40851B3C3043548F84FE87CF4B3BCD",
+  "containersUsed": false,
+  "runtimeVerified": false,
+  "treeDiagnostic": true,
+  "grassGroundCandidate": true,
+  "diagnosticQualification": "Retained failed import03: exactly12 branch source-description tangent/binormal corners. Ordinary-game diagnostic only; not clean acceptance or promotion."
+}

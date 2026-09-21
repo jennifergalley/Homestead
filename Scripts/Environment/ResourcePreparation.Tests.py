@@ -29,10 +29,12 @@ def fixture():
         Element(b"C", [b"OO", 4, 2], b"SLL", []),
         Element(b"C", [b"OP", 5, 3, b"DiffuseColor"], b"SLLS", []),
     ]
-    before = Element(b"", [], b"", [objects, Element(b"Connections", [], b"", links)])
+    settings = Element(b"GlobalSettings", [], b"", [Element(b"UnitScaleFactor", [1.0], b"D", [])])
+    before = Element(b"", [], b"", [objects, Element(b"Connections", [], b"", links), settings])
     after = Element(b"", [], b"", [
         Element(b"Objects", [], b"", [geometry, model, *materials]),
         Element(b"Connections", [], b"", links[:-1]),
+        settings,
     ])
     return before, after
 
@@ -66,6 +68,12 @@ class RetainedDataTests(unittest.TestCase):
     def test_unexpected_object_fails(self):
         before, after = fixture()
         before.elems[0].elems.append(element(b"AnimationCurve", 8))
+        with self.assertRaises(ValueError):
+            self.verify(before, after)
+
+    def test_source_axis_units_must_survive(self):
+        before, after = fixture()
+        after.elems[2] = Element(b"GlobalSettings", [], b"", [Element(b"UnitScaleFactor", [100.0], b"D", [])])
         with self.assertRaises(ValueError):
             self.verify(before, after)
 

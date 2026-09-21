@@ -14,12 +14,23 @@ silhouettes with the admitted natural asset bundle while preserving the warm
 clearing, open foreground, surrounding woodland, meadow and stream composition.
 Imported vegetation SHALL retain distinct bark and leaf surface appearance,
 credible proportions and grounded roots rather than uniform prototype tinting.
+The playable clearing SHALL read as a lush enclosed woodland with layered
+understory, rather than isolated showcase trees on an exposed primitive field.
+Existing gatherable bushes, saplings, branches and low plants SHALL receive
+authored natural silhouettes; decorative density alone does not satisfy this.
 
 #### Scenario: Ordinary clearing view
 - **WHEN** the player enters the clearing in a normally lit daytime scene
 - **THEN** the enclosing trees and nearby understory use the admitted natural
   assets, their bark and leaves remain visibly distinct, and the home site and
   approach to the stream remain readable
+
+#### Scenario: Coherent woodland and resource palette
+- **WHEN** actual wide, shoulder-level and ground-resource daytime views are reviewed
+- **THEN** overlapping canopy groups enclose usable open space, natural ground
+  layers connect them, and nearby interactive resources no longer retain the
+  dominant cone, blob-bush or bare stick-figure presentation
+- **AND** the visual judgment is recorded separately from asset counts and test passes
 
 #### Scenario: Material or asset unavailable
 - **WHEN** a required selected environment mesh or material cannot be loaded

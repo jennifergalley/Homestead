@@ -34,21 +34,99 @@ acceptance from a passing screenshot metric.
 
 ### Current delivery and next visible milestone
 
-The qualified `grass-ground-01` preview is selected at `415878c3`, with the
-samev5 profile and previous builds retained. Coordinator review accepted its
-textured, sparse, dry/earthy clearing, not lush woodland. The large foreground
-occluder in tree430 also exists in grove03; it is unfinished camera behavior,
-not a new grass regression. The original ground diffuse is itself patchy
-earth/grass, so a uniform-green result is not the contract.
+The selected baseline is `directional-navigation-06` at `5ccddea`, retaining
+samev5/current graphics and camera02 rollback. Jenny explicitly rejected the
+sparse environment and primitive resource silhouettes on September21 at13:39AZ;
+prior qualified technical increments are not visual acceptance.
 
-The next visible milestone is clearing readability in actual dawn/day/night
-game contexts and the known tree-encounter camera obstruction. Diagnose those
-conditions before changing illumination or material response; do not assume
-the observed warm dawn proves an asset bug. Interactive resource silhouettes
-remain a subsequent product gap, with base/produce/cleared semantics preserved.
-Do not repeat isolated asset polishing or certify unchanged historical tooling.
-`tasks.md` distinguishes that work from already delivered placement, rendering,
-credits, staging and selection.
+The inspected original `readability-endurance-01/Frames/milestone-01.png`
+shows09:59 clear daylight: exposed horizon beyond pale ground, widely separated
+tree silhouettes, cone saplings, blob bushes and stick-like reeds/flowers.
+The source caps the grove at16, rejects canopy overlap through twice-radius
+spacing, limits sites to30m, then omits every unselected tree. Resource exclusion
+also uses full tree crown radius where a trunk/access envelope is appropriate.
+These are concrete composition constraints, not proof that a density number
+will make the scene attractive.
+
+Compose overlapping canopy groups enclosing the usable clearing, with deliberate
+gaps/approaches and modest species-appropriate uniform variation. Distinguish
+solid trunk/camera access, home/build/plot buffers and canopy overhang instead
+of treating every crown as a ground obstacle. Use cheaper measured canopy tiers/
+instances where appropriate; do not blindly multiply the231785-triangle mesh.
+Keep deterministic placements and prevent decorations returning to cleared sites.
+
+Layer existing native-scale ferns and grass with an authored shrub/resource
+palette and leaf-litter/earth transitions. Grass Ground is inherently patchy
+earth, not a green-lawn texture; no arbitrary tint or oversized tree trick.
+Planner773 supplies a small exact CC0 resource map and preparation contract;
+main alone imports, builds and integrates. Persistent shrub/stump bases and
+separately harvested/renewed produce keep existing IDs/rewards/time/save semantics.
+Missing authored resources must be explicitly reported, not hidden by a
+successful-looking primitive fallback.
+
+Assess canopy, ground coverage and illumination together in a coherent candidate.
+Use the existing daylight/weather owner for justified palette/exposure adjustments,
+with disclosed controlled noon/dawn/night views if needed. Preserve terrain/
+stream geometry and camera traversal. Actual wide, shoulder-level and resource
+close views are the visual gate; targeted harvest/clear/renewal/save/collision
+and meaningful runtime measurements are separate regression evidence.
+
+### Candidate01 composition correction
+
+The actual09:59 `woodland-daylight-01` original confirms the sparse orchard
+appearance persists outside dawn. Its supported early stop is a cancelled
+observation, not a passed endurance test. Candidate01 remains unselected.
+
+Measured native grass rectangles sum to350.289m2 across6084m2 of sampled area,
+including transparent gaps/overlap; this is not rendered coverage. The nearest
+grass lies826.343cm from home. Low grass wrongly inherits650cm home/130cm
+resource access radii and a terrain-blend threshold. Separate its nonblocking
+layer: retain a300cm home pad, small resource visibility gaps, a usable
+home-to-stream path and graduated edges. Retain full cleared-cell, structure,
+plot and stream protection. Solid trees retain their existing access buffers.
+
+Compose the existing192 canopy trees into irregular overlapping groves. Redistribute
+the same16000 grass budget into beds, with up to768 native ferns and96 native firs.
+Fir camera-only query collision protects against engulfment without blocking
+walking. Keep exact native scales;19-28cm shrub shoots remain ground plants,
+not midstory. These counts are candidate limits, not beauty/performance acceptance.
+
+The verified material blends original authored ground maps in A and GrassGround
+maps in B using vertex red. Current weight is0 near home and45-88% outside:
+the paler woodland is not absence of the new map. Extend the existing original
+leaf-litter contribution under groves, graduating into patchy GrassGround between
+beds. Change spatial vertex weights, not source colors, PBR graphs, geometry,
+UVs, terrain collision, stream or lighting. Reuse unchanged cooked assets.
+Record actual new-layer inventory/material readiness, site invariants and
+decoration-build CPU duration; inspect ordinary original images. No import or
+new art-source round unless this coherent reuse-first candidate still lacks mass.
+
+### Candidate02 result and next enclosure correction
+
+Coordinator and Main inspected the original09:59 daylight02 milestone. Near
+ground detail improves, but a straight terrain termination against blue remains.
+Production creates320x320 playable cells at25cm, spanning[-4000,+4000] on X/Y,
+with stream ribbons sharing that extent and invisible edge rails at+/-4050.
+There is no ground beyond it. Shrubs alone cannot correct this finite-board view.
+
+Add only modest noninteractive background ground/scenery outside that footprint,
+and compose an enclosing forest belt at multiple depths. Preserve the original
+playable vertex positions/normals/UVs/indices, collision, stream and all gameplay/
+save coordinates. A separate noncolliding skirt must meet the existing boundary
+without a visible crack; any distant rolling rise is scenery, not buildable world
+generation or a new biome. Use existing authored PBR maps. Distribute understory
+with forest groups and irregular edge depth, not another conspicuous home ring.
+Inspect the existing canopy's close/distant evidence before increasing tree count;
+known reduction thresholds are not proof of the active render LOD or opacity.
+
+Planner773's sole actionable probe is Shrub02 a: glTF declares7590 triangles
+and waist/chest-sized local bounds, but its preview is open/twiggy. Main may acquire
+the exact832300-byte FBX and inspect real model/geometry/slot/transforms through
+the existing reader. No automatic import or dense-source claim follows from that.
+Only if warranted, use the five exact1K maps and scale-one overlapping plants as
+a disclosed art trial. Keep small removable berry/root produce naturally within
+their plant/soil silhouettes; retain IDs, rewards, readiness and clear/save logic.
+Candidate02 stays unpromoted; the sealed technical result is not visual acceptance.
 
 ### Historical tree increment and qualification
 
@@ -422,10 +500,11 @@ with no more accepted trees than the baseline and no more than the existing
 1150 grass-patch attempts, using one authored clump per accepted patch initially.
 Counts are initial experiment limits, not an asserted performance budget.
 
-Retain the home exclusion of `650 cm + footprint radius`, resource clearance
+For solid decorations retain the home exclusion of `650 cm + footprint radius`, resource clearance
 `130 cm + radius`, structure `225 cm + radius` and plot `175 cm + radius`;
 increase visual clearance if a canopy masks interaction. Do not shrink these
-to fit larger art. Preserve stream exclusions and edge barriers. Measure
+to fit larger art. The candidate01 correction above intentionally separates
+nonblocking ground cover from solid access footprints. Preserve stream exclusions and edge barriers. Measure
 collision/root footprints separately from decorative canopy reach. If a
 non-removable tree would occupy buildable clearance or obstruct the normal route,
 omit it rather than changing construction rules.

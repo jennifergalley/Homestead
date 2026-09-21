@@ -2,29 +2,38 @@
 
 ## Current state and next visible goal
 
-Selected: qualified `directional-navigation-06`, retaining the camera/environment
-increment, samev5 profile and previous graphics. Camera02/grass01 and earlier
-builds remain available. Delivery is recorded under
-`docs\research\character-assets\directional-navigation-delivery-01`.
-Fourteen of29 environment tasks complete.
-Tree import03 remains FAILED with twelve qualified branch basis corners;
-prior execution narrative is retained in `execution-history.md`.
+Baseline: selected `directional-navigation-06` / `5ccddea`, samev5 and current
+graphics. Fourteen of29 tasks complete; earlier delivery history is retained in
+`execution-history.md`. Tree import03 remains FAILED with twelve qualified
+branch basis corners. Earlier technical promotion is not Jenny's art approval.
 
-Camera-only sapling queries remove the confirmed settled-view obstruction.
-The controlled29-step harvest/clear/save/reload fixture passed. Natural70min
-play passed27.94646 game hours, four harvested-node renewals and actual daylight/
-night/Rain observation, with timing/memory limits disclosed. Evidence:
-`readability-camera-01` and `readability-endurance-01`. No silent time edits.
+**Current priority, Jenny September21 13:39AZ:** replace the sparse, primitive
+scene with a visibly lush woodland. Constructed-home/gameplay expansion and the
+parallel wardrobe round are deferred. No implementation from those rounds exists.
 
-Jenny's natural directional menu increment is integrated: actual720p/4K boundaries,
-save/quit/resume and fresh180s mapped gathering/eating passed. Its remaining
-transaction/mouse/focus matrix is tracked in `improve-menu-directional-navigation`.
-Next environment milestone remains useful constructed-house/plot interaction
-and relevant daylight/night readability, not another unchanged-art recertification.
-Early-orbit near-side surface, dark night heroine/ground, pale outer terrain,
-resource proxies, foliage motion and constructed-house/plot/broader render
-coverage remain open. Do not tint patchy ground or diagnose lighting from golden
-dawn alone; no blanket historical recertification or new test framework.
+Next visible goal: coherent enclosing canopy groups, layered natural understory
+and authored gatherable bushes/saplings/branches/flowers rather than decorative
+assets surrounding unchanged primitive resources. Main owns composition/runtime
+and the sole engine slot; planner773 has delivered the exact nine-model palette.
+Candidates01/02 have38 verified packages, real Shipping stages and passing
+ordinary harvest/tree-contact plus controlled camera/clear/reload routes.
+Both remain **visually rejected**, despite02's improved ground and clustered
+canopy/fern/fir beds. Open ground, under-crown sky gaps and exposed primitive
+produce remain. Both natural09:59 observations were deliberately stopped after
+their600s milestones, not passed endurance. Daylight02 exposes the ruler-straight
+end of the finite playable board.
+Next: a multi-depth enclosing forest belt and separate noncolliding background
+ground beyond the preserved playable terrain, with understory tied to forest groups.
+One bounded Shrub02 source probe is available (native size/density not yet admitted);
+it is a possible layer, not a substitute for correcting the board edge.
+Integrate produce into plant silhouettes.
+Inspect close/distant crown evidence before changing tree counts. No promotion.
+
+Review wide, shoulder-level and ground-resource views in actual neutral daylight;
+include dawn/night if lighting changes. Keep home/resource/build/plot/stream
+access and harvest/clear/regrowth/save behavior as targeted regressions, not a
+new gameplay milestone. Current preview stays selected until a coherent improved
+candidate is inspected. Counts, hashes and passes alone do not establish beauty.
 
 ## 1. Authorization and baseline
 
