@@ -1,0 +1,76 @@
+Module.SurvivalGame.2.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(210,16): error C3535: cannot deduce type for 'auto *' from 'TObjectPtr<UStaticMesh>'
+    auto* Mesh = Tree->GetStaticMesh();
+               ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(210,16): error C2440: 'initializing': cannot convert from 'TObjectPtr<UStaticMesh>' to '<error type> *'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(210,16): note: No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(214,53): error C3536: 'Body': cannot be used before it is initialized
+        && Mesh->GetStaticMaterials().Num() == 3 && Body && Body->AggGeom.SphylElems.Num() == 1
+                                                    ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(229,50): error C7595: 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,const FString::ElementType *,bool>::TCheckedFormatStringPrivate': call to immediate function is not a constant expression
+        PresentationSettings.Add(FString::Printf(TEXT("tree_material[%d]=%s imported_slot=%s shader_map_complete=%d"),
+                                                 ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: failure was caused by call of undefined function or one not declared 'constexpr'
+X(SNeedsWideCharPtrArg, "'%s' expects `TCHAR*`.")
+^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: see usage of 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,const FString::ElementType *,bool>::PRINTF_FORMAT_STRING_ERROR'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(229,50): note: the call stack of the evaluation (the oldest call first) is
+        PresentationSettings.Add(FString::Printf(TEXT("tree_material[%d]=%s imported_slot=%s shader_map_complete=%d"),
+                                                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(229,50): note: while evaluating function 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,const FString::ElementType *,bool>::TCheckedFormatStringPrivate<61>(const CharType (&)[61])'
+        with
+        [
+            CharType=FString::FmtCharType
+        ]
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: while evaluating function 'void UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,const FString::ElementType *,bool>::PRINTF_FORMAT_STRING_ERROR(const char *)'
+X(SNeedsWideCharPtrArg, "'%s' expects `TCHAR*`.")
+^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,10): error C2665: 'GetPathNameSafe': no overloaded function could convert all the argument types
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+         ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\CoreUObject\Public\UObject\Field.h(1269,25): note: could be 'FString GetPathNameSafe(const FField *,const UObject *)'
+COREUOBJECT_API FString GetPathNameSafe(const FField* InField, const UObject* StopOuter = nullptr);
+                        ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,10): note: 'FString GetPathNameSafe(const FField *,const UObject *)': cannot convert argument 1 from '<error type> *' to 'const FField *'
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+         ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,26): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+                         ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\CoreUObject\Public\UObject\UObjectBaseUtility.h(930,16): note: or       'FString GetPathNameSafe(const UObjectBaseUtility *)'
+inline FString GetPathNameSafe(const UObjectBaseUtility* Object)
+               ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,10): note: 'FString GetPathNameSafe(const UObjectBaseUtility *)': cannot convert argument 1 from '<error type> *' to 'const UObjectBaseUtility *'
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+         ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,26): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+                         ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,10): note: while trying to match the argument list '(<error type> *)'
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+         ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(233,9): error C2100: you cannot dereference an operand of type '_T'
+        with
+        [
+            _T=FString
+        ]
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+        ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(241,38): error C7595: 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,const FString::ElementType *>::TCheckedFormatStringPrivate': call to immediate function is not a constant expression
+    Observations.Add(FString::Printf(TEXT("Ordinary tree encounter: root=%s trunk_center_xy=%s radius_cm=%.6f capsule_cylinder_cm=%.6f"),
+                                     ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(39,1): note: failure was caused by call of undefined function or one not declared 'constexpr'
+X(NotEnoughArguments, "not enough arguments provided to format string.")
+^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(39,1): note: see usage of 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,const FString::ElementType *>::PRINTF_FORMAT_STRING_ERROR'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(241,38): note: the call stack of the evaluation (the oldest call first) is
+    Observations.Add(FString::Printf(TEXT("Ordinary tree encounter: root=%s trunk_center_xy=%s radius_cm=%.6f capsule_cylinder_cm=%.6f"),
+                                     ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(241,38): note: while evaluating function 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,const FString::ElementType *>::TCheckedFormatStringPrivate<92>(const CharType (&)[92])'
+        with
+        [
+            CharType=FString::FmtCharType
+        ]
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(39,1): note: while evaluating function 'void UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,const FString::ElementType *,const FString::ElementType *>::PRINTF_FORMAT_STRING_ERROR(const char *)'
+X(NotEnoughArguments, "not enough arguments provided to format string.")
+^

@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.2976872,
+  "samples": [
+    {
+      "queriedPids": [
+        12016
+      ],
+      "elapsedMs": 77.5985,
+      "endpoints": []
+    }
+  ],
+  "maximumSampleGapMs": 220.0652,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T12:36:18.1417662+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 12016,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344677781272610,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T12:36:18.1647089+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 12016,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344677781272610,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    }
+  ],
+  "coff": null,
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-native-build-04\\link2\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 815896,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344677778048461,
+    "LastWriteTime": 134344677778048461,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": 2,
+  "producedItems": [
+    {
+      "lastWriteUtc": "2026-09-21T12:36:18.1838692Z",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\UnrealEditor-SurvivalGameEditor.lib",
+      "bytes": 2800,
+      "sha256": "4BD978BBB748619B09DFD5790970645AE4F97D886DB4DCF3F5CF4389D009F1AF"
+    }
+  ],
+  "previousProductBackups": [],
+  "objectSha256": "4BD978BBB748619B09DFD5790970645AE4F97D886DB4DCF3F5CF4389D009F1AF",
+  "generatedManifest": null,
+  "stageCandidate": null,
+  "stageCookFileCount": 0,
+  "limits": "One explicitly selected guarded build leaf with exact approved Windows console host. No application helpers/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}

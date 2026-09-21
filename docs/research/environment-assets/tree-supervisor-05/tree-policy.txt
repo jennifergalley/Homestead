@@ -1,0 +1,1 @@
+PASS tree policy:67 rejected mutations/profiles; inventory mutations also rejected under exact12-corner diagnostic; diagnostic rejected as clean; reordered-role control,19 source pins,17 stems.

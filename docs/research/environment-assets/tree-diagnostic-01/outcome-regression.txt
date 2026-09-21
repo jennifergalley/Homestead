@@ -1,0 +1,1 @@
+PASS: two positive controls, eight negative cases and actual failed contact evidence rejected; no game launched.

@@ -1,0 +1,87 @@
+{
+  "status": "passed-targeted-policy",
+  "createdUtc": "2026-09-21T12:15:26.2534962+00:00",
+  "supervisorSources": [
+    {
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    },
+    {
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+      "path": "Scripts\\AuthoringProbePolicy.ps1"
+    },
+    {
+      "sha256": "8D9E1D08CF27D3C5655ACAF438BA764533AA2F2FCD2ECC3D5295DFA4F86A2A35",
+      "path": "Scripts\\FernSpikePolicy.ps1"
+    },
+    {
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3",
+      "path": "Scripts\\HairWavePolicy.ps1"
+    },
+    {
+      "sha256": "5EB3BA2C1454882CDFFA0288D98F6C87B234F277F044AFEC1CD16473BBC4B23F",
+      "path": "Scripts\\WardrobePolicy.ps1"
+    },
+    {
+      "sha256": "D526BC12CBB24EF9A7853669B6D59CE521AFA8762F40EE5406400C870BE8A2C7",
+      "path": "Scripts\\TreeSpikePolicy.ps1"
+    },
+    {
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755",
+      "path": "Scripts\\Development-Run.ps1"
+    },
+    {
+      "sha256": "730704EDFB175BAE18F0DB03987824522284ABB75685227837E4CA1072C6132F",
+      "path": "Tests\\Test-TreeSpikePolicy.ps1"
+    },
+    {
+      "sha256": "D440E44DB0F50E169D177BA41E8EAF1F6564844F89F61FCF01F8233ADFF60D45",
+      "path": "Tests\\Test-WardrobePolicy.ps1"
+    },
+    {
+      "sha256": "69819949E65F327A26BCBEBB6D99D277F5F8A24E322E6CDB030992B2F1E97DF9",
+      "path": "Tests\\Test-FernSpikePolicy.ps1"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "sha256": "501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-attempt-01.json"
+    },
+    {
+      "sha256": "0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "0B16BCBE1DA08D406BB8BFE913B0065E2A6FE989892CD85092106AB622BADCFA",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\wardrobe-result.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "3B9898BF0344512EED3ABCBAF3BD5E3995C921E82E193708245E6CC245612F1B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\probe-result.json"
+    },
+    {
+      "sha256": "6263C0C1AA3F62EF1A42BE7123AAC7ED66243BE405A49A3D599C2E3371FC4591",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\asset-admission.json"
+    },
+    {
+      "sha256": "4504EA31EBBA1DA6DA80A1CBFC827120DFB7CBEE410F48C7FF441FD63AA90AD3",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-verify-01\\probe-result.json"
+    }
+  ],
+  "nativeReceiptSha256": "AD8E33661008BE798DB5FD339DE55DEF4CF96BEF22E280980BA961194C1495E7",
+  "tests": {
+    "sharedNegativeCases": 40,
+    "productionTokens": "TreeImport/TreeVerify; unchanged completion-driven primitive; nullrhi, DisablePython, noshaderworker,7 isolated configs",
+    "wardrobeNegativeCases": 47,
+    "roleOrder": "Accept role reordering only by unique imported identity; validate all source counts/material bindings/maps.",
+    "limits": "Synthetic/offline policy data; real native import/reload remains separately required.",
+    "treeNegativeCases": 53
+  },
+  "scope": "Exactly one frozen reference-free LOD2 FBX plus13 maps into17 fresh TreeSmall02 trial packages. Native controls unchanged: pre-resume root-only job, no breakaway, inherited read-only existing marker until observed death, Python disabled/uninitialized snapshots, retained admitted local DDC, TraceControl-only endpoint policy. No arbitrary completion timer; stop/pause and existing owned-job failure cleanup retained. Failed tree imports retain named partial hashes without moving/deleting originals. Tree cook additionally requires released native import and separate-process persisted verification, with all fern/hair/wardrobe/tree cooked package stems. Current wardrobe-ui-02 selection is explicitly hash-pinned and protected.",
+  "wrapperPinPolicy": "Wrapper excluded from self-referential receipt hash; exact runtime wrapper hash captured before admission and rechecked through exit, as in existing production supervisor."
+}

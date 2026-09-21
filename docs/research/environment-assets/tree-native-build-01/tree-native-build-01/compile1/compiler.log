@@ -1,0 +1,5 @@
+HomesteadAuthoringProbeCommandlet.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(93,36): warning C4191: 'reinterpret_cast': unsafe conversion from 'FARPROC' to '`anonymous-namespace'::CapturePython::FIsInitialized'
+        Making a function call using the resulting pointer may cause your program to fail
+                const auto Query = reinterpret_cast<FIsInitialized>(GetProcAddress(Modules[Index], "Py_IsInitialized"));
+                                   ^

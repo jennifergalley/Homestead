@@ -1,0 +1,1 @@
+PASS:27 exact fit mappings,33 pinned source files,34 packages, production mode/tokens, shared quit-entry source contract; 47 negative cases.

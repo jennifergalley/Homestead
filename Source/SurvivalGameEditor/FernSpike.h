@@ -5,3 +5,4 @@
 bool RunFernSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven = false);
 bool RunHairWaveSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
 bool RunWardrobeSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
+bool RunTreeSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);

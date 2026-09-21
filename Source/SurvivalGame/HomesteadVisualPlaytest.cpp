@@ -1,6 +1,7 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadWorld.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
@@ -14,6 +15,11 @@
 #include "HAL/IConsoleManager.h"
 #include "HardwareInfo.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/StaticMesh.h"
+#include "PhysicsEngine/BodySetup.h"
+#include "MaterialShared.h"
 #include "InputKeyEventArgs.h"
 #include "Kismet/GameplayStatics.h"
 #include "HAL/FileManager.h"
@@ -182,8 +188,107 @@ void AHomesteadVisualPlaytest::Prepare()
         PresentationSettings.Add(TEXT("Timing records instrumented actor-tick wall intervals, NOT GPU duration or present timestamps. Only timing-* precedes all screenshot requests; capture-* is readback-disturbed and visits different positions, not a controlled performance A/B."));
         PresentationSettings.Add(TEXT("Runtime CVars and user settings are recorded separately. output_target is not the internal temporal-upscaler input resolution; auto/default resolution policy may require further evidence."));
     }
+    bTreeRoute = !bWaterRoute && !bClearRoute && !bWeedRoute && !bPresentationDiagnostics;
+    if (bTreeRoute) PrepareTreeEncounter();
     RecordPresentationSettings(TEXT("start"));
     LastWallTime = FPlatformTime::Seconds();
+}
+
+void AHomesteadVisualPlaytest::PrepareTreeEncounter()
+{
+    TArray<UStaticMeshComponent*> Parts;
+    if (PC->Landscape) PC->Landscape->GetComponents(Parts);
+    TArray<UStaticMeshComponent*> Trees;
+    for (auto* Part : Parts)
+        if (Part->ComponentHasTag(TEXT("AuthoredTreeSmall02"))) Trees.Add(Part);
+    if (Trees.Num() != 1)
+    {
+        Observations.Add(FString::Printf(TEXT("FAILED expected one ordinary-world authored tree, observed %d."), Trees.Num()));
+        return;
+    }
+    auto* Tree = Trees[0];
+    UStaticMesh* Mesh = Tree->GetStaticMesh();
+    auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
+    bTreeReady = Mesh && Mesh->GetPathName() == TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2")
+        && Tree->GetComponentScale().Equals(FVector::OneVector, 0.001)
+        && Mesh->GetStaticMaterials().Num() == 3 && Body && Body->AggGeom.SphylElems.Num() == 1
+        && Body->AggGeom.GetElementCount() == 1 && Body->CollisionTraceFlag == CTF_UseSimpleAsComplex
+        && Tree->GetCollisionEnabled() != ECollisionEnabled::NoCollision
+        && Tree->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block;
+    const FVector Root = Tree->GetComponentLocation();
+    const double GroundError = Root.Z - AHomesteadWorld::GroundHeight(Root.X, Root.Y);
+    bTreeReady &= FMath::Abs(GroundError) < 0.1;
+    for (int32 Index = 0; Mesh && Index < Mesh->GetStaticMaterials().Num(); ++Index)
+    {
+        const auto* Interface = Tree->GetMaterial(Index);
+        auto* Material = Interface ? Interface->GetMaterial() : nullptr;
+        auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+        const bool Ready = Material && Material->GetPathName().StartsWith(TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/"))
+            && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
+        bTreeReady &= Ready;
+        PresentationSettings.Add(FString::Printf(TEXT("tree_material[%d]=%s imported_slot=%s shader_map_complete=%d"),
+            Index, *GetPathNameSafe(Material), *Mesh->GetStaticMaterials()[Index].ImportedMaterialSlotName.ToString(), Ready));
+    }
+    PresentationSettings.Add(FString::Printf(TEXT("tree_mesh=%s root=%s scale=%s ground_error_cm=%.6f ready=%d"),
+        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+    if (!bTreeReady)
+    {
+        Observations.Add(TEXT("FAILED tree material/geometry/grounding/collision readiness."));
+        return;
+    }
+    ObservedTree = Tree;
+    TreeCenter = FVector2D(Tree->GetComponentTransform().TransformPosition(Body->AggGeom.SphylElems[0].Center));
+    Observations.Add(FString::Printf(TEXT("Ordinary tree encounter: root=%s trunk_center_xy=%s radius_cm=%.6f capsule_cylinder_cm=%.6f"),
+        *Root.ToString(), *TreeCenter.ToString(), Body->AggGeom.SphylElems[0].Radius, Body->AggGeom.SphylElems[0].Length));
+    Passes.Append({
+        {TEXT("walk-to-authored-tree"), 18},
+        {TEXT("view-authored-tree"), 3},
+        {TEXT("walk-into-authored-trunk"), 9},
+        {TEXT("retreat-from-authored-trunk"), 3}
+    });
+}
+
+void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta, FVector2D& Move, FVector2D& Look)
+{
+    const bool Approach = Pass.Label == TEXT("walk-to-authored-tree");
+    const bool View = Pass.Label == TEXT("view-authored-tree");
+    const bool Contact = Pass.Label == TEXT("walk-into-authored-trunk");
+    const bool Retreat = Pass.Label == TEXT("retreat-from-authored-trunk");
+    if (!bTreeReady || !(Approach || View || Contact || Retreat)) return;
+    const auto Point = PC->PlayerPoint();
+    const FVector2D Position(Point.x, Point.y);
+    const FVector2D Offset = (Approach ? TreeStaging : TreeCenter) - Position;
+    const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Offset.Y, Offset.X));
+    const float Difference = FMath::FindDeltaAngleDegrees(static_cast<float>(PC->GetControlRotation().Yaw), Yaw);
+    Look.X = FMath::Clamp(Difference / 45.0f, -0.7f, 0.7f);
+    Move.Y = View ? 0 : Retreat ? -0.65f : FMath::Abs(Difference) < 25 ? 0.7f : 0;
+    if (Approach && Offset.Size() < 45)
+    {
+        bReachedTree = true;
+        Move = Look = FVector2D::ZeroVector;
+        PassElapsed = Pass.Duration;
+    }
+    auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn());
+    if (Contact && Avatar && FMath::Abs(Difference) < 10)
+    {
+        const FVector Start = Avatar->GetActorLocation();
+        const FVector Direction(Offset.GetSafeNormal(), 0);
+        FHitResult Hit;
+        const FCollisionQueryParams Query(SCENE_QUERY_STAT(TreeWalkingContact), false, Avatar);
+        const bool HitTree = GetWorld()->SweepSingleByChannel(Hit, Start, Start + Direction * 15, FQuat::Identity,
+            ECC_Pawn, Avatar->GetCapsuleComponent()->GetCollisionShape(), Query) && Hit.GetComponent() == ObservedTree.Get();
+        TreeBlockedSeconds = HitTree && Avatar->GetVelocity().Size2D() < 5 ? TreeBlockedSeconds + Delta : 0;
+        if (TreeBlockedSeconds >= 0.75f)
+        {
+            bTreeBlocked = true;
+            TreeContact = Position;
+            Observations.Add(FString::Printf(TEXT("Actual walking blocked at authored trunk: player=%s distance_cm=%.6f sweep_component=%s"),
+                *Position.ToString(), Offset.Size(), *GetPathNameSafe(Hit.GetComponent())));
+            PassElapsed = Pass.Duration;
+        }
+    }
+    if (Retreat && bTreeBlocked && FVector2D::Distance(Position, TreeContact) > 100)
+        bTreeRetreated = true;
 }
 
 void AHomesteadVisualPlaytest::Capture(const FString& Label)
@@ -315,6 +420,11 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             Tap(EKeys::Gamepad_RightThumbstick);
             Tap(EKeys::Gamepad_RightThumbstick);
         }
+        if (Pass.Label == TEXT("walk-to-authored-tree"))
+        {
+            const auto Point = PC->PlayerPoint();
+            TreeStaging = TreeCenter + (FVector2D(Point.x, Point.y) - TreeCenter).GetSafeNormal() * 750;
+        }
         Observations.Add(FString::Printf(TEXT("BEGIN %.2fs %s: %s"), Elapsed, *Pass.Label, *PC->FocusTitle()));
     }
     FVector2D Move = Pass.Move;
@@ -334,6 +444,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             PassElapsed = Pass.Duration;
         }
     }
+    TickTreeEncounter(Pass, WallDelta, Move, Look);
     ApplyAxes(Move, Look);
     PassElapsed += WallDelta;
     CaptureElapsed += WallDelta;
@@ -383,6 +494,8 @@ void AHomesteadVisualPlaytest::Finish()
     {
         Observations.Add(FString::Printf(TEXT("Forage target reached=%d; resources actually gathered=%d"), bReachedForage, Gathered));
         Observations.Add(FString::Printf(TEXT("Picking action observed=%d; recovered to idle=%d"), bObservedGather, bGatherRecovered));
+        Observations.Add(FString::Printf(TEXT("Tree ready=%d; ordinary approach=%d; actual trunk blocked walking=%d; ordinary retreat=%d"),
+            bTreeReady, bReachedTree, bTreeBlocked, bTreeRetreated));
     }
     Observations.Add(TEXT("This observational capture is not a visual-quality pass or a replacement for human feel/listening review."));
     bool Saved = FFileHelper::SaveStringToFile(FString::Join(Telemetry, TEXT("\n")) + TEXT("\n"),
@@ -403,7 +516,8 @@ void AHomesteadVisualPlaytest::Finish()
         : bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered
         : bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
         : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
-        : bReachedForage && Gathered && bObservedGather && bGatherRecovered;
+        : bReachedForage && Gathered && bObservedGather && bGatherRecovered
+            && (!bTreeRoute || (bTreeReady && bReachedTree && bTreeBlocked && bTreeRetreated));
     const bool Cancelled = FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"))
         && IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-qa.txt")));
     FPlatformMisc::RequestExitWithStatus(false, Saved && Complete && !Cancelled ? 0 : 1);

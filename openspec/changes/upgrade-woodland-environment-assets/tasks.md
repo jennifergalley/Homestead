@@ -14,10 +14,19 @@ failed attempts remain failed. `docs/research/environment-assets/clearing-playab
 records the usable increment and limitations. Trees/grass/lighting/old hair
 still dominate the view; this is not full woodland or appearance acceptance.
 
-**Next visible delivery:** put the existing fern in the actual homestead
-clearing, preserve authored materials/proportions and open routes, inspect
-real world lighting, then produce a usable candidate. Do not wait for the
-entire tree/grass/ground palette or polish another isolated test scene.
+**Next visible delivery:** integrate one frozen reduced TreeSmall02 LOD2 with
+its thirteen maps, three authored materials and measured lower-trunk collision.
+Import and separately reload exactly seventeen new packages before real-world
+placement/cook/Shipping evidence. The existing fern is already integrated;
+wardrobe-ui-02 remains selected until a newer usable candidate is verified.
+Do not mass-place the original two-million-triangle mesh or start another UI
+cosmetic batch. See the current tree increment in `design.md`.
+
+Tree diagnostic01 now has a genuine fresh cook/Shipping stage and521 ordinary
+720p frames, but its strict trunk-contact/dependent-retreat assertions did not
+pass. The twelve-corner tangent qualification remains explicit; import03 stays
+failed. Keep wardrobe-ui-02 selected. This partial diagnostic evidence checks
+no additional top-level task; see `docs/research/environment-assets/tree-diagnostic-01/receipt.json`.
 
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns

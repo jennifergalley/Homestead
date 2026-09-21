@@ -1,0 +1,9 @@
+FernSpike.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(1218,18): error C3535: cannot deduce type for 'auto *' from 'TObjectPtr<UFbxImportUI>'
+        auto* UI = Factory->ImportUI;
+                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(1218,18): error C2440: 'initializing': cannot convert from 'TObjectPtr<UFbxImportUI>' to '<error type> *'
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(1218,18): note: No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(1229,9): error C3536: 'Data': cannot be used before it is initialized
+        Data->bCombineMeshes = true;
+        ^

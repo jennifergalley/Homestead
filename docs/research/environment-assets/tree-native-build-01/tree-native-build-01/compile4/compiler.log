@@ -1,0 +1,34 @@
+Module.SurvivalGame.1.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.h(14,24): error C2143: syntax error: missing ';' before '<class-head>'
+class SURVIVALGAME_API AHomesteadVisualPlaytest : public AActor
+                       ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.h(13,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+UCLASS()
+^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.h(16,5): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+    GENERATED_BODY()
+    ^
+E:\Repos\SurvivalGame\Intermediate\Build\Win64\UnrealEditor\Inc\SurvivalGame\UHT\HomesteadVisualPlaytest.gen.cpp(55,244): error C2248: 'AHomesteadVisualPlaytest::PC': cannot access private member declared in class 'AHomesteadVisualPlaytest'
+const UECodeGen_Private::FObjectPropertyParams UHT_STATICS::NewProp_PC = { "PC", nullptr, (EPropertyFlags)0x0144000000000000, UECodeGen_Private::EPropertyGenFlags::Object | UECodeGen_Private::EPropertyGenFlags::ObjectPtr, nullptr, nullptr, 1, STRUCT_OFFSET(AHomesteadVisualPlaytest, PC), Z_Construct_UClass_AHomesteadController, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PC_MetaData), NewProp_PC_MetaData) };
+                                                                                                                                                                                                                                                   ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.h(31,50): note: see declaration of 'AHomesteadVisualPlaytest::PC'
+    UPROPERTY() TObjectPtr<AHomesteadController> PC;
+                                                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.h(14,24): note: see declaration of 'AHomesteadVisualPlaytest'
+class SURVIVALGAME_API AHomesteadVisualPlaytest : public AActor
+                       ^
+E:\Repos\SurvivalGame\Intermediate\Build\Win64\UnrealEditor\Inc\SurvivalGame\UHT\HomesteadVisualPlaytest.gen.cpp(55,61): error C2737: 'NewProp_PC': const object must be initialized
+const UECodeGen_Private::FObjectPropertyParams UHT_STATICS::NewProp_PC = { "PC", nullptr, (EPropertyFlags)0x0144000000000000, UECodeGen_Private::EPropertyGenFlags::Object | UECodeGen_Private::EPropertyGenFlags::ObjectPtr, nullptr, nullptr, 1, STRUCT_OFFSET(AHomesteadVisualPlaytest, PC), Z_Construct_UClass_AHomesteadController, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PC_MetaData), NewProp_PC_MetaData) };
+                                                            ^
+E:\Repos\SurvivalGame\Intermediate\Build\Win64\UnrealEditor\Inc\SurvivalGame\UHT\HomesteadVisualPlaytest.gen.cpp(115,1): error C2511: 'AHomesteadVisualPlaytest::AHomesteadVisualPlaytest(FVTableHelper &)': overloaded member function not found in 'AHomesteadVisualPlaytest'
+DEFINE_VTABLE_PTR_HELPER_CTOR_NS(, AHomesteadVisualPlaytest);
+^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.h(14,24): note: see declaration of 'AHomesteadVisualPlaytest'
+class SURVIVALGAME_API AHomesteadVisualPlaytest : public AActor
+                       ^
+E:\Repos\SurvivalGame\Intermediate\Build\Win64\UnrealEditor\Inc\SurvivalGame\UHT\HomesteadVisualPlaytest.gen.cpp(115,1): error C2550: 'AHomesteadVisualPlaytest::{ctor}': constructor initializer lists are only allowed on constructor definitions
+DEFINE_VTABLE_PTR_HELPER_CTOR_NS(, AHomesteadVisualPlaytest);
+^
+E:\Repos\SurvivalGame\Intermediate\Build\Win64\UnrealEditor\Inc\SurvivalGame\UHT\HomesteadVisualPlaytest.gen.cpp(116,28): error C2600: 'AHomesteadVisualPlaytest::~AHomesteadVisualPlaytest': cannot define a compiler-generated special member function (must be declared in the class first)
+AHomesteadVisualPlaytest::~AHomesteadVisualPlaytest() {}
+                           ^

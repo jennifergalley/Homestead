@@ -1,0 +1,31 @@
+{
+  "sourceSha256": "03365d16ad77535e28c8f3b7243a8183d30768af3c719589cef58a44ed12e283",
+  "method": "Standalone official FBX parser, NumPy float32 UV arithmetic after UE V flip; predicted float32 model/axis/cm positions. No engine execution or asset changes.",
+  "limit": "Source-derived prediction, not identification of the actual12 native invalid tangent corners or a complete MikkTSpace reproduction.",
+  "byRole": {
+    "branches": {
+      "triangles": 23702,
+      "uvFloat32DeterminantZero": 0,
+      "uvFloat64DeterminantZeroFromSameFloat32Coordinates": 0,
+      "predictedFloat32CrossProductZero": 0,
+      "zeroFloat32UvTriangleIds": [],
+      "zeroFloat32GeometryTriangleIds": []
+    },
+    "leaves": {
+      "triangles": 193938,
+      "uvFloat32DeterminantZero": 0,
+      "uvFloat64DeterminantZeroFromSameFloat32Coordinates": 0,
+      "predictedFloat32CrossProductZero": 0,
+      "zeroFloat32UvTriangleIds": [],
+      "zeroFloat32GeometryTriangleIds": []
+    },
+    "trunk": {
+      "triangles": 14145,
+      "uvFloat32DeterminantZero": 0,
+      "uvFloat64DeterminantZeroFromSameFloat32Coordinates": 0,
+      "predictedFloat32CrossProductZero": 0,
+      "zeroFloat32UvTriangleIds": [],
+      "zeroFloat32GeometryTriangleIds": []
+    }
+  }
+}

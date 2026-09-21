@@ -1,0 +1,86 @@
+Log started at 09/21/2026 05:34:41 (2026-09-21T12:34:41Z)
+Resolved project argument E:\Repos\SurvivalGame\SurvivalGame.uproject to E:\Repos\SurvivalGame\SurvivalGame.uproject
+No config file at C:\ProgramData\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Jenny\AppData\Local\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Jenny\OneDrive\Documents\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Configuration will be read from:
+  C:\Users\Jenny\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): C:\Users\Jenny\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): E:\Repos\SurvivalGame\Saved\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): C:\Users\Jenny\AppData\Local\UnrealEngine\Intermediate\Build\UnrealBuildTool.Env.BuildConfiguration.xml
+Log file: E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-04\ubt.log
+
+Setting temp directory to 'E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-04\Temp\UnrealBuildTool\863af17b'
+    Registering build platform: UnrealBuildTool.AndroidPlatformFactory
+    Registering build platform: UnrealBuildTool.IOSPlatformFactory
+    Registering build platform: UnrealBuildTool.LinuxPlatformFactory
+    Registering build platform: UnrealBuildTool.MacPlatformFactory
+    Registering build platform: UnrealBuildTool.TVOSPlatformFactory
+    Registering build platform: UnrealBuildTool.WindowsPlatformFactory
+Found Windows 10 SDK root at C:\Program Files (x86)\Windows Kits\10 (1)
+Found Windows 10 SDK root at C:\Program Files (x86)\Windows Kits\10 (2)
+Found Windows 10 SDK version 10.0.26100.0 at C:\Program Files (x86)\Windows Kits\10
+Found Universal CRT version 10.0.26100.0 at C:\Program Files (x86)\Windows Kits\10
+Win64 Installed SDK(s): MinVersion_Sdk=10.0.19041.0, MaxVersion_Sdk=10.9.99999.0, CurrentVersion_Sdk=10.0.26100.0, Version_AutoSdk=10.0.22621.0, CurrentVersion_AutoSdk=
+        Registering build platform: Win64 - buildable: True
+    Registering build platform: UnrealBuildTool.VisionOSPlatformFactory
+Command line: "E:\Program Files\UE_5.8\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll" SurvivalGameEditor Win64 Development -Project=E:\Repos\SurvivalGame\SurvivalGame.uproject -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild -NoSNDBS -NoArtifactReads -NoArtifactWrites -NoEngineChanges -Log=E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-04\ubt.log -WriteOutdatedActions=E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-04\actions.json
+Determining max actions to execute in parallel (8 physical cores, 16 logical cores)
+  Executing up to 8 processes, one per physical core
+  Requested 1.5 GB memory per action, 8.62 GB available: limiting max parallel actions to 5
+UbaSessionServer - Disable remote execution (remote sessions will finish current processes)
+Skipping E:\Program Files\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5Rules.dll: File is installed
+Skipping E:\Program Files\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5ProgramRules.dll: File is installed
+Building UnrealEditor - SurvivalGameEditor - Win64 - Development
+Generated code is up to date.
+Deleting outdated item: E:\Repos\SurvivalGame\Binaries\Win64\UnrealEditor-SurvivalGameEditor.pdb
+Deleting outdated item: E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGameEditor\UnrealEditor-SurvivalGameEditor.lib
+===== Toolchain Information =====
+Using ISPC compiler (E:\Program Files\UE_5.8\Engine\Source\ThirdParty\Intel\ISPC\bin\Windows\ispc.exe)
+  Intel(r) Implicit SPMD Program Compiler (Intel(r) ISPC), 1.24.0 (build commit  @ 20250404, LLVM 18.1.2) 
+Using Visual Studio 14.44.35229 toolchain (E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207) and Windows 10.0.26100.0 SDK (C:\Program Files (x86)\Windows Kits\10).
+=================================
+Exported build actions to E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-04\actions.json
+WriteFileIfChanged() wrote 0 changed files of 1 requested writes.
+
+Timeline:
+[  0.000]  +0.327 Main
+   0.015          [  0.015]  +0.094 Apply XmlConfig
+   0.117          [  0.117]  +0.042 AddTelemetry
+   0.186          [  0.186]  +0.141 RegisterPlatforms
+[  0.351]  +0.048 ParseCommandLine
+[  0.496]  +0.265 LoadMakefile
+[  0.768]  +0.280 FindPlugins
+   0.948          [  0.179]  +0.109 EngineRulesPlugins
+[  1.059]  +0.021 MakefileValid
+   1.061          [  0.002]  +0.011 EngineRulesFetchDirs
+[  1.082]  +0.010 EngineRulesAssembly
+[  1.092]  +0.001 ProgramRulesAssembly
+[  1.094]  +0.003 ProjectRulesAssembly
+[  1.097]  +0.267 CreateTargetRules
+[  1.427]  +0.007 CppDependencyCache
+[  1.444]  +0.061 SurvivalGameEditor Win64 Development
+[  1.507]  +0.021 UHTWait
+   1.509          [  0.001]  +0.017 UHTManifest
+   1.527          [  0.019]  +0.020 UHTTimestamps
+[  1.553]  +0.003 CppDependencyCache
+[  1.557]  +0.073 Preparing ActionGraph
+   1.569          [  0.012]  +0.005 LinkActions
+   1.574             0.017          [  0.005]  +0.000 DetectActionGraphCycles
+   1.575          [  0.018]  +0.000 GatherPrerequisiteActions
+   1.577          [  0.019]  +0.000 CppDependencyCacheWait
+   1.577          [  0.020]  +0.034 GatherOutdatedActions
+   1.615          [  0.058]  +0.008 LinkActions
+   1.615             0.058          [  0.000]  +0.000 DetectActionGraphCycles
+   1.624          [  0.067]  +0.004 DeleteOutdatedProducedItems
+   1.628          [  0.071]  +0.001 SaveActionHistory
+   1.630          [  0.073]  +0.000 CreateDirectoriesForProducedItems
+[  1.635]  +0.013 Writing actions
+[  1.649]  +0.000 DisconnectCache
+[  1.653]  +0.000 SaveCasTable
+[  1.657]  +0.066 Saving caches
+[  1.724]  +0.004 TelemetryService.FlushEvents
+[  1.729]
+
+Result: Succeeded
+Total execution time: 1.73 seconds

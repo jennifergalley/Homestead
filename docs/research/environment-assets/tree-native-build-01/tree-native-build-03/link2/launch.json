@@ -1,0 +1,61 @@
+{
+  "pid": 54060,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+  "creationTime": 134344663499837481,
+  "executableSha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-native-build-03\\link2\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 815322,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344663497060246,
+    "LastWriteTime": 134344663497060246,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "A1BAEA8E9957917D79D09BA00B268DC165808C84E13C77AAF2F7462D9241DC2A",
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "allowedBuildOnlyConsole": {
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "signature": "Valid",
+    "path": "C:\\Windows\\System32\\conhost.exe"
+  },
+  "compileActionId": -1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\UnrealEditor-SurvivalGame.lib.rsp",
+      "sha256": "A1BAEA8E9957917D79D09BA00B268DC165808C84E13C77AAF2F7462D9241DC2A"
+    }
+  ],
+  "expectedProducedItems": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\UnrealEditor-SurvivalGame.lib",
+  "resourceLinkActionId": 2,
+  "exactReviewedArguments": "/LIB @\"E:/Repos/SurvivalGame/Intermediate/Build/Win64/x64/UnrealEditor/Development/SurvivalGame/UnrealEditor-SurvivalGame.lib.rsp\"",
+  "previousProductBackups": [],
+  "resourceConversion": "",
+  "derivedDllResponse": "",
+  "splitShippingManifest": false,
+  "embedShippingManifest": false,
+  "stageCooked": false,
+  "stageCandidate": null,
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": false,
+  "uiActions": false,
+  "shippingActions": false,
+  "wardrobeActions": false,
+  "treeActions": true
+}

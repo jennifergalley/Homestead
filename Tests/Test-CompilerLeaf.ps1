@@ -9,6 +9,7 @@ param(
     [switch]$FernActions,
     [switch]$UiActions,
     [switch]$WardrobeActions,
+    [switch]$TreeActions,
     [switch]$WardrobeSlotCorrection,
     [switch]$WardrobeMenuChecks,
     [switch]$ShippingActions,
@@ -17,7 +18,8 @@ param(
     [switch]$StageCooked,
     [switch]$HairWaveCandidate,
     [switch]$WardrobeCandidate,
-    [switch]$WardrobeVisualCorrection
+    [switch]$WardrobeVisualCorrection,
+    [switch]$TreeDiagnosticCandidate
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -26,11 +28,17 @@ $authorityRoot=$root
 if($HairWaveCandidate -and -not $ShippingActions){throw 'Hair-wave candidate applies only to the established Shipping leaves.'}
 if($WardrobeCandidate -and (-not $ShippingActions -or $HairWaveCandidate)){throw 'Wardrobe candidate requires exclusive Shipping selection.'}
 if($WardrobeVisualCorrection -and -not $WardrobeCandidate){throw 'Visual correction requires the explicit wardrobe Shipping candidate.'}
-$shippingBuildName=if($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$shippingLinkAction=if($WardrobeCandidate){2}else{1}
+if($TreeDiagnosticCandidate -and (-not $ShippingActions -or $HairWaveCandidate -or $WardrobeCandidate)){throw 'Tree diagnostic requires exclusive Shipping selection.'}
+$shippingBuildName=if($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkAction=if($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
-$shippingCompiles=if($WardrobeCandidate){@(-1,0,1)}else{@(-1,0)}
+$shippingCompiles=if($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
+if($TreeActions -and ($FernActions -or $UiActions -or $WardrobeActions -or $ShippingActions -or -not $DetachedConsole -or
+    $CompileActionId -notin @(-1,0) -or $ResourceLinkActionId -notin @(-1,1,2) -or
+    ($CompileActionId -eq -1 -and $ResourceLinkActionId -eq -1 -and -not $ConvertResource))){
+    throw 'Only the exact reduced-tree native compile/library/DLL/resource leaves are admitted.'
+}
 if($WardrobeMenuChecks -and (-not $WardrobeActions -or $WardrobeSlotCorrection -or $CompileActionId -notin @(-1,4) -or
     $ResourceLinkActionId -notin @(-1,5,6) -or $ConvertResource)){
     throw 'Wardrobe menu checks admit only existing game compile4/library6/DLL5.'
@@ -43,7 +51,7 @@ if($WardrobeActions -and ($FernActions -or $UiActions -or $ShippingActions -or -
     $CompileActionId -notin @(-1,0,1,4) -or $ResourceLinkActionId -notin @(-1,2,3,5,6))) {
     throw 'Only exact integrated wardrobe compile/library/DLL leaves are admitted.'
 }
-if(-not $WardrobeActions -and ($CompileActionId -eq 4 -or $ResourceLinkActionId -eq 5)){throw 'Action requires the pinned wardrobe export.'}
+if(-not $TreeActions -and -not $WardrobeActions -and ($CompileActionId -eq 4 -or $ResourceLinkActionId -eq 5)){throw 'Action requires the pinned wardrobe export.'}
 if($UiActions) {
     if($FernActions -or $ShippingActions -or $CompileActionId -notin @(0,6) -or $ResourceLinkActionId -ne -1 -or
         $ConvertResource -or $DerivedDllResponse -or -not $DetachedConsole){throw 'Only the isolated UI PCH/game compile leaves are admitted.'}
@@ -57,7 +65,7 @@ if($ShippingActions -and ($FernActions -or $UiActions -or $CompileActionId -noti
     ($CompileActionId -eq -1 -and $ResourceLinkActionId -eq -1 -and -not $ConvertResource -and -not $EmbedShippingManifest -and -not $StageCooked))) {
     throw 'Only the pinned Shipping compile/link/game-resource leaves are admitted.'
 }
-if($ResourceLinkActionId -eq 1 -and -not $ShippingActions){throw 'Link1 requires the pinned Shipping plan.'}
+if($ResourceLinkActionId -eq 1 -and -not $ShippingActions -and -not $TreeActions){throw 'Link1 requires the pinned Shipping/tree plan.'}
 if($SplitShippingManifest -and (-not $ShippingActions -or $ResourceLinkActionId -ne $shippingLinkAction -or -not $DerivedDllResponse)){throw 'Split manifest requires the exact Shipping link.'}
 if($EmbedShippingManifest -and (-not $ShippingActions -or $SplitShippingManifest -or $CompileActionId -ne -1 -or
     $ResourceLinkActionId -ne -1 -or $ConvertResource -or $DerivedDllResponse)){throw 'Manifest embedding must be a separate Shipping leaf.'}
@@ -75,9 +83,9 @@ $compiler='E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.ex
 $hash='FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619'
 if($CompileActionId -ne -1 -and $ResourceLinkActionId -ne -1){throw 'Select only one reviewed action.'}
 if($ConvertResource -and ($CompileActionId -ne -1 -or $ResourceLinkActionId -ne -1)){throw 'Conversion must be a separate leaf.'}
-$dllActionIds=if($WardrobeActions){@(2,5)}elseif($ShippingActions){@($shippingLinkAction)}elseif($FernActions){@(2)}else{@(6,9)}
+$dllActionIds=if($TreeActions){@(1)}elseif($WardrobeActions){@(2,5)}elseif($ShippingActions){@($shippingLinkAction)}elseif($FernActions){@(2)}else{@(6,9)}
 if($FernActions -and ($CompileActionId -notin @(-1,0,1) -or $ResourceLinkActionId -notin @(-1,2,3))){throw 'Only the two exported fern compiles/library/DLL are admitted.'}
-if(-not $FernActions -and -not $WardrobeActions -and -not($ShippingActions -and $WardrobeCandidate) -and $ResourceLinkActionId -in @(2,3)){throw 'Fern link IDs require the pinned fern map.'}
+if(-not $TreeActions -and -not $FernActions -and -not $WardrobeActions -and -not($ShippingActions -and ($WardrobeCandidate -or $TreeDiagnosticCandidate)) -and $ResourceLinkActionId -in @(2,3)){throw 'Link IDs require an explicitly pinned action map.'}
 if($DerivedDllResponse -and $ResourceLinkActionId -notin $dllActionIds){throw 'Derived response requires an approved DLL link.'}
 $selectedId=if($ResourceLinkActionId -ne -1){$ResourceLinkActionId}else{$CompileActionId}
 if($EmbedShippingManifest) {
@@ -124,24 +132,34 @@ if($StageCooked) {
     . (Join-Path $authorityRoot 'Scripts\FernSpikePolicy.ps1')
     $source='E:\Program Files\UE_5.8\Engine\Binaries\DotNET\AutomationTool\AutomationTool.dll'
     if((Get-FileHash $source).Hash -cne 'DBE23866969B66071B7035E8D4B262ED3B646A67883442748652BA89B98DA2FD'){throw 'Installed AutomationTool identity differs.'}
-    $cookOutput=Join-Path $root ("Saved\Automation\20260921-033354-2d257ba0\"+$(if($WardrobeCandidate){'wardrobe-cook-01'}elseif($HairWaveCandidate){'hair-cook-01'}else{'clearing-cook-02'}))
+    $cookOutput=Join-Path $root ("Saved\Automation\20260921-033354-2d257ba0\"+$(if($TreeDiagnosticCandidate){'tree-diagnostic-cook-02'}elseif($WardrobeCandidate){'wardrobe-cook-01'}elseif($HairWaveCandidate){'hair-cook-01'}else{'clearing-cook-02'}))
     $cookProof=Get-Content (Join-Path $cookOutput 'probe-result.json') -Raw|ConvertFrom-Json
-    if($cookProof.status -cne 'passed' -or -not $cookProof.subjectExited -or $cookProof.hardTerminated -or
+    $expectedCookStatus=if($TreeDiagnosticCandidate){'passed-diagnostic-only'}else{'passed'}
+    if($cookProof.status -cne $expectedCookStatus -or -not $cookProof.subjectExited -or $cookProof.hardTerminated -or
         -not $cookProof.guardDisposed -or @($cookProof.cleanupErrors).Count -or -not $cookProof.markerAfterRelease) {
         throw 'A genuinely completed protected cook with verified cleanup is required.'
     }
     $additional=@()
-    if($HairWaveCandidate -or $WardrobeCandidate) {
+    if($HairWaveCandidate -or $WardrobeCandidate -or $TreeDiagnosticCandidate) {
         . (Join-Path $authorityRoot 'Scripts\HairWavePolicy.ps1')
         $additional=@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})
     }
-    if($WardrobeCandidate){
+    if($WardrobeCandidate -or $TreeDiagnosticCandidate){
         . (Join-Path $authorityRoot 'Scripts\WardrobePolicy.ps1')
         $additional+=@(Get-WardrobePackageStems|ForEach-Object {"Content\SurvivalGame\Characters\ModularClothing\$_.uasset"})
     }
+    if($TreeDiagnosticCandidate){
+        . (Join-Path $authorityRoot 'Scripts\TreeSpikePolicy.ps1')
+        if(-not $cookProof.treeDiagnostic -or
+            (Get-FileHash (Join-Path $cookOutput 'probe-result.json')).Hash -cne 'D7E7C3AA4E524AD562BE6006645BBEFFF335B0F6E036AB69CB29AB5AA8700A0B'){
+            throw 'Only the exact completed qualified tree cook02 is admitted.'
+        }
+        $null=Get-TreeFailedImportDiagnosticAdmission $root
+        $additional+=@(Get-TreePackageStems|ForEach-Object {"Content\Trials\TreeSmall02_20260921_01\$_.uasset"})
+    }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -228,13 +246,30 @@ if($StageCooked) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-shipping-plan-02\actions.json'
         $planHash='D8358D20EA7F29D79B1BBA78EF5A34C5568D9A5CF6EE4EF0022FDA8940AF0A02'
     }
+    if($TreeDiagnosticCandidate){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-shipping-plan-01\actions.json'
+        $planHash='D817D090353C850E76F8DC256CC26012D2E6742254A3FFD8EF10F98B2C13EAC9'
+    }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'
         $planHash='5A801AC790664B9C17894AB1C730EBEC1DB5E541A8343D9B01E6CF1BE7A3E0AE'
     }
+    if($TreeActions) {
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-05\actions.json'
+        $planHash='3A3D94AF587678B71DCC3F41FF6350660CDC4F1487EC115337399EEB939BDA92'
+    }
     if((Get-FileHash $planPath).Hash -cne $planHash) { throw 'Reviewed action export changed.' }
     $plan=Get-Content $planPath -Raw|ConvertFrom-Json
     $action=@($plan.Actions|Where-Object Id -EQ $selectedId)[0]
+    if($TreeActions -and $ResourceLinkActionId -in @(1,2)) {
+        foreach($leaf in @('compile1')) {
+            $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\tree-native-build-01\$leaf\result.json") -Raw|ConvertFrom-Json
+            if($proof.status -cne 'passed'){throw 'Accepted current importer/commandlet compile missing.'}
+            foreach($product in $proof.producedItems) {
+                if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Current importer/commandlet product changed.'}
+            }
+        }
+    }
     if($action.CommandPath -ine $compiler -or ($CompileActionId -ne -1 -and
         ($action.Type -ne 'Compile' -or ($action.PrerequisiteActions.Count -and -not $UiActions)))) { throw 'Unreviewed action or compile dependencies.' }
     if($UiActions -and $CompileActionId -eq 6) {
@@ -256,11 +291,18 @@ if($StageCooked) {
                 if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Wardrobe prerequisite compile output changed.'}
             }
         }
-        if($WardrobeCandidate){
+        if($WardrobeCandidate -or $TreeDiagnosticCandidate){
             $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\compile$dependency\result.json") -Raw|ConvertFrom-Json
-            if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual wardrobe Shipping compile prerequisite missing.'}
+            if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual selected Shipping compile prerequisite missing.'}
             foreach($product in $proof.producedItems){
-                if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Wardrobe Shipping compile output changed.'}
+                if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Selected Shipping compile output changed.'}
+            }
+        }
+        if($TreeActions) {
+            $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\tree-native-build-05\compile$dependency\result.json") -Raw|ConvertFrom-Json
+            if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual tree compile prerequisite missing.'}
+            foreach($product in $proof.producedItems) {
+                if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Tree prerequisite product changed.'}
             }
         }
     }
@@ -301,7 +343,7 @@ if($StageCooked) {
         $derived=[IO.Path]::GetFullPath($DerivedDllResponse,$root)
         if(-not $derived.StartsWith((Join-Path $root "Saved\Automation\$($run.id)")+'\',[StringComparison]::OrdinalIgnoreCase) -or
             (Split-Path (Split-Path $derived -Parent) -Leaf) -notmatch '^resource-conversion-[0-9]{2}$'){throw 'Derived response is outside the approved fresh recipe.'}
-        $gameLink=if($WardrobeActions){$ResourceLinkActionId -eq 5}else{$ResourceLinkActionId -eq 6}
+        $gameLink=if($TreeActions){$false}elseif($WardrobeActions){$ResourceLinkActionId -eq 5}else{$ResourceLinkActionId -eq 6}
         $which=if($ShippingActions -or $gameLink){'game'}else{'probe'}
         $module=if($gameLink){'SurvivalGame'}else{'SurvivalGameEditor'}
         $resource=Join-Path $root "Intermediate\Build\Win64\x64\UnrealEditor\Development\$module\Default.rc2.res"
@@ -391,7 +433,8 @@ try {
         resourceConversion=$ConvertResource;derivedDllResponse=$DerivedDllResponse
         splitShippingManifest=[bool]$SplitShippingManifest;embedShippingManifest=[bool]$EmbedShippingManifest
         stageCooked=[bool]$StageCooked;stageCandidate=$stageCandidate
-        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions
+        treeDiagnosticCandidate=[bool]$TreeDiagnosticCandidate
+        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions;treeActions=[bool]$TreeActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()
     $null=$observedPids.Add($guard.ProcessId)
@@ -473,7 +516,9 @@ try {
             Copy-Item (Join-Path $root 'docs\asset-credits.md') (Join-Path $platform 'asset-credits.md')
             [ordered]@{configuration='Shipping';packageDirectory=$platform;archiveDirectory=$stageCandidate;
                 executable='SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe';status='Genuine loose-file stage; runtime acceptance pending';
-                cookedInput=$cooked;nativeExecutableSha256=$native.exe.sha256;containersUsed=$false;runtimeVerified=$false} |
+                cookedInput=$cooked;nativeExecutableSha256=$native.exe.sha256;containersUsed=$false;runtimeVerified=$false;
+                treeDiagnostic=[bool]$TreeDiagnosticCandidate;
+                diagnosticQualification=$(if($TreeDiagnosticCandidate){'Retained failed import03: exactly12 branch source-description tangent/binormal corners. Ordinary-game diagnostic only; not clean acceptance or promotion.'}else{$null})} |
                 ConvertTo-Json|Set-Content (Join-Path $stageCandidate 'build-receipt.json')
         }
         if($ConvertResource){$coff=Read-ResourceCoff $object}

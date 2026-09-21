@@ -1,0 +1,253 @@
+{
+  "capture": "Real engine controls; no teleport travel. Sampled frames are not a smooth-frame-rate measurement.",
+  "frames": 521,
+  "duration_seconds": 74.2006,
+  "motion": {
+    "slow-walk": {
+      "median_actor_speed_cm_s": 67.5,
+      "left_low_toe_samples": 17,
+      "left_low_toe_median_world_speed_cm_s": 4.701396686645763,
+      "left_authored_stance_samples": 9,
+      "left_authored_stance_median_world_speed_cm_s": 4.315933873847543,
+      "right_low_toe_samples": 14,
+      "right_low_toe_median_world_speed_cm_s": 4.587286342145872,
+      "right_authored_stance_samples": 9,
+      "right_authored_stance_median_world_speed_cm_s": 4.370066920711777
+    },
+    "full-walk": {
+      "median_actor_speed_cm_s": 180.0,
+      "left_low_toe_samples": 9,
+      "left_low_toe_median_world_speed_cm_s": 11.278222309719588,
+      "left_authored_stance_samples": 4,
+      "left_authored_stance_median_world_speed_cm_s": 11.327746799751852,
+      "right_low_toe_samples": 9,
+      "right_low_toe_median_world_speed_cm_s": 11.763710216107288,
+      "right_authored_stance_samples": 4,
+      "right_authored_stance_median_world_speed_cm_s": 11.465372791928019
+    },
+    "turn-while-moving": {
+      "median_actor_speed_cm_s": 142.237,
+      "left_low_toe_samples": 10,
+      "left_low_toe_median_world_speed_cm_s": 8.590433651106606,
+      "left_authored_stance_samples": 6,
+      "left_authored_stance_median_world_speed_cm_s": 8.326617849009036,
+      "right_low_toe_samples": 9,
+      "right_low_toe_median_world_speed_cm_s": 8.674555792237825,
+      "right_authored_stance_samples": 5,
+      "right_authored_stance_median_world_speed_cm_s": 8.025591990365161
+    }
+  },
+  "idle_toe_separation_cm": 17.500147713662304,
+  "blend_samples": [
+    {
+      "t": 4.4593,
+      "pass": "slow-walk",
+      "speed": 37.277,
+      "weight": 0.71,
+      "rate": 0.3106
+    },
+    {
+      "t": 8.5512,
+      "pass": "stop-from-slow-walk",
+      "speed": 0.0,
+      "weight": 0.3219,
+      "rate": 0.0
+    },
+    {
+      "t": 10.6577,
+      "pass": "full-walk",
+      "speed": 95.8,
+      "weight": 0.6843,
+      "rate": 0.7983
+    },
+    {
+      "t": 16.8405,
+      "pass": "stop-from-turn",
+      "speed": 0.0,
+      "weight": 0.306,
+      "rate": 0.0
+    },
+    {
+      "t": 34.9552,
+      "pass": "walk-to-forage",
+      "speed": 26.191,
+      "weight": 0.7483,
+      "rate": 0.2183
+    },
+    {
+      "t": 35.7962,
+      "pass": "settle-forage",
+      "speed": 0.0,
+      "weight": 0.2914,
+      "rate": 0.0
+    },
+    {
+      "t": 45.095,
+      "pass": "walk-to-authored-tree",
+      "speed": 61.308,
+      "weight": 0.7007,
+      "rate": 0.5109
+    },
+    {
+      "t": 59.209,
+      "pass": "view-authored-tree",
+      "speed": 0.0,
+      "weight": 0.2809,
+      "rate": 0.0
+    },
+    {
+      "t": 62.4133,
+      "pass": "walk-into-authored-trunk",
+      "speed": 60.439,
+      "weight": 0.6907,
+      "rate": 0.5037
+    },
+    {
+      "t": 68.7968,
+      "pass": "walk-into-authored-trunk",
+      "speed": 31.674,
+      "weight": 0.905,
+      "rate": 0.2639
+    },
+    {
+      "t": 68.9351,
+      "pass": "walk-into-authored-trunk",
+      "speed": 26.624,
+      "weight": 0.7607,
+      "rate": 0.2219
+    },
+    {
+      "t": 69.0716,
+      "pass": "walk-into-authored-trunk",
+      "speed": 24.99,
+      "weight": 0.714,
+      "rate": 0.2083
+    },
+    {
+      "t": 69.2102,
+      "pass": "walk-into-authored-trunk",
+      "speed": 24.261,
+      "weight": 0.6932,
+      "rate": 0.2022
+    },
+    {
+      "t": 69.3554,
+      "pass": "walk-into-authored-trunk",
+      "speed": 23.873,
+      "weight": 0.6821,
+      "rate": 0.1989
+    },
+    {
+      "t": 69.4913,
+      "pass": "walk-into-authored-trunk",
+      "speed": 23.496,
+      "weight": 0.6713,
+      "rate": 0.1958
+    },
+    {
+      "t": 69.6253,
+      "pass": "walk-into-authored-trunk",
+      "speed": 23.177,
+      "weight": 0.6622,
+      "rate": 0.1931
+    },
+    {
+      "t": 69.7617,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.932,
+      "weight": 0.6552,
+      "rate": 0.1911
+    },
+    {
+      "t": 69.8996,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.732,
+      "weight": 0.6495,
+      "rate": 0.1894
+    },
+    {
+      "t": 70.0406,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.579,
+      "weight": 0.6451,
+      "rate": 0.1882
+    },
+    {
+      "t": 70.183,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.447,
+      "weight": 0.6413,
+      "rate": 0.1871
+    },
+    {
+      "t": 70.3214,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.284,
+      "weight": 0.6367,
+      "rate": 0.1857
+    },
+    {
+      "t": 70.4565,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.124,
+      "weight": 0.6321,
+      "rate": 0.1844
+    },
+    {
+      "t": 70.5953,
+      "pass": "walk-into-authored-trunk",
+      "speed": 22.024,
+      "weight": 0.6293,
+      "rate": 0.1835
+    },
+    {
+      "t": 70.7298,
+      "pass": "walk-into-authored-trunk",
+      "speed": 21.901,
+      "weight": 0.6258,
+      "rate": 0.1825
+    },
+    {
+      "t": 70.8642,
+      "pass": "walk-into-authored-trunk",
+      "speed": 21.795,
+      "weight": 0.6227,
+      "rate": 0.1816
+    },
+    {
+      "t": 70.9994,
+      "pass": "walk-into-authored-trunk",
+      "speed": 21.719,
+      "weight": 0.6205,
+      "rate": 0.181
+    },
+    {
+      "t": 71.142,
+      "pass": "walk-into-authored-trunk",
+      "speed": 21.708,
+      "weight": 0.6202,
+      "rate": 0.1809
+    },
+    {
+      "t": 71.2837,
+      "pass": "retreat-from-authored-trunk",
+      "speed": 21.68,
+      "weight": 0.6194,
+      "rate": 0.1807
+    }
+  ],
+  "interpretation_limit": "Low-toe filtering is a stance approximation, not a collision/foot-contact detector. Use it with the recorded frames; do not call every toe movement a defect.",
+  "gathering": {
+    "active_samples": 10,
+    "action_starts": 1,
+    "final_weight": 0.0,
+    "maximum_wrist_travel_cm": 26.546131639092007,
+    "maximum_actor_travel_cm": 0.0,
+    "maximum_toe_travel_cm": {
+      "left": 0.527370837267282,
+      "right": 0.5326058580226084
+    },
+    "closest_wrist_to_target_xy_cm": 11.289976616450527,
+    "contact_limit": "Wrist-to-target XY is not fingertip/foliage contact or target-aware IK."
+  }
+}

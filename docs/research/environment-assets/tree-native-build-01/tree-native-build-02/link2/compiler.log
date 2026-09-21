@@ -1,0 +1,2 @@
+Module.SurvivalGame.2.cpp.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) enum EShaderPlatform GMaxRHIShaderPlatform" (__imp_?GMaxRHIShaderPlatform@@3W4EShaderPlatform@@A) referenced in function "private: void __cdecl AHomesteadVisualPlaytest::PrepareTreeEncounter(void)" (?PrepareTreeEncounter@AHomesteadVisualPlaytest@@AEAAXXZ)
+E:\Repos\SurvivalGame\Binaries\Win64\UnrealEditor-SurvivalGame.dll : fatal error LNK1120: 1 unresolved externals

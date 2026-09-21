@@ -1,0 +1,32 @@
+{
+  "runId": "20260921-033354-2d257ba0",
+  "rootPid": 10348,
+  "startedUtc": "2026-09-21T12:36:20.8520119Z",
+  "arguments": [
+    "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.dll",
+    "-Mode=WriteMetadata",
+    "-Input=E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\SurvivalGameEditor\\Development\\TargetMetadata.json",
+    "-Version=2",
+    "-Log=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-native-build-04\\metadata\\ubt.log"
+  ],
+  "identities": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+      "sha256": "0AF909A3DB0C02BD736F3008E2A9B20E7BA4E87EF27DD35619A7A9EC588191A8",
+      "bytes": 178400
+    },
+    {
+      "path": "C:\\WINDOWS\\System32\\conhost.exe",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "bytes": 1003520
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.dll",
+      "sha256": "A513EE9E22291D8827C5390C1ED5BBAD7AC564DA6CF82F3BD57B4E27509E7182",
+      "bytes": 3211704
+    }
+  ],
+  "leafJobApplied": false,
+  "sourceWorkingSetProvider": "Not queried by metadata-only mode",
+  "limitation": "Observational sampled build processes/endpoints, not a preventive child allowlist or complete history. Export-only ISPC --version is admitted; no ISPC compilation, runtime or remote executor."
+}

@@ -5,6 +5,19 @@ param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
     [string]$OutputDirectory, [switch]$ShippingQA)
 $ErrorActionPreference='Stop'
+function Assert-VisualPlaytestOutcome {
+    param([string]$Outcome,[string]$Required,[switch]$RequireTree)
+    if($Outcome.Contains('FAILED ') -or -not $Outcome.Contains($Required)) {
+        throw 'Recorded route did not meet its actual gameplay outcome.'
+    }
+    $treeLines=@($Outcome -split '\r?\n'|Where-Object {$_ -like 'Tree ready=*'})
+    if($RequireTree -or $treeLines.Count) {
+        if($treeLines.Count -ne 1 -or
+            $treeLines[0] -cne 'Tree ready=1; ordinary approach=1; actual trunk blocked walking=1; ordinary retreat=1') {
+            throw 'Recorded tree readiness/approach/trunk-contact/retreat outcome failed or is missing.'
+        }
+    }
+}
 if($PresentationDiagnostics -and ($Watering -or $Weeding -or $Clearing)) { throw 'Presentation diagnostics require a separate motion route.' }
 if($Watering -and $Weeding) { throw 'Choose one ordinary action route.' }
 if($Clearing -and ($Watering -or $Weeding)) { throw 'Choose one ordinary action route.' }
@@ -78,6 +91,11 @@ if($ShippingQA -and (Get-Content (Join-Path $output 'qa-admission.txt') -Raw) -n
     throw 'Actual Shipping QA/trace-disabled admission evidence is missing.'
 }
 $outcome=Get-Content -LiteralPath $observations -Raw
+$requireTree=$false
+if($ShippingQA -and -not ($Watering -or $Weeding -or $Clearing -or $PresentationDiagnostics)) {
+    $buildReceipt=Get-Content (Join-Path (Split-Path $packageRoot -Parent) 'build-receipt.json') -Raw|ConvertFrom-Json
+    $requireTree=$buildReceipt.PSObject.Properties.Name -contains 'treeDiagnostic' -and $buildReceipt.treeDiagnostic
+}
 $required=if($PresentationDiagnostics) {
     'Presentation diagnostic route completed=1;'
 } elseif($Clearing) {
@@ -89,9 +107,7 @@ $required=if($PresentationDiagnostics) {
 } else {
     'Forage target reached=1; resources actually gathered=1'
 }
-if($outcome.Contains('FAILED ') -or -not $outcome.Contains($required)) {
-    throw "Recorded route did not meet its actual gameplay outcome. See $observations."
-}
+Assert-VisualPlaytestOutcome $outcome $required -RequireTree:$requireTree
 $rows=Import-Csv -LiteralPath $telemetry
 if(-not $rows.Count) { throw "Visual playtest produced no telemetry: $telemetry" }
 Add-Type -AssemblyName System.Drawing

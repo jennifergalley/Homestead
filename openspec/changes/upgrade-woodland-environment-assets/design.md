@@ -32,6 +32,136 @@ acceptance from a passing screenshot metric.
 
 ## Decisions
 
+### Next increment: one reduced Tree Small02 in the real world
+
+The fern clearing and subsequent usable wardrobe preview have shipped as
+qualified increments. Keep wardrobe-ui-02 selected while integrating the frozen
+TreeSmall02Prepared/v3 handoff. Its LOD2 and thirteen unchanged 2048x2048 maps
+are hash-verified; do not repeat Blender reduction or import SourceLOD0.
+
+Reserve `/Game/Trials/TreeSmall02_20260921_01` for exactly seventeen packages:
+`Meshes/SM_TreeSmall02_LOD2`, three `Materials/M_TreeSmall02_{Branches,Leaves,Trunk}`,
+and thirteen explicit `Textures/T_TreeSmall02_{Branch,Leaves,Trunk}_{Diff,NormalDX,Roughness,AO}`
+plus `Textures/T_TreeSmall02_Leaves_Alpha`. This is one 231785-triangle mesh,
+not an automatic LOD chain. Preserve three source slot identities and measured
+section totals (23702 branches, 193938 leaves, 14145 trunk), both UV channels,
+zero root, valid imported normals and one scene/unit conversion at scale1.
+
+Correction01, following failed-before-save tree-import-01: the frozen blanket
+UV0 statement is incorrect. Raw LOD2 attribution proves branches use UV1
+(all23702 branch triangles have constant UV0), while leaves/trunk use UV0.
+On newly imported data only, swap branch vertex-instance UV0/UV1 reversibly
+before standard MikkTSpace tangent construction; preserve both channels and
+reject cross-role shared instances or unexpected occupancy. Materials then
+consistently sample runtimeUV0, including their tangent-space DirectX normals.
+Do not mutate or re-export frozen v3. Its zero normal is genuinely used by1379
+corners on1303 triangles (338 branch and1041 leaf corners), not unused metadata.
+Use supported UE ComputeTriangleTangentsAndNormals followed by
+ComputeTangentsAndNormals(Tangents|UseMikkTSpace), without the Normals flag.
+The installed implementation fills invalid normals while preserving valid
+custom normals; compare every nonzero input normal exactly and reject any
+change. Record actual zero-normal counts/repairs and reject remaining invalid
+normals. This is a specific native adaptation, not blanket normal recomputation.
+Inspect actual game shading; numerical readiness alone is not visual acceptance.
+
+Correction02 follows the separate failed-before-save tree-import-02: native
+pre-state confirmed exactly338 branch/1041 leaf zero-normal corners, but the
+engine's grouped repair left an invalid normal and admission stopped. Retain
+that failure. Only a remaining exact-zero source vertex instance with exactly
+one connected triangle may use its valid engine-computed face normal, followed
+by standard Mikk tangent regeneration. Reject ambiguous/shared instances and
+invalid face normals; preserve all nonzero source normals exactly. Export
+per-role grouped/intermediate/final measurements and actual imported bounds
+before adaptation. Distinct import03 reuses only the unchanged identified empty
+trial directory, not a reset or overwrite.
+
+Observed import03 outcome: the native inventory/save completed seventeen
+packages, but the external acceptance gate failed on twelve referenced branch
+tangent/binormal corners. All1379 source zero normals were repaired, including
+322 branch single-face fallbacks; no orphan vertex instances exist. Leaves and
+trunk have zero invalid basis corners. Actual UE bounds match the referenced
+source prediction. These packages remain unaccepted and retained, not inputs
+cleared for cook or selected gameplay. The separately retained failed result
+must not become a pass. A read-only source calculation found no zero float32 UV
+determinants or predicted float32 geometric cross products, so it does not
+explain the twelve native corners. Exact native-corner/render-buffer attribution
+is needed before another repair; no blind reimport, warning suppression or
+global normal/tangent recomputation.
+
+Final coordinator proportionality decision supersedes the optional additional
+native diagnostic: preserve that unbuilt diff separately and restore only those
+unbuilt edits to the exact receipt03 source/binaries, verified by hashes. Do not
+rebuild or delay actual viewing for another stored-versus-render-buffer study.
+The existing native read verification may inspect the exact retained seventeen
+packages under `TreeDiagnostic`, followed by existing cook and ordinary game
+viewing/collision. Only exactly twelve branch source-description tangent and
+binormal corners are admitted as a disclosed diagnostic qualification; normals,
+other roles, geometry, bounds, maps, UV routing and identities stay strict.
+Use distinct diagnostic outputs/reservations and `passed-diagnostic-only`, never
+rewrite failed import03 or turn the clean gate into a permissive default. Hash
+all seventeen packages before/after, with unchanged authoring/privacy controls.
+No source asset mutation, reimport or selected-preview change. Actual shaded
+appearance, grounding, collision and gameplay determine the next decision;
+neither the editor-description count nor diagnostic admission proves GPU damage,
+visual acceptance or promotion.
+
+Qualified read verification01 completed with unchanged packages and cooperative
+exit. Diagnostic cook01 then failed the real-output gate: the runtime-loaded
+tree namespace was missing from the existing explicit DirectoriesToAlwaysCook
+list. Add only that exact namespace and retain the failed cook; use distinct
+diagnostic cook02. Do not substitute old cooked files or enable broad CookAll.
+
+Cook02 passed qualified, followed by genuine Shipping compiles/link/manifest/
+metadata and fresh loose stage `tree-diagnostic-01`. Its first ordinary route
+recorded521 real1280x720 frames over74.20s. Forage, shader/material readiness and
+approach passed; trunk-block and dependent retreat flags remained zero. Actual
+player radius settled near72.59cm with tangential motion around21.7cm/s; the
+observer requires total speed below5cm/s, so the gate may reject sliding contact.
+Physical retreat increased separation to357.55cm, but that is not the missing
+specific-component collision proof. All19 sampled near-trunk positions had
+heading error14.86-16.51degrees; the observer only performs its tree sweep below
+10degrees. All four stages ran; this is not an omitted contact/retreat stage.
+Do not weaken the assertion or call this
+passed. The OS exit was zero despite the native failed-completion exit request;
+the old wrapper checked forage only. Its production outcome assertion now also
+rejects missing/failed tree outcomes, with the retained real failure as an offline
+regression. Preserve the original capture/guard result; no retroactive pass.
+Frame520 was directly inspected as recognizable textured tree geometry; quota
+blocked full-view424/contact480 inspection. These originals are retained for
+coordinator review. No second launch or selected-preview change at this checkpoint.
+
+Bounds compare polygon-referenced LOD2 extrema, not all FBX control points:
+40624 of424817 are unused, changing Y extent by0.4882cm. Transform all eight
+referenced-bound corners through the recorded model rotation, axis/handedness
+and metre-to-cm conversion; retain0.2cm tolerance and export actual min/max
+before rejection. Import03 and qualified reload01 confirmed those numeric bounds.
+
+Use explicit existing FBX/texture factory patterns, reference-free frozen inputs,
+no automatic materials/textures/collision, no Nanite or wind. Branch/trunk are
+opaque and single-sided; leaves are masked/two-sided with clip0.5. All use
+DefaultLit, authored diffuse/DirectX normal/roughness/AO; only diffuse is sRGB.
+Reject missing or extra slots, objects, references, maps and package files.
+Measure bounds (about456.4cm tall), source settings and material connections on
+import and again in a separate process before accepting persisted packages.
+
+Create only simple lower-trunk collision from measured trunk-section vertices
+in the bottom200cm, not canopy bounds or hidden primitive-tree dimensions.
+Record the actual shape and reject nonfinite/implausible dimensions. The world
+component uses that simple collision; foliage has no separate collision.
+Replace just one eligible deterministic primitive decoration near the clearing,
+keeping authored scale/materials, root placement and the existing reserved
+home/resource/structure/plot/stream corridors. Other trees remain unchanged.
+
+Carry existing completion-driven native controls, inherited marker lifetime,
+Python execution-disabled snapshots, root-only job, local DDC and endpoint
+policy forward. Rebuild genuine affected native products and refresh pins;
+the later Shipping UI build did not update the older Editor modules. Import,
+persisted verification, fresh cook and genuine Shipping stage are separate
+observed gates. No generic bootstrap, SaveAll, unguarded helper or copied old
+cooked-container shortcut. Inspect an actual game-camera tree silhouette,
+grounding and walking collision before selecting a newer usable candidate.
+One-tree cost is not broad-forest performance or full woodland acceptance.
+
 ### Current delivery order: visible fern clearing first
 
 Use the successful Fern02 assets in a small real-world patch now, before the

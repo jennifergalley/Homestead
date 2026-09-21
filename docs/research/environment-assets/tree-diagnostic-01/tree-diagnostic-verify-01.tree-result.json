@@ -1,0 +1,397 @@
+{
+	"mode": "TreeVerify",
+	"namespace": "/Game/Trials/TreeSmall02_20260921_01",
+	"stage": "persisted-inventory",
+	"boundsMinCm": [
+		-131.07241821289062,
+		-138.3023681640625,
+		-2.4194238185882568
+	],
+	"boundsMaxCm": [
+		161.07106018066406,
+		290.76226806640625,
+		453.98434448242188
+	],
+	"boundsExtentCm": [
+		146.07173919677734,
+		214.53231811523438,
+		228.20188415050507
+	],
+	"importTranslationCm": [
+		0,
+		0,
+		0
+	],
+	"expectedReferencedMinCm": [
+		-131.07242601213594,
+		-138.30241424710704,
+		-2.4194456579919783
+	],
+	"expectedReferencedMaxCm": [
+		161.07109942819218,
+		290.76234095444636,
+		453.98440329770136
+	],
+	"expectedAllControlPointsMinCm": [
+		-131.07242601786783,
+		-138.36797935635997,
+		-2.4194456686738897
+	],
+	"expectedAllControlPointsMaxCm": [
+		161.07109946514095,
+		291.1849855696197,
+		453.98440336655892
+	],
+	"sourceControlPoints": 424817,
+	"sourceReferencedControlPoints": 384193,
+	"sourceBoundsPolicy": "Selected LOD2 polygon-referenced extrema; transform all8 corners through raw model rotation, FBX axis basis, UE handedness and100cm/metre. Unused FBX control points are not rendered bounds.",
+	"meshDescriptionBasisAfter": [
+		{
+			"role": "tree_small_02_branches",
+			"invalidNormalCorners": 0,
+			"invalidTangentCorners": 12,
+			"invalidBinormalCorners": 12
+		},
+		{
+			"role": "tree_small_02_leaves",
+			"invalidNormalCorners": 0,
+			"invalidTangentCorners": 0,
+			"invalidBinormalCorners": 0
+		},
+		{
+			"role": "tree_small_02_trunk",
+			"invalidNormalCorners": 0,
+			"invalidTangentCorners": 0,
+			"invalidBinormalCorners": 0
+		}
+	],
+	"meshDescriptionBasisAfterOrphanVertexInstances": 0,
+	"meshDescriptionBasisAfterOrphanZeroNormals": 0,
+	"mesh": "/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2",
+	"triangles": 231785,
+	"uvChannels": 2,
+	"slots": [
+		{
+			"index": 0,
+			"sourceRoleIndex": 0,
+			"role": "tree_small_02_branches",
+			"slot": "tree_small_02_branches",
+			"material": "/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+			"triangles": 23702,
+			"sourceActiveUvChannel": 1,
+			"runtimeActiveUvChannel": 0,
+			"runtimeActiveUvDegenerateTriangles": 0,
+			"runtimeInactiveUvDegenerateTriangles": 23702,
+			"nearZeroImportedNormalCorners": 0
+		},
+		{
+			"index": 1,
+			"sourceRoleIndex": 1,
+			"role": "tree_small_02_leaves",
+			"slot": "tree_small_02_leaves",
+			"material": "/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+			"triangles": 193938,
+			"sourceActiveUvChannel": 0,
+			"runtimeActiveUvChannel": 0,
+			"runtimeActiveUvDegenerateTriangles": 0,
+			"runtimeInactiveUvDegenerateTriangles": 193938,
+			"nearZeroImportedNormalCorners": 0
+		},
+		{
+			"index": 2,
+			"sourceRoleIndex": 2,
+			"role": "tree_small_02_trunk",
+			"slot": "tree_small_02_trunk",
+			"material": "/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+			"triangles": 14145,
+			"sourceActiveUvChannel": 0,
+			"runtimeActiveUvChannel": 0,
+			"runtimeActiveUvDegenerateTriangles": 0,
+			"runtimeInactiveUvDegenerateTriangles": 14145,
+			"nearZeroImportedNormalCorners": 0
+		}
+	],
+	"lowerTrunkMinCm": [
+		-8.4985771179199219,
+		-11.368036270141602,
+		-2.4194238185882568
+	],
+	"lowerTrunkMaxCm": [
+		49.948398590087891,
+		57.242771148681641,
+		199.91714477539062
+	],
+	"measuredTrunkVertexSamples": 17194,
+	"collisionCenterCm": [
+		20.724910736083984,
+		22.93736743927002,
+		98.748860478401184
+	],
+	"collisionRadiusCm": 40.460086822509766,
+	"collisionCylinderLengthCm": 121.41639709472656,
+	"importUniformScale": 1,
+	"convertScene": true,
+	"convertSceneUnit": true,
+	"transformVertexToAbsolute": true,
+	"nanite": false,
+	"materials": [
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+			"twoSided": false,
+			"masked": false,
+			"opacityClip": 0.5,
+			"shadingModel": "DefaultLit"
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+			"twoSided": true,
+			"masked": true,
+			"opacityClip": 0.5,
+			"shadingModel": "DefaultLit"
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+			"twoSided": false,
+			"masked": false,
+			"opacityClip": 0.5,
+			"shadingModel": "DefaultLit"
+		}
+	],
+	"textures": [
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Diff.T_TreeSmall02_Branch_Diff",
+			"source": "tree_small_02_branch_diff_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 2,
+			"compression": 0,
+			"materialRole": 0,
+			"connectedOutputIndex": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_NormalDX.T_TreeSmall02_Branch_NormalDX",
+			"source": "tree_small_02_branch_nor_dx_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 4,
+			"compression": 1,
+			"materialRole": 0,
+			"connectedOutputIndex": 0,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Roughness.T_TreeSmall02_Branch_Roughness",
+			"source": "tree_small_02_branch_rough_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 2,
+			"compression": 2,
+			"materialRole": 0,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_AO.T_TreeSmall02_Branch_AO",
+			"source": "tree_small_02_branch_ao_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 4,
+			"compression": 2,
+			"materialRole": 0,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Diff.T_TreeSmall02_Leaves_Diff",
+			"source": "tree_small_02_leaves_diff_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 4,
+			"compression": 0,
+			"materialRole": 1,
+			"connectedOutputIndex": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_NormalDX.T_TreeSmall02_Leaves_NormalDX",
+			"source": "tree_small_02_leaves_nor_dx_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 4,
+			"compression": 1,
+			"materialRole": 1,
+			"connectedOutputIndex": 0,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Roughness.T_TreeSmall02_Leaves_Roughness",
+			"source": "tree_small_02_leaves_rough_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialRole": 1,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_AO.T_TreeSmall02_Leaves_AO",
+			"source": "tree_small_02_leaves_ao_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialRole": 1,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Alpha.T_TreeSmall02_Leaves_Alpha",
+			"source": "tree_small_02_leaves_alpha_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialRole": 1,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Diff.T_TreeSmall02_Trunk_Diff",
+			"source": "tree_small_02_diff_2k.jpg",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 2,
+			"compression": 0,
+			"materialRole": 2,
+			"connectedOutputIndex": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_NormalDX.T_TreeSmall02_Trunk_NormalDX",
+			"source": "tree_small_02_nor_dx_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 4,
+			"compression": 1,
+			"materialRole": 2,
+			"connectedOutputIndex": 0,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Roughness.T_TreeSmall02_Trunk_Roughness",
+			"source": "tree_small_02_rough_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialRole": 2,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_AO.T_TreeSmall02_Trunk_AO",
+			"source": "tree_small_02_ao_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"sourceFormat": 8,
+			"compression": 2,
+			"materialRole": 2,
+			"connectedOutputIndex": 1,
+			"srgb": false,
+			"flipGreen": false
+		}
+	],
+	"packages": 17,
+	"persistentObjectReferences": [
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_AO.T_TreeSmall02_Trunk_AO:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Roughness.T_TreeSmall02_Trunk_Roughness:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_NormalDX.T_TreeSmall02_Trunk_NormalDX:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Diff.T_TreeSmall02_Trunk_Diff:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Alpha.T_TreeSmall02_Leaves_Alpha:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_AO.T_TreeSmall02_Leaves_AO:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Roughness.T_TreeSmall02_Leaves_Roughness:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_NormalDX.T_TreeSmall02_Leaves_NormalDX:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Diff.T_TreeSmall02_Leaves_Diff:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_AO.T_TreeSmall02_Branch_AO:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Roughness.T_TreeSmall02_Branch_Roughness:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_NormalDX.T_TreeSmall02_Branch_NormalDX:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Diff.T_TreeSmall02_Branch_Diff:AssetImportData",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk:M_TreeSmall02_TrunkEditorOnlyData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Diff.T_TreeSmall02_Trunk_Diff",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_NormalDX.T_TreeSmall02_Trunk_NormalDX",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Roughness.T_TreeSmall02_Trunk_Roughness",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_AO.T_TreeSmall02_Trunk_AO",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk:MaterialExpressionTextureSample_0",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk:MaterialExpressionTextureSample_2",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk:MaterialExpressionTextureSample_1",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk:MaterialExpressionTextureSample_3",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_AO.T_TreeSmall02_Trunk_AO",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_NormalDX.T_TreeSmall02_Trunk_NormalDX",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Roughness.T_TreeSmall02_Trunk_Roughness",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Trunk_Diff.T_TreeSmall02_Trunk_Diff",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves:M_TreeSmall02_LeavesEditorOnlyData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Diff.T_TreeSmall02_Leaves_Diff",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_NormalDX.T_TreeSmall02_Leaves_NormalDX",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Roughness.T_TreeSmall02_Leaves_Roughness",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_AO.T_TreeSmall02_Leaves_AO",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Alpha.T_TreeSmall02_Leaves_Alpha",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves:MaterialExpressionTextureSample_0",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves:MaterialExpressionTextureSample_2",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves:MaterialExpressionTextureSample_1",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves:MaterialExpressionTextureSample_4",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves:MaterialExpressionTextureSample_3",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_AO.T_TreeSmall02_Leaves_AO",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Alpha.T_TreeSmall02_Leaves_Alpha",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_NormalDX.T_TreeSmall02_Leaves_NormalDX",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Roughness.T_TreeSmall02_Leaves_Roughness",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Leaves_Diff.T_TreeSmall02_Leaves_Diff",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches:M_TreeSmall02_BranchesEditorOnlyData",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Diff.T_TreeSmall02_Branch_Diff",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_NormalDX.T_TreeSmall02_Branch_NormalDX",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Roughness.T_TreeSmall02_Branch_Roughness",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_AO.T_TreeSmall02_Branch_AO",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches:MaterialExpressionTextureSample_0",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches:MaterialExpressionTextureSample_2",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches:MaterialExpressionTextureSample_1",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches:MaterialExpressionTextureSample_3",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_AO.T_TreeSmall02_Branch_AO",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_NormalDX.T_TreeSmall02_Branch_NormalDX",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Roughness.T_TreeSmall02_Branch_Roughness",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+		"/Game/Trials/TreeSmall02_20260921_01/Textures/T_TreeSmall02_Branch_Diff.T_TreeSmall02_Branch_Diff",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+		"/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2:HiResMeshDescription",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches.M_TreeSmall02_Branches",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves.M_TreeSmall02_Leaves",
+		"/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk.M_TreeSmall02_Trunk",
+		"/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2:FbxStaticMeshImportData_0"
+	],
+	"passed": true,
+	"cancelledAtPollingBoundary": false
+}

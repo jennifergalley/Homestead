@@ -1,0 +1,154 @@
+{
+  "status": "failed-unaccepted-retained",
+  "createdUtc": "2026-09-21T12:56:11.2192528+00:00",
+  "evidence": [
+    {
+      "sha256": "D9930BCAF37903D5B68F9A3547F089F7E3A428CEC60CA6437D7296A96E962DC7",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\effective-settings.json"
+    },
+    {
+      "sha256": "BDC3BDD9B4E95094B4E004188CA6229C3C40CDF2CCC7E5585690DD94BAB56513",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\launch.json"
+    },
+    {
+      "sha256": "31C4F0B9CD80E59B574FECF32F1EB40AB093CA38197F67E43C38910E8336ACB6",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\native-exit.json"
+    },
+    {
+      "sha256": "B978609E071F42B450C6CADDFBE019C7B2A80B30E0703D60D0BEA10767E77F5B",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\partial-content.json"
+    },
+    {
+      "sha256": "EA34CE51CE7A7711E22829894BA055BE670ACA5FD2968413A2D59BE920034A88",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\probe-result.json"
+    },
+    {
+      "sha256": "55E9877335BA75930DA3ED133959A7B3EA6552E010FD804DF8AC4243D7C27958",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\tree-result.json"
+    },
+    {
+      "sha256": "78C88F65117184869C43D58B53E66EB2B93F9138382CAD55CDFF63B760DC1557",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\tree-import-attempt-03.json"
+    },
+    {
+      "sha256": "5D7A9A1BBFE9D5C9D10DABDE941A123D72BB398DCAD6330D0DCC280401F5451C",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\tree-float-tangent-attribution.json"
+    },
+    {
+      "sha256": "9CBDFDF344CE1526337DEAB3B36B07BF1BF84029EFA4E9BEC08E8FA97883910C",
+      "path": "docs\\research\\environment-assets\\tree-import-03-review\\Inspect-TreeFloatTangents.py"
+    }
+  ],
+  "packages": [
+    {
+      "sha256": "AA54AC31A908D5C581EF7475DE4AEB251AE708EE89320B1EBEE855F2F99EE259",
+      "path": "Materials\\M_TreeSmall02_Branches.uasset",
+      "bytes": 7366
+    },
+    {
+      "sha256": "7219C2E33CBB27356F9EF95FB6B838B486BED0584D6338A5753B78D925967D8C",
+      "path": "Materials\\M_TreeSmall02_Leaves.uasset",
+      "bytes": 8226
+    },
+    {
+      "sha256": "D216EA51F0384C8FE313F37B244B1E6188B27D01BBC4F75656B88F243F699BCF",
+      "path": "Materials\\M_TreeSmall02_Trunk.uasset",
+      "bytes": 7372
+    },
+    {
+      "sha256": "802549CFAD5B31D265F4F792773D00A25C65C9FF28A11A019D40AB01C4F385F9",
+      "path": "Meshes\\SM_TreeSmall02_LOD2.uasset",
+      "bytes": 20785810
+    },
+    {
+      "sha256": "183AE56AAF76EE25DD6F3E8D9D87D4583E396FC869C6390B185B929D9284E90B",
+      "path": "Textures\\T_TreeSmall02_Branch_AO.uasset",
+      "bytes": 7661658
+    },
+    {
+      "sha256": "C9101ECC09B4D4ED36BB4E0DB5FD7FEEF6495BFDC9DF6AFA8B25DD88A73A0F19",
+      "path": "Textures\\T_TreeSmall02_Branch_Diff.uasset",
+      "bytes": 2959815
+    },
+    {
+      "sha256": "2B6CCB0DBE500F2BE3D90786085AD35B623592CB231C7BC89E3094CBF231B491",
+      "path": "Textures\\T_TreeSmall02_Branch_NormalDX.uasset",
+      "bytes": 13789623
+    },
+    {
+      "sha256": "E195E1C63F27670E54781AFBB5B53EC62B58CBE04E06790C5042BE4495DCB7A8",
+      "path": "Textures\\T_TreeSmall02_Branch_Roughness.uasset",
+      "bytes": 854379
+    },
+    {
+      "sha256": "AD5CF142DFCD0CAC3EF780D1DF1817E605CE5E026DAA0F1F137D4D766875F162",
+      "path": "Textures\\T_TreeSmall02_Leaves_Alpha.uasset",
+      "bytes": 540583
+    },
+    {
+      "sha256": "F39CE5FAD51C00FFDAA4C1F25704DBF6D74E0292D9FC7565014A4994F0B844FB",
+      "path": "Textures\\T_TreeSmall02_Leaves_AO.uasset",
+      "bytes": 6296484
+    },
+    {
+      "sha256": "8616498B4DECC974FA61EB57DE345A72C0CA092EB5F5CB82D5C5078D462FDEAC",
+      "path": "Textures\\T_TreeSmall02_Leaves_Diff.uasset",
+      "bytes": 6374895
+    },
+    {
+      "sha256": "F445F874114DE9828CFC5C829E7BE0F0CD80D7CAE1364E33FF9B8F9D1571C6AB",
+      "path": "Textures\\T_TreeSmall02_Leaves_NormalDX.uasset",
+      "bytes": 19930693
+    },
+    {
+      "sha256": "E21A7E4C4A80D3597771281598B21FF34F4D49A1006E7089B4DC004A1FF51CF7",
+      "path": "Textures\\T_TreeSmall02_Leaves_Roughness.uasset",
+      "bytes": 2440806
+    },
+    {
+      "sha256": "86F714EEB1E3C9AE4A709AD50E1D4FC30CC2B7578A85AF2526B94487ED6CA20E",
+      "path": "Textures\\T_TreeSmall02_Trunk_AO.uasset",
+      "bytes": 6206300
+    },
+    {
+      "sha256": "E5C6E0A50DD3C16E99CC21495B82235C5CD1355AF23F9EA43976E47CDB1210DD",
+      "path": "Textures\\T_TreeSmall02_Trunk_Diff.uasset",
+      "bytes": 3174724
+    },
+    {
+      "sha256": "D15DEDE58AB95F04A3ECD59E52310571D46733ABCE44DDAB4CBB325B7EB4970E",
+      "path": "Textures\\T_TreeSmall02_Trunk_NormalDX.uasset",
+      "bytes": 21145627
+    },
+    {
+      "sha256": "7150516D34D58AADA3284AECBC5E5E7FC6D7EBFBE25E272D76BDADD1A6899417",
+      "path": "Textures\\T_TreeSmall02_Trunk_Roughness.uasset",
+      "bytes": 5531778
+    }
+  ],
+  "directoryIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\TreeSmall02_20260921_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 815581,
+    "Attributes": 16,
+    "CreationTime": 134344667135701277
+  },
+  "actual": {
+    "sourceZeroNormalsRepaired": 1379,
+    "singleFaceBranchFallbacks": 322,
+    "hardTerminated": false,
+    "subjectExited": true,
+    "exitCode": 7,
+    "elapsedSeconds": 137.7032008,
+    "finalInvalidNormalCorners": 0,
+    "boundsReferencedSourceConfirmed": true,
+    "guardDisposed": true,
+    "invalidBranchTangentCorners": 12,
+    "invalidBranchBinormalCorners": 12,
+    "orphanVertexInstances": 0,
+    "nativeSavedPackages": 17,
+    "maximumSampleGapMs": 80762.05529999999
+  },
+  "limit": "FAILED external basis admission, not import acceptance. No cook, fresh-process verification, Shipping or shaded visual acceptance. No source float32-zero determinant/cross-product explanation found; exact native-corner/built-buffer attribution pending. Selected wardrobe-ui-02 unchanged; retain all17 unaccepted packages and original failed attempts. Observations are sampled, not continuous history."
+}

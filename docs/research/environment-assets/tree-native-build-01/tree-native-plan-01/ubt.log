@@ -1,0 +1,131 @@
+Log started at 09/21/2026 05:00:20 (2026-09-21T12:00:20Z)
+Resolved project argument E:\Repos\SurvivalGame\SurvivalGame.uproject to E:\Repos\SurvivalGame\SurvivalGame.uproject
+No config file at C:\ProgramData\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Jenny\AppData\Local\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Jenny\OneDrive\Documents\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Configuration will be read from:
+  C:\Users\Jenny\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): C:\Users\Jenny\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): E:\Repos\SurvivalGame\Saved\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): C:\Users\Jenny\AppData\Local\UnrealEngine\Intermediate\Build\UnrealBuildTool.Env.BuildConfiguration.xml
+Log file: E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-01\ubt.log
+
+Setting temp directory to 'E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-01\Temp\UnrealBuildTool\863af17b'
+    Registering build platform: UnrealBuildTool.AndroidPlatformFactory
+    Registering build platform: UnrealBuildTool.IOSPlatformFactory
+    Registering build platform: UnrealBuildTool.LinuxPlatformFactory
+    Registering build platform: UnrealBuildTool.MacPlatformFactory
+    Registering build platform: UnrealBuildTool.TVOSPlatformFactory
+    Registering build platform: UnrealBuildTool.WindowsPlatformFactory
+Found Windows 10 SDK root at C:\Program Files (x86)\Windows Kits\10 (1)
+Found Windows 10 SDK root at C:\Program Files (x86)\Windows Kits\10 (2)
+Found Windows 10 SDK version 10.0.26100.0 at C:\Program Files (x86)\Windows Kits\10
+Found Universal CRT version 10.0.26100.0 at C:\Program Files (x86)\Windows Kits\10
+Win64 Installed SDK(s): MinVersion_Sdk=10.0.19041.0, MaxVersion_Sdk=10.9.99999.0, CurrentVersion_Sdk=10.0.26100.0, Version_AutoSdk=10.0.22621.0, CurrentVersion_AutoSdk=
+        Registering build platform: Win64 - buildable: True
+    Registering build platform: UnrealBuildTool.VisionOSPlatformFactory
+Command line: "E:\Program Files\UE_5.8\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll" SurvivalGameEditor Win64 Development -Project=E:\Repos\SurvivalGame\SurvivalGame.uproject -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild -NoSNDBS -NoArtifactReads -NoArtifactWrites -NoEngineChanges -Log=E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-01\ubt.log -WriteOutdatedActions=E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-01\actions.json
+Determining max actions to execute in parallel (8 physical cores, 16 logical cores)
+  Executing up to 8 processes, one per physical core
+  Requested 1.5 GB memory per action, 8.62 GB available: limiting max parallel actions to 5
+UbaSessionServer - Disable remote execution (remote sessions will finish current processes)
+E:\Repos\SurvivalGame\Source\SurvivalGame\SurvivalGame.Build.cs has been modified since makefile was built.
+Invalidating makefile for SurvivalGameEditor (SurvivalGame.Build.cs modified)
+Skipping E:\Program Files\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5Rules.dll: File is installed
+Skipping E:\Program Files\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5ProgramRules.dll: File is installed
+Compiling E:\Repos\SurvivalGame\Intermediate\Build\BuildRules\SurvivalGameModuleRules.dll: E:\Repos\SurvivalGame\Source\SurvivalGameEditor\SurvivalGameEditor.Build.cs is newer
+Compiler: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+Linker: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\link.exe
+Library Manager: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\link.exe
+Resource Compiler: C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe
+Resource Converter: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cvtres.exe
+Using EngineIncludeOrderVersion.Unreal5_8 for target SurvivalGameEditor.Target.cs
+Building UnrealEditor - SurvivalGameEditor - Win64 - Development
+VerseVMBytecodeGenerator.Generate, generating CPP headers in: 'E:\Program Files\UE_5.8\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\CoreUObject\VerseVMBytecode'
+	Writing out generated header file. Changed:False Path:'E:\Program Files\UE_5.8\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\CoreUObject\VerseVMBytecode\VVMBytecodeOps.gen.h'
+	Writing out generated header file. Changed:False Path:'E:\Program Files\UE_5.8\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\CoreUObject\VerseVMBytecode\VVMBytecodesAndCaptures.gen.h'
+	Writing out generated header file. Changed:False Path:'E:\Program Files\UE_5.8\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\CoreUObject\VerseVMBytecode\VVMMakeCapturesFuncs.gen.h'
+	Writing out generated header file. Changed:False Path:'E:\Program Files\UE_5.8\Engine\Intermediate\Build\Win64\UnrealEditor\Inc\CoreUObject\VerseVMBytecode\VVMCaptureSwitch.gen.h'
+UnrealHeaderTool needs to run because SavedTimestamp is older than the rules file (E:\Repos\SurvivalGame\Source\SurvivalGame\SurvivalGame.Build.cs) for module SurvivalGame
+Found 5 shared PCH headers (listed in order of preference):
+	UnrealEd
+	Engine
+	Slate
+	CoreUObject
+	Core
+Parsing headers for SurvivalGameEditor
+  Running Internal UnrealHeaderTool E:\Repos\SurvivalGame\SurvivalGame.uproject E:\Repos\SurvivalGame\Intermediate\Build\Win64\SurvivalGameEditor\SurvivalGameEditor.uhtmanifest -WarningsAsErrors -installed
+UHT compiled-in object format Default
+Step - Parse Headers
+Updating E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\UnrealEditor-SurvivalGame.dll.rsp: contents have changed. Saving previous version to E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\UnrealEditor-SurvivalGame.dll.rsp.old.
+Updating E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGameEditor\UnrealEditor-SurvivalGameEditor.dll.rsp: contents have changed. Saving previous version to E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGameEditor\UnrealEditor-SurvivalGameEditor.dll.rsp.old.
+Updating E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\UnrealEditor-SurvivalGame.lib.rsp: contents have changed. Saving previous version to E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\UnrealEditor-SurvivalGame.lib.rsp.old.
+Updating E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\LiveCodingInfo.json: contents have changed. Saving previous version to E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\LiveCodingInfo.json.old.
+Updating E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\SurvivalGame.Shared.rsp: contents have changed. Saving previous version to E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\SurvivalGame.Shared.rsp.old.
+Reading engine version from file: E:\Program Files\UE_5.8\Engine\Source\Runtime\Launch\Resources\Version.h
+Got engine version 5.8.2
+Step - Populate symbol table
+Step - Exports
+       Exporter Stats skipped
+       Exporter Json skipped
+       Running exporter CodeGen
+UHT processed SurvivalGameEditor in 5.1946066 seconds (0 generated files written)
+Deleting outdated item: E:\Repos\SurvivalGame\Binaries\Win64\UnrealEditor-SurvivalGameEditor.pdb
+Deleting outdated item: E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGameEditor\UnrealEditor-SurvivalGameEditor.lib
+Deleting outdated item: E:\Repos\SurvivalGame\Binaries\Win64\UnrealEditor-SurvivalGame.pdb
+Deleting outdated item: E:\Repos\SurvivalGame\Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGame\UnrealEditor-SurvivalGame.lib
+===== Toolchain Information =====
+Using ISPC compiler (E:\Program Files\UE_5.8\Engine\Source\ThirdParty\Intel\ISPC\bin\Windows\ispc.exe)
+  Intel(r) Implicit SPMD Program Compiler (Intel(r) ISPC), 1.24.0 (build commit  @ 20250404, LLVM 18.1.2) 
+Using Visual Studio 14.44.35229 toolchain (E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207) and Windows 10.0.26100.0 SDK (C:\Program Files (x86)\Windows Kits\10).
+=================================
+Exported build actions to E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-01\actions.json
+WriteFileIfChanged() wrote 0 changed files of 1 requested writes.
+
+Timeline:
+[  0.000]  +0.405 Main
+   0.015          [  0.015]  +0.097 Apply XmlConfig
+   0.120          [  0.120]  +0.049 AddTelemetry
+   0.210          [  0.210]  +0.193 RegisterPlatforms
+[  0.477]  +0.045 ParseCommandLine
+[  0.594]  +0.176 LoadMakefile
+[  0.777]  +0.153 FindPlugins
+   0.816          [  0.038]  +0.133 EngineRulesPlugins
+   0.942             0.164          [  0.125]  +0.023 MakefileValid
+[  0.971]  +0.010 EngineRulesAssembly
+[  0.982]  +0.001 ProgramRulesAssembly
+[  0.983]  +2.953 ProjectRulesAssembly
+[  3.937]  +0.173 CreateTargetRules
+[  4.190]  +0.014 CppDependencyCache
+[  4.215]  +2.296 SurvivalGameEditor Win64 Development
+   4.215          [  0.000]  +0.784 <unknown>
+   4.999          [  0.784]  +0.068 UHTModules
+   5.250          [  1.035]  +0.213 UHTManifest
+   5.463          [  1.248]  +5.200 UHT
+   5.463             1.248          [  0.000]  +1.009 <unknown>
+   6.472             2.257          [  1.009]  +0.000 WaitOnWrites
+   6.513             2.297          [  1.049]  +0.168 SavingMakefile
+   6.681             2.466          [  1.218]  +3.981 <unknown>
+[  6.511]  +4.152 <unknown>
+[ 10.664]  +0.024 UHTTimestamps
+[ 10.698]  +0.013 CppDependencyCache
+[ 10.712]  +0.096 Preparing ActionGraph
+  10.730          [  0.018]  +0.008 LinkActions
+  10.738             0.026          [  0.007]  +0.000 DetectActionGraphCycles
+  10.739          [  0.027]  +0.000 GatherPrerequisiteActions
+  10.741          [  0.029]  +0.000 CppDependencyCacheWait
+  10.742          [  0.030]  +0.050 GatherOutdatedActions
+  10.796          [  0.084]  +0.003 LinkActions
+  10.796             0.084          [  0.000]  +0.000 DetectActionGraphCycles
+  10.801          [  0.088]  +0.001 DeleteOutdatedProducedItems
+  10.802          [  0.090]  +0.004 SaveActionHistory
+  10.808          [  0.096]  +0.000 CreateDirectoriesForProducedItems
+[ 10.813]  +0.010 Writing actions
+[ 10.825]  +0.000 DisconnectCache
+[ 10.829]  +0.000 SaveCasTable
+[ 10.833]  +0.071 Saving caches
+[ 10.905]  +0.003 TelemetryService.FlushEvents
+[ 10.910]
+
+Result: Succeeded
+Total execution time: 10.91 seconds

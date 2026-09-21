@@ -8,7 +8,7 @@ public class SurvivalGameEditor : ModuleRules
         PrivateIncludePathModuleNames.Add("PythonScriptPlugin");
         PrivateDependencyModuleNames.AddRange(new[] {
             "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "Projects", "DerivedDataCache",
-            "MaterialEditor", "MeshDescription", "RHI", "RenderCore"
+            "MaterialEditor", "MeshDescription", "StaticMeshDescription", "PhysicsCore", "RHI", "RenderCore"
         });
     }
 }

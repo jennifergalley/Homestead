@@ -15,6 +15,7 @@
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "ProceduralMeshComponent.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadWorld, Log, All);
@@ -346,11 +347,12 @@ void AHomesteadWorld::BuildLighting()
 void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
 {
     const FName FernTag(TEXT("AuthoredFern02"));
+    const FName TreeTag(TEXT("AuthoredTreeSmall02"));
     TArray<UStaticMeshComponent*> PreviousParts;
     GetComponents(PreviousParts);
     for (UStaticMeshComponent* Part : PreviousParts)
     {
-        if (Part->ComponentHasTag(FernTag))
+        if (Part->ComponentHasTag(FernTag) || Part->ComponentHasTag(TreeTag))
         {
             RemoveInstanceComponent(Part);
             Part->DestroyComponent();
@@ -444,6 +446,40 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
     }
     UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing fern patch: %d noncolliding plants; native materials and scale."), FernCount);
 
+    auto* AuthoredTree = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/Trials/TreeSmall02_20260921_01/Meshes/SM_TreeSmall02_LOD2.SM_TreeSmall02_LOD2"));
+    int32 TreeIndex = INDEX_NONE;
+    if (AuthoredTree && AuthoredTree->GetStaticMaterials().Num() == 3 && AuthoredTree->GetBodySetup()
+        && AuthoredTree->GetBodySetup()->AggGeom.SphylElems.Num() == 1
+        && AuthoredTree->GetBodySetup()->AggGeom.GetElementCount() == 1)
+    {
+        const FBox Bounds = AuthoredTree->GetBoundingBox();
+        const float Radius = FVector2D(FMath::Max(FMath::Abs(Bounds.Min.X), FMath::Abs(Bounds.Max.X)),
+            FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size();
+        float Nearest = TNumericLimits<float>::Max();
+        for (int32 Index = 0; Index < 430; ++Index)
+        {
+            FRandomStream Candidate(817391 + Index * 179);
+            const float X = Candidate.FRandRange(-3850, 3850);
+            const float Y = Candidate.FRandRange(-3850, 3850);
+            const float Edge = FMath::Max(FMath::Abs(X), FMath::Abs(Y));
+            const float Cluster = FMath::Sin(X / 480) * FMath::Cos(Y / 620);
+            if (Reserved(X, Y, 90) || FMath::Abs(X - Homestead::StreamX(Y)) < 280
+                || (Edge < 2650 && (Cluster < 0.45f || Candidate.FRand() < 0.68f)))
+                continue;
+            if (Reserved(X, Y, Radius) || FMath::Abs(X - Homestead::StreamX(Y)) < Radius + 120
+                || FVector2D(X + 1000, Y).Size() > 1900)
+                continue;
+            const float Distance = FVector2D(X - 250, Y + 650).SizeSquared();
+            if (Distance < Nearest) { TreeIndex = Index; Nearest = Distance; }
+        }
+    }
+    else
+    {
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Authored reduced tree or its measured simple trunk collision is unavailable."));
+    }
+    if (AuthoredTree && TreeIndex == INDEX_NONE)
+        UE_LOG(LogHomesteadWorld, Warning, TEXT("No safe seeded clearing tree site in this world state; keeping existing primitive decorations."));
     for (int Index = 0; Index < 430; ++Index)
     {
         Random.Initialize(817391 + Index * 179);
@@ -460,6 +496,24 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
         const float Width = Random.FRandRange(34, 58);
         const FVector Base = AtGround(X, Y);
         const float Yaw = Random.FRandRange(0, 360);
+        if (Index == TreeIndex)
+        {
+            auto* Part = NewObject<UStaticMeshComponent>(this);
+            AddInstanceComponent(Part);
+            Part->ComponentTags.Add(TreeTag);
+            Part->SetupAttachment(GetRootComponent());
+            Part->SetMobility(EComponentMobility::Static);
+            Part->SetStaticMesh(AuthoredTree);
+            Part->SetRelativeTransform(FTransform(FRotator(0, Yaw, 0), Base, FVector::OneVector));
+            Part->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+            Part->SetGenerateOverlapEvents(false);
+            Part->SetCullDistance(5000.0f);
+            Part->RegisterComponent();
+            UE_LOG(LogHomesteadWorld, Display,
+                TEXT("Authored reduced tree: seedIndex=%d root=%s yaw=%.6f scale=1; native three-role materials/simple trunk capsule."),
+                Index, *Base.ToString(), Yaw);
+            continue;
+        }
         AddDecoration(Cylinder, Base + FVector(0, 0, Height * 0.47f),
             FVector(Width, Width, Height * 0.94f), Bark, true);
         if (Index % 3 == 0)

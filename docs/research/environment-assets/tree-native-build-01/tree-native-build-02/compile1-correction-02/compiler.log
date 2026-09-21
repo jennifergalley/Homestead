@@ -1,0 +1,25 @@
+Module.SurvivalGame.2.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(225,47): error C2663: 'UMaterial::GetMaterialResource': no overloaded function has valid conversion for 'this' pointer
+        auto* Resource = Material ? Material->GetMaterialResource(GetWorld()->GetFeatureLevel()) : nullptr;
+                                              ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Engine\Public\Materials\Material.h(1313,46): note: could be 'const FMaterialResource *UMaterial::GetMaterialResource(EShaderPlatform,EMaterialQualityLevel::Type) const'
+	ENGINE_API virtual const FMaterialResource* GetMaterialResource(EShaderPlatform InShaderPlatform, EMaterialQualityLevel::Type QualityLevel = EMaterialQualityLevel::Num) const override;
+	                                            ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(225,47): note: 'const FMaterialResource *UMaterial::GetMaterialResource(EShaderPlatform,EMaterialQualityLevel::Type) const': cannot convert argument 1 from 'ERHIFeatureLevel::Type' to 'EShaderPlatform'
+        auto* Resource = Material ? Material->GetMaterialResource(GetWorld()->GetFeatureLevel()) : nullptr;
+                                              ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(225,94): note: Conversion to enumeration type requires an explicit cast (static_cast, C-style cast or parenthesized function-style cast)
+        auto* Resource = Material ? Material->GetMaterialResource(GetWorld()->GetFeatureLevel()) : nullptr;
+                                                                                             ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Engine\Public\Materials\Material.h(1312,40): note: or       'FMaterialResource *UMaterial::GetMaterialResource(EShaderPlatform,EMaterialQualityLevel::Type)'
+	ENGINE_API virtual FMaterialResource* GetMaterialResource(EShaderPlatform InShaderPlatform, EMaterialQualityLevel::Type QualityLevel = EMaterialQualityLevel::Num) override;
+	                                      ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(225,47): note: 'FMaterialResource *UMaterial::GetMaterialResource(EShaderPlatform,EMaterialQualityLevel::Type)': cannot convert 'this' pointer from 'ERHIFeatureLevel::Type' to 'UMaterial &'
+        auto* Resource = Material ? Material->GetMaterialResource(GetWorld()->GetFeatureLevel()) : nullptr;
+                                              ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(225,37): note: Conversion loses qualifiers
+        auto* Resource = Material ? Material->GetMaterialResource(GetWorld()->GetFeatureLevel()) : nullptr;
+                                    ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(225,47): note: while trying to match the argument list '(ERHIFeatureLevel::Type)'
+        auto* Resource = Material ? Material->GetMaterialResource(GetWorld()->GetFeatureLevel()) : nullptr;
+                                              ^

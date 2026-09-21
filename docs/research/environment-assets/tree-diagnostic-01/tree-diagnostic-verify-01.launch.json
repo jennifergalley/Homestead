@@ -1,0 +1,205 @@
+{
+  "pid": 45088,
+  "creationTime": 134344696101502947,
+  "image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+  "executableSha256": "AE92F55952A3C9A7DEF90983FCF5AEDCE52D8EE8E4565FBD923985E9D9D3E05E",
+  "moduleSha256": "B12E388E0C9BC572A009C1615C9EAFDF58E146A329A1232F288EEAFA2AF1978F",
+  "arguments": [
+    "E:\\Repos\\SurvivalGame\\SurvivalGame.uproject",
+    "-run=HomesteadAuthoringProbe",
+    "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01",
+    "-notraceserver",
+    "-traceautostart=0",
+    "-unattended",
+    "-nop4",
+    "-nosplash",
+    "-stdout",
+    "-FullStdOutLogOutput",
+    "-DisablePython",
+    "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+    "-noshaderworker",
+    "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\EngineUser",
+    "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\editor.log",
+    "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+    "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+    "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+    "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+    "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+    "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+    "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\Engine.ini",
+    "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\Editor.ini",
+    "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\EditorSettings.ini",
+    "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\EditorPerProjectUserSettings.ini",
+    "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\GameUserSettings.ini",
+    "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\Game.ini",
+    "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-verify-01\\Config\\Input.ini",
+    "-FernMode=TreeVerify",
+    "-nullrhi"
+  ],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344171775529435,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "explicitInheritedHandles": 3,
+  "expectedRules": [
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "TCP Query User{0A2FC548-73B9-422C-B077-058734737E11}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "TCP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    },
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "UDP Query User{C4984A9B-D060-40FD-8B40-E7089EBA10A5}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "UDP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    }
+  ],
+  "deadlineUtc": "",
+  "creationFlags": 525324,
+  "buildReceiptSha256": "16BB7A09538FFC59D270794C5B522D1ACA9D3991A529FA111969D9F617FE9CFA",
+  "productPins": [
+    {
+      "sha256": "2B69AE923A8FDF4A6163C7D947FF06B16FD7DB61876FDE62DFC18CCBBAD3C893",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2702336
+    },
+    {
+      "sha256": "6B7479802BDB6F20BDBE7214357A7813AEE2304745C80A843926916885E57721",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 88608768
+    },
+    {
+      "sha256": "B12E388E0C9BC572A009C1615C9EAFDF58E146A329A1232F288EEAFA2AF1978F",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 413184
+    },
+    {
+      "sha256": "BC781706E5C362349D975A91523D94E8B95B36A0E6C1D0770AB9DA305CEC1650",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 30150656
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032
+    }
+  ],
+  "supersession": {
+    "treeFirstResultSha256": "377B6A6CDEAA110C90BF99D4A3717F0D15C35F4E4F0A474BECFE5EF8FAA0186C",
+    "treeSecondReservationSha256": "3103F180B725580E429BCA8D97044FB5C497CF140D7A1F0B0305558D68884569",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7",
+    "treeFirstReservationSha256": "A3415A967E94AC5861CC7CE1476C81FAD92E1369D2860A6A304CD32303981E62",
+    "currentApproval": "Completion-driven environment continuation; coordinator confirmed exact frozen LOD2 tree slice after wardrobe-ui-02 delivery. Exactly17 fresh trial packages, measured trunk collision and ordinary-world acceptance, not another isolated showcase. Existing guarded native/privacy/DDC/endpoint controls retained; no original LOD0 import or selected-preview overwrite.",
+    "treeNormalCorrection": "Distinct import03 distinguishes orphan entries, retains grouped repair, and permits only referenced exact-zero single-face corners to use their valid engine-computed face normal. Nonzero custom normals preserved exactly; no group-cancellation claim without measurements.",
+    "diagnosticApproval": "Coordinator final proportional direction: use unchanged genuine receipt03 code/products, exact retained17 failed-import03 package pins, qualified read/reverify then existing cook/ordinary-game route. Exactly12 branch source-description tangent/binormal corners remain disclosed; every other geometry/normal/material/UV/identity/privacy gate unchanged. Import03 remains FAILED; no reimport, asset write, clean-pass or promotion.",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "treeCorrection": "Coordinator approved referenced bounds, reversible branch-only UV routing and selective invalid-normal engine handling; distinct import02 reuses only the unchanged empty identified failed-before-save namespace. Frozen v3 and original failure remain unchanged.",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "treeSecondResultSha256": "405E75148269BC380520F26DC773B74A9773DEC790BD683F6765C60E52041B82"
+  },
+  "buildMonitoringQualification": {
+    "inherited": {
+      "inherited": {
+        "inherited": "Genuine integrated strict native-menu/equipment/current-save/resume fixture game compile4/library6/DLL5 and metadata passed. Editor importer unchanged from previous genuine receipt. Raw guarded step evidence retained under exact paths/hash. Prior failed import01 and historical compiler/link/monitor qualifications remain unchanged. No new gameplay acceptance inferred from compilation.",
+        "current": "Genuine UBT exports/UHT, exact guarded native compiler/library/DLL leaves, resource-only substitutions, actual PE/PDB checks and real UBT metadata. UBT export/metadata remain sampled observational tools with the previously approved build-only conhost; not root-only leaf proofs. Original failed compiles and missing-RHI-dependency link remain failed. Global marker not used for these compiler leaves.",
+        "correction": "Typed TObjectPtr declarations, genuine UHT refresh after header movement, explicit RHI dependency for installed UE5.8 shader-platform material readiness. An attempted feature-level overload was rejected by the actual compiler and retained, not cast or claimed successful.",
+        "limit": "No tree import, persisted asset, Cook, Shipping or visual/runtime acceptance from this build."
+      },
+      "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+      "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+      "correction": "Importer only: referenced FBX bounds in UE frame; branch-only invertible UV swap; supported Tangents|UseMikkTSpace with exact nonzero-normal preservation; pre/post per-role basis measurements. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and actual metadata succeeded."
+    },
+    "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+    "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+    "correction": "Importer only: distinguish orphan vertex instances from referenced corners; permit only remaining exact-zero single-face referenced corners to use valid engine-computed face normals; regenerate Mikk tangents and compare nonzero normals exactly. Record intermediate/final per-role measurements and pre-adaptation actual bounds. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and metadata succeeded."
+  },
+  "mode": "TreeVerify",
+  "softSeconds": 0,
+  "hardSeconds": 0,
+  "ceilingSeconds": 0,
+  "trialIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\TreeSmall02_20260921_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 815581,
+    "Attributes": 16,
+    "CreationTime": 134344667135701277
+  },
+  "deadlineProfile": "CookCompletionDriven",
+  "supervisorReceiptSha256": "A45E27DE55F6A3C5C33D1F5DB1FA47008297674AD5A702FC1A6D6A059F94CA0C",
+  "wrapperSha256": "E6B13DA88CA0AB49310F3529C6FF51B3880BD614B0918C0BA9724DE50EC12D7F",
+  "startupSeconds": 0,
+  "captureSeconds": 0,
+  "ddc": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+  "ddcIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745022,
+    "Attributes": 16,
+    "CreationTime": 134344292212644463
+  },
+  "completionDriven": true
+}

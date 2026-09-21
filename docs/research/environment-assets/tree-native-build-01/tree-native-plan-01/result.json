@@ -1,0 +1,101 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 11.3366763,
+  "observedChildren": [
+    {
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "parentPid": 48516,
+      "admitted": true,
+      "pid": 53004,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "startUtc": "2026-09-21T12:00:20.3932895Z"
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 658.1015,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 1459.0949,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 2063.5345,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 2670.911,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 3301.4197,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 3911.6538,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 4552.2036,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 5210.0342,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 5846.6941,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 6789.0039,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 7788.9427,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 8703.4304,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 9518.5839,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 10271.9059,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 11188.4717,
+      "tcp": [],
+      "udp": []
+    }
+  ],
+  "exportCorroboration": {
+    "observation": "A log-confirmed brief version-query child may be absent from process samples; no retroactive identity/endpoint claim.",
+    "sampledIsNotCompleteHistory": true,
+    "version": "1.24.0",
+    "versionQueryReported": true,
+    "source": "ISPCToolChain.cs233-247 invokes --version through a process-local Lazy cache"
+  }
+}

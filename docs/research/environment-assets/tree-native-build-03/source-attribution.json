@@ -1,0 +1,211 @@
+{
+  "sourceFile": "TreeSmall02_LOD2.fbx",
+  "sourceSha256": "03365d16ad77535e28c8f3b7243a8183d30768af3c719589cef58a44ed12e283",
+  "fbxVersion": 7400,
+  "execution": "CPython 3.13 + NumPy; installed official standalone FBX binary reader only; no bpy, Blender process, Unreal, writes to source or repair.",
+  "measurements": {
+    "normalNearZero": "Euclidean length <= 1e-4 of the direct normal vector; dimensionless. Corner mapping follows FBX reference indices.",
+    "geometryZero": "Exact double-precision cross-product area == 0; no welding, tolerance merging or fan triangulation.",
+    "geometryNearZero": "Triangle area <= 1e-12 square metres from raw local coordinates (FBX UnitScaleFactor=100 cm/unit).",
+    "uv0Zero": "Exact abs(det(UV1-UV0,UV2-UV0)) == 0; determinant equals twice UV area.",
+    "uv0NearZero": "Absolute UV0 determinant <= 1e-12, dimensionless; no UV normalization/welding.",
+    "scope": "Frozen derived LOD2 only. Does not attribute defects to original acquisition vs decimation, or reproduce UE epsilon/normal/tangent algorithms."
+  },
+  "controlPoints": {
+    "total": 424817,
+    "referenced": 384193,
+    "unused": 40624
+  },
+  "triangles": 231785,
+  "corners": 695355,
+  "normalMapping": {
+    "mapping": "ByPolygonVertex",
+    "reference": "IndexToDirect"
+  },
+  "uv0Mapping": {
+    "mapping": "ByPolygonVertex",
+    "reference": "IndexToDirect"
+  },
+  "uv0Name": "UVMap",
+  "directNormals": {
+    "total": 347049,
+    "referenced": 347049,
+    "unused": 0,
+    "exactZero": 1,
+    "nearZero": 1,
+    "referencedNearZero": 1,
+    "lengthThresholdCounts": {
+      "0": 1,
+      "1e-12": 1,
+      "1e-08": 1,
+      "1e-06": 1,
+      "0.0001": 1
+    }
+  },
+  "nearZeroNormalAttribution": [
+    {
+      "directIndexZeroBased": 0,
+      "vector": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "length": 0.0,
+      "referencedCorners": 1379,
+      "referencedDistinctTriangles": 1303,
+      "referenced": true,
+      "byMaterial": {
+        "tree_small_02_branches": {
+          "corners": 338,
+          "distinctTriangles": 262
+        },
+        "tree_small_02_leaves": {
+          "corners": 1041,
+          "distinctTriangles": 1041
+        },
+        "tree_small_02_trunk": {
+          "corners": 0,
+          "distinctTriangles": 0
+        }
+      },
+      "firstReferencedTrianglesZeroBased": [
+        14209,
+        14210,
+        14239,
+        14257,
+        14305,
+        14306,
+        14355,
+        14361,
+        14474,
+        14475,
+        14477,
+        14492
+      ]
+    }
+  ],
+  "byMaterial": {
+    "tree_small_02_branches": {
+      "triangles": 23702,
+      "nearZeroNormalCorners": 338,
+      "trianglesWithNearZeroNormal": 262,
+      "exactZeroAreaTriangles": 0,
+      "areaAtMost1eMinus12SquareMeters": 0,
+      "exactZeroUv0DeterminantTriangles": 23702,
+      "uv0DeterminantAtMost1eMinus12": 23702,
+      "bothNearZeroAreaAndUv0": 0,
+      "nearZeroNormalAndNearZeroArea": 0,
+      "nearZeroNormalAndNearZeroUv0": 262
+    },
+    "tree_small_02_leaves": {
+      "triangles": 193938,
+      "nearZeroNormalCorners": 1041,
+      "trianglesWithNearZeroNormal": 1041,
+      "exactZeroAreaTriangles": 0,
+      "areaAtMost1eMinus12SquareMeters": 0,
+      "exactZeroUv0DeterminantTriangles": 0,
+      "uv0DeterminantAtMost1eMinus12": 0,
+      "bothNearZeroAreaAndUv0": 0,
+      "nearZeroNormalAndNearZeroArea": 0,
+      "nearZeroNormalAndNearZeroUv0": 0
+    },
+    "tree_small_02_trunk": {
+      "triangles": 14145,
+      "nearZeroNormalCorners": 0,
+      "trianglesWithNearZeroNormal": 0,
+      "exactZeroAreaTriangles": 0,
+      "areaAtMost1eMinus12SquareMeters": 0,
+      "exactZeroUv0DeterminantTriangles": 0,
+      "uv0DeterminantAtMost1eMinus12": 0,
+      "bothNearZeroAreaAndUv0": 0,
+      "nearZeroNormalAndNearZeroArea": 0,
+      "nearZeroNormalAndNearZeroUv0": 0
+    }
+  },
+  "supplementalUvLayersByRole": [
+    {
+      "layerIndex": 0,
+      "name": "UVMap",
+      "byMaterial": {
+        "tree_small_02_branches": {
+          "exactZeroDeterminants": 23702,
+          "determinantsAtMost1eMinus12": 23702,
+          "uvCornerMin": [
+            0.0,
+            0.0
+          ],
+          "uvCornerMax": [
+            0.0,
+            0.0
+          ]
+        },
+        "tree_small_02_leaves": {
+          "exactZeroDeterminants": 0,
+          "determinantsAtMost1eMinus12": 0,
+          "uvCornerMin": [
+            0.07840606570243835,
+            0.01732122339308262
+          ],
+          "uvCornerMax": [
+            0.9770695567131042,
+            0.96912682056427
+          ]
+        },
+        "tree_small_02_trunk": {
+          "exactZeroDeterminants": 0,
+          "determinantsAtMost1eMinus12": 0,
+          "uvCornerMin": [
+            0.003935873508453369,
+            0.003963932394981384
+          ],
+          "uvCornerMax": [
+            0.996068000793457,
+            0.9955413341522217
+          ]
+        }
+      }
+    },
+    {
+      "layerIndex": 1,
+      "name": "UV_map_01",
+      "byMaterial": {
+        "tree_small_02_branches": {
+          "exactZeroDeterminants": 0,
+          "determinantsAtMost1eMinus12": 0,
+          "uvCornerMin": [
+            -0.0006629583076573908,
+            -0.6426932215690613
+          ],
+          "uvCornerMax": [
+            1.0000296831130981,
+            1.211830735206604
+          ]
+        },
+        "tree_small_02_leaves": {
+          "exactZeroDeterminants": 193938,
+          "determinantsAtMost1eMinus12": 193938,
+          "uvCornerMin": [
+            0.0,
+            0.0
+          ],
+          "uvCornerMax": [
+            0.0,
+            0.0
+          ]
+        },
+        "tree_small_02_trunk": {
+          "exactZeroDeterminants": 14145,
+          "determinantsAtMost1eMinus12": 14145,
+          "uvCornerMin": [
+            0.0,
+            0.0
+          ],
+          "uvCornerMax": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    }
+  ]
+}

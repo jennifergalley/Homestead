@@ -1,0 +1,172 @@
+{
+  "status": "passed-targeted-policy",
+  "createdUtc": "2026-09-21T12:38:01.0356765+00:00",
+  "supervisorSources": [
+    {
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    },
+    {
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+      "path": "Scripts\\AuthoringProbePolicy.ps1"
+    },
+    {
+      "sha256": "8D9E1D08CF27D3C5655ACAF438BA764533AA2F2FCD2ECC3D5295DFA4F86A2A35",
+      "path": "Scripts\\FernSpikePolicy.ps1"
+    },
+    {
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3",
+      "path": "Scripts\\HairWavePolicy.ps1"
+    },
+    {
+      "sha256": "5EB3BA2C1454882CDFFA0288D98F6C87B234F277F044AFEC1CD16473BBC4B23F",
+      "path": "Scripts\\WardrobePolicy.ps1"
+    },
+    {
+      "sha256": "CBD306F7AD1B1D285FBD8CEA7D0946406C777D68466757A6BB53AB0BC8A45843",
+      "path": "Scripts\\TreeSpikePolicy.ps1"
+    },
+    {
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755",
+      "path": "Scripts\\Development-Run.ps1"
+    },
+    {
+      "sha256": "D72C932938D490C2EFAEC31A425D3BF49582B4ECC772064CC571654623DF2057",
+      "path": "Tests\\Test-TreeSpikePolicy.ps1"
+    },
+    {
+      "sha256": "D440E44DB0F50E169D177BA41E8EAF1F6564844F89F61FCF01F8233ADFF60D45",
+      "path": "Tests\\Test-WardrobePolicy.ps1"
+    },
+    {
+      "sha256": "69819949E65F327A26BCBEBB6D99D277F5F8A24E322E6CDB030992B2F1E97DF9",
+      "path": "Tests\\Test-FernSpikePolicy.ps1"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "sha256": "501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-attempt-01.json"
+    },
+    {
+      "sha256": "0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "0B16BCBE1DA08D406BB8BFE913B0065E2A6FE989892CD85092106AB622BADCFA",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\wardrobe-result.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "3B9898BF0344512EED3ABCBAF3BD5E3995C921E82E193708245E6CC245612F1B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\probe-result.json"
+    },
+    {
+      "sha256": "6263C0C1AA3F62EF1A42BE7123AAC7ED66243BE405A49A3D599C2E3371FC4591",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\asset-admission.json"
+    },
+    {
+      "sha256": "4504EA31EBBA1DA6DA80A1CBFC827120DFB7CBEE410F48C7FF441FD63AA90AD3",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-verify-01\\probe-result.json"
+    },
+    {
+      "sha256": "5A178FD9830F963DD56DAE520555D99DFD85FE998B3E01B0E4E8C392C642B1E9",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\editor.log"
+    },
+    {
+      "sha256": "2957FF55ED7E638B17EDC958B668E623F2D366307DF2B4457D1CFB33DABDF430",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\effective-settings.json"
+    },
+    {
+      "sha256": "A4C32A9BD6498D396866A5CDF0F4FC1E3948E1EF03525D6C0C9B12BB1D210FB9",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\entry-observed.json"
+    },
+    {
+      "sha256": "0012318136D730D98EA89131BEF746E7744D3F657AD229101148D2C808AB41AC",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\launch.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "7F5805D4FD53D4E3F37CE2208550F848F96E04E025F13027268799CE6975B789",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\operation-admitted.txt"
+    },
+    {
+      "sha256": "377B6A6CDEAA110C90BF99D4A3717F0D15C35F4E4F0A474BECFE5EF8FAA0186C",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "32A43E2883126C28E3D3FB21030F7792B3EEF55702C12C4D671628F04147F668",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\retained-inputs.json"
+    },
+    {
+      "sha256": "72354E545A0D00FEB7AB71D0A99D6EAF47C93BFCCD9D5A63F49C82F3394E43B2",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\retained-output-check.json"
+    },
+    {
+      "sha256": "018869AC602BA3495C95C6A3FEA01B37E6542F74E2BD36199E3CA86510754C18",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\stdout.log"
+    },
+    {
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\stop-probe.txt"
+    },
+    {
+      "sha256": "955795F156214808843EB6EAF4554EC989102F24492F1CD2387A7E1AEAB9E176",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\tree-result.json"
+    },
+    {
+      "sha256": "0F6E5F6EE35D1D08016AA73927D665B380165B85189CB086957465D6A40923C6",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\Editor.ini"
+    },
+    {
+      "sha256": "1C21ABFFCDA53B9B7772539CE387B3B7CBDCE03B48A174A8447CD6485E237052",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "sha256": "FC8C816C341836A68DD1443DF5C753DDEB82F747F751B62D2C204E37B6C2835B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\EditorSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\Game.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\GameUserSettings.ini"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\Config\\Input.ini"
+    },
+    {
+      "sha256": "9973F6C0CB1635144A0331316016061736C58778F04CCCABB4D89C05026AF02A",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM5\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "61B2B1EFDD8B416773330D36DBB7AB8B9CA3C13CD3D9DAD1BF9BE661B5DC30D2",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\EngineUser\\Intermediate\\ShaderAutogen\\PCD3D_SM6\\AutogenShaderHeaders.ush"
+    },
+    {
+      "sha256": "CE69D7E7BBD1A64729BD4D5724F3C1EFC47C6C3D555DA9D2C6AD741EDDC3D893",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-01\\EngineUser\\Saved\\Config\\CrashReportClient\\UECC-Windows-2B647D1043DD75D32E50D4B23CFA693C\\CrashReportClient.ini"
+    },
+    {
+      "sha256": "A3415A967E94AC5861CC7CE1476C81FAD92E1369D2860A6A304CD32303981E62",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-import-attempt-01.json"
+    }
+  ],
+  "nativeReceiptSha256": "D74A6DB012CD53876239CDA7010A50D99CDC53C70F1F447A6A3EACAF8902D86D",
+  "tests": {
+    "wardrobeNegativeCases": 47,
+    "sharedNegativeCases": 40,
+    "treeNegativeCases": 67
+  },
+  "scope": "Distinct diagnosed tree-import-02, then tree-verify-01. Reuse only the unchanged ordinary empty identified failed-before-save namespace; no deletion/reset. Reversible branch-only UV channel routing, supported selective zero-normal handling, referenced source bounds, all17 packages and existing controls. Actual per-role basis zero-invalid gate remains. Original failed import and old receipts immutable.",
+  "wrapperPinPolicy": "Wrapper excluded from self-referential receipt hash; exact runtime wrapper hash captured before admission and rechecked through exit, as in existing production supervisor."
+}

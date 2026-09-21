@@ -8,6 +8,7 @@
 #include "HomesteadVisualPlaytest.generated.h"
 
 class AHomesteadController;
+class UStaticMeshComponent;
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadVisualPlaytest : public AActor
@@ -52,6 +53,18 @@ private:
     TArray<FString> PresentationTimings;
     TArray<FString> PresentationSettings;
     void RecordPresentationSettings(const TCHAR* Phase);
+    TWeakObjectPtr<UStaticMeshComponent> ObservedTree;
+    FVector2D TreeCenter = FVector2D::ZeroVector;
+    FVector2D TreeStaging = FVector2D::ZeroVector;
+    FVector2D TreeContact = FVector2D::ZeroVector;
+    bool bTreeRoute = false;
+    bool bTreeReady = false;
+    bool bReachedTree = false;
+    bool bTreeBlocked = false;
+    bool bTreeRetreated = false;
+    float TreeBlockedSeconds = 0;
+    void PrepareTreeEncounter();
+    void TickTreeEncounter(const FPass& Pass, float Delta, FVector2D& Move, FVector2D& Look);
     bool bWaterRoute = false;
     bool bClearRoute = false;
     bool bCleared = false;
