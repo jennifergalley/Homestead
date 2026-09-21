@@ -72,7 +72,8 @@ public:
         {
             last_ = current; nextAt_ = now + 0.28; return current;
         }
-        if (now < nextAt_) return {};
+        // Absolute-time addition can differ from the same sampled deadline by one ULP.
+        if (now < nextAt_ && nextAt_ - now > 0.000001) return {};
         nextAt_ = now + 0.18;
         return current;
     }
