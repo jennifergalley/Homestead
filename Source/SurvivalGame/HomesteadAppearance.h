@@ -2,6 +2,11 @@
 
 #include "CoreMinimal.h"
 
+namespace HomesteadLook
+{
+    constexpr int32 HairColorCount = 5;
+}
+
 struct FHomesteadAppearance
 {
     int32 HairStyle = 0;
@@ -15,7 +20,7 @@ struct FHomesteadAppearance
     bool IsValid() const
     {
         return HairStyle >= 0 && HairStyle < 3
-            && HairColor >= 0 && HairColor < 4
+            && HairColor >= 0 && HairColor < HomesteadLook::HairColorCount
             && SkinTone >= 0 && SkinTone < 4
             && EyeColor >= 0 && EyeColor < 4
             && TunicColor >= 0 && TunicColor < 4
@@ -34,6 +39,7 @@ namespace HomesteadLook
     const TCHAR* OutfitName(int32 Index);
     const TCHAR* BodyPresetName(int32 Index);
     FLinearColor HairTint(int32 Index);
+    FLinearColor NeutralHairTint(int32 Index);
     FLinearColor SkinTint(int32 Index);
     FLinearColor IrisColor(int32 Index);
     FLinearColor TunicTint(int32 Index);
