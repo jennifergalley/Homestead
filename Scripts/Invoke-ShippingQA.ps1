@@ -7,11 +7,47 @@ param(
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 $root=Split-Path $PSScriptRoot -Parent
+function Get-NativeResumeSource([string]$CommandLine,[string]$Output,[string]$AutomationRoot) {
+    $tokens=[regex]::Matches($CommandLine,'(?i)(?:^|\s)-HomesteadNativeResumeFrom(?=[=\s]|$)')
+    if(-not $tokens.Count){return $null}
+    $match=[regex]::Match($CommandLine,'(?i)(?:^|\s)-HomesteadNativeResumeFrom="([^"\r\n]+)"(?=\s|$)')
+    if($tokens.Count -ne 1 -or -not $match.Success -or
+        $CommandLine -notmatch '(?i)(?:^|\s)-HomesteadNativeMenuTest(?:\s|$)' -or
+        $CommandLine -match '(?i)(?:^|\s)-HomesteadNativeQuitTest(?:\s|$)'){
+        throw 'Resume requires one explicit quoted producer path and NativeMenu without NativeQuit.'
+    }
+    $source=$match.Groups[1].Value
+    if(-not [IO.Path]::IsPathFullyQualified($source)){throw 'Resume producer must be absolute.'}
+    $source=[IO.Path]::GetFullPath($source)
+    $allowed=[IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($AutomationRoot))+'\'
+    if(-not $source.StartsWith($allowed,[StringComparison]::OrdinalIgnoreCase) -or
+        -not $Output.StartsWith($allowed,[StringComparison]::OrdinalIgnoreCase) -or
+        [IO.Path]::TrimEndingDirectorySeparator($source) -ieq [IO.Path]::TrimEndingDirectorySeparator($Output) -or
+        [IO.DriveInfo]::new([IO.Path]::GetPathRoot($source)).DriveType -ne [IO.DriveType]::Fixed){
+        throw 'Resume requires distinct producer/consumer paths within the same fixed local Automation root.'
+    }
+    foreach($name in @('native-wardrobe-fixture.json','native-wardrobe-fixture.sav')){
+        $file=Get-Item -LiteralPath (Join-Path $source $name)
+        $limit=if($name.EndsWith('.sav')){4MB}else{8MB}
+        if($file -is [IO.DirectoryInfo] -or $file.Length -le 0 -or $file.Length -gt $limit){throw 'Resume fixture size/type differs.'}
+        for($item=$file;$null -ne $item;$item=if($item -is [IO.DirectoryInfo]){$item.Parent}else{$item.Directory}){
+            if($item.Attributes -band ([IO.FileAttributes]::ReparsePoint -bor [IO.FileAttributes]::Device)){
+                throw 'Resume fixture/ancestor must be ordinary.'
+            }
+        }
+    }
+    return $source
+}
 $run=& (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
 if(-not $run.allowWork -or ($run.completionPolicy -ne 'until-complete' -and
     [DateTimeOffset]::UtcNow.AddSeconds(180) -ge [DateTimeOffset]$run.deadlineUtc)){throw 'Run does not admit the short Shipping QA route.'}
 $package=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
 $output=[IO.Path]::GetFullPath($OutputDirectory,$root)
+$resumeSource=Get-NativeResumeSource $Arguments $output (Join-Path $root 'Saved\Automation')
+$resumePins=@(if($resumeSource){foreach($name in @('native-wardrobe-fixture.json','native-wardrobe-fixture.sav')){
+    $path=Join-Path $resumeSource $name
+    @{path=$path;sha256=(Get-FileHash $path).Hash}
+}})
 $launch=Join-Path $output 'qa-launch.json'
 if($package.configuration -cne 'Shipping' -or (Test-Path $launch) -or
     $Arguments -notmatch '(?i)(?:^|\s)-HomesteadShippingQA(?:\s|$)' -or
@@ -57,7 +93,7 @@ try {
         throw 'Shipping QA admission changed before first-thread resume.'
     }
     [ordered]@{pid=$guard.ProcessId;image=$guard.ImagePath;creationTime=$guard.ProcessCreationTime;executableSha256=$imageHash;
-        arguments=$Arguments;markerBefore=$before;job=$guard.LastVerifiedJob;creationFlags=$guard.CreationFlags;
+        arguments=$Arguments;resumeSourcePins=$resumePins;markerBefore=$before;job=$guard.LastVerifiedJob;creationFlags=$guard.CreationFlags;
         handles=$guard.WhitelistedHandleCount;guardSha256=(Get-FileHash (Join-Path $PSScriptRoot 'AuthoringLeafGuard.cs')).Hash;
         adapterSha256=(Get-FileHash $PSCommandPath).Hash;softSeconds=100;hardSeconds=110;wrapperSeconds=120} |
         ConvertTo-Json -Depth 8|Set-Content $launch
@@ -78,6 +114,9 @@ try {
         throw "Shipping QA failed/cancelled: exit=$exitCode; deadline=$($guard.DeadlineError)"
     }
     if((Get-FileHash $package.executable).Hash -cne $imageHash){throw 'Staged executable changed during QA.'}
+    foreach($pin in $resumePins){
+        if((Get-FileHash $pin.path).Hash -cne $pin.sha256){throw 'Producer resume fixture changed during consumer QA.'}
+    }
 } catch {$failure=$_.ToString()}
 finally {
     if($guard) {

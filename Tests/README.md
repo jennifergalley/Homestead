@@ -17,19 +17,34 @@ hints, real item details, rejected craft conservation, placement cancellation
 and independent recovery/quit access. The failure-state fixture deliberately
 advances simulation time; it is not ordinary-play evidence. Screenshots include
 the actual Slate viewport UI. Normal Lit/Lighting-on/ShaderComplexity-off guards
-remain observational. The original joined prototype's material check is limited
-to actual DefaultLit rendering; admitted modular presentation is compared with
-the shared real mesh/material references. An image labeled provisional is not
-proof of completed wardrobe asset admission or aesthetic approval.
+remain observational. Every NativeMenu route now requires actual prepared
+modular presentation, with owned IDs, mesh/material identity and skin/hair/eye/
+garment tint checks; missing content fails, never a joined-prototype fallback.
+The default producer also exercises mapped unequip/equip/dye, five Appearance
+controls, real F5, deliberately altered equipment/look, and exact F9 restoration.
+Additional captures are `native-wardrobe-dyed.png` and
+`native-wardrobe-restored.png`. None implies human aesthetic approval.
 
 This is an early menu-flow check, not a substitute for successful equip/storage/
-craft/reload, mouse/hardware comfort or the
+craft/storage coverage, mouse/hardware comfort or the
 subsequent normal-play/garment review.
 The separate `-NativeMenuQuit` mode uses the same actor in a fresh owned process:
 it drives the real confirmation, verifies the saved current state and actual
 engine exit request, then writes the result before shutdown. The existing
 wrapper must also observe process termination. It does not use a mocked Quit
 callback and has no screenshot requirement.
+
+For separate-process current-save verification, use a new output and
+`-NativeMenu -NativeResumeFrom "<absolute successful producer output>"`.
+The same guarded Shipping route supplies
+`-HomesteadNativeResumeFrom="<producer>"`; it cannot combine with NativeMenuQuit.
+Both directories must belong to the same fixed local `Saved\Automation` root.
+The consumer checks ordinary nonreparse ancestors, bounded manifest/save bytes,
+the producer fingerprint and different PID, then populates only its fresh
+SmokeSave after normal QA admission. Real F9 must restore the exact expected
+world, full current simulation, all seven look fields and rendered equipment.
+Its capture is `native-wardrobe-resumed.png`; its result includes `NATIVE_RESUME`.
+The adapter checks producer fixture hashes before/after; no normal save is used.
 
 ## Portable simulation tests
 

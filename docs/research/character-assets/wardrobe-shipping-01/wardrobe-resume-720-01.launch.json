@@ -1,0 +1,44 @@
+{
+  "pid": 42676,
+  "image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-01\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "creationTime": 134344618390893281,
+  "executableSha256": "B080BAFD69087C0B12F4111DF05BFE6628249576CFDF99AE725F8583FAA48F2F",
+  "arguments": "-HomesteadSmokeTest -HomesteadTestOutput=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-01\" -GameUserSettingsINI=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-01\\Graphics\\GameUserSettings.ini\" -UserDir=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-01\\EngineUser\" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720  -nosplash -nosound -HomesteadNativeMenuTest -HomesteadRequireLit -HomesteadNativeResumeFrom=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-01\" -HomesteadRequireLit -abslog=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-resume-720-01\\engine.log\" -HomesteadShippingQA",
+  "resumeSourcePins": [
+    {
+      "sha256": "1E6B75840990118E4AA441C94A9213B372921AAE2A5AC2F54713817F46855B51",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-01\\native-wardrobe-fixture.json"
+    },
+    {
+      "sha256": "A84258259DAA13411EEC118FD4A8977AB2FD7CD1EDDD025A9721222227CF0903",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-menu-720-01\\native-wardrobe-fixture.sav"
+    }
+  ],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344171775529435,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "creationFlags": 525324,
+  "handles": 3,
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "adapterSha256": "B1019E6502BC9530C28FF393EC30B8016620257D864C3032F24836A3F818CB29",
+  "softSeconds": 100,
+  "hardSeconds": 110,
+  "wrapperSeconds": 120
+}

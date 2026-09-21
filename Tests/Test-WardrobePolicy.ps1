@@ -93,4 +93,46 @@ $pins=@(Get-WardrobeSourcePins $root)
 $stems=@(Get-WardrobePackageStems)
 if($pins.Count -ne 33 -or $fits.Count -ne 27 -or $stems.Count -ne 34 -or
     @($stems|Select-Object -Unique).Count -ne 34){throw 'Canonical input/output scope differs.'}
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $root 'Scripts\Invoke-ShippingQA.ps1'),[ref]$tokens,[ref]$errors)
+if($errors){throw 'Shipping resume adapter syntax differs.'}
+$policy=$ast.Find({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and
+    $node.Name -ceq 'Get-NativeResumeSource'},$true)
+if(-not $policy){throw 'Production resume preflight is missing.'}
+. ([scriptblock]::Create($policy.Extent.Text))
+$automation=Join-Path $root 'Saved\Automation'
+$scratch=Join-Path $automation ('wardrobe-resume-policy-'+[guid]::NewGuid().ToString('N'))
+$producer=Join-Path $scratch 'producer with space'
+$consumer=Join-Path $scratch 'consumer'
+$null=New-Item -ItemType Directory $producer -Force
+try {
+    foreach($name in 'native-wardrobe-fixture.json','native-wardrobe-fixture.sav'){
+        [IO.File]::WriteAllText((Join-Path $producer $name),'disposable preflight bytes, not a valid save')
+    }
+    $good="-HomesteadNativeMenuTest -HomesteadNativeResumeFrom=`"$producer`""
+    if((Get-NativeResumeSource $good $consumer $automation) -cne $producer){throw 'Quoted resume producer rejected.'}
+    if($null -ne (Get-NativeResumeSource '-HomesteadNativeMenuTest' $consumer $automation)){throw 'No-resume route changed.'}
+    foreach($line in @('-HomesteadNativeMenuTest -HomesteadNativeResumeFrom',
+        '-HomesteadNativeMenuTest -HomesteadNativeResumeFrom=""',
+        '-HomesteadNativeMenuTest -HomesteadNativeResumeFrom="relative"',
+        "-HomesteadNativeResumeFrom=`"$producer`"",
+        "$good -HomesteadNativeQuitTest",
+        "$good -HomesteadNativeResumeFrom=`"$producer`"",
+        "-HomesteadNativeMenuTest -HomesteadNativeResumeFrom=$producer")){
+        $rejected=$false
+        try{$null=Get-NativeResumeSource $line $consumer $automation}catch{$rejected=$true}
+        if(-not $rejected){throw "Invalid resume admitted:$line"}
+        $negative++
+    }
+    foreach($destination in @($producer,(Join-Path $root 'outside-automation'))){
+        $rejected=$false
+        try{$null=Get-NativeResumeSource $good $destination $automation}catch{$rejected=$true}
+        if(-not $rejected){throw 'Invalid resume destination admitted.'}
+        $negative++
+    }
+} finally {
+    Remove-Item -LiteralPath (Join-Path $producer 'native-wardrobe-fixture.json'),(Join-Path $producer 'native-wardrobe-fixture.sav')
+    Remove-Item -LiteralPath $producer
+    Remove-Item -LiteralPath $scratch
+}
 "PASS:27 exact fit mappings,33 pinned source files,34 packages, production mode/tokens; $negative negative cases."

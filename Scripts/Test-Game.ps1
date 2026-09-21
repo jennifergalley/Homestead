@@ -1,12 +1,17 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$NativeMenuQuit, [switch]$RequireLit, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA)
 $ErrorActionPreference = 'Stop'
 if ($NativeMenuQuit) { $NativeMenu = $true }
+if ($PSBoundParameters.ContainsKey('NativeResumeFrom') -and
+    (-not $NativeMenu -or $NativeMenuQuit -or [string]::IsNullOrWhiteSpace($NativeResumeFrom) -or
+        -not [IO.Path]::IsPathFullyQualified($NativeResumeFrom) -or $NativeResumeFrom -match '["\r\n]')) {
+    throw 'Native resume requires NativeMenu, a quoted-safe absolute producer directory, and no NativeMenuQuit.'
+}
 if ($NativeMenu -and ($BookClarity -or $Prompts -or $Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Native menu checks run separately from other acceptance modes.'
 }
@@ -89,8 +94,10 @@ if ($BookClarity) {
 }
 if ($NativeMenu) {
     $captures = @('native-settings.png','native-exit-confirm.png','native-save-error.png',
-        'native-inventory.png','native-crafting.png','native-recovery-exit.png')
+        'native-inventory.png','native-crafting.png','native-recovery-exit.png',
+        'native-wardrobe-dyed.png','native-wardrobe-restored.png')
 }
+if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
@@ -121,6 +128,7 @@ if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }
+if ($NativeResumeFrom) { $loopArguments += " -HomesteadNativeResumeFrom=`"$([IO.Path]::GetFullPath($NativeResumeFrom))`"" }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage $RenderScale`"" }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
@@ -147,6 +155,9 @@ $result = Get-Content -LiteralPath $report -Raw
 Write-Output $result
 if ($process.ExitCode -ne 0 -or $result -notmatch '(?m)^SUCCESS ') {
     throw "Game smoke test failed (exit $($process.ExitCode)). See $output."
+}
+if ($NativeResumeFrom -and $result -notmatch '(?m)^NATIVE_RESUME producer_pid=[1-9]\d* consumer_pid=[1-9]\d* ') {
+    throw 'Distinct-process current-save resume evidence is missing.'
 }
 if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mode=3 shader_complexity=0 ') {
     throw 'The requested sustained Lit guard did not produce successful runtime evidence.'

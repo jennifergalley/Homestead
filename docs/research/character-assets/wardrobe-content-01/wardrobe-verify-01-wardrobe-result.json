@@ -1,0 +1,2868 @@
+{
+	"mode": "WardrobeVerify",
+	"namespace": "/Game/SurvivalGame/Characters/ModularClothing",
+	"stage": "persisted-inventory",
+	"meshes": [
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Modular/SK_Modular_Preferred_Base_LongWave.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 133454,
+			"heightCm": 160.70219089090824,
+			"boundsOriginCm": [
+				0,
+				9.3000907897949219,
+				80.434640638530254
+			],
+			"boundsExtentCm": [
+				49.186962127685547,
+				19.870487213134766,
+				80.351095445454121
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_long01_Neutral",
+					"material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104328
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4854
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2286
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_long01_Neutral",
+					"triangles": 11818
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Bob.SK_Modular_Preferred_Base_Bob",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Modular/SK_Modular_Preferred_Base_Bob.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 151118,
+			"heightCm": 161.86097384989262,
+			"boundsOriginCm": [
+				0,
+				10.223791122436523,
+				81.014032118022442
+			],
+			"boundsExtentCm": [
+				49.186962127685547,
+				18.946786880493164,
+				80.930486924946308
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104328
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4854
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2286
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29482
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Ponytail.SK_Modular_Preferred_Base_Ponytail",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Ponytail.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Ponytail.SK_Heroine_Ponytail",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 143044,
+			"heightCm": 160.59934467077255,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				8.5883822441101074,
+				80.383219510316849
+			],
+			"boundsExtentCm": [
+				49.18696403503418,
+				20.582193851470947,
+				80.299672335386276
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_ponytail01",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Hair_ponytail01.M_Heroine_Hair_ponytail01"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104328
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4854
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2286
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_ponytail01",
+					"triangles": 21408
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Tunic.SK_Modular_Preferred_Tunic",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Tunic.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 15374,
+			"heightCm": 71.623725891113281,
+			"boundsOriginCm": [
+				-1.0195817947387695,
+				3.0853657722473145,
+				97.792217254638672
+			],
+			"boundsExtentCm": [
+				21.990408897399902,
+				16.511088848114014,
+				35.811862945556641
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Apron.SK_Modular_Preferred_Apron",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Apron.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 3536,
+			"heightCm": 46.000003814697266,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				7.930382251739502,
+				75.499998092651367
+			],
+			"boundsExtentCm": [
+				18.700000762939453,
+				19.394670009613037,
+				23.000001907348633
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_ApronLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"triangles": 80
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_ApronLinen",
+					"triangles": 3456
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Shoes.SK_Modular_Preferred_Shoes",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Shoes.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 3320,
+			"heightCm": 21.846754282712936,
+			"boundsOriginCm": [
+				9.5367431640625e-07,
+				8.6078755855560303,
+				11.078057184815407
+			],
+			"boundsExtentCm": [
+				22.582819938659668,
+				11.642696619033813,
+				10.923377141356468
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Footwraps.SK_Modular_Preferred_Footwraps",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Footwraps.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 11448,
+			"heightCm": 19.399999998509884,
+			"boundsOriginCm": [
+				9.5367431640625e-07,
+				8.9154825210571289,
+				9.8000000007450581
+			],
+			"boundsExtentCm": [
+				22.596013069152832,
+				11.514382362365723,
+				9.6999999992549419
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Modular_FootwrapCloth",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_FootwrapBinding",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Modular_FootwrapCloth",
+					"triangles": 10168
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_FootwrapBinding",
+					"triangles": 1280
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob.SK_Heroine_Bob",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Joined/SK_Heroine_Bob.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob.SK_Heroine_Bob",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 138104,
+			"heightCm": 161.78984083235264,
+			"boundsOriginCm": [
+				0,
+				7.8724274635314941,
+				81.049598626792431
+			],
+			"boundsExtentCm": [
+				49.186962127685547,
+				21.298150539398193,
+				80.894920416176319
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				},
+				{
+					"index": 9,
+					"sourceRoleIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 10,
+					"sourceRoleIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 11,
+					"sourceRoleIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_Skin",
+					"triangles": 79760
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29482
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				},
+				{
+					"materialIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob_Apron.SK_Heroine_Bob_Apron",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Joined/SK_Heroine_Bob_Apron.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob_Apron.SK_Heroine_Bob_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 141640,
+			"heightCm": 161.78984083235264,
+			"boundsOriginCm": [
+				0,
+				7.8724274635314941,
+				81.049598626792431
+			],
+			"boundsExtentCm": [
+				49.186962127685547,
+				21.298150539398193,
+				80.894920416176319
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				},
+				{
+					"index": 9,
+					"sourceRoleIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 10,
+					"sourceRoleIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 11,
+					"sourceRoleIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				},
+				{
+					"index": 12,
+					"sourceRoleIndex": 12,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				},
+				{
+					"index": 13,
+					"sourceRoleIndex": 13,
+					"role": "M_Heroine_ApronLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"triangles": 80
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_Skin",
+					"triangles": 79760
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29482
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				},
+				{
+					"materialIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 12,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				},
+				{
+					"materialIndex": 13,
+					"role": "M_Heroine_ApronLinen",
+					"triangles": 3456
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_LongWave.SK_Modular_Willow_Base_LongWave",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Modular/SK_Modular_Willow_Base_LongWave.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 133442,
+			"heightCm": 160.70594375580549,
+			"boundsOriginCm": [
+				0,
+				9.3048839569091797,
+				80.439111862331629
+			],
+			"boundsExtentCm": [
+				49.268024444580078,
+				19.895448684692383,
+				80.352971877902746
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_long01_Neutral",
+					"material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104284
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4866
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2302
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_long01_Neutral",
+					"triangles": 11822
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Bob.SK_Modular_Willow_Base_Bob",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Modular/SK_Modular_Willow_Base_Bob.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 151157,
+			"heightCm": 161.85795181244612,
+			"boundsOriginCm": [
+				0,
+				10.240331172943115,
+				81.015115890651941
+			],
+			"boundsExtentCm": [
+				49.268024444580078,
+				18.960001468658447,
+				80.928975906223059
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104284
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4866
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2302
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29537
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Ponytail.SK_Modular_Willow_Base_Ponytail",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Ponytail.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_Ponytail.SK_Heroine_Willow_Ponytail",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 143028,
+			"heightCm": 160.59899292141199,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				8.6122021675109863,
+				80.385638426989317
+			],
+			"boundsExtentCm": [
+				49.268026351928711,
+				20.588128566741943,
+				80.299496460705996
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_ponytail01",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Hair_ponytail01.M_Heroine_Hair_ponytail01"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104284
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4866
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2302
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_ponytail01",
+					"triangles": 21408
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Tunic.SK_Modular_Willow_Tunic",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Willow/SK_Modular_Willow_Tunic.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 15374,
+			"heightCm": 71.733802795410156,
+			"boundsOriginCm": [
+				-1.0242452621459961,
+				3.0299806594848633,
+				97.846965789794922
+			],
+			"boundsExtentCm": [
+				21.510924339294434,
+				16.40665340423584,
+				35.866901397705078
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Apron.SK_Modular_Willow_Apron",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Willow/SK_Modular_Willow_Apron.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 3536,
+			"heightCm": 46.000003814697266,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				7.8832650184631348,
+				75.499998092651367
+			],
+			"boundsExtentCm": [
+				18.700000762939453,
+				19.297725200653076,
+				23.000001907348633
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_ApronLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"triangles": 80
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_ApronLinen",
+					"triangles": 3456
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Shoes.SK_Modular_Willow_Shoes",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Willow/SK_Modular_Willow_Shoes.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 3320,
+			"heightCm": 21.895987033843994,
+			"boundsOriginCm": [
+				9.5367431640625e-07,
+				8.62159264087677,
+				11.108174085617065
+			],
+			"boundsExtentCm": [
+				22.630328178405762,
+				11.693488001823425,
+				10.947993516921997
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Footwraps.SK_Modular_Willow_Footwraps",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Willow/SK_Modular_Willow_Footwraps.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 11448,
+			"heightCm": 19.399999998509884,
+			"boundsOriginCm": [
+				9.5367431640625e-07,
+				8.9046883583068848,
+				9.8000000007450581
+			],
+			"boundsExtentCm": [
+				22.625584602355957,
+				11.570966243743896,
+				9.6999999992549419
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Modular_FootwrapCloth",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_FootwrapBinding",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Modular_FootwrapCloth",
+					"triangles": 10168
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_FootwrapBinding",
+					"triangles": 1280
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Willow_Bob.SK_Heroine_Willow_Bob",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Joined/SK_Heroine_Willow_Bob.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_Bob.SK_Heroine_Willow_Bob",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 138303,
+			"heightCm": 161.78391306102276,
+			"boundsOriginCm": [
+				0,
+				7.911829948425293,
+				81.052135266363621
+			],
+			"boundsExtentCm": [
+				49.268024444580078,
+				21.28850269317627,
+				80.891956530511379
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				},
+				{
+					"index": 9,
+					"sourceRoleIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 10,
+					"sourceRoleIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 11,
+					"sourceRoleIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_Skin",
+					"triangles": 79904
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29537
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				},
+				{
+					"materialIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Willow_Bob_Apron.SK_Heroine_Willow_Bob_Apron",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Joined/SK_Heroine_Willow_Bob_Apron.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_Bob_Apron.SK_Heroine_Willow_Bob_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 141839,
+			"heightCm": 161.78391306102276,
+			"boundsOriginCm": [
+				0,
+				7.911829948425293,
+				81.052135266363621
+			],
+			"boundsExtentCm": [
+				49.268024444580078,
+				21.28850269317627,
+				80.891956530511379
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				},
+				{
+					"index": 9,
+					"sourceRoleIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 10,
+					"sourceRoleIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 11,
+					"sourceRoleIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				},
+				{
+					"index": 12,
+					"sourceRoleIndex": 12,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				},
+				{
+					"index": 13,
+					"sourceRoleIndex": 13,
+					"role": "M_Heroine_ApronLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"triangles": 80
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_Skin",
+					"triangles": 79904
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29537
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				},
+				{
+					"materialIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 12,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				},
+				{
+					"materialIndex": 13,
+					"role": "M_Heroine_ApronLinen",
+					"triangles": 3456
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_LongWave.SK_Modular_Hazel_Base_LongWave",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Modular/SK_Modular_Hazel_Base_LongWave.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 133478,
+			"heightCm": 160.73969878256321,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				9.3069343566894531,
+				80.454308323562145
+			],
+			"boundsExtentCm": [
+				49.280874252319336,
+				19.913745880126953,
+				80.369849391281605
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_long01_Neutral",
+					"material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104372
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4822
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2270
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_long01_Neutral",
+					"triangles": 11846
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Bob.SK_Modular_Hazel_Base_Bob",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Modular/SK_Modular_Hazel_Base_Bob.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 151311,
+			"heightCm": 161.89979399740696,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				10.073835849761963,
+				81.03435593098402
+			],
+			"boundsExtentCm": [
+				49.280874252319336,
+				19.146844387054443,
+				80.94989699870348
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104372
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4822
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2270
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29679
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Ponytail.SK_Modular_Hazel_Base_Ponytail",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Ponytail.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_Ponytail.SK_Heroine_Hazel_Ponytail",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 143040,
+			"heightCm": 160.59872084856033,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				8.6037020683288574,
+				80.383821338415146
+			],
+			"boundsExtentCm": [
+				49.280874252319336,
+				20.616976261138916,
+				80.299360424280167
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Hair_ponytail01",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Hair_ponytail01.M_Heroine_Hair_ponytail01"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Skin",
+					"triangles": 104372
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_BaseBra",
+					"triangles": 4822
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Modular_BaseBriefs",
+					"triangles": 2270
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Hair_ponytail01",
+					"triangles": 21408
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Tunic.SK_Modular_Hazel_Tunic",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Tunic.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 15374,
+			"heightCm": 71.879615783691406,
+			"boundsOriginCm": [
+				-1.0206069946289062,
+				3.1159524917602539,
+				97.920101165771484
+			],
+			"boundsExtentCm": [
+				22.620204925537109,
+				16.850687980651855,
+				35.939807891845703
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Apron.SK_Modular_Hazel_Apron",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Apron.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 3536,
+			"heightCm": 46.000003814697266,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				7.8848695755004883,
+				75.499998092651367
+			],
+			"boundsExtentCm": [
+				18.700000762939453,
+				19.795289039611816,
+				23.000001907348633
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_ApronLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"triangles": 80
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_ApronLinen",
+					"triangles": 3456
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Shoes.SK_Modular_Hazel_Shoes",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Shoes.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 3320,
+			"heightCm": 21.898606911301613,
+			"boundsOriginCm": [
+				9.5367431640625e-07,
+				8.6238059997558594,
+				11.0813133046031
+			],
+			"boundsExtentCm": [
+				22.620375633239746,
+				11.673566818237305,
+				10.949303455650806
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Footwraps.SK_Modular_Hazel_Footwraps",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Footwraps.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 11448,
+			"heightCm": 19.399999998509884,
+			"boundsOriginCm": [
+				9.5367431640625e-07,
+				8.9046884775161743,
+				9.8000000007450581
+			],
+			"boundsExtentCm": [
+				22.635815620422363,
+				11.567187666893005,
+				9.6999999992549419
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Modular_FootwrapCloth",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Modular_FootwrapBinding",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Modular_FootwrapCloth",
+					"triangles": 10168
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Modular_FootwrapBinding",
+					"triangles": 1280
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Hazel_Bob.SK_Heroine_Hazel_Bob",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Joined/SK_Heroine_Hazel_Bob.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_Bob.SK_Heroine_Hazel_Bob",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 138285,
+			"heightCm": 161.85224491357803,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				7.7429718971252441,
+				81.058130472898483
+			],
+			"boundsExtentCm": [
+				49.280874252319336,
+				21.477708339691162,
+				80.926122456789017
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				},
+				{
+					"index": 9,
+					"sourceRoleIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 10,
+					"sourceRoleIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 11,
+					"sourceRoleIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_Skin",
+					"triangles": 79744
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29679
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				},
+				{
+					"materialIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				}
+			]
+		},
+		{
+			"object": "/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Hazel_Bob_Apron.SK_Heroine_Hazel_Bob_Apron",
+			"source": "../../../../../Repos/SurvivalGame/Assets/Characters/HairstyleRefinement/Joined/SK_Heroine_Hazel_Bob_Apron.fbx",
+			"reference": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_Bob_Apron.SK_Heroine_Hazel_Bob_Apron",
+			"skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+			"bones": 54,
+			"triangles": 141821,
+			"heightCm": 161.85224491357803,
+			"boundsOriginCm": [
+				1.9073486328125e-06,
+				7.7429718971252441,
+				81.058130472898483
+			],
+			"boundsExtentCm": [
+				49.280874252319336,
+				21.477708339691162,
+				80.926122456789017
+			],
+			"referencePoseMatchesIncumbent": true,
+			"slots": [
+				{
+					"index": 0,
+					"sourceRoleIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+				},
+				{
+					"index": 1,
+					"sourceRoleIndex": 1,
+					"role": "M_Heroine_Skin",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+				},
+				{
+					"index": 2,
+					"sourceRoleIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+				},
+				{
+					"index": 3,
+					"sourceRoleIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+				},
+				{
+					"index": 4,
+					"sourceRoleIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+				},
+				{
+					"index": 5,
+					"sourceRoleIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+				},
+				{
+					"index": 6,
+					"sourceRoleIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+				},
+				{
+					"index": 7,
+					"sourceRoleIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"material": "/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+				},
+				{
+					"index": 8,
+					"sourceRoleIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+				},
+				{
+					"index": 9,
+					"sourceRoleIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+				},
+				{
+					"index": 10,
+					"sourceRoleIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+				},
+				{
+					"index": 11,
+					"sourceRoleIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+				},
+				{
+					"index": 12,
+					"sourceRoleIndex": 12,
+					"role": "M_Heroine_Brass",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+				},
+				{
+					"index": 13,
+					"sourceRoleIndex": 13,
+					"role": "M_Heroine_ApronLinen",
+					"material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+				}
+			],
+			"sections": [
+				{
+					"materialIndex": 0,
+					"role": "M_Heroine_ApronTrim",
+					"triangles": 80
+				},
+				{
+					"materialIndex": 1,
+					"role": "M_Heroine_Skin",
+					"triangles": 79744
+				},
+				{
+					"materialIndex": 2,
+					"role": "M_Heroine_LightEyes",
+					"triangles": 2040
+				},
+				{
+					"materialIndex": 3,
+					"role": "M_Heroine_Eyebrows",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 4,
+					"role": "M_Heroine_Eyelashes",
+					"triangles": 368
+				},
+				{
+					"materialIndex": 5,
+					"role": "M_Heroine_Teeth",
+					"triangles": 7120
+				},
+				{
+					"materialIndex": 6,
+					"role": "M_Heroine_Tongue",
+					"triangles": 448
+				},
+				{
+					"materialIndex": 7,
+					"role": "M_Heroine_Hair_bob01_Neutral",
+					"triangles": 29679
+				},
+				{
+					"materialIndex": 8,
+					"role": "M_Heroine_LeatherShoes",
+					"triangles": 3320
+				},
+				{
+					"materialIndex": 9,
+					"role": "M_Heroine_MossLinen",
+					"triangles": 14336
+				},
+				{
+					"materialIndex": 10,
+					"role": "M_Heroine_LinenTrim",
+					"triangles": 462
+				},
+				{
+					"materialIndex": 11,
+					"role": "M_Heroine_ChestnutLeather",
+					"triangles": 192
+				},
+				{
+					"materialIndex": 12,
+					"role": "M_Heroine_Brass",
+					"triangles": 384
+				},
+				{
+					"materialIndex": 13,
+					"role": "M_Heroine_ApronLinen",
+					"triangles": 3456
+				}
+			]
+		}
+	],
+	"packages": 34,
+	"transformPolicy": "Scene/unit conversion once; scale1; zero import offsets; original reference bind/pivot",
+	"materialPolicy": "Original roles retained; admitted neutral hair; opaque fixed-color base/footwraps with UV8 weave",
+	"persistentObjectReferences": [
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Hazel_Bob_Apron.SK_Heroine_Hazel_Bob_Apron:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Hazel_Bob_Apron.SK_Heroine_Hazel_Bob_Apron:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Hazel_Bob.SK_Heroine_Hazel_Bob:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Hazel_Bob.SK_Heroine_Hazel_Bob:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Footwraps.SK_Modular_Hazel_Footwraps:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Footwraps.SK_Modular_Hazel_Footwraps:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Shoes.SK_Modular_Hazel_Shoes:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Shoes.SK_Modular_Hazel_Shoes:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Apron.SK_Modular_Hazel_Apron:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Apron.SK_Modular_Hazel_Apron:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Tunic.SK_Modular_Hazel_Tunic:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Tunic.SK_Modular_Hazel_Tunic:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Ponytail.SK_Modular_Hazel_Base_Ponytail:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Ponytail.SK_Modular_Hazel_Base_Ponytail:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Bob.SK_Modular_Hazel_Base_Bob:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Bob.SK_Modular_Hazel_Base_Bob:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_LongWave.SK_Modular_Hazel_Base_LongWave:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_LongWave.SK_Modular_Hazel_Base_LongWave:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Willow_Bob_Apron.SK_Heroine_Willow_Bob_Apron:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Willow_Bob_Apron.SK_Heroine_Willow_Bob_Apron:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Willow_Bob.SK_Heroine_Willow_Bob:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Willow_Bob.SK_Heroine_Willow_Bob:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Footwraps.SK_Modular_Willow_Footwraps:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Footwraps.SK_Modular_Willow_Footwraps:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Shoes.SK_Modular_Willow_Shoes:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Shoes.SK_Modular_Willow_Shoes:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Apron.SK_Modular_Willow_Apron:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Apron.SK_Modular_Willow_Apron:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Tunic.SK_Modular_Willow_Tunic:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Tunic.SK_Modular_Willow_Tunic:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Ponytail.SK_Modular_Willow_Base_Ponytail:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Ponytail.SK_Modular_Willow_Base_Ponytail:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Bob.SK_Modular_Willow_Base_Bob:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Bob.SK_Modular_Willow_Base_Bob:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_LongWave.SK_Modular_Willow_Base_LongWave:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_LongWave.SK_Modular_Willow_Base_LongWave:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob_Apron.SK_Heroine_Bob_Apron:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob_Apron.SK_Heroine_Bob_Apron:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob.SK_Heroine_Bob:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob.SK_Heroine_Bob:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Footwraps.SK_Modular_Preferred_Footwraps:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Footwraps.SK_Modular_Preferred_Footwraps:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Shoes.SK_Modular_Preferred_Shoes:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Shoes.SK_Modular_Preferred_Shoes:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Apron.SK_Modular_Preferred_Apron:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Apron.SK_Modular_Preferred_Apron:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Tunic.SK_Modular_Preferred_Tunic:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Tunic.SK_Modular_Preferred_Tunic:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Ponytail.SK_Modular_Preferred_Base_Ponytail:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Ponytail.SK_Modular_Preferred_Base_Ponytail:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Bob.SK_Modular_Preferred_Base_Bob:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Bob.SK_Modular_Preferred_Base_Bob:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave:SkeletalMeshDescriptionBulkData_0",
+		"/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+		"/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave:FbxSkeletalMeshImportData_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:M_Modular_FootwrapBindingEditorOnlyData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave:AssetImportData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionMultiply_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionConstant_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapBinding.M_Modular_FootwrapBinding",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:M_Modular_FootwrapClothEditorOnlyData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionMultiply_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionConstant_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_FootwrapCloth.M_Modular_FootwrapCloth",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:M_Modular_BaseBriefsEditorOnlyData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionMultiply_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionConstant_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:M_Modular_BaseBraEditorOnlyData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionMultiply_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionConstant_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionTextureCoordinate_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_ModularWeave.T_ModularWeave",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra:MaterialExpressionConstant3Vector_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:M_Heroine_Hair_bob01_NeutralEditorOnlyData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_BobReuse_Neutral.T_BobReuse_Neutral",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_BobReuse_Neutral.T_BobReuse_Neutral:AssetImportData",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:MaterialExpressionMultiply_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:MaterialExpressionConstant_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:MaterialExpressionVectorParameter_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral",
+		"/Game/SurvivalGame/Characters/ModularClothing/Textures/T_BobReuse_Neutral.T_BobReuse_Neutral",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:MaterialExpressionTextureSample_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral:MaterialExpressionVectorParameter_0",
+		"/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Heroine_Hair_bob01_Neutral.M_Heroine_Hair_bob01_Neutral"
+	],
+	"passed": true,
+	"cancelledAtPollingBoundary": false
+}

@@ -4,7 +4,7 @@ param(
     [switch]$ValidateOnly,
     [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify')][string]$Mode='Settings',
     [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard',
-    [ValidateSet('Clearing','HairWaves')][string]$CookCandidate='Clearing'
+    [ValidateSet('Clearing','HairWaves','Wardrobe')][string]$CookCandidate='Clearing'
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -19,7 +19,9 @@ $hairMode=$Mode -in @('HairImport','HairVerify')
 $wardrobeMode=$Mode -in @('WardrobeImport','WardrobeVerify')
 $characterMode=$hairMode -or $wardrobeMode
 $hairCook=$CookCandidate -eq 'HairWaves'
-if($hairCook -and $Mode -ne 'Cook'){throw 'HairWaves cook selection requires actual Cook mode.'}
+$wardrobeCook=$CookCandidate -eq 'Wardrobe'
+$characterCook=$hairCook -or $wardrobeCook
+if($characterCook -and $Mode -ne 'Cook'){throw 'Character cook selection requires actual Cook mode.'}
 $retainedRender=$RenderProfile -ne 'Standard' -or $characterMode
 $softSeconds=$operationPolicy.softSeconds
 $hardSeconds=$operationPolicy.hardSeconds
@@ -63,7 +65,7 @@ if($hairMode) {
 if($hairCook) {
     $supersession['currentApproval']='Cook the actually imported/fresh-process-verified frozen six-wave set for ordinary Shipping game-camera acceptance. Native Mode remains installed standard Windows Cook with SkipZenStore. No UI/Bob/modular expansion, no accepted candidate overwrite; existing completion-driven controls retained.'
 }
-if($wardrobeMode) {
+if($wardrobeMode -or $wardrobeCook) {
     $supersession['currentApproval']='Coordinator authorized canonical Bob/modular source integration and coherent native UI/wardrobe candidate after selected wave playable. Exact34 new packages in fresh ModularClothing namespace, original21 fits with six canonical base replacements and six canonical joined Bob meshes; original materials/rig reused. Completion-driven stop/pause/root-only/marker/privacy/localDDC policy unchanged. No selected playable overwrite or source reauthoring.'
     $supersession['slotCorrection']='Coordinator authorized root slot-name mapping correction after failed-before-save import01; only unchanged empty identified trial directory reused, distinct import02, no reset or deletion.'
     $supersession['wardrobeFirstReservationSha256']='501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B'
@@ -72,11 +74,14 @@ if($wardrobeMode) {
         (Get-FileHash (Join-Path $runRoot 'wardrobe-import-01\probe-result.json')).Hash -cne $supersession.wardrobeFirstResultSha256){
         throw 'Preserved first wardrobe failure changed.'
     }
+    if($wardrobeCook){
+        $supersession['currentApproval']='Coherent current native-menu/wardrobe candidate cook after actual34-package import02 and separate-process verify01. Includes retained wave/fern content; no reimport or selected playable overwrite. Existing completion-driven root-only/marker/Python/local-DDC/TraceControl policy and inner/outer SkipZenStore remain.'
+    }
 }
 function Assert-NamedSupersession {
     $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
     if($run.id -cne $expectedRun -or
-        $output -ine (Join-Path $runRoot $(if($Mode -eq 'WardrobeImport'){'wardrobe-import-02'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-01'}elseif($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
+        $output -ine (Join-Path $runRoot $(if($Mode -eq 'WardrobeImport'){'wardrobe-import-02'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-01'}elseif($wardrobeCook){'wardrobe-cook-01'}elseif($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
@@ -128,7 +133,7 @@ function Assert-NamedSupersession {
     }
 }
 Assert-NamedSupersession
-if($hairCook) {
+if($characterCook) {
     foreach($pin in @(
         @{path='clearing-cook-02\probe-result.json';sha256='42186AEDD5099F4497CB986CF440D38D9DA8F7C56AED5467B45DCB81ACF77739'},
         @{path='hair-verify-01\probe-result.json';sha256='6FA45F7737D75A9AA4C2959AA73A5DC55D4F6398E7B7FF010CBABAD9029A7F34'},
@@ -137,7 +142,7 @@ if($hairCook) {
         if((Get-FileHash (Join-Path $runRoot $pin.path)).Hash -cne $pin.sha256){throw 'Accepted hair/cook prerequisite changed.'}
     }
 }
-$attempt = Join-Path $runRoot $(if($Mode -eq 'WardrobeImport'){'wardrobe-import-attempt-02.json'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-attempt-01.json'}elseif($hairCook){'hair-cook-attempt-01.json'}elseif($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
+$attempt = Join-Path $runRoot $(if($Mode -eq 'WardrobeImport'){'wardrobe-import-attempt-02.json'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-attempt-01.json'}elseif($wardrobeCook){'wardrobe-cook-attempt-01.json'}elseif($hairCook){'hair-cook-attempt-01.json'}elseif($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -171,9 +176,9 @@ if($hairMode -or $hairCook) {
     $buildReceiptPath=Join-Path $root 'docs\research\character-assets\hair-native-build-01\receipt.json'
     $buildReceiptHash='950B1A51C800A87F60B5E4B3861AA817C70E2ADE304E11580935B67EC2F8FE74'
 }
-if($wardrobeMode) {
-    $buildReceiptPath=Join-Path $root 'docs\research\character-assets\wardrobe-native-build-02\receipt.json'
-    $buildReceiptHash='9058EFFFFAEF676141CA265F9D6A70BE8601C9D748A0D9759EB4C0EAC3C218EC'
+if($wardrobeMode -or $wardrobeCook) {
+    $buildReceiptPath=Join-Path $root 'docs\research\character-assets\wardrobe-native-build-03\receipt.json'
+    $buildReceiptHash='C402E1018D27D6988F8C0ACBB5895B297EED689B48CEEF682824D61EF2DD02C3'
 }
 $pythonPins = @{
     'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
@@ -205,9 +210,9 @@ if($Mode -ne 'Settings') {
         $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\hair-cook-policy-01\receipt.json'
         $supervisorReceiptHash='CD7817D3AD8B87332F05CD27B6F4FDDF9682C152D1E4D6343D0CC99EE9AC3DBA'
     }
-    if($wardrobeMode) {
-        $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\wardrobe-supervisor-02\receipt.json'
-        $supervisorReceiptHash='AD3DB96265575B73B5B32CA2230311D34C6BB160C413309A14E35DFC6EB8ED3B'
+    if($wardrobeMode -or $wardrobeCook) {
+        $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\wardrobe-supervisor-04\receipt.json'
+        $supervisorReceiptHash='F8AE465960EF6430D3D8372C0F7A0E3EEF70386DC4B2987CCCD259EA18550013'
     }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
@@ -326,12 +331,26 @@ if($characterMode) {
         Assert-FernPackagePins @($assetAdmission.packages) $trialBefore
     }
 }
-if($hairCook) {
+if($characterCook) {
     $hairAdmission=Get-Content (Join-Path $runRoot 'hair-import-01\asset-admission.json') -Raw|ConvertFrom-Json
     $hairTrial=Join-Path $root 'Content\Trials\HeroineWave_20260921_01'
     Assert-HairWaveNativeInventory $hairAdmission.inventory
     Assert-FernDirectoryIdentity $hairAdmission.directoryIdentity $hairTrial
     Assert-FernPackagePins @($hairAdmission.packages) @(Get-FernPackageFiles $hairTrial -Complete -Stems @(Get-HairWavePackageStems))
+}
+if($wardrobeCook){
+    foreach($pin in @(
+        @{path='wardrobe-import-02\asset-admission.json';sha256='6263C0C1AA3F62EF1A42BE7123AAC7ED66243BE405A49A3D599C2E3371FC4591'},
+        @{path='wardrobe-verify-01\probe-result.json';sha256='4504EA31EBBA1DA6DA80A1CBFC827120DFB7CBEE410F48C7FF441FD63AA90AD3'}
+    )){
+        if((Get-FileHash (Join-Path $runRoot $pin.path)).Hash -cne $pin.sha256){throw 'Verified wardrobe prerequisite changed.'}
+    }
+    $wardrobeAdmission=Get-Content (Join-Path $runRoot 'wardrobe-import-02\asset-admission.json') -Raw|ConvertFrom-Json
+    $wardrobeTrial=Join-Path $root 'Content\SurvivalGame\Characters\ModularClothing'
+    Assert-WardrobeNativeInventory $wardrobeAdmission.inventory $root
+    Assert-FernDirectoryIdentity $wardrobeAdmission.directoryIdentity $wardrobeTrial
+    Assert-FernPackagePins @($wardrobeAdmission.packages) @(Get-FernPackageFiles $wardrobeTrial -Complete -Stems @(Get-WardrobePackageStems))
+    $null=@(Get-WardrobeSourcePins $root)
 }
 $baseline = Get-Content -LiteralPath (Join-Path $root 'docs\research\environment-assets\authoring-preflight-01\receipt.json') -Raw | ConvertFrom-Json
 $expectedRules = @($baseline.existingInboundAllowRules | Where-Object { $_.program -ieq $exe })
@@ -374,9 +393,9 @@ if (@(Get-AuthoringProcesses).Count) { throw 'Another authoring process prevents
 $protected = @(Get-Content -LiteralPath (Join-Path $root 'Assets\Environment\woodland-preparation-01\protected-before.json') -Raw | ConvertFrom-Json)
 $before = @($protected | ForEach-Object {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root $_.path)).Hash
-    $selectedPreview=($characterMode -or $hairCook) -and $_.path -ceq 'Preview.json' -and
-        $hash -ceq $(if($wardrobeMode){'C1262ACE336ABDEFD3A564046DD4F233A4AFDA19B9E6C2460886ACD263820904'}else{'737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'})
-    if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not(($characterMode -or $hairCook) -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
+    $selectedPreview=($characterMode -or $characterCook) -and $_.path -ceq 'Preview.json' -and
+        $hash -ceq $(if($wardrobeMode -or $wardrobeCook){'C1262ACE336ABDEFD3A564046DD4F233A4AFDA19B9E6C2460886ACD263820904'}else{'737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'})
+    if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not(($characterMode -or $characterCook) -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
         'Scripts\Development-Run.ps1','Tests\DevelopmentRunTests.ps1',
         'Source\SurvivalGame\HomesteadWorld.cpp','Config\DefaultGame.ini')) {
         throw "Unrelated protected input changed:$($_.path)"
@@ -395,13 +414,13 @@ $ddcIdentity=$null
 $retainedFiles=@();$ddcBefore=@()
 if($Mode -in @('Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify')) {
     $ddc=Join-Path $evidenceRunRoot 'fern-import-02\DDC'
-    Assert-FernOrdinaryTree $ddc
+    if(-not $retainedRender){Assert-FernOrdinaryTree $ddc}
     $ddcIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($ddc)
     $importSettings=Get-Content (Join-Path $evidenceRunRoot 'fern-import-02\effective-settings.json') -Raw|ConvertFrom-Json
     Assert-AuthoringDdc $importSettings.ddcStores $ddc
     if($retainedRender) {
-        $ddcBefore=@(Get-FernRetainedFiles $ddc)
-        $retainedFiles=@(Get-FernRetainedFiles $evidenceRunRoot $ddc)
+        $ddcBefore=Get-FernMutableCacheObservation $ddc
+        $retainedFiles=@(Get-FernRetainedFiles $evidenceRunRoot $ddc -MetadataOnly)
     }
 }
 $arguments=@(Get-FernProbeArguments (Join-Path $root 'SurvivalGame.uproject') $output $ddc $configs $Mode)
@@ -425,7 +444,7 @@ if ($ValidateOnly) {
         softMilliseconds=$softSeconds*1000;hardMilliseconds=$hardSeconds*1000;ceilingSeconds=$ceilingSeconds
         nativeAbsoluteDeadline=$environment['HOMESTEAD_PROBE_DEADLINE'];ddc=$ddc;arguments=$arguments
         startupSeconds=$operationPolicy.startupSeconds;captureSeconds=$operationPolicy.captureSeconds;ddcIdentity=$ddcIdentity
-        retainedOldRunFiles=$retainedFiles.Count;retainedCacheFiles=$ddcBefore.Count
+        retainedOldRunFiles=$retainedFiles.Count;retainedCacheFiles=$(if($retainedRender){$ddcBefore.fileCount}else{0})
         completionDriven=$completionDriven
         output=$output;globalMarkerReadLocked=$false;runtimeVerified=$false;attemptConsumed=$false}
     return
@@ -434,7 +453,7 @@ $null=New-Item -ItemType Directory -Path $output,(Join-Path $output 'Config'),(J
     (Join-Path $output 'EngineUser'),(Join-Path $output 'DDC')
 foreach($name in $configs.Keys){[IO.File]::WriteAllText($configs[$name],'')}
 if($retainedRender) {
-    @{oldRunRoot=$evidenceRunRoot;immutableFiles=$retainedFiles;mutableCache=$ddc;cacheIdentity=$ddcIdentity;
+    @{oldRunRoot=$evidenceRunRoot;historicalFileMetadata=$retainedFiles;mutableCache=$ddc;cacheIdentity=$ddcIdentity;
         cacheBefore=$ddcBefore;permission='Only this exact retained candidate filesystem DDC is admitted old-run input/output.'} |
         ConvertTo-Json -Depth 8 | Set-Content (Join-Path $output 'retained-inputs.json')
 }
@@ -470,7 +489,7 @@ try {
     Assert-NamedSupersession
     if($retainedRender) {
         Assert-FernDirectoryIdentity $ddcIdentity $ddc
-        if((@(Get-FernRetainedFiles $evidenceRunRoot $ddc)|ConvertTo-Json -Depth 5 -Compress) -cne
+        if((@(Get-FernRetainedFiles $evidenceRunRoot $ddc -MetadataOnly)|ConvertTo-Json -Depth 5 -Compress) -cne
             ($retainedFiles|ConvertTo-Json -Depth 5 -Compress)){throw 'Old-run immutable files changed before launch.'}
     }
     [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($softSeconds*1000,$hardSeconds*1000,$deadlineProfile)
@@ -569,7 +588,8 @@ try {
         }
         if($Mode -eq 'Cook' -and -not $fernResult -and (Test-Path (Join-Path $output 'cook-result.json'))) {
             $fernResult=Get-Content (Join-Path $output 'cook-result.json') -Raw|ConvertFrom-Json
-            $additional=if($hairCook){@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})}else{@()}
+            $additional=if($characterCook){@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})}else{@()}
+            if($wardrobeCook){$additional+=@(Get-WardrobePackageStems|ForEach-Object {"Content\SurvivalGame\Characters\ModularClothing\$_.uasset"})}
             Assert-HomesteadCookOutput $fernResult $output -AdditionalPackages $additional
         }
         if($hairMode -and -not $fernResult -and (Test-Path (Join-Path $output 'hair-wave-result.json'))) {
@@ -653,9 +673,10 @@ try {
     }
     if($retainedRender) {
         try {
-            if((@(Get-FernRetainedFiles $evidenceRunRoot $ddc)|ConvertTo-Json -Depth 5 -Compress) -cne
-                ($retainedFiles|ConvertTo-Json -Depth 5 -Compress)){throw 'An old-run file outside the admitted cache changed.'}
-            @{cacheAfter=@(Get-FernRetainedFiles $ddc);unchangedOldRunFiles=$retainedFiles.Count} |
+            if((@(Get-FernRetainedFiles $evidenceRunRoot $ddc -MetadataOnly)|ConvertTo-Json -Depth 5 -Compress) -cne
+                ($retainedFiles|ConvertTo-Json -Depth 5 -Compress)){throw 'Old-run metadata outside the admitted cache changed.'}
+            @{cacheAfter=(Get-FernMutableCacheObservation $ddc);unchangedOldRunFileMetadata=$retainedFiles.Count;
+                qualification='Historical metadata comparison is not byte-identity proof. Named historical admission receipts, actual source/tools/products and protected Content remain hash checked.'} |
                 ConvertTo-Json -Depth 8 | Set-Content (Join-Path $output 'retained-output-check.json')
         } catch {$cleanupErrors.Add("Retained old-run protection failed:$_")}
     }

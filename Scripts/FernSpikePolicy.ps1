@@ -97,14 +97,45 @@ function Get-FernPackageStems {
         'Textures\T_Fern02_AO','Textures\T_Fern02_Alpha','Materials\M_Fern02')
 }
 
-function Get-FernRetainedFiles([string]$Directory,[string]$ExceptDirectory='') {
-    Assert-FernOrdinaryTree $Directory
-    @(Get-ChildItem -LiteralPath $Directory -File -Recurse -Force |
-        Where-Object {-not $ExceptDirectory -or -not $_.FullName.StartsWith($ExceptDirectory+'\',[StringComparison]::OrdinalIgnoreCase)} |
-        Sort-Object FullName | ForEach-Object {
-            [ordered]@{path=[IO.Path]::GetRelativePath($Directory,$_.FullName);bytes=$_.Length;
-                sha256=(Get-FileHash $_.FullName).Hash;lastWriteUtcTicks=$_.LastWriteTimeUtc.Ticks;attributes=[int]$_.Attributes}
-        })
+function Get-FernOrdinaryFiles([string]$Directory,[string]$ExceptDirectory='') {
+    $null=[Homestead.Authoring.LeafGuard]::InspectDirectory($Directory)
+    $Directory=[IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($Directory))
+    if($ExceptDirectory){
+        $ExceptDirectory=[IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($ExceptDirectory))
+        if(-not $ExceptDirectory.StartsWith($Directory+'\',[StringComparison]::OrdinalIgnoreCase)){
+            throw 'Excluded cache must be a strict descendant of the observed directory.'
+        }
+    }
+    $pending=[Collections.Generic.Queue[string]]::new()
+    $pending.Enqueue($Directory)
+    while($pending.Count){
+        foreach($item in Get-ChildItem -LiteralPath $pending.Dequeue() -Force){
+            if($item.Attributes -band ([IO.FileAttributes]::ReparsePoint -bor [IO.FileAttributes]::Device)){
+                throw "Nonordinary entry prohibited:$($item.FullName)"
+            }
+            if($item.PSIsContainer){
+                if($ExceptDirectory -and $item.FullName -ieq $ExceptDirectory){continue}
+                $pending.Enqueue($item.FullName)
+            }else{$item}
+        }
+    }
+}
+
+function Get-FernRetainedFiles([string]$Directory,[string]$ExceptDirectory='',[switch]$MetadataOnly) {
+    @(Get-FernOrdinaryFiles $Directory $ExceptDirectory | Sort-Object FullName | ForEach-Object {
+        $record=[ordered]@{path=[IO.Path]::GetRelativePath($Directory,$_.FullName);bytes=$_.Length;
+            lastWriteUtcTicks=$_.LastWriteTimeUtc.Ticks;attributes=[int]$_.Attributes}
+        if(-not $MetadataOnly){$record.sha256=(Get-FileHash $_.FullName).Hash}
+        $record
+    })
+}
+
+function Get-FernMutableCacheObservation([string]$Directory) {
+    $identity=[Homestead.Authoring.LeafGuard]::InspectDirectory($Directory)
+    $count=0;[long]$bytes=0
+    Get-FernOrdinaryFiles $Directory | ForEach-Object {$count++;$bytes+=$_.Length}
+    [ordered]@{directoryIdentity=$identity;fileCount=$count;bytes=$bytes;
+        method='Ordinary-tree metadata only; mutable cache bytes are deliberately not hashed.'}
 }
 
 function Assert-FernOrdinaryTree([string]$Path) {

@@ -15,6 +15,24 @@ function Reject([string]$Name,[scriptblock]$Action) {
     if(-not $rejected){throw "Unexpected admission:$Name"}
     $cases.Add($Name)
 }
+$history=Join-Path $output 'dummy-history'
+$cache=Join-Path $history 'import\DDC'
+$null=New-Item -ItemType Directory $cache -Force
+$immutable=Join-Path $history 'receipt.json'
+$mutable=Join-Path $cache 'shader.bin'
+[IO.File]::WriteAllText($immutable,'immutable dummy receipt')
+[IO.File]::WriteAllBytes($mutable,[byte[]]@(1,2,3))
+$held=[IO.File]::Open($mutable,'Open','Read','None')
+try {
+    $observation=Get-FernMutableCacheObservation $cache
+    if($observation.fileCount -ne 1 -or $observation.bytes -ne 3){throw 'Mutable cache metadata differs.'}
+    $retained=@(Get-FernRetainedFiles $history $cache)
+    if($retained.Count -ne 1 -or $retained[0].sha256 -cne (Get-FileHash $immutable).Hash){throw 'Excluded cache/immutable hashing differs.'}
+    $metadata=@(Get-FernRetainedFiles $history $cache -MetadataOnly)
+    if($metadata.Count -ne 1 -or $metadata[0].Contains('sha256')){throw 'Historical metadata unexpectedly hashes bytes.'}
+} finally {$held.Dispose()}
+Reject 'cache-exclusion-root' {Get-FernRetainedFiles $history $history}
+Reject 'cache-exclusion-outside' {Get-FernRetainedFiles $history $output}
 $trial=Join-Path $output 'dummy-trial'
 $null=New-Item -ItemType Directory -Path $trial
 $identity=[Homestead.Authoring.LeafGuard]::InspectDirectory($trial)
@@ -131,6 +149,17 @@ foreach($relative in $hairPackages) {
     [IO.File]::WriteAllBytes($file,[byte[]]@(1))
 }
 Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages $hairPackages
+. (Join-Path $root 'Scripts\WardrobePolicy.ps1')
+$wardrobePackages=@(Get-WardrobePackageStems|ForEach-Object {"Content\SurvivalGame\Characters\ModularClothing\$_.uasset"})
+Reject 'missing-cooked-wardrobe-packages' {Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages ($hairPackages+$wardrobePackages)}
+foreach($relative in $wardrobePackages){
+    $file=Join-Path $gameRoot $relative
+    $null=New-Item -ItemType Directory -Path (Split-Path $file -Parent) -Force
+    [IO.File]::WriteAllBytes($file,[byte[]]@(1))
+}
+Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages ($hairPackages+$wardrobePackages)
+[IO.File]::WriteAllBytes((Join-Path $gameRoot $wardrobePackages[0]),[byte[]]@())
+Reject 'empty-cooked-wardrobe-package' {Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages ($hairPackages+$wardrobePackages)}
 [IO.File]::WriteAllBytes((Join-Path $gameRoot $hairPackages[0]),[byte[]]@())
 Reject 'empty-cooked-hair-package' {Assert-HomesteadCookOutput $cook $cookOutput -AdditionalPackages $hairPackages}
 foreach($field in @('passed','cookByTheBook','skipZenStore')) {
@@ -153,7 +182,8 @@ $cook.cookProcessCount=1
 [IO.File]::WriteAllBytes((Join-Path $gameRoot 'Content\Trials\Fern02_20260920_01\Meshes\SM_Fern02_a.uasset'),[byte[]]@())
 Reject 'empty-cooked-fern' {Assert-HomesteadCookOutput $cook $cookOutput}
 @{status='passed';negativeCases=@($cases);positiveCases=@('directory-identity-across-writes-and-move','ten-dummy-package-file-gate',
-    'order-independent-package-pins','source-sized-native-inventory','image-header-and-RHI-gates');
+    'order-independent-package-pins','source-sized-native-inventory','image-header-and-RHI-gates',
+    'locked-mutable-cache-metadata-only','pruned-cache-immutable-hash','historical-metadata-not-byte-proof');
     limit='Disposable mechanism/data tests only; dummy bytes are not real Unreal packages, cooked data or decoded PNGs.'}|
     ConvertTo-Json -Depth 5|Set-Content (Join-Path $output 'result.json')
 Get-Content (Join-Path $output 'result.json') -Raw

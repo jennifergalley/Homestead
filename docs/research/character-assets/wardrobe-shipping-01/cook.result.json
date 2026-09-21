@@ -1,0 +1,15 @@
+{
+	"exitCode": 0,
+	"arguments": "-TargetPlatform=Windows -Map=/Game/SurvivalGame/Maps/Homestead -OutputDir=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-cook-01/Cooked\" -CookProcessCount=1 -SkipZenStore -unattended -nop4",
+	"skipZenStore": true,
+	"cancelled": false,
+	"outputDirectory": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-cook-01/Cooked",
+	"targetPlatform": "Windows",
+	"cookByTheBook": true,
+	"cookGlobalsInitialized": true,
+	"isClient": true,
+	"isServer": true,
+	"cookProcessCount": 1,
+	"errors": [],
+	"passed": true
+}

@@ -39,7 +39,7 @@ All engine execution belongs to the coordinator's single approved lane.
 ## 4. Compatible modular clothing and icons
 
 - [ ] 4.1 Reconstruct retained adult bases with permanent modest coverage/complete feet; verify supported presets have no deleted-geometry holes.
-- [ ] 4.2 Export/import tunic, apron, shoes/socks and original footwraps with compatible fits; verify rig/material/scale and provenance.
+- [x] 4.2 Export/import tunic, apron, shoes/socks and original footwraps with compatible fits; verify rig/material/scale and provenance.
 - [ ] 4.3 Bind prepared garment components to real equipped IDs; verify supported combinations, dye/skin/tool separation and missing-content error before commit.
 - [ ] 4.4 Add shared real character preview with explicit orbit focus; verify equipment parity and cleanup on close/load/recovery.
 - [ ] 4.5 Supply original or verified-license icons for items/recipes/plans/tabs/slots; verify complete recognizable coverage and names at grid size.
@@ -110,3 +110,24 @@ six PowerShell parse checks pass. This closes source/API reconciliation only;
 native compile, 34-package canonical content, equipment/current-save runtime,
 720p/4K views and candidate delivery remain pending. The main design records
 the exact import scope and the source-checker's untracked-backup defect.
+
+Main native integration: genuine current Editor/game compile/link/metadata
+passed. Canonical source receipt portability was corrected without media edits.
+Import01 failed before save on an incorrect positional apron-role assumption;
+that result remains preserved. Corrected semantic name-based import02 and
+separate-process WardrobeVerify01 both passed27 meshes/34 packages, original54
+bone bind/scale, source triangles, material roles and section/reference checks,
+clean cooperative exit and unchanged released marker/incumbent inputs.
+This completes4.2 technical import compatibility, not4.1 visible coverage,
+equipment rendering, save/resume, menu interaction or human visual acceptance.
+Actual native/guard/source/package receipts remain the evidence boundary.
+
+Main Shipping evidence: genuine cook/stage passed;43-step native menu producers
+and real separate-process current-save consumers passed at720p and4K, including
+actual modular equipment/dye and exact changed-state F5/F9 restoration.
+Actual images nevertheless expose tiny/bright preview and clipped/overflowing/
+low-contrast controls, so visual and delivery tasks remain unchecked. A
+separate quit attempt failed its entry sequence; wrapper exit0 is not a
+native-test pass. Its fixture correction awaits rebuilt runtime verification.
+Ordinary mapped walk/turn/stop/orbit/gather recorded306 real frames over43.7133s,
+not a performance or all-combination coverage pass. OpenSpec remains10/44.

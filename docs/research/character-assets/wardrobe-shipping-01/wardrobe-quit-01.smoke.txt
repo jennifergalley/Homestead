@@ -1,0 +1,4 @@
+PASS Required modular content is actually prepared and rendered; no prototype fallback
+INPUT_ISOLATION ignored_external_events=0 (includes 0 deliberate rejection probes)
+LIT_GUARD samples=42 final_mode=3 shader_complexity=0 render_percentage=0
+FAILURE Reach the real save-and-quit confirmation | 

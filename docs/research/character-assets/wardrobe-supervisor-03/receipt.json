@@ -1,0 +1,71 @@
+{
+  "status": "passed-targeted-policy",
+  "createdUtc": "2026-09-21T10:32:43.8948267+00:00",
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "E0CCA0876564712A924EFF09F39359D8E3F69BB4E695C42F5AAEB326EBCE8901"
+    },
+    {
+      "path": "Scripts\\HairWavePolicy.ps1",
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3"
+    },
+    {
+      "path": "Scripts\\WardrobePolicy.ps1",
+      "sha256": "5EB3BA2C1454882CDFFA0288D98F6C87B234F277F044AFEC1CD16473BBC4B23F"
+    },
+    {
+      "path": "Scripts\\Development-Run.ps1",
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755"
+    },
+    {
+      "path": "Tests\\Test-WardrobePolicy.ps1",
+      "sha256": "953D03D2C63020B88B8EB5E8B03AD24AADA8FC51BFE7955A6E61416E1B68317E"
+    },
+    {
+      "sha256": "85614CF7E8D7FD797FDDB247C8C8AEA833DAD19203A601EE390D5D9366FC8C73",
+      "path": "Tests\\Test-FernSpikePolicy.ps1"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "sha256": "501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-attempt-01.json"
+    },
+    {
+      "sha256": "0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "0B16BCBE1DA08D406BB8BFE913B0065E2A6FE989892CD85092106AB622BADCFA",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\wardrobe-result.json"
+    },
+    {
+      "sha256": "86299206D0271440998BCABF08DE465135D62223D8D2D270A3364B0C205CC681",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "3B9898BF0344512EED3ABCBAF3BD5E3995C921E82E193708245E6CC245612F1B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-import-02\\probe-result.json"
+    }
+  ],
+  "nativeReceiptSha256": "9058EFFFFAEF676141CA265F9D6A70BE8601C9D748A0D9759EB4C0EAC3C218EC",
+  "tests": {
+    "fernCookNegativeCases": 38,
+    "profile": "Unchanged CookCompletionDriven0/0 primitive; no artificial asset timer; manual stop and policy-failure cancellation retained",
+    "productionArgs": "WardrobeImport/WardrobeVerify, nullrhi, DisablePython, noshaderworker, exact7config destinations",
+    "wardrobeNegativeCases": 38,
+    "waveNegativeCases": 20,
+    "reorderedActualSlots": "Accepted actual slot reordering by name, sourceRoleIndex preserved; canonical joined hair-slot7 retained",
+    "mutableCache": "Locked dummy cache observed by metadata only; excluded subtree pruned; actual immutable receipt still hashed; invalid exclusion boundaries rejected"
+  },
+  "scope": "Exactly34 new packages in fresh ModularClothing root:21fits,6joinedBob,2textures,5materials. Canonical source only, original rig/materials and accepted wave material reused. No accepted asset overwrite; all incumbent Content protected. Existing read-only marker/inherited lifetime, root-only job, explicit detached stdio, direct Python uninitialized checks, only approved TraceControl and retained candidate-owned filesystem DDC. Native/synthetic evidence only until real import. Distinct import02 preserves failed-before-save import01; only recorded unchanged empty ordinary directory reused. All27source-role sets checked against pinned manifests; per-slot names drive binding, sections and duplicates validated. Coordinator-requested proportionality correction after import02 released: mutable DDC is ordinary-path/identity/count/size observation, excluded from old-run traversal; unrelated old-run metadata is explicitly not byte proof. Actual named historical/source/tool/output/content pins remain cryptographic."
+}

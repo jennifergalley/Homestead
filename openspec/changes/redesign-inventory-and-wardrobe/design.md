@@ -335,6 +335,56 @@ identified, completely empty ordinary namespace directory; no deletion,
 quarantine, reservation reset or accepted-content overwrite is admitted.
 Import01 remains failed with its original result and cleanup proof preserved.
 
+Actual import02 passed all34 packages/27 meshes and cooperative clean shutdown;
+the released marker and protected incumbent/source files were unchanged. Fresh
+process reload and real-game acceptance remain separate pending gates.
+After release, the coordinator-directed cache optimization replaced repeated
+mutable shader-byte hashing with ordinary-tree identity/count/size observations,
+and prunes that cache from old-run traversal. Unrelated historical files receive
+explicitly labeled metadata comparison, not claimed byte-identity proof. Named
+historical admission receipts and actual source/tool/product/Content invariants
+retain their hash checks. A locked disposable cache test confirms no byte reads;
+38 fern/cook/cache negatives and38 wardrobe negatives pass.
+
+The strict UI fixture commits `26b9081`/`d8f298f` are integrated as
+`9a1f1b5`/`a695fa7`. Actual game-module compilation/link/metadata passed again,
+as did23 source checks and47 wardrobe/resume preflight negatives. The fresh
+`wardrobe-ui-01` candidate uses the genuine exported two-compile Shipping plan,
+separate guarded resource/link/manifest leaves, existing metadata verification
+and loose staging. The distinct `wardrobe-cook-01` operation requires all34
+persisted wardrobe packages plus the retained eight wave packages, with the
+same source/content/privacy/marker/child/endpoint controls and inner/outer
+SkipZenStore. Forty cook/cache/coverage negatives pass.
+
+Actual guarded cook and fresh loose staging passed. The unpromoted
+`wardrobe-ui-01` Shipping executable is
+`B080BAFD69087C0B12F4111DF05BFE6628249576CFDF99AE725F8583FAA48F2F`.
+Both 1280x720 and 3840x2160 producers passed all43 native menu steps, including
+real modular equip/unequip/dye, five appearance controls, F5 and changed-state
+F9 restoration. Separate-process consumers passed at both resolutions with
+exact ownership/equipment/look/render identity and unchanged producer bytes.
+Measured producer means were59.96/60.04 FPS with p95 frame times16.88/16.87ms;
+these exclude startup and screenshot readback and are not human controller
+comfort or general gameplay performance proof.
+
+Actual inventory/restored images reveal an unusably small bright portrait,
+clipped Turn controls, low-contrast selected labels and overflowing details
+actions. Functional assertions do not establish visual usability. A bounded
+UI-owned layout/portrait correction is in progress; no global lighting or
+accepted geometry changes are part of it. The separate `wardrobe-quit-01`
+attempt failed at reaching confirmation despite successful guard cleanup and
+process exit0. Preserve that failure. Its repeated Escape chain is being
+replaced with the producer's proven, separately asserted mapped Back / closed
+guide / Escape / Settings entry sequence; successful save and genuine exit
+still require a rebuilt runtime test.
+
+Ordinary mapped walking, turning, stopping, orbit and actual berry gathering
+recorded306 frames over43.7133 seconds in `wardrobe-walk-01`, without teleport,
+time or simulation edits. Eight-Hz screenshot sampling is not an FPS test or
+continuous collision/garment-coverage proof. The inspected world view shows
+the prepared tunic/shoes and retained rough waves; all presets/combinations,
+preview usability and final integrated acceptance remain separate gates.
+
 Deliver UI and content together. Extend existing smoke fixtures for actual
 equip/unequip/dye and current-version save/load/resume with owned IDs, material
 presentation and quantities preserved. A menu-only pass or provisional joined

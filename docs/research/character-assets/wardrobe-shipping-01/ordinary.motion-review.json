@@ -1,0 +1,99 @@
+{
+  "capture": "Real engine controls; no teleport travel. Sampled frames are not a smooth-frame-rate measurement.",
+  "frames": 306,
+  "duration_seconds": 43.7133,
+  "motion": {
+    "slow-walk": {
+      "median_actor_speed_cm_s": 67.5,
+      "left_low_toe_samples": 15,
+      "left_low_toe_median_world_speed_cm_s": 4.533703852985596,
+      "left_authored_stance_samples": 9,
+      "left_authored_stance_median_world_speed_cm_s": 4.061136767394246,
+      "right_low_toe_samples": 13,
+      "right_low_toe_median_world_speed_cm_s": 4.839497857101794,
+      "right_authored_stance_samples": 8,
+      "right_authored_stance_median_world_speed_cm_s": 4.291384609695196
+    },
+    "full-walk": {
+      "median_actor_speed_cm_s": 180.0,
+      "left_low_toe_samples": 9,
+      "left_low_toe_median_world_speed_cm_s": 10.738032611852171,
+      "left_authored_stance_samples": 4,
+      "left_authored_stance_median_world_speed_cm_s": 10.650661035287492,
+      "right_low_toe_samples": 7,
+      "right_low_toe_median_world_speed_cm_s": 11.981502515855325,
+      "right_authored_stance_samples": 4,
+      "right_authored_stance_median_world_speed_cm_s": 10.729155561996308
+    },
+    "turn-while-moving": {
+      "median_actor_speed_cm_s": 142.237,
+      "left_low_toe_samples": 10,
+      "left_low_toe_median_world_speed_cm_s": 9.37130145815405,
+      "left_authored_stance_samples": 4,
+      "left_authored_stance_median_world_speed_cm_s": 8.609384252930512,
+      "right_low_toe_samples": 10,
+      "right_low_toe_median_world_speed_cm_s": 9.971602498264133,
+      "right_authored_stance_samples": 4,
+      "right_authored_stance_median_world_speed_cm_s": 9.855388349070811
+    }
+  },
+  "idle_toe_separation_cm": 17.500147713662304,
+  "blend_samples": [
+    {
+      "t": 4.499,
+      "pass": "slow-walk",
+      "speed": 36.409,
+      "weight": 0.6935,
+      "rate": 0.3034
+    },
+    {
+      "t": 8.5576,
+      "pass": "stop-from-slow-walk",
+      "speed": 0.0,
+      "weight": 0.3097,
+      "rate": 0.0
+    },
+    {
+      "t": 10.6781,
+      "pass": "full-walk",
+      "speed": 101.101,
+      "weight": 0.7222,
+      "rate": 0.8425
+    },
+    {
+      "t": 16.8288,
+      "pass": "stop-from-turn",
+      "speed": 0.0,
+      "weight": 0.2928,
+      "rate": 0.0
+    },
+    {
+      "t": 35.0288,
+      "pass": "walk-to-forage",
+      "speed": 24.716,
+      "weight": 0.7062,
+      "rate": 0.206
+    },
+    {
+      "t": 36.0119,
+      "pass": "settle-forage",
+      "speed": 0.0,
+      "weight": 0.3141,
+      "rate": 0.0
+    }
+  ],
+  "interpretation_limit": "Low-toe filtering is a stance approximation, not a collision/foot-contact detector. Use it with the recorded frames; do not call every toe movement a defect.",
+  "gathering": {
+    "active_samples": 10,
+    "action_starts": 1,
+    "final_weight": 0.0,
+    "maximum_wrist_travel_cm": 26.332832377091563,
+    "maximum_actor_travel_cm": 0.0,
+    "maximum_toe_travel_cm": {
+      "left": 0.6212567907073245,
+      "right": 0.600528100924497
+    },
+    "closest_wrist_to_target_xy_cm": 7.398910798218876,
+    "contact_limit": "Wrist-to-target XY is not fingertip/foliage contact or target-aware IK."
+  }
+}

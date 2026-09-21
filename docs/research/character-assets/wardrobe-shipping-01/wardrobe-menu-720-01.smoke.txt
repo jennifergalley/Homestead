@@ -1,0 +1,47 @@
+PASS Required modular content is actually prepared and rendered; no prototype fallback
+PASS Close initial guide through mapped Back
+PASS First exit-path press opens Settings
+PASS Capture native Slate menu: native-settings
+PASS Second and third exit-path presses reach confirmation
+PASS Capture native Slate menu: native-exit-confirm
+PASS Exit confirmation keeps simulation paused
+PASS Exit confirmation defaults to staying
+PASS Current-schema F5 writes a readable sandbox save
+PASS A real IO error does not quit or change inventory
+PASS Capture native Slate menu: native-save-error
+PASS Save failure stays actionable beyond toast expiry
+PASS Return from failure restores Settings without discarding progress
+PASS Controller tabs reach real carried inventory
+PASS Capture native Slate menu: native-inventory
+PASS Mouse noise does not steal controller hints
+PASS Keyboard tab shortcut opens actual recipes
+PASS Rejected UI crafting is atomic and describes real requirements
+PASS Capture native Slate menu: native-crafting
+PASS Real building plan enters placement without charging
+PASS Cancel placement and return to Settings
+PASS Select the actually owned starter tunic in Wearing
+PASS Mapped UI unequip commits exact ownership and removes the rendered tunic
+PASS Select that same nonduplicated garment from the carried grid
+PASS Mapped UI equip restores the same ID and committed garment mesh
+PASS Mapped UI dye changes only the owned item and its actual material tint
+PASS Capture admitted dyed wardrobe
+PASS Change real Appearance control 0 before persistence
+PASS Change real Appearance control 1 before persistence
+PASS Change real Appearance control 2 before persistence
+PASS Change real Appearance control 3 before persistence
+PASS Change real Appearance control 6 before persistence
+PASS Real F5 saves nondefault owned equipment, dye and all appearance fields
+PASS Mutate owned equipment through UI after saving
+PASS Mutate hairstyle through UI after saving
+PASS Genuine F9 restores exact current-version quantities, IDs, slots, dye, look and render identities
+PASS Export explicit producer fixture from the actual validated manual save
+PASS Capture restored admitted wardrobe
+PASS Prepare disclosed survival-failure fixture
+PASS Recovery has independent controller Settings access
+PASS Recovery exit warns about unsaved progress instead of overwriting checkpoint
+PASS Capture native Slate menu: native-recovery-exit
+PASS Cancel recovery exit returns to recovery without forcing retry
+INPUT_ISOLATION ignored_external_events=0 (includes 0 deliberate rejection probes)
+PERFORMANCE mean_fps=59.96 p95_frame_ms=16.88 p99_frame_ms=16.96 samples=1520 exclusions=startup_and_screenshot_readback
+LIT_GUARD samples=1675 final_mode=3 shader_complexity=0 render_percentage=0
+SUCCESS All engine integration steps passed.

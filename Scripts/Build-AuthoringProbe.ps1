@@ -5,13 +5,16 @@ param(
     [switch]$WriteMetadataOnly,
     [string]$ProjectDirectory = (Split-Path $PSScriptRoot -Parent),
     [switch]$ShippingActions,
-    [switch]$HairWaveCandidate
+    [switch]$HairWaveCandidate,
+    [switch]$WardrobeCandidate
 )
 $ErrorActionPreference = 'Stop'
 $authorityRoot = Split-Path $PSScriptRoot -Parent
 if($HairWaveCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly)){throw 'Hair-wave metadata requires the genuine Shipping metadata path.'}
-$shippingBuildName=if($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$manifestAttempt=if($HairWaveCandidate){'manifest-01'}else{'manifest-02'}
+if($WardrobeCandidate -and (-not $ShippingActions -or -not $WriteMetadataOnly -or $HairWaveCandidate)){throw 'Wardrobe metadata requires exclusive genuine Shipping metadata mode.'}
+$shippingBuildName=if($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkFolder=if($WardrobeCandidate){'link2'}else{'link1'}
+$manifestAttempt=if($HairWaveCandidate -or $WardrobeCandidate){'manifest-01'}else{'manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')
 if ($root -ine $authorityRoot -and
     (-not $ExportActions -or $WriteMetadataOnly -or
@@ -89,7 +92,7 @@ if ($WriteMetadataOnly) {
         $inspectionArgs=@($dll,$pdb)
         if($ShippingActions) {
             $inspectionArgs+=@('--executable','--manifest-input',
-                (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\link1\link-generated.manifest"),
+                (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\$shippingLinkFolder\link-generated.manifest"),
                 '--manifest-input',(Join-Path $engine 'Engine\Build\Windows\Resources\Default-Win64.manifest'))
             $embedded=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\$manifestAttempt\result.json") -Raw|ConvertFrom-Json
             if($embedded.status -cne 'passed' -or (Get-FileHash $dll).Hash -cne $embedded.objectSha256){throw 'Successful genuine manifest embedding is missing.'}
