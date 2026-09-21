@@ -1,0 +1,114 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.4181973,
+  "samples": [
+    {
+      "endpoints": [],
+      "elapsedMs": 107.5808,
+      "queriedPids": [
+        50744
+      ]
+    },
+    {
+      "endpoints": [],
+      "elapsedMs": 135.9719,
+      "queriedPids": [
+        50744
+      ]
+    }
+  ],
+  "maximumSampleGapMs": 282.19689999999997,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T10:00:18.2216695+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 50744,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344584182047621,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T10:00:18.2485547+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 50744,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344584182047621,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T10:00:18.2855936+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 50744,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344584182047621,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    }
+  ],
+  "coff": null,
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\library3\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 800614,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344584177907017,
+    "LastWriteTime": 134344584177907017,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": 3,
+  "producedItems": [
+    {
+      "lastWriteUtc": "2026-09-21T10:00:18.3093372Z",
+      "sha256": "4BD978BBB748619B09DFD5790970645AE4F97D886DB4DCF3F5CF4389D009F1AF",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\UnrealEditor-SurvivalGameEditor.lib",
+      "bytes": 2800
+    }
+  ],
+  "previousProductBackups": [],
+  "objectSha256": "4BD978BBB748619B09DFD5790970645AE4F97D886DB4DCF3F5CF4389D009F1AF",
+  "generatedManifest": null,
+  "stageCandidate": null,
+  "stageCookFileCount": 0,
+  "limits": "One explicitly selected guarded build leaf with exact approved Windows console host. No application helpers/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}

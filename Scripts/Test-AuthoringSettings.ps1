@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [switch]$ValidateOnly,
-    [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify')][string]$Mode='Settings',
+    [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify')][string]$Mode='Settings',
     [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard',
     [ValidateSet('Clearing','HairWaves')][string]$CookCandidate='Clearing'
 )
@@ -11,13 +11,16 @@ Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'AuthoringProbePolicy.ps1')
 . (Join-Path $PSScriptRoot 'FernSpikePolicy.ps1')
 . (Join-Path $PSScriptRoot 'HairWavePolicy.ps1')
+. (Join-Path $PSScriptRoot 'WardrobePolicy.ps1')
 Add-Type -Path (Join-Path $PSScriptRoot 'AuthoringLeafGuard.cs')
 $operationPolicy=Get-FernOperationPolicy -Mode $Mode -RenderProfile $RenderProfile
 $completionDriven=$RenderProfile -eq 'CompletionDriven'
 $hairMode=$Mode -in @('HairImport','HairVerify')
+$wardrobeMode=$Mode -in @('WardrobeImport','WardrobeVerify')
+$characterMode=$hairMode -or $wardrobeMode
 $hairCook=$CookCandidate -eq 'HairWaves'
 if($hairCook -and $Mode -ne 'Cook'){throw 'HairWaves cook selection requires actual Cook mode.'}
-$retainedRender=$RenderProfile -ne 'Standard' -or $hairMode
+$retainedRender=$RenderProfile -ne 'Standard' -or $characterMode
 $softSeconds=$operationPolicy.softSeconds
 $hardSeconds=$operationPolicy.hardSeconds
 $ceilingSeconds=$operationPolicy.ceilingSeconds
@@ -60,10 +63,20 @@ if($hairMode) {
 if($hairCook) {
     $supersession['currentApproval']='Cook the actually imported/fresh-process-verified frozen six-wave set for ordinary Shipping game-camera acceptance. Native Mode remains installed standard Windows Cook with SkipZenStore. No UI/Bob/modular expansion, no accepted candidate overwrite; existing completion-driven controls retained.'
 }
+if($wardrobeMode) {
+    $supersession['currentApproval']='Coordinator authorized canonical Bob/modular source integration and coherent native UI/wardrobe candidate after selected wave playable. Exact34 new packages in fresh ModularClothing namespace, original21 fits with six canonical base replacements and six canonical joined Bob meshes; original materials/rig reused. Completion-driven stop/pause/root-only/marker/privacy/localDDC policy unchanged. No selected playable overwrite or source reauthoring.'
+    $supersession['slotCorrection']='Coordinator authorized root slot-name mapping correction after failed-before-save import01; only unchanged empty identified trial directory reused, distinct import02, no reset or deletion.'
+    $supersession['wardrobeFirstReservationSha256']='501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B'
+    $supersession['wardrobeFirstResultSha256']='0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261'
+    if((Get-FileHash (Join-Path $runRoot 'wardrobe-import-attempt-01.json')).Hash -cne $supersession.wardrobeFirstReservationSha256 -or
+        (Get-FileHash (Join-Path $runRoot 'wardrobe-import-01\probe-result.json')).Hash -cne $supersession.wardrobeFirstResultSha256){
+        throw 'Preserved first wardrobe failure changed.'
+    }
+}
 function Assert-NamedSupersession {
     $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
     if($run.id -cne $expectedRun -or
-        $output -ine (Join-Path $runRoot $(if($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
+        $output -ine (Join-Path $runRoot $(if($Mode -eq 'WardrobeImport'){'wardrobe-import-02'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-01'}elseif($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
@@ -124,7 +137,7 @@ if($hairCook) {
         if((Get-FileHash (Join-Path $runRoot $pin.path)).Hash -cne $pin.sha256){throw 'Accepted hair/cook prerequisite changed.'}
     }
 }
-$attempt = Join-Path $runRoot $(if($hairCook){'hair-cook-attempt-01.json'}elseif($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
+$attempt = Join-Path $runRoot $(if($Mode -eq 'WardrobeImport'){'wardrobe-import-attempt-02.json'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-attempt-01.json'}elseif($hairCook){'hair-cook-attempt-01.json'}elseif($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -158,6 +171,10 @@ if($hairMode -or $hairCook) {
     $buildReceiptPath=Join-Path $root 'docs\research\character-assets\hair-native-build-01\receipt.json'
     $buildReceiptHash='950B1A51C800A87F60B5E4B3861AA817C70E2ADE304E11580935B67EC2F8FE74'
 }
+if($wardrobeMode) {
+    $buildReceiptPath=Join-Path $root 'docs\research\character-assets\wardrobe-native-build-02\receipt.json'
+    $buildReceiptHash='9058EFFFFAEF676141CA265F9D6A70BE8601C9D748A0D9759EB4C0EAC3C218EC'
+}
 $pythonPins = @{
     'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
     'python311.dll'='3E5A5C012CDDB3D156D147ACAD59BB489C0716B87DAD274CB5BF20EEC3B68192'
@@ -187,6 +204,10 @@ if($Mode -ne 'Settings') {
     if($hairCook) {
         $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\hair-cook-policy-01\receipt.json'
         $supervisorReceiptHash='CD7817D3AD8B87332F05CD27B6F4FDDF9682C152D1E4D6343D0CC99EE9AC3DBA'
+    }
+    if($wardrobeMode) {
+        $supervisorReceiptPath=Join-Path $root 'docs\research\character-assets\wardrobe-supervisor-02\receipt.json'
+        $supervisorReceiptHash='AD3DB96265575B73B5B32CA2230311D34C6BB160C413309A14E35DFC6EB8ED3B'
     }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
@@ -225,12 +246,12 @@ function Assert-AcceptedNativeProducts {
     }
 }
 Assert-AcceptedNativeProducts
-$trial=Join-Path $root $(if($hairMode){'Content\Trials\HeroineWave_20260921_01'}else{'Content\Trials\Fern02_20260920_01'})
-$packageStems=if($hairMode){@(Get-HairWavePackageStems)}else{@(Get-FernPackageStems)}
+$trial=Join-Path $root $(if($wardrobeMode){'Content\SurvivalGame\Characters\ModularClothing'}elseif($hairMode){'Content\Trials\HeroineWave_20260921_01'}else{'Content\Trials\Fern02_20260920_01'})
+$packageStems=if($wardrobeMode){@(Get-WardrobePackageStems)}elseif($hairMode){@(Get-HairWavePackageStems)}else{@(Get-FernPackageStems)}
 function Get-ProbePackageFiles { @(Get-FernPackageFiles $trial -Complete -Stems $packageStems) }
 $trialIdentity=$null;$trialBefore=@();$fernResult=$null;$fernInputs=@();$fernSourceInventory=$null
 $contentBefore=@();$assetAdmission=$null
-if($Mode -ne 'Settings' -and -not $hairMode) {
+if($Mode -ne 'Settings' -and -not $characterMode) {
     $sourceReceiptPath=Join-Path $root 'Assets\Environment\woodland-preparation-01\download-receipt.json'
     $inventoryPath=Join-Path $root 'Assets\Environment\woodland-preparation-01\source-inventory.json'
     if((Get-FileHash $sourceReceiptPath).Hash -cne 'AACF677F7B8CA07A5656842EA80AFEDC80845E509AFE8731F198DA973F339ECF' -or
@@ -272,23 +293,33 @@ if($Mode -ne 'Settings' -and -not $hairMode) {
         Assert-FernPackagePins @($assetAdmission.packages) $trialBefore
     }
 }
-if($hairMode) {
-    $fernInputs=@(Get-HairWaveSourcePins $root)
+if($characterMode) {
+    $fernInputs=if($wardrobeMode){@(Get-WardrobeSourcePins $root)}else{@(Get-HairWaveSourcePins $root)}
     Assert-FernOrdinaryTree (Join-Path $root 'Content')
     $contentBefore=@(Get-ChildItem (Join-Path $root 'Content') -Recurse -File -Force |
         Where-Object {-not $_.FullName.StartsWith($trial+'\',[StringComparison]::OrdinalIgnoreCase)} |
         ForEach-Object {@{path=$_.FullName;sha256=(Get-FileHash $_.FullName).Hash}})
-    if($Mode -eq 'HairImport') {
+    if($Mode -eq 'WardrobeImport') {
+        $failed=Get-Content (Join-Path $runRoot 'wardrobe-import-01\probe-result.json') -Raw|ConvertFrom-Json
+        if($failed.status -cne 'failed' -or $failed.exitCode -ne 7 -or -not $failed.subjectExited -or
+            -not $failed.guardDisposed -or $failed.hardTerminated -or @($failed.cleanupErrors).Count){
+            throw 'Only the released failed-before-save wardrobe scope can be reused.'
+        }
+        $trialIdentity=$failed.trialIdentity
+        Assert-FernDirectoryIdentity $trialIdentity $trial
+        if(@(Get-ChildItem $trial -Force).Count){throw 'Prior wardrobe scope must remain completely empty.'}
+    } elseif($Mode -eq 'HairImport') {
         if(Test-Path -LiteralPath $trial){throw 'Fresh wave trial namespace required; no accepted asset overwrite.'}
     } else {
-        $importOutput=Join-Path $runRoot 'hair-import-01'
+        $importOutput=Join-Path $runRoot $(if($wardrobeMode){'wardrobe-import-02'}else{'hair-import-01'})
         $importProof=Get-Content (Join-Path $importOutput 'probe-result.json') -Raw|ConvertFrom-Json
         $assetAdmission=Get-Content (Join-Path $importOutput 'asset-admission.json') -Raw|ConvertFrom-Json
         if($importProof.status -cne 'passed' -or -not $importProof.subjectExited -or
             -not $importProof.guardDisposed -or $importProof.hardTerminated -or @($importProof.cleanupErrors).Count) {
             throw 'Persisted wave verification requires an actually passed, released import.'
         }
-        Assert-HairWaveNativeInventory $assetAdmission.inventory
+        if($wardrobeMode){Assert-WardrobeNativeInventory $assetAdmission.inventory $root}
+        else{Assert-HairWaveNativeInventory $assetAdmission.inventory}
         $trialIdentity=$assetAdmission.directoryIdentity
         Assert-FernDirectoryIdentity $trialIdentity $trial
         $trialBefore=@(Get-ProbePackageFiles)
@@ -343,9 +374,9 @@ if (@(Get-AuthoringProcesses).Count) { throw 'Another authoring process prevents
 $protected = @(Get-Content -LiteralPath (Join-Path $root 'Assets\Environment\woodland-preparation-01\protected-before.json') -Raw | ConvertFrom-Json)
 $before = @($protected | ForEach-Object {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root $_.path)).Hash
-    $selectedPreview=($hairMode -or $hairCook) -and $_.path -ceq 'Preview.json' -and
-        $hash -ceq '737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'
-    if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not(($hairMode -or $hairCook) -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
+    $selectedPreview=($characterMode -or $hairCook) -and $_.path -ceq 'Preview.json' -and
+        $hash -ceq $(if($wardrobeMode){'C1262ACE336ABDEFD3A564046DD4F233A4AFDA19B9E6C2460886ACD263820904'}else{'737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'})
+    if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not(($characterMode -or $hairCook) -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
         'Scripts\Development-Run.ps1','Tests\DevelopmentRunTests.ps1',
         'Source\SurvivalGame\HomesteadWorld.cpp','Config\DefaultGame.ini')) {
         throw "Unrelated protected input changed:$($_.path)"
@@ -362,7 +393,7 @@ foreach ($name in @('Engine','Editor','EditorSettings','EditorPerProjectUserSett
 $ddc = Join-Path $output 'DDC'
 $ddcIdentity=$null
 $retainedFiles=@();$ddcBefore=@()
-if($Mode -in @('Render','Cook','HairImport','HairVerify')) {
+if($Mode -in @('Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify')) {
     $ddc=Join-Path $evidenceRunRoot 'fern-import-02\DDC'
     Assert-FernOrdinaryTree $ddc
     $ddcIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($ddc)
@@ -449,10 +480,13 @@ try {
             mode=$Mode;supervisorReceiptSha256=$supervisorReceiptHash
             priorFernReservationSha256='3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2'
             priorFernResultSha256='6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910'
-            approval=$(if($hairMode){$supersession.currentApproval}elseif($completionDriven){'Explicit21:19 until-complete continuation; preserve bounded capture-timeout; no synthetic deadline; manual stop and genuine failures remain.'}elseif($longStartup){'Explicit fresh90-minute run20260921-033354-2d257ba0; one longer-startup render; old import02 DDC admitted input/output only; no retry.'}else{'Coordinator explicit replacement import02; original failure immutable; conditional render reads import02.'})}|ConvertTo-Json))
+            approval=$(if($characterMode){$supersession.currentApproval}elseif($completionDriven){'Explicit21:19 until-complete continuation; preserve bounded capture-timeout; no synthetic deadline; manual stop and genuine failures remain.'}elseif($longStartup){'Explicit fresh90-minute run20260921-033354-2d257ba0; one longer-startup render; old import02 DDC admitted input/output only; no retry.'}else{'Coordinator explicit replacement import02; original failure immutable; conditional render reads import02.'})}|ConvertTo-Json))
         $reservation.Write($bytes)
     } finally { $reservation.Dispose() }
-    if($Mode -in @('Import','HairImport')) {
+    if($Mode -eq 'WardrobeImport') {
+        Assert-FernDirectoryIdentity $trialIdentity $trial
+        if(@(Get-ChildItem $trial -Force).Count){throw 'Prior wardrobe scope changed before reservation.'}
+    } elseif($Mode -in @('Import','HairImport')) {
         if(Test-Path -LiteralPath $trial){throw 'Trial appeared before reservation.'}
         $null=New-Item -ItemType Directory -Path $trial
         $trialIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($trial)
@@ -543,6 +577,11 @@ try {
             Assert-HairWaveNativeInventory $fernResult
             $null=Get-ProbePackageFiles
         }
+        if($wardrobeMode -and -not $fernResult -and (Test-Path (Join-Path $output 'wardrobe-result.json'))) {
+            $fernResult=Get-Content (Join-Path $output 'wardrobe-result.json') -Raw|ConvertFrom-Json
+            Assert-WardrobeNativeInventory $fernResult $root
+            $null=Get-ProbePackageFiles
+        }
         if($Mode -in @('Import','Render') -and -not $fernResult -and (Test-Path (Join-Path $output 'fern-result.json'))) {
             $fernResult=Get-Content (Join-Path $output 'fern-result.json') -Raw|ConvertFrom-Json
             if(-not $fernResult.passed) {
@@ -623,7 +662,7 @@ try {
     if($Mode -ne 'Settings') {
         try {
             foreach($inputFile in $fernInputs) {
-                $inputPath=if($hairMode){$inputFile.path}else{Join-Path $sourceRoot $inputFile.file}
+                $inputPath=if($characterMode){$inputFile.path}else{Join-Path $sourceRoot $inputFile.file}
                 if((Get-FileHash $inputPath).Hash -cne $inputFile.sha256){throw 'Original source input changed during operation.'}
             }
             $contentAfter=@(Get-ChildItem (Join-Path $root 'Content') -Recurse -File -Force |
@@ -632,12 +671,12 @@ try {
             foreach($file in $contentBefore){if((Get-FileHash $file.path).Hash -cne $file.sha256){throw "Existing content changed:$($file.path)"}}
             if($trialIdentity) {
                 Assert-FernDirectoryIdentity $trialIdentity $trial
-                if($Mode -in @('Render','Cook','HairVerify')){Assert-FernPackagePins $trialBefore @(Get-ProbePackageFiles)}
+                if($Mode -in @('Render','Cook','HairVerify','WardrobeVerify')){Assert-FernPackagePins $trialBefore @(Get-ProbePackageFiles)}
             }
         } catch {$cleanupErrors.Add("Fern protection check failed:$_")}
     }
     if ($cleanupErrors.Count) { $failure=(@($failure)+@($cleanupErrors) | Where-Object { $_ }) -join ' | ' }
-    if($Mode -in @('Import','HairImport') -and $trialIdentity) {
+    if($Mode -in @('Import','HairImport','WardrobeImport') -and $trialIdentity) {
         try {
             Assert-FernDirectoryIdentity $trialIdentity $trial
             if($failure -and ($subjectExited -or -not $guard)) {

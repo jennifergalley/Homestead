@@ -220,7 +220,8 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     Require(CompletionPolicy.IsEmpty() || CompletionPolicy == TEXT("bounded") || bCompletionDriven,
         TEXT("Unknown native completion policy."));
     Require(!bCompletionDriven || ((FernMode == TEXT("Render") || FernMode == TEXT("Cook")
-        || FernMode == TEXT("HairImport") || FernMode == TEXT("HairVerify"))
+        || FernMode == TEXT("HairImport") || FernMode == TEXT("HairVerify")
+        || FernMode == TEXT("WardrobeImport") || FernMode == TEXT("WardrobeVerify"))
         && FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")).IsEmpty()),
         TEXT("Completion-driven mode must be render/cook/hair without a synthetic deadline."));
     Result->SetBoolField(TEXT("completionDriven"), bCompletionDriven);
@@ -375,7 +376,9 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         return 4;
     }
     const bool bHairMode = FernMode == TEXT("HairImport") || FernMode == TEXT("HairVerify");
-    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render") && FernMode != TEXT("Cook") && !bHairMode) return 8;
+    const bool bWardrobeMode = FernMode == TEXT("WardrobeImport") || FernMode == TEXT("WardrobeVerify");
+    if (bWardrobeMode && !bCompletionDriven) return 8;
+    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render") && FernMode != TEXT("Cook") && !bHairMode && !bWardrobeMode) return 8;
     const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510
         : (FernMode == TEXT("Import") || FernMode == TEXT("HairImport")) ? 180 : 90);
     FDateTime RunDeadline;
@@ -402,6 +405,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         if (!FFileHelper::LoadFileToString(Admission, *AdmitPath) || Admission != FernMode
             || IFileManager::Get().FileExists(*StopPath) || !MayContinue()
             || !(FernMode == TEXT("Cook") ? CookPlayableCandidate(Output)
+                : bWardrobeMode ? RunWardrobeSpike(FernMode, Output, RunDeadline, bCompletionDriven)
                 : bHairMode ? RunHairWaveSpike(FernMode, Output, RunDeadline, bCompletionDriven)
                 : RunFernSpike(FernMode, Output, RunDeadline, bCompletionDriven)))
         {

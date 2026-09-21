@@ -1,0 +1,27 @@
+{
+	"pythonExit":
+	{
+		"moduleLoaded": true,
+		"configured": true,
+		"available": false,
+		"initialized": false,
+		"librariesEnumerated": true,
+		"runtimeLibraryLoaded": true,
+		"libraries": [
+			{
+				"path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python3.dll",
+				"queryAvailable": false,
+				"interpreterInitialized": -1
+			},
+			{
+				"path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python311.dll",
+				"queryAvailable": true,
+				"interpreterInitialized": 0
+			}
+		],
+		"valid": true
+	},
+	"stopReason": "fern-operation-failed",
+	"cooperative": true,
+	"passed": false
+}

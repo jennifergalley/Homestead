@@ -1,0 +1,7 @@
+{
+	"mode": "WardrobeImport",
+	"namespace": "/Game/SurvivalGame/Characters/ModularClothing",
+	"stage": "skeletal-import:SK_Heroine_Bob_Apron",
+	"passed": false,
+	"cancelledAtPollingBoundary": false
+}

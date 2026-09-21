@@ -26,6 +26,8 @@
 #include "Materials/MaterialExpressionMultiply.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
 #include "Materials/MaterialExpressionConstant.h"
+#include "Materials/MaterialExpressionConstant3Vector.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "MaterialShared.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
@@ -237,6 +239,55 @@ bool Inventory(const TArray<UStaticMesh*>& Meshes, const TArray<UTexture2D*>& Te
 
 namespace Hair
 {
+    USkeletalMesh* ImportRiggedMesh(const FString& Source, const FString& PackageName,
+        USkeleton* Skeleton, FStopFeedback& Feedback)
+    {
+        if (!Skeleton || Feedback.ReceivedUserCancel() || FindPackage(nullptr, *PackageName)
+            || FPackageName::DoesPackageExist(PackageName)) return nullptr;
+        auto* Factory = NewObject<UFbxFactory>();
+        Factory->SetDetectImportTypeOnImport(false);
+        auto* Task = NewObject<UAssetImportTask>();
+        Task->bAutomated = true;
+        Task->bReplaceExisting = false;
+        Factory->SetAssetImportTask(Task);
+        UFbxImportUI* UI = Factory->ImportUI;
+        UI->MeshTypeToImport = FBXIT_SkeletalMesh;
+        UI->OriginalImportType = FBXIT_SkeletalMesh;
+        UI->bAutomatedImportShouldDetectType = false;
+        UI->bImportMesh = true;
+        UI->bImportAsSkeletal = true;
+        UI->bImportAnimations = false;
+        UI->bImportMaterials = false;
+        UI->bImportTextures = false;
+        UI->bCreatePhysicsAsset = false;
+        UI->bOverrideFullName = true;
+        UI->Skeleton = Skeleton;
+        auto* Data = UI->SkeletalMeshImportData.Get();
+        Data->bConvertScene = true;
+        Data->bConvertSceneUnit = true;
+        Data->bForceFrontXAxis = false;
+        Data->ImportUniformScale = 1;
+        Data->ImportTranslation = FVector::ZeroVector;
+        Data->ImportRotation = FRotator::ZeroRotator;
+        Data->bImportMeshLODs = false;
+        Data->bImportMorphTargets = false;
+        Data->bUpdateSkeletonReferencePose = false;
+        Data->bUseT0AsRefPose = false;
+        Data->NormalImportMethod = FBXNIM_ImportNormals;
+        bool Cancelled = false;
+        const FString Name = FPackageName::GetShortName(PackageName);
+        auto* Mesh = Cast<USkeletalMesh>(Factory->ImportObject(USkeletalMesh::StaticClass(),
+            CreatePackage(*PackageName), *Name, RF_Public | RF_Standalone, Source, nullptr, Cancelled));
+        if (!Mesh || Cancelled || Factory->GetAdditionalImportedObjects().Num() || Feedback.ReceivedUserCancel())
+        {
+            UE_LOG(LogFernSpike, Error, TEXT("Explicit skeletal import rejected: %s -> %s"), *Source, *PackageName);
+            return nullptr;
+        }
+        TArray<USkinnedAsset*> Pending = {Mesh};
+        FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
+        return Mesh;
+    }
+
     bool WaveInventory(const TArray<USkeletalMesh*>& Meshes, UTexture2D* Texture, UMaterial* Material,
         const TSharedRef<FJsonObject>& Result)
     {
@@ -373,41 +424,9 @@ namespace Hair
             if (Feedback.ReceivedUserCancel()) return false;
             USkeletalMesh* Base = LoadObject<USkeletalMesh>(nullptr, *(IncumbentHeroine + Wave.Name));
             if (!Base || !Base->GetSkeleton() || Base->GetMaterials().Num() != Wave.Slots) return false;
-            auto* Factory = NewObject<UFbxFactory>();
-            Factory->SetDetectImportTypeOnImport(false);
-            auto* Task = NewObject<UAssetImportTask>();
-            Task->bAutomated = true;
-            Task->bReplaceExisting = false;
-            Factory->SetAssetImportTask(Task);
-            UFbxImportUI* UI = Factory->ImportUI;
-            UI->MeshTypeToImport = FBXIT_SkeletalMesh;
-            UI->OriginalImportType = FBXIT_SkeletalMesh;
-            UI->bAutomatedImportShouldDetectType = false;
-            UI->bImportMesh = true;
-            UI->bImportAsSkeletal = true;
-            UI->bImportAnimations = false;
-            UI->bImportMaterials = false;
-            UI->bImportTextures = false;
-            UI->bCreatePhysicsAsset = false;
-            UI->bOverrideFullName = true;
-            UI->Skeleton = Base->GetSkeleton();
-            auto* Data = UI->SkeletalMeshImportData.Get();
-            Data->bConvertScene = true;
-            Data->bConvertSceneUnit = true;
-            Data->bForceFrontXAxis = false;
-            Data->ImportUniformScale = 1;
-            Data->ImportTranslation = FVector::ZeroVector;
-            Data->ImportRotation = FRotator::ZeroRotator;
-            Data->bImportMeshLODs = false;
-            Data->bImportMorphTargets = false;
-            Data->bUpdateSkeletonReferencePose = false;
-            Data->bUseT0AsRefPose = false;
-            Data->NormalImportMethod = FBXNIM_ImportNormals;
-            Cancelled = false;
-            auto* Mesh = Cast<USkeletalMesh>(Factory->ImportObject(USkeletalMesh::StaticClass(),
-                CreatePackage(*(HairTrial + TEXT("/Meshes/") + Wave.Name)), Wave.Name, RF_Public | RF_Standalone,
-                FPaths::Combine(Source, TEXT("Joined"), FString(Wave.Name) + TEXT(".fbx")), nullptr, Cancelled));
-            if (!Mesh || Cancelled || Factory->GetAdditionalImportedObjects().Num() || Feedback.ReceivedUserCancel()) return false;
+            auto* Mesh = ImportRiggedMesh(FPaths::Combine(Source, TEXT("Joined"), FString(Wave.Name) + TEXT(".fbx")),
+                HairTrial + TEXT("/Meshes/") + Wave.Name, Base->GetSkeleton(), Feedback);
+            if (!Mesh) return false;
             TArray<USkinnedAsset*> Pending = { Mesh };
             FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
             if (Mesh->GetMaterials().Num() != Wave.Slots) return false;
@@ -467,6 +486,422 @@ namespace Hair
         Result->SetArrayField(TEXT("persistentObjectReferences"), References);
         Result->SetStringField(TEXT("stage"), TEXT("saving-eight-wave-packages"));
         for (UObject* Asset : Assets)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            UPackage* Package = Asset->GetOutermost();
+            const FString File = FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension());
+            if (IFileManager::Get().FileExists(*File)) return false;
+            FSavePackageArgs Args;
+            Args.TopLevelFlags = RF_Public | RF_Standalone;
+            Args.Error = GWarn;
+            if (!UPackage::SavePackage(Package, Asset, *File, Args) || Feedback.ReceivedUserCancel()) return false;
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("import-complete"));
+        return true;
+    }
+}
+
+namespace Wardrobe
+{
+    const FString Root = TEXT("/Game/SurvivalGame/Characters/ModularClothing");
+    const TCHAR* Bodies[] = {TEXT("Preferred"), TEXT("Willow"), TEXT("Hazel")};
+    const TCHAR* Parts[] = {TEXT("Base_LongWave"), TEXT("Base_Bob"), TEXT("Base_Ponytail"),
+        TEXT("Tunic"), TEXT("Apron"), TEXT("Shoes"), TEXT("Footwraps")};
+    const int32 Triangles[3][7] = {
+        {133454, 151118, 143044, 15374, 3536, 3320, 11448},
+        {133442, 151157, 143028, 15374, 3536, 3320, 11448},
+        {133478, 151311, 143040, 15374, 3536, 3320, 11448}
+    };
+    const int32 BobTriangles[] = {138104, 141640, 138303, 141839, 138285, 141821};
+    const TCHAR* ClothNames[] = {TEXT("M_Modular_BaseBra"), TEXT("M_Modular_BaseBriefs"),
+        TEXT("M_Modular_FootwrapCloth"), TEXT("M_Modular_FootwrapBinding")};
+    const FLinearColor ClothColors[] = {
+        FLinearColor(0.16f, 0.175f, 0.15f), FLinearColor(0.16f, 0.175f, 0.15f),
+        FLinearColor(0.49f, 0.4f, 0.26f), FLinearColor(0.25f, 0.19f, 0.11f)
+    };
+    const FString BobMaterial = TEXT("M_Heroine_Hair_bob01_Neutral");
+
+    struct FFit
+    {
+        FString Name, Package, Source, Reference;
+        int32 Triangles;
+        bool FullBody;
+        TArray<FName> Roles;
+    };
+
+    TArray<FFit> Fits()
+    {
+        TArray<FFit> Result;
+        for (int32 Body = 0; Body < 3; ++Body)
+        {
+            const FString Prefix = Body == 0 ? TEXT("SK_Heroine_") : FString::Printf(TEXT("SK_Heroine_%s_"), Bodies[Body]);
+            for (int32 Part = 0; Part < 7; ++Part)
+            {
+                FFit Fit;
+                Fit.Name = FString::Printf(TEXT("SK_Modular_%s_%s"), Bodies[Body], Parts[Part]);
+                Fit.Package = Root + TEXT("/") + Bodies[Body] + TEXT("/") + Fit.Name;
+                Fit.Source = FPaths::Combine(FPaths::ProjectDir(), Part < 2
+                    ? FString(TEXT("Assets/Characters/HairstyleRefinement/Modular/")) + Fit.Name + TEXT(".fbx")
+                    : FString(TEXT("Assets/Characters/ModularClothing/")) + Bodies[Body] + TEXT("/") + Fit.Name + TEXT(".fbx"));
+                Fit.Reference = IncumbentHeroine + Prefix + (Part == 2 ? TEXT("Ponytail") : TEXT("LongWave_Apron"));
+                Fit.Triangles = Triangles[Body][Part];
+                Fit.FullBody = Part < 3;
+                if (Part < 3)
+                    Fit.Roles = {TEXT("M_Heroine_Skin"), TEXT("M_Modular_BaseBra"), TEXT("M_Modular_BaseBriefs"),
+                        Part == 0 ? FName(TEXT("M_Heroine_Hair_long01_Neutral"))
+                            : Part == 1 ? FName(*BobMaterial) : FName(TEXT("M_Heroine_Hair_ponytail01")),
+                        TEXT("M_Heroine_LightEyes"), TEXT("M_Heroine_Eyebrows"), TEXT("M_Heroine_Eyelashes"),
+                        TEXT("M_Heroine_Teeth"), TEXT("M_Heroine_Tongue")};
+                else if (Part == 3) Fit.Roles = {TEXT("M_Heroine_MossLinen"), TEXT("M_Heroine_LinenTrim"),
+                    TEXT("M_Heroine_ChestnutLeather"), TEXT("M_Heroine_Brass")};
+                else if (Part == 4) Fit.Roles = {TEXT("M_Heroine_ApronTrim"), TEXT("M_Heroine_ApronLinen")};
+                else if (Part == 5) Fit.Roles = {TEXT("M_Heroine_LeatherShoes")};
+                else Fit.Roles = {ClothNames[2], ClothNames[3]};
+                Result.Add(MoveTemp(Fit));
+            }
+            for (int32 Outfit = 0; Outfit < 2; ++Outfit)
+            {
+                FFit Fit;
+                Fit.Name = Prefix + TEXT("Bob") + (Outfit ? TEXT("_Apron") : TEXT(""));
+                Fit.Package = Root + TEXT("/JoinedBob/") + Fit.Name;
+                Fit.Source = FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Characters/HairstyleRefinement/Joined"), Fit.Name + TEXT(".fbx"));
+                Fit.Reference = IncumbentHeroine + Fit.Name;
+                Fit.Triangles = BobTriangles[Body * 2 + Outfit];
+                Fit.FullBody = true;
+                Fit.Roles = {TEXT("M_Heroine_Brass"), TEXT("M_Heroine_Skin"), TEXT("M_Heroine_LightEyes"),
+                    TEXT("M_Heroine_Eyebrows"), TEXT("M_Heroine_Eyelashes"), TEXT("M_Heroine_Teeth"),
+                    TEXT("M_Heroine_Tongue"), FName(*BobMaterial), TEXT("M_Heroine_LeatherShoes"),
+                    TEXT("M_Heroine_MossLinen"), TEXT("M_Heroine_LinenTrim"), TEXT("M_Heroine_ChestnutLeather")};
+                if (Outfit)
+                {
+                    Fit.Roles[0] = TEXT("M_Heroine_ApronTrim");
+                    Fit.Roles.Append({TEXT("M_Heroine_Brass"), TEXT("M_Heroine_ApronLinen")});
+                }
+                Result.Add(MoveTemp(Fit));
+            }
+        }
+        return Result;
+    }
+
+    bool Reject(const TSharedRef<FJsonObject>& Result, const FString& Reason)
+    {
+        Result->SetStringField(TEXT("failureReason"), Reason);
+        UE_LOG(LogFernSpike, Error, TEXT("Wardrobe admission rejected: %s"), *Reason);
+        return false;
+    }
+
+    UMaterialInterface* Surface(FName Role, USkeletalMesh& Reference)
+    {
+        if (Role == TEXT("M_Heroine_Hair_long01_Neutral"))
+            return LoadObject<UMaterial>(nullptr, *(HairTrial + TEXT("/Materials/") + Role.ToString()));
+        if (Role == FName(*BobMaterial) || Role.ToString().StartsWith(TEXT("M_Modular_")))
+            return LoadObject<UMaterial>(nullptr, *(Root + TEXT("/Materials/") + Role.ToString()));
+        for (const auto& Slot : Reference.GetMaterials())
+            if (Slot.MaterialSlotName == Role) return Slot.MaterialInterface;
+        UE_LOG(LogFernSpike, Error, TEXT("Missing admitted material role %s in %s"), *Role.ToString(), *Reference.GetPathName());
+        return nullptr;
+    }
+
+    bool ResolveSlots(const FFit& Fit, USkeletalMesh& Mesh, USkeletalMesh& Reference,
+        const TSharedRef<FJsonObject>& Result, bool Bind)
+    {
+        if (Mesh.GetMaterials().Num() != Fit.Roles.Num())
+            return Reject(Result, FString::Printf(TEXT("%s material count: actual=%d expected=%d"),
+                *Fit.Name, Mesh.GetMaterials().Num(), Fit.Roles.Num()));
+        TSet<FName> Seen;
+        for (int32 Index = 0; Index < Mesh.GetMaterials().Num(); ++Index)
+        {
+            auto& Slot = Mesh.GetMaterials()[Index];
+            const FName Role = Slot.ImportedMaterialSlotName;
+            if (!Fit.Roles.Contains(Role) || Slot.MaterialSlotName != Role || Seen.Contains(Role))
+                return Reject(Result, FString::Printf(TEXT("%s slot %d: unknown/duplicate/renamed role=%s imported=%s"),
+                    *Fit.Name, Index, *Slot.MaterialSlotName.ToString(), *Role.ToString()));
+            Seen.Add(Role);
+            auto* Expected = Surface(Role, Reference);
+            if (!Expected || (!Bind && Slot.MaterialInterface != Expected))
+                return Reject(Result, FString::Printf(TEXT("%s slot %d role=%s material=%s expected=%s"),
+                    *Fit.Name, Index, *Role.ToString(), *GetPathNameSafe(Slot.MaterialInterface), *GetPathNameSafe(Expected)));
+            if (Fit.Package.StartsWith(Root + TEXT("/JoinedBob/")) && Role == FName(*BobMaterial) && Index != 7)
+                return Reject(Result, TEXT("Canonical joined Bob hair slot7 differs: ") + Fit.Name);
+            if (Bind) Slot.MaterialInterface = Expected;
+        }
+        return true;
+    }
+
+    UTexture2D* Texture(const TCHAR* Name, const FString& Source, FStopFeedback& Feedback)
+    {
+        if (Feedback.ReceivedUserCancel()) return nullptr;
+        auto* Factory = NewObject<UTextureFactory>();
+        auto* Task = NewObject<UAssetImportTask>();
+        Task->bAutomated = true;
+        Task->bReplaceExisting = false;
+        Factory->SetAssetImportTask(Task);
+        Factory->CompressionSettings = TC_Default;
+        bool Cancelled = false;
+        auto* Value = Cast<UTexture2D>(Factory->ImportObject(UTexture2D::StaticClass(),
+            CreatePackage(*(Root + TEXT("/Textures/") + Name)), Name, RF_Public | RF_Standalone, Source, nullptr, Cancelled));
+        if (!Value || Cancelled || Factory->GetAdditionalImportedObjects().Num() || Feedback.ReceivedUserCancel()) return nullptr;
+        Value->SRGB = true;
+        Value->CompressionSettings = TC_Default;
+        Value->PostEditChange();
+        return Value;
+    }
+
+    UMaterial* Material(const FString& Name, UTexture2D* Map, const FLinearColor& Color, bool Hair)
+    {
+        auto* Value = NewObject<UMaterial>(CreatePackage(*(Root + TEXT("/Materials/") + Name)),
+            *Name, RF_Public | RF_Standalone);
+        Value->BlendMode = Hair ? BLEND_Masked : BLEND_Opaque;
+        Value->TwoSided = true;
+        Value->OpacityMaskClipValue = 0.333f;
+        Value->SetShadingModel(MSM_DefaultLit);
+        if (!Value->SetMaterialUsage(MATUSAGE_SkeletalMesh)) return nullptr;
+        auto* Sample = Cast<UMaterialExpressionTextureSample>(UMaterialEditingLibrary::CreateMaterialExpression(Value,
+            UMaterialExpressionTextureSample::StaticClass()));
+        auto* Multiply = Cast<UMaterialExpressionMultiply>(UMaterialEditingLibrary::CreateMaterialExpression(Value,
+            UMaterialExpressionMultiply::StaticClass()));
+        auto* Rough = Cast<UMaterialExpressionConstant>(UMaterialEditingLibrary::CreateMaterialExpression(Value,
+            UMaterialExpressionConstant::StaticClass()));
+        if (!Sample || !Multiply || !Rough) return nullptr;
+        Sample->Texture = Map;
+        Sample->SamplerType = SAMPLERTYPE_Color;
+        Multiply->A.Expression = Sample;
+        Rough->R = Hair ? 0.7f : 0.92f;
+        if (Hair)
+        {
+            auto* Tint = Cast<UMaterialExpressionVectorParameter>(UMaterialEditingLibrary::CreateMaterialExpression(Value,
+                UMaterialExpressionVectorParameter::StaticClass()));
+            if (!Tint) return nullptr;
+            Tint->ParameterName = TEXT("ColorTint");
+            Tint->DefaultValue = Color;
+            Multiply->B.Expression = Tint;
+            if (!UMaterialEditingLibrary::ConnectMaterialProperty(Sample, TEXT("A"), MP_OpacityMask)) return nullptr;
+        }
+        else
+        {
+            auto* Tint = Cast<UMaterialExpressionConstant3Vector>(UMaterialEditingLibrary::CreateMaterialExpression(Value,
+                UMaterialExpressionConstant3Vector::StaticClass()));
+            auto* UV = Cast<UMaterialExpressionTextureCoordinate>(UMaterialEditingLibrary::CreateMaterialExpression(Value,
+                UMaterialExpressionTextureCoordinate::StaticClass()));
+            if (!Tint || !UV) return nullptr;
+            Tint->Constant = Color;
+            UV->UTiling = UV->VTiling = 8;
+            Sample->Coordinates.Expression = UV;
+            Multiply->B.Expression = Tint;
+        }
+        if (!UMaterialEditingLibrary::ConnectMaterialProperty(Multiply, TEXT(""), MP_BaseColor)
+            || !UMaterialEditingLibrary::ConnectMaterialProperty(Rough, TEXT(""), MP_Roughness)) return nullptr;
+        Value->PostEditChange();
+        return Value;
+    }
+
+    bool CheckMaterial(UMaterial* Value, UTexture2D* Map, const FLinearColor& Color, bool Hair)
+    {
+        if (!Value || !Map || Value->BlendMode != (Hair ? BLEND_Masked : BLEND_Opaque) || !Value->TwoSided
+            || !Value->GetUsageByFlag(MATUSAGE_SkeletalMesh) || !Value->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit)
+            || Value->GetExpressions().Num() != (Hair ? 4 : 5)) return false;
+        const auto* Base = Value->GetExpressionInputForProperty(MP_BaseColor);
+        const auto* Mul = Base ? Cast<UMaterialExpressionMultiply>(Base->Expression) : nullptr;
+        const auto* Sample = Mul ? Cast<UMaterialExpressionTextureSample>(Mul->A.Expression) : nullptr;
+        const auto* RoughInput = Value->GetExpressionInputForProperty(MP_Roughness);
+        const auto* Rough = RoughInput ? Cast<UMaterialExpressionConstant>(RoughInput->Expression) : nullptr;
+        if (!Sample || Sample->Texture != Map || Sample->SamplerType != SAMPLERTYPE_Color
+            || !Rough || !FMath::IsNearlyEqual(Rough->R, Hair ? 0.7f : 0.92f)) return false;
+        if (Hair)
+        {
+            const auto* Tint = Cast<UMaterialExpressionVectorParameter>(Mul->B.Expression);
+            const auto* Mask = Value->GetExpressionInputForProperty(MP_OpacityMask);
+            return Tint && Tint->ParameterName == TEXT("ColorTint") && Tint->DefaultValue.Equals(Color)
+                && Mask && Mask->Expression == Sample && Mask->OutputIndex == 4
+                && FMath::IsNearlyEqual(Value->OpacityMaskClipValue, 0.333f);
+        }
+        const auto* Tint = Cast<UMaterialExpressionConstant3Vector>(Mul->B.Expression);
+        const auto* UV = Cast<UMaterialExpressionTextureCoordinate>(Sample->Coordinates.Expression);
+        return Tint && Tint->Constant.Equals(Color) && UV && UV->CoordinateIndex == 0
+            && FMath::IsNearlyEqual(UV->UTiling, 8.0f) && FMath::IsNearlyEqual(UV->VTiling, 8.0f);
+    }
+
+    bool Inventory(const TSharedRef<FJsonObject>& Result, TArray<UObject*>& Assets, TSet<FString>& External)
+    {
+        auto* Bob = LoadObject<UTexture2D>(nullptr, *(Root + TEXT("/Textures/T_BobReuse_Neutral")));
+        auto* Weave = LoadObject<UTexture2D>(nullptr, *(Root + TEXT("/Textures/T_ModularWeave")));
+        if (!Bob || !Weave || Bob->Source.GetSizeX() != 2048 || Bob->Source.GetSizeY() != 2048
+            || Weave->Source.GetSizeX() != 256 || Weave->Source.GetSizeY() != 256 || !Bob->SRGB || !Weave->SRGB
+            || Bob->CompressionSettings != TC_Default || Weave->CompressionSettings != TC_Default)
+            return Reject(Result, TEXT("Texture identity, dimensions, sRGB or compression differs."));
+        Assets = {Bob, Weave};
+        auto* BobSurface = LoadObject<UMaterial>(nullptr, *(Root + TEXT("/Materials/") + BobMaterial));
+        if (!CheckMaterial(BobSurface, Bob, FLinearColor(0.055f, 0.011f, 0.003f, 1), true))
+            return Reject(Result, TEXT("Bob material graph or rendering properties differ."));
+        Assets.Add(BobSurface);
+        for (int32 Index = 0; Index < 4; ++Index)
+        {
+            auto* Cloth = LoadObject<UMaterial>(nullptr, *(Root + TEXT("/Materials/") + ClothNames[Index]));
+            if (!CheckMaterial(Cloth, Weave, ClothColors[Index], false))
+                return Reject(Result, FString::Printf(TEXT("Cloth material graph/properties differ: %s"), ClothNames[Index]));
+            Assets.Add(Cloth);
+        }
+        TArray<TSharedPtr<FJsonValue>> Records;
+        for (const FFit& Fit : Fits())
+        {
+            auto* Mesh = LoadObject<USkeletalMesh>(nullptr, *Fit.Package);
+            auto* Reference = LoadObject<USkeletalMesh>(nullptr, *Fit.Reference);
+            if (!Mesh || !Reference || !Reference->GetSkeleton() || Mesh->GetSkeleton() != Reference->GetSkeleton()
+                || !Mesh->GetImportedModel() || Mesh->GetImportedModel()->LODModels.Num() != 1
+                || Mesh->GetMaterials().Num() != Fit.Roles.Num())
+                return Reject(Result, TEXT("Mesh/reference/skeleton/LOD/material-count differs: ") + Fit.Name);
+            TArray<USkinnedAsset*> Pending = {Mesh};
+            FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
+            const auto& Ref = Mesh->GetRefSkeleton();
+            const auto& Original = Reference->GetRefSkeleton();
+            if (Ref.GetNum() != 54 || Ref.GetNum() != Original.GetNum())
+                return Reject(Result, FString::Printf(TEXT("%s bone counts: actual=%d reference=%d expected=54"),
+                    *Fit.Name, Ref.GetNum(), Original.GetNum()));
+            for (int32 Bone = 0; Bone < Ref.GetNum(); ++Bone)
+                if (Ref.GetBoneName(Bone) != Original.GetBoneName(Bone)
+                    || Ref.GetParentIndex(Bone) != Original.GetParentIndex(Bone)
+                    || !Ref.GetRefBonePose()[Bone].Equals(Original.GetRefBonePose()[Bone], 0.01f))
+                    return Reject(Result, FString::Printf(TEXT("%s bone %d name/parent/bind differs: actual=%s expected=%s"),
+                        *Fit.Name, Bone, *Ref.GetBoneName(Bone).ToString(), *Original.GetBoneName(Bone).ToString()));
+            int32 ActualTriangles = 0;
+            for (const auto& Section : Mesh->GetImportedModel()->LODModels[0].Sections) ActualTriangles += Section.NumTriangles;
+            const auto Bounds = Mesh->GetBounds();
+            const double Height = Bounds.BoxExtent.Z * 2;
+            if (ActualTriangles != Fit.Triangles || Bounds.Origin.ContainsNaN() || Bounds.BoxExtent.ContainsNaN()
+                || Bounds.BoxExtent.GetMin() <= 0 || !FMath::IsFinite(Height)
+                || (Fit.FullBody ? Height < 155 || Height > 175 : Height <= 0 || Height > 140))
+                return Reject(Result, FString::Printf(TEXT("%s geometry: triangles=%d expected=%d height_cm=%.6f extent=%s"),
+                    *Fit.Name, ActualTriangles, Fit.Triangles, Height, *Bounds.BoxExtent.ToString()));
+            TArray<TSharedPtr<FJsonValue>> Slots;
+            External.Add(Reference->GetSkeleton()->GetOutermost()->GetName());
+            if (!ResolveSlots(Fit, *Mesh, *Reference, Result, false)) return false;
+            for (int32 Index = 0; Index < Mesh->GetMaterials().Num(); ++Index)
+            {
+                const auto& Slot = Mesh->GetMaterials()[Index];
+                auto* Expected = Slot.MaterialInterface.Get();
+                if (!Expected->GetOutermost()->GetName().StartsWith(Root + TEXT("/")))
+                    External.Add(Expected->GetOutermost()->GetName());
+                auto Record = MakeShared<FJsonObject>();
+                Record->SetNumberField(TEXT("index"), Index);
+                Record->SetNumberField(TEXT("sourceRoleIndex"), Fit.Roles.IndexOfByKey(Slot.ImportedMaterialSlotName));
+                Record->SetStringField(TEXT("role"), Slot.MaterialSlotName.ToString());
+                Record->SetStringField(TEXT("material"), Expected->GetPathName());
+                Slots.Add(MakeShared<FJsonValueObject>(Record));
+            }
+            TArray<TSharedPtr<FJsonValue>> Sections;
+            TSet<int32> UsedSlots;
+            for (const auto& Section : Mesh->GetImportedModel()->LODModels[0].Sections)
+            {
+                if (!Mesh->GetMaterials().IsValidIndex(Section.MaterialIndex) || Section.NumTriangles <= 0)
+                    return Reject(Result, TEXT("Invalid section material index/triangles: ") + Fit.Name);
+                UsedSlots.Add(Section.MaterialIndex);
+                auto SectionRecord = MakeShared<FJsonObject>();
+                SectionRecord->SetNumberField(TEXT("materialIndex"), Section.MaterialIndex);
+                SectionRecord->SetStringField(TEXT("role"), Mesh->GetMaterials()[Section.MaterialIndex].ImportedMaterialSlotName.ToString());
+                SectionRecord->SetNumberField(TEXT("triangles"), Section.NumTriangles);
+                Sections.Add(MakeShared<FJsonValueObject>(SectionRecord));
+            }
+            if (UsedSlots.Num() != Fit.Roles.Num())
+                return Reject(Result, TEXT("Canonical material role has no mesh section: ") + Fit.Name);
+            auto Record = MakeShared<FJsonObject>();
+            Record->SetStringField(TEXT("object"), Mesh->GetPathName());
+            Record->SetStringField(TEXT("source"), Fit.Source);
+            Record->SetStringField(TEXT("reference"), Reference->GetPathName());
+            Record->SetStringField(TEXT("skeleton"), Mesh->GetSkeleton()->GetPathName());
+            Record->SetNumberField(TEXT("bones"), Ref.GetNum());
+            Record->SetNumberField(TEXT("triangles"), ActualTriangles);
+            Record->SetNumberField(TEXT("heightCm"), Height);
+            Record->SetArrayField(TEXT("boundsOriginCm"), Vector(Bounds.Origin));
+            Record->SetArrayField(TEXT("boundsExtentCm"), Vector(Bounds.BoxExtent));
+            Record->SetBoolField(TEXT("referencePoseMatchesIncumbent"), true);
+            Record->SetArrayField(TEXT("slots"), Slots);
+            Record->SetArrayField(TEXT("sections"), Sections);
+            Records.Add(MakeShared<FJsonValueObject>(Record));
+            Assets.Add(Mesh);
+            UE_LOG(LogFernSpike, Display, TEXT("Wardrobe inventory %s: triangles=%d height_cm=%.6f"), *Fit.Name, ActualTriangles, Height);
+        }
+        Result->SetArrayField(TEXT("meshes"), Records);
+        Result->SetNumberField(TEXT("packages"), Assets.Num());
+        Result->SetStringField(TEXT("transformPolicy"), TEXT("Scene/unit conversion once; scale1; zero import offsets; original reference bind/pivot"));
+        Result->SetStringField(TEXT("materialPolicy"), TEXT("Original roles retained; admitted neutral hair; opaque fixed-color base/footwraps with UV8 weave"));
+        return Assets.Num() == 34;
+    }
+
+    bool Audit(const TArray<UObject*>& Assets, const TSet<FString>& External, const TSharedRef<FJsonObject>& Result)
+    {
+        TSet<FString> Local;
+        for (auto* Asset : Assets) Local.Add(Asset->GetOutermost()->GetName());
+        for (TObjectIterator<UObject> It; It; ++It)
+            if (It->IsAsset() && It->GetOutermost()->GetName().StartsWith(Root + TEXT("/")) && !Assets.Contains(*It)) return false;
+        TArray<UObject*> Pending = Assets;
+        TSet<UObject*> Seen;
+        TArray<TSharedPtr<FJsonValue>> References;
+        while (Pending.Num())
+        {
+            UObject* Object = Pending.Pop(EAllowShrinking::No);
+            if (Seen.Contains(Object)) continue;
+            Seen.Add(Object);
+            if (Seen.Num() > 16384) return false;
+            TArray<UObject*> Found;
+            FReferenceFinder Finder(Found, nullptr, false, true, false, true);
+            Finder.FindReferences(Object);
+            for (auto* Reference : Found)
+            {
+                if (!Reference) continue;
+                const FString Package = Reference->GetOutermost()->GetName();
+                if (Package.StartsWith(TEXT("/Script/"))) continue;
+                if (!Local.Contains(Package) && !External.Contains(Package))
+                {
+                    UE_LOG(LogFernSpike, Error, TEXT("Unapproved wardrobe reference %s -> %s"), *Object->GetPathName(), *Reference->GetPathName());
+                    return false;
+                }
+                References.Add(MakeShared<FJsonValueString>(Reference->GetPathName()));
+                if (Local.Contains(Package)) Pending.Add(Reference);
+            }
+        }
+        Result->SetArrayField(TEXT("persistentObjectReferences"), References);
+        return true;
+    }
+
+    bool Import(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+    {
+        TArray<FString> Packages = {Root + TEXT("/Textures/T_BobReuse_Neutral"), Root + TEXT("/Textures/T_ModularWeave"),
+            Root + TEXT("/Materials/") + BobMaterial};
+        for (const auto* Name : ClothNames) Packages.Add(Root + TEXT("/Materials/") + Name);
+        for (const auto& Fit : Fits()) Packages.Add(Fit.Package);
+        for (const auto& Package : Packages)
+            if (FindPackage(nullptr, *Package) || FPackageName::DoesPackageExist(Package))
+                return Reject(Result, TEXT("Reserved package already exists: ") + Package);
+        Result->SetStringField(TEXT("stage"), TEXT("two-textures-five-materials"));
+        auto* Bob = Texture(TEXT("T_BobReuse_Neutral"),
+            FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Characters/HairstyleRefinement/Textures/T_BobReuse_Neutral.png")), Feedback);
+        auto* Weave = Texture(TEXT("T_ModularWeave"),
+            FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Characters/ModularClothing/Textures/T_ModularWeave.png")), Feedback);
+        if (!Bob || !Weave || !Material(BobMaterial, Bob, FLinearColor(0.055f, 0.011f, 0.003f, 1), true)) return false;
+        for (int32 Index = 0; Index < 4; ++Index)
+            if (Feedback.ReceivedUserCancel() || !Material(ClothNames[Index], Weave, ClothColors[Index], false)) return false;
+        for (const auto& Fit : Fits())
+        {
+            Result->SetStringField(TEXT("stage"), TEXT("skeletal-import:") + Fit.Name);
+            UE_LOG(LogFernSpike, Display, TEXT("Importing canonical wardrobe fit %s"), *Fit.Name);
+            auto* Reference = LoadObject<USkeletalMesh>(nullptr, *Fit.Reference);
+            if (!Reference) return Reject(Result, TEXT("Missing incumbent reference: ") + Fit.Reference);
+            if (Feedback.ReceivedUserCancel()) return false;
+            auto* Mesh = Hair::ImportRiggedMesh(Fit.Source, Fit.Package, Reference->GetSkeleton(), Feedback);
+            if (!Mesh || Mesh->GetMaterials().Num() != Fit.Roles.Num())
+                return Reject(Result, FString::Printf(TEXT("%s imported mesh/material count: actual=%d expected=%d"),
+                    *Fit.Name, Mesh ? Mesh->GetMaterials().Num() : -1, Fit.Roles.Num()));
+            if (!ResolveSlots(Fit, *Mesh, *Reference, Result, true)) return false;
+            Mesh->PostEditChange();
+            TArray<USkinnedAsset*> Pending = {Mesh};
+            FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("inventory-reference-audit"));
+        TArray<UObject*> Assets;
+        TSet<FString> External;
+        if (!Inventory(Result, Assets, External) || !Audit(Assets, External, Result) || Feedback.ReceivedUserCancel()) return false;
+        Result->SetStringField(TEXT("stage"), TEXT("saving-exactly34-packages"));
+        for (auto* Asset : Assets)
         {
             if (Feedback.ReceivedUserCancel()) return false;
             UPackage* Package = Asset->GetOutermost();
@@ -940,4 +1375,26 @@ bool RunHairWaveSpike(const FString& Mode, const FString& Output, const FDateTim
     Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
     if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Frozen wave %s failed; preserve its evidence and partial outputs."), *Mode);
     return WriteJson(FPaths::Combine(Output, TEXT("hair-wave-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
+}
+
+bool RunWardrobeSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven)
+{
+    FStopFeedback Feedback(Output, Deadline, bCompletionDriven);
+    auto Result = MakeShared<FJsonObject>();
+    Result->SetStringField(TEXT("mode"), Mode);
+    Result->SetStringField(TEXT("namespace"), Wardrobe::Root);
+    Result->SetStringField(TEXT("stage"), TEXT("persisted-inventory"));
+    bool Passed = false;
+    if (Mode == TEXT("WardrobeImport")) Passed = Wardrobe::Import(Feedback, Result);
+    else if (Mode == TEXT("WardrobeVerify"))
+    {
+        TArray<UObject*> Assets;
+        TSet<FString> External;
+        Passed = Wardrobe::Inventory(Result, Assets, External) && Wardrobe::Audit(Assets, External, Result);
+    }
+    Result->SetBoolField(TEXT("passed"), Passed);
+    Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
+    if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Wardrobe %s failed at %s; preserve evidence and partial outputs."),
+        *Mode, *Result->GetStringField(TEXT("stage")));
+    return WriteJson(FPaths::Combine(Output, TEXT("wardrobe-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
 }

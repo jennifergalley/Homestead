@@ -1,13 +1,15 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
-    [ValidateSet(-1,0,1,2,3,5,6)][int]$CompileActionId=-1,
-    [ValidateSet(-1,1,2,3,4,6,7,8,9)][int]$ResourceLinkActionId=-1,
+    [ValidateSet(-1,0,1,2,3,4,5,6)][int]$CompileActionId=-1,
+    [ValidateSet(-1,1,2,3,4,5,6,7,8,9)][int]$ResourceLinkActionId=-1,
     [ValidateSet('','Game','Probe')][string]$ConvertResource='',
     [string]$DerivedDllResponse='',
     [switch]$DetachedConsole,
     [switch]$FernActions,
     [switch]$UiActions,
+    [switch]$WardrobeActions,
+    [switch]$WardrobeSlotCorrection,
     [switch]$ShippingActions,
     [switch]$SplitShippingManifest,
     [switch]$EmbedShippingManifest,
@@ -21,6 +23,15 @@ $authorityRoot=$root
 if($HairWaveCandidate -and -not $ShippingActions){throw 'Hair-wave candidate applies only to the established Shipping leaves.'}
 $shippingBuildName=if($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
+if($WardrobeSlotCorrection -and (-not $WardrobeActions -or $CompileActionId -notin @(-1,0) -or
+    $ResourceLinkActionId -notin @(-1,2,3) -or $ConvertResource)){
+    throw 'Wardrobe slot correction admits only existing importer compile0/library3/DLL2.'
+}
+if($WardrobeActions -and ($FernActions -or $UiActions -or $ShippingActions -or -not $DetachedConsole -or
+    $CompileActionId -notin @(-1,0,1,4) -or $ResourceLinkActionId -notin @(-1,2,3,5,6))) {
+    throw 'Only exact integrated wardrobe compile/library/DLL leaves are admitted.'
+}
+if(-not $WardrobeActions -and ($CompileActionId -eq 4 -or $ResourceLinkActionId -eq 5)){throw 'Action requires the pinned wardrobe export.'}
 if($UiActions) {
     if($FernActions -or $ShippingActions -or $CompileActionId -notin @(0,6) -or $ResourceLinkActionId -ne -1 -or
         $ConvertResource -or $DerivedDllResponse -or -not $DetachedConsole){throw 'Only the isolated UI PCH/game compile leaves are admitted.'}
@@ -52,9 +63,9 @@ $compiler='E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.ex
 $hash='FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619'
 if($CompileActionId -ne -1 -and $ResourceLinkActionId -ne -1){throw 'Select only one reviewed action.'}
 if($ConvertResource -and ($CompileActionId -ne -1 -or $ResourceLinkActionId -ne -1)){throw 'Conversion must be a separate leaf.'}
-$dllActionIds=if($ShippingActions){@(1)}elseif($FernActions){@(2)}else{@(6,9)}
+$dllActionIds=if($WardrobeActions){@(2,5)}elseif($ShippingActions){@(1)}elseif($FernActions){@(2)}else{@(6,9)}
 if($FernActions -and ($CompileActionId -notin @(-1,0,1) -or $ResourceLinkActionId -notin @(-1,2,3))){throw 'Only the two exported fern compiles/library/DLL are admitted.'}
-if(-not $FernActions -and $ResourceLinkActionId -in @(2,3)){throw 'Fern link IDs require the pinned fern map.'}
+if(-not $FernActions -and -not $WardrobeActions -and $ResourceLinkActionId -in @(2,3)){throw 'Fern link IDs require the pinned fern map.'}
 if($DerivedDllResponse -and $ResourceLinkActionId -notin $dllActionIds){throw 'Derived response requires an approved DLL link.'}
 $selectedId=if($ResourceLinkActionId -ne -1){$ResourceLinkActionId}else{$CompileActionId}
 if($EmbedShippingManifest) {
@@ -193,6 +204,10 @@ if($StageCooked) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\clearing-shipping-plan-02\actions.json'
         $planHash='8923CCD7EA23E7362401B865DAD8684EB877CF0F758B2DD363A037BCFD5D7F27'
     }
+    if($WardrobeActions) {
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'
+        $planHash='5A801AC790664B9C17894AB1C730EBEC1DB5E541A8343D9B01E6CF1BE7A3E0AE'
+    }
     if((Get-FileHash $planPath).Hash -cne $planHash) { throw 'Reviewed action export changed.' }
     $plan=Get-Content $planPath -Raw|ConvertFrom-Json
     $action=@($plan.Actions|Where-Object Id -EQ $selectedId)[0]
@@ -208,6 +223,14 @@ if($StageCooked) {
     foreach($dependency in $action.PrerequisiteActions) {
         $prior=@($plan.Actions|Where-Object Id -EQ $dependency)[0]
         foreach($path in $prior.ProducedItems){if(-not(Test-Path -LiteralPath $path)){throw "Missing prerequisite:$path"}}
+        if($WardrobeActions) {
+            $build=if($WardrobeSlotCorrection -and $dependency -eq 0){'wardrobe-native-build-02'}else{'wardrobe-native-build-01'}
+            $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$build\compile$dependency\result.json") -Raw|ConvertFrom-Json
+            if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual wardrobe prerequisite compile missing.'}
+            foreach($product in $proof.producedItems) {
+                if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Wardrobe prerequisite compile output changed.'}
+            }
+        }
     }
     $exactArguments=$action.CommandArguments
     if($FernActions) {
@@ -246,8 +269,9 @@ if($StageCooked) {
         $derived=[IO.Path]::GetFullPath($DerivedDllResponse,$root)
         if(-not $derived.StartsWith((Join-Path $root "Saved\Automation\$($run.id)")+'\',[StringComparison]::OrdinalIgnoreCase) -or
             (Split-Path (Split-Path $derived -Parent) -Leaf) -notmatch '^resource-conversion-[0-9]{2}$'){throw 'Derived response is outside the approved fresh recipe.'}
-        $which=if($ShippingActions -or $ResourceLinkActionId -eq 6){'game'}else{'probe'}
-        $module=if($ResourceLinkActionId -eq 6){'SurvivalGame'}else{'SurvivalGameEditor'}
+        $gameLink=if($WardrobeActions){$ResourceLinkActionId -eq 5}else{$ResourceLinkActionId -eq 6}
+        $which=if($ShippingActions -or $gameLink){'game'}else{'probe'}
+        $module=if($gameLink){'SurvivalGame'}else{'SurvivalGameEditor'}
         $resource=Join-Path $root "Intermediate\Build\Win64\x64\UnrealEditor\Development\$module\Default.rc2.res"
         if($ShippingActions){$resource=Join-Path $root 'Intermediate\Build\Win64\x64\SurvivalGame\Shipping\SurvivalGame-Win64-Shipping-Default.rc2.res'}
         $converted=Join-Path (Split-Path $derived -Parent) "$which-resource.obj"
@@ -335,7 +359,7 @@ try {
         resourceConversion=$ConvertResource;derivedDllResponse=$DerivedDllResponse
         splitShippingManifest=[bool]$SplitShippingManifest;embedShippingManifest=[bool]$EmbedShippingManifest
         stageCooked=[bool]$StageCooked;stageCandidate=$stageCandidate
-        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions
+        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()
     $null=$observedPids.Add($guard.ProcessId)

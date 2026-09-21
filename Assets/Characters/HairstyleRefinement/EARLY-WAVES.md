@@ -34,6 +34,19 @@ round-trip position error below 0.000000064 m and 53 original authoring bones.
 Hashes and per-body checks are in the manifest. Broad card grouping and end
 silhouette still need ordinary in-game back/side/movement review.
 
+## Open visual limitation
+
+The CPU three-quarter review still shows broad, chunky locks and a conspicuous
+cut edge. Absence of the rejected accordion compression and correct tip height
+do **not** establish natural-looking ends. OpenSpec source-quality task 1.1
+remains open. This drop is interchange-ready, not an accepted visual improvement.
+Review the candidate at the ordinary in-game camera before further source
+sculpting; retain the original alternative if the visible result is worse.
+
+The published early source checkpoint is `a3a6dee`. Later local feather-tip
+experiments changed working-copy wave files; they are not the same artifact
+and must not be substituted without their own commit, hash and qualification.
+
 Reuse: existing admitted CC0 MakeHuman long01 geometry, original game_engine
 rig/weights and chestnut texture alpha. Only the required shorter end topology
 and a neutral color-support texture were custom changes. License/provenance:

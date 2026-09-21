@@ -1,0 +1,390 @@
+{
+  "status": "passed-current-editor-native-build",
+  "createdUtc": "2026-09-21T10:01:46.3825873+00:00",
+  "products": [
+    {
+      "sha256": "F6BF2A5D39E3D565D0BC54AE168BFE5FA1FEC4F6CF76BB50B0A13D66029B09A3",
+      "bytes": 2594816,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "sha256": "A603CA45988B7A252E7D1F520DA3C7A5B1D42ECADA505BAD9792503DEBC1E71A",
+      "bytes": 86437888,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "sha256": "114FAE90398D2ABB4AC6FE7AC78BE17D8444FBC24FEC59FC13657C9030677422",
+      "bytes": 323584,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "sha256": "F3545C339F95950A8D5856FC37A7803DC8E4A0220F1DFFA2F9BB9033E36F182A",
+      "bytes": 26316800,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "bytes": 166,
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "bytes": 945032,
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "25472C1F739C28C801C1431AED26232E751BCC3C65A3553E82D5D3C23204E2C6",
+      "path": "Source\\SurvivalGame.Target.cs"
+    },
+    {
+      "sha256": "1A3BA371827DF9262B7376169F1FE5BFB6372AA53A1D79A0114D6886B5592A05",
+      "path": "Source\\SurvivalGameEditor.Target.cs"
+    },
+    {
+      "sha256": "44E4A005C17600E77F0189E4A0B6A7609884F74E62DE2000B3F0C43A5C82737A",
+      "path": "Source\\SurvivalGame\\HomesteadActionTestState.h"
+    },
+    {
+      "sha256": "D66C9811BF092ABE3818315D07DC07A89C403862C2E32E6045DD47C34DF1EF0A",
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.cpp"
+    },
+    {
+      "sha256": "E28FE1088E89D9EBCF3C14746392995B5B5CAF2CA33B3B924A0A296F4D9E219B",
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.h"
+    },
+    {
+      "sha256": "116418605A7433E7FBC64442C1D1316B02B81FF9A5D2D8276F7DB2A29064B029",
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.cpp"
+    },
+    {
+      "sha256": "7E77BE0FDD8410EA2AD68805B8902C9F9E83311E8CF85D4D8F469E0FBB093104",
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.h"
+    },
+    {
+      "sha256": "CA2596A09E6FA5A2E3DEB03C17D946C06A522022AC62A5762EFDF702423B54ED",
+      "path": "Source\\SurvivalGame\\HomesteadBookClarityTest.cpp"
+    },
+    {
+      "sha256": "F16752470150401138AC2F7AF1ECBBB0EA0F40C6B8DC7A08338FA5942660078C",
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.cpp"
+    },
+    {
+      "sha256": "25C0E5745B1F983B9B15294AD856D7BE42FD3CE4698CB86DF5E09ED47569E74B",
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.h"
+    },
+    {
+      "sha256": "8E43B03870EBDE195156D18CCC665998864B6B1D1320B357BD12847565FB7F4A",
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp"
+    },
+    {
+      "sha256": "4BE257374BE2061E2840779C569BFC00494D23B62C119B9863DF55E8A1E4D682",
+      "path": "Source\\SurvivalGame\\HomesteadController.cpp"
+    },
+    {
+      "sha256": "6492DA47586F363A9644B7E5C55915AB69443B051BDC55C1CB8AB6290B048CA8",
+      "path": "Source\\SurvivalGame\\HomesteadController.h"
+    },
+    {
+      "sha256": "3A8EAE217BD896B46A8C6B7145D016E4575A772D21C99A5F32D8CF5131130835",
+      "path": "Source\\SurvivalGame\\HomesteadEndurancePlaytest.cpp"
+    },
+    {
+      "sha256": "389ACD085E24E5321068BBA4F9E8AA65763EBE88F986E08BAB551072FED6D852",
+      "path": "Source\\SurvivalGame\\HomesteadEnduranceState.h"
+    },
+    {
+      "sha256": "AC41A627C3CC4AFF94CF9F214EEBA9E88BDFC67ACA7EF25189EE733DBBC1BFA6",
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackMeasurements.cpp"
+    },
+    {
+      "sha256": "DB4C3EB29DFB3766D31A5E581DA3870344531DF0BC30A8D712ACEB855286FF44",
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackTest.cpp"
+    },
+    {
+      "sha256": "B1E4F5A1B6FB4070B7E4D85BA089BF3C3593CC7AD12F3878EA7FFEBFB6204DC7",
+      "path": "Source\\SurvivalGame\\HomesteadForageRenewal.cpp"
+    },
+    {
+      "sha256": "42D9106C656FE0DDB61D332922E55E48707C4D10B7236C3DA1D48F24D897435F",
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp"
+    },
+    {
+      "sha256": "99AA97162D8F30EFFD763D5ADA97A7FBDA145768D66BEE1AC6C5135078DBFFC6",
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.cpp"
+    },
+    {
+      "sha256": "BEA77510E11770942B0EF253692F39C55E1097AFB1D609AB106687655144AE38",
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.h"
+    },
+    {
+      "sha256": "6F8C8A0338241288538C99081820AB196DD225D73443EFB077211E13182AE9AD",
+      "path": "Source\\SurvivalGame\\HomesteadGatheringTest.cpp"
+    },
+    {
+      "sha256": "33AA1809BCC6F2DB444162BFBA9B09DF90AA022055DFF94C8C062296F9167A19",
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.cpp"
+    },
+    {
+      "sha256": "F6963986887E11D2DF5B76D476E8F29F7525D2792BECE8D1CB10B27F12C5C230",
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.h"
+    },
+    {
+      "sha256": "C05F19BB6D359E769A54E256EFA9A5C39B3FA892ADDC8C6F75D693920C99A413",
+      "path": "Source\\SurvivalGame\\HomesteadHotkeyTest.cpp"
+    },
+    {
+      "sha256": "3FD335630DFC4B727BEAAE617BE40C44111B31AE5AAFEA3C9438141C0B60277C",
+      "path": "Source\\SurvivalGame\\HomesteadHUD.cpp"
+    },
+    {
+      "sha256": "4341DB951DEC95F4876BC559B9041D0856CB8E125173AD57C8C2F103E6A32868",
+      "path": "Source\\SurvivalGame\\HomesteadHUD.h"
+    },
+    {
+      "sha256": "F07EB7E35A7E76BB8F820CD69CF75D5AF8F058B178676E5E975F691871E57A02",
+      "path": "Source\\SurvivalGame\\HomesteadPresentationTest.cpp"
+    },
+    {
+      "sha256": "09CCF9C06E5F9B428083BAC294DFC27ACB845BEF0ACD407F0D10D94625A542A6",
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.cpp"
+    },
+    {
+      "sha256": "B704619EC86B653B1E110A6582370F9F5592BB2175E1BB55010E97D5513961FA",
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.h"
+    },
+    {
+      "sha256": "3B78A2B383AF0E90EEF431928F04A0C568EA118935C5698AE499224991C05659",
+      "path": "Source\\SurvivalGame\\HomesteadPromptTest.cpp"
+    },
+    {
+      "sha256": "958DC048120BD20E9011B8394273B551B3080383F0F08780F0E05946073C5AF6",
+      "path": "Source\\SurvivalGame\\HomesteadRenewalState.h"
+    },
+    {
+      "sha256": "CDBC705D5772C9690293EC6845DEB15B35B6952C5190F9723B5BFD0FFE2C3F3D",
+      "path": "Source\\SurvivalGame\\HomesteadSave.h"
+    },
+    {
+      "sha256": "9C2ABC921A58E05855C3219BA43ACE1DD79D21E2F9B2E47D8309E4B3E1C9BF8E",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.cpp"
+    },
+    {
+      "sha256": "9597E28AA7F9C7E0448487EFA9DA8CC2A3B5B4B4ECDDEBE8CC35A94F90F8EC76",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.h"
+    },
+    {
+      "sha256": "3A3CB868D064FBE67B875F85B7470A45D1AFC84AEA2B581FF4FE6EA4010646E0",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRoutingTest.cpp"
+    },
+    {
+      "sha256": "CC3E9B4155168E4EDD8C3C7B51252351DC0B1F3A1F441E894C76E6252A1D8418",
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.cpp"
+    },
+    {
+      "sha256": "F6B6A7D9F433888142F784FB500F58773B772336CD85C848DD28366F8582BFB1",
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.h"
+    },
+    {
+      "sha256": "0FAD9A4F3073D90CE463D138398CCBC9D6D1AA7BF56FCFCF196E3B1ED404378B",
+      "path": "Source\\SurvivalGame\\HomesteadStartupProbe.cpp"
+    },
+    {
+      "sha256": "B9E9D6A031AE30581C574D25993B71520C502F9B9FC9F949205F8FD0229B0C39",
+      "path": "Source\\SurvivalGame\\HomesteadTestPaths.h"
+    },
+    {
+      "sha256": "3CAFD675BC651886F1CBDF27795B40D9917887DB75A0720F03FBEE3D5310431E",
+      "path": "Source\\SurvivalGame\\HomesteadToolGeometry.h"
+    },
+    {
+      "sha256": "0E89AB603A6BAB0DF1A319E0F8AE7C5648C3E0C9620F03D417DE1F47DDE9EDA9",
+      "path": "Source\\SurvivalGame\\HomesteadVideoSyncTest.cpp"
+    },
+    {
+      "sha256": "2615E6427399E0847409BCF5EB27B4F6786CC6C9C010539E57E39A2F3F74A097",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp"
+    },
+    {
+      "sha256": "B05FF0EFAEDF35A54BCE7A14471ED6E50B20B4513007DDAF4477BD2DBF0626C4",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h"
+    },
+    {
+      "sha256": "8129C57DFD5031F72DE790C9267DEED403036E86C8F00B12D2C4CA779FB849EC",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.cpp"
+    },
+    {
+      "sha256": "E705F5D49CDF4C605CABD97620E9EDCDD1C4CD05424384C231D9E64E5811FA06",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.h"
+    },
+    {
+      "sha256": "E4FA23EC3514593D90FCC344EBACCCF7BBEF25C120359047A1866C9FF41ADAC0",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobeSelection.h"
+    },
+    {
+      "sha256": "4BB77A6CE984EB0F2AA2DD93DA5B041A2839B4D9BD3D59692AE0E41E355CA5F7",
+      "path": "Source\\SurvivalGame\\HomesteadWateringPlaytest.cpp"
+    },
+    {
+      "sha256": "5EC591C2E5DF7C0265153308118002D01FC457EC024DF4628D422D934BAD5B93",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTest.cpp"
+    },
+    {
+      "sha256": "9C1C58E81E2E89F9AD46673E6E145136576633E65DFFA04A9F5CD89BA2E2C0E0",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.cpp"
+    },
+    {
+      "sha256": "301B4BBC8D00A9F3AC0236BE731D9D87836ACF7B25DFE0D2FBB616692FEDFF64",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.h"
+    },
+    {
+      "sha256": "739D6C3C8DCDC123DE82B36C358B16E02A5ABD123DA50ED685E8DEE5CC2192DE",
+      "path": "Source\\SurvivalGame\\HomesteadWeedingPlaytest.cpp"
+    },
+    {
+      "sha256": "4FFFAE84FF88204D7877BEE8AD8A8642AC3A8A2E6018EDCC6BDADF5FB2125C86",
+      "path": "Source\\SurvivalGame\\HomesteadWeedingTest.cpp"
+    },
+    {
+      "sha256": "C47779AF1640BCC4409FFDAFE064075ED358CA76461681679AA5260738F8F1EE",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp"
+    },
+    {
+      "sha256": "12B77CD988DF03ABCDE9AA158F5EF11859E17A4156908C1EA50D1B274EF82985",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h"
+    },
+    {
+      "sha256": "709297A9A12C097F734AD8AA415C81D2DB60C3DBDF41B01392840599DFFA65AE",
+      "path": "Source\\SurvivalGame\\SurvivalGame.Build.cs"
+    },
+    {
+      "sha256": "876F67FAE339EB8036B94CA19ADC55CBFAE0A3A3E72B2E1D48D8761BFB911467",
+      "path": "Source\\SurvivalGame\\SurvivalGame.cpp"
+    },
+    {
+      "sha256": "F593880C6C9801F9BAFAB406D36D914B873BCE76E60B9C8C329D6B9B0EDDAA1C",
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.cpp"
+    },
+    {
+      "sha256": "2EEB97DEBCF123D42E2E49AEDA0F5A84C3C8399BA1958C19E138D001B690F6D9",
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.h"
+    },
+    {
+      "sha256": "52592BBBA0EAC6ACF65E982BA5FF6A32AED1E33AACE4270603D6F24DE28B7661",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuInventory.cpp"
+    },
+    {
+      "sha256": "E0E4C23CA8650320BAA3DD57BE2F047548E72C94EC9B230B4DF6230AC89F16C1",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuNavigation.h"
+    },
+    {
+      "sha256": "F902D3591BAF3113DC6E63DB39D0639E592482B1A42C1A3CFEEF57D4BBEEAA00",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.cpp"
+    },
+    {
+      "sha256": "9ED2B293899F10AEDCF435E28171DC2511EABA89E0DF26ECA7009CFCCF32A442",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.h"
+    },
+    {
+      "sha256": "43211E5CB1B113A6A564A375FD527E9548CB01800831E35620D8F291EAEDD0A8",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuTests.cpp"
+    },
+    {
+      "sha256": "B0A8A788F9605C7F54DFD76FF36A9052E07055EEC545400F66629D5ED5A41BB9",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadNativeMenuTest.cpp"
+    },
+    {
+      "sha256": "2C0C2C7AD8A90DA07E9D272A89F536BDCD7C451D5660ADDDFA473509F735C78F",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.cpp"
+    },
+    {
+      "sha256": "C32CAE33B0A909D8C65D6EBC9A0CC2FEE3E4E74EF9089B554BE9ADAD238A36B3",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.h"
+    },
+    {
+      "sha256": "E9C199B13A4109E5C3302BD0EAA312C6861E448BD8885CB1AD6829F98AB6E000",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.cpp"
+    },
+    {
+      "sha256": "AB2C961122FC6474A7CA9DE44C7BF4A919B2C7DA12F8CA791EE7BE5106D2C49B",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.h"
+    },
+    {
+      "sha256": "904092DB86C2C05B1903F945B2D2ACF4F35F73F3D4CA44342E7751FFE343A148",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp"
+    },
+    {
+      "sha256": "064CB520AD1D3B6280EC309F53533E2966969B48A5DAA982B954A21E4E0B0559",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h"
+    },
+    {
+      "sha256": "179A12918E10F713BF0CB93025863889F5C579898F74E2AA2B0E98156B913E64",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "B934F6B7A5D50739D93104117483ABD4C40D464858E8C23C09D0CA688019D875",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.h"
+    },
+    {
+      "sha256": "FA84CF8ACC7CD6D84766D8BF29E3979FF78489F0E2700944A289DE2C7A7B2BE5",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "8F47E9C54BFAA78B79672022472962BD4B6E7548625F57A4409BA5CB09180A86",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.cpp"
+    },
+    {
+      "sha256": "1052EF0CB74D94F0C51EBE288D86D84EB44B374182088EB7E49A8ECE6B77E47C",
+      "path": "Config\\DefaultGame.ini"
+    }
+  ],
+  "steps": [
+    {
+      "sha256": "2F3873850D6681A5D89FB4B00D43218D40F90363A299CB43A052AA861F27B6B5",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-plan-01\\result.json"
+    },
+    {
+      "sha256": "705CBC552EA244779F2625D8799A7E12A7CDA02D0723B86D2156D080EEC407C4",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\compile0\\result.json"
+    },
+    {
+      "sha256": "C56BFD3531E0025D777A1C5862FF92702B00596A0BBC2A8A2F393AD9F2F62C72",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\compile1\\result.json"
+    },
+    {
+      "sha256": "847A8623A739154A2E03ED22BEE81C11A0CEAF3A641AA93403E8C68EA1F3B717",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\compile4\\result.json"
+    },
+    {
+      "sha256": "AB89F2C04670D7A4A2F1DE90DF0B34194C2F7682B753870E6A47574C8FC5D51C",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-06\\game\\result.json"
+    },
+    {
+      "sha256": "4BA395AE52A3720668596CFA3D16315EFF39F2131E2C3D5203939F1ECBE4FBC1",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-06\\probe\\result.json"
+    },
+    {
+      "sha256": "4A1A5C468257796F08C5C30291B6256E8FC7BABF90266546353E2FE130B1FD3B",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\library3\\result.json"
+    },
+    {
+      "sha256": "9B77EA88419FF47EC5E1431D2B8A1A1FF5CA26F479CDB83E5B6B7448F704F4A0",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\library6\\result.json"
+    },
+    {
+      "sha256": "4F923E74D24064D2E7B72EA342C95D4BF6987939386656F313DE451D28525E76",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\link5\\result.json"
+    },
+    {
+      "sha256": "CAED1AC943DA310A9EE501391AEEF3A1A03A90C910D85BAB9F956F5ED1860B44",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\link2\\result.json"
+    },
+    {
+      "sha256": "419CE4BB58A51BA3F531C9463410E01228362E7BB662097BCFEBBC49DBFD99F1",
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-native-build-01\\metadata\\result.json"
+    }
+  ],
+  "priorReceiptSha256": "950B1A51C800A87F60B5E4B3861AA817C70E2ADE304E11580935B67EC2F8FE74",
+  "qualification": "Actual integrated game/UI and native wardrobe importer/commandlet compiles, resource conversions, library/DLL links, PE/PDB checks and genuine UBT metadata passed. Existing guarded leaf policy retained. Historical failed game-link monitoring, VCTIP/conhost/link and prior hair compile failures remain qualified in the unchanged prior receipt chain; no retroactive pass or creation-time claim. Sampled process/endpoint evidence, not a filesystem/network sandbox or continuous trace. Native products only; no wardrobe asset import/runtime acceptance yet."
+}

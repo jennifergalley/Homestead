@@ -1,0 +1,44 @@
+{
+  "status": "passed-targeted-policy",
+  "createdUtc": "2026-09-21T10:02:35.8532996+00:00",
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "9789DD4FB287633A9398804755A949E3A9FACABF7DD710DC78454447ABC74F91"
+    },
+    {
+      "path": "Scripts\\HairWavePolicy.ps1",
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3"
+    },
+    {
+      "path": "Scripts\\WardrobePolicy.ps1",
+      "sha256": "22C084B43560C824A87B13B7E52FBD3C5C8BE0CED846C325C7BF150E3BD750A0"
+    },
+    {
+      "path": "Scripts\\Development-Run.ps1",
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755"
+    },
+    {
+      "path": "Tests\\Test-WardrobePolicy.ps1",
+      "sha256": "31FBDD260F259958C6DDAE07CE100F78F726274FBD096909667DF93887C5ABD2"
+    }
+  ],
+  "originalAttemptFiles": [],
+  "nativeReceiptSha256": "21AF855F842F292B0A0E02EC0D9774A0EBA038383BDB813E592358212C3C3C6B",
+  "tests": {
+    "fernCookNegativeCases": 36,
+    "profile": "Unchanged CookCompletionDriven0/0 primitive; no artificial asset timer; manual stop and policy-failure cancellation retained",
+    "productionArgs": "WardrobeImport/WardrobeVerify, nullrhi, DisablePython, noshaderworker, exact7config destinations",
+    "wardrobeNegativeCases": 30,
+    "waveNegativeCases": 20
+  },
+  "scope": "Exactly34 new packages in fresh ModularClothing root:21fits,6joinedBob,2textures,5materials. Canonical source only, original rig/materials and accepted wave material reused. No accepted asset overwrite; all incumbent Content protected. Existing read-only marker/inherited lifetime, root-only job, explicit detached stdio, direct Python uninitialized checks, only approved TraceControl and retained candidate-owned filesystem DDC. Native/synthetic evidence only until real import."
+}

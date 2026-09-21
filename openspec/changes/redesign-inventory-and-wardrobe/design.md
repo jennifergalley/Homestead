@@ -311,10 +311,29 @@ and check the saved inventory before cooking. Import/verification reuse the
 existing completion-driven guard primitive with live stop/pause and real native
 cancellation boundaries, not an arbitrary short import timer.
 
-The published source checker currently references ignored `.blend1` backups.
-The source owner is correcting that portability defect; final source admission
-must pass against committed files before asset import. Do not copy mutable
-backups or waive canonical geometry/hash checks to hide the failure.
+The source owner corrected ignored `.blend1` receipt prerequisites in `e72676f`;
+canonical media are unchanged. Main integrated the omitted historical wave
+qualification and exact committed LF archive bytes. Full final canonical and
+original modular source checks now pass without mutable backups or weakened
+geometry/hash checks. Thirty new policy negatives and36 existing fern/cook
+negatives pass. Current integrated native compiles/libraries/DLLs and genuine
+UBT metadata pass; `wardrobe-native-build-01/receipt.json` records exact products
+and preserves prior build-monitoring qualifications. Import/runtime acceptance
+still requires the guarded operation and subsequent real-game evidence.
+
+The first actual wardrobe import failed cooperatively before any package save:
+the initial importer incorrectly assumed joined-apron material order was the
+tunic order plus two appended slots. The pinned Bob source instead places apron
+trim at0 and brass at12. The corrected importer binds by each actual imported
+unique role/name, independently checks all27 source role sets, records source
+indices separately, and validates section membership/triangle coverage. Only
+the source's explicit joined-Bob hair-slot7 contract remains positional.
+An offline reordered-slot positive case and38 negatives pass; genuine corrected
+native products are recorded in `wardrobe-native-build-02/receipt.json`.
+Distinct import02 may reuse only the original failed attempt's unchanged,
+identified, completely empty ordinary namespace directory; no deletion,
+quarantine, reservation reset or accepted-content overwrite is admitted.
+Import01 remains failed with its original result and cleanup proof preserved.
 
 Deliver UI and content together. Extend existing smoke fixtures for actual
 equip/unequip/dye and current-version save/load/resume with owned IDs, material

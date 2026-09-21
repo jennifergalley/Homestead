@@ -1,0 +1,131 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 18.4761395,
+  "observedChildren": [
+    {
+      "parentPid": 54220,
+      "pid": 15992,
+      "admitted": true,
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "startUtc": "2026-09-21T09:53:13.8287268Z",
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5"
+    }
+  ],
+  "samples": [
+    {
+      "tcp": [],
+      "elapsedMs": 682.829,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 1601.5841,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 2437.9928,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 3145.492,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 3871.5164,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 4515.7975,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 5162.6924,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 5872.4727,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 6632.319,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 7458.6783,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 8182.103,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 9284.2784,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 10370.0607,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 11477.4214,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 12506.0216,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 13451.7163,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 14655.5873,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 15819.9658,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 16483.6901,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 17655.0742,
+      "udp": []
+    },
+    {
+      "tcp": [],
+      "elapsedMs": 18357.1181,
+      "udp": []
+    }
+  ],
+  "exportCorroboration": {
+    "versionQueryReported": true,
+    "version": "1.24.0",
+    "source": "ISPCToolChain.cs233-247 invokes --version through a process-local Lazy cache",
+    "observation": "A log-confirmed brief version-query child may be absent from process samples; no retroactive identity/endpoint claim.",
+    "sampledIsNotCompleteHistory": true
+  }
+}
