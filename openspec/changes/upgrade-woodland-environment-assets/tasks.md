@@ -7,9 +7,11 @@ graphics. Fourteen of29 tasks complete; earlier delivery history is retained in
 `execution-history.md`. Tree import03 remains FAILED with twelve qualified
 branch basis corners. Earlier technical promotion is not Jenny's art approval.
 
-**Current priority, Jenny September21 13:39AZ:** replace the sparse, primitive
-scene with a visibly lush woodland. Constructed-home/gameplay expansion and the
-parallel wardrobe round are deferred. No implementation from those rounds exists.
+**Current priority, Jenny September21 16:19-16:26AZ:** dense woodland with no
+pre-cleared house site; seeded exploration and persistent player-cleared building
+sites beyond the old square. Runtime architecture and acceptance now live in
+`add-persistent-generated-woodland`. This asset plan remains active for its
+unfulfilled visual/material clauses. Paused wardrobe expansion stays separate.
 
 Next visible goal: coherent enclosing canopy groups, layered natural understory
 and authored gatherable bushes/saplings/branches/flowers rather than decorative
@@ -22,15 +24,15 @@ canopy/fern/fir beds. Open ground, under-crown sky gaps and exposed primitive
 produce remain. Both natural09:59 observations were deliberately stopped after
 their600s milestones, not passed endurance. Daylight02 exposes the ruler-straight
 end of the finite playable board.
-Next: a multi-depth enclosing forest belt and separate noncolliding background
-ground beyond the preserved playable terrain, with understory tied to forest groups.
+The finite-background-skirt proposal is superseded before implementation by
+real generated chunks and authoritative removable trees, with layered cover.
 One bounded Shrub02 source probe is available (native size/density not yet admitted);
 it is a possible layer, not a substitute for correcting the board edge.
 Integrate produce into plant silhouettes.
-Inspect close/distant crown evidence before changing tree counts. No promotion.
+Increase tree density as needed, with appropriate LOD/budget evidence. No promotion.
 
 Review wide, shoulder-level and ground-resource views in actual neutral daylight;
-include dawn/night if lighting changes. Keep home/resource/build/plot/stream
+include dawn/night if lighting changes. Keep minimal spawn/resource/build/plot/stream
 access and harvest/clear/regrowth/save behavior as targeted regressions, not a
 new gameplay milestone. Current preview stays selected until a coherent improved
 candidate is inspected. Counts, hashes and passes alone do not establish beauty.
@@ -59,7 +61,7 @@ candidate is inspected. Counts, hashes and passes alone do not establish beauty.
 
 ## 4. World integration
 
-- [ ] 4.1 Integrate fern first, then trees/understory; preserve deterministic home/resource/structure/plot/stream exclusions.
+- [ ] 4.1 Integrate trees/understory with generated woodland; preserve minimal spawn/resource/occupied/player-cleared/stream access, not a reserved house clearing.
 - [ ] 4.2 Preserve resource base/produce/cleared semantics, readability and reserved cleared/build sites.
 - [x] 4.3 Add ground treatment without changing terrain topology, heights, collision or stream ribbons.
 - [ ] 4.4 Add restrained supported wind/distance behavior after static foliage works; verify stationary roots and bounds.

@@ -104,6 +104,32 @@ is historical, not the current build/authorization status.
    Imported assets, passing tools and screenshots are supporting milestones,
    not substitutes for integration, and task counts must remain honest.
 
+## Current woodland/world direction (Jenny, 2026-09-21 16:19-16:26 Arizona)
+
+- Start in dense, verdant woodland, not a pre-cleared home site. Retain only
+  minimal spawn/camera safety and actual occupied/player-cleared footprints.
+  Jenny chooses where to build by chopping reachable standing trees.
+- Extend exploration beyond the old80m square through seeded smooth procedural
+  chunks with remembered player changes. Minecraft is an exploration/persistence
+  reference, not a request for block voxels, digging or a new engine.
+- The first slice combines rolling woodland terrain, authoritative generated
+  resources/trees, real felling/build-site clearing and save/leave/return behavior.
+  Bound live chunks, not the world to the currently loaded window. Disclose
+  supported coordinate/edit limits and any fresh test profile; never silently
+  invent seeds for old saves or discard edits.
+- Coherent large mountains, drainage-connected rivers and lakes are phased
+  roadmap work. The first slice may retain an explicitly limited adaptation of
+  the existing winding stream; random noise alone is not a hydrology system.
+- Reduce indiscriminate fallen-wood/stick scatter. Keep modest reachable
+  bootstrap wood/stone/fiber, with later supply through deliberate harvesting,
+  felling and processing. Existing rewards are provisional, not final balance.
+- Dense, attractive integrated woodland remains an acceptance gate. A working
+  noise/chunk demo or unchoppable decorative forest is not the requested result.
+
+Current implementation plan: `openspec/changes/add-persistent-generated-woodland`.
+This supersedes fixed home-clearance and finite-background-skirt proposals;
+retain the useful existing assets, material/control work and evidence.
+
 ## Historical prototype status
 
 The initial implementation plan has been approved. This is the project-owned

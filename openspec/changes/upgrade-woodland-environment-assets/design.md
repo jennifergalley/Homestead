@@ -32,6 +32,15 @@ acceptance from a passing screenshot metric.
 
 ## Decisions
 
+### Governing supersession: September21 16:19-16:26
+
+Jenny now requires no initial house clearing and real seeded exploration with
+persistent player edits beyond the finite square. `add-persistent-generated-woodland`
+owns the new runtime/persistence architecture. The fixed home disk, fixed total
+tree limit, static tree-ID lattice and proposed finite background skirt below
+are historical, not current implementation constraints. No skirt CPP landed.
+Keep licensed assets, native-scale/PBR work, actual evidence and old failures.
+
 ### Current delivery and next visible milestone
 
 The selected baseline is `directional-navigation-06` at `5ccddea`, retaining
@@ -116,6 +125,11 @@ save coordinates. A separate noncolliding skirt must meet the existing boundary
 without a visible crack; any distant rolling rise is scenery, not buildable world
 generation or a new biome. Use existing authored PBR maps. Distribute understory
 with forest groups and irregular edge depth, not another conspicuous home ring.
+Initial background limit is+/-90m, with a low distant rise no more than210cm
+above the existing mathematical surface and a fall behind its crest. Match all
+25cm playable-edge samples. Keep192 trees initially, redistributing between
+near groves and an irregular multi-depth belt; outside-playable trees must not
+add Pawn/world collision. Existing grass/fern/fir counts remain bounded.
 Inspect the existing canopy's close/distant evidence before increasing tree count;
 known reduction thresholds are not proof of the active render LOD or opacity.
 
