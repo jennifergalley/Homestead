@@ -1,0 +1,172 @@
+{
+  "samples": 21,
+  "maximumGapMs": 5657.8956,
+  "firstMs": 5657.8956,
+  "lastMs": 44483.7214,
+  "tcp": [
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    },
+    {
+      "OwningProcess": 49552,
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 1985,
+      "RemoteAddress": "0.0.0.0",
+      "RemotePort": 0,
+      "State": 2
+    }
+  ],
+  "udp": [],
+  "children": [],
+  "otherAuthoring": [],
+  "limitation": "Complete observed rows only; finite sampling is not continuous absence."
+}

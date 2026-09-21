@@ -1,0 +1,7 @@
+{
+  "empty": true,
+  "lastWriteUtc": "2026-09-20T22:32:57.5529435Z",
+  "attributes": "Archive, NotContentIndexed",
+  "firstConstructorCleanup": "Checked CloseHandle path completed without aggregate cleanup error; marker data access was read-only. First pre-lock ACL/file-ID snapshot was not returned.",
+  "editorProcessCount": 0
+}

@@ -37,3 +37,28 @@ foreach ($stores in @(
     $count++
 }
 "$count authoring policy cases passed; no process/network/file mutation."
+Set-StrictMode -Version Latest
+function Empty-ProcessFixture { @() }
+if (@(Empty-ProcessFixture).Count -ne 0 -or @([pscustomobject]@{Pid=42}).Count -ne 1) {
+    throw 'Process-list array normalization failed.'
+}
+$job=@{Flags=8200;ProcessLimit=1;TotalProcesses=1;ActiveProcesses=1;HeldProcessIsMember=$true}
+$held=@{Error=$null;Pid=42;Image='E:\fixture.exe';CreationTime=123;IdentityFromHeldRoot=$true;Member=$true;Exited=$false}
+Assert-AuthoringRootObservation $job @($held) $held 42 'E:\fixture.exe' 123
+$held.Exited=$true
+Assert-AuthoringRootObservation $job @() $held 42 'E:\fixture.exe' 123
+$job.ActiveProcesses=0
+Assert-AuthoringRootObservation $job @() $held 42 'E:\fixture.exe' 123 -Final
+foreach ($invalid in @('extra-total','unknown-member','member-error','changed-creation','missing-live-root','final-live')) {
+    $badJob=$job.Clone();$badRoot=$held.Clone();$members=@()
+    switch ($invalid) {
+        'extra-total' {$badJob.TotalProcesses=2}
+        'unknown-member' {$other=$held.Clone();$other.Pid=43;$members=@($other)}
+        'member-error' {$other=$held.Clone();$other.Error='Access denied';$members=@($other)}
+        'changed-creation' {$badRoot.CreationTime=124}
+        'missing-live-root' {$badRoot.Exited=$false}
+        'final-live' {$badJob.ActiveProcesses=1}
+    }
+    Expect-Rejection { Assert-AuthoringRootObservation $badJob $members $badRoot 42 'E:\fixture.exe' 123 -Final }
+}
+'Empty/single enumeration, three lifecycle observations and six invalid job/exit cases passed.'

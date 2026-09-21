@@ -1,5 +1,27 @@
 # Authoring workflow approval proposal
 
+**17:43 Arizona named supersession:** first reservation was consumed but guard
+construction rejected the PowerShell null-to-empty-string binding before
+CreateProcessW. Its reservation733810D1... and resultF0AE7B69... remain
+byte-for-byte failed. The coordinator explicitly authorized one distinct
+`native-settings-02` reservation after the unambiguous token-array/Boolean
+overload, pre-resource argument validation, exact-call disposable regression,
+cleanup/marker-metadata check and ValidateOnly pass. No generic retry switch
+or reservation reset is allowed. The first constructor briefly held the
+read-only marker; checked constructor cleanup completed, but its pre-lock
+snapshot was not returned and is not invented. Actual Editor launches were0.
+
+**17:38 Arizona continuation:** the coordinator explicitly approved the four
+readiness corrections and Editor-Cmd DETACHED_PROCESS/file stdio for only the
+one conditional120s no-write settings/stop attempt. Flags0x0008040C retain
+suspended pre-start assignment, limit1/no breakaway/KILL_ON_JOB_CLOSE and the
+exact marker/NUL/file handle whitelist. No Editor conhost allowance or second
+process is admitted. Accepted build receipt/products are pinned; existing
+root/member/final-accounting methods and empty-list normalization are wired.
+Focused regressions and actual read-only admission must pass before the
+one attempt; any real failure is retained without retry/reservation reset.
+This authorization is not runtime proof or an import/cook/Pak/Shipping gate.
+
 **Latest,17:30 Arizona:** the separately approved standalone-resource and
 derived-link route produced both real DLL/PDB pairs. The probe link passed
 with explicitly approved **build-only** DETACHED_PROCESS. The game link

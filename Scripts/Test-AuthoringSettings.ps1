@@ -17,7 +17,21 @@ $runRoot = Join-Path $root "Saved\Automation\$($run.id)"
 if (-not $output.StartsWith($runRoot + '\', [StringComparison]::OrdinalIgnoreCase) -or (Test-Path -LiteralPath $output)) {
     throw 'Fresh current-run probe output required.'
 }
-$attempt = Join-Path $runRoot 'native-settings-attempt.json'
+$priorReservation=Join-Path $runRoot 'native-settings-attempt.json'
+$priorResult=Join-Path $runRoot 'native-settings-01\probe-result.json'
+$supersession=@{approval='Coordinator explicit single named supersession after pre-CreateProcess binding failure, 2026-09-20 17:43 Arizona'
+    reservationSha256='733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A'
+    resultSha256='F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7'}
+function Assert-NamedSupersession {
+    if($run.id -cne '20260920-182217-d1f84e39' -or
+        $output -ine (Join-Path $runRoot 'native-settings-02') -or
+        (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
+        (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256) {
+        throw 'Only the exact named failed-before-process attempt may be superseded once.'
+    }
+}
+Assert-NamedSupersession
+$attempt = Join-Path $runRoot 'native-settings-attempt-02.json'
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -33,6 +47,28 @@ foreach ($name in $approved.Keys) {
         (Get-AuthenticodeSignature -LiteralPath $path).Status -ne 'Valid') { throw "Engine identity differs:$name" }
 }
 $moduleHash = (Get-FileHash -LiteralPath $module).Hash
+$buildReceiptPath = Join-Path $root 'docs\research\environment-assets\guarded-link-01\receipt.json'
+$buildReceiptHash = 'E091B1C1C59F62460C29078DBE31FF805A3F39117CF678E9BADFEF934520817D'
+if ((Get-FileHash $buildReceiptPath).Hash -cne $buildReceiptHash) { throw 'Accepted native build receipt differs.' }
+$acceptedBuild = Get-Content $buildReceiptPath -Raw | ConvertFrom-Json
+$productPins = @($acceptedBuild.products)
+$requiredProducts = @('UnrealEditor-SurvivalGame.dll','UnrealEditor-SurvivalGame.pdb',
+    'UnrealEditor-SurvivalGameEditor.dll','UnrealEditor-SurvivalGameEditor.pdb',
+    'UnrealEditor.modules','SurvivalGameEditor.target') | ForEach-Object { "Binaries\Win64\$_" }
+if ($productPins.Count -ne $requiredProducts.Count -or
+    @($requiredProducts | Where-Object { $_ -cnotin $productPins.path }).Count) {
+    throw 'Accepted native product map differs.'
+}
+function Assert-AcceptedNativeProducts {
+    if ((Get-FileHash $buildReceiptPath).Hash -cne $buildReceiptHash) { throw 'Accepted receipt changed.' }
+    foreach ($product in $productPins) {
+        $path = Join-Path $root $product.path
+        if ((Get-Item $path).Length -ne $product.bytes -or (Get-FileHash $path).Hash -cne $product.sha256) {
+            throw "Accepted native product differs:$($product.path)"
+        }
+    }
+}
+Assert-AcceptedNativeProducts
 $baseline = Get-Content -LiteralPath (Join-Path $root 'docs\research\environment-assets\authoring-preflight-01\receipt.json') -Raw | ConvertFrom-Json
 $expectedRules = @($baseline.existingInboundAllowRules | Where-Object { $_.program -ieq $exe })
 function Assert-ExistingNetworkPermission {
@@ -70,7 +106,7 @@ function Get-AuthoringProcesses {
         Select-Object ProcessId,ParentProcessId,ExecutablePath,CreationDate)
 }
 Assert-ExistingNetworkPermission
-if ((Get-AuthoringProcesses).Count) { throw 'Another authoring process prevents the bounded shared-marker lock.' }
+if (@(Get-AuthoringProcesses).Count) { throw 'Another authoring process prevents the bounded shared-marker lock.' }
 $protected = @(Get-Content -LiteralPath (Join-Path $root 'Assets\Environment\woodland-preparation-01\protected-before.json') -Raw | ConvertFrom-Json)
 $before = @($protected | ForEach-Object {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root $_.path)).Hash
@@ -85,6 +121,8 @@ $markerFile = Get-Item -LiteralPath $markerPath
 if ($markerFile.Length -ne 0 -or ($markerFile.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Global marker metadata differs.' }
 if ($ValidateOnly) {
     [ordered]@{ eligibleForGuardConstruction=$true;executable=$exe;module=$module;moduleSha256=$moduleHash
+        buildReceiptSha256=$buildReceiptHash;productPins=$productPins;creationFlags=0x0008040C
+        buildMonitoringQualification=$acceptedBuild.qualification
         output=$output;globalMarkerReadLocked=$false;runtimeVerified=$false;attemptConsumed=$false }
     return
 }
@@ -127,6 +165,7 @@ $null = Get-CimInstance -Namespace root\StandardCimv2 -ClassName MSFT_NetUDPEndp
 $guard = $null
 $failure = $null
 $samples = [Collections.Generic.List[object]]::new()
+$jobSamples = [Collections.Generic.List[object]]::new()
 $native = $null
 $started = [DateTimeOffset]::UtcNow
 $clock = [Diagnostics.Stopwatch]::StartNew()
@@ -134,28 +173,45 @@ $stopPath = Join-Path $output 'stop-probe.txt'
 function Request-ProbeStop([string]$Reason) {
     if (-not (Test-Path -LiteralPath $stopPath)) { [IO.File]::WriteAllText($stopPath,$Reason) }
 }
+function Read-ProbeJob([string]$Phase, [switch]$Final) {
+    $job = if ($Final) { $guard.CaptureExitedJob() } else { $guard.ObserveJobPolicy() }
+    $members = @($guard.ObserveJobMembers())
+    $heldRoot = $guard.ObserveHeldRoot()
+    $jobSamples.Add(@{phase=$Phase;utc=[DateTimeOffset]::UtcNow.ToString('o')
+        job=$job;members=$members;heldRoot=$heldRoot})
+    Assert-AuthoringRootObservation $job $members $heldRoot $guard.ProcessId $guard.ImagePath $guard.ProcessCreationTime -Final:$Final
+    return $heldRoot.Exited
+}
 try {
     $state = & (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
-    if (-not $state.allowWork -or $state.id -ne $run.id -or (Get-AuthoringProcesses).Count) { throw 'Admission changed before guard construction.' }
+    if (-not $state.allowWork -or $state.id -ne $run.id -or @(Get-AuthoringProcesses).Count) { throw 'Admission changed before guard construction.' }
     Assert-ExistingNetworkPermission
+    Assert-AcceptedNativeProducts
+    Assert-NamedSupersession
     $reservation = [IO.File]::Open($attempt,'CreateNew','Write','Read')
     try {
-        $bytes=[Text.Encoding]::UTF8.GetBytes((@{utc=$started.ToString('o');output=$output;runId=$run.id}|ConvertTo-Json))
+        $bytes=[Text.Encoding]::UTF8.GetBytes((@{utc=$started.ToString('o');output=$output;runId=$run.id;supersession=$supersession}|ConvertTo-Json))
         $reservation.Write($bytes)
     } finally { $reservation.Dispose() }
     $guard = [Homestead.Authoring.LeafGuard]::new($exe,$approved['UnrealEditor-Cmd.exe'],[string[]]$arguments,
-        $root,$markerPath,(Join-Path $output 'stdout.log'),$environment)
+        $root,$markerPath,(Join-Path $output 'stdout.log'),$environment,$true)
+    if ($guard.CreationFlags -ne 0x0008040C -or $guard.WhitelistedHandleCount -ne 3) {
+        throw 'Approved Editor detached-console/stdio creation policy differs.'
+    }
     $guard.ArmDeadline(100000,110000,$stopPath)
+    $null = Read-ProbeJob 'suspended-before-resume'
     [ordered]@{pid=$guard.ProcessId;creationTime=$guard.ProcessCreationTime;image=$guard.ImagePath
         executableSha256=$approved['UnrealEditor-Cmd.exe'];moduleSha256=$moduleHash;arguments=$arguments
         markerBefore=$guard.MarkerBefore;job=$guard.LastVerifiedJob;explicitInheritedHandles=$guard.WhitelistedHandleCount
         expectedRules=$expectedRules;deadlineUtc=$environment['HOMESTEAD_PROBE_DEADLINE']
+        creationFlags=$guard.CreationFlags;buildReceiptSha256=$buildReceiptHash;productPins=$productPins;supersession=$supersession
+        buildMonitoringQualification=$acceptedBuild.qualification
     } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $output 'launch.json')
     $guard.Resume()
     $readyAt = $null
     $lastPermission = 0.0
     while (-not $guard.Wait(0)) {
-        $guard.VerifyJob(1)
+        if (Read-ProbeJob 'live') { break }
         $null = $guard.VerifyMarker()
         $children = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$($guard.ProcessId)" |
             Select-Object ProcessId,ParentProcessId,ExecutablePath,CreationDate)
@@ -216,6 +272,7 @@ try {
         }
         try { $subjectExited=$guard.Wait(5000) } catch { $cleanupErrors.Add("Exit observation failed:$_") }
         if ($subjectExited) {
+            try { $null = Read-ProbeJob 'after-observed-death' -Final } catch { $cleanupErrors.Add("Final job evidence failed:$_") }
             try { $markerAfter=$guard.VerifyMarker() } catch { $cleanupErrors.Add("Guarded marker verification failed:$_") }
             try {
                 $code=$guard.ExitCode;$hard=$guard.HardTerminated
@@ -237,6 +294,8 @@ try {
             if ((Get-FileHash -LiteralPath (Join-Path $root $item.path)).Hash -cne $item.sha256) { throw "Protected file changed:$($item.path)" }
         } catch { $cleanupErrors.Add($_.ToString()) }
     }
+    try { Assert-AcceptedNativeProducts } catch { $cleanupErrors.Add("Accepted build changed:$_") }
+    try { Assert-NamedSupersession } catch { $cleanupErrors.Add("Original failed attempt changed:$_") }
     if ($cleanupErrors.Count) { $failure=(@($failure)+@($cleanupErrors) | Where-Object { $_ }) -join ' | ' }
     $gaps = @()
     $previous = 0.0
@@ -247,6 +306,8 @@ try {
         elapsedSeconds=$clock.Elapsed.TotalSeconds;samples=$samples;maximumSampleGapMs=($gaps|Measure-Object -Maximum).Maximum
         markerBefore=$markerBefore;markerAfter=$markerAfter;markerAfterRelease=$released
         native=$native;protectedFiles=$before;executableSha256=$approved['UnrealEditor-Cmd.exe'];moduleSha256=$moduleHash
+        jobSamples=$jobSamples;buildReceiptSha256=$buildReceiptHash;productPins=$productPins;supersession=$supersession
+        buildMonitoringQualification=$acceptedBuild.qualification;approvedCreationFlags=0x0008040C
         limits='One NullRHI settings/stop probe. Sampled endpoints/processes, not packet/continuous broker tracing. Security prompts require human/coordinator stop; never click Allow. No shader workload/render/import/cook/Pak/Shipping-QA proof.'
     } | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath (Join-Path $output 'probe-result.json')
 }

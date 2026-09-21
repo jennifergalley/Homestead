@@ -1,0 +1,10 @@
+{
+  "runId": "20260920-182217-d1f84e39",
+  "supersession": {
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "approval": "Coordinator explicit single named supersession after pre-CreateProcess binding failure, 2026-09-20 17:43 Arizona",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A"
+  },
+  "output": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\native-settings-02",
+  "utc": "2026-09-21T00:47:12.6065429+00:00"
+}

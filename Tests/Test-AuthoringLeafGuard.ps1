@@ -29,8 +29,8 @@ function Get-DeniedOperation([string]$Path, [string]$Operation) {
     try {
         switch ($Operation) {
             'write' { Assert-WriteAllowed $Path }
-            'delete' { [IO.File]::Delete($Path) }
-            'rename' { [IO.File]::Move($Path, "$Path.renamed") }
+            'delete' { return [GuardFixtureAccess]::DeleteAccessDenied($Path) }
+            'rename' { return [GuardFixtureAccess]::DeleteAccessDenied($Path) }
         }
     } catch [IO.IOException] {
         $code = $_.Exception.HResult -band 0xffff
@@ -58,6 +58,27 @@ $live = & (Join-Path $repo 'Scripts\Development-Run.ps1') -Action Status
 Assert $live.allowWork 'Live run does not permit this synthetic operation.'
 Assert ([IO.Path]::IsPathFullyQualified($Root) -and [IO.Path]::IsPathFullyQualified($Subject)) 'Absolute fixture paths required.'
 Add-Type -Path (Join-Path $repo 'Scripts\AuthoringLeafGuard.cs')
+Add-Type -TypeDefinition @'
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+public static class GuardFixtureAccess {
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+    static extern IntPtr CreateFileW(string path, uint access, uint share, IntPtr security, uint disposition, uint flags, IntPtr template);
+    [DllImport("kernel32.dll", SetLastError=true)] static extern bool CloseHandle(IntPtr handle);
+    public static bool DeleteAccessDenied(string path) {
+        // DELETE access is required by deletion and rename; do not mutate after a racing process exit.
+        IntPtr handle=CreateFileW(path,0x10000,7,IntPtr.Zero,3,0x80,IntPtr.Zero);
+        if(handle != new IntPtr(-1)) {
+            if(!CloseHandle(handle)) throw new Win32Exception(Marshal.GetLastWin32Error());
+            return false;
+        }
+        int error=Marshal.GetLastWin32Error();
+        if(error == 32) return true;
+        throw new Win32Exception(error);
+    }
+}
+'@
 
 if ($Role -eq 'Controller') {
     Add-Type -TypeDefinition @'
@@ -65,6 +86,17 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 public static class GuardFixtureNative {
+    [DllImport("shell32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern IntPtr CommandLineToArgvW(string line, out int count);
+    [DllImport("kernel32.dll")] static extern IntPtr LocalFree(IntPtr memory);
+    public static string[] Parse(string line) {
+        int count; IntPtr data = CommandLineToArgvW(line, out count);
+        if (data == IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
+        try {
+            var result = new string[count];
+            for (int i=0; i<count; i++) result[i]=Marshal.PtrToStringUni(Marshal.ReadIntPtr(data,i*IntPtr.Size));
+            return result;
+        } finally { LocalFree(data); }
+    }
     [StructLayout(LayoutKind.Sequential)] public struct Info {
         public uint Attributes, CreationLow, CreationHigh, AccessLow, AccessHigh, WriteLow, WriteHigh;
         public uint Volume, SizeHigh, SizeLow, Links, IndexHigh, IndexLow;
@@ -90,13 +122,22 @@ public static class GuardFixtureNative {
         $environment['HOMESTEAD_TEST_CANARY_HANDLE'] = $handle.ToInt64().ToString()
         $environment['HOMESTEAD_TEST_CANARY_HIGH'] = $identity.IndexHigh.ToString()
         $environment['HOMESTEAD_TEST_CANARY_LOW'] = $identity.IndexLow.ToString()
+        $fixtureArguments=[string[]]@('--token-fixture','argument with spaces','embedded"quote','E:\fixture path\')
         $guard = [Homestead.Authoring.LeafGuard]::new($Subject, (Get-FileHash -LiteralPath $Subject).Hash,
-            [string[]]@(), $Root, (Join-Path $Root 'marker'), (Join-Path $Root 'subject.log'), $environment, $null, [bool]$DetachedConsole)
+            $fixtureArguments, $Root, (Join-Path $Root 'marker'), (Join-Path $Root 'subject.log'), $environment, [bool]$DetachedConsole)
+        $actualLine=(Get-CimInstance Win32_Process -Filter "ProcessId=$($guard.ProcessId)").CommandLine
+        $parsed=[GuardFixtureNative]::Parse($actualLine)
+        Assert ($parsed.Count -eq $fixtureArguments.Count+1) 'Actual process argument count differs.'
+        for($i=0;$i -lt $fixtureArguments.Count;$i++) {
+            Assert ($parsed[$i+1] -ceq $fixtureArguments[$i]) 'Actual process argument token differs.'
+        }
+        Assert ($guard.CreationFlags -eq $(if($DetachedConsole){0x0008040C}else{0x08080404})) 'Actual creation flags differ.'
         Write-NewJson (Join-Path $Root 'launch.json') ([ordered]@{
             pid = $guard.ProcessId; image = $guard.ImagePath; creationTime = $guard.ProcessCreationTime
             marker = $guard.MarkerBefore; job = $guard.LastVerifiedJob; explicitHandles = $guard.WhitelistedHandleCount
             jobMembers = $guard.ObserveJobMembers()
             creationFlags = $guard.CreationFlags
+            argumentTokens=$fixtureArguments;actualCommandLine=$actualLine;windowsParsedArguments=$parsed
             resumed = $guard.Resumed
         })
         if ($Case -eq 'watchdog') { $guard.ArmDeadline(300, 800, (Join-Path $Root 'stop.txt')) }
@@ -171,7 +212,7 @@ $null = New-Item -ItemType Directory -Path $Root
 $negative = Join-Path $Root 'rejections'
 $null = New-Item -ItemType Directory -Path $negative
 $rejections = [Collections.Generic.List[object]]::new()
-foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupied-stdout','nul-argument','invalid-environment')) {
+foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupied-stdout','nul-argument','invalid-environment','conflicting-arguments')) {
     $directory = Join-Path $negative $invalid
     $null = New-Item -ItemType Directory -Path $directory
     $marker = Join-Path $directory 'marker'
@@ -187,12 +228,21 @@ foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupie
         'occupied-stdout' { [IO.File]::WriteAllText((Join-Path $directory 'stdout'), 'do not replace') }
         'nul-argument' { $arguments = @("bad`0argument") }
         'invalid-environment' { $environment['BAD=KEY'] = 'not allowed' }
+        'conflicting-arguments' { $arguments = @('token') }
     }
     try {
         try {
-            $unexpected = [Homestead.Authoring.LeafGuard]::new($Subject, $expected, $arguments,
-                $directory, $marker, (Join-Path $directory 'stdout'), $environment)
+            if($invalid -eq 'conflicting-arguments') {
+                $unexpected = [Homestead.Authoring.LeafGuard]::new($Subject, $expected, $arguments,
+                    $directory, $marker, (Join-Path $directory 'stdout'), $environment, 'exact-token', $true)
+            } else {
+                $unexpected = [Homestead.Authoring.LeafGuard]::new($Subject, $expected, $arguments,
+                    $directory, $marker, (Join-Path $directory 'stdout'), $environment, [bool]$DetachedConsole)
+            }
         } catch { $rejected = $true; $failure = $_.Exception.ToString() }
+        if($invalid -in @('nul-argument','conflicting-arguments')) {
+            Assert (-not(Test-Path (Join-Path $directory 'stdout'))) 'Pure argument rejection touched stdout.'
+        }
     } finally {
         if ($unexpected) { $unexpected.HardStop(94); $unexpected.Dispose() }
         if ($writer) { $writer.Dispose() }
@@ -296,7 +346,7 @@ foreach ($scenario in $Scenarios) {
             ready = $ready; launch = $launch; outcome = $outcome
             observerMarkerBefore = $markerBefore; observerMarkerAfter = $markerAfter
             writeRenameDeletePositiveControls = $true; compatibleRead = $true; releaseVerified = $true
-            limitation = 'Sampled availability checks are not continuous execution tracing; inherited handle identity and job-close semantics provide the lifetime mechanism.'
+            limitation = 'Sampled checks are not continuous tracing. Delete/rename negative checks test required DELETE access without mutating after racing death; actual rename/delete positive controls run before lifetime, write/rename after release. Inherited handle identity and job-close semantics provide lifetime protection.'
         })
     } catch {
         Write-NewJson (Join-Path $directory 'observer-error.json') @{ error = $_.ToString() }

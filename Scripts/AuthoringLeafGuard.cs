@@ -189,8 +189,16 @@ namespace Homestead.Authoring
             string markerPath, string stdoutPath, IDictionary<string, string> overrides, string exactArgumentLine)
             : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, exactArgumentLine, false) { }
         public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
+            string markerPath, string stdoutPath, IDictionary<string, string> overrides, bool detachedConsole)
+            : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, null, detachedConsole) { }
+        public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
             string markerPath, string stdoutPath, IDictionary<string, string> overrides, string exactArgumentLine, bool detachedConsole)
         {
+            if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+            if (exactArgumentLine != null && (arguments.Length != 0 || exactArgumentLine.IndexOf('\0') >= 0))
+                throw new InvalidOperationException("Exact argument line cannot be combined with arguments or contain NUL.");
+            var command = new StringBuilder(Quote(System.IO.Path.GetFullPath(executable)) + " " +
+                (exactArgumentLine ?? string.Join(" ", arguments.Select(Quote))));
             IntPtr attributes = IntPtr.Zero, handles = IntPtr.Zero, environment = IntPtr.Zero;
             bool initializedAttributes = false;
             try
@@ -237,10 +245,6 @@ namespace Homestead.Authoring
                 var startup = new StartupEx(); startup.Startup.Size = (uint)Marshal.SizeOf<StartupEx>();
                 startup.Startup.Flags = 0x100; startup.Startup.Input = input;
                 startup.Startup.Output = output; startup.Startup.Error = output; startup.Attributes = attributes;
-                if (exactArgumentLine != null && (arguments.Length != 0 || exactArgumentLine.IndexOf('\0') >= 0))
-                    throw new InvalidOperationException("Exact argument line cannot be combined with arguments or contain NUL.");
-                var command = new StringBuilder(Quote(executable) + " " +
-                    (exactArgumentLine ?? string.Join(" ", arguments.Select(Quote))));
                 ulong earliest = (ulong)DateTime.UtcNow.AddSeconds(-1).ToFileTimeUtc();
                 ProcessInfo created;
                 CreationFlags = Suspended | ExtendedStartup | UnicodeEnvironment | (detachedConsole ? 8u : CreateNoWindow);

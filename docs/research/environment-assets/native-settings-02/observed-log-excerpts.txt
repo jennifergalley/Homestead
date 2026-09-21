@@ -1,0 +1,49 @@
+L8:LogWindows: File 'VtuneApi32e.dll' does not exist
+L9:LogWindows: Warning: CreateProc failed: Not enough quota is available to process this command. (0x00000718)
+L10:LogWindows: Warning: URL: ../../../Engine/Binaries/Win64/CrashReportClientEditor.exe  -READ=640 -WRITE=656 -MONITOR=49552 -ProcessGroupId=29CBCA6F48271CC03CA5D4B332A5414D -unattended -nullrhi -ConcertServer="FA171D5E48AA3E921217FB81D6D7DFE6"
+L11:LogWindows: Started CrashReportClient (pid=0)
+L12:LogWindows: Custom abort handler registered for crash reporting.
+L13:LogInit: Running DelayedAutoRegister Phase StartOfEnginePreInit
+L14:LogInit: Display: Running engine for game: SurvivalGame
+L79:LogConfig: Display: Branch Engine had commandline override(s), so override NoReplay mode. This will use a bit more memory, but is needed for plugin/GFP handling.
+L80:Launching UnrealBuildTool... [E:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat -Mode=ValidatePlatforms -OutputSDKs  -AllPlatforms  -project="E:/Repos/SurvivalGame/SurvivalGame.uproject" -log="E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/EngineUser/Saved/Logs/AutoSDKInfo.txt" -verbose -timestamps]
+L81:LogWindows: Warning: CreateProc failed: Not enough quota is available to process this command. (0x00000718)
+L82:LogWindows: Warning: URL: E:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat -Mode=ValidatePlatforms -OutputSDKs  -AllPlatforms  -project="E:/Repos/SurvivalGame/SurvivalGame.uproject" -log="E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/EngineUser/Saved/Logs/AutoSDKInfo.txt" -verbose -timestamps
+L83:LogDesktopPlatform: Warning: Failed to launch UnrealBuildTool (exe path is 'E:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat')
+L84:Failed to launch Unreal Build Tool. (E:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat)
+L85:LogTargetPlatformManager: Warning: AutoSDK is enabled (UE_SDKS_ROOT is set), but failed to run UBT to check SDK status! Check your installation.
+L86:LogAudio: Display: Audio Device Manager not initializing due to all audio being disabled. If this is not intentional, please check command line arguments for "-nosound".
+L87:LogModuleManager: InternalLoadLibrary: 'TelemetryUtils' ('E:/Program Files/UE_5.8/Engine/Binaries/Win64/UnrealEditor-TelemetryUtils.dll')
+L88:LogPluginManager: Looking for build plugins target receipt
+L937:[2026.09.21-00.47.31:161][  0]LogDerivedDataCache: E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/DDC: Speed tests took 0.02 seconds.
+L938:[2026.09.21-00.47.31:162][  0]LogDerivedDataCache: Display: E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/DDC: Performance: Latency=0.01ms. RandomReadSpeed=76.68MBs, RandomWriteSpeed=162.65MBs. Assigned SpeedClass 'Local'
+L939:[2026.09.21-00.47.31:162][  0]LogDerivedDataCache: Local: Using data cache path E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/DDC: Writable
+L940:[2026.09.21-00.47.31:167][  0]LogModuleManager: InternalLoadLibrary: 'ShaderPreprocessor' ('E:/Program Files/UE_5.8/Engine/Binaries/Win64/UnrealEditor-ShaderPreprocessor.dll')
+L941:[2026.09.21-00.47.31:167][  0]LogShaderCompilers: Guid format shader working directory is 6 characters bigger than the processId version (E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/EngineUser/Intermediate/Shaders/WorkingDirectory/49552/).
+L942:[2026.09.21-00.47.31:168][  0]LogShaderCompilers: Cleaned the shader compiler working directory 'E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/Temp/UnrealShaderWorkingDir/9C535AD643D8286AAF855E806540A290/'.
+L1568:[2026.09.21-00.47.55:152][  0]LogModuleManager: InternalLoadLibrary: 'SessionServices' ('E:/Program Files/UE_5.8/Engine/Binaries/Win64/UnrealEditor-SessionServices.dll')
+L1569:[2026.09.21-00.47.55:199][  0]LogPython: Python disabled via command-line flag '-DisablePython'
+L1570:[2026.09.21-00.47.55:263][  0]LogCsvProfiler: Display: Metadata set : raytracing="0"
+L1571:[2026.09.21-00.47.55:264][  0]LogModuleManager: InternalLoadLibrary: 'AndroidFileServerEditor' ('E:/Program Files/UE_5.8/Engine/Plugins/Runtime/AndroidFileServer/Binaries/Win64/UnrealEditor-AndroidFileServerEditor.dll')
+L1572:[2026.09.21-00.47.55:285][  0]LogModuleManager: InternalLoadLibrary: 'AudioCaptureEditor' ('E:/Program Files/UE_5.8/Engine/Plugins/Runtime/AudioCapture/Binaries/Win64/UnrealEditor-AudioCaptureEditor.dll')
+L1634:[2026.09.21-00.47.56:681][  0]LogModuleManager: InternalLoadLibrary: 'VirtualTexturingEditor' ('E:/Program Files/UE_5.8/Engine/Binaries/Win64/UnrealEditor-VirtualTexturingEditor.dll')
+L1635:[2026.09.21-00.47.56:685][  0]LogHomesteadAuthoringProbe: Error: An effective config path is outside the probe.
+L1636:[2026.09.21-00.47.56:685][  0]LogHomesteadAuthoringProbe: Error: An effective config path is outside the probe.
+L1637:[2026.09.21-00.47.56:685][  0]LogHomesteadAuthoringProbe: Error: Python was not fully disabled.
+L1638:[2026.09.21-00.47.56:685][  0]LogHomesteadAuthoringProbe: Error: An excluded plugin is enabled.
+L1639:[2026.09.21-00.47.56:687][  0]LogHomesteadAuthoringProbe: Error: Effective settings or guard admission failed.
+L1640:[2026.09.21-00.47.56:687][  0]LogCore: Engine exit requested (reason: Commandlet HomesteadAuthoringProbeCommandlet_0 finished execution (result 4))
+L1641:[2026.09.21-00.47.56:687][  0]LogInit: Display: 
+L1642:[2026.09.21-00.47.56:687][  0]LogInit: Display: Warning/Error Summary (Unique only)
+L1643:[2026.09.21-00.47.56:687][  0]LogInit: Display: -----------------------------------
+L1644:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogHomesteadAuthoringProbe: Error: An effective config path is outside the probe.
+L1645:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogHomesteadAuthoringProbe: Error: Python was not fully disabled.
+L1646:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogHomesteadAuthoringProbe: Error: An excluded plugin is enabled.
+L1647:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogHomesteadAuthoringProbe: Error: Effective settings or guard admission failed.
+L1648:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogWindows: Warning: CreateProc failed: Not enough quota is available to process this command. (0x00000718)
+L1649:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogWindows: Warning: URL: E:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat -Mode=ValidatePlatforms -OutputSDKs  -AllPlatforms  -project="E:/Repos/SurvivalGame/SurvivalGame.uproject" -log="E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/EngineUser/Saved/Logs/AutoSDKInfo.txt" -verbose -timestamps
+L1650:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogDesktopPlatform: Warning: Failed to launch UnrealBuildTool (exe path is 'E:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat')
+L1651:[2026.09.21-00.47.56:687][  0]LogInit: Display: LogTargetPlatformManager: Warning: AutoSDK is enabled (UE_SDKS_ROOT is set), but failed to run UBT to check SDK status! Check your installation.
+L1652:[2026.09.21-00.47.56:687][  0]LogInit: Display: 
+L1653:[2026.09.21-00.47.56:687][  0]LogInit: Display: Commandlet->Main return this error code: 4
+L1654:[2026.09.21-00.47.56:687][  0]LogInit: Display: With 5 error(s), 4 warning(s)

@@ -1,5 +1,11 @@
 # Tasks
 
+Current17:48: one real native settings attempt FAILED/exit4 after a separately
+retained pre-process binding failure. Root-only job and unchanged marker
+release were observed; effective config/Python checks failed and no successful
+stop-loop proof exists. `native-settings-result.md` records exact evidence.
+No further engine launch is authorized. Progress remains4/29.
+
 Current17:30 build milestone: both native DLL/PDB pairs and actual UBT metadata
 exist and have verified identities. `native-build-result.md` preserves the
 game-link shutdown monitoring gap. Editor settings/marker/runtime admission

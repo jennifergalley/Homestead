@@ -1,5 +1,11 @@
 # Native settings preflight: built, runtime admission pending
 
+**Current17:48:** `native-settings-result.md` supersedes the unconsumed-attempt
+status below. One actual Editor run failed its settings gate/exit4. Root-only
+job accounting and unchanged real-marker release were proved; runtime workflow
+and cooperative-stop success were not. Both reservations are retained.
+Only bounded read-only diagnosis is authorized; no further engine launch.
+
 **Current,17:30 Arizona:** the guarded compile/resource/derived-link route has
 produced both real AMD64 module DLLs and matching full PDBs. Direct supported
 UBT WriteMetadata passed and wrote the project manifest/receipt with

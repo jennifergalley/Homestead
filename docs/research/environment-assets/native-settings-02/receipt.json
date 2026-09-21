@@ -1,0 +1,80 @@
+{
+  "runId": "20260920-182217-d1f84e39",
+  "utc": "2026-09-21T00:50:01.2891346+00:00",
+  "status": "failed-effective-settings-cleanup-verified",
+  "reservations": 2,
+  "editorLaunches": 1,
+  "exitCode": 4,
+  "openSpecComplete": 4,
+  "openSpecTotal": 29,
+  "originalEngineLog": {
+    "sha256": "9488E5417621F5BFFB3DC7BB9EC58A19158FCA99357BAC1E98BB82B0AB4EEDAC",
+    "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\native-settings-02\\editor.log",
+    "bytes": 225357
+  },
+  "files": [
+    {
+      "file": "effective-settings.json",
+      "sha256": "5A7070792C6AA67DC47A192D7564F10E1FC38F62CC2A53C7FD6D6FF94473C56F",
+      "bytes": 7924
+    },
+    {
+      "file": "endpoint-rollup.json",
+      "sha256": "5BA05EC7CDCE711E860362FDE15836BEF9F8D35752CC633DA984551E0CB4F1A1",
+      "bytes": 3930
+    },
+    {
+      "file": "first-cleanup-qualification.json",
+      "sha256": "31A83A5CA727B87DA12F471C3F17448539BD20482C8B6FCBF006F2EC0A142C6C",
+      "bytes": 338
+    },
+    {
+      "file": "first-failure.json",
+      "sha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+      "bytes": 43884
+    },
+    {
+      "file": "first-reservation.json",
+      "sha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+      "bytes": 195
+    },
+    {
+      "file": "launch.json",
+      "sha256": "B7D14D3F2E54EC29794664F852E5337B1B47DCC7A3B5E3F6DBB450C4DB76514E",
+      "bytes": 7168
+    },
+    {
+      "file": "observed-log-excerpts.txt",
+      "sha256": "0DDFC948D746B6C23DE62022DBF014F3D80E59AB56A9B11D96E988B55EE1DB21",
+      "bytes": 7414
+    },
+    {
+      "file": "observer-failed.json",
+      "sha256": "F7DBD69F76AC8E03E0BFBCC6A2D9D5EFFA1DA8FC6CC5353DB45DCC9E9560A4C6",
+      "bytes": 221
+    },
+    {
+      "file": "probe-result.json",
+      "sha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7",
+      "bytes": 86993
+    },
+    {
+      "file": "read-only-admission.json",
+      "sha256": "F1A278A949B55918AF7BA454F131EE4172750E758FEC31B321CA75F55CC2FFCF",
+      "bytes": 2045
+    },
+    {
+      "file": "second-reservation.json",
+      "sha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+      "bytes": 537
+    },
+    {
+      "file": "token-lifetime.json",
+      "sha256": "580600F8471FA4CD256068D92AAA8F5AC91F3AC8C8E78CF29EC091433A5357E1",
+      "bytes": 69127
+    }
+  ],
+  "guardSha256": "7D7B64F98882D9790BF54D60973BFBB7D6A7129B1E6685D0B591EA9A1C82848E",
+  "wrapperSha256": "94C2AFCC159CB388A7787932F9E840B21C2C77C0CFA02313038D17DF739E9C73",
+  "noFurtherLaunchAuthorized": true
+}
