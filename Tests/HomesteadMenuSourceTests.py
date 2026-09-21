@@ -104,6 +104,17 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("ShowGraphicsSaveFailure(GraphicsSaveError)", body)
         self.assertIn("World saved; video preference not confirmed", MENU)
 
+    def test_saved_timestamp_is_bounded_before_date_formatting(self):
+        body = function_body(CONTROLLER, "UHomesteadSave* AHomesteadController::ReadSave(")
+        self.assertIn("Save->SavedAtUtc < 0", body)
+        self.assertIn("Save->SavedAtUtc > 253402300799LL", body)
+
+    def test_owned_dye_is_visible_without_hover(self):
+        adapter = (SOURCE / "UI" / "HomesteadMenuInventory.cpp").read_text()
+        self.assertIn("Row.IconTint", adapter)
+        self.assertIn('Row.Name += TEXT(" - ")', adapter)
+        self.assertIn(".Tint(Row.IconTint)", MENU)
+
     def test_portrait_reuses_shared_presentation(self):
         portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()
         self.assertIn("Character.GetEquipmentPresentation()", portrait)

@@ -22,7 +22,7 @@ const FLinearColor Ink(0.93f, 0.93f, 0.84f);
 const FLinearColor Muted(0.71f, 0.77f, 0.69f);
 const FLinearColor Gold(0.92f, 0.74f, 0.43f);
 const FLinearColor Pine(0.025f, 0.05f, 0.038f, 0.97f);
-const FLinearColor Selected(0.19f, 0.25f, 0.14f);
+const FLinearColor Selected(0.09f, 0.14f, 0.105f);
 const TCHAR* Tabs[] = {TEXT("Inventory"), TEXT("Craft"), TEXT("Build"), TEXT("Guidebook"),
     TEXT("Settings"), TEXT("Credits"), TEXT("Appearance")};
 const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("guide"),
@@ -143,6 +143,23 @@ void SHomesteadMenu::Construct(const FArguments& Args)
             ]
         ];
     }
+    TabBar->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)
+    [
+        SNew(SBox).WidthOverride(145)
+        [
+            SNew(STextBlock).AutoWrapText(true).ColorAndOpacity(Ink)
+            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 15))
+            .Text_Lambda([this]()
+            {
+                if (!Controller.IsValid()) return FText();
+                const double Hour = FMath::Fmod(Controller->State().hour, 24.0);
+                return FText::FromString(FString::Printf(TEXT("%s / Day %d\n%02d:%02d  %s"),
+                    UTF8_TO_TCHAR(Controller->Simulation().SeasonName()), Controller->Simulation().DayNumber(),
+                    FMath::FloorToInt(Hour), FMath::FloorToInt((Hour - FMath::FloorToInt(Hour)) * 60),
+                    Controller->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear")));
+            })
+        ]
+    ];
     Refresh();
 }
 
@@ -276,10 +293,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
                         .Text_Lambda([this]() { return FText::FromString(Controller->MenuPortraitStatus()); })
                     ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(6)
-                    [ MakeButton(TEXT("Turn left"), [this]() { Controller->OrbitMenuPortrait(-20); }) ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(6)
-                    [ MakeButton(TEXT("Turn right"), [this]() { Controller->OrbitMenuPortrait(20); }) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(4)
+                    [
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot().FillWidth(1)[ MakeButton(TEXT("< Turn"), [this]() { Controller->OrbitMenuPortrait(-20); }) ]
+                        + SHorizontalBox::Slot().FillWidth(1)[ MakeButton(TEXT("Turn >"), [this]() { Controller->OrbitMenuPortrait(20); }) ]
+                    ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(4)
+                    [ MakeButton(TEXT("Close-up / full body"), [this]() { Controller->ZoomMenuPortrait(); }) ]
                 ]
             ]
         ];
@@ -327,7 +348,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         if (SeenPage <= 2)
         {
             Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
-            [ SNew(SBox).WidthOverride(48).HeightOverride(48)[ SNew(SHomesteadIcon).Kind(EntryIcon(Row)) ] ];
+            [ SNew(SBox).WidthOverride(48).HeightOverride(48)[ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ];
         }
         Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
         if (SeenPage == 0)
@@ -359,6 +380,11 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 {
                     const int32 Index = DetailIndex();
                     return Entries.IsValidIndex(Index) ? EntryIcon(Entries[Index]) : FName(TEXT("pack"));
+                })
+                .Tint_Lambda([this]()
+                {
+                    const int32 Index = DetailIndex();
+                    return Entries.IsValidIndex(Index) ? Entries[Index].IconTint : Gold;
                 })
             ]
         ]
@@ -455,9 +481,19 @@ FString SHomesteadMenu::Footer() const
     if (!Controller.IsValid()) return {};
     if (bRecovery) return Controller->UsesGamepad() ? TEXT("A  Retry checkpoint    Y  Settings / Quit")
         : TEXT("Enter  Retry checkpoint    G  Settings / Quit");
-    return Controller->UsesGamepad()
-        ? TEXT("LB / RB  Tabs    LT / RT  Regions    D-pad  Select    A  Actions    X  Transfer    Y  Split    B  Back")
-        : TEXT("Ctrl+Tab  Tabs    Tab  Regions    Arrows  Select    Enter  Actions    F  Transfer    G  Split    Esc  Back");
+    const bool Pad = Controller->UsesGamepad();
+    FString Hint = Pad ? TEXT("LB/RB  Tabs    LT/RT  Regions    D-pad  Navigate    A  Activate")
+        : TEXT("Ctrl+Tab  Tabs    Tab  Regions    Arrows  Navigate    Enter  Activate");
+    if (SeenPage == 0 && Entries.IsValidIndex(ContentSelection))
+    {
+        const auto& Row = Entries[ContentSelection];
+        if (Row.CanStore || Row.CanTake) Hint += Pad ? TEXT("    X  Transfer") : TEXT("    F  Transfer");
+        if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Quantity > 1)
+            Hint += Pad ? TEXT("    Y  Split") : TEXT("    G  Split");
+    }
+    if (Region == ERegion::Portrait) Hint += Pad ? TEXT("    Right stick  Turn    R3  Zoom") : TEXT("    Left/Right  Turn    Z  Zoom");
+    if (Region == ERegion::Details) Hint += TEXT("    Up/Down  Scroll details");
+    return Hint + (Pad ? TEXT("    B  Back") : TEXT("    Esc  Back"));
 }
 FString SHomesteadMenu::RowKey(const FHomesteadRow& Row) const
 {
@@ -525,6 +561,12 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
             && Row.Subject == EHomesteadMenuSubject::ItemGroup)
         {
             Amount = 1; MaximumAmount = Row.Quantity - (Action == EHomesteadItemAction::Split ? 1 : 0);
+            if (Action == EHomesteadItemAction::Transfer)
+            {
+                const int32 Used = Row.ContainerId > 0 ? Controller->Simulation().UsedCapacity()
+                    : Controller->Simulation().ChestUsedCapacity(Row.DestinationId);
+                MaximumAmount = Used < 0 ? 0 : FMath::Min(MaximumAmount, Homestead::InventoryCapacity - Used);
+            }
             if (MaximumAmount < 1)
             { Controller->MenuItemAction(Row, Action, 1, PendingRevision); return; }
             SetDialog(EDialog::Amount); return;
@@ -588,8 +630,14 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         NextAxisMove = FPlatformTime::Seconds() + 0.18;
         Event = IE_Pressed;
     }
+    if (Event == IE_Repeat && (Key == EKeys::Left || Key == EKeys::Right || Key == EKeys::Up || Key == EKeys::Down
+        || Key == EKeys::Gamepad_DPad_Left || Key == EKeys::Gamepad_DPad_Right || Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_DPad_Down))
+        Event = IE_Pressed;
     if (Event != IE_Pressed || bSaving) return true;
     if (!Key.IsMouseButton()) Hover = INDEX_NONE;
+    if (Region == ERegion::Portrait && Dialog == EDialog::None
+        && (Key == EKeys::Z || Key == EKeys::Gamepad_RightThumbstick))
+    { Controller->ZoomMenuPortrait(); return true; }
     if (bRecovery)
     {
         if (Key == EKeys::Enter || Key == EKeys::E || Key == EKeys::Gamepad_FaceButton_Bottom) Controller->MenuRetry();

@@ -26,20 +26,25 @@ SNew(SHomesteadIcon)
 `SHomesteadIcon : public SLeafWidget` exports
 `void Construct(const FArguments& InArgs)`.
 Its `SLATE_BEGIN_ARGS` declares `SLATE_ATTRIBUTE(FName, Kind)` (default `pack`)
-and `SLATE_ARGUMENT(FLinearColor, Tint)` (default Gold above).
+and `SLATE_ATTRIBUTE(FLinearColor, Tint)` (default Gold above).
 `Kind` is stored as `TAttribute<FName>` and evaluated with `.Get()` during
 `OnPaint`. Existing `.Kind(FName(...))` calls remain supported, as do dynamic
 bindings such as `.Kind_Lambda([this]() { return SelectedIconKey; })` where
 `SelectedIconKey` is an `FName`. Bound kinds make the widget volatile so cached
-paint does not freeze a changing detail icon. Tint remains a construction-time
-value. Normal inherited Slate widget arguments remain available.
+paint does not freeze a changing detail icon. Tint also accepts `.Tint_Lambda`
+and is evaluated at paint time; a bound tint participates in volatility.
+Normal inherited Slate widget arguments remain available.
 
 Desired size is **56 x 56 Slate units**. Painting uniformly fits and centers
 the 56-unit artwork inside the actual allocation, including non-square slots.
 Zero-size allocations emit no elements. Paint layers advance in drawing order
 and `OnPaint` returns the highest layer used.
 
-Tint RGB replaces Gold accents, not the material palette. Tint alpha fades the
+Tint RGB replaces Gold accents and the tunic/apron cloth fill, not the rest of
+the material palette. Carried/worn garment rows use the existing authored
+MossLinen base RGB and shared tunic dye multipliers as a symbolic color cue,
+with a cream silhouette outline and explicit dye name. This is not a rendered
+material swatch or a promise of identical lighting. Tint alpha fades the
 entire illustration. Inherited widget color/opacity multiplies all colors;
 disabled state uses Slate's standard `DisabledEffect`. The icon is decorative,
 not an interactive control; the host owns labels, accessible descriptions,

@@ -37,6 +37,7 @@ struct FHomesteadRow
     FString Name;
     FString Location;
     FName Icon;
+    FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
 };
 
 UCLASS()
@@ -101,6 +102,7 @@ public:
     const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
     void RefreshMenuPortrait();
     void OrbitMenuPortrait(float Degrees);
+    void ZoomMenuPortrait();
     FString MenuPortraitStatus() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

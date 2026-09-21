@@ -21,8 +21,13 @@ the shared real mesh/material references. An image labeled provisional is not
 proof of completed wardrobe asset admission or aesthetic approval.
 
 This is an early menu-flow check, not a substitute for successful equip/storage/
-craft/reload, actual save-and-quit process exit, mouse/hardware comfort or the
+craft/reload, mouse/hardware comfort or the
 subsequent normal-play/garment review.
+The separate `-NativeMenuQuit` mode uses the same actor in a fresh owned process:
+it drives the real confirmation, verifies the saved current state and actual
+engine exit request, then writes the result before shutdown. The existing
+wrapper must also observe process termination. It does not use a mocked Quit
+callback and has no screenshot requirement.
 
 ## Portable simulation tests
 

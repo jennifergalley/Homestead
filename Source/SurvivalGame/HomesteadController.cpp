@@ -148,6 +148,7 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
     const EHomesteadPromptDevice Intent = PromptIntent.Classify(Params, FPlatformTime::Seconds(), HasAxisProperties ? &AxisProperties : nullptr);
     if (Intent != EHomesteadPromptDevice::None) bGamepad = Intent == EHomesteadPromptDevice::Gamepad;
+    if (NativeMenu.IsValid()) bShowMouseCursor = !bGamepad;
     if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
     {
         if (bMenuSaveInProgress) return true;
@@ -186,7 +187,7 @@ void AHomesteadController::ShowNativeMenu()
         MenuPointerInput = MakeShared<FHomesteadMenuPointerInput>(this);
         FSlateApplication::Get().RegisterInputPreProcessor(MenuPointerInput);
     }
-    bShowMouseCursor = true;
+    bShowMouseCursor = !bGamepad;
     FInputModeGameAndUI Mode;
     Mode.SetWidgetToFocus(NativeMenu);
     Mode.SetHideCursorDuringCapture(false);
@@ -232,7 +233,7 @@ void AHomesteadController::RefreshMenuPortrait()
     if (MenuPortrait && MenuPortrait->Refresh(*Avatar))
     {
         PortraitBrush.SetResourceObject(MenuPortrait->Texture());
-        PortraitBrush.ImageSize = FVector2D(512, 640);
+        PortraitBrush.ImageSize = FVector2D(384, 768);
         PortraitBrush.DrawAs = ESlateBrushDrawType::Image;
     }
     else
@@ -247,6 +248,11 @@ void AHomesteadController::RefreshMenuPortrait()
 void AHomesteadController::OrbitMenuPortrait(float Degrees)
 {
     if (MenuPortrait) MenuPortrait->Orbit(Degrees);
+}
+
+void AHomesteadController::ZoomMenuPortrait()
+{
+    if (MenuPortrait) MenuPortrait->ToggleCloseup();
 }
 
 FString AHomesteadController::MenuPortraitStatus() const
@@ -837,7 +843,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a digging stick. Till with F/X; bare plots offer roots with A/E or berry seeds with X/F.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill a watering can at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Fuel a cookfire with branches. Roast roots; sleep in a sheltered bedroll.")});
-        Result.Add({7, TEXT("Make this place your own"), TEXT("The Look page offers three hairstyles, two cosmetic outfits, and color choices.")});
+        Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is owned and crafted.")});
     }
     else if (Page == 4)
     {
@@ -1193,7 +1199,8 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::LoadGameFromMemory(Data));
     FGuid ParsedWorld;
     if (Save && !Save->IsCurrentVersion()) { bReadIncompatible = true; return nullptr; }
-    if (!Save || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
+    if (!Save || Save->SavedAtUtc < 0 || Save->SavedAtUtc > 253402300799LL
+        || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
         || !FGuid::Parse(Save->WorldId, ParsedWorld) || !ParsedWorld.IsValid()
         || FMath::Abs(Save->PlayerLocation.X) > 4000 || FMath::Abs(Save->PlayerLocation.Y) > 4000
         || FMath::Abs(Save->PlayerLocation.Z) > 5000 || !FMath::IsFinite(Save->CameraSensitivity)
@@ -1303,7 +1310,9 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     {
         Sim = Previous;
         Avatar->ClearPreparedEquipment();
-        Notify(TEXT("Save loading was canceled because its prepared appearance could not be displayed. ") + Error, true);
+        LoadProblem = TEXT("Save loading was canceled because its prepared appearance could not be displayed. ") + Error;
+        bTestResetRequired = !bHasPlayableSession;
+        Notify(LoadProblem, true);
         return false;
     }
     bTestResetRequired = false;

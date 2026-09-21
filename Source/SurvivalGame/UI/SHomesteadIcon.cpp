@@ -179,7 +179,7 @@ void SHomesteadIcon::Construct(const FArguments& InArgs)
 
 bool SHomesteadIcon::ComputeVolatility() const
 {
-    return Kind.IsBound() || SLeafWidget::ComputeVolatility();
+    return Kind.IsBound() || Tint.IsBound() || SLeafWidget::ComputeVolatility();
 }
 
 FVector2D SHomesteadIcon::ComputeDesiredSize(float LayoutScaleMultiplier) const
@@ -240,7 +240,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     const ESlateDrawEffect Effects = ShouldBeEnabled(bParentEnabled)
         ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
     FIconPainter P(AllottedGeometry, OutDrawElements, LayerId,
-        InWidgetStyle.GetColorAndOpacityTint(), Tint, Effects);
+        InWidgetStyle.GetColorAndOpacityTint(), Tint.Get(), Effects);
     if (P.GetScale() <= 0.0f)
     {
         return LayerId;
@@ -502,7 +502,9 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         break;
     case EKind::LinenTunic:
         P.Shape({{19, 9}, {24, 13}, {32, 13}, {37, 9}, {49, 21}, {41, 29},
-            {37, 25}, {39, 47}, {17, 47}, {19, 25}, {15, 29}, {7, 21}}, Cream);
+            {37, 25}, {39, 47}, {17, 47}, {19, 25}, {15, 29}, {7, 21}}, Gold);
+        P.Line({{19, 9}, {24, 13}, {32, 13}, {37, 9}, {49, 21}, {41, 29},
+            {37, 25}, {39, 47}, {17, 47}, {19, 25}, {15, 29}, {7, 21}, {19, 9}}, Cream, 1.5f);
         P.Line({{21, 10}, {25, 18}, {31, 18}, {35, 10}}, Wood, 2);
         P.Line({{18, 36}, {38, 36}}, Gold, 3);
         P.Line({{29, 36}, {32, 43}}, Wood, 2);
@@ -510,7 +512,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         break;
     case EKind::LinenApron:
         P.Line({{22, 17}, {22, 8}, {34, 8}, {34, 17}}, Gold, 3);
-        P.Shape({{21, 17}, {35, 17}, {35, 27}, {44, 48}, {12, 48}, {21, 27}}, Cream);
+        P.Shape({{21, 17}, {35, 17}, {35, 27}, {44, 48}, {12, 48}, {21, 27}}, Gold);
+        P.Line({{21, 17}, {35, 17}, {35, 27}, {44, 48}, {12, 48}, {21, 27}, {21, 17}}, Cream, 1.5f);
         P.Line({{21, 28}, {10, 24}, {9, 32}, {21, 28}, {35, 28}, {46, 24}, {47, 32}, {35, 28}}, Gold, 2);
         P.Rect(22, 33, 12, 9, Wood);
         P.Line({{23, 34}, {33, 34}}, Gold, 2);

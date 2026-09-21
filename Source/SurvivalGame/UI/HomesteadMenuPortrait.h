@@ -19,6 +19,7 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     bool Refresh(AHomesteadCharacter& Character);
     void Orbit(float Degrees);
+    void ToggleCloseup();
     UTextureRenderTarget2D* Texture() const { return Target; }
 
 private:
@@ -29,5 +30,6 @@ private:
     UPROPERTY() TObjectPtr<UTextureRenderTarget2D> Target;
     bool bCapturePending = false;
     float Yaw = 0;
+    bool bCloseup = false;
     FRotator MeshRotation = FRotator::ZeroRotator;
 };

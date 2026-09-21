@@ -71,7 +71,13 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
             : FString::Printf(TEXT("Chest %d"), Row.ContainerId);
         Row.Detail = FromUtf8(Homestead::WearableDescription(Instance.definition));
-        if (Info->dyeable) Row.Detail += TEXT("\nDye: ") + FromUtf8(Homestead::DyeName(Instance.dye));
+        if (Info->dyeable)
+        {
+            Row.Detail += TEXT("\nDye: ") + FromUtf8(Homestead::DyeName(Instance.dye));
+            Row.Name += TEXT(" - ") + FromUtf8(Homestead::DyeName(Instance.dye));
+            Row.Label = Row.Name;
+            Row.IconTint = FLinearColor(0.20f, 0.27f, 0.115f) * HomesteadLook::TunicTint(Instance.dye);
+        }
         Row.Detail += FString::Printf(TEXT("\nOwned item #%d\n"), Instance.id);
         if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Torso))) Row.Detail += TEXT("Torso + legs");
         else if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Apron))) Row.Detail += TEXT("Apron layer (requires tunic)");

@@ -33,9 +33,9 @@ AHomesteadMenuPortrait::AHomesteadMenuPortrait()
     }
     Capture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitCapture"));
     Capture->SetupAttachment(RootComponent);
-    Capture->SetRelativeLocation(FVector(300, 0, 85));
+    Capture->SetRelativeLocation(FVector(270, 0, 85));
     Capture->SetRelativeRotation(FRotator(0, 180, 0));
-    Capture->FOVAngle = 38;
+    Capture->FOVAngle = 20;
     Capture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
     Capture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
     Capture->bCaptureEveryFrame = false;
@@ -62,7 +62,7 @@ bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)
         Target = NewObject<UTextureRenderTarget2D>(this);
         Target->ClearColor = FLinearColor(0.025f, 0.05f, 0.038f, 1);
         Target->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
-        Target->InitAutoFormat(512, 640);
+        Target->InitAutoFormat(384, 768);
         Capture->TextureTarget = Target;
     }
     Capture->ClearShowOnlyComponents();
@@ -106,6 +106,13 @@ void AHomesteadMenuPortrait::Orbit(float Degrees)
 {
     Yaw = FMath::Fmod(Yaw + Degrees, 360.0f);
     Body->SetRelativeRotation(MeshRotation + FRotator(0, Yaw, 0));
+    bCapturePending = true;
+}
+
+void AHomesteadMenuPortrait::ToggleCloseup()
+{
+    bCloseup = !bCloseup;
+    Capture->SetRelativeLocation(bCloseup ? FVector(130, 0, 138) : FVector(270, 0, 85));
     bCapturePending = true;
 }
 

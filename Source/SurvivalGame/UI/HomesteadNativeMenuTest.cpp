@@ -1,6 +1,7 @@
 #include "../HomesteadSmokeTest.h"
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "../HomesteadSave.h"
 #include "../HomesteadTestPaths.h"
 #include "SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -11,6 +12,9 @@
 #include "InputCoreTypes.h"
 #include "InputKeyEventArgs.h"
 #include "Materials/MaterialInterface.h"
+#include "CoreGlobals.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 bool AHomesteadSmokeTest::VerifyNativeMenuPresentation() const
 {
@@ -56,6 +60,32 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     const auto Before = MakeShared<std::string>();
     const auto OriginalRoute = MakeShared<FString>();
     const auto Blocker = MakeShared<FString>(FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("native-menu-write-blocker")));
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeQuitTest")))
+    {
+        Add(TEXT("Reach the real save-and-quit confirmation"),
+            [this]()
+            {
+                Tap(EKeys::Escape);
+                Tap(EKeys::Escape);
+                Tap(EKeys::Right);
+                Tap(EKeys::Enter);
+            },
+            [this]() { return Controller->NativeMenu && Controller->NativeMenu->IsExitPrompt(); });
+        Add(TEXT("Successful save precedes actual engine exit request"),
+            [this, Before]()
+            {
+                *Before = Controller->Simulation().Serialize();
+                Tap(EKeys::Down);
+                Tap(EKeys::Enter);
+                const auto* SavedGame = Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual")));
+                const bool Verified = SavedGame && SavedGame->SimulationData == UTF8_TO_TCHAR(Before->c_str())
+                    && !Controller->ToastIsError() && IsEngineExitRequested();
+                Finish(Verified, Verified ? TEXT("Native save-and-quit saved current state and requested process exit.")
+                    : TEXT("Native save-and-quit did not verify both saved state and the exit request."));
+            },
+            []() { return true; }, 0);
+        return;
+    }
     auto Capture = [this](const FString& Name)
     {
         Add(TEXT("Capture native Slate menu: ") + Name, [this, Name]() { Screenshot(Name); },
