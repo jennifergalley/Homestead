@@ -47,6 +47,14 @@ No CommonUI framework, web UI, new shops/buffs/armor/durability/winter balance,
 face/hair redesign, copied reference assets, automatic schedules or historical
 save-migration/profile-snapshot project.
 
+For subsequent feature rounds, Jenny's 23:28 preference is focused free/reusable
+prior-art research before planning custom components. This round reused native
+Slate layout/focus/scroll controls, engine scene capture and existing simulation/
+save authority; the 32 original icons were already authored without an external
+icon-library comparison. Do not claim that comparison occurred or redo them just
+to manufacture process compliance. Remaining runtime checks will extend the
+existing smoke actor/screenshot route, not introduce another testing framework.
+
 ## Ownership and execution lanes
 
 | Lane | Owned files / contract | Dependency |

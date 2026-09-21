@@ -11,7 +11,7 @@ class UPointLightComponent;
 class UTextureRenderTarget2D;
 
 UCLASS(Transient)
-class AHomesteadMenuPortrait : public AActor
+class SURVIVALGAME_API AHomesteadMenuPortrait : public AActor
 {
     GENERATED_BODY()
 public:

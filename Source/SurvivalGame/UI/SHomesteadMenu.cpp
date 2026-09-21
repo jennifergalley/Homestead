@@ -263,9 +263,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Portrait ? Gold : Pine; })
                 [
                     SNew(SVerticalBox)
-                    + SVerticalBox::Slot().AutoHeight()
+                    + SVerticalBox::Slot().FillHeight(1)
                     [
-                        SNew(SBox).HeightOverride(238)
+                        SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
                         [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ]
                     ]
                     + SVerticalBox::Slot().AutoHeight().Padding(8)
@@ -394,10 +394,13 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
         { Actions.Add(EHomesteadItemAction::MoveEarlier); Actions.Add(EHomesteadItemAction::MoveLater); }
     }
     ActionSelection = FMath::Clamp(ActionSelection, 0, FMath::Max(0, Actions.Num() - 1));
+    TSharedPtr<SUniformGridPanel> ActionGrid;
+    Box->AddSlot().AutoHeight().Padding(0, 4, 0, 0)
+    [ SAssignNew(ActionGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ];
     for (int32 Index = 0; Index < Actions.Num(); ++Index)
     {
         const auto Action = Actions[Index];
-        Box->AddSlot().AutoHeight().Padding(0, 4, 0, 0)
+        ActionGrid->AddSlot(Index % 2, Index / 2)
         [
             SNew(SButton).IsFocusable(false).ContentPadding(8)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? Gold : Selected; })
@@ -491,9 +494,10 @@ FLinearColor SHomesteadMenu::CellColor(int32 Index) const
     return Index == ContentSelection ? Selected
         : Index == Hover ? Selected : FLinearColor(0.055f, 0.09f, 0.075f);
 }
-void SHomesteadMenu::Select(int32 Index)
+void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
 {
     ContentSelection = FMath::Clamp(Index, 0, FMath::Max(0, Entries.Num() - 1));
+    if (!KeepDesiredColumn) DesiredColumn = ContentSelection % Columns();
     if (Entries.IsValidIndex(ContentSelection))
     {
         RememberedKeys[SeenPage] = RowKey(Entries[ContentSelection]);
@@ -631,8 +635,15 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float Amount)
         else if (Region == ERegion::Session) SessionSelection = FMath::Clamp(SessionSelection + (Dx ? Dx : Dy), 0, 1);
         else if (Region == ERegion::Details && DetailsScroll)
             DetailsScroll->SetScrollOffset(FMath::Max(0.0f, DetailsScroll->GetScrollOffset() + (Dy ? Dy : Dx) * 48));
-        else if (Region == ERegion::Actions) ActionSelection = FMath::Clamp(ActionSelection + (Dy ? Dy : Dx), 0, Actions.Num() - 1);
-        else Select(HomesteadMenuNavigation::Step(ContentSelection, Entries.Num(), Columns(), Dx, Dy));
+        else if (Region == ERegion::Actions)
+            ActionSelection = FMath::Max(0, HomesteadMenuNavigation::Step(ActionSelection, Actions.Num(), 2, Dx, Dy));
+        else
+        {
+            int32 Next = HomesteadMenuNavigation::Step(ContentSelection, Entries.Num(), Columns(), Dx, Dy);
+            if (Dy && Next >= 0 && Next / Columns() != ContentSelection / Columns())
+                Next = FMath::Min(Next / Columns() * Columns() + DesiredColumn, Entries.Num() - 1);
+            Select(Next, Dy != 0);
+        }
     }
     return true;
 }

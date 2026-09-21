@@ -51,6 +51,7 @@ private:
     int32 SeenPage = -1;
     int32 Hover = INDEX_NONE;
     int32 ContentSelection = 0;
+    int32 DesiredColumn = 0;
     int32 ActionSelection = 0;
     int32 SessionSelection = 0;
     int32 DialogSelection = 0;
@@ -76,7 +77,7 @@ private:
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();
     TSharedRef<SWidget> MakeButton(const FString& Label, TFunction<void()> Action,
-        TAttribute<FSlateColor> Color = FSlateColor(FLinearColor::White));
+        TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.97f)));
     TSharedRef<SWidget> Text(const FString& Value, int32 Size = 18) const;
     FString EntryName(const FHomesteadRow& Row) const;
     FName EntryIcon(const FHomesteadRow& Row) const;
@@ -85,7 +86,7 @@ private:
     FLinearColor CellColor(int32 Index) const;
     int32 Columns() const;
     int32 DetailIndex() const;
-    void Select(int32 Index);
+    void Select(int32 Index, bool KeepDesiredColumn = false);
     void Activate();
     void RunAction(EHomesteadItemAction Action);
     FString ActionLabel(EHomesteadItemAction Action) const;
