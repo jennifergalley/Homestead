@@ -52,8 +52,8 @@
     "bytes": 5383436
   },
   "Assets\\Characters\\HairstyleRefinement\\BobReuse\\manifest.json": {
-    "sha256": "ba3c8e1aa45f4d49aa352d6612f0171f2be9dc64584a40ce07255d78a0a82ff4",
-    "bytes": 37378
+    "sha256": "6ae479c405b74312a61a996559cc90f2085f7ce48c7abcf4f04430bc1b7eed9a",
+    "bytes": 36945
   },
   "Assets\\Characters\\HairstyleRefinement\\BobReuse\\materials.json": {
     "sha256": "e8944a6fe853ca430b8feefa9b2a5a1f280296a57cd54fe06b9a5fefaecd3334",
@@ -100,8 +100,8 @@
     "bytes": 7003
   },
   "Scripts\\Characters\\build_hairstyle_bob_reuse.py": {
-    "sha256": "976c1510bdcf96fb13aa7f8413405e0e32b02cc41da1aacc5dffef61fef619f3",
-    "bytes": 12799
+    "sha256": "a2c6c609f52531d20b8cb9c522d0dbbe71b9df063410f632aa8e2a56a6ee09fd",
+    "bytes": 12827
   },
   "Scripts\\Characters\\check_hairstyle_bob_reuse.py": {
     "sha256": "88390ecc7a760275354b0ee71a623f06a5909a04f41bc8226be1b7428590a18d",

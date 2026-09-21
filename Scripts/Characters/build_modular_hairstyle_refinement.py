@@ -119,7 +119,7 @@ def preview(mesh, style, body):
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
     protected = {str(p.relative_to(recipe.ROOT)):recipe.sha(p)
-                 for p in SOURCE.rglob("*") if p.is_file()}
+                 for p in SOURCE.rglob("*") if recipe.is_receipt_file(p)}
     original_manifest = json.loads((SOURCE/"manifest.json").read_text())
     joined = {style:json.loads((recipe.OUT/(style+"-manifest.json")).read_text()) for style in STYLES}
     manifest = {

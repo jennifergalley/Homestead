@@ -30,6 +30,7 @@ def module(name, filename):
 
 exporter = module("hairstyle_export", "export_heroine.py")
 author = module("hairstyle_stage", "build_heroine.py")
+is_receipt_file = module("hairstyle_receipts", "hairstyle_receipts.py").is_receipt_file
 author.OUT = exporter.OUT = OUT
 author.PREVIEW = exporter.PREVIEW = PREVIEW
 
@@ -392,7 +393,7 @@ def main():
     (OUT/"Joined").mkdir(exist_ok=True)
     PREVIEW.mkdir(parents=True, exist_ok=True)
     protected = {str(p.relative_to(ROOT)):sha(p) for folder in ["Heroine","Variants","BodyPresets"]
-                 for p in (CHAR/folder).rglob("*") if p.is_file()}
+                 for p in (CHAR/folder).rglob("*") if is_receipt_file(p)}
     manifest = {"status":"interchange-validated candidate; source visual and Unreal acceptance pending", "style":args.style,
                 "rig":"original game_engine 53 bones; existing UE skeleton adds wrapper",
                 "palette":"neutral sRGB texture multiplied by HomesteadLook::NeutralHairTint; legacy eyebrows/ponytail use HairTint",

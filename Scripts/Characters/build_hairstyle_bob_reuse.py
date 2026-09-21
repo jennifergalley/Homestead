@@ -231,13 +231,13 @@ def main():
         (OUT/folder).mkdir(parents=True,exist_ok=True)
     PREVIEW.mkdir(parents=True,exist_ok=True)
     frozen = {str(p.relative_to(ROOT)):recipe.sha(p) for p in HAIR_ROOT.rglob("*")
-              if p.is_file() and "LongWave" in p.name}
+              if recipe.is_receipt_file(p) and "LongWave" in p.name}
     for name in ["HomesteadAppearance.h","HomesteadAppearance.cpp"]:
         p = ROOT/"Source"/"SurvivalGame"/name
         frozen[str(p.relative_to(ROOT))] = recipe.sha(p)
     protected = {str(p.relative_to(ROOT)):recipe.sha(p)
                  for namespace in ["Heroine","Variants","BodyPresets","ModularClothing"]
-                 for p in (recipe.CHAR/namespace).rglob("*") if p.is_file()}
+                 for p in (recipe.CHAR/namespace).rglob("*") if recipe.is_receipt_file(p)}
     manifest = {
         "status":"stock-reuse source candidate; not imported, cooked or reference-approved",
         "source_choice":"targeted adaptation of admitted CC0 bob01, preserving fitted cap and layered strand atlas",

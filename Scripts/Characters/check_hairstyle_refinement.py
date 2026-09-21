@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from hairstyle_receipts import is_receipt_file
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "Assets" / "Characters" / "HairstyleRefinement"
@@ -128,7 +129,7 @@ def main(argv=None):
                 sheet.paste(Image.open(path).convert("RGB").resize((240,400)),(x,y+20))
                 draw.text((x+4,y+4),path.stem.removeprefix("Modular-"),fill="white")
             sheet.save(OUT/"Previews"/"Modular-CPU-source.png")
-    artifacts = [p for p in OUT.rglob("*") if p.is_file() and p != OUT/"artifact-hashes.json"]
+    artifacts = [p for p in OUT.rglob("*") if is_receipt_file(p) and p != OUT/"artifact-hashes.json"]
     artifacts += list((ROOT/"Scripts"/"Characters").glob("*hairstyle*.py"))
     artifacts += [ROOT/"Scripts"/"Characters"/"Build-HairstyleRefinement.ps1",
                   ROOT/"Source"/"SurvivalGame"/"HomesteadAppearance.h",
