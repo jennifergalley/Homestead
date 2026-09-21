@@ -1,0 +1,197 @@
+{
+  "source_only": true,
+  "entries": [
+    {
+      "fbx": "Joined\\SK_Heroine_LongWave.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 10907,
+      "height_m": 1.6063106826040894,
+      "shoulder_waist_midpoint_m": 1.110503077507019,
+      "wave_tip_above_midpoint_m": 0.010914444923400879
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_LongWave_Apron.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 10907,
+      "height_m": 1.6063106826040894,
+      "shoulder_waist_midpoint_m": 1.110503077507019,
+      "wave_tip_above_midpoint_m": 0.010914444923400879
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Willow_LongWave.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 10965,
+      "height_m": 1.6063190966378897,
+      "shoulder_waist_midpoint_m": 1.110503077507019,
+      "wave_tip_above_midpoint_m": 4.458427429199219e-05
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Willow_LongWave_Apron.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 10965,
+      "height_m": 1.6063190966378897,
+      "shoulder_waist_midpoint_m": 1.110503077507019,
+      "wave_tip_above_midpoint_m": 4.458427429199219e-05
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Hazel_LongWave.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 11028,
+      "height_m": 1.6069215961033478,
+      "shoulder_waist_midpoint_m": 1.110503077507019,
+      "wave_tip_above_midpoint_m": 0.010510802268981934
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Hazel_LongWave_Apron.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 11028,
+      "height_m": 1.6069215961033478,
+      "shoulder_waist_midpoint_m": 1.110503077507019,
+      "wave_tip_above_midpoint_m": 0.010510802268981934
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Bob.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 38809,
+      "height_m": 1.617898421594873
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Bob_Apron.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 38809,
+      "height_m": 1.617898421594873
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Willow_Bob.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 39045,
+      "height_m": 1.6178392439614981
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Willow_Bob_Apron.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 39045,
+      "height_m": 1.6178392439614981
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Hazel_Bob.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 39332,
+      "height_m": 1.6185225673252717
+    },
+    {
+      "fbx": "Joined\\SK_Heroine_Hazel_Bob_Apron.fbx",
+      "nonhair_material_nodes_values_texture_names_exact": true,
+      "original_mesh_scale": [
+        1.0,
+        1.0,
+        1.0000001192092896
+      ],
+      "mesh_scale_roundtrip_error": 5.960464477539063e-08,
+      "nonhair_surface_error": 6.332993507385254e-08,
+      "nonhair_normal_error": 0.0,
+      "bind_error": 1.4960765838623047e-05,
+      "head_only_hair_vertices": 39332,
+      "height_m": 1.6185225673252717
+    }
+  ]
+}

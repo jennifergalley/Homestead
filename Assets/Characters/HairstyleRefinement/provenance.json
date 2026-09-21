@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "candidate_scope": "Final canonical selection: latest feather-tip waves plus stock-bob reuse, 12 Joined + 6 Modular outputs. Historical authored elements below include superseded prototype work.",
+  "final_selection": {
+    "manifest": "final-bundle.json",
+    "published_early_wave_commit": "a3a6dee",
+    "published_palette_commit": "013c70b",
+    "preferred_bob": "Bob-manifest.json; stock-authoring provenance in BobReuse\\provenance.json",
+    "selected_modular_parity": "Modular-manifest.json (latest waves plus stock Bob)",
+    "immutable_reference_only": "PublishedWaveParity\\provenance.json (a3a6dee, not selected final waves)",
+    "visual_acceptance": false,
+    "gameplay_acceptance": false
+  },
+  "status": "source/interchange validation only; coordinator-owned gameplay acceptance pending",
+  "inherited_provenance": [
+    "Assets\\Characters\\provenance.json",
+    "Assets\\Characters\\Variants\\provenance.json",
+    "Assets\\Characters\\BodyPresets\\provenance.json"
+  ],
+  "admitted_sources": {
+    "collection": "Official MakeHuman system assets and MPFB graphical output",
+    "author": "MakeHuman Team and contributors; Data Collection AB, Joel Palmius, Jonas Hauquier",
+    "license": "CC0-1.0",
+    "license_evidence": "Assets\\Characters\\Source\\Licenses\\LICENSE.ASSETS.md",
+    "source_url_record_only": "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+    "acquisition": "existing local admitted joined FBXs and textures; no download or source-pack access needed",
+    "wave_basis": "fitted long01 evaluated meshes and existing T_Long_Chestnut.png alpha/strand modulation",
+    "body_basis": "unchanged original adult3body Preferred, Willow, Hazel joined nonhair surfaces and game_engine rig"
+  },
+  "original_authored_elements": {
+    "author": "GitHub Copilot procedural authoring for Jenny's SurvivalGame project",
+    "recipe": "Scripts\\Characters\\build_hairstyle_refinement.py",
+    "elements": [
+      "Retained-cadence topology cut with staggered tapered-lock endpoints and lower-end UV remap to admitted alpha tips",
+      "Neutral wave strand texture derived from existing admitted texture, preserving alpha byte-for-byte",
+      "Original symmetric straight bob crown, chin/nape panels and short open fringe",
+      "Original procedural neutral bob strand texture",
+      "Five-color neutral hair palette with separate unchanged legacy tint helper"
+    ]
+  },
+  "private_reference": "No private portrait/reference access, copies or embedding. Written direction only.",
+  "third_party_game_art": "No copied or extracted Hades II or other game assets.",
+  "protected_inputs": "Per-style manifests hash all original Heroine, Variants and BodyPresets files; existing ponytail, rig and animation sources are unchanged.",
+  "modular_parity": {
+    "authorization": "Parent stable-base read-only handoff, 2026-09-20 23:53 Arizona",
+    "input": "Assets\\Characters\\ModularClothing",
+    "output": "Assets\\Characters\\HairstyleRefinement\\Modular",
+    "recipe": "Scripts\\Characters\\build_modular_hairstyle_refinement.py",
+    "method": "Transfer actual joined candidate hair only; retain permanent BaseBra/BaseBriefs, all other surfaces and original rig.",
+    "protected_hashes": "Modular-manifest.json protects the full input namespace, including ponytails and garments.",
+    "visual_status": "Same unresolved wave end finish and unapproved bob candidate; no new gameplay or art claim."
+  },
+  "integration": "Exact current-selector object paths in LongWave-manifest.json and Bob-manifest.json; no automatic promotion."
+}

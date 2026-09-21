@@ -9,6 +9,9 @@ tonight, not another isolated screenshot or unintegrated source experiment.
 
 ## What Changes
 
+- Reuse already-admitted legally available hair first, following Jenny's
+  explicit 23:28 preference. Adapt fitted CC0 long01/bob01 before further
+  substantial custom shaping; author only a documented essential quality gap.
 - Author believable mid-back brunette waves without the rejected lower-hair
   compression that produced accordion ridges and a blunt shelf.
 - Author an original straight blonde bob with the requested broad silhouette
@@ -39,5 +42,5 @@ Appearance IDs, Character mesh paths and original skeleton stay stable.
 Any needed hair-specific tint mapping must preserve user color choices and be
 coordinated with UI before source changes. The current source lane owns the
 character work; the main environment worker retains the sole Unreal tool slot.
-No private portrait access, external downloads, copied assets, UE sibling
+No private portrait access, external downloads, unlicensed/extracted game assets, UE sibling
 launches, automatic promotion or alteration of another checkout.
