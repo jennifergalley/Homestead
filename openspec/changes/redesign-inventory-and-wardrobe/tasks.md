@@ -1,22 +1,28 @@
 # Tasks
 
-September 20 22:35 policy revision: isolated parallel source work is authorized.
-Environment acceptance gates reconciliation/integration/delivery, not UI source
-work. Existing saves are disposable test data; current saves must still work.
-Old migration tasks were revised, not falsely completed. Partial/source-only
-work stays unchecked until its complete verification passes.
+## Current state and next visible goal
 
-Early lane: 1.1, 5.1-5.3, Settings portions of 5.6/5.7, section 6, then existing
-items in 4.5/5.4. Wardrobe authority/save/asset lanes proceed independently;
-functional equipment needs sections 2/3 and compatible section 4 assets.
-All engine execution belongs to the coordinator's single approved lane.
+September21 read-only evidence reconciliation:19/44 tasks complete. The delivered
+`wardrobe-ui-02` proof includes actual720p/4K producers, separate-process consumers,
+real save-and-quit and ordinary gameplay; accepted portable evidence is23 scenarios
+/1882 checks. This reconciliation records completed work, not new certification.
+
+Jenny says the menu looks pretty good; next visible goal is natural D-pad/left-stick
+section traversal, especially Down, without requiring LT/RT. The isolated UI owner
+owns `improve-menu-directional-navigation`; main retains world/camera/endurance and
+the serialized compiler/runtime slot. Current natural endurance stays uninterrupted.
+
+Actual Failed-dialog Retry-button success, incompatible-save reset, broader
+nonstarter clothing/storage/quantity/mouse flows, held-stick/human comfort and
+GPU/menu-cleanup evidence remain open. Freshv5 is not reset proof. Disposable test
+saves still require truthful current-save behavior; no migration project is implied.
 
 ## 1. Authorization and integration baseline
 
 - [x] 1.1 Record isolated UI/backend/asset source ownership and current authorization; verify no competing engine execution or main-checkout edits.
 - [x] 1.2 Reconcile source/API changes against the accepted environment before integration; verify delivery order remains environment then UI.
 - [ ] 1.3 Register synthetic current-version save fixtures and explicit incompatible-test reset cases; verify they do not require historical migration infrastructure.
-- [ ] 1.4 Register useful 720p/4K visual/controller/gameplay states and shared runtime slot; verify source-only evidence is not called runtime proof.
+- [x] 1.4 Register useful 720p/4K visual/controller/gameplay states and shared runtime slot; verify source-only evidence is not called runtime proof.
 
 ## 2. Portable item authority and conservation
 
@@ -56,30 +62,30 @@ All engine execution belongs to the coordinator's single approved lane.
 
 ## 6. Discoverable reliable exit
 
-- [ ] 6.1 Pin Settings exit with cancel-default confirmation; verify three-press gameplay route and labeled Settings path from every page.
+- [x] 6.1 Pin Settings exit with cancel-default confirmation; verify three-press gameplay route and labeled Settings path from every page.
 - [ ] 6.2 Report actual save success/failure and config persistence status; verify no attempted save is reported durable.
-- [ ] 6.3 Implement Saving/Failed/Retry handling; verify actual failure stays open/paused and successful save precedes exit.
+- [x] 6.3 Implement Saving/Failed/Retry handling; verify actual failure stays open/paused and successful save precedes exit.
 - [ ] 6.4 Add explicit unsaved confirmation and independent recovery Settings/quit; verify no forced retry/checkpoint overwrite or accidental discard.
 - [ ] 6.5 Keep invalid startup routes explicit and restart separately confirmed; verify cancel preserves state and reset clears stale focus.
 
 ## 7. Integrated evidence
 
-- [ ] 7.1 Run permitted portable rules/current-save tests; verify ownership conservation and existing gameplay semantics.
-- [ ] 7.2 Run approved focused menu/prompt/feedback/settings/lifecycle tests; verify real semantics rather than obsolete row-index assumptions.
+- [x] 7.1 Run permitted portable rules/current-save tests; verify ownership conservation and existing gameplay semantics.
+- [x] 7.2 Run approved focused menu/prompt/feedback/settings/lifecycle tests; verify real semantics rather than obsolete row-index assumptions.
 - [ ] 7.3 Run current save/load/reset/quit tests and existing route guards in shared slot; verify truthful results independently of process exit code.
 - [ ] 7.4 Run affected action/full-loop/hotkey cases with actual Lit/LightingOn/ShaderComplexityOff checks; verify unchanged rewards and materials.
 - [ ] 7.5 Review matched baseline/candidate 720p/4K menu states and ordinary character movement; verify legible icons/details/feedback and coverage.
-- [ ] 7.6 Batch demonstrated corrections and recheck them; verify scoped defects are resolved without arbitrary iteration/time/cost work-stop caps.
+- [x] 7.6 Batch demonstrated corrections and recheck them; verify scoped defects are resolved without arbitrary iteration/time/cost work-stop caps.
 - [ ] 7.7 Measure meaningful menu/gameplay timing and repeated open/close cleanup; verify no material regression and report actual 60 FPS evidence/limits.
 
 ## 8. Integrated playable delivery
 
 - [ ] 8.1 Update directly affected setup/design/playtest/test/provenance docs from actual implementation; verify controls and save-reset guidance are accurate.
-- [ ] 8.2 Checkpoint/push only owned coherent source and integrate via coordinator after environment; verify exact commits and approved shared build.
-- [ ] 8.3 Deliver latest playable UI/wardrobe candidate with actual basic visual/controller/gameplay/current-save evidence; verify no inferred human aesthetic approval.
+- [x] 8.2 Checkpoint/push only owned coherent source and integrate via coordinator after environment; verify exact commits and approved shared build.
+- [x] 8.3 Deliver latest playable UI/wardrobe candidate with actual basic visual/controller/gameplay/current-save evidence; verify no inferred human aesthetic approval.
 - [ ] 8.4 Report completed scope and remaining issues truthfully, with no automatic PR/schedule; verify final OpenSpec progress matches implemented and tested behavior.
 
-## Current UI lane evidence
+## Historical UI lane evidence
 
 September 20 source milestone: central policy revised before implementation;
 UI/wardrobe/asset owners exchanged typed API and rendering paths. Native Slate
@@ -143,3 +149,20 @@ navigation/visual/coverage/delivery tasks. The larger portrait retains dark
 lower-body/shoe lighting; human aesthetic/controller approval is not claimed.
 Corrected ordinary play records302 frames over43.0953s with actual berry harvest.
 The native StartupProbe observations compile but were not separately run.
+
+## September21 completed-evidence reconciliation
+
+The coordinator's separate read-only review closes exactly1.4,6.1,6.3,7.1,7.2,
+7.6,8.2 and8.3, from11/44 to19/44. Evidence is the already-delivered
+`Build\Releases\20260921-033354-2d257ba0\wardrobe-ui-02\acceptance-receipt.json`
+and its hash-pinned `Verification\proof-index.json`, plus the accepted23-scenario,
+1882-check portable result above. Delivery source checkpoint:
+`bb2a6f1808f0fad561d3a2c712f9837ada1a8dea`.
+
+Task6.3's verified clause is actual failure staying open/paused and successful
+save preceding exit. It does not certify clicking the Failed dialog's Retry button
+through success; that remains3.5. A newv5 profile does not demonstrate an
+incompatible-save reset:1.3,3.2,3.6 and6.5 stay open. No pointer/held-stick,
+all-outfit, human-controller or GPU coverage is inferred. The new directional
+navigation request is independent remaining work, not a retroactive failure or
+completion of all old navigation tasks.
