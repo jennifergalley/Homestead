@@ -21,7 +21,8 @@ param(
     [switch]$WardrobeVisualCorrection,
     [switch]$TreeDiagnosticCandidate,
     [switch]$TreeContactCorrection,
-    [switch]$GroveCandidate
+    [switch]$GroveCandidate,
+    [switch]$GroveProxyCorrection
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -33,10 +34,11 @@ if($WardrobeVisualCorrection -and -not $WardrobeCandidate){throw 'Visual correct
 if($TreeDiagnosticCandidate -and (-not $ShippingActions -or $HairWaveCandidate -or $WardrobeCandidate)){throw 'Tree diagnostic requires exclusive Shipping selection.'}
 if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires the explicit tree diagnostic candidate.'}
 if($GroveCandidate -and (-not $TreeDiagnosticCandidate -or $TreeContactCorrection)){throw 'Grove requires exclusive qualified tree Shipping selection.'}
-$shippingBuildName=if($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$shippingLinkAction=if($TreeContactCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
+if($GroveProxyCorrection -and -not $GroveCandidate){throw 'Proxy correction requires the explicit grove candidate.'}
+$shippingBuildName=if($GroveProxyCorrection){'grove-shipping-build-02'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkAction=if($TreeContactCorrection -or $GroveProxyCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
-$shippingCompiles=if($TreeContactCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
+$shippingCompiles=if($TreeContactCorrection -or $GroveProxyCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
 if($TreeActions -and ($FernActions -or $UiActions -or $WardrobeActions -or $ShippingActions -or -not $DetachedConsole -or
     $CompileActionId -notin @(-1,0) -or $ResourceLinkActionId -notin @(-1,1,2) -or
@@ -163,7 +165,7 @@ if($StageCooked) {
     }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GroveProxyCorrection){'clearing-grove-02'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -262,6 +264,10 @@ if($StageCooked) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grove-shipping-plan-01\actions.json'
         $planHash='8C320D1BB5AA564BD7EB8323AC1C6836ECDE9ACEBD32B6F3480FF246EDFFF98D'
     }
+    if($GroveProxyCorrection){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grove-shipping-plan-02\actions.json'
+        $planHash='C840F3F9448622E45985BD46FFFA774468A24A3BF246A3D04FEF317E35BE266E'
+    }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'
         $planHash='5A801AC790664B9C17894AB1C730EBEC1DB5E541A8343D9B01E6CF1BE7A3E0AE'
@@ -278,6 +284,13 @@ if($StageCooked) {
         if($retained.status -cne 'passed'){throw 'Unchanged first Shipping unity prerequisite is missing.'}
         foreach($product in $retained.producedItems){
             if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Unchanged first Shipping unity product differs.'}
+        }
+    }
+    if($GroveProxyCorrection -and $ResourceLinkActionId -eq 1){
+        $retained=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grove-shipping-build-01\compile0\result.json') -Raw|ConvertFrom-Json
+        if($retained.status -cne 'passed'){throw 'Unchanged first grove unity prerequisite is missing.'}
+        foreach($product in $retained.producedItems){
+            if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Unchanged first grove unity product differs.'}
         }
     }
     if($TreeActions -and $ResourceLinkActionId -in @(1,2)) {
@@ -456,6 +469,7 @@ try {
         treeDiagnosticCandidate=[bool]$TreeDiagnosticCandidate
         treeContactCorrection=[bool]$TreeContactCorrection
         groveCandidate=[bool]$GroveCandidate
+        groveProxyCorrection=[bool]$GroveProxyCorrection
         creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions;treeActions=[bool]$TreeActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()

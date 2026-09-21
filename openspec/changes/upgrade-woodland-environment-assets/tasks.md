@@ -81,6 +81,27 @@ grass, ground and broader construction/performance checks remain open.
 `docs/research/environment-assets/tree-grove-01/receipt.json` preserves exact
 outputs; single-tree03 remains selected while grove visual disposition is pending.
 
+Coordinator review of actual grove01 frame00141 rejected the local composition:
+taller decorative proxy trunks/crowns still dominate and obscure the authored
+trees. One placement-only correction suppresses whole remaining decorative tree
+groups within34m of clearing center, with the same15 admitted authored trees
+inside30m. This removes trunks and every crown tier together, not interactive
+resource saplings/forage or simulation IDs. Authored scale/capsules and all
+exclusions remain unchanged; only distant background proxies are deferred.
+Retain grove01 as functional/timing evidence, not convincing visual delivery.
+Use a fresh genuine Shipping candidate and one ordinary route/timing confirmation,
+without import, recook, giant scale changes or new rendering infrastructure.
+
+Corrected grove02 completed that single confirmation:510 ordinary frames,
+all23 stages, actual gathering/trunk blocking/292.305cm retreat, and exactly the
+same15 authored site/readiness/exclusion inventory as01. Its separate1,200
+screenshot-free timing samples remained near the60cap, p95 16.831..16.868ms and
+none over33.33ms, with matching baseline output/settings. Both guarded lifetimes
+exited/released cleanly without hard termination. Evidence is sealed separately
+in `docs/research/environment-assets/tree-grove-02`; current selected single-tree03
+is unchanged while the coordinator inspects corrected originals. Grove01's weak
+composition and import03's source-basis failure are not rewritten.
+
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns
 environment/engine integration; isolated siblings own UI, wardrobe rules

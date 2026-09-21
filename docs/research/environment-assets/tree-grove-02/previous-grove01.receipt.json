@@ -1,0 +1,483 @@
+{
+  "status": "passed-qualified-grove-placement-gameplay-and-capped-timing-not-selected",
+  "createdUtc": "2026-09-21T14:38:44.7673789+00:00",
+  "sourceBaseCheckpoint": "82f00b926ffe1787cc39e1ce3704c400eb26ab76",
+  "qualification": "Same retained failed import03 and exact12 branch source-description basis corners; no source/asset/collider/material mutation or renewed clean-mesh claim.",
+  "placement": {
+    "minimumMarginsCm": {
+      "home_margin_cm": 479.259943,
+      "resource_margin_cm": 135.993508,
+      "structure_margin_cm": 1000000000.0,
+      "plot_margin_cm": 1000000000.0,
+      "stream_margin_cm": 1169.15622,
+      "tree_spacing_margin_cm": 48.973576
+    },
+    "trees": 15,
+    "primitiveSitesReplaced": 15,
+    "cap": 16,
+    "structuresAndPlots": "None in fresh initial state; 1e9 means empty-set sentinel, not a measured constructed-site clearance.",
+    "sharedGeometry": "One existing reduced mesh/render-buffer set; triangle total is instances times actual mesh triangles, not visible draw or whole-scene/GPU work.",
+    "triangles": 3476775,
+    "triangleCap": 3708560
+  },
+  "ordinary": {
+    "forage": true,
+    "plannedPasses": 23,
+    "completedPasses": 23,
+    "frames": 492,
+    "blockedAtTrunk": true,
+    "retreatCm": 289.707935,
+    "wholeTreeInView": true
+  },
+  "screenshotFreeTiming": [
+    {
+      "stage": "timing-idle",
+      "baseline": {
+        "samples": 121,
+        "wall_seconds": 2.016638506,
+        "mean_tick_hz": 60.00083784971624,
+        "median_ms": 16.663201,
+        "p95_ms": 16.895503,
+        "p99_ms": 16.971499,
+        "max_ms": 17.013699,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 0.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "p95DifferenceMs": -0.015702000000000993,
+      "candidate": {
+        "samples": 120,
+        "wall_seconds": 2.000221797,
+        "mean_tick_hz": 59.99334682782681,
+        "median_ms": 16.673348500000003,
+        "p95_ms": 16.879801,
+        "p99_ms": 16.9692,
+        "max_ms": 17.030198,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 0.0,
+        "camera_yaw_travel_degrees": 0.0
+      }
+    },
+    {
+      "stage": "timing-walk",
+      "baseline": {
+        "samples": 360,
+        "wall_seconds": 6.000229512,
+        "mean_tick_hz": 59.99770496778957,
+        "median_ms": 16.6687,
+        "p95_ms": 16.880002,
+        "p99_ms": 17.0031,
+        "max_ms": 17.090701,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 90.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "p95DifferenceMs": 0.011495999999997508,
+      "candidate": {
+        "samples": 361,
+        "wall_seconds": 6.016603799,
+        "mean_tick_hz": 60.00062694173092,
+        "median_ms": 16.668499,
+        "p95_ms": 16.891498,
+        "p99_ms": 16.971502,
+        "max_ms": 17.015502,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 90.0,
+        "camera_yaw_travel_degrees": 0.0
+      }
+    },
+    {
+      "stage": "timing-turn",
+      "baseline": {
+        "samples": 360,
+        "wall_seconds": 6.000038494,
+        "mean_tick_hz": 59.99961506246964,
+        "median_ms": 16.667651,
+        "p95_ms": 16.848303,
+        "p99_ms": 17.001703,
+        "max_ms": 17.0816,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 106.5789999999997
+      },
+      "p95DifferenceMs": 0.03399699999999939,
+      "candidate": {
+        "samples": 360,
+        "wall_seconds": 6.000043804,
+        "mean_tick_hz": 59.99956196319796,
+        "median_ms": 16.666950999999997,
+        "p95_ms": 16.8823,
+        "p99_ms": 17.0177,
+        "max_ms": 17.0568,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 106.57899999999978
+      }
+    },
+    {
+      "stage": "timing-sweep",
+      "baseline": {
+        "samples": 360,
+        "wall_seconds": 6.000025402,
+        "mean_tick_hz": 59.999745981075435,
+        "median_ms": 16.665751,
+        "p95_ms": 16.8893,
+        "p99_ms": 16.991399,
+        "max_ms": 17.044999,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 319.7379999999994
+      },
+      "p95DifferenceMs": -0.02340199999999726,
+      "candidate": {
+        "samples": 360,
+        "wall_seconds": 6.0001997959999995,
+        "mean_tick_hz": 59.998002106528524,
+        "median_ms": 16.66975,
+        "p95_ms": 16.865898,
+        "p99_ms": 16.975202,
+        "max_ms": 17.064102,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 319.7399999999994
+      }
+    }
+  ],
+  "settings": {
+    "desktopMode": 1,
+    "outputTarget": [
+      1280,
+      720
+    ],
+    "screenPercentage": 0,
+    "vsync": 0,
+    "rhi": "D3D12",
+    "actualViewport": [
+      1280,
+      720
+    ],
+    "defaultScreenPercentage": 100,
+    "dynamicResolution": 0,
+    "matchingSnapshots": true,
+    "internalUpscalerInputResolution": "not measured",
+    "frameCap": 60
+  },
+  "candidatePhysicalMemoryBytes": {
+    "meaning": "Two process physical-memory snapshots, not peak/VRAM/whole-machine or baseline comparison.",
+    "start": 962891776,
+    "end": 999174144
+  },
+  "lifecycle": [
+    {
+      "seconds": 52.8489053,
+      "route": "grove-baseline-timing-01",
+      "maximumSampleGapMs": 618.1701,
+      "hardTerminated": false,
+      "released": true,
+      "observedDeath": true
+    },
+    {
+      "seconds": 87.2701005,
+      "route": "grove-ordinary-01",
+      "maximumSampleGapMs": 931.6942,
+      "hardTerminated": false,
+      "released": true,
+      "observedDeath": true
+    },
+    {
+      "seconds": 52.8495593,
+      "route": "grove-timing-01",
+      "maximumSampleGapMs": 633.7193,
+      "hardTerminated": false,
+      "released": true,
+      "observedDeath": true
+    }
+  ],
+  "selectedPreviewUnchanged": true,
+  "limits": [
+    "60-capped, one short deterministic route per build; no uncapped headroom/GPU/Present/4K/full-forest performance claim.",
+    "Screenshot intervals are excluded from timing and are not FPS evidence.",
+    "Actual frame141 inspected: several authored crowns are present but large distant proxies and very golden dawn still dominate.",
+    "Second worker image view blocked by quota; coordinator review of copied originals requested.",
+    "Grass and ground follow-on remain open; actual17-clump grass FBX fan estimate24730 is distinct from publisher1606633 polygon aggregate.",
+    "Existing selected single-tree03 and v5 saves untouched; no human game launch.",
+    "Editor native source/product receipts need genuine refresh before next authoring operation."
+  ],
+  "sourcePins": [
+    {
+      "sha256": "4740C776F57279C098DC9D8F15D536DDC6B7E0D32092C05A227CC532884AE8A3",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp"
+    },
+    {
+      "sha256": "7C58CC5EF47C26F64B8450107DD7A96625351405581E6D4C6ACCA1FAB35A770F",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp"
+    },
+    {
+      "sha256": "8B7BFE7075B084621CA587B1DCE35C23AFD82FBBDBA617C7FD27881F505F1337",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h"
+    },
+    {
+      "sha256": "D6FF84AB871178B5B32014B60C8E8C7A28C89F79CA764199567587184C62536C",
+      "path": "Scripts\\Analyze-PresentationDiagnostics.py"
+    },
+    {
+      "sha256": "75BD0479B7E63334CA13B5B5498C5E276F1029BA2BEFA026F22CA007705968EF",
+      "path": "Tests\\PresentationDiagnosticsTests.py"
+    },
+    {
+      "sha256": "E6B6925440F3EDE0EC5E5D8F1518BE109E148672C8ECEDA03FAC1D62387E07E7",
+      "path": "Tests\\Test-CompilerLeaf.ps1"
+    },
+    {
+      "sha256": "649DBD59DD2C61BF8D399C8912D7EBFDCCE0511B06E4A95649C5456277421B69",
+      "path": "Scripts\\Build-AuthoringProbe.ps1"
+    }
+  ],
+  "files": [
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\observations.txt",
+      "copy": "grove-baseline-timing-01.observations.txt",
+      "sha256": "3E4E6B9E6873DFD3B717372F9516AC5EBA94B9D514FACBB4CD0AAC14E3AD3FCD"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\telemetry.csv",
+      "copy": "grove-baseline-timing-01.telemetry.csv",
+      "sha256": "CDBE5CFFB8E887E29D460575EB4DAAC78E11695D9BA159E770559224FF7A4A31"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\presentation-settings.txt",
+      "copy": "grove-baseline-timing-01.presentation-settings.txt",
+      "sha256": "2864AD11525ED669C1C18C9835CD99F694D363042E3E2788F74457D58C2A08E3"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\qa-guard-result.json",
+      "copy": "grove-baseline-timing-01.qa-guard-result.json",
+      "sha256": "6DD256A98A96657A05156FED94C5437264E289B35F2C91950FCF07DB5DB6C91B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\qa-launch.json",
+      "copy": "grove-baseline-timing-01.qa-launch.json",
+      "sha256": "7238DFC52FDBB614DDC44B000DE8283CA0DCA50BF67260632B3D37EB9B212AC9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\qa-admission.txt",
+      "copy": "grove-baseline-timing-01.qa-admission.txt",
+      "sha256": "FE6F19FA8B200A4A39D2B89F339411F8BCECA15E3358F17CC14BB2466A0C04CD"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\presentation-timings.csv",
+      "copy": "grove-baseline-timing-01.presentation-timings.csv",
+      "sha256": "A404AF16C10C0DCF081387F9547ADA01CB05AD0B2369198FFDB411675B823149"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\presentation-analysis.json",
+      "copy": "grove-baseline-timing-01.presentation-analysis.json",
+      "sha256": "DFA906E45AF856BAD84113E1D8DAC91BF479582816E95DC763035FE283D25EB3"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\diagnostic-launch.json",
+      "copy": "grove-baseline-timing-01.diagnostic-launch.json",
+      "sha256": "23119E958BB6C0A89D991F873958AD5C00BAE9A3296136AE35DDE2000C8002E6"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\display-mode-before.json",
+      "copy": "grove-baseline-timing-01.display-mode-before.json",
+      "sha256": "002C6920945BB091844A615F3DA951F6F6C65FBFE952096908EE2E4F5B3D1352"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-baseline-timing-01\\display-mode-after.json",
+      "copy": "grove-baseline-timing-01.display-mode-after.json",
+      "sha256": "B4D1C81DF2C92375D10D2EFC8B27C61D50FC0E6C5755B65002DC74B2005FD9F9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\observations.txt",
+      "copy": "grove-timing-01.observations.txt",
+      "sha256": "5DDF9C2F1878562443266AB2AB256EE10B1405C2D7B66CC0D80E2C70FEECDB65"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\telemetry.csv",
+      "copy": "grove-timing-01.telemetry.csv",
+      "sha256": "4350242C3E5B777DF24714F44E6E6F186E52B167F8F298CF7ECA40ACEE7E6F0B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\presentation-settings.txt",
+      "copy": "grove-timing-01.presentation-settings.txt",
+      "sha256": "A0C51BDA06764E327BBF13A6F79C0575E5D3A08C2FD9BF16B4DF55386A3B2D3E"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\qa-guard-result.json",
+      "copy": "grove-timing-01.qa-guard-result.json",
+      "sha256": "B56D52EA43DE42CAE618741935311F29F63FC3BF3C3683E5B3F2982F171F3AC9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\qa-launch.json",
+      "copy": "grove-timing-01.qa-launch.json",
+      "sha256": "5870EB5C614F4302BF1DF09C8E0F20691D71F322887223A33DF2600919D227D9"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\qa-admission.txt",
+      "copy": "grove-timing-01.qa-admission.txt",
+      "sha256": "F986F92C57185EAE23A5F53494DEE16CD6AF2E30629F4C83420E2AAFE8D69DA3"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\presentation-timings.csv",
+      "copy": "grove-timing-01.presentation-timings.csv",
+      "sha256": "85DF0D4E9B36CE99E192557FC87FB0B8D88A79F126822D383AAF5FB217E290C1"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\presentation-analysis.json",
+      "copy": "grove-timing-01.presentation-analysis.json",
+      "sha256": "67E6D5B949F2FAF3968D68BE072821E6275ECBFC3EEA4DC9F0C845734065A35E"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\diagnostic-launch.json",
+      "copy": "grove-timing-01.diagnostic-launch.json",
+      "sha256": "42AF9A6EB1640C3F5FE793DF5601931E5954F2C81695BF7BE276513E426A2CA2"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\display-mode-before.json",
+      "copy": "grove-timing-01.display-mode-before.json",
+      "sha256": "C3711CD27813D7BACA3C76D20E41423D31959BD424E48B33AC4B2AEEBD7A4363"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\display-mode-after.json",
+      "copy": "grove-timing-01.display-mode-after.json",
+      "sha256": "1074ED9836FD6A64663998F1007D9BB071991AC964F9CA232C850555CC8A349D"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-timing-01\\grove-inventory.csv",
+      "copy": "grove-timing-01.grove-inventory.csv",
+      "sha256": "BB9F590610BEA204D1E3A49AB9BB3F040D3E159F5D3C390B842C4A30C29A3B3B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\observations.txt",
+      "copy": "grove-ordinary-01.observations.txt",
+      "sha256": "E0374F4962B33652F6B0759B612A970EFA317C8E68C1D89EFC54AE1F44062B06"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\telemetry.csv",
+      "copy": "grove-ordinary-01.telemetry.csv",
+      "sha256": "3F82B93CB0F600E2162950D348AEF570DCC9E2BF534CFFA7D0CD07DEB62BBA40"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\presentation-settings.txt",
+      "copy": "grove-ordinary-01.presentation-settings.txt",
+      "sha256": "42D3B9A429746A0AD96280AA036C9420A14D8DE99E85BBB09E77B9D3FA0A7D2C"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\qa-guard-result.json",
+      "copy": "grove-ordinary-01.qa-guard-result.json",
+      "sha256": "192759DAEDE1EEF925510B2BF3F63164C9900E2E526B06A8D3E63B48F2426884"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\qa-launch.json",
+      "copy": "grove-ordinary-01.qa-launch.json",
+      "sha256": "8C929CE5373FE3693D7459FB845767D4EB23A3895249924A44A21BF0560AFF5C"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\qa-admission.txt",
+      "copy": "grove-ordinary-01.qa-admission.txt",
+      "sha256": "5A3301F605F589B7DA5EA7234EC374F4F2A406F4C38E4DB360E7CA109DFBB701"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\grove-inventory.csv",
+      "copy": "grove-ordinary-01.grove-inventory.csv",
+      "sha256": "BB9F590610BEA204D1E3A49AB9BB3F040D3E159F5D3C390B842C4A30C29A3B3B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\tree-contact.csv",
+      "copy": "ordinary.tree-contact.csv",
+      "sha256": "BA0A66DEC29A0D8350A758BC669BAF50D470CD844970030EBB4939CB353B442C"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\Frames\\frame-00018.png",
+      "copy": "frame-00018.png",
+      "sha256": "BA4961D9B38AF5D3AC391F547D53DCA0F318CDD3FE75576480F6BD2DC6E1988B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\Frames\\frame-00141.png",
+      "copy": "frame-00141.png",
+      "sha256": "8D85CDCFFA26A91F29C017739A431100DF4D659278A0B1B80011662255752CAF"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\Frames\\frame-00407.png",
+      "copy": "frame-00407.png",
+      "sha256": "5ABABF94856C9982639634C82D9EDD8B518378FFB8D2F46D73F3A4E1C76FA718"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\Frames\\frame-00474.png",
+      "copy": "frame-00474.png",
+      "sha256": "3B7B269C4B2C1FEE99A03CCA99D7C020EE6B02D97062337A9F741E9D9F7CFE2F"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-01\\Frames\\frame-00491.png",
+      "copy": "frame-00491.png",
+      "sha256": "E3427525C0B8893DA9124467BE2B75CBB96FB7049FBF1B1868C66700ABF0B238"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\compile0\\result.json",
+      "copy": "shipping.compile0.result.json",
+      "sha256": "D1C9C75EBCA6618E152ECF07027C67048BB83D58BAB9B94188117D3EBB91FFCF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\compile1\\result.json",
+      "copy": "shipping.compile1.result.json",
+      "sha256": "6156C933DA3B9BEC4BAE86E819134DE3448A76FA06FD4300F78A203FAA2D01F5"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\link2\\result.json",
+      "copy": "shipping.link2.result.json",
+      "sha256": "00AE7C524A14A92C874924EDEAFB026C8AD5F5027D65BA159210372287138C01"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\manifest-01\\result.json",
+      "copy": "shipping.manifest-01.result.json",
+      "sha256": "CB1E097F4C1527A93892525018C2FADC658954FC73A615FF7F6F036D225C8B17"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\metadata\\result.json",
+      "copy": "shipping.metadata.result.json",
+      "sha256": "2FBB4536D5ADE9956761D713145CEFAB162F5FF9E9BE45FD070A3C9EB2A4DEA3"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\metadata\\native-products.json",
+      "copy": "shipping.metadata.native-products.json",
+      "sha256": "249B944F82459E4FCEB3DEA0D7C2C70EA6C230098CAB82793090C86CFD0747CA"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-build-01\\final-native-product.json",
+      "copy": "shipping.final-native-product.json",
+      "sha256": "CC684A49B9A1089E0F336E4A346AC0B0D9BEF1E5322559CA9D197F510B5A823A"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-plan-01\\actions.json",
+      "copy": "export.actions.json",
+      "sha256": "8C320D1BB5AA564BD7EB8323AC1C6836ECDE9ACEBD32B6F3480FF246EDFFF98D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-plan-01\\result.json",
+      "copy": "export.result.json",
+      "sha256": "C619F3E01333012E87A03FC08AE05F126A74659D420B169442AE3A27A953C26B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-plan-01\\launch.json",
+      "copy": "export.launch.json",
+      "sha256": "FA3349661A4B52D046CD5A48C5A914FF21503F7AC797A67707E20F537D6B9D98"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-13\\game\\result.json",
+      "copy": "resource.result.json",
+      "sha256": "2264F76BAE90EB9C250FBEC614539E2693595106773ED66F2FA5D7E534B3E835"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grove-stage-01\\result.json",
+      "copy": "stage.result.json",
+      "sha256": "0C304C704FD9445687217FD7B699BE445DB101AB8D8305905D8B2E9A7EA21F3E"
+    },
+    {
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-grove-01\\build-receipt.json",
+      "copy": "stage.build-receipt.json",
+      "sha256": "CA5A2C4DCE606ADF6BE9A73F710D0346B49887B20EA5DD1AE4D3126B57821553"
+    }
+  ]
+}

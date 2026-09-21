@@ -1,0 +1,35 @@
+Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips.
+Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark.
+Ordinary tree encounter: root=X=-273.948 Y=-1705.551 Z=-24.615 trunk_center_xy=X=-273.908 Y=-1736.465 radius_cm=40.460087 capsule_cylinder_cm=121.416397
+Grove inventory: trees=15 triangles=3476775 valid=1; shared qualified LOD2, not a whole-scene GPU cost.
+BEGIN 0.00s close-notes: The clearing
+BEGIN 1.08s idle: The clearing
+BEGIN 4.11s slow-walk: The clearing
+BEGIN 8.20s stop-from-slow-walk: The clearing
+BEGIN 10.33s full-walk: The clearing
+BEGIN 13.38s turn-while-moving: Sapling  (renewing)
+BEGIN 16.43s stop-from-turn: Berry bush
+BEGIN 18.56s orbit-standing-character: Stream reeds
+BEGIN 22.60s open-pack: Stream reeds
+BEGIN 23.16s open-look: Stream reeds
+BEGIN 26.22s portrait-idle: Stream reeds
+BEGIN 29.29s portrait-orbit: Stream reeds
+BEGIN 33.36s return-to-world: Stream reeds
+Forage target id=52 position=X=-100.000 Y=550.000
+BEGIN 34.49s walk-to-forage: Stream reeds
+BEGIN 35.53s settle-forage: Berry bush
+BEGIN 36.27s view-picking-side: Berry bush
+BEGIN 37.48s before-pick: Berry bush
+BEGIN 38.30s gather: Berry bush
+BEGIN 41.37s after-gather: Berry bush  (renewing)
+BEGIN 43.45s walk-to-authored-tree: Berry bush  (renewing)
+BEGIN 58.43s view-authored-tree: The clearing
+Tree bounds inside viewport=1; screen_min=X=335.207 Y=77.308; screen_max=X=789.945 Y=495.616; viewport=1280,720; camera_pitch=0.303355
+BEGIN 61.47s walk-into-authored-trunk: The clearing
+Actual inward walking blocked at authored trunk: player=X=-219.216 Y=-1688.779 distance_cm=72.561950 inward_intent=0.592558 inward_velocity_cm_s=-0.199722 radial_progress_cm_s=-0.014886 total_speed_cm_s=23.166165 sweep_component=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482334
+BEGIN 68.99s retreat-from-authored-trunk: The clearing
+Forage target reached=1; resources actually gathered=1
+Picking action observed=1; recovered to idle=1
+Tree ready=1; ordinary approach=1; actual trunk blocked walking=1; ordinary retreat=1
+Tree retreat displacement_cm=292.305206; retreat_start=X=-217.334 Y=-1691.032; completed_passes=23; planned_passes=23
+This observational capture is not a visual-quality pass or a replacement for human feel/listening review.

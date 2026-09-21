@@ -1,0 +1,78 @@
+{
+  "runId": "20260921-033354-2d257ba0",
+  "rootPid": 47288,
+  "startedUtc": "2026-09-21T14:42:11.4739204Z",
+  "arguments": [
+    "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.dll",
+    "SurvivalGame",
+    "Win64",
+    "Shipping",
+    "-Project=E:\\Repos\\SurvivalGame\\SurvivalGame.uproject",
+    "-WaitMutex",
+    "-NoHotReloadFromIDE",
+    "-NoUBA",
+    "-NoXGE",
+    "-NoFASTBuild",
+    "-NoSNDBS",
+    "-NoArtifactReads",
+    "-NoArtifactWrites",
+    "-NoEngineChanges",
+    "-Log=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-plan-02\\ubt.log",
+    "-WriteOutdatedActions=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grove-shipping-plan-02\\actions.json"
+  ],
+  "identities": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\DotNet\\10.0\\win-x64\\dotnet.exe",
+      "sha256": "0AF909A3DB0C02BD736F3008E2A9B20E7BA4E87EF27DD35619A7A9EC588191A8",
+      "bytes": 178400
+    },
+    {
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "sha256": "FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619",
+      "bytes": 677776
+    },
+    {
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+      "sha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+      "bytes": 3252616
+    },
+    {
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cvtres.exe",
+      "sha256": "B5DA94E7B9FF60B388EA9013D9E0E3D4A2A68BFF7C668C7017583459DAC4E3C5",
+      "bytes": 48544
+    },
+    {
+      "path": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\mspdbsrv.exe",
+      "sha256": "8FFBACFDBEF90A79E8441D640BC8B4C86BE02A2D9035CE87C5FA4F36DC3C70E1",
+      "bytes": 186248
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\rc.exe",
+      "sha256": "43DA1503C262C30894C851589BF0155F8365D77E63A5F7BC13982320E3A6B42D",
+      "bytes": 55640
+    },
+    {
+      "path": "C:\\WINDOWS\\System32\\cmd.exe",
+      "sha256": "97AC98B1A92C286054CCE55239CFCCDFC23A5517BD07FE693072C9CA96C7DABB",
+      "bytes": 344064
+    },
+    {
+      "path": "C:\\WINDOWS\\System32\\conhost.exe",
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "bytes": 1003520
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\ThirdParty\\Intel\\ISPC\\bin\\Windows\\ispc.exe",
+      "sha256": "D2F6C922DAE9257293615AD453EE79789F76B0DB895F129457F80058C2EAB874",
+      "bytes": 97822136
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\DotNET\\UnrealBuildTool\\UnrealBuildTool.dll",
+      "sha256": "A513EE9E22291D8827C5390C1ED5BBAD7AC564DA6CF82F3BD57B4E27509E7182",
+      "bytes": 3211704
+    }
+  ],
+  "leafJobApplied": false,
+  "sourceWorkingSetProvider": "None (operation-local environment XML configuration)",
+  "limitation": "Observational sampled build processes/endpoints, not a preventive child allowlist or complete history. Export-only ISPC --version is admitted; no ISPC compilation, runtime or remote executor."
+}
