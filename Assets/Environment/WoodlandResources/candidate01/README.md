@@ -52,3 +52,39 @@ Source inspection and preparation are a separate coordinated increment.
 MAIN alone executes admitted authoring and Unreal import at its reserved slot.
 Do not infer mesh count, material slots, active UVs or working LODs from the
 publisher's aggregate labels. Preserve separate berries/flowers/harvest state.
+
+## Read-only source inventory
+
+`ResourceInspection.py` reuses MAIN's existing `inspect_woodland_sources.py`
+bounded FBX/image reader and requires its admitted hash. It additionally
+attributes UV/near-zero normal data by material role and distinguishes unused
+from referenced control-point bounds. It never evaluates a Blender scene,
+follows embedded image paths, transforms geometry or exports assets.
+
+MAIN can execute it with the actual reviewed reader hash supplied by its
+existing invocation evidence:
+
+```powershell
+python .\Scripts\Environment\ResourceInspection.py `
+  --manifest .\Assets\Environment\WoodlandResources\candidate01\asset-manifest.json `
+  --receipt .\Assets\Environment\WoodlandResources\candidate01\download-receipt.json `
+  --source-root .\Assets\Source\woodland-resources-20260921 `
+  --output .\Assets\Environment\WoodlandResources\candidate01\source-inventory.json `
+  --control .\Automation\run.json --run-id 20260921-033354-2d257ba0 `
+  --inspector .\Scripts\inspect_woodland_sources.py `
+  --inspector-sha256 '<actual-admitted-reader-hash>'
+```
+
+Substitute the actual admitted reader hash in the final argument; do not guess
+it from a different checkout's line endings. A previously existing output is
+not overwritten.
+Run `python .\Scripts\Environment\ResourceInspection.Tests.py` for the
+offline role/bounds cases. A read-only smoke against frozen tree LOD2 reproduced
+its known 384,193 referenced control points, branch UV1/UV0 distinction and
+338 branch zero-normal corner references without changing its hash.
+
+The inventory reports actual PNG IHDR width/height/bit depth and decoded bands,
+not an assumed 1024-square texture from a `1k` filename. Fan-triangle counts and
+raw local transforms are source facts, not imported render geometry. Parser
+stop checks occur at file/pass/geometry boundaries; the reused reader retains
+its own node/depth/120-second bounds. No separate canopy experiment is included.
