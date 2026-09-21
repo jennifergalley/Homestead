@@ -1,0 +1,39 @@
+{
+  "status": "passed-targeted-policy",
+  "createdUtc": "2026-09-21T08:37:27.3247609+00:00",
+  "supervisorSources": [
+    {
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    },
+    {
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+      "path": "Scripts\\AuthoringProbePolicy.ps1"
+    },
+    {
+      "sha256": "2A6E549FBA174F748F4B556D22FE9B87CF371C226BE9C99554AC6402DA24C549",
+      "path": "Scripts\\FernSpikePolicy.ps1"
+    },
+    {
+      "sha256": "B421691AEE0E795748E4E4F4D734835D725A0D7DB73AD88E41E23FA6139DF0F3",
+      "path": "Scripts\\HairWavePolicy.ps1"
+    },
+    {
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755",
+      "path": "Scripts\\Development-Run.ps1"
+    },
+    {
+      "sha256": "95B7BDD882C5E7BB7077D4B1CBC0E9D5202D61171D3173A79A436A0D4AEE0642",
+      "path": "Tests\\Test-HairWavePolicy.ps1"
+    }
+  ],
+  "originalAttemptFiles": [],
+  "nativeReceiptSha256": "950B1A51C800A87F60B5E4B3861AA817C70E2ADE304E11580935B67EC2F8FE74",
+  "tests": {
+    "hairNegativeCases": 20,
+    "profile": "Existing CookCompletionDriven0/0 primitive only; actual mode is HairImport/HairVerify, not Cook",
+    "productionArgs": "HairImport/HairVerify, DisablePython, noshaderworker, nullrhi, exact seven config destinations",
+    "fernNegativeCases": 34
+  },
+  "scope": "Exactly eight fresh trial packages; existing skeleton/nonhair interfaces; all incumbent Content hashed. Explicit parent correction: no arbitrary short asset timer. Native/wrapper manual stop and policy cancellation retained; no runtime acceptance claimed."
+}

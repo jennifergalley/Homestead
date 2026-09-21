@@ -219,9 +219,10 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     FParse::Value(*Params, TEXT("FernMode="), FernMode);
     Require(CompletionPolicy.IsEmpty() || CompletionPolicy == TEXT("bounded") || bCompletionDriven,
         TEXT("Unknown native completion policy."));
-    Require(!bCompletionDriven || ((FernMode == TEXT("Render") || FernMode == TEXT("Cook"))
+    Require(!bCompletionDriven || ((FernMode == TEXT("Render") || FernMode == TEXT("Cook")
+        || FernMode == TEXT("HairImport") || FernMode == TEXT("HairVerify"))
         && FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")).IsEmpty()),
-        TEXT("Completion-driven mode must be render/cook without a synthetic deadline."));
+        TEXT("Completion-driven mode must be render/cook/hair without a synthetic deadline."));
     Result->SetBoolField(TEXT("completionDriven"), bCompletionDriven);
     UE_LOG(LogHomesteadAuthoringProbe, Display, TEXT("Native Main entry: completionDriven=%s"),
         bCompletionDriven ? TEXT("true") : TEXT("false"));
@@ -373,8 +374,10 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Effective settings or guard admission failed."));
         return 4;
     }
-    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render") && FernMode != TEXT("Cook")) return 8;
-    const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510 : FernMode == TEXT("Import") ? 180 : 90);
+    const bool bHairMode = FernMode == TEXT("HairImport") || FernMode == TEXT("HairVerify");
+    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render") && FernMode != TEXT("Cook") && !bHairMode) return 8;
+    const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510
+        : (FernMode == TEXT("Import") || FernMode == TEXT("HairImport")) ? 180 : 90);
     FDateTime RunDeadline;
     if (!bCompletionDriven && !FDateTime::ParseIso8601(*FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")), RunDeadline))
     {
@@ -399,6 +402,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         if (!FFileHelper::LoadFileToString(Admission, *AdmitPath) || Admission != FernMode
             || IFileManager::Get().FileExists(*StopPath) || !MayContinue()
             || !(FernMode == TEXT("Cook") ? CookPlayableCandidate(Output)
+                : bHairMode ? RunHairWaveSpike(FernMode, Output, RunDeadline, bCompletionDriven)
                 : RunFernSpike(FernMode, Output, RunDeadline, bCompletionDriven)))
         {
             Valid = false;

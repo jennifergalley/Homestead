@@ -7,6 +7,9 @@
 #include "HomesteadTestPaths.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/SkeletalMesh.h"
+#include "Materials/MaterialInterface.h"
+#include "Materials/Material.h"
 #include "GameFramework/GameUserSettings.h"
 #include "HAL/IConsoleManager.h"
 #include "HardwareInfo.h"
@@ -58,6 +61,16 @@ void AHomesteadVisualPlaytest::RecordPresentationSettings(const TCHAR* Phase)
             Size.X, Size.Y, Target.X, Target.Y, static_cast<int32>(Viewport->GetWindowMode())));
     }
     else PresentationSettings.Add(TEXT("actual_viewport=unavailable"));
+    if (const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
+    {
+        const auto* Component = Avatar->GetMesh();
+        PresentationSettings.Add(FString::Printf(TEXT("heroine_mesh=%s relative_scale=%s"),
+            *GetPathNameSafe(Component->GetSkeletalMeshAsset()), *Component->GetRelativeScale3D().ToString()));
+        for (int32 Index = 0; Index < Component->GetNumMaterials(); ++Index)
+            PresentationSettings.Add(FString::Printf(TEXT("heroine_material[%d]=%s base_material=%s"), Index,
+                *GetPathNameSafe(Component->GetMaterial(Index)),
+                *GetPathNameSafe(Component->GetMaterial(Index) ? Component->GetMaterial(Index)->GetMaterial() : nullptr)));
+    }
     if (const auto* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
     {
         float Normalized = 0, Scale = 0, Minimum = 0, Maximum = 0;

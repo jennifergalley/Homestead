@@ -1,0 +1,77 @@
+[
+  {
+    "sha256": "214F191B918C6BD90C0337A4436A351B4598ABC31A805D3BA484C52DEC4785B5",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\probe-result.json",
+    "copy": "hair-import-01\\probe-result.json"
+  },
+  {
+    "sha256": "73450A4698B615C00990D223DF730C1172ED4A023A2648A308CD28ECE7C5196A",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\launch.json",
+    "copy": "hair-import-01\\launch.json"
+  },
+  {
+    "sha256": "11AB247FB991FBBFC47BFB01CB6795C22A06734ED4517FDAE32469F993A470AB",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\hair-wave-result.json",
+    "copy": "hair-import-01\\hair-wave-result.json"
+  },
+  {
+    "sha256": "2F9F7F599E00E2C8625D18805CCA080C62A6354659CE55480730E39324F96D3F",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\effective-settings.json",
+    "copy": "hair-import-01\\effective-settings.json"
+  },
+  {
+    "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\native-exit.json",
+    "copy": "hair-import-01\\native-exit.json"
+  },
+  {
+    "sha256": "37F47227C41B86AA6D2347D528EAC2774D854902E88D54CBA53B5855D2E6B573",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\retained-output-check.json",
+    "copy": "hair-import-01\\retained-output-check.json"
+  },
+  {
+    "sha256": "83E0A36CFCB56C1C68BB11655300D3D4158D6500E3441A9F388AA4A355F04F8B",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-import-01\\asset-admission.json",
+    "copy": "hair-import-01\\asset-admission.json"
+  },
+  {
+    "actualUdpEndpointCount": 0.0,
+    "operation": "hair-import-01",
+    "result": "passed"
+  },
+  {
+    "sha256": "6FA45F7737D75A9AA4C2959AA73A5DC55D4F6398E7B7FF010CBABAD9029A7F34",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\probe-result.json",
+    "copy": "hair-verify-01\\probe-result.json"
+  },
+  {
+    "sha256": "8EADEB4E940D9EA364A4E1FC4E308B42592224DE93889C6D1155D2CA162F96B4",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\launch.json",
+    "copy": "hair-verify-01\\launch.json"
+  },
+  {
+    "sha256": "28D95970726C7E5499ED843655314433F950EAFC46098A9CD7533F37EC8E635F",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\hair-wave-result.json",
+    "copy": "hair-verify-01\\hair-wave-result.json"
+  },
+  {
+    "sha256": "1F34DC4E1C488461E32DFA2372F3F512B83AAC2B00CAAB4839BD33BB2E0A915D",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\effective-settings.json",
+    "copy": "hair-verify-01\\effective-settings.json"
+  },
+  {
+    "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\native-exit.json",
+    "copy": "hair-verify-01\\native-exit.json"
+  },
+  {
+    "sha256": "6B9BFB78AF5F5F85D1F28305E67F405A20B4BDFE2B8B376965FC3E85ACF2CB3A",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\hair-verify-01\\retained-output-check.json",
+    "copy": "hair-verify-01\\retained-output-check.json"
+  },
+  {
+    "actualUdpEndpointCount": 0.0,
+    "operation": "hair-verify-01",
+    "result": "passed"
+  }
+]

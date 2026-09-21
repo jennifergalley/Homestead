@@ -1,0 +1,1 @@
+PASS: source pins, six-mesh inventory, production token/profile checks; 20 negative cases.

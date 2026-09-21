@@ -1,0 +1,30 @@
+FernSpike.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(267,10): error C2601: 'WaveInventory': local function definitions are illegal
+    bool WaveInventory(const TArray<USkeletalMesh*>& Meshes, UTexture2D* Texture, UMaterial* Material,
+         ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(239,1): note: this line contains a '{' which has not yet been matched
+{
+^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(334,10): error C2601: 'ImportWaves': local function definitions are illegal
+    bool ImportWaves(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+         ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(239,1): note: this line contains a '{' which has not yet been matched
+{
+^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(410,24): error C3535: cannot deduce type for 'auto *' from 'TObjectPtr<UFbxSkeletalMeshImportData>'
+            auto* Data = UI->SkeletalMeshImportData;
+                       ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(410,24): error C2440: 'initializing': cannot convert from 'TObjectPtr<UFbxSkeletalMeshImportData>' to '<error type> *'
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(410,24): note: No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(444,14): error C3861: 'WaveInventory': identifier not found
+        if (!WaveInventory(Meshes, Texture, Material, Result) || Feedback.ReceivedUserCancel()) return false;
+             ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(363,24): warning C4996: 'UMaterial::SetMaterialUsage': Use the new (virtual) implementation - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile.
+        if (!Material->SetMaterialUsage(NeedsCompile, MATUSAGE_SkeletalMesh)) return false;
+                       ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(871,46): error C3861: 'ImportWaves': identifier not found
+    if (Mode == TEXT("HairImport")) Passed = ImportWaves(Feedback, Result);
+                                             ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(883,18): error C3861: 'WaveInventory': identifier not found
+        Passed = WaveInventory(Meshes,
+                 ^

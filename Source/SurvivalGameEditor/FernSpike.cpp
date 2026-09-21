@@ -1,18 +1,21 @@
 #include "FernSpike.h"
 #include "AssetCompilingManager.h"
 #include "AssetImportTask.h"
+#include "Animation/Skeleton.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DynamicRHI.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
 #include "Factories/FbxFactory.h"
 #include "Factories/FbxImportUI.h"
 #include "Factories/FbxStaticMeshImportData.h"
+#include "Factories/FbxSkeletalMeshImportData.h"
 #include "Factories/TextureFactory.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
@@ -20,6 +23,9 @@
 #include "MaterialEditingLibrary.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionMultiply.h"
+#include "Materials/MaterialExpressionVectorParameter.h"
+#include "Materials/MaterialExpressionConstant.h"
 #include "MaterialShared.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
@@ -31,10 +37,13 @@
 #include "Misc/Paths.h"
 #include "PreviewScene.h"
 #include "RenderingThread.h"
+#include "Rendering/SkeletalMeshModel.h"
+#include "Rendering/SkeletalMeshLODModel.h"
 #include "SceneInterface.h"
 #include "Serialization/JsonSerializer.h"
 #include "ShaderCompiler.h"
 #include "StaticMeshCompiler.h"
+#include "SkinnedAssetCompiler.h"
 #include "StaticMeshResources.h"
 #include "TextureResource.h"
 #include "UObject/Package.h"
@@ -71,6 +80,22 @@ const FMap Maps[] = {
     { TEXT("fern_02_rough_1k.png"), TEXT("T_Fern02_Roughness"), MP_Roughness, TC_Masks, SAMPLERTYPE_Masks, false },
     { TEXT("fern_02_ao_1k.png"), TEXT("T_Fern02_AO"), MP_AmbientOcclusion, TC_Masks, SAMPLERTYPE_Masks, false },
     { TEXT("fern_02_alpha_1k.png"), TEXT("T_Fern02_Alpha"), MP_OpacityMask, TC_Masks, SAMPLERTYPE_Masks, false }
+};
+const FString HairTrial = TEXT("/Game/Trials/HeroineWave_20260921_01");
+const FString IncumbentHeroine = TEXT("/Game/SurvivalGame/Characters/Heroine/");
+struct FWaveMesh
+{
+    const TCHAR* Name;
+    int32 Triangles;
+    int32 Slots;
+};
+const FWaveMesh WaveMeshes[] = {
+    { TEXT("SK_Heroine_LongWave"), 120440, 12 },
+    { TEXT("SK_Heroine_LongWave_Apron"), 123976, 14 },
+    { TEXT("SK_Heroine_Willow_LongWave"), 120588, 12 },
+    { TEXT("SK_Heroine_Willow_LongWave_Apron"), 124124, 14 },
+    { TEXT("SK_Heroine_Hazel_LongWave"), 120452, 12 },
+    { TEXT("SK_Heroine_Hazel_LongWave_Apron"), 123988, 14 }
 };
 
 bool WriteJson(const FString& Path, const TSharedRef<FJsonObject>& Value)
@@ -208,6 +233,253 @@ bool Inventory(const TArray<UStaticMesh*>& Meshes, const TArray<UTexture2D*>& Te
     Result->SetNumberField(TEXT("opacityClip"), Material->OpacityMaskClipValue);
     Result->SetStringField(TEXT("transformPolicy"), TEXT("FBX scene/unit conversion once; absolute transform bake; no extra scale, rotation or vertex recentering."));
     return true;
+}
+
+namespace Hair
+{
+    bool WaveInventory(const TArray<USkeletalMesh*>& Meshes, UTexture2D* Texture, UMaterial* Material,
+        const TSharedRef<FJsonObject>& Result)
+    {
+        if (Meshes.Num() != UE_ARRAY_COUNT(WaveMeshes) || !Texture || !Material
+            || Texture->Source.GetSizeX() != 2048 || Texture->Source.GetSizeY() != 2048 || !Texture->SRGB
+            || Texture->CompressionSettings != TC_Default || Material->BlendMode != BLEND_Masked
+            || !Material->TwoSided || !Material->GetUsageByFlag(MATUSAGE_SkeletalMesh)
+            || Material->GetExpressions().Num() != 4) return false;
+        const auto* Mask = Material->GetExpressionInputForProperty(MP_OpacityMask);
+        const auto* Sample = Mask ? Cast<UMaterialExpressionTextureSample>(Mask->Expression) : nullptr;
+        if (!Sample || Sample->Texture != Texture || Mask->OutputIndex != 4 || Sample->SamplerType != SAMPLERTYPE_Color) return false;
+        const auto* BaseColor = Material->GetExpressionInputForProperty(MP_BaseColor);
+        const auto* Multiply = BaseColor ? Cast<UMaterialExpressionMultiply>(BaseColor->Expression) : nullptr;
+        const auto* Tint = Multiply ? Cast<UMaterialExpressionVectorParameter>(Multiply->B.Expression) : nullptr;
+        const auto* RoughnessInput = Material->GetExpressionInputForProperty(MP_Roughness);
+        const auto* Roughness = RoughnessInput ? Cast<UMaterialExpressionConstant>(RoughnessInput->Expression) : nullptr;
+        if (!Multiply || Multiply->A.Expression != Sample || !Tint || Tint->ParameterName != TEXT("ColorTint")
+            || !Tint->DefaultValue.Equals(FLinearColor(0.055f, 0.011f, 0.003f, 1))
+            || !Roughness || !FMath::IsNearlyEqual(Roughness->R, 0.7f)
+            || !Material->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit)) return false;
+        TArray<TSharedPtr<FJsonValue>> Records;
+        for (int32 Index = 0; Index < Meshes.Num(); ++Index)
+        {
+            USkeletalMesh* Mesh = Meshes[Index];
+            USkeletalMesh* Base = LoadObject<USkeletalMesh>(nullptr, *(IncumbentHeroine + WaveMeshes[Index].Name));
+            if (!Mesh || !Base || !Mesh->GetSkeleton() || Mesh->GetSkeleton() != Base->GetSkeleton()
+                || Mesh->GetMaterials().Num() != WaveMeshes[Index].Slots || Base->GetMaterials().Num() != WaveMeshes[Index].Slots
+                || !Mesh->GetImportedModel() || Mesh->GetImportedModel()->LODModels.Num() != 1) return false;
+            const auto& Ref = Mesh->GetRefSkeleton();
+            const auto& Original = Base->GetRefSkeleton();
+            if (Ref.GetNum() != 54 || Ref.GetNum() != Original.GetNum()) return false;
+            for (int32 Bone = 0; Bone < Ref.GetNum(); ++Bone)
+                if (Ref.GetBoneName(Bone) != Original.GetBoneName(Bone)
+                    || Ref.GetParentIndex(Bone) != Original.GetParentIndex(Bone)
+                    || !Ref.GetRefBonePose()[Bone].Equals(Original.GetRefBonePose()[Bone], 0.01f)) return false;
+            int32 Triangles = 0;
+            for (const auto& Section : Mesh->GetImportedModel()->LODModels[0].Sections) Triangles += Section.NumTriangles;
+            const FBoxSphereBounds Bounds = Mesh->GetBounds();
+            const double Height = Bounds.BoxExtent.Z * 2;
+            UE_LOG(LogFernSpike, Display, TEXT("Wave inventory %s: triangles=%d slots=%d bones=%d height_cm=%.6f"),
+                *Mesh->GetPathName(), Triangles, Mesh->GetMaterials().Num(), Ref.GetNum(), Height);
+            if (Triangles != WaveMeshes[Index].Triangles || Height < 155 || Height > 175
+                || Bounds.Origin.ContainsNaN() || Bounds.BoxExtent.ContainsNaN()) return false;
+            TArray<TSharedPtr<FJsonValue>> Slots;
+            for (int32 SlotIndex = 0; SlotIndex < Mesh->GetMaterials().Num(); ++SlotIndex)
+            {
+                const auto& Slot = Mesh->GetMaterials()[SlotIndex];
+                const auto& Old = Base->GetMaterials()[SlotIndex];
+                if (!Slot.MaterialInterface || (SlotIndex == 7
+                    ? Slot.MaterialSlotName != TEXT("M_Heroine_Hair_long01_Neutral") || Slot.MaterialInterface != Material
+                    : Slot.MaterialSlotName != Old.MaterialSlotName || Slot.MaterialInterface != Old.MaterialInterface)) return false;
+                auto SlotRecord = MakeShared<FJsonObject>();
+                SlotRecord->SetNumberField(TEXT("index"), SlotIndex);
+                SlotRecord->SetStringField(TEXT("slot"), Slot.MaterialSlotName.ToString());
+                SlotRecord->SetStringField(TEXT("importedSlot"), Slot.ImportedMaterialSlotName.ToString());
+                SlotRecord->SetStringField(TEXT("material"), Slot.MaterialInterface->GetPathName());
+                Slots.Add(MakeShared<FJsonValueObject>(SlotRecord));
+            }
+            auto Record = MakeShared<FJsonObject>();
+            Record->SetStringField(TEXT("object"), Mesh->GetPathName());
+            Record->SetStringField(TEXT("incumbent"), Base->GetPathName());
+            Record->SetStringField(TEXT("skeleton"), Mesh->GetSkeleton()->GetPathName());
+            Record->SetNumberField(TEXT("bones"), Ref.GetNum());
+            Record->SetNumberField(TEXT("triangles"), Triangles);
+            Record->SetNumberField(TEXT("heightCm"), Height);
+            Record->SetArrayField(TEXT("boundsOriginCm"), Vector(Bounds.Origin));
+            Record->SetArrayField(TEXT("boundsExtentCm"), Vector(Bounds.BoxExtent));
+            Record->SetBoolField(TEXT("referencePoseMatchesIncumbent"), true);
+            Record->SetArrayField(TEXT("slots"), Slots);
+            Records.Add(MakeShared<FJsonValueObject>(Record));
+        }
+        Result->SetArrayField(TEXT("meshes"), Records);
+        Result->SetStringField(TEXT("texture"), Texture->GetPathName());
+        Result->SetStringField(TEXT("material"), Material->GetPathName());
+        Result->SetStringField(TEXT("transformPolicy"), TEXT("Scene/unit conversion once, uniform scale 1, zero import rotation/translation, unchanged incumbent reference pose"));
+        Result->SetStringField(TEXT("scope"), TEXT("Frozen joined-wave interchange, not visual approval; incumbent content remains unchanged"));
+        return true;
+    }
+
+    bool ImportWaves(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+    {
+        const FString Source = FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Characters/HairstyleRefinement"));
+        TArray<FString> Names = { TEXT("Textures/T_LongWave_Neutral"), TEXT("Materials/M_Heroine_Hair_long01_Neutral") };
+        for (const FWaveMesh& Wave : WaveMeshes) Names.Add(FString(TEXT("Meshes/")) + Wave.Name);
+        for (const FString& Name : Names)
+            if (FindPackage(nullptr, *(HairTrial + TEXT("/") + Name)) || FPackageName::DoesPackageExist(HairTrial + TEXT("/") + Name)) return false;
+        Result->SetStringField(TEXT("stage"), TEXT("neutral-texture"));
+        auto* TextureFactory = NewObject<UTextureFactory>();
+        auto* TextureTask = NewObject<UAssetImportTask>();
+        TextureTask->bAutomated = true;
+        TextureTask->bReplaceExisting = false;
+        TextureFactory->SetAssetImportTask(TextureTask);
+        TextureFactory->CompressionSettings = TC_Default;
+        bool Cancelled = false;
+        auto* Texture = Cast<UTexture2D>(TextureFactory->ImportObject(UTexture2D::StaticClass(),
+            CreatePackage(*(HairTrial + TEXT("/Textures/T_LongWave_Neutral"))), TEXT("T_LongWave_Neutral"),
+            RF_Public | RF_Standalone, FPaths::Combine(Source, TEXT("Textures/T_LongWave_Neutral.png")), nullptr, Cancelled));
+        if (!Texture || Cancelled || TextureFactory->GetAdditionalImportedObjects().Num() || Feedback.ReceivedUserCancel()) return false;
+        Texture->SRGB = true;
+        Texture->CompressionSettings = TC_Default;
+        Texture->PostEditChange();
+        auto* Material = NewObject<UMaterial>(CreatePackage(*(HairTrial + TEXT("/Materials/M_Heroine_Hair_long01_Neutral"))),
+            TEXT("M_Heroine_Hair_long01_Neutral"), RF_Public | RF_Standalone);
+        Material->BlendMode = BLEND_Masked;
+        Material->TwoSided = true;
+        Material->OpacityMaskClipValue = 0.333f;
+        Material->SetShadingModel(MSM_DefaultLit);
+        if (!Material->SetMaterialUsage(MATUSAGE_SkeletalMesh)) return false;
+        auto* Sample = Cast<UMaterialExpressionTextureSample>(UMaterialEditingLibrary::CreateMaterialExpression(
+            Material, UMaterialExpressionTextureSample::StaticClass(), -600, 0));
+        auto* Tint = Cast<UMaterialExpressionVectorParameter>(UMaterialEditingLibrary::CreateMaterialExpression(
+            Material, UMaterialExpressionVectorParameter::StaticClass(), -600, 200));
+        auto* Multiply = Cast<UMaterialExpressionMultiply>(UMaterialEditingLibrary::CreateMaterialExpression(
+            Material, UMaterialExpressionMultiply::StaticClass(), -300, 0));
+        auto* Roughness = Cast<UMaterialExpressionConstant>(UMaterialEditingLibrary::CreateMaterialExpression(
+            Material, UMaterialExpressionConstant::StaticClass(), -300, 300));
+        if (!Sample || !Tint || !Multiply || !Roughness) return false;
+        Sample->Texture = Texture;
+        Sample->SamplerType = SAMPLERTYPE_Color;
+        Tint->ParameterName = TEXT("ColorTint");
+        Tint->DefaultValue = FLinearColor(0.055f, 0.011f, 0.003f, 1);
+        Roughness->R = 0.7f;
+        if (!UMaterialEditingLibrary::ConnectMaterialExpressions(Sample, TEXT("RGB"), Multiply, TEXT("A"))
+            || !UMaterialEditingLibrary::ConnectMaterialExpressions(Tint, TEXT(""), Multiply, TEXT("B"))
+            || !UMaterialEditingLibrary::ConnectMaterialProperty(Multiply, TEXT(""), MP_BaseColor)
+            || !UMaterialEditingLibrary::ConnectMaterialProperty(Sample, TEXT("A"), MP_OpacityMask)
+            || !UMaterialEditingLibrary::ConnectMaterialProperty(Roughness, TEXT(""), MP_Roughness)) return false;
+        Material->PostEditChange();
+        TArray<USkeletalMesh*> Meshes;
+        TArray<UObject*> Assets = { Texture, Material };
+        for (const FWaveMesh& Wave : WaveMeshes)
+        {
+            Result->SetStringField(TEXT("stage"), FString(TEXT("skeletal-import:")) + Wave.Name);
+            if (Feedback.ReceivedUserCancel()) return false;
+            USkeletalMesh* Base = LoadObject<USkeletalMesh>(nullptr, *(IncumbentHeroine + Wave.Name));
+            if (!Base || !Base->GetSkeleton() || Base->GetMaterials().Num() != Wave.Slots) return false;
+            auto* Factory = NewObject<UFbxFactory>();
+            Factory->SetDetectImportTypeOnImport(false);
+            auto* Task = NewObject<UAssetImportTask>();
+            Task->bAutomated = true;
+            Task->bReplaceExisting = false;
+            Factory->SetAssetImportTask(Task);
+            UFbxImportUI* UI = Factory->ImportUI;
+            UI->MeshTypeToImport = FBXIT_SkeletalMesh;
+            UI->OriginalImportType = FBXIT_SkeletalMesh;
+            UI->bAutomatedImportShouldDetectType = false;
+            UI->bImportMesh = true;
+            UI->bImportAsSkeletal = true;
+            UI->bImportAnimations = false;
+            UI->bImportMaterials = false;
+            UI->bImportTextures = false;
+            UI->bCreatePhysicsAsset = false;
+            UI->bOverrideFullName = true;
+            UI->Skeleton = Base->GetSkeleton();
+            auto* Data = UI->SkeletalMeshImportData.Get();
+            Data->bConvertScene = true;
+            Data->bConvertSceneUnit = true;
+            Data->bForceFrontXAxis = false;
+            Data->ImportUniformScale = 1;
+            Data->ImportTranslation = FVector::ZeroVector;
+            Data->ImportRotation = FRotator::ZeroRotator;
+            Data->bImportMeshLODs = false;
+            Data->bImportMorphTargets = false;
+            Data->bUpdateSkeletonReferencePose = false;
+            Data->bUseT0AsRefPose = false;
+            Data->NormalImportMethod = FBXNIM_ImportNormals;
+            Cancelled = false;
+            auto* Mesh = Cast<USkeletalMesh>(Factory->ImportObject(USkeletalMesh::StaticClass(),
+                CreatePackage(*(HairTrial + TEXT("/Meshes/") + Wave.Name)), Wave.Name, RF_Public | RF_Standalone,
+                FPaths::Combine(Source, TEXT("Joined"), FString(Wave.Name) + TEXT(".fbx")), nullptr, Cancelled));
+            if (!Mesh || Cancelled || Factory->GetAdditionalImportedObjects().Num() || Feedback.ReceivedUserCancel()) return false;
+            TArray<USkinnedAsset*> Pending = { Mesh };
+            FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
+            if (Mesh->GetMaterials().Num() != Wave.Slots) return false;
+            for (int32 Index = 0; Index < Wave.Slots; ++Index)
+            {
+                auto& Slot = Mesh->GetMaterials()[Index];
+                const auto& Old = Base->GetMaterials()[Index];
+                if (Index != 7 && Slot.MaterialSlotName != Old.MaterialSlotName) return false;
+                Slot.MaterialInterface = Index == 7 ? Material : Old.MaterialInterface.Get();
+                if (Index == 7) Slot.MaterialSlotName = TEXT("M_Heroine_Hair_long01_Neutral");
+            }
+            Mesh->PostEditChange();
+            FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
+            Meshes.Add(Mesh);
+            Assets.Add(Mesh);
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("measured-wave-inventory"));
+        if (!WaveInventory(Meshes, Texture, Material, Result) || Feedback.ReceivedUserCancel()) return false;
+        for (TObjectIterator<UObject> It; It; ++It)
+            if (It->IsAsset() && It->GetOutermost()->GetName().StartsWith(HairTrial + TEXT("/")) && !Assets.Contains(*It)) return false;
+        TSet<FString> LocalPackages, IncumbentPackages;
+        for (UObject* Asset : Assets) LocalPackages.Add(Asset->GetOutermost()->GetName());
+        for (const FWaveMesh& Wave : WaveMeshes)
+        {
+            const auto* Base = LoadObject<USkeletalMesh>(nullptr, *(IncumbentHeroine + Wave.Name));
+            IncumbentPackages.Add(Base->GetSkeleton()->GetOutermost()->GetName());
+            for (int32 Index = 0; Index < Base->GetMaterials().Num(); ++Index)
+                if (Index != 7) IncumbentPackages.Add(Base->GetMaterials()[Index].MaterialInterface->GetOutermost()->GetName());
+        }
+        TArray<UObject*> Pending = Assets;
+        TSet<UObject*> Seen;
+        TArray<TSharedPtr<FJsonValue>> References;
+        while (Pending.Num())
+        {
+            UObject* Object = Pending.Pop(EAllowShrinking::No);
+            if (Seen.Contains(Object)) continue;
+            Seen.Add(Object);
+            if (Seen.Num() > 4096) return false;
+            TArray<UObject*> Found;
+            FReferenceFinder Finder(Found, nullptr, false, true, false, true);
+            Finder.FindReferences(Object);
+            for (UObject* Reference : Found)
+            {
+                if (!Reference) continue;
+                const FString Package = Reference->GetOutermost()->GetName();
+                if (Package.StartsWith(TEXT("/Script/"))) continue;
+                if (!LocalPackages.Contains(Package) && !IncumbentPackages.Contains(Package))
+                {
+                    UE_LOG(LogFernSpike, Error, TEXT("Unapproved wave reference: %s -> %s"),
+                        *Object->GetPathName(), *Reference->GetPathName());
+                    return false;
+                }
+                References.Add(MakeShared<FJsonValueString>(Reference->GetPathName()));
+                if (LocalPackages.Contains(Package)) Pending.Add(Reference);
+            }
+        }
+        Result->SetArrayField(TEXT("persistentObjectReferences"), References);
+        Result->SetStringField(TEXT("stage"), TEXT("saving-eight-wave-packages"));
+        for (UObject* Asset : Assets)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            UPackage* Package = Asset->GetOutermost();
+            const FString File = FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension());
+            if (IFileManager::Get().FileExists(*File)) return false;
+            FSavePackageArgs Args;
+            Args.TopLevelFlags = RF_Public | RF_Standalone;
+            Args.Error = GWarn;
+            if (!UPackage::SavePackage(Package, Asset, *File, Args) || Feedback.ReceivedUserCancel()) return false;
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("import-complete"));
+        return true;
+    }
 }
 
 bool Import(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
@@ -638,4 +910,34 @@ bool RunFernSpike(const FString& Mode, const FString& Output, const FDateTime& D
     Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
     if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Fern %s failed; retain evidence and do not retry."), *Mode);
     return WriteJson(FPaths::Combine(Output, TEXT("fern-result.json")), Result) && Passed;
+}
+
+bool RunHairWaveSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven)
+{
+    FStopFeedback Feedback(Output, Deadline, bCompletionDriven);
+    auto Result = MakeShared<FJsonObject>();
+    Result->SetStringField(TEXT("mode"), Mode);
+    Result->SetStringField(TEXT("namespace"), HairTrial);
+    Result->SetStringField(TEXT("stage"), TEXT("persisted-inventory"));
+    bool Passed = false;
+    if (Mode == TEXT("HairImport")) Passed = Hair::ImportWaves(Feedback, Result);
+    else if (Mode == TEXT("HairVerify"))
+    {
+        TArray<USkeletalMesh*> Meshes;
+        TArray<USkinnedAsset*> Pending;
+        for (const FWaveMesh& Wave : WaveMeshes)
+        {
+            auto* Mesh = LoadObject<USkeletalMesh>(nullptr, *(HairTrial + TEXT("/Meshes/") + Wave.Name));
+            Meshes.Add(Mesh);
+            if (Mesh) Pending.Add(Mesh);
+        }
+        FSkinnedAssetCompilingManager::Get().FinishCompilation(Pending);
+        Passed = Hair::WaveInventory(Meshes,
+            LoadObject<UTexture2D>(nullptr, *(HairTrial + TEXT("/Textures/T_LongWave_Neutral"))),
+            LoadObject<UMaterial>(nullptr, *(HairTrial + TEXT("/Materials/M_Heroine_Hair_long01_Neutral"))), Result);
+    }
+    Result->SetBoolField(TEXT("passed"), Passed);
+    Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
+    if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Frozen wave %s failed; preserve its evidence and partial outputs."), *Mode);
+    return WriteJson(FPaths::Combine(Output, TEXT("hair-wave-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
 }

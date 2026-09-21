@@ -1,0 +1,563 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.6201169,
+  "samples": [
+    {
+      "elapsedMs": 23.4588,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 46.3817,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 62.6108,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 77.7692,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 109.3194,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 123.9766,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 138.8299,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 170.5367,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 186.6152,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 216.4178,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 232.1036,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 248.6237,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 264.6446,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 280.5545,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 297.3604,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 312.974,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 328.0522,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 343.6661,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 359.38,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    },
+    {
+      "elapsedMs": 374.9427,
+      "endpoints": [],
+      "queriedPids": [
+        51920
+      ]
+    }
+  ],
+  "maximumSampleGapMs": 245.1592,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T08:35:39.2358270+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.2378672+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.2605699+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.2764918+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.2916679+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.3230877+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.3381403+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.3532494+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.3849857+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.4008498+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.4304700+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.4464936+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.4627302+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.4784012+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.4949452+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.5114710+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.5271330+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.5422389+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.5577799+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.5733415+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T08:35:39.5893024+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 51920,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344533392249973,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    }
+  ],
+  "coff": null,
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\hair-native-build-01\\probe-link2-completion\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 791812,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344533389189623,
+    "LastWriteTime": 134344533389189623,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": 2,
+  "producedItems": [
+    {
+      "bytes": 283648,
+      "sha256": "E11A7A2C2472DC213D6B5A179EAA47A8BF3C2C116D8A240A8B1930E8EA645879",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "lastWriteUtc": "2026-09-21T08:35:39.5510598Z"
+    },
+    {
+      "bytes": 27545600,
+      "sha256": "8A61DD2510685D5AE32C861D1B12E7804EA393C232D9622B854B947248306E61",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "lastWriteUtc": "2026-09-21T08:35:39.5525445Z"
+    }
+  ],
+  "previousProductBackups": [
+    {
+      "sha256": "3205124FC9D4A2C9DE28FE538CB6D581A70F3A6E65DC237D943F24DB6D0FA110",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "backup": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\hair-native-build-01\\probe-link2-completion\\before-products\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "sha256": "E277985D33F885200EE2AFFC0B84DE602DA36C0C34A155E47A02BAF8D7DBDB4C",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "backup": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\hair-native-build-01\\probe-link2-completion\\before-products\\UnrealEditor-SurvivalGameEditor.pdb"
+    }
+  ],
+  "objectSha256": "E11A7A2C2472DC213D6B5A179EAA47A8BF3C2C116D8A240A8B1930E8EA645879",
+  "generatedManifest": null,
+  "stageCandidate": null,
+  "stageCookFileCount": 0,
+  "limits": "One explicitly selected guarded build leaf with exact approved Windows console host. No application helpers/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}

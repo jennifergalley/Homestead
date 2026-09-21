@@ -83,7 +83,7 @@ bool AHomesteadCharacter::LoadHeroineAssets()
 {
     if (bAttemptedAssetLoad) return bHeroineAssetsValid;
     bAttemptedAssetLoad = true;
-    LongHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave.SK_Heroine_LongWave"));
+    LongHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave.SK_Heroine_LongWave"));
     BobHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob.SK_Heroine_Bob"));
     IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle"));
     WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
@@ -108,7 +108,7 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     WardrobeMeshes = {LongHairMesh, BobHairMesh};
     const TCHAR* MoreMeshes[] = {
         TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Ponytail.SK_Heroine_Ponytail"),
-        TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron"),
+        TEXT("/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron"),
         TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob_Apron.SK_Heroine_Bob_Apron"),
         TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Ponytail_Apron.SK_Heroine_Ponytail_Apron")
     };
@@ -131,7 +131,10 @@ bool AHomesteadCharacter::LoadHeroineAssets()
             for (const TCHAR* Style : Styles)
             {
                 const FString Name = FString::Printf(TEXT("SK_Heroine_%s_%s%s"), Body, Style, Outfit ? TEXT("_Apron") : TEXT(""));
-                const FString Path = FString::Printf(TEXT("/Game/SurvivalGame/Characters/Heroine/%s.%s"), *Name, *Name);
+                const TCHAR* Directory = FCString::Strcmp(Style, TEXT("LongWave")) == 0
+                    ? TEXT("/Game/Trials/HeroineWave_20260921_01/Meshes")
+                    : TEXT("/Game/SurvivalGame/Characters/Heroine");
+                const FString Path = FString::Printf(TEXT("%s/%s.%s"), Directory, *Name, *Name);
                 USkeletalMesh* Preset = LoadObject<USkeletalMesh>(nullptr, *Path);
                 if (!Preset || Preset->GetSkeleton() != LongHairMesh->GetSkeleton())
                 {

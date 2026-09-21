@@ -1,0 +1,728 @@
+{
+  "sourceInputs": [
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_LongWave.fbx",
+      "sha256": "C788B57D969826006AE0CCF86C4ED5E025D71B26F7F83D3C605B538126006BC1"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_LongWave_Apron.fbx",
+      "sha256": "21978BECF42D71136B9DE5A97006E2048B247F3A244CD6C986B687442961580E"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Willow_LongWave.fbx",
+      "sha256": "9D84ABF573C7A47D620491E6BF7D753A98F05F77AD91C96BF60BB14203A0F8C1"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Willow_LongWave_Apron.fbx",
+      "sha256": "34ED06EE0103034B06BD81E604BA0A24AF29891DD028C6F61974D8D05434A5A1"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Hazel_LongWave.fbx",
+      "sha256": "A514FEB06D27750355D183382DDBDFE8BBB6168FDFA845CEA300A21BC568BD42"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Hazel_LongWave_Apron.fbx",
+      "sha256": "C4C9A0FD5596C6C5FDB2DB51A6AB666CC4F76071088965CE1F50ED0B5281E046"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\Textures\\T_LongWave_Neutral.png",
+      "sha256": "DF985D44B9B708E32C478B86F0717C775C15825971D1FB2980F600DC3A0D3A55"
+    },
+    {
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Characters\\HairstyleRefinement\\LongWave-manifest.json",
+      "sha256": "CB6E61CD7624CC5535053BA2D503D3655A064BFA48D936AA61FED6BC8880CAC8"
+    }
+  ],
+  "packages": [
+    {
+      "path": "Materials\\M_Heroine_Hair_long01_Neutral.uasset",
+      "bytes": 7294,
+      "sha256": "0629A99576ED9410231DCE9A5AE59BE449C98C604F2895D3A8C7DB49CAF853DB"
+    },
+    {
+      "path": "Meshes\\SK_Heroine_Hazel_LongWave_Apron.uasset",
+      "bytes": 17168453,
+      "sha256": "5A2CF43EE32FEE50CAE5449DC80B5A8C5075B0BF283D18068335DC90DC4FB9B8"
+    },
+    {
+      "path": "Meshes\\SK_Heroine_Hazel_LongWave.uasset",
+      "bytes": 16681747,
+      "sha256": "319AC7D454472D921F6458BC6CC03A7E1E31C612CACB15BD19A1E602D27DE9CC"
+    },
+    {
+      "path": "Meshes\\SK_Heroine_LongWave_Apron.uasset",
+      "bytes": 17172721,
+      "sha256": "F76F2EF043BF9809FD5EC38E962893CFE39EC2955B9C7A454C94B18A6C1DEC34"
+    },
+    {
+      "path": "Meshes\\SK_Heroine_LongWave.uasset",
+      "bytes": 16683541,
+      "sha256": "3F14692E30819AC1495FA55623EB7ABB6B01E6D9368DDD32EE7C8B632E8C4068"
+    },
+    {
+      "path": "Meshes\\SK_Heroine_Willow_LongWave_Apron.uasset",
+      "bytes": 17214841,
+      "sha256": "4532EC7EA9C1C99C941A255B51797BA25E294ABF55233030FE2FBA7EC33B6F9E"
+    },
+    {
+      "path": "Meshes\\SK_Heroine_Willow_LongWave.uasset",
+      "bytes": 16746191,
+      "sha256": "D6AAB76E35217F4411AEA181A19984B567001E2C93C8D8452EE6B54BE780FC52"
+    },
+    {
+      "path": "Textures\\T_LongWave_Neutral.uasset",
+      "bytes": 1110491,
+      "sha256": "82ADE9E65FBC32CE490491A7FF0D3FA36E9B9FCBDDAAC33CD9210341905DC004"
+    }
+  ],
+  "sourceGraph": null,
+  "directoryIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\HeroineWave_20260921_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 792003,
+    "Attributes": 16,
+    "CreationTime": 134344539019470202
+  },
+  "inventory": {
+    "mode": "HairImport",
+    "namespace": "/Game/Trials/HeroineWave_20260921_01",
+    "stage": "import-complete",
+    "meshes": [
+      {
+        "object": "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave.SK_Heroine_LongWave",
+        "incumbent": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave.SK_Heroine_LongWave",
+        "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+        "bones": 54,
+        "triangles": 120440,
+        "heightCm": 160.63105787336826,
+        "boundsOriginCm": [
+          0,
+          7.872427463531494,
+          80.47020714730024
+        ],
+        "boundsExtentCm": [
+          49.18696212768555,
+          21.298150539398193,
+          80.31552893668413
+        ],
+        "referencePoseMatchesIncumbent": true,
+        "slots": [
+          {
+            "index": 0,
+            "slot": "M_Heroine_Brass",
+            "importedSlot": "M_Heroine_Brass",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+          },
+          {
+            "index": 1,
+            "slot": "M_Heroine_Skin",
+            "importedSlot": "M_Heroine_Skin",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+          },
+          {
+            "index": 2,
+            "slot": "M_Heroine_LightEyes",
+            "importedSlot": "M_Heroine_LightEyes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+          },
+          {
+            "index": 3,
+            "slot": "M_Heroine_Eyebrows",
+            "importedSlot": "M_Heroine_Eyebrows",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+          },
+          {
+            "index": 4,
+            "slot": "M_Heroine_Eyelashes",
+            "importedSlot": "M_Heroine_Eyelashes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+          },
+          {
+            "index": 5,
+            "slot": "M_Heroine_Teeth",
+            "importedSlot": "M_Heroine_Teeth",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+          },
+          {
+            "index": 6,
+            "slot": "M_Heroine_Tongue",
+            "importedSlot": "M_Heroine_Tongue",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+          },
+          {
+            "index": 7,
+            "slot": "M_Heroine_Hair_long01_Neutral",
+            "importedSlot": "M_Heroine_Hair_long01_Neutral",
+            "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+          },
+          {
+            "index": 8,
+            "slot": "M_Heroine_LeatherShoes",
+            "importedSlot": "M_Heroine_LeatherShoes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+          },
+          {
+            "index": 9,
+            "slot": "M_Heroine_MossLinen",
+            "importedSlot": "M_Heroine_MossLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+          },
+          {
+            "index": 10,
+            "slot": "M_Heroine_LinenTrim",
+            "importedSlot": "M_Heroine_LinenTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+          },
+          {
+            "index": 11,
+            "slot": "M_Heroine_ChestnutLeather",
+            "importedSlot": "M_Heroine_ChestnutLeather",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+          }
+        ]
+      },
+      {
+        "object": "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+        "incumbent": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron",
+        "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+        "bones": 54,
+        "triangles": 123976,
+        "heightCm": 160.63105787336826,
+        "boundsOriginCm": [
+          0,
+          7.872427463531494,
+          80.47020714730024
+        ],
+        "boundsExtentCm": [
+          49.18696212768555,
+          21.298150539398193,
+          80.31552893668413
+        ],
+        "referencePoseMatchesIncumbent": true,
+        "slots": [
+          {
+            "index": 0,
+            "slot": "M_Heroine_ApronTrim",
+            "importedSlot": "M_Heroine_ApronTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+          },
+          {
+            "index": 1,
+            "slot": "M_Heroine_Skin",
+            "importedSlot": "M_Heroine_Skin",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+          },
+          {
+            "index": 2,
+            "slot": "M_Heroine_LightEyes",
+            "importedSlot": "M_Heroine_LightEyes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+          },
+          {
+            "index": 3,
+            "slot": "M_Heroine_Eyebrows",
+            "importedSlot": "M_Heroine_Eyebrows",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+          },
+          {
+            "index": 4,
+            "slot": "M_Heroine_Eyelashes",
+            "importedSlot": "M_Heroine_Eyelashes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+          },
+          {
+            "index": 5,
+            "slot": "M_Heroine_Teeth",
+            "importedSlot": "M_Heroine_Teeth",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+          },
+          {
+            "index": 6,
+            "slot": "M_Heroine_Tongue",
+            "importedSlot": "M_Heroine_Tongue",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+          },
+          {
+            "index": 7,
+            "slot": "M_Heroine_Hair_long01_Neutral",
+            "importedSlot": "M_Heroine_Hair_long01_Neutral",
+            "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+          },
+          {
+            "index": 8,
+            "slot": "M_Heroine_LeatherShoes",
+            "importedSlot": "M_Heroine_LeatherShoes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+          },
+          {
+            "index": 9,
+            "slot": "M_Heroine_MossLinen",
+            "importedSlot": "M_Heroine_MossLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+          },
+          {
+            "index": 10,
+            "slot": "M_Heroine_LinenTrim",
+            "importedSlot": "M_Heroine_LinenTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+          },
+          {
+            "index": 11,
+            "slot": "M_Heroine_ChestnutLeather",
+            "importedSlot": "M_Heroine_ChestnutLeather",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+          },
+          {
+            "index": 12,
+            "slot": "M_Heroine_Brass",
+            "importedSlot": "M_Heroine_Brass",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+          },
+          {
+            "index": 13,
+            "slot": "M_Heroine_ApronLinen",
+            "importedSlot": "M_Heroine_ApronLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+          }
+        ]
+      },
+      {
+        "object": "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Willow_LongWave.SK_Heroine_Willow_LongWave",
+        "incumbent": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave.SK_Heroine_Willow_LongWave",
+        "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+        "bones": 54,
+        "triangles": 120588,
+        "heightCm": 160.63190500438213,
+        "boundsOriginCm": [
+          0,
+          7.911829948425293,
+          80.47613123804331
+        ],
+        "boundsExtentCm": [
+          49.26802444458008,
+          21.28850269317627,
+          80.31595250219107
+        ],
+        "referencePoseMatchesIncumbent": true,
+        "slots": [
+          {
+            "index": 0,
+            "slot": "M_Heroine_Brass",
+            "importedSlot": "M_Heroine_Brass",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+          },
+          {
+            "index": 1,
+            "slot": "M_Heroine_Skin",
+            "importedSlot": "M_Heroine_Skin",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+          },
+          {
+            "index": 2,
+            "slot": "M_Heroine_LightEyes",
+            "importedSlot": "M_Heroine_LightEyes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+          },
+          {
+            "index": 3,
+            "slot": "M_Heroine_Eyebrows",
+            "importedSlot": "M_Heroine_Eyebrows",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+          },
+          {
+            "index": 4,
+            "slot": "M_Heroine_Eyelashes",
+            "importedSlot": "M_Heroine_Eyelashes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+          },
+          {
+            "index": 5,
+            "slot": "M_Heroine_Teeth",
+            "importedSlot": "M_Heroine_Teeth",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+          },
+          {
+            "index": 6,
+            "slot": "M_Heroine_Tongue",
+            "importedSlot": "M_Heroine_Tongue",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+          },
+          {
+            "index": 7,
+            "slot": "M_Heroine_Hair_long01_Neutral",
+            "importedSlot": "M_Heroine_Hair_long01_Neutral",
+            "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+          },
+          {
+            "index": 8,
+            "slot": "M_Heroine_LeatherShoes",
+            "importedSlot": "M_Heroine_LeatherShoes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+          },
+          {
+            "index": 9,
+            "slot": "M_Heroine_MossLinen",
+            "importedSlot": "M_Heroine_MossLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+          },
+          {
+            "index": 10,
+            "slot": "M_Heroine_LinenTrim",
+            "importedSlot": "M_Heroine_LinenTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+          },
+          {
+            "index": 11,
+            "slot": "M_Heroine_ChestnutLeather",
+            "importedSlot": "M_Heroine_ChestnutLeather",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+          }
+        ]
+      },
+      {
+        "object": "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+        "incumbent": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron",
+        "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+        "bones": 54,
+        "triangles": 124124,
+        "heightCm": 160.63190500438213,
+        "boundsOriginCm": [
+          0,
+          7.911829948425293,
+          80.47613123804331
+        ],
+        "boundsExtentCm": [
+          49.26802444458008,
+          21.28850269317627,
+          80.31595250219107
+        ],
+        "referencePoseMatchesIncumbent": true,
+        "slots": [
+          {
+            "index": 0,
+            "slot": "M_Heroine_ApronTrim",
+            "importedSlot": "M_Heroine_ApronTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+          },
+          {
+            "index": 1,
+            "slot": "M_Heroine_Skin",
+            "importedSlot": "M_Heroine_Skin",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+          },
+          {
+            "index": 2,
+            "slot": "M_Heroine_LightEyes",
+            "importedSlot": "M_Heroine_LightEyes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+          },
+          {
+            "index": 3,
+            "slot": "M_Heroine_Eyebrows",
+            "importedSlot": "M_Heroine_Eyebrows",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+          },
+          {
+            "index": 4,
+            "slot": "M_Heroine_Eyelashes",
+            "importedSlot": "M_Heroine_Eyelashes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+          },
+          {
+            "index": 5,
+            "slot": "M_Heroine_Teeth",
+            "importedSlot": "M_Heroine_Teeth",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+          },
+          {
+            "index": 6,
+            "slot": "M_Heroine_Tongue",
+            "importedSlot": "M_Heroine_Tongue",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+          },
+          {
+            "index": 7,
+            "slot": "M_Heroine_Hair_long01_Neutral",
+            "importedSlot": "M_Heroine_Hair_long01_Neutral",
+            "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+          },
+          {
+            "index": 8,
+            "slot": "M_Heroine_LeatherShoes",
+            "importedSlot": "M_Heroine_LeatherShoes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+          },
+          {
+            "index": 9,
+            "slot": "M_Heroine_MossLinen",
+            "importedSlot": "M_Heroine_MossLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+          },
+          {
+            "index": 10,
+            "slot": "M_Heroine_LinenTrim",
+            "importedSlot": "M_Heroine_LinenTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+          },
+          {
+            "index": 11,
+            "slot": "M_Heroine_ChestnutLeather",
+            "importedSlot": "M_Heroine_ChestnutLeather",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+          },
+          {
+            "index": 12,
+            "slot": "M_Heroine_Brass",
+            "importedSlot": "M_Heroine_Brass",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+          },
+          {
+            "index": 13,
+            "slot": "M_Heroine_ApronLinen",
+            "importedSlot": "M_Heroine_ApronLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+          }
+        ]
+      },
+      {
+        "object": "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Hazel_LongWave.SK_Heroine_Hazel_LongWave",
+        "incumbent": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave.SK_Heroine_Hazel_LongWave",
+        "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+        "bones": 54,
+        "triangles": 120452,
+        "heightCm": 160.69214969873428,
+        "boundsOriginCm": [
+          1.9073486328125E-06,
+          7.742971897125244,
+          80.47808286547661
+        ],
+        "boundsExtentCm": [
+          49.280874252319336,
+          21.477708339691162,
+          80.34607484936714
+        ],
+        "referencePoseMatchesIncumbent": true,
+        "slots": [
+          {
+            "index": 0,
+            "slot": "M_Heroine_Brass",
+            "importedSlot": "M_Heroine_Brass",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+          },
+          {
+            "index": 1,
+            "slot": "M_Heroine_Skin",
+            "importedSlot": "M_Heroine_Skin",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+          },
+          {
+            "index": 2,
+            "slot": "M_Heroine_LightEyes",
+            "importedSlot": "M_Heroine_LightEyes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+          },
+          {
+            "index": 3,
+            "slot": "M_Heroine_Eyebrows",
+            "importedSlot": "M_Heroine_Eyebrows",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+          },
+          {
+            "index": 4,
+            "slot": "M_Heroine_Eyelashes",
+            "importedSlot": "M_Heroine_Eyelashes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+          },
+          {
+            "index": 5,
+            "slot": "M_Heroine_Teeth",
+            "importedSlot": "M_Heroine_Teeth",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+          },
+          {
+            "index": 6,
+            "slot": "M_Heroine_Tongue",
+            "importedSlot": "M_Heroine_Tongue",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+          },
+          {
+            "index": 7,
+            "slot": "M_Heroine_Hair_long01_Neutral",
+            "importedSlot": "M_Heroine_Hair_long01_Neutral",
+            "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+          },
+          {
+            "index": 8,
+            "slot": "M_Heroine_LeatherShoes",
+            "importedSlot": "M_Heroine_LeatherShoes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+          },
+          {
+            "index": 9,
+            "slot": "M_Heroine_MossLinen",
+            "importedSlot": "M_Heroine_MossLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+          },
+          {
+            "index": 10,
+            "slot": "M_Heroine_LinenTrim",
+            "importedSlot": "M_Heroine_LinenTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+          },
+          {
+            "index": 11,
+            "slot": "M_Heroine_ChestnutLeather",
+            "importedSlot": "M_Heroine_ChestnutLeather",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+          }
+        ]
+      },
+      {
+        "object": "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+        "incumbent": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron",
+        "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+        "bones": 54,
+        "triangles": 123988,
+        "heightCm": 160.69214969873428,
+        "boundsOriginCm": [
+          1.9073486328125E-06,
+          7.742971897125244,
+          80.47808286547661
+        ],
+        "boundsExtentCm": [
+          49.280874252319336,
+          21.477708339691162,
+          80.34607484936714
+        ],
+        "referencePoseMatchesIncumbent": true,
+        "slots": [
+          {
+            "index": 0,
+            "slot": "M_Heroine_ApronTrim",
+            "importedSlot": "M_Heroine_ApronTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronTrim.M_Heroine_ApronTrim"
+          },
+          {
+            "index": 1,
+            "slot": "M_Heroine_Skin",
+            "importedSlot": "M_Heroine_Skin",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin"
+          },
+          {
+            "index": 2,
+            "slot": "M_Heroine_LightEyes",
+            "importedSlot": "M_Heroine_LightEyes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes"
+          },
+          {
+            "index": 3,
+            "slot": "M_Heroine_Eyebrows",
+            "importedSlot": "M_Heroine_Eyebrows",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows"
+          },
+          {
+            "index": 4,
+            "slot": "M_Heroine_Eyelashes",
+            "importedSlot": "M_Heroine_Eyelashes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes"
+          },
+          {
+            "index": 5,
+            "slot": "M_Heroine_Teeth",
+            "importedSlot": "M_Heroine_Teeth",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth"
+          },
+          {
+            "index": 6,
+            "slot": "M_Heroine_Tongue",
+            "importedSlot": "M_Heroine_Tongue",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue"
+          },
+          {
+            "index": 7,
+            "slot": "M_Heroine_Hair_long01_Neutral",
+            "importedSlot": "M_Heroine_Hair_long01_Neutral",
+            "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+          },
+          {
+            "index": 8,
+            "slot": "M_Heroine_LeatherShoes",
+            "importedSlot": "M_Heroine_LeatherShoes",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LeatherShoes.M_Heroine_LeatherShoes"
+          },
+          {
+            "index": 9,
+            "slot": "M_Heroine_MossLinen",
+            "importedSlot": "M_Heroine_MossLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_MossLinen.M_Heroine_MossLinen"
+          },
+          {
+            "index": 10,
+            "slot": "M_Heroine_LinenTrim",
+            "importedSlot": "M_Heroine_LinenTrim",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LinenTrim.M_Heroine_LinenTrim"
+          },
+          {
+            "index": 11,
+            "slot": "M_Heroine_ChestnutLeather",
+            "importedSlot": "M_Heroine_ChestnutLeather",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ChestnutLeather.M_Heroine_ChestnutLeather"
+          },
+          {
+            "index": 12,
+            "slot": "M_Heroine_Brass",
+            "importedSlot": "M_Heroine_Brass",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Brass.M_Heroine_Brass"
+          },
+          {
+            "index": 13,
+            "slot": "M_Heroine_ApronLinen",
+            "importedSlot": "M_Heroine_ApronLinen",
+            "material": "/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_ApronLinen.M_Heroine_ApronLinen"
+          }
+        ]
+      }
+    ],
+    "texture": "/Game/Trials/HeroineWave_20260921_01/Textures/T_LongWave_Neutral.T_LongWave_Neutral",
+    "material": "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral",
+    "transformPolicy": "Scene/unit conversion once, uniform scale 1, zero import rotation/translation, unchanged incumbent reference pose",
+    "scope": "Frozen joined-wave interchange, not visual approval; incumbent content remains unchanged",
+    "persistentObjectReferences": [
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron:SkeletalMeshDescriptionBulkData_0",
+      "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron:FbxSkeletalMeshImportData_0",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Hazel_LongWave.SK_Heroine_Hazel_LongWave:SkeletalMeshDescriptionBulkData_0",
+      "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Hazel_LongWave.SK_Heroine_Hazel_LongWave:FbxSkeletalMeshImportData_0",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron:SkeletalMeshDescriptionBulkData_0",
+      "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron:FbxSkeletalMeshImportData_0",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Willow_LongWave.SK_Heroine_Willow_LongWave:SkeletalMeshDescriptionBulkData_0",
+      "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_Willow_LongWave.SK_Heroine_Willow_LongWave:FbxSkeletalMeshImportData_0",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron:SkeletalMeshDescriptionBulkData_0",
+      "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron:FbxSkeletalMeshImportData_0",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave.SK_Heroine_LongWave:SkeletalMeshDescriptionBulkData_0",
+      "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton.SK_Heroine_LongWave_Skeleton",
+      "/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave.SK_Heroine_LongWave:FbxSkeletalMeshImportData_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:M_Heroine_Hair_long01_NeutralEditorOnlyData",
+      "/Game/Trials/HeroineWave_20260921_01/Textures/T_LongWave_Neutral.T_LongWave_Neutral",
+      "/Game/Trials/HeroineWave_20260921_01/Textures/T_LongWave_Neutral.T_LongWave_Neutral:AssetImportData",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:MaterialExpressionMultiply_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:MaterialExpressionConstant_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:MaterialExpressionTextureSample_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:MaterialExpressionVectorParameter_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral",
+      "/Game/Trials/HeroineWave_20260921_01/Textures/T_LongWave_Neutral.T_LongWave_Neutral",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:MaterialExpressionTextureSample_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral:MaterialExpressionVectorParameter_0",
+      "/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral"
+    ],
+    "passed": true,
+    "cancelledAtPollingBoundary": false
+  }
+}
