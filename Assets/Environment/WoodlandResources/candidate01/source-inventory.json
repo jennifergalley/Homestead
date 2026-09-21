@@ -1,0 +1,3511 @@
+{
+  "scope": "Read-only four-resource source inventory; no bpy scene, image-reference traversal or Unreal.",
+  "manifestSha256": "BDB728405F33D82CDE68D27E0F316C3B2988311B74A328CEFCFE46175332BAE5",
+  "sourceReceiptSha256": "F8F97798328C0246099EBE90AA287515FEB925C316DF676AC2524C354005EC9F",
+  "inspectionToolSha256": "6271ADD4AA969E3DD4A1C78469BF73D98259F39AE4D14ADFC1F29633EEABD1B6",
+  "existingReaderSha256": "FE2D9FBC43AC56F810F7E70912F9C606EE9F5B144CB73E8D2AB348B71E6AA7DE",
+  "files": [
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_1k.fbx",
+      "sha256": "EBFAF1B728E8C9B8AE62F90DF3A6F1837C233FD736665342391C2F3029F3AD37",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 410,
+        "decodedArrayBytes": 2481016,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 4,
+          "Model": 4,
+          "Material": 1
+        },
+        "geometries": [
+          {
+            "id": 427213477,
+            "name": "Plane.014",
+            "vertices": 4108,
+            "faces": 3090,
+            "faceVertexHistogram": {
+              "4": 3087,
+              "3": 3
+            },
+            "fanTriangleEstimate": 6177,
+            "localBounds": {
+              "min": [
+                -0.09164010733366013,
+                -0.07412169873714447,
+                -0.007596241310238838
+              ],
+              "max": [
+                0.06451079249382019,
+                0.09444822371006012,
+                0.2728527784347534
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 860065540,
+            "name": "Plane.101",
+            "vertices": 4420,
+            "faces": 3296,
+            "faceVertexHistogram": {
+              "4": 3293,
+              "3": 3
+            },
+            "fanTriangleEstimate": 6589,
+            "localBounds": {
+              "min": [
+                -0.08108491450548172,
+                -0.08173307031393051,
+                -0.003048922633752227
+              ],
+              "max": [
+                0.06171264499425888,
+                0.08468720316886902,
+                0.2046535462141037
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 736702599,
+            "name": "Plane.063",
+            "vertices": 7246,
+            "faces": 5420,
+            "faceVertexHistogram": {
+              "4": 5415,
+              "3": 5
+            },
+            "fanTriangleEstimate": 10835,
+            "localBounds": {
+              "min": [
+                -0.15523797273635864,
+                -0.09095123410224915,
+                -0.005918123293668032
+              ],
+              "max": [
+                0.06261009722948074,
+                0.09596893936395645,
+                0.26743996143341064
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 635192995,
+            "name": "Plane.477",
+            "vertices": 2513,
+            "faces": 1864,
+            "faceVertexHistogram": {
+              "4": 1862,
+              "3": 2
+            },
+            "fanTriangleEstimate": 3726,
+            "localBounds": {
+              "min": [
+                -0.031277623027563095,
+                -0.0698394775390625,
+                -0.003391197882592678
+              ],
+              "max": [
+                0.10458744317293167,
+                0.03876056522130966,
+                0.19165778160095215
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 93264763,
+            "name": "shrub_04_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              427213477
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_04"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                43.526580810546875,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 614234143,
+            "name": "shrub_04_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              860065540
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_04"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                21.763290405273438,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 506680992,
+            "name": "shrub_04_d_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              736702599
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_04"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                65.28987121582031,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 902364038,
+            "name": "shrub_04_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              635192995
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_04"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "196993316": "shrub_04"
+        },
+        "uniqueGeometryFaces": 13670,
+        "uniqueGeometryFanTriangles": 27327,
+        "geometryModelBindings": 4,
+        "modelBoundFanTriangles": 27327,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_04_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_04_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_04_d_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_04_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [
+          {
+            "geometryId": 427213477,
+            "controlPoints": 4108,
+            "referencedControlPoints": 4108,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.09164010733366013,
+                -0.07412169873714447,
+                -0.007596241310238838
+              ],
+              "max": [
+                0.06451079249382019,
+                0.09444822371006012,
+                0.2728527784347534
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 3090,
+                "fanTriangleEstimate": 6177,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.04788416624069214,
+                      0.0545714795589447
+                    ],
+                    "max": [
+                      0.896820604801178,
+                      0.9264206290245056
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 12357,
+                    "referencedDirectVectors": 12357
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 860065540,
+            "controlPoints": 4420,
+            "referencedControlPoints": 4420,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.08108491450548172,
+                -0.08173307031393051,
+                -0.003048922633752227
+              ],
+              "max": [
+                0.06171264499425888,
+                0.08468720316886902,
+                0.2046535462141037
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 3296,
+                "fanTriangleEstimate": 6589,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.04788416624069214,
+                      0.0545714795589447
+                    ],
+                    "max": [
+                      0.896820604801178,
+                      0.9264206290245056
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 13181,
+                    "referencedDirectVectors": 13181
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 736702599,
+            "controlPoints": 7246,
+            "referencedControlPoints": 7244,
+            "unusedControlPoints": 2,
+            "referencedLocalBounds": {
+              "min": [
+                -0.15523797273635864,
+                -0.09095123410224915,
+                -0.005918123293668032
+              ],
+              "max": [
+                0.06261009722948074,
+                0.09596893936395645,
+                0.26743996143341064
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 5420,
+                "fanTriangleEstimate": 10835,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.04788416624069214,
+                      0.0545714795589447
+                    ],
+                    "max": [
+                      0.896820604801178,
+                      0.9264206290245056
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 21675,
+                    "referencedDirectVectors": 21675
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 635192995,
+            "controlPoints": 2513,
+            "referencedControlPoints": 2513,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.031277623027563095,
+                -0.0698394775390625,
+                -0.003391197882592678
+              ],
+              "max": [
+                0.10458744317293167,
+                0.03876056522130966,
+                0.19165778160095215
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 1864,
+                "fanTriangleEstimate": 3726,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.04788416624069214,
+                      0.0545714795589447
+                    ],
+                    "max": [
+                      0.896820604801178,
+                      0.9264206290245056
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 7454,
+                    "referencedDirectVectors": 7454
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          }
+        ],
+        "preparationBoundary": "Original mesh/model IDs, transforms and material slots only. No evaluated world axes/scale or automatic merging/reduction. Check UV per role, not only layer presence."
+      }
+    },
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_diff_1k.png",
+      "sha256": "D098301278A46D618118C95DA476F737AC57ADA38F96D0A354A454CC96133DE8",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            42,
+            255
+          ],
+          [
+            27,
+            249
+          ],
+          [
+            16,
+            214
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_nor_dx_1k.png",
+      "sha256": "5F13FF70CDFC3ABEDA98629AB9C6AD15BDE60E29C2879861B2B7671B12D2A9F6",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            17,
+            217
+          ],
+          [
+            35,
+            220
+          ],
+          [
+            188,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_rough_1k.png",
+      "sha256": "5D8C99953BAEEF78A3D5708217B93F0745A001D0ED45AA7B59A283F045FBD82F",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          19018,
+          52364
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_ao_1k.png",
+      "sha256": "14E7B4B9268FF783B94122D1979758238E02331247B53C99201C8BF5DBB632FA",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_alpha_1k.png",
+      "sha256": "6DDD60DCDBDCF55D7258AE747866F68F5ACC9D88A7735C9EB05B02D6DEC527E3",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "shrub_04",
+      "file": "shrub_04_mask_1k.png",
+      "sha256": "457E06CA26207E27021E8F252BA3E45A30EBDCE0FBCF05D2843E28A9AF75DA90",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "dry_branches_medium_01",
+      "file": "dry_branches_medium_01_1k.fbx",
+      "sha256": "3E47B10E0710B7736688521D66B3EB09AAD14CB2DB6179D9758A0FD5716CE639",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 454,
+        "decodedArrayBytes": 1997100,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 3,
+          "Model": 3,
+          "Material": 1,
+          "Texture": 3,
+          "Video": 3
+        },
+        "geometries": [
+          {
+            "id": 711997973,
+            "name": "branches_b_dynamesh.004",
+            "vertices": 2810,
+            "faces": 5616,
+            "faceVertexHistogram": {
+              "3": 5616
+            },
+            "fanTriangleEstimate": 5616,
+            "localBounds": {
+              "min": [
+                -0.06864907592535019,
+                -0.37239524722099304,
+                -0.053956836462020874
+              ],
+              "max": [
+                0.06191990152001381,
+                0.4047306180000305,
+                0.08930298686027527
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 949666676,
+            "name": "branches_b_dynamesh.005",
+            "vertices": 2629,
+            "faces": 5254,
+            "faceVertexHistogram": {
+              "3": 5254
+            },
+            "fanTriangleEstimate": 5254,
+            "localBounds": {
+              "min": [
+                -0.0599491149187088,
+                -0.5840448141098022,
+                -0.0626467615365982
+              ],
+              "max": [
+                0.09121467918157578,
+                0.45445898175239563,
+                0.07924063503742218
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 712888422,
+            "name": "branches_b_dynamesh.006",
+            "vertices": 2969,
+            "faces": 5933,
+            "faceVertexHistogram": {
+              "3": 5933
+            },
+            "fanTriangleEstimate": 5933,
+            "localBounds": {
+              "min": [
+                -0.13700003921985626,
+                -0.664777398109436,
+                -0.1402200609445572
+              ],
+              "max": [
+                0.18606369197368622,
+                0.6343755125999451,
+                0.20076525211334229
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 424157413,
+            "name": "dry_branches_medium_01_c",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              711997973
+            ],
+            "materialSlotsInConnectionOrder": [
+              "dry_branches_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                45.01285934448242,
+                4.933696746826172,
+                -5.088076591491699
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 250011136,
+            "name": "dry_branches_medium_01_b",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              949666676
+            ],
+            "materialSlotsInConnectionOrder": [
+              "dry_branches_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                1.7346084117889404,
+                6.085515022277832,
+                -6.261161804199219
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 482288108,
+            "name": "dry_branches_medium_01_a",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              712888422
+            ],
+            "materialSlotsInConnectionOrder": [
+              "dry_branches_medium_01"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -41.043766021728516,
+                12.369233131408691,
+                -5.545513153076172
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "318961443": "dry_branches_medium_01"
+        },
+        "uniqueGeometryFaces": 16803,
+        "uniqueGeometryFanTriangles": 16803,
+        "geometryModelBindings": 3,
+        "modelBoundFanTriangles": 16803,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/dry_branches_medium_01/_upload/fbx/1k/dry_branches_medium_01/textures/dry_branches_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "textures/dry_branches_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/dry_branches_medium_01/_upload/fbx/1k/dry_branches_medium_01/textures/dry_branches_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "textures/dry_branches_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/dry_branches_medium_01/_upload/fbx/1k/dry_branches_medium_01/textures/dry_branches_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "textures/dry_branches_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/dry_branches_medium_01/_upload/fbx/1k/dry_branches_medium_01/textures/dry_branches_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "textures/dry_branches_medium_01_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/dry_branches_medium_01/_upload/fbx/1k/dry_branches_medium_01/textures/dry_branches_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "textures/dry_branches_medium_01_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/dry_branches_medium_01/_upload/fbx/1k/dry_branches_medium_01/textures/dry_branches_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "textures/dry_branches_medium_01_rough_1k.exr"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [
+          {
+            "geometryId": 711997973,
+            "controlPoints": 2810,
+            "referencedControlPoints": 2810,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.06864907592535019,
+                -0.37239524722099304,
+                -0.053956836462020874
+              ],
+              "max": [
+                0.06191990152001381,
+                0.4047306180000305,
+                0.08930298686027527
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 5616,
+                "fanTriangleEstimate": 5616,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.06016860902309418,
+                      0.003326643258333206
+                    ],
+                    "max": [
+                      0.9944121241569519,
+                      0.9955379962921143
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 16848,
+                    "referencedDirectVectors": 16848
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 949666676,
+            "controlPoints": 2629,
+            "referencedControlPoints": 2629,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.0599491149187088,
+                -0.5840448141098022,
+                -0.0626467615365982
+              ],
+              "max": [
+                0.09121467918157578,
+                0.45445898175239563,
+                0.07924063503742218
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 5254,
+                "fanTriangleEstimate": 5254,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.0043738484382629395,
+                      0.004149586893618107
+                    ],
+                    "max": [
+                      0.9955216646194458,
+                      0.9755110740661621
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 15762,
+                    "referencedDirectVectors": 15762
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 712888422,
+            "controlPoints": 2969,
+            "referencedControlPoints": 2969,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.13700003921985626,
+                -0.664777398109436,
+                -0.1402200609445572
+              ],
+              "max": [
+                0.18606369197368622,
+                0.6343755125999451,
+                0.20076525211334229
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 5933,
+                "fanTriangleEstimate": 5933,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.00438380241394043,
+                      0.004088396206498146
+                    ],
+                    "max": [
+                      0.9957656860351562,
+                      0.9829952120780945
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 17799,
+                    "referencedDirectVectors": 17799
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          }
+        ],
+        "preparationBoundary": "Original mesh/model IDs, transforms and material slots only. No evaluated world axes/scale or automatic merging/reduction. Check UV per role, not only layer presence."
+      }
+    },
+    {
+      "asset": "dry_branches_medium_01",
+      "file": "dry_branches_medium_01_diff_1k.jpg",
+      "sha256": "1FBAF810A9CA29D2FAF0A179834E8DCE10CF4854BAFE13F63AF111030B3EC660",
+      "sourceInspection": {
+        "format": "JPEG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            1,
+            232
+          ],
+          [
+            0,
+            230
+          ],
+          [
+            0,
+            217
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": null,
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "dry_branches_medium_01",
+      "file": "dry_branches_medium_01_nor_dx_1k.png",
+      "sha256": "6896AB1C3D74C51C2486763AA92486F8A2336E87F15C58AA624462BC9493916E",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            15,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "dry_branches_medium_01",
+      "file": "dry_branches_medium_01_rough_1k.png",
+      "sha256": "47CD972D7DA0999913323217AF5D16F5FC7272AD6798C84024EA03367C466B1F",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          21178,
+          64584
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "dry_branches_medium_01",
+      "file": "dry_branches_medium_01_ao_1k.png",
+      "sha256": "29A3E274A8AA259781B87CD1645CF1D4F4AB3062683DC08F0FAF350FB6CD8CBD",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_1k.fbx",
+      "sha256": "5EAFD5FD2914639960238A6BEEF97C4D64BE9FB0A5B690FD03D13B2291F71DB1",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 501,
+        "decodedArrayBytes": 49155508,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 3,
+          "Model": 3,
+          "Material": 2,
+          "Texture": 3,
+          "Video": 3
+        },
+        "geometries": [
+          {
+            "id": 390441697,
+            "name": "Cylinder",
+            "vertices": 185662,
+            "faces": 79095,
+            "faceVertexHistogram": {
+              "4": 78307,
+              "3": 788
+            },
+            "fanTriangleEstimate": 157402,
+            "localBounds": {
+              "min": [
+                -0.43695688247680664,
+                -0.396030455827713,
+                -0.007901787757873535
+              ],
+              "max": [
+                0.42418965697288513,
+                0.42620566487312317,
+                1.2928361892700195
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 282,
+                  "1": 78813
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementColor",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 528446919,
+            "name": "Cylinder.069",
+            "vertices": 178013,
+            "faces": 75807,
+            "faceVertexHistogram": {
+              "4": 75069,
+              "3": 738
+            },
+            "fanTriangleEstimate": 150876,
+            "localBounds": {
+              "min": [
+                -0.32576000690460205,
+                -0.3871777057647705,
+                -9.949319064617157e-06
+              ],
+              "max": [
+                0.31415098905563354,
+                0.4303826093673706,
+                0.9515835642814636
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 264,
+                  "1": 75543
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementColor",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 52513824,
+            "name": "Cylinder.125",
+            "vertices": 147109,
+            "faces": 62675,
+            "faceVertexHistogram": {
+              "4": 62068,
+              "3": 607
+            },
+            "fanTriangleEstimate": 124743,
+            "localBounds": {
+              "min": [
+                -0.31641829013824463,
+                -0.31407177448272705,
+                -7.270835340023041e-05
+              ],
+              "max": [
+                0.3057711124420166,
+                0.3199334442615509,
+                0.735627293586731
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 198,
+                  "1": 62477
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementColor",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 985243675,
+            "name": "fir_sapling_a",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              390441697
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fir_sapling_branches",
+              "fir_sapling_twigs"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 174103527,
+            "name": "fir_sapling_b",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              528446919
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fir_sapling_branches",
+              "fir_sapling_twigs"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                100.0,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 593523097,
+            "name": "fir_sapling_c",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              52513824
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fir_sapling_branches",
+              "fir_sapling_twigs"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                200.0,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "729487867": "fir_sapling_branches",
+          "155413958": "fir_sapling_twigs"
+        },
+        "uniqueGeometryFaces": 217577,
+        "uniqueGeometryFanTriangles": 433021,
+        "geometryModelBindings": 3,
+        "modelBoundFanTriangles": 433021,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/fir_sapling/_upload/fbx/1k/fir_sapling/textures/fir_sapling_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "textures/fir_sapling_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/fir_sapling/_upload/fbx/1k/fir_sapling/textures/fir_sapling_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "textures/fir_sapling_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/fir_sapling/_upload/fbx/1k/fir_sapling/textures/fir_sapling_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "textures/fir_sapling_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/fir_sapling/_upload/fbx/1k/fir_sapling/textures/fir_sapling_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "textures/fir_sapling_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/fir_sapling/_upload/fbx/1k/fir_sapling/textures/fir_sapling_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "textures/fir_sapling_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "/home/pumpkin/admin.polyhaven.com/tmp/Staging/Models/fir_sapling/_upload/fbx/1k/fir_sapling/textures/fir_sapling_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "textures/fir_sapling_branches_rough_1k.png"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [
+          {
+            "geometryId": 390441697,
+            "controlPoints": 185662,
+            "referencedControlPoints": 185662,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.43695688247680664,
+                -0.396030455827713,
+                -0.007901787757873535
+              ],
+              "max": [
+                0.42418965697288513,
+                0.42620566487312317,
+                1.2928361892700195
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 282,
+                "fanTriangleEstimate": 546,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.02056112512946129,
+                      -0.12812280654907227
+                    ],
+                    "max": [
+                      0.2798011898994446,
+                      1.3318456411361694
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 315592,
+                    "referencedDirectVectors": 1110
+                  }
+                ]
+              },
+              "1": {
+                "polygons": 78813,
+                "fanTriangleEstimate": 156856,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.00954437255859375,
+                      0.0018265694379806519
+                    ],
+                    "max": [
+                      0.981453001499176,
+                      1.4685375690460205
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 315592,
+                    "referencedDirectVectors": 314482
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 528446919,
+            "controlPoints": 178013,
+            "referencedControlPoints": 178013,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.32576000690460205,
+                -0.3871777057647705,
+                -9.949319064617157e-06
+              ],
+              "max": [
+                0.31415098905563354,
+                0.4303826093673706,
+                0.9515835642814636
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 264,
+                "fanTriangleEstimate": 510,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.02056112512946129,
+                      -0.12812280654907227
+                    ],
+                    "max": [
+                      0.2798011898994446,
+                      1.3318456411361694
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 302490,
+                    "referencedDirectVectors": 1038
+                  }
+                ]
+              },
+              "1": {
+                "polygons": 75543,
+                "fanTriangleEstimate": 150366,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.00954437255859375,
+                      0.0018265694379806519
+                    ],
+                    "max": [
+                      0.981453001499176,
+                      1.4685375690460205
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 302490,
+                    "referencedDirectVectors": 301452
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 52513824,
+            "controlPoints": 147109,
+            "referencedControlPoints": 147109,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.31641829013824463,
+                -0.31407177448272705,
+                -7.270835340023041e-05
+              ],
+              "max": [
+                0.3057711124420166,
+                0.3199334442615509,
+                0.735627293586731
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 198,
+                "fanTriangleEstimate": 384,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.02056112512946129,
+                      -0.12812280654907227
+                    ],
+                    "max": [
+                      0.2451830953359604,
+                      1.3318456411361694
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 250093,
+                    "referencedDirectVectors": 780
+                  }
+                ]
+              },
+              "1": {
+                "polygons": 62477,
+                "fanTriangleEstimate": 124359,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.00954437255859375,
+                      0.0018265694379806519
+                    ],
+                    "max": [
+                      0.26327380537986755,
+                      1.4685375690460205
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 250093,
+                    "referencedDirectVectors": 249313
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          }
+        ],
+        "preparationBoundary": "Original mesh/model IDs, transforms and material slots only. No evaluated world axes/scale or automatic merging/reduction. Check UV per role, not only layer presence."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_branches_diff_1k.png",
+      "sha256": "8813B75888F3D76AE8581A09B7F9FDB8D2B7B0D3C7977BA32BE1678373EEE657",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            30,
+            141
+          ],
+          [
+            27,
+            136
+          ],
+          [
+            18,
+            129
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_branches_nor_dx_1k.png",
+      "sha256": "6FD57E27E9010CFC4AD0CDBFF4142CFA116EE2B33F402EC196EF544C824F6AE8",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            2,
+            254
+          ],
+          [
+            3,
+            249
+          ],
+          [
+            139,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_branches_rough_1k.png",
+      "sha256": "8D96BD806BD7EBE73B69DDC38516533F0A616C1BFD0E6670FE7A99A34B23E371",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          51315,
+          63874
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_branches_ao_1k.png",
+      "sha256": "B981A4FCCB5AF5FD751FE6D393FCCCBEB600FB4C82810C6D2236FFCCC05B8D00",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          11744,
+          65434
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_twigs_diff_1k.png",
+      "sha256": "C29CB18884DC4CD24A72D0E39F01C1BAEADB798D0FE3D196D82B8CB11B18F061",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            21,
+            167
+          ],
+          [
+            22,
+            166
+          ],
+          [
+            7,
+            126
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_twigs_nor_dx_1k.png",
+      "sha256": "080CDCCD8A202459FC9F2FAFCA0528C2315B23434A5C48D50F4DB7E479F4F3E4",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            254
+          ],
+          [
+            1,
+            254
+          ],
+          [
+            136,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_twigs_rough_1k.png",
+      "sha256": "64E351910B74D2450029713DC08F7CD1FF0BB0C0C5A17CE271A0C87527E38812",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          11951,
+          61166
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_twigs_ao_1k.png",
+      "sha256": "162810B953EC27496C61B771308528330E34805B1EDF45CB4DADABB9FF8826F6",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          4883,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_twigs_alpha_1k.png",
+      "sha256": "91E8A6114E2F180DE3D2FA60D397D69FEE0D3C745A15E012DA705C86CD4DE976",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling",
+      "file": "fir_sapling_twigs_mask_1k.png",
+      "sha256": "E703E1A8BA79A6802E7A79511853148FC80119FDA0AB61E64CF76CA202BAD73C",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            162
+          ],
+          [
+            0,
+            162
+          ],
+          [
+            0,
+            162
+          ],
+          [
+            240,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "flower_empodium",
+      "file": "flower_empodium_1k.fbx",
+      "sha256": "D7E38932DC0DE638063777036FB57D6C1205109421FADABBDA24FD9CE83DE8E7",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 466,
+        "decodedArrayBytes": 227232,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 5,
+          "Model": 5,
+          "Material": 1
+        },
+        "geometries": [
+          {
+            "id": 28790185,
+            "name": "Plane.040",
+            "vertices": 657,
+            "faces": 395,
+            "faceVertexHistogram": {
+              "4": 363,
+              "3": 32
+            },
+            "fanTriangleEstimate": 758,
+            "localBounds": {
+              "min": [
+                -0.1152864322066307,
+                -0.07378727197647095,
+                -0.0022940149065107107
+              ],
+              "max": [
+                0.10207722336053848,
+                0.17697839438915253,
+                0.26477786898612976
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 160722651,
+            "name": "Plane.045",
+            "vertices": 645,
+            "faces": 396,
+            "faceVertexHistogram": {
+              "4": 362,
+              "3": 34
+            },
+            "fanTriangleEstimate": 758,
+            "localBounds": {
+              "min": [
+                -0.10251105576753616,
+                -0.10225968062877655,
+                -0.003344173077493906
+              ],
+              "max": [
+                0.07900680601596832,
+                0.10240572690963745,
+                0.18717342615127563
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 156131585,
+            "name": "Plane.072",
+            "vertices": 810,
+            "faces": 491,
+            "faceVertexHistogram": {
+              "4": 442,
+              "3": 49
+            },
+            "fanTriangleEstimate": 933,
+            "localBounds": {
+              "min": [
+                -0.10225417464971542,
+                -0.10711567103862762,
+                -0.0035159438848495483
+              ],
+              "max": [
+                0.1146261990070343,
+                0.05081859976053238,
+                0.17509831488132477
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 297389016,
+            "name": "Plane.001",
+            "vertices": 300,
+            "faces": 180,
+            "faceVertexHistogram": {
+              "4": 180
+            },
+            "fanTriangleEstimate": 360,
+            "localBounds": {
+              "min": [
+                -0.09807941317558289,
+                -0.1028098613023758,
+                -0.003309954423457384
+              ],
+              "max": [
+                0.09600304812192917,
+                0.09146563708782196,
+                0.16469475626945496
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 138209168,
+            "name": "Plane.064",
+            "vertices": 201,
+            "faces": 122,
+            "faceVertexHistogram": {
+              "4": 122
+            },
+            "fanTriangleEstimate": 244,
+            "localBounds": {
+              "min": [
+                -0.03987874463200569,
+                -0.07957375794649124,
+                -0.003573642810806632
+              ],
+              "max": [
+                0.07130422443151474,
+                0.08639029413461685,
+                0.14334116876125336
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 302411512,
+            "name": "flower_empodium_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              28790185
+            ],
+            "materialSlotsInConnectionOrder": [
+              "flower_empodium"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -56.81260299682617,
+                0.0,
+                -8.578465894970577e-06
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 777242687,
+            "name": "flower_empodium_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              160722651
+            ],
+            "materialSlotsInConnectionOrder": [
+              "flower_empodium"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -28.406301498413086,
+                0.0,
+                -4.289232947485289e-06
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 8841549,
+            "name": "flower_empodium_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              156131585
+            ],
+            "materialSlotsInConnectionOrder": [
+              "flower_empodium"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 476996020,
+            "name": "flower_empodium_d_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              297389016
+            ],
+            "materialSlotsInConnectionOrder": [
+              "flower_empodium"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                28.406301498413086,
+                0.0,
+                4.289232947485289e-06
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 558852771,
+            "name": "flower_empodium_e_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              138209168
+            ],
+            "materialSlotsInConnectionOrder": [
+              "flower_empodium"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                56.81260299682617,
+                0.0,
+                8.578465894970577e-06
+              ],
+              "Lcl Rotation": [
+                -90.00000250447816,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "28197303": "flower_empodium"
+        },
+        "uniqueGeometryFaces": 1584,
+        "uniqueGeometryFanTriangles": 3053,
+        "geometryModelBindings": 5,
+        "modelBoundFanTriangles": 3053,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "flower_empodium_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "flower_empodium_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "flower_empodium_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "flower_empodium_d_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "flower_empodium_e_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [
+          {
+            "geometryId": 28790185,
+            "controlPoints": 657,
+            "referencedControlPoints": 657,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.1152864322066307,
+                -0.07378727197647095,
+                -0.0022940149065107107
+              ],
+              "max": [
+                0.10207722336053848,
+                0.17697839438915253,
+                0.26477786898612976
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 395,
+                "fanTriangleEstimate": 758,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      -0.0013702213764190674,
+                      0.04586080089211464
+                    ],
+                    "max": [
+                      0.7591755986213684,
+                      0.9875927567481995
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 654,
+                    "referencedDirectVectors": 654
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 160722651,
+            "controlPoints": 645,
+            "referencedControlPoints": 645,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.10251105576753616,
+                -0.10225968062877655,
+                -0.003344173077493906
+              ],
+              "max": [
+                0.07900680601596832,
+                0.10240572690963745,
+                0.18717342615127563
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 396,
+                "fanTriangleEstimate": 758,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      -0.0013702213764190674,
+                      0.04586080089211464
+                    ],
+                    "max": [
+                      0.7591755986213684,
+                      0.9875927567481995
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 642,
+                    "referencedDirectVectors": 642
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 156131585,
+            "controlPoints": 810,
+            "referencedControlPoints": 810,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.10225417464971542,
+                -0.10711567103862762,
+                -0.0035159438848495483
+              ],
+              "max": [
+                0.1146261990070343,
+                0.05081859976053238,
+                0.17509831488132477
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 491,
+                "fanTriangleEstimate": 933,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      -0.0013702213764190674,
+                      0.04586080089211464
+                    ],
+                    "max": [
+                      0.7591755986213684,
+                      0.9875927567481995
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 806,
+                    "referencedDirectVectors": 806
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 297389016,
+            "controlPoints": 300,
+            "referencedControlPoints": 300,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.09807941317558289,
+                -0.1028098613023758,
+                -0.003309954423457384
+              ],
+              "max": [
+                0.09600304812192917,
+                0.09146563708782196,
+                0.16469475626945496
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 180,
+                "fanTriangleEstimate": 360,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      -0.0013702213764190674,
+                      0.14427869021892548
+                    ],
+                    "max": [
+                      0.9242510795593262,
+                      0.9875927567481995
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 300,
+                    "referencedDirectVectors": 300
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 138209168,
+            "controlPoints": 201,
+            "referencedControlPoints": 201,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.03987874463200569,
+                -0.07957375794649124,
+                -0.003573642810806632
+              ],
+              "max": [
+                0.07130422443151474,
+                0.08639029413461685,
+                0.14334116876125336
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 122,
+                "fanTriangleEstimate": 244,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.13725076615810394,
+                      0.23033207654953003
+                    ],
+                    "max": [
+                      0.6909147500991821,
+                      0.9875927567481995
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 201,
+                    "referencedDirectVectors": 201
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          }
+        ],
+        "preparationBoundary": "Original mesh/model IDs, transforms and material slots only. No evaluated world axes/scale or automatic merging/reduction. Check UV per role, not only layer presence."
+      }
+    },
+    {
+      "asset": "flower_empodium",
+      "file": "flower_empodium_diff_1k.png",
+      "sha256": "0C582F351E08F5BE631269D9E72F1412B7D172AEE6EADD4E3670E72FB4DAC492",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            251
+          ],
+          [
+            0,
+            215
+          ],
+          [
+            0,
+            166
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "flower_empodium",
+      "file": "flower_empodium_nor_dx_1k.png",
+      "sha256": "2835768DACD377149F018DA3DC21411C57BE58A51364AA1DED87E1D07B647C51",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            21,
+            234
+          ],
+          [
+            15,
+            243
+          ],
+          [
+            139,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "flower_empodium",
+      "file": "flower_empodium_rough_1k.png",
+      "sha256": "527D80AA22E02DFE39F695859841E9A865C262D7A6650FBC7316D2C846EC6077",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          65535,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "flower_empodium",
+      "file": "flower_empodium_ao_1k.png",
+      "sha256": "FD509942842A0E0F7994DE571475A0D7F31DB65955CDEE30389CF43796025962",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          19024,
+          65447
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "flower_empodium",
+      "file": "flower_empodium_alpha_1k.png",
+      "sha256": "41AA40A0F570160CA64E8D99E49B4EECDC852158A6B021545831F0D654B0529E",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    }
+  ],
+  "limits": "Parser cancellation is checked before each file/pass/geometry; the reused parser has its existing node/depth/120-second bounds. Raw local bounds are not transformed native render bounds."
+}
