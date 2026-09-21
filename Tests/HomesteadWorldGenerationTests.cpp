@@ -246,6 +246,7 @@ void VersionFixture()
         append(entity.yawDegrees);
         append(entity.scalePermille);
     }
+    CHECK(fingerprint == UINT64_C(7104536168363204436));
     std::cout << "Generation v1 fixture fingerprint: " << fingerprint << '\n';
 }
 }
