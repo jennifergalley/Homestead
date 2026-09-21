@@ -81,6 +81,10 @@ Evidence: `canonical-consolidation.json`, `roundtrip-validation.json`, per-mesh
 manifests and logs under `Build\CharacterPreview\HairstyleRefinement\FinalBundle`.
 **145 original input files** and **26 frozen wave/palette/parent-handoff files**
 are hash-protected. The stable modular originals also match commit 1425aff.
+That authoring-time count included three ignored local `.blend1` backups.
+Committed-checkout validation now requires **142 durable original inputs**;
+the backup observations are historical only, not rerun proof or import
+dependencies. Their recorded hashes remain in the OpenSpec `source-handoff.md`.
 All recipe Python files parse; the PowerShell wrapper parses; scoped whitespace
 checks pass. Blender used offline, factory-startup, disable-autoexec and two CPU
 threads. No new aesthetic render loop was performed for consolidation.

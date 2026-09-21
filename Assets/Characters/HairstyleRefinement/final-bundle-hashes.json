@@ -1,15 +1,15 @@
 {
   "Assets\\Characters\\HairstyleRefinement\\Bob-manifest.json": {
-    "sha256": "e3a48d09b396d683664dc313616ba25ca37ab551688a4a45012e8a4837388265",
-    "bytes": 32268
+    "sha256": "2f6fbb5dfe2910c004e4d62e76ad9b8a0bcb6acc5d9d862591a85b784db4ee6e",
+    "bytes": 31835
   },
   "Assets\\Characters\\HairstyleRefinement\\Bob-materials.json": {
     "sha256": "e8944a6fe853ca430b8feefa9b2a5a1f280296a57cd54fe06b9a5fefaecd3334",
     "bytes": 584
   },
   "Assets\\Characters\\HairstyleRefinement\\canonical-consolidation.json": {
-    "sha256": "f4e0cc7ae4c1eb763bfbdcc6ca24fb953a16be139ff2c213cc127789e213c7d9",
-    "bytes": 24710
+    "sha256": "249774a876f516375a73cc77df35f202fc341b4096cc644eb4e7232af18a5a00",
+    "bytes": 24277
   },
   "Assets\\Characters\\HairstyleRefinement\\EARLY-WAVES.md": {
     "sha256": "0af345d47ef9bb97290036efb663e7635aa652f5db1ef7c9c3d34473a3b77e50",
@@ -20,8 +20,8 @@
     "bytes": 6229
   },
   "Assets\\Characters\\HairstyleRefinement\\FINAL-HANDOFF.md": {
-    "sha256": "625e382ed41691666470e5e983f52246ef1b0c777d0a12afae67d05f149502ff",
-    "bytes": 4717
+    "sha256": "e1b50a98091a77fd7c54cd2171ebb533b306efc6477e51ad238f7805ccd07af8",
+    "bytes": 5022
   },
   "Assets\\Characters\\HairstyleRefinement\\incumbent-neutral-tint.patch": {
     "sha256": "4363cf11dc65b74864e04a06368d0f8c959f283ae694a7a7909871a5fa9cfcde",
@@ -180,8 +180,8 @@
     "bytes": 4582380
   },
   "Assets\\Characters\\HairstyleRefinement\\Modular-manifest.json": {
-    "sha256": "35cb5ba164c1a2627e84aeef29eb5523d01eb9070a2ca02329beb87580ac14f8",
-    "bytes": 22346
+    "sha256": "d965cb04e3590db61311f0401365e8b5d906c9dda809eaa21ddccc84ec36d9f7",
+    "bytes": 21913
   },
   "Assets\\Characters\\HairstyleRefinement\\provenance.json": {
     "sha256": "9ad643ec96c42a0e52a67fb2221c72e801d639a6b074401ec270778389b0809e",
@@ -208,16 +208,16 @@
     "bytes": 2304
   },
   "Scripts\\Characters\\build_hairstyle_bob_reuse.py": {
-    "sha256": "976c1510bdcf96fb13aa7f8413405e0e32b02cc41da1aacc5dffef61fef619f3",
-    "bytes": 12799
+    "sha256": "a2c6c609f52531d20b8cb9c522d0dbbe71b9df063410f632aa8e2a56a6ee09fd",
+    "bytes": 12827
   },
   "Scripts\\Characters\\build_hairstyle_refinement.py": {
-    "sha256": "5a696b2181ca30cb9c67dfd1028a8cc7adff6127eee18b344c2d9b40b3567330",
-    "bytes": 21593
+    "sha256": "94400d960768731520834e271a46837fc1a6f34eb7ee4f21599ebbd9083b1289",
+    "bytes": 21689
   },
   "Scripts\\Characters\\build_modular_hairstyle_refinement.py": {
-    "sha256": "eb341daa0643842f77355e6f4042faa0287386762b28af42632569152f3f8fbb",
-    "bytes": 10871
+    "sha256": "9e881d9b8351430bb163b950b0e4cfbec28d0f79a2d2c82270a35890256f8aae",
+    "bytes": 10885
   },
   "Scripts\\Characters\\build_published_hairstyle_parity.py": {
     "sha256": "33249a7200989a82be3b811bdb906ce8bc06f56e36db6661c1bcb436aa2d0c28",
@@ -232,8 +232,8 @@
     "bytes": 9262
   },
   "Scripts\\Characters\\check_hairstyle_refinement.py": {
-    "sha256": "f0ca5193d1c431fdd10b9f8e8fc5558f0e43164bd01310f21e72e34d877cbb64",
-    "bytes": 8427
+    "sha256": "8c6b7b749613ddbf7fac4c9dd1189721780ee493f78c9fe7eb186be803b00e6f",
+    "bytes": 8482
   },
   "Scripts\\Characters\\check_hairstyle_waves.py": {
     "sha256": "7d68e09aa3e86a18a754b355e1fa7dce43f512cc176a94ffe09ec6e65d9d5645",
@@ -243,6 +243,10 @@
     "sha256": "a9d5ea0d89ea94e3667bcfd4ecd3013bda95917684d625ec4539a3c8f3a7361b",
     "bytes": 7946
   },
+  "Scripts\\Characters\\hairstyle_receipts.py": {
+    "sha256": "0b518cc6bf2c84118790d5e2da13597dd71dfac83fc4cd37b55cb4abac82b552",
+    "bytes": 252
+  },
   "Scripts\\Characters\\inspect_hairstyle_sources.py": {
     "sha256": "f011a121bdda741a33b02476fd24cc2679af828dd77cc13aa4c8321c119b01a5",
     "bytes": 1521
@@ -250,6 +254,10 @@
   "Scripts\\Characters\\preview_hairstyle_palette.py": {
     "sha256": "2508fd622685ac217b26e593f4f530cacabf5607e96694fcac5f14bd24bf60ee",
     "bytes": 1947
+  },
+  "Scripts\\Characters\\test_hairstyle_receipts.py": {
+    "sha256": "3439f8b232443f4dc0973aa8e59dc819e4d880fe2534bec2d1e5c949d361d897",
+    "bytes": 1197
   },
   "Scripts\\Characters\\verify_hairstyle_roundtrips.py": {
     "sha256": "61d1b885c6e7b2617aa6a3040146bc77d34e96ab7f9c6142ef424f2a67a9f057",

@@ -10,7 +10,6 @@
     "Assets\\Characters\\ModularClothing\\README.md": "5d7b6924f879a431d33cd7bb56d1fcd0bad4a8e9c960a06c40037e6c57bbaa0d",
     "Assets\\Characters\\ModularClothing\\validation.json": "c10c6f45f3fc1543a45e98228febbb35e7591e779005f0ad0e8fdaf09436fe48",
     "Assets\\Characters\\ModularClothing\\Hazel\\Hazel_Modular.blend": "fc182368f69343ad5c1364d08113281beb9240f267e02521da932cd0967bc6fa",
-    "Assets\\Characters\\ModularClothing\\Hazel\\Hazel_Modular.blend1": "9bae214cf07817033eea987d3054d30a0ab486894a8a229c6e5c6cce348a2122",
     "Assets\\Characters\\ModularClothing\\Hazel\\materials.json": "da1037b1b3cf1c5c237bb007ba5fd3e951c04ea6c41ff3baba9b5a873916043a",
     "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Apron.fbx": "3cf63aac0d347052684a1f9bd3ae8a685a2e2323cbf032fcf2bae6b6ec1635ec",
     "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Base_Bob.fbx": "f9a425b0695aa1c3e011d3b054505669fc503b51fd15b739f62ec94172f00783",
@@ -22,7 +21,6 @@
     "Assets\\Characters\\ModularClothing\\Hazel\\source-report.json": "7d4fa9760e240fb42c84c8cdb56d96ae0e6267b33784d05df3b6deb047203bce",
     "Assets\\Characters\\ModularClothing\\Preferred\\materials.json": "e8e2854faac11fa6ab7d81bf3c4f071980ad69fc638beff424b75789f859aa5a",
     "Assets\\Characters\\ModularClothing\\Preferred\\Preferred_Modular.blend": "485d0fe95b074878b19350e876ce0232d9920313d4afbd724858dc3b4b658b73",
-    "Assets\\Characters\\ModularClothing\\Preferred\\Preferred_Modular.blend1": "a2fd44708341a4f41be3ed113d27be161ef0c90cc50e93ffe04a672a7ca444d9",
     "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Apron.fbx": "a56b1f0e1f65d4765c329db06391443ad6babaf2971af227365e6dfbf25fee1b",
     "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_Bob.fbx": "446bf8d9788287eefc9af579958d93dc066d365f0f1444b577d5480e09bc281f",
     "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_LongWave.fbx": "6336521182abeb18cb7e16236d362b7cc27c323a5c309f2105ca96060a96d255",
@@ -56,8 +54,7 @@
     "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Shoes.fbx": "ba28892795b9a7c465c9c4142b56781cbf91d7385168b901f00cfcb0f627b419",
     "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Tunic.fbx": "4b539e9f5494db62744c8b0baead9cd1fb06ff0d4f44a5d605352a3aebf540e7",
     "Assets\\Characters\\ModularClothing\\Willow\\source-report.json": "97bd7600958c18db259e49dc84f7e65d166f1556da9a8f764840ea754b58e2ff",
-    "Assets\\Characters\\ModularClothing\\Willow\\Willow_Modular.blend": "6d09c0fa5276f3809d2701ae79f116ee17d321df82d4449c8c3a7b126c9b8dd9",
-    "Assets\\Characters\\ModularClothing\\Willow\\Willow_Modular.blend1": "cd2014de9e5503821fe8751363648ca2252da1ea2c7c0fd402c9d2dcc7f12fc2"
+    "Assets\\Characters\\ModularClothing\\Willow\\Willow_Modular.blend": "6d09c0fa5276f3809d2701ae79f116ee17d321df82d4449c8c3a7b126c9b8dd9"
   },
   "entries": [
     {

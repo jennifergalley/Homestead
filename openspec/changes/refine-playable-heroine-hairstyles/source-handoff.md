@@ -34,3 +34,23 @@ not accepted. Stock-based bob is also not human-approved. Main owns actual
 Unreal import/build/cook and normal-camera play review (tasks 1.3/2.3), and must
 retain the old alternative if the candidate looks worse. No automatic merge,
 PR or playable promotion was performed by this source lane.
+
+## Committed-checkout receipt correction
+
+Main reported that the final checker required ignored `.blend1` authoring
+backups absent from its committed checkout. The follow-up is limited to receipt
+enumeration and dependent metadata: exclude Blender numbered backups and `.bak`
+files, retain strict checks for every real source/canonical asset, and verify a
+fresh committed-tree checkout without untracked backup files. No geometry,
+texture, rig, authoring export, compiler or engine work is authorized by this fix.
+
+Historical local backup observations are retained here, not as import or
+validation prerequisites. These ignored files were recorded during authoring;
+their prior observations are **not rerun or newly proven** in the committed-tree
+check. Paths below are relative to `Assets\Characters\ModularClothing`.
+
+| Historical backup | Recorded SHA-256 |
+| --- | --- |
+| `Hazel\Hazel_Modular.blend1` | `9bae214cf07817033eea987d3054d30a0ab486894a8a229c6e5c6cce348a2122` |
+| `Preferred\Preferred_Modular.blend1` | `a2fd44708341a4f41be3ed113d27be161ef0c90cc50e93ffe04a672a7ca444d9` |
+| `Willow\Willow_Modular.blend1` | `cd2014de9e5503821fe8751363648ca2252da1ea2c7c0fd402c9d2dcc7f12fc2` |
