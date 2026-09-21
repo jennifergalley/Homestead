@@ -19,7 +19,8 @@ const TCHAR* HairStyleName(int32 Index)
 }
 const TCHAR* HairColorName(int32 Index)
 {
-    static const TCHAR* Values[] = {TEXT("Chestnut"), TEXT("Dark brown"), TEXT("Black"), TEXT("Copper")};
+    static const TCHAR* Values[] = {TEXT("Chestnut"), TEXT("Dark brown"), TEXT("Black"), TEXT("Copper"), TEXT("Blonde")};
+    static_assert(UE_ARRAY_COUNT(Values) == HairColorCount);
     return Choice(Values, Index);
 }
 const TCHAR* SkinToneName(int32 Index)
@@ -51,7 +52,19 @@ FLinearColor HairTint(int32 Index)
 {
     static const FLinearColor Values[] = {
         FLinearColor::White, FLinearColor(0.45f, 0.36f, 0.32f),
-        FLinearColor(0.15f, 0.14f, 0.13f), FLinearColor(1.15f, 0.68f, 0.43f)};
+        FLinearColor(0.15f, 0.14f, 0.13f), FLinearColor(1.15f, 0.68f, 0.43f),
+        FLinearColor(1.35f, 1.15f, 0.85f)};
+    static_assert(UE_ARRAY_COUNT(Values) == HairColorCount);
+    return Choice(Values, Index);
+}
+FLinearColor NeutralHairTint(int32 Index)
+{
+    // Linear reflectance for neutral strand textures; legacy hair/brows retain HairTint.
+    static const FLinearColor Values[] = {
+        FLinearColor(0.055f, 0.011f, 0.003f), FLinearColor(0.025f, 0.004f, 0.001f),
+        FLinearColor(0.008f, 0.0015f, 0.0004f), FLinearColor(0.075f, 0.009f, 0.002f),
+        FLinearColor(0.68f, 0.46f, 0.19f)};
+    static_assert(UE_ARRAY_COUNT(Values) == HairColorCount);
     return Choice(Values, Index);
 }
 FLinearColor SkinTint(int32 Index)
