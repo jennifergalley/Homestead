@@ -871,7 +871,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     else if (Page == 6)
     {
         Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::HairStyleName(Appearance.HairStyle)), TEXT("Long waves, a straight bob, or a practical ponytail.")});
-        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("A small chestnut-based color palette.")});
+        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("Chestnut, dark brown, black, copper, or blonde. Hair color is independent of hairstyle.")});
         Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)), TEXT("Prototype tone adjustments; deeper presets follow.")});
         Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Iris color changes preserve the whites and pupils.")});
         Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
@@ -979,7 +979,7 @@ void AHomesteadController::ActivateRow()
         switch (Id)
         {
         case 0: Next.HairStyle = (Next.HairStyle + 1) % 3; break;
-        case 1: Next.HairColor = (Next.HairColor + 1) % 4; break;
+        case 1: Next.HairColor = (Next.HairColor + 1) % HomesteadLook::HairColorCount; break;
         case 2: Next.SkinTone = (Next.SkinTone + 1) % 4; break;
         case 3: Next.EyeColor = (Next.EyeColor + 1) % 4; break;
         case 4: Next.TunicColor = (Next.TunicColor + 1) % 4; break;
