@@ -4,6 +4,29 @@ This target builds the same C++17 simulation used by Unreal, without engine
 headers, third-party libraries, or exceptions. Checks execute in Release builds.
 No test writes to the filesystem or requires network access.
 
+The wardrobe authority scenarios cover independent garment IDs, tunic/apron
+dependencies, footwear slots, 120-unit pack/chest capacity, full-pack swaps,
+280 cm chest reach, exact 12/6/8-Fiber recipes with the existing knife, per-item
+dye, stable split/merge/reorder groups, stale confirmations, and atomic save
+rejection. Existing gathering/crafting/building/gardening/storage checks continue
+to exercise the same quantity authority and current-schema round trips.
+
+Portable saves now write/read `HOMESTEAD 4`; Unreal wrappers use version 5.
+Earlier disposable test saves return `ResultCode::UnsupportedVersion` without
+changing live state or files. Corrupt current saves return `CorruptSave`.
+The caller handles a clearly disclosed new-clearing/reset flow; decoding never
+silently starts a new world. New games start with one equipped tunic, one pair
+of shoes, the existing knife, and no extra materials or apron. These portable
+tests do not establish modular asset admission, Controller integration or
+shipped gameplay.
+
+During an authoring-tool launch restriction, do not run the generic compiler
+commands below as a bypass. The 2026-09-20 authority-lane run instead reused
+the coordinator-approved, hash-pinned `AuthoringLeafGuard` route for separate
+root-only compile/link/test leaves, with outputs in session artifacts and no
+engine launch. See the change's `authority-lane.md` for that run's exact evidence
+and integration boundary.
+
 From a Visual Studio developer command prompt:
 
 ```powershell
