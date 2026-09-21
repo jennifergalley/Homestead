@@ -26,8 +26,11 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-The selected **qualified camera/readability increment** is
-`Build\Releases\20260921-033354-2d257ba0\clearing-readability-02\Windows`.
+The selected **qualified directional-menu increment** is
+`Build\Releases\20260921-033354-2d257ba0\directional-navigation-06\Windows`.
+It adds natural D-pad/left-stick movement between menu sections, including
+downward equipment access and the return from the portrait to your selected item.
+The following environment/camera improvements are retained unchanged.
 It replaces the purely decorative placeholder tree groups with15 reduced,
 textured Tree Small02 instances while retaining interactive resource plants,
 rocks and outer-meadow grass. The clearing now adds512 native-scale authored
@@ -51,19 +54,26 @@ See `docs\research\environment-assets\readability-delivery-01` and
 Fresh matched grass01/grove03 screenshot-free routes measured approximately
 60 actor ticks/second at a60 cap and720p output, with no intervals over33.33ms;
 this is not GPU/Present timing,4K performance or uncapped-headroom evidence.
-Grass01, grove03 and all earlier candidates remain available.
+Camera02, grass01, grove03 and all earlier candidates remain available.
 
 The candidate retains the native inventory/wardrobe integration from
-`wardrobe-ui-02`, which remains available for rollback. Its prior720p/4K
-menu/equipment/dye/save, separate-process reload and save-and-quit evidence is
-in `docs\research\character-assets\wardrobe-shipping-02\receipt.json`; that full
-matrix was not rerun for this environment increment. Compact item cards, readable
-selection/details and the larger portrait remain; lower-body portrait lighting
-is provisional. `Preview.json` is the authority for the human build.
+`wardrobe-ui-02`. Actual720p/4K directional routes cover visible native focus,
+held-stick repeat/release/reversal, short/full/empty grids and explicit quantity
+editing/cancel. Existing4K equipment/dye/save, separate-process F9 and genuine
+save-and-quit passed, followed by180s of fresh mapped gathering/eating/save/load.
+Sealed results, failed attempts and image-review limits are in
+`docs\research\character-assets\directional-navigation-01\receipt.json`.
+Full mouse/removal-focus/quantity-confirm coverage remains open. Compact item
+cards and the larger portrait remain; lower-body portrait lighting is provisional.
+`Preview.json` is the authority for the human build, with the samev5 profile and
+byte-identical prior graphics preferences; no existing save was reset.
 
-In the native menu, LB/RB or Ctrl+Tab/Ctrl+Shift+Tab changes tabs; LT/RT or
-Tab/Shift+Tab changes regions; D-pad/arrows navigate; A/Enter activates and
-B/Escape cancels/closes. Inventory clothing actions operate on real owned
+In the native menu, D-pad, left stick or arrows move within grids and across
+their edges to nearby sections; triggers are not required. LB/RB or
+Ctrl+Tab/Ctrl+Shift+Tab changes tabs; LT/RT or Tab/Shift+Tab remain optional
+region shortcuts. A/Enter activates and B/Escape cancels/closes. Choose Amount
+and activate it before changing a quantity; Back leaves editing before cancelling.
+Inventory clothing actions operate on real owned
 garments; Appearance changes body/hair/skin/eyes, not free outfits. Item details
 and actions scroll inside their pane. From gameplay, Escape/B, Right, Activate
 reaches a cancel-default save-and-quit confirmation. The preserved original

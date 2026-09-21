@@ -713,3 +713,21 @@ samev5 profile, byte-identical prior graphics preferences, no human launch/save
 read/reset. Grass01 and previous builds remain available. Historical pending
 receipts remain unchanged; new disposition is `readability-delivery-01`.
 Navigation is a separate next increment, not claimed in this executable.
+
+### Directional-menu increment delivery
+
+Jenny's requested D-pad/left-stick section browsing is integrated in
+`directional-navigation-06`, retaining this environment/camera slice without
+asset/world edits. Actual43-step directional routes passed at720p and4K,
+including held repeat/release/reversal and native portrait-to-content return.
+Existing4K menu/wardrobe, different-process resume and genuine quit passed.
+Fresh180.260s mapped play gathered3 times, ate once, reached20 waypoints and
+restored an exact same-world save, with no clock/teleport edits or navigation
+failures. This supplements, not replaces, the earlier70-minute natural evidence.
+
+Source/evidence checkpoint `4f17f78af4acf51fa10c9c618e1a6a736e597a93` was
+privately pushed/verified. Samev5 and current graphics are preserved; camera02
+is retained as rollback. Delivery/evidence and image-quota qualifications live
+under `docs\research\character-assets\directional-navigation*`. Native failures
+01-05 stay failed. Environment14/29 and wardrobe19/44 are unchanged; remaining
+navigation transaction/mouse/removal-focus/upper-boundary clauses remain open.

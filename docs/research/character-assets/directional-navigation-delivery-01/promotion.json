@@ -1,0 +1,17 @@
+{
+  "status": "promoted-qualified-directional-navigation",
+  "createdUtc": "2026-09-21T19:48:55.7770266+00:00",
+  "authority": "Explicit coordinator standing-normal-promotion approval after sealed pins/private checkpoint and normal ValidateOnly.",
+  "sourceCheckpoint": "4f17f78af4acf51fa10c9c618e1a6a736e597a93",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\directional-navigation-06",
+  "profile": "jenny-review-v5",
+  "executableSha256": "F3D669EC6B31312B46BEBB109EF5200346B94446C48765386491BD626A093B2F",
+  "selectedPreviewSha256": "2FA0530E787B50BC141F42B88E96D82D2A825EB029398D1035BA21DCEFE2CB76",
+  "normalLaunchValidated": true,
+  "humanGameLaunched": false,
+  "savesReadOrReset": false,
+  "previousCandidateRetained": "clearing-readability-02",
+  "evidenceReceipt": "docs\\research\\character-assets\\directional-navigation-01\\receipt.json",
+  "evidenceReceiptSha256": "971EC4554839AD61EA36AAC4297044DF58F3B5A0ABDDADA05A6C75ACD14691EC",
+  "scope": "Natural menu section navigation and native/ordinary-play regression. Navigation4/8; uncovered quantity-confirm/mouse/removal-focus/upper-boundary clauses remain open. Environment14/29 and wardrobe19/44 unchanged. Image-review quota and historical failures remain explicit."
+}

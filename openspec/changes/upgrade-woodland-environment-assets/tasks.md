@@ -2,9 +2,11 @@
 
 ## Current state and next visible goal
 
-Selected: qualified `clearing-readability-02`, samev5 profile; grass01 and earlier
-builds retained. Normal-launch validation/promotion:
-`readability-delivery-01/promotion.json`. Fourteen of29 tasks complete.
+Selected: qualified `directional-navigation-06`, retaining the camera/environment
+increment, samev5 profile and previous graphics. Camera02/grass01 and earlier
+builds remain available. Delivery is recorded under
+`docs\research\character-assets\directional-navigation-delivery-01`.
+Fourteen of29 environment tasks complete.
 Tree import03 remains FAILED with twelve qualified branch basis corners;
 prior execution narrative is retained in `execution-history.md`.
 
@@ -14,9 +16,11 @@ play passed27.94646 game hours, four harvested-node renewals and actual daylight
 night/Rain observation, with timing/memory limits disclosed. Evidence:
 `readability-camera-01` and `readability-endurance-01`. No silent time edits.
 
-Next visible goal: integrate Jenny's natural directional-menu navigation through
-the existing helpers, then verify returning to ordinary world interactions.
-The parallel UI owner owns that source; shared engine work is serialized.
+Jenny's natural directional menu increment is integrated: actual720p/4K boundaries,
+save/quit/resume and fresh180s mapped gathering/eating passed. Its remaining
+transaction/mouse/focus matrix is tracked in `improve-menu-directional-navigation`.
+Next environment milestone remains useful constructed-house/plot interaction
+and relevant daylight/night readability, not another unchanged-art recertification.
 Early-orbit near-side surface, dark night heroine/ground, pale outer terrain,
 resource proxies, foliage motion and constructed-house/plot/broader render
 coverage remain open. Do not tint patchy ground or diagnose lighting from golden

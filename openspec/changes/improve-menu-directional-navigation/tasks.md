@@ -2,11 +2,12 @@
 
 ## Current state and next visible goal
 
-Candidate `directional-navigation-06` passes actual720p/4K directional input,
+Selected `directional-navigation-06` passes actual720p/4K directional input,
 4K menu/wardrobe, separate-process resume, genuine save-and-quit and180s fresh
-mapped gathering/eating. Three of8 tasks complete; delivery validation remains.
-Main owns the engine slot. Next: seal/private-checkpoint/normal promotion with
-the samev5 profile and camera rollback. No asset/world changes.
+mapped gathering/eating. Four of8 tasks complete. Normal launch was validated,
+not human-launched; samev5/current graphics and camera rollback are retained.
+Next visible goal: fuller item transactions and pointer/focus coverage for the
+remaining clauses below. No asset/world changes.
 
 ## 1. Directional browsing increment
 
@@ -23,7 +24,7 @@ the samev5 profile and camera rollback. No asset/world changes.
 ## 3. Integrated acceptance
 
 - [x] 3.1 Extend existing native UI tests with actual D-pad and left-stick boundary sequences, real focus assertions and modal/empty/short/full cases; verify compiled tests rather than a direct region-shortcut proxy.
-- [ ] 3.2 Integrate after main releases the shared engine, run targeted 720p/4K boundary playtests and record limits; verify current save/quit/input behavior and unchanged visual/asset/world scope before delivery.
+- [x] 3.2 Integrate after main releases the shared engine, run targeted 720p/4K boundary playtests and record limits; verify current save/quit/input behavior and unchanged visual/asset/world scope before delivery.
 
 ## Current evidence
 
