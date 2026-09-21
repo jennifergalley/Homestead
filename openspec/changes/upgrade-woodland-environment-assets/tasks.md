@@ -4,8 +4,37 @@
 
 Fern02 import and two real offscreen captures passed:
 `docs/research/environment-assets/fern-render-success-01`. This is pipeline
-proof, not finished world art or packaged/performance approval. Six of29
+proof, not finished world art or packaged/performance approval. Twelve of29
 top-level tasks are complete; partial evidence does not manufacture more.
+
+The current selected build is `grass-ground-01`, checkpoint `415878c3`.
+Coordinator review accepted the restrained increment after viewing wide149,
+tree430 and the old grove03 comparison. The near-camera yellow/green occluder
+already existed; camera quality is still unfinished, but this is not a grass
+regression. The source ground diffuse is itself patchy earth/grass. Do not
+promise lush cover from it or blindly tint it.
+
+Six additional checkboxes below reconcile already delivered features against
+the sealed tree/grass gameplay, asset and delivery receipts: authored placement,
+static understory/tree collision, the chosen conventional rendering path,
+credits/documentation, genuine staging/checkpointing and selection. No new
+engine run or stronger clean-mesh/art/performance claim is implied.
+
+**Remaining product work:** daytime/night/weather appearance and readability;
+the known foreground camera obstruction; readable, less primitive interactive
+resource representations with unchanged base/produce/cleared behavior; and
+restrained foliage motion/distance behavior if it improves the scene. More
+tree/grass density is not automatically the solution. Native clouds are optional,
+not a missing mandatory feature. Constructed-site/build-route coverage and
+broader regression/render-resolution evidence are remaining checks, not proof
+that the delivered import, PBR, instancing, ground blend or launcher is absent.
+
+**Next visible milestone:** a readable clearing across actual dawn, daytime
+and night gameplay, including the existing tree-encounter camera obstruction.
+First evaluate the current game at those times; change lighting/materials only
+for demonstrated problems. Preserve the qualified usable build and avoid another
+isolated asset-polish round. Resource-art replacement follows with its gameplay
+semantics intact; do not recertify unchanged historical tools to start that work.
 
 The first integrated fern Shipping route subsequently passed with 302 real
 1280x720 ordinary-control frames and actual gathering. Fresh cook, genuine
@@ -262,8 +291,8 @@ renderer evidence is in `fern-completion-driven-run.md`.
 
 - [ ] 3.1 Extend targeted import incrementally, preserving objects/slots and explicit input failures; establish idempotent reuse without blind reimports.
 - [ ] 3.2 Preserve authored PBR, map color spaces, DX normals, alpha/mips and two-sided response; no prototype Tint on imported foliage.
-- [ ] 3.3 Add authored-material/uniform-scale/ground-anchor placement without changing primitive callers; a small static-component fern patch may precede broad instancing.
-- [ ] 3.4 Keep understory nonblocking and roots grounded; verify silhouettes and tree collision before wind or optional Nanite.
+- [x] 3.3 Add authored-material/uniform-scale/ground-anchor placement without changing primitive callers; a small static-component fern patch may precede broad instancing.
+- [x] 3.4 Keep understory nonblocking and roots grounded; verify silhouettes and tree collision before wind or optional Nanite.
 - [ ] 3.5 Review representative assets under homestead lighting incrementally; full-palette review does not block the first visible fern patch.
 
 ## 4. World integration
@@ -272,7 +301,7 @@ renderer evidence is in `fern-completion-driven-run.md`.
 - [ ] 4.2 Preserve resource base/produce/cleared semantics, readability and reserved cleared/build sites.
 - [x] 4.3 Add ground treatment without changing terrain topology, heights, collision or stream ribbons.
 - [ ] 4.4 Add restrained supported wind/distance behavior after static foliage works; verify stationary roots and bounds.
-- [ ] 4.5 Retain conventional rendering unless an actual LOD/Nanite comparison is warranted; record the chosen path.
+- [x] 4.5 Retain conventional rendering unless an actual LOD/Nanite comparison is warranted; record the chosen path.
 - [ ] 4.6 Evaluate optional native clouds only if justified after foliage, under the existing lighting owner; otherwise retain the current sky.
 
 ## 5. Gameplay and visual checks
@@ -286,7 +315,7 @@ renderer evidence is in `fern-completion-driven-run.md`.
 
 ## 6. Playable delivery
 
-- [ ] 6.1 Update provenance/credits and directly affected documentation from actual imported/cooked results.
-- [ ] 6.2 Stage genuine fresh executable/cooked content/registry/shaders to a fresh candidate (supported loose files or containers) and checkpoint content/code; report smoke results, known issues and test-save resets.
-- [ ] 6.3 Select the latest basically verified usable candidate for playtesting without claiming subjective approval or full environment completion.
+- [x] 6.1 Update provenance/credits and directly affected documentation from actual imported/cooked results.
+- [x] 6.2 Stage genuine fresh executable/cooked content/registry/shaders to a fresh candidate (supported loose files or containers) and checkpoint content/code; report smoke results, known issues and test-save resets.
+- [x] 6.3 Select the latest basically verified usable candidate for playtesting without claiming subjective approval or full environment completion.
 - [ ] 6.4 Keep cheap rollback and report remaining work; honor explicit stop controls without new schedules.

@@ -1,0 +1,22 @@
+{
+  "recordedUtc": "2026-09-21T16:33:22.912Z",
+  "reviewer": "Homestead Orchestrator",
+  "disposition": "accepted-qualified-restrained-grass-ground-increment",
+  "promotionCheckpoint": "415878c33ebc4aec02c92213c1f58fd7e3c458f9",
+  "reviewedOriginalFrames": [
+    "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\Frames\\frame-00149.png",
+    "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\Frames\\frame-00430.png",
+    "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-03\\Frames\\frame-00430.png"
+  ],
+  "observations": [
+    "More textured ground and scattered vegetation, still dry/earthy and very golden, not lush woodland.",
+    "The huge near-camera yellow/green occluder was already present in the grove03 baseline, not introduced by grass.",
+    "Coordinator also inspected a downscaled original Grass Ground diffuse: inherently patchy earth/grass, not uniform green meadow."
+  ],
+  "limits": [
+    "Acceptance is for a usable restrained increment, not completed camera quality or full woodland art.",
+    "Terrain invariance, placement and timing/resolution qualifications remain as sealed.",
+    "Previous builds remain available; original failed tree import03 and twelve-corner qualification remain unchanged.",
+    "No extra asset/image polish round. Evaluate future lighting in actual game context at relevant times; do not assume all orange is an asset defect or blindly tint the ground."
+  ]
+}

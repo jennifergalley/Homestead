@@ -32,7 +32,25 @@ acceptance from a passing screenshot metric.
 
 ## Decisions
 
-### Next increment: one reduced Tree Small02 in the real world
+### Current delivery and next visible milestone
+
+The qualified `grass-ground-01` preview is selected at `415878c3`, with the
+samev5 profile and previous builds retained. Coordinator review accepted its
+textured, sparse, dry/earthy clearing, not lush woodland. The large foreground
+occluder in tree430 also exists in grove03; it is unfinished camera behavior,
+not a new grass regression. The original ground diffuse is itself patchy
+earth/grass, so a uniform-green result is not the contract.
+
+The next visible milestone is clearing readability in actual dawn/day/night
+game contexts and the known tree-encounter camera obstruction. Diagnose those
+conditions before changing illumination or material response; do not assume
+the observed warm dawn proves an asset bug. Interactive resource silhouettes
+remain a subsequent product gap, with base/produce/cleared semantics preserved.
+Do not repeat isolated asset polishing or certify unchanged historical tooling.
+`tasks.md` distinguishes that work from already delivered placement, rendering,
+credits, staging and selection.
+
+### Historical tree increment and qualification
 
 The fern clearing and subsequent usable wardrobe preview have shipped as
 qualified increments. Keep wardrobe-ui-02 selected while integrating the frozen
