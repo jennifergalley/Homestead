@@ -32,12 +32,17 @@ int main()
     stick.Sample(false, 0.9f, 2);
     if (!Check(stick.Poll(2).y == 1, "initial downward stick gesture")
         || !Check(!stick.Poll(2.1).Any(), "no premature repeat")) return 1;
+    stick.Sample(false, 0.9f, 2.279);
+    if (!Check(!stick.Poll(2.279).Any(), "one millisecond before initial deadline does not repeat")) return 1;
     stick.Sample(false, 0.9f, 2.28);
-    if (!Check(stick.Poll(2.28).y == 1, "held stick repeat")) return 1;
-    stick.Sample(false, -0.9f, 2.3);
-    if (!Check(stick.Poll(2.3).y == -1, "reversal immediate")) return 1;
-    stick.Sample(false, 0, 2.31);
-    if (!Check(!stick.Poll(2.31).Any(), "neutral stops")) return 1;
+    if (!Check(stick.Poll(2.28).y == 1, "held stick repeat at initial deadline")
+        || !Check(!stick.Poll(2.459).Any(), "one millisecond before repeat deadline does not repeat")) return 1;
+    stick.Sample(false, 0.9f, 2.46);
+    if (!Check(stick.Poll(2.46).y == 1, "held stick repeat at subsequent deadline")) return 1;
+    stick.Sample(false, -0.9f, 2.5);
+    if (!Check(stick.Poll(2.5).y == -1, "reversal immediate")) return 1;
+    stick.Sample(false, 0, 2.51);
+    if (!Check(!stick.Poll(2.51).Any(), "neutral stops")) return 1;
     stick.Sample(true, 0.9f, 3);
     if (!Check(stick.Poll(3).x == 1, "horizontal stick")
         || !Check(!stick.Poll(3.4).Any(), "stale/disconnected stick stops")) return 1;
