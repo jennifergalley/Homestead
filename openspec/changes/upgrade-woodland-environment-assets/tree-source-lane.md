@@ -76,3 +76,64 @@ No main game code, central planning artifacts, existing content, launcher,
 Unreal processes or shared authoring/build tools were modified/launched.
 Main still owns in-game appearance, material response, collisions, instancing,
 runtime LOD selection and performance. This lane does not mark those tasks done.
+
+## September 21 visual resource continuation
+
+Jenny's 13:39 Arizona feedback rejects the sparse woodland and primitive
+resource silhouettes. Main confirmed live baseline `5ccddea` and owns the
+canonical proposal/design/tasks, composition, native adaptation and all engine
+execution. This addendum records only this lane's coordinated source scope;
+the branch's older central task counts are not current integrated progress.
+
+Reuse Tree Small 02, Fern 02, the four already prepared Grass Medium 01 meshes,
+Grass Ground and incumbent moss rocks/leaf floor. The current 16-tree cap,
+full-canopy exclusions/separation and omission of all nonselected trees are
+composition concerns, not reasons to wait for another asset catalog.
+
+Main reserved and authorized acquisition of exactly these four CC0 assets:
+Shrub 04, Dry Branches Medium 01, small Fir Sapling and Flower Empodium.
+Publisher previews were inspected before selection. Shrub 04's living broadleaf
+shoots suit a compact berry-base assembly better than sparse Shrub 02. Preserve
+separate ready/harvested produce; the source shrub does not contain berries.
+Fallen log acquisition is deferred. Existing natural leaves/grass can provide
+honestly labeled generic low-herb and bank-grass silhouettes for roots/reeds,
+not a claim of botanical crop or cattail authenticity.
+
+Owned continuation paths: `Assets\Environment\WoodlandResources\candidate01`,
+fresh ignored `Assets\Source\woodland-resources-20260921`, narrowly named
+`Scripts\Environment\Resource*` tools/tests and the resource-palette research
+note. Keep frozen TreeSmall02 v3 unchanged. No main-checkout, common-script,
+central-plan, existing-content, launcher or source-original edits.
+
+Acquisition reuses the established explicit-host/no-redirect download pattern,
+expected bytes and publisher MD5 (left-padded to 32 hex digits), SHA-256 receipts,
+no overwrite, and current coordinator stop checks. Do not spoof the old
+hardcoded run. Main will execute source preparation at its reserved admitted
+slot after receiving input hashes/inventory; this lane launches no Blender,
+compiler, editor, import or build.
+
+Canopy-tier continuation is a proposal/script only until main executes it.
+Do not repeat known near-view failures or promise a 15k tree: the prior
+73k/55k collapse trials lost canopy detail, and preserving boundaries by planar
+reduction left over 1.4M triangles. Preserve the measured 231k near source.
+A lower mid tier needs evaluation at its actual switch distance; a far tier
+needs a concrete leaf/cluster-preserving approach and measured role UV/PBR,
+not arbitrary whole-tree collapse. Main explicitly accepts evidence-driven
+counts rather than exact 60k/15k targets.
+
+### Continuation status
+
+- [x] Read current baseline resource/decorative roles and existing source contracts.
+- [x] Visually compared author previews and selected the four named acquisitions.
+- [x] Agreed isolated acquisition ownership and main-only authoring execution.
+- [ ] Acquire the exact pinned files after targeted checks and live control input.
+- [ ] Deliver actual source inventory and guarded preparation inputs to main.
+
+Ordinary in-game beauty is the acceptance target. Publisher thumbnails and
+source checks support selection; they are not that deliverable.
+
+Acquisition execution subsequently moved to MAIN, with the same four-asset
+reservation, because MAIN can read its authoritative live run control directly.
+This lane supplies the pinned manifest and tested narrow helper; no stale
+control mirror or duplicate download is created. The actual source receipt and
+inventory remain pending until MAIN executes acquisition.
