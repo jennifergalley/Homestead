@@ -102,6 +102,27 @@ in `docs/research/environment-assets/tree-grove-02`; current selected single-tre
 is unchanged while the coordinator inspects corrected originals. Grove01's weak
 composition and import03's source-basis failure are not rewritten.
 
+Parent's actual grove02 frame00145 review found that the outer giant proxy ring
+still dominated the skyline. Final composition direction for this small map:
+when the admitted grove exists, suppress the remaining **decorative tree
+generation groups everywhere**, not by root distance. Keep the exact15 real
+sites/scales/capsules and all interactive saplings/berries plus decorative
+rocks/grass; never clear shared cone/sphere batches globally. Grove02 stays a
+valid functional correction, not accepted visual replacement. One fresh
+Shipping ordinary-route confirmation follows this one-branch change; no new
+import/cook/baseline study or further tree-polishing cycle. Accept the provisional
+sparse grove/open meadow if no blocker, then proceed to grass/ground. Golden
+light, unfinished ground and realistic resource representations remain honest
+limitations rather than being hidden by a placeholder forest.
+
+Final grove03 ordinary confirmation passed with516 real720p frames, all23 stages,
+the same15 authored sites/3,476,775 triangles, actual gathering, whole-crown view,
+trunk blocking and283.091cm retreat. Guard exit/release was clean with no hard
+stop. No new baseline/timing study ran: prior grove01/02 timing remains explicitly
+prior-build evidence. `docs/research/environment-assets/tree-grove-03/receipt.json`
+seals this final provisional-composition increment separately; normal-launch
+verification and same-v5 selection follow under the coordinator's final direction.
+
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns
 environment/engine integration; isolated siblings own UI, wardrobe rules

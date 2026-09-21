@@ -1,0 +1,13 @@
+{
+  "configuration": "Shipping",
+  "packageDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-grove-03\\Windows",
+  "archiveDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-grove-03",
+  "executable": "SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "status": "Genuine loose-file stage; runtime acceptance pending",
+  "cookedInput": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\tree-diagnostic-cook-02\\Cooked",
+  "nativeExecutableSha256": "30E05E3AE01500A0AA624E19B576FC3123BE0406669D6C5DBE0E8ED1BCBBCEAE",
+  "containersUsed": false,
+  "runtimeVerified": false,
+  "treeDiagnostic": true,
+  "diagnosticQualification": "Retained failed import03: exactly12 branch source-description tangent/binormal corners. Ordinary-game diagnostic only; not clean acceptance or promotion."
+}

@@ -22,7 +22,7 @@ if($TreeDiagnosticCandidate -and (-not $ShippingActions -or -not $WriteMetadataO
 if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires explicit tree diagnostic metadata.'}
 if($GroveCandidate -and (-not $TreeDiagnosticCandidate -or $TreeContactCorrection)){throw 'Grove requires exclusive qualified tree Shipping metadata.'}
 if($GroveProxyCorrection -and -not $GroveCandidate){throw 'Proxy correction requires explicit grove metadata.'}
-$shippingBuildName=if($GroveProxyCorrection){'grove-shipping-build-02'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingBuildName=if($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 $shippingLinkFolder=if($TreeContactCorrection -or $GroveProxyCorrection){'link1'}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){'link2'}else{'link1'}
 $manifestAttempt=if($HairWaveCandidate -or $WardrobeCandidate -or $TreeDiagnosticCandidate){'manifest-01'}else{'manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')

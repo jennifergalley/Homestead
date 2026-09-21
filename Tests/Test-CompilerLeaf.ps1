@@ -35,7 +35,7 @@ if($TreeDiagnosticCandidate -and (-not $ShippingActions -or $HairWaveCandidate -
 if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires the explicit tree diagnostic candidate.'}
 if($GroveCandidate -and (-not $TreeDiagnosticCandidate -or $TreeContactCorrection)){throw 'Grove requires exclusive qualified tree Shipping selection.'}
 if($GroveProxyCorrection -and -not $GroveCandidate){throw 'Proxy correction requires the explicit grove candidate.'}
-$shippingBuildName=if($GroveProxyCorrection){'grove-shipping-build-02'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingBuildName=if($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 $shippingLinkAction=if($TreeContactCorrection -or $GroveProxyCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
 $shippingCompiles=if($TreeContactCorrection -or $GroveProxyCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
@@ -165,7 +165,7 @@ if($StageCooked) {
     }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GroveProxyCorrection){'clearing-grove-02'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GroveProxyCorrection){'clearing-grove-03'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -265,8 +265,8 @@ if($StageCooked) {
         $planHash='8C320D1BB5AA564BD7EB8323AC1C6836ECDE9ACEBD32B6F3480FF246EDFFF98D'
     }
     if($GroveProxyCorrection){
-        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grove-shipping-plan-02\actions.json'
-        $planHash='C840F3F9448622E45985BD46FFFA774468A24A3BF246A3D04FEF317E35BE266E'
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grove-shipping-plan-03\actions.json'
+        $planHash='E2329563F407BED73D8982E7B12C5A1415BA5AEA821A1275B0C478E22650FE29'
     }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'

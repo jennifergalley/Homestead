@@ -549,7 +549,7 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
             continue;
         }
         // The upgraded clearing is a sparse real grove, not real trees hidden among taller proxies.
-        if (GroveIndices.Num() > 0 && FVector2D(X + 1000, Y).Size() <= 3400.0f)
+        if (GroveIndices.Num() > 0)
             continue;
         AddDecoration(Cylinder, Base + FVector(0, 0, Height * 0.47f),
             FVector(Width, Width, Height * 0.94f), Bark, true);

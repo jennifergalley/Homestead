@@ -1,0 +1,35 @@
+{
+  "pid": 35824,
+  "image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-grove-03\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "creationTime": 134344762374137483,
+  "executableSha256": "30E05E3AE01500A0AA624E19B576FC3123BE0406669D6C5DBE0E8ED1BCBBCEAE",
+  "arguments": "-HomesteadVisualPlaytest -HomesteadTestOutput=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-03\" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -nosplash -abslog=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-03\\engine.log\" -HomesteadShippingQA -GameUserSettingsINI=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-03\\Graphics\\GameUserSettings.ini\" -UserDir=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grove-ordinary-03\\EngineUser\"",
+  "resumeSourcePins": [],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344752690114052,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "creationFlags": 525324,
+  "handles": 3,
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "adapterSha256": "B1019E6502BC9530C28FF393EC30B8016620257D864C3032F24836A3F818CB29",
+  "softSeconds": 100,
+  "hardSeconds": 110,
+  "wrapperSeconds": 120
+}
