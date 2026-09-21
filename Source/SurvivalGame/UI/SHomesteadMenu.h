@@ -54,6 +54,7 @@ private:
     TSharedPtr<SScrollBox> DialogScroll;
     TArray<TSharedPtr<SWidget>> DialogButtons;
     TArray<TSharedPtr<SWidget>> Cells;
+    TArray<TSharedPtr<SWidget>> ActionButtons;
     TArray<FHomesteadRow> Entries;
     TArray<int32> RowIndices;
     TArray<EHomesteadItemAction> Actions;
@@ -87,11 +88,14 @@ private:
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();
     TSharedRef<SWidget> MakeButton(const FString& Label, TFunction<void()> Action,
-        TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.97f)));
+        TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.97f)),
+        const FString& AccessibleLabel = FString(), FMargin Padding = FMargin(14, 10));
     TSharedRef<SWidget> Text(const FString& Value, int32 Size = 18) const;
     FString EntryName(const FHomesteadRow& Row) const;
     FName EntryIcon(const FHomesteadRow& Row) const;
     FString DetailsText() const;
+    FString DetailsBodyText() const;
+    void ScrollActionIntoView();
     FString Footer() const;
     FLinearColor CellColor(int32 Index) const;
     int32 Columns() const;
