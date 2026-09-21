@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "previewSaveRoutingVersion": 1,
+  "executableSha256": "9F741A1F6AAD7102656DA366BD39153406C9F9EB702CC663B86382AC245806EE",
+  "checkpoint": "63960605eb823448fdb59f5480d12bea7ff8e223",
+  "privateRemoteVerified": true,
+  "proofIndex": "Verification\\proof-index.json",
+  "proofIndexSha256": "39B5EBCCAAFFDD14F9075B395282E53D25CE319B93BE32FFC91BC4974AEA6872",
+  "scope": "Qualified restrained grass/ground playtest increment with actual ordinary runtime evidence, not full woodland/performance/art approval.",
+  "knownLimitations": [
+    "Restrained sparse clearing patch, not finished woodland or Jenny art approval; intensely golden dawn and interactive resource silhouettes remain.",
+    "Original tree-import03 remains FAILED with exactly12 qualified branch source-description tangent/binormal corners.",
+    "Single matched short720p-output/60-capped actor-tick runs, not GPU/Present/4K/uncapped headroom; internal temporal input resolution unmeasured.",
+    "Physical-memory start/end snapshots are not peak memory; no constructed-house/plot scenario.",
+    "Samev5 profile, no human save read/reset/migration or full UI/save-matrix rerun. Earlier candidates retained.",
+    "No new full functional smoke pass claimed; actual ordinary gathering/tree/grass/terrain route and targeted timing passed.",
+    "OpenSpec6/29 complete: ground treatment4.3 now evidenced; full environment gates remain open."
+  ],
+  "previousSelection": "previous-preview.json",
+  "testSaves": "Same jenny-review-v5; existing saves untouched.",
+  "normalLaunch": "QA-off/native-borderless; no automated controls/mute/quit. ValidateOnly, no human launch.",
+  "graphicsPreferencesSha256": "00F9289D8B5F3F16A386B0C83CBAA9C55E7EAF9DFFD7113614EC33A4B4A7852C"
+}

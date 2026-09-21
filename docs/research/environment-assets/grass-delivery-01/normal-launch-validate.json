@@ -1,0 +1,14 @@
+{
+  "Executable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "WorkingDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\Windows",
+  "Arguments": [
+    "-HomesteadPreviewProfile=jenny-review-v5",
+    "-Res=0x0wf",
+    "-UserDir=E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\Windows\\SurvivalGame"
+  ],
+  "Profile": "jenny-review-v5",
+  "Candidate": "Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01",
+  "Checkpoint": "63960605eb823448fdb59f5480d12bea7ff8e223",
+  "ExecutableSha256": "9F741A1F6AAD7102656DA366BD39153406C9F9EB702CC663B86382AC245806EE",
+  "Receipt": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\acceptance-receipt.json"
+}

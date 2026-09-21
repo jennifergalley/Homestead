@@ -1,0 +1,171 @@
+{
+  "status": "passed-qualified-grass-ground-increment",
+  "evidence": "grass-evidence.json",
+  "evidenceSha256": "DAE1011B969DAA9493AC34CAF5BCAE6D9768086196476FEF8E4B4DF8E43586B8",
+  "checkpoint": "63960605eb823448fdb59f5480d12bea7ff8e223",
+  "executableSha256": "9F741A1F6AAD7102656DA366BD39153406C9F9EB702CC663B86382AC245806EE",
+  "actualRuntime": {
+    "grassTriangles": 297633,
+    "maxPositionErrorCm": 0,
+    "completedPasses": 23,
+    "trees": 15,
+    "clumpCounts": [
+      136,
+      123,
+      125,
+      128
+    ],
+    "clumps": 512,
+    "maxRedWeightQuantizationError": 0.001960745,
+    "treeBlocking": true,
+    "terrainVertices": 103041,
+    "dimensions": [
+      1280,
+      720
+    ],
+    "gathering": true,
+    "treeTriangles": 3476775,
+    "terrainTriangles": 204800,
+    "frames": 513,
+    "maxUvError": 0,
+    "batches": 4,
+    "ordinaryRetreatCm": 290.426689,
+    "plannedPasses": 23,
+    "maxNormalError": 0
+  },
+  "timing": {
+    "frameCap": 60,
+    "candidatePhysicalBytes": [
+      970379264,
+      1001316352
+    ],
+    "actualViewport": [
+      1280,
+      720
+    ],
+    "candidate": {
+      "timing-idle": {
+        "samples": 121,
+        "wall_seconds": 2.0166295,
+        "mean_tick_hz": 60.00110580550369,
+        "median_ms": 16.666699,
+        "p95_ms": 16.844001,
+        "p99_ms": 16.935501,
+        "max_ms": 16.937003,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 0.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-walk": {
+        "samples": 360,
+        "wall_seconds": 6.0003277950000005,
+        "mean_tick_hz": 59.996722229072816,
+        "median_ms": 16.6682505,
+        "p95_ms": 16.862497,
+        "p99_ms": 16.969997,
+        "max_ms": 17.0886,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 90.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-turn": {
+        "samples": 360,
+        "wall_seconds": 6.000045794,
+        "mean_tick_hz": 59.99954206349513,
+        "median_ms": 16.66555,
+        "p95_ms": 16.845398,
+        "p99_ms": 16.9589,
+        "max_ms": 17.0273,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 106.58099999999988
+      },
+      "timing-sweep": {
+        "samples": 360,
+        "wall_seconds": 6.0001039060000005,
+        "mean_tick_hz": 59.99896095799378,
+        "median_ms": 16.665,
+        "p95_ms": 16.865697,
+        "p99_ms": 16.9277,
+        "max_ms": 17.074998,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 319.7409999999994
+      }
+    },
+    "baseline": {
+      "timing-idle": {
+        "samples": 120,
+        "wall_seconds": 2.0000399950000003,
+        "mean_tick_hz": 59.998800173993516,
+        "median_ms": 16.6729505,
+        "p95_ms": 16.8433,
+        "p99_ms": 16.932499,
+        "max_ms": 16.957801,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 0.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-walk": {
+        "samples": 360,
+        "wall_seconds": 6.000080604,
+        "mean_tick_hz": 59.999193970828195,
+        "median_ms": 16.664801500000003,
+        "p95_ms": 16.859401,
+        "p99_ms": 16.980302,
+        "max_ms": 17.648999,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 90.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-turn": {
+        "samples": 360,
+        "wall_seconds": 6.000127898,
+        "mean_tick_hz": 59.99872104726258,
+        "median_ms": 16.6646,
+        "p95_ms": 16.855501,
+        "p99_ms": 17.0044,
+        "max_ms": 17.0932,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 106.57899999999947
+      },
+      "timing-sweep": {
+        "samples": 361,
+        "wall_seconds": 6.0168811,
+        "mean_tick_hz": 59.99786168285758,
+        "median_ms": 16.6656,
+        "p95_ms": 16.873099,
+        "p99_ms": 17.008699,
+        "max_ms": 17.0778,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 320.62999999999937
+      }
+    },
+    "limitation": "One short matched route each; instrumented actor ticks, not GPU/Present/uncapped headroom/4K. Memory start/end snapshots are not peaks; temporal-upscaler internal input resolution unmeasured.",
+    "rhi": "D3D12",
+    "baselinePhysicalBytes": [
+      908574720,
+      959627264
+    ],
+    "baselineCandidate": "clearing-grove-03"
+  },
+  "profile": "jenny-review-v5",
+  "saveDisposition": "Same profile; no save read/reset/migration/deletion.",
+  "graphics": {
+    "sourceUnchanged": true,
+    "source": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-grove-03\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini",
+    "sha256": "00F9289D8B5F3F16A386B0C83CBAA9C55E7EAF9DFFD7113614EC33A4B4A7852C",
+    "destination": "Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini"
+  },
+  "knownLimitations": [
+    "Restrained sparse clearing patch, not finished woodland or Jenny art approval; intensely golden dawn and interactive resource silhouettes remain.",
+    "Original tree-import03 remains FAILED with exactly12 qualified branch source-description tangent/binormal corners.",
+    "Single matched short720p-output/60-capped actor-tick runs, not GPU/Present/4K/uncapped headroom; internal temporal input resolution unmeasured.",
+    "Physical-memory start/end snapshots are not peak memory; no constructed-house/plot scenario.",
+    "Samev5 profile, no human save read/reset/migration or full UI/save-matrix rerun. Earlier candidates retained.",
+    "No new full functional smoke pass claimed; actual ordinary gathering/tree/grass/terrain route and targeted timing passed.",
+    "OpenSpec6/29 complete: ground treatment4.3 now evidenced; full environment gates remain open."
+  ]
+}
