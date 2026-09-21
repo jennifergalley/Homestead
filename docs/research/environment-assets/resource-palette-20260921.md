@@ -95,3 +95,24 @@ UVs, normals/tangents, referenced bounds/root and separable harvest parts before
 a final contract. Do not call imported components or thumbnails a beauty pass:
 the next ordinary gameplay screenshots must show a coherent living woodland
 and authored resource silhouettes.
+
+## Acquisition and measured selection follow-through
+
+MAIN acquired all 29 files and published actual receipt/inventory in
+`c163a1da9895c492793e7fe809b561cdc80eeaf5`. The source lane read those facts and
+agreed nine model selections: shrub a/c, all three branches, fir a/c (real
+1.30 m and 0.74 m variants), flower a/b. Exact IDs, role bindings, measured
+counts and input hashes are in `candidate01\selection.json`; measured source
+counts supersede publisher aggregate estimates above.
+
+The generic "advertised LODs" field did not establish a supplied runtime chain:
+these selected raw sources have one chosen geometry each. All selected source
+material roles use UV0 with no flagged near-zero diagnostics; that finding is
+specific to these inputs and does not override the earlier Tree Small 02
+branch-UV1 finding. MAIN owns native transformed dimensions and any dynamic
+distance LODs.
+
+Flower clumps are removable as whole authored produce above a separate admitted
+low-grass base. There is still no petal-only or separate-blossom-material claim.
+Source references, metadata and committed adapters are ready for MAIN's guarded
+execution; no in-game visual approval is implied.

@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "state": "selected source inputs; native transforms/materials/game appearance unverified",
+  "manifestSha256": "BDB728405F33D82CDE68D27E0F316C3B2988311B74A328CEFCFE46175332BAE5",
+  "sourceReceiptSha256": "F8F97798328C0246099EBE90AA287515FEB925C316DF676AC2524C354005EC9F",
+  "sourceInventorySha256": "DE7F9980E188521FF5634E4AD3D744771A6A74C4F7CFDE6247D0D5862B461A77",
+  "inventoryCommit": "c163a1da9895c492793e7fe809b561cdc80eeaf5",
+  "assets": [
+    {
+      "id": "shrub_04",
+      "sourceFile": "shrub_04_1k.fbx",
+      "sourceSha256": "EBFAF1B728E8C9B8AE62F90DF3A6F1837C233FD736665342391C2F3029F3AD37",
+      "models": [
+        {"name": "shrub_04_a_LOD0", "id": 902364038, "geometryId": 635192995, "materials": ["shrub_04"], "uvChannelsByRole": [0], "sourceFanTriangles": 3726},
+        {"name": "shrub_04_c_LOD0", "id": 93264763, "geometryId": 427213477, "materials": ["shrub_04"], "uvChannelsByRole": [0], "sourceFanTriangles": 6177}
+      ],
+      "purpose": "Measured healthy 20-28 cm shoots for compact multi-shoot berry bases and generic low-leaf plants; separately placed berry produce remains main-owned."
+    },
+    {
+      "id": "dry_branches_medium_01",
+      "sourceFile": "dry_branches_medium_01_1k.fbx",
+      "sourceSha256": "3E47B10E0710B7736688521D66B3EB09AAD14CB2DB6179D9758A0FD5716CE639",
+      "models": [
+        {"name": "dry_branches_medium_01_a", "id": 482288108, "geometryId": 712888422, "materials": ["dry_branches_medium_01"], "uvChannelsByRole": [0], "sourceFanTriangles": 5933},
+        {"name": "dry_branches_medium_01_b", "id": 250011136, "geometryId": 949666676, "materials": ["dry_branches_medium_01"], "uvChannelsByRole": [0], "sourceFanTriangles": 5254},
+        {"name": "dry_branches_medium_01_c", "id": 424157413, "geometryId": 711997973, "materials": ["dry_branches_medium_01"], "uvChannelsByRole": [0], "sourceFanTriangles": 5616}
+      ],
+      "purpose": "Natural 0.78-1.30 m branch pieces replacing the gatherable cylinder group; entire produce group is removable."
+    },
+    {
+      "id": "fir_sapling",
+      "sourceFile": "fir_sapling_1k.fbx",
+      "sourceSha256": "5EAFD5FD2914639960238A6BEEF97C4D64BE9FB0A5B690FD03D13B2291F71DB1",
+      "models": [
+        {"name": "fir_sapling_a", "id": 985243675, "geometryId": 390441697, "materials": ["fir_sapling_branches", "fir_sapling_twigs"], "uvChannelsByRole": [0, 0], "sourceFanTriangles": 157402, "sourceFanTrianglesByRole": [546, 156856]},
+        {"name": "fir_sapling_c", "id": 593523097, "geometryId": 52513824, "materials": ["fir_sapling_branches", "fir_sapling_twigs"], "uvChannelsByRole": [0, 0], "sourceFanTriangles": 124743, "sourceFanTrianglesByRole": [384, 124359]}
+      ],
+      "purpose": "Real 1.301 m and 0.736 m young-conifer variation, not an enlarged small tree or mature canopy. Preserve two material bindings, with opaque branches and masked/two-sided twigs. No supplied LOD chain."
+    },
+    {
+      "id": "flower_empodium",
+      "sourceFile": "flower_empodium_1k.fbx",
+      "sourceSha256": "D7E38932DC0DE638063777036FB57D6C1205109421FADABBDA24FD9CE83DE8E7",
+      "models": [
+        {"name": "flower_empodium_a_LOD0", "id": 302411512, "geometryId": 28790185, "materials": ["flower_empodium"], "uvChannelsByRole": [0], "sourceFanTriangles": 758},
+        {"name": "flower_empodium_b_LOD0", "id": 777242687, "geometryId": 160722651, "materials": ["flower_empodium"], "uvChannelsByRole": [0], "sourceFanTriangles": 758}
+      ],
+      "purpose": "Natural flower produce clumps above a separately retained natural low-leaf/grass base; no separate blossom slot or petal-only removal is claimed."
+    }
+  ],
+  "coordinateContract": {
+    "rawFbxUnitScaleFactor": 1,
+    "modelScale": [100, 100, 100],
+    "modelRotationDegrees": [-90.00000250447816, 0, 0],
+    "note": "Source models retain authored layout translations. Native import evaluates axes/units once and measures referenced bounds/root; do not apply prepared TreeSmall02 v3's different unit header."
+  },
+  "diagnostics": {
+    "selectedRoleNearZeroNormals": 0,
+    "selectedRoleNearZeroUvDeterminants": 0,
+    "selectedRoleNearZeroGeometricFanAreas": 0,
+    "thresholds": "normal length<=1e-4; abs UV determinant<=1e-12; diagnostic fan area<=1e-12 raw local units squared",
+    "textureHeaders": "All 25 acquired images are measured 1024x1024; use full source inventory for bit depth and bands."
+  }
+}

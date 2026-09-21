@@ -126,8 +126,8 @@ counts rather than exact 60k/15k targets.
 - [x] Read current baseline resource/decorative roles and existing source contracts.
 - [x] Visually compared author previews and selected the four named acquisitions.
 - [x] Agreed isolated acquisition ownership and main-only authoring execution.
-- [ ] Acquire the exact pinned files after targeted checks and live control input.
-- [ ] Deliver actual source inventory and guarded preparation inputs to main.
+- [x] MAIN acquired the exact pinned files after targeted checks and live control input.
+- [x] Read actual source inventory and author the explicit selected preparation inputs.
 
 Ordinary in-game beauty is the acceptance target. Publisher thumbnails and
 source checks support selection; they are not that deliverable.
@@ -137,3 +137,30 @@ reservation, because MAIN can read its authoritative live run control directly.
 This lane supplies the pinned manifest and tested narrow helper; no stale
 control mirror or duplicate download is created. The actual source receipt and
 inventory remain pending until MAIN executes acquisition.
+
+MAIN subsequently reported successful acquisition of all 29 originals
+(58,729,776 bytes) with publisher MD5 and actual SHA-256 checks. This lane
+published a read-only inspector that reuses the existing bounded reader and
+adds per-role UV/normal/reference diagnostics; actual image dimensions are
+read from headers, not guessed from "1k". An optional MAIN-only preparation
+adapter reuses the existing image-reference stripper without changing model
+geometry, roles, UVs or transforms. Actual inventory and prepared-output
+execution evidence belong to MAIN.
+
+MAIN also took the canopy LOD experiment into its existing native static-mesh
+reduction path. No separate canopy preparation script is being developed here.
+
+The final source selection is pinned to MAIN inventory commit
+`c163a1da9895c492793e7fe809b561cdc80eeaf5`: shrub a/c, branch a/b/c, fir a/c and
+flower a/b, nine meshes and five source material roles. Both fir models retain
+two ordered material links. All selected roles use UV0 and have zero flagged
+near-zero normal corners/UV determinants/diagnostic fan areas at the stated
+thresholds. All 25 image headers are actually 1024x1024.
+
+The MAIN-only preparation adapter reuses the existing selected-object algorithm
+and official parser/encoder, with explicit one/two-material counts instead of
+the grass-only one-material assumption. It removes unused models and image
+objects, preserves exact selected bindings/arrays/transforms, and reparses to
+check identity. It writes only fresh `candidate01\Prepared\*_selected.fbx` inputs
+and provenance. Actual execution/containment and native beauty acceptance remain
+MAIN's responsibilities, not source-lane claims.
