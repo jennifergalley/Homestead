@@ -1,0 +1,654 @@
+{
+  "version": 1,
+  "asset": "Tree Small 02",
+  "author": "Rico Cilliers",
+  "sourceUrl": "https://polyhaven.com/a/tree_small_02",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "blenderVersion": "4.5.14 LTS",
+  "toolSha256": "5bf3a83cb145d5971649695e3a8f5a26004ff50ae88f1ba16db906655d3cd28f",
+  "sourceReceiptSha256": "aacf677f7b8ca07a5656842ea80afedc80845e509afe8731f198da973f339ecf",
+  "sourceFiles": [
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_2k.fbx",
+      "bytes": 75487180,
+      "sha256": "14D6D0754B79A442254795663C4E5FFA1F679E54562F48B21AB0BBC78858724D",
+      "publisherMd5": "f034912ea38c6f1e91a9bab740f86a29",
+      "actualMd5": "F034912EA38C6F1E91A9BAB740F86A29",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/2k/tree_small_02/tree_small_02_2k.fbx",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_diff_2k.jpg",
+      "bytes": 3170612,
+      "sha256": "4AB3210B6EC6BB1181145500BCA71D1C1F81EAD6BAAA8600F5979C2CEC50C6A4",
+      "publisherMd5": "ff4d82640b7e0daaec0b71bfc1cef76c",
+      "actualMd5": "FF4D82640B7E0DAAEC0B71BFC1CEF76C",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/tree_small_02/tree_small_02_diff_2k.jpg",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_nor_dx_2k.png",
+      "bytes": 20265048,
+      "sha256": "38351077D965820EACA9D5E80A13F939A353235CB55FBB4FCEF8C7BCF2F62658",
+      "publisherMd5": "a3174f0c9b5b9d780216bf6ef5194320",
+      "actualMd5": "A3174F0C9B5B9D780216BF6EF5194320",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_nor_dx_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_rough_2k.png",
+      "bytes": 5912476,
+      "sha256": "C1A7C3453DE0E57545459C5BABB94331225059484B8160C2AC313EE96EEC3D27",
+      "publisherMd5": "2c11b8b7d511e48b256dcf8a017ae37f",
+      "actualMd5": "2C11B8B7D511E48B256DCF8A017AE37F",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_rough_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_ao_2k.png",
+      "bytes": 6392317,
+      "sha256": "60DB6F895CA27C824DDD1C1F15674C8C743196C887DE48DB1FD64FD75B7D1C79",
+      "publisherMd5": "100ae8f7f5a7dc7c14a67b191ad4d1ca",
+      "actualMd5": "100AE8F7F5A7DC7C14A67B191AD4D1CA",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_ao_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_diff_2k.png",
+      "bytes": 2714537,
+      "sha256": "553D0CDBC12B63BE3BD85756713F95BEC5CDF8CC57DAE74D3F19D8DF13AC126C",
+      "publisherMd5": "d2ef708e997a1c7fe0cb200f071f12dc",
+      "actualMd5": "D2EF708E997A1C7FE0CB200F071F12DC",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_branch_diff_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_nor_dx_2k.png",
+      "bytes": 15595794,
+      "sha256": "F733B70D60C5785FD853C8154578BD17D484A20D48B2D92B1D0CB8F1D4CEC40B",
+      "publisherMd5": "882813c4222d99f7ae810d0da85e913f",
+      "actualMd5": "882813C4222D99F7AE810D0DA85E913F",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_branch_nor_dx_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_rough_2k.png",
+      "bytes": 835917,
+      "sha256": "2ACFC7EBD7269E65917D0535C463BCF4ADF44627B3C34F528E2B1623CB2A5B9C",
+      "publisherMd5": "9850c2d4ac13de854135e854dbd89b75",
+      "actualMd5": "9850C2D4AC13DE854135E854DBD89B75",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_branch_rough_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_branch_ao_2k.png",
+      "bytes": 8154080,
+      "sha256": "33CFDAF253D01841F1D237AA5CFCFB10594F9CC5DA001069A4B92410BF45C7A5",
+      "publisherMd5": "b34c0868c7fe4c46989630e4b8593feb",
+      "actualMd5": "B34C0868C7FE4C46989630E4B8593FEB",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_branch_ao_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_diff_2k.png",
+      "bytes": 7729923,
+      "sha256": "DA46F05805BBC3B608051B66EE9E2B3705108DE3C897EA998AB98E0360DC2B72",
+      "publisherMd5": "02180efde7be35883f91d5b1dccd42a8",
+      "actualMd5": "02180EFDE7BE35883F91D5B1DCCD42A8",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_leaves_diff_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_nor_dx_2k.png",
+      "bytes": 18979693,
+      "sha256": "B30515235D44AB58004A9DED02F614DEDA6358AC19FAB7D04C8FDEF6BF6B2D09",
+      "publisherMd5": "15f5ecd89a4a720041e19ce90a82d0a6",
+      "actualMd5": "15F5ECD89A4A720041E19CE90A82D0A6",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_leaves_nor_dx_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_rough_2k.png",
+      "bytes": 2953248,
+      "sha256": "5E7FEE2EB56AFA1265178BB2BF9267DBA12C95149D9E2068ADFC1EBF2D44D082",
+      "publisherMd5": "1b06e94155066c11a720f339e1934173",
+      "actualMd5": "1B06E94155066C11A720F339E1934173",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_leaves_rough_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_ao_2k.png",
+      "bytes": 6540343,
+      "sha256": "CFFDFE4F55FA39A93F98C20DCCC60FD00E91521CBCBD8523CFC2E9B504521DAE",
+      "publisherMd5": "9b9cbc113d4a6e666065c9ec9857be15",
+      "actualMd5": "9B9CBC113D4A6E666065C9EC9857BE15",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_leaves_ao_2k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "tree_small_02",
+      "file": "tree_small_02_leaves_alpha_2k.png",
+      "bytes": 636661,
+      "sha256": "566484C7047CE67AF5A4435C1E4DA2B773578D73F83AE45DFAD0FD442DF7B9D5",
+      "publisherMd5": "4d94de8e4677e92ce6d812871f9cf541",
+      "actualMd5": "4D94DE8E4677E92CE6D812871F9CF541",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/2k/tree_small_02/tree_small_02_leaves_alpha_2k.png",
+      "license": "CC0-1.0"
+    }
+  ],
+  "levels": [
+    {
+      "name": "tree_small_02_LOD0",
+      "vertices": 1755568,
+      "polygons": 1150237,
+      "triangles": 2062487,
+      "polygonSizes": {
+        "3": 237987,
+        "4": 912250
+      },
+      "materials": [
+        {
+          "slot": 0,
+          "name": "tree_small_02_branches",
+          "polygons": 47407,
+          "triangles": 94814
+        },
+        {
+          "slot": 1,
+          "name": "tree_small_02_leaves",
+          "polygons": 1074537,
+          "triangles": 1939380
+        },
+        {
+          "slot": 2,
+          "name": "tree_small_02_trunk",
+          "polygons": 28293,
+          "triangles": 28293
+        }
+      ],
+      "uvLayers": [
+        {
+          "name": "UVMap",
+          "loops": 4362961,
+          "finite": true,
+          "min": [
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.996068000793457,
+            0.9955413341522217
+          ]
+        },
+        {
+          "name": "UV_map_01",
+          "loops": 4362961,
+          "finite": true,
+          "min": [
+            0.0,
+            0.0
+          ],
+          "max": [
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "localBounds": {
+        "min": [
+          -1.3089934587478638,
+          -2.9098503589630127,
+          -0.02410384640097618
+        ],
+        "max": [
+          1.6077065467834473,
+          1.3826267719268799,
+          4.532637119293213
+        ]
+      },
+      "worldBoundsMeters": {
+        "min": [
+          -1.3089934587478638,
+          -2.9098498333515908,
+          -0.024103851696486503
+        ],
+        "max": [
+          1.6077065467834473,
+          1.3826271934905012,
+          4.532637147087015
+        ]
+      },
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          1.6292067073209182e-07,
+          0.0
+        ],
+        [
+          0.0,
+          -1.6292067073209182e-07,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "originWorldMeters": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "customNormals": true,
+      "level": "SourceLOD0",
+      "file": "TreeSmall02_SourceLOD0.fbx",
+      "collapseRatiosBySlot": null,
+      "bytes": 75493852,
+      "sha256": "3a5d8f100b40ebfd357af2867a539ca4159fd4e20fd8d6d00805e26f88db886a"
+    },
+    {
+      "name": "TreeSmall02_LOD1",
+      "vertices": 555253,
+      "polygons": 378926,
+      "triangles": 378926,
+      "polygonSizes": {
+        "3": 378926
+      },
+      "materials": [
+        {
+          "slot": 0,
+          "name": "tree_small_02_branches",
+          "polygons": 47407,
+          "triangles": 47407
+        },
+        {
+          "slot": 1,
+          "name": "tree_small_02_leaves",
+          "polygons": 310300,
+          "triangles": 310300
+        },
+        {
+          "slot": 2,
+          "name": "tree_small_02_trunk",
+          "polygons": 21219,
+          "triangles": 21219
+        }
+      ],
+      "uvLayers": [
+        {
+          "name": "UVMap",
+          "loops": 1136778,
+          "finite": true,
+          "min": [
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.996068000793457,
+            0.9955413341522217
+          ]
+        },
+        {
+          "name": "UV_map_01",
+          "loops": 1136778,
+          "finite": true,
+          "min": [
+            -0.0004748823121190071,
+            -0.007512521930038929
+          ],
+          "max": [
+            1.0000590085983276,
+            1.0015407800674438
+          ]
+        }
+      ],
+      "localBounds": {
+        "min": [
+          -1.310724139213562,
+          -2.910918951034546,
+          -0.024194231256842613
+        ],
+        "max": [
+          1.6107107400894165,
+          1.3833600282669067,
+          4.53292989730835
+        ]
+      },
+      "worldBoundsMeters": {
+        "min": [
+          -1.310724139213562,
+          -2.9109184251828,
+          -0.024194237556836203
+        ],
+        "max": [
+          1.6107107400894165,
+          1.3833604502739245,
+          4.532929852337138
+        ]
+      },
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          1.6292067073209182e-07,
+          0.0
+        ],
+        [
+          0.0,
+          -1.6292067073209182e-07,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "originWorldMeters": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "customNormals": true,
+      "level": "LOD1",
+      "file": "TreeSmall02_LOD1.fbx",
+      "collapseRatiosBySlot": [
+        0.5,
+        0.16,
+        0.75
+      ],
+      "bytes": 24950828,
+      "sha256": "4f5db47d8caf731b8a2693455b1102288a2c35e76394bfe983081bd1b928abd9"
+    },
+    {
+      "name": "TreeSmall02_LOD2",
+      "vertices": 424817,
+      "polygons": 231785,
+      "triangles": 231785,
+      "polygonSizes": {
+        "3": 231785
+      },
+      "materials": [
+        {
+          "slot": 0,
+          "name": "tree_small_02_branches",
+          "polygons": 23702,
+          "triangles": 23702
+        },
+        {
+          "slot": 1,
+          "name": "tree_small_02_leaves",
+          "polygons": 193938,
+          "triangles": 193938
+        },
+        {
+          "slot": 2,
+          "name": "tree_small_02_trunk",
+          "polygons": 14145,
+          "triangles": 14145
+        }
+      ],
+      "uvLayers": [
+        {
+          "name": "UVMap",
+          "loops": 695355,
+          "finite": true,
+          "min": [
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.996068000793457,
+            0.9955413341522217
+          ]
+        },
+        {
+          "name": "UV_map_01",
+          "loops": 695355,
+          "finite": true,
+          "min": [
+            -0.0006629583076573908,
+            -0.6426932215690613
+          ],
+          "max": [
+            1.0000296831130981,
+            1.211830735206604
+          ]
+        }
+      ],
+      "localBounds": {
+        "min": [
+          -1.310724139213562,
+          -2.9118497371673584,
+          -0.024194231256842613
+        ],
+        "max": [
+          1.6107107400894165,
+          1.383678913116455,
+          4.539843559265137
+        ]
+      },
+      "worldBoundsMeters": {
+        "min": [
+          -1.310724139213562,
+          -2.911849209675221,
+          -0.024194237556836203
+        ],
+        "max": [
+          1.6107107400894165,
+          1.3836793366801576,
+          4.539843587431313
+        ]
+      },
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          1.6292067073209182e-07,
+          0.0
+        ],
+        [
+          0.0,
+          -1.6292067073209182e-07,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "originWorldMeters": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "customNormals": true,
+      "level": "LOD2",
+      "file": "TreeSmall02_LOD2.fbx",
+      "collapseRatiosBySlot": [
+        0.25,
+        0.1,
+        0.5
+      ],
+      "bytes": 16784764,
+      "sha256": "03365d16ad77535e28c8f3b7243a8183d30768af3c719589cef58a44ed12e283"
+    },
+    {
+      "name": "TreeSmall02_LOD3",
+      "vertices": 373376,
+      "polygons": 170289,
+      "triangles": 170289,
+      "polygonSizes": {
+        "3": 170289
+      },
+      "materials": [
+        {
+          "slot": 0,
+          "name": "tree_small_02_branches",
+          "polygons": 9481,
+          "triangles": 9481
+        },
+        {
+          "slot": 1,
+          "name": "tree_small_02_leaves",
+          "polygons": 155150,
+          "triangles": 155150
+        },
+        {
+          "slot": 2,
+          "name": "tree_small_02_trunk",
+          "polygons": 5658,
+          "triangles": 5658
+        }
+      ],
+      "uvLayers": [
+        {
+          "name": "UVMap",
+          "loops": 510867,
+          "finite": true,
+          "min": [
+            0.0,
+            0.0
+          ],
+          "max": [
+            0.996068000793457,
+            0.9928640127182007
+          ]
+        },
+        {
+          "name": "UV_map_01",
+          "loops": 510867,
+          "finite": true,
+          "min": [
+            -0.0006629583076573908,
+            -0.19952455163002014
+          ],
+          "max": [
+            1.0000238418579102,
+            1.211830735206604
+          ]
+        }
+      ],
+      "localBounds": {
+        "min": [
+          -1.311058759689331,
+          -2.9118497371673584,
+          -0.024366820231080055
+        ],
+        "max": [
+          1.6075533628463745,
+          1.384316086769104,
+          4.539843559265137
+        ]
+      },
+      "worldBoundsMeters": {
+        "min": [
+          -1.311058759689331,
+          -2.911849209675221,
+          -0.02436682931707702
+        ],
+        "max": [
+          1.6075533628463745,
+          1.3843165098722026,
+          4.539843587431313
+        ]
+      },
+      "matrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          1.6292067073209182e-07,
+          0.0
+        ],
+        [
+          0.0,
+          -1.6292067073209182e-07,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "originWorldMeters": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "customNormals": true,
+      "level": "LOD3",
+      "file": "TreeSmall02_LOD3.fbx",
+      "collapseRatiosBySlot": [
+        0.1,
+        0.08,
+        0.2
+      ],
+      "bytes": 13023484,
+      "sha256": "dee2fbf309bb4d027b079c41a3abfc0cee61317b47091f209c694dc5e77d0796"
+    }
+  ],
+  "unitContract": {
+    "blenderMetersPerUnit": 1.0,
+    "fbxExportApplyUnitScale": true,
+    "fbxExportScaleOption": "FBX_SCALE_UNITS",
+    "axisForward": "-Y",
+    "axisUp": "Z",
+    "root": "Original source origin (0,0,0), no recenter or ground translation."
+  },
+  "method": {
+    "wood": "Blender Decimate COLLAPSE independently per material.",
+    "leaves": "collapse",
+    "preserved": "Both UV layers and source material slot order."
+  },
+  "limitations": "No wind, collision, UE import, runtime LOD thresholds or GPU performance verified."
+}
