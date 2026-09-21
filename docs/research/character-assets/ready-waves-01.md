@@ -125,3 +125,22 @@ Task1.3 remains open for complete selector coverage/visual acceptance;
 task1.1's cut-edge/natural-wave quality remains open. UI is not bundled:
 its missing modular dependencies would otherwise prevent genuine normal
 current-save resume despite passing the narrower menu smoke route.
+
+## Selected rough increment
+
+`Preview.json` now selects `hair-waves-01` / Shipping `B90F52C1...E369AB`,
+with the full hash above and private evidence checkpoint
+`eec27904f94ab1a899aa87517a9f1c7e74070aa3`. Actual normal
+`Start-Preview.ps1 -ValidateOnly` passed: profile `jenny-review`,
+`-Res=0x0wf`, candidate-local graphics UserDir; no QA/route/input/quit/mute
+flags. Existing `Homestead.lnk` was read and still targets `Preview.cmd`;
+it was not rewritten or launched.
+
+The prior candidate remains intact. Its exact selection JSON is
+`Build\Releases\20260921-033354-2d257ba0\hair-waves-01\previous-preview.json`
+(SHA256 `737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB`).
+Restoring that pointer to `Preview.json` rolls back the launcher selection.
+Existing graphics were copied read-only into the fresh candidate; the fixed
+preview save profile is unchanged and no game save was copied/reset.
+This delivers the accessible hairstyle prototype with its limitations,
+not natural-wave completion or Jenny's subjective approval.
