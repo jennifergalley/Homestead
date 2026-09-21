@@ -34,6 +34,16 @@ acceptance from a passing screenshot metric.
 
 ### 1. Admission before import, and a separate offline execution gate
 
+Current18:08 ordering clarification: the coordinator accepted the corrected
+Editor settings/startup/cooperative-stop subgate in `native-settings-success.md`.
+A separately approved isolated representative import may follow this subgate
+plus completed source admission, without first completing cook/Pak/Shipping
+or all of1.3. `fern-spike-plan.md` is the bounded first proposal, not execution
+approval. All per-operation privacy/network/containment/output requirements and
+all later visual/performance/gameplay gates remain. Full1.3 and2.3 stay unchecked.
+The earlier all-engine-work dependency below is superseded only for this
+explicitly admitted representative lane; it is not permission for integration.
+
 Use the exact CC0 bundle and fallback in the decision dossier. Fab Black Alder
 remains excluded unless a later explicit refresh resolves price/license/source
 access; the 2024 Megascans promotion is not evidence of entitlement.
@@ -112,8 +122,9 @@ Source/exported-mesh counts, hierarchy, units, slots and maps must be labeled as
 such; they are not imported Unreal triangles, renderability, material correctness
 or runtime cost. Task2.3 retains its runtime-dependent evidence requirement and
 stays unchecked until all of it is met. All engine/import/cook/pak/build/test
-execution and environment game/material implementation remain blocked until
-task1.3 is approved and proven. No other task receives an ordering exception.
+execution and environment game/material implementation otherwise remain blocked
+until task1.3 is approved and proven. The separately admitted isolated
+representative lane above is the only additional ordering exception.
 
 Keep acquisition in a candidate-owned source folder, with exact publisher/license
 links, date, chosen source version, bytes, SHA-256 and conversion notes. Extend

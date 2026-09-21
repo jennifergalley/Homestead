@@ -5,6 +5,11 @@ accepted by coordinator; `native-settings-success.md` records actual evidence.
 Full task1.3 remains unchecked,4/29. No import/render/cook/Pak/Shipping gate or
 environment quality gate passed, and prior failures remain unchanged.
 
+Current18:12 planning-only dependency clarification: a separately approved
+isolated representative import may follow the passed Editor subgate and
+completed source admission before cook/Pak/Shipping/full1.3. Exact fern-only
+proposal: `fern-spike-plan.md`. No new build/import/render is authorized yet.
+
 Current17:57 continuation: coordinator explicitly refines this settings-only
 probe to Python execution disabled, not dependency-module absence. Existing
 in-process dependency DLLs may load; interpreter/scripts/.pth/pip execution,
@@ -80,9 +85,11 @@ rules. The separate authoring-workflow verification gate in task1.3 is unresolve
 | 2.1 admission refresh | Completed1.1/1.2 plus separate coordinator apply continuation after review of this refinement | Selected CC0 sources only; no new research scope/accounts/claims |
 | 2.2 acquisition | That continuation plus actual2.1 admission | Exact HTTP files and byte/hash/license receipts; isolated source files only |
 | Source-only portion of2.3 | That continuation plus verified2.2 files | Data-only source/exported-mesh facts, not Unreal/runtime evidence |
-| Runtime-dependent2.3, engine/import/cook/pak/build/test execution and environment game/material implementation | Exact1.3 workflow approved and proven, plus relevant baseline/admission prerequisites | No execution/implementation permitted by the preparation exception |
+| Isolated representative-import portion of2.3/3.1/3.2 | Passed Editor subgate, completed source admission and separate coordinator approval of exact fern plan/operation controls | Trial namespace only; no implicit render/integration/cook/Pak/Shipping approval or checked task |
+| Other runtime-dependent2.3, engine/import/cook/pak/build/test execution and environment game/material implementation | Exact relevant workflow approved and proven, plus baseline/admission prerequisites | No execution/implementation permitted by source preparation or settings result alone |
 
-Only2.1/2.2 and the source-only portion of2.3 may run out of heading order.
+The admitted source lane and separately approved isolated representative lane
+may run out of heading order; the latter is currently planning only.
 Keep2.3 unchecked while any runtime-dependent inventory requirement is pending;
 record partial source facts separately without substituting them for imported
 mesh/runtime measurements. All other tasks retain their existing dependencies.
