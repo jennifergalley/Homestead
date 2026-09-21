@@ -75,8 +75,11 @@ AHomesteadCharacter::AHomesteadCharacter()
 void AHomesteadCharacter::BeginPlay()
 {
     Super::BeginPlay();
-    if (auto* PC = Cast<AHomesteadController>(Controller))
-        ApplyAppearance(PC->GetAppearance());
+    if (!ActiveEquipment.Ready)
+    {
+        if (auto* PC = Cast<AHomesteadController>(Controller))
+            ApplyAppearance(PC->GetAppearance());
+    }
     CreateMappings();
     if (APlayerController* PC = Cast<APlayerController>(Controller))
     {

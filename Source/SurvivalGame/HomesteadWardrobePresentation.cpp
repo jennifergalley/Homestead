@@ -51,6 +51,11 @@ bool IsHair(FName Name)
     return Name.ToString().StartsWith(TEXT("M_Heroine_Hair_")) || Name == TEXT("M_Heroine_Eyebrows");
 }
 
+bool IsNeutralHair(FName Name)
+{
+    return Name == TEXT("M_Heroine_Hair_long01_Neutral") || Name == TEXT("M_Heroine_Hair_bob01_Neutral");
+}
+
 bool IsDyeLinen(FName Name)
 {
     return Name == TEXT("M_Heroine_MossLinen") || Name == TEXT("M_Heroine_ApronLinen");
@@ -93,7 +98,9 @@ bool ValidateMesh(USkeletalMesh& Mesh, const USkeletalMesh& Reference,
         const auto& Slot = Materials[Index];
         const FName Name = Slot.MaterialSlotName;
         UMaterialInterface* Surface = Slot.MaterialInterface;
-        if (Name != Expected[Index] || !Surface
+        const bool NeutralHairSlot = IsNeutralHair(Name)
+            && Name.ToString() == Expected[Index].ToString() + TEXT("_Neutral");
+        if ((Name != Expected[Index] && !NeutralHairSlot) || !Surface
             || Surface->GetMaterial() == UMaterial::GetDefaultMaterial(MD_Surface))
             return Reject(Error, FString::Printf(TEXT("%s material %d is missing or has the wrong role."),
                 *Mesh.GetName(), Index));
@@ -142,6 +149,8 @@ bool PrepareSurface(UObject* Owner, USkeletalMesh* Mesh, const FHomesteadAppeara
         const FName Name = Slot.MaterialSlotName;
         if (Name == TEXT("M_Heroine_Skin"))
             Material->SetVectorParameterValue(TEXT("ColorTint"), HomesteadLook::SkinTint(Look.SkinTone));
+        else if (IsNeutralHair(Name))
+            Material->SetVectorParameterValue(TEXT("ColorTint"), HomesteadLook::NeutralHairTint(Look.HairColor));
         else if (IsHair(Name))
             Material->SetVectorParameterValue(TEXT("ColorTint"), HomesteadLook::HairTint(Look.HairColor));
         else if (IsDyeLinen(Name))
