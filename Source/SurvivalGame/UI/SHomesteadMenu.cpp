@@ -34,6 +34,8 @@ const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("wate
     TEXT("roasted-roots"), TEXT("herbed-roots")};
 const TCHAR* PieceIcons[] = {TEXT("foundation"), TEXT("wall"), TEXT("doorway"), TEXT("roof"),
     TEXT("fire"), TEXT("bed"), TEXT("chest")};
+constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
+    Homestead::EquipmentSlot::Torso, Homestead::EquipmentSlot::Apron, Homestead::EquipmentSlot::Feet};
 }
 
 TSharedRef<SWidget> SHomesteadMenu::Text(const FString& Value, int32 Size) const
@@ -305,15 +307,33 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             ]
         ];
     }
+    TSharedPtr<SVerticalBox> InventoryColumn;
     ColumnsBox->AddSlot().FillWidth(0.68f).Padding(0, 0, 16, 0)
         [
             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Pine).Padding(12)
             [
-                SAssignNew(Scroll, SScrollBox)
-                + SScrollBox::Slot()
-                [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
+                SAssignNew(InventoryColumn, SVerticalBox)
+                + SVerticalBox::Slot().FillHeight(1)
+                [
+                    SAssignNew(Scroll, SScrollBox)
+                    + SScrollBox::Slot()
+                    [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
+                ]
             ]
         ];
+    if (SeenPage == 0)
+    {
+        TSharedPtr<SHorizontalBox> EquipmentBar;
+        InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Text(TEXT("Equipped slots"), 16) ];
+        InventoryColumn->AddSlot().AutoHeight()[ SAssignNew(EquipmentBar, SHorizontalBox) ];
+        for (int32 Index = 0; Index < 3; ++Index)
+            EquipmentBar->AddSlot().FillWidth(1).Padding(3, 0)
+            [
+                MakeButton(EquipmentLabel(Index), [this, Index]() { FocusEquipment(Index); },
+                    TAttribute<FSlateColor>::CreateLambda([this, Index]()
+                        { return Region == ERegion::Equipment && EquipmentSelection == Index ? Gold : Selected; }))
+            ];
+    }
     ColumnsBox->AddSlot().FillWidth(0.32f)
         [
             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
@@ -527,6 +547,28 @@ void SHomesteadMenu::ChangeInventoryView(int32 View)
     Region = ERegion::Content;
     Refresh();
 }
+FString SHomesteadMenu::EquipmentLabel(int32 Index) const
+{
+    const TCHAR* Names[] = {TEXT("Torso + legs"), TEXT("Apron"), TEXT("Feet")};
+    if (!Controller.IsValid() || Index < 0 || Index >= 3) return {};
+    const int32 Id = Controller->State().equipment[static_cast<int32>(VisibleEquipmentSlots[Index])];
+    const auto* Item = Controller->Simulation().GetWearable(Id);
+    return FString(Names[Index]) + TEXT("\n") + (Item
+        ? FString(UTF8_TO_TCHAR(Homestead::WearableName(Item->definition))) : TEXT("Empty - choose from pack"));
+}
+void SHomesteadMenu::FocusEquipment(int32 Index)
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None || Index < 0 || Index >= 3) return;
+    const int32 Id = Controller->State().equipment[static_cast<int32>(VisibleEquipmentSlots[Index])];
+    EquipmentSelection = Index;
+    ChangeInventoryView(Id ? 2 : 0);
+    if (Id)
+    {
+        const int32 Entry = Entries.IndexOfByPredicate([Id](const FHomesteadRow& Row)
+            { return Row.Subject == EHomesteadMenuSubject::Wearable && Row.SubjectId == Id; });
+        if (Entry >= 0) { Select(Entry); Region = ERegion::Actions; ActionSelection = 0; }
+    }
+}
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
 {
     return Index == ContentSelection ? Selected
@@ -592,6 +634,7 @@ void SHomesteadMenu::Activate()
     if (Dialog != EDialog::None) { DialogAction(DialogSelection); return; }
     if (Region == ERegion::Tabs) ChangePage(FocusedTab);
     else if (Region == ERegion::Inventory) ChangeInventoryView(InventorySelection);
+    else if (Region == ERegion::Equipment) FocusEquipment(EquipmentSelection);
     else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else RequestExit(); }
     else if (Region == ERegion::Actions && Actions.IsValidIndex(ActionSelection)) RunAction(Actions[ActionSelection]);
     else { Region = ERegion::Actions; ActionSelection = 0; }
@@ -608,7 +651,9 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     if (SeenPage == 4) Regions.Add(ERegion::Session);
     if (SeenPage == 0) Regions.Add(ERegion::Inventory);
     if (Controller->MenuPortraitBrush()) Regions.Add(ERegion::Portrait);
-    Regions.Add(ERegion::Content); Regions.Add(ERegion::Details); Regions.Add(ERegion::Actions);
+    Regions.Add(ERegion::Content);
+    if (SeenPage == 0) Regions.Add(ERegion::Equipment);
+    Regions.Add(ERegion::Details); Regions.Add(ERegion::Actions);
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
 }
@@ -681,6 +726,7 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         Hover = INDEX_NONE;
         if (Region == ERegion::Tabs) FocusedTab = HomesteadMenuNavigation::Cycle(FocusedTab, 7, Dx ? Dx : Dy);
         else if (Region == ERegion::Inventory) InventorySelection = FMath::Clamp(InventorySelection + (Dx ? Dx : Dy), 0, 2);
+        else if (Region == ERegion::Equipment) EquipmentSelection = FMath::Clamp(EquipmentSelection + (Dx ? Dx : Dy), 0, 2);
         else if (Region == ERegion::Portrait) Controller->OrbitMenuPortrait((Dx ? Dx : Dy) * 15);
         else if (Region == ERegion::Session) SessionSelection = FMath::Clamp(SessionSelection + (Dx ? Dx : Dy), 0, 1);
         else if (Region == ERegion::Details && DetailsScroll)

@@ -115,6 +115,12 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn('Row.Name += TEXT(" - ")', adapter)
         self.assertIn(".Tint(Row.IconTint)", MENU)
 
+    def test_equipment_slots_use_actual_authority(self):
+        self.assertIn("Controller->State().equipment[", MENU)
+        self.assertIn("Homestead::EquipmentSlot::Torso", MENU)
+        self.assertIn("Controller->Simulation().GetWearable(Id)", MENU)
+        self.assertIn("Empty - choose from pack", MENU)
+
     def test_portrait_reuses_shared_presentation(self):
         portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()
         self.assertIn("Character.GetEquipmentPresentation()", portrait)

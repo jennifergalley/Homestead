@@ -41,7 +41,7 @@ public:
     FString GetDisplayedDetails() const { return DetailsText(); }
 
 private:
-    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Details, Actions };
+    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions };
     enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
@@ -66,6 +66,7 @@ private:
     int32 FocusedTab = 0;
     FString RememberedKeys[7];
     int32 InventorySelection = 0;
+    int32 EquipmentSelection = 0;
     ERegion Region = ERegion::Content;
     EDialog Dialog = EDialog::None;
     FString DialogError;
@@ -100,6 +101,8 @@ private:
     FString ActionLabel(EHomesteadItemAction Action) const;
     FString RowKey(const FHomesteadRow& Row) const;
     void ChangeInventoryView(int32 View);
+    void FocusEquipment(int32 Index);
+    FString EquipmentLabel(int32 Index) const;
     void CycleRegion(int32 Direction);
     void SetDialog(EDialog Value);
     void BuildDialog();
