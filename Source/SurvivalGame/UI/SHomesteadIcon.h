@@ -35,9 +35,8 @@ private:
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,
         LinenTunic, LinenApron, LeatherShoes, WovenFootwraps
     };
-    }
-    using SHomesteadIcon = HomesteadIcons::SHomesteadIcon;
-
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     FLinearColor Tint = FLinearColor(0.92f, 0.74f, 0.43f, 1.0f);
 };
+}
+using SHomesteadIcon = HomesteadIcons::SHomesteadIcon;

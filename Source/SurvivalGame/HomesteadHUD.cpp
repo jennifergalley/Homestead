@@ -10,7 +10,7 @@ namespace
 {
 const FLinearColor Ink(0.93f, 0.93f, 0.84f, 1);
 const FLinearColor Muted(0.71f, 0.77f, 0.69f, 1);
-const FLinearColor Gold(0.92f, 0.74f, 0.43f, 1);
+const FLinearColor HudGold(0.92f, 0.74f, 0.43f, 1);
 const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
 const FLinearColor Warning(1.0f, 0.67f, 0.48f, 1);
 }
@@ -115,7 +115,7 @@ void AHomesteadHUD::DrawHUD()
         Wrap(TEXT("You ran out of warmth, food, or energy. Return to a recovery checkpoint and try a different preparation."),
             X, ViewHeight * 0.39f + 76, 740, 25, Muted);
         Write(PC->UsesGamepad() ? TEXT("[A] Retry checkpoint") : TEXT("[E / Enter] Retry checkpoint"),
-            X, ViewHeight * 0.39f + 180, 27, Gold);
+            X, ViewHeight * 0.39f + 180, 27, HudGold);
     }
     else if (PC->IsBookOpen())
     {
@@ -135,7 +135,7 @@ void AHomesteadHUD::DrawHUD()
             ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 230, Width, 100);
             Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 217, Width - 44, 24, Ink, 2);
             Write(PC->UsesGamepad() ? TEXT("Left stick: position   RB: rotate   A: place   B: done")
-                : TEXT("WASD: position   R: rotate   E: place   Esc: done"), X + 22, ViewHeight - 157, 20, Gold);
+                : TEXT("WASD: position   R: rotate   E: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
         else
         {
@@ -144,7 +144,7 @@ void AHomesteadHUD::DrawHUD()
             Panel(ContextX, ViewHeight - 225, ContextWidth, 105, Pine);
             ProtectFeedback(TEXT("context-panel"), ContextX, ViewHeight - 225, ContextWidth, 105);
             Wrap(PC->FocusTitle(), ContextX + 22, ViewHeight - 213, ContextWidth - 44, 21, Ink, 2);
-            Write(PC->FocusActions(), ContextX + 22, ViewHeight - 153, 20, Gold);
+            Write(PC->FocusActions(), ContextX + 22, ViewHeight - 153, 20, HudGold);
         }
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);
         Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [R3] Camera distance") : TEXT("[I] Field book   [C] Craft   [B] Build   Mouse wheel: zoom"),
@@ -220,8 +220,8 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     for (int Index = 0; Index < 7; ++Index)
     {
         const float TabX = X + 34 + Index * TabWidth;
-        Write(Tabs[Index], TabX + 4, Y + 88, 23, Index == PC.BookPage() ? Gold : Muted);
-        if (Index == PC.BookPage()) Panel(TabX, Y + 123, TabWidth - 20, 3, Gold);
+        Write(Tabs[Index], TabX + 4, Y + 88, 23, Index == PC.BookPage() ? HudGold : Muted);
+        if (Index == PC.BookPage()) Panel(TabX, Y + 123, TabWidth - 20, 3, HudGold);
     }
 
     const auto Rows = PC.Rows();
@@ -254,7 +254,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
             Panel(X + 23, RowY - 5, Width - 46, RowHeight - 5, FLinearColor(0.09f, 0.14f, 0.105f, 1));
             ProtectFeedback(TEXT("selected-row"), X + 23, RowY - 5, Width - 46, RowHeight - 5);
         }
-        Write(Rows[Index].Label, X + 40, RowY + 3, 24, Selected ? Gold : Ink);
+        Write(Rows[Index].Label, X + 40, RowY + 3, 24, Selected ? HudGold : Ink);
         Wrap(Rows[Index].Detail, X + 40, RowY + 36, Width - 80, 18, Muted, 1);
     }
     if (Rows.Num() > Visible)
@@ -288,7 +288,7 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
             Panel(X + 15, RowY - 7, Width - 30, RowHeight - 6, FLinearColor(0.09f, 0.14f, 0.105f, 1));
             ProtectFeedback(TEXT("selected-look-row"), X + 15, RowY - 7, Width - 30, RowHeight - 6);
         }
-        Write(Options[Index].Label, X + 28, RowY, 22, Index == PC.SelectedRow() ? Gold : Ink);
+        Write(Options[Index].Label, X + 28, RowY, 22, Index == PC.SelectedRow() ? HudGold : Ink);
         Wrap(Options[Index].Detail, X + 28, RowY + 31, Width - 56, 16, Muted, 2);
     }
     if (Options.Num() > Visible)
@@ -299,5 +299,5 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
         X + 28, Y + Height - 91, Width - 56, 17, Muted, 2);
     Wrap(PC.UsesGamepad() ? TEXT("Right stick: orbit   R3: view distance")
         : TEXT("Mouse: orbit   Mouse wheel: view distance"),
-        X + 28, Y + Height - 39, Width - 56, 17, Gold, 1);
+        X + 28, Y + Height - 39, Width - 56, 17, HudGold, 1);
 }

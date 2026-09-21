@@ -3,7 +3,7 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHomesteadMenuNavigationTest, "Homestead.UI.GridNavigation",
-    EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::EngineFilter)
+    EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::EngineFilter)
 
 bool FHomesteadMenuNavigationTest::RunTest(const FString& Parameters)
 {

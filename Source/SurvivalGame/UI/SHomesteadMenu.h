@@ -25,7 +25,7 @@ public:
     virtual FReply OnAnalogValueChanged(const FGeometry&, const FAnalogInputEvent& Event) override;
     virtual FReply OnMouseMove(const FGeometry&, const FPointerEvent& Event) override;
     virtual FReply OnMouseWheel(const FGeometry&, const FPointerEvent& Event) override;
-    bool HandleKey(FKey Key, EInputEvent Event, float Amount);
+    bool HandleKey(FKey Key, EInputEvent Event, float InputAmount);
     void ChangePage(int32 Page);
     void RequestExit();
     void ShowSaveFailure(const FString& Error);

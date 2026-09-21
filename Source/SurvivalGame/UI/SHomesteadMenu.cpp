@@ -570,7 +570,7 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
 }
-bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float Amount)
+bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
 {
     if (Key == EKeys::LeftControl || Key == EKeys::RightControl) bControl = Event != IE_Released;
     if (Key == EKeys::LeftShift || Key == EKeys::RightShift) bShift = Event != IE_Released;
@@ -578,12 +578,12 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float Amount)
     {
         if (Region == ERegion::Portrait && Dialog == EDialog::None && Key == EKeys::Gamepad_RightX)
         {
-            if (FMath::Abs(Amount) > 0.3f) Controller->OrbitMenuPortrait(Amount * 1.5f);
+            if (FMath::Abs(InputAmount) > 0.3f) Controller->OrbitMenuPortrait(InputAmount * 1.5f);
             return true;
         }
-        if (FMath::Abs(Amount) < 0.55f || FPlatformTime::Seconds() < NextAxisMove) return true;
-        if (Key == EKeys::Gamepad_LeftX) Key = Amount > 0 ? EKeys::Right : EKeys::Left;
-        else if (Key == EKeys::Gamepad_LeftY) Key = Amount > 0 ? EKeys::Up : EKeys::Down;
+        if (FMath::Abs(InputAmount) < 0.55f || FPlatformTime::Seconds() < NextAxisMove) return true;
+        if (Key == EKeys::Gamepad_LeftX) Key = InputAmount > 0 ? EKeys::Right : EKeys::Left;
+        else if (Key == EKeys::Gamepad_LeftY) Key = InputAmount > 0 ? EKeys::Up : EKeys::Down;
         else return true;
         NextAxisMove = FPlatformTime::Seconds() + 0.18;
         Event = IE_Pressed;
