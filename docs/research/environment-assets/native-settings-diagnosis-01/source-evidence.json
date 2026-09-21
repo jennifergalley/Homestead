@@ -1,0 +1,76 @@
+{
+  "recordedUtc": "2026-09-21T00:54:56.1156846+00:00",
+  "operation": "Read-only source/log diagnosis; offline assertion only; no engine launch or policy change",
+  "sources": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Private\\Misc\\ConfigCacheIni.cpp",
+      "bytes": 260382,
+      "sha256": "7F4871539400DB4CF9F60CD08D8B3515E3F077D75D255305A2700799FD622DBF"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Public\\Misc\\ConfigCacheIni.h",
+      "bytes": 83455,
+      "sha256": "15E5481088838025174AE651881A76B32C4C14CEEAC710A51848D4B35D524345"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Private\\Misc\\ConfigContext.cpp",
+      "bytes": 52621,
+      "sha256": "E885987DB4711FF5FE6BA6E053E5CED57D8DBE9EB911C12130E8A6F28666A1CC"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Runtime\\Projects\\Private\\PluginManager.cpp",
+      "bytes": 143416,
+      "sha256": "B2AA3A2C551FCBD86A3DE72103030331591F619CA2C66AFF8B6EAE7E662BD2DF"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Developer\\TargetPlatform\\Private\\TargetPlatformManagerModule.cpp",
+      "bytes": 61188,
+      "sha256": "E86827925AECB8ED2250F5D7AB655269ED7FE6A83D6691B244FA36FAAD5A4E17"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Developer\\DerivedDataCache\\Private\\DerivedDataCacheStoreAsync.cpp",
+      "bytes": 6478,
+      "sha256": "1D059CC4DEA41C7D7621CEE7D5AE4C48628BD059F81533247E3F2D714F22C7FB"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Source\\Developer\\DerivedDataCache\\Private\\DerivedDataCacheStoreHierarchy.cpp",
+      "bytes": 57699,
+      "sha256": "4537FC4CC9731ECAB57CA6F26ACBCAC3CB8CC42507FDC05AC88FDEE86BF7B270"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PythonScriptPlugin\\Source\\PythonScriptPlugin\\Private\\PythonScriptPlugin.cpp",
+      "bytes": 73760,
+      "sha256": "BD2EB72879B145ECD3C53B196D5C3C8C47B970FBE65E38A61CA16F0254180AAA"
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PythonScriptPlugin\\Source\\PythonScriptPluginPreload\\Private\\PythonScriptPluginPreload.cpp",
+      "bytes": 3171,
+      "sha256": "12D27580637040ED53DA4A8BB386A701A2D19866994B8E8FFFA8DA0D5E425E30"
+    }
+  ],
+  "settingsSha256": "5A7070792C6AA67DC47A192D7564F10E1FC38F62CC2A53C7FD6D6FF94473C56F",
+  "policySha256": "FBC8D8336DDBE6EA5E367091BFAFF02F1847CABD79E2D7F8FDCCBD341B9EBFDA",
+  "offlineDdcFailure": "An effective DDC store is not admitted local file/memory storage.",
+  "actualDdcNodes": [
+    {
+      "type": "Async",
+      "name": "",
+      "local": true,
+      "attributes": {}
+    },
+    {
+      "type": "",
+      "name": "",
+      "local": false,
+      "attributes": {}
+    },
+    {
+      "type": "File System",
+      "name": "E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-02/DDC",
+      "local": true,
+      "attributes": {}
+    }
+  ],
+  "pluginDependencyReportSha256": "D8CD7D8B04B6004738C6B0E08971629F5651B771C9FDA2C2B2C4542702EA25CF",
+  "closureLimitations": "Conservative reverse closure over currently enabled descriptors, filtered by enabled/platform/target; not full UE receipt/optional/version/configuration replay or runtime validation"
+}

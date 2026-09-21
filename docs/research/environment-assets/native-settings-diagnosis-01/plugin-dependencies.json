@@ -1,0 +1,2184 @@
+{
+  "scope": "Only currently enabled Editor/Win64 descriptor dependencies; not future enablement or runtime proof",
+  "enabledCount": 242,
+  "descriptorCount": 242,
+  "disabledClosure": [
+    "AlembicImporter",
+    "AnimationData",
+    "AnimatorKit",
+    "BaseCharacterFXEditor",
+    "Buoyancy",
+    "CameraShakePreviewer",
+    "ChaosCaching",
+    "ChaosCloth",
+    "ChaosEditor",
+    "ChaosNiagara",
+    "ControlRig",
+    "ControlRigModules",
+    "ControlRigPhysics",
+    "ControlRigSpline",
+    "Dataflow",
+    "DeformerGraph",
+    "EditorScriptingUtilities",
+    "EngineCameras",
+    "FullBodyIK",
+    "GameplayCameras",
+    "GeometryCache",
+    "GeometryCollectionPlugin",
+    "GeometryDataflow",
+    "GeometryFlow",
+    "GeometryScripting",
+    "GLTFExporter",
+    "HairStrands",
+    "IKRig",
+    "Interchange",
+    "InterchangeEditor",
+    "InterchangeTests",
+    "LevelSequenceEditor",
+    "LevelSequenceNavigatorBridge",
+    "MediaPlate",
+    "MeshLODToolset",
+    "MeshModelingToolset",
+    "MeshModelingToolsetExp",
+    "MeshPainting",
+    "MetaHumanSDK",
+    "ModelingToolsEditorMode",
+    "Niagara",
+    "NiagaraSimCaching",
+    "PCG",
+    "PluginBrowser",
+    "PluginUtils",
+    "PythonScriptPlugin",
+    "RigLogic",
+    "RigVM",
+    "SequencerAnimTools",
+    "SequencerScripting",
+    "SequenceValidator",
+    "SkeletalMeshModelingTools",
+    "Takes",
+    "TemplateSequence",
+    "UVEditor",
+    "Water"
+  ],
+  "causes": [
+    {
+      "because": [
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "GeometryCollectionPlugin"
+    },
+    {
+      "because": [
+        "GeometryCollectionPlugin",
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "ChaosEditor"
+    },
+    {
+      "because": [
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "MetaHumanSDK"
+    },
+    {
+      "because": [
+        "PythonScriptPlugin"
+      ],
+      "plugin": "Niagara"
+    },
+    {
+      "because": [
+        "PythonScriptPlugin"
+      ],
+      "plugin": "SequencerScripting"
+    },
+    {
+      "because": [
+        "SequencerScripting"
+      ],
+      "plugin": "SequencerAnimTools"
+    },
+    {
+      "because": [
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "PCG"
+    },
+    {
+      "because": [
+        "Niagara"
+      ],
+      "plugin": "GeometryCache"
+    },
+    {
+      "because": [
+        "Niagara"
+      ],
+      "plugin": "Water"
+    },
+    {
+      "because": [
+        "GeometryCache"
+      ],
+      "plugin": "Dataflow"
+    },
+    {
+      "because": [
+        "Niagara"
+      ],
+      "plugin": "NiagaraSimCaching"
+    },
+    {
+      "because": [
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "InterchangeTests"
+    },
+    {
+      "because": [
+        "Niagara"
+      ],
+      "plugin": "ChaosNiagara"
+    },
+    {
+      "because": [
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "PluginUtils"
+    },
+    {
+      "because": [
+        "PythonScriptPlugin"
+      ],
+      "plugin": "RigVM"
+    },
+    {
+      "because": [
+        "SequencerScripting"
+      ],
+      "plugin": "LevelSequenceEditor"
+    },
+    {
+      "because": [
+        "RigVM",
+        "LevelSequenceEditor",
+        "SequencerScripting"
+      ],
+      "plugin": "ControlRig"
+    },
+    {
+      "because": [
+        "GeometryCache"
+      ],
+      "plugin": "MeshModelingToolset"
+    },
+    {
+      "because": [
+        "EditorScriptingUtilities"
+      ],
+      "plugin": "MeshLODToolset"
+    },
+    {
+      "because": [
+        "LevelSequenceEditor"
+      ],
+      "plugin": "SequenceValidator"
+    },
+    {
+      "because": [
+        "GeometryCache"
+      ],
+      "plugin": "Interchange"
+    },
+    {
+      "because": [
+        "Dataflow"
+      ],
+      "plugin": "GeometryDataflow"
+    },
+    {
+      "because": [
+        "Water"
+      ],
+      "plugin": "ChaosCloth"
+    },
+    {
+      "because": [
+        "LevelSequenceEditor"
+      ],
+      "plugin": "TemplateSequence"
+    },
+    {
+      "because": [
+        "MeshModelingToolset"
+      ],
+      "plugin": "UVEditor"
+    },
+    {
+      "because": [
+        "ControlRig",
+        "RigVM"
+      ],
+      "plugin": "ControlRigSpline"
+    },
+    {
+      "because": [
+        "Niagara",
+        "GeometryCache",
+        "Dataflow"
+      ],
+      "plugin": "HairStrands"
+    },
+    {
+      "because": [
+        "MeshModelingToolset"
+      ],
+      "plugin": "MeshModelingToolsetExp"
+    },
+    {
+      "because": [
+        "ControlRig"
+      ],
+      "plugin": "AnimationData"
+    },
+    {
+      "because": [
+        "TemplateSequence"
+      ],
+      "plugin": "GameplayCameras"
+    },
+    {
+      "because": [
+        "LevelSequenceEditor"
+      ],
+      "plugin": "LevelSequenceNavigatorBridge"
+    },
+    {
+      "because": [
+        "GeometryCache"
+      ],
+      "plugin": "AlembicImporter"
+    },
+    {
+      "because": [
+        "ControlRig",
+        "ControlRigSpline",
+        "RigVM"
+      ],
+      "plugin": "AnimatorKit"
+    },
+    {
+      "because": [
+        "MeshModelingToolset"
+      ],
+      "plugin": "GeometryScripting"
+    },
+    {
+      "because": [
+        "Interchange"
+      ],
+      "plugin": "InterchangeEditor"
+    },
+    {
+      "because": [
+        "MeshModelingToolset"
+      ],
+      "plugin": "BaseCharacterFXEditor"
+    },
+    {
+      "because": [
+        "Water"
+      ],
+      "plugin": "Buoyancy"
+    },
+    {
+      "because": [
+        "Interchange"
+      ],
+      "plugin": "GLTFExporter"
+    },
+    {
+      "because": [
+        "LevelSequenceEditor"
+      ],
+      "plugin": "Takes"
+    },
+    {
+      "because": [
+        "InterchangeEditor"
+      ],
+      "plugin": "MeshPainting"
+    },
+    {
+      "because": [
+        "MeshModelingToolsetExp"
+      ],
+      "plugin": "GeometryFlow"
+    },
+    {
+      "because": [
+        "TemplateSequence"
+      ],
+      "plugin": "EngineCameras"
+    },
+    {
+      "because": [
+        "ControlRig",
+        "ControlRigSpline",
+        "RigVM"
+      ],
+      "plugin": "ControlRigModules"
+    },
+    {
+      "because": [
+        "ControlRig"
+      ],
+      "plugin": "FullBodyIK"
+    },
+    {
+      "because": [
+        "PluginUtils"
+      ],
+      "plugin": "PluginBrowser"
+    },
+    {
+      "because": [
+        "ControlRig"
+      ],
+      "plugin": "RigLogic"
+    },
+    {
+      "because": [
+        "ControlRig",
+        "FullBodyIK"
+      ],
+      "plugin": "IKRig"
+    },
+    {
+      "because": [
+        "MeshModelingToolset"
+      ],
+      "plugin": "MediaPlate"
+    },
+    {
+      "because": [
+        "ControlRig"
+      ],
+      "plugin": "ControlRigPhysics"
+    },
+    {
+      "because": [
+        "ControlRig"
+      ],
+      "plugin": "DeformerGraph"
+    },
+    {
+      "because": [
+        "MeshModelingToolset",
+        "MeshModelingToolsetExp",
+        "MeshLODToolset"
+      ],
+      "plugin": "ModelingToolsEditorMode"
+    },
+    {
+      "because": [
+        "ModelingToolsEditorMode",
+        "GeometryScripting"
+      ],
+      "plugin": "SkeletalMeshModelingTools"
+    },
+    {
+      "because": [
+        "Takes"
+      ],
+      "plugin": "ChaosCaching"
+    },
+    {
+      "because": [
+        "GameplayCameras"
+      ],
+      "plugin": "CameraShakePreviewer"
+    }
+  ],
+  "descriptors": [
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\2D\\Paper2D\\Paper2D.uplugin",
+      "name": "Paper2D",
+      "sha256": "E98B22501A4FB0D91BA8EFC8FB16E2B7AE107D7751A275F0DFCEBDF24D603DB0",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\AI\\AISupport\\AISupport.uplugin",
+      "name": "AISupport",
+      "sha256": "C9E835C6EE10609F056D2C382F2AA4857E2BD48EE3017DAAA8E970E23CEB5C2A",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\AI\\EnvironmentQueryEditor\\EnvironmentQueryEditor.uplugin",
+      "name": "EnvironmentQueryEditor",
+      "sha256": "0581E63257E0540D551F96E7A22600C7673F5543C81F892C26E64A89B061448B",
+      "enabledDependencies": [
+        "AISupport"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\ACLPlugin\\ACLPlugin.uplugin",
+      "name": "ACLPlugin",
+      "sha256": "3F8E1E7FEA93D2D1198BAE040C5C47AFC8970E7CC8851CADFD9464ACCE03C7EE",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\AnimationData\\AnimationData.uplugin",
+      "name": "AnimationData",
+      "sha256": "F2411DE26D85F2352467606996127D1EDB88467832AB74F586B13B0E97E0A718",
+      "enabledDependencies": [
+        "ControlRig"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\AnimationModifierLibrary\\AnimationModifierLibrary.uplugin",
+      "name": "AnimationModifierLibrary",
+      "sha256": "CB1533AEEFA34A2B93331CCD55DB7018680C65A7ED46919456AACBC0FBC8B2F6",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\AnimatorKit\\AnimatorKit.uplugin",
+      "name": "AnimatorKit",
+      "sha256": "00DAE8F3D76EC7B56265C29FF788CB6B12DA58597DF08D1F528AF4EC496B1E14",
+      "enabledDependencies": [
+        "ControlRig",
+        "ControlRigSpline",
+        "ControlRigPhysics",
+        "RigVM",
+        "DeformerGraph",
+        "GizmoFramework",
+        "PhysicsControl"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\BlendSpaceMotionAnalysis\\BlendSpaceMotionAnalysis.uplugin",
+      "name": "BlendSpaceMotionAnalysis",
+      "sha256": "BC7BB320837376734C62DE122EA90C3918A0054EC24FE2850D84226182A6E58C",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\ControlRig\\ControlRig.uplugin",
+      "name": "ControlRig",
+      "sha256": "A5470E0AA54D21F3226CB086E017AD6376414167F3D897E0A39FECD2729F6FBF",
+      "enabledDependencies": [
+        "RigVM",
+        "LevelSequenceEditor",
+        "PropertyAccessEditor",
+        "SequencerScripting",
+        "TweeningUtils"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\ControlRigModules\\ControlRigModules.uplugin",
+      "name": "ControlRigModules",
+      "sha256": "3D3D3C3B58D9AF9DE09232CD0BE44E1548DB26024E921D077719E6D3BB449006",
+      "enabledDependencies": [
+        "ControlRig",
+        "ControlRigSpline",
+        "RigVM",
+        "ControlRigPhysics",
+        "PhysicsControl",
+        "FullBodyIK"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\ControlRigSpline\\ControlRigSpline.uplugin",
+      "name": "ControlRigSpline",
+      "sha256": "07FFA1D23E9E4C8686DED5B7855A1FA3B185D434C2429443A8CC0B3AFE3EE8A9",
+      "enabledDependencies": [
+        "ControlRig",
+        "RigVM"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\DeformerGraph\\DeformerGraph.uplugin",
+      "name": "DeformerGraph",
+      "sha256": "D05BE63A5625889C62D46C4C6185CDAA91D748480134D4FC25155A1DFB5FA6FC",
+      "enabledDependencies": [
+        "ComputeFramework",
+        "ControlRig"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\EaseCurveTool\\EaseCurveTool.uplugin",
+      "name": "EaseCurveTool",
+      "sha256": "48DC4F5371CC302C4C6B63BB5052E26CC8BF364D57C810745589BD229A18B2A7",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\GameplayInsights\\GameplayInsights.uplugin",
+      "name": "GameplayInsights",
+      "sha256": "7D54DBE6B74A980989A7D8E3B995D24127D7F1E18A644471122DF0757C7E1F0B",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\IKRig\\IKRig.uplugin",
+      "name": "IKRig",
+      "sha256": "3BD4D9AF1082D24913CD7272F38826896789E5C188B2CF9FEC1F55694524A962",
+      "enabledDependencies": [
+        "ControlRig",
+        "FullBodyIK"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\PhysicsControl\\PhysicsControl.uplugin",
+      "name": "PhysicsControl",
+      "sha256": "9549E8BFB06C986865C5A8405F85E57D16854D5CBFC30DF0BC315250627CBA22",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\RigLogic\\RigLogic.uplugin",
+      "name": "RigLogic",
+      "sha256": "8A05054EEF27D511E7C4A6E9112616B9F62590F1834DA0D5DDD6B04760E036A6",
+      "enabledDependencies": [
+        "ControlRig"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\SkeletalMeshModelingTools\\SkeletalMeshModelingTools.uplugin",
+      "name": "SkeletalMeshModelingTools",
+      "sha256": "34176395C519A3AC4909B96717D025B711C2BC306408F8E59F31957BDEF7B667",
+      "enabledDependencies": [
+        "ModelingToolsEditorMode",
+        "GeometryScripting"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Animation\\TweeningUtils\\TweeningUtils.uplugin",
+      "name": "TweeningUtils",
+      "sha256": "C1B3565EBE4EE2A0FD97F9122FB379BB5EFBD41C7D30BA8CC5959677A0998F4E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\AudioInsights\\AudioInsights.uplugin",
+      "name": "AudioInsights",
+      "sha256": "ED5149F6755B415139BD16A1710415415B247B30905DD8C49DCF42CD1D5BC142",
+      "enabledDependencies": [
+        "AudioWidgets"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\AudioInsightsRuntime\\AudioInsightsRuntime.uplugin",
+      "name": "AudioInsightsRuntime",
+      "sha256": "76D0F564E9836B5545A8A3C60A38BEEDA1A2810EDDE2BEC76370BEFD9CD1EF3D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\AudioModulationInsights\\AudioModulationInsights.uplugin",
+      "name": "AudioModulationInsights",
+      "sha256": "FD3C8A9519E9034353727A17656293C10BE47803DAB27A4A9448B713846EDADE",
+      "enabledDependencies": [
+        "AudioInsights"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\BaseMaterial\\BaseMaterial.uplugin",
+      "name": "BaseMaterial",
+      "sha256": "7EFF8E9C9497B32884667890C9A3BB92481D251D7874BC2918C10B3DC7D3F257",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Cameras\\CameraShakePreviewer\\CameraShakePreviewer.uplugin",
+      "name": "CameraShakePreviewer",
+      "sha256": "23C55F0A7E12D24459EC4AC09A92F661DD4BD9425B3DDB85F0504925507D1FDC",
+      "enabledDependencies": [
+        "GameplayCameras"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Cameras\\EngineCameras\\EngineCameras.uplugin",
+      "name": "EngineCameras",
+      "sha256": "5019A09AF69364BD393DA60A73F8871B2F6D3C19B4B1C6612DDF273A6E1F0DB3",
+      "enabledDependencies": [
+        "TemplateSequence"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Cameras\\GameplayCameras\\GameplayCameras.uplugin",
+      "name": "GameplayCameras",
+      "sha256": "99EAC19AB4E17E442B5686F3DF32A3B684E805CAF1D72648BD0B448A52F0BB30",
+      "enabledDependencies": [
+        "EnhancedInput",
+        "StateTree",
+        "TemplateSequence"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\ChaosCloth\\ChaosCloth.uplugin",
+      "name": "ChaosCloth",
+      "sha256": "EA6E1B91512C94BD93BD6FD852BA30916C5CD202716A7D80213DC1A6608C3B5B",
+      "enabledDependencies": [
+        "ChaosCaching",
+        "Buoyancy",
+        "Water"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\ChaosInsights\\ChaosInsights.uplugin",
+      "name": "ChaosInsights",
+      "sha256": "D28C5285409DD0949233B4C5F3EC8DDF3DC5C17599AC7961B72A1C500EA597E9",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\ChaosVD\\ChaosVD.uplugin",
+      "name": "ChaosVD",
+      "sha256": "1339824E6E21192AC2786A3BC1EE49C16B6CF4A148DA820B713C200E2270FBE1",
+      "enabledDependencies": [
+        "EditorDataStorage",
+        "EditorDataStorageFeatures",
+        "GeometryProcessing"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\CmdLinkServer\\CmdLinkServer.uplugin",
+      "name": "CmdLinkServer",
+      "sha256": "99D86F63B8CFE159A66985E62311C40DFDC299E276C51B53A3FECEF9F2FF1D7E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Compositing\\CompositeCore\\CompositeCore.uplugin",
+      "name": "CompositeCore",
+      "sha256": "D28EC1448D1652D3911904270A97C08E89C6903DB78CE5A745ACB3CAEC30FAC7",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Compression\\OodleNetwork\\OodleNetwork.uplugin",
+      "name": "OodleNetwork",
+      "sha256": "35CFF91E6D4EFB7293FB14ED9971F8B2DFD8C0ADA5DEC0FF5BC2324B1C2D761C",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Dataflow\\Dataflow.uplugin",
+      "name": "Dataflow",
+      "sha256": "7B2ECCAE90051F199EF85EA13A8920535F89DF339643545390213BB54133D2C4",
+      "enabledDependencies": [
+        "BaseCharacterFXEditor",
+        "ProceduralMeshComponent",
+        "GeometryProcessing",
+        "MeshModelingToolsetExp",
+        "ModelingToolsEditorMode",
+        "ChaosCaching",
+        "GeometryCache",
+        "EditorDataStorage",
+        "EditorDataStorageFeatures",
+        "MeshModelingToolset",
+        "SkeletalMeshModelingTools"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\DerivedDataBuildController\\DerivedDataBuildController.uplugin",
+      "name": "DerivedDataBuildController",
+      "sha256": "71277CC12830DEC12A2697DCCC22D8CAFFC92A213A94F91971B7FCCB6E089BFC",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\AnimationSharing\\AnimationSharing.uplugin",
+      "name": "AnimationSharing",
+      "sha256": "C2B2B5C7860950C3A03A4D63A9E8E9E550CA8D32AB6636CD154C836B034E5257",
+      "enabledDependencies": [
+        "SignificanceManager"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\CLionSourceCodeAccess\\CLionSourceCodeAccess.uplugin",
+      "name": "CLionSourceCodeAccess",
+      "sha256": "A5550FBBFB1A43A34FBD5B86A66E7A2D15E6F018447929D3EB795EF0B4F23938",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\CodeLiteSourceCodeAccess\\CodeLiteSourceCodeAccess.uplugin",
+      "name": "CodeLiteSourceCodeAccess",
+      "sha256": "5317E46F03ED91D16D607ACA62E7174C89DEA3F2EB46A7B61BCB8278024BDF2D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\Concert\\ConcertMain\\ConcertMain.uplugin",
+      "name": "ConcertMain",
+      "sha256": "09F2CA143C97ABBF2364E25921B2C286DC09CCBDA40E4F2996046DF2C89CD53A",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\Concert\\ConcertSync\\ConcertSyncClient\\ConcertSyncClient.uplugin",
+      "name": "ConcertSyncClient",
+      "sha256": "830FB2CF206943FB985B95FEE3BEF88FB31C78F561B9241309B894B4AEBC3FE5",
+      "enabledDependencies": [
+        "ConcertSyncCore",
+        "ConcertMain",
+        "FileSandbox"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\Concert\\ConcertSync\\ConcertSyncCore\\ConcertSyncCore.uplugin",
+      "name": "ConcertSyncCore",
+      "sha256": "FBF9BCA6EF5D942FA789FEBA3AD31DF8DAE952A6192906F1976726811FAFB435",
+      "enabledDependencies": [
+        "ConcertMain",
+        "SQLiteCore"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\Concert\\ConcertUI\\ConcertSharedSlate\\ConcertSharedSlate.uplugin",
+      "name": "ConcertSharedSlate",
+      "sha256": "9C045A1340360F0CCA8F1AB55D8B6BC70A7CBB6B3B758294002D00DD63CC7CC2",
+      "enabledDependencies": [
+        "ConcertMain",
+        "ConcertSyncCore"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\DumpGPUServices\\DumpGPUServices.uplugin",
+      "name": "DumpGPUServices",
+      "sha256": "C250484923A267A4BBFB14415E653B994454028C825E6B0E9C85495B4D747328",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\GitSourceControl\\GitSourceControl.uplugin",
+      "name": "GitSourceControl",
+      "sha256": "CE08B9E8100E7E2CE13939D89B241202CD196F6CC330DC2491C4D2977EB095A4",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\GPUReshape\\GPUReshape.uplugin",
+      "name": "GPUReshape",
+      "sha256": "5D714B483939880493CFF2B6D4297A6B25DDBCD4B62A60BD1E88218A36C7A57F",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\KDevelopSourceCodeAccess\\KDevelopSourceCodeAccess.uplugin",
+      "name": "KDevelopSourceCodeAccess",
+      "sha256": "E4E8FBEB8FC579C47EB1FBFC5EBA8CC20A4DFD89C147D6CFB86924C05158F6F0",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\N10XSourceCodeAccess\\N10XSourceCodeAccess.uplugin",
+      "name": "N10XSourceCodeAccess",
+      "sha256": "4F2B88641C00B1D57E9E61627EC71D70E5C98486FB4F1F24A458E9F28557CF2D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\NamingTokens\\NamingTokens.uplugin",
+      "name": "NamingTokens",
+      "sha256": "2859AC6C9F3E60B8296473745EA7E913D822014219503265BF9CFE18178E5415",
+      "enabledDependencies": [
+        "EngineAssetDefinitions"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\NullSourceCodeAccess\\NullSourceCodeAccess.uplugin",
+      "name": "NullSourceCodeAccess",
+      "sha256": "C8C5DB840CB32464EB0ED3EF10073FB3955B240E00E8ADCAC9092AEF016B0698",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\PerforceSourceControl\\PerforceSourceControl.uplugin",
+      "name": "PerforceSourceControl",
+      "sha256": "A0BC42BDC18E711D8296D301F699DC3A615D162261ADE30A98FAB184BCB100B1",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\PixWinPlugin\\PixWinPlugin.uplugin",
+      "name": "PixWinPlugin",
+      "sha256": "74034C3DE2BFFFB0E019A307F3BF69D01886549F8D5294FBCDAC0029668C98FD",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\PlasticSourceControl\\PlasticSourceControl.uplugin",
+      "name": "PlasticSourceControl",
+      "sha256": "0D6CD65F7021359EBEF7DC8B2857A2907993F146604193947CC48A119E069725",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\PluginUtils\\PluginUtils.uplugin",
+      "name": "PluginUtils",
+      "sha256": "C611BD3116E9BDF6185071054B28F5D36C472410F026539759ED5C6BE80C40F4",
+      "enabledDependencies": [
+        "EditorScriptingUtilities"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\ProjectLauncher\\ProjectLauncher.uplugin",
+      "name": "ProjectLauncher",
+      "sha256": "1D72F4806033E394A5B3CCF9EBAF15F596619FFF0CEEA8D8F9C521863F896648",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\PropertyAccessNode\\PropertyAccessNode.uplugin",
+      "name": "PropertyAccessNode",
+      "sha256": "D1179F23D845C826CD22548AB4483F4B3F94CF30C2E08A2690C000BB3A55DC9B",
+      "enabledDependencies": [
+        "PropertyAccessEditor"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\RenderDocPlugin\\RenderDocPlugin.uplugin",
+      "name": "RenderDocPlugin",
+      "sha256": "420F687BBE015244B325CB78D5358CDF652815F43E8795869F65CCCEEA42FB98",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\RiderSourceCodeAccess\\RiderSourceCodeAccess.uplugin",
+      "name": "RiderSourceCodeAccess",
+      "sha256": "72DA2CA15C7D4AC663C4668F0FB2C65D6FE5DFDEAEF85D3A9BF9B77FBF2BA5FF",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\Sandbox\\FileSandbox\\FileSandbox.uplugin",
+      "name": "FileSandbox",
+      "sha256": "1C69107E987BFEEF6A897814D9B140E449718727884F4CE1758C51A3BB7054B0",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\SubversionSourceControl\\SubversionSourceControl.uplugin",
+      "name": "SubversionSourceControl",
+      "sha256": "50693B18848223EB064A837860039BE17F315C1A6BC8782532740E9C2D1CAA6E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\UObjectPlugin\\UObjectPlugin.uplugin",
+      "name": "UObjectPlugin",
+      "sha256": "14A5A628C8F8F9CC3760D3232DA8304887C08736A1BD3C8B5AEE320226B9C1EF",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\VisualStudioCodeSourceCodeAccess\\VisualStudioCodeSourceCodeAccess.uplugin",
+      "name": "VisualStudioCodeSourceCodeAccess",
+      "sha256": "E4F0902A3824DBA30384AB951CDC8350C10340513FA0F53FF70887F188C83550",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\VisualStudioSourceCodeAccess\\VisualStudioSourceCodeAccess.uplugin",
+      "name": "VisualStudioSourceCodeAccess",
+      "sha256": "0006E21C2D9DCB000339588E16574EE3CC78931DF43139D097A16AB0C3D5812A",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Developer\\XCodeSourceCodeAccess\\XCodeSourceCodeAccess.uplugin",
+      "name": "XCodeSourceCodeAccess",
+      "sha256": "AC339437241FED722E33E0E919E5D8A6270A385C8081D45B142540C7ABA80CDD",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\AssetManagerEditor\\AssetManagerEditor.uplugin",
+      "name": "AssetManagerEditor",
+      "sha256": "5B37035EECDDD31707F2B3A522CEAFE97E95D0638916F3713CB26F9AC0B3C49A",
+      "enabledDependencies": [
+        "ContentBrowserAssetDataSource"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\BlueprintHeaderView\\BlueprintHeaderView.uplugin",
+      "name": "BlueprintHeaderView",
+      "sha256": "6814583D475124935CC32A01D06216C2D2C7DB6F6F050ADB5DFCC0F29A9A6793",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\BlueprintMaterialTextureNodes\\BlueprintMaterialTextureNodes.uplugin",
+      "name": "BlueprintMaterialTextureNodes",
+      "sha256": "31F03882C3783D538DD2B1C940BD0D9C4776675880F4E076BD6D1EC1483F171B",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ChangelistReview\\ChangelistReview.uplugin",
+      "name": "ChangelistReview",
+      "sha256": "69104E558539BE603030811F8903995C5B1564EFEF404DEA6CEB2944959709CE",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ColorGrading\\ColorGrading.uplugin",
+      "name": "ColorGrading",
+      "sha256": "96AC3594F9A020969C09C562C83AD4F040D69963593B1F0B32126053F46F1D4E",
+      "enabledDependencies": [
+        "ObjectMixer"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ConsoleVariablesEditor\\ConsoleVariables.uplugin",
+      "name": "ConsoleVariables",
+      "sha256": "F7DB00379844B318CD7D556C5F1378009D7253E879BA99C35E60ECB070ABEEC9",
+      "enabledDependencies": [
+        "ConcertSyncClient",
+        "ConcertSyncCore",
+        "ConcertMain",
+        "ConcertSharedSlate"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ContentBrowser\\ContentBrowserAssetDataSource\\ContentBrowserAssetDataSource.uplugin",
+      "name": "ContentBrowserAssetDataSource",
+      "sha256": "368CC1DCD0FC2C9E2E9F1FCB1B0066180933F14CB7DD392CC2C4D93F4AD9BBFF",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ContentBrowser\\ContentBrowserClassDataSource\\ContentBrowserClassDataSource.uplugin",
+      "name": "ContentBrowserClassDataSource",
+      "sha256": "3113E33A1B4CC7614574D220A289B91ECBAD69C0F89C96E68E777DDB1E15F8E1",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ContentBrowser\\ContentBrowserFileDataSource\\ContentBrowserFileDataSource.uplugin",
+      "name": "ContentBrowserFileDataSource",
+      "sha256": "18ABD531EE9283F01C9CBD6034DAD8EAF4C1E409ADDB4E0A64955B5C66445A28",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\CryptoKeys\\CryptoKeys.uplugin",
+      "name": "CryptoKeys",
+      "sha256": "D27F228B2C337FC7454D4E7E20EDD248D4C79FFA921AB124E013B3B77CFE4FF7",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\CurveEditorTools\\CurveEditorTools.uplugin",
+      "name": "CurveEditorTools",
+      "sha256": "818B3F798677D6E0148BDEDA374053C0DD1CF6C8D8FDF733A4966D5562557F85",
+      "enabledDependencies": [
+        "TweeningUtils"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\DataValidation\\DataValidation.uplugin",
+      "name": "DataValidation",
+      "sha256": "D0D847D443BD29D92AA16F3F8A6CD7F2776A042BD2140A8E6242650681600CE2",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\EditorDebugTools\\EditorDebugTools.uplugin",
+      "name": "EditorDebugTools",
+      "sha256": "216C6623979762C3A6DE1F15C2B45B924E46C8999A6AE2CDD7C33CD707690430",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\EditorScriptingUtilities\\EditorScriptingUtilities.uplugin",
+      "name": "EditorScriptingUtilities",
+      "sha256": "5DC2406F1BB6150DECCAC3A4445D3A7BE5F4037F9F0B4AE0DD1803B176E94C3F",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\EngineAssetDefinitions\\EngineAssetDefinitions.uplugin",
+      "name": "EngineAssetDefinitions",
+      "sha256": "AAEB5B57FBAC2AF2F4D72CA5C0A73CAD9913D680999DA741B2117336D28BC687",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\FacialAnimation\\FacialAnimation.uplugin",
+      "name": "FacialAnimation",
+      "sha256": "52939DF44DEC1B1747879415C44195B69796B3F782E59808FF19E85C7FCAF8F6",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\GameplayTagsEditor\\GameplayTagsEditor.uplugin",
+      "name": "GameplayTagsEditor",
+      "sha256": "F182707C07A013741C34B1EE646DA57885DFA9493353BEA9765612D574FF91D1",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\GeometryMode\\GeometryMode.uplugin",
+      "name": "GeometryMode",
+      "sha256": "A1A4D092BB30D2FE57625BC0EEEC07164AAAA238FFF2A410E9AD90CDC09BD081",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\Localization\\PortableObjectFileDataSource\\PortableObjectFileDataSource.uplugin",
+      "name": "PortableObjectFileDataSource",
+      "sha256": "56BEDC07AFCA9B9F796F5127CBBCD3E7FCFE2688B7679869635CD591ACB50D67",
+      "enabledDependencies": [
+        "ContentBrowserFileDataSource"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\MacGraphicsSwitching\\MacGraphicsSwitching.uplugin",
+      "name": "MacGraphicsSwitching",
+      "sha256": "D30A41FA624E3BEB6C5F4405DF3174F11C422E5D2F26FEF3ED5D57CCB913DDB3",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\MaterialAnalyzer\\MaterialAnalyzer.uplugin",
+      "name": "MaterialAnalyzer",
+      "sha256": "E65F355C55538C690E6EFDDFB976362D79CD3BEB9C2760259ED1699C5EE9D35F",
+      "enabledDependencies": [
+        "AssetManagerEditor"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\MaterialAssetWizard\\MaterialAssetWizard.uplugin",
+      "name": "MaterialAssetWizard",
+      "sha256": "0EEF2A87B87C4EE8BC26A9388CC4111FDBE792D850797C917315A7AAF2AB0C7D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\MeshLODToolset\\MeshLODToolset.uplugin",
+      "name": "MeshLODToolset",
+      "sha256": "5B427EEA767DCE4CA468B17206F26D945297F2DE3F699B007BB3E792E3B9BE06",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "GeometryFlow",
+        "MeshModelingToolsetExp",
+        "EditorScriptingUtilities"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\MobileLauncherProfileWizard\\MobileLauncherProfileWizard.uplugin",
+      "name": "MobileLauncherProfileWizard",
+      "sha256": "7C0888CBDEFE9007B048D0DD7DF560E2B476403F0205D76C66D9948C77413DAD",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ModelingToolsEditorMode\\ModelingToolsEditorMode.uplugin",
+      "name": "ModelingToolsEditorMode",
+      "sha256": "A09D756A40247BD9E6FB73CB9D4CA92BA11960215FCD5C77F2BB8E2BF114A0D0",
+      "enabledDependencies": [
+        "MeshModelingToolset",
+        "MeshModelingToolsetExp",
+        "MeshLODToolset",
+        "ToolPresets",
+        "StylusInput"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ObjectMixer\\LightMixer\\LightMixer.uplugin",
+      "name": "LightMixer",
+      "sha256": "077A06CA013C67183D79D55BB693DF6E9CEB2509E4122585770991051C2B8A97",
+      "enabledDependencies": [
+        "ObjectMixer"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ObjectMixer\\ObjectMixer\\ObjectMixer.uplugin",
+      "name": "ObjectMixer",
+      "sha256": "30E50FA66F70C1EF627705B8C3FDAD1AEAA985CAA03DED23C0253F29C48BE127",
+      "enabledDependencies": [
+        "EngineAssetDefinitions"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\PluginBrowser\\PluginBrowser.uplugin",
+      "name": "PluginBrowser",
+      "sha256": "E68E85A25185AF94973E295C760EA55CAB5BB41886BA234CD6F470A100BA36D9",
+      "enabledDependencies": [
+        "PluginUtils"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\ProxyLODPlugin\\ProxyLODPlugin.uplugin",
+      "name": "ProxyLODPlugin",
+      "sha256": "DCCCABF06824B449B6B9C6FF2C4D513A441582C567A6A4552AFB8105B44898F4",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\SequencerAnimTools\\SequencerAnimTools.uplugin",
+      "name": "SequencerAnimTools",
+      "sha256": "9B7C6ECAB76A0E0C56D6FCA48EF1C2A6082FB1F856BFDC5CB0494BD17D01E336",
+      "enabledDependencies": [
+        "ControlRig",
+        "LevelSequenceEditor",
+        "SequencerScripting"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\SpeedTreeImporter\\SpeedTreeImporter.uplugin",
+      "name": "SpeedTreeImporter",
+      "sha256": "018C7AFE7EFF493ABD824E5DD6DB22C735F147E2AA1C2667FF27194DD5F8DAA0",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\StylusInput\\StylusInput.uplugin",
+      "name": "StylusInput",
+      "sha256": "CA45D994EBF63ADF7D3C170E9FF17EC7E92B5088F13BCB1634D29EAFE8381624",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\UMGWidgetPreview\\UMGWidgetPreview.uplugin",
+      "name": "UMGWidgetPreview",
+      "sha256": "CBB5E723276EC64FE49B6DE793509CBE01FF039EFC2959E4350E02F2480A5812",
+      "enabledDependencies": [
+        "DataValidation"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\UVEditor\\UVEditor.uplugin",
+      "name": "UVEditor",
+      "sha256": "959B987370D917EE612F8945B1C75794B9C4DBF90E3DC5530247120BD8110D96",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "MeshModelingToolset",
+        "MeshModelingToolsetExp"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Editor\\WorldPartitionHLODUtilities\\WorldPartitionHLODUtilities.uplugin",
+      "name": "WorldPartitionHLODUtilities",
+      "sha256": "A2DAE3AF1D37DBB6224A22BC1DF6CE6E040AF19862ACA71BAF16B360DA812BFE",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\EnhancedInput\\EnhancedInput.uplugin",
+      "name": "EnhancedInput",
+      "sha256": "6BCBBFEFEB6309DB8FA805CD758250780D8CBAF2CA0092760C5FD9BE921901FF",
+      "enabledDependencies": [
+        "DataValidation"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Enterprise\\DatasmithContent\\DatasmithContent.uplugin",
+      "name": "DatasmithContent",
+      "sha256": "D3782F61D24952626C277E9401D60FE55C6FE157815AFCDFCA730659F212DA89",
+      "enabledDependencies": [
+        "VariantManagerContent"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Enterprise\\GLTFExporter\\GLTFExporter.uplugin",
+      "name": "GLTFExporter",
+      "sha256": "730ADB1B40D9B89BDBDB572DFBB564629A31D0C821C13DA6EACDA14D54105C8C",
+      "enabledDependencies": [
+        "VariantManagerContent",
+        "Interchange",
+        "InterchangeAssets"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Enterprise\\VariantManager\\VariantManager.uplugin",
+      "name": "VariantManager",
+      "sha256": "D0314635BF1CBF8A6A4E4D08E56596EC7AEB88D05CFA0C64579CFFD4EF2F87C1",
+      "enabledDependencies": [
+        "VariantManagerContent"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Enterprise\\VariantManagerContent\\VariantManagerContent.uplugin",
+      "name": "VariantManagerContent",
+      "sha256": "286F59ECC9CE84016B38F6A81A749204026EB8BEA661D0B958F9A2052B852C96",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\AdvancedRenamer\\AdvancedRenamer.uplugin",
+      "name": "AdvancedRenamer",
+      "sha256": "CF42B43BEFCE433EF87BCA2DE2BC1C6DB25D8A8C068A36C660A68998B9D7AF25",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\Animation\\Scribble\\Scribble.uplugin",
+      "name": "Scribble",
+      "sha256": "514FE9596A0732F2FE421623201834A9B8D362EDDA02CD2A68C9726587348EDD",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\AutomationUtils\\AutomationUtils.uplugin",
+      "name": "AutomationUtils",
+      "sha256": "7FA902BC1E1C40CC42E220CECB6645B16B90A252907ECEF03C2AC241A1E1E80D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\BackChannel\\BackChannel.uplugin",
+      "name": "BackChannel",
+      "sha256": "CA5C83FFBE47971C3BA8A3F32F0A5D7F7B8EAC69EF90F9C25B3186A0F2783C4B",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\Buoyancy\\Buoyancy.uplugin",
+      "name": "Buoyancy",
+      "sha256": "18B03A4534F2D082D7C5D2B6DD8A4350D4B7C06E4FF59C31F96D14E9E75C4A91",
+      "enabledDependencies": [
+        "Water",
+        "ChaosUserDataPT"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ChaosCaching\\ChaosCaching.uplugin",
+      "name": "ChaosCaching",
+      "sha256": "5F778AB41EB73E19CEF50A25032A41BF48BCFA61D84AFD04CBAF351C218046B9",
+      "enabledDependencies": [
+        "Takes"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ChaosEditor\\ChaosEditor.uplugin",
+      "name": "ChaosEditor",
+      "sha256": "E3CA6FC1DA387D8BE8F62E5102039E0C5CCAF5357D70265131A818755EE61F20",
+      "enabledDependencies": [
+        "PlanarCut",
+        "GeometryCollectionPlugin",
+        "MeshModelingToolsetExp",
+        "EditorScriptingUtilities",
+        "Fracture"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ChaosNiagara\\ChaosNiagara.uplugin",
+      "name": "ChaosNiagara",
+      "sha256": "F7DC3BF237402FD7745E00AECE88BDF358613B57FCAF34F00176364078793CB1",
+      "enabledDependencies": [
+        "Niagara",
+        "ChaosSolverPlugin"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ChaosSolverPlugin\\ChaosSolverPlugin.uplugin",
+      "name": "ChaosSolverPlugin",
+      "sha256": "7EBD3E4D841FA5D29895A95F3878F6B5730D3B8008FE977B98CE322156B49CCC",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ChaosUserDataPT\\ChaosUserDataPT.uplugin",
+      "name": "ChaosUserDataPT",
+      "sha256": "B489405BDB110ED1C968F634B8CF3BE55F71F972A49722236BA99B1DB1955181",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\CharacterAI\\CharacterAI.uplugin",
+      "name": "CharacterAI",
+      "sha256": "3D4598818DE5FE0DFFC800C64ACD02D9690221A4BCC98A621602F3A139EFCE7E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\CharacterFXEditor\\BaseCharacterFXEditor\\BaseCharacterFXEditor.uplugin",
+      "name": "BaseCharacterFXEditor",
+      "sha256": "DEE8CDB3241FD308A06A655F301C91A93F1035FF21E61E6F63241866E7B9C400",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "MeshModelingToolset"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ControlRigPhysics\\ControlRigPhysics.uplugin",
+      "name": "ControlRigPhysics",
+      "sha256": "37E292027859001D036AFBAEE2A4C901095430847BA718B3BF744481EA88B09C",
+      "enabledDependencies": [
+        "ControlRig",
+        "PhysicsControl"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\EditorDataStorage\\EditorDataStorage.uplugin",
+      "name": "EditorDataStorage",
+      "sha256": "21E6E33471EAFE680C1E5531D15B76E7BC95EE20600AC7F692B7FB7E7BD3058A",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\EditorDataStorageFeatures\\EditorDataStorageFeatures.uplugin",
+      "name": "EditorDataStorageFeatures",
+      "sha256": "815493CACB85B48F377546D17D43386F8B8EF5A43FB08B1FDC585AB0C6C17604",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\EditorPerformance\\EditorPerformance.uplugin",
+      "name": "EditorPerformance",
+      "sha256": "6D83F31694EC169A2C2D33CF0F4A2933F94AA74E5E534C88380BCA75A6F25BF4",
+      "enabledDependencies": [
+        "EditorDataStorageFeatures"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\EditorTelemetry\\EditorTelemetry.uplugin",
+      "name": "EditorTelemetry",
+      "sha256": "6B5F3721B2AEC04E9300A085600965F34C890CDB0604886E7BA0B65F8335CDD9",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\EditorTRSGizmo\\EditorTRSGizmo.uplugin",
+      "name": "EditorTRSGizmo",
+      "sha256": "B019CAC5EF92DB59B479D310477870AFD116B8AC5B0B50340A134D645E6699C4",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\Fracture\\Fracture.uplugin",
+      "name": "Fracture",
+      "sha256": "267295F24BA332811ED628E3A7F76A05F2D8FE55E568F15885CA178FC342FC40",
+      "enabledDependencies": [
+        "PlanarCut"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\FullBodyIK\\FullBodyIK.uplugin",
+      "name": "FullBodyIK",
+      "sha256": "C57A145495AE8929274DC02C778754A638AC4556BCF499E31406E0FBE182A1FF",
+      "enabledDependencies": [
+        "ControlRig"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\GeometryCollectionPlugin\\GeometryCollectionPlugin.uplugin",
+      "name": "GeometryCollectionPlugin",
+      "sha256": "F346892E8641BF3650C00F293E29D8AA01A7028AB058E76CF17F685313F43AA6",
+      "enabledDependencies": [
+        "ProceduralMeshComponent",
+        "ChaosSolverPlugin",
+        "Dataflow",
+        "PlanarCut",
+        "GeometryProcessing",
+        "GeometryDataflow",
+        "Fracture",
+        "EditorScriptingUtilities"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\GeometryDataflow\\GeometryDataflow.uplugin",
+      "name": "GeometryDataflow",
+      "sha256": "1DCC1560C2EAEF3D35CE90F313D544CA8E49DC1054148194937F0516DCFA8323",
+      "enabledDependencies": [
+        "Dataflow",
+        "GeometryProcessing"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\GeometryFlow\\GeometryFlow.uplugin",
+      "name": "GeometryFlow",
+      "sha256": "E4D8EA6597E20A0DD9D963D71A8AE072DAB11E16AE39F31E1FD71778BB523208",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "MeshModelingToolsetExp"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\GizmoFramework\\GizmoFramework.uplugin",
+      "name": "GizmoFramework",
+      "sha256": "A157277E1732BFE8DDD57FCAC4E43B40B45E9104B193E886C78CD07F94649350",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\GlobalConfigurationData\\GlobalConfigurationData.uplugin",
+      "name": "GlobalConfigurationData",
+      "sha256": "1BC84CC9541CB744814013A2F766BA01E2A2DAC666BE3E4C51D7C3DA0BD2CC2F",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\HttpInsights\\HttpInsights.uplugin",
+      "name": "HttpInsights",
+      "sha256": "B81E1B9AA96F6B513A6EDA8D7790F518BF3A926D5D0F5EF6BADBB51F81B09AFA",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\InterchangeAxF\\Assets\\InterchangeAxfAssets.uplugin",
+      "name": "InterchangeAxfAssets",
+      "sha256": "79637FE15B08AC52E2AB73E747F5204E11250A6F544B955A763839B97C0A7CFD",
+      "enabledDependencies": [
+        "InterchangeAssets",
+        "BaseMaterial"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\Landmass\\Landmass.uplugin",
+      "name": "Landmass",
+      "sha256": "838B95DD84BE61CCFFB777718F8EFC8548EC8D5FC33A8395D50503A29D17A695",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\LevelSequenceNavigatorBridge\\LevelSequenceNavigatorBridge.uplugin",
+      "name": "LevelSequenceNavigatorBridge",
+      "sha256": "F446324B12F111D9F2F62D2B091DB92F145F322C89E376722215352A7B435E35",
+      "enabledDependencies": [
+        "LevelSequenceEditor",
+        "SequenceNavigator"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\LocalizableMessage\\LocalizableMessage.uplugin",
+      "name": "LocalizableMessage",
+      "sha256": "E700A2317401FA6C9CAB73381642A57815BB7088934679E5B5F3418823B6A286",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\LowLevelNetTrace\\LowLevelNetTrace.uplugin",
+      "name": "LowLevelNetTrace",
+      "sha256": "C976138EE031F19257228FF3E24E66CEEFFA505B3A1A681372DDF8F2F3AC98A7",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\MeshModelingToolsetExp\\MeshModelingToolsetExp.uplugin",
+      "name": "MeshModelingToolsetExp",
+      "sha256": "F7C896EBEE0EDA10C5AED7A9DC35F4DD1EC97B590EB0D2BAE65D988556A6477C",
+      "enabledDependencies": [
+        "MeshModelingToolset",
+        "GeometryProcessing",
+        "ProxyLODPlugin"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\MutableAssetUserData\\MutableAssetUserData.uplugin",
+      "name": "MutableAssetUserData",
+      "sha256": "0723C3A06CB76A15AD9DCE7A0E5928151A0767DEC93C5A2E75F3A6A100CE02F4",
+      "enabledDependencies": [
+        "Mutable"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\NFORDenoise\\NFORDenoise.uplugin",
+      "name": "NFORDenoise",
+      "sha256": "FD3883A67245DA0457C6BFF3723537FDA3AA9206B7A32D16EFA3245ADAF5AB8C",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PlanarCutPlugin\\PlanarCut.uplugin",
+      "name": "PlanarCut",
+      "sha256": "1A86684BB69F30C37DC7C86CED2B2B630FE2A6B465609DA714EC2444A3F6FDC4",
+      "enabledDependencies": [
+        "GeometryProcessing"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PlatformCrypto\\PlatformCrypto.uplugin",
+      "name": "PlatformCrypto",
+      "sha256": "5461FF6E3E9A4EEB38A7550D401F5AB3E7737FE18A431C405F20243A70C095B8",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\PythonScriptPlugin\\PythonScriptPlugin.uplugin",
+      "name": "PythonScriptPlugin",
+      "sha256": "BD796B32B69F8C4113E0B2547EE12E3620507C063F23090D5CC6042AD387B5CB",
+      "enabledDependencies": [
+        "ContentBrowserFileDataSource"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\RuntimeTelemetry\\RuntimeTelemetry.uplugin",
+      "name": "RuntimeTelemetry",
+      "sha256": "17D4FBA2E68663A8E97904CDCB2ADA4D34409AB02AD1E9F083E6B48ADDDDD726",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\SequenceNavigator\\SequenceNavigator.uplugin",
+      "name": "SequenceNavigator",
+      "sha256": "99F0651B5D1FCA46C64CCCBE2F6117D83A25E1F37B516F730E23C8A1CC4CE8BA",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\SkeletalReduction\\SkeletalReduction.uplugin",
+      "name": "SkeletalReduction",
+      "sha256": "71C3B683DFF452610C743590D02B423BDCD8A2B5B6478E4D6AF61DDD5C240E10",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\ToolPresets\\ToolPresets.uplugin",
+      "name": "ToolPresets",
+      "sha256": "499777615723E85F641AA1CFF9CDC48FCB727834D1CB5CB2C38158BC91EF001F",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Experimental\\Water\\Water.uplugin",
+      "name": "Water",
+      "sha256": "83C357A92D54FF2E5EC2D28FC134AB4F1BCDAF463B3DD51D45F2C551480D3493",
+      "enabledDependencies": [
+        "Landmass",
+        "Niagara",
+        "GeometryProcessing",
+        "BlueprintMaterialTextureNodes"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\FX\\Cascade\\Cascade.uplugin",
+      "name": "Cascade",
+      "sha256": "76E8942087BAF6DEBAA110305993DF480D7616282AF66E8C9E39A246AFB166D0",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\FX\\Niagara\\Niagara.uplugin",
+      "name": "Niagara",
+      "sha256": "C719837E3542EAB8FF412BBE5CE45B94615CAE634720186B93D1775F846A0350",
+      "enabledDependencies": [
+        "PythonScriptPlugin"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\FX\\NiagaraInsights\\NiagaraInsights.uplugin",
+      "name": "NiagaraInsights",
+      "sha256": "1539B98C41D3EDAAD3A01B64BCF1631392F6985D6DCC8DF16413317F181F9B6A",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\FX\\NiagaraPreviewContent\\NiagaraPreviewContent.uplugin",
+      "name": "NiagaraPreviewContent",
+      "sha256": "78226F72E9CAE202468BEC0DF2230A16D3DA8ACFD1E1306B77BEECCE94781A99",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\FX\\NiagaraSimCaching\\NiagaraSimCaching.uplugin",
+      "name": "NiagaraSimCaching",
+      "sha256": "BAE9B9628E6EC0520AC593AEE49B7161D94680774B3EF73E7C0678FDEFEB35CD",
+      "enabledDependencies": [
+        "Takes",
+        "Niagara"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Importers\\AlembicImporter\\AlembicImporter.uplugin",
+      "name": "AlembicImporter",
+      "sha256": "86FEB0595ACF7950972E7AE7631AB12FAF7440E788D555096293FF6EB2AC5D5D",
+      "enabledDependencies": [
+        "GeometryCache"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Interchange\\Assets\\InterchangeAssets.uplugin",
+      "name": "InterchangeAssets",
+      "sha256": "331248276182B1887418493F57C271C4C1310A85E99D8E99A487B7C066564BDF",
+      "enabledDependencies": [
+        "BaseMaterial"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Interchange\\Editor\\InterchangeEditor.uplugin",
+      "name": "InterchangeEditor",
+      "sha256": "954E69845EE848755EE8EE4DBA5A8E11F4D4B47D988FA5B81388C0B3EBB63BD6",
+      "enabledDependencies": [
+        "Interchange"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Interchange\\Runtime\\Interchange.uplugin",
+      "name": "Interchange",
+      "sha256": "B7B4BDD3E6D1A8D7F862C75F90B9372058FC121FB46C3B6A767B89AEC79B3672",
+      "enabledDependencies": [
+        "HairStrands",
+        "GeometryCache",
+        "GeometryProcessing",
+        "VariantManagerContent",
+        "VariantManager",
+        "InterchangeAssets"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\IoStoreInsights\\IoStoreInsights.uplugin",
+      "name": "IoStoreInsights",
+      "sha256": "7398AA403DC2AB223FC424E86EDB82F562D9B95822FEA220E75EC4ADFFB2117C",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MassInsights\\MassInsights.uplugin",
+      "name": "MassInsights",
+      "sha256": "8804F82EE52DA5746C2834A5E5468B8A6B3723778F2A113F45607C9CC2ECC037",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\AndroidMedia\\AndroidMedia.uplugin",
+      "name": "AndroidMedia",
+      "sha256": "57AD402C146C720339662568AEB95442A0257117C346D4C367D0703E0D655CEE",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\AvfMedia\\AvfMedia.uplugin",
+      "name": "AvfMedia",
+      "sha256": "E6BF4FB3289C2C91E30CF0E5247CF051D90C01CD2D088F7E60782FF0E4D85DEA",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\ImgMedia\\ImgMedia.uplugin",
+      "name": "ImgMedia",
+      "sha256": "A436B306A24E41FC5DB3144ED9FC2CB41F1B8BF4E65EDD2E0805708B17D525C4",
+      "enabledDependencies": [
+        "TmvMedia",
+        "MediaPlayerEditor"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\MediaCompositing\\MediaCompositing.uplugin",
+      "name": "MediaCompositing",
+      "sha256": "3157387DEB7CB90789CDEB36490C68FC27C893CF18926ECB536DE8ADF5233F65",
+      "enabledDependencies": [
+        "ImgMedia"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\MediaPlate\\MediaPlate.uplugin",
+      "name": "MediaPlate",
+      "sha256": "36E3CF136BDD47504E350FE6AD0841D3C9ECD8EA88ED2DF967F8A84EEEEBE92D",
+      "enabledDependencies": [
+        "MediaCompositing",
+        "MediaPlayerEditor",
+        "MeshModelingToolset",
+        "CompositeCore"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\MediaPlayerEditor\\MediaPlayerEditor.uplugin",
+      "name": "MediaPlayerEditor",
+      "sha256": "6B21BBF9882F8FE54373353F6988050566578396E4F5D1A36F861D20617598FC",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\MP4Utilities\\MP4Utilities.uplugin",
+      "name": "MP4Utilities",
+      "sha256": "572894558FFFE5622D60E9A907023B29D9A4B6ED6185DA97C2841F0B0D7771C9",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\TmvMedia\\TmvMedia.uplugin",
+      "name": "TmvMedia",
+      "sha256": "30E4D97918DA85A64B31F2A236703FB9B17CA95F8A6CE4B29962214054C0D1FA",
+      "enabledDependencies": [
+        "MP4Utilities"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\WebMMedia\\WebMMedia.uplugin",
+      "name": "WebMMedia",
+      "sha256": "78426A8BA108294AA90AB46D5983FB359E9A70744864E49803AC3FF6021A8463",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Media\\WmfMedia\\WmfMedia.uplugin",
+      "name": "WmfMedia",
+      "sha256": "5FFFE1A8F7EEFE215DD67624A310B468E4C2010FD935B9CC6BA6F7B622FCC930",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MeshPainting\\MeshPainting.uplugin",
+      "name": "MeshPainting",
+      "sha256": "1AD85A1BB4D2368D39271E6B988F85F1E1F31939E131B99E027B944DE3013EED",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "InterchangeEditor"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MetaHuman\\MetaHumanSDK\\MetaHumanSDK.uplugin",
+      "name": "MetaHumanSDK",
+      "sha256": "8B5C0ABC8F7D7B07D7996C10A8E059B4134EE8380A1BB546C59253FF12AC316B",
+      "enabledDependencies": [
+        "EditorScriptingUtilities",
+        "ControlRig",
+        "HairStrands",
+        "RigLogic",
+        "Interchange",
+        "EOSShared"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MovieScene\\ActorSequence\\ActorSequence.uplugin",
+      "name": "ActorSequence",
+      "sha256": "19860BD01105527B12FA2BD0D1296547C1940B6D102A4B6A9048EE2BA6656069",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MovieScene\\LevelSequenceEditor\\LevelSequenceEditor.uplugin",
+      "name": "LevelSequenceEditor",
+      "sha256": "0157730DBF2118439365455EE7F65283B608D40AA6E698A245E9A9028EF8C35B",
+      "enabledDependencies": [
+        "SequencerScripting"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MovieScene\\SequencerScripting\\SequencerScripting.uplugin",
+      "name": "SequencerScripting",
+      "sha256": "EFC7EAE868E8F897E8B5C00F8A39B2109A71D57104BF3C22E032D8D05D253959",
+      "enabledDependencies": [
+        "PythonScriptPlugin"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MovieScene\\SequenceValidator\\SequenceValidator.uplugin",
+      "name": "SequenceValidator",
+      "sha256": "B93A6CA597D5C6353E1A568C2808C1710E9220D9FEA66B61834442C66CC42971",
+      "enabledDependencies": [
+        "LevelSequenceEditor"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\MovieScene\\TemplateSequence\\TemplateSequence.uplugin",
+      "name": "TemplateSequence",
+      "sha256": "F9A6428B93791BBD5B4D9FA87CBCD941B0E06C802454B3D1FECEE65DDFBE30AE",
+      "enabledDependencies": [
+        "LevelSequenceEditor"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Mutable\\Mutable.uplugin",
+      "name": "Mutable",
+      "sha256": "DFF412C3E1BC9E633AA27F61C9A83FB8BBE2F3CAFB9F981DD7D60FC869BC1AA5",
+      "enabledDependencies": [
+        "SkeletalMerging",
+        "DataValidation"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\NNE\\NNEDenoiser\\NNEDenoiser.uplugin",
+      "name": "NNEDenoiser",
+      "sha256": "10A1189B0E2A7F43BBD5D75091CE4218D4F38EF4A7F82EA8AED6701620820C14",
+      "enabledDependencies": [
+        "NNERuntimeORT"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\NNE\\NNERuntimeORT\\NNERuntimeORT.uplugin",
+      "name": "NNERuntimeORT",
+      "sha256": "26D241E4DA0DA793F15EFF47AFC87BDE31CAF164D0FC07B2B23755CEE6014ECB",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\Android\\OnlineSubsystemGooglePlay\\OnlineSubsystemGooglePlay.uplugin",
+      "name": "OnlineSubsystemGooglePlay",
+      "sha256": "92B1D39408425D1DB7D248279FEDDEFD3C5B7C6BB861987D310872625C79355A",
+      "enabledDependencies": [
+        "OnlineSubsystem",
+        "AndroidPermission"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\EOSShared\\EOSShared.uplugin",
+      "name": "EOSShared",
+      "sha256": "035E6D52E89F44357C3E330C380277805BD1E742D8E3DF19DF121F81FCFD55EF",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\IOS\\OnlineSubsystemIOS\\OnlineSubsystemIOS.uplugin",
+      "name": "OnlineSubsystemIOS",
+      "sha256": "F773EBC6562EC8970E9BF8F0DBDCA7D93B1DF38A9AF08A2EFC39E6F24476AD80",
+      "enabledDependencies": [
+        "OnlineSubsystem"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\OnlineBase\\OnlineBase.uplugin",
+      "name": "OnlineBase",
+      "sha256": "548582891C50755DBC5B4AA379A8CC323400150CE7FE9D80499299A1BFA8EB12",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\OnlineServices\\OnlineServices.uplugin",
+      "name": "OnlineServices",
+      "sha256": "D28C8E501BD1DEE9EDF6AE382DD9298DD5D3E9CE03A341FAA862BE6C556187F2",
+      "enabledDependencies": [
+        "OnlineBase"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\OnlineSubsystem\\OnlineSubsystem.uplugin",
+      "name": "OnlineSubsystem",
+      "sha256": "7EAA206C5060F90AB7B860A856F398187A4920BDC040A23CBEEBE0FD4C8B0D06",
+      "enabledDependencies": [
+        "OnlineBase"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\OnlineSubsystemNull\\OnlineSubsystemNull.uplugin",
+      "name": "OnlineSubsystemNull",
+      "sha256": "11AC96DE7926CFF8984FB6316E71BC2F5ABA2093B40D63D5E60825746610BF90",
+      "enabledDependencies": [
+        "OnlineSubsystem",
+        "OnlineSubsystemUtils"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Online\\OnlineSubsystemUtils\\OnlineSubsystemUtils.uplugin",
+      "name": "OnlineSubsystemUtils",
+      "sha256": "326E9C9ADCEDD913F0B3962ED594128DEC178B8A5AD6DCF02D3EFA6613CD9386",
+      "enabledDependencies": [
+        "OnlineSubsystem",
+        "OnlineServices"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\PCG\\PCG.uplugin",
+      "name": "PCG",
+      "sha256": "6309DFB08E39F55E3E40929FB9DCD9FC0D4063CFA05265E85C599E1A255342BE",
+      "enabledDependencies": [
+        "EditorScriptingUtilities",
+        "ComputeFramework",
+        "GeometryProcessing",
+        "MeshModelingToolset"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Performance\\AutomatedPerfTestTools\\AutomatedPerfTestTools.uplugin",
+      "name": "AutomatedPerfTestTools",
+      "sha256": "6B390BF62A85A7EB4122FB452350D0E79C537DB92CB3D25523DC5E46DEBE20CB",
+      "enabledDependencies": [
+        "ProjectLauncher"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Portal\\LauncherChunkInstaller\\LauncherChunkInstaller.uplugin",
+      "name": "LauncherChunkInstaller",
+      "sha256": "5E0B6BA073E322CEAC6928AE955089FC1C5AA92B64E97011BD87B55536F06B8F",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\RenderGraphInsights\\RenderGraphInsights.uplugin",
+      "name": "RenderGraphInsights",
+      "sha256": "2E8088B193DACEC4C83E91172A33D1BB6405EAD2FEE85B05C4FCE5AF4D9A4D5D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\RenderTraceInsights\\RenderTraceInsights.uplugin",
+      "name": "RenderTraceInsights",
+      "sha256": "CE2CE83B30B751A3D0D776B4E82E41B5318C93ACBCF90D820857DDE5669C7F7B",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ActorLayerUtilities\\ActorLayerUtilities.uplugin",
+      "name": "ActorLayerUtilities",
+      "sha256": "8104669719208FB355399FFC343E24F7F28B0B740643A5038C8F93FEE41A2DD1",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AndroidDeviceProfileSelector\\AndroidDeviceProfileSelector.uplugin",
+      "name": "AndroidDeviceProfileSelector",
+      "sha256": "E08E75C9A35DD74868028D6FB207C367A85B1569D096F75AD8E2FC7EE3BC9AD7",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AndroidFileServer\\AndroidFileServer.uplugin",
+      "name": "AndroidFileServer",
+      "sha256": "FF5E3CB2C16238BB7ED48AD1509D22D40D257496D035830F29F5660EE59E442D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AndroidMoviePlayer\\AndroidMoviePlayer.uplugin",
+      "name": "AndroidMoviePlayer",
+      "sha256": "7A5BF14844F220DF065A6DF8FBCAF08FCD6D641645BA817732934C613AC749E8",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AndroidPermission\\AndroidPermission.uplugin",
+      "name": "AndroidPermission",
+      "sha256": "B9EAE81DC33ED484E4B4EF1B916BFD9D0E163D772CB792A91245B97382517FEC",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AppleImageUtils\\AppleImageUtils.uplugin",
+      "name": "AppleImageUtils",
+      "sha256": "1D8B56A1EAE9F247F09307209CB70E786303021243A493CADE24E18F38D2A2FA",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AppleMoviePlayer\\AppleMoviePlayer.uplugin",
+      "name": "AppleMoviePlayer",
+      "sha256": "7F1681006AC6DC66FBABC893F72EA25F7EBA09A6FCB91A3F3D8B4860925D9501",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ArchVisCharacter\\ArchVisCharacter.uplugin",
+      "name": "ArchVisCharacter",
+      "sha256": "824AD22101284EA59CEC24F548EF4A171C94B43A684863DA1BC3EBEB305B266D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AssetTags\\AssetTags.uplugin",
+      "name": "AssetTags",
+      "sha256": "A8D424F767A3B0A44B802AAEAB687E9235A6DB8978DD1AE4F64E932D4EE64603",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AudioCapture\\AudioCapture.uplugin",
+      "name": "AudioCapture",
+      "sha256": "8B585386521FDFBEA54E8B0013866181BAE6FFC48AC94204362773C4C5B7B38A",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AudioSynesthesia\\AudioSynesthesia.uplugin",
+      "name": "AudioSynesthesia",
+      "sha256": "61E49182A88A02745794B3E5329A883086B8E14846080FE571032FCD558CCE38",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\AudioWidgets\\AudioWidgets.uplugin",
+      "name": "AudioWidgets",
+      "sha256": "77BEC7F8A2D2A30E85FE6249FD61FBD24F72B971872F9A26FB3EB72C84952E72",
+      "enabledDependencies": [
+        "AudioSynesthesia"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\CableComponent\\CableComponent.uplugin",
+      "name": "CableComponent",
+      "sha256": "5E70901F794838C0D15534FAA11AACE8DE9D95E13F43C21AD2E56E117911153E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ChunkDownloader\\ChunkDownloader.uplugin",
+      "name": "ChunkDownloader",
+      "sha256": "377D1F84C6D97D4AFBD57E98674378652A001C7BC9861998584C9E5DFEE5736E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ComputeFramework\\ComputeFramework.uplugin",
+      "name": "ComputeFramework",
+      "sha256": "DE07291D66DAECD86AC62556C452905AD17195C373E79C3048C0A87219A93550",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\CustomMeshComponent\\CustomMeshComponent.uplugin",
+      "name": "CustomMeshComponent",
+      "sha256": "9383074814C91D07F82A26D6DD797294B5D702033A3BAB967399308306F03765",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\Database\\SQLiteCore\\SQLiteCore.uplugin",
+      "name": "SQLiteCore",
+      "sha256": "6D6C3F26E26DD4FE65280ADE72D8394777539A6051CAB95AF6C5168BDDE92A0E",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ExampleDeviceProfileSelector\\ExampleDeviceProfileSelector.uplugin",
+      "name": "ExampleDeviceProfileSelector",
+      "sha256": "D935F3FFBF62A4C8402BAA3ADDD75840BAF74E142D40E0C2EDA4584A57BEC163",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GeometryCache\\GeometryCache.uplugin",
+      "name": "GeometryCache",
+      "sha256": "89F18CF79EC4442C71F80AE48B0DACD98921C06D8F30427479F32E7F7C977292",
+      "enabledDependencies": [
+        "Niagara"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GeometryProcessing\\GeometryProcessing.uplugin",
+      "name": "GeometryProcessing",
+      "sha256": "2C0DDB8DC21C9560844C0D3BD4D1531A6988ACEE84B8C7C59C34CAC2F1C6BBB1",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GeometryScripting\\GeometryScripting.uplugin",
+      "name": "GeometryScripting",
+      "sha256": "B4F110A7231BBEC02EE58C94CB4C269B75BB1D54EE9089FA2B49B8DAD883628C",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "MeshModelingToolset",
+        "PlanarCut"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GoogleCloudMessaging\\GoogleCloudMessaging.uplugin",
+      "name": "GoogleCloudMessaging",
+      "sha256": "D7D817ECBD9BA7DF6D07421E8FB8A6957B9DB7B8D9E26179AA942DF372BE2B0D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GooglePAD\\GooglePAD.uplugin",
+      "name": "GooglePAD",
+      "sha256": "ED5645C2857C41B44634167CB659240D628A61078D227CA503932331958A4414",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\HairStrands\\HairStrands.uplugin",
+      "name": "HairStrands",
+      "sha256": "FACD132092E26FBA918538C13B73E6AEB0D4DCFF798DDFB393B9980C08FD8C47",
+      "enabledDependencies": [
+        "Niagara",
+        "GeometryCache",
+        "DeformerGraph",
+        "Dataflow",
+        "ComputeFramework"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\InputDebugging\\InputDebugging.uplugin",
+      "name": "InputDebugging",
+      "sha256": "F55046C8A221A572341983949174583ECBC0BAC7BA200CC0C82EF8A9844D6371",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\IOSDeviceProfileSelector\\IOSDeviceProfileSelector.uplugin",
+      "name": "IOSDeviceProfileSelector",
+      "sha256": "F79BD00BACBA9DEA60D9ED255EF3EF6010C540DE7208C432CBDF2FA365B3CE08",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\LinuxDeviceProfileSelector\\LinuxDeviceProfileSelector.uplugin",
+      "name": "LinuxDeviceProfileSelector",
+      "sha256": "6C015EB8C6CE023BA96161A9068FC1573BDDF38093849BE049D66E2A1099513B",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\LocationServicesBPLibrary\\LocationServicesBPLibrary.uplugin",
+      "name": "LocationServicesBPLibrary",
+      "sha256": "B746D16EB89DFA8037EB02DA0BD33FD200ADC7BA249F72A7C0E17C5346FABF59",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\MeshModelingToolset\\MeshModelingToolset.uplugin",
+      "name": "MeshModelingToolset",
+      "sha256": "3AF0BCD77A7995AE1872DBF174B553E737FE53B3D6E2EF36ED10F3D2EF5436B7",
+      "enabledDependencies": [
+        "GeometryProcessing",
+        "ProxyLODPlugin",
+        "PlanarCut",
+        "GeometryCache"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\Metasound\\Metasound.uplugin",
+      "name": "Metasound",
+      "sha256": "DA4A4EBAF2E26447C99A2742D008E1B799D5FC7C28FC154CA8732B4991C86E1E",
+      "enabledDependencies": [
+        "AudioWidgets",
+        "AudioSynesthesia",
+        "ContentBrowserAssetDataSource",
+        "WaveTable",
+        "ModelViewViewModel"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\MobilePatchingUtils\\MobilePatchingUtils.uplugin",
+      "name": "MobilePatchingUtils",
+      "sha256": "A990E268EA865067AFFAE5BE677FAA674F4F858126D53BB01062D47A668A6CF7",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ModelViewViewModel\\ModelViewViewModel.uplugin",
+      "name": "ModelViewViewModel",
+      "sha256": "FAB29E590D80B14757B32DBB364572F0974D6E54FE3BA0483573BB69B894A732",
+      "enabledDependencies": [
+        "EnhancedInput"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\MsQuic\\MsQuic.uplugin",
+      "name": "MsQuic",
+      "sha256": "9149ADC3E4DD2004D90A7A4F8C77F8886C1C2433F306B85112312B99649D9092",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ProceduralMeshComponent\\ProceduralMeshComponent.uplugin",
+      "name": "ProceduralMeshComponent",
+      "sha256": "E5349272FF487A5F1C6019F0F94F1F96F2D6C674205081DC9293DB9214966F1D",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\PropertyAccess\\PropertyAccessEditor.uplugin",
+      "name": "PropertyAccessEditor",
+      "sha256": "10B2BF4D8A1D59B9F0B1B081FCC9BA4E1B9CC037C4E0019FE206C0A319336A97",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\PropertyBindingUtils\\PropertyBindingUtils.uplugin",
+      "name": "PropertyBindingUtils",
+      "sha256": "180B7C732C1907A8E3BB6C65CD9C1F417E6B5795133ED3B2E885FBFBE619C0C8",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\ResonanceAudio\\ResonanceAudio.uplugin",
+      "name": "ResonanceAudio",
+      "sha256": "ACAD0D757E5940A91F55C747E731B4732EA924E0C2D822495990FE6476AA64A9",
+      "enabledDependencies": [
+        "ProceduralMeshComponent"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\RigVM\\RigVM.uplugin",
+      "name": "RigVM",
+      "sha256": "A5CBD6E56D57E7A6249B7C9EBC4861FA4B5E17FA194DC738947FC50750B8956A",
+      "enabledDependencies": [
+        "GameplayInsights",
+        "Scribble",
+        "PythonScriptPlugin"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\SignificanceManager\\SignificanceManager.uplugin",
+      "name": "SignificanceManager",
+      "sha256": "A6FC7EF1051EEA4075A872D0CAFF2FC9A30A8F6241A60DF9AAF78D1EB1130A87",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\SkeletalMerging\\SkeletalMerging.uplugin",
+      "name": "SkeletalMerging",
+      "sha256": "36BBFB01923C15C8DF3161762945A2632F7961AA2B4AF9F5E777B4A9DA90468C",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\SoundFields\\SoundFields.uplugin",
+      "name": "SoundFields",
+      "sha256": "649CACC31292D7C8897FBB3BDB93997182104E850880C7BC5A92C170C8999902",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\StateTree\\StateTree.uplugin",
+      "name": "StateTree",
+      "sha256": "7A4C680317080232FAE2C6BD7AFCBA216AD46BC93992C37FBF6106A8333F5068",
+      "enabledDependencies": [
+        "GameplayInsights",
+        "PropertyAccessEditor",
+        "PropertyBindingUtils"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\Synthesis\\Synthesis.uplugin",
+      "name": "Synthesis",
+      "sha256": "4DE96BD8DC7309AEB13AE18D2090AF687F228E881ABBB3C3639D0BFC77E7CF70",
+      "enabledDependencies": [
+        "AudioSynesthesia"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\WaveTable\\WaveTable.uplugin",
+      "name": "WaveTable",
+      "sha256": "106576D629903B09852F24B9E9C4A30A11C25025CD08C1FE6B1C525B25409144",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\WebMMoviePlayer\\WebMMoviePlayer.uplugin",
+      "name": "WebMMoviePlayer",
+      "sha256": "E6EEC62B3EDD3B53EF44D88261CFDC01083AFAB7EB6932840747C30A120A5D3D",
+      "enabledDependencies": [
+        "WebMMedia"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\Windows\\XInputDevice\\XInputDevice.uplugin",
+      "name": "XInputDevice",
+      "sha256": "F085B865AFD1BC8C2FFF00E70EFC7633EF950D5E6944C88AA3D1135A3A1F9C18",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\WindowsDeviceProfileSelector\\WindowsDeviceProfileSelector.uplugin",
+      "name": "WindowsDeviceProfileSelector",
+      "sha256": "B73975D3F7D7CD2151D772D0CE379E62916FEE2B360693C71247C03D10A29BED",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\WindowsMoviePlayer\\WindowsMoviePlayer.uplugin",
+      "name": "WindowsMoviePlayer",
+      "sha256": "83CA0C718B85810F09E7994A8C36823CF38282B54DD305EA8814C657BA1B5E16",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\Tests\\InterchangeTests\\InterchangeTests.uplugin",
+      "name": "InterchangeTests",
+      "sha256": "6E1E6767D61A5B967995CD6C3EBB6C18BF5B20B870B0278B0FE91D11D915A745",
+      "enabledDependencies": [
+        "Interchange",
+        "VariantManagerContent",
+        "EditorScriptingUtilities"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\TraceUtilities\\TraceUtilities.uplugin",
+      "name": "TraceUtilities",
+      "sha256": "09C44515D522FCBD430449DF7FE4C84B9487AE82EEFE53B2996EE9C73C48BAE3",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\UbaController\\UbaController.uplugin",
+      "name": "UbaController",
+      "sha256": "B1018454F57D13A8CFD0D6E9A2C8352F36562915792D34F43CD55F25BFF90E45",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\VirtualProduction\\Takes\\Takes.uplugin",
+      "name": "Takes",
+      "sha256": "C46030A406E3C0C48FDEC363A73A90AF824A60B8418864E41EBE4F6DF0B6A96C",
+      "enabledDependencies": [
+        "AudioCapture",
+        "LevelSequenceEditor",
+        "NamingTokens"
+      ]
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\WorldMetrics\\WorldMetrics.uplugin",
+      "name": "WorldMetrics",
+      "sha256": "3268B5CC4FA9C1EB904EA64BD15945E9D449F7293B489B7052C1F3F27D9110F2",
+      "enabledDependencies": []
+    },
+    {
+      "path": "E:\\Program Files\\UE_5.8\\Engine\\Plugins\\XGEController\\XGEController.uplugin",
+      "name": "XGEController",
+      "sha256": "C1630FA1AAE5B018A0C8FADD7EC9244081228467F61787AAC8EAED38C8E179AF",
+      "enabledDependencies": []
+    }
+  ]
+}

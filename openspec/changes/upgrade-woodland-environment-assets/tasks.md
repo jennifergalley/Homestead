@@ -1,5 +1,12 @@
 # Tasks
 
+Current17:55 read-only diagnosis is complete; see
+`native-settings-diagnosis.md`. Config logical-name handling, optional AutoSDK
+validation and DDC structural-node classification have supported corrections,
+but Python is re-enabled by dependencies and strict module absence affects
+the import plugin graph. Nothing was corrected or relaunched in this
+diagnosis. Task1.3 remains unchecked; CLI progress4/29. Runtime hold remains.
+
 Current17:48: one real native settings attempt FAILED/exit4 after a separately
 retained pre-process binding failure. Root-only job and unchanged marker
 release were observed; effective config/Python checks failed and no successful

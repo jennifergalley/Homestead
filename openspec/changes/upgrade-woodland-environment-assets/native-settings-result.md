@@ -1,5 +1,9 @@
 # One real settings probe: failed, cleaned up, no retry
 
+Read-only follow-up: `native-settings-diagnosis.md` explains the observed
+config/Python/DDC/AutoSDK results without changing the failed result,
+assertions, reservations or launch authority.
+
 2026-09-20,17:48 Arizona. Run20260920-182217-d1f84e39.
 OpenSpec remains4/29; task1.3 is unchecked. No import/cook/Pak/Shipping or
 environment visual upgrade occurred.
