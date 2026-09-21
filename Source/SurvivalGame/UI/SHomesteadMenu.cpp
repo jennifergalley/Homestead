@@ -645,6 +645,16 @@ void SHomesteadMenu::ChangePage(int32 Page)
     Controller->MenuPage(Page);
     Refresh();
 }
+bool SHomesteadMenu::FocusLegacySubject(int32 Id)
+{
+    const int32 Index = Entries.IndexOfByPredicate([Id](const FHomesteadRow& Row)
+        { return Row.Subject == EHomesteadMenuSubject::Legacy && Row.Id == Id; });
+    if (Index < 0) return false;
+    Region = ERegion::Content;
+    Hover = INDEX_NONE;
+    Select(Index);
+    return true;
+}
 void SHomesteadMenu::CycleRegion(int32 Direction)
 {
     TArray<ERegion> Regions = {ERegion::Tabs};

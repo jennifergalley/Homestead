@@ -25,10 +25,8 @@
 
 AHomesteadVisualPlaytest::AHomesteadVisualPlaytest()
 {
-#if !UE_BUILD_SHIPPING
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = HomesteadAutomatedActorsEnabled();
     PrimaryActorTick.TickGroup = TG_PostUpdateWork;
-#endif
 }
 
 void AHomesteadVisualPlaytest::Tap(FKey Key)
@@ -170,8 +168,8 @@ void AHomesteadVisualPlaytest::Prepare()
         PresentationSettings.Add(TEXT("Output is GPU-rendered game framebuffer, NOT physical scanout. Actual DXGI Present flags/interval, DWM composition and VRR engagement are not observed."));
         PresentationSettings.Add(TEXT("Timing records instrumented actor-tick wall intervals, NOT GPU duration or present timestamps. Only timing-* precedes all screenshot requests; capture-* is readback-disturbed and visits different positions, not a controlled performance A/B."));
         PresentationSettings.Add(TEXT("Runtime CVars and user settings are recorded separately. output_target is not the internal temporal-upscaler input resolution; auto/default resolution policy may require further evidence."));
-        RecordPresentationSettings(TEXT("start"));
     }
+    RecordPresentationSettings(TEXT("start"));
     LastWallTime = FPlatformTime::Seconds();
 }
 
@@ -249,6 +247,13 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         Prepare();
         if (bFinished) return;
         Elapsed = 0;
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"))
+        && IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-qa.txt"))))
+    {
+        Observations.Add(TEXT("FAILED Shipping QA cancelled by its owned supervisor."));
+        Finish();
+        return;
     }
     if (bForageRenewal) { TickRenewal(DeltaSeconds); return; }
     if (bEndurance) { TickEndurance(DeltaSeconds); return; }
@@ -373,12 +378,12 @@ void AHomesteadVisualPlaytest::Finish()
         *FPaths::Combine(OutputDirectory, TEXT("observations.txt"))) && Saved;
     if (bPresentationDiagnostics)
     {
-        RecordPresentationSettings(TEXT("end"));
         Saved = FFileHelper::SaveStringToFile(FString::Join(PresentationTimings, TEXT("\n")) + TEXT("\n"),
             *FPaths::Combine(OutputDirectory, TEXT("presentation-timings.csv"))) && Saved;
-        Saved = FFileHelper::SaveStringToFile(FString::Join(PresentationSettings, TEXT("\n")) + TEXT("\n"),
-            *FPaths::Combine(OutputDirectory, TEXT("presentation-settings.txt"))) && Saved;
     }
+    RecordPresentationSettings(TEXT("end"));
+    Saved = FFileHelper::SaveStringToFile(FString::Join(PresentationSettings, TEXT("\n")) + TEXT("\n"),
+        *FPaths::Combine(OutputDirectory, TEXT("presentation-settings.txt"))) && Saved;
     if (!Saved) UE_LOG(LogTemp, Error, TEXT("Visual playtest could not persist all evidence files."));
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
     const bool Complete = bPresentationDiagnostics ? PassIndex >= Passes.Num() && !Passes.IsEmpty() && CaptureIndex > 0
@@ -386,5 +391,7 @@ void AHomesteadVisualPlaytest::Finish()
         : bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
         : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered
         : bReachedForage && Gathered && bObservedGather && bGatherRecovered;
-    FPlatformMisc::RequestExitWithStatus(false, Saved && Complete ? 0 : 1);
+    const bool Cancelled = FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"))
+        && IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-qa.txt")));
+    FPlatformMisc::RequestExitWithStatus(false, Saved && Complete && !Cancelled ? 0 : 1);
 }

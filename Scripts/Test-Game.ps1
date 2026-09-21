@@ -4,12 +4,13 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
-    [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200)
+    [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA)
 $ErrorActionPreference = 'Stop'
 if ($NativeMenuQuit) { $NativeMenu = $true }
 if ($NativeMenu -and ($BookClarity -or $Prompts -or $Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Native menu checks run separately from other acceptance modes.'
 }
+if ($ShippingQA -and $RenderScale -ne 100) { throw 'Shipping QA preserves normal resolution policy; render-scale console overrides are not admitted.' }
 if ($BookClarity -and ($Prompts -or $Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Book clarity fixtures run separately from other acceptance modes.'
 }
@@ -39,8 +40,10 @@ $root = Split-Path $PSScriptRoot -Parent
 $project = Join-Path $root 'SurvivalGame.uproject'
 $output = Join-Path $root 'Saved\Automation'
 if ($Packaged) {
-    $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-    $executable = Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+    $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+    $packageRoot = $package.packageDirectory
+    $executable = $package.executable
+    if (($package.configuration -eq 'Shipping') -ne [bool]$ShippingQA) { throw 'Shipping automated smoke requires explicit -ShippingQA; it is not a Development override.' }
     if (-not (Test-Path -LiteralPath $executable)) { throw 'Package the Windows game before running packaged integration tests.' }
     $output = Join-Path $output 'Packaged'
     $prefix = ''
@@ -52,6 +55,9 @@ if ($Packaged) {
     $prefix = "`"$project`" /Game/SurvivalGame/Maps/Homestead -game "
 }
 if ($OutputDirectory) { $output = [IO.Path]::GetFullPath($OutputDirectory, $root) }
+if ($ShippingQA -and (-not $Packaged -or -not $OutputDirectory -or $Weeding -or (Test-Path -LiteralPath $output))) {
+    throw 'Shipping QA requires a packaged route and explicit fresh output; injected weeding fixtures are not admitted.'
+}
 $null = New-Item -ItemType Directory -Path $output -Force
 if ($Weeding) { & (Join-Path $PSScriptRoot 'Initialize-TestWorldFixture.ps1') -SourceSave $FixtureSave -OutputDirectory $output }
 $report = Join-Path $output 'smoke-result.txt'
@@ -116,16 +122,26 @@ if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
-$arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -ExecCmds=`"r.ScreenPercentage $RenderScale`" -nosplash $audioArguments $loopArguments -abslog=`"$log`""
-$process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
-Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
-Write-Host "Requested output: ${Width}x${Height}; 3D screen percentage: $RenderScale."
-if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+$scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage $RenderScale`"" }
+$arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
+if ($ShippingQA) { $arguments += ' -HomesteadShippingQA' }
+if ($ShippingQA) {
+    $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments
+} else {
+    $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
+    Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
+}
+Write-Host "Requested output: ${Width}x${Height}; 3D resolution policy: $(if($ShippingQA){'unchanged Shipping defaults'}else{$RenderScale})."
+if (-not $ShippingQA -and -not $process.WaitForExit($TimeoutSeconds * 1000)) {
     Stop-Process -Id $process.Id
     throw "Engine smoke test exceeded $TimeoutSeconds seconds. Stopped only its process $($process.Id)."
 }
 if (-not (Test-Path -LiteralPath $report)) {
+    if ($ShippingQA -and $process.ExitCode -eq 2) { throw 'Shipping QA admission rejected: explicit single route and fresh isolated output/graphics/user/save directories are required.' }
     throw "The game exited without a smoke-test report (exit $($process.ExitCode)). See $log."
+}
+if ($ShippingQA -and (Get-Content (Join-Path $output 'qa-admission.txt') -Raw) -notmatch 'shipping=1\r?\ntrace_compiled=0\r?\nroute=smoke') {
+    throw 'Actual Shipping QA/trace-disabled admission evidence is missing.'
 }
 $result = Get-Content -LiteralPath $report -Raw
 Write-Output $result

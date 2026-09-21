@@ -22,20 +22,47 @@ namespace Homestead.Authoring
         public uint Flags, ProcessLimit, ActiveProcesses, TotalProcesses, TerminatedForLimits;
         public bool HeldProcessIsMember;
     }
+    public sealed class DirectoryEvidence
+    {
+        public string Path;
+        public uint Volume, IndexHigh, IndexLow, Attributes;
+        public ulong CreationTime;
+    }
+    public sealed class JobMemberEvidence
+    {
+        public uint Pid, NativeError;
+        public string Image, Error;
+        public ulong CreationTime;
+        public bool Member, Exited, IdentityFromHeldRoot;
+        public uint ExitCode;
+    }
+    public sealed class EndpointEvidence
+    {
+        public uint Pid, State;
+        public string Protocol, LocalAddress, RemoteAddress;
+        public int LocalPort, RemotePort;
+    }
 
     // Native process primitive only. Approval, socket policy and run controls belong to its caller.
     public sealed class LeafGuard : IDisposable
     {
         const uint Read = 0x80000000, Write = 0x40000000, ShareRead = 1;
         const uint Inherit = 1, Suspended = 4, ExtendedStartup = 0x80000, UnicodeEnvironment = 0x400;
-        const uint Limits = 0x2008, ObjectSignaled = 0, Timeout = 258;
+        const uint Limits = 0x2008, ObjectSignaled = 0, Timeout = 258, CreateNoWindow = 0x08000000;
         static readonly IntPtr Invalid = new IntPtr(-1);
         IntPtr marker, job, process, thread, input, output;
         readonly object lifetime = new object();
         Timer softDeadline, hardDeadline;
+        readonly System.Diagnostics.Stopwatch deadlineClock = new System.Diagnostics.Stopwatch();
+        public bool CaptureDeadlineArmed { get; private set; }
+        public int CaptureSoftMilliseconds { get; private set; }
+        public int CaptureHardMilliseconds { get; private set; }
         public bool DeadlineStopRequested { get; private set; }
         public bool DeadlineHardStop { get; private set; }
         public string DeadlineError { get; private set; }
+        public string DeadlineProfile { get; private set; }
+        public int SoftDeadlineMilliseconds { get; private set; }
+        public int HardDeadlineMilliseconds { get; private set; }
         public uint ProcessId { get; private set; }
         public ulong ProcessCreationTime { get; private set; }
         public string ImagePath { get; private set; }
@@ -44,6 +71,7 @@ namespace Homestead.Authoring
         public long MarkerHandle { get { return marker.ToInt64(); } }
         public long JobHandle { get { return job.ToInt64(); } }
         public bool Resumed { get; private set; }
+        public uint CreationFlags { get; private set; }
         public bool HardTerminated { get; private set; }
         public uint WhitelistedHandleCount { get { return 3; } }
 
@@ -89,6 +117,10 @@ namespace Homestead.Authoring
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int kind, ref ExtendedLimits limits, uint size);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, out ExtendedLimits limits, uint size, IntPtr returned);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, out Accounting accounting, uint size, IntPtr returned);
+        [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, IntPtr data, uint size, out uint returned);
+        [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+        [DllImport("iphlpapi.dll")] static extern uint GetExtendedTcpTable(IntPtr table, ref uint size, bool order, uint family, int tableClass, uint reserved);
+        [DllImport("iphlpapi.dll")] static extern uint GetExtendedUdpTable(IntPtr table, ref uint size, bool order, uint family, int tableClass, uint reserved);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool IsProcessInJob(IntPtr process, IntPtr job, out bool member);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool InitializeProcThreadAttributeList(IntPtr list, int count, uint flags, ref IntPtr size);
@@ -153,6 +185,21 @@ namespace Homestead.Authoring
             try { return Snapshot(handle, path); }
             finally { Close(ref handle); }
         }
+        public static DirectoryEvidence InspectDirectory(string path)
+        {
+            OrdinaryPath(path);
+            IntPtr handle = CreateFileW(path, 0x80, 7, IntPtr.Zero, 3, 0x02200000, IntPtr.Zero);
+            Check(Valid(handle), "open ordinary directory metadata");
+            try
+            {
+                FileInfo info; Check(GetFileInformationByHandle(handle, out info), "directory identity");
+                if ((info.Attributes & 0x10) == 0 || (info.Attributes & 0x400) != 0)
+                    throw new InvalidOperationException("Ordinary non-reparse directory required.");
+                return new DirectoryEvidence { Path = path, Volume = info.Volume, IndexHigh = info.IndexHigh,
+                    IndexLow = info.IndexLow, Attributes = info.Attributes, CreationTime = info.Creation.Value };
+            }
+            finally { Close(ref handle); }
+        }
         public MarkerEvidence VerifyMarker()
         {
             var current = Snapshot(marker, MarkerBefore.Path);
@@ -165,7 +212,21 @@ namespace Homestead.Authoring
         }
         public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
             string markerPath, string stdoutPath, IDictionary<string, string> overrides)
+            : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, null) { }
+        public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
+            string markerPath, string stdoutPath, IDictionary<string, string> overrides, string exactArgumentLine)
+            : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, exactArgumentLine, false) { }
+        public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
+            string markerPath, string stdoutPath, IDictionary<string, string> overrides, bool detachedConsole)
+            : this(executable, expectedSha256, arguments, directory, markerPath, stdoutPath, overrides, null, detachedConsole) { }
+        public LeafGuard(string executable, string expectedSha256, string[] arguments, string directory,
+            string markerPath, string stdoutPath, IDictionary<string, string> overrides, string exactArgumentLine, bool detachedConsole)
         {
+            if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+            if (exactArgumentLine != null && (arguments.Length != 0 || exactArgumentLine.IndexOf('\0') >= 0))
+                throw new InvalidOperationException("Exact argument line cannot be combined with arguments or contain NUL.");
+            var command = new StringBuilder(Quote(System.IO.Path.GetFullPath(executable)) + " " +
+                (exactArgumentLine ?? string.Join(" ", arguments.Select(Quote))));
             IntPtr attributes = IntPtr.Zero, handles = IntPtr.Zero, environment = IntPtr.Zero;
             bool initializedAttributes = false;
             try
@@ -212,11 +273,11 @@ namespace Homestead.Authoring
                 var startup = new StartupEx(); startup.Startup.Size = (uint)Marshal.SizeOf<StartupEx>();
                 startup.Startup.Flags = 0x100; startup.Startup.Input = input;
                 startup.Startup.Output = output; startup.Startup.Error = output; startup.Attributes = attributes;
-                var command = new StringBuilder(Quote(executable) + " " + string.Join(" ", arguments.Select(Quote)));
                 ulong earliest = (ulong)DateTime.UtcNow.AddSeconds(-1).ToFileTimeUtc();
                 ProcessInfo created;
+                CreationFlags = Suspended | ExtendedStartup | UnicodeEnvironment | (detachedConsole ? 8u : CreateNoWindow);
                 Check(CreateProcessW(executable, command, IntPtr.Zero, IntPtr.Zero, true,
-                    Suspended | ExtendedStartup | UnicodeEnvironment, environment, directory, ref startup, out created), "suspended leaf");
+                    CreationFlags, environment, directory, ref startup, out created), "suspended leaf");
                 process = created.Process; thread = created.Thread; ProcessId = created.Id;
                 Check(AssignProcessToJobObject(job, process), "pre-resume job assignment");
                 var path = new StringBuilder(32768); uint length = (uint)path.Capacity;
@@ -254,15 +315,26 @@ namespace Homestead.Authoring
         }
         public void VerifyJob(uint active)
         {
+            JobEvidence observed = ObserveJobPolicy();
+            if (observed.ActiveProcesses != active)
+                throw new InvalidOperationException("Job count differs: active=" + observed.ActiveProcesses +
+                    ", expected=" + active + ", total=" + observed.TotalProcesses +
+                    ", limitTerminated=" + observed.TerminatedForLimits);
+        }
+        public JobEvidence ObserveJobPolicy()
+        {
             ExtendedLimits limits; Accounting counts; bool member;
             Check(IsProcessInJob(process, job, out member) && member, "held process job identity");
             Check(QueryInformationJobObject(job, 9, out limits, (uint)Marshal.SizeOf<ExtendedLimits>(), IntPtr.Zero), "job policy");
             Check(QueryInformationJobObject(job, 1, out counts, (uint)Marshal.SizeOf<Accounting>(), IntPtr.Zero), "job accounting");
-            if (limits.Basic.Flags != Limits || limits.Basic.Active != 1 || counts.Active != active)
-                throw new InvalidOperationException("Job policy/count differs.");
             LastVerifiedJob = new JobEvidence { Flags = limits.Basic.Flags, ProcessLimit = limits.Basic.Active,
                 ActiveProcesses = counts.Active, TotalProcesses = counts.Total, TerminatedForLimits = counts.Terminated,
                 HeldProcessIsMember = member };
+            if (limits.Basic.Flags != Limits || limits.Basic.Active != 1)
+                throw new InvalidOperationException("Job policy/count differs: flags=" + limits.Basic.Flags +
+                    ", limit=" + limits.Basic.Active + ", active=" + counts.Active +
+                    ", total=" + counts.Total + ", limitTerminated=" + counts.Terminated);
+            return LastVerifiedJob;
         }
         public void Resume()
         {
@@ -270,6 +342,123 @@ namespace Homestead.Authoring
             VerifyJob(1); VerifyMarker();
             Check(ResumeThread(thread) == 1, "first thread resume");
             Resumed = true;
+        }
+        public JobEvidence CaptureExitedJob()
+        {
+            if (!Wait(0)) throw new InvalidOperationException("Exit accounting requires observed process death.");
+            ExtendedLimits limits; Accounting counts; bool member;
+            Check(QueryInformationJobObject(job, 9, out limits, (uint)Marshal.SizeOf<ExtendedLimits>(), IntPtr.Zero), "exited job policy");
+            Check(QueryInformationJobObject(job, 1, out counts, (uint)Marshal.SizeOf<Accounting>(), IntPtr.Zero), "exited job accounting");
+            Check(IsProcessInJob(process, job, out member), "exited held-process membership");
+            if (limits.Basic.Flags != Limits || limits.Basic.Active != 1 || counts.Active != 0)
+                throw new InvalidOperationException("Exited job policy/count differs.");
+            return new JobEvidence { Flags = limits.Basic.Flags, ProcessLimit = limits.Basic.Active,
+                ActiveProcesses = counts.Active, TotalProcesses = counts.Total, TerminatedForLimits = counts.Terminated,
+                HeldProcessIsMember = member };
+        }
+        public JobMemberEvidence[] ObserveJobMembers()
+        {
+            int size = 8 + 64 * IntPtr.Size;
+            IntPtr buffer = Marshal.AllocHGlobal(size);
+            try
+            {
+                uint returned;
+                Check(QueryInformationJobObject(job, 3, buffer, (uint)size, out returned), "job process list");
+                uint assigned = (uint)Marshal.ReadInt32(buffer, 0), count = (uint)Marshal.ReadInt32(buffer, 4);
+                if (count > 64 || count > assigned) throw new InvalidOperationException("Invalid job member count.");
+                var result = new List<JobMemberEvidence>();
+                for (int index = 0; index < count; index++)
+                {
+                    uint pid = checked((uint)Marshal.ReadIntPtr(buffer, 8 + index * IntPtr.Size).ToInt64());
+                    if (pid == ProcessId) { result.Add(ObserveHeldRoot()); continue; }
+                    var item = new JobMemberEvidence { Pid = pid };
+                    IntPtr held = OpenProcess(0x00101000, false, pid);
+                    if (!Valid(held)) item.NativeError = (uint)Marshal.GetLastWin32Error();
+                    try
+                    {
+                        Check(Valid(held), "open listed job member");
+                        var image = new StringBuilder(32768); uint length = (uint)image.Capacity;
+                        Check(QueryFullProcessImageNameW(held, 0, image, ref length), "listed member image");
+                        item.Image = image.ToString();
+                        Time created, exit, kernel, user;
+                        Check(GetProcessTimes(held, out created, out exit, out kernel, out user), "listed member creation");
+                        item.CreationTime = created.Value;
+                        uint state = WaitForSingleObject(held, 0);
+                        Check(state == ObjectSignaled || state == Timeout, "listed member exit state");
+                        item.Exited = state == ObjectSignaled;
+                        bool member; Check(IsProcessInJob(held, job, out member), "listed member association");
+                        item.Member = member;
+                        if (!member && !item.Exited) throw new InvalidOperationException("Live listed process left the owned job.");
+                        uint code; Check(GetExitCodeProcess(held, out code), "listed member exit code");
+                        item.ExitCode = code;
+                    }
+                    catch (Exception error) { item.Error = error.ToString(); }
+                    finally { Close(ref held); }
+                    result.Add(item);
+                }
+                return result.ToArray();
+            }
+            finally { Marshal.FreeHGlobal(buffer); }
+        }
+        public JobMemberEvidence ObserveHeldRoot()
+        {
+            if (!Valid(process)) throw new InvalidOperationException("Root handle has been released.");
+            bool exited = Wait(0), member;
+            uint code;
+            Check(GetExitCodeProcess(process, out code), "held root exit code");
+            Check(IsProcessInJob(process, job, out member), "held root membership");
+            if (!member && !exited) throw new InvalidOperationException("Live root left its owned job.");
+            return new JobMemberEvidence { Pid = ProcessId, Image = ImagePath, CreationTime = ProcessCreationTime,
+                IdentityFromHeldRoot = true, Exited = exited, ExitCode = code, Member = member };
+        }
+        public static EndpointEvidence[] ObserveEndpoints(uint[] pids)
+        {
+            var owned = new HashSet<uint>(pids);
+            var rows = new List<EndpointEvidence>();
+            foreach (bool tcp in new[] { true, false })
+            foreach (uint family in new uint[] { 2, 23 })
+            {
+                uint size = 0;
+                uint error = tcp ? GetExtendedTcpTable(IntPtr.Zero, ref size, false, family, 5, 0)
+                    : GetExtendedUdpTable(IntPtr.Zero, ref size, false, family, 1, 0);
+                if (error != 122 && error != 0) throw new Win32Exception((int)error, "size owned endpoint table");
+                if (size > 4 * 1024 * 1024) throw new InvalidOperationException("Endpoint table exceeds bound.");
+                size += 65536;
+                IntPtr data = Marshal.AllocHGlobal((int)size);
+                try
+                {
+                    error = tcp ? GetExtendedTcpTable(data, ref size, false, family, 5, 0)
+                        : GetExtendedUdpTable(data, ref size, false, family, 1, 0);
+                    if (error != 0) throw new Win32Exception((int)error, "read owned endpoint table");
+                    int count = Marshal.ReadInt32(data), stride = tcp ? (family == 2 ? 24 : 56) : (family == 2 ? 12 : 28);
+                    if (count < 0 || 4L + (long)count * stride > size) throw new InvalidOperationException("Invalid endpoint rows.");
+                    for (int index = 0; index < count; index++)
+                    {
+                        IntPtr row = IntPtr.Add(data, 4 + index * stride);
+                        uint pid = (uint)Marshal.ReadInt32(row, stride - 4);
+                        if (!owned.Contains(pid)) continue;
+                        int local = tcp && family == 2 ? 4 : 0;
+                        int port = family == 2 ? (tcp ? 8 : 4) : 20;
+                        int remote = family == 2 ? 12 : 24;
+                        byte[] address = new byte[family == 2 ? 4 : 16];
+                        Marshal.Copy(IntPtr.Add(row, local), address, 0, address.Length);
+                        var item = new EndpointEvidence { Pid = pid, Protocol = tcp ? "TCP" : "UDP",
+                            LocalAddress = new System.Net.IPAddress(address).ToString(),
+                            LocalPort = Marshal.ReadByte(row, port) * 256 + Marshal.ReadByte(row, port + 1) };
+                        if (tcp)
+                        {
+                            Marshal.Copy(IntPtr.Add(row, remote), address, 0, address.Length);
+                            item.RemoteAddress = new System.Net.IPAddress(address).ToString();
+                            int remotePort = family == 2 ? 16 : 44;
+                            item.RemotePort = Marshal.ReadByte(row, remotePort) * 256 + Marshal.ReadByte(row, remotePort + 1);
+                            item.State = (uint)Marshal.ReadInt32(row, family == 2 ? 0 : 48);
+                        }
+                        rows.Add(item);
+                    }
+                }
+                finally { Marshal.FreeHGlobal(data); }
+            }
+            return rows.ToArray();
         }
         public bool Wait(uint milliseconds)
         {
@@ -292,15 +481,39 @@ namespace Homestead.Authoring
                 Check(Wait(5000), "hard-terminated process exit");
             }
         }
+        public static void ValidateDeadlineProfile(int softMilliseconds, int hardMilliseconds, string profile)
+        {
+            if (profile == "RenderCompletionDriven" || profile == "CookCompletionDriven")
+            {
+                if (softMilliseconds != 0 || hardMilliseconds != 0)
+                    throw new InvalidOperationException("Completion-driven rendering has no synthetic time limit.");
+                return;
+            }
+            bool admitted = profile == "Default" && hardMilliseconds <= 110000
+                || profile == "Import" && softMilliseconds == 150000 && hardMilliseconds == 180000
+                || profile == "Render" && softMilliseconds == 480000 && hardMilliseconds == 510000
+                || profile == "RenderLongStartup" && softMilliseconds == 3240000 && hardMilliseconds == 3300000;
+            if (!admitted || softMilliseconds < 1 || hardMilliseconds <= softMilliseconds || hardMilliseconds > 3300000)
+                throw new InvalidOperationException("Deadline pair is outside the exact approved profile.");
+        }
         public void ArmDeadline(int softMilliseconds, int hardMilliseconds, string stopPath)
         {
+            ArmDeadline(softMilliseconds, hardMilliseconds, stopPath, "Default");
+        }
+        public void ArmDeadline(int softMilliseconds, int hardMilliseconds, string stopPath, string profile)
+        {
+            ValidateDeadlineProfile(softMilliseconds, hardMilliseconds, profile);
             lock (lifetime)
             {
-                if (Resumed || softDeadline != null || softMilliseconds < 1 ||
-                    hardMilliseconds <= softMilliseconds || hardMilliseconds > 110000)
-                    throw new InvalidOperationException("Deadline must be armed once before resume, within 110 seconds.");
+                if (Resumed || DeadlineProfile != null)
+                    throw new InvalidOperationException("Deadline must be armed once before resume.");
                 OrdinaryPath(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(stopPath)));
                 if (File.Exists(stopPath)) throw new InvalidOperationException("Fresh deadline stop path required.");
+                DeadlineProfile = profile;
+                SoftDeadlineMilliseconds = softMilliseconds;
+                HardDeadlineMilliseconds = hardMilliseconds;
+                if (profile == "RenderCompletionDriven" || profile == "CookCompletionDriven") return;
+                deadlineClock.Start();
                 softDeadline = new Timer(_ =>
                 {
                     lock (lifetime)
@@ -333,6 +546,25 @@ namespace Homestead.Authoring
                         catch (Exception error) { DeadlineError = "Deadline hard stop failed: " + error; }
                     }
                 }, null, hardMilliseconds, System.Threading.Timeout.Infinite);
+            }
+        }
+        public void ConstrainCaptureDeadline()
+        {
+            lock (lifetime)
+            {
+                if (DeadlineProfile != "RenderLongStartup" || !Resumed || CaptureDeadlineArmed || softDeadline == null ||
+                    DeadlineStopRequested || DeadlineHardStop || Wait(0))
+                    throw new InvalidOperationException("Capture deadline requires one live admitted long-startup render.");
+                long elapsed = deadlineClock.ElapsedMilliseconds;
+                if (elapsed >= 2700000)
+                    throw new InvalidOperationException("Native entry exceeded the startup admission boundary.");
+                CaptureSoftMilliseconds = (int)Math.Min(540000, SoftDeadlineMilliseconds - elapsed);
+                CaptureHardMilliseconds = (int)Math.Min(600000, HardDeadlineMilliseconds - elapsed);
+                if (CaptureSoftMilliseconds < 1 || CaptureHardMilliseconds <= CaptureSoftMilliseconds)
+                    throw new InvalidOperationException("No bounded capture budget remains.");
+                softDeadline.Change(CaptureSoftMilliseconds, System.Threading.Timeout.Infinite);
+                hardDeadline.Change(CaptureHardMilliseconds, System.Threading.Timeout.Infinite);
+                CaptureDeadlineArmed = true;
             }
         }
         public void Dispose()

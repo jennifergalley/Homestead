@@ -27,6 +27,7 @@ public:
     virtual FReply OnMouseWheel(const FGeometry&, const FPointerEvent& Event) override;
     bool HandleKey(FKey Key, EInputEvent Event, float InputAmount);
     void ChangePage(int32 Page);
+    bool FocusLegacySubject(int32 Id);
     void RequestExit();
     void ShowSaveFailure(const FString& Error);
     void ShowGraphicsSaveFailure(const FString& Error);

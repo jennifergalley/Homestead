@@ -79,6 +79,33 @@ AHomesteadController::AHomesteadController()
 void AHomesteadController::BeginPlay()
 {
     Super::BeginPlay();
+    const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
+    const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
+#if UE_BUILD_SHIPPING
+    const bool ShippingQA = FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"));
+    if (ShippingQA || SmokeTest || VisualPlaytest)
+    {
+        FString Output;
+        const auto* Graphics = GConfig->FindBranch(TEXT("GameUserSettings"), {});
+        const bool Admitted = HomesteadAutomatedActorsEnabled()
+            && FParse::Value(FCommandLine::Get(), TEXT("HomesteadTestOutput="), Output)
+            && !Output.IsEmpty() && !FPaths::IsRelative(Output)
+            && IFileManager::Get().DirectoryExists(*Output)
+            && FPaths::IsUnderDirectory(FPaths::ProjectSavedDir(), FPaths::Combine(Output, TEXT("EngineUser")))
+            && Graphics && FPaths::IsSamePath(Graphics->IniPath, FPaths::Combine(Output, TEXT("Graphics/GameUserSettings.ini")))
+            && !IFileManager::Get().DirectoryExists(*FPaths::Combine(Output, TEXT("SmokeSave")))
+            && !IFileManager::Get().DirectoryExists(*FPaths::Combine(Output, TEXT("Frames")))
+            && !IFileManager::Get().FileExists(*FPaths::Combine(Output, TEXT("qa-admission.txt")))
+            && !IFileManager::Get().FileExists(*FPaths::Combine(Output, TEXT("smoke-result.txt")))
+            && !IFileManager::Get().FileExists(*FPaths::Combine(Output, TEXT("telemetry.csv")));
+        if (!Admitted)
+        {
+            FPlatformMisc::LowLevelOutputDebugString(TEXT("SHIPPING_QA_REJECTED: Explicit single route and fresh isolated output/graphics/user/save directories are required.\n"));
+            FPlatformMisc::RequestExitWithStatus(true, 2);
+            return;
+        }
+    }
+#endif
     FString RoutingError;
     bSaveRoutingReady = ResolveHomesteadSaveRoute(FCommandLine::Get(), FPaths::ProjectSavedDir(),
         FPlatformProcess::UserSettingsDir(), HomesteadTestOutputDirectory(), SaveRoute, RoutingError);
@@ -89,6 +116,22 @@ void AHomesteadController::BeginPlay()
         FPlatformMisc::RequestExitWithStatus(true, 2);
         return;
     }
+#if UE_BUILD_SHIPPING
+    if (ShippingQA)
+    {
+        const FString Output = HomesteadTestOutputDirectory();
+        const FString Admission = FString::Printf(TEXT("version=1\nshipping=1\ntrace_compiled=%d\nroute=%s\nsave_directory=%s\nproject_saved_directory=%s\n"),
+            UE_TRACE_ENABLED != 0, SmokeTest ? TEXT("smoke") : TEXT("visual"), *SaveRoute.Directory, *FPaths::ProjectSavedDir());
+        if (SaveRoute.Mode != TEXT("test-sandbox")
+            || !FPaths::IsSamePath(SaveRoute.Directory, FPaths::Combine(Output, TEXT("SmokeSave")))
+            || !FFileHelper::SaveStringToFile(Admission, *FPaths::Combine(Output, TEXT("qa-admission.txt"))))
+        {
+            FPlatformMisc::LowLevelOutputDebugString(TEXT("SHIPPING_QA_REJECTED: Isolated save routing or admission evidence failed.\n"));
+            FPlatformMisc::RequestExitWithStatus(true, 2);
+            return;
+        }
+    }
+#endif
     if (!PrepareStartupProbe()) return;
 #if !UE_BUILD_SHIPPING
     bSaveRoutingTestPending = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveRoutingTest"));
@@ -112,11 +155,7 @@ void AHomesteadController::BeginPlay()
     }
     Landscape->Initialize(Sim.GetState());
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
-    const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
-    const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
-#if !UE_BUILD_SHIPPING
-    bAutomatedInputOnly = SmokeTest || VisualPlaytest || bSaveRoutingTestPending;
-#endif
+    bAutomatedInputOnly = (HomesteadAutomatedActorsEnabled() && (SmokeTest || VisualPlaytest)) || bSaveRoutingTestPending;
     bAutomatedInputOnly |= !StartupProbeDirectory.IsEmpty();
     UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING version=1 mode=%s profile=%s directory=\"%s\" automation_input=%d smoke_actor=%d visual_actor=%d"),
         *SaveRoute.Mode, *SaveRoute.Profile, *SaveRoute.Directory, bAutomatedInputOnly, SmokeTest, VisualPlaytest);
@@ -125,10 +164,11 @@ void AHomesteadController::BeginPlay()
     if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();
-#if !UE_BUILD_SHIPPING
-    if (SmokeTest) GetWorld()->SpawnActor<AHomesteadSmokeTest>();
-    else if (VisualPlaytest) GetWorld()->SpawnActor<AHomesteadVisualPlaytest>();
-#endif
+    if (HomesteadAutomatedActorsEnabled())
+    {
+        if (SmokeTest) GetWorld()->SpawnActor<AHomesteadSmokeTest>();
+        else if (VisualPlaytest) GetWorld()->SpawnActor<AHomesteadVisualPlaytest>();
+    }
 }
 
 bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
@@ -637,7 +677,12 @@ void AHomesteadController::Interact()
             break;
         }
         break;
-    case EFocus::Fire: OpenBook(1); Selection = 3; break;
+    case EFocus::Fire:
+        OpenBook(1);
+        Selection = static_cast<int32>(Homestead::Recipe::RoastedRoots);
+        if (NativeMenu && !NativeMenu->FocusLegacySubject(Selection))
+            Notify(TEXT("The cookfire recipe could not be selected."), true);
+        break;
     case EFocus::Bed:
     {
         Notify(Sim.Sleep(8, Position));
@@ -650,7 +695,7 @@ void AHomesteadController::Interact()
         }
         break;
     }
-    case EFocus::Chest: OpenBook(0); break;
+    case EFocus::Chest: MenuInventoryView(1); OpenBook(0); break;
     case EFocus::Water: Notify(Sim.FillWater(Position)); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
@@ -1439,6 +1484,7 @@ void AHomesteadController::NewGame()
 {
     bTestResetRequired = false;
     bHasPlayableSession = true;
+    LastSuccessfulSave = FDateTime();
     LoadProblem.Reset();
     Sim.NewGame();
     Appearance = FHomesteadAppearance();

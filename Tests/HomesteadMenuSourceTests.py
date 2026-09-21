@@ -121,6 +121,19 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("Controller->Simulation().GetWearable(Id)", MENU)
         self.assertIn("Empty - choose from pack", MENU)
 
+    def test_context_actions_select_native_subjects(self):
+        self.assertIn("case EFocus::Chest: MenuInventoryView(1); OpenBook(0);", CONTROLLER)
+        self.assertIn("NativeMenu->FocusLegacySubject(Selection)", CONTROLLER)
+        self.assertIn("Homestead::Recipe::RoastedRoots", CONTROLLER)
+
+    def test_shipping_gate_preserves_native_routes(self):
+        self.assertIn("HomesteadAutomatedActorsEnabled()", CONTROLLER)
+        self.assertIn("SHIPPING_QA_REJECTED", CONTROLLER)
+        smoke = (SOURCE / "HomesteadSmokeTest.cpp").read_text()
+        self.assertIn("PrepareNativeMenuChecks();", smoke)
+        self.assertIn("Controller->HasNativeMenu(), false", smoke)
+        self.assertIn("Shipping QA cancelled", smoke)
+
     def test_portrait_reuses_shared_presentation(self):
         portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()
         self.assertIn("Character.GetEquipmentPresentation()", portrait)

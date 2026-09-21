@@ -6,8 +6,10 @@
 existing smoke-actor route; repeat at 3840x2160 for actual native UI review.
 Under the current shared authoring restriction, the coordinator must run the
 equivalent arguments through the approved guarded runtime slot instead of
-launching this generic script as a bypass. The mode is Development/editor-only,
-not a claim that Shipping supports smoke actors.
+launching this generic script as a bypass. Supported Shipping runs additionally
+require `-Packaged -ShippingQA` and the common explicit fresh-output admission;
+normal Shipping never enables the automated actors. The same native-menu route
+remains available to admitted Development/editor verification.
 
 The route exercises mapped Settings/exit confirmation and cancel, persistent
 real save-IO failure, current-schema writing, controller/keyboard tabs, stable

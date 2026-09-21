@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$PackageDirectory = 'Build\Windows')
+param([string]$PackageDirectory = 'Build\Windows', [switch]$Details)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $archive = [IO.Path]::GetFullPath($PackageDirectory, $root)
@@ -14,4 +14,8 @@ if ($found.Count -gt 1) { throw "Multiple packaged games exist under $archive. P
 if (@($binaries | Where-Object { Test-Path -LiteralPath (Join-Path $found[0] $_) }).Count -ne 1) {
     throw 'Mixed Development/Shipping executables in one package are not supported.'
 }
-$found[0]
+if ($Details) {
+    $binary = @($binaries | Where-Object { Test-Path -LiteralPath (Join-Path $found[0] $_) })[0]
+    [pscustomobject]@{packageDirectory=$found[0];executable=(Join-Path $found[0] $binary)
+        configuration=$(if($binary -like '*-Shipping.exe'){'Shipping'}else{'Development'})}
+} else { $found[0] }
