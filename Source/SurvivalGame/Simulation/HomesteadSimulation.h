@@ -1,5 +1,7 @@
 #pragma once
 
+#include "HomesteadWorldGeneration.h"
+
 #include <array>
 #include <cstdint>
 #include <string>
@@ -12,7 +14,7 @@ enum class Item : int
     Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
     Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Count
 };
-enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, Count };
+enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, Count };
 enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, Count };
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Count };
 enum class CropKind : int { Roots, Berries, Count };
@@ -20,8 +22,11 @@ enum class CropKind : int { Roots, Berries, Count };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 4;
+constexpr int SimulationSaveVersion = 5;
 constexpr double ChestReach = 280.0;
+constexpr double MaxWorldCoordinate = 1000000.0;
+constexpr int MaxResourceEdits = 16384;
+constexpr int TransientResourceIdBase = 1000000;
 
 enum class WearableDefinition : int { LinenTunic, LinenApron, LeatherShoes, WovenFootwraps, Count };
 enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Count };
@@ -76,6 +81,14 @@ struct ResourceNode
     Point position;
     double readyAtHour = 0.0;
     bool cleared = false;
+    Generation::GeneratedEntityKey key{};
+};
+
+struct ResourceEdit
+{
+    Generation::GeneratedEntityKey key{};
+    bool cleared = false;
+    double readyAtHour = 0.0;
 };
 
 struct Structure
@@ -121,6 +134,9 @@ struct State
     std::vector<WearableInstance> wearables;
     std::array<int, EquipmentSlotCount> equipment{};
     InventoryLayout inventoryLayout;
+    Generation::WorldDescriptor world{};
+    Generation::ChunkCoord activeChunk{};
+    std::vector<ResourceEdit> resourceEdits;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -144,7 +160,10 @@ class Simulation
 public:
     Simulation();
     const State& GetState() const { return state_; }
-    void NewGame();
+    Result NewGame();
+    Result NewGame(std::uint64_t seed);
+    Result SetActiveWorldRegion(Point player);
+    Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
     int Count(Item item) const;
     int UsedCapacity() const;
     int ChestUsedCapacity(int chestId) const;
@@ -195,10 +214,12 @@ public:
 
     std::string Serialize() const;
     Result Deserialize(const std::string& data);
+    Result Deserialize(const std::string& data, Generation::WorldDescriptor expectedWorld);
 
 private:
     State state_;
     std::uint64_t revision_ = 0;
+    int nextResourceHandle_ = TransientResourceIdBase;
     bool TryAdjust(const Inventory& change);
     Result CheckRevision(std::uint64_t expectedRevision) const;
     Result CommitInventory(State&& candidate, const char* message);
