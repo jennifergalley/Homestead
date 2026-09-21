@@ -1,0 +1,33 @@
+{
+  "exe": {
+    "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "bytes": 166929920,
+    "sha256": "2BD33490E1169EF7DD2AD885BB82F9507833FAA74086DA9AE30FD504DE66FA2A"
+  },
+  "pdb": {
+    "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.pdb",
+    "bytes": 237047808,
+    "sha256": "5456EDDDAEAF43FF760E1BAC868F7FBDB4D2CED1168C7A2241FF56E6C4EEB532"
+  },
+  "machine": "AMD64",
+  "isDll": false,
+  "moduleName": "SurvivalGame-Win64-Shipping.exe",
+  "manifest": {
+    "resourceType": 24,
+    "resourceId": 1,
+    "language": 1033,
+    "bytes": 1135,
+    "sha256": "BF5DCA0FE1C186D6C72539906FA23D85221ACB3F420DD096A4AE284849741BB6",
+    "verifiedInputs": [
+      "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\link2\\link-generated.manifest",
+      "E:\\Program Files\\UE_5.8\\Engine\\Build\\Windows\\Resources\\Default-Win64.manifest"
+    ]
+  },
+  "moduleMarker": null,
+  "exportCount": 0,
+  "probeExports": [],
+  "debugGuid": "0aa138c8-ca47-e3c1-876c-5274f36967be",
+  "debugAge": 1,
+  "recordedPdb": "SurvivalGame-Win64-Shipping.pdb",
+  "codeLoaded": false
+}

@@ -5,10 +5,14 @@
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
 #include "HomesteadSave.h"
+#include "HomesteadWorld.h"
+#include "UI/SHomesteadMenu.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "GameFramework/PlayerInput.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformMemory.h"
 #include "HAL/PlatformProcess.h"
@@ -70,8 +74,9 @@ void AHomesteadVisualPlaytest::PrepareEndurance()
     E.Started = E.LastTick = E.StepStarted = FPlatformTime::Seconds();
     FParse::Value(FCommandLine::Get(), TEXT("HomesteadEnduranceSeconds="), E.Duration);
     FParse::Value(FCommandLine::Get(), TEXT("HomesteadEnduranceControl="), E.ControlPath);
+    E.FreshWorld = FParse::Param(FCommandLine::Get(), TEXT("HomesteadEnduranceFresh"));
     const auto* Config = GConfig->FindBranch(TEXT("GameUserSettings"), {});
-    if ((E.Duration != 180 && E.Duration != 2700) || E.ControlPath.IsEmpty()
+    if ((E.Duration != 180 && E.Duration != 2700 && !(E.FreshWorld && E.Duration == 4200)) || E.ControlPath.IsEmpty()
         || !Config || !FPaths::IsSamePath(FPaths::ConvertRelativePathToFull(Config->IniPath),
             FPaths::ConvertRelativePathToFull(FPaths::Combine(OutputDirectory, TEXT("Graphics"), TEXT("GameUserSettings.ini")))))
     { FinishEndurance(TEXT("failed"), TEXT("Invalid duration/control path or non-isolated graphics destination.")); return; }
@@ -80,18 +85,32 @@ void AHomesteadVisualPlaytest::PrepareEndurance()
         if (FParse::Param(FCommandLine::Get(), Flag))
         { FinishEndurance(TEXT("failed"), TEXT("Endurance cannot overlap other test modes.")); return; }
     TSharedPtr<FJsonObject> Control;
-    FString Deadline, State;
+    FString Deadline, State, Completion;
     if (!ReadObject(E.ControlPath, Control) || !Control->TryGetStringField(TEXT("id"), E.RunId)
-        || !Control->TryGetStringField(TEXT("state"), State) || State != TEXT("running")
-        || !Control->TryGetStringField(TEXT("deadlineUtc"), Deadline) || !FDateTime::ParseIso8601(*Deadline, E.DeadlineUtc)
-        || (E.DeadlineUtc - FDateTime::UtcNow()).GetTotalSeconds() < E.Duration + 90)
+        || !Control->TryGetStringField(TEXT("state"), State) || State != TEXT("running"))
     { FinishEndurance(TEXT("failed"), TEXT("Run control does not allow this bounded duration.")); return; }
+    Control->TryGetStringField(TEXT("completionPolicy"), Completion);
+    E.CompletionDriven = Completion == TEXT("until-complete");
+    if (!E.CompletionDriven && (!Control->TryGetStringField(TEXT("deadlineUtc"), Deadline)
+        || !FDateTime::ParseIso8601(*Deadline, E.DeadlineUtc)
+        || (E.DeadlineUtc - FDateTime::UtcNow()).GetTotalSeconds() < E.Duration + 90))
+    { FinishEndurance(TEXT("failed"), TEXT("Run deadline does not allow this exercise.")); return; }
     E.FrameHistogram.Init(0, 10001);
     E.Samples.Add(TEXT("wall_seconds,paused_seconds,unpaused_seconds,engine_unpaused_seconds,game_hour,hunger,energy,warmth,moving_seconds,distance_cm,physical_bytes,virtual_bytes,object_slots_in_use,resources,available_resources,structures,plots,gathers,eats,waypoints,autosave_writes,refreshes"));
-    const auto* Seed = PC->ReadSave(PC->SavePath(TEXT("Homestead_Manual")));
-    if (!Seed) { FinishEndurance(TEXT("failed"), TEXT("Disclosed fixture is missing or corrupt.")); return; }
-    E.WorldId = Seed->WorldId;
-    E.SavedState = Seed->SimulationData;
+    if (E.FreshWorld)
+    {
+        if (IFileManager::Get().FileExists(*PC->SavePath(TEXT("Homestead_Manual"))) || PC->WorldId.IsEmpty())
+        { FinishEndurance(TEXT("failed"), TEXT("Fresh-world endurance requires a new isolated world without a manual fixture.")); return; }
+        E.WorldId = PC->WorldId;
+        E.Step = FHomesteadEnduranceState::Phase::Settle;
+    }
+    else
+    {
+        const auto* Seed = PC->ReadSave(PC->SavePath(TEXT("Homestead_Manual")));
+        if (!Seed) { FinishEndurance(TEXT("failed"), TEXT("Disclosed fixture is missing or corrupt.")); return; }
+        E.WorldId = Seed->WorldId;
+        E.SavedState = Seed->SimulationData;
+    }
     if (!GEngine || !GEngine->GameViewport || !PC->PlayerInput
         || !FPaths::IsUnderDirectory(FPaths::ConvertRelativePathToFull(FPaths::ScreenShotDir()), OutputDirectory))
     { FinishEndurance(TEXT("failed"), TEXT("Missing viewport/input or non-isolated screenshot directory.")); return; }
@@ -100,17 +119,21 @@ void AHomesteadVisualPlaytest::PrepareEndurance()
     E.StartupShaderComplexity = GEngine->GameViewport->EngineShowFlags.ShaderComplexity;
     E.StartupShowFlags = GEngine->GameViewport->EngineShowFlags.ToString();
 #if !UE_BUILD_SHIPPING
+    E.DebugBindingQueryAvailable = true;
     E.F5Binding = PC->PlayerInput->GetBind(EKeys::F5);
     E.F9Binding = PC->PlayerInput->GetBind(EKeys::F9);
 #else
-    FinishEndurance(TEXT("failed"), TEXT("Endurance binding evidence requires the Development build.")); return;
+    if (!E.FreshWorld || !FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA")))
+    { FinishEndurance(TEXT("failed"), TEXT("Shipping endurance requires the explicit guarded fresh-world route.")); return; }
 #endif
     if (!E.F5Binding.IsEmpty() || !E.F9Binding.IsEmpty())
     { FinishEndurance(TEXT("failed"), TEXT("Conflicting effective F5/F9 debug bindings remain.")); return; }
     if (!IsNormalLit())
     { FinishEndurance(TEXT("failed"), TEXT("Endurance requires normal Lit/lighting without ShaderComplexity.")); return; }
     RecordPresentationSettings(TEXT("start"));
-    EnduranceEvent(TEXT("Prepared existing test-world fixture; mapped travel/actions only; no retries or direct simulation edits."));
+    EnduranceEvent(E.FreshWorld
+        ? TEXT("Prepared fresh isolated world; mapped travel/actions only; no fixture, retries or direct simulation edits.")
+        : TEXT("Prepared existing test-world fixture; mapped travel/actions only; no retries or direct simulation edits."));
 }
 
 bool AHomesteadVisualPlaytest::TapEnduranceLoad()
@@ -156,6 +179,12 @@ bool AHomesteadVisualPlaytest::WriteEnduranceProgress(const FString& Status, con
     auto Object = MakeShared<FJsonObject>();
     Object->SetStringField(TEXT("status"), Status);
     Object->SetStringField(TEXT("reason"), Reason);
+    Object->SetBoolField(TEXT("freshWorld"), E.FreshWorld);
+    Object->SetBoolField(TEXT("completionDriven"), E.CompletionDriven);
+    Object->SetBoolField(TEXT("debugBindingQueryAvailable"), E.DebugBindingQueryAvailable);
+    Object->SetNumberField(TEXT("dayMinutes"), PC->State().dayMinutes);
+    Object->SetBoolField(TEXT("raining"), PC->Simulation().IsRaining());
+    Object->SetBoolField(TEXT("night"), PC->Simulation().IsNight());
     Object->SetNumberField(TEXT("litGuardVersion"), 1);
     Object->SetNumberField(TEXT("litGuardTicks"), E.LitGuardTicks);
     Object->SetNumberField(TEXT("startupViewMode"), E.StartupViewMode);
@@ -187,6 +216,7 @@ bool AHomesteadVisualPlaytest::WriteEnduranceProgress(const FString& Status, con
     Object->SetNumberField(TEXT("autosaveSlots"), E.SaveStamps.Num());
     Object->SetNumberField(TEXT("autosaveWrites"), E.AutosaveWrites);
     Object->SetNumberField(TEXT("resourceRefreshes"), E.Refreshes);
+    Object->SetNumberField(TEXT("verifiedHarvestedResourceRegrowth"), E.VerifiedRegrowth.Num());
     Object->SetNumberField(TEXT("navigationFailures"), E.NavigationFailures);
     Object->SetNumberField(TEXT("recoveryAttempts"), 0);
     Object->SetNumberField(TEXT("captures"), CaptureIndex);
@@ -240,19 +270,23 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
     {
         E.NextControl = Now + 1;
         TSharedPtr<FJsonObject> Control;
-        FString State, Deadline, RunId;
+        FString State, Deadline, RunId, Completion;
         FDateTime DeadlineUtc;
         if (!ReadObject(E.ControlPath, Control) || !Control->TryGetStringField(TEXT("state"), State)
-            || !Control->TryGetStringField(TEXT("id"), RunId)
-            || !Control->TryGetStringField(TEXT("deadlineUtc"), Deadline) || !FDateTime::ParseIso8601(*Deadline, DeadlineUtc))
+            || !Control->TryGetStringField(TEXT("id"), RunId))
         { FinishEndurance(TEXT("failed"), TEXT("Run control became unreadable/invalid.")); return; }
-        if (State != TEXT("running") || RunId != E.RunId || FDateTime::UtcNow() >= DeadlineUtc
-            || FDateTime::UtcNow() >= E.DeadlineUtc
+        Control->TryGetStringField(TEXT("completionPolicy"), Completion);
+        const bool CompletionDriven = Completion == TEXT("until-complete");
+        if (!CompletionDriven && (!Control->TryGetStringField(TEXT("deadlineUtc"), Deadline)
+            || !FDateTime::ParseIso8601(*Deadline, DeadlineUtc)))
+        { FinishEndurance(TEXT("failed"), TEXT("Run deadline became unreadable/invalid.")); return; }
+        if (State != TEXT("running") || RunId != E.RunId || CompletionDriven != E.CompletionDriven
+            || (!CompletionDriven && (FDateTime::UtcNow() >= DeadlineUtc || FDateTime::UtcNow() >= E.DeadlineUtc))
             || IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-endurance.txt"))))
         { FinishEndurance(TEXT("cancelled"), TEXT("Stop marker, run state, or deadline requested graceful exit.")); return; }
     }
     if (PC->IsFailed()) { FinishEndurance(TEXT("failed"), TEXT("Natural survival failure; recovery policy cap0, no concealed retry.")); return; }
-    if (E.Events.Num() > 2000 || E.Samples.Num() > 100 || Age > E.Duration + 30)
+    if (E.Events.Num() > 2000 || E.Samples.Num() > FMath::CeilToInt(E.Duration / 30) + 3 || Age > E.Duration + 30)
     { FinishEndurance(TEXT("failed"), TEXT("Bounded driver/evidence timeout.")); return; }
     if (E.Loaded)
     {
@@ -284,7 +318,28 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
             {
                 if (Node.cleared) continue;
                 if (PC->Simulation().CanHarvest(Node.id))
-                { ++Available; if (E.PreviouslyUnavailable.Remove(Node.id)) ++E.Refreshes; }
+                {
+                    ++Available;
+                    if (E.PreviouslyUnavailable.Remove(Node.id))
+                    {
+                        ++E.Refreshes;
+                        if (E.HarvestedProduceCounts.Contains(Node.id))
+                        {
+                            auto* Landscape = Cast<AHomesteadWorld>(UGameplayStatics::GetActorOfClass(GetWorld(), AHomesteadWorld::StaticClass()));
+                            const auto* Base = Landscape ? Landscape->ResourceVisuals.Find(Node.id) : nullptr;
+                            const auto* Produce = Landscape ? Landscape->ResourceProduceVisuals.Find(Node.id) : nullptr;
+                            if (!Base || !Produce || Base->Components.Num() != E.HarvestedBaseCounts[Node.id]
+                                || Produce->Components.Num() != E.HarvestedProduceCounts[Node.id])
+                            { FinishEndurance(TEXT("failed"), TEXT("Naturally renewed resource did not restore its actual component inventory.")); return; }
+                            for (const auto& Component : Produce->Components)
+                                if (!Component || !Component->IsRegistered() || !Component->IsVisible())
+                                { FinishEndurance(TEXT("failed"), TEXT("Renewed produce component is absent or hidden.")); return; }
+                            E.VerifiedRegrowth.Add(Node.id);
+                            EnduranceEvent(FString::Printf(TEXT("naturally renewed previously harvested resource%d; base=%d produce=%d"),
+                                Node.id, Base->Components.Num(), Produce->Components.Num()));
+                        }
+                    }
+                }
                 else E.PreviouslyUnavailable.Add(Node.id);
             }
             const auto Memory = FPlatformMemory::GetStats();
@@ -298,18 +353,21 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
         }
         if (Age >= E.NextCapture && Age < E.Duration - 5)
         {
-            E.NextCapture = Age + 600;
+            E.NextCapture = FMath::Min(Age + 600, E.Duration - 10);
+            if (Age >= E.Duration - 11) E.NextCapture = E.Duration;
             const FString Base = FPaths::Combine(OutputDirectory, TEXT("Frames"), FString::Printf(TEXT("milestone-%02d"), CaptureIndex));
             IFileManager::Get().MakeDirectory(*FPaths::GetPath(Base), true);
             auto Metadata = EndurancePresentation();
             Metadata->SetNumberField(TEXT("wallSeconds"), Age);
             Metadata->SetNumberField(TEXT("gameHour"), PC->State().hour);
+            Metadata->SetBoolField(TEXT("raining"), PC->Simulation().IsRaining());
+            Metadata->SetBoolField(TEXT("night"), PC->Simulation().IsNight());
             Metadata->SetNumberField(TEXT("litGuardTicks"), E.LitGuardTicks);
             FString Text;
             FJsonSerializer::Serialize(Metadata, TJsonWriterFactory<>::Create(&Text));
             if (!AtomicText(Base + TEXT(".json"), Text))
             { FinishEndurance(TEXT("failed"), TEXT("Could not persist milestone presentation evidence.")); return; }
-            FScreenshotRequest::RequestScreenshot(Base + TEXT(".png"), false, false);
+            FScreenshotRequest::RequestScreenshot(Base + TEXT(".png"), true, false);
             ++CaptureIndex;
             E.CaptureExcludeUntil = Now + 2;
         }
@@ -327,6 +385,13 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
             {
                 if (!PC->IsResourceFocused(E.ForageId)) { FinishEndurance(TEXT("failed"), TEXT("Mapped approach reached mismatching focus.")); return; }
                 E.BeforeCount = PC->Simulation().UsedCapacity();
+                auto* Landscape = Cast<AHomesteadWorld>(UGameplayStatics::GetActorOfClass(GetWorld(), AHomesteadWorld::StaticClass()));
+                const auto* Base = Landscape ? Landscape->ResourceVisuals.Find(E.ForageId) : nullptr;
+                const auto* Produce = Landscape ? Landscape->ResourceProduceVisuals.Find(E.ForageId) : nullptr;
+                if (!Base || !Produce || Produce->Components.IsEmpty())
+                { FinishEndurance(TEXT("failed"), TEXT("Harvestable target has no actual produce component inventory.")); return; }
+                E.HarvestedBaseCounts.Add(E.ForageId, Base->Components.Num());
+                E.HarvestedProduceCounts.Add(E.ForageId, Produce->Components.Num());
                 const double BeforeHour = PC->State().hour;
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
                 E.ActionHours += PC->State().hour - BeforeHour;
@@ -354,20 +419,25 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
         Tap(EKeys::Gamepad_Special_Right); Go(Phase::Settle); break;
     case Phase::Settle:
         if (Now - E.StepStarted < 1) break;
-        if (PC->WorldId != E.WorldId || UTF8_TO_TCHAR(PC->Simulation().Serialize().c_str()) != E.SavedState)
+        if (PC->WorldId != E.WorldId || (!E.FreshWorld && UTF8_TO_TCHAR(PC->Simulation().Serialize().c_str()) != E.SavedState))
         { FinishEndurance(TEXT("failed"), TEXT("Fixture load did not restore exact disclosed state.")); return; }
         E.Loaded = true; E.Started = E.LastTick = Now; E.InitialHour = PC->State().hour;
         E.LastPosition = PC->GetPawn()->GetActorLocation();
-        Tap(EKeys::Gamepad_FaceButton_Right); Go(Phase::Choose); break;
+        if (PC->IsBookOpen()) Tap(EKeys::Gamepad_FaceButton_Right);
+        Go(Phase::Choose); break;
     case Phase::Choose:
     {
         if (Age >= E.NextSave) { Go(Phase::Save); break; }
-        if (PC->State().hunger < 75)
+        if (PC->State().hunger < (E.FreshWorld && E.Eats == 0 ? 95 : 75))
         {
             E.FoodId = -1;
             for (const auto Item : {Homestead::Item::HerbedRoots, Homestead::Item::RoastedRoots, Homestead::Item::Berries})
                 if (PC->Simulation().Count(Item) > 0) { E.FoodId = static_cast<int32>(Item); break; }
-            if (E.FoodId >= 0) { Tap(EKeys::Gamepad_Special_Right); Go(Phase::EatSelect); break; }
+            if (E.FoodId >= 0)
+            {
+                E.LastMenuSubject.Empty(); E.MenuDirection = 1;
+                Tap(EKeys::Gamepad_Special_Right); Go(Phase::EatSelect); break;
+            }
         }
         E.ForageId = -1;
         if (Age >= E.NextForage && PC->Simulation().UsedCapacity() < 105)
@@ -379,6 +449,7 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
             {
                 if (!PC->Simulation().CanHarvest(Node.id) || Node.position.x < -600 || Node.position.x > 150
                     || Node.position.y < -450 || Node.position.y > -250) continue;
+                if (E.FreshWorld && E.Eats == 0 && Node.kind != Homestead::ResourceKind::BerryBush) continue;
                 Homestead::Item Item;
                 int32 Desired;
                 switch (Node.kind)
@@ -404,17 +475,37 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
         break;
     }
     case Phase::Gather:
+    {
         if (Now - E.StepStarted < 2) break;
         if (PC->ToastIsError() || PC->Simulation().UsedCapacity() <= E.BeforeCount || PC->Simulation().CanHarvest(E.ForageId))
         { FinishEndurance(TEXT("failed"), TEXT("Mapped gather did not succeed exactly as observed.")); return; }
+        auto* Landscape = Cast<AHomesteadWorld>(UGameplayStatics::GetActorOfClass(GetWorld(), AHomesteadWorld::StaticClass()));
+        const auto* Base = Landscape ? Landscape->ResourceVisuals.Find(E.ForageId) : nullptr;
+        const auto* Produce = Landscape ? Landscape->ResourceProduceVisuals.Find(E.ForageId) : nullptr;
+        if (!Base || Base->Components.Num() != E.HarvestedBaseCounts[E.ForageId]
+            || (Produce && !Produce->Components.IsEmpty()))
+        { FinishEndurance(TEXT("failed"), TEXT("Harvest did not preserve the base and remove the actual produce.")); return; }
+        E.PreviouslyUnavailable.Add(E.ForageId);
         ++E.Gathers; EnduranceEvent(FString::Printf(TEXT("gathered resource%d"), E.ForageId)); Go(Phase::Choose); break;
+    }
     case Phase::EatSelect:
     {
-        const auto Rows = PC->Rows();
-        if (Now - E.StepStarted > 8 || !Rows.IsValidIndex(PC->SelectedRow()))
+        const auto* Subject = PC->NativeMenu ? PC->NativeMenu->GetSelectedSubject() : nullptr;
+        if (Now - E.StepStarted > 8 || !Subject || PC->BookPage() != 0)
         { FinishEndurance(TEXT("failed"), TEXT("Pack navigation hung.")); return; }
-        if (Rows[PC->SelectedRow()].Id != E.FoodId) { Tap(EKeys::Gamepad_DPad_Down); break; }
-        E.BeforeCount = PC->State().inventory[E.FoodId]; Tap(EKeys::Gamepad_FaceButton_Bottom); Go(Phase::EatCheck); break;
+        if (Subject->Subject != EHomesteadMenuSubject::ItemGroup || Subject->Id != E.FoodId)
+        {
+            const FString Key = FString::Printf(TEXT("%d:%d"), static_cast<int32>(Subject->Subject), Subject->SubjectId);
+            if (Key == E.LastMenuSubject)
+            { Tap(EKeys::Gamepad_DPad_Down); E.MenuDirection *= -1; E.LastMenuSubject.Empty(); }
+            else
+            { E.LastMenuSubject = Key; Tap(E.MenuDirection > 0 ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left); }
+            break;
+        }
+        E.BeforeCount = PC->State().inventory[E.FoodId];
+        Tap(EKeys::Gamepad_FaceButton_Bottom);
+        Tap(EKeys::Gamepad_FaceButton_Bottom);
+        Go(Phase::EatCheck); break;
     }
     case Phase::EatCheck:
         if (PC->ToastIsError() || PC->State().inventory[E.FoodId] != E.BeforeCount - 1)
@@ -440,11 +531,14 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
         E.RoundTrip = true; E.NextSave = Age + 300;
         if (E.Finalizing)
         {
-            const bool Long = E.Duration == 2700;
+            const bool Long = E.Duration >= 2700;
             const bool Passed = E.Unpaused >= E.Duration * 0.9 && E.Moving >= E.Duration * 0.3
                 && E.Gathers >= (Long ? 2 : 1) && E.Eats >= 1 && E.Waypoints >= (Long ? 40 : 4)
                 && E.Loads == 1 && E.RoundTrip && InspectEnduranceSaves()
-                && (!Long || (PC->State().hour - E.InitialHour - E.ActionHours >= 15 && E.SaveStamps.Num() == 3 && E.AutosaveWrites >= 8));
+                && (!Long || (PC->State().hour - E.InitialHour - E.ActionHours >= 15 && E.SaveStamps.Num() == 3
+                    && E.AutosaveWrites >= 8))
+                && (E.Duration != 4200 || (PC->State().hour - E.InitialHour - E.ActionHours >= 24
+                    && E.VerifiedRegrowth.Num() >= 1));
             FinishEndurance(Passed ? TEXT("passed") : TEXT("failed"), TEXT("Fixed duration/participation/action/save criteria evaluated."));
             return;
         }

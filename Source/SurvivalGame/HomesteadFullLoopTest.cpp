@@ -132,6 +132,7 @@ void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
         [this, Before, Item]()
         {
             *Before = Controller->Simulation().Count(Item);
+            if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, Before, Item]()

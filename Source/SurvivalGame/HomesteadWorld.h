@@ -42,6 +42,7 @@ public:
 
 private:
     friend class AHomesteadVisualPlaytest;
+    friend class AHomesteadSmokeTest;
     UPROPERTY()
     TObjectPtr<UStaticMesh> Cube;
     UPROPERTY()

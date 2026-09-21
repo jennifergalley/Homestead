@@ -14,4 +14,5 @@
 # Hash-pinned machine evidence retains its original bytes and formatting.
 docs/research/environment-assets/tree-*/** -text -whitespace
 docs/research/environment-assets/grass-*/** -text -whitespace
+docs/research/environment-assets/readability-*/** -text -whitespace
 Assets/Environment/GrassMedium01Prepared/** -text -whitespace

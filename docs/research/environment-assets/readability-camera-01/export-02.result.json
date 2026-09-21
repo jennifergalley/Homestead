@@ -1,0 +1,51 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 4.137211,
+  "observedChildren": [
+    {
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "parentPid": 56284,
+      "pid": 55652,
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "admitted": true,
+      "startUtc": "2026-09-21T17:22:06.4346912Z"
+    }
+  ],
+  "samples": [
+    {
+      "udp": [],
+      "tcp": [],
+      "elapsedMs": 835.0312
+    },
+    {
+      "udp": [],
+      "tcp": [],
+      "elapsedMs": 1668.253
+    },
+    {
+      "udp": [],
+      "tcp": [],
+      "elapsedMs": 2448.6725
+    },
+    {
+      "udp": [],
+      "tcp": [],
+      "elapsedMs": 3168.6625
+    },
+    {
+      "udp": [],
+      "tcp": [],
+      "elapsedMs": 4013.833
+    }
+  ],
+  "exportCorroboration": {
+    "sampledIsNotCompleteHistory": true,
+    "version": "1.24.0",
+    "source": "ISPCToolChain.cs233-247 invokes --version through a process-local Lazy cache",
+    "versionQueryReported": true,
+    "observation": "A log-confirmed brief version-query child may be absent from process samples; no retroactive identity/endpoint claim."
+  }
+}

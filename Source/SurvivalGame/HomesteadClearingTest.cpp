@@ -4,8 +4,12 @@
 #include "HomesteadHatchet.h"
 #include "HomesteadWateringTool.h"
 #include "HomesteadActionTestState.h"
+#include "HomesteadWorld.h"
+#include "HomesteadTestPaths.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Misc/FileHelper.h"
 
 namespace
 {
@@ -17,6 +21,7 @@ struct FClearProbe
     bool Ready = false;
     FVector Actor, Hand, LeftToe, RightToe;
     FRotator View;
+    TArray<FString> CameraSnapshots;
 };
 }
 
@@ -96,6 +101,68 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Add(TEXT("Save actual crafted setup for independent appearance/transaction cases"),
         [this]() { Tap(EKeys::F5); }, [this, Hidden]()
         { return !Controller->ToastIsError() && Controller->Simulation().Count(Homestead::Item::Hatchet) == 1 && Hidden(); });
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadCameraLifecycle")))
+    {
+        const auto CameraCanopy = [this, Tree, Probe](bool Ready, bool Cleared)
+        {
+            const auto* Landscape = Controller->Landscape.Get();
+            const auto* Produce = Landscape ? Landscape->ResourceProduceVisuals.Find(Tree.id) : nullptr;
+            const auto* Base = Landscape ? Landscape->ResourceVisuals.Find(Tree.id) : nullptr;
+            if (!Produce || !Base || Produce->Components.Num() != (Ready ? 3 : 0)
+                || Base->Components.Num() != (Cleared ? 0 : 1)) return false;
+            int32 CameraBlockers = 0;
+            for (const auto& Component : Produce->Components)
+            {
+                const auto* Mesh = Cast<UStaticMeshComponent>(Component);
+                if (!Mesh || !Mesh->IsRegistered() || !Mesh->IsVisible() || Mesh->bHiddenInGame
+                    || Mesh->CanEverAffectNavigation() || Mesh->GetGenerateOverlapEvents()) return false;
+                if (!Mesh->IsQueryCollisionEnabled()) continue;
+                if (Mesh->GetCollisionEnabled() != ECollisionEnabled::QueryOnly) return false;
+                FCollisionResponseContainer ExpectedResponses(ECR_Ignore);
+                ExpectedResponses.SetResponse(ECC_Camera, ECR_Block);
+                if (Mesh->GetCollisionResponseToChannels() != ExpectedResponses) return false;
+                ++CameraBlockers;
+            }
+            const FVector Center(Tree.position.x, Tree.position.y,
+                AHomesteadWorld::GroundHeight(Tree.position.x, Tree.position.y) + 108);
+            FHitResult Hit;
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(SaplingCameraLifecycle), false, Controller->GetPawn());
+            const bool Blocked = GetWorld()->SweepSingleByChannel(Hit, Center - FVector(150, 0, 0),
+                Center + FVector(150, 0, 0), FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(12), Query);
+            bool OwnProduceHit = false;
+            for (const auto& Component : Produce->Components) OwnProduceHit |= Hit.GetComponent() == Component;
+            Probe->CameraSnapshots.Add(FString::Printf(TEXT("node=%d ready=%d cleared=%d blockers=%d sweep=%d own_produce=%d"),
+                Tree.id, Ready, Cleared, CameraBlockers, Blocked, OwnProduceHit));
+            const bool Persisted = FFileHelper::SaveStringArrayToFile(Probe->CameraSnapshots,
+                *FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("camera-lifecycle.txt")));
+            return Persisted && CameraBlockers == (Ready ? 2 : 0) && Blocked == Ready && OwnProduceHit == Ready;
+        };
+        Approach(Tree);
+        Add(TEXT("Visible sapling canopy blocks the real camera query only"),
+            []() {}, [CameraCanopy]() { return CameraCanopy(true, false); });
+        Add(TEXT("Mapped sapling harvest removes produce and camera blockers together"),
+            [this]() { Tap(EKeys::E); },
+            [this, Tree, CameraCanopy]() { return !Controller->ToastIsError()
+                && !Controller->Simulation().CanHarvest(Tree.id) && CameraCanopy(false, false); });
+        Restore();
+        Add(TEXT("Checkpoint reload restores the visible canopy and its camera query"),
+            []() {}, [CameraCanopy]() { return CameraCanopy(true, false); });
+        Clear(Tree, EKeys::F);
+        Add(TEXT("Permanent clear removes the real camera sweep obstruction"),
+            [this]() { Screenshot(TEXT("clearing-swing")); },
+            [CameraCanopy]() { return CameraCanopy(false, true); }, 0.12f);
+        Add(TEXT("Clearing recovery leaves no invisible blocker"),
+            []() {}, [Hidden, CameraCanopy]() { return Hidden() && CameraCanopy(false, true); }, 2.0f);
+        Add(TEXT("Capture recovered cleared site"),
+            [this]() { Screenshot(TEXT("clearing-recovered")); }, Hidden);
+        Add(TEXT("Save the permanent clear"), [this]() { Tap(EKeys::F5); },
+            [this, CameraCanopy]() { return !Controller->ToastIsError() && CameraCanopy(false, true); });
+        Add(TEXT("Reload preserves the cleared ID and absence of camera blockers"),
+            [this]() { Tap(EKeys::F9); },
+            [this, Hidden, Matches, CameraCanopy]() { return !Controller->ToastIsError()
+                && Hidden() && Matches() && CameraCanopy(false, true); }, 0.8f);
+        return;
+    }
     const auto OtherTree = Saplings[1];
     Homestead::ResourceNode Branch{};
     for (const auto& Node : Controller->State().resources)

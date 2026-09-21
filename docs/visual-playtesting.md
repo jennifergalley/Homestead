@@ -63,6 +63,23 @@ no competing authoring process; they do not affect an existing player window.
 Ordinary captures now also record actual RHI/viewport/default-resolution policy
 in `presentation-settings.txt`, without forcing screen percentage.
 
+For the specifically admitted natural-play route, `Test-Endurance.ps1
+-FreshWorld -ShippingQA` reuses the same lifetime/endpoint controls without a
+synthetic supervisor timer; see `endurance-playtesting.md`. It does not change
+the ordinary short-route limits. `Test-Game.ps1 -Clearing -CameraLifecycle
+-ShippingQA -Packaged` selects the focused **controlled** clearing fixture:
+mapped gather/craft with functional teleports, actual camera-channel canopy
+queries, harvest removal, checkpoint restoration, permanent clear and save/load.
+That fixture is not ordinary travel or natural sapling-regrowth evidence.
+
+Ordinary tree-view captures also write `camera-foreground.json`: actual resource
+component identities, spring-arm fix/unfixed position, matching sphere sweep and
+sampled bounds/complex-collision rays. Bounds coverage is not visible pixel
+coverage; inspect the original frames. The confirmed sapling correction changes
+only its produce-cone camera query responses, not material, scale, Pawn collision
+or navigation. Query components are destroyed/rebuilt with the existing produce
+lifecycle rather than kept as separate invisible blockers.
+
 The first integrated Shipping route is documented in
 `research\environment-assets\clearing-playable.md`.
 

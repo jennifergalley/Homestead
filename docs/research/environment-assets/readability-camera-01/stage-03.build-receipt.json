@@ -1,0 +1,14 @@
+{
+  "configuration": "Shipping",
+  "packageDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\Windows",
+  "archiveDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02",
+  "executable": "SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "status": "Genuine loose-file stage; runtime acceptance pending",
+  "cookedInput": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Cooked",
+  "nativeExecutableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "containersUsed": false,
+  "runtimeVerified": false,
+  "treeDiagnostic": true,
+  "grassGroundCandidate": true,
+  "diagnosticQualification": "Retained failed import03: exactly12 branch source-description tangent/binormal corners. Ordinary-game diagnostic only; not clean acceptance or promotion."
+}

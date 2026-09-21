@@ -21,7 +21,10 @@ struct FHomesteadEnduranceState
     TArray<FString> Samples, Events;
     TMap<FString, int64> SaveStamps;
     TSet<int32> PreviouslyUnavailable;
+    TMap<int32, int32> HarvestedBaseCounts, HarvestedProduceCounts;
+    TSet<int32> VerifiedRegrowth;
     FString ControlPath, WorldId, SavedState;
+    FString LastMenuSubject;
     FString RunId;
     FDateTime DeadlineUtc;
     FVector LastPosition = FVector::ZeroVector;
@@ -29,5 +32,7 @@ struct FHomesteadEnduranceState
     int32 Waypoint = 0, Waypoints = 0, Gathers = 0, Eats = 0, ManualSaves = 0, Loads = 0;
     int32 AutosaveWrites = 0, Refreshes = 0, NavigationFailures = 0, ForageId = -1;
     int32 BeforeCount = 0, FoodId = -1;
+    int32 MenuDirection = 1;
+    bool FreshWorld = false, CompletionDriven = false, DebugBindingQueryAvailable = false;
     bool Loaded = false, RoundTrip = false, Finalizing = false;
 };

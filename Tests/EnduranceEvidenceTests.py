@@ -20,8 +20,11 @@ def main():
         for case in cases:
             root = Path(temporary) / case
             root.mkdir()
-            for name in ("progress.json", "endurance-events.txt", "endurance-samples.csv", "engine.log"):
+            for name in ("progress.json", "endurance-events.txt", "endurance-samples.csv"):
                 shutil.copy2(source / name, root / name)
+            for name in ("qa-admission.txt", "qa-guard-result.json", "engine.log", "qa-native.log"):
+                if (source / name).exists():
+                    shutil.copy2(source / name, root / name)
             for name in ("SmokeSave", "Frames"):
                 shutil.copytree(source / name, root / name)
             (root / "EngineUser").mkdir()
@@ -35,7 +38,7 @@ def main():
             elif case == "flags":
                 result["presentation"]["showFlags"] = "Lighting=0,ShaderComplexity=0"
             elif case == "f9":
-                result["f9NoScreenshotChecks"] = 1
+                result["f9NoScreenshotChecks"] += 1
             elif case == "frame":
                 path = next((root / "Frames").glob("*.json"))
                 frame = json.loads(path.read_text(encoding="utf-8-sig"))

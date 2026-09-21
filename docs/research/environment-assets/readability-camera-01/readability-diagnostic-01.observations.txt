@@ -1,0 +1,36 @@
+Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips.
+Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark.
+Ordinary tree encounter: root=X=-273.948 Y=-1705.551 Z=-24.615 trunk_center_xy=X=-273.908 Y=-1736.465 radius_cm=40.460087 capsule_cylinder_cm=121.416397
+Grove inventory: trees=15 triangles=3476775 valid=1; shared qualified LOD2, not a whole-scene GPU cost.
+Grass/ground inventory: clumps=512 triangles=297633 batches=4 placement_valid=1 terrain_valid=1; current actor/mesh/material observations, not GPU timing.
+BEGIN 0.00s close-notes: The clearing
+BEGIN 1.08s idle: The clearing
+BEGIN 4.28s slow-walk: The clearing
+BEGIN 8.35s stop-from-slow-walk: The clearing
+BEGIN 10.44s full-walk: The clearing
+BEGIN 13.52s turn-while-moving: Sapling  (renewing)
+BEGIN 16.65s stop-from-turn: Berry bush
+BEGIN 18.72s orbit-standing-character: Stream reeds
+BEGIN 22.76s open-pack: Stream reeds
+BEGIN 23.36s open-look: Stream reeds
+BEGIN 26.45s portrait-idle: Stream reeds
+BEGIN 29.55s portrait-orbit: Stream reeds
+BEGIN 33.67s return-to-world: Stream reeds
+Forage target id=52 position=X=-100.000 Y=550.000
+BEGIN 34.67s walk-to-forage: Stream reeds
+BEGIN 35.83s settle-forage: Berry bush
+BEGIN 36.54s view-picking-side: Berry bush
+BEGIN 37.79s before-pick: Berry bush
+BEGIN 38.62s gather: Berry bush
+BEGIN 41.66s after-gather: Berry bush  (renewing)
+BEGIN 43.53s walk-to-authored-tree: Berry bush  (renewing)
+BEGIN 58.74s view-authored-tree: The clearing
+Tree bounds inside viewport=1; screen_min=X=332.272 Y=78.754; screen_max=X=788.854 Y=498.253; viewport=1280,720; camera_pitch=0.533985
+BEGIN 61.82s walk-into-authored-trunk: The clearing
+Actual inward walking blocked at authored trunk: player=X=-219.884 Y=-1687.944 distance_cm=72.614813 inward_intent=0.590346 inward_velocity_cm_s=-0.352073 radial_progress_cm_s=-0.154647 total_speed_cm_s=23.842559 sweep_component=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482342
+BEGIN 69.24s retreat-from-authored-trunk: The clearing
+Forage target reached=1; resources actually gathered=1
+Picking action observed=1; recovered to idle=1
+Tree ready=1; ordinary approach=1; actual trunk blocked walking=1; ordinary retreat=1
+Tree retreat displacement_cm=280.165228; retreat_start=X=-217.703 Y=-1690.509; completed_passes=23; planned_passes=23
+This observational capture is not a visual-quality pass or a replacement for human feel/listening review.

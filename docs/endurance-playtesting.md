@@ -2,9 +2,40 @@
 
 This is opt-in stability evidence, not a new gameplay feature or approval of rendering,
 physical presentation, character art, indefinite memory stability, or controller comfort.
-The accepted human preview stays on video-sync-01; endurance-01 is diagnostic-only.
+The historical `endurance-01` below is diagnostic-only. `Preview.json` identifies
+the current human selection; diagnostic routes never change it.
 
-## Frozen setup and criteria (before sanity or long run)
+## Current fresh-world Shipping route
+
+`Test-Endurance.ps1 -FreshWorld -ShippingQA` reuses the existing observer with a
+fresh disposable world, no copied save, no teleports and no time/lighting edits.
+Pass an explicit Shipping package and fresh output directory. `-Seconds 180`
+checks mapped gathering, current native-menu eating and exact save/load.
+`2700` retains the45-minute observation; `4200` provides70minutes to observe
+actual24-hour branch renewal at the unchanged60-minute day length.
+
+The70-minute route additionally requires at least24 natural game hours and
+one resource it actually harvested to regain its original registered, visible
+produce components while retaining its base. Harvest removal is checked too.
+There is no claim that a70-minute run tests168-hour sapling renewal. A separate
+controlled clearing fixture covers canopy removal and checkpoint restoration.
+
+Fresh Shipping requires live `until-complete` authority. It uses the existing
+root-only, detached `Invoke-ShippingQA.ps1` route and its existing zero-timer
+`RenderCompletionDriven` lifetime profile; no external duration-based kill is
+added. Live stop/pause, identity changes, endpoint/helper violations and owned-job
+cancellation still apply. The finite observer duration is a gameplay observation
+criterion, not a wall-clock supervisor cutoff. Ordinary short QA retains100/110s.
+
+Sparse original HUD-inclusive frames record actual game hour, night/rain and Lit
+presentation every600seconds plus a final pre-exit milestone. Renderer, save,
+action and participation checks remain; unavailable Shipping debug-binding queries
+are explicitly distinguished from the historical Development binding evidence.
+An absent Shipping engine log is recorded as unavailable, not treated as a clean
+engine log; the native process stream, guard outcome and explicit gameplay evidence
+are checked. Results for the new route belong to their own output/receipts.
+
+## Historical fixture setup and criteria
 
 One 180-second harness sanity, a short graceful-cancellation probe, then one 2700-second
 (45-minute) run. No automatic long-run retry. The timer starts after loading and settling.

@@ -1,0 +1,32 @@
+PASS Close notes for actual gather/craft setup
+PASS Functional-only approach south of sapling 7
+PASS No-hatchet rejection gives no reward, energy cost, clear or prop
+PASS Approach full-loop forage node 1
+PASS Gather node 1 toward 4 Branch
+PASS Foraging supplied at least 4 Branch
+PASS Approach full-loop forage node 2
+PASS Gather node 2 toward 3 Stone
+PASS Foraging supplied at least 3 Stone
+PASS Approach full-loop forage node 6
+PASS Gather node 6 toward 2 Fiber
+PASS Foraging supplied at least 2 Fiber
+PASS Open crafting for Crude hatchet
+PASS Navigate the field book to row ID 0
+PASS Craft Crude hatchet using gamepad A
+PASS Close the crafting book
+PASS Save actual crafted setup for independent appearance/transaction cases
+PASS Functional-only approach south of sapling 7
+PASS Visible sapling canopy blocks the real camera query only
+PASS Mapped sapling harvest removes produce and camera blockers together
+PASS Reload the real crafted checkpoint, including unchanged sapling IDs
+PASS Functional-only approach south of sapling 7
+PASS Checkpoint reload restores the visible canopy and its camera query
+PASS One authoritative sapling clear with scale-one held hatchet: F
+PASS Permanent clear removes the real camera sweep obstruction
+PASS Clearing recovery leaves no invisible blocker
+PASS Capture recovered cleared site
+PASS Save the permanent clear
+PASS Reload preserves the cleared ID and absence of camera blockers
+INPUT_ISOLATION ignored_external_events=0 (includes 0 deliberate rejection probes)
+PERFORMANCE mean_fps=60.07 p95_frame_ms=16.88 p99_frame_ms=16.96 samples=909 exclusions=startup_and_screenshot_readback
+SUCCESS All engine integration steps passed.

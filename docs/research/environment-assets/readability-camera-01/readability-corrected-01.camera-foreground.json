@@ -1,0 +1,53 @@
+{
+	"camera": "X=-233.826 Y=-621.040 Z=108.941",
+	"rotation": "P=0.374990 Y=-85.535101 R=0.000000",
+	"gameHour": 6.3343699142833794,
+	"width": 1280,
+	"height": 720,
+	"limits": "Actual spring-arm state and independent matching camera-channel sweep; bounds and complex-collision ray counts are not pixel coverage. Inspect the real frame for surface visibility.",
+	"cameraCollisionTest": true,
+	"probeChannel": 4,
+	"probeRadius": 12,
+	"collisionFixApplied": true,
+	"unfixedCamera": "X=-231.911 Y=-572.987 Z=115.534",
+	"matchingCameraSweepBlocked": true,
+	"sweepComponent": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482097",
+	"sweepLocation": "X=-233.826 Y=-621.040 Z=108.941",
+	"sweepStartPenetrating": false,
+	"nearbyVisibleResourceBounds": [
+		{
+			"resourceId": 21,
+			"resourceKind": 6,
+			"role": "produce",
+			"component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482098",
+			"mesh": "/Engine/BasicShapes/Cone.Cone",
+			"transform": "-200.000000,-600.000000,88.696930|0.000000,0.000000,-0.000000|1.050000,1.050000,1.500000",
+			"meshBoundsMin": "X=-50.000 Y=-50.000 Z=-50.000",
+			"meshBoundsMax": "X=50.000 Y=50.000 Z=50.000",
+			"cameraInMeshSpace": "X=-32.215 Y=-20.038 Z=13.496",
+			"boundsRayHitsOf144": 144,
+			"complexCollisionRayHitsOf144": 0,
+			"queryEnabled": true,
+			"cameraResponse": 2,
+			"pawnResponse": 0,
+			"tint": "(R=0.120000,G=0.260000,B=0.065000,A=1.000000)"
+		},
+		{
+			"resourceId": 21,
+			"resourceKind": 6,
+			"role": "produce",
+			"component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482097",
+			"mesh": "/Engine/BasicShapes/Cone.Cone",
+			"transform": "-200.000000,-600.000000,138.696930|0.000000,0.000000,-0.000000|0.720000,0.720000,1.150000",
+			"meshBoundsMin": "X=-50.000 Y=-50.000 Z=-50.000",
+			"meshBoundsMax": "X=50.000 Y=50.000 Z=50.000",
+			"cameraInMeshSpace": "X=-46.981 Y=-29.222 Z=-25.875",
+			"boundsRayHitsOf144": 99,
+			"complexCollisionRayHitsOf144": 0,
+			"queryEnabled": true,
+			"cameraResponse": 2,
+			"pawnResponse": 0,
+			"tint": "(R=0.270000,G=0.370000,B=0.095000,A=1.000000)"
+		}
+	]
+}

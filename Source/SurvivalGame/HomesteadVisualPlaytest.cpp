@@ -12,6 +12,7 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/Material.h"
 #include "GameFramework/GameUserSettings.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "HAL/IConsoleManager.h"
 #include "HardwareInfo.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -31,6 +32,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Serialization/JsonSerializer.h"
 #include "UnrealClient.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
@@ -398,6 +400,97 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
         Valid && TerrainValid ? TEXT("") : TEXT("FAILED "), Clumps, Triangles, AuthoredBatches, Valid, TerrainValid));
 }
 
+void AHomesteadVisualPlaytest::RecordCameraForeground()
+{
+    if (!PC->Landscape) return;
+    FVector Camera;
+    FRotator Rotation;
+    PC->GetPlayerViewPoint(Camera, Rotation);
+    int32 Width = 0, Height = 0;
+    PC->GetViewportSize(Width, Height);
+    auto Evidence = MakeShared<FJsonObject>();
+    Evidence->SetStringField(TEXT("camera"), Camera.ToString());
+    Evidence->SetStringField(TEXT("rotation"), Rotation.ToString());
+    Evidence->SetNumberField(TEXT("gameHour"), PC->State().hour);
+    Evidence->SetNumberField(TEXT("width"), Width);
+    Evidence->SetNumberField(TEXT("height"), Height);
+    Evidence->SetStringField(TEXT("limits"), TEXT("Actual spring-arm state and independent matching camera-channel sweep; bounds and complex-collision ray counts are not pixel coverage. Inspect the real frame for surface visibility."));
+    const auto* Boom = PC->GetPawn()->FindComponentByClass<USpringArmComponent>();
+    if (Boom)
+    {
+        Evidence->SetBoolField(TEXT("cameraCollisionTest"), Boom->bDoCollisionTest);
+        Evidence->SetNumberField(TEXT("probeChannel"), Boom->ProbeChannel.GetValue());
+        Evidence->SetNumberField(TEXT("probeRadius"), Boom->ProbeSize);
+        Evidence->SetBoolField(TEXT("collisionFixApplied"), Boom->IsCollisionFixApplied());
+        Evidence->SetStringField(TEXT("unfixedCamera"), Boom->GetUnfixedCameraPosition().ToString());
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(CameraForeground), false, PC->GetPawn());
+        const bool Blocked = GetWorld()->SweepSingleByChannel(Hit, Boom->PreviousArmOrigin,
+            Boom->GetUnfixedCameraPosition(), FQuat::Identity, Boom->ProbeChannel,
+            FCollisionShape::MakeSphere(Boom->ProbeSize), Query);
+        Evidence->SetBoolField(TEXT("matchingCameraSweepBlocked"), Blocked);
+        Evidence->SetStringField(TEXT("sweepComponent"), Hit.GetComponent() ? Hit.GetComponent()->GetPathName() : TEXT(""));
+        Evidence->SetStringField(TEXT("sweepLocation"), Hit.Location.ToString());
+        Evidence->SetBoolField(TEXT("sweepStartPenetrating"), Hit.bStartPenetrating);
+    }
+    TArray<TSharedPtr<FJsonValue>> Rows;
+    const auto Inspect = [&](const TMap<int32, FHomesteadWorldVisual>& Visuals, const TCHAR* VisualRole)
+    {
+        for (const auto& Pair : Visuals)
+            for (const auto& Component : Pair.Value.Components)
+            {
+                auto* Part = Cast<UStaticMeshComponent>(Component);
+                const UStaticMesh* Mesh = Part ? Part->GetStaticMesh() : nullptr;
+                if (!Mesh || !Part->IsVisible() || Part->bHiddenInGame
+                    || Part->Bounds.GetBox().ComputeSquaredDistanceToPoint(Camera) > FMath::Square(400.0)) continue;
+                const FTransform Transform = Part->GetComponentTransform();
+                const FBox Bounds = Mesh->GetBoundingBox();
+                int32 Hits = 0, SurfaceHits = 0;
+                for (int32 Y = 0; Y < 9; ++Y)
+                    for (int32 X = 0; X < 16; ++X)
+                    {
+                        FVector Origin, Direction;
+                        if (!PC->DeprojectScreenPositionToWorld((X + 0.5f) * Width / 16, (Y + 0.5f) * Height / 9, Origin, Direction)) continue;
+                        const FVector Start = Transform.InverseTransformPosition(Origin);
+                        const FVector End = Transform.InverseTransformPosition(Origin + Direction * 400);
+                        Hits += FMath::LineBoxIntersection(Bounds, Start, End, End - Start) ? 1 : 0;
+                        FHitResult Surface;
+                        FCollisionQueryParams Query(SCENE_QUERY_STAT(ForegroundSurface), true);
+                        if (Part->IsQueryCollisionEnabled()
+                            && Part->LineTraceComponent(Surface, Origin, Origin + Direction * 400, Query)) ++SurfaceHits;
+                    }
+                if (!Hits) continue;
+                auto Row = MakeShared<FJsonObject>();
+                Row->SetNumberField(TEXT("resourceId"), Pair.Key);
+                for (const auto& Node : PC->State().resources)
+                    if (Node.id == Pair.Key) Row->SetNumberField(TEXT("resourceKind"), static_cast<int32>(Node.kind));
+                Row->SetStringField(TEXT("role"), VisualRole);
+                Row->SetStringField(TEXT("component"), Part->GetPathName());
+                Row->SetStringField(TEXT("mesh"), Mesh->GetPathName());
+                Row->SetStringField(TEXT("transform"), Transform.ToString());
+                Row->SetStringField(TEXT("meshBoundsMin"), Bounds.Min.ToString());
+                Row->SetStringField(TEXT("meshBoundsMax"), Bounds.Max.ToString());
+                Row->SetStringField(TEXT("cameraInMeshSpace"), Transform.InverseTransformPosition(Camera).ToString());
+                Row->SetNumberField(TEXT("boundsRayHitsOf144"), Hits);
+                Row->SetNumberField(TEXT("complexCollisionRayHitsOf144"), SurfaceHits);
+                Row->SetBoolField(TEXT("queryEnabled"), Part->IsQueryCollisionEnabled());
+                Row->SetNumberField(TEXT("cameraResponse"), Part->GetCollisionResponseToChannel(ECC_Camera));
+                Row->SetNumberField(TEXT("pawnResponse"), Part->GetCollisionResponseToChannel(ECC_Pawn));
+                FLinearColor Tint;
+                const bool HasTint = Part->GetMaterial(0) && Part->GetMaterial(0)->GetVectorParameterValue(FMaterialParameterInfo(TEXT("Tint")), Tint);
+                Row->SetStringField(TEXT("tint"), HasTint ? Tint.ToString() : TEXT("unavailable"));
+                Rows.Add(MakeShared<FJsonValueObject>(Row));
+            }
+    };
+    Inspect(PC->Landscape->ResourceVisuals, TEXT("base"));
+    Inspect(PC->Landscape->ResourceProduceVisuals, TEXT("produce"));
+    Evidence->SetArrayField(TEXT("nearbyVisibleResourceBounds"), Rows);
+    FString Text;
+    if (!FJsonSerializer::Serialize(Evidence, TJsonWriterFactory<>::Create(&Text))
+        || !FFileHelper::SaveStringToFile(Text, *FPaths::Combine(OutputDirectory, TEXT("camera-foreground.json"))))
+        Observations.Add(TEXT("FAILED camera foreground evidence persistence."));
+}
+
 void AHomesteadVisualPlaytest::PrepareTreeEncounter()
 {
     TArray<UStaticMeshComponent*> Parts;
@@ -478,6 +571,7 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
         Look.Y = -FMath::Clamp(PitchError / 30.0f, -0.65f, 0.65f) * (PC->bInvertY ? -1.0f : 1.0f);
         if (PassElapsed + Delta >= Pass.Duration)
         {
+            RecordCameraForeground();
             int32 Width = 0, Height = 0;
             PC->GetViewportSize(Width, Height);
             const FBox Bounds = ObservedTree->Bounds.GetBox();
@@ -636,7 +730,8 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         && IFileManager::Get().FileExists(*FPaths::Combine(OutputDirectory, TEXT("stop-qa.txt"))))
     {
         Observations.Add(TEXT("FAILED Shipping QA cancelled by its owned supervisor."));
-        Finish();
+        if (bEndurance) FinishEndurance(TEXT("cancelled"), TEXT("Shipping QA cancelled by its owned supervisor."));
+        else Finish();
         return;
     }
     if (bForageRenewal) { TickRenewal(DeltaSeconds); return; }

@@ -1,0 +1,630 @@
+{
+  "status": "camera-and-controlled-lifecycle-passed-natural-long-route-pending-not-promoted",
+  "createdUtc": "2026-09-21T17:45:32.1460647+00:00",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02",
+  "executableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "sourceBaseCheckpoint": "146326bbcbf9c3bff4f87958896a387140325e00",
+  "sourcePins": [
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "5AC541E3EC6D4505B260BB4BF1632809E11E162FD9F43B05FD93FDE2B3659D42"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h",
+      "sha256": "8C9E406F630D08BB7A04A16A3E2F4D9BF272CBE38FA896D286E671C590CF7CB0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp",
+      "sha256": "4F6F340336F3C0F96A7683CFEA7AD5737AC8C8A001959CC5196181DFD269B723"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h",
+      "sha256": "8227A6D7EF83D3CB94B3503DC41484881EFCE495F0C1F14C6DAD68E7A58CD8B0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp",
+      "sha256": "B7A353F7D95A310BEF360B3513E5AAEB468789944DC73B22327F42B31CC51D63"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp",
+      "sha256": "2FEF302D90F093E46240992AC98747E1BB369267FEE4AD11F7E9393DCA970813"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadEndurancePlaytest.cpp",
+      "sha256": "441D4FE27B779F34B066CAF52A860EDCA93854D68A133F8313D258F93C68D14D"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadEnduranceState.h",
+      "sha256": "701627CEC713C77A8C40F2268407CF6237DF05088CC765D4DCB8DDA564AFD3ED"
+    },
+    {
+      "path": "Scripts\\Build-AuthoringProbe.ps1",
+      "sha256": "3C0B0213DFCCCE327A61BBB0BC9E90847F5FAA41C238430A236A8F84DB4BA509"
+    },
+    {
+      "path": "Scripts\\Invoke-ShippingQA.ps1",
+      "sha256": "C4F7C53F6234107B9E363D0CAE49E1A88CDBD1A7D352A19EA13637EC03509BD2"
+    },
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Scripts\\Test-Endurance.ps1",
+      "sha256": "F5B5FF4F247FAE8827B9E1BCA94EBA1E19576D78EB0152C3A06CF381D4CF6DBF"
+    },
+    {
+      "path": "Scripts\\Analyze-Endurance.py",
+      "sha256": "8105B8A9583584AAC96633DB61883110A69606A1C6C4AA5CA99EE722FC79B82C"
+    },
+    {
+      "path": "Scripts\\Test-Game.ps1",
+      "sha256": "F557D0F1E4B0BA0B05BE3ED0D011B388D5C49E910C3879E93EBA2F6F36865489"
+    },
+    {
+      "path": "Tests\\Test-CompilerLeaf.ps1",
+      "sha256": "56954FD3C989A6458402A74CFFD1E840467D36BE56687AF7A10A81BB3449253B"
+    },
+    {
+      "path": "Tests\\Test-GrassShippingPolicy.ps1",
+      "sha256": "A1E60D6024926D8B7211598BD7B729811535F0C8A75D66DC599616269DC1D67A"
+    },
+    {
+      "path": "Tests\\EnduranceEvidenceTests.py",
+      "sha256": "ACD139C9166DECB3F8F56714F20FD01B12ED9A451C5ED077A1F24A83120930DC"
+    }
+  ],
+  "files": [
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\camera-foreground.json",
+      "copy": "readability-diagnostic-01.camera-foreground.json",
+      "sha256": "9E662587E94C3FB9D010C659A647D4634D71F190885CC809864D9A20B5D8FE31"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\observations.txt",
+      "copy": "readability-diagnostic-01.observations.txt",
+      "sha256": "CAD3843019754725D934C24BEA00F1E1D138BE885BE3C824A87E69C2323E4232"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\telemetry.csv",
+      "copy": "readability-diagnostic-01.telemetry.csv",
+      "sha256": "16CACCC3A0DAB0F4486D066D35996AD480308643D3F5186545CF6A7AD667F37E"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\presentation-settings.txt",
+      "copy": "readability-diagnostic-01.presentation-settings.txt",
+      "sha256": "3065596979C51E9AB7800208BD98F5C0D040541D97C08208A74A96DE473A0AA7"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\qa-guard-result.json",
+      "copy": "readability-diagnostic-01.qa-guard-result.json",
+      "sha256": "C495E29960B100400466462911FF373AEACF38CF3F8660A7C5E8DEE5DEBC089B"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\qa-launch.json",
+      "copy": "readability-diagnostic-01.qa-launch.json",
+      "sha256": "3D8997C8D9592A4583D82B23F48EB400AA6DA6802E7E807BEFAB76315BAD8832"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\qa-admission.txt",
+      "copy": "readability-diagnostic-01.qa-admission.txt",
+      "sha256": "D204DBBEA84C2502DC678F0A6529A800DA812D988100C6C92FF319BFA50AA49A"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\tree-contact.csv",
+      "copy": "readability-diagnostic-01.tree-contact.csv",
+      "sha256": "52A76D11C615AE1FB1D5CAAE0EB14EEA9B71BA6EC9F5D3426FA63D9B696C21B7"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\camera-foreground.json",
+      "copy": "readability-corrected-01.camera-foreground.json",
+      "sha256": "8D9C9AA4D691FB87245BDE9485149303194805C458DF8405EC31014F420BA329"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\observations.txt",
+      "copy": "readability-corrected-01.observations.txt",
+      "sha256": "6AAE2F48A62C978B0D640674A919C9073A7559C659C3D40EB72F22E769849468"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\telemetry.csv",
+      "copy": "readability-corrected-01.telemetry.csv",
+      "sha256": "E238B4B1AFFFD4FD0758879AD7C5F6806086506815E617630FBEF4D6A529C496"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\presentation-settings.txt",
+      "copy": "readability-corrected-01.presentation-settings.txt",
+      "sha256": "8C106D4CDA0E6A068D31B943CFC07ECE6BCDCC4BA5167E2E11795E2DAB16E9B7"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\qa-guard-result.json",
+      "copy": "readability-corrected-01.qa-guard-result.json",
+      "sha256": "9F7E65FCC4DC2B1FA67215D27037416F27F663A8FAF26F45D5B59450C76E8398"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\qa-launch.json",
+      "copy": "readability-corrected-01.qa-launch.json",
+      "sha256": "3833B3D84D4BE30F908C4F038757A524E7CC01C1B6355B0209523CE3CF282E39"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\qa-admission.txt",
+      "copy": "readability-corrected-01.qa-admission.txt",
+      "sha256": "46D4213AB2A20D4973DFFFD20FB81644EB18A9FD6AAF7A2542F342A63BED16CB"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\tree-contact.csv",
+      "copy": "readability-corrected-01.tree-contact.csv",
+      "sha256": "8F33C17AC9E15F25299E301972FEA9E95975469C8E2020E396C26C33594C9CB4"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\Frames\\frame-00425.png",
+      "copy": "corrected.frame-00425.png",
+      "sha256": "AA3FCD6F8B4AB6B472DAE04D9C53BBDCD8ECF81955700A6C1A517C6A3C0204A5"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\Frames\\frame-00430.png",
+      "copy": "corrected.frame-00430.png",
+      "sha256": "B23349EE0B0AE729410A99FEF289669073DCF95F26467D5C1FA08D2D2C2D106A"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-corrected-01\\Frames\\frame-00438.png",
+      "copy": "corrected.frame-00438.png",
+      "sha256": "01D4137BAECF5DAFEB025250BF02DF866751827AB7D92091F790531A4DE415B1"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\readability-diagnostic-01\\Frames\\frame-00430.png",
+      "copy": "diagnostic.frame-00430.png",
+      "sha256": "D55B86A376887FE0BC31180B42C4ECC45E3C7A3B70EE8CCE605667C9DA99DCCF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-01\\qa-guard-result.json",
+      "copy": "readability-camera-lifecycle-01.qa-guard-result.json",
+      "sha256": "FA3501D9FEDE5DF0D0FD18604CAD4FFDCE591CD7F673301389987D197C056133"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-01\\qa-launch.json",
+      "copy": "readability-camera-lifecycle-01.qa-launch.json",
+      "sha256": "0F9A70FCDD8F370C4755975FE303B42235596CA12DAFAEE17270EF7E5C084FCA"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-01\\qa-admission.txt",
+      "copy": "readability-camera-lifecycle-01.qa-admission.txt",
+      "sha256": "58E875F5BC52158AA867D3FD5FF1C611620153EFC20A703B4D0BB04EFF1D4963"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-01\\qa-native.log",
+      "copy": "readability-camera-lifecycle-01.qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-01\\smoke-result.txt",
+      "copy": "readability-camera-lifecycle-01.smoke-result.txt",
+      "sha256": "9DC3E85B995C72B0036AD66A90EDEEC96B3BCDA42FC32C1463D12D4D112A4AA2"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-02\\qa-guard-result.json",
+      "copy": "readability-camera-lifecycle-02.qa-guard-result.json",
+      "sha256": "CCACC1CF5961C6CD314E37CF24F3D7068C0919AD4248843D33DD12E861203AED"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-02\\qa-launch.json",
+      "copy": "readability-camera-lifecycle-02.qa-launch.json",
+      "sha256": "0F93981B49A112B84ACB83111892BD66F01C7488AB592BCD9787393DAD704725"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-02\\qa-admission.txt",
+      "copy": "readability-camera-lifecycle-02.qa-admission.txt",
+      "sha256": "D5DD93CA6DCFF0C6AE5D03B00D07ADA1AC46C70DC353F0993E8A5ECE11CDA478"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-02\\qa-native.log",
+      "copy": "readability-camera-lifecycle-02.qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-02\\smoke-result.txt",
+      "copy": "readability-camera-lifecycle-02.smoke-result.txt",
+      "sha256": "794B3F2AF53E7CCC1C9BDAB2CECADD419A27AE81B1C9A8D78478330227439DD8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\qa-guard-result.json",
+      "copy": "readability-endurance-short-01.qa-guard-result.json",
+      "sha256": "26DAF1CEE93AD3EA61577CA31F6E4A9F20B43A2B5B368D053545E4F7B995A368"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\qa-launch.json",
+      "copy": "readability-endurance-short-01.qa-launch.json",
+      "sha256": "B025FACAE1A7340C7162CE336C19BC679108D499289984BF671E8C0C39D83739"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\qa-admission.txt",
+      "copy": "readability-endurance-short-01.qa-admission.txt",
+      "sha256": "AE152910DF5D810884EEB6E181A5CB69EDD4E80B60E6481A81CE8F2E191E888B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\qa-native.log",
+      "copy": "readability-endurance-short-01.qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-camera-lifecycle-02\\camera-lifecycle.txt",
+      "copy": "actual-camera-lifecycle.txt",
+      "sha256": "E7E91F054A542423887D07BB93C9A0D7D085005327C60714D7291448250BF252"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\progress.json",
+      "copy": "endurance-short.progress.json",
+      "sha256": "09702864FACACB3D686EC54183C48D8609FB754A87DEC535D8BCBC1BD76CA3B5"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\endurance-events.txt",
+      "copy": "endurance-short.endurance-events.txt",
+      "sha256": "8E41AF81849F3E4F630D2303AF9618104C015CA2E15C272AFA35A4938A73B24A"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\endurance-samples.csv",
+      "copy": "endurance-short.endurance-samples.csv",
+      "sha256": "ADE4B3EFCF1F3B7714706C81702069EF254785615AF415BE312D9AF970C45278"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\analysis.json",
+      "copy": "endurance-short.analysis.json",
+      "sha256": "B8E63728848214ACA7124051A46D0FCD368D45D8986AB6DA9F0A2B941686FAFB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\launch.json",
+      "copy": "endurance-short.launch.json",
+      "sha256": "BB077D0F992E47199A216C5FB108A8C56F8BCF98FD10A358C0DA1C674C611FDF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-short-01\\presentation-settings.txt",
+      "copy": "endurance-short.presentation-settings.txt",
+      "sha256": "F3894CD87FADB5B1186493FD02D8E6F9D499A572618F894067EB830860EB6DE5"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\compile0\\result.json",
+      "copy": "build-01.compile0.result.json",
+      "sha256": "D226F12BF3A7D4A5DB22E82C447BD61D67087A439DE44BE25A5860ECD43F0CDC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\compile1\\result.json",
+      "copy": "build-01.compile1.result.json",
+      "sha256": "0D7762E930330EDCE525FD15C8B0DA6F35D117D79211F8DDB8AE2A67DE136BAD"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\compile1-02\\result.json",
+      "copy": "build-01.compile1-02.result.json",
+      "sha256": "ED9A36D80CAE10D980D0C45B97C1A6F1603E777F3C3554A649CBFFED1A23B9AB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\link2\\result.json",
+      "copy": "build-01.link2.result.json",
+      "sha256": "A21C7AFB5FB4C817BE45E3AC0CFDED9D5E9C22242A0936007F23907F5CF94D6E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\manifest-01\\result.json",
+      "copy": "build-01.manifest-01.result.json",
+      "sha256": "A2ECCE05EF76BA0CE610BEDD2EC5106AF497ADDAD374D791BB74B14F887B3B91"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\metadata\\result.json",
+      "copy": "build-01.metadata.result.json",
+      "sha256": "545FFC7FE2D523BC262CC03AFAE1F9E62A079CF2F3C9967E42B4E3B23A633EB4"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\metadata\\native-products.json",
+      "copy": "build-01.native-products.json",
+      "sha256": "B491E9F74D407A52DF5DC7356086230954E4104A617370CCAF7667FBF1C9668B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-01\\actions.json",
+      "copy": "export-01.actions.json",
+      "sha256": "FBE0553F6CA0CA104FE320E38E4AF7AD6FB0586503AA3314F15D1DD91EFB0675"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-01\\result.json",
+      "copy": "export-01.result.json",
+      "sha256": "31464CD543343AFA16E967DAD9F52A38B682B4BC3740B1035F47B918189EC42E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-01\\launch.json",
+      "copy": "export-01.launch.json",
+      "sha256": "D698DBF83ECF4A76FE7E0611245B339A16167E3E8CB1CED97F810C90B189CDDF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-stage-01\\result.json",
+      "copy": "stage-01.result.json",
+      "sha256": "7D343002A3B3BA75EF409D568EAA5B8FB825FE423B41331CDE7D48FDF34B6DFC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-02\\compile0\\result.json",
+      "copy": "build-02.compile0.result.json",
+      "sha256": "9B32F7A8A5630DC1C6803998747DF0DFF7A0E92703332CBA84C0533D758C9207"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-02\\compile1\\result.json",
+      "copy": "build-02.compile1.result.json",
+      "sha256": "2912A8E5584EF2514FD828E118C65375B41636CC4F69C21093D352B11CD351ED"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-02\\link2\\result.json",
+      "copy": "build-02.link2.result.json",
+      "sha256": "E039847B79C1DC5CABCBC7B0C5A4E26273ED0E7343EF67D5CEF215B7965B4B52"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-02\\manifest-01\\result.json",
+      "copy": "build-02.manifest-01.result.json",
+      "sha256": "FC2C486FDC5F41A4D88B01D92710ADFC03BD783722D57CA41292ED5B712CDAA5"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-02\\metadata\\result.json",
+      "copy": "build-02.metadata.result.json",
+      "sha256": "F7F8A5D71213A8CAEE40E49113E3AC32709192AAD5E304B65C06B3F689BCAE72"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-02\\metadata\\native-products.json",
+      "copy": "build-02.native-products.json",
+      "sha256": "B3445A306E61EF1F58CA07CE4B3C39C30073D0537B49192676E559E93D370AA8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-02\\actions.json",
+      "copy": "export-02.actions.json",
+      "sha256": "14F962668002BDCA3CC6266EF4BADC4DD0E3203CB58EFBED9C890B7B5F91DA39"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-02\\result.json",
+      "copy": "export-02.result.json",
+      "sha256": "B1984319D84F7FF0EF264A28B3030D2CD30081F9AB5CCD0D9A61FEEF1309ECEB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-02\\launch.json",
+      "copy": "export-02.launch.json",
+      "sha256": "FAA0E3B16F61C650BA3F5D8CC97FAAC987760AE5CFF8B8F783795A82E138F322"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-stage-02\\result.json",
+      "copy": "stage-02.result.json",
+      "sha256": "FFE0C52D948252E939273B9F670B8A3453E18496AD4114F5BBE67BBA0A579C14"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-03\\compile0\\result.json",
+      "copy": "build-03.compile0.result.json",
+      "sha256": "55FFABF5F29499B0EEFC8643F870214256FDD8F57D1F52B887CE0204BB3AAB38"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-03\\link1\\result.json",
+      "copy": "build-03.link1.result.json",
+      "sha256": "3A8593D724A90D7FEAC5667B5C807883EF33F92D5894D36A33D72885A53B2C8F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-03\\manifest-01\\result.json",
+      "copy": "build-03.manifest-01.result.json",
+      "sha256": "B0039B53F0A482909A0698F5574D3448DB42D6C082CEC530D57E3A38FD7B4CD8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-03\\metadata\\result.json",
+      "copy": "build-03.metadata.result.json",
+      "sha256": "55EA1C8E20A5AEB69A4E80C229E502941155BF3791DDF0F18606A5574D319D5F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-03\\metadata\\native-products.json",
+      "copy": "build-03.native-products.json",
+      "sha256": "7E0BB083C2F0EE3F38D2C2EF15527D02A7C6B77CB3AF24A77BD6329A9BD5F95F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-03\\actions.json",
+      "copy": "export-03.actions.json",
+      "sha256": "7FD06316E1534B6B764418802A808CD09F29EC4ABDCBF7BB7A0343FEF86C39DC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-03\\result.json",
+      "copy": "export-03.result.json",
+      "sha256": "4BEBF188035BA6A289E6DF8DEF415CC76B16DC3AD818FDB2608FC51745C2B8D2"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-plan-03\\launch.json",
+      "copy": "export-03.launch.json",
+      "sha256": "D258EBBB96FC2343DE87EDD5CA3088FE0C94BF234F305A8DD035A7DB78B2B41E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-stage-03\\result.json",
+      "copy": "stage-03.result.json",
+      "sha256": "95655D53BECB99DED81CAB17CE26D705B111629540986FB03D6C72CBAF74D6F7"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-18\\game\\result.json",
+      "copy": "resource-18.result.json",
+      "sha256": "313E51A4B0C56466E9D29D0BDDFBE24653222CAA1217CCC0DE0EA7ECD48069F8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-19\\game\\result.json",
+      "copy": "resource-19.result.json",
+      "sha256": "CEFEFF8D5C487CCDF8A59FE813A2D506A7546B12DCF4E349DCD1DB8A4B71A8B8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-20\\game\\result.json",
+      "copy": "resource-20.result.json",
+      "sha256": "9BC916BDBF948B1F03047D2DD0E096930554B56EE16A3CFC9B287EEB10274137"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-stage-03\\stage-inputs.json",
+      "copy": "stage-03.inputs.json",
+      "sha256": "416FB86022A6B21E12EC653B6DDD9B52EA39293D9026FA85AF83BA458F1CD53E"
+    },
+    {
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02\\build-receipt.json",
+      "copy": "stage-03.build-receipt.json",
+      "sha256": "7FC893D5ABE40C03BA879C34624B0D9FA2B0C895F0D0BC8B74C87A413720D254"
+    }
+  ],
+  "packages": [
+    {
+      "sha256": "690047921E4281C947B25EE5E7AFCA13FC2E949A2B8364DB4784237AA034354D",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_mid_b.uasset",
+      "bytes": 61633
+    },
+    {
+      "sha256": "DE7E8021C8AEF1C6A114B2195105A5C96E18CF2309E80967219E20A065DAACAA",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_small_b.uasset",
+      "bytes": 41890
+    },
+    {
+      "sha256": "DB32D30832B31CAE90B11E555D50830736D95CB1B14F2C577681CEAFC3767775",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_tall_a.uasset",
+      "bytes": 26032
+    },
+    {
+      "sha256": "BC7D514E02700CA2340B539B100C5CE07D2AB639C74786D9640574958615E7CC",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_tiny_a.uasset",
+      "bytes": 16803
+    },
+    {
+      "sha256": "3ABD081BC19E9C526CBCA45F5A81E610491A898488B7CB5890CCA026A32F0359",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Materials\\M_GrassMedium01.uasset",
+      "bytes": 7857
+    },
+    {
+      "sha256": "8227111DC9473D9B9016CC833EEBB566FC88ADC21DCB2A7AC75CEFAA95CD0ACA",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Materials\\M_GrassGroundBlend.uasset",
+      "bytes": 10043
+    },
+    {
+      "sha256": "4EFE9AFC4CAC8B1D1C47C0A861A1A555BAD3AEEB9B7E068666EEF343EE8DF7C1",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Diff.uasset",
+      "bytes": 1990824
+    },
+    {
+      "sha256": "EA436A3C952B4332427975988544FA8B3F596B61E4E1F2FFB4C431B1D13CC5D8",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_NormalDX.uasset",
+      "bytes": 3877609
+    },
+    {
+      "sha256": "5369A2E5F0D67372C0CBF443779C7EAE484B887E2B541B3C2540133156BBE193",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Roughness.uasset",
+      "bytes": 1095264
+    },
+    {
+      "sha256": "E72663DBCD1473152ADFADCD4878B3883FD5847EC3916536E2E2082BFF4D9C29",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_AO.uasset",
+      "bytes": 608280
+    },
+    {
+      "sha256": "68A193749C1AF35E81C8A2B1698A7A1C1211EE94B7E04739A53F817F5BD7E142",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Alpha.uasset",
+      "bytes": 619672
+    },
+    {
+      "sha256": "6FB037438A143EC54A7D3FE30270E33413C66CA0C9051E7043909EC4A1473C0B",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_Diff.uasset",
+      "bytes": 24401886
+    },
+    {
+      "sha256": "01B9032418BEED691C300A03FBF7B49B720B54E9742F3FE2774BB3196D9DFFC5",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_NormalDX.uasset",
+      "bytes": 26069451
+    },
+    {
+      "sha256": "9DFDD26AD9395BD99C705C8C3A08488C4F1BFAF80B1787745F5CA83B179C811F",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_Roughness.uasset",
+      "bytes": 6812747
+    }
+  ],
+  "camera": {
+    "actual": {
+      "camera": "X=-233.826 Y=-621.040 Z=108.941",
+      "rotation": "P=0.374990 Y=-85.535101 R=0.000000",
+      "gameHour": 6.334369914283379,
+      "width": 1280,
+      "height": 720,
+      "limits": "Actual spring-arm state and independent matching camera-channel sweep; bounds and complex-collision ray counts are not pixel coverage. Inspect the real frame for surface visibility.",
+      "cameraCollisionTest": true,
+      "probeChannel": 4,
+      "probeRadius": 12,
+      "collisionFixApplied": true,
+      "unfixedCamera": "X=-231.911 Y=-572.987 Z=115.534",
+      "matchingCameraSweepBlocked": true,
+      "sweepComponent": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482097",
+      "sweepLocation": "X=-233.826 Y=-621.040 Z=108.941",
+      "sweepStartPenetrating": false,
+      "nearbyVisibleResourceBounds": [
+        {
+          "resourceId": 21,
+          "resourceKind": 6,
+          "role": "produce",
+          "component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482098",
+          "mesh": "/Engine/BasicShapes/Cone.Cone",
+          "transform": "-200.000000,-600.000000,88.696930|0.000000,0.000000,-0.000000|1.050000,1.050000,1.500000",
+          "meshBoundsMin": "X=-50.000 Y=-50.000 Z=-50.000",
+          "meshBoundsMax": "X=50.000 Y=50.000 Z=50.000",
+          "cameraInMeshSpace": "X=-32.215 Y=-20.038 Z=13.496",
+          "boundsRayHitsOf144": 144,
+          "complexCollisionRayHitsOf144": 0,
+          "queryEnabled": true,
+          "cameraResponse": 2,
+          "pawnResponse": 0,
+          "tint": "(R=0.120000,G=0.260000,B=0.065000,A=1.000000)"
+        },
+        {
+          "resourceId": 21,
+          "resourceKind": 6,
+          "role": "produce",
+          "component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482097",
+          "mesh": "/Engine/BasicShapes/Cone.Cone",
+          "transform": "-200.000000,-600.000000,138.696930|0.000000,0.000000,-0.000000|0.720000,0.720000,1.150000",
+          "meshBoundsMin": "X=-50.000 Y=-50.000 Z=-50.000",
+          "meshBoundsMax": "X=50.000 Y=50.000 Z=50.000",
+          "cameraInMeshSpace": "X=-46.981 Y=-29.222 Z=-25.875",
+          "boundsRayHitsOf144": 99,
+          "complexCollisionRayHitsOf144": 0,
+          "queryEnabled": true,
+          "cameraResponse": 2,
+          "pawnResponse": 0,
+          "tint": "(R=0.270000,G=0.370000,B=0.095000,A=1.000000)"
+        }
+      ]
+    },
+    "retreatCm": 292.925978,
+    "ordinaryStages": 23,
+    "provenance": "Camera image/sweep evidence uses correction01 executable C8BE0A7ABFA77FD604E7EBCDD8CDE22D2C2904F2D9B52E25CABA8BD68C94A96F. Current02 differs only in the focused smoke fixture; unchanged camera/world unity products were hash-verified before final link.",
+    "resourceId": 21,
+    "ordinaryFrames": 514,
+    "inspected": "Worker personally inspected original corrected frame438: settled tree/crown and heroine visible; giant near-camera surface absent. Frame425 retains a near-side surface during orbit settling, so all-angle camera quality is not complete."
+  },
+  "lifecycle": {
+    "failedAttempt": "lifecycle01 failed a newly added test-only out-of-range channel check: ECC_MAX includes the deprecated nonserialized sentinel beyond the64-entry response container. Exact container comparison fixes the assertion; failure retained, never relabeled.",
+    "passedSteps": 29,
+    "actual": "Two visible QueryOnly canopies, exactly Camera=Block and every serialized other response Ignore; no navigation/overlap events. Harvest removes them; checkpoint restores them; clear and cleared save/load leave no camera blocker.",
+    "fixture": "Controlled functional teleports plus actual mapped gather/craft/harvest/clear/save/load, not ordinary travel or natural sapling renewal."
+  },
+  "shortEndurance": {
+    "engineLogAvailable": false,
+    "gathers": 3,
+    "evidenceMutationChecks": 8,
+    "debugBindingQueryAvailable": false,
+    "wallSeconds": 180.26442490145564,
+    "eats": 1,
+    "navigationFailures": 0,
+    "naturalGameHours": 1.18983799596867,
+    "waypoints": 20,
+    "exactSameWorldRoundTrip": true
+  },
+  "longEndurance": {
+    "setup": "Fresh isolated world; existing finite observer and zero-timer lifetime profile, live stop; no fixture/time/lighting edits. No outcome or day/night/regrowth claim yet.",
+    "status": "running-not-yet-verified",
+    "path": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01",
+    "seconds": 4200
+  },
+  "unchanged": {
+    "profile": "jenny-review-v5",
+    "selectedPreviewSha256": "9E72E101D0995CCDA67CAD1740C9AE4670AD4CE3AFE6A3F0CD269250B854F2EC",
+    "assets": "Original qualified tree/grass packages and shaders reused; no imports/cook/geometry/material/lighting edits.",
+    "cook": "grass-ground-cook-01"
+  },
+  "limits": [
+    "Settled encounter correction, not every camera angle or finished resource silhouettes/woodland/art approval.",
+    "Original tree-import03 remains FAILED with12 qualified branch source-description basis corners.",
+    "No constructed-house/plot scenario or clean GPU/Present/4K/uncapped benchmark; captured frames are not FPS evidence.",
+    "Existing native export/metadata monitoring qualifications and failed VCTIP history remain; no retroactive created-time or helper-boundary pass.",
+    "Root-only lifetime protection and finite endpoint observations are not continuous-history or filesystem/network sandbox proof.",
+    "Normal selected player, original launcher, saves, music, character geometry and graphics preferences untouched."
+  ]
+}

@@ -1,9 +1,11 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$PackageDirectory,
-    [Parameter(Mandatory)][string]$FixtureSave,
+    [string]$FixtureSave,
     [Parameter(Mandatory)][string]$OutputDirectory,
-    [ValidateSet(180,2700)][int]$Seconds=2700,
+    [ValidateSet(180,2700,4200)][int]$Seconds=2700,
+    [switch]$FreshWorld,
+    [switch]$ShippingQA,
     [switch]$CancelProbe,
     [switch]$LitFailureProbe,
     [DateTimeOffset]$LatestStartUtc = [DateTimeOffset]::MaxValue
@@ -11,6 +13,38 @@ param(
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $state=& (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
+if($FreshWorld -or $ShippingQA){
+    if(-not ($FreshWorld -and $ShippingQA) -or $FixtureSave -or $CancelProbe -or $LitFailureProbe -or
+        -not $state.allowWork -or $state.completionPolicy -cne 'until-complete' -or
+        [DateTimeOffset]::UtcNow -ge $LatestStartUtc){
+        throw 'Fresh endurance requires Shipping QA, live completion-driven authority and no fixture/debug-mode/cancellation injection.'
+    }
+    $out=[IO.Path]::GetFullPath($OutputDirectory,$root)
+    if(Test-Path -LiteralPath $out){throw 'Endurance requires a fresh dedicated output directory.'}
+    $package=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+    if($package.configuration -cne 'Shipping'){throw 'Fresh Shipping endurance requires a real Shipping package.'}
+    $null=New-Item -ItemType Directory -Path (Join-Path $out 'Graphics')
+    $ini=Join-Path $out 'Graphics\GameUserSettings.ini'
+    Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $ini
+    $control=Join-Path $root 'Automation\run.json'
+    $arguments="-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadEndurance -HomesteadEnduranceFresh -HomesteadEnduranceSeconds=$Seconds -HomesteadEnduranceControl=`"$control`" -HomesteadTestOutput=`"$out`" -GameUserSettingsINI=`"$ini`" -UserDir=`"$(Join-Path $out 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1920 -ResY=1080 -nosound -nosplash -abslog=`"$(Join-Path $out 'engine.log')`""
+    [ordered]@{runId=$state.id;seconds=$Seconds;freshWorld=$true;completionDriven=$true;
+        arguments=$arguments;fixture=$null;executable=$package.executable;
+        executableSha256=(Get-FileHash $package.executable).Hash;
+        setup='Fresh isolated world; mapped travel, gathering, eating and exact save/load; natural clock only. No state, time or lighting edits.';
+        timing='Existing finite observation duration, not an external timed kill. Existing root-only lifetime guard and live run stop remain active.'} |
+        ConvertTo-Json -Depth 5|Set-Content (Join-Path $out 'launch.json')
+    $process=& (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $PackageDirectory -OutputDirectory $out -Arguments $arguments -CompletionDriven
+    $result=Get-Content (Join-Path $out 'progress.json') -Raw|ConvertFrom-Json
+    if($process.ExitCode -ne 0 -or $result.status -cne 'passed' -or -not $result.freshWorld){
+        throw "Fresh endurance $($result.status): $($result.reason). See $out"
+    }
+    python (Join-Path $PSScriptRoot 'Analyze-Endurance.py') $out
+    if($LASTEXITCODE -ne 0){throw 'Endurance evidence analysis failed.'}
+    Write-Host "Fresh-world endurance passed; actual wallSeconds=$($result.wallSeconds)."
+    return
+}
+if(-not $FixtureSave -or $Seconds -eq 4200){throw 'Legacy endurance requires its disclosed fixture and original duration.'}
 if(-not $state.allowWork -or ([DateTimeOffset]$state.deadlineUtc - [DateTimeOffset]::UtcNow).TotalSeconds -lt $Seconds+180){
     throw 'Run state/deadline does not allow this complete bounded exercise.'
 }

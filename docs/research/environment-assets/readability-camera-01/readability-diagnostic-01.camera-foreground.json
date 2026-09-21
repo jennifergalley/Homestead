@@ -1,0 +1,42 @@
+{
+	"camera": "X=-230.148 Y=-584.198 Z=114.465",
+	"rotation": "P=0.533985 Y=-85.154914 R=-0.000000",
+	"gameHour": 6.3371493000785621,
+	"width": 1280,
+	"height": 720,
+	"limits": "Actual resource component transforms and mesh bounds; ray coverage is bounding-box coverage, not pixel or triangle attribution.",
+	"nearbyVisibleResourceBounds": [
+		{
+			"resourceId": 21,
+			"resourceKind": 6,
+			"role": "produce",
+			"component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482098",
+			"mesh": "/Engine/BasicShapes/Cone.Cone",
+			"transform": "-200.000000,-600.000000,88.696930|0.000000,0.000000,-0.000000|1.050000,1.050000,1.500000",
+			"meshBoundsMin": "X=-50.000 Y=-50.000 Z=-50.000",
+			"meshBoundsMax": "X=50.000 Y=50.000 Z=50.000",
+			"cameraInMeshSpace": "X=-28.712 Y=15.050 Z=17.179",
+			"boundsRayHitsOf144": 144,
+			"queryEnabled": false,
+			"cameraResponse": 0,
+			"pawnResponse": 2,
+			"tint": "(R=0.120000,G=0.260000,B=0.065000,A=1.000000)"
+		},
+		{
+			"resourceId": 21,
+			"resourceKind": 6,
+			"role": "produce",
+			"component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482097",
+			"mesh": "/Engine/BasicShapes/Cone.Cone",
+			"transform": "-200.000000,-600.000000,138.696930|0.000000,0.000000,-0.000000|0.720000,0.720000,1.150000",
+			"meshBoundsMin": "X=-50.000 Y=-50.000 Z=-50.000",
+			"meshBoundsMax": "X=50.000 Y=50.000 Z=50.000",
+			"cameraInMeshSpace": "X=-41.872 Y=21.947 Z=-21.071",
+			"boundsRayHitsOf144": 135,
+			"queryEnabled": false,
+			"cameraResponse": 0,
+			"pawnResponse": 2,
+			"tint": "(R=0.270000,G=0.370000,B=0.095000,A=1.000000)"
+		}
+	]
+}

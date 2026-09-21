@@ -24,7 +24,10 @@ param(
     [switch]$TreeContactCorrection,
     [switch]$GroveCandidate,
     [switch]$GroveProxyCorrection,
-    [switch]$GrassGroundCandidate
+    [switch]$GrassGroundCandidate,
+    [switch]$ReadabilityDiagnostic,
+    [switch]$ReadabilityCorrection,
+    [switch]$ReadabilityLifecycle
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -40,10 +43,13 @@ if($GroveProxyCorrection -and -not $GroveCandidate){throw 'Proxy correction requ
 if($GrassGroundCandidate -and (-not $TreeDiagnosticCandidate -or $GroveCandidate -or $TreeContactCorrection)){
     throw 'Grass/ground requires exclusive qualified tree Shipping selection.'
 }
-$shippingBuildName=if($GrassGroundCandidate){'grass-shipping-build-01'}elseif($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$shippingLinkAction=if($GrassGroundCandidate){3}elseif($TreeContactCorrection -or $GroveProxyCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
+if($ReadabilityDiagnostic -and -not $GrassGroundCandidate){throw 'Readability diagnostic requires the qualified grass Shipping candidate.'}
+if($ReadabilityCorrection -and -not $ReadabilityDiagnostic){throw 'Readability correction requires the explicit diagnostic-derived candidate.'}
+if($ReadabilityLifecycle -and -not $ReadabilityCorrection){throw 'Lifecycle fixture correction requires the confirmed readability candidate.'}
+$shippingBuildName=if($ReadabilityLifecycle){'readability-shipping-build-03'}elseif($ReadabilityCorrection){'readability-shipping-build-02'}elseif($ReadabilityDiagnostic){'readability-shipping-build-01'}elseif($GrassGroundCandidate){'grass-shipping-build-01'}elseif($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkAction=if($ReadabilityLifecycle){1}elseif($ReadabilityDiagnostic){2}elseif($GrassGroundCandidate){3}elseif($TreeContactCorrection -or $GroveProxyCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
-$shippingCompiles=if($GrassGroundCandidate){@(-1,0,1,2)}elseif($TreeContactCorrection -or $GroveProxyCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
+$shippingCompiles=if($ReadabilityLifecycle){@(-1,0)}elseif($ReadabilityDiagnostic){@(-1,0,1)}elseif($GrassGroundCandidate){@(-1,0,1,2)}elseif($TreeContactCorrection -or $GroveProxyCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
 if($GrassActions -and ($FernActions -or $UiActions -or $WardrobeActions -or $TreeActions -or $ShippingActions -or
     -not $DetachedConsole -or $CompileActionId -notin @(-1,0,1,4,5,6) -or $ResourceLinkActionId -notin @(-1,2,3,7,8) -or
@@ -187,7 +193,7 @@ if($StageCooked) {
     }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GrassGroundCandidate){'grass-ground-01'}elseif($GroveProxyCorrection){'clearing-grove-03'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($ReadabilityLifecycle){'clearing-readability-02'}elseif($ReadabilityCorrection){'clearing-readability-01'}elseif($ReadabilityDiagnostic){'readability-diagnostic-01'}elseif($GrassGroundCandidate){'grass-ground-01'}elseif($GroveProxyCorrection){'clearing-grove-03'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -294,6 +300,18 @@ if($StageCooked) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grass-shipping-plan-01\actions.json'
         $planHash='0F48D68CEC9BBD5E516FED07DD1089734268CD0FBAC27BDEF732E9D9C4C3061A'
     }
+    if($ReadabilityDiagnostic){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\readability-shipping-plan-01\actions.json'
+        $planHash='FBE0553F6CA0CA104FE320E38E4AF7AD6FB0586503AA3314F15D1DD91EFB0675'
+    }
+    if($ReadabilityCorrection){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\readability-shipping-plan-02\actions.json'
+        $planHash='14F962668002BDCA3CC6266EF4BADC4DD0E3203CB58EFBED9C890B7B5F91DA39'
+    }
+    if($ReadabilityLifecycle){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\readability-shipping-plan-03\actions.json'
+        $planHash='7FD06316E1534B6B764418802A808CD09F29EC4ABDCBF7BB7A0343FEF86C39DC'
+    }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'
         $planHash='5A801AC790664B9C17894AB1C730EBEC1DB5E541A8343D9B01E6CF1BE7A3E0AE'
@@ -309,6 +327,20 @@ if($StageCooked) {
     if((Get-FileHash $planPath).Hash -cne $planHash) { throw 'Reviewed action export changed.' }
     $plan=Get-Content $planPath -Raw|ConvertFrom-Json
     $action=@($plan.Actions|Where-Object Id -EQ $selectedId)[0]
+    if($ReadabilityDiagnostic -and $ResourceLinkActionId -eq $shippingLinkAction){
+        $retained=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grass-shipping-build-01\compile2\result.json') -Raw|ConvertFrom-Json
+        if($retained.status -cne 'passed'){throw 'Unchanged third Shipping unity is missing.'}
+        foreach($product in $retained.producedItems){
+            if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Unchanged third Shipping unity differs.'}
+        }
+    }
+    if($ReadabilityLifecycle -and $ResourceLinkActionId -eq 1){
+        $retained=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\readability-shipping-build-02\compile1\result.json') -Raw|ConvertFrom-Json
+        if($retained.status -cne 'passed'){throw 'Unchanged camera/world unity is missing.'}
+        foreach($product in $retained.producedItems){
+            if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Unchanged camera/world unity differs.'}
+        }
+    }
     if($TreeContactCorrection -and $ResourceLinkActionId -eq 1){
         $retained=Get-Content (Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-shipping-build-03\compile0\result.json') -Raw|ConvertFrom-Json
         if($retained.status -cne 'passed'){throw 'Unchanged first Shipping unity prerequisite is missing.'}
@@ -355,6 +387,7 @@ if($StageCooked) {
         }
         if($WardrobeCandidate -or $TreeDiagnosticCandidate){
             $compileFolder="compile$dependency"
+            if($ReadabilityDiagnostic -and -not $ReadabilityCorrection -and $dependency -eq 1){$compileFolder='compile1-02'}
             $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\$shippingBuildName\$compileFolder\result.json") -Raw|ConvertFrom-Json
             if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual selected Shipping compile prerequisite missing.'}
             foreach($product in $proof.producedItems){
@@ -509,6 +542,9 @@ try {
         groveCandidate=[bool]$GroveCandidate
         groveProxyCorrection=[bool]$GroveProxyCorrection
         grassGroundCandidate=[bool]$GrassGroundCandidate
+        readabilityDiagnostic=[bool]$ReadabilityDiagnostic
+        readabilityCorrection=[bool]$ReadabilityCorrection
+        readabilityLifecycle=[bool]$ReadabilityLifecycle
         creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions;treeActions=[bool]$TreeActions;grassActions=[bool]$GrassActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()

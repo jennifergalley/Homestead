@@ -1,0 +1,7 @@
+node=7 ready=1 cleared=0 blockers=2 sweep=1 own_produce=1
+node=7 ready=0 cleared=0 blockers=0 sweep=0 own_produce=0
+node=7 ready=1 cleared=0 blockers=2 sweep=1 own_produce=1
+node=7 ready=0 cleared=1 blockers=0 sweep=0 own_produce=0
+node=7 ready=0 cleared=1 blockers=0 sweep=0 own_produce=0
+node=7 ready=0 cleared=1 blockers=0 sweep=0 own_produce=0
+node=7 ready=0 cleared=1 blockers=0 sweep=0 own_produce=0

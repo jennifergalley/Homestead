@@ -765,7 +765,13 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     {
         if (bProduce == bProduceOnly)
         {
-            AddPart(Visual, Mesh, Base + Offset, Size, Color, false, Rotation);
+            auto* Component = AddPart(Visual, Mesh, Base + Offset, Size, Color, false, Rotation);
+            if (Component && bProduce && Node.kind == Homestead::ResourceKind::Sapling && Mesh == Cone)
+            {
+                Component->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+                Component->SetCollisionResponseToAllChannels(ECR_Ignore);
+                Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
+            }
         }
     };
 

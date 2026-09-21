@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
@@ -22,6 +22,7 @@ if ($BookClarity -and ($Prompts -or $Clearing -or $Weeding -or $Gathering -or $W
 if ($Prompts -and ($Clearing -or $Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Prompt-intent fixtures run separately from other acceptance modes.'
 }
+if ($CameraLifecycle -and -not $Clearing) { throw 'Camera lifecycle uses the existing controlled clearing fixture.' }
 if ($Clearing -and ($Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Clearing lifecycle checks run separately from other acceptance modes.'
 }
@@ -124,6 +125,7 @@ if ($Gathering) { $loopArguments = '-HomesteadGatheringTest' }
 if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
 if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
+if ($CameraLifecycle) { $loopArguments += ' -HomesteadCameraLifecycle' }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }

@@ -1,0 +1,1794 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 1.5831607,
+  "samples": [
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 19.3369
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 56.5403
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 86.9015
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 116.8474
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 132.7915
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 161.9231
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 177.9688
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 192.7849
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 208.8536
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 224.2036
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 239.3343
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 255.4275
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 270.3419
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 286.6912
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 301.8356
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 317.4527
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 332.4626
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 348.6122
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 363.6247
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 379.875
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 395.7275
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 410.8515
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 426.8933
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 442.1222
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 457.2313
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 472.2951
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 487.3887
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 503.128
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 517.9942
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 533.5791
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 549.2471
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 565.6886
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 580.9264
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 595.8432
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 610.9002
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 626.2832
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 657.3833
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 673.6608
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 689.887
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 705.1768
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 720.1417
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 735.6911
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 750.822
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 765.68
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 780.9332
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 795.9394
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 810.9241
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 825.9349
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 841.1977
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 856.5789
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 887.1128
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 901.8853
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 916.9697
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 932.709
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 948.4442
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 963.913
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 980.2273
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 995.4982
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1011.7849
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1027.1416
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1041.862
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1057.609
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1072.8574
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1087.6893
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1102.9433
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1118.8701
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1133.9847
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1149.1001
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1164.4059
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1179.4182
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1195.5789
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        53332
+      ],
+      "elapsedMs": 1210.8497
+    }
+  ],
+  "maximumSampleGapMs": 372.29510000000005,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T17:05:55.3308661+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.3326852+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.3695525+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.3996879+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.4297025+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.4456251+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.4751021+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.4911835+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5063023+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5223568+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5374880+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5525971+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5685277+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5836810+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.5996619+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.6148272+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.6309092+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.6460073+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.6620308+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.6771324+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.6931018+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.7091082+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.7242844+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.7403201+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.7554611+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.7704852+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.7856148+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8006581+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8163624+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8312778+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8468939+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8624599+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8790040+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.8941733+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.9091250+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.9243219+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.9398033+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.9706926+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:55.9866892+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0028419+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0183073+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0334894+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0489571+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0642023+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0791575+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.0943378+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.1093165+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.1243508+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.1394655+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.1545057+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.1696111+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2002452+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2152549+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2304516+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2459567+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2618508+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2769929+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.2934811+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.3087205+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.3247424+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.3403323+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.3553382+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.3710006+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.3860321+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4010263+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4163081+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4322120+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4473475+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4624090+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4776578+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.4925769+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.5085639+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T17:05:56.5239347+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 53332,
+          "NativeError": 0,
+          "Image": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+          "Error": null,
+          "CreationTime": 134344839553219984,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    }
+  ],
+  "coff": null,
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\readability-shipping-build-01\\manifest-01\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 859312,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344839550196783,
+    "LastWriteTime": 134344839550196783,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": -1,
+  "producedItems": [
+    {
+      "sha256": "2BD33490E1169EF7DD2AD885BB82F9507833FAA74086DA9AE30FD504DE66FA2A",
+      "bytes": 166929920,
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+      "lastWriteUtc": "2026-09-21T17:05:56.5158149Z"
+    }
+  ],
+  "previousProductBackups": [],
+  "objectSha256": "2BD33490E1169EF7DD2AD885BB82F9507833FAA74086DA9AE30FD504DE66FA2A",
+  "generatedManifest": null,
+  "stageCandidate": null,
+  "stageCookFileCount": 0,
+  "limits": "One explicitly selected guarded build leaf with exact approved Windows console host. No application helpers/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}
