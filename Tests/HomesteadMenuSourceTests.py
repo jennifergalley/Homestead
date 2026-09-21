@@ -226,6 +226,46 @@ class MenuSourceContracts(unittest.TestCase):
                     self.assertEqual(stack.pop(), pairs[character], str(path))
             self.assertFalse(stack, str(path))
 
+    def test_directional_edges_use_native_focus_navigation(self):
+        self.assertIn("HomesteadMenuNavigation::Move(", MENU)
+        self.assertIn("Slate.ProcessReply(Path, FReply::Handled().SetNavigation(", MENU)
+        self.assertIn("FNavigationReply::Stop()", MENU)
+        self.assertIn("SetKeyboardFocus(Target, EFocusCause::Navigation)", MENU)
+        self.assertIn("Button->SetOnFocusReceived(", MENU)
+
+    def test_left_stick_uses_shared_navigation_not_portrait_rotation(self):
+        handler = function_body(MENU, "bool SHomesteadMenu::HandleKey(")
+        self.assertIn("LeftStick.Sample(true, InputAmount", handler)
+        self.assertIn("LeftStick.Sample(false, -InputAmount", handler)
+        tick = function_body(MENU, "void SHomesteadMenu::Tick(")
+        self.assertIn("LeftStick.Poll(", tick)
+        self.assertIn("NavigateDirection(Direction)", tick)
+        navigation = function_body(MENU, "void SHomesteadMenu::NavigateDirection(")
+        self.assertNotIn("OrbitMenuPortrait", navigation)
+        self.assertNotIn("MenuItemAction", navigation)
+
+    def test_quantity_has_explicit_edit_and_parent_focus_trap(self):
+        self.assertIn("Root->SetEnabled(Value == EDialog::None)", MENU)
+        self.assertIn("Dialog == EDialog::Amount && bEditingAmount", MENU)
+        self.assertIn("DialogSelection < 0", MENU)
+        self.assertIn("activate to edit", MENU)
+        footer = function_body(MENU, "FString SHomesteadMenu::Footer(")
+        self.assertIn("D-pad / Left stick", footer)
+        self.assertNotIn("LT/RT  Regions", footer)
+
+    def test_native_navigation_checks_send_real_directional_events(self):
+        fixture = (SOURCE / "UI" / "HomesteadDirectionalNavigationTest.cpp").read_text()
+        self.assertIn("Tap(EKeys::Gamepad_DPad_Down)", fixture)
+        self.assertIn("SlateAxis(EKeys::Gamepad_LeftY, -0.9f)", fixture)
+        self.assertIn("Axis(EKeys::Gamepad_LeftX, 0.9f)", fixture)
+        self.assertIn("HasSynchronizedFocus()", fixture)
+        self.assertIn("IsFocusedControlVisible()", fixture)
+        self.assertNotIn("CycleRegion(", fixture)
+        self.assertNotIn("AdoptFocus(", fixture)
+        self.assertIn("ProcessKeyDownEvent(Event)", fixture)
+        self.assertIn("ProcessAnalogInputEvent(", fixture)
+        self.assertIn("TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true)", fixture)
+
 
 if __name__ == "__main__":
     unittest.main()

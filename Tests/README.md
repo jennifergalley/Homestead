@@ -1,5 +1,22 @@
 # Homestead verification
 
+## Directional menu refinement
+
+The focused existing smoke route accepts `-HomesteadDirectionalNavigationTest`
+with `-HomesteadSmokeTest -HomesteadNativeMenuTest -HomesteadRequireLit` and the
+existing isolated Shipping-QA arguments/guard. Main must admit and run it only
+after the shared engine slot is released; no raw compiler or second engine.
+It sends real D-pad, left-stick and keyboard events, checks actual Slate focus
+and visible selected controls, and verifies no navigation-only item/pawn/
+portrait changes. Short/full-row fixtures use disclosed authority harvesting
+and stack splitting; they are not an ordinary gathering playthrough.
+The route also covers empty nearby storage, explicit quantity editing/cancel
+and the existing Settings exit path. No trigger/region-shortcut proxy is used.
+
+`HomesteadDirectionalNavigationTests.cpp` exercises the same engine-free grid/
+stick helpers used by the widget. Run it through the existing approved portable
+compiler/test slot; a portable pass alone does not prove native spatial focus.
+
 ## Native menu integration
 
 `Scripts\Test-Game.ps1 -NativeMenu -Width 1280 -Height 720` selects the focused
