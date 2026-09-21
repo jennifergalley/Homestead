@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "scope": "Offline modular character source and FBX exports; Unreal acceptance pending",
+  "inherited_rights": [
+    "Assets\\Characters\\provenance.json",
+    "Assets\\Characters\\Variants\\provenance.json",
+    "Assets\\Characters\\BodyPresets\\provenance.json"
+  ],
+  "tools": {
+    "blender": "4.5.14 LTS, verified existing local installation; CPU only",
+    "mpfb": "2.0.17, verified existing addon copied into process-local lane profile",
+    "new_downloads": false,
+    "shared_profile_modified": false
+  },
+  "third_party": {
+    "author": "MakeHuman Team and contributors",
+    "license": "CC0-1.0 for mesh, targets, rig, weights, skin, eyes, brows, lashes, teeth, tongue, hair and shoes01",
+    "license_evidence": [
+      "Assets\\Characters\\Source\\Licenses\\LICENSE.ASSETS.md",
+      "Assets\\Characters\\Source\\Licenses\\MAKEHUMAN-CC0.md"
+    ],
+    "inputs": "Existing packed original Preferred/Willow/Hazel scenes and saved MPFB recipes; installed MPFB bundled anatomical data. No private portrait or downloaded asset script accessed.",
+    "source_hashes": "manifest.json bodies/source_sha256, reconstruction/recipe_sha256 and detail_target_sha256; bundled base SHA recorded at manifest root"
+  },
+  "original_work": {
+    "author": "Procedural authoring by GitHub Copilot for Jenny's SurvivalGame project",
+    "rights": "Project-authored geometry and scripts; underlying MakeHuman derivations remain CC0",
+    "elements": [
+      "Separate permanent opaque bra and briefs with fitted bra straps, per Jenny's follow-up",
+      "Original closed woven slippers, cuffs and crossed ankle bindings",
+      "Deterministic neutral weave texture",
+      "Source-only reconstruction, modular export, validation and CPU review scripts"
+    ],
+    "scripts": [
+      "Scripts\\Characters\\build_modular_clothing.py",
+      "Scripts\\Characters\\verify_modular_clothing.py",
+      "Scripts\\Characters\\check_modular_manifest.py"
+    ]
+  },
+  "validation": "validation.json; real FBX interchange, source coverage and sampled original actions",
+  "output_hashes": "asset-hashes.json covers every blend, FBX, texture and retained review; manifest.json and per-body materials.json also bind validated exports/textures",
+  "limits": [
+    "No Unreal import, cook, build, runtime integration test or ordinary-play visual acceptance in this lane.",
+    "No cloth simulation or new gameplay warmth effects.",
+    "CPU contact sheets are technical authoring review, not Jenny's aesthetic approval.",
+    "Existing original and joined assets remain usable and unchanged."
+  ]
+}
