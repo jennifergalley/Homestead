@@ -50,6 +50,23 @@ double Clamp(double value, double low, double high) { return std::max(low, std::
 Result Good(const std::string& text) { return {true, text}; }
 Result Bad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
 Result Failed() { return Bad("You need to recover. Load your recent checkpoint to continue."); }
+double FoodNutrition(Item item)
+{
+    switch (item)
+    {
+    case Item::Berries: return 12.0;
+    case Item::RoastedRoots: return 28.0;
+    case Item::HerbedRoots: return 38.0;
+    default: return 0.0;
+    }
+}
+Result CanEat(const State& state, Item item)
+{
+    if (state.failed) return Failed();
+    if (FoodNutrition(item) == 0.0) return Bad("Eat berries, roasted roots, or herbed roots. Raw roots need cooking.");
+    if (state.hunger >= 100.0) return Bad("You are already full. Save this food for later.");
+    return Good("");
+}
 Inventory Items(std::initializer_list<std::pair<Item, int>> values)
 {
     Inventory result{};
@@ -917,16 +934,29 @@ Result Simulation::Clear(int nodeId, Point player)
 }
 Result Simulation::Eat(Item item)
 {
-    if (state_.failed) return Failed();
-    double nutrition = 0.0;
-    if (item == Item::Berries) nutrition = 12.0;
-    if (item == Item::RoastedRoots) nutrition = 28.0;
-    if (item == Item::HerbedRoots) nutrition = 38.0;
-    if (nutrition == 0.0) return Bad("Eat berries, roasted roots, or herbed roots. Raw roots need cooking.");
-    if (state_.hunger >= 100.0) return Bad("You are already full. Save this food for later.");
+    const auto allowed = CanEat(state_, item);
+    if (!allowed) return allowed;
     if (!TryAdjust(Items({{item, -1}}))) return Bad(std::string("Gather or cook some ") + ItemName(item) + " first.");
-    state_.hunger = std::min(100.0, state_.hunger + nutrition);
+    state_.hunger = std::min(100.0, state_.hunger + FoodNutrition(item));
     return Good(std::string("Ate ") + ItemName(item) + ".");
+}
+Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    State candidate = state_;
+    auto entry = std::find_if(candidate.inventoryLayout.begin(), candidate.inventoryLayout.end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == candidate.inventoryLayout.end())
+        return Bad("Choose a carried food group. Take stored food into your pack first.");
+    const auto allowed = CanEat(candidate, entry->item);
+    if (!allowed) return allowed;
+    const Item item = entry->item;
+    --entry->quantity;
+    --candidate.inventory[static_cast<int>(item)];
+    candidate.hunger = std::min(100.0, candidate.hunger + FoodNutrition(item));
+    const std::string message = std::string("Ate ") + ItemName(item) + ".";
+    return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Craft(Recipe recipe, Point player)
 {

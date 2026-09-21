@@ -1307,6 +1307,72 @@ void QuantityMutationReconciliation()
     CHECK(sim.Count(Item::Branch) == 119 && sim.UsedCapacity() == 120);
     InventoryRoundTrip(sim);
 }
+void SelectedFoodGroupTransactions()
+{
+    for (const auto food : {std::pair<Item, double>{Item::Berries, 12.0},
+        {Item::RoastedRoots, 28.0}, {Item::HerbedRoots, 38.0}})
+    {
+        for (double hunger : {50.0, 95.0})
+        {
+            Simulation sim;
+            Stock(sim, {{Item::Knife, 1}, {food.first, 5}});
+            Edit(sim, [&](State& state) { state.hunger = hunger; });
+            const int first = Group(sim, food.first);
+            OK(sim.SplitGroup(0, first, 2, Home, sim.GetRevision()));
+            const int selected = sim.GetState().nextGroupId - 1;
+            State expectedState = sim.GetState();
+            expectedState.inventoryLayout.back().quantity = 1;
+            --expectedState.inventory[static_cast<int>(food.first)];
+            expectedState.hunger = hunger + food.second > 100.0 ? 100.0 : hunger + food.second;
+            Simulation expected;
+            OK(expected.Deserialize(Encode(expectedState)));
+            Simulation aggregate = sim;
+            const auto aggregateResult = aggregate.Eat(food.first);
+            OK(aggregateResult);
+            const auto revision = sim.GetRevision();
+            const auto result = sim.EatGroup(selected, revision);
+            OK(result);
+            CHECK(result.revision == revision + 1 && sim.GetRevision() == result.revision);
+            CHECK(result.message == aggregateResult.message);
+            CHECK(sim.GetState().hunger == aggregate.GetState().hunger);
+            CHECK(sim.GetLayout(0)->at(1).groupId == first && sim.GetLayout(0)->at(1).quantity == 3);
+            CHECK(sim.GetLayout(0)->back().groupId == selected && sim.GetLayout(0)->back().quantity == 1);
+            CHECK(sim.Serialize() == expected.Serialize());
+            UnchangedFailure(sim, [&] { return sim.EatGroup(selected, revision); });
+            if (sim.GetState().hunger == 100.0)
+            {
+                UnchangedFailure(sim, [&] { return sim.EatGroup(selected, sim.GetRevision()); });
+            }
+            InventoryRoundTrip(sim);
+        }
+    }
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    const int chest = sim.GetState().structures.back().id;
+    Stock(sim, {{Item::Knife, 1}, {Item::Berries, 5}, {Item::Roots, 2}});
+    Edit(sim, [](State& state) { state.hunger = 50; });
+    const int berries = Group(sim, Item::Berries);
+    OK(sim.SplitGroup(0, berries, 1, Home, sim.GetRevision()));
+    const int single = sim.GetState().nextGroupId - 1;
+    OK(sim.EatGroup(single, sim.GetRevision()));
+    CHECK(sim.Count(Item::Berries) == 4 && sim.GetState().hunger == 62);
+    CHECK(sim.GetLayout(0)->at(1).groupId == berries && sim.GetLayout(0)->at(1).quantity == 4);
+    CHECK(sim.GetLayout(0)->size() == 3);
+    UnchangedFailure(sim, [&] { return sim.EatGroup(single, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(0, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(-1, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Knife), sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Roots), sim.GetRevision()); });
+    OK(sim.TransferGroup(chest, berries, 2, true, Home, sim.GetRevision()));
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Berries, chest), sim.GetRevision()); });
+    const auto beforeLoad = sim.GetRevision();
+    OK(sim.Deserialize(sim.Serialize()));
+    UnchangedFailure(sim, [&] { return sim.EatGroup(berries, beforeLoad); });
+    Edit(sim, [](State& state) { state.failed = true; state.energy = 0; });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Berries), sim.GetRevision()); });
+    InventoryRoundTrip(sim);
+}
 void WardrobeSaveRejection()
 {
     Simulation sim;
@@ -1414,6 +1480,7 @@ int main()
     Run("wardrobe storage, shared capacity and exact 280cm reach", WardrobeStorageAndReach);
     Run("persistent layout and stale transaction rejection", PersistentLayoutTransactions);
     Run("existing quantity mutations and 120 groups without slot cost", QuantityMutationReconciliation);
+    Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
     Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
