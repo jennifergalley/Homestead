@@ -1,0 +1,167 @@
+{
+  "runId": "20260920-182217-d1f84e39",
+  "utc": "2026-09-21T01:05:06.0106701+00:00",
+  "authorization": "Coordinator17:57 bounded corrected settings build and conditional third probe",
+  "status": "corrected-products-verified-runtime-unproven",
+  "priorBuildReceiptSha256": "E091B1C1C59F62460C29078DBE31FF805A3F39117CF678E9BADFEF934520817D",
+  "qualification": "Game module unchanged from accepted build; original game-link and compile5 shutdown-monitor failures remain historical failed receipts. Corrected probe build operations passed. UBT export/metadata use established sampled orchestration, not leaf containment; empty sampled endpoints are not continuous absence.",
+  "products": [
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2093056,
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90222592,
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 149504,
+      "sha256": "21DBC64E6E93612181D8ADF7EC0AF1352EEE8E9AD55F007BCEBA4DC599EF41B5"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 9588736,
+      "sha256": "DF832C62AA6CCDCFD16A923FC48A1C6D5435EAF4A02754325917D58354A4E2B4"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166,
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A"
+    },
+    {
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032,
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1"
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "6CD89110DCA96760BA7FC6F450CC6844E7A8987673C002BB373E7F4AF68BA02A",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "D1C82D04DA09787FF21A354CC5041C84F5FD192C006E5C8694BB332486EF8DBD",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+      "path": "Scripts\\AuthoringProbePolicy.ps1"
+    },
+    {
+      "sha256": "AA7C45AFB5DF094D7139395E9BE51E9B7FA0B4C1FE3F2CA6B5EF3EE847F23EB8",
+      "path": "Tests\\Test-AuthoringProbePolicy.ps1"
+    }
+  ],
+  "files": [
+    {
+      "bytes": 2899,
+      "sha256": "6DDD5720857BC656D9FE42297495179FF5486A4A95580EA178779E1A99527ACB",
+      "file": "compile-0-launch.json"
+    },
+    {
+      "bytes": 382279,
+      "sha256": "FED9491B5729322561E41E0E08045569F3A7055535AFEEF16135D9329F9F7BE4",
+      "file": "compile-0-result.json"
+    },
+    {
+      "bytes": 2877,
+      "sha256": "A74042791BCF5FC9C7967DD3F03BE94B574033CC1E71F72F525BAE35B5D052CF",
+      "file": "compile-1-launch.json"
+    },
+    {
+      "bytes": 200719,
+      "sha256": "B63567C96A2678BD85A07D43B9B81270639F246BA04F19B9C319AE7DE22281AD",
+      "file": "compile-1-result.json"
+    },
+    {
+      "bytes": 2829,
+      "sha256": "A32ABDD15DE74D9BA75102FB98B37FAD683FA043D7F1A47C09BF928DA0567F9A",
+      "file": "compile-2-launch.json"
+    },
+    {
+      "bytes": 43762,
+      "sha256": "010AC7DD84179AC1955604FCF0C9601FB89A973BBD3E708AF4BE7F007D7C4E6A",
+      "file": "compile-2-result.json"
+    },
+    {
+      "bytes": 2824,
+      "sha256": "F9FF8D42381873C8020034815C65C4BFB371F057F43712AB874C36740AC2A36E",
+      "file": "compile-3-launch.json"
+    },
+    {
+      "bytes": 68800,
+      "sha256": "2D5366B6DDA48D9E2EE2DA77B626B25E35DF1F1E4596CD0D0D9E77C30BCC5AB5",
+      "file": "compile-3-result.json"
+    },
+    {
+      "bytes": 2445,
+      "sha256": "579E0E27B40A4146B0D4D4C2B41215A01E092E34E13C0DAACE89E8F9963CFD86",
+      "file": "converter-launch.json"
+    },
+    {
+      "bytes": 3315,
+      "sha256": "1D40193CF374A097F666775D87ED3BA408FFC62298DAC0A07CBE61DA6F748B50",
+      "file": "converter-result.json"
+    },
+    {
+      "bytes": 2886,
+      "sha256": "DAC64A50F6F50F6DEDF7A777F435CC7320064B456111E288B8C8AC6D51B58E3D",
+      "file": "export-launch.json"
+    },
+    {
+      "bytes": 1461,
+      "sha256": "F561A41B90DC617AFEBED8622A711BB31FD95E37F81E2C0962D0EB428A3DDD6C",
+      "file": "export-result.json"
+    },
+    {
+      "bytes": 2304,
+      "sha256": "5BB653C672EE90E8A2904E8EAFEB2F70030B8DDB72EC0FAD3E2340752ACDADE1",
+      "file": "library-launch.json"
+    },
+    {
+      "bytes": 2845,
+      "sha256": "9E618A839278639782BD71569A0DB055C9F00C3D783BC7062889E0553E68B56B",
+      "file": "library-result.json"
+    },
+    {
+      "bytes": 3244,
+      "sha256": "07CCB83738177DC4B9CE38D9992C2F48EB0FE85D7359A005F833FADD5D4DA3F2",
+      "file": "link-launch.json"
+    },
+    {
+      "bytes": 8944,
+      "sha256": "E60CDF6BFD6EC9214014563CA6B7AED716B295E4D7AC3D6BCF73DDB5FD87FAD1",
+      "file": "link-result.json"
+    },
+    {
+      "bytes": 1331,
+      "sha256": "7004C92F754948266147267103D9FC2AE197E968D012799D8FA07B7E5FE9F999",
+      "file": "metadata-launch.json"
+    },
+    {
+      "bytes": 571,
+      "sha256": "076B5AD50B3F77031429C38564AE72B7C902CD0326A362B00592DB22F075EDE4",
+      "file": "metadata-result.json"
+    },
+    {
+      "bytes": 1752,
+      "sha256": "CA3BE3B5359C3CFAE289563B63FF0F4DDC5132B396DD631054AE2D7BA65F1355",
+      "file": "native-products.json"
+    },
+    {
+      "bytes": 247,
+      "sha256": "603132BBFF31CEA08AAB29D76BE833B6FAB1A258F76A75110AA45B166A5CBE8F",
+      "file": "policy-tests.txt"
+    },
+    {
+      "bytes": 512,
+      "sha256": "92631E1185A01F01654D60348E920F63598724D3273A6AFA7BE40A1881982F25",
+      "file": "python-query-export.json"
+    }
+  ],
+  "updatedActionsSha256": "1EF46AB9A4868287980B8A9151F2D787778AEF017B407E435C5D8E2B2EA5D603",
+  "recipeQualification": "Current exported commands and produced items match old reviewed IDs0-4/9; newly generated response files are measured in each launch. New link response replaces only resource token using fresh guarded converted object. Genuine target metadata input hash unchanged."
+}

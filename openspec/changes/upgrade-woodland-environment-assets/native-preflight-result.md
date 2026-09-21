@@ -1,4 +1,11 @@
-# Native settings preflight: built, runtime admission pending
+# Native settings preflight: settings subgate passed, wider workflow pending
+
+**Current18:06:** coordinator accepted the corrected settings/startup/
+cooperative-stop subgate in `native-settings-success.md`. Third reservation,
+second actual Editor launch, exit0; exact config destinations, constrained
+DDC/Python states, root-only accounting and unchanged marker cleanup passed.
+This does not pass full task1.3 or authorize imports automatically. Earlier
+failed attempts below remain failed; progress is4/29.
 
 **Current17:48:** `native-settings-result.md` supersedes the unconsumed-attempt
 status below. One actual Editor run failed its settings gate/exit4. Root-only

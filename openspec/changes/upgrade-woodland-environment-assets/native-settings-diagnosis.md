@@ -1,5 +1,13 @@
 # Bounded read-only diagnosis of the failed native settings probe
 
+Subsequent17:57 decision: coordinator explicitly approved the settings-only
+execution-disabled Python contract rather than the overbroad module-absence
+proxy. Installed dependency modules are permitted, but interpreter,
+startup-script/.pth/pip execution is not. One corrected build and distinct
+third probe are conditional on direct entry/exit state measurements and all
+existing containment/network/marker requirements. This does not pass the
+old attempt or admit asset operations. The diagnosis below is historical.
+
 2026-09-20,17:55 Arizona. Run20260920-182217-d1f84e39.
 OpenSpec CLI reports4/29. Task1.3 remains unchecked. No implementation,
 compilation, fixture, additional Editor launch or asset operation occurred

@@ -1,0 +1,107 @@
+[
+  {
+    "operation": "native-correction-build-01\\compile-0",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 394.48679999999877,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  },
+  {
+    "operation": "native-correction-build-01\\compile-1",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 209.0549000000001,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  },
+  {
+    "operation": "native-correction-build-01\\compile-2",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 193.01379999999995,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  },
+  {
+    "operation": "native-correction-build-01\\compile-3",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 185.6387000000002,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  },
+  {
+    "operation": "native-correction-build-01\\library",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 218.2529,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  },
+  {
+    "operation": "native-correction-build-01\\link",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 253.05579999999998,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  },
+  {
+    "operation": "resource-conversion-03\\probe",
+    "exitCode": 0,
+    "status": "passed",
+    "maximumSampleGapMs": 206.11769999999999,
+    "endpointRows": 0,
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    }
+  }
+]

@@ -24,18 +24,49 @@ Expect-Rejection { Assert-AuthoringEndpoints @() @(@{LocalPort=1}) 42 }
 Expect-Rejection { Assert-AuthoringEndpoints @(@{},@{}) @() 42 }
 $count += 2
 $cache = 'E:\DisposableProbe\DDC'
-Assert-AuthoringDdc @(@{type='';name='';local=$false},@{type='Memory';name='';local=$true},
-    @{type='File System';name=$cache;local=$true}) $cache
+$tree = @(@{index=0;parent=-1;childCount=1;type='Async';name='';local=$true},
+    @{index=1;parent=0;childCount=1;type='';name='';local=$false},
+    @{index=2;parent=1;childCount=0;type='File System';name=$cache;local=$true})
+Assert-AuthoringDdc $tree $cache
 $count++
-foreach ($stores in @(
-    ,@(@{type='Zen';name=$cache;local=$true}),
-    ,@(@{type='File System';name=$cache;local=$false}),
-    ,@(@{type='File System';name='E:\Outside';local=$true}),
-    ,@(@{type='Memory';name='';local=$true})
-)) {
+foreach ($change in @(@{type='Zen'},@{local=$false},@{name='E:\Outside'},@{type='Memory';name=''},
+    @{type='';name=''},@{parent=2},@{index=4},@{childCount=1},@{name='relative'})) {
+    $stores=@($tree | ForEach-Object {$_.Clone()})
+    foreach($key in $change.Keys){$stores[2][$key]=$change[$key]}
     Expect-Rejection { Assert-AuthoringDdc $stores $cache }
     $count++
 }
+foreach($change in @(@{name='unexpected'},@{local=$false},@{childCount=0},@{type='HTTP'})) {
+    $stores=@($tree | ForEach-Object {$_.Clone()})
+    foreach($key in $change.Keys){$stores[0][$key]=$change[$key]}
+    Expect-Rejection { Assert-AuthoringDdc $stores $cache }
+    $count++
+}
+$output='E:\DisposableProbe'
+$branches=@('Engine','Editor','EditorSettings','EditorPerProjectUserSettings','GameUserSettings','Game','Input') |
+    ForEach-Object {@{name=$_;logicalKey=$_;found=$true;destination="$output\Config\$_.ini"}}
+Assert-AuthoringConfigBranches $branches $output
+foreach($change in @(@{found=$false},@{destination='E:\Outside\Engine.ini'},@{destination='Engine'},
+    @{name='Unknown'},@{logicalKey=''})) {
+    $bad=@($branches | ForEach-Object {$_.Clone()})
+    foreach($key in $change.Keys){$bad[0][$key]=$change[$key]}
+    Expect-Rejection { Assert-AuthoringConfigBranches $bad $output }
+}
+Expect-Rejection { Assert-AuthoringConfigBranches @($branches | Select-Object -Skip 1) $output }
+$python=@{valid=$true;librariesEnumerated=$true;moduleLoaded=$true;configured=$true;available=$false;initialized=$false
+    runtimeLibraryLoaded=$true;libraries=@(@{path='E:\python311.dll';queryAvailable=$true;interpreterInitialized=0})}
+Assert-AuthoringPythonState $python
+Assert-AuthoringPythonState @{valid=$true;librariesEnumerated=$true;moduleLoaded=$false;configured=$false;
+    available=$false;initialized=$false;runtimeLibraryLoaded=$false;libraries=@()}
+foreach($change in @(@{available=$true},@{initialized=$true},@{configured=$false},@{librariesEnumerated=$false},
+    @{runtimeLibraryLoaded=$false},@{libraries=@(@{path='E:\python311.dll';queryAvailable=$false;interpreterInitialized=-1})},
+    @{libraries=@(@{path='E:\python311.dll';queryAvailable=$true;interpreterInitialized=1})},
+    @{libraries=@(@{path='E:\python999.dll';queryAvailable=$true;interpreterInitialized=0})})) {
+    $bad=$python.Clone()
+    foreach($key in $change.Keys){$bad[$key]=$change[$key]}
+    Expect-Rejection { Assert-AuthoringPythonState $bad }
+}
+'Config: one positive/six negatives; Python: two positives/eight negatives passed.'
 "$count authoring policy cases passed; no process/network/file mutation."
 Set-StrictMode -Version Latest
 function Empty-ProcessFixture { @() }

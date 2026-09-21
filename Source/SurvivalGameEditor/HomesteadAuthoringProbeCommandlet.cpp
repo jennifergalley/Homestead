@@ -6,6 +6,7 @@
 #include "HAL/IConsoleManager.h"
 #include "HAL/PlatformProcess.h"
 #include "Interfaces/IPluginManager.h"
+#include "IPythonScriptPlugin.h"
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
@@ -15,6 +16,7 @@
 #include "Serialization/JsonSerializer.h"
 #include "ShaderCompiler.h"
 #include "Windows/WindowsHWrapper.h"
+#include <Psapi.h>
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadAuthoringProbe, Log, All);
 
@@ -43,6 +45,77 @@ uint64 FileTimeValue(const FILETIME& Time)
 {
     return (static_cast<uint64>(Time.dwHighDateTime) << 32) | Time.dwLowDateTime;
 }
+
+bool CapturePython(const TSharedRef<FJsonObject>& State)
+{
+    const IPythonScriptPlugin* Plugin = IPythonScriptPlugin::Get();
+    State->SetBoolField(TEXT("moduleLoaded"), Plugin != nullptr);
+    State->SetBoolField(TEXT("configured"), Plugin && Plugin->IsPythonConfigured());
+    State->SetBoolField(TEXT("available"), Plugin && Plugin->IsPythonAvailable());
+    State->SetBoolField(TEXT("initialized"), Plugin && Plugin->IsPythonInitialized());
+    bool Valid = FParse::Param(FCommandLine::Get(), TEXT("DisablePython"))
+        && (!Plugin || (Plugin->IsPythonConfigured() && !Plugin->IsPythonAvailable() && !Plugin->IsPythonInitialized()));
+    HMODULE Modules[2048]{};
+    DWORD Needed = 0;
+    const bool Enumerated = K32EnumProcessModules(GetCurrentProcess(), Modules, sizeof(Modules), &Needed)
+        && Needed <= sizeof(Modules) && Needed % sizeof(HMODULE) == 0;
+    State->SetBoolField(TEXT("librariesEnumerated"), Enumerated);
+    Valid &= Enumerated;
+    bool RuntimeFound = false;
+    TArray<TSharedPtr<FJsonValue>> Libraries;
+    if (Enumerated)
+    {
+        for (DWORD Index = 0; Index < Needed / sizeof(HMODULE); ++Index)
+        {
+            WCHAR Buffer[32768]{};
+            const DWORD Length = GetModuleFileNameW(Modules[Index], Buffer, UE_ARRAY_COUNT(Buffer));
+            if (Length == 0 || Length >= UE_ARRAY_COUNT(Buffer)) { Valid = false; continue; }
+            const FString Path(Buffer);
+            const FString Name = FPaths::GetCleanFilename(Path).ToLower();
+            if (!Name.StartsWith(TEXT("python")) || !Name.EndsWith(TEXT(".dll"))) continue;
+            auto Library = MakeShared<FJsonObject>();
+            Library->SetStringField(TEXT("path"), Path);
+            const FString Expected = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+                FPaths::EngineDir(), TEXT("Binaries/ThirdParty/Python3/Win64"), Name));
+            const bool AdmittedLibrary = (Name == TEXT("python3.dll") || Name == TEXT("python311.dll"))
+                && FPaths::IsSamePath(Path, Expected);
+            Valid &= AdmittedLibrary;
+            bool QueryAvailable = false;
+            int Initialized = -1;
+            if (AdmittedLibrary && Name == TEXT("python311.dll"))
+            {
+                RuntimeFound = true;
+                using FIsInitialized = int (__cdecl*)();
+                const auto Query = reinterpret_cast<FIsInitialized>(GetProcAddress(Modules[Index], "Py_IsInitialized"));
+                QueryAvailable = Query != nullptr;
+                if (Query) Initialized = Query();
+                Valid &= QueryAvailable && Initialized == 0;
+            }
+            Library->SetBoolField(TEXT("queryAvailable"), QueryAvailable);
+            Library->SetNumberField(TEXT("interpreterInitialized"), Initialized);
+            Libraries.Add(MakeShared<FJsonValueObject>(Library));
+        }
+    }
+    Valid &= RuntimeFound || (!Plugin && Libraries.IsEmpty());
+    State->SetBoolField(TEXT("runtimeLibraryLoaded"), RuntimeFound);
+    State->SetArrayField(TEXT("libraries"), Libraries);
+    State->SetBoolField(TEXT("valid"), Valid);
+    return Valid;
+}
+
+void CaptureDdc(const FDerivedDataCacheStatsNode& Node, int32 Parent, TArray<TSharedPtr<FJsonValue>>& Stores)
+{
+    const int32 Index = Stores.Num();
+    auto Store = MakeShared<FJsonObject>();
+    Store->SetNumberField(TEXT("index"), Index);
+    Store->SetNumberField(TEXT("parent"), Parent);
+    Store->SetNumberField(TEXT("childCount"), Node.Children.Num());
+    Store->SetStringField(TEXT("type"), Node.GetCacheType());
+    Store->SetStringField(TEXT("name"), Node.GetCacheName());
+    Store->SetBoolField(TEXT("local"), Node.IsLocal());
+    Stores.Add(MakeShared<FJsonValueObject>(Store));
+    for (const auto& Child : Node.Children) CaptureDdc(*Child, Index, Stores);
+}
 }
 
 UHomesteadAuthoringProbeCommandlet::UHomesteadAuthoringProbeCommandlet()
@@ -70,6 +143,9 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     {
         if (!Condition) { UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("%s"), Message); Valid = false; }
     };
+    auto PythonEntry = MakeShared<FJsonObject>();
+    Require(CapturePython(PythonEntry), TEXT("Python execution is not proved disabled at entry."));
+    Result->SetObjectField(TEXT("pythonEntry"), PythonEntry);
     Result->SetNumberField(TEXT("pid"), GetCurrentProcessId());
     Result->SetStringField(TEXT("executable"), FPaths::ConvertRelativePathToFull(
         FPaths::Combine(FPlatformProcess::BaseDir(), FPlatformProcess::ExecutableName(false))));
@@ -79,8 +155,46 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     Result->SetStringField(TEXT("editorSettingsIni"), GEditorSettingsIni);
     Result->SetStringField(TEXT("editorPerProjectIni"), GEditorPerProjectIni);
     Result->SetStringField(TEXT("gameUserSettingsIni"), GGameUserSettingsIni);
-    for (const FString& Ini : {GEngineIni, GEditorSettingsIni, GEditorPerProjectIni, GGameUserSettingsIni})
-        Require(FPaths::IsUnderDirectory(Ini, Output), TEXT("An effective config path is outside the probe."));
+    TArray<TSharedPtr<FJsonValue>> ConfigBranches;
+    struct FConfigIdentity { const TCHAR* Name; FString Key; };
+    for (const FConfigIdentity& Identity : {
+        FConfigIdentity{TEXT("Engine"), GEngineIni}, {TEXT("Editor"), GEditorIni},
+        {TEXT("EditorSettings"), GEditorSettingsIni}, {TEXT("EditorPerProjectUserSettings"), GEditorPerProjectIni},
+        {TEXT("GameUserSettings"), GGameUserSettingsIni}, {TEXT("Game"), GGameIni}, {TEXT("Input"), GInputIni}})
+    {
+        auto Record = MakeShared<FJsonObject>();
+        Record->SetStringField(TEXT("name"), Identity.Name);
+        Record->SetStringField(TEXT("logicalKey"), Identity.Key);
+        const FConfigBranch* Branch = GConfig->FindBranchWithNoReload(FName(Identity.Name), Identity.Key);
+        Record->SetBoolField(TEXT("found"), Branch != nullptr);
+        Require(Branch != nullptr, TEXT("An existing config branch is missing."));
+        if (Branch)
+        {
+            Record->SetStringField(TEXT("destination"), Branch->IniPath);
+            Require(!FPaths::IsRelative(Branch->IniPath) && FPaths::IsSamePath(Branch->IniPath,
+                FPaths::Combine(Output, TEXT("Config"), FString(Identity.Name) + TEXT(".ini"))),
+                TEXT("An actual config destination differs from the isolated file."));
+            Record->SetStringField(TEXT("sourceEngineDirectory"), Branch->SourceEngineConfigDir);
+            Record->SetStringField(TEXT("sourceProjectDirectory"), Branch->SourceProjectConfigDir);
+            TArray<TSharedPtr<FJsonValue>> Hierarchy, Static, Dynamic;
+            for (const auto& Layer : Branch->Hierarchy)
+                Hierarchy.Add(MakeShared<FJsonValueString>(FString(Layer.Value)));
+            for (const auto& Layer : Branch->StaticLayers)
+                Static.Add(MakeShared<FJsonValueString>(Layer.Key));
+            for (const FConfigCommandStream* Layer : Branch->DynamicLayers)
+                Dynamic.Add(MakeShared<FJsonValueString>(Layer->Filename));
+            Record->SetArrayField(TEXT("hierarchy"), Hierarchy);
+            Record->SetArrayField(TEXT("staticLayers"), Static);
+            Record->SetArrayField(TEXT("dynamicLayers"), Dynamic);
+            Record->SetStringField(TEXT("savedLayer"), Branch->SavedLayer.Filename);
+            Record->SetStringField(TEXT("commandLineLayer"), Branch->CommandLineOverrides.Filename);
+            Record->SetNumberField(TEXT("commandLineSectionCount"), Branch->CommandLineOverrides.Num());
+        }
+        ConfigBranches.Add(MakeShared<FJsonValueObject>(Record));
+    }
+    Result->SetArrayField(TEXT("configBranches"), ConfigBranches);
+    Require(FPlatformMisc::GetEnvironmentVariable(TEXT("UE_SKIP_UBT_SDK_SETUP")) == TEXT("1"),
+        TEXT("Settings-only SDK validation suppression is missing."));
 
     const FString HandleText = FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_GUARD_HANDLE"));
     TCHAR* End = nullptr;
@@ -140,12 +254,11 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
 
     const bool PythonLoaded = FModuleManager::Get().IsModuleLoaded(TEXT("PythonScriptPlugin"));
     Result->SetBoolField(TEXT("pythonModuleLoaded"), PythonLoaded);
-    Require(!PythonLoaded && FParse::Param(FCommandLine::Get(), TEXT("DisablePython")), TEXT("Python was not fully disabled."));
     TArray<TSharedPtr<FJsonValue>> Plugins;
     for (const TSharedRef<IPlugin>& Plugin : IPluginManager::Get().GetEnabledPlugins())
     {
         Plugins.Add(MakeShared<FJsonValueString>(Plugin->GetName()));
-        Require(Plugin->GetName() != TEXT("PythonScriptPlugin") && Plugin->GetName() != TEXT("UdpMessaging")
+        Require(Plugin->GetName() != TEXT("UdpMessaging")
             && Plugin->GetName() != TEXT("TcpMessaging"), TEXT("An excluded plugin is enabled."));
     }
     Result->SetArrayField(TEXT("enabledPlugins"), Plugins);
@@ -164,17 +277,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     TArray<TSharedPtr<FJsonValue>> Stores;
     // UE5.8 still uses this public legacy adapter for its own cache diagnostics.
     PRAGMA_DISABLE_DEPRECATION_WARNINGS
-    GetDerivedDataCacheRef().GatherUsageStats()->ForEachDescendant([&Stores](TSharedRef<const FDerivedDataCacheStatsNode> Node)
-    {
-        auto Store = MakeShared<FJsonObject>();
-        Store->SetStringField(TEXT("type"), Node->GetCacheType());
-        Store->SetStringField(TEXT("name"), Node->GetCacheName());
-        Store->SetBoolField(TEXT("local"), Node->IsLocal());
-        auto Attributes = MakeShared<FJsonObject>();
-        COOK_STAT(for (const auto& Attribute : Node->CustomStats) Attributes->SetStringField(Attribute.Key, Attribute.Value));
-        Store->SetObjectField(TEXT("attributes"), Attributes);
-        Stores.Add(MakeShared<FJsonValueObject>(Store));
-    });
+    CaptureDdc(*GetDerivedDataCacheRef().GatherUsageStats(), -1, Stores);
     PRAGMA_ENABLE_DEPRECATION_WARNINGS
     Result->SetArrayField(TEXT("ddcStores"), Stores);
     Result->SetBoolField(TEXT("valid"), Valid);
@@ -206,9 +309,12 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         FPlatformProcess::SleepNoStats(0.02f);
     }
     auto Exit = MakeShared<FJsonObject>();
+    auto PythonExit = MakeShared<FJsonObject>();
+    Require(CapturePython(PythonExit), TEXT("Python execution is not proved disabled before exit."));
+    Exit->SetObjectField(TEXT("pythonExit"), PythonExit);
     Exit->SetStringField(TEXT("stopReason"), Stop);
     Exit->SetBoolField(TEXT("cooperative"), true);
-    Exit->SetBoolField(TEXT("passed"), Stop.TrimStartAndEnd() == TEXT("complete"));
+    Exit->SetBoolField(TEXT("passed"), Valid && Stop.TrimStartAndEnd() == TEXT("complete"));
     Require(SaveEvidence(FPaths::Combine(Output, TEXT("native-exit.json")), Exit), TEXT("Cannot persist stop evidence."));
     return Valid && Stop.TrimStartAndEnd() == TEXT("complete") ? 0 : 7;
 }

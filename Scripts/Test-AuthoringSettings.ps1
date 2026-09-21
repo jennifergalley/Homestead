@@ -19,19 +19,23 @@ if (-not $output.StartsWith($runRoot + '\', [StringComparison]::OrdinalIgnoreCas
 }
 $priorReservation=Join-Path $runRoot 'native-settings-attempt.json'
 $priorResult=Join-Path $runRoot 'native-settings-01\probe-result.json'
-$supersession=@{approval='Coordinator explicit single named supersession after pre-CreateProcess binding failure, 2026-09-20 17:43 Arizona'
+$supersession=@{approval='Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass'
     reservationSha256='733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A'
-    resultSha256='F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7'}
+    resultSha256='F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7'
+    secondReservationSha256='D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A'
+    secondResultSha256='A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7'}
 function Assert-NamedSupersession {
     if($run.id -cne '20260920-182217-d1f84e39' -or
-        $output -ine (Join-Path $runRoot 'native-settings-02') -or
+        $output -ine (Join-Path $runRoot 'native-settings-03') -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
-        (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256) {
-        throw 'Only the exact named failed-before-process attempt may be superseded once.'
+        (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
+        (Get-FileHash (Join-Path $runRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
+        (Get-FileHash (Join-Path $runRoot 'native-settings-02\probe-result.json')).Hash -cne $supersession.secondResultSha256) {
+        throw 'Only the explicitly authorized third attempt with both prior failures preserved is admitted.'
     }
 }
 Assert-NamedSupersession
-$attempt = Join-Path $runRoot 'native-settings-attempt-02.json'
+$attempt = Join-Path $runRoot 'native-settings-attempt-03.json'
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -47,8 +51,12 @@ foreach ($name in $approved.Keys) {
         (Get-AuthenticodeSignature -LiteralPath $path).Status -ne 'Valid') { throw "Engine identity differs:$name" }
 }
 $moduleHash = (Get-FileHash -LiteralPath $module).Hash
-$buildReceiptPath = Join-Path $root 'docs\research\environment-assets\guarded-link-01\receipt.json'
-$buildReceiptHash = 'E091B1C1C59F62460C29078DBE31FF805A3F39117CF678E9BADFEF934520817D'
+$buildReceiptPath = Join-Path $root 'docs\research\environment-assets\guarded-correction-01\receipt.json'
+$buildReceiptHash = '3F4B00F44B25F3F02207A7A39A94C6F107FB9E3BB43893A3932E30E03570A53B'
+$pythonPins = @{
+    'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
+    'python311.dll'='3E5A5C012CDDB3D156D147ACAD59BB489C0716B87DAD274CB5BF20EEC3B68192'
+}
 if ((Get-FileHash $buildReceiptPath).Hash -cne $buildReceiptHash) { throw 'Accepted native build receipt differs.' }
 $acceptedBuild = Get-Content $buildReceiptPath -Raw | ConvertFrom-Json
 $productPins = @($acceptedBuild.products)
@@ -65,6 +73,11 @@ function Assert-AcceptedNativeProducts {
         $path = Join-Path $root $product.path
         if ((Get-Item $path).Length -ne $product.bytes -or (Get-FileHash $path).Hash -cne $product.sha256) {
             throw "Accepted native product differs:$($product.path)"
+        }
+    }
+    foreach ($name in $pythonPins.Keys) {
+        if ((Get-FileHash (Join-Path (Split-Path (Split-Path $engine -Parent) -Parent) "Binaries\ThirdParty\Python3\Win64\$name")).Hash -cne $pythonPins[$name]) {
+            throw 'Installed Python dependency identity differs.'
         }
     }
 }
@@ -157,6 +170,7 @@ $environment['TEMP'] = Join-Path $output 'Temp'
 $environment['TMP'] = Join-Path $output 'Temp'
 $environment['UE_PYTHONPATH'] = $null
 $environment['UE_PIPINSTALL_PATH'] = Join-Path $output 'PipMustRemainAbsent'
+$environment['UE_SKIP_UBT_SDK_SETUP'] = '1'
 $environment['UE-LocalDataCachePath'] = $ddc
 $environment['HOMESTEAD_PROBE_OUTPUT'] = $output
 $environment['HOMESTEAD_PROBE_DEADLINE'] = [DateTimeOffset]::UtcNow.AddSeconds(110).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
@@ -236,11 +250,17 @@ try {
                 [IO.Path]::GetFullPath($native.executable) -ine $guard.ImagePath -or
                 $native.marker.volume -ne $guard.MarkerBefore.Volume -or $native.marker.indexHigh -ne $guard.MarkerBefore.IndexHigh -or
                 $native.marker.indexLow -ne $guard.MarkerBefore.IndexLow -or
-                $native.pythonModuleLoaded -or $native.cachedSendReports -or $native.cachedSendUsage -or
+                $native.cachedSendReports -or $native.cachedSendUsage -or
                 $native.jobFlags -ne 8200 -or $native.jobProcessLimit -ne 1 -or $native.jobActiveProcesses -ne 1) {
                 throw 'Actual native identity/config/privacy/guard evidence failed.'
             }
             Assert-AuthoringDdc $native.ddcStores $ddc
+            Assert-AuthoringConfigBranches $native.configBranches $output
+            Assert-AuthoringPythonState $native.pythonEntry
+            $priorPlugins = (Get-Content (Join-Path $runRoot 'native-settings-02\effective-settings.json') -Raw | ConvertFrom-Json).enabledPlugins
+            if (@($native.enabledPlugins | Where-Object { $_ -cnotin $priorPlugins }).Count) {
+                throw 'An additional unreviewed plugin became enabled.'
+            }
             $readyAt = $clock.Elapsed.TotalSeconds
         }
         if ($null -ne $readyAt -and $clock.Elapsed.TotalSeconds - $readyAt -ge 10 -and $samples.Count -ge 10) {
@@ -252,6 +272,7 @@ try {
     if (-not $native -or $guard.ExitCode -ne 0 -or $guard.HardTerminated -or $guard.DeadlineError) { throw 'Native settings probe failed or was hard-terminated.' }
     $exit = Get-Content -LiteralPath (Join-Path $output 'native-exit.json') -Raw | ConvertFrom-Json
     if (-not $exit.passed -or -not $exit.cooperative -or $exit.stopReason.Trim() -ne 'complete') { throw 'Native cooperative stop was not proved.' }
+    Assert-AuthoringPythonState $exit.pythonExit
     if (Test-Path -LiteralPath $environment['UE_PIPINSTALL_PATH']) { throw 'Disabled Python unexpectedly touched the pip output.' }
 } catch {
     $failure = $_.ToString()

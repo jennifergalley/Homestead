@@ -1,5 +1,29 @@
 # Authoring workflow approval proposal
 
+**17:57 Arizona policy refinement and conditional third reservation:**
+the coordinator reviewed7369dab and explicitly authorized Python execution
+disabled rather than dependency DLL/module absence for this settings-only
+probe. Already-observed installed dependency modules may load; no interpreter
+initialization, scripts, .pth processing, pip, new helpers, uploads or
+endpoints are permitted. Keep -DisablePython and remote/pip controls.
+Public configured/available/initialized states and a direct Py_IsInitialized
+query on the already-loaded pinned python311.dll must show disabled state
+at commandlet entry and before successful exit. No LoadLibrary or interpreter
+initialization is used; PE inspection verifies a direct non-forwarded export.
+These are snapshots, not continuous-history proof.
+
+The same continuation authorizes targeted guarded rebuild, actual existing
+config-branch destination/hierarchy export, strict structural DDC traversal,
+and child-only UE_SKIP_UBT_SDK_SETUP=1 for this settings probe, not SDK readiness.
+Only after corrected product pins, offline negatives, ValidateOnly and all
+live conditions pass may the distinct native-settings-attempt-03.json /
+native-settings-03 output run once. Both previous reservations/results stay
+unchanged and failed. The original120s ceiling,100s soft/110s hard watchdog,
+root-only pre-start job, inherited read-only marker, detached file stdio and
+TraceControl-only exception remain. No assets/world/import/cook/Pak/Shipping
+operation follows automatically. Task1.3 is still unchecked;4/29.
+Earlier paragraphs below are historical, not conflicting current authority.
+
 **17:43 Arizona named supersession:** first reservation was consumed but guard
 construction rejected the PowerShell null-to-empty-string binding before
 CreateProcessW. Its reservation733810D1... and resultF0AE7B69... remain

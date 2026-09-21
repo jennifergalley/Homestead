@@ -1,0 +1,5 @@
+L11:LogWindows: Started CrashReportClient (pid=0)
+L979:[2026.09.21-01.06.04:195][  0]LogDerivedDataCache: E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-03/DDC: Speed tests took 0.02 seconds.
+L980:[2026.09.21-01.06.04:196][  0]LogDerivedDataCache: Display: E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-03/DDC: Performance: Latency=0.01ms. RandomReadSpeed=126.64MBs, RandomWriteSpeed=149.87MBs. Assigned SpeedClass 'Local'
+L981:[2026.09.21-01.06.04:196][  0]LogDerivedDataCache: Local: Using data cache path E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/native-settings-03/DDC: Writable
+L1609:[2026.09.21-01.06.07:171][  0]LogPython: Python disabled via command-line flag '-DisablePython'

@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 8.1633431,
+  "observedChildren": [
+    {
+      "startUtc": "2026-09-21T01:00:59.4868748Z",
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "parentPid": 48664,
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "pid": 42320,
+      "admitted": true,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe"
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 620.7333,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 1352.5688,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 1932.8803,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 2514.8241,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 3088.0777,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 3649.1601,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 4231.6809,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 4868.4279,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 5756.6211,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 6397.795,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 7431.2975,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 8048.7663,
+      "tcp": [],
+      "udp": []
+    }
+  ]
+}

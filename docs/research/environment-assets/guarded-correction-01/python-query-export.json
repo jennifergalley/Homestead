@@ -1,0 +1,15 @@
+{
+  "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python311.dll",
+  "sha256": "3E5A5C012CDDB3D156D147ACAD59BB489C0716B87DAD274CB5BF20EEC3B68192",
+  "bytes": 5800168,
+  "readOnlyPeInspection": true,
+  "exports": [
+    {
+      "export": "Py_IsInitialized",
+      "rva": 2415160,
+      "forwarded": false,
+      "firstBytes": "8b05d2753400c3cc488bc4534883ec60"
+    }
+  ],
+  "apiDeclaration": "Engine\\Source\\ThirdParty\\Python3\\Win64\\include\\pylifecycle.h:18"
+}

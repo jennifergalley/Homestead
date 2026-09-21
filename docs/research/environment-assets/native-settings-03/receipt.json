@@ -1,0 +1,68 @@
+{
+  "runId": "20260920-182217-d1f84e39",
+  "utc": "2026-09-21T01:07:47.5654646+00:00",
+  "status": "settings-only-probe-passed-broader-workflow-held",
+  "reservationNumber": 3,
+  "totalActualEditorLaunches": 2,
+  "priorReservationsUnchanged": true,
+  "openSpecComplete": 4,
+  "openSpecTotal": 29,
+  "buildReceiptSha256": "3F4B00F44B25F3F02207A7A39A94C6F107FB9E3BB43893A3932E30E03570A53B",
+  "exitCode": 0,
+  "elapsedSeconds": 27.2214523,
+  "sampleCount": 11,
+  "maximumSampleGapMs": 5428.560600000001,
+  "protectedFileCount": 234,
+  "originalEngineLog": {
+    "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\native-settings-03\\editor.log",
+    "bytes": 226966,
+    "sha256": "34F36211B8D881F449CDD257F23C395E07215B0E4139804BE67A2B4E09CAE7C0"
+  },
+  "guardSha256": "7D7B64F98882D9790BF54D60973BFBB7D6A7129B1E6685D0B591EA9A1C82848E",
+  "wrapperSha256": "C2324220E52525757D391CFEAFEC1F316A50A7E5B1ADEC11C4E9F99E338A7290",
+  "policySha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0",
+  "files": [
+    {
+      "file": "corrected-build-rollup.json",
+      "bytes": 2680,
+      "sha256": "D7F126D683751375FD5DC23282AFEADB5971B41FBB11A4C33256739915E1E153"
+    },
+    {
+      "file": "effective-settings.json",
+      "bytes": 15877,
+      "sha256": "26EC9B28084E31A2E11D393202528581B61776F621C7235213D54B1D0AC28936"
+    },
+    {
+      "file": "launch.json",
+      "bytes": 7513,
+      "sha256": "A12C03FF97A21DE1E47FB3C6C7BBE7EC35E2DF374E007B171485A0FAFB0AD6D3"
+    },
+    {
+      "file": "native-exit.json",
+      "bytes": 654,
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A"
+    },
+    {
+      "file": "observed-log-excerpts.txt",
+      "bytes": 779,
+      "sha256": "4CBFED12F2E9FC662E1EE4801B5C29AA1B2C9F9274A9F4EF57BCCACC548B4610"
+    },
+    {
+      "file": "probe-result.json",
+      "bytes": 81913,
+      "sha256": "FB6E92F924EBD7F841D52B6FF408B4ED708B49AFB3569595E32B7A8228EB5D7C"
+    },
+    {
+      "file": "third-admission.json",
+      "bytes": 2141,
+      "sha256": "3DDBBCFC3DF1A239F2C69D7D7968B98AF9C1304F07ADEDFCDA585CDD3329CEB8"
+    },
+    {
+      "file": "third-reservation.json",
+      "bytes": 786,
+      "sha256": "F45A17352F06F0F029090C3ACAE9A4043F58E8EA1C0642B581B30337E96C2046"
+    }
+  ],
+  "limits": "NullRHI settings/stop only; Python entry/exit snapshots and finite network samples do not prove continuous history; no shader workload, GPU/VRAM, import/cook/Pak/Shipping or environment visual proof",
+  "noFurtherLaunchAuthorized": true
+}

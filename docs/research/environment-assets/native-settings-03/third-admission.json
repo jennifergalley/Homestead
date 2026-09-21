@@ -1,0 +1,45 @@
+{
+  "eligibleForGuardConstruction": true,
+  "executable": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+  "module": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+  "moduleSha256": "21DBC64E6E93612181D8ADF7EC0AF1352EEE8E9AD55F007BCEBA4DC599EF41B5",
+  "buildReceiptSha256": "3F4B00F44B25F3F02207A7A39A94C6F107FB9E3BB43893A3932E30E03570A53B",
+  "productPins": [
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2093056,
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90222592,
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 149504,
+      "sha256": "21DBC64E6E93612181D8ADF7EC0AF1352EEE8E9AD55F007BCEBA4DC599EF41B5"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 9588736,
+      "sha256": "DF832C62AA6CCDCFD16A923FC48A1C6D5435EAF4A02754325917D58354A4E2B4"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166,
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A"
+    },
+    {
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032,
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1"
+    }
+  ],
+  "creationFlags": 525324,
+  "buildMonitoringQualification": "Game module unchanged from accepted build; original game-link and compile5 shutdown-monitor failures remain historical failed receipts. Corrected probe build operations passed. UBT export/metadata use established sampled orchestration, not leaf containment; empty sampled endpoints are not continuous absence.",
+  "output": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\native-settings-03",
+  "globalMarkerReadLocked": false,
+  "runtimeVerified": false,
+  "attemptConsumed": false
+}

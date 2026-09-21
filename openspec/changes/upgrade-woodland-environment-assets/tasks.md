@@ -1,5 +1,19 @@
 # Tasks
 
+Current18:06: corrected settings/startup/cooperative-stop subgate PASSED and
+accepted by coordinator; `native-settings-success.md` records actual evidence.
+Full task1.3 remains unchecked,4/29. No import/render/cook/Pak/Shipping gate or
+environment quality gate passed, and prior failures remain unchanged.
+
+Current17:57 continuation: coordinator explicitly refines this settings-only
+probe to Python execution disabled, not dependency-module absence. Existing
+in-process dependency DLLs may load; interpreter/scripts/.pth/pip execution,
+new helpers or endpoints remain excluded. A targeted corrected native build
+and one distinct third settings reservation are conditionally authorized.
+Entry/exit public Python states plus direct already-loaded CPython
+Py_IsInitialized query, actual config destinations and strict DDC traversal
+must pass. Prior failed results are not reclassified. Task1.3 stays unchecked.
+
 Current17:55 read-only diagnosis is complete; see
 `native-settings-diagnosis.md`. Config logical-name handling, optional AutoSDK
 validation and DDC structural-node classification have supported corrections,
