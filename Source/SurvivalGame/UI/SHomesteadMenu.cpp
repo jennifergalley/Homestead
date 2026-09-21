@@ -3,6 +3,7 @@
 #include "HomesteadMenuNavigation.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
+#include "Styling/SlateTypes.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SBox.h"
@@ -13,6 +14,7 @@
 #include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Images/SImage.h"
+#include "Brushes/SlateColorBrush.h"
 
 namespace HomesteadMenus
 {
@@ -23,6 +25,19 @@ const FLinearColor Muted(0.71f, 0.77f, 0.69f);
 const FLinearColor Gold(0.92f, 0.74f, 0.43f);
 const FLinearColor Pine(0.025f, 0.05f, 0.038f, 0.97f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f);
+constexpr float PortraitWidth = 240;
+constexpr float DetailsWidth = 340;
+constexpr float ItemCellWidth = 112;
+const FButtonStyle& MenuButtonStyle()
+{
+    static const FButtonStyle Style = FButtonStyle()
+        .SetNormal(FSlateColorBrush(FLinearColor::White))
+        .SetHovered(FSlateColorBrush(FLinearColor(1.12f, 1.12f, 1.12f, 1)))
+        .SetPressed(FSlateColorBrush(FLinearColor(0.85f, 0.85f, 0.85f, 1)))
+        .SetDisabled(FSlateColorBrush(FLinearColor(0.65f, 0.65f, 0.65f, 1)))
+        .SetNormalPadding(FMargin(0)).SetPressedPadding(FMargin(0));
+    return Style;
+}
 const TCHAR* Tabs[] = {TEXT("Inventory"), TEXT("Craft"), TEXT("Build"), TEXT("Guidebook"),
     TEXT("Settings"), TEXT("Credits"), TEXT("Appearance")};
 const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("guide"),
@@ -45,10 +60,10 @@ TSharedRef<SWidget> SHomesteadMenu::Text(const FString& Value, int32 Size) const
 }
 
 TSharedRef<SWidget> SHomesteadMenu::MakeButton(const FString& Label, TFunction<void()> Action,
-    TAttribute<FSlateColor> Color)
+    TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding)
 {
-    return SNew(SButton).IsFocusable(false).ContentPadding(FMargin(14, 10))
-        .ButtonColorAndOpacity(Color).ToolTipText(FText::FromString(Label))
+    return SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(Padding)
+        .ButtonColorAndOpacity(Color).ToolTipText(FText::FromString(AccessibleLabel.IsEmpty() ? Label : AccessibleLabel))
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
             SNew(STextBlock).Text(FText::FromString(Label)).AutoWrapText(true)
@@ -99,7 +114,8 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                                 ]
                             ]
                         ]
-                        + SVerticalBox::Slot().FillHeight(1)[ SAssignNew(ContentHost, SBox) ]
+                        + SVerticalBox::Slot().FillHeight(1)
+                        [ SAssignNew(ContentHost, SBox).Clipping(EWidgetClipping::ClipToBounds) ]
                         + SVerticalBox::Slot().AutoHeight().Padding(0, 10, 0, 0)
                         [
                             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
@@ -120,7 +136,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     {
         TabBar->AddSlot().FillWidth(1).Padding(3, 0)
         [
-            SNew(SButton).IsFocusable(false).ContentPadding(FMargin(4, 7))
+            SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(4, 7))
             .ButtonColorAndOpacity_Lambda([this, Page]() { return SeenPage == Page ? Selected
                 : Region == ERegion::Tabs && FocusedTab == Page ? Selected : Pine; })
             .ToolTipText(FText::FromString(Tabs[Page]))
@@ -182,7 +198,7 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
 
 int32 SHomesteadMenu::Columns() const
 {
-    return SeenPage == 0 && Controller.IsValid() && Controller->MenuPortraitBrush() ? 5
+    return SeenPage == 0 && Controller.IsValid() && Controller->MenuPortraitBrush() ? 4
         : SeenPage <= 2 ? 6 : SeenPage == 4 || SeenPage == 6 ? 2 : 1;
 }
 
@@ -235,15 +251,6 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     TSharedPtr<SVerticalBox> Body;
     TSharedPtr<SUniformGridPanel> Grid;
     auto Result = SNew(SVerticalBox)
-        + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot().FillWidth(1)
-            [ Text(SeenPage <= 2 ? Controller->BookTitle() : Tabs[SeenPage], 28) ]
-            + SHorizontalBox::Slot().AutoWidth()
-            [ Text(SeenPage == 0 ? Controller->MenuInventorySummary()
-                : Controller->PreviewLabel(), 17) ]
-        ]
         + SVerticalBox::Slot().FillHeight(1)
         [
             SAssignNew(Body, SVerticalBox)
@@ -261,24 +268,13 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [this]() { RequestExit(); }, TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Session && SessionSelection == 1 ? Gold : Pine; })) ]
         ];
     }
-    if (SeenPage == 0)
-    {
-        TSharedPtr<SHorizontalBox> Views;
-        Body->AddSlot().AutoHeight().Padding(0, 0, 0, 12)[ SAssignNew(Views, SHorizontalBox) ];
-        const TCHAR* Names[] = {TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")};
-        for (int32 View = 0; View < 3; ++View)
-            Views->AddSlot().FillWidth(1).Padding(0, 0, 8, 0)
-            [ MakeButton(Names[View], [this, View]() { ChangeInventoryView(View); },
-                TAttribute<FSlateColor>::CreateLambda([this, View]()
-                { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })) ];
-    }
     TSharedPtr<SHorizontalBox> ColumnsBox;
     Body->AddSlot().FillHeight(1)[ SAssignNew(ColumnsBox, SHorizontalBox) ];
     if ((SeenPage == 0 || SeenPage == 6) && Controller->MenuPortraitBrush())
     {
         ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, 12, 0)
         [
-            SNew(SBox).WidthOverride(190)
+            SNew(SBox).WidthOverride(PortraitWidth).Clipping(EWidgetClipping::ClipToBounds)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Portrait ? Gold : Pine; })
@@ -286,7 +282,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     SNew(SVerticalBox)
                     + SVerticalBox::Slot().FillHeight(1)
                     [
-                        SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
+                        SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
                         [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ]
                     ]
                     + SVerticalBox::Slot().AutoHeight().Padding(8)
@@ -295,32 +291,56 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
                         .Text_Lambda([this]() { return FText::FromString(Controller->MenuPortraitStatus()); })
                     ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(4)
+                    + SVerticalBox::Slot().AutoHeight().Padding(8, 0, 8, 8)
                     [
-                        SNew(SHorizontalBox)
-                        + SHorizontalBox::Slot().FillWidth(1)[ MakeButton(TEXT("< Turn"), [this]() { Controller->OrbitMenuPortrait(-20); }) ]
-                        + SHorizontalBox::Slot().FillWidth(1)[ MakeButton(TEXT("Turn >"), [this]() { Controller->OrbitMenuPortrait(20); }) ]
+                        SNew(SBox).HeightOverride(44)
+                        [
+                            SNew(SHorizontalBox)
+                            + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 4, 0)
+                            [ MakeButton(TEXT("<"), [this]() { Controller->OrbitMenuPortrait(-20); }, Pine,
+                                TEXT("Turn character left"), FMargin(8)) ]
+                            + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 4, 0)
+                            [ MakeButton(TEXT(">"), [this]() { Controller->OrbitMenuPortrait(20); }, Pine,
+                                TEXT("Turn character right"), FMargin(8)) ]
+                            + SHorizontalBox::Slot().FillWidth(1)
+                            [ MakeButton(TEXT("Zoom"), [this]() { Controller->ZoomMenuPortrait(); }, Pine,
+                                TEXT("Toggle close-up and full-body view"), FMargin(8)) ]
+                        ]
                     ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(4)
-                    [ MakeButton(TEXT("Close-up / full body"), [this]() { Controller->ZoomMenuPortrait(); }) ]
                 ]
             ]
         ];
     }
     TSharedPtr<SVerticalBox> InventoryColumn;
-    ColumnsBox->AddSlot().FillWidth(0.68f).Padding(0, 0, 16, 0)
+    ColumnsBox->AddSlot().FillWidth(1).Padding(0, 0, 16, 0)
         [
             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Pine).Padding(12)
+            .Clipping(EWidgetClipping::ClipToBounds)
             [
                 SAssignNew(InventoryColumn, SVerticalBox)
-                + SVerticalBox::Slot().FillHeight(1)
-                [
-                    SAssignNew(Scroll, SScrollBox)
-                    + SScrollBox::Slot()
-                    [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
-                ]
             ]
         ];
+    InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
+    [ Text(SeenPage <= 2 ? Controller->BookTitle() : Tabs[SeenPage], 26) ];
+    InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)
+    [ Text(SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary(), 17) ];
+    if (SeenPage == 0)
+    {
+        TSharedPtr<SHorizontalBox> Views;
+        InventoryColumn->AddSlot().AutoHeight().Padding(0, 0, 0, 12)[ SAssignNew(Views, SHorizontalBox) ];
+        const TCHAR* Names[] = {TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")};
+        for (int32 View = 0; View < 3; ++View)
+            Views->AddSlot().FillWidth(1).Padding(0, 0, View < 2 ? 6 : 0, 0)
+            [ MakeButton(Names[View], [this, View]() { ChangeInventoryView(View); },
+                TAttribute<FSlateColor>::CreateLambda([this, View]()
+                { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })) ];
+    }
+    InventoryColumn->AddSlot().FillHeight(1)
+    [
+        SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
+        + SScrollBox::Slot().HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)
+        [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
+    ];
     if (SeenPage == 0)
     {
         TSharedPtr<SHorizontalBox> EquipmentBar;
@@ -334,13 +354,16 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         { return Region == ERegion::Equipment && EquipmentSelection == Index ? Gold : Selected; }))
             ];
     }
-    ColumnsBox->AddSlot().FillWidth(0.32f)
+    ColumnsBox->AddSlot().AutoWidth()
         [
-            SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
-            .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Details ? Gold : Pine; })
+            SNew(SBox).WidthOverride(DetailsWidth).Clipping(EWidgetClipping::ClipToBounds)
             [
-                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Pine).Padding(16)
-                [ SAssignNew(DetailsHost, SBox)[ BuildDetails() ] ]
+                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
+                .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Details ? Gold : Pine; })
+                [
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Pine).Padding(16)
+                    [ SAssignNew(DetailsHost, SBox)[ BuildDetails() ] ]
+                ]
             ]
         ];
     if (Entries.IsEmpty())
@@ -354,7 +377,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         const FString Name = EntryName(Row);
         TSharedPtr<SWidget> Cell;
         TSharedPtr<SVerticalBox> Contents;
-        auto Button = SNew(SButton).IsFocusable(false).ContentPadding(7)
+        auto Button = SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(7)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return CellColor(Index); })
             .ToolTipText(FText::FromString(Name + TEXT("\n") + Row.Detail))
             .OnHovered_Lambda([this, Index]() { if (Controller.IsValid() && !Controller->UsesGamepad()) Hover = Index; })
@@ -375,8 +398,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         {
             Contents->AddSlot().AutoHeight()[ Text(FString::Printf(TEXT("%s %d"), *Row.Location, Row.Quantity), 15) ];
         }
-        Cell = SNew(SBox).MinDesiredWidth(SeenPage <= 2 ? 100 : SeenPage == 4 ? 330 : SeenPage == 6 ? 270 : 670)
-            .MinDesiredHeight(SeenPage <= 2 ? 116 : 72)
+        Cell = SNew(SBox).WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth) : FOptionalSize())
+            .MinDesiredWidth(SeenPage <= 2 ? ItemCellWidth : SeenPage == 4 ? 330 : SeenPage == 6 ? 250 : 670)
+            .MinDesiredHeight(SeenPage <= 2 ? 144 : 72)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this, Index]() { return Index == ContentSelection ? Gold : FLinearColor::Transparent; })
@@ -390,35 +414,70 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
 
 TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
 {
-    TSharedPtr<SVerticalBox> Box;
-    auto Result = SAssignNew(Box, SVerticalBox)
-        + SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 12)
+    TSharedPtr<SVerticalBox> DetailsContent;
+    auto Result = SNew(SVerticalBox)
+        + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 12)
         [
-            SNew(SBox).WidthOverride(72).HeightOverride(72)
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 12, 0)
             [
-                SNew(SHomesteadIcon).Kind_Lambda([this]()
-                {
-                    const int32 Index = DetailIndex();
-                    return Entries.IsValidIndex(Index) ? EntryIcon(Entries[Index]) : FName(TEXT("pack"));
-                })
-                .Tint_Lambda([this]()
-                {
-                    const int32 Index = DetailIndex();
-                    return Entries.IsValidIndex(Index) ? Entries[Index].IconTint : Gold;
-                })
+                SNew(SBox).WidthOverride(48).HeightOverride(48)
+                [
+                    SNew(SHomesteadIcon).Kind_Lambda([this]()
+                    {
+                        const int32 Index = DetailIndex();
+                        return Entries.IsValidIndex(Index) ? EntryIcon(Entries[Index]) : FName(TEXT("pack"));
+                    })
+                    .Tint_Lambda([this]()
+                    {
+                        const int32 Index = DetailIndex();
+                        return Entries.IsValidIndex(Index) ? Entries[Index].IconTint : Gold;
+                    })
+                ]
+            ]
+            + SHorizontalBox::Slot().FillWidth(1)
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot().AutoHeight()
+                [
+                    SNew(STextBlock).WrapTextAt(DetailsWidth - 100).ColorAndOpacity(Ink)
+                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 22))
+                    .Text_Lambda([this]()
+                    {
+                        const int32 Index = DetailIndex();
+                        return FText::FromString(Entries.IsValidIndex(Index) ? EntryName(Entries[Index]) : TEXT("Details"));
+                    })
+                ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
+                [
+                    SNew(STextBlock).WrapTextAt(DetailsWidth - 100).ColorAndOpacity(Muted)
+                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+                    .Text_Lambda([this]()
+                    {
+                        const int32 Index = DetailIndex();
+                        if (!Entries.IsValidIndex(Index)) return FText();
+                        const auto& Row = Entries[Index];
+                        return FText::FromString(Row.Quantity > 0 ? FString::Printf(TEXT("%s: %d"), *Row.Location, Row.Quantity) : Row.Location);
+                    })
+                ]
             ]
         ]
         + SVerticalBox::Slot().FillHeight(1)
         [
-            SAssignNew(DetailsScroll, SScrollBox)
+            SAssignNew(DetailsScroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
             + SScrollBox::Slot()
             [
-                SNew(STextBlock).AutoWrapText(true).ColorAndOpacity(Ink)
-                .Font(FCoreStyle::GetDefaultFontStyle("Regular", 19))
-                .Text_Lambda([this]() { return FText::FromString(DetailsText()); })
+                SAssignNew(DetailsContent, SVerticalBox)
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)
+                [
+                    SNew(STextBlock).WrapTextAt(DetailsWidth - 56).ColorAndOpacity(Ink)
+                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 18))
+                    .Text_Lambda([this]() { return FText::FromString(DetailsBodyText()); })
+                ]
             ]
         ];
     Actions.Reset();
+    ActionButtons.Reset();
     if (Entries.IsValidIndex(ContentSelection))
     {
         const auto& Row = Entries[ContentSelection];
@@ -443,18 +502,18 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
     }
     ActionSelection = FMath::Clamp(ActionSelection, 0, FMath::Max(0, Actions.Num() - 1));
     TSharedPtr<SUniformGridPanel> ActionGrid;
-    Box->AddSlot().AutoHeight().Padding(0, 4, 0, 0)
+    DetailsContent->AddSlot().AutoHeight().Padding(0, 4, 0, 0)
     [ SAssignNew(ActionGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ];
     for (int32 Index = 0; Index < Actions.Num(); ++Index)
     {
         const auto Action = Actions[Index];
-        ActionGrid->AddSlot(Index % 2, Index / 2)
+        TSharedRef<SWidget> Button = SNew(SBox).WidthOverride(136).MinDesiredHeight(44)
         [
-            SNew(SButton).IsFocusable(false).ContentPadding(8)
+            SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(8)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? Gold : Selected; })
             .OnClicked_Lambda([this, Action]() { if (PointerAction()) RunAction(Action); return FReply::Handled(); })
             [
-                SNew(STextBlock).AutoWrapText(true)
+                SNew(STextBlock).WrapTextAt(120)
                 .ColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? FSlateColor(Pine) : FSlateColor(Ink); })
                 .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
                 .Text_Lambda([this, Action]()
@@ -463,6 +522,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 })
             ]
         ];
+        ActionButtons.Add(Button);
+        ActionGrid->AddSlot(Index % 2, Index / 2)[ Button ];
     }
     return Result;
 }
@@ -485,9 +546,16 @@ int32 SHomesteadMenu::DetailIndex() const { return Hover != INDEX_NONE ? Hover :
 FString SHomesteadMenu::DetailsText() const
 {
     const int32 Index = DetailIndex();
+    if (!Entries.IsValidIndex(Index)) return DetailsBodyText();
+    const auto& Row = Entries[Index];
+    return Row.Label + TEXT("\n") + Row.Location + TEXT("\n\n") + DetailsBodyText();
+}
+FString SHomesteadMenu::DetailsBodyText() const
+{
+    const int32 Index = DetailIndex();
     if (!Entries.IsValidIndex(Index)) return TEXT("Select an item to see its details.\n\nNothing here is a recipe output you already own.");
     const auto& Row = Entries[Index];
-    FString Detail = Row.Label + TEXT("\n") + Row.Location + TEXT("\n\n") + Row.Detail;
+    FString Detail = Row.Detail;
     if (SeenPage == 0)
     {
         if (Row.ContainerId == 0 && !Row.CanStore) Detail += TEXT("\n\nStand near a chest to store this item.");
@@ -495,6 +563,11 @@ FString SHomesteadMenu::DetailsText() const
     if (SeenPage == 4 && Controller.IsValid() && Controller->IsFailed())
         Detail += TEXT("\n\nRecovery: saving a failed state is disabled. Retry a checkpoint or quit explicitly.");
     return Detail;
+}
+void SHomesteadMenu::ScrollActionIntoView()
+{
+    if (Region == ERegion::Actions && DetailsScroll && ActionButtons.IsValidIndex(ActionSelection))
+        DetailsScroll->ScrollDescendantIntoView(ActionButtons[ActionSelection], false, EDescendantScrollDestination::IntoView);
 }
 FString SHomesteadMenu::Footer() const
 {
@@ -566,7 +639,7 @@ void SHomesteadMenu::FocusEquipment(int32 Index)
     {
         const int32 Entry = Entries.IndexOfByPredicate([Id](const FHomesteadRow& Row)
             { return Row.Subject == EHomesteadMenuSubject::Wearable && Row.SubjectId == Id; });
-        if (Entry >= 0) { Select(Entry); Region = ERegion::Actions; ActionSelection = 0; }
+        if (Entry >= 0) { Select(Entry); Region = ERegion::Actions; ActionSelection = 0; ScrollActionIntoView(); }
     }
 }
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
@@ -585,6 +658,7 @@ void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
         if (Scroll && Cells.IsValidIndex(ContentSelection))
             Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
         if (DetailsHost) DetailsHost->SetContent(BuildDetails());
+        ScrollActionIntoView();
     }
 }
 bool SHomesteadMenu::PointerAction()
@@ -637,7 +711,7 @@ void SHomesteadMenu::Activate()
     else if (Region == ERegion::Equipment) FocusEquipment(EquipmentSelection);
     else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else RequestExit(); }
     else if (Region == ERegion::Actions && Actions.IsValidIndex(ActionSelection)) RunAction(Actions[ActionSelection]);
-    else { Region = ERegion::Actions; ActionSelection = 0; }
+    else { Region = ERegion::Actions; ActionSelection = 0; ScrollActionIntoView(); }
 }
 void SHomesteadMenu::ChangePage(int32 Page)
 {
@@ -666,6 +740,7 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     Regions.Add(ERegion::Details); Regions.Add(ERegion::Actions);
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
+    ScrollActionIntoView();
 }
 bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
 {
@@ -742,7 +817,10 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         else if (Region == ERegion::Details && DetailsScroll)
             DetailsScroll->SetScrollOffset(FMath::Max(0.0f, DetailsScroll->GetScrollOffset() + (Dy ? Dy : Dx) * 48));
         else if (Region == ERegion::Actions)
+        {
             ActionSelection = FMath::Max(0, HomesteadMenuNavigation::Step(ActionSelection, Actions.Num(), 2, Dx, Dy));
+            ScrollActionIntoView();
+        }
         else
         {
             int32 Next = HomesteadMenuNavigation::Step(ContentSelection, Entries.Num(), Columns(), Dx, Dy);

@@ -32,4 +32,7 @@ private:
     float Yaw = 0;
     bool bCloseup = false;
     FRotator MeshRotation = FRotator::ZeroRotator;
+    FVector SubjectCenter = FVector::ZeroVector;
+    FVector SubjectExtent = FVector::ZeroVector;
+    void UpdateCaptureFraming();
 };

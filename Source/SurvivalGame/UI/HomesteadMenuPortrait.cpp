@@ -6,6 +6,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/SkeletalMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 AHomesteadMenuPortrait::AHomesteadMenuPortrait()
@@ -40,14 +41,37 @@ AHomesteadMenuPortrait::AHomesteadMenuPortrait()
     Capture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
     Capture->bCaptureEveryFrame = false;
     Capture->bCaptureOnMovement = false;
+    Capture->bAlwaysPersistRenderingState = true;
     Capture->ShowFlags.SetAtmosphere(false);
     Capture->ShowFlags.SetFog(false);
     Capture->ShowFlags.SetMotionBlur(false);
-    Capture->ShowFlags.SetEyeAdaptation(false);
+    Capture->ShowFlags.SetDepthOfField(false);
+    Capture->ShowFlags.SetSkyLighting(false);
+    Capture->ShowFlags.SetGlobalIllumination(false);
+    Capture->ShowFlags.SetReflectionEnvironment(false);
+    Capture->ShowFlags.SetLocalExposure(false);
+    Capture->ShowFlags.SetEyeAdaptation(true);
+    Capture->PostProcessBlendWeight = 1;
+    auto& Exposure = Capture->PostProcessSettings;
+    Exposure.bOverride_AutoExposureMethod = true;
+    Exposure.AutoExposureMethod = AEM_Manual;
+    Exposure.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
+    Exposure.AutoExposureApplyPhysicalCameraExposure = true;
+    Exposure.bOverride_AutoExposureBias = true;
+    Exposure.AutoExposureBias = 0;
+    Exposure.bOverride_CameraISO = true;
+    Exposure.CameraISO = 400;
+    Exposure.bOverride_CameraShutterSpeed = true;
+    Exposure.CameraShutterSpeed = 15;
+    Exposure.bOverride_DepthOfFieldFstop = true;
+    Exposure.DepthOfFieldFstop = 2.8f;
+    Exposure.bOverride_BloomIntensity = true;
+    Exposure.BloomIntensity = 0;
     Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PortraitLight"));
     Light->SetupAttachment(RootComponent);
     Light->SetRelativeLocation(FVector(180, -120, 200));
-    Light->SetIntensity(8000);
+    Light->SetIntensityUnits(ELightUnits::Lumens);
+    Light->SetIntensity(3000);
     Light->SetAttenuationRadius(700);
     Light->SetCastShadows(false);
     Light->SetLightingChannels(false, false, true);
@@ -62,7 +86,7 @@ bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)
         Target = NewObject<UTextureRenderTarget2D>(this);
         Target->ClearColor = FLinearColor(0.025f, 0.05f, 0.038f, 1);
         Target->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
-        Target->InitAutoFormat(384, 768);
+        Target->InitAutoFormat(768, 1536);
         Capture->TextureTarget = Target;
     }
     Capture->ClearShowOnlyComponents();
@@ -97,6 +121,21 @@ bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)
     MeshRotation = Source->GetRelativeRotation();
     Body->SetRelativeRotation(MeshRotation + FRotator(0, Yaw, 0));
     Body->SetRelativeScale3D(Source->GetRelativeScale3D());
+    FTransform ReferenceTransform = Body->GetRelativeTransform();
+    ReferenceTransform.SetRotation(MeshRotation.Quaternion());
+    FBox SubjectBounds = Body->GetSkeletalMeshAsset()->GetBounds().GetBox().TransformBy(ReferenceTransform);
+    for (const auto& Part : Garments)
+        if (Part->IsVisible() && Part->GetSkeletalMeshAsset())
+            SubjectBounds += Part->GetSkeletalMeshAsset()->GetBounds().GetBox().TransformBy(
+                Part->GetRelativeTransform() * ReferenceTransform);
+    if (!SubjectBounds.IsValid || SubjectBounds.GetExtent().ContainsNaN() || SubjectBounds.GetExtent().Z <= 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Menu portrait rejected invalid rendered subject bounds."));
+        return false;
+    }
+    SubjectCenter = SubjectBounds.GetCenter();
+    SubjectExtent = SubjectBounds.GetExtent();
+    UpdateCaptureFraming();
     Capture->ShowOnlyComponent(Body);
     bCapturePending = true;
     return true;
@@ -106,14 +145,39 @@ void AHomesteadMenuPortrait::Orbit(float Degrees)
 {
     Yaw = FMath::Fmod(Yaw + Degrees, 360.0f);
     Body->SetRelativeRotation(MeshRotation + FRotator(0, Yaw, 0));
+    UpdateCaptureFraming();
     bCapturePending = true;
 }
 
 void AHomesteadMenuPortrait::ToggleCloseup()
 {
     bCloseup = !bCloseup;
-    Capture->SetRelativeLocation(bCloseup ? FVector(130, 0, 138) : FVector(270, 0, 85));
+    UpdateCaptureFraming();
     bCapturePending = true;
+}
+
+void AHomesteadMenuPortrait::UpdateCaptureFraming()
+{
+    if (!Target || SubjectExtent.Z <= 0) return;
+    const float HalfFov = FMath::DegreesToRadians(Capture->FOVAngle * 0.5f);
+    const double Aspect = static_cast<double>(Target->SizeX) / Target->SizeY;
+    const double VerticalTangent = FMath::Tan(HalfFov) / Aspect;
+    FVector Center = SubjectCenter;
+    double Distance = 0;
+    if (bCloseup)
+    {
+        Center.Z += SubjectExtent.Z * 0.68;
+        Distance = SubjectExtent.Z * 0.38 * 1.12 / VerticalTangent + SubjectExtent.X;
+    }
+    else
+    {
+        const double Radius = FVector2D(SubjectExtent.X, SubjectExtent.Y).Size();
+        Distance = FMath::Max(Radius / FMath::Sin(HalfFov),
+            SubjectExtent.Z / VerticalTangent + SubjectExtent.X) * 1.08;
+    }
+    Center = FRotator(0, Yaw, 0).RotateVector(Center);
+    Capture->SetRelativeLocation(Center + FVector(Distance, 0, 0));
+    Capture->SetRelativeRotation(FRotator(0, 180, 0));
 }
 
 void AHomesteadMenuPortrait::Tick(float DeltaSeconds)

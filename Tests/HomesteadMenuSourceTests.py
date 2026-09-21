@@ -121,6 +121,38 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("Controller->Simulation().GetWearable(Id)", MENU)
         self.assertIn("Empty - choose from pack", MENU)
 
+    def test_item_grid_has_fixed_compact_cells_without_single_column_stretch(self):
+        self.assertIn("constexpr float ItemCellWidth = 112", MENU)
+        self.assertIn("HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)", MENU)
+        self.assertIn("WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth)", MENU)
+
+    def test_detail_actions_are_inside_the_clipped_scroll_region(self):
+        details = function_body(MENU, "TSharedRef<SWidget> SHomesteadMenu::BuildDetails(")
+        self.assertIn("SAssignNew(DetailsScroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)", details)
+        self.assertIn("SAssignNew(DetailsContent, SVerticalBox)", details)
+        self.assertIn("DetailsContent->AddSlot()", details)
+        self.assertIn("EntryName(Entries[Index])", details)
+        self.assertIn('TEXT("%s: %d"), *Row.Location, Row.Quantity', details)
+        self.assertIn("DetailsScroll->ScrollDescendantIntoView(ActionButtons[ActionSelection]", MENU)
+
+    def test_explicit_button_brush_and_compact_named_portrait_controls(self):
+        self.assertIn(".SetNormal(FSlateColorBrush(FLinearColor::White))", MENU)
+        self.assertIn("ButtonStyle(&MenuButtonStyle())", MENU)
+        self.assertIn('TEXT("Turn character left")', MENU)
+        self.assertIn('TEXT("Turn character right")', MENU)
+        self.assertNotIn('TEXT("< Turn")', MENU)
+        self.assertNotIn('TEXT("Turn >")', MENU)
+
+    def test_portrait_framing_and_exposure_are_capture_local(self):
+        portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()
+        self.assertIn("GetBounds().GetBox().TransformBy(ReferenceTransform)", portrait)
+        self.assertIn("SubjectExtent.Z / VerticalTangent", portrait)
+        self.assertIn("AutoExposureMethod = AEM_Manual", portrait)
+        self.assertIn("Light->SetIntensityUnits(ELightUnits::Lumens)", portrait)
+        self.assertIn("Capture->ShowFlags.SetSkyLighting(false)", portrait)
+        self.assertNotIn("IConsoleManager", portrait)
+        self.assertNotIn("SetViewMode", portrait)
+
     def test_context_actions_select_native_subjects(self):
         self.assertIn("case EFocus::Chest: MenuInventoryView(1); OpenBook(0);", CONTROLLER)
         self.assertIn("NativeMenu->FocusLegacySubject(Selection)", CONTROLLER)
