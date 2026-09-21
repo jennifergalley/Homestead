@@ -88,3 +88,69 @@ not an assumed 1024-square texture from a `1k` filename. Fan-triangle counts and
 raw local transforms are source facts, not imported render geometry. Parser
 stop checks occur at file/pass/geometry boundaries; the reused reader retains
 its own node/depth/120-second bounds. No separate canopy experiment is included.
+
+## Optional image-reference-free preparation at MAIN's authoring slot
+
+`ResourcePreparation.py` reuses the already admitted selected-model algorithm
+and `TreePreparation` official binary parser/writer modules, with a narrow
+extension to explicit one/two-material bindings. MAIN invokes it only
+through the existing root-only guarded Blender caller and inherited
+`HOMESTEAD_SOURCE_STOP_PATH`, not a raw Blender launch from this source lane.
+It requires:
+
+- `--manifest`, `--receipt`, `--inventory`: the actual acquired/inspected inputs.
+- `--selection Assets\Environment\WoodlandResources\candidate01\selection.json`:
+  the nine main-confirmed models, IDs, geometry IDs and ordered material roles.
+- `--source-root`: the unchanged raw directory above.
+- `--output Assets\Environment\WoodlandResources\candidate01\Prepared`:
+  MAIN's agreed fresh native-input directory.
+- `--helper Scripts\Environment\TreePreparation.py` and
+  `--helper-sha256 <actual-admitted-helper-hash>`.
+- `--control Automation\run.json --run-id 20260921-033354-2d257ba0`.
+
+It writes four `*_selected.fbx` candidates and provenance, retaining exactly
+nine models: shrub a/c, branch a/b/c, fir a/c and flower a/b. Other models and
+all image objects/connections are removed. Reparse comparison verifies selected
+geometry/model/material arrays, transforms and non-image connections, including
+material order. Both fir models preserve their two ordered material bindings.
+The common helper remains unchanged.
+
+Agreed native inputs are therefore
+`Prepared\shrub_04_selected.fbx`,
+`Prepared\dry_branches_medium_01_selected.fbx`,
+`Prepared\fir_sapling_selected.fbx`, and
+`Prepared\flower_empodium_selected.fbx`. MAIN's planned native names are
+`SM_Shrub04_a/c`, `SM_DryBranchesMedium01_a/b/c`, `SM_FirSapling_a/c` and
+`SM_FlowerEmpodium_a/b`; those packages are not produced by this script.
+
+No scene import, texture loading, mesh merge/reduction, normal/UV repair,
+world-axis conversion, PBR graph creation or render is performed. The previous
+raw files stay byte-identical. Source cancellation is checked before/after each
+asset operation; individual existing parse/encode/reparse calls are not
+interrupted internally. Actual duration and caller containment remain MAIN's
+execution evidence. Offline retained-data and explicit multi-role selection tests
+pass, but this lane has
+not executed the preparation against the newly acquired assets.
+
+Image-free preparation is not a new mandatory infrastructure gate if MAIN's
+existing native importer can safely use the same receipted originals with
+explicit dependency loading disabled. Use the established route that reaches
+the actual woodland sooner without skipping source/material correctness.
+
+## Measured selection
+
+`selection.json` is pinned to MAIN's actual inventory/receipt from
+`c163a1da9895c492793e7fe809b561cdc80eeaf5`, not the earlier publisher estimates.
+The nine selected models have 3,726 / 6,177 shrub triangles; 5,933 / 5,254 / 5,616
+branch triangles; 157,402 / 124,743 fir triangles; and 758 / 758 flower triangles
+(source fan counts until native triangulation is checked). All selected roles
+use UV0 and have no reported near-zero normals, UV determinants or diagnostic
+fan areas at the documented thresholds. Referenced bounds exclude unused
+control points; actual native transformed bounds remain MAIN's measurement.
+
+All 25 acquired image headers are 1024x1024. The unused shrub/fir `Mask` maps
+remain preserved originals but are not proposed native shader inputs.
+MAIN plans 23 texture maps and five materials for these resources, plus its
+separate native canopy mesh. Whole flower clumps are removable produce above
+an admitted low-grass base; there is no separate blossom slot/petal-only claim.
+Both real fir heights are retained rather than enlarging the shorter variant.
