@@ -1,0 +1,4 @@
+# Keep the archived git-show JSON bytes stable under Windows autocrlf.
+.gitattributes text eol=lf
+LongWave-manifest.json text eol=lf
+LongWave-materials.json text eol=lf
