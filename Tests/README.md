@@ -1,4 +1,30 @@
-# Portable homestead simulation tests
+# Homestead verification
+
+## Native menu integration
+
+`Scripts\Test-Game.ps1 -NativeMenu -Width 1280 -Height 720` selects the focused
+existing smoke-actor route; repeat at 3840x2160 for actual native UI review.
+Under the current shared authoring restriction, the coordinator must run the
+equivalent arguments through the approved guarded runtime slot instead of
+launching this generic script as a bypass. The mode is Development/editor-only,
+not a claim that Shipping supports smoke actors.
+
+The route exercises mapped Settings/exit confirmation and cancel, persistent
+real save-IO failure, current-schema writing, controller/keyboard tabs, stable
+hints, real item details, rejected craft conservation, placement cancellation
+and independent recovery/quit access. The failure-state fixture deliberately
+advances simulation time; it is not ordinary-play evidence. Screenshots include
+the actual Slate viewport UI. Normal Lit/Lighting-on/ShaderComplexity-off guards
+remain observational. The original joined prototype's material check is limited
+to actual DefaultLit rendering; admitted modular presentation is compared with
+the shared real mesh/material references. An image labeled provisional is not
+proof of completed wardrobe asset admission or aesthetic approval.
+
+This is an early menu-flow check, not a substitute for successful equip/storage/
+craft/reload, actual save-and-quit process exit, mouse/hardware comfort or the
+subsequent normal-play/garment review.
+
+## Portable simulation tests
 
 This target builds the same C++17 simulation used by Unreal, without engine
 headers, third-party libraries, or exceptions. Checks execute in Release builds.

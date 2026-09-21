@@ -33,6 +33,12 @@ public:
     void Back();
     void Refresh();
     bool PrepareQuickAction();
+    bool HasActiveDialog() const { return Dialog != EDialog::None; }
+    bool IsExitPrompt() const { return Dialog == EDialog::Exit; }
+    bool IsSaveError() const { return Dialog == EDialog::SaveFailed; }
+    bool IsUnsavedPrompt() const { return Dialog == EDialog::Unsaved; }
+    const FHomesteadRow* GetSelectedSubject() const { return Entries.IsValidIndex(ContentSelection) ? &Entries[ContentSelection] : nullptr; }
+    FString GetDisplayedDetails() const { return DetailsText(); }
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Details, Actions };

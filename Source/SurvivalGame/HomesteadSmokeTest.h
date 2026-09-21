@@ -59,6 +59,8 @@ private:
     int32 GardenPlotId = -1;
 
     void Prepare();
+    void PrepareNativeMenuChecks();
+    bool VerifyNativeMenuPresentation() const;
     void PreparePresentation();
     void PrepareGatheringChecks();
     void PrepareWateringChecks();
