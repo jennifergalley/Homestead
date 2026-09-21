@@ -1,6 +1,6 @@
 #include "HomesteadMenuPortrait.h"
-#include "HomesteadCharacter.h"
-#include "HomesteadWardrobePresentation.h"
+#include "../HomesteadCharacter.h"
+#include "../HomesteadWardrobePresentation.h"
 #include "Components/SceneComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SkeletalMeshComponent.h"

@@ -2,13 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
-#include "HomesteadController.h"
+#include "../HomesteadController.h"
 
 class SScrollBox;
 class SVerticalBox;
 class SHorizontalBox;
 class SBox;
 
+namespace HomesteadMenus
+{
 class SHomesteadMenu : public SCompoundWidget
 {
 public:
@@ -99,3 +101,4 @@ private:
     int32 DialogCount() const;
     bool PointerAction();
 };
+}

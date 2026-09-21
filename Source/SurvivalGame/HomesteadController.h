@@ -13,7 +13,8 @@ class AHomesteadWorld;
 class UHomesteadSave;
 class UAudioComponent;
 class USoundBase;
-class SHomesteadMenu;
+namespace HomesteadMenus { class SHomesteadMenu; }
+using SHomesteadMenu = HomesteadMenus::SHomesteadMenu;
 class IInputProcessor;
 class AHomesteadMenuPortrait;
 

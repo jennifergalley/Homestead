@@ -1309,7 +1309,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     bTestResetRequired = false;
     bHasPlayableSession = true;
     LoadProblem.Reset();
-    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
+    if (Avatar) Avatar->CancelAction();
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
     Appearance.HairStyle = Save.HairStyle;

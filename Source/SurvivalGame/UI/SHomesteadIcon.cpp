@@ -1,10 +1,12 @@
-#include "UI/SHomesteadIcon.h"
+#include "SHomesteadIcon.h"
 
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
 
 #include <initializer_list>
 
+namespace HomesteadIcons
+{
 namespace
 {
     const FLinearColor Cream(0.93f, 0.93f, 0.84f);
@@ -537,4 +539,5 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         break;
     }
     return P.GetLayer();
+}
 }

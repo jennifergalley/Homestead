@@ -14,6 +14,8 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Images/SImage.h"
 
+namespace HomesteadMenus
+{
 namespace
 {
 const FLinearColor Ink(0.93f, 0.93f, 0.84f);
@@ -823,4 +825,5 @@ void SHomesteadMenu::DialogAction(int32 Index)
         bSaving = true;
         Controller->MenuSaveAndQuit();
     }
+}
 }
