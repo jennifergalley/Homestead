@@ -123,6 +123,13 @@ prior-build evidence. `docs/research/environment-assets/tree-grove-03/receipt.js
 seals this final provisional-composition increment separately; normal-launch
 verification and same-v5 selection follow under the coordinator's final direction.
 
+Grove03 is now selected as the **qualified provisional sparse-grove increment**
+after prospective/default normal-launch verification without launching a human
+process. It keeps existingv5 saves and copied graphics preferences; single-tree03
+is the explicit rollback and prior UI candidates remain. This is not full
+woodland, clean-mesh, exact03 performance or Jenny's subjective approval.
+No further tree-image refinement is planned in this round; grass/ground is next.
+
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns
 environment/engine integration; isolated siblings own UI, wardrobe rules

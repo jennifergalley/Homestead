@@ -1,0 +1,45 @@
+{
+  "status": "passed-qualified-provisional-sparse-grove-increment",
+  "evidence": "grove-evidence.json",
+  "evidenceSha256": "E1BCB3BF9F5CD1B402ACEAB0BA72EBC759166777C53873A93023E2050B2569BF",
+  "checkpoint": "e9ddbebb49ba85ee36aec9be0eed243178b597f0",
+  "executableSha256": "30E05E3AE01500A0AA624E19B576FC3123BE0406669D6C5DBE0E8ED1BCBBCEAE",
+  "actualRuntime": {
+    "plannedPasses": 23,
+    "durationSeconds": 71.5377,
+    "wholeBoundsInView": true,
+    "retreatDistanceCm": 283.090962,
+    "frames": 516,
+    "contact": true,
+    "triangles": 3476775,
+    "trees": 15,
+    "forage": true,
+    "authoredInventoryUnchangedFrom01": true,
+    "retreat": true,
+    "completedPasses": 23,
+    "dimensions": [
+      1280,
+      720
+    ],
+    "readiness": true,
+    "approach": true
+  },
+  "coordinatorDisposition": "Final explicit direction: suppress all decorative proxy tree groups when admitted grove exists, retain same15 real sites and all resources, confirm one ordinary route, then accept provisional composition if no blocker and move to grass/ground.",
+  "profile": "jenny-review-v5",
+  "saveDisposition": "No save read/reset/migration/deletion; same existing profile.",
+  "graphics": {
+    "sha256": "00F9289D8B5F3F16A386B0C83CBAA9C55E7EAF9DFFD7113614EC33A4B4A7852C",
+    "sourceUnchanged": true,
+    "destination": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-grove-03\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini",
+    "source": "Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini"
+  },
+  "knownLimitations": [
+    "Provisional sparse15-tree grove/open meadow, not full woodland or Jenny art approval; golden lighting, ground, grass and resource silhouettes remain unfinished.",
+    "Original tree-import03 remains FAILED: exactly12 branch source-description tangent/binormal corners remain explicitly qualified. No clean-mesh claim.",
+    "Grove01/02 passed functional/timing checks but their compositions were rejected. Final03 suppresses all remaining decorative tree groups without changing interactive resources.",
+    "Prior01/02 screenshot-free720p-output/60cap timing is prior-build evidence, not exact03 GPU/Present/4K/uncapped performance. Final03 has one actual ordinary confirmation.",
+    "Worker image quota prevented firsthand final03 review. Coordinator prescribed provisional acceptance after final ordinary confirmation, not subjective approval.",
+    "Same existingv5 profile; no full UI/save matrix rerun or save read/reset/migration. Earlier candidates retained.",
+    "OpenSpec woodland remains incomplete; future Editor authoring needs genuinely refreshed source/product receipts."
+  ]
+}

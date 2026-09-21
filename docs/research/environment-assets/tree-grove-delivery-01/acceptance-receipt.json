@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "previewSaveRoutingVersion": 1,
+  "executableSha256": "30E05E3AE01500A0AA624E19B576FC3123BE0406669D6C5DBE0E8ED1BCBBCEAE",
+  "checkpoint": "e9ddbebb49ba85ee36aec9be0eed243178b597f0",
+  "privateRemoteVerified": true,
+  "proofIndex": "Verification\\proof-index.json",
+  "proofIndexSha256": "7123918A4F8F96AB3B2132B7AD9F05A214B2994C452094B2E343A2B9192CDF52",
+  "scope": "Qualified provisional sparse-grove playtest increment with actual ordinary gameplay proof, not clean-mesh/full-woodland/performance/Jenny art approval.",
+  "import03Disposition": "FAILED with exactly12 branch source-description basis corners; unchanged explicit qualification.",
+  "knownLimitations": [
+    "Provisional sparse15-tree grove/open meadow, not full woodland or Jenny art approval; golden lighting, ground, grass and resource silhouettes remain unfinished.",
+    "Original tree-import03 remains FAILED: exactly12 branch source-description tangent/binormal corners remain explicitly qualified. No clean-mesh claim.",
+    "Grove01/02 passed functional/timing checks but their compositions were rejected. Final03 suppresses all remaining decorative tree groups without changing interactive resources.",
+    "Prior01/02 screenshot-free720p-output/60cap timing is prior-build evidence, not exact03 GPU/Present/4K/uncapped performance. Final03 has one actual ordinary confirmation.",
+    "Worker image quota prevented firsthand final03 review. Coordinator prescribed provisional acceptance after final ordinary confirmation, not subjective approval.",
+    "Same existingv5 profile; no full UI/save matrix rerun or save read/reset/migration. Earlier candidates retained.",
+    "OpenSpec woodland remains incomplete; future Editor authoring needs genuinely refreshed source/product receipts."
+  ],
+  "previousSelection": "previous-preview.json",
+  "testSaves": "Same jenny-review-v5; existing saves untouched.",
+  "normalLaunch": "QA-off/native-borderless; no automated controls/mute/quit. ValidateOnly, no human launch.",
+  "graphicsPreferencesSha256": "00F9289D8B5F3F16A386B0C83CBAA9C55E7EAF9DFFD7113614EC33A4B4A7852C"
+}

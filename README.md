@@ -26,15 +26,19 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-The selected **qualified single-tree playtest increment** is
-`Build\Releases\20260921-033354-2d257ba0\tree-diagnostic-03\Windows`.
-It adds one reduced, textured Tree Small02 to the clearing. Actual ordinary
-gameplay verified forage, whole-crown framing, specific-tree inward blocking
-with natural sliding, and retreat. Existing dawn is very bright/golden and the
-surrounding proxy forest still dominates. Original import03 remains **FAILED**:
+The selected **qualified provisional sparse-grove increment** is
+`Build\Releases\20260921-033354-2d257ba0\clearing-grove-03\Windows`.
+It replaces the purely decorative placeholder tree groups with15 reduced,
+textured Tree Small02 instances while retaining interactive resource plants,
+rocks and grass. Actual ordinary gameplay verified gathering, whole-crown
+framing, specific-tree inward blocking with natural sliding, and retreat.
+Existing dawn is very bright/golden; grass, ground and resource silhouettes
+remain unfinished. Original import03 remains **FAILED**:
 twelve branch source-description tangent/binormal corners are explicitly
 qualified, not recast as a clean mesh or full woodland/performance/art approval.
-See `docs\research\environment-assets\tree-delivery-01`.
+See `docs\research\environment-assets\tree-grove-delivery-01`.
+Prior grove01/02 have separate60-capped,720p-output screenshot-free timing;
+that is not a GPU/4K/headroom claim or an exact grove03 timing measurement.
 
 The candidate retains the native inventory/wardrobe integration from
 `wardrobe-ui-02`, which remains available for rollback. Its prior720p/4K
@@ -78,7 +82,7 @@ Preview saves live in
 Manual saves, all three autosaves, recovery and backups stay there. Relaunch
 `Preview.cmd` to continue; use `Play.cmd` to return to the untouched original.
 Prior selected-build graphics preferences were copied byte-for-byte; the old wave
-package/profile and both wardrobe candidates remain available. The new candidate's
+package/profile, both wardrobe candidates and single-tree03 remain available. The new candidate's
 `previous-preview.json` records the prior selection for an explicit rollback.
 **Do not launch the candidate executable directly:** the preview-profile argument,
 not its package folder, selects this isolated save namespace.
