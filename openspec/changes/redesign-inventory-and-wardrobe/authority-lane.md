@@ -43,10 +43,61 @@ Notion writes, purchases, firewall changes or public uploads.
 
 ## Lane checklist
 
-- [ ] Stable catalog/ownership/equipment and capacity-safe atomic actions.
-- [ ] Persistent layout split/merge/reorder and quantity reconciliation.
-- [ ] Current portable v4/wrapper v5 contract, validation and defaults.
-- [ ] Focused portable regression evidence, integration notes, private commit/push.
+- [x] Stable catalog/ownership/equipment and capacity-safe atomic actions.
+- [x] Persistent layout split/merge/reorder and quantity reconciliation.
+- [x] Current portable v4/wrapper v5 contract, validation and defaults.
+- [x] Focused portable regression evidence, integration notes, private commit/push.
 
 No compiled source in this lane alone establishes shipped wardrobe gameplay,
 rendered modular garments, accepted art or current-playable integration.
+
+## Verification and integration handoff
+
+The existing portable suite plus six wardrobe scenarios passed with MSVC
+14.44.35207, `/std:c++17 /W4 /WX /EHs-c- /D_HAS_EXCEPTIONS=0 /MT /Od`.
+Separate direct `cl /c`, `cl /c`, `link /INCREMENTAL:NO /MANIFEST:NO`, and test
+execution used the coordinator's unchanged pinned guard/evidence helpers, the
+approved existing SDK 10.0.26100.0 include/lib directories, and fresh session-only
+outputs. No UBT, UE, Blender, vcvars, engine headers or player save access.
+Initial adapter attempt failed before process creation because PowerShell
+converted a null optional argument to an empty string; using the existing
+boolean overload fixed it without changing containment.
+
+Evidence: session `6e4e8162-6f64-459c-a766-ba613d11c82f`,
+`files\native-tests-02\{compile-simulation,compile-tests,link,tests}\result.json`
+and `stdout.log`. All four returned 0 with one total process, zero active
+processes at completion, verified marker cleanup and no owned endpoints in
+their finite samples. The test run passed 22 scenarios / 1714 explicit checks.
+Sampling is not continuous network tracing. CMake's generic launcher was not
+run under the current coordinated-tool restriction.
+
+UI/controller integration:
+
+- Read `Simulation::GetRevision()` when constructing a transaction dialog and
+  pass that exact revision at confirmation. Success and stale-result revisions
+  are available in `Result`; refresh snapshots via `GetRevision()` after other
+  outcomes. Rejected operations preserve serialized bytes and revision.
+  A duplicate successful confirmation becomes stale. NewGame/Deserialize
+  invalidate existing drafts; revisions are session-local, not saved data.
+- `GetWearable`, `GetLayout` and `GetState` return transient const views.
+  Retain IDs, not their pointers/references, across successful mutations.
+  Container 0 is the pack; positive IDs identify chests. `ChestUsedCapacity`
+  returns -1 for a missing/non-chest ID.
+- `GetWearableDefinition`, `WearableName`, `WearableDescription`,
+  `GarmentRequirements` and `DyeName` are the UI/catalog contract. The catalog
+  exposes stable string keys, occupied-slot bitmask, dye support and actual
+  fiber cost. Do not infer recipe identity or actions by parsing display copy.
+- Garment caller must preflight prepared compatible render assets before
+  craft/equip submission. This portable lane deliberately has no UE asset
+  handles and does not claim art is available.
+- Preserve existing `Recipe` IDs for tools/cooking; new garment crafting uses
+  `CraftGarment(WearableDefinition, Point, expectedRevision)`. Old aggregate
+  `Transfer` remains supported, now with combined garment capacity and 280 cm
+  reach; selected-group UI uses revision-guarded `TransferGroup`.
+- Controller must require `UHomesteadSave::CurrentVersion`/`IsCurrentVersion()`
+  plus successful portable decode, retain protected temp/readback/backup IO,
+  and handle explicit incompatible-test-save reset separately from corruption.
+  Old Outfit/TunicColor fields remain source-compatible legacy fields, not
+  wardrobe ownership. This lane does not edit Controller or its save routing.
+- The central plan remains owned by the UI lane. Its mixed persistence/UI/art
+  tasks cannot be checked complete from this source-only test result.

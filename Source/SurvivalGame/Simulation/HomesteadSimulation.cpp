@@ -48,7 +48,7 @@ bool Near(Point a, Point b, double reach = Reach)
 int Cell(double value) { return static_cast<int>(std::floor(value / CellSize)); }
 double Clamp(double value, double low, double high) { return std::max(low, std::min(high, value)); }
 Result Good(const std::string& text) { return {true, text}; }
-Result Bad(const std::string& text) { return {false, text}; }
+Result Bad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
 Result Failed() { return Bad("You need to recover. Load your recent checkpoint to continue."); }
 Inventory Items(std::initializer_list<std::pair<Item, int>> values)
 {
@@ -208,8 +208,259 @@ void WriteStock(std::ostream& stream, const Inventory& stock)
     for (int value : stock) stream << ' ' << value;
     stream << '\n';
 }
+constexpr unsigned Slot(EquipmentSlot slot) { return 1u << static_cast<int>(slot); }
+constexpr WearableDefinitionInfo Wearables[] = {
+    {WearableDefinition::LinenTunic, "linen-tunic", "Linen tunic",
+        Slot(EquipmentSlot::Torso) | Slot(EquipmentSlot::Legs), true, 12},
+    {WearableDefinition::LinenApron, "linen-apron", "Linen apron", Slot(EquipmentSlot::Apron), true, 6},
+    {WearableDefinition::LeatherShoes, "legacy-laceup-shoes", "Leather shoes", Slot(EquipmentSlot::Feet), false, 0},
+    {WearableDefinition::WovenFootwraps, "woven-footwraps", "Woven footwraps", Slot(EquipmentSlot::Feet), false, 8}
+};
+bool InContainer(const WearableInstance& item, int container)
+{
+    return container == 0 ? item.owner == WearableOwner::Carried :
+        item.owner == WearableOwner::Chest && item.chestId == container;
+}
+const Inventory* ContainerStock(const State& state, int container)
+{
+    if (container == 0) return &state.inventory;
+    const auto* chest = Find(state.structures, container);
+    return chest && chest->kind == Piece::Chest ? &chest->storage : nullptr;
+}
+Inventory* ContainerStock(State& state, int container)
+{
+    if (container == 0) return &state.inventory;
+    auto* chest = Find(state.structures, container);
+    return chest && chest->kind == Piece::Chest ? &chest->storage : nullptr;
+}
+const InventoryLayout* ContainerLayout(const State& state, int container)
+{
+    if (container == 0) return &state.inventoryLayout;
+    const auto* chest = Find(state.structures, container);
+    return chest && chest->kind == Piece::Chest ? &chest->layout : nullptr;
+}
+InventoryLayout* ContainerLayout(State& state, int container)
+{
+    if (container == 0) return &state.inventoryLayout;
+    auto* chest = Find(state.structures, container);
+    return chest && chest->kind == Piece::Chest ? &chest->layout : nullptr;
+}
+int ContainerUsed(const State& state, int container)
+{
+    const auto* stock = ContainerStock(state, container);
+    if (!stock) return -1;
+    int total = 0;
+    for (int count : *stock) total += count;
+    for (const auto& item : state.wearables) if (InContainer(item, container)) ++total;
+    return total;
+}
+Result ContainerAccess(const State& state, int container, Point player)
+{
+    if (container == 0) return Good("");
+    const auto* chest = Find(state.structures, container);
+    if (!chest || chest->kind != Piece::Chest) return Bad("Choose an existing storage chest.");
+    if (!Near(player, CellCenter(chest->cellX, chest->cellY), ChestReach))
+        return Bad("Move within 280 cm of this chest.");
+    return Good("");
+}
+bool CanAllocate(int next) { return next > 0 && next < std::numeric_limits<int>::max() - 1; }
+
+bool ReconcileLayout(State& state, int container)
+{
+    auto* layout = ContainerLayout(state, container);
+    const auto* stock = ContainerStock(state, container);
+    if (!layout || !stock) return false;
+    layout->erase(std::remove_if(layout->begin(), layout->end(), [&](const LayoutEntry& entry) {
+        if (entry.wearableId == 0) return false;
+        const auto* item = Find(state.wearables, entry.wearableId);
+        return !item || !InContainer(*item, container);
+    }), layout->end());
+    for (int i = 0; i < ItemCount; ++i)
+    {
+        int displayed = 0;
+        for (const auto& entry : *layout)
+            if (entry.wearableId == 0 && static_cast<int>(entry.item) == i) displayed += entry.quantity;
+        int difference = (*stock)[i] - displayed;
+        for (auto& entry : *layout)
+        {
+            if (entry.wearableId != 0 || static_cast<int>(entry.item) != i) continue;
+            if (difference > 0) { entry.quantity += difference; difference = 0; }
+            else if (difference < 0)
+            {
+                const int removed = std::min(entry.quantity, -difference);
+                entry.quantity -= removed;
+                difference += removed;
+            }
+        }
+        if (difference > 0)
+        {
+            if (!CanAllocate(state.nextGroupId)) return false;
+            layout->push_back({state.nextGroupId++, static_cast<Item>(i), difference, 0});
+        }
+    }
+    layout->erase(std::remove_if(layout->begin(), layout->end(), [](const LayoutEntry& entry) {
+        return entry.wearableId == 0 && entry.quantity == 0;
+    }), layout->end());
+    for (const auto& item : state.wearables)
+    {
+        if (!InContainer(item, container)) continue;
+        const auto found = std::find_if(layout->begin(), layout->end(),
+            [&](const LayoutEntry& entry) { return entry.wearableId == item.id; });
+        if (found == layout->end()) layout->push_back({0, Item::Knife, 0, item.id});
+    }
+    return true;
+}
+Result ValidateInventory(const State& state)
+{
+    if (!CanAllocate(state.nextWearableId) || !CanAllocate(state.nextGroupId) || state.wearables.size() > MaxObjects)
+        return Bad("The wardrobe identity allocator is invalid or exhausted.");
+    std::set<int> ids, groupIds, displayed;
+    std::array<int, EquipmentSlotCount> equipment{};
+    for (const auto& item : state.wearables)
+    {
+        const auto* definition = GetWearableDefinition(item.definition);
+        if (item.id <= 0 || item.id >= state.nextWearableId || !ids.insert(item.id).second || !definition ||
+            item.dye < 0 || item.dye > (definition->dyeable ? 3 : 0))
+            return Bad("A garment has an invalid identity, definition or dye.");
+        switch (item.owner)
+        {
+        case WearableOwner::Carried:
+            if (item.chestId != 0) return Bad("A carried garment also names a chest.");
+            break;
+        case WearableOwner::Chest:
+            if (item.chestId <= 0 || !ContainerStock(state, item.chestId))
+                return Bad("A garment names a missing chest.");
+            break;
+        case WearableOwner::Equipped:
+            if (item.chestId != 0) return Bad("An equipped garment also names a chest.");
+            for (int slot = 0; slot < EquipmentSlotCount; ++slot)
+            {
+                if ((definition->slots & (1u << slot)) == 0) continue;
+                if (equipment[slot] != 0) return Bad("Two garments occupy the same equipment slot.");
+                equipment[slot] = item.id;
+            }
+            break;
+        default: return Bad("A garment has an unknown owner.");
+        }
+    }
+    if (equipment != state.equipment ||
+        (equipment[static_cast<int>(EquipmentSlot::Apron)] != 0 &&
+         equipment[static_cast<int>(EquipmentSlot::Torso)] == 0))
+        return Bad("Equipment references or dependent garment layers are invalid.");
+    const auto validateContainer = [&](int container) -> Result {
+        const auto* stock = ContainerStock(state, container);
+        const auto* layout = ContainerLayout(state, container);
+        if (!stock || !layout || !StockValid(*stock) || ContainerUsed(state, container) > InventoryCapacity)
+            return {false, container == 0 ? "Not enough pack space." : "The chest does not have enough space.", ResultCode::Capacity};
+        if (layout->size() > InventoryCapacity) return Bad("Inventory layout has too many entries.");
+        Inventory total{};
+        for (const auto& entry : *layout)
+        {
+            if (entry.wearableId != 0)
+            {
+                const auto* item = Find(state.wearables, entry.wearableId);
+                if (!item || !InContainer(*item, container) || entry.groupId != 0 || entry.quantity != 0 ||
+                    entry.item != Item::Knife || !displayed.insert(entry.wearableId).second)
+                    return Bad("A garment layout reference is invalid or duplicated.");
+            }
+            else
+            {
+                if (entry.groupId <= 0 || entry.groupId >= state.nextGroupId || !groupIds.insert(entry.groupId).second ||
+                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > InventoryCapacity)
+                    return Bad("A fungible group has invalid identity, item or quantity.");
+                total[static_cast<int>(entry.item)] += entry.quantity;
+            }
+        }
+        if (total != *stock) return Bad("Inventory layout does not partition the stored quantities.");
+        return Good("");
+    };
+    auto result = validateContainer(0);
+    if (!result) return result;
+    for (const auto& piece : state.structures)
+    {
+        if (piece.kind == Piece::Chest)
+        {
+            result = validateContainer(piece.id);
+            if (!result) return result;
+        }
+        else if (!piece.layout.empty()) return Bad("Only chests may contain inventory layout.");
+    }
+    if (groupIds.size() > MaxObjects) return Bad("The homestead has reached its inventory group limit.");
+    for (const auto& item : state.wearables)
+        if (item.owner != WearableOwner::Equipped && !displayed.count(item.id))
+            return Bad("A stored garment is missing its layout reference.");
+    return Good("");
+}
+void RefreshEquipment(State& state)
+{
+    state.equipment.fill(0);
+    for (const auto& item : state.wearables)
+    {
+        if (item.owner != WearableOwner::Equipped) continue;
+        const auto* definition = GetWearableDefinition(item.definition);
+        if (!definition) continue; // Validation rejects unknown definitions before commit.
+        for (int slot = 0; slot < EquipmentSlotCount; ++slot)
+            if (definition->slots & (1u << slot)) state.equipment[slot] = item.id;
+    }
+}
+void WriteLayout(std::ostream& output, const InventoryLayout& layout)
+{
+    output << layout.size() << '\n';
+    for (const auto& entry : layout)
+        output << entry.groupId << ' ' << static_cast<int>(entry.item) << ' ' << entry.quantity << ' ' << entry.wearableId << '\n';
+}
+bool ReadLayout(std::istream& input, InventoryLayout& layout)
+{
+    int count = 0;
+    if (!(input >> count) || count < 0 || count > InventoryCapacity) return false;
+    for (int i = 0; i < count; ++i)
+    {
+        LayoutEntry entry;
+        int item = 0;
+        if (!(input >> entry.groupId >> item >> entry.quantity >> entry.wearableId)) return false;
+        entry.item = static_cast<Item>(item);
+        layout.push_back(entry);
+    }
+    return true;
+}
 }
 
+const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition)
+{
+    return ValidEnum(definition, WearableDefinition::Count) ? &Wearables[static_cast<int>(definition)] : nullptr;
+}
+const char* WearableName(WearableDefinition definition)
+{
+    const auto* info = GetWearableDefinition(definition);
+    return info ? info->name : "Unknown garment";
+}
+const char* WearableDescription(WearableDefinition definition)
+{
+    switch (definition)
+    {
+    case WearableDefinition::LinenTunic: return "A fiber-worked tunic covering torso and legs. Cosmetic clothing; no warmth bonus.";
+    case WearableDefinition::LinenApron: return "A separate apron worn over a linen tunic. Cosmetic clothing; no warmth bonus.";
+    case WearableDefinition::LeatherShoes: return "Starter lace-up shoes with socks. Authored color; not craftable.";
+    case WearableDefinition::WovenFootwraps: return "Fiber-woven footwear, worn instead of shoes. Authored color; no warmth bonus.";
+    default: return "Unknown garment";
+    }
+}
+const char* DyeName(int dye)
+{
+    static const char* names[] = {"Moss", "Wine", "Slate", "Flax"};
+    return dye >= 0 && dye < 4 ? names[dye] : "Unknown dye";
+}
+const char* GarmentRequirements(WearableDefinition definition)
+{
+    static const auto requirements = [] {
+        std::array<std::string, static_cast<int>(WearableDefinition::Count)> result{};
+        for (const auto& info : Wearables)
+            result[static_cast<int>(info.id)] = info.fiberCost > 0 ?
+                std::to_string(info.fiberCost) + " Fiber; knife required; work fiber into cloth" : "Starter footwear; not craftable";
+        return result;
+    }();
+    return GetWearableDefinition(definition) ? requirements[static_cast<int>(definition)].c_str() : "Unknown garment";
+}
 const char* ItemName(Item item)
 {
     static const char* names[] = {"Knife", "Branch", "Stone", "Fiber", "Berries", "Roots",
@@ -286,6 +537,12 @@ void Simulation::NewGame()
 {
     state_ = State{};
     state_.inventory[static_cast<int>(Item::Knife)] = 1;
+    state_.inventoryLayout.push_back({state_.nextGroupId++, Item::Knife, 1, 0});
+    state_.wearables = {
+        {1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0},
+        {2, WearableDefinition::LeatherShoes, 0, WearableOwner::Equipped, 0}};
+    RefreshEquipment(state_);
+    ++revision_;
     // The first eight patches form a short forage route from the arrival clearing to the stream.
     static const Point patches[] = {{-1100, -400}, {-600, -400}, {-100, -400}, {400, -400},
         {900, -400}, {1150, 200}, {550, 550}, {-300, 550}, {-1900, -1100},
@@ -309,10 +566,14 @@ int Simulation::Count(Item item) const
 }
 int Simulation::UsedCapacity() const
 {
-    int used = 0;
-    for (int count : state_.inventory) used += count;
-    return used;
+    return ContainerUsed(state_, 0);
 }
+int Simulation::ChestUsedCapacity(int chestId) const
+{
+    return chestId > 0 ? ContainerUsed(state_, chestId) : -1;
+}
+const WearableInstance* Simulation::GetWearable(int id) const { return Find(state_.wearables, id); }
+const InventoryLayout* Simulation::GetLayout(int containerId) const { return ContainerLayout(state_, containerId); }
 bool Simulation::TryAdjust(const Inventory& change)
 {
     Inventory updated{};
@@ -323,8 +584,197 @@ bool Simulation::TryAdjust(const Inventory& change)
         updated[i] = static_cast<int>(value);
     }
     if (!StockValid(updated)) return false;
-    state_.inventory = updated;
+    State candidate = state_;
+    candidate.inventory = updated;
+    if (!ReconcileLayout(candidate, 0) || !ValidateInventory(candidate)) return false;
+    // Existing callers retain resource/plot/structure pointers across this helper.
+    state_.inventory = candidate.inventory;
+    state_.inventoryLayout = std::move(candidate.inventoryLayout);
+    state_.nextGroupId = candidate.nextGroupId;
+    ++revision_;
     return true;
+}
+Result Simulation::CheckRevision(std::uint64_t expectedRevision) const
+{
+    if (expectedRevision != revision_)
+        return {false, "Inventory changed. Select the item again before confirming.", ResultCode::StaleRevision, revision_};
+    if (state_.failed) return {false, Failed().message, ResultCode::Unavailable, revision_};
+    return {true, "", ResultCode::None, revision_};
+}
+Result Simulation::CommitInventory(State&& candidate, const char* message)
+{
+    if (!ReconcileLayout(candidate, 0))
+        return {false, "Inventory group identities are exhausted.", ResultCode::Unavailable, revision_};
+    for (const auto& piece : candidate.structures)
+        if (piece.kind == Piece::Chest && !ReconcileLayout(candidate, piece.id))
+            return {false, "Storage group identities are exhausted.", ResultCode::Unavailable, revision_};
+    auto result = ValidateInventory(candidate);
+    if (!result) { result.revision = revision_; return result; }
+    state_ = std::move(candidate);
+    return {true, message, ResultCode::None, ++revision_};
+}
+
+Result Simulation::EquipWearable(int id, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto* original = GetWearable(id);
+    if (!original || original->owner != WearableOwner::Carried)
+        return Bad("Take this garment into your pack before equipping it.");
+    const auto* definition = GetWearableDefinition(original->definition);
+    if (!definition) return Bad("This garment definition is unavailable.");
+    if (original->definition == WearableDefinition::LinenApron &&
+        state_.equipment[static_cast<int>(EquipmentSlot::Torso)] == 0)
+        return Bad("Equip a linen tunic before wearing an apron.");
+    State candidate = state_;
+    for (auto& item : candidate.wearables)
+    {
+        if (item.owner == WearableOwner::Equipped &&
+            (GetWearableDefinition(item.definition)->slots & definition->slots) != 0)
+            item.owner = WearableOwner::Carried;
+    }
+    Find(candidate.wearables, id)->owner = WearableOwner::Equipped;
+    RefreshEquipment(candidate);
+    return CommitInventory(std::move(candidate), "Garment equipped.");
+}
+Result Simulation::UnequipWearable(int id, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto* original = GetWearable(id);
+    if (!original || original->owner != WearableOwner::Equipped) return Bad("Choose an equipped garment.");
+    State candidate = state_;
+    Find(candidate.wearables, id)->owner = WearableOwner::Carried;
+    if (original->definition == WearableDefinition::LinenTunic)
+    {
+        const int apron = candidate.equipment[static_cast<int>(EquipmentSlot::Apron)];
+        if (apron != 0) Find(candidate.wearables, apron)->owner = WearableOwner::Carried;
+    }
+    RefreshEquipment(candidate);
+    return CommitInventory(std::move(candidate), "Garment and any dependent layer moved to your pack.");
+}
+Result Simulation::MoveWearable(int id, int destinationChestId, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto* original = GetWearable(id);
+    if (!original || original->owner == WearableOwner::Equipped)
+        return Bad("Unequip this garment into your pack before moving it.");
+    if ((original->owner == WearableOwner::Carried && destinationChestId <= 0) ||
+        (original->owner == WearableOwner::Chest && destinationChestId != 0))
+        return Bad("Move clothing between your pack and one reachable chest.");
+    const int chestId = destinationChestId == 0 ? original->chestId : destinationChestId;
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    State candidate = state_;
+    auto* item = Find(candidate.wearables, id);
+    item->owner = destinationChestId == 0 ? WearableOwner::Carried : WearableOwner::Chest;
+    item->chestId = destinationChestId;
+    return CommitInventory(std::move(candidate), destinationChestId == 0 ? "Garment taken from chest." : "Garment stored in chest.");
+}
+Result Simulation::CraftGarment(WearableDefinition definition, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto* info = GetWearableDefinition(definition);
+    if (!info || info->fiberCost <= 0 || !ValidPoint(player)) return Bad("Choose a craftable garment and valid location.");
+    if (Count(Item::Knife) == 0) return Bad("Take your knife from storage to work fiber into clothing.");
+    if (Count(Item::Fiber) < info->fiberCost)
+        return Bad("Gather " + std::to_string(info->fiberCost - Count(Item::Fiber)) + " more Fiber first.");
+    if (!CanAllocate(state_.nextWearableId) || state_.wearables.size() >= MaxObjects)
+        return Bad("The homestead has reached its garment identity limit.");
+    State candidate = state_;
+    candidate.inventory[static_cast<int>(Item::Fiber)] -= info->fiberCost;
+    candidate.wearables.push_back({candidate.nextWearableId++, definition, 0, WearableOwner::Carried, 0});
+    return CommitInventory(std::move(candidate), "Made one garment from fiber.");
+}
+Result Simulation::RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto* original = GetWearable(id);
+    if (!original || !GetWearableDefinition(original->definition)->dyeable || dye < 0 || dye > 3)
+        return Bad("Choose Moss, Wine, Slate or Flax for a tunic or apron.");
+    const auto access = ContainerAccess(state_, original->chestId, player);
+    if (!access) return access;
+    if (original->dye == dye) return Bad("This garment already has that color.");
+    State candidate = state_;
+    Find(candidate.wearables, id)->dye = dye;
+    return CommitInventory(std::move(candidate), "Garment recolored. This is a cosmetic change only.");
+}
+Result Simulation::TransferGroup(int chestId, int groupId, int amount, bool toChest, Point player,
+    std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    State candidate = state_;
+    const int source = toChest ? 0 : chestId, destination = toChest ? chestId : 0;
+    auto* layout = ContainerLayout(candidate, source);
+    auto entry = std::find_if(layout->begin(), layout->end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == layout->end() || amount <= 0 || amount > entry->quantity)
+        return Bad("Choose an available quantity from the selected group.");
+    const int item = static_cast<int>(entry->item);
+    entry->quantity -= amount;
+    (*ContainerStock(candidate, source))[item] -= amount;
+    (*ContainerStock(candidate, destination))[item] += amount;
+    return CommitInventory(std::move(candidate), toChest ? "Selected quantity stored." : "Selected quantity taken.");
+}
+Result Simulation::SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto access = ContainerAccess(state_, containerId, player);
+    if (!access) return access;
+    State candidate = state_;
+    auto* layout = ContainerLayout(candidate, containerId);
+    auto entry = std::find_if(layout->begin(), layout->end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == layout->end() || amount <= 0 || amount >= entry->quantity)
+        return Bad("Split a positive quantity smaller than the selected group.");
+    if (!CanAllocate(candidate.nextGroupId)) return Bad("Inventory group identities are exhausted.");
+    const LayoutEntry split{candidate.nextGroupId++, entry->item, amount, 0};
+    entry->quantity -= amount;
+    layout->insert(entry + 1, split);
+    return CommitInventory(std::move(candidate), "Group split; pack and chest capacity are unchanged.");
+}
+Result Simulation::MergeGroups(int containerId, int sourceGroupId, int targetGroupId, Point player,
+    std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto access = ContainerAccess(state_, containerId, player);
+    if (!access) return access;
+    State candidate = state_;
+    auto* layout = ContainerLayout(candidate, containerId);
+    auto source = std::find_if(layout->begin(), layout->end(),
+        [&](const LayoutEntry& value) { return value.groupId == sourceGroupId && value.wearableId == 0; });
+    auto target = std::find_if(layout->begin(), layout->end(),
+        [&](const LayoutEntry& value) { return value.groupId == targetGroupId && value.wearableId == 0; });
+    if (source == layout->end() || target == layout->end() || source == target || source->item != target->item)
+        return Bad("Choose two different groups of the same item in this container.");
+    target->quantity += source->quantity;
+    layout->erase(source);
+    return CommitInventory(std::move(candidate), "Groups merged; capacity is unchanged.");
+}
+Result Simulation::ReorderEntry(int containerId, int index, int targetIndex, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto access = ContainerAccess(state_, containerId, player);
+    if (!access) return access;
+    State candidate = state_;
+    auto* layout = ContainerLayout(candidate, containerId);
+    if (index < 0 || targetIndex < 0 || index >= static_cast<int>(layout->size()) ||
+        targetIndex >= static_cast<int>(layout->size()) || index == targetIndex)
+        return Bad("Choose two different positions in this container.");
+    const LayoutEntry entry = (*layout)[index];
+    layout->erase(layout->begin() + index);
+    layout->insert(layout->begin() + targetIndex, entry);
+    return CommitInventory(std::move(candidate), "Inventory order updated.");
 }
 bool Simulation::IsNight() const
 {
@@ -609,17 +1059,16 @@ Result Simulation::Transfer(int chestId, Item item, int amount, Point player)
     if (state_.failed) return Failed();
     auto* chest = Find(state_.structures, chestId);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose a storage chest.");
-    if (!Near(player, CellCenter(chest->cellX, chest->cellY))) return Bad("Move closer to this chest.");
+    if (!Near(player, CellCenter(chest->cellX, chest->cellY), ChestReach)) return Bad("Move within 280 cm of this chest.");
     if (!ValidEnum(item, Item::Count) || amount == 0 || amount < -InventoryCapacity || amount > InventoryCapacity)
         return Bad("Choose an item and a transfer amount between one and 120.");
     const int index = static_cast<int>(item);
-    Inventory storage = chest->storage;
-    storage[index] += amount;
-    if (!StockValid(storage)) return Bad(amount > 0 ? "The chest does not have enough space." : "The chest does not contain that many items.");
-    const Inventory change = Items({{item, -amount}});
-    if (!TryAdjust(change)) return Bad(MissingMessage(change, state_.inventory));
-    chest->storage = storage;
-    return Good(amount > 0 ? "Items stored in the chest." : "Items taken from the chest.");
+    if (amount > 0 && state_.inventory[index] < amount) return Bad("Your pack does not contain that many items.");
+    if (amount < 0 && chest->storage[index] < -amount) return Bad("The chest does not contain that many items.");
+    State candidate = state_;
+    candidate.inventory[index] -= amount;
+    Find(candidate.structures, chestId)->storage[index] += amount;
+    return CommitInventory(std::move(candidate), amount > 0 ? "Items stored in the chest." : "Items taken from the chest.");
 }
 Result Simulation::SetDayMinutes(double minutes)
 {
@@ -731,20 +1180,29 @@ std::string Simulation::Serialize() const
         body << piece.id << ' ' << static_cast<int>(piece.kind) << ' ' << piece.cellX << ' '
              << piece.cellY << ' ' << piece.rotation << ' ' << piece.fuelHours;
         WriteStock(body, piece.storage);
+        WriteLayout(body, piece.layout);
     }
     body << state_.plots.size() << '\n';
     for (const auto& plot : state_.plots)
         body << plot.id << ' ' << plot.cellX << ' ' << plot.cellY << ' ' << plot.planted << ' '
              << plot.growth << ' ' << plot.moisture << ' ' << plot.weeds << ' ' << static_cast<int>(plot.kind) << '\n';
+    body << state_.nextWearableId << ' ' << state_.nextGroupId << '\n' << state_.wearables.size() << '\n';
+    for (const auto& item : state_.wearables)
+        body << item.id << ' ' << static_cast<int>(item.definition) << ' ' << item.dye << ' '
+             << static_cast<int>(item.owner) << ' ' << item.chestId << '\n';
+    for (int id : state_.equipment) body << id << ' ';
+    body << '\n';
+    WriteLayout(body, state_.inventoryLayout);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
-    output << "HOMESTEAD 3 " << payload.size() << ' ' << Checksum(payload) << '\n' << payload;
+    output << "HOMESTEAD " << SimulationSaveVersion << ' ' << payload.size() << ' ' << Checksum(payload) << '\n' << payload;
     return output.str();
 }
 Result Simulation::Deserialize(const std::string& data)
 {
-    const auto invalid = [] { return Bad("This save is incomplete, unsupported, or invalid. Your current game was not changed."); };
+    const auto invalid = [&] { return Result{false,
+        "This save is corrupt or incomplete. Your current game was not changed.", ResultCode::CorruptSave, revision_}; };
     if (data.empty() || data.size() > MaxSaveBytes) return invalid();
     const auto newline = data.find('\n');
     if (newline == std::string::npos || newline > 100) return invalid();
@@ -753,9 +1211,12 @@ Result Simulation::Deserialize(const std::string& data)
     std::string magic;
     int version = 0;
     std::uint64_t size = 0, checksum = 0;
-    if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD" || (version != 2 && version != 3)) return invalid();
+    if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD") return invalid();
     header >> std::ws;
     if (!header.eof()) return invalid();
+    if (version != SimulationSaveVersion) return {false,
+        "This test save uses an incompatible version. Start a new clearing with this build; no save was changed.",
+        ResultCode::UnsupportedVersion, revision_};
     const std::string payload = data.substr(newline + 1);
     if (size != payload.size() || Checksum(payload) != checksum) return invalid();
     for (unsigned char c : payload) if (c > 127 || (c < 32 && c != '\n' && c != '\r' && c != '\t')) return invalid();
@@ -796,7 +1257,7 @@ Result Simulation::Deserialize(const std::string& data)
         Structure piece;
         int kind = 0;
         if (!(input >> piece.id >> kind >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours) ||
-            !ReadStock(input, piece.storage)) return invalid();
+            !ReadStock(input, piece.storage) || !ReadLayout(input, piece.layout)) return invalid();
         piece.kind = static_cast<Piece>(kind);
         if (!acceptId(piece.id) || !ValidEnum(piece.kind, Piece::Count) || !ValidCell(piece.cellX, piece.cellY) ||
             piece.rotation < 0 || piece.rotation >= 4 ||
@@ -822,13 +1283,9 @@ Result Simulation::Deserialize(const std::string& data)
         Plot plot;
         if (!(input >> plot.id >> plot.cellX >> plot.cellY) || !ReadBool(input, plot.planted) ||
             !(input >> plot.growth >> plot.moisture >> plot.weeds)) return invalid();
-        if (version == 3)
-        {
-            int kind = -1;
-            if (!(input >> kind)) return invalid();
-            plot.kind = static_cast<CropKind>(kind);
-        }
-        // Version 2 only supported roots; its missing kind is an explicit schema migration.
+        int kind = -1;
+        if (!(input >> kind)) return invalid();
+        plot.kind = static_cast<CropKind>(kind);
         if (!acceptId(plot.id) || !ValidCell(plot.cellX, plot.cellY) || !ValidEnum(plot.kind, CropKind::Count) ||
             (!plot.planted && plot.kind != CropKind::Roots) ||
             !FiniteRange(plot.growth, 0.0, 1.0) || !FiniteRange(plot.moisture, 0.0, 1.0) ||
@@ -839,9 +1296,24 @@ Result Simulation::Deserialize(const std::string& data)
             if (piece.cellX == plot.cellX && piece.cellY == plot.cellY) return invalid();
         candidate.plots.push_back(plot);
     }
+    if (!(input >> candidate.nextWearableId >> candidate.nextGroupId >> count) || count < 0 || count > MaxObjects)
+        return invalid();
+    for (int i = 0; i < count; ++i)
+    {
+        WearableInstance item;
+        int definition = -1, owner = -1;
+        if (!(input >> item.id >> definition >> item.dye >> owner >> item.chestId)) return invalid();
+        item.definition = static_cast<WearableDefinition>(definition);
+        item.owner = static_cast<WearableOwner>(owner);
+        candidate.wearables.push_back(item);
+    }
+    for (int& id : candidate.equipment) if (!(input >> id)) return invalid();
+    if (!ReadLayout(input, candidate.inventoryLayout)) return invalid();
     input >> std::ws;
     if (!input.eof()) return invalid();
+    const auto inventory = ValidateInventory(candidate);
+    if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
     state_ = std::move(candidate);
-    return Good("Homestead restored. No time passed while you were away.");
+    return {true, "Homestead restored. No time passed while you were away.", ResultCode::None, ++revision_};
 }
 }
