@@ -219,6 +219,35 @@ void StreamAndNormals()
         CHECK(std::abs(edge.normalY / edge.normalZ + (dyp.heightCm - dym.heightCm) / 100.0) < 1e-12);
     }
 }
+
+void VersionFixture()
+{
+    ChunkBaseline chunk;
+    CHECK(GenerateChunk({817391, 1}, {-1, 0}, chunk) == Status::Ok);
+    std::uint64_t fingerprint = UINT64_C(14695981039346656037);
+    const auto append = [&](std::uint64_t value) {
+        for (int byte = 0; byte < 8; ++byte)
+        {
+            fingerprint ^= (value >> (byte * 8)) & 255U;
+            fingerprint *= UINT64_C(1099511628211);
+        }
+    };
+    for (const auto& sample : chunk.terrain)
+    {
+        // This fixture is wholly west of the stream; its heights are exact Q8 noise.
+        append(static_cast<std::uint64_t>(std::llround(sample.heightCm * 256.0)));
+        append(sample.woodland);
+    }
+    for (const auto& entity : chunk.entities)
+    {
+        append(entity.key.localId);
+        append(static_cast<std::uint64_t>(entity.xCm));
+        append(static_cast<std::uint64_t>(entity.yCm));
+        append(entity.yawDegrees);
+        append(entity.scalePermille);
+    }
+    std::cout << "Generation v1 fixture fingerprint: " << fingerprint << '\n';
+}
 }
 
 int main()
@@ -227,6 +256,7 @@ int main()
     SeamsAndOrder();
     IdentitiesAndDistribution();
     StreamAndNormals();
+    VersionFixture();
     std::cout << "World generation: " << checks << " checks passed.\n";
     return 0;
 }
