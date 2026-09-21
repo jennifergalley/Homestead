@@ -1,5 +1,6 @@
 #include "HomesteadSimulation.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -57,10 +58,11 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
     out << std::setprecision(17) << s.hour << ' ' << s.dayMinutes << ' ' << s.hunger << ' '
         << s.energy << ' ' << s.warmth << ' ' << s.failed << ' ' << s.warmOutfit << ' ' << s.nextId << '\n';
     for (int value : s.inventory) out << value << ' ';
-    out << '\n' << s.resources.size() << '\n';
-    for (const auto& n : s.resources)
-        out << n.id << ' ' << static_cast<int>(n.kind) << ' ' << n.position.x << ' ' << n.position.y
-            << ' ' << n.readyAtHour << ' ' << n.cleared << '\n';
+    out << '\n' << s.world.seed << ' ' << s.world.generationVersion << ' ' << s.activeChunk.x << ' ' << s.activeChunk.y << '\n';
+    out << s.resourceEdits.size() << '\n';
+    for (const auto& edit : s.resourceEdits)
+        out << edit.key.chunk.x << ' ' << edit.key.chunk.y << ' ' << edit.key.localId << ' '
+            << edit.cleared << ' ' << edit.readyAtHour << '\n';
     out << s.structures.size() << '\n';
     for (const auto& p : s.structures)
     {
@@ -112,10 +114,27 @@ void FixtureLayouts(State& state)
     rebuild(state.inventoryLayout, state.inventory, 0);
     for (auto& piece : state.structures) rebuild(piece.layout, piece.storage, piece.id);
 }
-void Edit(Simulation& sim, const std::function<void(State&)>& edit)
+void ClearFixtureSites(State& state)
+{
+    // Legacy rule fixtures use prepared building sites; seeded-world tests below exercise actual felling.
+    for (const auto& node : state.resources)
+    {
+        if (node.kind != ResourceKind::ForestTree && node.kind != ResourceKind::Sapling) continue;
+        if (node.position.x < -1550 || node.position.x > 1250 ||
+            node.position.y < -950 || node.position.y > 650) continue;
+        auto found = std::find_if(state.resourceEdits.begin(), state.resourceEdits.end(),
+            [&](const ResourceEdit& value) { return value.key == node.key; });
+        if (found == state.resourceEdits.end()) state.resourceEdits.push_back({node.key, true, 0});
+        else *found = {node.key, true, 0};
+    }
+    std::sort(state.resourceEdits.begin(), state.resourceEdits.end(),
+        [](const ResourceEdit& a, const ResourceEdit& b) { return a.key < b.key; });
+}
+void Edit(Simulation& sim, const std::function<void(State&)>& edit, bool prepareSites = true)
 {
     State state = sim.GetState();
     edit(state);
+    if (prepareSites) ClearFixtureSites(state);
     FixtureLayouts(state);
     OK(sim.Deserialize(Encode(state)));
 }
@@ -153,6 +172,7 @@ void BuildingStock(Simulation& sim)
 }
 void BuildRoom(Simulation& sim, int x = -3, int y = 0)
 {
+    Edit(sim, [](State&) {});
     const Point center = CellCenter(x, y);
     OK(sim.Place(Piece::Foundation, x, y, 0, center));
     OK(sim.Place(Piece::Roof, x, y, 0, center));
@@ -184,8 +204,9 @@ void DefaultsAndValidation()
     CHECK(IsNearWater({1680, 0}));
     CHECK(!IsNearWater({1681, 0}));
     CHECK(Close(CellCenter(-1, -1).x, -150));
-    CHECK(sim.FindNearestResource({-1000, 0}, 300) != -1);
-    CHECK(sim.FindNearestResource({-3900, -3900}, 100) == -1);
+    const auto branch = Node(sim, ResourceKind::Branches);
+    CHECK(sim.FindNearestResource(branch.position, 0) == branch.id);
+    CHECK(sim.FindNearestResource({-900000, -900000}, 100) == -1);
     CHECK(sim.FindNearestPlot(Home, 100) == -1);
     CHECK(sim.FindNearestStructure(Home, Piece::Bed, 100) == -1);
     const auto nan = std::numeric_limits<double>::quiet_NaN();
@@ -265,6 +286,7 @@ void RequirementsMatchTransactions()
 void GameplayWalkthrough()
 {
     Simulation sim;
+    Edit(sim, [](State&) {});
     GatherUntil(sim, Item::Branch, ResourceKind::Branches, 15);
     GatherUntil(sim, Item::Stone, ResourceKind::Stones, 8);
     GatherUntil(sim, Item::Fiber, ResourceKind::Reeds, 10);
@@ -384,7 +406,9 @@ void RegrowthAndClearing()
     CHECK(!sim.CanHarvest(branch.id));
     CHECK(sim.FindNearestResource(branch.position, 0) == -1);
     UnchangedFailure(sim, [&] { return sim.Harvest(branch.id, branch.position); });
-    const double ready = sim.GetState().resources[0].readyAtHour;
+    ResourceNode branchAfter;
+    OK(sim.ResolveGeneratedResource(branch.key, branchAfter));
+    const double ready = branchAfter.readyAtHour;
     CHECK(ready == 30.0);
     Edit(sim, [&](State& state) { state.hour = ready - 0.02; });
     sim.AdvanceGameHours(0.01, Home);
@@ -395,7 +419,8 @@ void RegrowthAndClearing()
     const int branches = sim.Count(Item::Branch);
     OK(sim.Clear(branch.id, branch.position));
     CHECK(sim.Count(Item::Branch) == branches);
-    CHECK(sim.GetState().resources[0].cleared);
+    OK(sim.ResolveGeneratedResource(branch.key, branchAfter));
+    CHECK(branchAfter.cleared);
     Edit(sim, [](State& state) { state.hour += 500; });
     CHECK(!sim.CanHarvest(branch.id));
     Simulation loaded;
@@ -756,7 +781,7 @@ void CropKindPersistenceAndVersionRejection()
     OK(sim.Clear(berry.id, berry.position));
     sim.AdvanceGameHours(2, Home);
     const std::string expected = sim.Serialize();
-    CHECK(expected.rfind("HOMESTEAD 4 ", 0) == 0);
+    CHECK(expected.rfind("HOMESTEAD 5 ", 0) == 0);
     const std::string legacy = Encode(sim.GetState(), 2);
     Simulation migrated;
     const auto initial = migrated.Serialize();
@@ -803,7 +828,7 @@ void CropKindPersistenceAndVersionRejection()
     const std::string payload = mixed.substr(mixed.find('\n') + 1);
     reject(Envelope(payload, 2));
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 5));
+    reject(Envelope(payload, 6));
     State malformedLegacy = sim.GetState();
     malformedLegacy.plots[0].growth = 1.1;
     reject(Encode(malformedLegacy, 2));
@@ -956,7 +981,7 @@ void SleepAndFiniteBoundaries()
     once.AdvanceGameHours(1, Home);
     CHECK(once.Serialize() == before);
     UnchangedFailure(once, [&] { return once.Sleep(1, Home); });
-    Edit(once, [](State& state) { state.nextId = std::numeric_limits<int>::max() - 1; });
+    Edit(once, [](State& state) { state.nextId = TransientResourceIdBase - 1; });
     UnchangedFailure(once, [&] { return once.Till(-1, -1, CellCenter(-1, -1)); });
     UnchangedFailure(once, [&] { return once.Place(Piece::Foundation, -1, -1, 0, CellCenter(-1, -1)); });
     Simulation restored;
@@ -983,10 +1008,10 @@ void PersistenceRejection()
     reject(original.substr(0, original.size() - 1));
     reject(original + "garbage");
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 5));
+    reject(Envelope(payload, 6));
     reject(Envelope(payload + "garbage"));
     reject(Envelope(payload.substr(0, payload.size() - 8)));
-    reject(std::string(1024 * 1024 + 1, 'x'));
+    reject(std::string(8 * 1024 * 1024 + 1, 'x'));
     std::string corrupt = original;
     corrupt.back() = 'x';
     reject(corrupt);
@@ -1004,17 +1029,17 @@ void PersistenceRejection()
         [](State& s) { s.inventory[0] = 100; s.inventory[1] = 100; },
         [](State& s) { s.nextId = 0; },
         [](State& s) { s.nextId = 1; },
-        [](State& s) { s.resources[0].id = s.resources[1].id; },
-        [](State& s) { s.resources[0].id = 0; },
-        [](State& s) { s.resources[0].kind = static_cast<ResourceKind>(99); },
-        [](State& s) { s.resources[0].position.x = 4001; },
-        [](State& s) { s.resources[0].readyAtHour = -1; },
-        [](State& s) { s.resources[0].readyAtHour = 1; },
-        [](State& s) { s.resources[0].readyAtHour = s.hour + 10000; },
-        [](State& s) { s.resources[0].cleared = true; s.resources[0].readyAtHour = 20; },
-        [](State& s) { s.structures[0].id = s.resources[0].id; },
+        [](State& s) { s.resourceEdits.push_back(s.resourceEdits[0]); },
+        [](State& s) { s.resourceEdits[0].key.localId = 0; },
+        [](State& s) { s.resourceEdits[0].key.localId = 0xffffffffu; },
+        [](State& s) { s.resourceEdits[0].key.chunk.x = 999999; },
+        [](State& s) { s.resourceEdits[0].readyAtHour = -1; },
+        [](State& s) { s.resourceEdits[0].readyAtHour = 1; },
+        [](State& s) { s.resourceEdits[0].readyAtHour = s.hour + 10000; },
+        [](State& s) { s.resourceEdits[0].cleared = true; s.resourceEdits[0].readyAtHour = 20; },
+        [](State& s) { s.structures[0].id = TransientResourceIdBase; },
         [](State& s) { s.structures[0].kind = static_cast<Piece>(99); },
-        [](State& s) { s.structures[0].cellX = -14; },
+        [](State& s) { s.structures[0].cellX = -3334; },
         [](State& s) { s.structures[0].rotation = 4; },
         [](State& s) { s.structures[0].rotation = -1; },
         [](State& s) { s.structures[0].fuelHours = 1; },
@@ -1025,8 +1050,8 @@ void PersistenceRejection()
         [](State& s) { s.structures[0].cellX = 0; },
         [](State& s) { auto p = s.structures[0]; p.id = s.nextId++; s.structures.push_back(p); },
         [](State& s) { auto p = s.structures[2]; p.id = s.nextId++; s.structures.push_back(p); },
-        [](State& s) { s.plots[0].id = s.resources[0].id; },
-        [](State& s) { s.plots[0].cellX = 100; },
+        [](State& s) { s.plots[0].id = TransientResourceIdBase; },
+        [](State& s) { s.plots[0].cellX = 3334; },
         [](State& s) { s.plots[0].cellX = -3; s.plots[0].cellY = 0; },
         [](State& s) { s.plots[0].growth = -0.01; },
         [](State& s) { s.plots[0].growth = 1.01; },
@@ -1036,7 +1061,7 @@ void PersistenceRejection()
         [](State& s) { s.plots[0].kind = CropKind::Count; },
         [](State& s) { s.plots[0].planted = false; s.plots[0].growth = 0.5; },
         [](State& s) { auto p = s.plots[0]; p.id = s.nextId++; s.plots.push_back(p); },
-        [](State& s) { s.resources.resize(4097); }
+        [](State& s) { s.resourceEdits.resize(MaxResourceEdits + 1); }
     };
     for (const auto& edit : edits)
     {
@@ -1124,7 +1149,7 @@ void WardrobeDefaultsAndCrafting()
     }
     UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::LeatherShoes, Home, sim.GetRevision()); });
     UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::Count, Home, sim.GetRevision()); });
-    UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::LinenTunic, {5000, 0}, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::LinenTunic, {1000001, 0}, sim.GetRevision()); });
     Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 116}});
     CHECK(sim.UsedCapacity() == 120);
     OK(sim.CraftGarment(WearableDefinition::LinenTunic, Home, sim.GetRevision()));
@@ -1437,7 +1462,7 @@ void WardrobeSaveRejection()
     FixtureLayouts(dependent);
     CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
-    for (int version : {1, 2, 3, 5, 999})
+    for (int version : {1, 2, 3, 4, 6, 999})
     {
         CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
@@ -1447,6 +1472,281 @@ void WardrobeSaveRejection()
     OK(sim.Deserialize(original));
     CHECK(sim.GetState().wearables.size() == 3 && sim.GetWearable(apron)->chestId == chest);
     CHECK(sim.Serialize() == original);
+}
+
+void WorldStock(Simulation& sim, std::initializer_list<std::pair<Item, int>> items)
+{
+    Edit(sim, [&](State& state) {
+        state.inventory.fill(0);
+        for (const auto& item : items) state.inventory[static_cast<int>(item.first)] = item.second;
+    }, false);
+}
+ResourceNode WorldNode(const Simulation& sim, ResourceKind kind)
+{
+    for (const auto& node : sim.GetState().resources)
+        if (node.kind == kind && !node.cleared) return node;
+    CHECK(false);
+    return {};
+}
+void GeneratedWorldIdentityAndActivation()
+{
+    Simulation sim, same;
+    CHECK(sim.Serialize() == same.Serialize());
+    CHECK(sim.GetState().world.generationVersion == Generation::WorldGenerationVersion);
+    CHECK(sim.GetState().activeChunk == (Generation::ChunkCoord{-1, 0}));
+    CHECK(sim.GetState().nextId == 1);
+    CHECK(sim.GetState().resourceEdits.empty());
+    CHECK(sim.GetState().resources.size() <= 9 * Generation::MaxEntitiesPerChunk);
+    CHECK(sim.GetState().resources.size() > 98);
+    CHECK(sim.Count(Item::Knife) == 1 && sim.UsedCapacity() == 1);
+    std::array<bool, static_cast<int>(ResourceKind::Count)> kinds{};
+    for (const auto& node : sim.GetState().resources)
+    {
+        CHECK(node.id >= TransientResourceIdBase);
+        kinds[static_cast<int>(node.kind)] = true;
+        ResourceNode resolved;
+        const auto before = sim.Serialize();
+        const auto revision = sim.GetRevision();
+        OK(sim.ResolveGeneratedResource(node.key, resolved));
+        CHECK(resolved.id == node.id && resolved.kind == node.kind);
+        CHECK(resolved.position.x == node.position.x && resolved.position.y == node.position.y);
+        CHECK(before == sim.Serialize() && revision == sim.GetRevision());
+        if (node.kind == ResourceKind::ForestTree)
+        {
+            const double dx = node.position.x + 1000, dy = node.position.y;
+            CHECK(dx * dx + dy * dy > 90 * 90);
+            double t = ((node.position.x + 1300) * 300 + (node.position.y + 80) * 80) / 96400.0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const double sx = node.position.x + 1300 - t * 300;
+            const double sy = node.position.y + 80 - t * 80;
+            CHECK(sx * sx + sy * sy > 60 * 60);
+        }
+    }
+    for (bool present : kinds) CHECK(present);
+    const auto original = sim.Serialize();
+    const auto originalNodes = sim.GetState().resources;
+    const auto revision = sim.GetRevision();
+    OK(sim.SetActiveWorldRegion({-1, 1}));
+    CHECK(sim.GetRevision() == revision);
+    OK(sim.SetActiveWorldRegion({1, 1}));
+    CHECK(sim.GetRevision() == revision + 1);
+    for (const auto& old : originalNodes)
+        for (const auto& current : sim.GetState().resources)
+            if (old.key == current.key) CHECK(old.id == current.id);
+    OK(sim.SetActiveWorldRegion({-1, -1}));
+    CHECK(sim.GetState().activeChunk == (Generation::ChunkCoord{-1, -1}));
+    for (const Point position : {Point{10000, 10000}, {-10000, 10000}, {10000, -10000},
+        {-10000, -10000}, {MaxWorldCoordinate, MaxWorldCoordinate}, {-MaxWorldCoordinate, -MaxWorldCoordinate}})
+    {
+        OK(sim.SetActiveWorldRegion(position));
+        CHECK(sim.GetState().resources.size() <= 9 * Generation::MaxEntitiesPerChunk);
+        CHECK(sim.GetState().resourceEdits.empty());
+        CHECK(sim.GetState().nextId == 1);
+        CHECK(sim.Serialize().size() < 1024);
+    }
+    OK(sim.SetActiveWorldRegion({-1000, 0}));
+    CHECK(sim.Serialize() == original);
+    for (const auto& node : sim.GetState().resources) CHECK(node.id > originalNodes.back().id);
+    UnchangedFailure(sim, [&] { return sim.Harvest(originalNodes.front().id, originalNodes.front().position); });
+    UnchangedFailure(sim, [&] { return sim.SetActiveWorldRegion({1000001, 0}); });
+    UnchangedFailure(sim, [&] { return sim.SetActiveWorldRegion({0, -1000001}); });
+    UnchangedFailure(sim, [&] { return sim.SetActiveWorldRegion({std::numeric_limits<double>::quiet_NaN(), 0}); });
+    ResourceNode untouched = sim.GetState().resources.front();
+    CHECK(!sim.ResolveGeneratedResource({{0, 0}, 0}, untouched));
+    CHECK(untouched.id == sim.GetState().resources.front().id);
+    const auto previousHandle = sim.GetState().resources.back().id;
+    OK(sim.NewGame(987654321));
+    CHECK(sim.GetState().world.seed == 987654321 && sim.GetState().resourceEdits.empty());
+    CHECK(sim.GetState().resources.front().id > previousHandle);
+    OK(same.NewGame(987654321));
+    CHECK(sim.Serialize() == same.Serialize());
+    const auto saved = sim.Serialize();
+    UnchangedFailure(sim, [&] { return sim.Deserialize(saved, {0, Generation::WorldGenerationVersion}); });
+    UnchangedFailure(sim, [&] { return sim.Deserialize(saved, {987654321, 2}); });
+    OK(sim.Deserialize(saved, {987654321, Generation::WorldGenerationVersion}));
+}
+void GeneratedFellingAndPersistentTimers()
+{
+    Simulation sim;
+    const auto tree = WorldNode(sim, ResourceKind::ForestTree);
+    CHECK(!sim.CanHarvest(tree.id));
+    UnchangedFailure(sim, [&] { return sim.Harvest(tree.id, tree.position); });
+    UnchangedFailure(sim, [&] { return sim.Clear(tree.id, tree.position); });
+    WorldStock(sim, {{Item::Hatchet, 1}, {Item::Branch, 110}});
+    UnchangedFailure(sim, [&] { return sim.Clear(tree.id, tree.position); });
+    CHECK(sim.GetState().resourceEdits.empty());
+    WorldStock(sim, {{Item::Hatchet, 1}, {Item::Branch, 109}});
+    UnchangedFailure(sim, [&] { return sim.Harvest(tree.id, {tree.position.x + 301, tree.position.y}); });
+    const double hour = sim.GetState().hour;
+    OK(sim.Harvest(tree.id, {tree.position.x + 300, tree.position.y}));
+    CHECK(sim.UsedCapacity() == 120 && sim.Count(Item::Branch) == 117 && sim.Count(Item::Fiber) == 2);
+    CHECK(sim.GetState().hour == hour);
+    CHECK(sim.GetState().resourceEdits.size() == 1);
+    CHECK(sim.GetState().resourceEdits[0].key == tree.key && sim.GetState().resourceEdits[0].cleared);
+    UnchangedFailure(sim, [&] { return sim.Harvest(tree.id, tree.position); });
+    UnchangedFailure(sim, [&] { return sim.Clear(tree.id, tree.position); });
+    WorldStock(sim, {{Item::Hatchet, 1}, {Item::Knife, 1}});
+    const auto branch = WorldNode(sim, ResourceKind::Branches);
+    OK(sim.Harvest(branch.id, branch.position));
+    const auto sapling = WorldNode(sim, ResourceKind::Sapling);
+    OK(sim.Harvest(sapling.id, sapling.position));
+    CHECK(sim.GetState().resourceEdits.size() == 3);
+    ResourceNode resolved;
+    OK(sim.SetActiveWorldRegion({-12000, -12000}));
+    OK(sim.ResolveGeneratedResource(tree.key, resolved));
+    CHECK(resolved.id == 0 && resolved.cleared && resolved.readyAtHour == 0);
+    const auto save = sim.Serialize();
+    Simulation loaded;
+    OK(loaded.Deserialize(save));
+    CHECK(loaded.Serialize() == save);
+    OK(loaded.ResolveGeneratedResource(branch.key, resolved));
+    CHECK(resolved.id == 0 && !resolved.cleared && resolved.readyAtHour == hour + 24);
+    OK(loaded.ResolveGeneratedResource(sapling.key, resolved));
+    CHECK(!resolved.cleared && resolved.readyAtHour == hour + 168);
+    OK(loaded.SetActiveWorldRegion(tree.position));
+    OK(loaded.ResolveGeneratedResource(tree.key, resolved));
+    CHECK(resolved.id >= TransientResourceIdBase && resolved.cleared && !loaded.CanHarvest(resolved.id));
+    Edit(loaded, [](State& state) { state.hour += 200; }, false);
+    OK(loaded.ResolveGeneratedResource(tree.key, resolved));
+    CHECK(resolved.cleared && !loaded.CanHarvest(resolved.id));
+    OK(loaded.ResolveGeneratedResource(branch.key, resolved));
+    CHECK(loaded.CanHarvest(resolved.id));
+    const int before = loaded.Count(Item::Branch);
+    OK(loaded.Harvest(resolved.id, resolved.position));
+    CHECK(loaded.Count(Item::Branch) == before + 5);
+    CHECK(loaded.GetState().resourceEdits.size() == 3);
+    OK(loaded.ResolveGeneratedResource(sapling.key, resolved));
+    CHECK(loaded.CanHarvest(resolved.id));
+    const int branchesBeforeClear = loaded.Count(Item::Branch);
+    OK(loaded.Clear(resolved.id, resolved.position));
+    CHECK(loaded.Count(Item::Branch) == branchesBeforeClear + 8);
+    InventoryRoundTrip(loaded);
+}
+void FellFixtureCell(Simulation& sim, int x, int y)
+{
+    const auto nodes = sim.GetState().resources;
+    for (const auto& node : nodes)
+    {
+        if (node.cleared || (node.kind != ResourceKind::ForestTree && node.kind != ResourceKind::Sapling)) continue;
+        const double left = x * CellSize, bottom = y * CellSize;
+        const double px = std::max(left, std::min(left + CellSize, node.position.x));
+        const double py = std::max(bottom, std::min(bottom + CellSize, node.position.y));
+        const double dx = px - node.position.x, dy = py - node.position.y;
+        const bool blocks = node.kind == ResourceKind::ForestTree ? dx * dx + dy * dy <= 2500 :
+            static_cast<int>(std::floor(node.position.x / CellSize)) == x &&
+            static_cast<int>(std::floor(node.position.y / CellSize)) == y;
+        if (blocks) OK(sim.Clear(node.id, node.position));
+    }
+}
+void GeneratedBuildingFootprintAndReload()
+{
+    Simulation sim;
+    OK(sim.SetActiveWorldRegion({-12000, 12000}));
+    WorldStock(sim, {{Item::Hatchet, 1}, {Item::DiggingStick, 1}, {Item::Branch, 20}, {Item::Stone, 10}});
+    auto tree = WorldNode(sim, ResourceKind::ForestTree);
+    int cellX = static_cast<int>(std::floor(tree.position.x / CellSize));
+    int cellY = static_cast<int>(std::floor(tree.position.y / CellSize));
+    for (const auto& node : sim.GetState().resources)
+    {
+        if (node.kind != ResourceKind::ForestTree) continue;
+        const int cx = static_cast<int>(std::floor(node.position.x / CellSize));
+        if (node.position.x - cx * CellSize <= 50)
+        {
+            tree = node;
+            cellX = cx - 1;
+            cellY = static_cast<int>(std::floor(node.position.y / CellSize));
+            break;
+        }
+    }
+    CHECK(static_cast<int>(std::floor(tree.position.x / CellSize)) != cellX);
+    const auto site = CellCenter(cellX, cellY);
+    UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, cellX, cellY, 0, site); });
+    UnchangedFailure(sim, [&] { return sim.Till(cellX, cellY, site); });
+    OK(sim.SetActiveWorldRegion({12000, -12000}));
+    UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, cellX, cellY, 0, site); });
+    OK(sim.SetActiveWorldRegion(tree.position));
+    FellFixtureCell(sim, cellX, cellY);
+    OK(sim.Place(Piece::Foundation, cellX, cellY, 0, site));
+    const int foundation = sim.GetState().structures.back().id;
+    CHECK(foundation > 0 && foundation < TransientResourceIdBase);
+    const int plotX = cellX + 2;
+    FellFixtureCell(sim, plotX, cellY);
+    OK(sim.Till(plotX, cellY, CellCenter(plotX, cellY)));
+    CHECK(sim.GetState().plots.back().id < TransientResourceIdBase);
+    OK(sim.SetActiveWorldRegion({12000, -12000}));
+    const auto save = sim.Serialize();
+    Simulation loaded;
+    OK(loaded.Deserialize(save));
+    CHECK(loaded.Serialize() == save);
+    CHECK(loaded.GetState().structures.back().id == foundation);
+    ResourceNode resolved;
+    OK(loaded.ResolveGeneratedResource(tree.key, resolved));
+    CHECK(resolved.cleared && resolved.id == 0);
+    State corrupt = loaded.GetState();
+    corrupt.resourceEdits.erase(std::remove_if(corrupt.resourceEdits.begin(), corrupt.resourceEdits.end(),
+        [&](const ResourceEdit& edit) { return edit.key == tree.key; }), corrupt.resourceEdits.end());
+    UnchangedFailure(loaded, [&] { return loaded.Deserialize(Encode(corrupt)); });
+    OK(loaded.SetActiveWorldRegion(tree.position));
+    CHECK(loaded.FindNearestStructure(site, Piece::Foundation, 1) == foundation);
+}
+void GeneratedSaveValidationAndEditLimit()
+{
+    Simulation sim;
+    WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}});
+    const auto branch = WorldNode(sim, ResourceKind::Branches);
+    OK(sim.Harvest(branch.id, branch.position));
+    const auto save = sim.Serialize();
+    for (const auto& mutate : std::vector<std::function<void(State&)>>{
+        [](State& s) { s.activeChunk.x = 417; },
+        [](State& s) { s.activeChunk.y = -418; },
+        [](State& s) { s.resourceEdits[0].key.localId = 0; },
+        [](State& s) { s.resourceEdits[0].key.chunk.x = 500; },
+        [](State& s) { s.resourceEdits[0].readyAtHour = 0; },
+        [](State& s) { s.resourceEdits[0].readyAtHour = std::numeric_limits<double>::infinity(); },
+        [](State& s) { s.resourceEdits[0].cleared = true; },
+        [](State& s) { s.resourceEdits.push_back(s.resourceEdits[0]); },
+        [](State& s) { s.resourceEdits.resize(MaxResourceEdits + 1); }})
+    {
+        State state = sim.GetState();
+        mutate(state);
+        UnchangedFailure(sim, [&] { return sim.Deserialize(Encode(state)); });
+    }
+    for (auto version : {0u, 2u, std::numeric_limits<std::uint32_t>::max()})
+    {
+        State state = sim.GetState();
+        state.world.generationVersion = version;
+        CHECK(sim.Deserialize(Encode(state)).code == ResultCode::UnsupportedVersion);
+        CHECK(sim.Serialize() == save);
+    }
+    State full = sim.GetState();
+    for (int y = 10; full.resourceEdits.size() < MaxResourceEdits; ++y)
+        for (int x = 10; x < 40 && full.resourceEdits.size() < MaxResourceEdits; ++x)
+        {
+            Generation::ChunkBaseline chunk;
+            CHECK(Generation::GenerateChunk(full.world, {x, y}, chunk) == Generation::Status::Ok);
+            for (const auto& entity : chunk.entities)
+            {
+                if (full.resourceEdits.size() == MaxResourceEdits) break;
+                full.resourceEdits.push_back({entity.key, true, 0});
+            }
+        }
+    std::sort(full.resourceEdits.begin(), full.resourceEdits.end(),
+        [](const ResourceEdit& a, const ResourceEdit& b) { return a.key < b.key; });
+    OK(sim.Deserialize(Encode(full)));
+    CHECK(sim.GetState().resourceEdits.size() == MaxResourceEdits);
+    CHECK(sim.Serialize().size() < 8 * 1024 * 1024);
+    const auto tree = WorldNode(sim, ResourceKind::ForestTree);
+    UnchangedFailure(sim, [&] { return sim.Clear(tree.id, tree.position); });
+    const auto herbs = WorldNode(sim, ResourceKind::Flowers);
+    UnchangedFailure(sim, [&] { return sim.Harvest(herbs.id, herbs.position); });
+    Edit(sim, [](State& state) { state.hour += 24; }, false);
+    ResourceNode resolved;
+    OK(sim.ResolveGeneratedResource(branch.key, resolved));
+    OK(sim.Harvest(resolved.id, resolved.position));
+    CHECK(sim.GetState().resourceEdits.size() == MaxResourceEdits);
+    OK(sim.SetActiveWorldRegion({-100000, -100000}));
+    CHECK(sim.GetState().resourceEdits.size() == MaxResourceEdits);
+    InventoryRoundTrip(sim);
 }
 
 void Run(const char* name, void (*test)())
@@ -1482,6 +1782,10 @@ int main()
     Run("existing quantity mutations and 120 groups without slot cost", QuantityMutationReconciliation);
     Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
     Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
+    Run("seeded resource identity and bounded region activation", GeneratedWorldIdentityAndActivation);
+    Run("permanent generated felling and persistent renewable timers", GeneratedFellingAndPersistentTimers);
+    Run("cross-cell trunk footprint, chosen building sites and reload", GeneratedBuildingFootprintAndReload);
+    Run("generated save validation and explicit sparse edit limit", GeneratedSaveValidationAndEditLimit);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

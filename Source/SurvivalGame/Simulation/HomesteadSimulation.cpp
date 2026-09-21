@@ -22,7 +22,7 @@ constexpr double TimeStep = 1.0 / 120.0;
 constexpr int MaxObjects = 4096;
 constexpr int MaxStock = 120;
 constexpr double MaxFuel = 48.0;
-constexpr std::size_t MaxSaveBytes = 1024 * 1024;
+constexpr std::size_t MaxSaveBytes = 8 * 1024 * 1024;
 
 template <typename T> bool ValidEnum(T value, T count)
 {
@@ -34,9 +34,13 @@ bool FiniteRange(double value, double low, double high)
 }
 bool ValidPoint(Point p)
 {
-    return FiniteRange(p.x, -4000.0, 4000.0) && FiniteRange(p.y, -4000.0, 4000.0);
+    return FiniteRange(p.x, -MaxWorldCoordinate, MaxWorldCoordinate) &&
+        FiniteRange(p.y, -MaxWorldCoordinate, MaxWorldCoordinate);
 }
-bool ValidCell(int x, int y) { return x >= -13 && x <= 12 && y >= -13 && y <= 12; }
+bool ValidCell(int x, int y)
+{
+    return x >= -3333 && x <= 3332 && y >= -3333 && y <= 3332;
+}
 double DistanceSquared(Point a, Point b)
 {
     return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
@@ -108,6 +112,7 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Flowers: return 24.0;
     case ResourceKind::Reeds: return 24.0;
     case ResourceKind::Sapling: return 168.0;
+    case ResourceKind::ForestTree: return 0.0;
     default: return 0.0;
     }
 }
@@ -122,6 +127,7 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Flowers: return Items({{Item::Flowers, 3}});
     case ResourceKind::Reeds: return Items({{Item::Fiber, 5}});
     case ResourceKind::Sapling: return Items({{Item::Branch, 8}, {Item::Fiber, 2}});
+    case ResourceKind::ForestTree: return Items({{Item::Branch, 8}, {Item::Fiber, 2}});
     default: return {};
     }
 }
@@ -195,12 +201,131 @@ bool HasPiece(const State& state, Piece kind, int x, int y)
         if (piece.kind == kind && piece.cellX == x && piece.cellY == y) return true;
     return false;
 }
-bool BlockedBySapling(const State& state, int x, int y)
+bool RequiresHatchet(ResourceKind kind)
 {
-    for (const auto& node : state.resources)
-        if (!node.cleared && node.kind == ResourceKind::Sapling &&
-            Cell(node.position.x) == x && Cell(node.position.y) == y) return true;
-    return false;
+    return kind == ResourceKind::Sapling || kind == ResourceKind::ForestTree;
+}
+Result GenerationFailure(Generation::Status status)
+{
+    return {false, std::string(Generation::StatusMessage(status)) + " The world was not changed.",
+        status == Generation::Status::UnsupportedVersion ? ResultCode::UnsupportedVersion : ResultCode::Invalid};
+}
+bool SuppressedTree(const Generation::GeneratedEntity& entity)
+{
+    if (entity.kind != Generation::EntityKind::ForestTree) return false;
+    const Point p{static_cast<double>(entity.xCm), static_cast<double>(entity.yCm)};
+    if (DistanceSquared(p, {-1000, 0}) <= 90.0 * 90.0) return true;
+    const Point start{-1300, -80};
+    const double along = Clamp(((p.x - start.x) * 300.0 + (p.y - start.y) * 80.0) /
+        (300.0 * 300.0 + 80.0 * 80.0), 0.0, 1.0);
+    return DistanceSquared(p, {start.x + 300.0 * along, start.y + 80.0 * along}) <= 60.0 * 60.0;
+}
+ResourceKind ResourceType(Generation::EntityKind kind)
+{
+    switch (kind)
+    {
+    case Generation::EntityKind::ForestTree: return ResourceKind::ForestTree;
+    case Generation::EntityKind::Branches: return ResourceKind::Branches;
+    case Generation::EntityKind::Stones: return ResourceKind::Stones;
+    case Generation::EntityKind::BerryBush: return ResourceKind::BerryBush;
+    case Generation::EntityKind::Roots: return ResourceKind::Roots;
+    case Generation::EntityKind::Flowers: return ResourceKind::Flowers;
+    case Generation::EntityKind::Reeds: return ResourceKind::Reeds;
+    case Generation::EntityKind::Sapling: return ResourceKind::Sapling;
+    default: return ResourceKind::Count;
+    }
+}
+bool GeneratedNode(const State& state, const Generation::GeneratedEntity& entity, ResourceNode& out)
+{
+    const Point position{static_cast<double>(entity.xCm), static_cast<double>(entity.yCm)};
+    if (!ValidPoint(position) || SuppressedTree(entity)) return false;
+    ResourceNode node;
+    node.kind = ResourceType(entity.kind);
+    if (!ValidEnum(node.kind, ResourceKind::Count)) return false;
+    node.position = position;
+    node.key = entity.key;
+    const auto edit = std::lower_bound(state.resourceEdits.begin(), state.resourceEdits.end(), node.key,
+        [](const ResourceEdit& value, const Generation::GeneratedEntityKey& key) { return value.key < key; });
+    if (edit != state.resourceEdits.end() && edit->key == node.key)
+    {
+        node.cleared = edit->cleared;
+        node.readyAtHour = edit->readyAtHour;
+    }
+    out = node;
+    return true;
+}
+Result Materialize(State& candidate, const State* previous, int& nextHandle)
+{
+    std::vector<ResourceNode> resources;
+    for (int dy = -1; dy <= 1; ++dy)
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+            Generation::ChunkBaseline baseline;
+            const Generation::ChunkCoord coord{candidate.activeChunk.x + dx, candidate.activeChunk.y + dy};
+            const auto status = Generation::GenerateChunk(candidate.world, coord, baseline);
+            if (status != Generation::Status::Ok) return GenerationFailure(status);
+            for (const auto& entity : baseline.entities)
+            {
+                ResourceNode node;
+                if (!GeneratedNode(candidate, entity, node)) continue;
+                if (previous)
+                    for (const auto& old : previous->resources)
+                        if (old.key == node.key) { node.id = old.id; break; }
+                if (node.id == 0)
+                {
+                    if (nextHandle == std::numeric_limits<int>::max())
+                        return Bad("This session has exhausted transient resource handles. Save and restart.");
+                    node.id = nextHandle++;
+                }
+                resources.push_back(node);
+            }
+        }
+    candidate.resources = std::move(resources);
+    return Good("");
+}
+bool SaveResourceEdit(State& candidate, const ResourceNode& node)
+{
+    auto edit = std::lower_bound(candidate.resourceEdits.begin(), candidate.resourceEdits.end(), node.key,
+        [](const ResourceEdit& value, const Generation::GeneratedEntityKey& key) { return value.key < key; });
+    if (edit != candidate.resourceEdits.end() && edit->key == node.key)
+        *edit = {node.key, node.cleared, node.readyAtHour};
+    else
+    {
+        if (candidate.resourceEdits.size() >= MaxResourceEdits) return false;
+        candidate.resourceEdits.insert(edit, {node.key, node.cleared, node.readyAtHour});
+    }
+    return true;
+}
+Result CheckBuildingResources(const State& state, int x, int y)
+{
+    const double left = static_cast<double>(x) * CellSize;
+    const double bottom = static_cast<double>(y) * CellSize;
+    Generation::ChunkCoord low, high;
+    const auto lowStatus = Generation::ChunkAt(static_cast<std::int64_t>(left - 50),
+        static_cast<std::int64_t>(bottom - 50), low);
+    const auto highStatus = Generation::ChunkAt(static_cast<std::int64_t>(left + CellSize + 50),
+        static_cast<std::int64_t>(bottom + CellSize + 50), high);
+    if (lowStatus != Generation::Status::Ok) return GenerationFailure(lowStatus);
+    if (highStatus != Generation::Status::Ok) return GenerationFailure(highStatus);
+    for (int cy = low.y; cy <= high.y; ++cy)
+        for (int cx = low.x; cx <= high.x; ++cx)
+        {
+            Generation::ChunkBaseline baseline;
+            const auto status = Generation::GenerateChunk(state.world, {cx, cy}, baseline);
+            if (status != Generation::Status::Ok) return GenerationFailure(status);
+            for (const auto& entity : baseline.entities)
+            {
+                if (entity.kind != Generation::EntityKind::ForestTree && entity.kind != Generation::EntityKind::Sapling) continue;
+                ResourceNode node;
+                if (!GeneratedNode(state, entity, node) || node.cleared) continue;
+                const bool blocked = node.kind == ResourceKind::Sapling ?
+                    Cell(node.position.x) == x && Cell(node.position.y) == y :
+                    DistanceSquared(node.position, {Clamp(node.position.x, left, left + CellSize),
+                        Clamp(node.position.y, bottom, bottom + CellSize)}) <= 50.0 * 50.0;
+                if (blocked) return Bad("Fell the standing tree or clear the sapling before using this building cell.");
+            }
+        }
+    return Good("");
 }
 std::uint64_t Checksum(const std::string& body)
 {
@@ -213,6 +338,21 @@ bool ReadBool(std::istream& stream, bool& value)
     int number = -1;
     if (!(stream >> number) || (number != 0 && number != 1)) return false;
     value = number == 1;
+    return true;
+}
+bool ReadUnsigned(std::istream& stream, std::uint64_t& value)
+{
+    std::string token;
+    if (!(stream >> token) || token.empty() || token.size() > 20) return false;
+    std::uint64_t parsed = 0;
+    for (char c : token)
+    {
+        if (c < '0' || c > '9') return false;
+        const auto digit = static_cast<std::uint64_t>(c - '0');
+        if (parsed > (std::numeric_limits<std::uint64_t>::max() - digit) / 10) return false;
+        parsed = parsed * 10 + digit;
+    }
+    value = parsed;
     return true;
 }
 bool ReadStock(std::istream& stream, Inventory& stock)
@@ -488,7 +628,7 @@ const char* ItemName(Item item)
 const char* ResourceName(ResourceKind kind)
 {
     static const char* names[] = {"Fallen branches", "Loose stones", "Berry bush", "Wild roots",
-        "Meadow herb", "Stream reeds", "Sapling"};
+        "Meadow herb", "Stream reeds", "Sapling", "Forest tree"};
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
 const char* RecipeName(Recipe recipe)
@@ -538,7 +678,7 @@ const char* PieceRequirements(Piece piece)
     }();
     return ValidEnum(piece, Piece::Count) ? descriptions[static_cast<int>(piece)].c_str() : "Unknown structure";
 }
-double StreamX(double y) { return 1500.0 + 180.0 * std::sin(y / 800.0); }
+double StreamX(double y) { return Generation::StreamCenterCm(y); }
 bool IsNearWater(Point position)
 {
     return ValidPoint(position) && std::abs(position.x - StreamX(position.y)) <= 180.0;
@@ -550,32 +690,55 @@ Point CellCenter(int cellX, int cellY)
 }
 
 Simulation::Simulation() { NewGame(); }
-void Simulation::NewGame()
+Result Simulation::NewGame() { return NewGame(0); }
+Result Simulation::NewGame(std::uint64_t seed)
 {
-    state_ = State{};
-    state_.inventory[static_cast<int>(Item::Knife)] = 1;
-    state_.inventoryLayout.push_back({state_.nextGroupId++, Item::Knife, 1, 0});
-    state_.wearables = {
+    State candidate;
+    candidate.world.seed = seed;
+    candidate.inventory[static_cast<int>(Item::Knife)] = 1;
+    candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::Knife, 1, 0});
+    candidate.wearables = {
         {1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0},
         {2, WearableDefinition::LeatherShoes, 0, WearableOwner::Equipped, 0}};
-    RefreshEquipment(state_);
-    ++revision_;
-    // The first eight patches form a short forage route from the arrival clearing to the stream.
-    static const Point patches[] = {{-1100, -400}, {-600, -400}, {-100, -400}, {400, -400},
-        {900, -400}, {1150, 200}, {550, 550}, {-300, 550}, {-1900, -1100},
-        {-2300, 1000}, {2200, 1600}, {2400, -1700}, {-900, 1900}, {400, -2100}};
-    for (const Point patch : patches)
-    {
-        for (int kind = 0; kind < static_cast<int>(ResourceKind::Count); ++kind)
-        {
-            Point position{patch.x + (kind % 3) * 100.0, patch.y + (kind / 3) * 100.0};
-            if (kind == static_cast<int>(ResourceKind::Sapling))
-                position = {patch.x - 100.0, patch.y - 200.0};
-            if (kind == static_cast<int>(ResourceKind::Reeds) && patch.x > 800)
-                position.x = StreamX(position.y) - 100.0;
-            state_.resources.push_back({state_.nextId++, static_cast<ResourceKind>(kind), position, 0.0, false});
-        }
-    }
+    RefreshEquipment(candidate);
+    const auto status = Generation::ChunkAt(-1000, 0, candidate.activeChunk);
+    if (status != Generation::Status::Ok) return GenerationFailure(status);
+    int nextHandle = nextResourceHandle_;
+    const auto populated = Materialize(candidate, nullptr, nextHandle);
+    if (!populated) return populated;
+    state_ = std::move(candidate);
+    nextResourceHandle_ = nextHandle;
+    return {true, "A new seeded woodland is ready.", ResultCode::None, ++revision_};
+}
+Result Simulation::SetActiveWorldRegion(Point player)
+{
+    if (!ValidPoint(player)) return Bad("Exploration supports coordinates within 1000000 cm of the origin.");
+    Generation::ChunkCoord coord;
+    const auto status = Generation::ChunkAt(static_cast<std::int64_t>(std::floor(player.x)),
+        static_cast<std::int64_t>(std::floor(player.y)), coord);
+    if (status != Generation::Status::Ok) return GenerationFailure(status);
+    if (coord == state_.activeChunk) return {true, "The active region is unchanged.", ResultCode::None, revision_};
+    State candidate = state_;
+    candidate.activeChunk = coord;
+    int nextHandle = nextResourceHandle_;
+    const auto populated = Materialize(candidate, &state_, nextHandle);
+    if (!populated) return populated;
+    state_ = std::move(candidate);
+    nextResourceHandle_ = nextHandle;
+    return {true, "Active woodland region updated.", ResultCode::None, ++revision_};
+}
+Result Simulation::ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const
+{
+    Generation::GeneratedEntity entity;
+    const auto status = Generation::FindEntity(state_.world, key, entity);
+    if (status != Generation::Status::Ok) return GenerationFailure(status);
+    ResourceNode node;
+    if (!GeneratedNode(state_, entity, node))
+        return {false, "This resource is outside the supported world or reserved spawn safety footprint.", ResultCode::Unavailable, revision_};
+    for (const auto& active : state_.resources)
+        if (active.key == key) { node.id = active.id; break; }
+    out = node;
+    return {true, "", ResultCode::None, revision_};
 }
 int Simulation::Count(Item item) const
 {
@@ -854,7 +1017,7 @@ bool Simulation::CanHarvest(int nodeId) const
 {
     const auto* node = Find(state_.resources, nodeId);
     return !state_.failed && node && !node->cleared && node->readyAtHour <= state_.hour &&
-        (node->kind == ResourceKind::Sapling ? Count(Item::Hatchet) > 0 : Count(Item::Knife) > 0);
+        (RequiresHatchet(node->kind) ? Count(Item::Hatchet) > 0 : Count(Item::Knife) > 0);
 }
 int Simulation::FindNearestResource(Point position, double maxDistance) const
 {
@@ -905,6 +1068,7 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (state_.failed) return Failed();
     auto* node = Find(state_.resources, nodeId);
     if (!node || node->cleared) return Bad("That resource is no longer available.");
+    if (node->kind == ResourceKind::ForestTree) return Clear(nodeId, player);
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
     if (node->readyAtHour > state_.hour) return Bad("This patch needs more time to regrow.");
     if (node->kind == ResourceKind::Sapling && Count(Item::Hatchet) == 0)
@@ -912,9 +1076,13 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (node->kind != ResourceKind::Sapling && Count(Item::Knife) == 0)
         return Bad("Take your knife from storage before gathering.");
     const Inventory yield = Yield(node->kind);
-    if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
-    node->readyAtHour = state_.hour + Regrowth(node->kind);
-    return Good(std::string("Gathered ") + ResourceName(node->kind) + ". This patch will regrow.");
+    State candidate = state_;
+    auto* updated = Find(candidate.resources, nodeId);
+    updated->readyAtHour = state_.hour + Regrowth(node->kind);
+    if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
+    for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
+    const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ". This patch will regrow.";
+    return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Clear(int nodeId, Point player)
 {
@@ -922,15 +1090,18 @@ Result Simulation::Clear(int nodeId, Point player)
     auto* node = Find(state_.resources, nodeId);
     if (!node || node->cleared) return Bad("This patch has already been cleared.");
     if (!Near(player, node->position)) return Bad("Move closer to clear this patch.");
-    if (node->kind == ResourceKind::Sapling && Count(Item::Hatchet) == 0)
-        return Bad("Craft a crude hatchet before clearing saplings.");
-    if (node->kind != ResourceKind::Sapling && Count(Item::Knife) == 0)
+    if (RequiresHatchet(node->kind) && Count(Item::Hatchet) == 0)
+        return Bad("Craft a crude hatchet before felling trees or clearing saplings.");
+    if (!RequiresHatchet(node->kind) && Count(Item::Knife) == 0)
         return Bad("Take your knife from storage before clearing.");
     const Inventory yield = node->readyAtHour <= state_.hour ? Yield(node->kind) : Inventory{};
-    if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
-    node->cleared = true;
-    node->readyAtHour = 0.0;
-    return Good("Land cleared permanently. This patch will no longer regrow.");
+    State candidate = state_;
+    auto* updated = Find(candidate.resources, nodeId);
+    updated->cleared = true;
+    updated->readyAtHour = 0.0;
+    if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
+    for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
+    return CommitInventory(std::move(candidate), "Land cleared permanently. This patch will no longer regrow.");
 }
 Result Simulation::Eat(Item item)
 {
@@ -976,9 +1147,10 @@ Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point p
         return Bad("Choose a valid structure and building cell.");
     rotation = ((rotation % 4) + 4) % 4;
     if (!Near(player, CellCenter(cellX, cellY), 700.0)) return Bad("Move closer to this building site.");
-    if (state_.structures.size() >= MaxObjects || state_.nextId >= std::numeric_limits<int>::max() - 1)
+    if (state_.structures.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The homestead has reached its structure limit.");
-    if (BlockedBySapling(state_, cellX, cellY)) return Bad("Clear the sapling from this cell with a hatchet first.");
+    const auto space = CheckBuildingResources(state_, cellX, cellY);
+    if (!space) return space;
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("Keep this crop plot clear of buildings.");
     for (const auto& piece : state_.structures)
@@ -1002,9 +1174,10 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     if (state_.failed) return Failed();
     if (!ValidCell(cellX, cellY) || !Near(player, CellCenter(cellX, cellY))) return Bad("Move closer to a valid garden cell.");
     if (Count(Item::DiggingStick) == 0) return Bad("Craft a digging stick before tilling soil.");
-    if (state_.plots.size() >= MaxObjects || state_.nextId >= std::numeric_limits<int>::max() - 1)
+    if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
-    if (BlockedBySapling(state_, cellX, cellY)) return Bad("Clear the sapling from this cell before tilling.");
+    const auto space = CheckBuildingResources(state_, cellX, cellY);
+    if (!space) return space;
     for (const auto& structure : state_.structures)
         if (structure.cellX == cellX && structure.cellY == cellY) return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
@@ -1200,10 +1373,12 @@ std::string Simulation::Serialize() const
          << state_.energy << ' ' << state_.warmth << ' ' << state_.failed << ' '
          << state_.warmOutfit << ' ' << state_.nextId << '\n';
     WriteStock(body, state_.inventory);
-    body << state_.resources.size() << '\n';
-    for (const auto& node : state_.resources)
-        body << node.id << ' ' << static_cast<int>(node.kind) << ' ' << node.position.x << ' '
-             << node.position.y << ' ' << node.readyAtHour << ' ' << node.cleared << '\n';
+    body << state_.world.seed << ' ' << state_.world.generationVersion << ' '
+         << state_.activeChunk.x << ' ' << state_.activeChunk.y << '\n';
+    body << state_.resourceEdits.size() << '\n';
+    for (const auto& edit : state_.resourceEdits)
+        body << edit.key.chunk.x << ' ' << edit.key.chunk.y << ' ' << edit.key.localId << ' '
+             << edit.cleared << ' ' << edit.readyAtHour << '\n';
     body << state_.structures.size() << '\n';
     for (const auto& piece : state_.structures)
     {
@@ -1245,7 +1420,7 @@ Result Simulation::Deserialize(const std::string& data)
     header >> std::ws;
     if (!header.eof()) return invalid();
     if (version != SimulationSaveVersion) return {false,
-        "This test save uses an incompatible version. Start a new clearing with this build; no save was changed.",
+        "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
     const std::string payload = data.substr(newline + 1);
     if (size != payload.size() || Checksum(payload) != checksum) return invalid();
@@ -1258,25 +1433,40 @@ Result Simulation::Deserialize(const std::string& data)
     if (!FiniteRange(candidate.hour, 6.0, MaxHour) || !FiniteRange(candidate.dayMinutes, 1.0, 1440.0) ||
         !FiniteRange(candidate.hunger, 0.0, 100.0) || !FiniteRange(candidate.energy, 0.0, 100.0) ||
         !FiniteRange(candidate.warmth, 0.0, 100.0) || candidate.nextId < 1 ||
-        candidate.nextId == std::numeric_limits<int>::max()) return invalid();
+        candidate.nextId >= TransientResourceIdBase) return invalid();
     const bool critical = candidate.hunger == 0 || candidate.energy == 0 || candidate.warmth == 0;
     if (critical != candidate.failed || !ReadStock(input, candidate.inventory)) return invalid();
     std::set<int> ids;
     const auto acceptId = [&](int id) { return id > 0 && id < candidate.nextId && ids.insert(id).second; };
     int count = 0;
-    if (!(input >> count) || count < 0 || count > MaxObjects) return invalid();
+    std::uint64_t generationVersion = 0;
+    if (!ReadUnsigned(input, candidate.world.seed) || !ReadUnsigned(input, generationVersion)) return invalid();
+    if (generationVersion != Generation::WorldGenerationVersion) return {false,
+        "This save uses an unsupported world generation version. No terrain or saved changes were regenerated.",
+        ResultCode::UnsupportedVersion, revision_};
+    candidate.world.generationVersion = static_cast<std::uint32_t>(generationVersion);
+    if (!(input >> candidate.activeChunk.x >> candidate.activeChunk.y) ||
+        candidate.activeChunk.x < -417 || candidate.activeChunk.x > 416 ||
+        candidate.activeChunk.y < -417 || candidate.activeChunk.y > 416) return invalid();
+    if (!(input >> count) || count < 0 || count > MaxResourceEdits) return invalid();
     for (int i = 0; i < count; ++i)
     {
+        ResourceEdit edit;
+        std::uint64_t localId = 0;
+        if (!(input >> edit.key.chunk.x >> edit.key.chunk.y) || !ReadUnsigned(input, localId) ||
+            localId > std::numeric_limits<std::uint32_t>::max() ||
+            !ReadBool(input, edit.cleared) || !(input >> edit.readyAtHour)) return invalid();
+        edit.key.localId = static_cast<std::uint32_t>(localId);
+        if (!candidate.resourceEdits.empty() && !(candidate.resourceEdits.back().key < edit.key)) return invalid();
+        Generation::GeneratedEntity entity;
+        if (Generation::FindEntity(candidate.world, edit.key, entity) != Generation::Status::Ok) return invalid();
         ResourceNode node;
-        int kind = 0;
-        if (!(input >> node.id >> kind >> node.position.x >> node.position.y >> node.readyAtHour) ||
-            !ReadBool(input, node.cleared)) return invalid();
-        node.kind = static_cast<ResourceKind>(kind);
-        if (!acceptId(node.id) || !ValidEnum(node.kind, ResourceKind::Count) || !ValidPoint(node.position) ||
-            !FiniteRange(node.readyAtHour, 0.0, candidate.hour + Regrowth(node.kind)) ||
-            (node.readyAtHour != 0.0 && node.readyAtHour < 6.0 + Regrowth(node.kind)) ||
-            (node.cleared && node.readyAtHour != 0.0)) return invalid();
-        candidate.resources.push_back(node);
+        if (!GeneratedNode(candidate, entity, node) ||
+            !FiniteRange(edit.readyAtHour, 0.0, candidate.hour + Regrowth(node.kind)) ||
+            (edit.readyAtHour != 0.0 && edit.readyAtHour < 6.0 + Regrowth(node.kind)) ||
+            (edit.cleared && edit.readyAtHour != 0.0) ||
+            (!edit.cleared && (edit.readyAtHour == 0.0 || node.kind == ResourceKind::ForestTree))) return invalid();
+        candidate.resourceEdits.push_back(edit);
     }
     std::set<std::tuple<int, int, int>> cells;
     std::set<Edge> edges;
@@ -1294,7 +1484,7 @@ Result Simulation::Deserialize(const std::string& data)
             !FiniteRange(piece.fuelHours, 0.0, MaxFuel) ||
             (piece.kind != Piece::Fire && piece.fuelHours != 0.0) ||
             (piece.kind != Piece::Chest && !Empty(piece.storage)) ||
-            BlockedBySapling(candidate, piece.cellX, piece.cellY)) return invalid();
+            !CheckBuildingResources(candidate, piece.cellX, piece.cellY)) return invalid();
         if (EdgePiece(piece.kind))
         {
             if (!edges.insert(EdgeKey(piece.cellX, piece.cellY, piece.rotation)).second) return invalid();
@@ -1321,7 +1511,7 @@ Result Simulation::Deserialize(const std::string& data)
             !FiniteRange(plot.growth, 0.0, 1.0) || !FiniteRange(plot.moisture, 0.0, 1.0) ||
             !FiniteRange(plot.weeds, 0.0, 1.0) || (!plot.planted && plot.growth != 0.0) ||
             !plots.insert({plot.cellX, plot.cellY}).second ||
-            BlockedBySapling(candidate, plot.cellX, plot.cellY)) return invalid();
+            !CheckBuildingResources(candidate, plot.cellX, plot.cellY)) return invalid();
         for (const auto& piece : candidate.structures)
             if (piece.cellX == plot.cellX && piece.cellY == plot.cellY) return invalid();
         candidate.plots.push_back(plot);
@@ -1343,7 +1533,25 @@ Result Simulation::Deserialize(const std::string& data)
     if (!input.eof()) return invalid();
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
+    int nextHandle = nextResourceHandle_;
+    const bool sameWorld = candidate.world.seed == state_.world.seed &&
+        candidate.world.generationVersion == state_.world.generationVersion;
+    const auto populated = Materialize(candidate, sameWorld ? &state_ : nullptr, nextHandle);
+    if (!populated) return populated;
     state_ = std::move(candidate);
+    nextResourceHandle_ = nextHandle;
     return {true, "Homestead restored. No time passed while you were away.", ResultCode::None, ++revision_};
+}
+Result Simulation::Deserialize(const std::string& data, Generation::WorldDescriptor expectedWorld)
+{
+    Simulation candidate = *this;
+    const auto result = candidate.Deserialize(data);
+    if (!result) return result;
+    if (candidate.state_.world.seed != expectedWorld.seed ||
+        candidate.state_.world.generationVersion != expectedWorld.generationVersion)
+        return {false, "This save does not match the expected world seed and generation version. Your current game was not changed.",
+            ResultCode::Invalid, revision_};
+    *this = std::move(candidate);
+    return result;
 }
 }
