@@ -1,0 +1,27 @@
+{
+  "status": "passed-normal-launch-validation-no-process-start",
+  "selectedPlan": {
+    "Executable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "WorkingDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows",
+    "Arguments": [
+      "-HomesteadPreviewProfile=jenny-review-v5",
+      "-Res=0x0wf",
+      "-UserDir=E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows\\SurvivalGame"
+    ],
+    "Profile": "jenny-review-v5",
+    "Candidate": "Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03",
+    "Checkpoint": "3a89646efb355045f7e7882a300de32827dfb800",
+    "ExecutableSha256": "304D679C7A902711575D7BD33712A722EC116DE4EC7F4D0EA074109099A373C0",
+    "Receipt": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\acceptance-receipt.json"
+  },
+  "selectionSha256": "364CD60551ED378D9DAA3246E5A8160A4DD4F9049548C61C3987BAD6CB041458",
+  "launcherRegressionChecks": 52,
+  "humanProcessLaunched": false,
+  "profileReset": false,
+  "priorCandidateRetained": true,
+  "creditsRefresh": {
+    "path": "Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows\\asset-credits.md",
+    "after": "AF964A32E28116865413CCE69A990CF23F49060D3CEDA8635B66EC8EAF308935",
+    "before": "B8257EE47005A396823DF5652378237823F5DABBD9B8AAB0AFB0DFFC77BB449F"
+  }
+}

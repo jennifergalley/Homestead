@@ -36,6 +36,13 @@ corners remain a separate qualification. This does not complete the broader
 tasks below or select the candidate; current evidence is
 `docs/research/environment-assets/tree-diagnostic-03/receipt.json`.
 
+Coordinator-reviewed diagnostic03 is now selected as a **qualified single-tree
+playtest increment** after normal-launcher verification, using the same existing
+v5 profile. Prior wardrobe-ui-02 is retained; no human process was launched and
+no save reset occurred. Import03 remains FAILED with the explicit twelve-corner
+qualification. The full forest/understory/ground/performance tasks below remain
+open; this delivery does not manufacture additional top-level completion.
+
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns
 environment/engine integration; isolated siblings own UI, wardrobe rules

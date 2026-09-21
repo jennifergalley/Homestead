@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "previewSaveRoutingVersion": 1,
+  "executableSha256": "304D679C7A902711575D7BD33712A722EC116DE4EC7F4D0EA074109099A373C0",
+  "checkpoint": "3a89646efb355045f7e7882a300de32827dfb800",
+  "privateRemoteVerified": true,
+  "proofIndex": "Verification\\proof-index.json",
+  "proofIndexSha256": "524D2D3918AF0AFD2F3C6C6319AF422BB5718DB1B6972741B289C17563DE2639",
+  "scope": "Qualified single-tree playtest increment with actual ordinary framing/forage/contact/retreat evidence, not clean mesh/full woodland/performance/Jenny art approval.",
+  "import03Disposition": "FAILED; exactly12 branch source-description basis corners retained as explicit diagnostic qualification.",
+  "knownLimitations": [
+    "Original tree-import-03 remains FAILED. Exactly12 branch source-description tangent/binormal corners are a disclosed qualification, not clean mesh acceptance.",
+    "One reduced231785-triangle tree only; existing bright/golden dawn and surrounding proxy forest remain. No broad-forest performance or Jenny art/controller approval.",
+    "Earlier ordinary scenarios01/02 remain failed observer cases; corrected03 passed all requested actual outcomes.",
+    "720p sampled ordinary gameplay is not4K/FPS/physical scanout verification. No new human window was launched.",
+    "Inherited wardrobe/UI limitations remain; this increment did not rerun its complete720p/4K menu/save matrix.",
+    "Full woodland OpenSpec remains incomplete; future Editor authoring must genuinely refresh changed source/product pins."
+  ],
+  "testSaves": "Same jenny-review-v5 profile (UE schema5/portable4); existing saves untouched.",
+  "previousSelection": "previous-preview.json",
+  "normalLaunch": "QA-off, native borderless default, no scripted inputs/mute/automatic quit. ValidateOnly only; no human launch.",
+  "graphicsPreferencesSha256": "7356A1167F34BF874F60FC993764D36022E5EDD2C21506F3B8CAF98A4ACF22D0"
+}

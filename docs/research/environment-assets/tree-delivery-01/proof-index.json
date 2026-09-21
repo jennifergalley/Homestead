@@ -1,0 +1,68 @@
+{
+  "status": "passed-qualified-single-tree-playtest-increment",
+  "evidence": "tree-evidence.json",
+  "evidenceSha256": "0A277926EF838A8A51A6CE1BE8C16B69B71A8F51DC15EEE6D625CB31BCE8E5DC",
+  "checkpoint": "3a89646efb355045f7e7882a300de32827dfb800",
+  "executableSha256": "304D679C7A902711575D7BD33712A722EC116DE4EC7F4D0EA074109099A373C0",
+  "coordinatorReview": "Personally inspected sealed whole-crown frame425: recognizable detailed bark/branch/leaves genuinely in the clearing, crown included, no obvious checker/missing material; bright existing dawn and proxy forest remain. Approved qualified delivery after launcher verification.",
+  "actualRuntime": {
+    "frames": 501,
+    "retreat": true,
+    "durationSeconds": 71.7983,
+    "wholeBoundsInView": true,
+    "readiness": true,
+    "completedPasses": 23,
+    "plannedPasses": 23,
+    "contact": true,
+    "dimensions": [
+      1280,
+      720
+    ],
+    "forage": true,
+    "retreatDistanceCm": 286.637043,
+    "sustainedSamples": 6,
+    "approach": true,
+    "lastContact": {
+      "seconds": "68.731071",
+      "x": "-219.855100",
+      "y": "-1688.015563",
+      "distance_cm": "72.588369",
+      "input_x": "-0.307135",
+      "input_y": "-0.544328",
+      "inward_intent": "0.592022",
+      "inward_velocity_cm_s": "-0.243627",
+      "radial_progress_cm_s": "0.039479",
+      "total_speed_cm_s": "23.233125",
+      "hit_component": "/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadWorld_2147482375.StaticMeshComponent_2147482339",
+      "geometry_blocking_flag": "0",
+      "start_penetrating": "0",
+      "hit_distance_cm": "0.128288",
+      "blocked_seconds": "0.832057",
+      "geometry_hit": "1",
+      "tree_query": "1",
+      "pawn_query": "1",
+      "tree_blocks_pawn": "1",
+      "pawn_blocks_tree": "1",
+      "tree_object_type": "0",
+      "pawn_object_type": "2",
+      "tree_actor_collision": "1",
+      "pawn_actor_collision": "1"
+    }
+  },
+  "profile": "jenny-review-v5",
+  "saveDisposition": "Same existing v5 profile; no save read, migration, reset or deletion by this promotion.",
+  "graphics": {
+    "sha256": "7356A1167F34BF874F60FC993764D36022E5EDD2C21506F3B8CAF98A4ACF22D0",
+    "sourceUnchanged": true,
+    "destination": "Build\\Releases\\20260921-033354-2d257ba0\\tree-diagnostic-03\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini",
+    "source": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini"
+  },
+  "knownLimitations": [
+    "Original tree-import-03 remains FAILED. Exactly12 branch source-description tangent/binormal corners are a disclosed qualification, not clean mesh acceptance.",
+    "One reduced231785-triangle tree only; existing bright/golden dawn and surrounding proxy forest remain. No broad-forest performance or Jenny art/controller approval.",
+    "Earlier ordinary scenarios01/02 remain failed observer cases; corrected03 passed all requested actual outcomes.",
+    "720p sampled ordinary gameplay is not4K/FPS/physical scanout verification. No new human window was launched.",
+    "Inherited wardrobe/UI limitations remain; this increment did not rerun its complete720p/4K menu/save matrix.",
+    "Full woodland OpenSpec remains incomplete; future Editor authoring must genuinely refresh changed source/product pins."
+  ]
+}

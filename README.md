@@ -26,15 +26,23 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-The selected native inventory/wardrobe integration candidate is
-`Build\Releases\20260921-033354-2d257ba0\wardrobe-ui-02\Windows`.
-It has real720p/4K menu/equipment/dye/save checks, separate-process current-save
-reloads, and verified save-and-quit. The corrected UI has compact item cards,
-readable selection/details and a larger character preview; its lower-body
-preview lighting is still provisional. `Preview.json` remains the authority
-for the human build. Coordinator review accepted this usable prototype increment,
-not finished art or all OpenSpec work. See the wardrobe OpenSpec and
-`docs\research\character-assets\wardrobe-shipping-02\receipt.json`.
+The selected **qualified single-tree playtest increment** is
+`Build\Releases\20260921-033354-2d257ba0\tree-diagnostic-03\Windows`.
+It adds one reduced, textured Tree Small02 to the clearing. Actual ordinary
+gameplay verified forage, whole-crown framing, specific-tree inward blocking
+with natural sliding, and retreat. Existing dawn is very bright/golden and the
+surrounding proxy forest still dominates. Original import03 remains **FAILED**:
+twelve branch source-description tangent/binormal corners are explicitly
+qualified, not recast as a clean mesh or full woodland/performance/art approval.
+See `docs\research\environment-assets\tree-delivery-01`.
+
+The candidate retains the native inventory/wardrobe integration from
+`wardrobe-ui-02`, which remains available for rollback. Its prior720p/4K
+menu/equipment/dye/save, separate-process reload and save-and-quit evidence is
+in `docs\research\character-assets\wardrobe-shipping-02\receipt.json`; that full
+matrix was not rerun for this tree increment. Compact item cards, readable
+selection/details and the larger portrait remain; lower-body portrait lighting
+is provisional. `Preview.json` is the authority for the human build.
 
 In the native menu, LB/RB or Ctrl+Tab/Ctrl+Shift+Tab changes tabs; LT/RT or
 Tab/Shift+Tab changes regions; D-pad/arrows navigate; A/Enter activates and
@@ -51,8 +59,9 @@ open. In-game Settings includes **Save and quit**.
 To review the separately verified movement and action improvements, double-click
 **`Preview.cmd`** (requires PowerShell 7). It selects only the explicit candidate
 in `Preview.json`, checks its acceptance receipt/executable hash, and uses the
-persistent **`jenny-review-v5`** save profile. This is a deliberately fresh test
-clearing for UE save schema5 / portable4; old `jenny-review` progress remains
+persistent **`jenny-review-v5`** save profile. The tree promotion keeps this
+existing profile and its progress; no reset or migration was performed. It uses
+UE save schema5 / portable4; old `jenny-review` progress remains
 untouched rather than being migrated or silently reset. It does not replace `Play.cmd`, import
 your original world, run automated inputs, or quit automatically.
 
@@ -68,8 +77,8 @@ Preview saves live in
 `%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-jenny-review-v5\SaveGames`.
 Manual saves, all three autosaves, recovery and backups stay there. Relaunch
 `Preview.cmd` to continue; use `Play.cmd` to return to the untouched original.
-Prior wave-build graphics preferences were copied byte-for-byte; the old wave
-package/profile and `wardrobe-ui-01` remain available. The new candidate's
+Prior selected-build graphics preferences were copied byte-for-byte; the old wave
+package/profile and both wardrobe candidates remain available. The new candidate's
 `previous-preview.json` records the prior selection for an explicit rollback.
 **Do not launch the candidate executable directly:** the preview-profile argument,
 not its package folder, selects this isolated save namespace.

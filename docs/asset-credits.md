@@ -19,7 +19,7 @@ includes this credit. Include this document in any distributed build.
 | Brown Mud Leaves 01 | Rob Tuytel | https://polyhaven.com/a/brown_mud_leaves_01 | CC0 |
 | Rock Moss Set 02 | Kless Gyzen | https://polyhaven.com/a/rock_moss_set_02 | CC0 |
 | Fern 02 | Rob Tuytel (scanning), Rico Cilliers (modeling) | https://polyhaven.com/a/fern_02 | CC0 |
-| Tree Small 02 (diagnostic candidate only) | Rico Cilliers | https://polyhaven.com/a/tree_small_02 | CC0 |
+| Tree Small 02 (qualified single-tree increment) | Rico Cilliers | https://polyhaven.com/a/tree_small_02 | CC0 |
 | Forest Ambience | TinyWorlds | https://opengameart.org/content/forest-ambience | CC0 |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
@@ -32,13 +32,15 @@ are recorded in `Assets\Environment\woodland-preparation-01`; import and preview
 evidence is in `docs\research\environment-assets`. This does not imply that the
 other acquired woodland assets are included in the playable candidate.
 
-The unselected Tree Small 02 diagnostic uses the project-reduced LOD2 mesh,
+The qualified Tree Small 02 increment uses the project-reduced LOD2 mesh,
 thirteen unchanged 2K maps and three project-wired materials. Provenance is in
 `Assets\Environment\TreeSmall02Prepared\v3\provenance.json`. Import adapts the
 branch UV ordering and repairs only invalid normals while preserving valid
 custom normals. Twelve branch tangent/binormal corners remain a disclosed
-diagnostic qualification; the first ordinary trunk-contact assertion did not
-pass. This is not accepted world art or a replacement for the selected preview.
+diagnostic qualification; original import03 remains FAILED. The first two
+ordinary contact-observer scenarios failed and the corrected third scenario
+passed. Coordinator review accepted this limited playtest increment, not clean
+mesh, full woodland, performance or Jenny's art approval.
 
 ## Character prototype
 
