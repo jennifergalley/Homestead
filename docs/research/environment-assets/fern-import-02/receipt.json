@@ -1,0 +1,46 @@
+{
+  "files": [
+    {
+      "file": "asset-admission.json",
+      "sha256": "C818E55DBD142CA6AA28D26CEB9BA42E6ECAEBD81F2A5FDDD04D7C64B2846B33",
+      "bytes": 23821
+    },
+    {
+      "file": "editor.log",
+      "sha256": "1CC627C8E583ABA9B5908699316ABD357BA991F5004B10CC798F5DDA47146A65",
+      "bytes": 237792
+    },
+    {
+      "file": "effective-settings.json",
+      "sha256": "C7CDD1D6653F17DE5F9B5800EA62F042059DABB95CAE549BE872F6E3D06EED2D",
+      "bytes": 15830
+    },
+    {
+      "file": "fern-result.json",
+      "sha256": "E64BCE332F22E3790FE8C83C38C4593DB7DA70C2E6AD4B135F5DD020BCD03018",
+      "bytes": 9365
+    },
+    {
+      "file": "launch.json",
+      "sha256": "307D0F8AED2FE7DE9322CF3003867E4B5AC79DA91DAA4C3FFB69A54D2DFE9640",
+      "bytes": 8228
+    },
+    {
+      "file": "native-exit.json",
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A",
+      "bytes": 654
+    },
+    {
+      "file": "probe-result.json",
+      "sha256": "31477873B75CC0BD90C7557E0A96D21BC474BE87D278D7787143D55A66720624",
+      "bytes": 81376
+    },
+    {
+      "file": "reservation.json",
+      "sha256": "B3955E859FEEE605CF10248F3B5808B55925FB3FF8BED7454C1CC1C394CADA52",
+      "bytes": 1290
+    }
+  ],
+  "qualification": "Exactly ten new packages,6232 source triangles across four meshes; NullRHI import, no image/shader/performance/world-upgrade proof. Original pre-resume failure preserved.",
+  "status": "passed-isolated-import"
+}

@@ -22,6 +22,12 @@ namespace Homestead.Authoring
         public uint Flags, ProcessLimit, ActiveProcesses, TotalProcesses, TerminatedForLimits;
         public bool HeldProcessIsMember;
     }
+    public sealed class DirectoryEvidence
+    {
+        public string Path;
+        public uint Volume, IndexHigh, IndexLow, Attributes;
+        public ulong CreationTime;
+    }
     public sealed class JobMemberEvidence
     {
         public uint Pid, NativeError;
@@ -50,6 +56,9 @@ namespace Homestead.Authoring
         public bool DeadlineStopRequested { get; private set; }
         public bool DeadlineHardStop { get; private set; }
         public string DeadlineError { get; private set; }
+        public string DeadlineProfile { get; private set; }
+        public int SoftDeadlineMilliseconds { get; private set; }
+        public int HardDeadlineMilliseconds { get; private set; }
         public uint ProcessId { get; private set; }
         public ulong ProcessCreationTime { get; private set; }
         public string ImagePath { get; private set; }
@@ -170,6 +179,21 @@ namespace Homestead.Authoring
             IntPtr handle = CreateFileW(path, Read, ShareRead, IntPtr.Zero, 3, 0x80, IntPtr.Zero);
             Check(Valid(handle), "inspect existing read-only marker");
             try { return Snapshot(handle, path); }
+            finally { Close(ref handle); }
+        }
+        public static DirectoryEvidence InspectDirectory(string path)
+        {
+            OrdinaryPath(path);
+            IntPtr handle = CreateFileW(path, 0x80, 7, IntPtr.Zero, 3, 0x02200000, IntPtr.Zero);
+            Check(Valid(handle), "open ordinary directory metadata");
+            try
+            {
+                FileInfo info; Check(GetFileInformationByHandle(handle, out info), "directory identity");
+                if ((info.Attributes & 0x10) == 0 || (info.Attributes & 0x400) != 0)
+                    throw new InvalidOperationException("Ordinary non-reparse directory required.");
+                return new DirectoryEvidence { Path = path, Volume = info.Volume, IndexHigh = info.IndexHigh,
+                    IndexLow = info.IndexLow, Attributes = info.Attributes, CreationTime = info.Creation.Value };
+            }
             finally { Close(ref handle); }
         }
         public MarkerEvidence VerifyMarker()
@@ -453,15 +477,30 @@ namespace Homestead.Authoring
                 Check(Wait(5000), "hard-terminated process exit");
             }
         }
+        public static void ValidateDeadlineProfile(int softMilliseconds, int hardMilliseconds, string profile)
+        {
+            bool admitted = profile == "Default" && hardMilliseconds <= 110000
+                || profile == "Import" && softMilliseconds == 150000 && hardMilliseconds == 180000
+                || profile == "Render" && softMilliseconds == 480000 && hardMilliseconds == 510000;
+            if (!admitted || softMilliseconds < 1 || hardMilliseconds <= softMilliseconds || hardMilliseconds > 510000)
+                throw new InvalidOperationException("Deadline pair is outside the exact approved profile.");
+        }
         public void ArmDeadline(int softMilliseconds, int hardMilliseconds, string stopPath)
         {
+            ArmDeadline(softMilliseconds, hardMilliseconds, stopPath, "Default");
+        }
+        public void ArmDeadline(int softMilliseconds, int hardMilliseconds, string stopPath, string profile)
+        {
+            ValidateDeadlineProfile(softMilliseconds, hardMilliseconds, profile);
             lock (lifetime)
             {
-                if (Resumed || softDeadline != null || softMilliseconds < 1 ||
-                    hardMilliseconds <= softMilliseconds || hardMilliseconds > 110000)
-                    throw new InvalidOperationException("Deadline must be armed once before resume, within 110 seconds.");
+                if (Resumed || softDeadline != null)
+                    throw new InvalidOperationException("Deadline must be armed once before resume.");
                 OrdinaryPath(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(stopPath)));
                 if (File.Exists(stopPath)) throw new InvalidOperationException("Fresh deadline stop path required.");
+                DeadlineProfile = profile;
+                SoftDeadlineMilliseconds = softMilliseconds;
+                HardDeadlineMilliseconds = hardMilliseconds;
                 softDeadline = new Timer(_ =>
                 {
                     lock (lifetime)

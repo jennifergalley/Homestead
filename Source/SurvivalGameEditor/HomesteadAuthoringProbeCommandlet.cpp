@@ -1,4 +1,5 @@
 #include "HomesteadAuthoringProbeCommandlet.h"
+#include "FernSpike.h"
 #include "DerivedDataCacheInterface.h"
 #include "DerivedDataCacheUsageStats.h"
 #include "GenericPlatform/GenericPlatformCrashContext.h"
@@ -272,7 +273,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         Result->SetBoolField(TEXT("shaderCompilationSkipped"), GShaderCompilingManager->IsShaderCompilationSkipped());
         Result->SetNumberField(TEXT("configuredShaderSlotsNotChildCount"), GShaderCompilingManager->GetNumLocalWorkers());
     }
-    Result->SetStringField(TEXT("shaderEvidenceLimit"), TEXT("Settings-only NullRHI probe, not proof of a shader compile workload."));
+    Result->SetStringField(TEXT("shaderEvidenceLimit"), TEXT("Entry settings snapshot only; any fern workload readiness is reported separately."));
     Result->SetStringField(TEXT("ddcGraph"), GetDerivedDataCacheRef().GetGraphName());
     TArray<TSharedPtr<FJsonValue>> Stores;
     // UE5.8 still uses this public legacy adapter for its own cache diagnostics.
@@ -291,7 +292,10 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Effective settings or guard admission failed."));
         return 4;
     }
-    const double Deadline = FPlatformTime::Seconds() + 90;
+    FString FernMode;
+    FParse::Value(*Params, TEXT("FernMode="), FernMode);
+    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render")) return 8;
+    const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510 : FernMode == TEXT("Import") ? 180 : 90);
     FDateTime RunDeadline;
     if (!FDateTime::ParseIso8601(*FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")), RunDeadline))
     {
@@ -299,7 +303,25 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         return 5;
     }
     FString Stop;
-    while (FPlatformTime::Seconds() < Deadline && FDateTime::UtcNow() < RunDeadline)
+    if (!FernMode.IsEmpty())
+    {
+        const FString AdmitPath = FPaths::Combine(Output, TEXT("operation-admitted.txt"));
+        const FString StopPath = FPaths::Combine(Output, TEXT("stop-probe.txt"));
+        while (!IFileManager::Get().FileExists(*AdmitPath) && !IFileManager::Get().FileExists(*StopPath)
+            && FPlatformTime::Seconds() < Deadline && FDateTime::UtcNow() < RunDeadline)
+        {
+            FPlatformProcess::SleepNoStats(0.02f);
+        }
+        FString Admission;
+        if (!FFileHelper::LoadFileToString(Admission, *AdmitPath) || Admission != FernMode
+            || IFileManager::Get().FileExists(*StopPath) || FDateTime::UtcNow() >= RunDeadline
+            || !RunFernSpike(FernMode, Output, RunDeadline))
+        {
+            Valid = false;
+            Stop = TEXT("fern-operation-failed");
+        }
+    }
+    while (Stop.IsEmpty() && FPlatformTime::Seconds() < Deadline && FDateTime::UtcNow() < RunDeadline)
     {
         if (IFileManager::Get().FileExists(*FPaths::Combine(Output, TEXT("stop-probe.txt"))))
         {

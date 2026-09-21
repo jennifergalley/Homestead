@@ -1,0 +1,109 @@
+{
+  "status": "passed-managed-supervisor-revision",
+  "createdUtc": "2026-09-21T01:52:33.5165243+00:00",
+  "nativeBuildReceiptSha256": "86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F",
+  "nativeProductsUnchanged": true,
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "681755C95EDA914D06A177DB186FBF2654D8E53EB28E78FCA16A895072C2C00D"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "0519141FA944A067BD650CB831B7BF5EF8CB50B24EA624617AA5CC09B7336C8C"
+    },
+    {
+      "path": "Tests\\Test-AuthoringLeafGuard.ps1",
+      "sha256": "55E88353E020822AA6A8D72F58EBAD9B5B5DA89256634FB69B8CFC1C45237C65"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "bytes": 47190,
+      "sha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\probe-result.json"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stdout.log"
+    },
+    {
+      "bytes": 9,
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stop-probe.txt"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Editor.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Engine.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Game.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\GameUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Input.ini"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "fern-deadline-import-01",
+      "sha256": "C1F27524689E8F59C8254D2CEBF72F594915C0B48DF24F16C23B34AF0EB03B55",
+      "negativeCases": 14,
+      "cases": "normal"
+    },
+    {
+      "name": "fern-deadline-render-01",
+      "sha256": "16D17D92F9554D2D55002AD150401B4B2FD8663513EEAE2D0C9FF1F1D3264CA1",
+      "negativeCases": 14,
+      "cases": "normal"
+    },
+    {
+      "name": "fern-deadline-default-01",
+      "sha256": "099E69613D321D3F711425F6A80F05FC1FF7875195B93B3FAF4BE39DDC0BFD02",
+      "negativeCases": 14,
+      "cases": [
+        "normal",
+        "watchdog",
+        "controller-failure"
+      ]
+    }
+  ],
+  "profiles": {
+    "absoluteMaximumHardMs": 510000,
+    "Render": [
+      480000,
+      510000
+    ],
+    "DefaultMaximumHardMs": 110000,
+    "Import": [
+      150000,
+      180000
+    ]
+  },
+  "qualification": "No native rebuild or alteration of historical build receipt. Exact production four-argument profile arms passed before resume, then fixtures promptly stopped; scaled independent watchdog and controller-failure cleanup retained. One explicit replacement import02 only. Original pre-resume failure remains failed/hard-cancelled, no application execution."
+}

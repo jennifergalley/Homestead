@@ -6,6 +6,7 @@ param(
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal',
     [switch]$ObserveAccountingOnly,
     [switch]$DetachedConsole,
+    [ValidateSet('Default','Import','Render')][string]$DeadlineProfile='Default',
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')]
     [string[]]$Scenarios = @('normal','pause','deadline','timeout','controller-failure','watchdog')
 )
@@ -132,6 +133,19 @@ public static class GuardFixtureNative {
             Assert ($parsed[$i+1] -ceq $fixtureArguments[$i]) 'Actual process argument token differs.'
         }
         Assert ($guard.CreationFlags -eq $(if($DetachedConsole){0x0008040C}else{0x08080404})) 'Actual creation flags differ.'
+        $doubleArmRejected=$null
+        if($DeadlineProfile -ne 'Default') {
+            $softSeconds=if($DeadlineProfile -eq 'Import'){150}else{480}
+            $hardSeconds=if($DeadlineProfile -eq 'Import'){180}else{510}
+            [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($softSeconds*1000,$hardSeconds*1000,$DeadlineProfile)
+            $guard.ArmDeadline($softSeconds*1000,$hardSeconds*1000,(Join-Path $Root 'stop.txt'),$DeadlineProfile)
+            Assert ($guard.DeadlineProfile -ceq $DeadlineProfile -and $guard.SoftDeadlineMilliseconds -eq $softSeconds*1000 -and
+                $guard.HardDeadlineMilliseconds -eq $hardSeconds*1000) 'Actual production deadline profile differs.'
+            $doubleArmRejected=$false
+            try {$guard.ArmDeadline($softSeconds*1000,$hardSeconds*1000,(Join-Path $Root 'stop.txt'),$DeadlineProfile)}
+            catch {$doubleArmRejected=$true}
+            Assert $doubleArmRejected 'Double deadline arm was admitted.'
+        } elseif ($Case -eq 'watchdog') { $guard.ArmDeadline(300, 800, (Join-Path $Root 'stop.txt')) }
         Write-NewJson (Join-Path $Root 'launch.json') ([ordered]@{
             pid = $guard.ProcessId; image = $guard.ImagePath; creationTime = $guard.ProcessCreationTime
             marker = $guard.MarkerBefore; job = $guard.LastVerifiedJob; explicitHandles = $guard.WhitelistedHandleCount
@@ -139,9 +153,14 @@ public static class GuardFixtureNative {
             creationFlags = $guard.CreationFlags
             argumentTokens=$fixtureArguments;actualCommandLine=$actualLine;windowsParsedArguments=$parsed
             resumed = $guard.Resumed
+            deadlineProfile=$guard.DeadlineProfile;softMilliseconds=$guard.SoftDeadlineMilliseconds
+            hardMilliseconds=$guard.HardDeadlineMilliseconds;doubleArmRejected=$doubleArmRejected
         })
-        if ($Case -eq 'watchdog') { $guard.ArmDeadline(300, 800, (Join-Path $Root 'stop.txt')) }
         $guard.Resume()
+        $postResumeRejected=$false
+        try {$guard.ArmDeadline(100000,110000,(Join-Path $Root 'stop.txt'),'Default')}
+        catch {$postResumeRejected=$true}
+        Assert $postResumeRejected 'Post-resume arm was admitted.'
         if ($Case -eq 'watchdog') { [Threading.Thread]::Sleep(1200) }
         $timer = [Diagnostics.Stopwatch]::StartNew()
         $stopRequested = $false
@@ -193,6 +212,7 @@ public static class GuardFixtureNative {
             liveJobMembers = $memberSamples
             exitedJobMembers = $exitedMembers
             exitedRoot = $rootAfter
+            postResumeArmRejected=$postResumeRejected
         })
     } catch {
         Write-NewJson (Join-Path $Root 'controller-error.json') @{ error = $_.ToString() }
@@ -212,6 +232,19 @@ $null = New-Item -ItemType Directory -Path $Root
 $negative = Join-Path $Root 'rejections'
 $null = New-Item -ItemType Directory -Path $negative
 $rejections = [Collections.Generic.List[object]]::new()
+foreach($pair in @(
+    @{name='zero-soft';soft=0;hard=1000;profile='Default'},
+    @{name='invalid-order';soft=1000;hard=1000;profile='Default'},
+    @{name='legacy-over110';soft=100000;hard=110001;profile='Default'},
+    @{name='wrong-import-pair';soft=150000;hard=179999;profile='Import'},
+    @{name='wrong-render-pair';soft=479000;hard=510000;profile='Render'},
+    @{name='over-absolute-maximum';soft=480000;hard=510001;profile='Render'},
+    @{name='unknown-profile';soft=1;hard=2;profile='Unlimited'})) {
+    $rejected=$false
+    try {[Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($pair.soft,$pair.hard,$pair.profile)}catch{$rejected=$true}
+    Assert $rejected "Invalid deadline admitted:$($pair.name)"
+    $rejections.Add(@{case=$pair.name;rejected=$true;noProcessConstructed=$true})
+}
 foreach ($invalid in @('wrong-hash','nonempty-marker','existing-writer','occupied-stdout','nul-argument','invalid-environment','conflicting-arguments')) {
     $directory = Join-Path $negative $invalid
     $null = New-Item -ItemType Directory -Path $directory
@@ -283,6 +316,7 @@ foreach ($scenario in $Scenarios) {
     }
     if ($ObserveAccountingOnly) { $start.ArgumentList.Add('-ObserveAccountingOnly') }
     if ($DetachedConsole) { $start.ArgumentList.Add('-DetachedConsole') }
+    $start.ArgumentList.Add('-DeadlineProfile');$start.ArgumentList.Add($DeadlineProfile)
     $controller = [Diagnostics.Process]::Start($start)
     $subjectProcess = $null
     $samples = 0; $maxGapMs = 0.0; $lastSample = $null; $requested = $false

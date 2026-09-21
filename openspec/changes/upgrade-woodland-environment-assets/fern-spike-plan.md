@@ -1,7 +1,18 @@
-# Fern-first isolated import and material spike: approval plan only
+# Fern-first isolated import and material spike: bounded execution approved
+
+Outcome19:07: actual replacement import passed with the ten named packages;
+the single conditional render timed out in cold RHI shader startup before
+commandlet entry. No image or world upgrade exists. See
+`fern-import-result.md` and `fern-render-result.md`; all historical failures
+remain preserved and no automatic retry is authorized.
 
 2026-09-20,18:12 Arizona. Settings subgate sealed at11e1fc3.
-No new build, engine launch, import or render is authorized by this document.
+Superseded at18:14 by the coordinator's explicit approval of1953fd7184c6e1acb9e25843571095afda31f827:
+native implementation/targeted guarded build, ONE import and, only after its
+actual inventory passes, ONE offscreen render. Exact150/180/210s import and
+480/510/540s render bounds, per-operation existing-marker read protection and
+exact fresh-trial quarantine are approved. No automatic retry, cook/Pak or
+Shipping authorization. Historical proposed wording below is retained.
 Original19:22 deadline and current Shipping/player/saves remain unchanged.
 
 ## Exact retained inputs

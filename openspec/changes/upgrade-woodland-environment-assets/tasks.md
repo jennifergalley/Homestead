@@ -1,5 +1,41 @@
 # Tasks
 
+Current19:07: import02 is a verified ten-package/6232-triangle isolated
+candidate. The ONE conditional real-RHI render failed during cold engine
+shader startup before commandlet entry, with no PNG. Owned hard cancellation
+and unchanged marker/package cleanup passed; `fern-render-result.md` records
+the494.50s result and finite-sampling limits. No automatic retry/promotion;
+full1.3 and remaining runtime/quality gates stay unchecked,4/29.
+
+Current18:53: explicit replacement authorization received. The managed guard
+now admits only Default<=110s, Import150/180s, Render480/510s, with an absolute
+510s maximum and one-arm-before-resume. Exact production profile arms,
+14 negatives, scaled independent watchdog and cleanup fixtures pass.
+Revision7D930D038282AB18A14855EDA4E798B2847CC1DEAF7723F69B46B87099E9C761
+is separate from the unchanged native build receipt. Fresh import02 is
+conditionally authorized; original failed-before-resume attempt immutable.
+
+Current18:45: first fern reservation failed before Resume because the managed
+guard still capped its deadline at110s. The approved150/180s import profile
+was therefore rejected. Exact suspended root was hard-cancelled, death and
+unchanged marker release verified, empty trial directory quarantined.
+No import/render occurred; see `fern-import-result.md`. No automatic retry;
+progress remains4/29 pending the coordinator's concrete decision.
+
+Current18:43: targeted native fern build and real DLL/PDB/metadata verification
+passed, receipt86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F.
+The coordinator resolved the historical ISPC hold with an exact export-only
+version-query authorization; the missed-process qualification remains.
+Nineteen fern offline negative cases and inherited-marker normal/controller
+failure regressions passed. Distinct first import admission is next; no
+import/render result yet and all task counts remain4/29.
+
+Current18:24: the18:14-approved fern implementation is an unbuilt draft.
+One UBT export exposed an unadmitted short-lived ISPC version-query helper
+that escaped process sampling. Further launches are held; see
+`fern-build-hold.md`. No fern import/render or new product receipt exists,
+no reservation was consumed, and progress remains4/29.
+
 Current18:06: corrected settings/startup/cooperative-stop subgate PASSED and
 accepted by coordinator; `native-settings-success.md` records actual evidence.
 Full task1.3 remains unchecked,4/29. No import/render/cook/Pak/Shipping gate or
@@ -8,7 +44,8 @@ environment quality gate passed, and prior failures remain unchanged.
 Current18:12 planning-only dependency clarification: a separately approved
 isolated representative import may follow the passed Editor subgate and
 completed source admission before cook/Pak/Shipping/full1.3. Exact fern-only
-proposal: `fern-spike-plan.md`. No new build/import/render is authorized yet.
+proposal: `fern-spike-plan.md`. The planning-only authorization state here
+was superseded by the explicit18:14 approval and later18:24 helper hold.
 
 Current17:57 continuation: coordinator explicitly refines this settings-only
 probe to Python execution disabled, not dependency-module absence. Existing

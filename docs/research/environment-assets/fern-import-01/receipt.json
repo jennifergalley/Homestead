@@ -1,0 +1,20 @@
+{
+  "suspendedProcessCreated": true,
+  "cleanupErrors": [],
+  "heldRoot": {
+    "Pid": 33284,
+    "NativeError": 0,
+    "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+    "Error": null,
+    "CreationTime": 134344286733115548,
+    "Member": true,
+    "Exited": true,
+    "IdentityFromHeldRoot": true,
+    "ExitCode": 96
+  },
+  "emptyQuarantineVerified": true,
+  "resultSha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+  "status": "failed-before-resume",
+  "reservationSha256": "3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2",
+  "applicationResumed": false
+}

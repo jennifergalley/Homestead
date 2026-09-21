@@ -1,0 +1,85 @@
+{
+  "status": "failed-render-before-commandlet-entry",
+  "recordedUtc": "2026-09-21T02:11:18.3976683+00:00",
+  "files": [
+    {
+      "file": "editor.log",
+      "bytes": 113132,
+      "sha256": "D586F170468F3373EB6D842B1A4BA7DBC64CA0C55CE90DFB900157CD36108044"
+    },
+    {
+      "file": "launch.json",
+      "bytes": 8270,
+      "sha256": "57A51B519FD4D03E3780112D9062027439786A3F777A1B56F82A5A2E0723E941"
+    },
+    {
+      "file": "probe-result.json",
+      "bytes": 415999,
+      "sha256": "4158EE119137E1C62AED0D6B5667D116295CD880C0D4470AA6FFC5AA5195F065"
+    },
+    {
+      "file": "reservation.json",
+      "bytes": 1290,
+      "sha256": "DA6060A37CC6D29CFFD354A7A07B88873484895DBA17021DAE48A2DBFD79B283"
+    },
+    {
+      "file": "stdout.log",
+      "bytes": 113098,
+      "sha256": "E1BF37BC9E857A91E7986C3AC2D14B575E4367F482B15589BF966121580BDB0C"
+    },
+    {
+      "file": "stop-probe.txt",
+      "bytes": 17,
+      "sha256": "A5BD4BBE1F9D842661F9BE2381E659349D5343225093CAFFAB6D69C658920518"
+    }
+  ],
+  "importReceiptSha256": "D65E8D93FF728A31AEA354979E22482723B583F71B8FFAEBF8287B9EB55DA66F",
+  "nativeReceiptSha256": "86DEE9CA2EA8CCC3CF6EC810F8F4967A60BBE249F3622032DEE3356D07821F6F",
+  "supervisorReceiptSha256": "7D930D038282AB18A14855EDA4E798B2847CC1DEAF7723F69B46B87099E9C761",
+  "unchangedPackages": 10,
+  "unchangedProtectedFiles": 234,
+  "protectedBaseline": "Actual admitted render protectedFiles, includes prior approved source/target/run-control changes; not the earlier pre-authoring source baseline.",
+  "unchangedSourceFiles": 6,
+  "nativeProductsUnchanged": true,
+  "sourceLicense": "CC0-1.0; exact source mapping in import02 asset-admission.json",
+  "ownedAuthoringProcesses": 0,
+  "subjectExited": true,
+  "guardDisposed": true,
+  "markerUnchangedAfterRelease": true,
+  "elapsedSeconds": 494.502389,
+  "exitCode": 96,
+  "hardTerminated": true,
+  "cleanupErrors": [],
+  "sampleCount": 251,
+  "maximumSampleGapMs": 9289.3027,
+  "finalJob": {
+    "phase": "after-observed-death",
+    "heldRoot": {
+      "Pid": 34992,
+      "NativeError": 0,
+      "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+      "Error": null,
+      "CreationTime": 134344294777039572,
+      "Member": true,
+      "Exited": true,
+      "IdentityFromHeldRoot": true,
+      "ExitCode": 96
+    },
+    "members": [],
+    "job": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    },
+    "utc": "2026-09-20T19:06:05.9951179-07:00"
+  },
+  "entrySnapshotPresent": false,
+  "imageCount": 0,
+  "gpuFrameTime": null,
+  "measuredVramUsage": null,
+  "primaryFraction": null,
+  "qualification": "D3D12/SM5 RTX5080 startup only; cold shader work exceeded bound before Main. No SceneCapture or visual/performance/world-upgrade result. Hard cancelled, not graceful. Sampling is finite; import stays valid, no retry or promotion."
+}

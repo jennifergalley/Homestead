@@ -1,0 +1,30 @@
+{
+  "status": "qualified-export-not-clean-admission",
+  "ispcSha256": "D2F6C922DAE9257293615AD453EE79789F76B0DB895F129457F80058C2EAB874",
+  "originalResultSha256": "14CB6DBDEF1391F6FC029946721B1BEE22183A275C933A9899957D7928E7C5D7",
+  "originals": [
+    {
+      "sha256": "08927B0830323882DB8D8661625BE63ECE077218836A800362AB39BB52EC6EB0",
+      "file": "launch.json"
+    },
+    {
+      "sha256": "14CB6DBDEF1391F6FC029946721B1BEE22183A275C933A9899957D7928E7C5D7",
+      "file": "result.json"
+    },
+    {
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "file": "stderr.log"
+    },
+    {
+      "sha256": "A840DFEC0D345FAD690AE0F5593456C6BEF72A9CF0A08D11B90ADC608BAB2EFC",
+      "file": "stdout.log"
+    },
+    {
+      "sha256": "F0A85FDB5F0B1D4B8AD334697BB554BB4B8E9A1CA8B434C743DDDC68A23F9321",
+      "file": "ubt.log"
+    }
+  ],
+  "capturedIsPcPid": null,
+  "capturedIsPcEndpoints": null,
+  "qualification": "Game products retain accepted historical game-link shutdown-monitor qualification. Export04 ran a previously unadmitted ISPC --version helper missed by sampling; original result preserved, later exact query approved only for export. Failed C++ API iterations retained. Repeated library link exited0 but kept prior timestamp and was rejected; existing named intermediate library moved to recorded backup, then genuine fresh library/link/metadata passed. No runtime import/render claimed."
+}

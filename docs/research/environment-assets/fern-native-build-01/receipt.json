@@ -1,0 +1,152 @@
+{
+  "status": "passed-targeted-native-build",
+  "createdUtc": "2026-09-21T01:42:49.4583824+00:00",
+  "products": [
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2093056,
+      "sha256": "BB967BC6472321597D6E13293A9FB7C89F957091BC113C619538C8868DA2178A"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90222592,
+      "sha256": "698B565378F305A9343D16F92619F12CC50780DDD0BF6D10E21B56138542C367"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 228864,
+      "sha256": "F76DD2D0EE97FBB356D29CBB039B4FCB29E19C9FAFECB6B23E8E5DCD9CED229D"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 25038848,
+      "sha256": "5D63311BE18DBC8DB60EFD99EAF01F30737E10624A0743444429982BBA275E57"
+    },
+    {
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166,
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A"
+    },
+    {
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032,
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1"
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "E2E883F23B768D785F8E95E17956BA74C043FE3B7867975CDA0499790F68857F",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp"
+    },
+    {
+      "sha256": "5B9EBA39684A64C187B3F5AF9ABC84C1D1D72DC3A9929EED604F6C0AFB0AF358",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h"
+    },
+    {
+      "sha256": "9DA09866F880F6C2615EC16A06580FC937125D759B9823B071CA6AF5BD1C8253",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "FA84CF8ACC7CD6D84766D8BF29E3979FF78489F0E2700944A289DE2C7A7B2BE5",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "81999DF6C251C0252FD30B14E51B760C6424E36E14FD490C3CEAF63713978026",
+      "path": "Scripts\\AuthoringLeafGuard.cs"
+    }
+  ],
+  "steps": [
+    {
+      "step": "fern-build-01\\compile0-06",
+      "resultSha256": "1AD5D1A3326AF2FFDD7624E19E76D3A1C23DD701212093A42E9F890ACE7B16C8",
+      "elapsedSeconds": 21.0080835,
+      "exitCode": 0,
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "endpointRows": 0,
+      "samplingLimit": "Finite observations; metadata orchestrator is not pre-start child containment."
+    },
+    {
+      "step": "fern-build-01\\compile1",
+      "resultSha256": "4676AC028F2ACEB3BCEB3A904C860A8FFAE5F8990AE70049E6FBF090271E5BB0",
+      "elapsedSeconds": 10.1904299,
+      "exitCode": 0,
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "endpointRows": 0,
+      "samplingLimit": "Finite observations; metadata orchestrator is not pre-start child containment."
+    },
+    {
+      "step": "fern-build-01\\library3-03",
+      "resultSha256": "632EA6F65A1625B0EA9E40860ED787B59FDC8D47CD06B982A4F382969C89E593",
+      "elapsedSeconds": 0.2773796,
+      "exitCode": 0,
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "endpointRows": 0,
+      "samplingLimit": "Finite observations; metadata orchestrator is not pre-start child containment."
+    },
+    {
+      "step": "resource-conversion-04\\probe",
+      "resultSha256": "82C06466D0DBBE77EA75C61E8E2999A89CB3460ED482085B398FEBD6F2646376",
+      "elapsedSeconds": 0.2966047,
+      "exitCode": 0,
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "endpointRows": 0,
+      "samplingLimit": "Finite observations; metadata orchestrator is not pre-start child containment."
+    },
+    {
+      "step": "fern-build-01\\link2-02",
+      "resultSha256": "79CD77FE6B2AB697DF9EFC250D7B6E79D9D75229041F1B6BC2E2419FFF047A61",
+      "elapsedSeconds": 0.5823859,
+      "exitCode": 0,
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      },
+      "endpointRows": 0,
+      "samplingLimit": "Finite observations; metadata orchestrator is not pre-start child containment."
+    },
+    {
+      "step": "fern-build-01\\metadata-02",
+      "resultSha256": "10F2A61749A2BE59FB852432EE3316D7CAE159D718F803EA3D71E531813DFFCF",
+      "elapsedSeconds": 0.8580705,
+      "exitCode": 0,
+      "job": null,
+      "endpointRows": 0,
+      "samplingLimit": "Finite observations; metadata orchestrator is not pre-start child containment."
+    }
+  ],
+  "qualification": "Game products retain accepted historical game-link shutdown-monitor qualification. Export04 ran a previously unadmitted ISPC --version helper missed by sampling; original result preserved, later exact query approved only for export. Failed C++ API iterations retained. Repeated library link exited0 but kept prior timestamp and was rejected; existing named intermediate library moved to recorded backup, then genuine fresh library/link/metadata passed. No runtime import/render claimed.",
+  "exportActionsSha256": "612841C7EF24A780D6C89A6873A0812E4E48E4207ACE86EC9343E46C3762DA36",
+  "responseQualification": "Actual UBT compile RSPs append /nologo /TP /GR- /std:c++20 /wd5054 beyond JSON ResponseFileContents; complete actual RSPs/shared inputs reviewed and pinned, not rewritten."
+}

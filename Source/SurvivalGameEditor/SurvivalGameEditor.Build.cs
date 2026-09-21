@@ -7,7 +7,8 @@ public class SurvivalGameEditor : ModuleRules
         PCHUsage = PCHUsageMode.NoPCHs;
         PrivateIncludePathModuleNames.Add("PythonScriptPlugin");
         PrivateDependencyModuleNames.AddRange(new[] {
-            "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "Projects", "DerivedDataCache"
+            "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "Projects", "DerivedDataCache",
+            "MaterialEditor", "MeshDescription", "RHI", "RenderCore"
         });
     }
 }

@@ -22,6 +22,14 @@ $compiler = 'E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64'
 $sdk = 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64'
 $allowed = @($dotnet, "$compiler\cl.exe", "$compiler\link.exe", "$compiler\cvtres.exe",
     "$compiler\mspdbsrv.exe", "$sdk\rc.exe", "$env:SystemRoot\System32\cmd.exe", "$env:SystemRoot\System32\conhost.exe")
+$ispc = Join-Path $engine 'Engine\Source\ThirdParty\Intel\ISPC\bin\Windows\ispc.exe'
+if ($ExportActions) {
+    if ((Get-FileHash $ispc).Hash -cne 'D2F6C922DAE9257293615AD453EE79789F76B0DB895F129457F80058C2EAB874' -or
+        (Get-Item $ispc).Length -ne 97822136 -or (Get-AuthenticodeSignature $ispc).Status -ne 'Valid') {
+        throw 'Approved export-only ISPC version-query identity differs.'
+    }
+    $allowed += $ispc
+}
 if ($WriteMetadataOnly) {
     if ($ExportActions) { throw 'Metadata and build-export modes are exclusive.' }
     $allowed = @($dotnet, "$env:SystemRoot\System32\conhost.exe")
@@ -110,7 +118,7 @@ $failure = $null
 try {
     [ordered]@{ runId = $run.id; rootPid = $process.Id; startedUtc = $process.StartTime.ToUniversalTime().ToString('o')
         arguments = $arguments; identities = $identities; leafJobApplied = $false
-        limitation = 'Sampled local build orchestration; no engine runtime or remote executor is authorized.'
+        limitation = 'Observational sampled build processes/endpoints, not a preventive child allowlist or complete history. Export-only ISPC --version is admitted; no ISPC compilation, runtime or remote executor.'
     } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $output 'launch.json')
     while (-not $process.HasExited) {
         if ($clock.Elapsed.TotalMinutes -gt 10) { throw 'Local build exceeded ten minutes.' }
@@ -119,6 +127,10 @@ try {
         $filter = (@($owned.Keys) | ForEach-Object { "ParentProcessId=$_" }) -join ' OR '
         foreach ($child in Get-CimInstance Win32_Process -Filter $filter) {
             if ($owned.ContainsKey([int]$child.ProcessId)) { continue }
+            if ($child.ExecutablePath -ieq $ispc -and (-not $ExportActions -or
+                $child.CommandLine -notmatch '^"?[^"]*ispc\.exe"?\s+--version\s*$')) {
+                throw 'Only the source-established export ISPC --version command is admitted.'
+            }
             try { $held = [Diagnostics.Process]::GetProcessById($child.ProcessId) }
             catch [ArgumentException] {
                 $observed.Add(@{ pid = $child.ProcessId; parentPid = $child.ParentProcessId; path = $child.ExecutablePath
@@ -157,6 +169,17 @@ try {
     }
     $process.WaitForExit()
     if ($process.ExitCode -ne 0) { throw "Direct local UBT failed:$($process.ExitCode)" }
+    $exportCorroboration = $null
+    if ($ExportActions) {
+        $actual = Get-Content (Join-Path $output 'actions.json') -Raw | ConvertFrom-Json
+        if (@($actual.Actions | Where-Object CommandPath -IEQ $ispc).Count) { throw 'ISPC compilation is not authorized.' }
+        $log = $stdout.GetAwaiter().GetResult()
+        if ($log -match 'Using ISPC compiler' -and $log -notmatch 'ISPC\), 1\.24\.0') { throw 'ISPC version output differs.' }
+        $exportCorroboration = @{versionQueryReported=($log -match 'Using ISPC compiler')
+            version='1.24.0';sampledIsNotCompleteHistory=$true
+            source='ISPCToolChain.cs233-247 invokes --version through a process-local Lazy cache'
+            observation='A log-confirmed brief version-query child may be absent from process samples; no retroactive identity/endpoint claim.'}
+    }
     if ($WriteMetadataOnly) {
         if ((Get-FileHash $metadataPath).Hash -cne $metadataHash -or (Get-FileHash $versionPath).Hash -cne $versionHash) {
             throw 'Metadata input or installed engine version changed.'
@@ -192,7 +215,7 @@ try {
     [IO.File]::WriteAllText((Join-Path $output 'stderr.log'), $stderr.GetAwaiter().GetResult())
     [ordered]@{ status = $(if ($failure) { 'failed' } else { 'passed' }); error = $failure
         exitCode = $process.ExitCode; elapsedSeconds = $clock.Elapsed.TotalSeconds
-        observedChildren = $observed; samples = $samples
+        observedChildren = $observed; samples = $samples; exportCorroboration=$exportCorroboration
     } | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $output 'result.json')
     foreach ($held in $owned.Values) { $held.Dispose() }
 }

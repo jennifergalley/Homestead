@@ -1,0 +1,14 @@
+{
+  "supersession": {
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7"
+  },
+  "mode": "Import",
+  "utc": "2026-09-21T01:44:28.6567605+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "output": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01",
+  "approval": "Fern plan1953fd7 explicitly approved18:14; exact per-operation marker and150/180/210 import or480/510/540 render bounds"
+}

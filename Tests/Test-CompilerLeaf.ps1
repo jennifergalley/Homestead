@@ -2,10 +2,11 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [ValidateSet(-1,0,1,2,3,5)][int]$CompileActionId=-1,
-    [ValidateSet(-1,4,6,7,8,9)][int]$ResourceLinkActionId=-1,
+    [ValidateSet(-1,2,3,4,6,7,8,9)][int]$ResourceLinkActionId=-1,
     [ValidateSet('','Game','Probe')][string]$ConvertResource='',
     [string]$DerivedDllResponse='',
-    [switch]$DetachedConsole
+    [switch]$DetachedConsole,
+    [switch]$FernActions
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -20,7 +21,10 @@ $compiler='E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.ex
 $hash='FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619'
 if($CompileActionId -ne -1 -and $ResourceLinkActionId -ne -1){throw 'Select only one reviewed action.'}
 if($ConvertResource -and ($CompileActionId -ne -1 -or $ResourceLinkActionId -ne -1)){throw 'Conversion must be a separate leaf.'}
-if($DerivedDllResponse -and $ResourceLinkActionId -notin @(6,9)){throw 'Derived response requires an approved DLL link.'}
+$dllActionIds=if($FernActions){@(2)}else{@(6,9)}
+if($FernActions -and ($CompileActionId -notin @(-1,0,1) -or $ResourceLinkActionId -notin @(-1,2,3))){throw 'Only the two exported fern compiles/library/DLL are admitted.'}
+if(-not $FernActions -and $ResourceLinkActionId -in @(2,3)){throw 'Fern link IDs require the pinned fern map.'}
+if($DerivedDllResponse -and $ResourceLinkActionId -notin $dllActionIds){throw 'Derived response requires an approved DLL link.'}
 $selectedId=if($ResourceLinkActionId -ne -1){$ResourceLinkActionId}else{$CompileActionId}
 if($ConvertResource) {
     $selectedId="convert-$ConvertResource"
@@ -55,8 +59,9 @@ if($ConvertResource) {
 } elseif($selectedId -eq -1) {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'CompilerLeafFixture.cpp') -Destination $source
 } else {
-    $planPath=Join-Path $root 'Saved\Automation\20260920-182217-d1f84e39\native-build-plan-02\actions.json'
-    if((Get-FileHash $planPath).Hash -cne '10BD045C4AEAD4344ECAECF061DBD65BBA94224DDA478D03F296ED564F5F10FA') { throw 'Reviewed action export changed.' }
+    $planPath=Join-Path $root $(if($FernActions){'Saved\Automation\20260920-182217-d1f84e39\native-build-plan-04\actions.json'}else{'Saved\Automation\20260920-182217-d1f84e39\native-build-plan-02\actions.json'})
+    $planHash=if($FernActions){'612841C7EF24A780D6C89A6873A0812E4E48E4207ACE86EC9343E46C3762DA36'}else{'10BD045C4AEAD4344ECAECF061DBD65BBA94224DDA478D03F296ED564F5F10FA'}
+    if((Get-FileHash $planPath).Hash -cne $planHash) { throw 'Reviewed action export changed.' }
     $plan=Get-Content $planPath -Raw|ConvertFrom-Json
     $action=@($plan.Actions|Where-Object Id -EQ $selectedId)[0]
     if($action.CommandPath -ine $compiler -or ($CompileActionId -ne -1 -and
@@ -66,6 +71,18 @@ if($ConvertResource) {
         foreach($path in $prior.ProducedItems){if(-not(Test-Path -LiteralPath $path)){throw "Missing prerequisite:$path"}}
     }
     $exactArguments=$action.CommandArguments
+    if($FernActions) {
+        if((Get-FileHash (Join-Path $root 'Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGameEditor\SurvivalGameEditor.Shared.rsp')).Hash -cne '6EB0ED3808F77D6C0675B647A639DBA7734C2B23C20EDF7604687E4310EEF045' -or
+            (Get-FileHash (Join-Path $root 'Intermediate\Build\Win64\x64\UnrealEditor\Development\SurvivalGameEditor\Definitions.h')).Hash -cne '116BDD78EDABBF8B31C806F1D01DE57BD7E4617728BBD757DF9C238749552573') { throw 'Fern shared response/definitions differ.' }
+        if($action.CommandArguments -notmatch '@"([^"]+)"'){throw 'Missing fern response.'}
+        $fernResponsePins=@{
+            0='B57B76FE3163082B2462B90BBAFDDC1DEE9053927AC6E26718025D91CB890F1B'
+            1='281BA939780E14EB53E20AF93D7E51E6362555982AB6B532145425C9DA24A5D0'
+            2='9DE3CD1086EB718A2993E18BD2F136AD9328B5F26B577A0C4EE39F6F164FB309'
+            3='8DC5BF3C775B5680C731DADC239B71678E0D95812EE65CF85A1A063665E2EF3A'
+        }
+        if((Get-FileHash $Matches[1].Replace('/','\')).Hash -cne $fernResponsePins[$selectedId]){throw 'Reviewed actual UBT fern response differs.'}
+    }
     $pending=[Collections.Generic.Queue[string]]::new()
     if($action.CommandArguments -match '@"([^"]+)"') {
         $response=[IO.Path]::GetFullPath($Matches[1].Replace('/','\'));$pending.Enqueue($response)
@@ -110,13 +127,14 @@ if($ConvertResource) {
     $working=$action.WorkingDirectory
     foreach($path in $action.ProducedItems) {
         if(-not $path.StartsWith((Join-Path $root 'Intermediate\Build')+'\',[StringComparison]::OrdinalIgnoreCase) -and
-            -not ($ResourceLinkActionId -in @(6,9) -and $path.StartsWith((Join-Path $root 'Binaries\Win64')+'\',[StringComparison]::OrdinalIgnoreCase))) { throw 'Unexpected tool output path.' }
-        if($ResourceLinkActionId -in @(6,9) -and (Test-Path -LiteralPath $path)) {
+            -not ($ResourceLinkActionId -in $dllActionIds -and $path.StartsWith((Join-Path $root 'Binaries\Win64')+'\',[StringComparison]::OrdinalIgnoreCase))) { throw 'Unexpected tool output path.' }
+        if(($ResourceLinkActionId -in $dllActionIds -or $path -like '*.lib') -and (Test-Path -LiteralPath $path)) {
             $backupDirectory=Join-Path $output 'before-products'
             $null=New-Item -ItemType Directory -Path $backupDirectory -Force
             $backup=Join-Path $backupDirectory ([IO.Path]::GetFileName($path))
             $beforeHash=(Get-FileHash -LiteralPath $path).Hash
-            Copy-Item -LiteralPath $path -Destination $backup
+            if($path -like '*.lib'){[IO.File]::Move($path,$backup)}
+            else{Copy-Item -LiteralPath $path -Destination $backup}
             if((Get-FileHash $backup).Hash -cne $beforeHash){throw 'Editor binary backup differs.'}
             $backups+=@{path=$path;backup=$backup;sha256=$beforeHash}
         }
@@ -157,7 +175,7 @@ try {
         expectedProducedItems=$(if($action){$action.ProducedItems}else{@($object)})
         resourceLinkActionId=$ResourceLinkActionId;exactReviewedArguments=$exactArguments;previousProductBackups=$backups
         resourceConversion=$ConvertResource;derivedDllResponse=$DerivedDllResponse
-        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole
+        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()
     $null=$observedPids.Add($guard.ProcessId)
