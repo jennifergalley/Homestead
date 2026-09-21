@@ -27,6 +27,11 @@
 #include "Misc/Parse.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWave.h"
+#include "UI/SHomesteadMenu.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Application/IInputProcessor.h"
+#include "UI/HomesteadMenuPortrait.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 namespace
 {
@@ -35,6 +40,29 @@ bool Edible(Homestead::Item Item)
 {
     return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
 }
+
+class FHomesteadMenuPointerInput final : public IInputProcessor
+{
+public:
+    explicit FHomesteadMenuPointerInput(AHomesteadController* InController) : Controller(InController) {}
+    virtual void Tick(float, FSlateApplication&, TSharedRef<ICursor>) override {}
+    virtual bool HandleMouseMoveEvent(FSlateApplication&, const FPointerEvent& Event) override
+    {
+        if (!Controller.IsValid()) return false;
+        Controller->MenuPointerIntent(Event.GetCursorDelta().X, Event.GetCursorDelta().Y);
+        return !Controller->MenuAcceptsPhysicalInput();
+    }
+    virtual bool HandleMouseButtonDownEvent(FSlateApplication&, const FPointerEvent& Event) override
+    {
+        return Controller.IsValid() && !Controller->MenuPhysicalInput(Event.GetEffectingButton(), IE_Pressed);
+    }
+    virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication&, const FPointerEvent& Event, const FPointerEvent*) override
+    {
+        return Controller.IsValid() && !Controller->MenuPhysicalInput(EKeys::MouseWheelAxis, IE_Axis, Event.GetWheelDelta());
+    }
+private:
+    TWeakObjectPtr<AHomesteadController> Controller;
+};
 }
 
 AHomesteadController::AHomesteadController()
@@ -126,13 +154,14 @@ void AHomesteadController::BeginPlay()
         return;
     }
     Landscape->Initialize(Sim.GetState());
-    SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
+    CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     bAutomatedInputOnly = (HomesteadAutomatedActorsEnabled() && (SmokeTest || VisualPlaytest)) || bSaveRoutingTestPending;
     bAutomatedInputOnly |= !StartupProbeDirectory.IsEmpty();
     UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING version=1 mode=%s profile=%s directory=\"%s\" automation_input=%d smoke_actor=%d visual_actor=%d"),
         *SaveRoute.Mode, *SaveRoute.Profile, *SaveRoute.Directory, bAutomatedInputOnly, SmokeTest, VisualPlaytest);
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
-    if (!Loaded) OpenBook(3);
+    bHasPlayableSession = !bTestResetRequired;
+    if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();
     if (HomesteadAutomatedActorsEnabled())
@@ -159,8 +188,195 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
     const EHomesteadPromptDevice Intent = PromptIntent.Classify(Params, FPlatformTime::Seconds(), HasAxisProperties ? &AxisProperties : nullptr);
     if (Intent != EHomesteadPromptDevice::None) bGamepad = Intent == EHomesteadPromptDevice::Gamepad;
+    if (NativeMenu.IsValid()) bShowMouseCursor = !bGamepad;
+    if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
+    {
+        if (bMenuSaveInProgress) return true;
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F5)
+        { if (NativeMenu->PrepareQuickAction()) QuickSave(); return true; }
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F9)
+        { if (NativeMenu->PrepareQuickAction()) QuickLoad(); return true; }
+        const auto Menu = NativeMenu;
+        return Menu->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
+    }
     return Super::InputKey(Params);
 }
+
+bool AHomesteadController::MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount)
+{
+    InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key, Event, Amount, false, FPlatformTime::Cycles64()));
+    return !bAutomatedInputOnly;
+}
+
+bool AHomesteadController::MenuPointerIntent(float X, float Y)
+{
+    MenuPhysicalInput(EKeys::MouseX, IE_Axis, X);
+    MenuPhysicalInput(EKeys::MouseY, IE_Axis, Y);
+    return !bAutomatedInputOnly && !bGamepad;
+}
+
+void AHomesteadController::ShowNativeMenu()
+{
+    if (!GEngine || !GEngine->GameViewport) return;
+    RefreshMenuPortrait();
+    if (!NativeMenu.IsValid())
+    {
+        FlushPressedKeys();
+        NativeMenu = SNew(SHomesteadMenu).Controller(this);
+        GEngine->GameViewport->AddViewportWidgetContent(NativeMenu.ToSharedRef(), 100);
+        MenuPointerInput = MakeShared<FHomesteadMenuPointerInput>(this);
+        FSlateApplication::Get().RegisterInputPreProcessor(MenuPointerInput);
+    }
+    bShowMouseCursor = !bGamepad;
+    FInputModeGameAndUI Mode;
+    Mode.SetWidgetToFocus(NativeMenu);
+    Mode.SetHideCursorDuringCapture(false);
+    Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+    SetInputMode(Mode);
+    NativeMenu->Refresh();
+}
+
+void AHomesteadController::HideNativeMenu()
+{
+    if (MenuPointerInput.IsValid() && FSlateApplication::IsInitialized())
+        FSlateApplication::Get().UnregisterInputPreProcessor(MenuPointerInput);
+    MenuPointerInput.Reset();
+    if (NativeMenu.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(NativeMenu.ToSharedRef());
+    NativeMenu.Reset();
+    if (MenuPortrait) MenuPortrait->Destroy();
+    MenuPortrait = nullptr;
+    PortraitBrush.SetResourceObject(nullptr);
+    FlushPressedKeys();
+    bShowMouseCursor = false;
+    SetInputMode(FInputModeGameOnly());
+}
+
+void AHomesteadController::RefreshMenuPortrait()
+{
+    if (!bBookOpen || (Page != 0 && Page != 6))
+    {
+        if (MenuPortrait) MenuPortrait->Destroy();
+        MenuPortrait = nullptr;
+        PortraitBrush.SetResourceObject(nullptr);
+        return;
+    }
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    if (!MenuPortrait)
+    {
+        FActorSpawnParameters Parameters;
+        Parameters.ObjectFlags |= RF_Transient;
+        Parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        MenuPortrait = GetWorld()->SpawnActor<AHomesteadMenuPortrait>(FVector(0, 0, -20000), FRotator::ZeroRotator, Parameters);
+    }
+    if (MenuPortrait && MenuPortrait->Refresh(*Avatar))
+    {
+        PortraitBrush.SetResourceObject(MenuPortrait->Texture());
+        PortraitBrush.ImageSize = FVector2D(384, 768);
+        PortraitBrush.DrawAs = ESlateBrushDrawType::Image;
+    }
+    else
+    {
+        if (MenuPortrait) MenuPortrait->Destroy();
+        MenuPortrait = nullptr;
+        PortraitBrush.SetResourceObject(nullptr);
+        UE_LOG(LogTemp, Warning, TEXT("Menu character preview is unavailable."));
+    }
+}
+
+void AHomesteadController::OrbitMenuPortrait(float Degrees)
+{
+    if (MenuPortrait) MenuPortrait->Orbit(Degrees);
+}
+
+void AHomesteadController::ZoomMenuPortrait()
+{
+    if (MenuPortrait) MenuPortrait->ToggleCloseup();
+}
+
+FString AHomesteadController::MenuPortraitStatus() const
+{
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    return Avatar && Avatar->IsEquipmentPresentationReady()
+        ? TEXT("Your worn clothing\nNeutral preview lighting")
+        : TEXT("Character prototype\nOwned clothing is not yet renderable");
+}
+
+void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
+{
+    HideNativeMenu();
+    Super::EndPlay(Reason);
+}
+
+void AHomesteadController::MenuPage(int32 TargetPage)
+{
+    if (!bMenuSaveInProgress) OpenBook(TargetPage);
+}
+void AHomesteadController::MenuSelect(int32 Row)
+{
+    Selection = FMath::Clamp(Row, 0, FMath::Max(0, Rows().Num() - 1));
+}
+void AHomesteadController::MenuActivate()
+{
+    if (bMenuSaveInProgress || !bBookOpen) return;
+    if (bTestResetRequired && (Page != 4 || !Rows().IsValidIndex(Selection)
+        || (Rows()[Selection].Id != 1 && Rows()[Selection].Id != 8 && Rows()[Selection].Id != 9)))
+    { Notify(LoadProblem, true); return; }
+    if (IsFailed() && Page != 4 && Page != 3 && Page != 5)
+    { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
+    if (IsFailed() && Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 0)
+    { Notify(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."), true); return; }
+    ActivateRow();
+}
+void AHomesteadController::MenuStore() { if (!bMenuSaveInProgress) Secondary(); }
+void AHomesteadController::MenuTake() { if (!bMenuSaveInProgress) Withdraw(); }
+void AHomesteadController::MenuBack()
+{
+    if (bTestResetRequired) { Notify(LoadProblem, true); return; }
+    if (!bMenuSaveInProgress) CloseBook();
+}
+void AHomesteadController::MenuRetry()
+{
+    if (bMenuSaveInProgress) return;
+    RetryCheckpoint();
+    if (!IsFailed()) CloseBook();
+}
+void AHomesteadController::MenuRequestExit() { if (NativeMenu.IsValid()) NativeMenu->RequestExit(); }
+FString AHomesteadController::MenuSaveStatus() const
+{
+    const FString When = LastSuccessfulSave.GetTicks() > 0
+        ? LastSuccessfulSave.ToString(TEXT("%Y-%m-%d %H:%M:%S UTC")) : TEXT("not known in this session");
+    return FString::Printf(TEXT("%s\nLast successful save: %s"),
+        PreviewLabel().IsEmpty() ? TEXT("Current homestead") : *PreviewLabel(), *When);
+}
+void AHomesteadController::MenuSaveAndQuit()
+{
+    if (bMenuSaveInProgress) return;
+    if (IsFailed())
+    {
+        if (NativeMenu.IsValid()) NativeMenu->ShowSaveFailure(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."));
+        return;
+    }
+    bMenuSaveInProgress = true;
+    const bool Saved = SaveSlot(TEXT("Homestead_Manual"));
+    bMenuSaveInProgress = false;
+    if (Saved)
+    {
+        if (PendingResolutionScale.IsSet() && !PersistResolutionScale(PendingResolutionScale.GetValue()))
+        {
+            if (NativeMenu.IsValid()) NativeMenu->ShowGraphicsSaveFailure(GraphicsSaveError);
+            return;
+        }
+        UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+    }
+    else if (NativeMenu.IsValid()) NativeMenu->ShowSaveFailure(ToastText);
+}
+void AHomesteadController::MenuQuitWithoutSaving()
+{
+    if (!bMenuSaveInProgress) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+}
+void AHomesteadController::MenuRestart() { if (!bMenuSaveInProgress) NewGame(); }
 
 void AHomesteadController::SetupInputComponent()
 {
@@ -232,11 +448,20 @@ void AHomesteadController::Tick(float DeltaSeconds)
         SetControlRotation(PendingRotation);
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         {
-            if (!Avatar->ApplyAppearance(Appearance))
-                Notify(TEXT("Character assets could not be applied. The technical stand-in remains; see the log."), true);
-            Avatar->SetAppearancePreview(bBookOpen && Page == 6);
+            FString Error;
+            if (Avatar->PrepareEquipment(State(), Appearance, Error))
+            {
+                if (!Avatar->ApplyPreparedEquipment(Error)) Notify(Error, true);
+            }
+            else
+            {
+                if (!Avatar->IsEquipmentPresentationReady()) Avatar->ApplyAppearance(Appearance);
+                Notify(TEXT("Owned clothing could not be displayed; the character preview is provisional. ") + Error, true);
+            }
+            Avatar->SetAppearancePreview(false);
         }
         bPendingSpawn = false;
+        RefreshMenuPortrait();
     }
     if (APawn* ControlledPawn = GetPawn())
     {
@@ -250,7 +475,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         }
     }
 
-    Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning);
+    Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired);
     if (IsFailed() && !bWasFailed)
     {
         EndPlacement();
@@ -452,7 +677,12 @@ void AHomesteadController::Interact()
             break;
         }
         break;
-    case EFocus::Fire: OpenBook(1); Selection = 3; break;
+    case EFocus::Fire:
+        OpenBook(1);
+        Selection = static_cast<int32>(Homestead::Recipe::RoastedRoots);
+        if (NativeMenu && !NativeMenu->FocusLegacySubject(Selection))
+            Notify(TEXT("The cookfire recipe could not be selected."), true);
+        break;
     case EFocus::Bed:
     {
         Notify(Sim.Sleep(8, Position));
@@ -465,7 +695,7 @@ void AHomesteadController::Interact()
         }
         break;
     }
-    case EFocus::Chest: OpenBook(0); break;
+    case EFocus::Chest: MenuInventoryView(1); OpenBook(0); break;
     case EFocus::Water: Notify(Sim.FillWater(Position)); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
@@ -535,8 +765,9 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     {
         Avatar->CancelAction();
         Avatar->GetCharacterMovement()->StopMovementImmediately();
-        Avatar->SetAppearancePreview(Page == 6);
+        Avatar->SetAppearancePreview(false);
     }
+    ShowNativeMenu();
 }
 
 void AHomesteadController::Withdraw()
@@ -558,6 +789,8 @@ void AHomesteadController::CloseBook()
     bBookOpen = false;
     bConfirmRestart = false;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(false);
+    if (IsFailed()) ShowNativeMenu();
+    else HideNativeMenu();
 }
 void AHomesteadController::ToggleBook() { if (IsFailed()) return; if (bBookOpen) CloseBook(); else OpenBook(0); }
 void AHomesteadController::OpenCraft() { if (!IsFailed()) OpenBook(1); }
@@ -655,7 +888,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a digging stick. Till with F/X; bare plots offer roots with A/E or berry seeds with X/F.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill a watering can at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Fuel a cookfire with branches. Roast roots; sleep in a sheltered bedroll.")});
-        Result.Add({7, TEXT("Make this place your own"), TEXT("The Look page offers three hairstyles, two cosmetic outfits, and color choices.")});
+        Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is owned and crafted.")});
     }
     else if (Page == 4)
     {
@@ -667,7 +900,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Cycle volume; nature continues between pieces.")});
         Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind and woodland ambience.")});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
-        Result.Add({8, bConfirmRestart ? TEXT("Confirm a new clearing") : TEXT("Start a new clearing"), TEXT("Select twice to reset this session. Existing save files are retained.")});
+        Result.Add({8, TEXT("Start a new clearing"), TEXT("Open a confirmation before replacing this test session. Cancel keeps your current clearing.")});
         Result.Add({9, TEXT("Save and quit"), TEXT("Save this homestead and close the game. Failed saves leave the game open.")});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {
@@ -689,7 +922,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     else if (Page == 6)
     {
         Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::HairStyleName(Appearance.HairStyle)), TEXT("Long waves, a straight bob, or a practical ponytail.")});
-        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("A small chestnut-based color palette.")});
+        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("Chestnut, dark brown, black, copper, or blonde. Hair color is independent of hairstyle.")});
         Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)), TEXT("Prototype tone adjustments; deeper presets follow.")});
         Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Iris color changes preserve the whites and pupils.")});
         Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
@@ -797,7 +1030,7 @@ void AHomesteadController::ActivateRow()
         switch (Id)
         {
         case 0: Next.HairStyle = (Next.HairStyle + 1) % 3; break;
-        case 1: Next.HairColor = (Next.HairColor + 1) % 4; break;
+        case 1: Next.HairColor = (Next.HairColor + 1) % HomesteadLook::HairColorCount; break;
         case 2: Next.SkinTone = (Next.SkinTone + 1) % 4; break;
         case 3: Next.EyeColor = (Next.EyeColor + 1) % 4; break;
         case 4: Next.TunicColor = (Next.TunicColor + 1) % 4; break;
@@ -806,9 +1039,13 @@ void AHomesteadController::ActivateRow()
         default: Notify(TEXT("More character presets and clothes are planned. These controls are a first prototype.")); return;
         }
         auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-        if (!Avatar || !Avatar->ApplyAppearance(Next))
+        FString AppearanceError;
+        const bool Applied = Avatar && (Avatar->IsEquipmentPresentationReady()
+            ? Avatar->PrepareEquipment(State(), Next, AppearanceError) && Avatar->ApplyPreparedEquipment(AppearanceError)
+            : Avatar->ApplyAppearance(Next));
+        if (!Applied)
         {
-            Notify(TEXT("That appearance could not be applied. Your saved selection has not changed."), true);
+            Notify(TEXT("That appearance could not be applied. Your saved selection has not changed. ") + AppearanceError, true);
             return;
         }
         Appearance = Next;
@@ -834,17 +1071,14 @@ void AHomesteadController::ActivateRow()
         case 7: EffectsVolume = EffectsVolume >= 0.99f ? 0 : FMath::Min(1.0f, EffectsVolume + 0.2f); break;
         case 8: if (bConfirmRestart) NewGame(); else bConfirmRestart = true; break;
         case 9:
-            if (SaveSlot(TEXT("Homestead_Manual")))
-                UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+            MenuRequestExit();
             break;
         case 10:
             if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
             {
                 float Normalized = 0, Scale = 100, Minimum = 0, Maximum = 100;
                 Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
-                Settings->SetResolutionScaleValueEx(Scale > 99 ? 85 : Scale > 84 ? 70 : 100);
-                Settings->ApplyNonResolutionSettings();
-                if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))) Settings->SaveSettings();
+                PersistResolutionScale(Scale > 99 ? 85 : Scale > 84 ? 70 : 100);
             }
             else Notify(TEXT("Video settings are unavailable in this session."), true);
             break;
@@ -852,6 +1086,42 @@ void AHomesteadController::ActivateRow()
         default: break;
         }
     }
+}
+
+bool AHomesteadController::PersistResolutionScale(float Requested)
+{
+    auto* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+    if (!Settings)
+    {
+        PendingResolutionScale = Requested;
+        GraphicsSaveError = TEXT("Video settings are unavailable; the requested 3D resolution scale was not saved.");
+        Notify(GraphicsSaveError, true);
+        return false;
+    }
+    float Normalized = 0, Previous = 100, Minimum = 0, Maximum = 100;
+    Settings->GetResolutionScaleInformationEx(Normalized, Previous, Minimum, Maximum);
+    Settings->SetResolutionScaleValueEx(Requested);
+    Settings->ApplyNonResolutionSettings();
+    if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest")))
+    {
+        Settings->SaveSettings();
+        FConfigFile Disk;
+        float Persisted = -1;
+        if (!Disk.Combine(GGameUserSettingsIni)
+            || !Disk.GetFloat(TEXT("ScalabilityGroups"), TEXT("sg.ResolutionQuality"), Persisted)
+            || !FMath::IsNearlyEqual(Persisted, Requested, 0.1f))
+        {
+            Settings->SetResolutionScaleValueEx(Previous);
+            Settings->ApplyNonResolutionSettings();
+            PendingResolutionScale = Requested;
+            GraphicsSaveError = TEXT("Could not verify the saved 3D resolution scale. The previous runtime scale was restored; the disk preference is unverified.");
+            Notify(GraphicsSaveError, true);
+            return false;
+        }
+    }
+    PendingResolutionScale.Reset();
+    GraphicsSaveError.Reset();
+    return true;
 }
 
 void AHomesteadController::ToggleVerticalSync()
@@ -961,6 +1231,7 @@ void AHomesteadController::CycleZoom()
 
 UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 {
+    bReadIncompatible = false;
     TArray<uint8> Data;
     if (IFileManager::Get().FileSize(*Filename) > 4 * 1024 * 1024) return nullptr;
     if (!FFileHelper::LoadFileToArray(Data, *Filename)) return nullptr;
@@ -972,7 +1243,9 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     Data.RemoveAt(0, 12, EAllowShrinking::No);
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::LoadGameFromMemory(Data));
     FGuid ParsedWorld;
-    if (!Save || Save->Version < 1 || Save->Version > 4 || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
+    if (Save && !Save->IsCurrentVersion()) { bReadIncompatible = true; return nullptr; }
+    if (!Save || Save->SavedAtUtc < 0 || Save->SavedAtUtc > 253402300799LL
+        || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
         || !FGuid::Parse(Save->WorldId, ParsedWorld) || !ParsedWorld.IsValid()
         || FMath::Abs(Save->PlayerLocation.X) > 4000 || FMath::Abs(Save->PlayerLocation.Y) > 4000
         || FMath::Abs(Save->PlayerLocation.Z) > 5000 || !FMath::IsFinite(Save->CameraSensitivity)
@@ -991,12 +1264,14 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     SavedLook.BodyPreset = Save->BodyPreset;
     if (!SavedLook.IsValid()) return nullptr;
     Homestead::Simulation Candidate;
-    if (!Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData))) return nullptr;
+    const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
+    if (!Decoded) { bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion; return nullptr; }
     return Save;
 }
 
 bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
 {
+    if (bTestResetRequired) { Notify(TEXT("Choose an explicit test reset before saving a new clearing."), true); return false; }
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
     if (!Save) { Notify(TEXT("Could not create a save record."), true); return false; }
@@ -1052,15 +1327,45 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
         return false;
     }
     if (!Quiet) Notify(TEXT("Your homestead is saved."));
+    LastSuccessfulSave = FDateTime::UtcNow();
     return true;
 }
 
-void AHomesteadController::ApplySave(const UHomesteadSave& Save)
+bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
 {
-    const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
-    if (!Result) { Notify(Result); return; }
-    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
+    Homestead::Simulation Candidate = Sim;
+    const auto Result = Candidate.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
+    if (!Result) { Notify(Result); return false; }
+    FHomesteadAppearance Look;
+    Look.HairStyle = Save.HairStyle; Look.HairColor = Save.HairColor;
+    Look.SkinTone = Save.SkinTone; Look.EyeColor = Save.EyeColor;
+    Look.TunicColor = Save.TunicColor; Look.Outfit = Save.Outfit; Look.BodyPreset = Save.BodyPreset;
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    FString Error;
+    if (Avatar && !Avatar->PrepareEquipment(Candidate.GetState(), Look, Error))
+    {
+        LoadProblem = TEXT("This save is valid, but its clothing content is unavailable. Nothing was loaded. ") + Error;
+        bTestResetRequired = !bHasPlayableSession;
+        Notify(LoadProblem, true);
+        return false;
+    }
+    const Homestead::Simulation Previous = Sim;
+    Sim = MoveTemp(Candidate);
+    if (Avatar && !Avatar->ApplyPreparedEquipment(Error))
+    {
+        Sim = Previous;
+        Avatar->ClearPreparedEquipment();
+        LoadProblem = TEXT("Save loading was canceled because its prepared appearance could not be displayed. ") + Error;
+        bTestResetRequired = !bHasPlayableSession;
+        Notify(LoadProblem, true);
+        return false;
+    }
+    bTestResetRequired = false;
+    bHasPlayableSession = true;
+    LoadProblem.Reset();
+    if (Avatar) Avatar->CancelAction();
     WorldId = Save.WorldId;
+    LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
     Appearance.HairStyle = Save.HairStyle;
     Appearance.HairColor = Save.HairColor;
     Appearance.SkinTone = Save.SkinTone;
@@ -1077,12 +1382,14 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
     MusicVolume = Save.MusicVolume;
     AmbienceVolume = Save.AmbienceVolume;
     EffectsVolume = Save.EffectsVolume;
+    CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     Music->SetVolumeMultiplier(MusicVolume);
     Ambience->SetVolumeMultiplier(AmbienceVolume);
     EndPlacement();
     CloseBook();
     Landscape->Refresh(State());
     RefreshRemaining = 0;
+    return true;
 }
 
 bool AHomesteadController::LoadLatest(bool RecoveryOnly)
@@ -1093,6 +1400,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
         : TArray<FString>{TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
+    bool Incompatible = false;
     for (const auto& Slot : Slots)
     {
         for (const FString& Suffix : { FString(), FString(TEXT(".bak")) })
@@ -1102,7 +1410,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             UHomesteadSave* Save = ReadSave(Path);
             if (!Save)
             {
-                Corrupt = true;
+                Incompatible |= bReadIncompatible;
+                Corrupt |= !bReadIncompatible;
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
                 continue;
             }
@@ -1113,7 +1422,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 || Candidate.GetState().warmth < 20 || Candidate.GetState().energy < 20)) continue;
             if (RecoveryOnly && Slot == TEXT("Homestead_Recovery"))
             {
-                ApplySave(*Save);
+                if (!ApplySave(*Save)) return false;
                 Notify(TEXT("Returned to your sheltered recovery checkpoint."));
                 return true;
             }
@@ -1122,7 +1431,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     }
     if (Best)
     {
-        ApplySave(*Best);
+        if (!ApplySave(*Best)) return false;
         if (!StartupProbeDirectory.IsEmpty()) StartupProbeLoadedState = UTF8_TO_TCHAR(Sim.Serialize().c_str());
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveAudit")) && GEngine && GEngine->GameViewport)
             UE_LOG(LogTemp, Display, TEXT("SAVE_LOAD_AUDIT world=%s simulation_md5=%s look=%d,%d,%d,%d,%d,%d,%d view_mode=%d shader_complexity=%d"),
@@ -1133,31 +1442,56 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
         Notify(Corrupt ? TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.") : TEXT("Welcome back to your homestead."), Corrupt);
         return true;
     }
-    if (Corrupt) Notify(TEXT("No valid save could be read. Files were preserved; starting a new session."), true);
+    if (Corrupt || Incompatible)
+    {
+        LoadProblem = Incompatible && !Corrupt
+            ? TEXT("These test saves use an incompatible version. Start a new test clearing to use this build.")
+            : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
+        Notify(LoadProblem, true);
+        // Do not let a fresh startup silently autosave over an unsuccessful load.
+        bTestResetRequired = !RecoveryOnly && !bHasPlayableSession;
+    }
     return false;
 }
 
 void AHomesteadController::RetryCheckpoint()
 {
     if (LoadLatest(true)) return;
+    if (SessionWorld != WorldId)
+    { Notify(TEXT("No checkpoint belongs to this world. You can start a new test clearing or quit from Settings."), true); return; }
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*SessionCheckpoint));
     if (!Result) { Notify(Result); return; }
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
-    PendingLocation = FVector(-1000, 0, 180);
+    Appearance = SessionAppearance;
+    PendingLocation = SessionLocation;
+    PendingRotation = SessionRotation;
     bPendingSpawn = true;
     bWasFailed = false;
     RefreshRemaining = 0;
-    Notify(TEXT("Returned to the start of this clearing. No recovery save was available."));
+    Notify(TEXT("Returned to this session's checkpoint. No usable recovery save was available."));
+}
+
+void AHomesteadController::CaptureSessionCheckpoint(FVector Location, FRotator Rotation)
+{
+    SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
+    SessionAppearance = Appearance;
+    SessionWorld = WorldId;
+    SessionLocation = Location;
+    SessionRotation = Rotation;
 }
 
 void AHomesteadController::NewGame()
 {
+    bTestResetRequired = false;
+    bHasPlayableSession = true;
+    LastSuccessfulSave = FDateTime();
+    LoadProblem.Reset();
     Sim.NewGame();
     Appearance = FHomesteadAppearance();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
-    SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);
+    CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     bPendingSpawn = true;
     bWasFailed = false;
     RefreshRemaining = 0;
@@ -1174,7 +1508,11 @@ void AHomesteadController::QuickSave()
 void AHomesteadController::QuickLoad()
 {
     if (bAutomatedInputOnly) ++TestQuickLoads;
-    if (!LoadLatest()) Notify(TEXT("There is no usable save to load yet."), true);
+    if (!LoadLatest())
+    {
+        if (bTestResetRequired) OpenBook(4);
+        else if (LoadProblem.IsEmpty()) Notify(TEXT("There is no usable save to load yet."), true);
+    }
 }
 
 FString AHomesteadController::SavePath(const FString& Slot) const

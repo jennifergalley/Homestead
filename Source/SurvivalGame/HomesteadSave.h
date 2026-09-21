@@ -9,7 +9,9 @@ class SURVIVALGAME_API UHomesteadSave : public USaveGame
 {
     GENERATED_BODY()
 public:
-    UPROPERTY() int32 Version = 4;
+    static constexpr int32 CurrentVersion = 5;
+    UPROPERTY() int32 Version = CurrentVersion;
+    bool IsCurrentVersion() const { return Version == CurrentVersion; }
     UPROPERTY() FString WorldId;
     UPROPERTY() FString SimulationData;
     UPROPERTY() FVector PlayerLocation = FVector(-1000, 0, 150);

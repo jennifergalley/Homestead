@@ -125,6 +125,9 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
         *Controller->GetPawn()->GetActorLocation().ToString(), *CameraLocation.ToString(),
         *CameraRotation.ToString(), Controller->BookPage());
     Framing += FString::Printf(TEXT("prompts_gamepad=%d\nfocus_actions=%s\n"), Controller->UsesGamepad(), *Controller->FocusActions());
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest")))
+        Framing += FString::Printf(TEXT("native_menu=%d\nportrait_status=%s\n"),
+            Controller->HasNativeMenu(), *Controller->MenuPortraitStatus());
     if (GEngine && GEngine->GameViewport)
         Framing += FString::Printf(TEXT("view_mode=%d\nlit_mode=%d\nshow_flags=%s\nrender_percentage=%s\n"),
             GEngine->GameViewport->ViewModeIndex, static_cast<int32>(VMI_Lit),
@@ -161,11 +164,16 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
     }
     if (!FFileHelper::SaveStringToFile(Framing, *FPaths::Combine(Directory, Name + TEXT(".frame.txt"))))
         UE_LOG(LogTemp, Error, TEXT("Could not write screenshot framing evidence."));
-    FScreenshotRequest::RequestScreenshot(FPaths::Combine(Directory, Name + TEXT(".png")), false, false);
+    FScreenshotRequest::RequestScreenshot(FPaths::Combine(Directory, Name + TEXT(".png")), Controller->HasNativeMenu(), false);
 }
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest")))
+    {
+        PrepareNativeMenuChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")))
     {
         PrepareHotkeyChecks();
@@ -677,7 +685,8 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadRequireLit")))
     {
         if (!GEngine || !GEngine->GameViewport || GEngine->GameViewport->ViewModeIndex != VMI_Lit
-            || GEngine->GameViewport->EngineShowFlags.ShaderComplexity)
+            || GEngine->GameViewport->EngineShowFlags.ShaderComplexity
+            || !GEngine->GameViewport->EngineShowFlags.Lighting)
         {
             Finish(false, TEXT("Sustained normal-Lit viewport requirement violated."));
             return;
@@ -759,7 +768,10 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         Finish(false, Step.Name + TEXT(" | Hand-action pose remained active during a menu, planning or failure."));
         return;
     }
-    if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest")) && !VerifyPresentationMaterials())
+    const bool MaterialsValid = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+        || (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
+            ? VerifyNativeMenuPresentation() : VerifyPresentationMaterials());
+    if (!MaterialsValid)
     {
         TraceState(TEXT("MATERIAL FAIL ") + Step.Name);
         Finish(false, Step.Name + TEXT(" | Skin/eye material or saved color contract failed."));
@@ -818,6 +830,7 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));

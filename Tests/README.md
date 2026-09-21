@@ -1,8 +1,66 @@
-# Portable homestead simulation tests
+# Homestead verification
+
+## Native menu integration
+
+`Scripts\Test-Game.ps1 -NativeMenu -Width 1280 -Height 720` selects the focused
+existing smoke-actor route; repeat at 3840x2160 for actual native UI review.
+Under the current shared authoring restriction, the coordinator must run the
+equivalent arguments through the approved guarded runtime slot instead of
+launching this generic script as a bypass. Supported Shipping runs additionally
+require `-Packaged -ShippingQA` and the common explicit fresh-output admission;
+normal Shipping never enables the automated actors. The same native-menu route
+remains available to admitted Development/editor verification.
+
+The route exercises mapped Settings/exit confirmation and cancel, persistent
+real save-IO failure, current-schema writing, controller/keyboard tabs, stable
+hints, real item details, rejected craft conservation, placement cancellation
+and independent recovery/quit access. The failure-state fixture deliberately
+advances simulation time; it is not ordinary-play evidence. Screenshots include
+the actual Slate viewport UI. Normal Lit/Lighting-on/ShaderComplexity-off guards
+remain observational. The original joined prototype's material check is limited
+to actual DefaultLit rendering; admitted modular presentation is compared with
+the shared real mesh/material references. An image labeled provisional is not
+proof of completed wardrobe asset admission or aesthetic approval.
+
+This is an early menu-flow check, not a substitute for successful equip/storage/
+craft/reload, mouse/hardware comfort or the
+subsequent normal-play/garment review.
+The separate `-NativeMenuQuit` mode uses the same actor in a fresh owned process:
+it drives the real confirmation, verifies the saved current state and actual
+engine exit request, then writes the result before shutdown. The existing
+wrapper must also observe process termination. It does not use a mocked Quit
+callback and has no screenshot requirement.
+
+## Portable simulation tests
 
 This target builds the same C++17 simulation used by Unreal, without engine
 headers, third-party libraries, or exceptions. Checks execute in Release builds.
 No test writes to the filesystem or requires network access.
+
+The wardrobe authority scenarios cover independent garment IDs, tunic/apron
+dependencies, footwear slots, 120-unit pack/chest capacity, full-pack swaps,
+280 cm chest reach, exact 12/6/8-Fiber recipes with the existing knife, per-item
+dye, stable split/merge/reorder groups, stale confirmations, and atomic save
+rejection. `EatGroup` checks preserve the selected carried food stack, all three
+existing food effects, zero-time semantics and unchanged rejected/stale actions.
+Existing gathering/crafting/building/gardening/storage checks continue
+to exercise the same quantity authority and current-schema round trips.
+
+Portable saves now write/read `HOMESTEAD 4`; Unreal wrappers use version 5.
+Earlier disposable test saves return `ResultCode::UnsupportedVersion` without
+changing live state or files. Corrupt current saves return `CorruptSave`.
+The caller handles a clearly disclosed new-clearing/reset flow; decoding never
+silently starts a new world. New games start with one equipped tunic, one pair
+of shoes, the existing knife, and no extra materials or apron. These portable
+tests do not establish modular asset admission, Controller integration or
+shipped gameplay.
+
+During an authoring-tool launch restriction, do not run the generic compiler
+commands below as a bypass. The 2026-09-20 authority-lane run instead reused
+the coordinator-approved, hash-pinned `AuthoringLeafGuard` route for separate
+root-only compile/link/test leaves, with outputs in session artifacts and no
+engine launch. See the change's `authority-lane.md` for that run's exact evidence
+and integration boundary.
 
 From a Visual Studio developer command prompt:
 

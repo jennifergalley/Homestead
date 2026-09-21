@@ -42,7 +42,7 @@ bool Close(double a, double b, double tolerance = 1e-7) { return std::abs(a - b)
 constexpr Point Home{-750, 150};
 constexpr Point WaterSource{1500, 0};
 
-std::string Envelope(const std::string& body, int version = 3)
+std::string Envelope(const std::string& body, int version = SimulationSaveVersion)
 {
     std::uint64_t hash = UINT64_C(14695981039346656037);
     for (unsigned char c : body) { hash ^= c; hash *= UINT64_C(1099511628211); }
@@ -50,7 +50,7 @@ std::string Envelope(const std::string& body, int version = 3)
         std::to_string(hash) + "\n" + body;
 }
 // Independent fixture writer intentionally permits invalid states so parser validation is exercised.
-std::string Encode(const State& s, int version = 3)
+std::string Encode(const State& s, int version = SimulationSaveVersion)
 {
     std::ostringstream out;
     out.imbue(std::locale::classic());
@@ -68,6 +68,12 @@ std::string Encode(const State& s, int version = 3)
             << p.rotation << ' ' << p.fuelHours << ' ';
         for (int value : p.storage) out << value << ' ';
         out << '\n';
+        if (version >= 4)
+        {
+            out << p.layout.size() << '\n';
+            for (const auto& e : p.layout)
+                out << e.groupId << ' ' << static_cast<int>(e.item) << ' ' << e.quantity << ' ' << e.wearableId << '\n';
+        }
     }
     out << s.plots.size() << '\n';
     for (const auto& p : s.plots)
@@ -77,12 +83,40 @@ std::string Encode(const State& s, int version = 3)
         if (version >= 3) out << ' ' << static_cast<int>(p.kind);
         out << '\n';
     }
+    if (version >= 4)
+    {
+        out << s.nextWearableId << ' ' << s.nextGroupId << '\n' << s.wearables.size() << '\n';
+        for (const auto& w : s.wearables)
+            out << w.id << ' ' << static_cast<int>(w.definition) << ' ' << w.dye << ' '
+                << static_cast<int>(w.owner) << ' ' << w.chestId << '\n';
+        for (int id : s.equipment) out << id << ' ';
+        out << '\n' << s.inventoryLayout.size() << '\n';
+        for (const auto& e : s.inventoryLayout)
+            out << e.groupId << ' ' << static_cast<int>(e.item) << ' ' << e.quantity << ' ' << e.wearableId << '\n';
+    }
     return Envelope(out.str(), version);
+}
+void FixtureLayouts(State& state)
+{
+    // Synthetic fixture edits replace counts; real gameplay must reconcile stable groups instead.
+    state.nextGroupId = 1;
+    const auto rebuild = [&](InventoryLayout& layout, const Inventory& stock, int chestId) {
+        layout.clear();
+        for (int i = 0; i < ItemCount; ++i)
+            if (stock[i] > 0) layout.push_back({state.nextGroupId++, static_cast<Item>(i), stock[i], 0});
+        for (const auto& item : state.wearables)
+            if ((chestId == 0 && item.owner == WearableOwner::Carried) ||
+                (chestId != 0 && item.owner == WearableOwner::Chest && item.chestId == chestId))
+                layout.push_back({0, Item::Knife, 0, item.id});
+    };
+    rebuild(state.inventoryLayout, state.inventory, 0);
+    for (auto& piece : state.structures) rebuild(piece.layout, piece.storage, piece.id);
 }
 void Edit(Simulation& sim, const std::function<void(State&)>& edit)
 {
     State state = sim.GetState();
     edit(state);
+    FixtureLayouts(state);
     OK(sim.Deserialize(Encode(state)));
 }
 void Stock(Simulation& sim, std::initializer_list<std::pair<Item, int>> items)
@@ -128,8 +162,10 @@ void BuildRoom(Simulation& sim, int x = -3, int y = 0)
 void UnchangedFailure(Simulation& sim, const std::function<Result()>& action)
 {
     const std::string before = sim.Serialize();
+    const auto revision = sim.GetRevision();
     CHECK(!action().ok);
     CHECK(sim.Serialize() == before);
+    CHECK(sim.GetRevision() == revision);
 }
 
 void DefaultsAndValidation()
@@ -696,7 +732,7 @@ void BerryCropCycle()
     CHECK(regrowing.GetState().hunger > hungerBefore);
 }
 
-void CropKindPersistenceAndMigration()
+void CropKindPersistenceAndVersionRejection()
 {
     Simulation sim;
     BuildingStock(sim);
@@ -720,10 +756,15 @@ void CropKindPersistenceAndMigration()
     OK(sim.Clear(berry.id, berry.position));
     sim.AdvanceGameHours(2, Home);
     const std::string expected = sim.Serialize();
-    CHECK(expected.rfind("HOMESTEAD 3 ", 0) == 0);
+    CHECK(expected.rfind("HOMESTEAD 4 ", 0) == 0);
     const std::string legacy = Encode(sim.GetState(), 2);
     Simulation migrated;
-    OK(migrated.Deserialize(legacy));
+    const auto initial = migrated.Serialize();
+    CHECK(migrated.Deserialize(legacy).code == ResultCode::UnsupportedVersion);
+    CHECK(migrated.Serialize() == initial);
+    CHECK(migrated.Deserialize(Encode(sim.GetState(), 3)).code == ResultCode::UnsupportedVersion);
+    CHECK(migrated.Serialize() == initial);
+    OK(migrated.Deserialize(expected));
     CHECK(migrated.Serialize() == expected);
     CHECK(migrated.GetState().plots[0].kind == CropKind::Roots);
     CHECK(migrated.GetState().plots[1].kind == CropKind::Roots);
@@ -760,23 +801,16 @@ void CropKindPersistenceAndMigration()
     impossible.plots[1].growth = 0;
     reject(Encode(impossible));
     const std::string payload = mixed.substr(mixed.find('\n') + 1);
-    const auto kindAt = payload.find_last_of(' ');
-    std::string missingKind = payload;
-    missingKind.erase(kindAt, payload.size() - kindAt - 1);
-    reject(Envelope(missingKind));
-    std::string textKind = payload;
-    textKind.replace(kindAt + 1, payload.size() - kindAt - 2, "berries");
-    reject(Envelope(textKind));
     reject(Envelope(payload, 2));
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 4));
+    reject(Envelope(payload, 5));
     State malformedLegacy = sim.GetState();
     malformedLegacy.plots[0].growth = 1.1;
     reject(Encode(malformedLegacy, 2));
     reject(legacy.substr(0, legacy.size() - 1));
 
     Edit(sim, [](State& state) { state.plots[0].growth = 1; });
-    OK(restored.Deserialize(Encode(sim.GetState(), 2)));
+    OK(restored.Deserialize(Encode(sim.GetState())));
     const int rootsBefore = restored.Count(Item::Roots), seedsBefore = restored.Count(Item::Seeds);
     OK(restored.HarvestCrop(id, garden));
     CHECK(restored.Count(Item::Roots) == rootsBefore + 4);
@@ -949,7 +983,7 @@ void PersistenceRejection()
     reject(original.substr(0, original.size() - 1));
     reject(original + "garbage");
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 4));
+    reject(Envelope(payload, 5));
     reject(Envelope(payload + "garbage"));
     reject(Envelope(payload.substr(0, payload.size() - 8)));
     reject(std::string(1024 * 1024 + 1, 'x'));
@@ -1026,6 +1060,395 @@ void PersistenceRejection()
     CHECK(sim.Serialize() == original);
 }
 
+int Group(const Simulation& sim, Item item, int container = 0)
+{
+    const auto* layout = sim.GetLayout(container);
+    CHECK(layout);
+    for (const auto& entry : *layout)
+        if (entry.wearableId == 0 && entry.item == item) return entry.groupId;
+    CHECK(false);
+    return 0;
+}
+void InventoryRoundTrip(const Simulation& sim)
+{
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.Serialize() == sim.Serialize());
+    CHECK(loaded.UsedCapacity() <= InventoryCapacity);
+    for (const auto& piece : loaded.GetState().structures)
+        if (piece.kind == Piece::Chest) CHECK(loaded.ChestUsedCapacity(piece.id) <= InventoryCapacity);
+}
+void WardrobeDefaultsAndCrafting()
+{
+    static_assert(ItemCount == 14, "Fungible save IDs are unchanged");
+    static_assert(static_cast<int>(Recipe::Count) == 5, "Existing recipe IDs are unchanged");
+    Simulation sim;
+    CHECK(sim.GetState().wearables.size() == 2);
+    CHECK(sim.GetState().equipment == (std::array<int, 4>{1, 1, 0, 2}));
+    CHECK(sim.GetWearable(1)->definition == WearableDefinition::LinenTunic);
+    CHECK(sim.GetWearable(2)->definition == WearableDefinition::LeatherShoes);
+    CHECK(sim.GetWearable(0) == nullptr);
+    CHECK(sim.GetLayout(-1) == nullptr);
+    CHECK(sim.ChestUsedCapacity(0) == -1);
+    CHECK(std::string(DyeName(0)) == "Moss");
+    CHECK(std::string(DyeName(3)) == "Flax");
+    CHECK(std::string(DyeName(4)) == "Unknown dye");
+    CHECK(GetWearableDefinition(WearableDefinition::Count) == nullptr);
+    const int worldId = sim.GetState().nextId;
+    for (auto definition : {WearableDefinition::LinenTunic, WearableDefinition::LinenApron, WearableDefinition::WovenFootwraps})
+    {
+        const int cost = GetWearableDefinition(definition)->fiberCost;
+        Stock(sim, {{Item::Knife, 1}, {Item::Fiber, cost - 1}});
+        UnchangedFailure(sim, [&] { return sim.CraftGarment(definition, Home, sim.GetRevision()); });
+        Stock(sim, {{Item::Fiber, cost}});
+        UnchangedFailure(sim, [&] { return sim.CraftGarment(definition, Home, sim.GetRevision()); });
+        Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 115}});
+        const int beforeCapacity = sim.UsedCapacity();
+        const int beforeCount = static_cast<int>(sim.GetState().wearables.size());
+        const auto hour = sim.GetState().hour;
+        const int expectedId = sim.GetState().nextWearableId;
+        const auto revision = sim.GetRevision();
+        const auto result = sim.CraftGarment(definition, Home, revision);
+        OK(result);
+        CHECK(result.revision == sim.GetRevision() && result.revision > revision);
+        CHECK(sim.Count(Item::Fiber) == 115 - cost);
+        CHECK(sim.UsedCapacity() == beforeCapacity - cost + 1);
+        CHECK(static_cast<int>(sim.GetState().wearables.size()) == beforeCount + 1);
+        CHECK(sim.GetWearable(expectedId)->definition == definition);
+        CHECK(sim.GetWearable(expectedId)->owner == WearableOwner::Carried);
+        CHECK(sim.GetState().nextId == worldId);
+        CHECK(sim.GetState().hour == hour);
+        CHECK(std::string(GarmentRequirements(definition)).rfind(std::to_string(cost) + " Fiber; knife required", 0) == 0);
+        UnchangedFailure(sim, [&] { return sim.CraftGarment(definition, Home, revision); });
+        InventoryRoundTrip(sim);
+    }
+    UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::LeatherShoes, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::Count, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::LinenTunic, {5000, 0}, sim.GetRevision()); });
+    Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 116}});
+    CHECK(sim.UsedCapacity() == 120);
+    OK(sim.CraftGarment(WearableDefinition::LinenTunic, Home, sim.GetRevision()));
+    CHECK(sim.UsedCapacity() == 109);
+    InventoryRoundTrip(sim);
+}
+void AtomicEquipmentAndDye()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 40}});
+    OK(sim.CraftGarment(WearableDefinition::LinenApron, Home, sim.GetRevision()));
+    const int apron = sim.GetState().wearables.back().id;
+    OK(sim.EquipWearable(apron, sim.GetRevision()));
+    OK(sim.CraftGarment(WearableDefinition::LinenTunic, Home, sim.GetRevision()));
+    const int tunic = sim.GetState().wearables.back().id;
+    CHECK(tunic != 1);
+    OK(sim.RecolorWearable(tunic, 1, Home, sim.GetRevision()));
+    CHECK(sim.GetWearable(1)->dye == 0 && sim.GetWearable(tunic)->dye == 1);
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 118}});
+    CHECK(sim.UsedCapacity() == 120);
+    const auto revision = sim.GetRevision();
+    OK(sim.EquipWearable(tunic, revision));
+    CHECK(sim.UsedCapacity() == 120);
+    CHECK(sim.GetState().equipment == (std::array<int, 4>{tunic, tunic, apron, 2}));
+    CHECK(sim.GetWearable(1)->owner == WearableOwner::Carried);
+    UnchangedFailure(sim, [&] { return sim.EquipWearable(tunic, revision); });
+    UnchangedFailure(sim, [&] { return sim.UnequipWearable(2, sim.GetRevision()); });
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 117}});
+    CHECK(sim.UsedCapacity() == 119);
+    UnchangedFailure(sim, [&] { return sim.UnequipWearable(tunic, sim.GetRevision()); });
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 116}});
+    OK(sim.UnequipWearable(tunic, sim.GetRevision()));
+    CHECK(sim.UsedCapacity() == 120);
+    CHECK(sim.GetState().equipment == (std::array<int, 4>{0, 0, 0, 2}));
+    CHECK(sim.GetWearable(apron)->owner == WearableOwner::Carried);
+    UnchangedFailure(sim, [&] { return sim.EquipWearable(apron, sim.GetRevision()); });
+    OK(sim.EquipWearable(1, sim.GetRevision()));
+    OK(sim.EquipWearable(apron, sim.GetRevision()));
+    UnchangedFailure(sim, [&] { return sim.EquipWearable(1, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.UnequipWearable(tunic, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EquipWearable(999999, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.RecolorWearable(2, 1, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.RecolorWearable(1, 4, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.RecolorWearable(1, -1, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.RecolorWearable(1, 0, Home, sim.GetRevision()); });
+    sim.SetWarmOutfit(true);
+    const auto before = sim.GetState();
+    OK(sim.RecolorWearable(1, 3, Home, sim.GetRevision()));
+    CHECK(sim.GetState().warmOutfit && sim.GetState().warmth == before.warmth);
+    CHECK(sim.GetState().hunger == before.hunger && sim.GetState().energy == before.energy && sim.GetState().hour == before.hour);
+    CHECK(sim.GetWearable(tunic)->dye == 1);
+    InventoryRoundTrip(sim);
+}
+void WardrobeStorageAndReach()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    const int chest = sim.GetState().structures.back().id;
+    Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 12}});
+    OK(sim.CraftGarment(WearableDefinition::LinenTunic, Home, sim.GetRevision()));
+    const int tunic = sim.GetState().wearables.back().id;
+    OK(sim.RecolorWearable(tunic, 2, Home, sim.GetRevision()));
+    UnchangedFailure(sim, [&] { return sim.MoveWearable(1, chest, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.MoveWearable(tunic, 0, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.MoveWearable(tunic, 99999, Home, sim.GetRevision()); });
+    const Point outside{Home.x + 281, Home.y};
+    const Point edge{Home.x + 280, Home.y};
+    UnchangedFailure(sim, [&] { return sim.MoveWearable(tunic, chest, outside, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Knife, 1, outside); });
+    OK(sim.MoveWearable(tunic, chest, edge, sim.GetRevision()));
+    CHECK(sim.ChestUsedCapacity(chest) == 1 && sim.UsedCapacity() == 1);
+    CHECK(sim.GetWearable(tunic)->chestId == chest && sim.GetWearable(tunic)->dye == 2);
+    UnchangedFailure(sim, [&] { return sim.EquipWearable(tunic, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.RecolorWearable(tunic, 1, outside, sim.GetRevision()); });
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 119}});
+    OK(sim.Transfer(chest, Item::Branch, 119, edge));
+    CHECK(sim.ChestUsedCapacity(chest) == 120);
+    UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Knife, 1, edge); });
+    OK(sim.UnequipWearable(2, sim.GetRevision()));
+    UnchangedFailure(sim, [&] { return sim.MoveWearable(2, chest, Home, sim.GetRevision()); });
+    Stock(sim, {{Item::Knife, 1}, {Item::Stone, 118}});
+    CHECK(sim.UsedCapacity() == 120);
+    UnchangedFailure(sim, [&] { return sim.MoveWearable(tunic, 0, edge, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Branch, -1, edge); });
+    OK(sim.EquipWearable(2, sim.GetRevision()));
+    OK(sim.MoveWearable(tunic, 0, edge, sim.GetRevision()));
+    CHECK(sim.UsedCapacity() == 120 && sim.ChestUsedCapacity(chest) == 119);
+    CHECK(sim.GetWearable(tunic)->dye == 2);
+    InventoryRoundTrip(sim);
+}
+void PersistentLayoutTransactions()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    const int chest = sim.GetState().structures.back().id;
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 20}, {Item::Fiber, 20}});
+    const int branches = Group(sim, Item::Branch), fibers = Group(sim, Item::Fiber);
+    const int used = sim.UsedCapacity();
+    OK(sim.SplitGroup(0, branches, 7, Home, sim.GetRevision()));
+    const int split = sim.GetState().nextGroupId - 1;
+    CHECK(sim.GetLayout(0)->at(1).quantity == 13);
+    CHECK(sim.GetLayout(0)->at(2).groupId == split);
+    CHECK(sim.GetLayout(0)->at(2).quantity == 7);
+    CHECK(sim.UsedCapacity() == used && sim.Count(Item::Branch) == 20);
+    const auto revision = sim.GetRevision();
+    OK(sim.TransferGroup(chest, split, 3, true, Home, revision));
+    CHECK(sim.GetLayout(0)->at(1).quantity == 13 && sim.GetLayout(0)->at(2).quantity == 4);
+    CHECK(sim.Count(Item::Branch) == 17 && sim.ChestUsedCapacity(chest) == 3);
+    UnchangedFailure(sim, [&] { return sim.TransferGroup(chest, split, 3, true, Home, revision); });
+    UnchangedFailure(sim, [&] { return sim.TransferGroup(chest, split, 5, true, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.TransferGroup(chest, split, 0, true, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.SplitGroup(0, split, 4, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.MergeGroups(0, split, fibers, Home, sim.GetRevision()); });
+    OK(sim.ReorderEntry(0, 2, 0, Home, sim.GetRevision()));
+    CHECK(sim.GetLayout(0)->front().groupId == split);
+    OK(sim.Transfer(chest, Item::Branch, 5, Home));
+    CHECK(sim.Count(Item::Branch) == 12);
+    CHECK(sim.GetLayout(0)->at(1).groupId == branches && sim.GetLayout(0)->at(1).quantity == 12);
+    const int chestGroup = Group(sim, Item::Branch, chest);
+    const Point outside{Home.x + 281, Home.y};
+    UnchangedFailure(sim, [&] { return sim.SplitGroup(chest, chestGroup, 1, outside, sim.GetRevision()); });
+    OK(sim.SplitGroup(chest, chestGroup, 2, Home, sim.GetRevision()));
+    const int chestSplit = sim.GetState().nextGroupId - 1;
+    UnchangedFailure(sim, [&] { return sim.MergeGroups(chest, chestSplit, chestGroup, outside, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.ReorderEntry(chest, 0, 1, outside, sim.GetRevision()); });
+    OK(sim.ReorderEntry(chest, 0, 1, Home, sim.GetRevision()));
+    OK(sim.MergeGroups(chest, chestSplit, chestGroup, Home, sim.GetRevision()));
+    OK(sim.TransferGroup(chest, chestGroup, 8, false, Home, sim.GetRevision()));
+    CHECK(sim.GetLayout(chest)->empty());
+    CHECK(sim.Count(Item::Branch) == 20 && sim.UsedCapacity() == used);
+    UnchangedFailure(sim, [&] { return sim.TransferGroup(chest, chestGroup, 1, false, Home, sim.GetRevision()); });
+    InventoryRoundTrip(sim);
+    const auto beforeLoad = sim.GetRevision();
+    OK(sim.Deserialize(sim.Serialize()));
+    CHECK(sim.GetRevision() > beforeLoad);
+    UnchangedFailure(sim, [&] { return sim.SplitGroup(0, branches, 1, Home, beforeLoad); });
+    const auto beforeNew = sim.GetRevision();
+    sim.NewGame();
+    CHECK(sim.GetRevision() > beforeNew);
+    UnchangedFailure(sim, [&] { return sim.UnequipWearable(1, beforeNew); });
+}
+void QuantityMutationReconciliation()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Knife, 1}, {Item::Berries, 8}, {Item::Fiber, 20}, {Item::Branch, 20}, {Item::Stone, 12}});
+    int berries = Group(sim, Item::Berries);
+    OK(sim.SplitGroup(0, berries, 3, Home, sim.GetRevision()));
+    OK(sim.Eat(Item::Berries));
+    CHECK(sim.GetLayout(0)->back().quantity > 0);
+    InventoryRoundTrip(sim);
+    const auto oldRevision = sim.GetRevision();
+    auto node = Node(sim, ResourceKind::BerryBush);
+    OK(sim.Harvest(node.id, node.position));
+    UnchangedFailure(sim, [&] { return sim.SplitGroup(0, berries, 1, Home, oldRevision); });
+    InventoryRoundTrip(sim);
+    OK(sim.Craft(Recipe::DiggingStick, Home));
+    OK(sim.Craft(Recipe::WateringCan, Home));
+    OK(sim.FillWater(WaterSource));
+    const Point garden = CellCenter(-2, -1);
+    OK(sim.Till(-2, -1, garden));
+    const int plot = sim.GetState().plots.back().id;
+    OK(sim.Plant(plot, garden, CropKind::Berries));
+    OK(sim.Water(plot, garden));
+    OK(sim.Place(Piece::Fire, -3, 0, 0, Home));
+    OK(sim.AddFuel(sim.GetState().structures.back().id, Home));
+    InventoryRoundTrip(sim);
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 119}});
+    const int branch = Group(sim, Item::Branch);
+    for (int i = 0; i < 118; ++i) OK(sim.SplitGroup(0, branch, 1, Home, sim.GetRevision()));
+    CHECK(sim.GetLayout(0)->size() == 120 && sim.UsedCapacity() == 120);
+    UnchangedFailure(sim, [&] { return sim.SplitGroup(0, branch, 1, Home, sim.GetRevision()); });
+    InventoryRoundTrip(sim);
+    while (sim.GetLayout(0)->size() > 2)
+    {
+        const int source = sim.GetLayout(0)->back().groupId;
+        OK(sim.MergeGroups(0, source, branch, Home, sim.GetRevision()));
+    }
+    CHECK(sim.Count(Item::Branch) == 119 && sim.UsedCapacity() == 120);
+    InventoryRoundTrip(sim);
+}
+void SelectedFoodGroupTransactions()
+{
+    for (const auto food : {std::pair<Item, double>{Item::Berries, 12.0},
+        {Item::RoastedRoots, 28.0}, {Item::HerbedRoots, 38.0}})
+    {
+        for (double hunger : {50.0, 95.0})
+        {
+            Simulation sim;
+            Stock(sim, {{Item::Knife, 1}, {food.first, 5}});
+            Edit(sim, [&](State& state) { state.hunger = hunger; });
+            const int first = Group(sim, food.first);
+            OK(sim.SplitGroup(0, first, 2, Home, sim.GetRevision()));
+            const int selected = sim.GetState().nextGroupId - 1;
+            State expectedState = sim.GetState();
+            expectedState.inventoryLayout.back().quantity = 1;
+            --expectedState.inventory[static_cast<int>(food.first)];
+            expectedState.hunger = hunger + food.second > 100.0 ? 100.0 : hunger + food.second;
+            Simulation expected;
+            OK(expected.Deserialize(Encode(expectedState)));
+            Simulation aggregate = sim;
+            const auto aggregateResult = aggregate.Eat(food.first);
+            OK(aggregateResult);
+            const auto revision = sim.GetRevision();
+            const auto result = sim.EatGroup(selected, revision);
+            OK(result);
+            CHECK(result.revision == revision + 1 && sim.GetRevision() == result.revision);
+            CHECK(result.message == aggregateResult.message);
+            CHECK(sim.GetState().hunger == aggregate.GetState().hunger);
+            CHECK(sim.GetLayout(0)->at(1).groupId == first && sim.GetLayout(0)->at(1).quantity == 3);
+            CHECK(sim.GetLayout(0)->back().groupId == selected && sim.GetLayout(0)->back().quantity == 1);
+            CHECK(sim.Serialize() == expected.Serialize());
+            UnchangedFailure(sim, [&] { return sim.EatGroup(selected, revision); });
+            if (sim.GetState().hunger == 100.0)
+            {
+                UnchangedFailure(sim, [&] { return sim.EatGroup(selected, sim.GetRevision()); });
+            }
+            InventoryRoundTrip(sim);
+        }
+    }
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    const int chest = sim.GetState().structures.back().id;
+    Stock(sim, {{Item::Knife, 1}, {Item::Berries, 5}, {Item::Roots, 2}});
+    Edit(sim, [](State& state) { state.hunger = 50; });
+    const int berries = Group(sim, Item::Berries);
+    OK(sim.SplitGroup(0, berries, 1, Home, sim.GetRevision()));
+    const int single = sim.GetState().nextGroupId - 1;
+    OK(sim.EatGroup(single, sim.GetRevision()));
+    CHECK(sim.Count(Item::Berries) == 4 && sim.GetState().hunger == 62);
+    CHECK(sim.GetLayout(0)->at(1).groupId == berries && sim.GetLayout(0)->at(1).quantity == 4);
+    CHECK(sim.GetLayout(0)->size() == 3);
+    UnchangedFailure(sim, [&] { return sim.EatGroup(single, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(0, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(-1, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Knife), sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Roots), sim.GetRevision()); });
+    OK(sim.TransferGroup(chest, berries, 2, true, Home, sim.GetRevision()));
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Berries, chest), sim.GetRevision()); });
+    const auto beforeLoad = sim.GetRevision();
+    OK(sim.Deserialize(sim.Serialize()));
+    UnchangedFailure(sim, [&] { return sim.EatGroup(berries, beforeLoad); });
+    Edit(sim, [](State& state) { state.failed = true; state.energy = 0; });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Berries), sim.GetRevision()); });
+    InventoryRoundTrip(sim);
+}
+void WardrobeSaveRejection()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    const int chest = sim.GetState().structures.back().id;
+    OK(sim.CraftGarment(WearableDefinition::LinenApron, Home, sim.GetRevision()));
+    const int apron = sim.GetState().wearables.back().id;
+    OK(sim.MoveWearable(apron, chest, Home, sim.GetRevision()));
+    const auto original = sim.Serialize();
+    const auto revision = sim.GetRevision();
+    const std::vector<std::function<void(State&)>> edits = {
+        [](State& s) { s.wearables.push_back(s.wearables[0]); },
+        [](State& s) { s.wearables[0].id = 0; },
+        [](State& s) { s.wearables[0].definition = WearableDefinition::Count; },
+        [](State& s) { s.wearables[0].definition = static_cast<WearableDefinition>(-1); },
+        [](State& s) { s.wearables[0].dye = 4; },
+        [](State& s) { s.wearables[1].dye = 1; },
+        [](State& s) { s.wearables[0].owner = static_cast<WearableOwner>(3); },
+        [](State& s) { s.wearables[0].chestId = 123; },
+        [](State& s) { s.wearables.back().chestId = 0; },
+        [](State& s) { s.wearables.back().chestId = 99999; },
+        [](State& s) { s.wearables[0].owner = WearableOwner::Carried; },
+        [](State& s) { s.equipment[1] = 0; },
+        [](State& s) { s.equipment[2] = 1; },
+        [](State& s) { s.equipment[3] = 99999; },
+        [](State& s) { s.nextWearableId = s.wearables.back().id; },
+        [](State& s) { s.nextWearableId = std::numeric_limits<int>::max(); },
+        [](State& s) { s.nextGroupId = 1; },
+        [](State& s) { s.nextGroupId = std::numeric_limits<int>::max(); },
+        [](State& s) { s.inventoryLayout[0].quantity = 0; },
+        [](State& s) { s.inventoryLayout[0].quantity = -1; },
+        [](State& s) { s.inventoryLayout[0].quantity = 121; },
+        [](State& s) { s.inventoryLayout[0].item = Item::Count; },
+        [](State& s) { s.inventoryLayout[0].groupId = 0; },
+        [](State& s) { s.inventoryLayout.push_back(s.inventoryLayout[0]); },
+        [](State& s) { s.inventoryLayout[0].wearableId = 1; },
+        [](State& s) { s.inventoryLayout.push_back({0, Item::Knife, 0, 1}); },
+        [](State& s) { s.structures.back().layout.clear(); },
+        [](State& s) { s.structures.back().layout.push_back(s.structures.back().layout[0]); },
+        [](State& s) { s.structures.back().layout[0].quantity = 1; },
+        [](State& s) { s.structures.back().layout[0].item = Item::Fiber; },
+        [](State& s) { s.structures.back().layout[0].wearableId = 99999; }
+    };
+    for (const auto& edit : edits)
+    {
+        State bad = sim.GetState();
+        edit(bad);
+        CHECK(sim.Deserialize(Encode(bad)).code == ResultCode::CorruptSave);
+        CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
+    }
+    State full = sim.GetState();
+    full.structures.back().storage[static_cast<int>(Item::Branch)] = 120;
+    FixtureLayouts(full);
+    CHECK(sim.Deserialize(Encode(full)).code == ResultCode::CorruptSave);
+    CHECK(sim.Serialize() == original);
+    State dependent = sim.GetState();
+    dependent.wearables[0].owner = WearableOwner::Carried;
+    dependent.wearables.back().owner = WearableOwner::Equipped;
+    dependent.wearables.back().chestId = 0;
+    dependent.equipment = {0, 0, apron, 2};
+    FixtureLayouts(dependent);
+    CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
+    CHECK(sim.Serialize() == original);
+    for (int version : {1, 2, 3, 5, 999})
+    {
+        CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
+        CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
+    }
+    InventoryRoundTrip(sim);
+    OK(sim.Deserialize(original));
+    OK(sim.Deserialize(original));
+    CHECK(sim.GetState().wearables.size() == 3 && sim.GetWearable(apron)->chestId == chest);
+    CHECK(sim.Serialize() == original);
+}
+
 void Run(const char* name, void (*test)())
 {
     test();
@@ -1047,11 +1470,18 @@ int main()
     Run("independent fires and chest storage", FireAndStorage);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
-    Run("crop-kind persistence and version-two migration", CropKindPersistenceAndMigration);
+    Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
     Run("warmth, sleep and failure recovery", WarmthSleepAndFailure);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
     Run("strict atomic persistence", PersistenceRejection);
+    Run("wardrobe defaults, truthful crafting and independent identities", WardrobeDefaultsAndCrafting);
+    Run("atomic equipment, full-pack swaps and per-instance dye", AtomicEquipmentAndDye);
+    Run("wardrobe storage, shared capacity and exact 280cm reach", WardrobeStorageAndReach);
+    Run("persistent layout and stale transaction rejection", PersistentLayoutTransactions);
+    Run("existing quantity mutations and 120 groups without slot cost", QuantityMutationReconciliation);
+    Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
+    Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

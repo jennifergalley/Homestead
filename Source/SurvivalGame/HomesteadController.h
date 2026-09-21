@@ -6,12 +6,20 @@
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
+#include "Styling/SlateBrush.h"
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
 class UHomesteadSave;
 class UAudioComponent;
 class USoundBase;
+namespace HomesteadMenus { class SHomesteadMenu; }
+using SHomesteadMenu = HomesteadMenus::SHomesteadMenu;
+class IInputProcessor;
+class AHomesteadMenuPortrait;
+
+enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe };
+enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye };
 
 struct FHomesteadRow
 {
@@ -21,6 +29,15 @@ struct FHomesteadRow
     FString Action;
     bool CanStore = false;
     bool CanTake = false;
+    EHomesteadMenuSubject Subject = EHomesteadMenuSubject::Legacy;
+    int32 SubjectId = 0;
+    int32 ContainerId = 0;
+    int32 DestinationId = 0;
+    int32 Quantity = 0;
+    FString Name;
+    FString Location;
+    FName Icon;
+    FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
 };
 
 UCLASS()
@@ -46,6 +63,11 @@ public:
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }
     TArray<FHomesteadRow> Rows() const;
+    TArray<FHomesteadRow> MenuRows() const;
+    void MenuInventoryView(int32 View);
+    int32 InventoryView() const { return MenuInventoryViewIndex; }
+    bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    FString MenuInventorySummary() const;
     FString BookTitle() const;
     FString BookSummary() const;
     FString BookFooter() const;
@@ -58,6 +80,31 @@ public:
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
     void NudgePlacement(FVector2D Axis);
+    bool HasNativeMenu() const { return NativeMenu.IsValid(); }
+    void MenuPage(int32 TargetPage);
+    void MenuSelect(int32 Row);
+    void MenuActivate();
+    void MenuStore();
+    void MenuTake();
+    void MenuBack();
+    void MenuRequestExit();
+    void MenuSaveAndQuit();
+    void MenuQuitWithoutSaving();
+    void MenuRestart();
+    void MenuRetry();
+    bool MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount = 1);
+    bool MenuPointerIntent(float X, float Y);
+    bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly; }
+    FString MenuSaveStatus() const;
+    FString MenuLastError() const { return ToastText; }
+    bool MenuNeedsTestReset() const { return bTestResetRequired; }
+    FString MenuLoadProblem() const { return LoadProblem; }
+    const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
+    void RefreshMenuPortrait();
+    void OrbitMenuPortrait(float Degrees);
+    void ZoomMenuPortrait();
+    FString MenuPortraitStatus() const;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -113,7 +160,28 @@ private:
     FString ToastText;
     bool bToastError = false;
     FString SessionCheckpoint;
+    FHomesteadAppearance SessionAppearance;
+    FString SessionWorld;
+    FVector SessionLocation = FVector(-1000, 0, 180);
+    FRotator SessionRotation = FRotator(-15, 15, 0);
+    void CaptureSessionCheckpoint(FVector Location, FRotator Rotation);
     FString WorldId;
+    int32 MenuInventoryViewIndex = 0;
+    mutable bool bReadIncompatible = false;
+    bool bTestResetRequired = false;
+    bool bHasPlayableSession = false;
+    FString LoadProblem;
+    TSharedPtr<SHomesteadMenu> NativeMenu;
+    TSharedPtr<IInputProcessor> MenuPointerInput;
+    UPROPERTY() TObjectPtr<AHomesteadMenuPortrait> MenuPortrait;
+    FSlateBrush PortraitBrush;
+    bool bMenuSaveInProgress = false;
+    FDateTime LastSuccessfulSave;
+    TOptional<float> PendingResolutionScale;
+    FString GraphicsSaveError;
+    bool PersistResolutionScale(float Requested);
+    void ShowNativeMenu();
+    void HideNativeMenu();
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;
     bool bSaveRoutingTestPending = false;
@@ -159,7 +227,7 @@ private:
     void RunSaveRoutingChecks();
     bool LoadLatest(bool RecoveryOnly = false);
     UHomesteadSave* ReadSave(const FString& Filename) const;
-    void ApplySave(const UHomesteadSave& Save);
+    bool ApplySave(const UHomesteadSave& Save);
     void InitializeAudio();
     void PlayEffect(USoundBase* Cue, float Gain = 0.12f);
     UFUNCTION() void MusicFinished();
