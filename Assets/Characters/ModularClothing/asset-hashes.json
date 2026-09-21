@@ -1,0 +1,162 @@
+{
+  "Hazel\\Hazel_Modular.blend": {
+    "bytes": 36445177,
+    "sha256": "fc182368f69343ad5c1364d08113281beb9240f267e02521da932cd0967bc6fa"
+  },
+  "Hazel\\SK_Modular_Hazel_Apron.fbx": {
+    "bytes": 225324,
+    "sha256": "3cf63aac0d347052684a1f9bd3ae8a685a2e2323cbf032fcf2bae6b6ec1635ec"
+  },
+  "Hazel\\SK_Modular_Hazel_Base_Bob.fbx": {
+    "bytes": 5187676,
+    "sha256": "f9a425b0695aa1c3e011d3b054505669fc503b51fd15b739f62ec94172f00783"
+  },
+  "Hazel\\SK_Modular_Hazel_Base_LongWave.fbx": {
+    "bytes": 4683004,
+    "sha256": "fd91ec24974ef97a24051aa311c3edb01e3b3c4b71d06e2ca395a0cf738652e0"
+  },
+  "Hazel\\SK_Modular_Hazel_Base_Ponytail.fbx": {
+    "bytes": 4829900,
+    "sha256": "60b33f5ae8e22a47917c6460ea962336e21f8dd9e1dd7af0898c9492af9cdd46"
+  },
+  "Hazel\\SK_Modular_Hazel_Footwraps.fbx": {
+    "bytes": 373356,
+    "sha256": "a1f0e0f5838055365689ffc478ed82d7c40f5287bc52acbf233acbf5d8bbc987"
+  },
+  "Hazel\\SK_Modular_Hazel_Shoes.fbx": {
+    "bytes": 221404,
+    "sha256": "57851d492deb2c1b5267223a86e7c9a0dda3620f34e8d2a11166f4275bbb3647"
+  },
+  "Hazel\\SK_Modular_Hazel_Tunic.fbx": {
+    "bytes": 577388,
+    "sha256": "b9c408b3b00bacd0b5f646e2ad413c3058fb042cd454c40bb11668d9fb84bc18"
+  },
+  "Preferred\\Preferred_Modular.blend": {
+    "bytes": 36445185,
+    "sha256": "485d0fe95b074878b19350e876ce0232d9920313d4afbd724858dc3b4b658b73"
+  },
+  "Preferred\\SK_Modular_Preferred_Apron.fbx": {
+    "bytes": 225516,
+    "sha256": "a56b1f0e1f65d4765c329db06391443ad6babaf2971af227365e6dfbf25fee1b"
+  },
+  "Preferred\\SK_Modular_Preferred_Base_Bob.fbx": {
+    "bytes": 5190316,
+    "sha256": "446bf8d9788287eefc9af579958d93dc066d365f0f1444b577d5480e09bc281f"
+  },
+  "Preferred\\SK_Modular_Preferred_Base_LongWave.fbx": {
+    "bytes": 4683564,
+    "sha256": "6336521182abeb18cb7e16236d362b7cc27c323a5c309f2105ca96060a96d255"
+  },
+  "Preferred\\SK_Modular_Preferred_Base_Ponytail.fbx": {
+    "bytes": 4828908,
+    "sha256": "4b01a51cb3eb9d86dd857ac7b0bfd22dc021a307a1b84d152d83c0bb07d7276f"
+  },
+  "Preferred\\SK_Modular_Preferred_Footwraps.fbx": {
+    "bytes": 373180,
+    "sha256": "04c2f2b631dab7055957f58f36182e751cdaa19cc096254a3a9be40e94c8df40"
+  },
+  "Preferred\\SK_Modular_Preferred_Shoes.fbx": {
+    "bytes": 221388,
+    "sha256": "9b7e65fa04abf174428f05d862d6a4b51a212b8a5688638be689167029f9ff94"
+  },
+  "Preferred\\SK_Modular_Preferred_Tunic.fbx": {
+    "bytes": 576764,
+    "sha256": "57f7121edb682a06e479e6ade33b9dee0a705f959511454e7ac4942252e7f833"
+  },
+  "Review\\Hazel-contact-sheet.png": {
+    "bytes": 1354499,
+    "sha256": "b5b62251e25658d43b39f98dfbba75b11994f3bd062d100fc1edf87c6c902f17"
+  },
+  "Review\\Preferred-contact-sheet.png": {
+    "bytes": 1352601,
+    "sha256": "46306efd0ea6ab594444cae2f338afc12eb20d0e8552b83d4fee6540167b00d3"
+  },
+  "Review\\Willow-contact-sheet.png": {
+    "bytes": 1352839,
+    "sha256": "ce20df97e4dc73c0c5c7ee9d6a97dda82d6afab2c4a24139d84327485bc3c01d"
+  },
+  "Textures\\blue_eye.png": {
+    "bytes": 879405,
+    "sha256": "f89ac33fc6a94d05cdadffd27b2643ee16160608f9337b12da572084e3dd5920"
+  },
+  "Textures\\eyebrow001.png": {
+    "bytes": 100186,
+    "sha256": "1b1f509b428528a42a4941b49ffd83924c96414b2f1d135879e175daa3d0e750"
+  },
+  "Textures\\eyelashes01.png": {
+    "bytes": 111903,
+    "sha256": "cefe3aa06869e88c908c342984c624ada1f74c918fd67226ecba28d99502a239"
+  },
+  "Textures\\shoes01_diffuse.png": {
+    "bytes": 1438984,
+    "sha256": "49e2114ef411bf5f874713c1d27149ec9fa75251115b3923daf97fc40a7c98ea"
+  },
+  "Textures\\T_ApronLinen.png": {
+    "bytes": 137351,
+    "sha256": "e3676eeb6e14d8811d3ae67fd996600d02b21038d1c111b4612c00ee68e0ea8f"
+  },
+  "Textures\\T_Bob_Chestnut.png": {
+    "bytes": 1986650,
+    "sha256": "e953d110d4c42fb2fec458176898baa6871917790c1ffbd90c396509dbeb7f4a"
+  },
+  "Textures\\T_Long_Chestnut.png": {
+    "bytes": 1840868,
+    "sha256": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2"
+  },
+  "Textures\\T_LongWave_Chestnut.png": {
+    "bytes": 1840868,
+    "sha256": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2"
+  },
+  "Textures\\T_ModularWeave.png": {
+    "bytes": 3080,
+    "sha256": "5f503797b34804bfe06bb59df5ada2899d5160bcab4ae15b8aa982dd24a3da23"
+  },
+  "Textures\\T_Ponytail_Chestnut.png": {
+    "bytes": 2595877,
+    "sha256": "1d12cabbab25c6084f5ce6f7d46382fa8e626c24476407f9aad4015d73219bbf"
+  },
+  "Textures\\teeth.png": {
+    "bytes": 2474023,
+    "sha256": "f73c5936a40ea046f7fb136aa4857fb37a67702b1ef95ffa41db922e57afbf58"
+  },
+  "Textures\\tongue01_diffuse.png": {
+    "bytes": 751968,
+    "sha256": "a6a1b883355eafba77e0764ace30c0c32b7c2a0e4e9943cb3599afad4d8458c9"
+  },
+  "Textures\\young_lightskinned_female_diffuse.png": {
+    "bytes": 5249387,
+    "sha256": "33fec958e0d40773e46d6f64b084871e40388c957e32930fc74c200e5e256934"
+  },
+  "Willow\\SK_Modular_Willow_Apron.fbx": {
+    "bytes": 225468,
+    "sha256": "b2a7d567bd42669c4823176186e58d228aacea80b3a866cfb398d36ae235cf33"
+  },
+  "Willow\\SK_Modular_Willow_Base_Bob.fbx": {
+    "bytes": 5185932,
+    "sha256": "8b4c8acb53a6709930bb06c97f9d7103031d504730ccdc7a4536d67bc0941337"
+  },
+  "Willow\\SK_Modular_Willow_Base_LongWave.fbx": {
+    "bytes": 4682316,
+    "sha256": "4c721f8f75b4611c75d6271dce36127f072b01375f06f1fe7884be16963309b4"
+  },
+  "Willow\\SK_Modular_Willow_Base_Ponytail.fbx": {
+    "bytes": 4829068,
+    "sha256": "67ad75b06de1f07117c5853a75852672fb7415146d9d71b023ff30cfc4aa8ab0"
+  },
+  "Willow\\SK_Modular_Willow_Footwraps.fbx": {
+    "bytes": 373228,
+    "sha256": "ed5e0d19710af143619a02db5385f9875a8f1381b3ab1c7a47451be48a318f13"
+  },
+  "Willow\\SK_Modular_Willow_Shoes.fbx": {
+    "bytes": 221356,
+    "sha256": "ba28892795b9a7c465c9c4142b56781cbf91d7385168b901f00cfcb0f627b419"
+  },
+  "Willow\\SK_Modular_Willow_Tunic.fbx": {
+    "bytes": 576892,
+    "sha256": "4b539e9f5494db62744c8b0baead9cd1fb06ff0d4f44a5d605352a3aebf540e7"
+  },
+  "Willow\\Willow_Modular.blend": {
+    "bytes": 36445185,
+    "sha256": "6d09c0fa5276f3809d2701ae79f116ee17d321df82d4449c8c3a7b126c9b8dd9"
+  }
+}

@@ -1,0 +1,434 @@
+{
+  "M_Modular_FootwrapBinding": {
+    "base_color": [
+      0.25,
+      0.1899999976158142,
+      0.10999999940395355,
+      1.0
+    ],
+    "roughness": 0.9200000166893005,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\T_ModularWeave.png",
+    "texture_multiply": true,
+    "uv_scale": 8,
+    "sha256": "5f503797b34804bfe06bb59df5ada2899d5160bcab4ae15b8aa982dd24a3da23",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Modular_BaseBra": {
+    "base_color": [
+      0.1599999964237213,
+      0.17499999701976776,
+      0.15000000596046448,
+      1.0
+    ],
+    "roughness": 0.9200000166893005,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\T_ModularWeave.png",
+    "texture_multiply": true,
+    "uv_scale": 8,
+    "sha256": "5f503797b34804bfe06bb59df5ada2899d5160bcab4ae15b8aa982dd24a3da23",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_MossLinen": {
+    "base_color": [
+      0.20000000298023224,
+      0.27000001072883606,
+      0.11500000208616257,
+      1.0
+    ],
+    "roughness": 0.8700000047683716,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": null,
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "role": "garment_linen",
+    "parameter": "ColorTint",
+    "dye_multipliers": [
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1.1,
+        0.17,
+        0.56,
+        1
+      ],
+      [
+        0.5,
+        0.6,
+        2.4,
+        1
+      ],
+      [
+        2.75,
+        1.78,
+        2.61,
+        1
+      ]
+    ]
+  },
+  "M_Heroine_ApronTrim": {
+    "base_color": [
+      0.7400000095367432,
+      0.6700000166893005,
+      0.5299999713897705,
+      1.0
+    ],
+    "roughness": 0.8600000143051147,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": null,
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "role": "garment_trim",
+    "parameter": null,
+    "note": "Retain authored neutral trim; never flat-tint all garment slots."
+  },
+  "M_Heroine_LightEyes": {
+    "base_color": [
+      0.25,
+      0.4699999988079071,
+      0.5299999713897705,
+      1.0
+    ],
+    "roughness": 0.2199999988079071,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": true,
+    "two_sided": true,
+    "texture": "Textures\\blue_eye.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "f89ac33fc6a94d05cdadffd27b2643ee16160608f9337b12da572084e3dd5920",
+    "role": "eyes",
+    "parameters": [
+      "IrisColor",
+      "IrisMix"
+    ]
+  },
+  "M_Heroine_ApronLinen": {
+    "base_color": [
+      0.6700000166893005,
+      0.6000000238418579,
+      0.46000000834465027,
+      1.0
+    ],
+    "roughness": 0.9200000166893005,
+    "metallic": 0.0,
+    "specular": 0.25,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\T_ApronLinen.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "e3676eeb6e14d8811d3ae67fd996600d02b21038d1c111b4612c00ee68e0ea8f",
+    "role": "garment_linen",
+    "parameter": "ColorTint",
+    "dye_multipliers": [
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1.1,
+        0.17,
+        0.56,
+        1
+      ],
+      [
+        0.5,
+        0.6,
+        2.4,
+        1
+      ],
+      [
+        2.75,
+        1.78,
+        2.61,
+        1
+      ]
+    ]
+  },
+  "M_Heroine_Skin": {
+    "base_color": [
+      0.6600000262260437,
+      0.4300000071525574,
+      0.3199999928474426,
+      1.0
+    ],
+    "roughness": 0.47999998927116394,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\young_lightskinned_female_diffuse.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "33fec958e0d40773e46d6f64b084871e40388c957e32930fc74c200e5e256934",
+    "role": "skin",
+    "parameter": "ColorTint"
+  },
+  "M_Modular_BaseBriefs": {
+    "base_color": [
+      0.1599999964237213,
+      0.17499999701976776,
+      0.15000000596046448,
+      1.0
+    ],
+    "roughness": 0.9200000166893005,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\T_ModularWeave.png",
+    "texture_multiply": true,
+    "uv_scale": 8,
+    "sha256": "5f503797b34804bfe06bb59df5ada2899d5160bcab4ae15b8aa982dd24a3da23",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_Hair_long01": {
+    "base_color": [
+      0.11999999731779099,
+      0.04800000041723251,
+      0.020999999716877937,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.10000000149011612,
+    "alpha_mask": true,
+    "two_sided": true,
+    "texture": "Textures\\T_LongWave_Chestnut.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2",
+    "role": "hair",
+    "parameter": "ColorTint"
+  },
+  "M_Heroine_Teeth": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\teeth.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "f73c5936a40ea046f7fb136aa4857fb37a67702b1ef95ffa41db922e57afbf58",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_Hair_bob01": {
+    "base_color": [
+      0.11999999731779099,
+      0.04800000041723251,
+      0.020999999716877937,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.10000000149011612,
+    "alpha_mask": true,
+    "two_sided": true,
+    "texture": "Textures\\T_Bob_Chestnut.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "e953d110d4c42fb2fec458176898baa6871917790c1ffbd90c396509dbeb7f4a",
+    "role": "hair",
+    "parameter": "ColorTint"
+  },
+  "M_Modular_FootwrapCloth": {
+    "base_color": [
+      0.49000000953674316,
+      0.4000000059604645,
+      0.25999999046325684,
+      1.0
+    ],
+    "roughness": 0.9200000166893005,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\T_ModularWeave.png",
+    "texture_multiply": true,
+    "uv_scale": 8,
+    "sha256": "5f503797b34804bfe06bb59df5ada2899d5160bcab4ae15b8aa982dd24a3da23",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_Tongue": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\tongue01_diffuse.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "a6a1b883355eafba77e0764ace30c0c32b7c2a0e4e9943cb3599afad4d8458c9",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_Hair_ponytail01": {
+    "base_color": [
+      0.11999999731779099,
+      0.04800000041723251,
+      0.020999999716877937,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.10000000149011612,
+    "alpha_mask": true,
+    "two_sided": true,
+    "texture": "Textures\\T_Ponytail_Chestnut.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "1d12cabbab25c6084f5ce6f7d46382fa8e626c24476407f9aad4015d73219bbf",
+    "role": "hair",
+    "parameter": "ColorTint"
+  },
+  "M_Heroine_LinenTrim": {
+    "base_color": [
+      0.4399999976158142,
+      0.4000000059604645,
+      0.23999999463558197,
+      1.0
+    ],
+    "roughness": 0.800000011920929,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": null,
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "role": "garment_trim",
+    "parameter": null,
+    "note": "Retain authored neutral trim; never flat-tint all garment slots."
+  },
+  "M_Heroine_Brass": {
+    "base_color": [
+      0.30000001192092896,
+      0.1899999976158142,
+      0.06499999761581421,
+      1.0
+    ],
+    "roughness": 0.3199999928474426,
+    "metallic": 0.75,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": null,
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_LeatherShoes": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": "Textures\\shoes01_diffuse.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "49e2114ef411bf5f874713c1d27149ec9fa75251115b3923daf97fc40a7c98ea",
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_ChestnutLeather": {
+    "base_color": [
+      0.0949999988079071,
+      0.03700000047683716,
+      0.01600000075995922,
+      1.0
+    ],
+    "roughness": 0.699999988079071,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": false,
+    "two_sided": true,
+    "texture": null,
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "role": "fixed",
+    "parameter": null
+  },
+  "M_Heroine_Eyebrows": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": true,
+    "two_sided": true,
+    "texture": "Textures\\eyebrow001.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "1b1f509b428528a42a4941b49ffd83924c96414b2f1d135879e175daa3d0e750",
+    "role": "hair",
+    "parameter": "ColorTint"
+  },
+  "M_Heroine_Eyelashes": {
+    "base_color": [
+      0.25,
+      0.12999999523162842,
+      0.07000000029802322,
+      1.0
+    ],
+    "roughness": 0.5799999833106995,
+    "metallic": 0.0,
+    "specular": 0.5,
+    "alpha_mask": true,
+    "two_sided": true,
+    "texture": "Textures\\eyelashes01.png",
+    "texture_multiply": false,
+    "uv_scale": 1,
+    "sha256": "cefe3aa06869e88c908c342984c624ada1f74c918fd67226ecba28d99502a239",
+    "role": "fixed",
+    "parameter": null
+  }
+}

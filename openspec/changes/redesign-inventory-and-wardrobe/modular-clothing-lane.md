@@ -52,14 +52,14 @@ footwear and the permanent base never inherit garment dye.
 
 ## Lane checks and handoff
 
-- [ ] Inspect source geometry and reconstruct complete bodies where needed.
-- [ ] Build three permanently covered bases with retained hair/face choices.
-- [ ] Export four independently fitted garments per body and nine base FBXs.
-- [ ] Verify source counts, feet/coverage, units, bind names/transforms,
+- [x] Inspect source geometry and reconstruct complete bodies where needed.
+- [x] Build three permanently covered bases with retained hair/face choices.
+- [x] Export four independently fitted garments per body and nine base FBXs.
+- [x] Verify source counts, feet/coverage, units, bind names/transforms,
   normalized <=4 weights, material assignments and real FBX round trips.
-- [ ] Sample existing movement/action deformation and inexpensive CPU previews;
+- [x] Sample existing movement/action deformation and inexpensive CPU previews;
   document limits rather than claim gameplay or aesthetic acceptance.
-- [ ] Record source/license/output hashes, import/material mapping and commands.
+- [x] Record source/license/output hashes, import/material mapping and commands.
 - [ ] Commit via existing LFS rules, verify private remote and push this branch.
 
 ## Added presentation-source ownership
@@ -96,9 +96,27 @@ held-tool attachments and nonclothing tint/eye parameters remain authoritative.
 Legacy joined appearance remains usable before wardrobe activation but is not
 a fallback for missing modular equipment and cannot replace an active wardrobe.
 
-- [ ] Implement and hand off the prepared presentation API and follower parts.
-- [ ] Check catalog/path/material consistency and rejection behavior in source.
+- [x] Implement and hand off the prepared presentation API and follower parts.
+- [x] Check catalog/path/material consistency and rejection behavior in source.
 
 Unreal import/build, actual cooked admission and ordinary gameplay/visual
 acceptance remain coordinator-owned pending work. Central 4.1/4.2/4.3 must not
 be marked fully complete merely because this source lane passes.
+
+## Native compiler incident and evidence limits
+
+At 2026-09-20 23:03:05 Arizona the source lane invoked `cl` through
+`vcvars64.bat`/`cmd.exe` for `HomesteadWardrobeSelectionTests.cpp` and
+`HomesteadSimulation.cpp`, outside the coordinator's guarded compiler route.
+The test executable passed its functional selection/rejection checks, but this
+is not a clean admitted compiler run. Output timestamps strongly correlate the
+launch with VCTIP PID 48608 (parent 45016); no retained parent-PID proof exists.
+No historical network/upload assurance is inferred.
+
+The coordinator later verified the exact helper process handle/path/creation
+`2026-09-21T06:03:05.243905Z` and hash beginning `D591358C`, stopped only that
+PID, observed its death and a fresh empty uploader enumeration. No unrelated
+process was changed by this lane. Compiler work was paused; further compiler
+execution requires the supplied unchanged guarded route and main coordination,
+not direct `cl`, `vcvars`, or compiler-version probes. UE compilation remains
+pending in the main-owned slot.
