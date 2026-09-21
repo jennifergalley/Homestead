@@ -264,6 +264,11 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         { Finish(false, TEXT("Supply exactly one nonempty -HomesteadNativeResumeFrom=<producer output>.")); return; }
         ResumeRequested = true;
         ProducerOutput = Token.Mid(ResumePrefix.Len());
+        // FParse::Token preserves quotes embedded after an option's equals sign.
+        if (ProducerOutput.StartsWith(TEXT("\"")) && ProducerOutput.EndsWith(TEXT("\"")) && ProducerOutput.Len() >= 2)
+            ProducerOutput = ProducerOutput.Mid(1, ProducerOutput.Len() - 2);
+        if (ProducerOutput.IsEmpty() || ProducerOutput.Contains(TEXT("\"")))
+        { Finish(false, TEXT("Resume requires one nonempty, correctly quoted producer directory.")); return; }
     }
     if (ResumeRequested)
     {

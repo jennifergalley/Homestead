@@ -161,6 +161,8 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("GetDriveTypeW(*Root) != DRIVE_FIXED", fixture)
         self.assertIn('const FString Segment(TEXT("/Saved/Automation/"))', fixture)
         self.assertIn("static_cast<uint32>(Process) == FPlatformProcess::GetCurrentProcessId()", fixture)
+        self.assertIn("ProducerOutput.Mid(1, ProducerOutput.Len() - 2)", fixture)
+        self.assertIn("ResumeRequested || !Token.StartsWith(ResumePrefix", fixture)
         route = function_body(fixture, "void AHomesteadSmokeTest::PrepareNativeResumeChecks(")
         self.assertIn('Controller->SaveRoute.Mode != TEXT("test-sandbox")', route)
         self.assertIn("Tap(EKeys::F9)", route)
