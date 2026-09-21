@@ -86,8 +86,19 @@ retained in their original Saved directories. Relevant checks:52 preview/
 configuration/fresh-QA guards,34 negative fern/cook policy cases, four native
 manifest tests, genuine Shipping compilation and strict OpenSpec validation.
 
-Normal Preview selection may use this qualified usable candidate while
+Normal Preview now selects this qualified usable candidate while
 retaining the previous offline-startup candidate for cheap rollback. Normal
 launch has no QA flag, test actor, forced action or automatic quit. Continuing
 priorities are the ready waves-hair comparison in game, the remaining woodland
 palette and the separately implemented UI. None is claimed complete here.
+
+The actual `Start-Preview.ps1 -ValidateOnly` result passed for this executable,
+profile `jenny-review`, native `-Res=0x0wf` and candidate-local UserDir. The
+existing Desktop `Homestead.lnk` already targets `Preview.cmd`; it was neither
+rewritten nor launched. Graphics were copied byte-for-byte from the previously
+selected candidate only into the new candidate, SHA-256
+`7356A1167F34BF874F60FC993764D36022E5EDD2C21506F3B8CAF98A4ACF22D0`.
+The source/evidence checkpoint is `7bb393586fdf50eea5ec3cc527942317895a847c`,
+verified on the existing private remote. The local acceptance receipt links
+that checkpoint and the qualified proof index. `previous-preview.json` in the
+new candidate preserves the exact previous selection; both packages remain.
