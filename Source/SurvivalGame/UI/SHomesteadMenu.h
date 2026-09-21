@@ -31,18 +31,19 @@ public:
     void Refresh();
 
 private:
-    enum class ERegion { Tabs, Session, Content, Details, Actions };
-    enum class EDialog { None, Exit, SaveFailed, Unsaved, Restart };
+    enum class ERegion { Tabs, Session, Inventory, Content, Details, Actions };
+    enum class EDialog { None, Exit, SaveFailed, Unsaved, Restart, TestReset, Amount, Merge };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
     TSharedPtr<SBox> ContentHost;
     TSharedPtr<SBox> ModalHost;
+    TSharedPtr<SBox> DetailsHost;
     TSharedPtr<SScrollBox> Scroll;
     TSharedPtr<SScrollBox> DetailsScroll;
     TArray<TSharedPtr<SWidget>> Cells;
     TArray<FHomesteadRow> Entries;
     TArray<int32> RowIndices;
-    TArray<int32> Actions;
+    TArray<EHomesteadItemAction> Actions;
     int32 SeenPage = -1;
     int32 Hover = INDEX_NONE;
     int32 ContentSelection = 0;
@@ -50,7 +51,8 @@ private:
     int32 SessionSelection = 0;
     int32 DialogSelection = 0;
     int32 FocusedTab = 0;
-    int32 RememberedIds[7] = {-1, -1, -1, -1, -1, -1, -1};
+    FString RememberedKeys[7];
+    int32 InventorySelection = 0;
     ERegion Region = ERegion::Content;
     EDialog Dialog = EDialog::None;
     FString DialogError;
@@ -59,7 +61,13 @@ private:
     bool bShift = false;
     bool bSaving = false;
     bool bRecovery = false;
+    bool bResetPromptShown = false;
     double NextAxisMove = 0;
+    FHomesteadRow PendingRow;
+    EHomesteadItemAction PendingAction = EHomesteadItemAction::Primary;
+    uint64 PendingRevision = 0;
+    int32 Amount = 1, MaximumAmount = 1;
+    TArray<int32> MergeTargets;
 
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();
@@ -75,7 +83,10 @@ private:
     int32 DetailIndex() const;
     void Select(int32 Index);
     void Activate();
-    void RunAction(int32 Action);
+    void RunAction(EHomesteadItemAction Action);
+    FString ActionLabel(EHomesteadItemAction Action) const;
+    FString RowKey(const FHomesteadRow& Row) const;
+    void ChangeInventoryView(int32 View);
     void CycleRegion(int32 Direction);
     void SetDialog(EDialog Value);
     void BuildDialog();

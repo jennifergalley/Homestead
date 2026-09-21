@@ -1,0 +1,170 @@
+#include "HomesteadController.h"
+
+namespace
+{
+bool IsFood(Homestead::Item Item)
+{
+    return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
+}
+FString FromUtf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
+}
+
+void AHomesteadController::MenuInventoryView(int32 View)
+{
+    MenuInventoryViewIndex = FMath::Clamp(View, 0, 2);
+}
+
+FString AHomesteadController::MenuInventorySummary() const
+{
+    if (MenuInventoryViewIndex == 2) return TEXT("Wearing  |  Equipped clothes do not use pack capacity");
+    if (MenuInventoryViewIndex == 1)
+    {
+        const int Chest = Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach);
+        return Chest >= 0 ? FString::Printf(TEXT("Chest %d  |  %d / 120 units"), Chest, Sim.ChestUsedCapacity(Chest))
+            : TEXT("No reachable chest  |  Move near storage to open it");
+    }
+    return FString::Printf(TEXT("Your pack  |  %d / 120 units"), Sim.UsedCapacity());
+}
+
+TArray<FHomesteadRow> AHomesteadController::MenuRows() const
+{
+    if (Page != 0)
+    {
+        auto Result = Rows();
+        if (Page == 6)
+            Result.RemoveAll([](const FHomesteadRow& Row) { return Row.Id == 4 || Row.Id == 5; });
+        if (Page == 1)
+        {
+            for (int Index = 0; Index < static_cast<int>(Homestead::WearableDefinition::Count); ++Index)
+            {
+                const auto Definition = static_cast<Homestead::WearableDefinition>(Index);
+                const auto* Info = Homestead::GetWearableDefinition(Definition);
+                if (!Info || Info->fiberCost <= 0) continue;
+                FHomesteadRow Row;
+                Row.Id = Index; Row.SubjectId = Index; Row.Subject = EHomesteadMenuSubject::GarmentRecipe;
+                Row.Name = Row.Label = FromUtf8(Info->name);
+                Row.Detail = TEXT("Needs: ") + FromUtf8(Homestead::GarmentRequirements(Definition));
+                Row.Action = TEXT("Craft clothing");
+                Row.Icon = FName(UTF8_TO_TCHAR(Info->key));
+                Result.Add(MoveTemp(Row));
+            }
+        }
+        return Result;
+    }
+
+    TArray<FHomesteadRow> Result;
+    const int Chest = Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach);
+    const int Container = MenuInventoryViewIndex == 1 ? Chest : 0;
+    auto AddWearable = [&](const Homestead::WearableInstance& Instance)
+    {
+        const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
+        if (!Info) return;
+        FHomesteadRow Row;
+        Row.Id = static_cast<int>(Instance.definition); Row.SubjectId = Instance.id;
+        Row.Subject = EHomesteadMenuSubject::Wearable;
+        Row.ContainerId = Instance.owner == Homestead::WearableOwner::Chest ? Instance.chestId
+            : Instance.owner == Homestead::WearableOwner::Equipped ? -1 : 0;
+        Row.DestinationId = Row.ContainerId == 0 ? Chest : 0;
+        Row.Quantity = 1;
+        Row.Name = Row.Label = FromUtf8(Info->name);
+        Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
+            : FString::Printf(TEXT("Chest %d"), Row.ContainerId);
+        Row.Detail = FromUtf8(Homestead::WearableDescription(Instance.definition));
+        if (Info->dyeable) Row.Detail += TEXT("\nDye: ") + FromUtf8(Homestead::DyeName(Instance.dye));
+        Row.Detail += FString::Printf(TEXT("\nOwned item #%d\n"), Instance.id);
+        if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Torso))) Row.Detail += TEXT("Torso + legs");
+        else if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Apron))) Row.Detail += TEXT("Apron layer (requires tunic)");
+        else Row.Detail += TEXT("Feet");
+        Row.Action = Row.ContainerId < 0 ? TEXT("Unequip") : Row.ContainerId == 0 ? TEXT("Equip") : TEXT("Take to pack");
+        Row.Icon = Instance.definition == Homestead::WearableDefinition::LeatherShoes ? FName(TEXT("leather-shoes"))
+            : FName(UTF8_TO_TCHAR(Info->key));
+        Row.CanStore = Row.ContainerId == 0 && Chest >= 0;
+        Row.CanTake = Row.ContainerId > 0;
+        Result.Add(MoveTemp(Row));
+    };
+    if (MenuInventoryViewIndex == 2)
+    {
+        for (const auto& Instance : State().wearables)
+            if (Instance.owner == Homestead::WearableOwner::Equipped) AddWearable(Instance);
+        return Result;
+    }
+    if (Container < 0) return Result;
+    const auto* Layout = Sim.GetLayout(Container);
+    if (!Layout) return Result;
+    for (const auto& Entry : *Layout)
+    {
+        if (Entry.wearableId)
+        {
+            if (const auto* Instance = Sim.GetWearable(Entry.wearableId)) AddWearable(*Instance);
+            continue;
+        }
+        FHomesteadRow Row;
+        Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
+        Row.Subject = EHomesteadMenuSubject::ItemGroup;
+        Row.ContainerId = Container; Row.DestinationId = Container == 0 ? Chest : 0; Row.Quantity = Entry.quantity;
+        Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
+        Row.Location = Container == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), Container);
+        Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
+            IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
+        Row.CanStore = Container == 0 && Chest >= 0;
+        Row.CanTake = Container > 0;
+        Row.Action = Container > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : TEXT("Inspect");
+        Result.Add(MoveTemp(Row));
+    }
+    return Result;
+}
+
+bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action,
+    int32 Amount, uint64 ExpectedRevision)
+{
+    if (bMenuSaveInProgress || IsFailed() || bTestResetRequired)
+    { Notify(TEXT("This action is unavailable until you return to a playable clearing."), true); return false; }
+    if (ExpectedRevision != Sim.GetRevision())
+    { Notify(TEXT("Your inventory changed. Select the item again before confirming."), true); return false; }
+    Homestead::Result Result{false, "That action is not available for this item."};
+    if (Row.Subject == EHomesteadMenuSubject::GarmentRecipe || Action == EHomesteadItemAction::Equip
+        || Action == EHomesteadItemAction::Unequip || Action == EHomesteadItemAction::Dye)
+    {
+        Notify(TEXT("Compatible modular clothing has not been admitted in this build. Your possessions have not changed."), true);
+        return false;
+    }
+    if (Row.Subject == EHomesteadMenuSubject::Wearable)
+    {
+        if (Action == EHomesteadItemAction::Transfer && Row.ContainerId >= 0 && Row.DestinationId >= 0)
+            Result = Sim.MoveWearable(Row.SubjectId, Row.DestinationId, PlayerPoint(), ExpectedRevision);
+    }
+    else if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
+    {
+        if (Action == EHomesteadItemAction::Transfer)
+        {
+            const int Chest = Row.ContainerId > 0 ? Row.ContainerId : Row.DestinationId;
+            Result = Sim.TransferGroup(Chest, Row.SubjectId, Amount, Row.ContainerId == 0, PlayerPoint(), ExpectedRevision);
+        }
+        else if (Action == EHomesteadItemAction::Split)
+            Result = Sim.SplitGroup(Row.ContainerId, Row.SubjectId, Amount, PlayerPoint(), ExpectedRevision);
+        else if (Action == EHomesteadItemAction::Merge)
+            Result = Sim.MergeGroups(Row.ContainerId, Row.SubjectId, Amount, PlayerPoint(), ExpectedRevision);
+        else if (Action == EHomesteadItemAction::Primary && Row.ContainerId == 0)
+        {
+            if (IsFood(static_cast<Homestead::Item>(Row.Id))) Result = Sim.Eat(static_cast<Homestead::Item>(Row.Id));
+            else { Notify(Row.Detail); return true; }
+        }
+    }
+    if (Action == EHomesteadItemAction::MoveEarlier || Action == EHomesteadItemAction::MoveLater)
+    {
+        const auto* Layout = Sim.GetLayout(Row.ContainerId);
+        if (Layout)
+        {
+            for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
+                if ((Row.Subject == EHomesteadMenuSubject::Wearable && (*Layout)[Index].wearableId == Row.SubjectId)
+                    || (Row.Subject == EHomesteadMenuSubject::ItemGroup && (*Layout)[Index].groupId == Row.SubjectId))
+                {
+                    Result = Sim.ReorderEntry(Row.ContainerId, Index, Index + (Action == EHomesteadItemAction::MoveEarlier ? -1 : 1),
+                        PlayerPoint(), ExpectedRevision);
+                    break;
+                }
+        }
+    }
+    Notify(Result);
+    return Result.ok;
+}

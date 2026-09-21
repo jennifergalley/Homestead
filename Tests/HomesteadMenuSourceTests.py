@@ -68,6 +68,29 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIsNotNone(declaration)
         self.assertEqual(len(re.findall(r'TEXT\("([^"]+)"\)', declaration.group(1))), 14)
 
+    def test_current_schema_and_explicit_reset(self):
+        body = function_body(CONTROLLER, "UHomesteadSave* AHomesteadController::ReadSave(")
+        self.assertIn("Save->IsCurrentVersion()", body)
+        self.assertIn("Homestead::ResultCode::UnsupportedVersion", body)
+        save = function_body(CONTROLLER, "bool AHomesteadController::SaveSlot(")
+        self.assertIn("if (bTestResetRequired)", save)
+        load = function_body(CONTROLLER, "bool AHomesteadController::LoadLatest(")
+        self.assertNotIn("starting a new session", load)
+        self.assertIn("!bHasPlayableSession", load)
+
+    def test_inventory_adapter_uses_authority_and_captured_revision(self):
+        adapter = (SOURCE / "UI" / "HomesteadMenuInventory.cpp").read_text()
+        self.assertIn("ExpectedRevision != Sim.GetRevision()", adapter)
+        for api in ("TransferGroup", "SplitGroup", "MergeGroups", "ReorderEntry", "MoveWearable"):
+            self.assertIn(f"Sim.{api}(", adapter)
+        self.assertIn("PendingRevision = Controller->Simulation().GetRevision()", MENU)
+        self.assertNotIn("const_cast", adapter)
+
+    def test_pointer_bridge_is_scoped_and_does_not_add_classifier(self):
+        self.assertIn("RegisterInputPreProcessor(MenuPointerInput)", CONTROLLER)
+        self.assertIn("UnregisterInputPreProcessor(MenuPointerInput)", CONTROLLER)
+        self.assertEqual(CONTROLLER.count("PromptIntent.Classify("), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -147,10 +147,13 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
 {
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
-    FString Next = FString::Printf(TEXT("%d:%d"), Controller->BookPage(), Controller->IsFailed() && !Controller->IsBookOpen());
-    for (const auto& Row : Controller->Rows())
-        Next += FString::Printf(TEXT("|%d:%s:%s:%s:%d:%d"), Row.Id, *Row.Label, *Row.Detail, *Row.Action, Row.CanStore, Row.CanTake);
+    FString Next = FString::Printf(TEXT("%d:%d:%d"), Controller->BookPage(), Controller->IsFailed() && !Controller->IsBookOpen(), Controller->InventoryView());
+    for (const auto& Row : Controller->MenuRows())
+        Next += FString::Printf(TEXT("|%s:%s:%s:%s:%d:%d:%d"), *RowKey(Row), *Row.Label, *Row.Detail, *Row.Action, Row.CanStore, Row.CanTake, Row.DestinationId);
     if (Next != Signature) { Signature = Next; Refresh(); }
+    if (Controller->MenuNeedsTestReset() && !bResetPromptShown)
+    { bResetPromptShown = true; SetDialog(EDialog::TestReset); }
+    if (!Controller->MenuNeedsTestReset()) bResetPromptShown = false;
     if (Controller->UsesGamepad()) Hover = INDEX_NONE;
 }
 
@@ -162,17 +165,20 @@ void SHomesteadMenu::Refresh()
     const int32 OldPage = SeenPage;
     const bool WasRecovery = bRecovery;
     bRecovery = Controller->IsFailed() && !Controller->IsBookOpen();
-    const int32 OldId = Entries.IsValidIndex(ContentSelection) ? Entries[ContentSelection].Id : -1;
+    const FString OldKey = Entries.IsValidIndex(ContentSelection) ? RowKey(Entries[ContentSelection]) : FString();
     SeenPage = Controller->BookPage();
     Entries.Reset(); RowIndices.Reset(); Cells.Reset();
-    const auto Rows = Controller->Rows();
+    const auto Rows = Controller->MenuRows();
+    const auto LegacyRows = Controller->Rows();
     for (int32 Index = 0; Index < Rows.Num(); ++Index)
     {
         if (SeenPage == 4 && Rows[Index].Id == 9) continue; // The exit is pinned, never in scrolled controls.
-        Entries.Add(Rows[Index]); RowIndices.Add(Index);
+        Entries.Add(Rows[Index]);
+        RowIndices.Add(Rows[Index].Subject == EHomesteadMenuSubject::Legacy
+            ? LegacyRows.IndexOfByPredicate([&](const FHomesteadRow& Row) { return Row.Id == Rows[Index].Id; }) : INDEX_NONE);
     }
-    const int32 DesiredId = OldPage == SeenPage ? OldId : RememberedIds[SeenPage];
-    int32 Match = Entries.IndexOfByPredicate([DesiredId](const FHomesteadRow& Row) { return Row.Id == DesiredId; });
+    const FString DesiredKey = OldPage == SeenPage ? OldKey : RememberedKeys[SeenPage];
+    int32 Match = Entries.IndexOfByPredicate([&](const FHomesteadRow& Row) { return RowKey(Row) == DesiredKey; });
     ContentSelection = Match >= 0 ? Match : FMath::Clamp(ContentSelection, 0, FMath::Max(0, Entries.Num() - 1));
     Hover = INDEX_NONE;
     if (OldPage != SeenPage || WasRecovery != bRecovery)
@@ -207,7 +213,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             + SHorizontalBox::Slot().FillWidth(1)
             [ Text(SeenPage <= 2 ? Controller->BookTitle() : Tabs[SeenPage], 28) ]
             + SHorizontalBox::Slot().AutoWidth()
-            [ Text(SeenPage == 0 ? FString::Printf(TEXT("Pack %d / %d units"), Controller->Simulation().UsedCapacity(), Homestead::InventoryCapacity)
+            [ Text(SeenPage == 0 ? Controller->MenuInventorySummary()
                 : Controller->PreviewLabel(), 17) ]
         ]
         + SVerticalBox::Slot().FillHeight(1)
@@ -227,6 +233,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [this]() { RequestExit(); }, TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Session && SessionSelection == 1 ? Gold : Pine; })) ]
         ];
     }
+    if (SeenPage == 0)
+    {
+        TSharedPtr<SHorizontalBox> Views;
+        Body->AddSlot().AutoHeight().Padding(0, 0, 0, 12)[ SAssignNew(Views, SHorizontalBox) ];
+        const TCHAR* Names[] = {TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")};
+        for (int32 View = 0; View < 3; ++View)
+            Views->AddSlot().FillWidth(1).Padding(0, 0, 8, 0)
+            [ MakeButton(Names[View], [this, View]() { ChangeInventoryView(View); },
+                TAttribute<FSlateColor>::CreateLambda([this, View]()
+                { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })) ];
+    }
     Body->AddSlot().FillHeight(1)
     [
         SNew(SHorizontalBox)
@@ -245,12 +262,15 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Details ? Gold : Pine; })
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Pine).Padding(16)
-                [ BuildDetails() ]
+                [ SAssignNew(DetailsHost, SBox)[ BuildDetails() ] ]
             ]
         ]
     ];
     if (Entries.IsEmpty())
-        Grid->AddSlot(0, 0)[ Text(TEXT("Your pack is empty.\nGather supplies or take an item from a nearby chest.")) ];
+        Grid->AddSlot(0, 0)[ Text(SeenPage == 0 && Controller->InventoryView() == 1
+            ? TEXT("No items in reachable storage.\nStand near a chest to manage its contents.")
+            : SeenPage == 0 && Controller->InventoryView() == 2 ? TEXT("No removable clothing is equipped.")
+            : TEXT("Your pack is empty.\nGather supplies or take an item from a nearby chest.")) ];
     for (int32 Index = 0; Index < Entries.Num(); ++Index)
     {
         const auto& Row = Entries[Index];
@@ -276,8 +296,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
         if (SeenPage == 0)
         {
-            const auto Item = static_cast<Homestead::Item>(Row.Id);
-            Contents->AddSlot().AutoHeight()[ Text(FString::Printf(TEXT("Carried %d"), Controller->Simulation().Count(Item)), 15) ];
+            Contents->AddSlot().AutoHeight()[ Text(FString::Printf(TEXT("%s %d"), *Row.Location, Row.Quantity), 15) ];
         }
         Cell = SNew(SBox).MinDesiredWidth(SeenPage <= 2 ? 100 : SeenPage == 4 || SeenPage == 6 ? 330 : 670)
             .MinDesiredHeight(SeenPage <= 2 ? 116 : 72)
@@ -317,30 +336,45 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 .Text_Lambda([this]() { return FText::FromString(DetailsText()); })
             ]
         ];
-    Actions = {0};
-    if (SeenPage == 0) { Actions.Add(1); Actions.Add(2); }
+    Actions.Reset();
+    if (Entries.IsValidIndex(ContentSelection))
+    {
+        const auto& Row = Entries[ContentSelection];
+        if (Row.Subject == EHomesteadMenuSubject::Wearable)
+        {
+            Actions.Add(Row.ContainerId < 0 ? EHomesteadItemAction::Unequip : Row.ContainerId == 0
+                ? EHomesteadItemAction::Equip : EHomesteadItemAction::Transfer);
+            const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
+            if (Info && Info->dyeable) Actions.Add(EHomesteadItemAction::Dye);
+            if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Transfer);
+        }
+        else if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
+        {
+            Actions.Add(Row.ContainerId == 0 ? EHomesteadItemAction::Primary : EHomesteadItemAction::Transfer);
+            if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Transfer);
+            if (Row.Quantity > 1) Actions.Add(EHomesteadItemAction::Split);
+            Actions.Add(EHomesteadItemAction::Merge);
+        }
+        else Actions.Add(EHomesteadItemAction::Primary);
+        if (SeenPage == 0 && Row.ContainerId >= 0)
+        { Actions.Add(EHomesteadItemAction::MoveEarlier); Actions.Add(EHomesteadItemAction::MoveLater); }
+    }
+    ActionSelection = FMath::Clamp(ActionSelection, 0, FMath::Max(0, Actions.Num() - 1));
     for (int32 Index = 0; Index < Actions.Num(); ++Index)
     {
-        const int32 Action = Actions[Index];
-        Box->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+        const auto Action = Actions[Index];
+        Box->AddSlot().AutoHeight().Padding(0, 4, 0, 0)
         [
-            SNew(SButton).IsFocusable(false).ContentPadding(12)
+            SNew(SButton).IsFocusable(false).ContentPadding(8)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? Gold : Selected; })
             .OnClicked_Lambda([this, Action]() { if (PointerAction()) RunAction(Action); return FReply::Handled(); })
             [
                 SNew(STextBlock).AutoWrapText(true)
                 .ColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? FSlateColor(Pine) : FSlateColor(Ink); })
-                .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+                .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
                 .Text_Lambda([this, Action]()
                 {
-                    if (Action == 1) return FText::FromString(TEXT("Store 1 in nearby chest"));
-                    if (Action == 2) return FText::FromString(TEXT("Take 1 from nearby chest"));
-                    const int32 Index = DetailIndex();
-                    if (!Entries.IsValidIndex(Index)) return FText::FromString(TEXT("No item selected"));
-                    const auto& Row = Entries[Index];
-                    return FText::FromString(SeenPage == 0 ? (Row.Action.IsEmpty() ? TEXT("Inspect item") : Row.Action)
-                        : SeenPage == 1 ? TEXT("Craft") : SeenPage == 2 ? TEXT("Plan placement")
-                        : SeenPage == 3 || SeenPage == 5 ? TEXT("Read") : TEXT("Change / activate"));
+                    return FText::FromString(ActionLabel(Action));
                 })
             ]
         ];
@@ -350,11 +384,13 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
 
 FString SHomesteadMenu::EntryName(const FHomesteadRow& Row) const
 {
+    if (!Row.Name.IsEmpty()) return Row.Name;
     return SeenPage == 0 && Row.Id >= 0 && Row.Id < Homestead::ItemCount
         ? FString(UTF8_TO_TCHAR(Homestead::ItemName(static_cast<Homestead::Item>(Row.Id)))) : Row.Label;
 }
 FName SHomesteadMenu::EntryIcon(const FHomesteadRow& Row) const
 {
+    if (!Row.Icon.IsNone()) return Row.Icon;
     if (SeenPage == 0 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(ItemIcons)) return FName(ItemIcons[Row.Id]);
     if (SeenPage == 1 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(RecipeIcons)) return FName(RecipeIcons[Row.Id]);
     if (SeenPage == 2 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(PieceIcons)) return FName(PieceIcons[Row.Id]);
@@ -366,11 +402,10 @@ FString SHomesteadMenu::DetailsText() const
     const int32 Index = DetailIndex();
     if (!Entries.IsValidIndex(Index)) return TEXT("Select an item to see its details.\n\nNothing here is a recipe output you already own.");
     const auto& Row = Entries[Index];
-    FString Detail = Row.Label + TEXT("\n\n") + Row.Detail;
+    FString Detail = Row.Label + TEXT("\n") + Row.Location + TEXT("\n\n") + Row.Detail;
     if (SeenPage == 0)
     {
-        if (!Row.CanStore) Detail += TEXT("\n\nStore unavailable: carry this item and stand near a chest.");
-        if (!Row.CanTake) Detail += TEXT("\n\nTake unavailable: no stock in nearby storage.");
+        if (Row.ContainerId == 0 && !Row.CanStore) Detail += TEXT("\n\nStand near a chest to store this item.");
     }
     if (SeenPage == 4 && Controller.IsValid() && Controller->IsFailed())
         Detail += TEXT("\n\nRecovery: saving a failed state is disabled. Retry a checkpoint or quit explicitly.");
@@ -382,8 +417,40 @@ FString SHomesteadMenu::Footer() const
     if (bRecovery) return Controller->UsesGamepad() ? TEXT("A  Retry checkpoint    Y  Settings / Quit")
         : TEXT("Enter  Retry checkpoint    G  Settings / Quit");
     return Controller->UsesGamepad()
-        ? TEXT("LB / RB  Tabs    LT / RT  Regions    D-pad  Select    A  Activate    X  Store    Y  Take    B  Back")
-        : TEXT("Ctrl+Tab  Tabs    Tab  Regions    Arrows  Select    Enter  Activate    F  Store    G  Take    Esc  Back");
+        ? TEXT("LB / RB  Tabs    LT / RT  Regions    D-pad  Select    A  Actions    X  Transfer    Y  Split    B  Back")
+        : TEXT("Ctrl+Tab  Tabs    Tab  Regions    Arrows  Select    Enter  Actions    F  Transfer    G  Split    Esc  Back");
+}
+FString SHomesteadMenu::RowKey(const FHomesteadRow& Row) const
+{
+    return FString::Printf(TEXT("%d:%d:%d"), static_cast<int>(Row.Subject), Row.ContainerId,
+        Row.Subject == EHomesteadMenuSubject::Legacy ? Row.Id : Row.SubjectId);
+}
+FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
+{
+    if (!Entries.IsValidIndex(ContentSelection)) return TEXT("No item selected");
+    const auto& Row = Entries[ContentSelection];
+    switch (Action)
+    {
+    case EHomesteadItemAction::Transfer: return Row.ContainerId > 0 ? TEXT("Take to pack...")
+        : Row.DestinationId < 0 ? TEXT("Store (no nearby chest)") : FString::Printf(TEXT("Store in chest %d..."), Row.DestinationId);
+    case EHomesteadItemAction::Split: return TEXT("Split stack...");
+    case EHomesteadItemAction::Merge: return TEXT("Merge with stack...");
+    case EHomesteadItemAction::MoveEarlier: return TEXT("Move earlier in grid");
+    case EHomesteadItemAction::MoveLater: return TEXT("Move later in grid");
+    case EHomesteadItemAction::Equip: return TEXT("Equip");
+    case EHomesteadItemAction::Unequip: return TEXT("Unequip to pack");
+    case EHomesteadItemAction::Dye: return TEXT("Change dye");
+    default: return Row.Action.IsEmpty() ? (SeenPage == 3 || SeenPage == 5 ? TEXT("Read") : TEXT("Change / activate")) : Row.Action;
+    }
+}
+void SHomesteadMenu::ChangeInventoryView(int32 View)
+{
+    if (Dialog != EDialog::None || !Controller.IsValid()) return;
+    InventorySelection = FMath::Clamp(View, 0, 2);
+    Controller->MenuInventoryView(InventorySelection);
+    ContentSelection = 0; Hover = INDEX_NONE;
+    Region = ERegion::Content;
+    Refresh();
 }
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
 {
@@ -395,33 +462,56 @@ void SHomesteadMenu::Select(int32 Index)
     ContentSelection = FMath::Clamp(Index, 0, FMath::Max(0, Entries.Num() - 1));
     if (Entries.IsValidIndex(ContentSelection))
     {
-        RememberedIds[SeenPage] = Entries[ContentSelection].Id;
-        Controller->MenuSelect(RowIndices[ContentSelection]);
+        RememberedKeys[SeenPage] = RowKey(Entries[ContentSelection]);
+        if (RowIndices[ContentSelection] != INDEX_NONE) Controller->MenuSelect(RowIndices[ContentSelection]);
         if (Scroll && Cells.IsValidIndex(ContentSelection))
             Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
+        if (DetailsHost) DetailsHost->SetContent(BuildDetails());
     }
 }
 bool SHomesteadMenu::PointerAction()
 {
     return Controller.IsValid() && Controller->MenuAcceptsPhysicalInput();
 }
-void SHomesteadMenu::RunAction(int32 Action)
+void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
 {
     if (!Controller.IsValid() || Dialog != EDialog::None || bSaving) return;
-    if (Hover != INDEX_NONE) Select(Hover);
     if (!Entries.IsValidIndex(ContentSelection)) return;
+    const auto Row = Entries[ContentSelection];
+    if (Row.Subject != EHomesteadMenuSubject::Legacy)
+    {
+        PendingRow = Row; PendingAction = Action; PendingRevision = Controller->Simulation().GetRevision();
+        if ((Action == EHomesteadItemAction::Transfer || Action == EHomesteadItemAction::Split)
+            && Row.Subject == EHomesteadMenuSubject::ItemGroup)
+        {
+            Amount = 1; MaximumAmount = Row.Quantity - (Action == EHomesteadItemAction::Split ? 1 : 0);
+            if (MaximumAmount < 1)
+            { Controller->MenuItemAction(Row, Action, 1, PendingRevision); return; }
+            SetDialog(EDialog::Amount); return;
+        }
+        if (Action == EHomesteadItemAction::Merge)
+        {
+            MergeTargets.Reset();
+            for (const auto& Target : Entries)
+                if (Target.Subject == EHomesteadMenuSubject::ItemGroup && Target.Id == Row.Id && Target.ContainerId == Row.ContainerId
+                    && Target.SubjectId != Row.SubjectId) MergeTargets.Add(Target.SubjectId);
+            SetDialog(EDialog::Merge); return;
+        }
+        Controller->MenuItemAction(Row, Action, 1, PendingRevision);
+        Refresh();
+        return;
+    }
     Controller->MenuSelect(RowIndices[ContentSelection]);
-    if (Action == 1) Controller->MenuStore();
-    else if (Action == 2) Controller->MenuTake();
-    else if (SeenPage == 4 && Entries[ContentSelection].Id == 8) SetDialog(EDialog::Restart);
+    if (SeenPage == 4 && Row.Id == 8) SetDialog(EDialog::Restart);
     else Controller->MenuActivate();
 }
 void SHomesteadMenu::Activate()
 {
     if (Dialog != EDialog::None) { DialogAction(DialogSelection); return; }
     if (Region == ERegion::Tabs) ChangePage(FocusedTab);
+    else if (Region == ERegion::Inventory) ChangeInventoryView(InventorySelection);
     else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else RequestExit(); }
-    else if (Region == ERegion::Actions) RunAction(Actions.IsValidIndex(ActionSelection) ? Actions[ActionSelection] : 0);
+    else if (Region == ERegion::Actions && Actions.IsValidIndex(ActionSelection)) RunAction(Actions[ActionSelection]);
     else { Region = ERegion::Actions; ActionSelection = 0; }
 }
 void SHomesteadMenu::ChangePage(int32 Page)
@@ -434,6 +524,7 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
 {
     TArray<ERegion> Regions = {ERegion::Tabs};
     if (SeenPage == 4) Regions.Add(ERegion::Session);
+    if (SeenPage == 0) Regions.Add(ERegion::Inventory);
     Regions.Add(ERegion::Content); Regions.Add(ERegion::Details); Regions.Add(ERegion::Actions);
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
@@ -465,6 +556,11 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float Amount)
     int32 Dy = Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down ? 1 : Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up ? -1 : 0;
     if (Dialog != EDialog::None)
     {
+        if (Dialog == EDialog::Amount)
+        {
+            const int32 Delta = Dx ? Dx : Key == EKeys::Gamepad_RightShoulder ? 10 : Key == EKeys::Gamepad_LeftShoulder ? -10 : 0;
+            if (Delta) { Amount = FMath::Clamp(Amount + Delta, 1, MaximumAmount); BuildDialog(); return true; }
+        }
         if (Dx || Dy) { DialogSelection = HomesteadMenuNavigation::Cycle(DialogSelection, DialogCount(), Dx ? Dx : Dy); }
         return true;
     }
@@ -478,12 +574,13 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float Amount)
     }
     if (Key == EKeys::Gamepad_LeftTrigger) { CycleRegion(-1); return true; }
     if (Key == EKeys::Gamepad_RightTrigger) { CycleRegion(1); return true; }
-    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left) { if (SeenPage == 0) RunAction(1); return true; }
-    if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0) RunAction(2); return true; }
+    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left) { if (SeenPage == 0) RunAction(EHomesteadItemAction::Transfer); return true; }
+    if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0) RunAction(EHomesteadItemAction::Split); return true; }
     if (Dx || Dy)
     {
         Hover = INDEX_NONE;
         if (Region == ERegion::Tabs) FocusedTab = HomesteadMenuNavigation::Cycle(FocusedTab, 7, Dx ? Dx : Dy);
+        else if (Region == ERegion::Inventory) InventorySelection = FMath::Clamp(InventorySelection + (Dx ? Dx : Dy), 0, 2);
         else if (Region == ERegion::Session) SessionSelection = FMath::Clamp(SessionSelection + (Dx ? Dx : Dy), 0, 1);
         else if (Region == ERegion::Details && DetailsScroll)
             DetailsScroll->SetScrollOffset(FMath::Max(0.0f, DetailsScroll->GetScrollOffset() + (Dy ? Dy : Dx) * 48));
@@ -538,13 +635,40 @@ void SHomesteadMenu::SetDialog(EDialog Value)
     Dialog = Value; DialogSelection = 0;
     BuildDialog();
 }
-int32 SHomesteadMenu::DialogCount() const { return Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed ? 3 : 2; }
+int32 SHomesteadMenu::DialogCount() const
+{
+    if (Dialog == EDialog::Amount) return 4;
+    if (Dialog == EDialog::Merge) return MergeTargets.Num() + 1;
+    return Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed ? 3 : 2;
+}
 void SHomesteadMenu::BuildDialog()
 {
     if (Dialog == EDialog::None) { ModalHost->SetVisibility(EVisibility::Collapsed); return; }
     FString Title, Description;
     TArray<FString> Labels;
-    if (Dialog == EDialog::Exit)
+    if (Dialog == EDialog::Amount)
+    {
+        Title = PendingAction == EHomesteadItemAction::Split ? TEXT("Split stack") : TEXT("Transfer items");
+        const FString Destination = PendingAction == EHomesteadItemAction::Split ? TEXT("A new stack in the same container")
+            : PendingRow.ContainerId > 0 ? TEXT("Your pack") : FString::Printf(TEXT("Chest %d"), PendingRow.DestinationId);
+        Description = FString::Printf(TEXT("%s\nFrom: %s\nTo: %s\n\nAmount: %d / %d\nLeft / Right: one   LB / RB: ten\nUp / Down: choose a button"),
+            *PendingRow.Name, *PendingRow.Location, *Destination, Amount, MaximumAmount);
+        Labels = {TEXT("Cancel"), TEXT("Confirm"), TEXT("One"), TEXT("All available")};
+    }
+    else if (Dialog == EDialog::Merge)
+    {
+        Title = TEXT("Merge stacks");
+        Description = MergeTargets.IsEmpty() ? TEXT("No other matching stack exists in this container.")
+            : TEXT("Choose the destination stack. Quantities are combined; nothing changes until you confirm a destination.");
+        Labels.Add(TEXT("Cancel"));
+        for (int32 Target : MergeTargets)
+        {
+            const auto* Row = Entries.FindByPredicate([Target](const FHomesteadRow& Entry)
+                { return Entry.Subject == EHomesteadMenuSubject::ItemGroup && Entry.SubjectId == Target; });
+            Labels.Add(FString::Printf(TEXT("Stack #%d  (%d)"), Target, Row ? Row->Quantity : 0));
+        }
+    }
+    else if (Dialog == EDialog::Exit)
     {
         Title = TEXT("Save and quit?");
         Description = TEXT("Save this homestead before closing the game.\n\n") + Controller->MenuSaveStatus();
@@ -561,6 +685,12 @@ void SHomesteadMenu::BuildDialog()
         Title = TEXT("Quit without saving?");
         Description = TEXT("Progress since the last successful save will be lost.\n\n") + Controller->MenuSaveStatus();
         Labels = {TEXT("Cancel"), TEXT("Quit without saving")};
+    }
+    else if (Dialog == EDialog::TestReset)
+    {
+        Title = TEXT("This test save could not be loaded");
+        Description = Controller->MenuLoadProblem() + TEXT("\n\nA reset starts a fresh test world. It is not a migration of the old progress.");
+        Labels = {TEXT("Stay in Settings"), TEXT("Start a new test clearing")};
     }
     else
     {
@@ -589,9 +719,22 @@ void SHomesteadMenu::DialogAction(int32 Index)
 {
     if (!Controller.IsValid() || bSaving) return;
     if (Index == 0) { SetDialog(EDialog::None); return; }
+    if (Dialog == EDialog::Amount)
+    {
+        if (Index == 2) { Amount = 1; BuildDialog(); return; }
+        if (Index == 3) { Amount = MaximumAmount; BuildDialog(); return; }
+        Controller->MenuItemAction(PendingRow, PendingAction, Amount, PendingRevision);
+        SetDialog(EDialog::None); Refresh(); return;
+    }
+    if (Dialog == EDialog::Merge)
+    {
+        if (MergeTargets.IsValidIndex(Index - 1))
+            Controller->MenuItemAction(PendingRow, PendingAction, MergeTargets[Index - 1], PendingRevision);
+        SetDialog(EDialog::None); Refresh(); return;
+    }
     if ((Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed) && Index == 2) { SetDialog(EDialog::Unsaved); return; }
     if (Dialog == EDialog::Unsaved) Controller->MenuQuitWithoutSaving();
-    else if (Dialog == EDialog::Restart) { SetDialog(EDialog::None); Controller->MenuRestart(); }
+    else if (Dialog == EDialog::Restart || Dialog == EDialog::TestReset) { SetDialog(EDialog::None); Controller->MenuRestart(); }
     else if (Dialog == EDialog::Exit || Dialog == EDialog::SaveFailed)
     {
         bSaving = true;

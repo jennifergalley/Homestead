@@ -109,7 +109,7 @@ void AHomesteadController::BeginPlay()
         return;
     }
     Landscape->Initialize(Sim.GetState());
-    SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
+    CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
     const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
 #if !UE_BUILD_SHIPPING
@@ -119,7 +119,8 @@ void AHomesteadController::BeginPlay()
     UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING version=1 mode=%s profile=%s directory=\"%s\" automation_input=%d smoke_actor=%d visual_actor=%d"),
         *SaveRoute.Mode, *SaveRoute.Profile, *SaveRoute.Directory, bAutomatedInputOnly, SmokeTest, VisualPlaytest);
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
-    if (!Loaded) OpenBook(3);
+    bHasPlayableSession = !bTestResetRequired;
+    if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();
 #if !UE_BUILD_SHIPPING
@@ -219,6 +220,9 @@ void AHomesteadController::MenuSelect(int32 Row)
 void AHomesteadController::MenuActivate()
 {
     if (bMenuSaveInProgress || !bBookOpen) return;
+    if (bTestResetRequired && (Page != 4 || !Rows().IsValidIndex(Selection)
+        || (Rows()[Selection].Id != 1 && Rows()[Selection].Id != 8 && Rows()[Selection].Id != 9)))
+    { Notify(LoadProblem, true); return; }
     if (IsFailed() && Page != 4 && Page != 3 && Page != 5)
     { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
     if (IsFailed() && Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 0)
@@ -227,7 +231,11 @@ void AHomesteadController::MenuActivate()
 }
 void AHomesteadController::MenuStore() { if (!bMenuSaveInProgress) Secondary(); }
 void AHomesteadController::MenuTake() { if (!bMenuSaveInProgress) Withdraw(); }
-void AHomesteadController::MenuBack() { if (!bMenuSaveInProgress) CloseBook(); }
+void AHomesteadController::MenuBack()
+{
+    if (bTestResetRequired) { Notify(LoadProblem, true); return; }
+    if (!bMenuSaveInProgress) CloseBook();
+}
 void AHomesteadController::MenuRetry()
 {
     if (bMenuSaveInProgress) return;
@@ -350,7 +358,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         }
     }
 
-    Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning);
+    Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired);
     if (IsFailed() && !bWasFailed)
     {
         EndPlacement();
@@ -1077,6 +1085,7 @@ void AHomesteadController::CycleZoom()
 
 UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 {
+    bReadIncompatible = false;
     TArray<uint8> Data;
     if (IFileManager::Get().FileSize(*Filename) > 4 * 1024 * 1024) return nullptr;
     if (!FFileHelper::LoadFileToArray(Data, *Filename)) return nullptr;
@@ -1088,7 +1097,8 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     Data.RemoveAt(0, 12, EAllowShrinking::No);
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::LoadGameFromMemory(Data));
     FGuid ParsedWorld;
-    if (!Save || Save->Version < 1 || Save->Version > 4 || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
+    if (Save && !Save->IsCurrentVersion()) { bReadIncompatible = true; return nullptr; }
+    if (!Save || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
         || !FGuid::Parse(Save->WorldId, ParsedWorld) || !ParsedWorld.IsValid()
         || FMath::Abs(Save->PlayerLocation.X) > 4000 || FMath::Abs(Save->PlayerLocation.Y) > 4000
         || FMath::Abs(Save->PlayerLocation.Z) > 5000 || !FMath::IsFinite(Save->CameraSensitivity)
@@ -1107,12 +1117,14 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     SavedLook.BodyPreset = Save->BodyPreset;
     if (!SavedLook.IsValid()) return nullptr;
     Homestead::Simulation Candidate;
-    if (!Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData))) return nullptr;
+    const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
+    if (!Decoded) { bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion; return nullptr; }
     return Save;
 }
 
 bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
 {
+    if (bTestResetRequired) { Notify(TEXT("Choose an explicit test reset before saving a new clearing."), true); return false; }
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
     if (!Save) { Notify(TEXT("Could not create a save record."), true); return false; }
@@ -1176,6 +1188,9 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
 {
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
     if (!Result) { Notify(Result); return; }
+    bTestResetRequired = false;
+    bHasPlayableSession = true;
+    LoadProblem.Reset();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
@@ -1195,6 +1210,7 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
     MusicVolume = Save.MusicVolume;
     AmbienceVolume = Save.AmbienceVolume;
     EffectsVolume = Save.EffectsVolume;
+    CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     Music->SetVolumeMultiplier(MusicVolume);
     Ambience->SetVolumeMultiplier(AmbienceVolume);
     EndPlacement();
@@ -1211,6 +1227,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
         : TArray<FString>{TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
+    bool Incompatible = false;
     for (const auto& Slot : Slots)
     {
         for (const FString& Suffix : { FString(), FString(TEXT(".bak")) })
@@ -1220,7 +1237,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             UHomesteadSave* Save = ReadSave(Path);
             if (!Save)
             {
-                Corrupt = true;
+                Incompatible |= bReadIncompatible;
+                Corrupt |= !bReadIncompatible;
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
                 continue;
             }
@@ -1251,31 +1269,55 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
         Notify(Corrupt ? TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.") : TEXT("Welcome back to your homestead."), Corrupt);
         return true;
     }
-    if (Corrupt) Notify(TEXT("No valid save could be read. Files were preserved; starting a new session."), true);
+    if (Corrupt || Incompatible)
+    {
+        LoadProblem = Incompatible && !Corrupt
+            ? TEXT("These test saves use an incompatible version. Start a new test clearing to use this build.")
+            : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
+        Notify(LoadProblem, true);
+        // Do not let a fresh startup silently autosave over an unsuccessful load.
+        bTestResetRequired = !RecoveryOnly && !bHasPlayableSession;
+    }
     return false;
 }
 
 void AHomesteadController::RetryCheckpoint()
 {
     if (LoadLatest(true)) return;
+    if (SessionWorld != WorldId)
+    { Notify(TEXT("No checkpoint belongs to this world. You can start a new test clearing or quit from Settings."), true); return; }
     const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*SessionCheckpoint));
     if (!Result) { Notify(Result); return; }
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
-    PendingLocation = FVector(-1000, 0, 180);
+    Appearance = SessionAppearance;
+    PendingLocation = SessionLocation;
+    PendingRotation = SessionRotation;
     bPendingSpawn = true;
     bWasFailed = false;
     RefreshRemaining = 0;
-    Notify(TEXT("Returned to the start of this clearing. No recovery save was available."));
+    Notify(TEXT("Returned to this session's checkpoint. No usable recovery save was available."));
+}
+
+void AHomesteadController::CaptureSessionCheckpoint(FVector Location, FRotator Rotation)
+{
+    SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
+    SessionAppearance = Appearance;
+    SessionWorld = WorldId;
+    SessionLocation = Location;
+    SessionRotation = Rotation;
 }
 
 void AHomesteadController::NewGame()
 {
+    bTestResetRequired = false;
+    bHasPlayableSession = true;
+    LoadProblem.Reset();
     Sim.NewGame();
     Appearance = FHomesteadAppearance();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
-    SessionCheckpoint = UTF8_TO_TCHAR(Sim.Serialize().c_str());
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);
+    CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     bPendingSpawn = true;
     bWasFailed = false;
     RefreshRemaining = 0;
@@ -1292,7 +1334,11 @@ void AHomesteadController::QuickSave()
 void AHomesteadController::QuickLoad()
 {
     if (bAutomatedInputOnly) ++TestQuickLoads;
-    if (!LoadLatest()) Notify(TEXT("There is no usable save to load yet."), true);
+    if (!LoadLatest())
+    {
+        if (bTestResetRequired) OpenBook(4);
+        else if (LoadProblem.IsEmpty()) Notify(TEXT("There is no usable save to load yet."), true);
+    }
 }
 
 FString AHomesteadController::SavePath(const FString& Slot) const

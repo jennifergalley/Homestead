@@ -15,6 +15,9 @@ class USoundBase;
 class SHomesteadMenu;
 class IInputProcessor;
 
+enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe };
+enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye };
+
 struct FHomesteadRow
 {
     int32 Id = 0;
@@ -23,6 +26,14 @@ struct FHomesteadRow
     FString Action;
     bool CanStore = false;
     bool CanTake = false;
+    EHomesteadMenuSubject Subject = EHomesteadMenuSubject::Legacy;
+    int32 SubjectId = 0;
+    int32 ContainerId = 0;
+    int32 DestinationId = 0;
+    int32 Quantity = 0;
+    FString Name;
+    FString Location;
+    FName Icon;
 };
 
 UCLASS()
@@ -48,6 +59,11 @@ public:
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }
     TArray<FHomesteadRow> Rows() const;
+    TArray<FHomesteadRow> MenuRows() const;
+    void MenuInventoryView(int32 View);
+    int32 InventoryView() const { return MenuInventoryViewIndex; }
+    bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    FString MenuInventorySummary() const;
     FString BookTitle() const;
     FString BookSummary() const;
     FString BookFooter() const;
@@ -77,6 +93,8 @@ public:
     bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly; }
     FString MenuSaveStatus() const;
     FString MenuLastError() const { return ToastText; }
+    bool MenuNeedsTestReset() const { return bTestResetRequired; }
+    FString MenuLoadProblem() const { return LoadProblem; }
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     float Sensitivity = 1.0f;
@@ -133,7 +151,17 @@ private:
     FString ToastText;
     bool bToastError = false;
     FString SessionCheckpoint;
+    FHomesteadAppearance SessionAppearance;
+    FString SessionWorld;
+    FVector SessionLocation = FVector(-1000, 0, 180);
+    FRotator SessionRotation = FRotator(-15, 15, 0);
+    void CaptureSessionCheckpoint(FVector Location, FRotator Rotation);
     FString WorldId;
+    int32 MenuInventoryViewIndex = 0;
+    mutable bool bReadIncompatible = false;
+    bool bTestResetRequired = false;
+    bool bHasPlayableSession = false;
+    FString LoadProblem;
     TSharedPtr<SHomesteadMenu> NativeMenu;
     TSharedPtr<IInputProcessor> MenuPointerInput;
     bool bMenuSaveInProgress = false;
