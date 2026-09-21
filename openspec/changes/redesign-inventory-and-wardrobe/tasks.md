@@ -94,3 +94,11 @@ Backend authority commits `e8068cb`/`c11317a`, integrated here as `1a972ce`/
 not rendered equipment, Controller IO or native-menu runtime acceptance.
 `cf4bc38` adds UI authority adapters and current-save/reset handling; its 11
 Python source-contract checks are deliberately labeled source-only.
+
+Follow-up dependencies: `5c75ea3` (`2db0c12` here) supplies selected food-group
+consumption, subsequently verified by the backend owner with 23 scenarios /
+1882 checks. `11ba95c` (`990cb2c` here) supplies prepared Character presentation;
+its portable selection checks are not a UE/content admission pass. Controller
+now prepares candidate wardrobe before live commit/apply, and UI-owned portrait
+source reuses that shared presentation. Fourteen source checks pass; first
+shared native compile/UHT and actual visuals are still pending.

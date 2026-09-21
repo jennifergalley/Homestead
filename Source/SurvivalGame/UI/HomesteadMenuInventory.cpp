@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "HomesteadCharacter.h"
 
 namespace
 {
@@ -125,8 +126,39 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     if (Row.Subject == EHomesteadMenuSubject::GarmentRecipe || Action == EHomesteadItemAction::Equip
         || Action == EHomesteadItemAction::Unequip || Action == EHomesteadItemAction::Dye)
     {
-        Notify(TEXT("Compatible modular clothing has not been admitted in this build. Your possessions have not changed."), true);
-        return false;
+        auto Transaction = [&](Homestead::Simulation& Target) -> Homestead::Result
+        {
+            if (Row.Subject == EHomesteadMenuSubject::GarmentRecipe)
+                return Target.CraftGarment(static_cast<Homestead::WearableDefinition>(Row.SubjectId), PlayerPoint(), ExpectedRevision);
+            if (Action == EHomesteadItemAction::Equip) return Target.EquipWearable(Row.SubjectId, ExpectedRevision);
+            if (Action == EHomesteadItemAction::Unequip) return Target.UnequipWearable(Row.SubjectId, ExpectedRevision);
+            const auto* Item = Target.GetWearable(Row.SubjectId);
+            if (!Item) return {false, "That owned garment no longer exists."};
+            return Target.RecolorWearable(Row.SubjectId, (Item->dye + 1) % 4, PlayerPoint(), ExpectedRevision);
+        };
+        Homestead::Simulation Candidate = Sim;
+        const auto Proposed = Transaction(Candidate);
+        if (!Proposed) { Notify(Proposed); return false; }
+        auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        FString Error;
+        if (!Avatar || !Avatar->PrepareEquipment(Candidate.GetState(), Appearance, Error))
+        {
+            Notify(Error.IsEmpty() ? TEXT("The character is not ready to display clothing. Your possessions have not changed.")
+                : Error + TEXT(" Your possessions have not changed."), true);
+            return false;
+        }
+        const Homestead::Simulation Previous = Sim;
+        Result = Transaction(Sim);
+        if (!Result) { Avatar->ClearPreparedEquipment(); Notify(Result); return false; }
+        if (!Avatar->ApplyPreparedEquipment(Error))
+        {
+            Sim = Previous;
+            Avatar->ClearPreparedEquipment();
+            Notify(TEXT("The prepared wardrobe could not be displayed; the transaction was canceled. ") + Error, true);
+            return false;
+        }
+        Notify(Result);
+        return true;
     }
     if (Row.Subject == EHomesteadMenuSubject::Wearable)
     {
@@ -146,7 +178,7 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
             Result = Sim.MergeGroups(Row.ContainerId, Row.SubjectId, Amount, PlayerPoint(), ExpectedRevision);
         else if (Action == EHomesteadItemAction::Primary && Row.ContainerId == 0)
         {
-            if (IsFood(static_cast<Homestead::Item>(Row.Id))) Result = Sim.Eat(static_cast<Homestead::Item>(Row.Id));
+            if (IsFood(static_cast<Homestead::Item>(Row.Id))) Result = Sim.EatGroup(Row.SubjectId, ExpectedRevision);
             else { Notify(Row.Detail); return true; }
         }
     }

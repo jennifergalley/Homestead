@@ -6,6 +6,7 @@
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
+#include "Styling/SlateBrush.h"
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
@@ -14,6 +15,7 @@ class UAudioComponent;
 class USoundBase;
 class SHomesteadMenu;
 class IInputProcessor;
+class AHomesteadMenuPortrait;
 
 enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe };
 enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye };
@@ -95,6 +97,10 @@ public:
     FString MenuLastError() const { return ToastText; }
     bool MenuNeedsTestReset() const { return bTestResetRequired; }
     FString MenuLoadProblem() const { return LoadProblem; }
+    const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
+    void RefreshMenuPortrait();
+    void OrbitMenuPortrait(float Degrees);
+    FString MenuPortraitStatus() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     float Sensitivity = 1.0f;
@@ -164,6 +170,8 @@ private:
     FString LoadProblem;
     TSharedPtr<SHomesteadMenu> NativeMenu;
     TSharedPtr<IInputProcessor> MenuPointerInput;
+    UPROPERTY() TObjectPtr<AHomesteadMenuPortrait> MenuPortrait;
+    FSlateBrush PortraitBrush;
     bool bMenuSaveInProgress = false;
     FDateTime LastSuccessfulSave;
     void ShowNativeMenu();
@@ -213,7 +221,7 @@ private:
     void RunSaveRoutingChecks();
     bool LoadLatest(bool RecoveryOnly = false);
     UHomesteadSave* ReadSave(const FString& Filename) const;
-    void ApplySave(const UHomesteadSave& Save);
+    bool ApplySave(const UHomesteadSave& Save);
     void InitializeAudio();
     void PlayEffect(USoundBase* Cue, float Gain = 0.12f);
     UFUNCTION() void MusicFinished();

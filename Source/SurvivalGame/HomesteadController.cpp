@@ -30,6 +30,8 @@
 #include "UI/SHomesteadMenu.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/IInputProcessor.h"
+#include "UI/HomesteadMenuPortrait.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 namespace
 {
@@ -149,8 +151,10 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
     if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
     {
         if (bMenuSaveInProgress) return true;
-        if (Params.Event == IE_Pressed && Params.Key == EKeys::F5) { QuickSave(); return true; }
-        if (Params.Event == IE_Pressed && Params.Key == EKeys::F9) { QuickLoad(); return true; }
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F5)
+        { if (NativeMenu->PrepareQuickAction()) QuickSave(); return true; }
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F9)
+        { if (NativeMenu->PrepareQuickAction()) QuickLoad(); return true; }
         const auto Menu = NativeMenu;
         return Menu->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
     }
@@ -173,6 +177,7 @@ bool AHomesteadController::MenuPointerIntent(float X, float Y)
 void AHomesteadController::ShowNativeMenu()
 {
     if (!GEngine || !GEngine->GameViewport) return;
+    RefreshMenuPortrait();
     if (!NativeMenu.IsValid())
     {
         FlushPressedKeys();
@@ -198,9 +203,58 @@ void AHomesteadController::HideNativeMenu()
     if (NativeMenu.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(NativeMenu.ToSharedRef());
     NativeMenu.Reset();
+    if (MenuPortrait) MenuPortrait->Destroy();
+    MenuPortrait = nullptr;
+    PortraitBrush.SetResourceObject(nullptr);
     FlushPressedKeys();
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
+}
+
+void AHomesteadController::RefreshMenuPortrait()
+{
+    if (!bBookOpen || (Page != 0 && Page != 6))
+    {
+        if (MenuPortrait) MenuPortrait->Destroy();
+        MenuPortrait = nullptr;
+        PortraitBrush.SetResourceObject(nullptr);
+        return;
+    }
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    if (!MenuPortrait)
+    {
+        FActorSpawnParameters Parameters;
+        Parameters.ObjectFlags |= RF_Transient;
+        Parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        MenuPortrait = GetWorld()->SpawnActor<AHomesteadMenuPortrait>(FVector(0, 0, -20000), FRotator::ZeroRotator, Parameters);
+    }
+    if (MenuPortrait && MenuPortrait->Refresh(*Avatar))
+    {
+        PortraitBrush.SetResourceObject(MenuPortrait->Texture());
+        PortraitBrush.ImageSize = FVector2D(512, 640);
+        PortraitBrush.DrawAs = ESlateBrushDrawType::Image;
+    }
+    else
+    {
+        if (MenuPortrait) MenuPortrait->Destroy();
+        MenuPortrait = nullptr;
+        PortraitBrush.SetResourceObject(nullptr);
+        UE_LOG(LogTemp, Warning, TEXT("Menu character preview is unavailable."));
+    }
+}
+
+void AHomesteadController::OrbitMenuPortrait(float Degrees)
+{
+    if (MenuPortrait) MenuPortrait->Orbit(Degrees);
+}
+
+FString AHomesteadController::MenuPortraitStatus() const
+{
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    return Avatar && Avatar->IsEquipmentPresentationReady()
+        ? TEXT("Your worn clothing\nNeutral preview lighting")
+        : TEXT("Character prototype\nOwned clothing is not yet renderable");
 }
 
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
@@ -340,11 +394,20 @@ void AHomesteadController::Tick(float DeltaSeconds)
         SetControlRotation(PendingRotation);
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         {
-            if (!Avatar->ApplyAppearance(Appearance))
-                Notify(TEXT("Character assets could not be applied. The technical stand-in remains; see the log."), true);
-            Avatar->SetAppearancePreview(bBookOpen && Page == 6);
+            FString Error;
+            if (Avatar->PrepareEquipment(State(), Appearance, Error))
+            {
+                if (!Avatar->ApplyPreparedEquipment(Error)) Notify(Error, true);
+            }
+            else
+            {
+                if (!Avatar->IsEquipmentPresentationReady()) Avatar->ApplyAppearance(Appearance);
+                Notify(TEXT("Owned clothing could not be displayed; the character preview is provisional. ") + Error, true);
+            }
+            Avatar->SetAppearancePreview(false);
         }
         bPendingSpawn = false;
+        RefreshMenuPortrait();
     }
     if (APawn* ControlledPawn = GetPawn())
     {
@@ -643,7 +706,7 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     {
         Avatar->CancelAction();
         Avatar->GetCharacterMovement()->StopMovementImmediately();
-        Avatar->SetAppearancePreview(Page == 6);
+        Avatar->SetAppearancePreview(false);
     }
     ShowNativeMenu();
 }
@@ -917,9 +980,13 @@ void AHomesteadController::ActivateRow()
         default: Notify(TEXT("More character presets and clothes are planned. These controls are a first prototype.")); return;
         }
         auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-        if (!Avatar || !Avatar->ApplyAppearance(Next))
+        FString AppearanceError;
+        const bool Applied = Avatar && (Avatar->IsEquipmentPresentationReady()
+            ? Avatar->PrepareEquipment(State(), Next, AppearanceError) && Avatar->ApplyPreparedEquipment(AppearanceError)
+            : Avatar->ApplyAppearance(Next));
+        if (!Applied)
         {
-            Notify(TEXT("That appearance could not be applied. Your saved selection has not changed."), true);
+            Notify(TEXT("That appearance could not be applied. Your saved selection has not changed. ") + AppearanceError, true);
             return;
         }
         Appearance = Next;
@@ -1184,10 +1251,33 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     return true;
 }
 
-void AHomesteadController::ApplySave(const UHomesteadSave& Save)
+bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
 {
-    const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
-    if (!Result) { Notify(Result); return; }
+    Homestead::Simulation Candidate = Sim;
+    const auto Result = Candidate.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
+    if (!Result) { Notify(Result); return false; }
+    FHomesteadAppearance Look;
+    Look.HairStyle = Save.HairStyle; Look.HairColor = Save.HairColor;
+    Look.SkinTone = Save.SkinTone; Look.EyeColor = Save.EyeColor;
+    Look.TunicColor = Save.TunicColor; Look.Outfit = Save.Outfit; Look.BodyPreset = Save.BodyPreset;
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    FString Error;
+    if (Avatar && !Avatar->PrepareEquipment(Candidate.GetState(), Look, Error))
+    {
+        LoadProblem = TEXT("This save is valid, but its clothing content is unavailable. Nothing was loaded. ") + Error;
+        bTestResetRequired = !bHasPlayableSession;
+        Notify(LoadProblem, true);
+        return false;
+    }
+    const Homestead::Simulation Previous = Sim;
+    Sim = MoveTemp(Candidate);
+    if (Avatar && !Avatar->ApplyPreparedEquipment(Error))
+    {
+        Sim = Previous;
+        Avatar->ClearPreparedEquipment();
+        Notify(TEXT("Save loading was canceled because its prepared appearance could not be displayed. ") + Error, true);
+        return false;
+    }
     bTestResetRequired = false;
     bHasPlayableSession = true;
     LoadProblem.Reset();
@@ -1217,6 +1307,7 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
     CloseBook();
     Landscape->Refresh(State());
     RefreshRemaining = 0;
+    return true;
 }
 
 bool AHomesteadController::LoadLatest(bool RecoveryOnly)
@@ -1249,7 +1340,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 || Candidate.GetState().warmth < 20 || Candidate.GetState().energy < 20)) continue;
             if (RecoveryOnly && Slot == TEXT("Homestead_Recovery"))
             {
-                ApplySave(*Save);
+                if (!ApplySave(*Save)) return false;
                 Notify(TEXT("Returned to your sheltered recovery checkpoint."));
                 return true;
             }
@@ -1258,7 +1349,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     }
     if (Best)
     {
-        ApplySave(*Best);
+        if (!ApplySave(*Best)) return false;
         if (!StartupProbeDirectory.IsEmpty()) StartupProbeLoadedState = UTF8_TO_TCHAR(Sim.Serialize().c_str());
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveAudit")) && GEngine && GEngine->GameViewport)
             UE_LOG(LogTemp, Display, TEXT("SAVE_LOAD_AUDIT world=%s simulation_md5=%s look=%d,%d,%d,%d,%d,%d,%d view_mode=%d shader_complexity=%d"),

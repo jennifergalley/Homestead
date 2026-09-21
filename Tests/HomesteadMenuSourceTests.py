@@ -91,6 +91,34 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("UnregisterInputPreProcessor(MenuPointerInput)", CONTROLLER)
         self.assertEqual(CONTROLLER.count("PromptIntent.Classify("), 1)
 
+    def test_equipment_prepares_before_authority_commit(self):
+        adapter = (SOURCE / "UI" / "HomesteadMenuInventory.cpp").read_text()
+        self.assertLess(adapter.index("Avatar->PrepareEquipment("), adapter.index("Result = Transaction(Sim)"))
+        self.assertLess(adapter.index("Result = Transaction(Sim)"), adapter.index("Avatar->ApplyPreparedEquipment("))
+        self.assertIn("Sim.EatGroup(Row.SubjectId, ExpectedRevision)", adapter)
+
+    def test_portrait_reuses_shared_presentation(self):
+        portrait = (SOURCE / "UI" / "HomesteadMenuPortrait.cpp").read_text()
+        self.assertIn("Character.GetEquipmentPresentation()", portrait)
+        self.assertIn("HomesteadWardrobePresentation::ApplySurface(", portrait)
+        self.assertIn("SetCollisionEnabled(ECollisionEnabled::NoCollision)", portrait)
+        self.assertIn("bCaptureEveryFrame = false", portrait)
+
+    def test_ui_delimiters_balance(self):
+        # Lexical smoke check only; the shared Unreal compiler remains authoritative.
+        strip = re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'', re.S)
+        pairs = {")": "(", "]": "[", "}": "{"}
+        for path in (SOURCE / "UI").glob("*.cpp"):
+            text = strip.sub("", path.read_text())
+            stack = []
+            for character in text:
+                if character in "([{":
+                    stack.append(character)
+                elif character in pairs:
+                    self.assertTrue(stack, str(path))
+                    self.assertEqual(stack.pop(), pairs[character], str(path))
+            self.assertFalse(stack, str(path))
+
 
 if __name__ == "__main__":
     unittest.main()

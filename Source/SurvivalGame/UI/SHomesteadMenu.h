@@ -29,9 +29,10 @@ public:
     void ShowSaveFailure(const FString& Error);
     void Back();
     void Refresh();
+    bool PrepareQuickAction();
 
 private:
-    enum class ERegion { Tabs, Session, Inventory, Content, Details, Actions };
+    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Details, Actions };
     enum class EDialog { None, Exit, SaveFailed, Unsaved, Restart, TestReset, Amount, Merge };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
@@ -40,6 +41,8 @@ private:
     TSharedPtr<SBox> DetailsHost;
     TSharedPtr<SScrollBox> Scroll;
     TSharedPtr<SScrollBox> DetailsScroll;
+    TSharedPtr<SScrollBox> DialogScroll;
+    TArray<TSharedPtr<SWidget>> DialogButtons;
     TArray<TSharedPtr<SWidget>> Cells;
     TArray<FHomesteadRow> Entries;
     TArray<int32> RowIndices;
