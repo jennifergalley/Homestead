@@ -7,14 +7,15 @@ with equal controller, keyboard and mouse access while the world is paused.
 
 ## ADDED Requirements
 
-### Requirement: Implementation follows the accepted environment baseline
-The redesign MUST begin implementation only after the environment change is
-completed and accepted, the applicable offline authoring workflow is approved
-and proven, and a new implementation authorization is recorded.
+### Requirement: Parallel implementation reconciles before delivery
+Authorized isolated source lanes SHALL be allowed before environment acceptance.
+UI integration/delivery MUST follow accepted environment work and source
+reconciliation. Engine authoring/build/runtime work MUST use the coordinator's
+single approved execution lane, not competing worktree launches.
 
 #### Scenario: Environment work is still pending
-- **WHEN** the UI proposal is artifact-complete but environment acceptance or tool approval is missing
-- **THEN** it remains a plan and does not authorize code, asset authoring, engine execution or preview promotion
+- **WHEN** environment work is pending but isolated UI source work is explicitly authorized
+- **THEN** the UI lane can implement and run non-engine checks without claiming environment acceptance, launching engine tools or promoting an integrated candidate
 
 ### Requirement: Fullscreen shell communicates screen purpose
 The menu SHALL fill the viewport with a translucent world backdrop and readable

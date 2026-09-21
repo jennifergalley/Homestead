@@ -58,12 +58,12 @@ textures, fonts or character designs.
 - **WHEN** the current joined export or body-deletion mask prevents a valid unequipped state
 - **THEN** compatible original/verified-license modular geometry and the base layer are authored and verified before claiming wearable support, rather than relabeling cosmetic outfit switching
 
-### Requirement: Visual acceptance is bounded and honest
-The candidate SHALL undergo at most two matched visual review sets covering the
-menu and garment states, with actual supported resolutions and gameplay movement.
-Technical test success SHALL not be described as Jenny's aesthetic approval.
-Failure after the second set SHALL be reported as incomplete, not trigger an
-unbounded cosmetic iteration.
+### Requirement: Visual acceptance is purposeful and honest
+The candidate SHALL undergo matched baseline/candidate and correction review
+passes covering menu and garment states at supported resolutions with gameplay
+movement. Technical test success SHALL not be described as Jenny's aesthetic
+approval. Demonstrated defects SHALL be corrected and rechecked without an
+arbitrary two-pass, screenshot-count, cost or time ceiling stopping scoped work.
 
 #### Scenario: Functional checks pass but garments clip visibly
 - **WHEN** the final matched review finds unacceptable coverage, clipping or readability

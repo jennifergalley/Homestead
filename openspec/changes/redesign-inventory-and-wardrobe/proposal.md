@@ -4,8 +4,8 @@
 
 Jenny cannot discover/use the current exit reliably, and the row-based field
 book does not provide the visual inventory, contextual details, or wearable-item
-ownership she wants. Plan a coherent native menu redesign now, for implementation
-only after the woodland environment upgrade is completed and accepted.
+ownership she wants. Implement isolated UI and wardrobe source lanes in parallel
+with environment work, then reconcile and deliver environment first, UI second.
 
 ## What Changes
 
@@ -21,14 +21,14 @@ only after the woodland environment upgrade is completed and accepted.
   an explicit, separately confirmed unsaved exit, including survival recovery.
 - Replace free cosmetic outfit toggling with individually owned tunic, apron
   and footwear items that can be crafted, moved, stored and equipped. Preserve
-  legacy appearance/dye and existing resource quantities; no free UI spawning.
+  current-version ownership and resource quantities; no free UI spawning.
 - Add atomic ownership/equipment transactions, real compatible garment
   geometry, a permanently modest base layer, truthful icons/details and a
   bounded original/verified-license content pipeline.
-- Evolve both save layers with exactly-once legacy conversion, stable IDs,
-  durable inventory ordering and recovery-safe backups. **Compatibility change:**
-  new wardrobe saves are not readable by older builds; rollback must use the
-  preserved pre-upgrade candidate/profile snapshot, not overwrite the new save.
+- Evolve saves for stable owned items and durable inventory ordering with
+  integrity checks and truthful errors. **Compatibility change:** existing
+  saves are disposable test data; incompatible versions use an explicit test
+  reset, not a legacy migration/profile-preservation project.
 - Preserve 120-unit inventory/chest capacity, existing input-intent filtering,
   world mappings, menu pause, Lit save/load guards and isolated preview routing.
 
@@ -44,8 +44,8 @@ only after the woodland environment upgrade is completed and accepted.
   equipped ownership, garment crafting and capacity-conserving transactions.
 - `wearable-character-presentation`: Compatible modular garments, modest
   unequipped presentation, appearance separation, icons and provenance.
-- `wardrobe-save-migration`: Versioned persistence, deterministic legacy
-  conversion, grid ordering, integrity validation and same-world recovery.
+- `wardrobe-save-migration`: Current-version persistence, explicit incompatible
+  test-save reset, grid ordering, integrity validation and same-world recovery.
 
 ### Modified Capabilities
 
@@ -54,7 +54,7 @@ The separate environment change's deltas are not modified by this proposal.
 
 ## Impact
 
-Future implementation touches `HomesteadController`, `HomesteadHUD`,
+Implementation touches `HomesteadController`, `HomesteadHUD`,
 `HomesteadCharacter`, `HomesteadAppearance`, `HomesteadSave`, portable
 `Simulation\HomesteadSimulation`, new narrowly scoped native widget/presentation
 adapters, the module's UMG/Slate dependencies, character authoring/export/import
@@ -65,17 +65,20 @@ not rewritten now to imply the UI already exists.
 
 ## Prerequisites and authorization
 
-Implementation depends on **completed and coordinator-accepted
-`upgrade-woodland-environment-assets`**, its accepted package/source baseline,
-and the then-current approved and proven offline authoring/import/build/test
-workflow. Its current 4/29 progress is not acceptance. This change does not
-inherit that run's deadline or permission to launch tools.
+Jenny's September 20 22:35 instructions and the coordinator's explicit lane
+assignment authorize isolated parallel source implementation before environment
+acceptance. Integration/delivery stays **environment then UI**, with a source
+reconciliation against the actual accepted environment baseline first.
+One global engine-authoring lane remains with the environment implementer:
+this UI worktree must not launch UE/UBT/UAT/cook or unadmitted compiler helpers.
+Source, original icons and non-engine checks can progress independently.
 
 OpenSpec 1.13.1's inspected change commands expose no inter-change dependency
 option; the prerequisite is explicit here, in design, specs and task 1.1, not
-invented YAML metadata. A new apply authorization is required after those gates.
-This deliverable is planning only: no engine/Blender launches, code or asset
-edits, downloads, purchases, automation, merge, push or PR.
+invented YAML metadata. Authorization is now present; it is not permission for
+parallel engine launches, purchases, automatic merge/PR or schedules. Prioritize
+integrated playable increments; no arbitrary time/cost/capture iteration limit
+is a work-stop gate. Use purposeful review passes and fix demonstrated defects.
 
 ## Non-goals
 

@@ -86,7 +86,7 @@ unchanged; previewing items SHALL never create them.
 - **THEN** costs are deducted once, one uniquely identified item appears in carried inventory, and recipe details match the actual transaction
 
 ### Requirement: Dye belongs to clothing rather than the character
-Legacy dye SHALL become per-instance appearance data. The existing limited
+Garment dye SHALL be per-instance appearance data. The existing limited
 recoloring affordance SHALL operate only on an owned selected garment, preserve
 its identity, and remain explicitly cosmetic; a paid/resource dye economy is
 not part of this change.
