@@ -26,14 +26,14 @@ remain human checks. See `docs\setup.md` for precise verification limits.
 
 ## Build and run
 
-The native inventory/wardrobe integration candidate is
+The selected native inventory/wardrobe integration candidate is
 `Build\Releases\20260921-033354-2d257ba0\wardrobe-ui-02\Windows`.
 It has real720p/4K menu/equipment/dye/save checks, separate-process current-save
 reloads, and verified save-and-quit. The corrected UI has compact item cards,
 readable selection/details and a larger character preview; its lower-body
 preview lighting is still provisional. `Preview.json` remains the authority
-for the separately selected human build; this candidate is not automatically
-selected by being built. See the wardrobe OpenSpec and
+for the human build. Coordinator review accepted this usable prototype increment,
+not finished art or all OpenSpec work. See the wardrobe OpenSpec and
 `docs\research\character-assets\wardrobe-shipping-02\receipt.json`.
 
 In the native menu, LB/RB or Ctrl+Tab/Ctrl+Shift+Tab changes tabs; LT/RT or
@@ -51,7 +51,9 @@ open. In-game Settings includes **Save and quit**.
 To review the separately verified movement and action improvements, double-click
 **`Preview.cmd`** (requires PowerShell 7). It selects only the explicit candidate
 in `Preview.json`, checks its acceptance receipt/executable hash, and uses the
-persistent **`jenny-review`** save profile. It does not replace `Play.cmd`, import
+persistent **`jenny-review-v5`** save profile. This is a deliberately fresh test
+clearing for UE save schema5 / portable4; old `jenny-review` progress remains
+untouched rather than being migrated or silently reset. It does not replace `Play.cmd`, import
 your original world, run automated inputs, or quit automatically.
 
 Human preview now requests monitor-sized **windowed fullscreen** through the
@@ -63,9 +65,12 @@ proof; it is not selected until coordinator review. See
 `docs\offline-startup.md` for evidence, preserved preferences and limitations.
 
 Preview saves live in
-`%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-jenny-review\SaveGames`.
+`%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-jenny-review-v5\SaveGames`.
 Manual saves, all three autosaves, recovery and backups stay there. Relaunch
 `Preview.cmd` to continue; use `Play.cmd` to return to the untouched original.
+Prior wave-build graphics preferences were copied byte-for-byte; the old wave
+package/profile and `wardrobe-ui-01` remain available. The new candidate's
+`previous-preview.json` records the prior selection for an explicit rollback.
 **Do not launch the candidate executable directly:** the preview-profile argument,
 not its package folder, selects this isolated save namespace.
 
@@ -73,7 +78,8 @@ The review candidate retains the accepted relaxed locomotion and generic
 gathering, watering, weeding and sapling-hatchet feedback. These are technical
 improvements, not Jenny's aesthetic approval or precise hand/tool-contact IK.
 Rejected facial-shader and shortened-wave trials are not included. The requested
-mid-back wavy length and Melinoe-inspired blonde bob remain unmet/deferred.
+mid-back waves are now a disclosed rough increment (broad locks/scalloped ends
+remain); the Melinoe-inspired blonde-bob direction is still deferred.
 See `docs\setup.md` for profile selection, verification and known limits.
 
 Controller prompt stability and the limited clarity introduced in
@@ -89,10 +95,10 @@ Read-only diagnostics found a reported 4K/30Hz desktop mode and a VSync-off,
 observe physical scanout. See `docs\presentation-diagnostics.md` for exact runtime
 settings, capture limits and the next human check. No graphics defaults changed.
 
-The selected **`hotkey-safety-01`** retains the accepted `video-sync-01`
+The current candidate retains the **`hotkey-safety-01`** correction and `video-sync-01`
 **Settings > Vertical sync** control, a
 reversible On/Off toggle for later human comparison. Default remains Off;
-tearing is still unresolved. The persistent `jenny-review` save profile is unchanged.
+tearing is still unresolved. The current schema-named profile is `jenny-review-v5`.
 Graphics preferences are shared within that game's Unreal config, not isolated
 per preview-save profile. See `docs\setup.md` for controls and override behavior.
 
@@ -146,10 +152,11 @@ use the explicit procedure in `docs\offline-startup.md` for this release.
 | Rotate placement | RB or X | R or F |
 | Save / load | Field book Settings | Settings or F5 / F9 |
 
-The accepted, explicitly selected `hotkey-safety-01` removes inherited engine
+The retained `hotkey-safety-01` correction removes inherited engine
 debug commands from F5/F9 without changing their save/load actions. It does not
 force a graphics mode after saving. See `docs\hotkey-safety-playtesting.md`;
-selection checkpoint `af0c907` keeps the same `jenny-review` save profile.
+historical selection checkpoint `af0c907` used `jenny-review`; the current
+wardrobe delivery deliberately uses the separate `jenny-review-v5` profile.
 
 The field book and construction preview pause simulation. Near a storage chest,
 the Pack page supports storing with X/F and taking stored materials with Y/G.

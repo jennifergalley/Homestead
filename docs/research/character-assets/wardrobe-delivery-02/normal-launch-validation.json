@@ -1,0 +1,21 @@
+{
+  "validatedUtc": "2026-09-21T11:43:49.1302050+00:00",
+  "launched": false,
+  "plan": {
+    "Executable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+    "WorkingDirectory": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows",
+    "Arguments": [
+      "-HomesteadPreviewProfile=jenny-review-v5",
+      "-Res=0x0wf",
+      "-UserDir=E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame"
+    ],
+    "Profile": "jenny-review-v5",
+    "Candidate": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02",
+    "Checkpoint": "bb2a6f1808f0fad561d3a2c712f9837ada1a8dea",
+    "ExecutableSha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+    "Receipt": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\acceptance-receipt.json"
+  },
+  "selectedSha256": "4AC315EDC7CC6C75F11ECE46E0B0ED30E574D533A04BA432CFBEDDAA470DE116",
+  "profileCreated": false,
+  "limits": "Actual resolver/receipt/hash/normal arguments checked without starting a human game; not a pure-normal runtime startup pass."
+}

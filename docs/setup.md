@@ -114,12 +114,18 @@ The runtime uses the fixed Windows user-settings root:
 `%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-<id>\SaveGames`.
 The `profile-` prefix also avoids Windows reserved device-directory names.
 All manual/rotating-auto/recovery files and their `.bak`/atomic `.tmp` siblings
-stay in that directory. The default selected profile is `jenny-review`.
+stay in that directory. The current selected profile is `jenny-review-v5`.
+This is a deliberately fresh test clearing for wardrobe UE schema5/portable4.
+Old `jenny-review` progress and original saves remain untouched, not migrated
+or silently reset. Prior wave-candidate graphics preferences were copied
+byte-for-byte into the new candidate's local graphics file.
 
 The same profile persists across relaunches and explicitly selected compatible
 preview packages. A different ID starts a separate preview world; it does not
 copy, reset or migrate any existing world. This isolates game save slots, not
-every Unreal graphics/config/cache file. No save schema was changed.
+every Unreal graphics/config/cache file. The preview-routing contract remains
+version1; the wardrobe save schema changed separately. Incompatible old test
+saves and corrupt current saves must remain distinct explicit failures.
 Unflagged ordinary launches retain `ProjectSavedDir\SaveGames`; smoke/visual
 modes retain their explicit `SmokeSave` sandbox even with a valid preview flag.
 An invalid preview flag still fails before either route is used.
@@ -144,7 +150,8 @@ a separately built compatible candidate and its evidence, then deliberately
 update `Preview.json`; do not point at a rejected trial or edit receipts to
 bypass checks. Local receipts/hashes are integrity checks, not signed distribution.
 
-Focused checks:
+Historical routing checks (not authorization to bypass the current guarded
+Shipping workflow or evidence that these older fixture variants passed again):
 
 ```powershell
 .\Tests\PreviewLauncherTests.ps1
@@ -166,10 +173,30 @@ events are not a human hardware/controller-comfort test.
 Accepted content is relaxed locomotion and generic gathering/watering/weeding/
 hatchet presentation. No target-aware IK or exact contact is claimed; weeds and
 saplings still disappear when the original transaction commits. Rejected face
-shaders and shortened hair are absent; mid-back waves and the blonde-bob request
-remain unmet/deferred. The consolidated candidate's own receipt records its
+shaders and shortened hair are absent. Rough mid-back waves are delivered with
+broad-lock/scalloped-end qualifications; the blonde-bob direction remains
+deferred. The consolidated candidate's own receipt records its
 functional/native-4K evidence. Do not transfer the older clean-performance
 numbers below to this concurrent-GPU review run.
+
+### Current native wardrobe/UI delivery
+
+`Preview.cmd` selects `wardrobe-ui-02`, executable SHA256
+`241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD`.
+Actual720p/4K43-step menu flows, distinct-process current-save reloads at both
+resolutions, real saved-state/save-and-quit and ordinary mapped gathering passed.
+Coordinator4K image review accepted a usable prototype, not finished art:
+lower-body/shoe/hair portrait lighting is dark and labels/card density remain
+provisional. Comprehensive native chest/stack/recipe/controller variants and
+all-preset garment coverage remain open. No human window/process was launched;
+normal launcher arguments were validated without execution.
+
+Normal production menu/equipment selection is unconditional; the ordinary
+capture also used actual modular meshes without NativeMenuTest. A separate
+pure-normal StartupProbe run is not claimed. The previous wave package and
+profile remain intact; `wardrobe-ui-02\previous-preview.json` records the cheap
+rollback selection. See `research\character-assets\wardrobe-delivery-02` for
+acceptance/proof metadata and the OpenSpec for incomplete work.
 
 ### Review-01 evidence
 

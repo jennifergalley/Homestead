@@ -1,0 +1,31 @@
+{
+  "status": "passed-usable-native-ui-increment",
+  "evidence": "wardrobe-evidence.json",
+  "evidenceSha256": "FDB408131F8690FFD6864E90A9A86CC954D4C351844CCC566C876048CC0FF1A9",
+  "checkpoint": "bb2a6f1808f0fad561d3a2c712f9837ada1a8dea",
+  "executableSha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+  "coordinatorReview": "Personally inspected actual corrected4K inventory/restored images; accepted useful full-body portrait, compact stable cells, readable selections/details and contained actions. Dark lower legs/shoes/hair and prototype labels/density remain qualified.",
+  "actualRuntime": [
+    "43-step720p producer",
+    "43-step4K producer",
+    "separate-process current-save consumers at720p and4K",
+    "real save-and-quit with observed process death",
+    "302-frame43.0953s ordinary walk/turn/stop/orbit/gather"
+  ],
+  "testProfile": "jenny-review-v5",
+  "testProfileState": "New schema-named profile did not exist at delivery; no old save read, migrated, deleted or reset.",
+  "graphics": {
+    "sourceUnchanged": true,
+    "source": "Build\\Releases\\20260921-033354-2d257ba0\\hair-waves-01\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini",
+    "destination": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-ui-02\\Windows\\SurvivalGame\\Saved\\Config\\Windows\\GameUserSettings.ini",
+    "sha256": "7356A1167F34BF874F60FC993764D36022E5EDD2C21506F3B8CAF98A4ACF22D0"
+  },
+  "limits": [
+    "Basic usability evidence is not human aesthetic/controller approval or all44 OpenSpec tasks.",
+    "4K captures are real; independent coordinator image review remains separate.",
+    "Native StartupProbe observations compile, but historical offline-startup wrapper was not launched; default-selection evidence is unconditional source and ordinary non-NativeMenuTest QA route.",
+    "Sampled ordinary frames are not an FPS test; menu timing excludes startup/readback.",
+    "Candidate01 and failed quit01 remain preserved; no retroactive pass.",
+    "Source/cook/guard ownership and selected preview remain unchanged at sealing; selection is a separate delivery action."
+  ]
+}

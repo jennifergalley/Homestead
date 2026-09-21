@@ -271,6 +271,12 @@ That is not a claimed separate pure-normal-process startup pass. No old
 offline-startup harness or obsolete save fixture was launched as a shortcut.
 Music, world lighting, normal player processes/saves and prior candidates remain
 untouched. Full OpenSpec coverage and final visual acceptance remain separate.
+Coordinator review also inspected the actual4K inventory/restored images:
+the Wine garment visibly matches its details and core usability defects are
+resolved. This increment is selected through `Preview.cmd` with a deliberately
+fresh `jenny-review-v5` test profile for schema5/portable4. Old profiles/saves
+were not read, migrated or deleted. Prior candidate-local graphics preferences
+were copied unchanged; no human game/window was launched or manipulated.
 
 ## Deferred feedback - 2026-09-19
 

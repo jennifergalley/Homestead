@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "previewSaveRoutingVersion": 1,
+  "executableSha256": "241437C63D63EB905787C10F6F85C3FA237AE8379F7F8319C390F88D97D2D3FD",
+  "checkpoint": "bb2a6f1808f0fad561d3a2c712f9837ada1a8dea",
+  "privateRemoteVerified": true,
+  "proofIndex": "Verification\\proof-index.json",
+  "proofIndexSha256": "B8A2D5C058B831BE98940D076EF8E203F509A72ECAC0959FFE096DAD29E9998D",
+  "scope": "Usable native inventory/owned-wardrobe increment with actual720p/4K menu/save, real quit and ordinary-gameplay evidence; not full OpenSpec or finished art acceptance.",
+  "knownLimitations": [
+    "Dark portrait lower-body/shoe/hair lighting and prototype labels/card density.",
+    "Hazel/apron/footwrap combinations and comprehensive native chest/split/merge/recipe/controller variants are not newly verified by this bounded slice.",
+    "No human hardware comfort/audio/visible fullscreen/scanout claim; render_percentage=0 is default policy, not a3D100-percent-native claim.",
+    "Normal feature selection is unconditional source plus ordinary non-NativeMenuTest route evidence; separate pure-normal StartupProbe was not run.",
+    "Full OpenSpec remains11/44; old default/full-loop fixtures still need affected obsolete presentation assumptions adapted."
+  ],
+  "testSaves": "Fresh jenny-review-v5 profile for UE schema5/portable4. Old jenny-review and original saves remain untouched; no migration or silent corruption reset.",
+  "previousSelection": "previous-preview.json",
+  "normalLaunch": "QA-off; schema-named profile, native borderless default; no route, automatic input, forced action, mute or automatic quit.",
+  "desktop": "Preview.cmd unchanged; no human instance launched or window/process manipulated.",
+  "graphicsPreferencesSha256": "7356A1167F34BF874F60FC993764D36022E5EDD2C21506F3B8CAF98A4ACF22D0"
+}

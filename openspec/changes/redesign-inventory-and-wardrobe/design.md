@@ -417,6 +417,14 @@ milestone, not all-presets visual approval or completed OpenSpec acceptance.
 `docs/research/character-assets/wardrobe-shipping-02/receipt.json` seals the exact
 build, source pins, actual images, state/save/quit and ordinary-route evidence.
 
+Coordinator firsthand4K inventory/restored review accepted this usable prototype
+increment with the stated lighting/density qualifications. `Preview.json` now
+selects `wardrobe-ui-02` with fresh `jenny-review-v5` for schema5/portable4.
+Existing `jenny-review` and original saves remain untouched; no migration,
+silent corruption reset or human-process launch occurred. Prior wave-candidate
+graphics preferences were copied byte-for-byte, and its selection/package are
+retained for cheap rollback. This first delivery does not close all44 tasks.
+
 Deliver UI and content together. Extend existing smoke fixtures for actual
 equip/unequip/dye and current-version save/load/resume with owned IDs, material
 presentation and quantities preserved. A menu-only pass or provisional joined
