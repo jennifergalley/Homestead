@@ -1,0 +1,216 @@
+{
+  "name": "link",
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+  "sha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+  "arguments": [
+    "/NOLOGO",
+    "/INCREMENTAL:NO",
+    "/MANIFEST:NO",
+    "/SUBSYSTEM:CONSOLE",
+    "/MACHINE:X64",
+    "/OUT:C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\HomesteadDirectionalNavigationTests.exe",
+    "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\navigation.obj"
+  ],
+  "exitCode": 0,
+  "error": null,
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "samples": [
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48764,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+          "Error": null,
+          "CreationTime": 134344911075586085,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "Utc": "2026-09-21T19:05:07.5709285+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.5958235+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.6086456+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.6213252+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.6369441+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.6506478+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.6633833+00:00",
+      "Endpoints": []
+    },
+    {
+      "Utc": "2026-09-21T19:05:07.6756108+00:00",
+      "Endpoints": []
+    }
+  ],
+  "markerAfter": {
+    "Path": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\link\\dummy-marker",
+    "Volume": 1086832636,
+    "IndexHigh": 32243712,
+    "IndexLow": 109176,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344911075488104,
+    "LastWriteTime": 134344911075488104,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "41CBBDE3ED35DAD1F0E937908567F40EE4270C1842F73283C4E7BBBCC6A603BB"
+  }
+}

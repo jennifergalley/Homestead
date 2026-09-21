@@ -1,0 +1,8 @@
+PASS Required modular content is actually prepared and rendered; no prototype fallback
+PASS Close initial guide through mapped Back
+PASS First exit-path press opens Settings
+PASS Reach the real save-and-quit confirmation
+INPUT_ISOLATION ignored_external_events=0 (includes 0 deliberate rejection probes)
+PERFORMANCE mean_fps=60.71 p95_frame_ms=16.82 p99_frame_ms=16.92 samples=85 exclusions=startup_and_screenshot_readback
+LIT_GUARD samples=85 final_mode=3 shader_complexity=0 render_percentage=0
+SUCCESS Native save-and-quit saved current state and requested process exit.

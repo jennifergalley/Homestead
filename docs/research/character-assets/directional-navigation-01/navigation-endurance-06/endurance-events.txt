@@ -1,0 +1,9 @@
+0.001 Prepared fresh isolated world; mapped travel/actions only; no fixture, retries or direct simulation edits.
+9.711 gathered resource10
+10.761 ate1 Berries
+31.912 manual save; no progression rewind
+32.180 F9 screenshot request before=0 after=0
+69.978 gathered resource12
+142.697 gathered resource8
+180.004 manual save; no progression rewind
+180.259 passed: Fixed duration/participation/action/save criteria evaluated.

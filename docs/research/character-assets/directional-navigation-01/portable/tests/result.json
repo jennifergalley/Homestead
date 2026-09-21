@@ -1,0 +1,68 @@
+{
+  "name": "tests",
+  "image": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\HomesteadDirectionalNavigationTests.exe",
+  "sha256": "6F43E7968E7C8AC8E294CF6A9C4C36FBE16B3F4D7DF7B4F301A0B878B4BC4625",
+  "arguments": [],
+  "exitCode": 0,
+  "error": null,
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "samples": [
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 55264,
+          "NativeError": 0,
+          "Image": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\HomesteadDirectionalNavigationTests.exe",
+          "Error": null,
+          "CreationTime": 134344911082434982,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 55264,
+          "NativeError": 0,
+          "Image": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\HomesteadDirectionalNavigationTests.exe",
+          "Error": null,
+          "CreationTime": 134344911082434982,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "Utc": "2026-09-21T19:05:08.2555343+00:00",
+      "Endpoints": []
+    }
+  ],
+  "markerAfter": {
+    "Path": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\tests\\dummy-marker",
+    "Volume": 1086832636,
+    "IndexHigh": 16318464,
+    "IndexLow": 119810,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344911081523794,
+    "LastWriteTime": 134344911081523794,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "41CBBDE3ED35DAD1F0E937908567F40EE4270C1842F73283C4E7BBBCC6A603BB"
+  }
+}

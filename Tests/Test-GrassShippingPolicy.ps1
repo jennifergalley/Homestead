@@ -36,8 +36,25 @@ if($lifecycle.build -cne 'readability-shipping-build-03' -or $lifecycle.link -ne
 $legacy=& $leaf -OutputDirectory 'unused' -ShippingActions -TreeDiagnosticCandidate -GroveCandidate -GroveProxyCorrection
 if($legacy.build -cne 'grove-shipping-build-03' -or $legacy.link -ne 1 -or
     ($legacy.compiles -join ',') -cne '-1,0'){throw 'Legacy grove selector changed'}
+$navigation=& $leaf -OutputDirectory 'unused' -ShippingActions -TreeDiagnosticCandidate -GrassGroundCandidate -NavigationCandidate
+$navigationMeta=& $meta -OutputDirectory 'unused' -ProjectDirectory $root -ShippingActions -WriteMetadataOnly -TreeDiagnosticCandidate -GrassGroundCandidate -NavigationCandidate
+if($navigation.build -cne 'navigation-shipping-build-01' -or $navigation.link -ne 3 -or
+    ($navigation.compiles -join ',') -cne '-1,0,1,2' -or $navigationMeta.build -cne $navigation.build -or
+    $navigationMeta.link -cne 'link3'){throw 'Actual navigation selectors differ'}
+$navigation2=& $leaf -OutputDirectory 'unused' -ShippingActions -TreeDiagnosticCandidate -GrassGroundCandidate -NavigationCandidate -NavigationRevision 2
+$navigation2Meta=& $meta -OutputDirectory 'unused' -ProjectDirectory $root -ShippingActions -WriteMetadataOnly -TreeDiagnosticCandidate -GrassGroundCandidate -NavigationCandidate -NavigationRevision 2
+if($navigation2.build -cne 'navigation-shipping-build-02' -or $navigation2Meta.build -cne $navigation2.build -or
+    $navigation2.link -ne 3 -or $navigation2Meta.link -cne 'link3'){throw 'Second navigation selectors differ'}
+$navigation4=& $leaf -OutputDirectory 'unused' -ShippingActions -TreeDiagnosticCandidate -GrassGroundCandidate -NavigationCandidate -NavigationRevision 4
+$navigation4Meta=& $meta -OutputDirectory 'unused' -ProjectDirectory $root -ShippingActions -WriteMetadataOnly -TreeDiagnosticCandidate -GrassGroundCandidate -NavigationCandidate -NavigationRevision 4
+if($navigation4.build -cne 'navigation-shipping-build-04' -or $navigation4Meta.build -cne $navigation4.build -or
+    $navigation4.link -ne 2 -or $navigation4Meta.link -cne 'link2' -or
+    ($navigation4.compiles -join ',') -cne '-1,0,1'){throw 'Actual corrected analog action map differs'}
 $rejected=0
 foreach($flags in @(
+    @{NavigationCandidate=$true},
+    @{NavigationRevision=2},
+    @{ShippingActions=$true;TreeDiagnosticCandidate=$true;GrassGroundCandidate=$true;ReadabilityDiagnostic=$true;NavigationCandidate=$true},
     @{ReadabilityLifecycle=$true},
     @{ReadabilityCorrection=$true},
     @{ReadabilityDiagnostic=$true},
@@ -95,3 +112,21 @@ if(-not $qa.Contains("if(`$CompletionDriven){`$guard.ArmDeadline(0,0,`$stop,'Ren
     throw 'Actual completion/default guard entry points differ'
 }
 'Passed actual fresh Shipping completion-route policy, invalid/mixed routes and existing zero-timer guard profile.'
+$smoke=Get-Content (Join-Path $root 'Scripts\Test-Game.ps1') -Raw
+$null=[Management.Automation.Language.Parser]::ParseInput($smoke,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw 'Smoke wrapper syntax differs'}
+$admission=[scriptblock]::Create($smoke.Substring(0,$smoke.IndexOf('$root = Split-Path'))+';[bool]$NativeMenu')
+if(-not (& $admission -DirectionalNavigation)){throw 'Directional selector did not use the existing native menu route'}
+foreach($flags in @(
+    @{DirectionalNavigation=$true;NativeMenuQuit=$true},
+    @{DirectionalNavigation=$true;NativeResumeFrom=''},
+    @{DirectionalNavigation=$true;FullLoop=$true},
+    @{DirectionalNavigation=$true;CameraLifecycle=$true},
+    @{DirectionalNavigation=$true;Clearing=$true},
+    @{DirectionalNavigation=$true;WithAudio=$true}
+)){
+    $failed=$false
+    try{$null=& $admission @flags}catch{$failed=$true}
+    if(-not $failed){throw 'Mixed directional smoke route admitted'}
+}
+'Passed production directional smoke selector and six incompatible route rejections without launching a game.'

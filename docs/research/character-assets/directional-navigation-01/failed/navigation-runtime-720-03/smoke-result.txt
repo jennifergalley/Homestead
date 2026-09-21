@@ -1,0 +1,12 @@
+PASS Directional navigation starts with actual native item focus
+PASS Real D-pad Down crosses final carried row into equipment without trigger
+PASS Capture actual directional focus: native-navigation-equipment
+PASS Real D-pad Up reverses from equipment into carried items
+PASS Focused-widget Slate D-pad routing reaches the same equipment boundary exactly once
+PASS Focused-widget Slate keyboard routing returns to content
+PASS Real left-stick Down crosses the same boundary
+DIAGNOSTIC stick-up region=Equipment sync=1 visible=1 gamepad=1 state_equal=1 actor_before=X=-1000.000 Y=0.000 Z=88.150 actor_after=X=-1000.000 Y=0.000 Z=88.150 portrait_before=P=-0.000000 Y=-86.499695 R=0.000000 portrait_after=P=-0.000000 Y=-86.499695 R=0.000000
+INPUT_ISOLATION ignored_external_events=0 (includes 0 deliberate rejection probes)
+PERFORMANCE mean_fps=60.40 p95_frame_ms=16.84 p99_frame_ms=16.89 samples=150 exclusions=startup_and_screenshot_readback
+LIT_GUARD samples=169 final_mode=3 shader_complexity=0 render_percentage=0
+FAILURE Real left-stick Up returns without moving pawn or rotating portrait | 

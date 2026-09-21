@@ -826,7 +826,8 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
     {
         Axis(EKeys::Gamepad_LeftY, 0);
         Axis(EKeys::Gamepad_RightX, 0);
-        const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+        const int32 Probes = FParse::Param(FCommandLine::Get(), TEXT("HomesteadDirectionalNavigationTest")) ? 2
+            : FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGatheringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))

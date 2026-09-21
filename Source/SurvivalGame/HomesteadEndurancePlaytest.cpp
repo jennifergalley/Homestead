@@ -435,7 +435,6 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
                 if (PC->Simulation().Count(Item) > 0) { E.FoodId = static_cast<int32>(Item); break; }
             if (E.FoodId >= 0)
             {
-                E.LastMenuSubject.Empty(); E.MenuDirection = 1;
                 Tap(EKeys::Gamepad_Special_Right); Go(Phase::EatSelect); break;
             }
         }
@@ -491,15 +490,22 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
     case Phase::EatSelect:
     {
         const auto* Subject = PC->NativeMenu ? PC->NativeMenu->GetSelectedSubject() : nullptr;
-        if (Now - E.StepStarted > 8 || !Subject || PC->BookPage() != 0)
+        if (Now - E.StepStarted > 8 || !Subject || PC->BookPage() != 0
+            || PC->NativeMenu->GetFocusedRegionName() != TEXT("Content"))
         { FinishEndurance(TEXT("failed"), TEXT("Pack navigation hung.")); return; }
         if (Subject->Subject != EHomesteadMenuSubject::ItemGroup || Subject->Id != E.FoodId)
         {
-            const FString Key = FString::Printf(TEXT("%d:%d"), static_cast<int32>(Subject->Subject), Subject->SubjectId);
-            if (Key == E.LastMenuSubject)
-            { Tap(EKeys::Gamepad_DPad_Down); E.MenuDirection *= -1; E.LastMenuSubject.Empty(); }
+            const auto Rows = PC->MenuRows();
+            const int32 Target = Rows.IndexOfByPredicate([&E](const FHomesteadRow& Row)
+                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == E.FoodId; });
+            const int32 Current = PC->NativeMenu->GetSelectedContentIndex();
+            const int32 Columns = PC->NativeMenu->GetContentColumnCount();
+            if (Target == INDEX_NONE || !Rows.IsValidIndex(Current) || Columns <= 0)
+            { FinishEndurance(TEXT("failed"), TEXT("Observed pack grid has no valid food navigation target.")); return; }
+            if (Target / Columns != Current / Columns)
+                Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
             else
-            { E.LastMenuSubject = Key; Tap(E.MenuDirection > 0 ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left); }
+                Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
             break;
         }
         E.BeforeCount = PC->State().inventory[E.FoodId];

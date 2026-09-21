@@ -17,6 +17,26 @@ and the existing Settings exit path. No trigger/region-shortcut proxy is used.
 stick helpers used by the widget. Run it through the existing approved portable
 compiler/test slot; a portable pass alone does not prove native spatial focus.
 
+`Scripts\Test-Game.ps1 -Packaged -ShippingQA -DirectionalNavigation` selects
+this route with a fresh explicit candidate/output directory. It records actual
+equipment-boundary, scrolled-pack and quantity-edit PNGs and frame metadata.
+Run at720p and4K for the requested layout boundaries; these controlled fixtures
+are not ordinary walking. The existing fresh endurance driver chooses the real
+food row/column using mapped directions without deliberately hitting grid edges.
+The existing two-column wardrobe action-grid inputs remain unchanged.
+
+Candidate06 passed43 native directional steps at720p and4K, the existing4K
+menu/wardrobe producer, different-process F9 consumer and genuine save-and-quit.
+A180s fresh-world regression passed mapped food traversal and exact save/load.
+Focused buttons/anchors pass analog to shared admission rather than consuming
+Slate's default analog reply; initial/reverse input and held repeat share one
+helper. The tall portrait image alone has native Custom Right metadata resolving
+the live remembered content widget (or empty-content anchor).
+Evidence and retained failures01-05:
+`docs\research\character-assets\directional-navigation-01\receipt.json`.
+Actual amount confirmation, full mouse/device switching and removal/rebuild/
+upper-boundary matrices are not claimed; see the open change tasks.
+
 ## Native menu integration
 
 `Scripts\Test-Game.ps1 -NativeMenu -Width 1280 -Height 720` selects the focused

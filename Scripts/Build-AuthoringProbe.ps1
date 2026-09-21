@@ -15,7 +15,9 @@ param(
     [switch]$GrassGroundCandidate,
     [switch]$ReadabilityDiagnostic,
     [switch]$ReadabilityCorrection,
-    [switch]$ReadabilityLifecycle
+    [switch]$ReadabilityLifecycle,
+    [switch]$NavigationCandidate,
+    [ValidateSet(1,2,3,4,5,6)][int]$NavigationRevision=1
 )
 $ErrorActionPreference = 'Stop'
 $authorityRoot = Split-Path $PSScriptRoot -Parent
@@ -32,8 +34,12 @@ if($GrassGroundCandidate -and (-not $TreeDiagnosticCandidate -or $GroveCandidate
 if($ReadabilityDiagnostic -and -not $GrassGroundCandidate){throw 'Readability diagnostic requires qualified grass Shipping metadata.'}
 if($ReadabilityCorrection -and -not $ReadabilityDiagnostic){throw 'Readability correction requires diagnostic-derived metadata.'}
 if($ReadabilityLifecycle -and -not $ReadabilityCorrection){throw 'Lifecycle fixture correction requires confirmed readability metadata.'}
-$shippingBuildName=if($ReadabilityLifecycle){'readability-shipping-build-03'}elseif($ReadabilityCorrection){'readability-shipping-build-02'}elseif($ReadabilityDiagnostic){'readability-shipping-build-01'}elseif($GrassGroundCandidate){'grass-shipping-build-01'}elseif($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+if($NavigationCandidate -and (-not $GrassGroundCandidate -or $ReadabilityDiagnostic)){throw 'Navigation requires exclusive grass-derived Shipping metadata.'}
+if($NavigationRevision -ne 1 -and -not $NavigationCandidate){throw 'Navigation revision requires its explicit metadata candidate.'}
+$shippingBuildName=if($NavigationCandidate){'navigation-shipping-build-01'}elseif($ReadabilityLifecycle){'readability-shipping-build-03'}elseif($ReadabilityCorrection){'readability-shipping-build-02'}elseif($ReadabilityDiagnostic){'readability-shipping-build-01'}elseif($GrassGroundCandidate){'grass-shipping-build-01'}elseif($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
 $shippingLinkFolder=if($ReadabilityLifecycle){'link1'}elseif($ReadabilityDiagnostic){'link2'}elseif($GrassGroundCandidate){'link3'}elseif($TreeContactCorrection -or $GroveProxyCorrection){'link1'}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){'link2'}else{'link1'}
+if($NavigationCandidate){$shippingBuildName='navigation-shipping-build-{0:D2}' -f $NavigationRevision}
+if($NavigationCandidate -and $NavigationRevision -ge 4){$shippingLinkFolder='link2'}
 $manifestAttempt=if($HairWaveCandidate -or $WardrobeCandidate -or $TreeDiagnosticCandidate){'manifest-01'}else{'manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')
 if ($root -ine $authorityRoot -and

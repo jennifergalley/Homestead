@@ -1,0 +1,10 @@
+[
+  {
+    "sha256": "8780B09B2DFDE6FCD889C2C1B419C73FEF49867A9964BCED8E24B94CB37184A2",
+    "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.target"
+  },
+  {
+    "sha256": "2C94D8C30DF424622504FF9CBEBB1A6DE62E3083BEE0910394DDF4BDE0A3840F",
+    "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor.version"
+  }
+]

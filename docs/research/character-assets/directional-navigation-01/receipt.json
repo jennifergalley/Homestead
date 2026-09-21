@@ -1,0 +1,1112 @@
+{
+  "schemaVersion": 1,
+  "status": "passed-qualified-directional-navigation-not-promoted",
+  "createdUtc": "2026-09-21T19:45:31.5473346+00:00",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\directional-navigation-06",
+  "executableSha256": "F3D669EC6B31312B46BEBB109EF5200346B94446C48765386491BD626A093B2F",
+  "sourcePins": [
+    {
+      "sha256": "B703DED9F99383A8F9F7402E6D4C88084439F1BD819F63420E2AAF986D935375",
+      "path": "Config\\DefaultEngine.ini"
+    },
+    {
+      "sha256": "E58B0041B328179329674068406CE7E4DC9363A0A79ABC0CD01C196B226D3FDE",
+      "path": "Config\\DefaultGame.ini"
+    },
+    {
+      "sha256": "E4C94C8C2B3ECCA3EFF9FACD82EEBDBD8CD43DF160CBAFB55C2330C03A233FE1",
+      "path": "Config\\DefaultGameUserSettings.ini"
+    },
+    {
+      "sha256": "25746261566D8A8508DD58974E42E64B9FAB616BD28F09313F66582707ED3EFC",
+      "path": "Config\\DefaultInput.ini"
+    },
+    {
+      "sha256": "25472C1F739C28C801C1431AED26232E751BCC3C65A3553E82D5D3C23204E2C6",
+      "path": "Source\\SurvivalGame.Target.cs"
+    },
+    {
+      "sha256": "44E4A005C17600E77F0189E4A0B6A7609884F74E62DE2000B3F0C43A5C82737A",
+      "path": "Source\\SurvivalGame\\HomesteadActionTestState.h"
+    },
+    {
+      "sha256": "D66C9811BF092ABE3818315D07DC07A89C403862C2E32E6045DD47C34DF1EF0A",
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.cpp"
+    },
+    {
+      "sha256": "E28FE1088E89D9EBCF3C14746392995B5B5CAF2CA33B3B924A0A296F4D9E219B",
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.h"
+    },
+    {
+      "sha256": "116418605A7433E7FBC64442C1D1316B02B81FF9A5D2D8276F7DB2A29064B029",
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.cpp"
+    },
+    {
+      "sha256": "7E77BE0FDD8410EA2AD68805B8902C9F9E83311E8CF85D4D8F469E0FBB093104",
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.h"
+    },
+    {
+      "sha256": "CA2596A09E6FA5A2E3DEB03C17D946C06A522022AC62A5762EFDF702423B54ED",
+      "path": "Source\\SurvivalGame\\HomesteadBookClarityTest.cpp"
+    },
+    {
+      "sha256": "F16752470150401138AC2F7AF1ECBBB0EA0F40C6B8DC7A08338FA5942660078C",
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.cpp"
+    },
+    {
+      "sha256": "25C0E5745B1F983B9B15294AD856D7BE42FD3CE4698CB86DF5E09ED47569E74B",
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.h"
+    },
+    {
+      "sha256": "B7A353F7D95A310BEF360B3513E5AAEB468789944DC73B22327F42B31CC51D63",
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp"
+    },
+    {
+      "sha256": "C49C18730C4A83B64ACE6BB90AEDF93E5B4CF9EB1BE7E479E562C1332EE6F1ED",
+      "path": "Source\\SurvivalGame\\HomesteadController.cpp"
+    },
+    {
+      "sha256": "98AF9DEB26C97A4193FB9BD04CE8401693DB9F096029E2D995B13AFCFA751FC7",
+      "path": "Source\\SurvivalGame\\HomesteadController.h"
+    },
+    {
+      "sha256": "629A9DAF266AE251272E068F38C5C5E4ED7C99C4651BD1B22D548F18904B027C",
+      "path": "Source\\SurvivalGame\\HomesteadEndurancePlaytest.cpp"
+    },
+    {
+      "sha256": "0F1D215D4DBD3AA79131FA8E9F11073D0513C993F9F5E7A0EB31D48EA634DE59",
+      "path": "Source\\SurvivalGame\\HomesteadEnduranceState.h"
+    },
+    {
+      "sha256": "AC41A627C3CC4AFF94CF9F214EEBA9E88BDFC67ACA7EF25189EE733DBBC1BFA6",
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackMeasurements.cpp"
+    },
+    {
+      "sha256": "DB4C3EB29DFB3766D31A5E581DA3870344531DF0BC30A8D712ACEB855286FF44",
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackTest.cpp"
+    },
+    {
+      "sha256": "B1E4F5A1B6FB4070B7E4D85BA089BF3C3593CC7AD12F3878EA7FFEBFB6204DC7",
+      "path": "Source\\SurvivalGame\\HomesteadForageRenewal.cpp"
+    },
+    {
+      "sha256": "2FEF302D90F093E46240992AC98747E1BB369267FEE4AD11F7E9393DCA970813",
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp"
+    },
+    {
+      "sha256": "99AA97162D8F30EFFD763D5ADA97A7FBDA145768D66BEE1AC6C5135078DBFFC6",
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.cpp"
+    },
+    {
+      "sha256": "BEA77510E11770942B0EF253692F39C55E1097AFB1D609AB106687655144AE38",
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.h"
+    },
+    {
+      "sha256": "6F8C8A0338241288538C99081820AB196DD225D73443EFB077211E13182AE9AD",
+      "path": "Source\\SurvivalGame\\HomesteadGatheringTest.cpp"
+    },
+    {
+      "sha256": "3FD335630DFC4B727BEAAE617BE40C44111B31AE5AAFEA3C9438141C0B60277C",
+      "path": "Source\\SurvivalGame\\HomesteadHUD.cpp"
+    },
+    {
+      "sha256": "4341DB951DEC95F4876BC559B9041D0856CB8E125173AD57C8C2F103E6A32868",
+      "path": "Source\\SurvivalGame\\HomesteadHUD.h"
+    },
+    {
+      "sha256": "33AA1809BCC6F2DB444162BFBA9B09DF90AA022055DFF94C8C062296F9167A19",
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.cpp"
+    },
+    {
+      "sha256": "F6963986887E11D2DF5B76D476E8F29F7525D2792BECE8D1CB10B27F12C5C230",
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.h"
+    },
+    {
+      "sha256": "C05F19BB6D359E769A54E256EFA9A5C39B3FA892ADDC8C6F75D693920C99A413",
+      "path": "Source\\SurvivalGame\\HomesteadHotkeyTest.cpp"
+    },
+    {
+      "sha256": "F07EB7E35A7E76BB8F820CD69CF75D5AF8F058B178676E5E975F691871E57A02",
+      "path": "Source\\SurvivalGame\\HomesteadPresentationTest.cpp"
+    },
+    {
+      "sha256": "09CCF9C06E5F9B428083BAC294DFC27ACB845BEF0ACD407F0D10D94625A542A6",
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.cpp"
+    },
+    {
+      "sha256": "B704619EC86B653B1E110A6582370F9F5592BB2175E1BB55010E97D5513961FA",
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.h"
+    },
+    {
+      "sha256": "3B78A2B383AF0E90EEF431928F04A0C568EA118935C5698AE499224991C05659",
+      "path": "Source\\SurvivalGame\\HomesteadPromptTest.cpp"
+    },
+    {
+      "sha256": "958DC048120BD20E9011B8394273B551B3080383F0F08780F0E05946073C5AF6",
+      "path": "Source\\SurvivalGame\\HomesteadRenewalState.h"
+    },
+    {
+      "sha256": "CDBC705D5772C9690293EC6845DEB15B35B6952C5190F9723B5BFD0FFE2C3F3D",
+      "path": "Source\\SurvivalGame\\HomesteadSave.h"
+    },
+    {
+      "sha256": "9C2ABC921A58E05855C3219BA43ACE1DD79D21E2F9B2E47D8309E4B3E1C9BF8E",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.cpp"
+    },
+    {
+      "sha256": "9597E28AA7F9C7E0448487EFA9DA8CC2A3B5B4B4ECDDEBE8CC35A94F90F8EC76",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.h"
+    },
+    {
+      "sha256": "3A3CB868D064FBE67B875F85B7470A45D1AFC84AEA2B581FF4FE6EA4010646E0",
+      "path": "Source\\SurvivalGame\\HomesteadSaveRoutingTest.cpp"
+    },
+    {
+      "sha256": "C98C9B3510FFC82539C139C27A0E279EE76B78F6C6012F7D512C174CFAE6A4AD",
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.cpp"
+    },
+    {
+      "sha256": "EADB437E89B41F8DA243EF1885214E0778A631DCE5E807A2FFF7DFD483A4AC38",
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.h"
+    },
+    {
+      "sha256": "24F7F33A5E5B99A86C1F6B87261A23F111E9AD1539D529DFF8E4C614BC546577",
+      "path": "Source\\SurvivalGame\\HomesteadStartupProbe.cpp"
+    },
+    {
+      "sha256": "B9E9D6A031AE30581C574D25993B71520C502F9B9FC9F949205F8FD0229B0C39",
+      "path": "Source\\SurvivalGame\\HomesteadTestPaths.h"
+    },
+    {
+      "sha256": "3CAFD675BC651886F1CBDF27795B40D9917887DB75A0720F03FBEE3D5310431E",
+      "path": "Source\\SurvivalGame\\HomesteadToolGeometry.h"
+    },
+    {
+      "sha256": "0E89AB603A6BAB0DF1A319E0F8AE7C5648C3E0C9620F03D417DE1F47DDE9EDA9",
+      "path": "Source\\SurvivalGame\\HomesteadVideoSyncTest.cpp"
+    },
+    {
+      "sha256": "4F6F340336F3C0F96A7683CFEA7AD5737AC8C8A001959CC5196181DFD269B723",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp"
+    },
+    {
+      "sha256": "8227A6D7EF83D3CB94B3503DC41484881EFCE495F0C1F14C6DAD68E7A58CD8B0",
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h"
+    },
+    {
+      "sha256": "8129C57DFD5031F72DE790C9267DEED403036E86C8F00B12D2C4CA779FB849EC",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.cpp"
+    },
+    {
+      "sha256": "E705F5D49CDF4C605CABD97620E9EDCDD1C4CD05424384C231D9E64E5811FA06",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.h"
+    },
+    {
+      "sha256": "E4FA23EC3514593D90FCC344EBACCCF7BBEF25C120359047A1866C9FF41ADAC0",
+      "path": "Source\\SurvivalGame\\HomesteadWardrobeSelection.h"
+    },
+    {
+      "sha256": "4BB77A6CE984EB0F2AA2DD93DA5B041A2839B4D9BD3D59692AE0E41E355CA5F7",
+      "path": "Source\\SurvivalGame\\HomesteadWateringPlaytest.cpp"
+    },
+    {
+      "sha256": "5EC591C2E5DF7C0265153308118002D01FC457EC024DF4628D422D934BAD5B93",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTest.cpp"
+    },
+    {
+      "sha256": "9C1C58E81E2E89F9AD46673E6E145136576633E65DFFA04A9F5CD89BA2E2C0E0",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.cpp"
+    },
+    {
+      "sha256": "301B4BBC8D00A9F3AC0236BE731D9D87836ACF7B25DFE0D2FBB616692FEDFF64",
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.h"
+    },
+    {
+      "sha256": "739D6C3C8DCDC123DE82B36C358B16E02A5ABD123DA50ED685E8DEE5CC2192DE",
+      "path": "Source\\SurvivalGame\\HomesteadWeedingPlaytest.cpp"
+    },
+    {
+      "sha256": "4FFFAE84FF88204D7877BEE8AD8A8642AC3A8A2E6018EDCC6BDADF5FB2125C86",
+      "path": "Source\\SurvivalGame\\HomesteadWeedingTest.cpp"
+    },
+    {
+      "sha256": "5AC541E3EC6D4505B260BB4BF1632809E11E162FD9F43B05FD93FDE2B3659D42",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp"
+    },
+    {
+      "sha256": "8C9E406F630D08BB7A04A16A3E2F4D9BF272CBE38FA896D286E671C590CF7CB0",
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h"
+    },
+    {
+      "sha256": "F593880C6C9801F9BAFAB406D36D914B873BCE76E60B9C8C329D6B9B0EDDAA1C",
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.cpp"
+    },
+    {
+      "sha256": "2EEB97DEBCF123D42E2E49AEDA0F5A84C3C8399BA1958C19E138D001B690F6D9",
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.h"
+    },
+    {
+      "sha256": "677C6C15DCD9AF8D67B83B0C76EE712F39F021D71F41A6ED3D8081E294B86D6C",
+      "path": "Source\\SurvivalGame\\SurvivalGame.Build.cs"
+    },
+    {
+      "sha256": "876F67FAE339EB8036B94CA19ADC55CBFAE0A3A3E72B2E1D48D8761BFB911467",
+      "path": "Source\\SurvivalGame\\SurvivalGame.cpp"
+    },
+    {
+      "sha256": "319D13D3AA0229238C85BE82C266F5A663DC82B572C1A82AD80DD7FC9B53ECAF",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadDirectionalNavigationTest.cpp"
+    },
+    {
+      "sha256": "52592BBBA0EAC6ACF65E982BA5FF6A32AED1E33AACE4270603D6F24DE28B7661",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuInventory.cpp"
+    },
+    {
+      "sha256": "7CE11232912570E3AA0D1F2A66EA2936C7E110AAA7EF162C6135DE71A46D9CF7",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuNavigation.h"
+    },
+    {
+      "sha256": "FB286AA1D89EE02373A87606880E10AC601729829372F0B33C6728E5B74A7146",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.cpp"
+    },
+    {
+      "sha256": "95536A0CAB9AF545069DE1ADCB2E0FDF96C50E964B4CA6735377C4A0FBF897AF",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.h"
+    },
+    {
+      "sha256": "43211E5CB1B113A6A564A375FD527E9548CB01800831E35620D8F291EAEDD0A8",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuTests.cpp"
+    },
+    {
+      "sha256": "641B7F0A5A511220F660D7E826B3D0B18A11208C3B21A1F71A2EEC46104FEC19",
+      "path": "Source\\SurvivalGame\\UI\\HomesteadNativeMenuTest.cpp"
+    },
+    {
+      "sha256": "2C0C2C7AD8A90DA07E9D272A89F536BDCD7C451D5660ADDDFA473509F735C78F",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.cpp"
+    },
+    {
+      "sha256": "C32CAE33B0A909D8C65D6EBC9A0CC2FEE3E4E74EF9089B554BE9ADAD238A36B3",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.h"
+    },
+    {
+      "sha256": "DC7CADD4EBD5DD6B91FA07F36A10A7326217691D17934E577F469732823ECA6E",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.cpp"
+    },
+    {
+      "sha256": "B10EA0B056EB21BCFA8048ECAF3677A395AFB60B901F0531681DBB734D2F44A1",
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.h"
+    },
+    {
+      "sha256": "1A3BA371827DF9262B7376169F1FE5BFB6372AA53A1D79A0114D6886B5592A05",
+      "path": "Source\\SurvivalGameEditor.Target.cs"
+    },
+    {
+      "sha256": "7862702B7B28CE1D1325E86B3371DE8D333248FE7D76B95200EE76393AE17F48",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp"
+    },
+    {
+      "sha256": "0F6F16766D6601FB91A17578606814C974C457B3F07623958B4BB0E125A4DBE4",
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h"
+    },
+    {
+      "sha256": "A82E45418AC31992A364149C0941BDA31DF96D77D01D284D8557640951B80C5D",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp"
+    },
+    {
+      "sha256": "B934F6B7A5D50739D93104117483ABD4C40D464858E8C23C09D0CA688019D875",
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.h"
+    },
+    {
+      "sha256": "1C5C12CA144BAB9FDE9580026BCA827168576612C98F5A700EB34CE7890D70E4",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs"
+    },
+    {
+      "sha256": "8F47E9C54BFAA78B79672022472962BD4B6E7548625F57A4409BA5CB09180A86",
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.cpp"
+    }
+  ],
+  "sourceBaseCheckpoint": "cf427de6b79135375f673dab71069965caeafa3d",
+  "sealNote": "Initial seal rejected a63-character stdout pin transcribed in the conversation summary. Actual64-character SHA and exact PASS58099 output were read; partial copies were hash-checked without overwrite before completing this seal.",
+  "routes": [
+    {
+      "guard": {
+        "maximumSampleGapMs": 764.5366,
+        "totalProcesses": 1,
+        "status": "passed",
+        "exitCode": 0,
+        "pid": 8540,
+        "markerUnchanged": true,
+        "hardTerminated": false,
+        "subjectExited": true,
+        "activeProcesses": 0
+      },
+      "passes": 43,
+      "name": "navigation-runtime-720-06"
+    },
+    {
+      "guard": {
+        "maximumSampleGapMs": 682.1631,
+        "totalProcesses": 1,
+        "status": "passed",
+        "exitCode": 0,
+        "pid": 37276,
+        "markerUnchanged": true,
+        "hardTerminated": false,
+        "subjectExited": true,
+        "activeProcesses": 0
+      },
+      "passes": 43,
+      "name": "navigation-runtime-4k-06"
+    },
+    {
+      "guard": {
+        "maximumSampleGapMs": 675.5054,
+        "totalProcesses": 1,
+        "status": "passed",
+        "exitCode": 0,
+        "pid": 55504,
+        "markerUnchanged": true,
+        "hardTerminated": false,
+        "subjectExited": true,
+        "activeProcesses": 0
+      },
+      "passes": 43,
+      "name": "navigation-menu-4k-06"
+    },
+    {
+      "guard": {
+        "maximumSampleGapMs": 680.6568,
+        "totalProcesses": 1,
+        "status": "passed",
+        "exitCode": 0,
+        "pid": 52444,
+        "markerUnchanged": true,
+        "hardTerminated": false,
+        "subjectExited": true,
+        "activeProcesses": 0
+      },
+      "passes": 4,
+      "name": "navigation-resume-4k-06"
+    },
+    {
+      "guard": {
+        "maximumSampleGapMs": 569.3709,
+        "totalProcesses": 1,
+        "status": "passed",
+        "exitCode": 0,
+        "pid": 38628,
+        "markerUnchanged": true,
+        "hardTerminated": false,
+        "subjectExited": true,
+        "activeProcesses": 0
+      },
+      "passes": 4,
+      "name": "navigation-quit-4k-06"
+    }
+  ],
+  "frames": [
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-equipment.png",
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "7B632E36A517F15377F93780B24229A8E4567708DF98C36302D7497DFF41CF11"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-scrolled.png",
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "03559B1707836B8812EFBF27D48F30EB0DC97EEC166E36A899DE7444ECDA89FB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-amount.png",
+      "dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "4F4B5B3CD29CC167EF8089161F195DA14600876B9B61A9E449819971073139EC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-equipment.png",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "sha256": "514CF580A49BA3C3DFD8896AE345AE7190949AE864D3B9D853DFFAF49B22D095"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-scrolled.png",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "sha256": "4DAC9AAA85B9B1298F10E1D384A61F9F7DE2F51731D3297470A429E016E3BDB8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-amount.png",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "sha256": "A0AC79F2E06DBD15E153619CCA4B5A78C624E53948A2E5769FFE708D687D4700"
+    }
+  ],
+  "failedAttempts": [
+    {
+      "qualification": "Actual failed native predicate retained.",
+      "name": "navigation-runtime-720-01",
+      "failure": "Real left-stick Up returns without moving pawn or rotating portrait | "
+    },
+    {
+      "qualification": "Wrong unity rebuilt: diagnostic fixture change was not incorporated. No new diagnostic or fix claimed.",
+      "name": "navigation-runtime-720-02",
+      "failure": "Real left-stick Up returns without moving pawn or rotating portrait | "
+    },
+    {
+      "qualification": "Actual failed native predicate retained.",
+      "name": "navigation-runtime-720-03",
+      "failure": "Real left-stick Up returns without moving pawn or rotating portrait | "
+    },
+    {
+      "qualification": "Actual failed native predicate retained.",
+      "name": "navigation-runtime-720-04",
+      "failure": "Right reverses from portrait into the carried content | "
+    },
+    {
+      "qualification": "Actual failed native predicate retained.",
+      "name": "navigation-runtime-720-05",
+      "failure": "Right reverses from portrait into the carried content | "
+    }
+  ],
+  "ordinaryRegression": {
+    "guard": {
+      "maximumSampleGapMs": 636.869,
+      "totalProcesses": 1,
+      "status": "passed",
+      "exitCode": 0,
+      "pid": 25780,
+      "markerUnchanged": true,
+      "hardTerminated": false,
+      "subjectExited": true,
+      "activeProcesses": 0
+    },
+    "actual": {
+      "status": "passed",
+      "reason": "Fixed duration/participation/action/save criteria evaluated.",
+      "freshWorld": true,
+      "completionDriven": true,
+      "debugBindingQueryAvailable": false,
+      "dayMinutes": 60,
+      "raining": false,
+      "night": false,
+      "litGuardVersion": 1,
+      "litGuardTicks": 10850,
+      "startupViewMode": 3,
+      "startupLighting": true,
+      "startupShaderComplexity": false,
+      "startupShowFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1",
+      "effectiveF5DebugBinding": "",
+      "effectiveF9DebugBinding": "",
+      "f9NoScreenshotChecks": 1,
+      "presentation": {
+        "available": true,
+        "viewMode": 3,
+        "lighting": true,
+        "shaderComplexity": false,
+        "showFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1"
+      },
+      "pid": 25780,
+      "wallSeconds": 180.25964760035276,
+      "targetSeconds": 180,
+      "pausedSeconds": 1.8214221000671387,
+      "unpausedSeconds": 178.4365819990635,
+      "engineUnpausedSeconds": 178.43668300658464,
+      "movingSeconds": 134.07371190562844,
+      "distanceCm": 14902.727182586023,
+      "initialHour": 6,
+      "hour": 7.189577886712952,
+      "actionHours": 0,
+      "naturalGameHours": 1.1895778867129518,
+      "gathers": 3,
+      "eats": 1,
+      "waypoints": 20,
+      "manualSaves": 2,
+      "loads": 1,
+      "exactSameWorldRoundTrip": true,
+      "autosaveSlots": 0,
+      "autosaveWrites": 0,
+      "resourceRefreshes": 0,
+      "verifiedHarvestedResourceRegrowth": 0,
+      "navigationFailures": 0,
+      "recoveryAttempts": 0,
+      "captures": 2,
+      "timedFrames": 7096,
+      "meanTickMs": 16.667716403564242,
+      "maxTickMs": 28.512798249721527,
+      "p95TickMs": 16.900000000000002,
+      "p99TickMs": 17,
+      "timingLimits": "Instrumented actor wall-tick cadence, not GPU/Present/scanout. First60s and capture+2s excluded;1000ms histogram overflow bin."
+    },
+    "analysis": {
+      "result": {
+        "status": "passed",
+        "reason": "Fixed duration/participation/action/save criteria evaluated.",
+        "freshWorld": true,
+        "completionDriven": true,
+        "debugBindingQueryAvailable": false,
+        "dayMinutes": 60,
+        "raining": false,
+        "night": false,
+        "litGuardVersion": 1,
+        "litGuardTicks": 10850,
+        "startupViewMode": 3,
+        "startupLighting": true,
+        "startupShaderComplexity": false,
+        "startupShowFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1",
+        "effectiveF5DebugBinding": "",
+        "effectiveF9DebugBinding": "",
+        "f9NoScreenshotChecks": 1,
+        "presentation": {
+          "available": true,
+          "viewMode": 3,
+          "lighting": true,
+          "shaderComplexity": false,
+          "showFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1"
+        },
+        "pid": 25780,
+        "wallSeconds": 180.25964760035276,
+        "targetSeconds": 180,
+        "pausedSeconds": 1.8214221000671387,
+        "unpausedSeconds": 178.4365819990635,
+        "engineUnpausedSeconds": 178.43668300658464,
+        "movingSeconds": 134.07371190562844,
+        "distanceCm": 14902.727182586023,
+        "initialHour": 6,
+        "hour": 7.189577886712952,
+        "actionHours": 0,
+        "naturalGameHours": 1.1895778867129518,
+        "gathers": 3,
+        "eats": 1,
+        "waypoints": 20,
+        "manualSaves": 2,
+        "loads": 1,
+        "exactSameWorldRoundTrip": true,
+        "autosaveSlots": 0,
+        "autosaveWrites": 0,
+        "resourceRefreshes": 0,
+        "verifiedHarvestedResourceRegrowth": 0,
+        "navigationFailures": 0,
+        "recoveryAttempts": 0,
+        "captures": 2,
+        "timedFrames": 7096,
+        "meanTickMs": 16.667716403564242,
+        "maxTickMs": 28.512798249721527,
+        "p95TickMs": 16.900000000000002,
+        "p99TickMs": 17,
+        "timingLimits": "Instrumented actor wall-tick cadence, not GPU/Present/scanout. First60s and capture+2s excluded;1000ms histogram overflow bin."
+      },
+      "postWarmupTrends": {
+        "physical_bytes": {
+          "first": 995799040.0,
+          "last": 990810112.0,
+          "min": 990810112.0,
+          "max": 1001152512.0,
+          "netChange": -4988928.0
+        },
+        "virtual_bytes": {
+          "first": 1970806784.0,
+          "last": 2005868544.0,
+          "min": 1968791552.0,
+          "max": 2011344896.0,
+          "netChange": 35061760.0
+        },
+        "object_slots_in_use": {
+          "first": 35150.0,
+          "last": 35145.0,
+          "min": 35135.0,
+          "max": 35151.0,
+          "netChange": -5.0
+        },
+        "resources": {
+          "first": 98.0,
+          "last": 98.0,
+          "min": 98.0,
+          "max": 98.0,
+          "netChange": 0.0
+        },
+        "structures": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "netChange": 0.0
+        },
+        "plots": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "netChange": 0.0
+        }
+      },
+      "validSaveEnvelopes": [
+        {
+          "file": "Homestead_Manual.sav",
+          "sha256": "9193ba7c7d551fb2da5be4af0f0b23ab5b4bda13e89463e7347fbbd33f8f5622",
+          "crcValid": true
+        },
+        {
+          "file": "Homestead_Manual.sav.bak",
+          "sha256": "fd9623f2c51997034f0e6021041839476a4c7a4a8324862fe6b599ffa9bbebb1",
+          "crcValid": true
+        }
+      ],
+      "diagnosticLog": "qa-native.log",
+      "engineLogAvailable": false,
+      "distinctAutosaveTransitions": [],
+      "actualFrames": 2,
+      "naturalHoursFromEngineDeltaAtRecordedDayLength": 1.1895778867105642,
+      "pausedPercent": 1.0104436152595553,
+      "movingPercent": 74.37810607667363,
+      "limits": "Instrumented actor cadence, not GPU/Present/scanout. Observer allocations/IO and concurrent machine load included. Not an indefinite leak-free claim."
+    }
+  },
+  "build": "Exact exported local guarded compile/link/resource-conversion/manifest/metadata/loose-stage route. Unchanged unity1 from build01, unity2 from build05, corrected widget unity3 from build06. Existing metadata/export observational-monitoring and original game-link monitor caveats retained; no stronger continuous-history claim.",
+  "fixes": [
+    "Focused controls bubble analog through shared controller admission; accepted stick input dispatches immediately, existing helper polls held repeat.",
+    "Measured portrait (26,174,236,330) right sweep chose Inventory header (288,270,196,47). Native Custom Right metadata now resolves the live remembered eligible Content widget, including empty anchor; normal focus callback retains semantic synchronization.",
+    "Endurance uses actual grid target row/column, not obsolete edge-stall snake traversal."
+  ],
+  "visualReview": {
+    "worker": "Personally inspected720p native-navigation-amount.png: readable Gold Amount2 editing control, contained Cancel/Confirm/One; description has its own scroll/clipping. Earlier failed01 equipment capture was inspected. Current06 equipment/scrolled and4K firsthand viewing blocked by image quota.",
+    "coordinator": "Personally inspected one scrolled Branch-grid original from720/4K batch; exact resolution/file not safely attributed. Readable selected outline, details/sections and directional footer; dark portrait feet/lower body remain. No claim to six-image firsthand review."
+  },
+  "limitations": [
+    "Controlled native fixtures disclose authority harvesting/splits and survival failure; only180s fresh endurance is ordinary mapped play, not the UI fixtures.",
+    "No hardware/controller comfort, complete mouse matrix, selected-removal/rebuild matrix, actual amount-confirm transaction or all upper-boundary coverage claimed. Uncovered OpenSpec clauses remain open.",
+    "No new art/world/save schema/music changes. Samev5 profile and prior camera candidate retained; environment14/29 and wardrobe19/44 are unchanged.",
+    "Actual720p/4K output PNGs are not4K GPU/Present/internal temporal input-resolution/performance proof. Shipping engine logging absent; explicit native evidence and finite guard sampling used.",
+    "Historical failures01-05 and portable floating-point failure remain failed. Original tree import03 FAILED/12 branch basis-corner qualification and prior tool-monitor limits remain."
+  ],
+  "files": [
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\smoke-result.txt",
+      "copy": "navigation-runtime-720-06\\smoke-result.txt",
+      "sha256": "EBDE0EA4474061A022D7578D5EE1F97A77743DFDC733B65EF9987CEC03CF1ED7"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\qa-guard-result.json",
+      "copy": "navigation-runtime-720-06\\qa-guard-result.json",
+      "sha256": "4AF559E667C209CB341B76492ED98AD479596EEED383871A6E2E924C77BB29E0"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\qa-launch.json",
+      "copy": "navigation-runtime-720-06\\qa-launch.json",
+      "sha256": "13A7A4932957C97A859586024F2A9DBC5B9E0C01B03BA5953F5BCE0EB651430E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\qa-admission.txt",
+      "copy": "navigation-runtime-720-06\\qa-admission.txt",
+      "sha256": "4A48C9A3AF3A6DEDF6C676F32646B4F9F5CE20402DCFD8F7B6D3A1056CE65ACD"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\qa-native.log",
+      "copy": "navigation-runtime-720-06\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-equipment.png",
+      "copy": "navigation-runtime-720-06\\native-navigation-equipment.png",
+      "sha256": "7B632E36A517F15377F93780B24229A8E4567708DF98C36302D7497DFF41CF11"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-equipment.frame.txt",
+      "copy": "navigation-runtime-720-06\\native-navigation-equipment.frame.txt",
+      "sha256": "EDAB6EE57C985ACD5E30D4D28A4060C6417ABFC6D687A1C164856F08DE28894D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-scrolled.png",
+      "copy": "navigation-runtime-720-06\\native-navigation-scrolled.png",
+      "sha256": "03559B1707836B8812EFBF27D48F30EB0DC97EEC166E36A899DE7444ECDA89FB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-scrolled.frame.txt",
+      "copy": "navigation-runtime-720-06\\native-navigation-scrolled.frame.txt",
+      "sha256": "096AB09EE70DD35C8A05D75290CEBDB90978AA11FDF80C4DD00964093F2D175E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-amount.png",
+      "copy": "navigation-runtime-720-06\\native-navigation-amount.png",
+      "sha256": "4F4B5B3CD29CC167EF8089161F195DA14600876B9B61A9E449819971073139EC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-06\\native-navigation-amount.frame.txt",
+      "copy": "navigation-runtime-720-06\\native-navigation-amount.frame.txt",
+      "sha256": "52C81E3D40345E1574FEE8FB3BDEC1A4C8B941F7FB73D3DC45EA56181ACA7BDF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\smoke-result.txt",
+      "copy": "navigation-runtime-4k-06\\smoke-result.txt",
+      "sha256": "88898C019BD7530C5950E0D89566672D89B6FE50969AAF4F2F929D104D87AD8E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\qa-guard-result.json",
+      "copy": "navigation-runtime-4k-06\\qa-guard-result.json",
+      "sha256": "D82ABB747E66687B7C4BF2EEDC428648E65E311DFB6AE35538EBE628074F4F54"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\qa-launch.json",
+      "copy": "navigation-runtime-4k-06\\qa-launch.json",
+      "sha256": "FBFFADD0209D17B8B287955298AADB40FE3C40B6A6DBF501D4D33B7382C4CD5D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\qa-admission.txt",
+      "copy": "navigation-runtime-4k-06\\qa-admission.txt",
+      "sha256": "BE4DDCCAB39E80B9042CFDE518AB23E677F4B406ADA5D8A39169F96D32BD63B6"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\qa-native.log",
+      "copy": "navigation-runtime-4k-06\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-equipment.png",
+      "copy": "navigation-runtime-4k-06\\native-navigation-equipment.png",
+      "sha256": "514CF580A49BA3C3DFD8896AE345AE7190949AE864D3B9D853DFFAF49B22D095"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-equipment.frame.txt",
+      "copy": "navigation-runtime-4k-06\\native-navigation-equipment.frame.txt",
+      "sha256": "485C2283303B32BF424454787B4278818184E7A238F399C982519219E1866C0A"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-scrolled.png",
+      "copy": "navigation-runtime-4k-06\\native-navigation-scrolled.png",
+      "sha256": "4DAC9AAA85B9B1298F10E1D384A61F9F7DE2F51731D3297470A429E016E3BDB8"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-scrolled.frame.txt",
+      "copy": "navigation-runtime-4k-06\\native-navigation-scrolled.frame.txt",
+      "sha256": "36BD2532FF72147E7EC07E2A595BABB7D30453208FF748DFEB8AF9AFAE3A34B3"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-amount.png",
+      "copy": "navigation-runtime-4k-06\\native-navigation-amount.png",
+      "sha256": "A0AC79F2E06DBD15E153619CCA4B5A78C624E53948A2E5769FFE708D687D4700"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-4k-06\\native-navigation-amount.frame.txt",
+      "copy": "navigation-runtime-4k-06\\native-navigation-amount.frame.txt",
+      "sha256": "69C14FA4E5C9FC4B76ECD1081C63F5F36EB2A8C64FF54CD238E67C3AE1A96BBA"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-menu-4k-06\\smoke-result.txt",
+      "copy": "navigation-menu-4k-06\\smoke-result.txt",
+      "sha256": "A51B274E8115D4297D85C38EB24CBC31EC95A556EB72A266762B04A73DD06F80"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-menu-4k-06\\qa-guard-result.json",
+      "copy": "navigation-menu-4k-06\\qa-guard-result.json",
+      "sha256": "086A9591E1493A57AF51E072399D4F73BB28D3F78F8DF3611D8518F5ACF3F5FC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-menu-4k-06\\qa-launch.json",
+      "copy": "navigation-menu-4k-06\\qa-launch.json",
+      "sha256": "F5527DC94CDF30659BBEA390FBEC8E095FB42033B0161A61AEF2306DE107F286"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-menu-4k-06\\qa-admission.txt",
+      "copy": "navigation-menu-4k-06\\qa-admission.txt",
+      "sha256": "5E1ABAC4A6395E4B44968188591ACDBCA5E7E22B118E40B10D57DBA2DC6DAF45"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-menu-4k-06\\qa-native.log",
+      "copy": "navigation-menu-4k-06\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-resume-4k-06\\smoke-result.txt",
+      "copy": "navigation-resume-4k-06\\smoke-result.txt",
+      "sha256": "D8C0BE118C18BC7D49EA528E5E460B9CA275A658D1D19909E2A7AC7A00928E1D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-resume-4k-06\\qa-guard-result.json",
+      "copy": "navigation-resume-4k-06\\qa-guard-result.json",
+      "sha256": "608C53D25021D0D183FB38165E0120FA3D21F8E7A9271D48D25856AE527BE6BA"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-resume-4k-06\\qa-launch.json",
+      "copy": "navigation-resume-4k-06\\qa-launch.json",
+      "sha256": "6395F2A4E0A6CCB8F0AD32BB0F3AB4E549EE23DA5207965CCB6D8C891CE11E6F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-resume-4k-06\\qa-admission.txt",
+      "copy": "navigation-resume-4k-06\\qa-admission.txt",
+      "sha256": "27C254CC4883488A9722A32012840DFC072401077424A39E8833674ADA512846"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-resume-4k-06\\qa-native.log",
+      "copy": "navigation-resume-4k-06\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\smoke-result.txt",
+      "copy": "navigation-quit-4k-06\\smoke-result.txt",
+      "sha256": "57ABE52239D151902EA247918F8160525EDAA4E95281BE03B26A8D1FD5E71505"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\qa-guard-result.json",
+      "copy": "navigation-quit-4k-06\\qa-guard-result.json",
+      "sha256": "4DFD223410616DFF4AC33285178411FB5813741EE18404E07177858E7A9E36B7"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\qa-launch.json",
+      "copy": "navigation-quit-4k-06\\qa-launch.json",
+      "sha256": "C57F667EC665D639E6950704E3EE781B12ABC5923FF5E345F4EDFD5ED107077D"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\qa-admission.txt",
+      "copy": "navigation-quit-4k-06\\qa-admission.txt",
+      "sha256": "57D24FDE51BA34EAA7D70391520AF3E86CF6A235EA98868D0F54B6C1841EAD26"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\qa-native.log",
+      "copy": "navigation-quit-4k-06\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\progress.json",
+      "copy": "navigation-endurance-06\\progress.json",
+      "sha256": "83C1034098002C7E4A8FB5D94C6B0B71081055B066A4AB1B3924C8078294EFD2"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\analysis.json",
+      "copy": "navigation-endurance-06\\analysis.json",
+      "sha256": "D5F55F98714F570D531666DD0660146076D580984EC73B94E0A8AC02E86C2C67"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\endurance-events.txt",
+      "copy": "navigation-endurance-06\\endurance-events.txt",
+      "sha256": "5737EC877DE0E9A501CB3C06D0BFD364D602EC80FF58327AEE546D5E95A89091"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\endurance-samples.csv",
+      "copy": "navigation-endurance-06\\endurance-samples.csv",
+      "sha256": "803154A27BAAA04EF44DFE240F6137322ADE6A11655CDA96838AF1DA05507F52"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\presentation-settings.txt",
+      "copy": "navigation-endurance-06\\presentation-settings.txt",
+      "sha256": "C52BBAF504E7845103BD0F817479844026A32EFB36F7BCBABB58F02424A2B255"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\launch.json",
+      "copy": "navigation-endurance-06\\launch.json",
+      "sha256": "C23B3A37CD5A453512B0A8D5A1A3A9EFD0A253D6C96B65F9CB08E8822C7D9BD1"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\qa-launch.json",
+      "copy": "navigation-endurance-06\\qa-launch.json",
+      "sha256": "B1C4512DA371D6E83AEEBE097EBD3A94793E1DF7B61FD1AEF69059C48680D8F2"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\qa-guard-result.json",
+      "copy": "navigation-endurance-06\\qa-guard-result.json",
+      "sha256": "85DF592B35CD104A03B7AB15D9D79BDC3104B6D4336F5EF8552F42C1B8E3C01C"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\qa-admission.txt",
+      "copy": "navigation-endurance-06\\qa-admission.txt",
+      "sha256": "FE7B5F808B61093A1C87192A0E7096F8B4B43CFCB05E45AE9252F84C9E861FE4"
+    },
+    {
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\qa-native.log",
+      "copy": "navigation-endurance-06\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "source": "E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\Frames\\milestone-00.json",
+      "copy": "navigation-endurance-06\\Frames\\milestone-00.json",
+      "sha256": "A0350980D8F65941CAAFBF77CDEE8FC06A722155DDFD37E9376BA67CAE8FD336"
+    },
+    {
+      "source": "E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\Frames\\milestone-00.png",
+      "copy": "navigation-endurance-06\\Frames\\milestone-00.png",
+      "sha256": "B6C0E408158564DE959540AD6AEBF5D24BB6559EACEEF9F670F59B99F9118094"
+    },
+    {
+      "source": "E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\Frames\\milestone-01.json",
+      "copy": "navigation-endurance-06\\Frames\\milestone-01.json",
+      "sha256": "0E82E6E7C778596DAFF51E0EEDDFE5BCF35DF4B85D7AA3ADAE2B72A7DCCDC70F"
+    },
+    {
+      "source": "E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\Frames\\milestone-01.png",
+      "copy": "navigation-endurance-06\\Frames\\milestone-01.png",
+      "sha256": "B4FC50DAD7E33CBA3C9C4C18071F42F16D297490659E4025C82BB62BCF70040B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-01\\smoke-result.txt",
+      "copy": "failed\\navigation-runtime-720-01\\smoke-result.txt",
+      "sha256": "491ED8E8951EE64DDE324C5A4536CEF7B8396322C8A40BAAF2D5D13DDA36403C"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-01\\qa-guard-result.json",
+      "copy": "failed\\navigation-runtime-720-01\\qa-guard-result.json",
+      "sha256": "976896022B8D84490980F8CAD8D9FE9330EE1F12ABAB01DD022410BD97FDACB0"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-01\\qa-launch.json",
+      "copy": "failed\\navigation-runtime-720-01\\qa-launch.json",
+      "sha256": "30E51A259861EA44EE3DA94C582A1CBA360167A5F344F783F1EDC0B5577884A2"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-02\\smoke-result.txt",
+      "copy": "failed\\navigation-runtime-720-02\\smoke-result.txt",
+      "sha256": "D1B1AF2F716891045E3A0D22F81B991905999FAC1672BC6483506799BBD02AB0"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-02\\qa-guard-result.json",
+      "copy": "failed\\navigation-runtime-720-02\\qa-guard-result.json",
+      "sha256": "11424D4E54091975551655508174D16387B8A18F07F1138ED46908040181D1A1"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-02\\qa-launch.json",
+      "copy": "failed\\navigation-runtime-720-02\\qa-launch.json",
+      "sha256": "B21A1304BB6CDD65AE096BA8DB0A7A96B7366B740D3E75A28BF6579AEDE086DF"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-03\\smoke-result.txt",
+      "copy": "failed\\navigation-runtime-720-03\\smoke-result.txt",
+      "sha256": "6540C9662AB733811D94029B0E4E99E0251AFD51E7EC21B35BACAE9DC3EC0DCB"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-03\\qa-guard-result.json",
+      "copy": "failed\\navigation-runtime-720-03\\qa-guard-result.json",
+      "sha256": "2D04A47F00980E3959F9B0AC594716000BE0B7523A57F814F07ABF072B011373"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-03\\qa-launch.json",
+      "copy": "failed\\navigation-runtime-720-03\\qa-launch.json",
+      "sha256": "6351B57EA60FCD2929740B2456CB423AB3640DAABE3AF40495C4516B953DA745"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-04\\smoke-result.txt",
+      "copy": "failed\\navigation-runtime-720-04\\smoke-result.txt",
+      "sha256": "5BE01E67E0BC748A146CBEEF1664C38A67A5F8B66559549E54A99D78B74B62B9"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-04\\qa-guard-result.json",
+      "copy": "failed\\navigation-runtime-720-04\\qa-guard-result.json",
+      "sha256": "EA2C76809D1A57C05C1BD79FC0497ADF1E241686AEA02303609A2887820FA74C"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-04\\qa-launch.json",
+      "copy": "failed\\navigation-runtime-720-04\\qa-launch.json",
+      "sha256": "3C753EE265DDB2977901F7BFC1EA98835A1CAF906B9976A9A5142CFCEC585CA2"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-05\\smoke-result.txt",
+      "copy": "failed\\navigation-runtime-720-05\\smoke-result.txt",
+      "sha256": "1220CA7A47B443E32BD3CB946BF06CF776B808466EED8B82CB18E5F839878BF6"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-05\\qa-guard-result.json",
+      "copy": "failed\\navigation-runtime-720-05\\qa-guard-result.json",
+      "sha256": "11AD573762B6D956158E6E9892F846EEE5AA777CD23769C9D9BDB0BB3190931B"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-runtime-720-05\\qa-launch.json",
+      "copy": "failed\\navigation-runtime-720-05\\qa-launch.json",
+      "sha256": "019B2513638D2F58FEE7AD875DCE06AB6B4EFBEA966CF6A405AEE2EAC8A4AA1F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-01\\compile0\\result.json",
+      "copy": "build\\navigation-shipping-build-01\\compile0\\result.json",
+      "sha256": "4C8180FAFC8622BA6DF1F9F306161720014DED7D84A169F2D4F1678FE7690AF6"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-05\\compile0\\result.json",
+      "copy": "build\\navigation-shipping-build-05\\compile0\\result.json",
+      "sha256": "06BA0BFCC3F69FAD0772400453B0B3BA9251DBDC62C4EB45B4F99BD555BDF3E7"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\compile1\\result.json",
+      "copy": "build\\navigation-shipping-build-06\\compile1\\result.json",
+      "sha256": "D44B820B58FBF69FD666D4F23A46876D2070BFABC409B65FC3AF5738C8F0D463"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\link2\\result.json",
+      "copy": "build\\navigation-shipping-build-06\\link2\\result.json",
+      "sha256": "2133089D1BC590024152F2162EFE6B1EF2EB18F16607DDFBF39DEEB253E699AC"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\manifest-01\\result.json",
+      "copy": "build\\navigation-shipping-build-06\\manifest-01\\result.json",
+      "sha256": "E03446086A8670C0C94B26CABD12E5CA3B9EBCB31DE4B4A51EFE5F2B812D65DD"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\metadata\\result.json",
+      "copy": "build\\navigation-shipping-build-06\\metadata\\result.json",
+      "sha256": "0D45B6A518F3BE2D85CEE2BEEAF49BDC5B144907C6D089081102525B7F245442"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-stage-06\\result.json",
+      "copy": "build\\navigation-stage-06\\result.json",
+      "sha256": "345280EE004F960F31F0F888296AA9C5C530D1C3A019FC42B6A58C8E0A54932F"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-plan-04\\actions.json",
+      "copy": "build\\actions.json",
+      "sha256": "27DC7C3B92548053833BB219894276ED8709893FA9FB00E3607EB89A16E19B7C"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\final-native-product.json",
+      "copy": "build\\final-native-product.json",
+      "sha256": "CFA7C99260812BB17F8DBE9AC9AC9EF02C82FE52B7AFCB5B6557DBAA7035A894"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\metadata\\native-products.json",
+      "copy": "build\\native-products.json",
+      "sha256": "D9CF2086ACEF34F28AB3C0FCA399066D2E23ED633CF8925FDEEB30CD399EC139"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-shipping-build-06\\metadata\\metadata-products.json",
+      "copy": "build\\metadata-products.json",
+      "sha256": "8FEC091B84B5BF4FC1959439DE7D2E4C7D51776D6F3E7A177FC0276528D74D7E"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\navigation-stage-06\\stage-inputs.json",
+      "copy": "build\\stage-inputs.json",
+      "sha256": "7A79B0DA1D78D7F64949C2D5A02A2DECAC4B13E4153461EB11E9935873709E99"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-21\\navigation-link-06.rsp",
+      "copy": "build\\derived-link.rsp",
+      "sha256": "A76954D0ACFA8E507D3C4BF4728D48863AC023FFDC5C14626C50DD730E048200"
+    },
+    {
+      "source": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\compile-navigation\\result.json",
+      "copy": "portable\\compile-navigation\\result.json",
+      "sha256": "1081D10230F14E46384C248F38F3A0AC57BCE3E9EC598C0EDE7C9E97F2779BD9"
+    },
+    {
+      "source": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\link\\result.json",
+      "copy": "portable\\link\\result.json",
+      "sha256": "00319B16811DC1078AFA44753898EF0329D1751F72D15BCE43D62C93A5AF53FA"
+    },
+    {
+      "source": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\tests\\result.json",
+      "copy": "portable\\tests\\result.json",
+      "sha256": "44AD9B6FC42B0415B2EBCBF22E75093CF2AFB6AED0DE83B27B5936E0FA512854"
+    },
+    {
+      "source": "C:\\Users\\Jenny\\.copilot\\session-state\\6e4e8162-6f64-459c-a766-ba613d11c82f\\files\\directional-tests-6f0bb37\\tests\\stdout.log",
+      "copy": "portable\\tests\\stdout.log",
+      "sha256": "2EE604CE8F4A044A033605A987DE815DD6B2BEB2C8A479E7D27315E03DEFE308"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+PASS Directional navigation starts with actual native item focus
+PASS Real D-pad Down crosses final carried row into equipment without trigger
+PASS Capture actual directional focus: native-navigation-equipment
+PASS Real D-pad Up reverses from equipment into carried items
+PASS Focused-widget Slate D-pad routing reaches the same equipment boundary exactly once
+PASS Focused-widget Slate keyboard routing returns to content
+PASS Unadmitted focused-widget analog input cannot bypass automation isolation
+PASS Real left-stick Down crosses the same boundary
+INPUT stick-up value=0.9 monotonic=16955967.112967499 before=Equipment after_dispatch=Content widget=SMenuButton
+PASS Real left-stick Up returns without moving pawn or rotating portrait
+PASS Left boundary reaches visible portrait without rotation
+INPUT_ISOLATION ignored_external_events=2 (includes 2 deliberate rejection probes)
+PERFORMANCE mean_fps=60.28 p95_frame_ms=16.84 p99_frame_ms=16.91 samples=213 exclusions=startup_and_screenshot_readback
+LIT_GUARD samples=232 final_mode=3 shader_complexity=0 render_percentage=0
+FAILURE Right reverses from portrait into the carried content | 

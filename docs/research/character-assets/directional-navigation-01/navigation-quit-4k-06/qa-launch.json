@@ -1,0 +1,37 @@
+{
+  "pid": 38628,
+  "image": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\directional-navigation-06\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "creationTime": 134344929942167881,
+  "executableSha256": "F3D669EC6B31312B46BEBB109EF5200346B94446C48765386491BD626A093B2F",
+  "arguments": "-HomesteadSmokeTest -HomesteadTestOutput=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\" -GameUserSettingsINI=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\Graphics\\GameUserSettings.ini\" -UserDir=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\EngineUser\" -unattended -RenderOffscreen -windowed -ForceRes -ResX=3840 -ResY=2160  -nosplash -nosound -HomesteadNativeMenuTest -HomesteadRequireLit -HomesteadNativeQuitTest -abslog=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\navigation-quit-4k-06\\engine.log\" -HomesteadShippingQA",
+  "resumeSourcePins": [],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344752690114052,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "creationFlags": 525324,
+  "handles": 3,
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "adapterSha256": "C4F7C53F6234107B9E363D0CAE49E1A88CDBD1A7D352A19EA13637EC03509BD2",
+  "completionDriven": false,
+  "deadlineProfile": "Default",
+  "softSeconds": 100,
+  "hardSeconds": 110,
+  "wrapperSeconds": 120
+}

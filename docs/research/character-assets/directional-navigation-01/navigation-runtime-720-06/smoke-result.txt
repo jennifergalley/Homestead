@@ -1,0 +1,49 @@
+PASS Directional navigation starts with actual native item focus
+PASS Real D-pad Down crosses final carried row into equipment without trigger
+PASS Capture actual directional focus: native-navigation-equipment
+PASS Real D-pad Up reverses from equipment into carried items
+PASS Focused-widget Slate D-pad routing reaches the same equipment boundary exactly once
+PASS Focused-widget Slate keyboard routing returns to content
+PASS Unadmitted focused-widget analog input cannot bypass automation isolation
+PASS Real left-stick Down crosses the same boundary
+INPUT stick-up value=0.9 monotonic=16956425.416938599 before=Equipment after_dispatch=Content widget=SMenuButton
+PASS Real left-stick Up returns without moving pawn or rotating portrait
+PASS Left boundary reaches visible portrait without rotation
+INPUT portrait-right before=Portrait widget=SMenuFocusAnchor position=(26.00,174.00) size=(236.00,330.00)
+PASS Right reverses from portrait into the carried content
+PASS Right boundary reaches actual details or action controls
+PASS Prepare disclosed short-row fixture from real stock and splits
+PASS Navigate to the desired last column
+PASS Short final row retains desired column memory
+PASS Up from short row restores original column
+PASS Prepare disclosed full-row scrolled fixture
+PASS Held focused-widget stick repeats into the next logical row
+PASS Released stick stops repeating while focus remains visible
+PASS Reverse stick gesture returns one row without waiting for held repeat
+PASS D-pad returns to the first row after stick navigation
+PASS Directional input traverses a real logical row and scrolls its widget into view
+PASS Directional input traverses a real logical row and scrolls its widget into view
+PASS Directional input traverses a real logical row and scrolls its widget into view
+PASS Directional input traverses a real logical row and scrolls its widget into view
+PASS Directional input traverses a real logical row and scrolls its widget into view
+PASS Capture actual directional focus: native-navigation-scrolled
+PASS Only the actual final scrolled row exits downward
+PASS Empty nearby-storage view has real explanatory focus
+PASS Empty content can move down to equipment and back up
+PASS Reverse returns to the empty-content focus anchor
+PASS Select a real splittable stack for modal navigation
+PASS Mapped split opens a safe focused modal
+PASS Focus browsing does not edit or activate quantity
+PASS Scroll modal choices and return to a visible amount editor
+PASS Explicit amount activation enters editing
+PASS Actual left-stick input edits only the draft in edit mode
+PASS Capture actual directional focus: native-navigation-amount
+PASS Back first leaves editing without closing modal
+PASS Modal cancel returns real focus to the original stable subject
+PASS Settings still begins on safe Resume control
+PASS Existing Right then Activate still reaches quit confirmation
+PASS Quit modal remains trapped and defaults to staying
+INPUT_ISOLATION ignored_external_events=2 (includes 2 deliberate rejection probes)
+PERFORMANCE mean_fps=60.07 p95_frame_ms=16.86 p99_frame_ms=16.92 samples=878 exclusions=startup_and_screenshot_readback
+LIT_GUARD samples=936 final_mode=3 shader_complexity=0 render_percentage=0
+SUCCESS All engine integration steps passed.

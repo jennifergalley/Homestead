@@ -1,0 +1,6 @@
+version=1
+shipping=1
+trace_compiled=0
+route=smoke
+save_directory=E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/navigation-menu-4k-06/SmokeSave
+project_saved_directory=E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/navigation-menu-4k-06/EngineUser/Saved/

@@ -1,0 +1,12 @@
+{
+  "runId": "20260921-033354-2d257ba0",
+  "seconds": 180,
+  "freshWorld": true,
+  "completionDriven": true,
+  "arguments": "-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadEndurance -HomesteadEnduranceFresh -HomesteadEnduranceSeconds=180 -HomesteadEnduranceControl=\"E:\\Repos\\SurvivalGame\\Automation\\run.json\" -HomesteadTestOutput=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\" -GameUserSettingsINI=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\Graphics\\GameUserSettings.ini\" -UserDir=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\EngineUser\" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1920 -ResY=1080 -nosound -nosplash -abslog=\"E:\\Repos\\SurvivalGame\\Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\navigation-endurance-06\\engine.log\"",
+  "fixture": null,
+  "executable": "E:\\Repos\\SurvivalGame\\Build\\Releases\\20260921-033354-2d257ba0\\directional-navigation-06\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+  "executableSha256": "F3D669EC6B31312B46BEBB109EF5200346B94446C48765386491BD626A093B2F",
+  "setup": "Fresh isolated world; mapped travel, gathering, eating and exact save/load; natural clock only. No state, time or lighting edits.",
+  "timing": "Existing finite observation duration, not an external timed kill. Existing root-only lifetime guard and live run stop remain active."
+}

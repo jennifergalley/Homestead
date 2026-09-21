@@ -1,0 +1,30 @@
+viewport=1280 720
+actor=X=-1000.000 Y=0.000 Z=88.150
+camera=X=-1436.413 Y=-70.349 Z=262.921
+camera_rotation=P=-15.000000 Y=15.000000 R=-0.000000
+page=0
+prompts_gamepad=1
+focus_actions=[X] Till ground   [Menu] Field book
+native_menu=1
+portrait_status=Your worn clothing
+Neutral preview lighting
+view_mode=3
+lit_mode=3
+show_flags=PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1
+render_percentage=0
+mesh_location=X=-1000.000 Y=0.000 Z=2.150
+mesh_rotation=P=-0.000000 Y=-86.499695 R=0.000000
+bounds_center=X=-990.717 Y=0.568 Z=82.585
+bounds_extent=X=22.836 Y=50.308 Z=80.351
+center_projected=1 558.6 460.8
+head=X=-995.946 Y=-0.153 Z=146.689
+head_projected=1 556.0 355.4
+mesh_asset=SK_Modular_Preferred_Base_LongWave
+neck_01=X=-1000.179 Y=-0.412 Z=135.260
+neck_01_projected=1 557.3 377.4
+spine_01=X=-1002.343 Y=-0.544 Z=90.452
+spine_01_projected=1 559.8 455.4
+upperarm_l=X=-997.001 Y=-16.046 Z=126.693
+upperarm_l_projected=1 528.6 392.9
+spine_02=X=-1000.138 Y=-0.409 Z=96.717
+spine_02_projected=1 559.1 443.5

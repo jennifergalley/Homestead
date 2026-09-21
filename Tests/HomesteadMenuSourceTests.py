@@ -237,12 +237,32 @@ class MenuSourceContracts(unittest.TestCase):
         handler = function_body(MENU, "bool SHomesteadMenu::HandleKey(")
         self.assertIn("LeftStick.Sample(true, InputAmount", handler)
         self.assertIn("LeftStick.Sample(false, -InputAmount", handler)
+        self.assertLess(handler.index("LeftStick.Sample("), handler.index("LeftStick.Poll("))
+        self.assertIn("NavigateDirection(Direction)", handler)
         tick = function_body(MENU, "void SHomesteadMenu::Tick(")
         self.assertIn("LeftStick.Poll(", tick)
         self.assertIn("NavigateDirection(Direction)", tick)
         navigation = function_body(MENU, "void SHomesteadMenu::NavigateDirection(")
         self.assertNotIn("OrbitMenuPortrait", navigation)
         self.assertNotIn("MenuItemAction", navigation)
+
+    def test_focused_controls_bubble_analog_through_shared_admission(self):
+        controls = MENU[MENU.index("class SMenuButton"):MENU.index("const FLinearColor Ink")]
+        self.assertEqual(controls.count("OnAnalogValueChanged("), 2)
+        self.assertEqual(controls.count("return FReply::Unhandled();"), 2)
+        self.assertNotIn("SNew(SButton)", MENU)
+        analog = function_body(MENU, "FReply SHomesteadMenu::OnAnalogValueChanged(")
+        self.assertIn("MenuPhysicalInput(", analog)
+
+    def test_portrait_uses_live_native_content_destination(self):
+        anchor = function_body(MENU, "TSharedRef<SWidget> SHomesteadMenu::FocusAnchor(")
+        self.assertIn("TargetRegion == ERegion::Portrait && Index == -1", anchor)
+        self.assertIn("EUINavigation::Right, EUINavigationRule::Custom", anchor)
+        self.assertIn("Entries.IsEmpty() ? -1 : ContentSelection", anchor)
+        self.assertIn("IsTargetAvailable(Target.region, Target.index)", anchor)
+        self.assertIn("Widget->SupportsKeyboardFocus()", anchor)
+        self.assertNotIn("Region = ", anchor)
+        self.assertIn("Select(Index, Index == ContentSelection)", MENU)
 
     def test_quantity_has_explicit_edit_and_parent_focus_trap(self):
         self.assertIn("Root->SetEnabled(Value == EDialog::None)", MENU)

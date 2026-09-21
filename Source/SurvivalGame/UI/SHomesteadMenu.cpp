@@ -16,12 +16,19 @@
 #include "Widgets/Images/SImage.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Input/NavigationReply.h"
+#include "Types/NavigationMetaData.h"
 #include "Layout/WidgetPath.h"
 
 namespace HomesteadMenus
 {
 namespace
 {
+class SMenuButton : public SButton
+{
+public:
+    virtual FReply OnAnalogValueChanged(const FGeometry&, const FAnalogInputEvent&) override
+    { return FReply::Unhandled(); }
+};
 class SMenuFocusAnchor : public SCompoundWidget
 {
 public:
@@ -43,6 +50,8 @@ public:
     virtual bool SupportsKeyboardFocus() const override { return true; }
     virtual FReply OnFocusReceived(const FGeometry&, const FFocusEvent&) override
     { Focused.ExecuteIfBound(); return FReply::Handled(); }
+    virtual FReply OnAnalogValueChanged(const FGeometry&, const FAnalogInputEvent&) override
+    { return FReply::Unhandled(); }
 private:
     FSimpleDelegate Focused;
 };
@@ -88,7 +97,7 @@ TSharedRef<SWidget> SHomesteadMenu::Text(const FString& Value, int32 Size) const
 TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<void()> Action,
     TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding)
 {
-    return SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(Padding)
+    return SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(Padding)
         .ButtonColorAndOpacity(Color).ToolTipText(FText::FromString(AccessibleLabel.IsEmpty() ? Label : AccessibleLabel))
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
@@ -100,7 +109,6 @@ TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<v
 
 TSharedRef<SButton> SHomesteadMenu::RegisterButton(TSharedRef<SButton> Button, ERegion TargetRegion, int32 Index)
 {
-    Button->SetIsFocusable(true);
     Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, TargetRegion, Index]() { AdoptFocus(TargetRegion, Index); }));
     FocusTargets.Add({TargetRegion, Index, Button});
     return Button;
@@ -110,6 +118,26 @@ TSharedRef<SWidget> SHomesteadMenu::FocusAnchor(TSharedRef<SWidget> Content, ERe
 {
     auto Anchor = SNew(SMenuFocusAnchor)
         .OnFocused_Lambda([this, TargetRegion, Index]() { AdoptFocus(TargetRegion, Index); })[Content];
+    if (TargetRegion == ERegion::Portrait && Index == -1)
+    {
+        // The tall image overlaps header rows; its right neighbor is remembered content.
+        auto Navigation = MakeShared<FNavigationMetaData>();
+        Navigation->SetNavigationCustom(EUINavigation::Right, EUINavigationRule::Custom,
+            FNavigationDelegate::CreateLambda([this](EUINavigation) -> TSharedPtr<SWidget>
+            {
+                if (!Controller.IsValid() || !Controller->IsBookOpen() || Dialog != EDialog::None || bSaving) return nullptr;
+                const int32 Remembered = Entries.IsEmpty() ? -1 : ContentSelection;
+                for (const auto& Target : FocusTargets)
+                    if (Target.region == ERegion::Content && Target.index == Remembered
+                        && IsTargetAvailable(Target.region, Target.index))
+                    {
+                        const auto Widget = Target.widget.Pin();
+                        if (Widget && Widget->SupportsKeyboardFocus()) return Widget;
+                    }
+                return nullptr;
+            }));
+        Anchor->AddMetadata(Navigation);
+    }
     FocusTargets.Add({TargetRegion, Index, Anchor});
     return Anchor;
 }
@@ -130,7 +158,7 @@ void SHomesteadMenu::AdoptFocus(ERegion TargetRegion, int32 Index)
     case ERegion::Actions: ActionSelection = Index; ScrollActionIntoView(); break;
     case ERegion::Recovery: RecoverySelection = Index; break;
     case ERegion::Details: DetailsSelection = Index; break;
-    case ERegion::Content: if (ChangedSubject && Index >= 0) Select(Index); break;
+    case ERegion::Content: if (ChangedSubject && Index >= 0) Select(Index, Index == ContentSelection); break;
     default: break;
     }
 }
@@ -293,7 +321,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     {
         TabBar->AddSlot().FillWidth(1).Padding(3, 0)
         [
-            RegisterButton(SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(4, 7))
+            RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(4, 7))
             .ButtonColorAndOpacity_Lambda([this, Page]() { return SeenPage == Page ? Selected
                 : Region == ERegion::Tabs && FocusedTab == Page ? Selected : Pine; })
             .ToolTipText(FText::FromString(Tabs[Page]))
@@ -552,7 +580,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         const FString Name = EntryName(Row);
         TSharedPtr<SWidget> Cell;
         TSharedPtr<SVerticalBox> Contents;
-        auto Button = RegisterButton(SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(7)
+        auto Button = RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(7)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return CellColor(Index); })
             .ToolTipText(FText::FromString(Name + TEXT("\n") + Row.Detail))
             .OnHovered_Lambda([this, Index]() { if (Controller.IsValid() && !Controller->UsesGamepad()) Hover = Index; })
@@ -684,7 +712,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
     for (int32 Index = 0; Index < Actions.Num(); ++Index)
     {
         const auto Action = Actions[Index];
-        auto ActionButton = RegisterButton(SNew(SButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(8)
+        auto ActionButton = RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(8)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? Gold : Selected; })
             .OnClicked_Lambda([this, Action]() { if (PointerAction()) RunAction(Action); return FReply::Handled(); })
             [
@@ -1068,8 +1096,14 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
             if (FMath::Abs(InputAmount) > 0.3f) Controller->OrbitMenuPortrait(InputAmount * 1.5f);
             return true;
         }
-        if (Key == EKeys::Gamepad_LeftX) LeftStick.Sample(true, InputAmount, FPlatformTime::Seconds());
-        else if (Key == EKeys::Gamepad_LeftY) LeftStick.Sample(false, -InputAmount, FPlatformTime::Seconds());
+        if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY)
+        {
+            const double Now = FPlatformTime::Seconds();
+            if (Key == EKeys::Gamepad_LeftX) LeftStick.Sample(true, InputAmount, Now);
+            else LeftStick.Sample(false, -InputAmount, Now);
+            const auto Direction = LeftStick.Poll(Now);
+            if (Direction.Any() && Controller->UsesGamepad() && !bSaving) NavigateDirection(Direction);
+        }
         return true;
     }
     if (Event == IE_Repeat && (Key == EKeys::Left || Key == EKeys::Right || Key == EKeys::Up || Key == EKeys::Down

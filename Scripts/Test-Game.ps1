@@ -1,11 +1,17 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA)
 $ErrorActionPreference = 'Stop'
+if ($DirectionalNavigation) {
+    if ($NativeMenuQuit -or $PSBoundParameters.ContainsKey('NativeResumeFrom')) {
+        throw 'Directional navigation is a separate native menu fixture, not a quit/resume route.'
+    }
+    $NativeMenu = $true
+}
 if ($NativeMenuQuit) { $NativeMenu = $true }
 if ($PSBoundParameters.ContainsKey('NativeResumeFrom') -and
     (-not $NativeMenu -or $NativeMenuQuit -or [string]::IsNullOrWhiteSpace($NativeResumeFrom) -or
@@ -98,6 +104,9 @@ if ($NativeMenu) {
         'native-inventory.png','native-crafting.png','native-recovery-exit.png',
         'native-wardrobe-dyed.png','native-wardrobe-restored.png')
 }
+if ($DirectionalNavigation) {
+    $captures = @('native-navigation-equipment.png','native-navigation-scrolled.png','native-navigation-amount.png')
+}
 if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
@@ -129,6 +138,7 @@ if ($CameraLifecycle) { $loopArguments += ' -HomesteadCameraLifecycle' }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }
+if ($DirectionalNavigation) { $loopArguments += ' -HomesteadDirectionalNavigationTest' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }
 if ($NativeResumeFrom) { $loopArguments += " -HomesteadNativeResumeFrom=`"$([IO.Path]::GetFullPath($NativeResumeFrom))`"" }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
