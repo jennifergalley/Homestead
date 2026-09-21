@@ -12,6 +12,8 @@ class AHomesteadWorld;
 class UHomesteadSave;
 class UAudioComponent;
 class USoundBase;
+class SHomesteadMenu;
+class IInputProcessor;
 
 struct FHomesteadRow
 {
@@ -58,6 +60,24 @@ public:
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
     void NudgePlacement(FVector2D Axis);
+    bool HasNativeMenu() const { return NativeMenu.IsValid(); }
+    void MenuPage(int32 TargetPage);
+    void MenuSelect(int32 Row);
+    void MenuActivate();
+    void MenuStore();
+    void MenuTake();
+    void MenuBack();
+    void MenuRequestExit();
+    void MenuSaveAndQuit();
+    void MenuQuitWithoutSaving();
+    void MenuRestart();
+    void MenuRetry();
+    bool MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount = 1);
+    bool MenuPointerIntent(float X, float Y);
+    bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly; }
+    FString MenuSaveStatus() const;
+    FString MenuLastError() const { return ToastText; }
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -114,6 +134,12 @@ private:
     bool bToastError = false;
     FString SessionCheckpoint;
     FString WorldId;
+    TSharedPtr<SHomesteadMenu> NativeMenu;
+    TSharedPtr<IInputProcessor> MenuPointerInput;
+    bool bMenuSaveInProgress = false;
+    FDateTime LastSuccessfulSave;
+    void ShowNativeMenu();
+    void HideNativeMenu();
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;
     bool bSaveRoutingTestPending = false;

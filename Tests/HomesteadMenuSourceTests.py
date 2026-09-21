@@ -1,0 +1,73 @@
+"""Source-contract checks only; not a substitute for Unreal compile/playtesting."""
+from pathlib import Path
+import re
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "Source" / "SurvivalGame"
+CONTROLLER = (SOURCE / "HomesteadController.cpp").read_text()
+MENU = (SOURCE / "UI" / "SHomesteadMenu.cpp").read_text()
+
+
+def function_body(source, signature):
+    start = source.index("{", source.index(signature))
+    depth = 0
+    for index in range(start, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return source[start:index + 1]
+    raise AssertionError(f"Unclosed function {signature}")
+
+
+class MenuSourceContracts(unittest.TestCase):
+    def test_single_prompt_classifier(self):
+        self.assertEqual(CONTROLLER.count("PromptIntent.Classify("), 1)
+        self.assertNotIn("PromptIntent.Classify(", MENU)
+        body = function_body(CONTROLLER, "bool AHomesteadController::InputKey(")
+        self.assertLess(body.index("bAutomatedInputOnly"), body.index("PromptIntent.Classify("))
+        self.assertLess(body.index("PromptIntent.Classify("), body.index("Menu->HandleKey("))
+
+    def test_exit_gated_on_real_save(self):
+        body = function_body(CONTROLLER, "void AHomesteadController::MenuSaveAndQuit(")
+        self.assertIn('SaveSlot(TEXT("Homestead_Manual"))', body)
+        self.assertIn("if (Saved) UKismetSystemLibrary::QuitGame", body)
+        self.assertIn("ShowSaveFailure(ToastText)", body)
+        self.assertIn("if (IsFailed())", body)
+
+    def test_no_save_in_explicit_discard(self):
+        body = function_body(CONTROLLER, "void AHomesteadController::MenuQuitWithoutSaving(")
+        self.assertNotIn("SaveSlot(", body)
+        self.assertIn("QuitGame(", body)
+
+    def test_recovery_and_pinned_exit_are_independent(self):
+        self.assertIn("Retry checkpoint  [A / Enter]", MENU)
+        self.assertIn("Settings / Quit  [Y / G]", MENU)
+        self.assertIn("Rows[Index].Id == 9) continue", MENU)
+        self.assertIn("Save and quit to desktop", MENU)
+
+    def test_no_label_parsing_for_item_identity(self):
+        body = function_body(MENU, "FString SHomesteadMenu::EntryName(")
+        self.assertIn("Row.Id", body)
+        self.assertNotRegex(MENU, r"(ParseIntoArray|Split|Find)\([^;\n]*Row.Label")
+
+    def test_modal_cancel_is_default_and_failure_persistent(self):
+        body = function_body(MENU, "void SHomesteadMenu::SetDialog(")
+        self.assertIn("DialogSelection = 0", body)
+        self.assertIn("Retry save and quit", MENU)
+        self.assertNotIn("ToastRemaining", MENU)
+
+    def test_shell_suppresses_canvas_menu(self):
+        hud = (SOURCE / "HomesteadHUD.cpp").read_text()
+        self.assertIn("if (PC->HasNativeMenu()) return;", hud)
+
+    def test_icon_keys_cover_existing_items(self):
+        declaration = re.search(r"const TCHAR\* ItemIcons\[\] = \{(.*?)\};", MENU, re.S)
+        self.assertIsNotNone(declaration)
+        self.assertEqual(len(re.findall(r'TEXT\("([^"]+)"\)', declaration.group(1))), 14)
+
+
+if __name__ == "__main__":
+    unittest.main()

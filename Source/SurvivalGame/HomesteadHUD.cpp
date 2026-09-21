@@ -84,6 +84,7 @@ void AHomesteadHUD::DrawHUD()
     if (!Canvas) return;
     const AHomesteadController* PC = Cast<AHomesteadController>(PlayerOwner);
     if (!PC) return;
+    if (PC->HasNativeMenu()) return;
     UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 3.0f);
     ViewWidth = Canvas->ClipX / UiScale;
     ViewHeight = Canvas->ClipY / UiScale;

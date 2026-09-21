@@ -8,7 +8,8 @@ public class SurvivalGame : ModuleRules
         CppStandard = CppStandardVersion.Cpp20;
         PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
-            "ProceduralMeshComponent", "AudioMixer", "AnimGraphRuntime", "Json"
+            "ProceduralMeshComponent", "AudioMixer", "AnimGraphRuntime", "Json",
+            "Slate", "SlateCore"
         });
     }
 }

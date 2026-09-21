@@ -57,7 +57,7 @@ The separate environment change's deltas are not modified by this proposal.
 Implementation touches `HomesteadController`, `HomesteadHUD`,
 `HomesteadCharacter`, `HomesteadAppearance`, `HomesteadSave`, portable
 `Simulation\HomesteadSimulation`, new narrowly scoped native widget/presentation
-adapters, the module's UMG/Slate dependencies, character authoring/export/import
+adapters, the module's required native Slate dependencies, character authoring/export/import
 scripts, item/icon/garment content definitions and focused native/packaged tests.
 Existing save routing and receipt/preview mechanisms remain authoritative.
 Design and reference documentation will be updated from the eventual build,

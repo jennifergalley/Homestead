@@ -13,7 +13,7 @@ All engine execution belongs to the coordinator's single approved lane.
 
 ## 1. Authorization and integration baseline
 
-- [ ] 1.1 Record isolated UI/backend/asset source ownership and current authorization; verify no competing engine execution or main-checkout edits.
+- [x] 1.1 Record isolated UI/backend/asset source ownership and current authorization; verify no competing engine execution or main-checkout edits.
 - [ ] 1.2 Reconcile source/API changes against the accepted environment before integration; verify delivery order remains environment then UI.
 - [ ] 1.3 Register synthetic current-version save fixtures and explicit incompatible-test reset cases; verify they do not require historical migration infrastructure.
 - [ ] 1.4 Register useful 720p/4K visual/controller/gameplay states and shared runtime slot; verify source-only evidence is not called runtime proof.
@@ -78,3 +78,12 @@ All engine execution belongs to the coordinator's single approved lane.
 - [ ] 8.2 Checkpoint/push only owned coherent source and integrate via coordinator after environment; verify exact commits and approved shared build.
 - [ ] 8.3 Deliver latest playable UI/wardrobe candidate with actual basic visual/controller/gameplay/current-save evidence; verify no inferred human aesthetic approval.
 - [ ] 8.4 Report completed scope and remaining issues truthfully, with no automatic PR/schedule; verify final OpenSpec progress matches implemented and tested behavior.
+
+## Current UI lane evidence
+
+September 20 source milestone: central policy revised before implementation;
+UI/wardrobe/asset owners exchanged typed API and rendering paths. Native Slate
+shell, original icons, current-item grid/details and explicit exit flow are
+source work in the isolated UI branch. Python source-contract checks are not
+C++ compilation or visual proof. Shared engine compile/controller/720p/4K review
+remain pending; relevant mixed-source/runtime tasks remain unchecked.

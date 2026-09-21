@@ -66,9 +66,10 @@ Central plan is UI-owned; siblings use uniquely named lane addenda.
 
 ### Native shell, not another UI framework
 
-Use a narrow C++-authored native widget layer (UMG host with Slate composition
-where typed callbacks/layout simplify the implementation). Add UMG/Slate/
-SlateCore dependencies only. Keep Canvas for gameplay/planning. One menu surface
+Use a narrow C++-authored Slate widget directly in the game viewport. The early
+implementation uses native typed callbacks/layout without an unnecessary UMG
+host. Add only Slate/SlateCore dependencies actually used; a later preview must
+justify any additional module. Keep Canvas for gameplay/planning. One menu surface
 owns drawing, focus and feedback; no duplicate old-book draw beneath the shell.
 Controller remains action/save authority; widgets never mutate simulation arrays.
 

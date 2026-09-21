@@ -27,6 +27,9 @@
 #include "Misc/Parse.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWave.h"
+#include "UI/SHomesteadMenu.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Application/IInputProcessor.h"
 
 namespace
 {
@@ -35,6 +38,29 @@ bool Edible(Homestead::Item Item)
 {
     return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
 }
+
+class FHomesteadMenuPointerInput final : public IInputProcessor
+{
+public:
+    explicit FHomesteadMenuPointerInput(AHomesteadController* InController) : Controller(InController) {}
+    virtual void Tick(float, FSlateApplication&, TSharedRef<ICursor>) override {}
+    virtual bool HandleMouseMoveEvent(FSlateApplication&, const FPointerEvent& Event) override
+    {
+        if (!Controller.IsValid()) return false;
+        Controller->MenuPointerIntent(Event.GetCursorDelta().X, Event.GetCursorDelta().Y);
+        return !Controller->MenuAcceptsPhysicalInput();
+    }
+    virtual bool HandleMouseButtonDownEvent(FSlateApplication&, const FPointerEvent& Event) override
+    {
+        return Controller.IsValid() && !Controller->MenuPhysicalInput(Event.GetEffectingButton(), IE_Pressed);
+    }
+    virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication&, const FPointerEvent& Event, const FPointerEvent*) override
+    {
+        return Controller.IsValid() && !Controller->MenuPhysicalInput(EKeys::MouseWheelAxis, IE_Axis, Event.GetWheelDelta());
+    }
+private:
+    TWeakObjectPtr<AHomesteadController> Controller;
+};
 }
 
 AHomesteadController::AHomesteadController()
@@ -119,8 +145,122 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
     const EHomesteadPromptDevice Intent = PromptIntent.Classify(Params, FPlatformTime::Seconds(), HasAxisProperties ? &AxisProperties : nullptr);
     if (Intent != EHomesteadPromptDevice::None) bGamepad = Intent == EHomesteadPromptDevice::Gamepad;
+    if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
+    {
+        if (bMenuSaveInProgress) return true;
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F5) { QuickSave(); return true; }
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F9) { QuickLoad(); return true; }
+        const auto Menu = NativeMenu;
+        return Menu->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
+    }
     return Super::InputKey(Params);
 }
+
+bool AHomesteadController::MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount)
+{
+    InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key, Event, Amount, false, FPlatformTime::Cycles64()));
+    return !bAutomatedInputOnly;
+}
+
+bool AHomesteadController::MenuPointerIntent(float X, float Y)
+{
+    MenuPhysicalInput(EKeys::MouseX, IE_Axis, X);
+    MenuPhysicalInput(EKeys::MouseY, IE_Axis, Y);
+    return !bAutomatedInputOnly && !bGamepad;
+}
+
+void AHomesteadController::ShowNativeMenu()
+{
+    if (!GEngine || !GEngine->GameViewport) return;
+    if (!NativeMenu.IsValid())
+    {
+        FlushPressedKeys();
+        NativeMenu = SNew(SHomesteadMenu).Controller(this);
+        GEngine->GameViewport->AddViewportWidgetContent(NativeMenu.ToSharedRef(), 100);
+        MenuPointerInput = MakeShared<FHomesteadMenuPointerInput>(this);
+        FSlateApplication::Get().RegisterInputPreProcessor(MenuPointerInput);
+    }
+    bShowMouseCursor = true;
+    FInputModeGameAndUI Mode;
+    Mode.SetWidgetToFocus(NativeMenu);
+    Mode.SetHideCursorDuringCapture(false);
+    Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+    SetInputMode(Mode);
+    NativeMenu->Refresh();
+}
+
+void AHomesteadController::HideNativeMenu()
+{
+    if (MenuPointerInput.IsValid() && FSlateApplication::IsInitialized())
+        FSlateApplication::Get().UnregisterInputPreProcessor(MenuPointerInput);
+    MenuPointerInput.Reset();
+    if (NativeMenu.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(NativeMenu.ToSharedRef());
+    NativeMenu.Reset();
+    FlushPressedKeys();
+    bShowMouseCursor = false;
+    SetInputMode(FInputModeGameOnly());
+}
+
+void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
+{
+    HideNativeMenu();
+    Super::EndPlay(Reason);
+}
+
+void AHomesteadController::MenuPage(int32 TargetPage)
+{
+    if (!bMenuSaveInProgress) OpenBook(TargetPage);
+}
+void AHomesteadController::MenuSelect(int32 Row)
+{
+    Selection = FMath::Clamp(Row, 0, FMath::Max(0, Rows().Num() - 1));
+}
+void AHomesteadController::MenuActivate()
+{
+    if (bMenuSaveInProgress || !bBookOpen) return;
+    if (IsFailed() && Page != 4 && Page != 3 && Page != 5)
+    { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
+    if (IsFailed() && Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 0)
+    { Notify(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."), true); return; }
+    ActivateRow();
+}
+void AHomesteadController::MenuStore() { if (!bMenuSaveInProgress) Secondary(); }
+void AHomesteadController::MenuTake() { if (!bMenuSaveInProgress) Withdraw(); }
+void AHomesteadController::MenuBack() { if (!bMenuSaveInProgress) CloseBook(); }
+void AHomesteadController::MenuRetry()
+{
+    if (bMenuSaveInProgress) return;
+    RetryCheckpoint();
+    if (!IsFailed()) CloseBook();
+}
+void AHomesteadController::MenuRequestExit() { if (NativeMenu.IsValid()) NativeMenu->RequestExit(); }
+FString AHomesteadController::MenuSaveStatus() const
+{
+    const FString When = LastSuccessfulSave.GetTicks() > 0
+        ? LastSuccessfulSave.ToString(TEXT("%Y-%m-%d %H:%M:%S UTC")) : TEXT("not known in this session");
+    return FString::Printf(TEXT("%s\nLast successful save: %s"),
+        PreviewLabel().IsEmpty() ? TEXT("Current homestead") : *PreviewLabel(), *When);
+}
+void AHomesteadController::MenuSaveAndQuit()
+{
+    if (bMenuSaveInProgress) return;
+    if (IsFailed())
+    {
+        if (NativeMenu.IsValid()) NativeMenu->ShowSaveFailure(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."));
+        return;
+    }
+    bMenuSaveInProgress = true;
+    const bool Saved = SaveSlot(TEXT("Homestead_Manual"));
+    bMenuSaveInProgress = false;
+    if (Saved) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+    else if (NativeMenu.IsValid()) NativeMenu->ShowSaveFailure(ToastText);
+}
+void AHomesteadController::MenuQuitWithoutSaving()
+{
+    if (!bMenuSaveInProgress) UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+}
+void AHomesteadController::MenuRestart() { if (!bMenuSaveInProgress) NewGame(); }
 
 void AHomesteadController::SetupInputComponent()
 {
@@ -497,6 +637,7 @@ void AHomesteadController::OpenBook(int32 TargetPage)
         Avatar->GetCharacterMovement()->StopMovementImmediately();
         Avatar->SetAppearancePreview(Page == 6);
     }
+    ShowNativeMenu();
 }
 
 void AHomesteadController::Withdraw()
@@ -518,6 +659,8 @@ void AHomesteadController::CloseBook()
     bBookOpen = false;
     bConfirmRestart = false;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(false);
+    if (IsFailed()) ShowNativeMenu();
+    else HideNativeMenu();
 }
 void AHomesteadController::ToggleBook() { if (IsFailed()) return; if (bBookOpen) CloseBook(); else OpenBook(0); }
 void AHomesteadController::OpenCraft() { if (!IsFailed()) OpenBook(1); }
@@ -627,7 +770,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Cycle volume; nature continues between pieces.")});
         Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind and woodland ambience.")});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
-        Result.Add({8, bConfirmRestart ? TEXT("Confirm a new clearing") : TEXT("Start a new clearing"), TEXT("Select twice to reset this session. Existing save files are retained.")});
+        Result.Add({8, TEXT("Start a new clearing"), TEXT("Open a confirmation before replacing this test session. Cancel keeps your current clearing.")});
         Result.Add({9, TEXT("Save and quit"), TEXT("Save this homestead and close the game. Failed saves leave the game open.")});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {
@@ -794,8 +937,7 @@ void AHomesteadController::ActivateRow()
         case 7: EffectsVolume = EffectsVolume >= 0.99f ? 0 : FMath::Min(1.0f, EffectsVolume + 0.2f); break;
         case 8: if (bConfirmRestart) NewGame(); else bConfirmRestart = true; break;
         case 9:
-            if (SaveSlot(TEXT("Homestead_Manual")))
-                UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+            MenuRequestExit();
             break;
         case 10:
             if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
@@ -804,7 +946,21 @@ void AHomesteadController::ActivateRow()
                 Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
                 Settings->SetResolutionScaleValueEx(Scale > 99 ? 85 : Scale > 84 ? 70 : 100);
                 Settings->ApplyNonResolutionSettings();
-                if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))) Settings->SaveSettings();
+                if (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest")))
+                {
+                    Settings->SaveSettings();
+                    FConfigFile Disk;
+                    float Persisted = -1;
+                    const float Requested = Scale > 99 ? 85 : Scale > 84 ? 70 : 100;
+                    if (!Disk.Combine(GGameUserSettingsIni)
+                        || !Disk.GetFloat(TEXT("ScalabilityGroups"), TEXT("sg.ResolutionQuality"), Persisted)
+                        || !FMath::IsNearlyEqual(Persisted, Requested, 0.1f))
+                    {
+                        Settings->SetResolutionScaleValueEx(Scale);
+                        Settings->ApplyNonResolutionSettings();
+                        Notify(TEXT("Could not save 3D resolution scale. The previous preference was restored."), true);
+                    }
+                }
             }
             else Notify(TEXT("Video settings are unavailable in this session."), true);
             break;
@@ -1012,6 +1168,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
         return false;
     }
     if (!Quiet) Notify(TEXT("Your homestead is saved."));
+    LastSuccessfulSave = FDateTime::UtcNow();
     return true;
 }
 
@@ -1021,6 +1178,7 @@ void AHomesteadController::ApplySave(const UHomesteadSave& Save)
     if (!Result) { Notify(Result); return; }
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
     WorldId = Save.WorldId;
+    LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
     Appearance.HairStyle = Save.HairStyle;
     Appearance.HairColor = Save.HairColor;
     Appearance.SkinTone = Save.SkinTone;
