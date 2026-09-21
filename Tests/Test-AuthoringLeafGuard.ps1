@@ -130,6 +130,9 @@ public static class GuardFixtureNative {
         $after = $guard.VerifyMarker()
         $exitedJob = $guard.CaptureExitedJob()
         $exitedMembers = $guard.ObserveJobMembers()
+        $rootAfter = $guard.ObserveHeldRoot()
+        Assert ($rootAfter.Exited -and $rootAfter.IdentityFromHeldRoot -and
+            $rootAfter.CreationTime -eq $guard.ProcessCreationTime -and $rootAfter.Image -eq $guard.ImagePath) 'Held-root exit observation differs.'
         if (-not $ObserveAccountingOnly) { Assert ($exitedJob.TotalProcesses -eq 1) 'Unclassified extra job member.' }
         $exitCode = $guard.ExitCode
         $hard = $guard.HardTerminated
@@ -146,6 +149,7 @@ public static class GuardFixtureNative {
             liveJobAccounting = $jobSamples; exitedJob = $exitedJob
             liveJobMembers = $memberSamples
             exitedJobMembers = $exitedMembers
+            exitedRoot = $rootAfter
         })
     } catch {
         Write-NewJson (Join-Path $Root 'controller-error.json') @{ error = $_.ToString() }

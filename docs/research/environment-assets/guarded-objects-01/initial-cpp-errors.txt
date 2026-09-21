@@ -1,0 +1,10 @@
+HomesteadAuthoringProbeCommandlet.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(91,58): error C2065: 'FALSE': undeclared identifier
+    Require(GetFileInformationByHandle(Marker, &Info) != FALSE, TEXT("Inherited marker identity unavailable."));
+                                                         ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(108,18): error C2065: 'FALSE': undeclared identifier
+    BOOL InJob = FALSE;
+                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(120,88): error C2065: 'FALSE': undeclared identifier
+    Require(GetProcessTimes(GetCurrentProcess(), &Created, &Exited, &Kernel, &User) != FALSE, TEXT("Process creation identity unavailable."));
+                                                                                       ^

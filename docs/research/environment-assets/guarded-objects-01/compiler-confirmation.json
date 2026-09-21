@@ -1,0 +1,184 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.4094137,
+  "samples": [
+    {
+      "endpoints": [],
+      "queriedPids": 48916,
+      "elapsedMs": 58.1821
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        16660,
+        48916
+      ],
+      "elapsedMs": 86.7792
+    },
+    {
+      "endpoints": [],
+      "queriedPids": [
+        16660,
+        48916
+      ],
+      "elapsedMs": 117.5959
+    }
+  ],
+  "maximumSampleGapMs": 291.7866,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 2,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-20T23:48:46.8613692+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48916,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+          "Error": null,
+          "CreationTime": 134344217268507794,
+          "Member": true,
+          "Exited": false,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-20T23:48:46.8827656+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48916,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+          "Error": null,
+          "CreationTime": 134344217268507794,
+          "Member": true,
+          "Exited": false,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-20T23:48:46.9175665+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48916,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+          "Error": null,
+          "CreationTime": 134344217268507794,
+          "Member": true,
+          "Exited": false,
+          "ExitCode": 259
+        },
+        {
+          "Pid": 16660,
+          "Image": "C:\\Windows\\System32\\conhost.exe",
+          "Error": null,
+          "CreationTime": 134344217268853039,
+          "Member": true,
+          "Exited": false,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-20T23:48:46.9492035+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 48916,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+          "Error": null,
+          "CreationTime": 134344217268507794,
+          "Member": true,
+          "Exited": false,
+          "ExitCode": 259
+        },
+        {
+          "Pid": 16660,
+          "Image": "C:\\Windows\\System32\\conhost.exe",
+          "Error": null,
+          "CreationTime": 134344217268853039,
+          "Member": true,
+          "Exited": false,
+          "ExitCode": 259
+        }
+      ]
+    }
+  ],
+  "coff": {
+    "machine": "AMD64",
+    "bytes": 1866,
+    "sections": [
+      {
+        "name": ".drectve",
+        "bytes": 47,
+        "offset": 260,
+        "flags": 1051136
+      },
+      {
+        "name": ".debug$S",
+        "bytes": 420,
+        "offset": 307,
+        "flags": 1108344896
+      },
+      {
+        "name": ".text$mn",
+        "bytes": 6,
+        "offset": 727,
+        "flags": 1615859744
+      },
+      {
+        "name": ".debug$S",
+        "bytes": 172,
+        "offset": 733,
+        "flags": 1108348992
+      },
+      {
+        "name": ".debug$T",
+        "bytes": 552,
+        "offset": 945,
+        "flags": 1108344896
+      },
+      {
+        "name": ".chks64",
+        "bytes": 48,
+        "offset": 1497,
+        "flags": 2560
+      }
+    ],
+    "symbolCount": 16,
+    "function": {
+      "symbol": "HomesteadCompilerLeafFixture",
+      "section": ".text$mn",
+      "offset": 0,
+      "machineCode": "B8DF9B5713C3",
+      "returnValue": 324508639
+    },
+    "codeExecuted": false
+  },
+  "malformedCoffCases": 5,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\compiler-leaf-confirmed-01\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 742994,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344217265201810,
+    "LastWriteTime": 134344217265201810,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "objectSha256": "10576ADD73EDFD03929C001C315DFF320C4E0AAF829CE3E0F202949C55DE2E47",
+  "limits": "One guarded compile-only fixture with exact approved build-only Windows console host. No link/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}

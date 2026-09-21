@@ -1,5 +1,11 @@
 # Tasks
 
+Latest native progress: all five reviewed compile-only actions produced fresh
+objects. Four monitors passed; the fifth compiler exited0 with a preserved
+shutdown-monitor failure. `native-link-proposal.md` separates that evidence and
+requests the remaining resource/link/metadata authorization. No Editor ran;
+OpenSpec remains4/29.
+
 Latest bounded preflight: `compiler-leaf-result.md` records one valid
 compile-only object and identifies the dummy's extra job member as the exact
 signed build-only console host. That does not retroactively identify the

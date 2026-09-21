@@ -1,0 +1,167 @@
+[
+  {
+    "outputs": [
+      {
+        "lastWriteUtc": "2026-09-20T23:54:34.0970298Z",
+        "sha256": "F7036F85A939B69F551F9224D046CE2CF8A032E9934AC54944924B00C45ACA48",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.obj",
+        "bytes": 8751142
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:33.2258053Z",
+        "sha256": "82FA5F5E0E126CFBC7227F1AD9B23A4A6CB22136E9ED3895CF7A161496F0F9DB",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.sarif",
+        "bytes": 572
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:33.0051132Z",
+        "sha256": "2FEB2C68AB78F8A5A7DA5861333DE18C2B101A8F4571AC7C99090BF7D3FBB0AA",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp.dep.json",
+        "bytes": 103777
+      }
+    ],
+    "actionId": 0,
+    "compilerExitCode": 0,
+    "originalMonitorStatus": "passed",
+    "monitoringComplete": true,
+    "maximumSampleGapMs": 281.71489999999903,
+    "rootCreationTime": 134344220643032453,
+    "rootPid": 39492,
+    "elapsedSeconds": 10.1068187,
+    "endpointObservations": 1,
+    "originalMonitorError": null,
+    "endpointSamples": 600
+  },
+  {
+    "outputs": [
+      {
+        "lastWriteUtc": "2026-09-20T23:54:40.3264949Z",
+        "sha256": "39A8A730EE5654145FE8EF07BBEFCA54B98DD9D91DB9E909DB1BBE6043346DEB",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\Module.SurvivalGameEditor.gen.cpp.obj",
+        "bytes": 3582551
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:40.1652917Z",
+        "sha256": "82FA5F5E0E126CFBC7227F1AD9B23A4A6CB22136E9ED3895CF7A161496F0F9DB",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\Module.SurvivalGameEditor.gen.cpp.sarif",
+        "bytes": 572
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:40.0497420Z",
+        "sha256": "539DEC2D9932B6E9985C8E523E7EF56D84041D049DF604AA4E3ACF914281098B",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\Module.SurvivalGameEditor.gen.cpp.dep.json",
+        "bytes": 80226
+      }
+    ],
+    "actionId": 1,
+    "compilerExitCode": 0,
+    "originalMonitorStatus": "passed",
+    "monitoringComplete": true,
+    "maximumSampleGapMs": 213.47820000000047,
+    "rootCreationTime": 134344220750280507,
+    "rootPid": 49504,
+    "elapsedSeconds": 5.5325319,
+    "endpointObservations": 1,
+    "originalMonitorError": null,
+    "endpointSamples": 339
+  },
+  {
+    "outputs": [
+      {
+        "lastWriteUtc": "2026-09-20T23:54:42.1765206Z",
+        "sha256": "04F67976E5CA3825316A5ECD7A8C7D3A5ABF5D779525007CB27CE46EF9078E18",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\PerModuleInline.gen.cpp.obj",
+        "bytes": 353828
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:42.1388451Z",
+        "sha256": "82FA5F5E0E126CFBC7227F1AD9B23A4A6CB22136E9ED3895CF7A161496F0F9DB",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\PerModuleInline.gen.cpp.sarif",
+        "bytes": 572
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:42.1171903Z",
+        "sha256": "F0D769D070A91546EB9D8602B364A435A0B17778A1248CC141CAA40CBD4ADAD2",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\PerModuleInline.gen.cpp.dep.json",
+        "bytes": 35475
+      }
+    ],
+    "actionId": 2,
+    "compilerExitCode": 0,
+    "originalMonitorStatus": "passed",
+    "monitoringComplete": true,
+    "maximumSampleGapMs": 194.1884,
+    "rootCreationTime": 134344220810929137,
+    "rootPid": 48956,
+    "elapsedSeconds": 1.2956798,
+    "endpointObservations": 1,
+    "originalMonitorError": null,
+    "endpointSamples": 70
+  },
+  {
+    "outputs": [
+      {
+        "lastWriteUtc": "2026-09-20T23:54:44.6026528Z",
+        "sha256": "CD00910CD7A8452FCDE9F1540B4F5A46D875092D150D4B0F5765333E1B1D1A49",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\SurvivalGameEditor.cpp.obj",
+        "bytes": 709021
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:44.5639419Z",
+        "sha256": "82FA5F5E0E126CFBC7227F1AD9B23A4A6CB22136E9ED3895CF7A161496F0F9DB",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\SurvivalGameEditor.cpp.sarif",
+        "bytes": 572
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:54:44.5347950Z",
+        "sha256": "FC8DECF7D7569C3E43A24941E0A3443DB24DD856BD16D2482751213061F378C9",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGameEditor\\SurvivalGameEditor.cpp.dep.json",
+        "bytes": 46404
+      }
+    ],
+    "actionId": 3,
+    "compilerExitCode": 0,
+    "originalMonitorStatus": "passed",
+    "monitoringComplete": true,
+    "maximumSampleGapMs": 204.47500000000014,
+    "rootCreationTime": 134344220829071173,
+    "rootPid": 44172,
+    "elapsedSeconds": 1.9104373,
+    "endpointObservations": 1,
+    "originalMonitorError": null,
+    "endpointSamples": 107
+  },
+  {
+    "outputs": [
+      {
+        "lastWriteUtc": "2026-09-20T23:55:25.0936268Z",
+        "sha256": "53C95B8D1FE7A695C5156C12EEC1735822AE4B0A1F2F6A8BFF857D36C3F9517B",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\Module.SurvivalGame.cpp.obj",
+        "bytes": 28530587
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:55:16.5669089Z",
+        "sha256": "82FA5F5E0E126CFBC7227F1AD9B23A4A6CB22136E9ED3895CF7A161496F0F9DB",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\Module.SurvivalGame.cpp.sarif",
+        "bytes": 572
+      },
+      {
+        "lastWriteUtc": "2026-09-20T23:55:15.7131625Z",
+        "sha256": "A64FAF7389EC81BD0F5E26955C135DE26FFDC9AFEEB04852C609FE4B442E92AD",
+        "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\Module.SurvivalGame.cpp.dep.json",
+        "bytes": 43301
+      }
+    ],
+    "actionId": 5,
+    "compilerExitCode": 0,
+    "originalMonitorStatus": "failed",
+    "monitoringComplete": false,
+    "maximumSampleGapMs": 94.50209999999788,
+    "rootCreationTime": 134344220853502688,
+    "rootPid": 48580,
+    "elapsedSeconds": 39.8662585,
+    "endpointObservations": 1,
+    "originalMonitorError": "Unexpected or unidentified live job member:{\"Pid\":48580,\"NativeError\":0,\"Image\":null,\"Error\":\"System.ComponentModel.Win32Exception (5): listed member image\\r\\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\\r\\n   at Homestead.Authoring.LeafGuard.ObserveJobMembers()\",\"CreationTime\":0,\"Member\":false,\"Exited\":false,\"ExitCode\":0}",
+    "endpointSamples": 2525
+  }
+]

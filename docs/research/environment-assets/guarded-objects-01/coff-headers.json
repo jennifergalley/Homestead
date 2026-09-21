@@ -1,0 +1,37 @@
+[
+  {
+    "id": 0,
+    "firstWord": 0,
+    "secondWord": 65535,
+    "bigObjectMachine": 34404,
+    "bytes": 8751142
+  },
+  {
+    "id": 1,
+    "firstWord": 0,
+    "secondWord": 65535,
+    "bigObjectMachine": 34404,
+    "bytes": 3582551
+  },
+  {
+    "id": 2,
+    "firstWord": 0,
+    "secondWord": 65535,
+    "bigObjectMachine": 34404,
+    "bytes": 353828
+  },
+  {
+    "id": 3,
+    "firstWord": 0,
+    "secondWord": 65535,
+    "bigObjectMachine": 34404,
+    "bytes": 709021
+  },
+  {
+    "id": 5,
+    "firstWord": 0,
+    "secondWord": 65535,
+    "bigObjectMachine": 34404,
+    "bytes": 28530587
+  }
+]

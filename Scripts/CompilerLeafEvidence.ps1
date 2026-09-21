@@ -7,10 +7,12 @@ function Assert-CompilerLeafAccounting($Job, [array]$Samples, [uint32]$RootPid, 
     foreach($sample in $Samples) {
         if($sample.Error) { throw "Job observation failed:$($sample.Error)" }
         foreach($member in $sample.Members) {
-            if($member.Error -or -not $member.Member -or -not $member.CreationTime) { throw 'Unverified job member.' }
+            $key=$member.Pid.ToString()
+            if($member.Error -and $member.NativeError -eq 87 -and $seen.ContainsKey($key)) { continue }
+            if($member.Error -or -not $member.CreationTime -or
+                (-not $member.Member -and (-not $member.Exited -or -not $seen.ContainsKey($key)))) { throw 'Unverified job member.' }
             $expected=if($member.Pid -eq $RootPid){$CompilerImage}else{'C:\Windows\System32\conhost.exe'}
             if($member.Image -ine $expected) { throw "Unadmitted job image:$($member.Image)" }
-            $key=$member.Pid.ToString()
             if($seen.ContainsKey($key) -and $seen[$key].CreationTime -ne $member.CreationTime) { throw 'Job PID identity changed.' }
             $seen[$key]=$member
         }

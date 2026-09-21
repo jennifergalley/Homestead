@@ -7,6 +7,14 @@ $result=Get-Content (Join-Path $evidence 'member-diagnostic-02.json') -Raw|Conve
 $case=$result.cases[0]
 $samples=@($case.outcome.liveJobMembers|ForEach-Object{[pscustomobject]@{Error=$null;Members=$_.members}})
 Assert-CompilerLeafAccounting $case.outcome.exitedJob $samples $case.launch.pid $case.launch.image
+$retired=[pscustomobject]@{Error=$null;Members=@([pscustomobject]@{
+    Pid=$case.launch.pid;Error='Process disappeared after enumeration';NativeError=87
+})}
+Assert-CompilerLeafAccounting $case.outcome.exitedJob (@($samples)+@($retired)) $case.launch.pid $case.launch.image
+$retired.Members[0].Pid=[uint32]999999
+$rejected=$false
+try { Assert-CompilerLeafAccounting $case.outcome.exitedJob (@($samples)+@($retired)) $case.launch.pid $case.launch.image } catch { $rejected=$true }
+if(-not $rejected){throw 'An unidentified vanished member was accepted.'}
 foreach($invalid in @('unknown-image','missing-member','changed-creation','bad-policy')) {
     $copy=$samples|ConvertTo-Json -Depth 8|ConvertFrom-Json
     $job=$case.outcome.exitedJob|ConvertTo-Json|ConvertFrom-Json
@@ -22,4 +30,4 @@ foreach($invalid in @('unknown-image','missing-member','changed-creation','bad-p
 }
 $coff=Read-CompilerLeafCoff ([IO.File]::ReadAllBytes((Join-Path $evidence 'fixture.coff')))
 if($coff.bytes -ne 1818 -or $coff.function.machineCode -cne 'B8DF9B5713C3') { throw 'Recorded COFF proof differs.' }
-'Two actual-data positive checks and four negative policy cases passed; no tool/process launched.'
+'Three actual-data positive checks and five negative policy cases passed; no tool/process launched.'

@@ -24,11 +24,17 @@ namespace Homestead.Authoring
     }
     public sealed class JobMemberEvidence
     {
-        public uint Pid;
+        public uint Pid, NativeError;
         public string Image, Error;
         public ulong CreationTime;
-        public bool Member, Exited;
+        public bool Member, Exited, IdentityFromHeldRoot;
         public uint ExitCode;
+    }
+    public sealed class EndpointEvidence
+    {
+        public uint Pid, State;
+        public string Protocol, LocalAddress, RemoteAddress;
+        public int LocalPort, RemotePort;
     }
 
     // Native process primitive only. Approval, socket policy and run controls belong to its caller.
@@ -99,6 +105,8 @@ namespace Homestead.Authoring
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, out Accounting accounting, uint size, IntPtr returned);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int kind, IntPtr data, uint size, out uint returned);
         [DllImport("kernel32.dll", SetLastError = true)] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+        [DllImport("iphlpapi.dll")] static extern uint GetExtendedTcpTable(IntPtr table, ref uint size, bool order, uint family, int tableClass, uint reserved);
+        [DllImport("iphlpapi.dll")] static extern uint GetExtendedUdpTable(IntPtr table, ref uint size, bool order, uint family, int tableClass, uint reserved);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool IsProcessInJob(IntPtr process, IntPtr job, out bool member);
         [DllImport("kernel32.dll", SetLastError = true)] static extern bool InitializeProcThreadAttributeList(IntPtr list, int count, uint flags, ref IntPtr size);
@@ -319,13 +327,13 @@ namespace Homestead.Authoring
                 for (int index = 0; index < count; index++)
                 {
                     uint pid = checked((uint)Marshal.ReadIntPtr(buffer, 8 + index * IntPtr.Size).ToInt64());
+                    if (pid == ProcessId) { result.Add(ObserveHeldRoot()); continue; }
                     var item = new JobMemberEvidence { Pid = pid };
                     IntPtr held = OpenProcess(0x00101000, false, pid);
+                    if (!Valid(held)) item.NativeError = (uint)Marshal.GetLastWin32Error();
                     try
                     {
                         Check(Valid(held), "open listed job member");
-                        bool member; Check(IsProcessInJob(held, job, out member) && member, "listed member association");
-                        item.Member = member;
                         var image = new StringBuilder(32768); uint length = (uint)image.Capacity;
                         Check(QueryFullProcessImageNameW(held, 0, image, ref length), "listed member image");
                         item.Image = image.ToString();
@@ -335,6 +343,9 @@ namespace Homestead.Authoring
                         uint state = WaitForSingleObject(held, 0);
                         Check(state == ObjectSignaled || state == Timeout, "listed member exit state");
                         item.Exited = state == ObjectSignaled;
+                        bool member; Check(IsProcessInJob(held, job, out member), "listed member association");
+                        item.Member = member;
+                        if (!member && !item.Exited) throw new InvalidOperationException("Live listed process left the owned job.");
                         uint code; Check(GetExitCodeProcess(held, out code), "listed member exit code");
                         item.ExitCode = code;
                     }
@@ -345,6 +356,66 @@ namespace Homestead.Authoring
                 return result.ToArray();
             }
             finally { Marshal.FreeHGlobal(buffer); }
+        }
+        public JobMemberEvidence ObserveHeldRoot()
+        {
+            if (!Valid(process)) throw new InvalidOperationException("Root handle has been released.");
+            bool exited = Wait(0), member;
+            uint code;
+            Check(GetExitCodeProcess(process, out code), "held root exit code");
+            Check(IsProcessInJob(process, job, out member), "held root membership");
+            if (!member && !exited) throw new InvalidOperationException("Live root left its owned job.");
+            return new JobMemberEvidence { Pid = ProcessId, Image = ImagePath, CreationTime = ProcessCreationTime,
+                IdentityFromHeldRoot = true, Exited = exited, ExitCode = code, Member = member };
+        }
+        public static EndpointEvidence[] ObserveEndpoints(uint[] pids)
+        {
+            var owned = new HashSet<uint>(pids);
+            var rows = new List<EndpointEvidence>();
+            foreach (bool tcp in new[] { true, false })
+            foreach (uint family in new uint[] { 2, 23 })
+            {
+                uint size = 0;
+                uint error = tcp ? GetExtendedTcpTable(IntPtr.Zero, ref size, false, family, 5, 0)
+                    : GetExtendedUdpTable(IntPtr.Zero, ref size, false, family, 1, 0);
+                if (error != 122 && error != 0) throw new Win32Exception((int)error, "size owned endpoint table");
+                if (size > 4 * 1024 * 1024) throw new InvalidOperationException("Endpoint table exceeds bound.");
+                size += 65536;
+                IntPtr data = Marshal.AllocHGlobal((int)size);
+                try
+                {
+                    error = tcp ? GetExtendedTcpTable(data, ref size, false, family, 5, 0)
+                        : GetExtendedUdpTable(data, ref size, false, family, 1, 0);
+                    if (error != 0) throw new Win32Exception((int)error, "read owned endpoint table");
+                    int count = Marshal.ReadInt32(data), stride = tcp ? (family == 2 ? 24 : 56) : (family == 2 ? 12 : 28);
+                    if (count < 0 || 4L + (long)count * stride > size) throw new InvalidOperationException("Invalid endpoint rows.");
+                    for (int index = 0; index < count; index++)
+                    {
+                        IntPtr row = IntPtr.Add(data, 4 + index * stride);
+                        uint pid = (uint)Marshal.ReadInt32(row, stride - 4);
+                        if (!owned.Contains(pid)) continue;
+                        int local = tcp && family == 2 ? 4 : 0;
+                        int port = family == 2 ? (tcp ? 8 : 4) : 20;
+                        int remote = family == 2 ? 12 : 24;
+                        byte[] address = new byte[family == 2 ? 4 : 16];
+                        Marshal.Copy(IntPtr.Add(row, local), address, 0, address.Length);
+                        var item = new EndpointEvidence { Pid = pid, Protocol = tcp ? "TCP" : "UDP",
+                            LocalAddress = new System.Net.IPAddress(address).ToString(),
+                            LocalPort = Marshal.ReadByte(row, port) * 256 + Marshal.ReadByte(row, port + 1) };
+                        if (tcp)
+                        {
+                            Marshal.Copy(IntPtr.Add(row, remote), address, 0, address.Length);
+                            item.RemoteAddress = new System.Net.IPAddress(address).ToString();
+                            int remotePort = family == 2 ? 16 : 44;
+                            item.RemotePort = Marshal.ReadByte(row, remotePort) * 256 + Marshal.ReadByte(row, remotePort + 1);
+                            item.State = (uint)Marshal.ReadInt32(row, family == 2 ? 0 : 48);
+                        }
+                        rows.Add(item);
+                    }
+                }
+                finally { Marshal.FreeHGlobal(data); }
+            }
+            return rows.ToArray();
         }
         public bool Wait(uint milliseconds)
         {

@@ -88,7 +88,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     Require(!HandleText.IsEmpty() && End && *End == 0 && HandleNumber != 0, TEXT("Invalid inherited marker handle."));
     const HANDLE Marker = reinterpret_cast<HANDLE>(static_cast<UPTRINT>(HandleNumber));
     BY_HANDLE_FILE_INFORMATION Info{};
-    Require(GetFileInformationByHandle(Marker, &Info) != FALSE, TEXT("Inherited marker identity unavailable."));
+    Require(GetFileInformationByHandle(Marker, &Info) != 0, TEXT("Inherited marker identity unavailable."));
     Require(Info.nFileSizeHigh == 0 && Info.nFileSizeLow == 0
         && (Info.dwFileAttributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)) == 0,
         TEXT("Inherited marker is not an ordinary empty file."));
@@ -105,7 +105,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     Result->SetObjectField(TEXT("marker"), MarkerInfo);
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION Limits{};
     JOBOBJECT_BASIC_ACCOUNTING_INFORMATION Accounting{};
-    BOOL InJob = FALSE;
+    BOOL InJob = 0;
     Require(IsProcessInJob(GetCurrentProcess(), nullptr, &InJob) && InJob, TEXT("Probe is not in a job."));
     Require(QueryInformationJobObject(nullptr, JobObjectExtendedLimitInformation, &Limits, sizeof(Limits), nullptr)
         && QueryInformationJobObject(nullptr, JobObjectBasicAccountingInformation, &Accounting, sizeof(Accounting), nullptr),
@@ -117,7 +117,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         && Limits.BasicLimitInformation.ActiveProcessLimit == 1 && Accounting.ActiveProcesses == 1,
         TEXT("Actual leaf job policy differs."));
     FILETIME Created{}, Exited{}, Kernel{}, User{};
-    Require(GetProcessTimes(GetCurrentProcess(), &Created, &Exited, &Kernel, &User) != FALSE, TEXT("Process creation identity unavailable."));
+    Require(GetProcessTimes(GetCurrentProcess(), &Created, &Exited, &Kernel, &User) != 0, TEXT("Process creation identity unavailable."));
     Result->SetStringField(TEXT("processCreationTime"), LexToString(FileTimeValue(Created)));
 
     auto Config = MakeShared<FJsonObject>();

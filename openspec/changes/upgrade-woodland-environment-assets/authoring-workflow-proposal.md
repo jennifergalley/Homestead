@@ -1,5 +1,13 @@
 # Authoring workflow approval proposal
 
+**Latest,17:04 Arizona:** the confirmed compiler route executed all five
+reviewed compile actions and produced fresh AMD64 objects. Four supervisors
+passed; the fifth compiler exited0 but retained a root-shutdown observation
+failure, separately verified rather than rewritten. The held-root correction
+has a disposable exit regression. `native-link-proposal.md` is the single
+remaining resource/link/PDB/metadata proposal. Those operations and Editor
+remain held; task1.3 is unchecked.
+
 **Latest,16:42 Arizona:** direct held-job PID queries identified the dummy's
 persistent extra member as the exact signed Windows console host already
 allowed for builds. The compiler-only leaf produced valid COFF, but its own

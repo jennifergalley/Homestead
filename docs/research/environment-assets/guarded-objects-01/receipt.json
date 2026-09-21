@@ -1,0 +1,62 @@
+{
+  "utc": "2026-09-21T00:07:08.6820189+00:00",
+  "runId": "20260920-182217-d1f84e39",
+  "status": "five-compiler-outputs-verified-link-held",
+  "compilerActionsExitedZero": 5,
+  "fullyPassedMonitors": 4,
+  "preservedFailedMonitorAction": 5,
+  "freshExpectedOutputs": 15,
+  "coffObjects": 5,
+  "allObjectMachines": "AMD64 bigobj",
+  "newEditorRuns": 0,
+  "newLinkRuns": 0,
+  "newResourceRuns": 0,
+  "metadataExecuted": false,
+  "openSpecComplete": 4,
+  "openSpecTotal": 29,
+  "sourceGuardSha256": "E52DC48F0B5DC64559D87ED24780D8F2B1742AC818DB282ADAAB62D15BF430E9",
+  "sourceCommandletSha256": "5902060B8378EF689645A730DE228BCFC987DE18D923D90FFD55EC4FCCFB7B4B",
+  "files": [
+    {
+      "file": "coff-headers.json",
+      "sha256": "4CDEB6969FFA3501FBC75B62F0F9E44992DF88A50FF2EF47CEAFD83624CD85E0",
+      "bytes": 634
+    },
+    {
+      "file": "compile-monitor-index.json",
+      "sha256": "534CC9A082E20469812D474C67B143E37DEA8C2ABB29394AF8EC7189B117AE55",
+      "bytes": 22055
+    },
+    {
+      "file": "compiler-confirmation-launch.json",
+      "sha256": "20A571317385AB743A8CAA0EF724204DEEA717C8C73EB0A287040EFD54F20BF5",
+      "bytes": 1677
+    },
+    {
+      "file": "compiler-confirmation.json",
+      "sha256": "EFAC7109579B9C13B6850D742B1765C157CC26D3073CBDEA00E899503B8D526C",
+      "bytes": 4893
+    },
+    {
+      "file": "fresh-output-verification.json",
+      "sha256": "8E1FF417C7BFD32A968255FAEBA03B3AB530FCD6AC7E22CC3153402E681489B1",
+      "bytes": 7561
+    },
+    {
+      "file": "held-root-exit-regression.json",
+      "sha256": "ADDFBCE062513B67610DF28FA647DC003C641A0AE9B24F36BCA90A2DF43C7B28",
+      "bytes": 25964
+    },
+    {
+      "file": "initial-cpp-errors.txt",
+      "sha256": "159A6044B1C1F69F9FEAF311FECAFD26334A9D79D5A38E66FF52B59B33BA58C1",
+      "bytes": 911
+    },
+    {
+      "file": "remaining-actions.json",
+      "sha256": "69A3500061908FFF646F1BC50EE79F362909A3EE1E655E8A43211DCBB71371A3",
+      "bytes": 6492
+    }
+  ],
+  "qualification": "Action5 original monitoring failure remains failed. Its compiler exit0 and all fresh outputs are verified separately. Held-root observation regression passes; no retry replaced the failed receipt."
+}
