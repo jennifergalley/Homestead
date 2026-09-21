@@ -186,6 +186,11 @@ polish task.
 ## Confirmed requirements
 
 - Controller-first play, with mouse and keyboard also supported.
+- Menu focus must move naturally between visible sections with the left
+  thumbstick and D-pad, including continuing downward out of a grid. Trigger
+  presses must not be required to change sections. Retain useful tab shortcuts,
+  readable focus, mouse parity and safe modal/edit behavior without changing the
+  menu appearance Jenny already likes.
 - Free third-person camera, reasonably close, with zoom out for farming/building.
 - Beautiful, cozy environments with realistic graphics where practical.
 - A beautiful, peaceful, varied landscape: forest, occasional meadows,

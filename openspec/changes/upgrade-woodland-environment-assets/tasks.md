@@ -4,7 +4,7 @@
 
 Selected: qualified `grass-ground-01`, promotion `415878c3`; samev5 profile,
 earlier builds retained. Coordinator acceptance is recorded in
-`grass-delivery-01/coordinator-review.json`. Thirteen of29 top-level tasks are
+`grass-delivery-01/coordinator-review.json`. Fourteen of29 top-level tasks are
 complete; tree import03 remains FAILED with twelve qualified branch basis
 corners. Detailed prior execution narrative is in `execution-history.md`.
 
@@ -22,9 +22,11 @@ play and later night/weather when reached, plus one build/farm/resource-regrowth
 regression. The existing fresh-world endurance route now also supports a70-minute
 observation, needed to reach actual24-hour branch regrowth and the next natural
 morning; this is a finite gameplay route, not an external timed kill. The180s
-fresh Shipping route passed;70min `readability-endurance-long-01` is running.
+fresh Shipping route and70min `readability-endurance-long-01` passed.
 Completed camera/build evidence is sealed in `readability-camera-01/receipt.json`;
-the long result and promotion are still pending. Disclose the controlled fixture;
+the natural result is in `readability-endurance-01/receipt.json`:27.94646 natural
+hours, four actual harvested-node renewals, daylight/night/Rain frames and actual
+timing/memory limits. Promotion remains pending. Disclose the controlled fixture;
 no silent time/lighting edits.
 Update only demonstrably obsolete UI/free-outfit/quantity assumptions. Reuse
 existing input/cache/tool/root-only controls and completion-driven cancellation;
@@ -72,7 +74,7 @@ Parent owns the separate read-only UI evidence/task reconciliation.
 - [ ] 5.1 Update affected primitive-count tests to semantic renderability/collision checks while preserving exact gameplay state/rewards.
 - [x] 5.2 Build and run relevant native/basic packaged smoke; disclose unrelated existing defects without weakening assertions.
 - [ ] 5.3 Exercise ordinary walking/cameras and key gather/build routes; fix blocking collision, floating roots and inaccessible targets.
-- [ ] 5.4 Measure meaningful integrated runtime timing/memory separately from screenshots; disclose unmeasured performance without blocking the first slice on exhaustive benchmarks.
+- [x] 5.4 Measure meaningful integrated runtime timing/memory separately from screenshots; disclose unmeasured performance without blocking the first slice on exhaustive benchmarks.
 - [ ] 5.5 Inspect representative day/night/weather conditions and address blocking visual defects without arbitrary cosmetic iteration caps.
 - [ ] 5.6 Record actual viewport/render scale/RHI and limitations; no PNG-size-only4K, screenshot-as-FPS or unsupported display claims.
 

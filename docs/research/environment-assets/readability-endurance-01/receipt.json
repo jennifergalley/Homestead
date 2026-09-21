@@ -1,0 +1,380 @@
+{
+  "status": "passed-qualified-natural-play-and-regrowth-not-promoted",
+  "createdUtc": "2026-09-21T18:52:34.7040278+00:00",
+  "executableSha256": "BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-readability-02",
+  "cameraEvidence": {
+    "path": "docs\\research\\environment-assets\\readability-camera-01\\receipt.json",
+    "sha256": "DD7C515BD0BE92CAC77A4FEBA48D10563C484DD3CB1468EE2393E7E25E114E4A"
+  },
+  "sourceCheckpoint": "a8dee30a053c3bcbc34ee45441b1220b42f2d5ac",
+  "actual": {
+    "status": "passed",
+    "reason": "Fixed duration/participation/action/save criteria evaluated.",
+    "freshWorld": true,
+    "completionDriven": true,
+    "debugBindingQueryAvailable": false,
+    "dayMinutes": 60,
+    "raining": true,
+    "night": false,
+    "litGuardVersion": 1,
+    "litGuardTicks": 251934,
+    "startupViewMode": 3,
+    "startupLighting": true,
+    "startupShaderComplexity": false,
+    "startupShowFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1",
+    "effectiveF5DebugBinding": "",
+    "effectiveF9DebugBinding": "",
+    "f9NoScreenshotChecks": 1,
+    "presentation": {
+      "available": true,
+      "viewMode": 3,
+      "lighting": true,
+      "shaderComplexity": false,
+      "showFlags": "PostProcessing=1,Bloom=1,LocalExposure=1,Tonemapper=1,AntiAliasing=1,TemporalAA=1,AmbientCubemap=1,EyeAdaptation=1,VisualizeHDR=0,VisualizeSkyLightIlluminance=0,VisualizeLocalFogVolumes=0,VisualizeLocalExposure=0,LensFlares=1,LensDistortion=1,GlobalIllumination=1,Vignette=1,Grain=1,AmbientOcclusion=1,Decals=1,CameraImperfections=1,OnScreenDebug=1,OverrideDiffuseAndSpecular=0,LightingOnlyOverride=0,ReflectionOverride=0,MaterialNormal=1,MaterialAmbientOcclusion=1,VisualizeBuffer=0,VisualizeNanite=0,VisualizeLumen=0,VisualizeMegaLights=1,VisualizeSubstrate=0,VisualizeGroom=0,VisualizeVirtualShadowMap=0,DirectLighting=1,DirectionalLights=1,PointLights=1,SpotLights=1,RectLights=1,ColorGrading=1,VisualizeColorGrading=0,VectorFields=0,DepthOfField=1,GBufferHints=0,MotionBlur=1,CompositeDebugPrimitives=0,CompositeEditorPrimitives=0,OpaqueCompositeEditorPrimitives=0,TestImage=0,VisualizeDOF=0,VertexColors=0,PhysicalMaterialMasks=0,Refraction=1,CameraInterpolation=1,SceneColorFringe=1,ToneCurve=1,SeparateTranslucency=1,ScreenPercentage=1,VisualizeMotionBlur=0,VisualizeMotionVectors=0,VisualizeReprojection=0,VisualizeTemporalUpscaler=0,VisualizeTSR=0,MegaLights=1,ReflectionEnvironment=1,VisualizeOutOfBoundsPixels=0,Diffuse=1,Specular=1,SelectionOutline=0,ScreenSpaceReflections=1,LumenReflections=1,ContactShadows=1,RayTracedDistanceFieldShadows=1,CapsuleShadows=1,SubsurfaceScattering=1,VisualizeSSS=0,VolumetricLightmap=1,IndirectLightingCache=1,DebugAI=0,VisLog=0,Navigation=0,GameplayDebug=0,TexturedLightProfiles=1,LightFunctions=1,InstancedStaticMeshes=1,InstancedFoliage=1,HISMCOcclusionBounds=0,HISMCClusterTree=0,VisualizeInstanceUpdates=0,InstancedGrass=1,DynamicShadows=1,Particles=1,Niagara=1,HeterogeneousVolumes=1,SkeletalMeshes=1,BuilderBrush=0,Translucency=1,BillboardSprites=1,LOD=1,LightComplexity=0,ShaderComplexity=0,StationaryLightOverlap=0,LightMapDensity=0,StreamingBounds=0,Constraints=0,MassProperties=0,CameraFrustums=0,AudioRadius=0,ForceFeedbackRadius=0,BSPSplit=0,Brushes=0,Lighting=1,UnlitRichView=1,UnlitViewmode=1,DeferredLighting=1,Editor=0,BSPTriangles=1,LargeVertices=0,Grid=0,Snap=0,MeshEdges=0,Cover=0,Splines=0,Selection=0,VisualizeLevelInstanceEditing=0,ModeWidgets=0,Bounds=0,HitProxies=0,LightInfluences=0,Pivot=0,ShadowFrustums=0,Wireframe=0,Materials=1,StaticMeshes=1,Landscape=1,LightRadius=0,Fog=1,Volumes=0,Game=1,BSP=1,Collision=0,CollisionVisibility=0,CollisionPawn=0,LightShafts=1,PostProcessMaterial=1,Atmosphere=1,DeferredAtmospherePass=1,Cloud=1,CameraAspectRatioBars=0,CameraSafeFrames=1,TextRender=1,Rendering=1,HMDDistortion=0,StereoRendering=0,DistanceCulledPrimitives=0,VisualizeLightCulling=0,PrecomputedVisibility=1,SkyLighting=1,PreviewShadowsIndicator=0,PrecomputedVisibilityCells=0,VisualizeVolumetricLightmap=0,VolumeLightingSamples=0,Paper2DSprites=1,VisualizeDistanceFieldAO=0,VisualizeMeshDistanceFields=0,PhysicsField=0,VisualizeGlobalDistanceField=0,VisualizeLightingOnProbes=0,ScreenSpaceAO=1,DistanceFieldAO=1,LumenGlobalIllumination=1,VolumetricFog=1,VisualizeSSR=0,VisualizeShadingModels=0,VisualizeSenses=0,LODColoration=0,HLODColoration=0,StreamingTextureDeficit=0,StreamingTextureResidency=0,StreamingMeshLODDeficit=0,StreamingMeshLODResidency=0,QuadOverdraw=0,ShaderComplexityWithQuadOverdraw=0,PrimitiveDistanceAccuracy=0,MeshUVDensityAccuracy=0,MaterialTextureScaleAccuracy=0,OutputMaterialTextureScales=0,RequiredTextureResolution=0,VisualizeVirtualTexture=0,WidgetComponents=1,Bones=0,ServerDrawDebug=0,MediaPlanes=1,VREditing=0,OcclusionMeshes=0,VisualizeInstanceOcclusionQueries=0,DisableOcclusionQueries=0,PathTracing=0,RayTracingDebug=0,VisualizeSkyAtmosphere=0,VisualizeLightFunctionAtlas=0,VisualizeCalibrationColor=0,VisualizeCalibrationGrayscale=0,VisualizeCalibrationCustom=0,VisualizePostProcessStack=0,VirtualTexturePrimitives=0,VisualizeVolumetricCloudConservativeDensity=0,VisualizeVolumetricCloudEmptySpaceSkipping=0,VirtualShadowMapPersistentData=1,DebugDrawDistantVirtualSMLights=0,VirtualTextureResidency=0,MaterialCacheVirtualTextureAllocator=0,InputDebugVisualizer=0,LumenScreenTraces=1,LumenDetailTraces=1,LumenGlobalTraces=1,LumenFarFieldTraces=1,LumenSecondaryBounces=1,LumenShortRangeAmbientOcclusion=1,MegaLightsScreenTraces=1,MegaLightsWorldSpaceTraces=1,MegaLightsFarFieldTraces=1,MegaLightsHairVoxelTraces=1,NaniteMeshes=1,NaniteStreamingGeometry=1,VisualizeGPUSkinCache=0,VisualizeLWCComplexity=0,VisualizeShadowCasters=0,ShaderPrint=1,SceneCaptureCopySceneDepth=1,Cameras=1,Hair=1,AllowPrimitiveAlphaHoldout=1,AlphaInvert=0,StereoMotionVectors=0,Clay=0,Zebra=0,FrontBackFace=0,RandomColor=0,GameplayCameras=1"
+    },
+    "pid": 45380,
+    "wallSeconds": 4200.2634942010045,
+    "targetSeconds": 4200,
+    "pausedSeconds": 8.291388094425201,
+    "unpausedSeconds": 4191.967790104449,
+    "engineUnpausedSeconds": 4191.968417882919,
+    "movingSeconds": 3346.9753918088973,
+    "distanceCm": 367834.5718027734,
+    "initialHour": 6,
+    "hour": 33.94645611913294,
+    "actionHours": 0,
+    "naturalGameHours": 27.94645611913294,
+    "gathers": 8,
+    "eats": 4,
+    "waypoints": 628,
+    "manualSaves": 15,
+    "loads": 1,
+    "exactSameWorldRoundTrip": true,
+    "autosaveSlots": 3,
+    "autosaveWrites": 17,
+    "resourceRefreshes": 4,
+    "verifiedHarvestedResourceRegrowth": 4,
+    "navigationFailures": 0,
+    "recoveryAttempts": 0,
+    "captures": 8,
+    "timedFrames": 247556,
+    "meanTickMs": 16.66823037859385,
+    "maxTickMs": 41.85179993510246,
+    "p95TickMs": 16.900000000000002,
+    "p99TickMs": 17,
+    "timingLimits": "Instrumented actor wall-tick cadence, not GPU/Present/scanout. First60s and capture+2s excluded;1000ms histogram overflow bin."
+  },
+  "memoryTrends": {
+    "physical_bytes": {
+      "first": 1005182976.0,
+      "last": 344141824.0,
+      "min": 340344832.0,
+      "max": 1050480640.0,
+      "netChange": -661041152.0
+    },
+    "virtual_bytes": {
+      "first": 1977700352.0,
+      "last": 1941598208.0,
+      "min": 1936986112.0,
+      "max": 2043858944.0,
+      "netChange": -36102144.0
+    },
+    "object_slots_in_use": {
+      "first": 35150.0,
+      "last": 35143.0,
+      "min": 35108.0,
+      "max": 35170.0,
+      "netChange": -7.0
+    },
+    "resources": {
+      "first": 98.0,
+      "last": 98.0,
+      "min": 98.0,
+      "max": 98.0,
+      "netChange": 0.0
+    },
+    "structures": {
+      "first": 0.0,
+      "last": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "netChange": 0.0
+    },
+    "plots": {
+      "first": 0.0,
+      "last": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "netChange": 0.0
+    }
+  },
+  "saveEnvelopes": [
+    {
+      "file": "Homestead_Auto_0.sav",
+      "sha256": "69505b234a009ffc0987c5a9fef46d32e6f984ebd05e43a23befb5aa7bcf56a6",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Auto_0.sav.bak",
+      "sha256": "286ffad16f8c9b18216db3b0edc3ddf2d6d23aab575a76a9e85b6842abf75c2f",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Auto_1.sav",
+      "sha256": "3ee93cb4492e3e0c49568c3619d204546bc7f12b78822e997c2b10b002eed25d",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Auto_1.sav.bak",
+      "sha256": "e75220db661de391a7c588b45d875a1430ccfd2841aa6323094874348896d9fd",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Auto_2.sav",
+      "sha256": "433c0c623b8af93901e3dbb4f9a8590edd8fdf8d1bd4f95edd47db3ff5e10fa6",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Auto_2.sav.bak",
+      "sha256": "afddbbde5df743dc5e7f60da0d2f61de632daaa92ef5fc9a4a380441b43775bd",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Manual.sav",
+      "sha256": "2bd7a35139e0efb8d2345ad406d06157166e1a1cddf83c562be7ead57abcadfb",
+      "crcValid": true
+    },
+    {
+      "file": "Homestead_Manual.sav.bak",
+      "sha256": "b1032f03b416ca5cd85f978d649c1cc9c83858daead2c9058bbc0c10f6288987",
+      "crcValid": true
+    }
+  ],
+  "frames": [
+    {
+      "wallSeconds": 0.01667189970612526,
+      "night": false,
+      "raining": false,
+      "hour": 6.000111111328006,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-00.png"
+    },
+    {
+      "wallSeconds": 600.0264638997614,
+      "night": false,
+      "raining": false,
+      "hour": 9.987842669213979,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-01.png"
+    },
+    {
+      "wallSeconds": 1200.0413370989263,
+      "night": false,
+      "raining": false,
+      "hour": 13.984484775257378,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-02.png"
+    },
+    {
+      "wallSeconds": 1800.056164700538,
+      "night": false,
+      "raining": false,
+      "hour": 17.974133289935335,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-03.png"
+    },
+    {
+      "wallSeconds": 2400.0718819983304,
+      "night": true,
+      "raining": false,
+      "hour": 21.97089218134141,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-04.png"
+    },
+    {
+      "wallSeconds": 3000.0778947994113,
+      "night": true,
+      "raining": false,
+      "hour": 25.960599146616623,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-05.png"
+    },
+    {
+      "wallSeconds": 3600.093206897378,
+      "night": true,
+      "raining": false,
+      "hour": 29.95036734659933,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-06.png"
+    },
+    {
+      "wallSeconds": 4190.0119532980025,
+      "night": false,
+      "raining": true,
+      "hour": 33.8798099585262,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "file": "milestone-07.png"
+    }
+  ],
+  "files": [
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\progress.json",
+      "sha256": "1D5DBB2D98C47A2632A30AF5B70BA504BC15B74494B6E5CE2D98EB44AC6B18A7",
+      "copy": "progress.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\analysis.json",
+      "sha256": "4AAD7EF31BE257552E41344832C08E862D77BDB330DB279E65BCC33B0F7CF1D1",
+      "copy": "analysis.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\endurance-events.txt",
+      "sha256": "78FF44A28FBA5808677792A9CE305493850454BD0A13705021482586756400E3",
+      "copy": "endurance-events.txt"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\endurance-samples.csv",
+      "sha256": "0836F4EB96899665E29EBFF020C3A1C8F6FC75C0F2A900417D3618A72C9CCFDC",
+      "copy": "endurance-samples.csv"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\presentation-settings.txt",
+      "sha256": "BF6FAE19DD5FC770743B72459F308A0E9E462BFB3671C5BABF80816C903BE343",
+      "copy": "presentation-settings.txt"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\launch.json",
+      "sha256": "939E4E51E393A85FC9FAED1F2C97C609D1F7D8F32B75FBEAEA5653619B1EC5FE",
+      "copy": "launch.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\qa-launch.json",
+      "sha256": "DF5A53E0993649F48D326E09C61CA646F4D3A50060B6194C3F78DA59D104D537",
+      "copy": "qa-launch.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\qa-guard-result.json",
+      "sha256": "727AF9987D7022C6B75B3E4BBE22450CF972BF2E3E94378392F9C4C779061E80",
+      "copy": "qa-guard-result.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\qa-admission.txt",
+      "sha256": "E883361531E2DEEA49629CA75666BFB6161145FFFE4C5426C3AC5052018A60A2",
+      "copy": "qa-admission.txt"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\qa-native.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "copy": "qa-native.log"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-00.png",
+      "sha256": "04DA59B4BE395C6E50C92AA4887FC230261BB07CBBC7734EF10B7AA99775A112",
+      "copy": "Frames\\milestone-00.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-00.json",
+      "sha256": "3685A89FDEB241C1F867B82B52DD0594137A6094A647E5A26F2BFA348285ACEB",
+      "copy": "Frames\\milestone-00.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-01.png",
+      "sha256": "9AEB16AAC94DAD6D140A8CF8290A57E188B92F6DCC0B426E19382209ED1DC575",
+      "copy": "Frames\\milestone-01.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-01.json",
+      "sha256": "69BEFA7584B51752473B266C3E4A72527795604E560400EC459CAFAAB9EB6D71",
+      "copy": "Frames\\milestone-01.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-02.png",
+      "sha256": "D17656F5E4163BD1D566161E2365EE6A91EE8C15C82AB6A77C2722801EA02AA2",
+      "copy": "Frames\\milestone-02.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-02.json",
+      "sha256": "82640EA29C0993C70F5E69242F9941D45CA2F0F78EFE100E5918A7CD718F0C80",
+      "copy": "Frames\\milestone-02.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-03.png",
+      "sha256": "33A44870CF5941F5AA19D9F8FD18BB66AD9FA3C547D43BDA0F12E5AA2648913F",
+      "copy": "Frames\\milestone-03.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-03.json",
+      "sha256": "10CE891017B97657BEDA98FEB675F5A54F90F43E6EA983959994E1ED9B5CF65B",
+      "copy": "Frames\\milestone-03.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-04.png",
+      "sha256": "79D7C688F5D297A11C270DE0B33DA04BDFE5790448D0C7B1196C6963239DD8BC",
+      "copy": "Frames\\milestone-04.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-04.json",
+      "sha256": "D9F785C19034063C26108DEFB4983E7A7F0F6AD6B5255B99DC1A2013B4C5CA65",
+      "copy": "Frames\\milestone-04.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-05.png",
+      "sha256": "780590222EE6B4E954F90ADEBB812A0B9C1C48D07B6497B49243538B1E84619E",
+      "copy": "Frames\\milestone-05.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-05.json",
+      "sha256": "D42D8B836281FD4390B89FEE1649CBF5B9C46F84668DC21F02A6FA8AEBEB9A26",
+      "copy": "Frames\\milestone-05.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-06.png",
+      "sha256": "FA8A1749F6DEC4A164F2C7828D16587585B17720A68CAE977442F1478D0C21F3",
+      "copy": "Frames\\milestone-06.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-06.json",
+      "sha256": "72804C4C4B5327C8300F9B8C3D5103C37EFC018FFF8D62EE26A592082F37A8EF",
+      "copy": "Frames\\milestone-06.json"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-07.png",
+      "sha256": "4C0DDE2CC667CE5773494D10D13E5150C7E1FC957F6E6E9B9A1A9F560FCC150A",
+      "copy": "Frames\\milestone-07.png"
+    },
+    {
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\readability-endurance-long-01\\Frames\\milestone-07.json",
+      "sha256": "223FEDEEC01948050F43F30221B7B1F9E5F9F76C0F6ABBBEDF60F5DFA7D67F89",
+      "copy": "Frames\\milestone-07.json"
+    }
+  ],
+  "setup": "Fresh isolated world. Mapped walking, gathering, eating and exact save/load; no fixture, teleports, sleep or clock/lighting edits. Explicit finite observation route, existing zero-timer root-only lifetime protection and live stop.",
+  "performance": "Instrumented actor cadence after60s and excluding capture+2s, not GPU/Present/scanout/uncapped headroom. Concurrent machine load and observer/checkpoint IO included. Memory snapshots/trends are not indefinite leak proof. Actual1920x1080 viewport/D3D12; default temporal internal input resolution remains unmeasured.",
+  "visualLimits": "Clear daylight controls/central view; natural night has readable HUD and distinguishable silhouettes but very dark heroine/hair/near ground. Earthy textured clearing, bare outer terrain and resource proxies remain visible art gaps. No full woodland, all-angle camera, human controller or art approval.",
+  "preserved": "Selected grass01, samev5 graphics/profile, previous packages, human saves/music/character geometry unchanged. Original tree-import03 FAILED/12-corner source-basis qualification retained. Earlier camera fixture01 failure and historical tool-monitoring qualifications retained."
+}

@@ -35,6 +35,35 @@ An absent Shipping engine log is recorded as unavailable, not treated as a clean
 engine log; the native process stream, guard outcome and explicit gameplay evidence
 are checked. Results for the new route belong to their own output/receipts.
 
+### Fresh-world natural-play result, September21
+
+`readability-endurance-long-01` passed4200.263seconds, with4191.968 unpaused,
+3346.975 moving,27.94646 natural game hours,8 gathers,4 meals,628 waypoints,
+15 manual saves, one exact paused reload and17 distinct rotating autosave writes.
+Eight current envelopes/backups passed independent CRC checks. Navigation and
+recovery failures:0. Four previously harvested branch/flower nodes actually
+renewed their visible component inventories; branches8/15 were harvested again.
+No sleep, clock edit, teleport or synthetic starting fixture was used.
+
+Eight original1920x1080 milestones cover natural dawn, daylight, night and the
+next morning's Rain state. Daylight controls/central view are readable. Night
+has a readable HUD and distinguishable silhouettes but very dark heroine/hair
+and near ground. Pale bare outer terrain and primitive resources remain visible
+art gaps. These are observations, not finished lighting or human-play approval.
+
+Post-warmup actor intervals averaged16.668ms, p95=16.9ms, p99=17.0ms,
+maximum41.852ms under a60 cap. Sampled physical memory ranged340344832 to
+1050480640bytes; virtual1936986112 to2043858944bytes, with98 resources and no
+constructed structures/plots. The working-set decline has no established cause;
+it is not leak-freedom evidence. Screenshot exclusion and observer/concurrent-load
+qualifications above apply; GPU/Present/internal temporal resolution remain unmeasured.
+
+Actual guard exit0, active0/total1, observed death before unchanged marker release,
+no hard termination or cleanup errors. Largest finite sampling gap4136.622ms;
+no continuous-history claim. Sealed receipt:
+`research\environment-assets\readability-endurance-01\receipt.json`
+(`31B7CB81F9FC07A6F93B41D8E392342AC24783FAB134F0A8E621808093FCDF56`).
+
 ## Historical fixture setup and criteria
 
 One 180-second harness sanity, a short graceful-cancellation probe, then one 2700-second

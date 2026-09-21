@@ -679,3 +679,26 @@ Candidate02 executable SHA256
 `BC4AB798312E7004D928664903F95505938F9764C03D2A3D289191C46885202F`.
 Only5.2 is newly complete (relevant native build and targeted packaged smoke),
 not the full legacy/basic/UI matrix. Progress13/29; grass01 remains selected.
+
+### Natural-play completion
+
+`readability-endurance-long-01` passed4200.263s/27.94646 natural hours:
+8 gathers,4 meals,628 waypoints,15 manual saves, one exact reload and17 autosave
+transitions; eight CRC-valid envelopes/backups. Four actually harvested branch/
+flower nodes renewed their component inventories; branches8/15 were gathered
+again. Zero navigation/recovery failures. Eight original1920x1080 frames include
+daylight, deep night and next-morning Rain. No fixture/time/lighting edits.
+Worker inspected daytime,01:57 night and09:52 Rain: controls are readable,
+night heroine/hair/near ground are very dark, outer terrain pale and resource
+proxies obvious. This is not complete environment/art/all-angle camera approval.
+
+Actual exit0, root active0/total1, observed death then unchanged marker release,
+no hard stop or cleanup error. Largest finite observation gap4136.622ms.
+Long-run actor timing/memory excludes startup/capture intervals and is reported
+with observer/load/cap/GPU/Present limitations in `docs/endurance-playtesting.md`.
+Task5.4 is now complete from actual integrated measurements, not a clean-FPS/
+4K/GPU or indefinite-memory claim:14/29. Final receipt SHA256
+`31B7CB81F9FC07A6F93B41D8E392342AC24783FAB134F0A8E621808093FCDF56`.
+Navigation's guarded portable compile slot was released only after this cleanup;
+normal launcher verification and camera-candidate selection are the next delivery
+step. The live run has not been stopped.

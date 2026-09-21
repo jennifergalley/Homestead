@@ -1,0 +1,51 @@
+0.001 Prepared fresh isolated world; mapped travel/actions only; no fixture, retries or direct simulation edits.
+9.757 gathered resource10
+10.824 ate1 Berries
+32.008 manual save; no progression rewind
+32.277 F9 screenshot request before=0 after=0
+70.042 gathered resource12
+142.731 gathered resource8
+201.832 gathered resource15
+263.466 gathered resource19
+270.034 valid rotating autosave Homestead_Auto_0 at UTC 1790012718
+329.217 gathered resource17
+338.019 manual save; no progression rewind
+510.043 valid rotating autosave Homestead_Auto_1 at UTC 1790012959
+644.950 manual save; no progression rewind
+750.308 valid rotating autosave Homestead_Auto_2 at UTC 1790013199
+948.650 manual save; no progression rewind
+990.336 valid rotating autosave Homestead_Auto_0 at UTC 1790013439
+1230.350 valid rotating autosave Homestead_Auto_1 at UTC 1790013679
+1255.601 manual save; no progression rewind
+1470.381 valid rotating autosave Homestead_Auto_2 at UTC 1790013920
+1559.253 manual save; no progression rewind
+1659.369 ate1 Berries
+1710.389 valid rotating autosave Homestead_Auto_0 at UTC 1790014161
+1866.894 manual save; no progression rewind
+1950.412 valid rotating autosave Homestead_Auto_1 at UTC 1790014401
+2170.567 valid rotating autosave Homestead_Auto_2 at UTC 1790014641
+2170.567 manual save; no progression rewind
+2430.432 valid rotating autosave Homestead_Auto_0 at UTC 1790014882
+2477.319 manual save; no progression rewind
+2556.333 ate1 Berries
+2670.439 valid rotating autosave Homestead_Auto_1 at UTC 1790015123
+2782.310 manual save; no progression rewind
+2910.445 valid rotating autosave Homestead_Auto_2 at UTC 1790015363
+3089.181 manual save; no progression rewind
+3150.466 valid rotating autosave Homestead_Auto_0 at UTC 1790015603
+3390.474 valid rotating autosave Homestead_Auto_1 at UTC 1790015844
+3392.892 manual save; no progression rewind
+3458.990 ate1 Berries
+3630.486 valid rotating autosave Homestead_Auto_2 at UTC 1790016085
+3690.487 naturally renewed previously harvested resource12; base=5 produce=15
+3701.124 manual save; no progression rewind
+3750.492 naturally renewed previously harvested resource8; base=0 produce=3
+3776.589 gathered resource8
+3810.493 naturally renewed previously harvested resource15; base=0 produce=3
+3841.724 gathered resource15
+3870.496 valid rotating autosave Homestead_Auto_0 at UTC 1790016325
+3870.498 naturally renewed previously harvested resource19; base=5 produce=15
+4005.123 manual save; no progression rewind
+4110.508 valid rotating autosave Homestead_Auto_1 at UTC 1790016565
+4200.012 manual save; no progression rewind
+4200.263 passed: Fixed duration/participation/action/save criteria evaluated.
