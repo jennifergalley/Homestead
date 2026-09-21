@@ -1,0 +1,2858 @@
+{
+  "status": "passed-diagnostic-only",
+  "error": null,
+  "cleanupErrors": [],
+  "treeDiagnostic": true,
+  "diagnosticQualification": "Grass/ground cook uses genuinely rebuilt current native products and the unchanged17 tree packages/persisted qualified verification. Exactly12 branch source-description tangent/binormal corners remain disclosed; original tree import03 stays FAILED. No tree reimport/asset rewrite, clean-mesh/full-woodland/performance/art-approval claim.",
+  "subjectExited": true,
+  "guardDisposed": true,
+  "exitCode": 0,
+  "hardTerminated": false,
+  "watchdog": {
+    "error": null,
+    "requested": false,
+    "hardStop": false
+  },
+  "elapsedSeconds": 164.6017418,
+  "samples": [
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:16.3463221+00:00",
+      "elapsedMs": 41714.1977
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:22.4072452+00:00",
+      "elapsedMs": 47775.4537
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:23.3407990+00:00",
+      "elapsedMs": 48708.9737
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:24.3117479+00:00",
+      "elapsedMs": 49679.8862
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:25.3066676+00:00",
+      "elapsedMs": 50674.7744
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:30.7767146+00:00",
+      "elapsedMs": 56144.6266
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:31.5903050+00:00",
+      "elapsedMs": 56958.1875
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:32.4443126+00:00",
+      "elapsedMs": 57812.1569
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:33.3308466+00:00",
+      "elapsedMs": 58698.6652
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:38.6840285+00:00",
+      "elapsedMs": 64051.6575
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:39.5033477+00:00",
+      "elapsedMs": 64870.9489
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:40.3309397+00:00",
+      "elapsedMs": 65698.5023
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:41.1336561+00:00",
+      "elapsedMs": 66501.1994
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:46.5505519+00:00",
+      "elapsedMs": 71917.9013
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:47.3509869+00:00",
+      "elapsedMs": 72718.3083
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:48.1924396+00:00",
+      "elapsedMs": 73559.7291
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:49.0096966+00:00",
+      "elapsedMs": 74376.9579
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:54.6986202+00:00",
+      "elapsedMs": 80065.67
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:55.7784286+00:00",
+      "elapsedMs": 81145.4483
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:02:57.0028532+00:00",
+      "elapsedMs": 82369.8315
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [
+        {
+          "OwningProcess": 50948,
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": 1985,
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": 0,
+          "State": 2
+        }
+      ],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:03:03.7228448+00:00",
+      "elapsedMs": 89089.5819
+    },
+    {
+      "otherAuthoring": [],
+      "tcp": [],
+      "udp": [],
+      "children": [],
+      "utc": "2026-09-21T16:03:04.6934414+00:00",
+      "elapsedMs": 90060.1466
+    }
+  ],
+  "maximumSampleGapMs": 74541.08210000001,
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344752690114052,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "markerAfter": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344752690114052,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "markerAfterRelease": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344752690114052,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "native": {
+    "completionDriven": true,
+    "pythonEntry": {
+      "moduleLoaded": true,
+      "configured": true,
+      "available": false,
+      "initialized": false,
+      "librariesEnumerated": true,
+      "runtimeLibraryLoaded": true,
+      "libraries": [
+        {
+          "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python3.dll",
+          "queryAvailable": false,
+          "interpreterInitialized": -1
+        },
+        {
+          "path": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\ThirdParty\\Python3\\Win64\\python311.dll",
+          "queryAvailable": true,
+          "interpreterInitialized": 0
+        }
+      ],
+      "valid": true
+    },
+    "pid": 50948,
+    "executable": "E:/Program Files/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe",
+    "projectSavedDirectory": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/EngineUser/Saved/",
+    "userDirectory": "C:/Users/Jenny/OneDrive/Documents/",
+    "engineIni": "Engine",
+    "editorSettingsIni": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/EditorSettings.ini",
+    "editorPerProjectIni": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/EditorPerProjectUserSettings.ini",
+    "gameUserSettingsIni": "GameUserSettings",
+    "configBranches": [
+      {
+        "name": "Engine",
+        "logicalKey": "Engine",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/Engine.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEngine.ini",
+          "../../../Engine/Config/Windows/BaseWindowsEngine.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultEngine.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEngine.ini",
+          "../../../Engine/Config/Windows/BaseWindowsEngine.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultEngine.ini"
+        ],
+        "dynamicLayers": [
+          "../../../Engine/Plugins/ChaosVD/Config/Engine.ini"
+        ],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 5
+      },
+      {
+        "name": "Editor",
+        "logicalKey": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/Editor.ini",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/Editor.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEditor.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEditor.ini"
+        ],
+        "dynamicLayers": [
+          "../../../Engine/Plugins/Online/OnlineSubsystemUtils/Config/Editor.ini",
+          "../../../Engine/Plugins/Animation/AnimatorKit/Config/Editor.ini",
+          "../../../Engine/Plugins/Animation/DeformerGraph/Config/Editor.ini",
+          "../../../Engine/Plugins/Runtime/RigVM/Config/Editor.ini"
+        ],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 0
+      },
+      {
+        "name": "EditorSettings",
+        "logicalKey": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/EditorSettings.ini",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/EditorSettings.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEditorSettings.ini",
+          "../../../Engine/Config/Windows/WindowsEditorSettings.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEditorSettings.ini",
+          "../../../Engine/Config/Windows/WindowsEditorSettings.ini"
+        ],
+        "dynamicLayers": [],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 2
+      },
+      {
+        "name": "EditorPerProjectUserSettings",
+        "logicalKey": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/EditorPerProjectUserSettings.ini",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/EditorPerProjectUserSettings.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEditorPerProjectUserSettings.ini",
+          "../../../Engine/Config/Windows/WindowsEditorPerProjectUserSettings.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseEditorPerProjectUserSettings.ini",
+          "../../../Engine/Config/Windows/WindowsEditorPerProjectUserSettings.ini"
+        ],
+        "dynamicLayers": [
+          "../../../Engine/Plugins/PCG/Config/EditorPerProjectUserSettings.ini"
+        ],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 0
+      },
+      {
+        "name": "GameUserSettings",
+        "logicalKey": "GameUserSettings",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/GameUserSettings.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseGameUserSettings.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultGameUserSettings.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseGameUserSettings.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultGameUserSettings.ini"
+        ],
+        "dynamicLayers": [],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 0
+      },
+      {
+        "name": "Game",
+        "logicalKey": "Game",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/Game.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseGame.ini",
+          "../../../Engine/Config/Windows/BaseWindowsGame.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultGame.ini",
+          "../../../Engine/Config/Windows/WindowsGame.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseGame.ini",
+          "../../../Engine/Config/Windows/BaseWindowsGame.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultGame.ini",
+          "../../../Engine/Config/Windows/WindowsGame.ini"
+        ],
+        "dynamicLayers": [
+          "../../../Engine/Plugins/NNE/NNEDenoiser/Config/Game.ini"
+        ],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 0
+      },
+      {
+        "name": "Input",
+        "logicalKey": "Input",
+        "found": true,
+        "destination": "E:/Repos/SurvivalGame/Saved/Automation/20260921-033354-2d257ba0/grass-ground-cook-01/Config/Input.ini",
+        "sourceEngineDirectory": "../../../Engine/Config/",
+        "sourceProjectDirectory": "../../../../../Repos/SurvivalGame/Config/",
+        "hierarchy": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseInput.ini",
+          "../../../Engine/Config/Windows/BaseWindowsInput.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultInput.ini",
+          "../../../Engine/Config/Windows/WindowsInput.ini"
+        ],
+        "staticLayers": [
+          "../../../Engine/Config/Base.ini",
+          "../../../Engine/Config/BaseInput.ini",
+          "../../../Engine/Config/Windows/BaseWindowsInput.ini",
+          "../../../../../Repos/SurvivalGame/Config/DefaultInput.ini",
+          "../../../Engine/Config/Windows/WindowsInput.ini"
+        ],
+        "dynamicLayers": [
+          "../../../Engine/Plugins/EnhancedInput/Config/Input.ini",
+          "../../../Engine/Plugins/Runtime/InputDebugging/Config/Input.ini",
+          "../../../Engine/Plugins/Runtime/Windows/XInputDevice/Config/Input.ini"
+        ],
+        "savedLayer": "",
+        "commandLineLayer": "",
+        "commandLineSectionCount": 0
+      }
+    ],
+    "marker": {
+      "volume": 1086832636,
+      "indexHigh": 6946816,
+      "indexLow": 850384,
+      "attributes": 8224,
+      "creationTime": "134343200004107596",
+      "lastWriteTime": "134344752690114052"
+    },
+    "jobFlags": 8200,
+    "jobProcessLimit": 1,
+    "jobActiveProcesses": 1,
+    "processCreationTime": "134344801355704098",
+    "effectiveConfig": {
+      "udpDefault": false,
+      "udpDefaultFound": true,
+      "udpTransport": false,
+      "udpTransportFound": true,
+      "udpTunnel": false,
+      "udpTunnelFound": true,
+      "tcpTransport": false,
+      "tcpTransportFound": true,
+      "pythonRemote": false,
+      "pythonRemoteFound": true,
+      "pythonPip": false,
+      "pythonPipFound": true,
+      "shaderWorkers": false,
+      "shaderWorkersFound": true,
+      "sendReportsConfig": false,
+      "sendReportsConfigFound": true,
+      "sendUsageConfig": false,
+      "sendUsageConfigFound": true
+    },
+    "cachedSendReports": false,
+    "cachedSendUsage": false,
+    "pythonModuleLoaded": true,
+    "enabledPlugins": [
+      "AudioInsights",
+      "AudioInsightsRuntime",
+      "AudioModulationInsights",
+      "BaseMaterial",
+      "ChaosCloth",
+      "ChaosInsights",
+      "ChaosVD",
+      "CmdLinkServer",
+      "Dataflow",
+      "DerivedDataBuildController",
+      "EnhancedInput",
+      "IoStoreInsights",
+      "MassInsights",
+      "MeshPainting",
+      "Mutable",
+      "PCG",
+      "RenderGraphInsights",
+      "RenderTraceInsights",
+      "TraceUtilities",
+      "UbaController",
+      "XGEController",
+      "WorldMetrics",
+      "AnimationSharing",
+      "CLionSourceCodeAccess",
+      "CompositeCore",
+      "CodeLiteSourceCodeAccess",
+      "DumpGPUServices",
+      "GPUReshape",
+      "GitSourceControl",
+      "KDevelopSourceCodeAccess",
+      "N10XSourceCodeAccess",
+      "NullSourceCodeAccess",
+      "NamingTokens",
+      "PerforceSourceControl",
+      "PixWinPlugin",
+      "PlasticSourceControl",
+      "PluginUtils",
+      "PropertyAccessNode",
+      "InterchangeAssets",
+      "ProjectLauncher",
+      "RenderDocPlugin",
+      "RiderSourceCodeAccess",
+      "InterchangeEditor",
+      "Interchange",
+      "SubversionSourceControl",
+      "UObjectPlugin",
+      "VisualStudioSourceCodeAccess",
+      "VisualStudioCodeSourceCodeAccess",
+      "XCodeSourceCodeAccess",
+      "AndroidMedia",
+      "AvfMedia",
+      "ImgMedia",
+      "MediaCompositing",
+      "MediaPlate",
+      "MediaPlayerEditor",
+      "MP4Utilities",
+      "TmvMedia",
+      "WebMMedia",
+      "WmfMedia",
+      "MetaHumanSDK",
+      "AdvancedRenamer",
+      "AutomationUtils",
+      "BackChannel",
+      "Buoyancy",
+      "ChaosCaching",
+      "ChaosEditor",
+      "ChaosNiagara",
+      "ChaosSolverPlugin",
+      "ChaosUserDataPT",
+      "CharacterAI",
+      "ControlRigPhysics",
+      "EditorDataStorage",
+      "EditorDataStorageFeatures",
+      "EditorPerformance",
+      "EditorTelemetry",
+      "EditorTRSGizmo",
+      "Fracture",
+      "FullBodyIK",
+      "GeometryCollectionPlugin",
+      "GeometryDataflow",
+      "GeometryFlow",
+      "GizmoFramework",
+      "GlobalConfigurationData",
+      "HttpInsights",
+      "Landmass",
+      "LevelSequenceNavigatorBridge",
+      "LocalizableMessage",
+      "LowLevelNetTrace",
+      "MeshModelingToolsetExp",
+      "MutableAssetUserData",
+      "NFORDenoise",
+      "PlanarCut",
+      "PlatformCrypto",
+      "PythonScriptPlugin",
+      "RuntimeTelemetry",
+      "SequenceNavigator",
+      "SkeletalReduction",
+      "ToolPresets",
+      "AutomatedPerfTestTools",
+      "Water",
+      "EOSShared",
+      "OnlineBase",
+      "OnlineServices",
+      "OnlineSubsystem",
+      "NNEDenoiser",
+      "NNERuntimeORT",
+      "InterchangeTests",
+      "OnlineSubsystemNull",
+      "OnlineSubsystemUtils",
+      "LauncherChunkInstaller",
+      "Paper2D",
+      "AISupport",
+      "EnvironmentQueryEditor",
+      "Takes",
+      "ACLPlugin",
+      "AnimationData",
+      "AnimationModifierLibrary",
+      "AnimatorKit",
+      "BlendSpaceMotionAnalysis",
+      "ControlRig",
+      "ControlRigSpline",
+      "ControlRigModules",
+      "DeformerGraph",
+      "EaseCurveTool",
+      "GameplayInsights",
+      "IKRig",
+      "CameraShakePreviewer",
+      "EngineCameras",
+      "GameplayCameras",
+      "OodleNetwork",
+      "AssetManagerEditor",
+      "PhysicsControl",
+      "RigLogic",
+      "SkeletalMeshModelingTools",
+      "TweeningUtils",
+      "BlueprintHeaderView",
+      "BlueprintMaterialTextureNodes",
+      "ChangelistReview",
+      "ColorGrading",
+      "ConsoleVariables",
+      "CryptoKeys",
+      "CurveEditorTools",
+      "DataValidation",
+      "EditorDebugTools",
+      "EditorScriptingUtilities",
+      "EngineAssetDefinitions",
+      "FacialAnimation",
+      "GameplayTagsEditor",
+      "GeometryMode",
+      "MacGraphicsSwitching",
+      "MaterialAnalyzer",
+      "MaterialAssetWizard",
+      "MeshLODToolset",
+      "ModelingToolsEditorMode",
+      "MobileLauncherProfileWizard",
+      "DatasmithContent",
+      "PluginBrowser",
+      "GLTFExporter",
+      "ProxyLODPlugin",
+      "SequencerAnimTools",
+      "SpeedTreeImporter",
+      "UMGWidgetPreview",
+      "UVEditor",
+      "StylusInput",
+      "VariantManager",
+      "VariantManagerContent",
+      "WorldPartitionHLODUtilities",
+      "Cascade",
+      "AlembicImporter",
+      "ActorSequence",
+      "Niagara",
+      "NiagaraInsights",
+      "NiagaraSimCaching",
+      "NiagaraPreviewContent",
+      "ActorLayerUtilities",
+      "LevelSequenceEditor",
+      "SequencerScripting",
+      "SequenceValidator",
+      "TemplateSequence",
+      "AndroidDeviceProfileSelector",
+      "AndroidFileServer",
+      "AndroidMoviePlayer",
+      "AndroidPermission",
+      "AppleMoviePlayer",
+      "AppleImageUtils",
+      "ArchVisCharacter",
+      "AssetTags",
+      "AudioCapture",
+      "AudioSynesthesia",
+      "AudioWidgets",
+      "CableComponent",
+      "ChunkDownloader",
+      "ComputeFramework",
+      "CustomMeshComponent",
+      "ExampleDeviceProfileSelector",
+      "GeometryCache",
+      "GeometryProcessing",
+      "GeometryScripting",
+      "GoogleCloudMessaging",
+      "GooglePAD",
+      "HairStrands",
+      "InputDebugging",
+      "IOSDeviceProfileSelector",
+      "LinuxDeviceProfileSelector",
+      "LocationServicesBPLibrary",
+      "MeshModelingToolset",
+      "Metasound",
+      "MobilePatchingUtils",
+      "ModelViewViewModel",
+      "MsQuic",
+      "ProceduralMeshComponent",
+      "PropertyAccessEditor",
+      "PropertyBindingUtils",
+      "RigVM",
+      "ResonanceAudio",
+      "SignificanceManager",
+      "SkeletalMerging",
+      "SoundFields",
+      "StateTree",
+      "Synthesis",
+      "WaveTable",
+      "WebMMoviePlayer",
+      "WindowsDeviceProfileSelector",
+      "WindowsMoviePlayer",
+      "OnlineSubsystemIOS",
+      "FileSandbox",
+      "InterchangeAxfAssets",
+      "ContentBrowserFileDataSource",
+      "ContentBrowserClassDataSource",
+      "ContentBrowserAssetDataSource",
+      "PortableObjectFileDataSource",
+      "SQLiteCore",
+      "ConcertMain",
+      "Scribble",
+      "BaseCharacterFXEditor",
+      "XInputDevice",
+      "LightMixer",
+      "OnlineSubsystemGooglePlay",
+      "ObjectMixer",
+      "ConcertSharedSlate",
+      "ConcertSyncClient",
+      "ConcertSyncCore"
+    ],
+    "shaderManagerPresent": true,
+    "shaderCompilationSkipped": false,
+    "configuredShaderSlotsNotChildCount": 1,
+    "shaderEvidenceLimit": "Entry settings snapshot only; any fern workload readiness is reported separately.",
+    "ddcGraph": "(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+    "ddcStores": [
+      {
+        "index": 0,
+        "parent": -1,
+        "childCount": 1,
+        "type": "Async",
+        "name": "",
+        "local": true
+      },
+      {
+        "index": 1,
+        "parent": 0,
+        "childCount": 1,
+        "type": "",
+        "name": "",
+        "local": false
+      },
+      {
+        "index": 2,
+        "parent": 1,
+        "childCount": 0,
+        "type": "File System",
+        "name": "E:/Repos/SurvivalGame/Saved/Automation/20260920-182217-d1f84e39/fern-import-02/DDC",
+        "local": true
+      }
+    ],
+    "valid": true
+  },
+  "protectedFiles": [
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Hazel.blend",
+      "sha256": "CE5D74C11C7A982D347557E380C90F4C81D9C498427B7B85DC12AD397F183360"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\SK_Heroine_Hazel_Bob.fbx",
+      "sha256": "7DA4F9E063176F24CD0C941D540E565ED910F393CCA12AF1686B81930579E6E2"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\SK_Heroine_Hazel_Bob_Apron.fbx",
+      "sha256": "D9464D7F6536C6622B236B212142F2EAA2C7C02EB6F06BABBA26F8B2C30A37AB"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\SK_Heroine_Hazel_LongWave.fbx",
+      "sha256": "5D34FA66AEB3E200AAB764C4053C74CBB4D3AEEEAAB17730BB5BC333E76177B8"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\SK_Heroine_Hazel_LongWave_Apron.fbx",
+      "sha256": "051EFDBABC779A49C3AB8B09663AC68B033B75AE3775764EA82EFAE96C235494"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\SK_Heroine_Hazel_Ponytail.fbx",
+      "sha256": "EA78EA3550D51D955AD8B5849DA2A42BAE29C459412AB0A7439FC8231BFC60FA"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\SK_Heroine_Hazel_Ponytail_Apron.fbx",
+      "sha256": "089DB7E4201AB754EABD85F34E86A11531550196D1DB54F718CF34EE322BAFAF"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\T_ApronLinen.png",
+      "sha256": "E3676EEB6E14D8811D3AE67FD996600D02B21038D1C111B4612C00EE68E0EA8F"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\T_Bob_Chestnut.png",
+      "sha256": "E953D110D4C42FB2FEC458176898BAA6871917790C1FFBD90C396509DBEB7F4A"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\T_LongWave_Chestnut.png",
+      "sha256": "093CC944BBBBB93C28E96416F6B576497C29B1F7689F21E6A7A7A43247D67CE2"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\T_Ponytail_Chestnut.png",
+      "sha256": "1D12CABBAB25C6084F5CE6F7D46382FA8E626C24476407F9AAD4015D73219BBF"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\blue_eye.png",
+      "sha256": "572DDC93AB3E177100619EC7C00B2574540CFB382805AFC2E450788117F6140C"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\eyebrow001.png",
+      "sha256": "9940F7D0B1B223709A19B05156BA6F6E9E4DBDBCED02D7574F4D51D72C58967B"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\eyelashes01.png",
+      "sha256": "4B69C0FFF2648874460E9CAF80C31413C444218A5C50AFEBC425AEAA65484A35"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\shoes01_diffuse.png",
+      "sha256": "50C9A406A7F1CB6AA7B42912348E78F09D0252AA3963C8229CF18DFE8353CDBF"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\teeth.png",
+      "sha256": "D0AFB57869C6FBB56B98F5EFC4AEC629EE7593E70D8DD2BFB9DE923ACFB65F43"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\tongue01_diffuse.png",
+      "sha256": "3150BE398E48E8BA1FEAC164C3143C16C0B2E959D9FFB6155F0171F59CFB4EA9"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\Textures\\young_lightskinned_female_diffuse.png",
+      "sha256": "B2A6AC8CD4F9FEBDB447368E29C76CD68410BB66E46D9DCFA2D5F75126EEA8FC"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\materials.json",
+      "sha256": "C9BBE954620FA1BE3D607731064021DC11A14F4D7AAEAD27BDF006A0E6D97154"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\mpfb-authoring-preset.json",
+      "sha256": "9507B1411F67D4BC47CC61667A3DBDBD18CD11B49C66CBA3E318062033CA036C"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Hazel\\recipe.json",
+      "sha256": "4861977F461A344FA675FBB6B572A1BFF2355D8303D0CF3CE45C4CDA76B87913"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\SK_Heroine_Willow_Bob.fbx",
+      "sha256": "8486779F7C416FFAD760D981670DBB1C34651287ED1914CE63127DB7E1D65B31"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\SK_Heroine_Willow_Bob_Apron.fbx",
+      "sha256": "C145FDE83C61586A8E75611DDE3D2FD881CDFF32DB0C2AD17B5D66DFA7C8B711"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\SK_Heroine_Willow_LongWave.fbx",
+      "sha256": "E2D45B402EC2BB792EE24F3A68E42A4AA72333CDDF31FDA86C98F211EC0EBA79"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\SK_Heroine_Willow_LongWave_Apron.fbx",
+      "sha256": "33B762B456422A93FFA7F37BFEAA689E6BF73DBA8F6DCE2CF66AA64CE6C11E16"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\SK_Heroine_Willow_Ponytail.fbx",
+      "sha256": "C2FDB7CDC07EAFABA952F08B1D24D966B4387A2488735CC98365F3C33EB3808C"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\SK_Heroine_Willow_Ponytail_Apron.fbx",
+      "sha256": "0B7DA126DA097F3AEBC190BE79CEA4F443C37658F6175794C1C7A327E55CF05E"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\T_ApronLinen.png",
+      "sha256": "E3676EEB6E14D8811D3AE67FD996600D02B21038D1C111B4612C00EE68E0EA8F"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\T_Bob_Chestnut.png",
+      "sha256": "E953D110D4C42FB2FEC458176898BAA6871917790C1FFBD90C396509DBEB7F4A"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\T_LongWave_Chestnut.png",
+      "sha256": "093CC944BBBBB93C28E96416F6B576497C29B1F7689F21E6A7A7A43247D67CE2"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\T_Ponytail_Chestnut.png",
+      "sha256": "1D12CABBAB25C6084F5CE6F7D46382FA8E626C24476407F9AAD4015D73219BBF"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\blue_eye.png",
+      "sha256": "572DDC93AB3E177100619EC7C00B2574540CFB382805AFC2E450788117F6140C"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\eyebrow001.png",
+      "sha256": "9940F7D0B1B223709A19B05156BA6F6E9E4DBDBCED02D7574F4D51D72C58967B"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\eyelashes01.png",
+      "sha256": "4B69C0FFF2648874460E9CAF80C31413C444218A5C50AFEBC425AEAA65484A35"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\shoes01_diffuse.png",
+      "sha256": "50C9A406A7F1CB6AA7B42912348E78F09D0252AA3963C8229CF18DFE8353CDBF"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\teeth.png",
+      "sha256": "D0AFB57869C6FBB56B98F5EFC4AEC629EE7593E70D8DD2BFB9DE923ACFB65F43"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\tongue01_diffuse.png",
+      "sha256": "3150BE398E48E8BA1FEAC164C3143C16C0B2E959D9FFB6155F0171F59CFB4EA9"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Textures\\young_lightskinned_female_diffuse.png",
+      "sha256": "B2A6AC8CD4F9FEBDB447368E29C76CD68410BB66E46D9DCFA2D5F75126EEA8FC"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\Willow.blend",
+      "sha256": "FF4BEED5C3FD47F00B9138625CF1B5A5576951E5F79F0050331198209B8FCC69"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\materials.json",
+      "sha256": "C9BBE954620FA1BE3D607731064021DC11A14F4D7AAEAD27BDF006A0E6D97154"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\mpfb-authoring-preset.json",
+      "sha256": "DC12A5A02721712B467A7937AE41ED8673854B666578321BAB9861A490B45290"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\Willow\\recipe.json",
+      "sha256": "1EFAF42CA5D073D970D8E4071AECC31266BFE8A452EC8D588B8E31F69C108C1E"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\body-preset-manifest.json",
+      "sha256": "26E26CC6B8CE831FBED783E686190A0D210F9688FA8D7A89DA4EF658E4A27F19"
+    },
+    {
+      "path": "Assets\\Characters\\BodyPresets\\provenance.json",
+      "sha256": "E8078F9854569DB4AC979D1ACF4B57B300534E655D321DA00674CDB7F63FCA8D"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\AN_Heroine_Idle.fbx",
+      "sha256": "118206C8B1EF12AF9289BBB37D3DD23725B688AE7D01A83DF53775365282114A"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\AN_Heroine_Walk.fbx",
+      "sha256": "12E9C9AF5B61BFD0A0F0E17BA63344200C4F3D0D8A34D8E89DE14DC39180BC3C"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Clearing\\AN_Heroine_Clear.fbx",
+      "sha256": "CA8E3A0E2FB5A2E0507F4F5C26A993D4356353B959CCA3EC74AF9EDA7F138268"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Clearing\\clearing-contract.json",
+      "sha256": "CFA0D0E98F1AD17F096D3DB8D54BF041F06757C3AAC85B61A6F828833966B5E9"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Gathering\\AN_Heroine_Gather.fbx",
+      "sha256": "34DFDAD44FF0A9224B8928315284237F022DDC1B24BB2A8A4F48822220760D58"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Gathering\\gathering-contract.json",
+      "sha256": "246756CC2F018DDD7021742F2CDEDCBF3A002CC99660786070A130B7C77EEB1A"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Heroine.blend",
+      "sha256": "6DD180B3FE20B8D3F92CCB4E17F097A4DBF77B09EA0302B6C25918F2102F0FBF"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Locomotion\\AN_Heroine_GroundedWalk.fbx",
+      "sha256": "DD5D1CF302DB8F51A0A05206B47FB8171F677D7847F25B4C3F55E04C6A74349D"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Locomotion\\AN_Heroine_RelaxedIdle.fbx",
+      "sha256": "9CD7DC64D5FBA7E04972EBB24231E66575CB7AFB5B052E2E0F6648AC0A7B23DB"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Locomotion\\locomotion-contract.json",
+      "sha256": "6BC27E17E271517EC10D245E3B80BC14053B30C3FA62518723ECF791545A1636"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\SK_Heroine_Bob.fbx",
+      "sha256": "DE9677BCE06CD6CB10A9BCF42E6F6A13078803A431DE5881ECBF5C9A4CD0A9BF"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\SK_Heroine_LongWave.fbx",
+      "sha256": "ACD73A31538262256720FF1610C2FAE7C04E1D2F8AB5E7DE1CE44B0EF57D818E"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\T_Bob_Chestnut.png",
+      "sha256": "E953D110D4C42FB2FEC458176898BAA6871917790C1FFBD90C396509DBEB7F4A"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\T_Long_Chestnut.png",
+      "sha256": "093CC944BBBBB93C28E96416F6B576497C29B1F7689F21E6A7A7A43247D67CE2"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\blue_eye.png",
+      "sha256": "572DDC93AB3E177100619EC7C00B2574540CFB382805AFC2E450788117F6140C"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\eyebrow001.png",
+      "sha256": "9940F7D0B1B223709A19B05156BA6F6E9E4DBDBCED02D7574F4D51D72C58967B"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\eyelashes01.png",
+      "sha256": "4B69C0FFF2648874460E9CAF80C31413C444218A5C50AFEBC425AEAA65484A35"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\shoes01_diffuse.png",
+      "sha256": "50C9A406A7F1CB6AA7B42912348E78F09D0252AA3963C8229CF18DFE8353CDBF"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\teeth.png",
+      "sha256": "D0AFB57869C6FBB56B98F5EFC4AEC629EE7593E70D8DD2BFB9DE923ACFB65F43"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\tongue01_diffuse.png",
+      "sha256": "3150BE398E48E8BA1FEAC164C3143C16C0B2E959D9FFB6155F0171F59CFB4EA9"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Textures\\young_lightskinned_female_diffuse.png",
+      "sha256": "B2A6AC8CD4F9FEBDB447368E29C76CD68410BB66E46D9DCFA2D5F75126EEA8FC"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Watering\\AN_Heroine_Water.fbx",
+      "sha256": "5941DAAB1D2A9E4C61C55A1B9AD2408F36AA8C17CAC296B7F9980034B4E98F3C"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\Watering\\watering-contract.json",
+      "sha256": "F57FF79285F5183C6CFFFE2F71E24B651445360BF5CD9098820621DF94225F53"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\appearance-contract.json",
+      "sha256": "C8AD90EC95552B427384E543B440D4E0D26AF07A935060F8B645052DD5F80756"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\materials.json",
+      "sha256": "0A078D5A8FF91807A68DEFC2BB1434CCE4B2B8A5EA7CBCF07908E751957E7B9E"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\mpfb-authoring-preset.json",
+      "sha256": "A245032A4657A3E09C1BE25108F7B6EE29787F196CB3BB3494E31BA40FF06D44"
+    },
+    {
+      "path": "Assets\\Characters\\Heroine\\recipe.json",
+      "sha256": "5A0B323002CE11EC455DFE38A3DE4B5E03EBB9C2920C0090F57AD522B872B2DF"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\Licenses\\LICENSE.ASSETS.md",
+      "sha256": "5F3AB0CF6F7EBE92EFE4B83213131C617D308D164EEEFD5DA230373640B0C226"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\Licenses\\LICENSE.CODE.md",
+      "sha256": "55C07FCE8610715116C5AC62035B3E0ABD417EBAE63F64A635E212FAE4578C4B"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\Licenses\\LICENSE.md",
+      "sha256": "5279D29B31202BC7BDAFD01B64321548CF3B210EF58C08EB49050981FEADABF9"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\Licenses\\MAKEHUMAN-CC0.md",
+      "sha256": "F6089CBA01CB570A24712B41AB8A586CCD3CC5EF53DC266CA50B95C288956D2C"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\Licenses\\MAKEHUMAN-LICENSE.md",
+      "sha256": "EDD99571CA62698F78C943FD4FFFB159A413C315FA0D4819D3CEC5CADAF8B4F1"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\blender-4.5.14.sha256",
+      "sha256": "F1AED1E7DB457995D7B0348DC2639FDDB6595B06EE911D409A33A13C6E160C1F"
+    },
+    {
+      "path": "Assets\\Characters\\Source\\mpfb-official-release.json",
+      "sha256": "D5AE3716C2B959833173181CFC4D6B62361EB83C05F6ED399BEFFCF1DCBB3D79"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Heroine_Variants.blend",
+      "sha256": "2FB5EF6422F4A028844FE60FC849AF4606833A4E81156D7BCEDD36204FCB1D4F"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\SK_Heroine_Bob_Apron.fbx",
+      "sha256": "B8684DD6C4B22A19397CBCBE098006D9B44F0D7530A5695D068DAA380DD729EE"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\SK_Heroine_LongWave_Apron.fbx",
+      "sha256": "F22A28A153932F3B52FB4DD5A3D816CB837A91A397B3676873CA49618AEB5F70"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\SK_Heroine_Ponytail.fbx",
+      "sha256": "E5DB34A9F0EA2A23C35565D4C8B3D31EEB46D3DFAC6DD8D99EA23D90D20EE088"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\SK_Heroine_Ponytail_Apron.fbx",
+      "sha256": "82C6C9BCD9FAE420EA2066B47D88584505D9D5C8B5AEAD9DA76A5F43B66E49B1"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\T_ApronLinen.png",
+      "sha256": "E3676EEB6E14D8811D3AE67FD996600D02B21038D1C111B4612C00EE68E0EA8F"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\T_Bob_Chestnut.png",
+      "sha256": "E953D110D4C42FB2FEC458176898BAA6871917790C1FFBD90C396509DBEB7F4A"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\T_Long_Chestnut.png",
+      "sha256": "093CC944BBBBB93C28E96416F6B576497C29B1F7689F21E6A7A7A43247D67CE2"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\T_Ponytail_Chestnut.png",
+      "sha256": "1D12CABBAB25C6084F5CE6F7D46382FA8E626C24476407F9AAD4015D73219BBF"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\blue_eye.png",
+      "sha256": "572DDC93AB3E177100619EC7C00B2574540CFB382805AFC2E450788117F6140C"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\eyebrow001.png",
+      "sha256": "9940F7D0B1B223709A19B05156BA6F6E9E4DBDBCED02D7574F4D51D72C58967B"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\eyelashes01.png",
+      "sha256": "4B69C0FFF2648874460E9CAF80C31413C444218A5C50AFEBC425AEAA65484A35"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\shoes01_diffuse.png",
+      "sha256": "50C9A406A7F1CB6AA7B42912348E78F09D0252AA3963C8229CF18DFE8353CDBF"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\teeth.png",
+      "sha256": "D0AFB57869C6FBB56B98F5EFC4AEC629EE7593E70D8DD2BFB9DE923ACFB65F43"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\tongue01_diffuse.png",
+      "sha256": "3150BE398E48E8BA1FEAC164C3143C16C0B2E959D9FFB6155F0171F59CFB4EA9"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\Textures\\young_lightskinned_female_diffuse.png",
+      "sha256": "B2A6AC8CD4F9FEBDB447368E29C76CD68410BB66E46D9DCFA2D5F75126EEA8FC"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\materials.json",
+      "sha256": "601CFA8989130590248C3B9FF4E04FB8B8A441DA31C465114DB8E1D2156C93D4"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\provenance.json",
+      "sha256": "1BA768B067B4AE01EDE755165643EC9929B8F09C67E4A1A65BCA3ED130796CDA"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\review-notes.json",
+      "sha256": "CF42B63B32563D84A5C9BDCCB925FB0228F8D2BDF9EB47D6565F4253D5423F8F"
+    },
+    {
+      "path": "Assets\\Characters\\Variants\\variant-manifest.json",
+      "sha256": "99FD7C8D6B036C58C6BF778FE18FA467CE1FD3099C46ADDEFE08D10682D06589"
+    },
+    {
+      "path": "Assets\\Characters\\provenance.json",
+      "sha256": "EC2DCB4B70B5F49F79F4CA4F16880EFCEDBE3296124258C3A2AA51BE658F5380"
+    },
+    {
+      "path": "Assets\\asset-manifest.json",
+      "sha256": "B137A3BFEA9340C09E2EC377BB612B050EEAA52E4B0AFAD56AE7A5E7C16BCA50"
+    },
+    {
+      "path": "Assets\\download-receipt.json",
+      "sha256": "3A3CB139C7185BDC6D9B145CC4B1492709C7308579DF88785F8A1FF65F575AF1"
+    },
+    {
+      "path": "Config\\DefaultEngine.ini",
+      "sha256": "B703DED9F99383A8F9F7402E6D4C88084439F1BD819F63420E2AAF986D935375"
+    },
+    {
+      "path": "Config\\DefaultGame.ini",
+      "sha256": "E58B0041B328179329674068406CE7E4DC9363A0A79ABC0CD01C196B226D3FDE"
+    },
+    {
+      "path": "Config\\DefaultGameUserSettings.ini",
+      "sha256": "E4C94C8C2B3ECCA3EFF9FACD82EEBDBD8CD43DF160CBAFB55C2330C03A233FE1"
+    },
+    {
+      "path": "Config\\DefaultInput.ini",
+      "sha256": "25746261566D8A8508DD58974E42E64B9FAB616BD28F09313F66582707ED3EFC"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Ambience\\ForestAmbience.uasset",
+      "sha256": "79301B1AAEE986ED55B3944C3420423BC236D96BC31D2B90793C02E421666F29"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Effects\\GrassStepA.uasset",
+      "sha256": "E1693166405015B0DC96F3350714E869697208224F3F7456DB0026879E5D9C64"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Effects\\GrassStepB.uasset",
+      "sha256": "CEF3B93EF7CCDB3CC7EA0B4CBEDC2D51C64D862B2E0FDF178FEDF924D3527DED"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Effects\\UIClick.uasset",
+      "sha256": "681F540600380DCDFAD8635EAC707BD9364ACECFC2AF82ADFFBFB99A0CA09AFE"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Effects\\WoodTapA.uasset",
+      "sha256": "04D1B7F205FA95C9B80C25819537BD6AA284FC9A4AC562D6F3BBC07AB29B8724"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Effects\\WoodTapB.uasset",
+      "sha256": "DAB7997AD312119AFF67FF1638F4B42167CE7328607F21F127A0F330AA194118"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Audio\\Music\\EveningHarp.uasset",
+      "sha256": "D17541B89272E9E6ACFD053D982478A60F7DD4E4E7C35EBFC610DAAB4ECD5816"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_Clear.uasset",
+      "sha256": "FB788F73BA7E0D08AEF92E7A70FC6706EA42ECABB57F651C8F311FD5BCE14F3B"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_Gather.uasset",
+      "sha256": "B9BF0C449F9F07A6B64A9265BE93B2BC60B577878412C4A63290F8E54AA6468F"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_GroundedWalk.uasset",
+      "sha256": "E58EF30E4195346CDC78F27E6B310BBF9DAC5A61E098293F7257ABDFFA026E32"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_Idle.uasset",
+      "sha256": "94B6E00EF1AE470F139119F9F21DB7CA1D4E106C2C7A9C97C885477CD19ABEDD"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_RelaxedIdle.uasset",
+      "sha256": "550133B688559BF76F6008B557EFB352BCDB615C80076B03B1697335ABB92D03"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_Walk.uasset",
+      "sha256": "CD1ECAB01EFCC8E4994B3237FB99024D77B7BE5A05E6D3B7DE06873F93CDBCA5"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Animations\\AN_Heroine_Water.uasset",
+      "sha256": "6FA25C3DAE46D125A8B800589ECC55301A2A86719AC7E51952E067B17C4AD44E"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_ApronLinen.uasset",
+      "sha256": "DAF52FD77B2542B1D5569193762E87885B74C284DA0A2B87F6F29C5F1A3C190F"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_ApronTrim.uasset",
+      "sha256": "2689F4F744561E5D546102422FB7AB2903058227EF29D9D9C215DB28CC6A31EF"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Brass.uasset",
+      "sha256": "0C144F1136B6966C6E0CED34E1DE2691946D26B0A5C4C81F129E08A1E0CE1F4D"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_ChestnutLeather.uasset",
+      "sha256": "2F0B2247E55F7F9B21972DA1AD4FEF5709037D33B557E31697ABC557D1709B22"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Eyebrows.uasset",
+      "sha256": "13AA7EE9608727B0F7951EC9C8230893A5FA1F276F4102273CA4B6CE0B0111F2"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Eyelashes.uasset",
+      "sha256": "00ABB5F94F89BA38E361FB41A1E235E336F0262F0D589E78B1103F3D700F772B"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Hair_bob01.uasset",
+      "sha256": "37F2F50495418ED3B00FB65C12EE71C2C50B5C3BB03B3E297E872F0F7BA352B0"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Hair_long01.uasset",
+      "sha256": "B2074AF52080E10F635C38163AC72A479D8BBFDEC94400F01F19896F00D3AAE3"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Hair_ponytail01.uasset",
+      "sha256": "C809E6993B8ABC87A7FCD48D2F7A8A28061AE93C7A66E924877D735B1D364BFE"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_LeatherShoes.uasset",
+      "sha256": "3D82DBE0BBF9B967FC28E9F884DB52F0B1569261EAE55053E8D852CDCAE892FA"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_LightEyes.uasset",
+      "sha256": "D5C8496FD499B813C6403679731CF344F0208222E45720DB090D700F0AAFC52B"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_LinenTrim.uasset",
+      "sha256": "0F8730C1F0990E9C0C89BE83DE113CA3EC09648C1810297A1E06D7A5B6B12111"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_MossLinen.uasset",
+      "sha256": "5BD74A8EA9D27A1F8C05D623121C24B5A8E61B7FB0D52BA76DC356268D1D74F3"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Skin.uasset",
+      "sha256": "99F6DF706901B7DA8049F5160A057980429700F3291D5FF2505EFA76DBF57A88"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Teeth.uasset",
+      "sha256": "B88706E95777C7ED440F5D84EB186DFB4B882AA1674BB08D32ECA307E471F554"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Materials\\M_Heroine_Tongue.uasset",
+      "sha256": "1960D36883FEA44E7A86AB29F7A90B4039901058AEDAD5CF1108E13DB74FA7CA"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Bob.uasset",
+      "sha256": "73E5F3EF43E2EC627E24E03B85E40970FF256D4CD1E013B9307B6AD07B033F7C"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Bob_Apron.uasset",
+      "sha256": "A46BDE4E7444E941D74618CD385FA3D85D93FE928C36F99F9EB7AD5A0B520B24"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Hazel_Bob.uasset",
+      "sha256": "8DECB6CE63A85B6E3702E37DF2E43B33EE57D6B336F2C132E7A86F778E1BA22C"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Hazel_Bob_Apron.uasset",
+      "sha256": "30DD6DF13DAE7DDDA74ED020764417D261ADC6C41F691C5C32D9385399E1FC69"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Hazel_LongWave.uasset",
+      "sha256": "716AE83264BAF2F965FCB647184B8623E18224806FD6066084FDD97B797FE8B9"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Hazel_LongWave_Apron.uasset",
+      "sha256": "F68E82A159EB2C681A112A0C8E75467C5B4F141D1D202FF3BB68126258397528"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Hazel_Ponytail.uasset",
+      "sha256": "09086C7FCC69F40F8DE8F32F2DF4F3E868CCD0E578D766C4620DFD0B4C0A8295"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Hazel_Ponytail_Apron.uasset",
+      "sha256": "561E3647819E10C754D52EB92688078BD6A4BCEDE7A4255D1A2CD0D8D19C2263"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_LongWave.uasset",
+      "sha256": "378BA6056324B07DADD0EA2AA43B521808FAB285B73D3625412923C8B90C6D67"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_LongWave_Apron.uasset",
+      "sha256": "7AB87EFC395806E0A1CE6F96EA79D8CA5843DE9FD7293F1287DC77A7F7C34083"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_LongWave_Skeleton.uasset",
+      "sha256": "0EE864A35C957BB34326FEF5CB04D043B9D8CB5F9584C8A2E01936F22327A24A"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Ponytail.uasset",
+      "sha256": "8C6B218B96181D3F0E73D96F9DB5B1D8420E211DBC2FA365B88BDB4957FCB5E6"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Ponytail_Apron.uasset",
+      "sha256": "AC5C7BC46C1150C270522C4A12B34B3AE15F6C49E5BE5052E38210AA79CCA21F"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Willow_Bob.uasset",
+      "sha256": "AF9B913FDC429935C3748483C247070B3C0B6BEC46FE8D29B5378352C9F27280"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Willow_Bob_Apron.uasset",
+      "sha256": "C1B37153C533A142283D3F990E4072001B4AEBED0DB36C8DFB5E0E7F6F6AFBAE"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Willow_LongWave.uasset",
+      "sha256": "08F6790B9D40272AEC8131B5861BBCE9BDFDE5D81BBE15F065671F52FE0D0A96"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Willow_LongWave_Apron.uasset",
+      "sha256": "5E789826024B7C7C4CA5BD0AA9CF4A4E45D49234561AB0229CE722F672A922A8"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Willow_Ponytail.uasset",
+      "sha256": "DDA44B5C18862112191EBB51A5FBB9ECF667034AA4FED1F33DD6D6457B2CBD88"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\SK_Heroine_Willow_Ponytail_Apron.uasset",
+      "sha256": "16C778D7BE1AC91EAC29B77F682E46E551EA3B78EFCC07C0DD5053977CE149E7"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_T_ApronLinen.uasset",
+      "sha256": "8AE22BB77FEA4C6DA8D69EC72170FC08CC4CD5AB6181234515FE69C9F59EE2FD"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_T_Bob_Chestnut.uasset",
+      "sha256": "D55D232D140AC1AD473A7AF50A988FB8BB1EAF1C5F77453826AC58F99CBD65C0"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_T_Long_Chestnut.uasset",
+      "sha256": "06B8108F382190472ACD2FEC645CCAFFF5AC3C8E8C0BFF6E5F46BAA232B22CD7"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_T_Ponytail_Chestnut.uasset",
+      "sha256": "75440EAF4F6E396CC3E3D093B9D580AA7E8CA4620EE944C3E4FD18DDE345F903"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_blue_eye.uasset",
+      "sha256": "038A31A2E3BFC232CD73525874B5C6EFFF182098BEB8360BC156774F676B0A1D"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_eyebrow001.uasset",
+      "sha256": "BDBE9C0296EAF2848C3F22CBE072FDA633DB47E3317A4DC0FCE9DF556D8083B0"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_eyelashes01.uasset",
+      "sha256": "840BDEAC1BDD14123B7569644A7566559F3B0FEBA72BF6FB9E41EE32B84CAFC6"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_shoes01_diffuse.uasset",
+      "sha256": "A86A57F743998B1DA63FF0F89C273F90F06010836BC70424F2EAE6ADCFA9C284"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_teeth.uasset",
+      "sha256": "CB2FA25E76F9F38AE14F34AE210A7D0BAF8C91936E98BB8EFABF27097532A6E7"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_tongue01_diffuse.uasset",
+      "sha256": "D4A4DA84C1446BC0EE0BC7B9EA9782F815FEC1164BA00BA887B347B999F60D40"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Characters\\Heroine\\Textures\\T_young_lightskinned_female_diffuse.uasset",
+      "sha256": "BA0A2D3AEF08D1FC705F529AE061024D2BF28BC27987439193FBE82A0E10878A"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Environment\\MossRocks.uasset",
+      "sha256": "20FBFE58BCA58A3A36EF944EC766043C9BFFA723ADF79BF281CF301755978CE4"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Maps\\Homestead.umap",
+      "sha256": "ADC9192AF3DF6AE82468BD863E7B22CAE882408F8CFA47EB5AACC8D1D00ADDDA"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Materials\\M_Field.uasset",
+      "sha256": "55DBA9EBADEACDCEE5004E8C36EE77DCCDC043DF44F448C470AA7057FCE1AE41"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Materials\\M_Ground.uasset",
+      "sha256": "D31A34A857C784EDEDE68202E081447882D4B0839DB49F2C0AD3976AC80A16D6"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Materials\\M_Rock.uasset",
+      "sha256": "5054B1A7D07E6CAC9F27AAE0BBD9721BD4FB4FE1A330B3B5677E51140F117752"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Textures\\T_GroundColor.uasset",
+      "sha256": "C25CCD49354E72B9485E4FD3089151933614D0AAB2F7F063C8ED5F75DB60ACE2"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Textures\\T_GroundNormal.uasset",
+      "sha256": "A9F1D44B03AAF9FEF3ED158E8A7BAF524E6F5D232EA1A94F5EDEE7C3ACAAE5B0"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Textures\\T_GroundRoughness.uasset",
+      "sha256": "A66084D29605F8B4E5114B729F7B9C0B9B9F339D4C5BEEBE6550D62492D3EA57"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Textures\\T_RockColor.uasset",
+      "sha256": "E59A83C75801D621037053BCF31F4155A2851084EDF8C1EFEE011A2A69D8AA54"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Textures\\T_RockNormal.uasset",
+      "sha256": "C4F93EE8EA711BA97A0996E44F5FFBEF4C6875A0B7CF7B58D4CBE40217378B3F"
+    },
+    {
+      "path": "Content\\SurvivalGame\\Textures\\T_RockRoughness.uasset",
+      "sha256": "C93055B4A7E5A056FB9E2A9B391ACDE610B76FFD1228D49B3F8D12A9CAC05DF9"
+    },
+    {
+      "path": "Play.cmd",
+      "sha256": "21B4AC5EEE2DDBA42B00505B99B187BA7A7282D5D64014E7F354516F3F48B3F1"
+    },
+    {
+      "path": "Preview.json",
+      "sha256": "22C01AFC137BE5C841887855EEC49B4B51CAC0A5F856D49E38C20E41B7E7FC3F"
+    },
+    {
+      "path": "Source\\SurvivalGame.Target.cs",
+      "sha256": "25472C1F739C28C801C1431AED26232E751BCC3C65A3553E82D5D3C23204E2C6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadActionTestState.h",
+      "sha256": "44E4A005C17600E77F0189E4A0B6A7609884F74E62DE2000B3F0C43A5C82737A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.cpp",
+      "sha256": "D66C9811BF092ABE3818315D07DC07A89C403862C2E32E6045DD47C34DF1EF0A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.h",
+      "sha256": "E28FE1088E89D9EBCF3C14746392995B5B5CAF2CA33B3B924A0A296F4D9E219B"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.cpp",
+      "sha256": "116418605A7433E7FBC64442C1D1316B02B81FF9A5D2D8276F7DB2A29064B029"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.h",
+      "sha256": "7E77BE0FDD8410EA2AD68805B8902C9F9E83311E8CF85D4D8F469E0FBB093104"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadBookClarityTest.cpp",
+      "sha256": "CA2596A09E6FA5A2E3DEB03C17D946C06A522022AC62A5762EFDF702423B54ED"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.cpp",
+      "sha256": "F16752470150401138AC2F7AF1ECBBB0EA0F40C6B8DC7A08338FA5942660078C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.h",
+      "sha256": "25C0E5745B1F983B9B15294AD856D7BE42FD3CE4698CB86DF5E09ED47569E74B"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp",
+      "sha256": "8E43B03870EBDE195156D18CCC665998864B6B1D1320B357BD12847565FB7F4A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadController.cpp",
+      "sha256": "4BE257374BE2061E2840779C569BFC00494D23B62C119B9863DF55E8A1E4D682"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadController.h",
+      "sha256": "B677BE355FF448582413E039E6CB08ADD4637DBC0D95CDED372385706A48150F"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadEndurancePlaytest.cpp",
+      "sha256": "3A8EAE217BD896B46A8C6B7145D016E4575A772D21C99A5F32D8CF5131130835"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadEnduranceState.h",
+      "sha256": "389ACD085E24E5321068BBA4F9E8AA65763EBE88F986E08BAB551072FED6D852"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackMeasurements.cpp",
+      "sha256": "AC41A627C3CC4AFF94CF9F214EEBA9E88BDFC67ACA7EF25189EE733DBBC1BFA6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackTest.cpp",
+      "sha256": "DB4C3EB29DFB3766D31A5E581DA3870344531DF0BC30A8D712ACEB855286FF44"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadForageRenewal.cpp",
+      "sha256": "B1E4F5A1B6FB4070B7E4D85BA089BF3C3593CC7AD12F3878EA7FFEBFB6204DC7"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp",
+      "sha256": "42D9106C656FE0DDB61D332922E55E48707C4D10B7236C3DA1D48F24D897435F"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.cpp",
+      "sha256": "99AA97162D8F30EFFD763D5ADA97A7FBDA145768D66BEE1AC6C5135078DBFFC6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.h",
+      "sha256": "BEA77510E11770942B0EF253692F39C55E1097AFB1D609AB106687655144AE38"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadGatheringTest.cpp",
+      "sha256": "6F8C8A0338241288538C99081820AB196DD225D73443EFB077211E13182AE9AD"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHUD.cpp",
+      "sha256": "3FD335630DFC4B727BEAAE617BE40C44111B31AE5AAFEA3C9438141C0B60277C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHUD.h",
+      "sha256": "4341DB951DEC95F4876BC559B9041D0856CB8E125173AD57C8C2F103E6A32868"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.cpp",
+      "sha256": "33AA1809BCC6F2DB444162BFBA9B09DF90AA022055DFF94C8C062296F9167A19"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.h",
+      "sha256": "F6963986887E11D2DF5B76D476E8F29F7525D2792BECE8D1CB10B27F12C5C230"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHotkeyTest.cpp",
+      "sha256": "C05F19BB6D359E769A54E256EFA9A5C39B3FA892ADDC8C6F75D693920C99A413"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPresentationTest.cpp",
+      "sha256": "F07EB7E35A7E76BB8F820CD69CF75D5AF8F058B178676E5E975F691871E57A02"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.cpp",
+      "sha256": "09CCF9C06E5F9B428083BAC294DFC27ACB845BEF0ACD407F0D10D94625A542A6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.h",
+      "sha256": "B704619EC86B653B1E110A6582370F9F5592BB2175E1BB55010E97D5513961FA"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPromptTest.cpp",
+      "sha256": "3B78A2B383AF0E90EEF431928F04A0C568EA118935C5698AE499224991C05659"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadRenewalState.h",
+      "sha256": "958DC048120BD20E9011B8394273B551B3080383F0F08780F0E05946073C5AF6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSave.h",
+      "sha256": "CDBC705D5772C9690293EC6845DEB15B35B6952C5190F9723B5BFD0FFE2C3F3D"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.cpp",
+      "sha256": "9C2ABC921A58E05855C3219BA43ACE1DD79D21E2F9B2E47D8309E4B3E1C9BF8E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.h",
+      "sha256": "9597E28AA7F9C7E0448487EFA9DA8CC2A3B5B4B4ECDDEBE8CC35A94F90F8EC76"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSaveRoutingTest.cpp",
+      "sha256": "3A3CB868D064FBE67B875F85B7470A45D1AFC84AEA2B581FF4FE6EA4010646E0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.cpp",
+      "sha256": "CC3E9B4155168E4EDD8C3C7B51252351DC0B1F3A1F441E894C76E6252A1D8418"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.h",
+      "sha256": "AE1A7D8B78D40A7277178F7A5F1BC2451626729AC1D5CE1E8EF57F8AFDB66839"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadStartupProbe.cpp",
+      "sha256": "24F7F33A5E5B99A86C1F6B87261A23F111E9AD1539D529DFF8E4C614BC546577"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadTestPaths.h",
+      "sha256": "B9E9D6A031AE30581C574D25993B71520C502F9B9FC9F949205F8FD0229B0C39"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadToolGeometry.h",
+      "sha256": "3CAFD675BC651886F1CBDF27795B40D9917887DB75A0720F03FBEE3D5310431E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVideoSyncTest.cpp",
+      "sha256": "0E89AB603A6BAB0DF1A319E0F8AE7C5648C3E0C9620F03D417DE1F47DDE9EDA9"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp",
+      "sha256": "6750AD2D3CB17EB9D2F23CE6F78B80055FAB7FE411357D4F3533E05E8C40093E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h",
+      "sha256": "82E4C5592DA8D2B416A6A670C6F73D8AB645AC9F7DE5CA1AC32FD10A9C33DE7E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringPlaytest.cpp",
+      "sha256": "4BB77A6CE984EB0F2AA2DD93DA5B041A2839B4D9BD3D59692AE0E41E355CA5F7"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringTest.cpp",
+      "sha256": "5EC591C2E5DF7C0265153308118002D01FC457EC024DF4628D422D934BAD5B93"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.cpp",
+      "sha256": "9C1C58E81E2E89F9AD46673E6E145136576633E65DFFA04A9F5CD89BA2E2C0E0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.h",
+      "sha256": "301B4BBC8D00A9F3AC0236BE731D9D87836ACF7B25DFE0D2FBB616692FEDFF64"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWeedingPlaytest.cpp",
+      "sha256": "739D6C3C8DCDC123DE82B36C358B16E02A5ABD123DA50ED685E8DEE5CC2192DE"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWeedingTest.cpp",
+      "sha256": "4FFFAE84FF88204D7877BEE8AD8A8642AC3A8A2E6018EDCC6BDADF5FB2125C86"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "2C0450C0589184695EA7F0F0EB96F33071172644280AF47D15F77913E6F4BE1E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h",
+      "sha256": "C83288155C49BC741F69E311459D164053E51B42F109F77C7B33485013AB20EF"
+    },
+    {
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.cpp",
+      "sha256": "F593880C6C9801F9BAFAB406D36D914B873BCE76E60B9C8C329D6B9B0EDDAA1C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.h",
+      "sha256": "2EEB97DEBCF123D42E2E49AEDA0F5A84C3C8399BA1958C19E138D001B690F6D9"
+    },
+    {
+      "path": "Source\\SurvivalGame\\SurvivalGame.Build.cs",
+      "sha256": "677C6C15DCD9AF8D67B83B0C76EE712F39F021D71F41A6ED3D8081E294B86D6C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\SurvivalGame.cpp",
+      "sha256": "876F67FAE339EB8036B94CA19ADC55CBFAE0A3A3E72B2E1D48D8761BFB911467"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor.Target.cs",
+      "sha256": "1A3BA371827DF9262B7376169F1FE5BFB6372AA53A1D79A0114D6886B5592A05"
+    }
+  ],
+  "executableSha256": "AE92F55952A3C9A7DEF90983FCF5AEDCE52D8EE8E4565FBD923985E9D9D3E05E",
+  "moduleSha256": "6B130BC6DA04F2C75C2848FA0CB410EBB9A834C7813FF18F2E4FDCFE06384A55",
+  "jobSamples": [
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "suspended-before-resume",
+      "utc": "2026-09-21T16:02:15.5894331+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:15.6132839+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:21.5346394+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:22.5340532+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:23.4524082+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:24.4248052+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:30.0812902+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:30.8974445+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:31.7081533+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:32.5648334+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:38.0008964+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:38.7977652+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:39.6223372+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:40.4471607+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:45.8813469+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:46.6703254+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:47.4673595+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:48.3101971+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:53.8096282+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:54.8074844+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:02:55.8846465+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:03:02.8933238+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 259
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [
+        {
+          "Pid": 50948,
+          "NativeError": 0,
+          "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+          "Error": null,
+          "CreationTime": 134344801355704098,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        }
+      ],
+      "phase": "live",
+      "utc": "2026-09-21T16:03:03.8469006+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": false,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 0
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 1,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    },
+    {
+      "members": [],
+      "phase": "after-observed-death",
+      "utc": "2026-09-21T16:03:04.8085472+00:00",
+      "heldRoot": {
+        "Pid": 50948,
+        "NativeError": 0,
+        "Image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+        "Error": null,
+        "CreationTime": 134344801355704098,
+        "Member": true,
+        "Exited": true,
+        "IdentityFromHeldRoot": true,
+        "ExitCode": 0
+      },
+      "job": {
+        "Flags": 8200,
+        "ProcessLimit": 1,
+        "ActiveProcesses": 0,
+        "TotalProcesses": 1,
+        "TerminatedForLimits": 0,
+        "HeldProcessIsMember": true
+      }
+    }
+  ],
+  "buildReceiptSha256": "83558EBBBEF65B17C4EC5F563B98FA0E69D66FE14E0B1520E822422F38CDA30D",
+  "productPins": [
+    {
+      "sha256": "618C13B4C32393FCE3FFD3D001B9C15973C7DA17EE55D54D4F1D4B4C0D746FE9",
+      "bytes": 2743296,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "sha256": "94A1311EF41DCBEE7CFA12C4C4C576A18D49D2EB074AB6FE6110EE5368AF3CFF",
+      "bytes": 88829952,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "sha256": "6B130BC6DA04F2C75C2848FA0CB410EBB9A834C7813FF18F2E4FDCFE06384A55",
+      "bytes": 448512,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "sha256": "906E32E8F1B1AA2785913C2E62CC283207F8C724A2F09AD0253AE075D68AC5D1",
+      "bytes": 30314496,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "bytes": 166,
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "bytes": 945032,
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "supersession": {
+    "diagnosticApproval": "Grass/ground cook uses genuinely rebuilt current native products and the unchanged17 tree packages/persisted qualified verification. Exactly12 branch source-description tangent/binormal corners remain disclosed; original tree import03 stays FAILED. No tree reimport/asset rewrite, clean-mesh/full-woodland/performance/art-approval claim.",
+    "wardrobeFirstReservationSha256": "501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B",
+    "treeFirstReservationSha256": "A3415A967E94AC5861CC7CE1476C81FAD92E1369D2860A6A304CD32303981E62",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "treeSecondResultSha256": "405E75148269BC380520F26DC773B74A9773DEC790BD683F6765C60E52041B82",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "treeCorrection": "Coordinator approved referenced bounds, reversible branch-only UV routing and selective invalid-normal engine handling; distinct import02 reuses only the unchanged empty identified failed-before-save namespace. Frozen v3 and original failure remain unchanged.",
+    "slotCorrection": "Coordinator authorized root slot-name mapping correction after failed-before-save import01; only unchanged empty identified trial directory reused, distinct import02, no reset or deletion.",
+    "treeNormalCorrection": "Distinct import03 distinguishes orphan entries, retains grouped repair, and permits only referenced exact-zero single-face corners to use their valid engine-computed face normal. Nonzero custom normals preserved exactly; no group-cancellation claim without measurements.",
+    "currentApproval": "Completion-driven environment continuation after parent acceptance/promotion of provisional grove03. Four selected source clumps2279 total triangles, eight exact textures, two described materials, exactly14 fresh trial packages. Ground vertex-red blend retains original terrain geometry/collision/UVs and three read-only old maps. No selected candidate overwrite; root-only marker/Python/local-DDC/TraceControl controls unchanged.",
+    "treeSecondReservationSha256": "3103F180B725580E429BCA8D97044FB5C497CF140D7A1F0B0305558D68884569",
+    "wardrobeFirstResultSha256": "0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "treeFirstResultSha256": "377B6A6CDEAA110C90BF99D4A3717F0D15C35F4E4F0A474BECFE5EF8FAA0186C",
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7"
+  },
+  "buildMonitoringQualification": {
+    "actualExport": "Distinct grass-native-plan-02 passed existing observational allowlist/None working-set controls. ISPC1.24 --version is log/source-corroborated but absent from process samples; no full short-lived-child identity/endpoint-history claim. No new helper allowance.",
+    "links": "Two genuine import libraries, two resource conversions and resource-token-only DLL links passed under detached pre-resume limit1/no-breakaway jobs; no forged produced items. PE/PDB identities and actual UBT metadata verified.",
+    "failedExport": "grass-native-plan-01 FAILED: unidentified exited child20456, path unavailable; no retrospective identity or endpoint claim. Preserved failure is not superseded as a pass.",
+    "limit": "Build/source evidence only. New14-package import/reload, cook and actual ordinary gameplay remain separate unpassed gates. Selected grove03 untouched.",
+    "inherited": {
+      "inherited": {
+        "inherited": {
+          "inherited": "Genuine integrated strict native-menu/equipment/current-save/resume fixture game compile4/library6/DLL5 and metadata passed. Editor importer unchanged from previous genuine receipt. Raw guarded step evidence retained under exact paths/hash. Prior failed import01 and historical compiler/link/monitor qualifications remain unchanged. No new gameplay acceptance inferred from compilation.",
+          "current": "Genuine UBT exports/UHT, exact guarded native compiler/library/DLL leaves, resource-only substitutions, actual PE/PDB checks and real UBT metadata. UBT export/metadata remain sampled observational tools with the previously approved build-only conhost; not root-only leaf proofs. Original failed compiles and missing-RHI-dependency link remain failed. Global marker not used for these compiler leaves.",
+          "correction": "Typed TObjectPtr declarations, genuine UHT refresh after header movement, explicit RHI dependency for installed UE5.8 shader-platform material readiness. An attempted feature-level overload was rejected by the actual compiler and retained, not cast or claimed successful.",
+          "limit": "No tree import, persisted asset, Cook, Shipping or visual/runtime acceptance from this build."
+        },
+        "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+        "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+        "correction": "Importer only: referenced FBX bounds in UE frame; branch-only invertible UV swap; supported Tangents|UseMikkTSpace with exact nonzero-normal preservation; pre/post per-role basis measurements. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and actual metadata succeeded."
+      },
+      "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+      "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+      "correction": "Importer only: distinguish orphan vertex instances from referenced corners; permit only remaining exact-zero single-face referenced corners to use valid engine-computed face normals; regenerate Mikk tangents and compare nonzero normals exactly. Record intermediate/final per-role measurements and pre-adaptation actual bounds. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and metadata succeeded."
+    },
+    "compilers": "Five genuine root-only guarded compile actions passed; action5 first failed on TObjectPtr deduction/mixed SmoothStep types, corrected in source and passed as distinct compile5-02. Actual original failure retained."
+  },
+  "approvedCreationFlags": 525324,
+  "mode": "Cook",
+  "fernInventory": {
+    "exitCode": 0,
+    "arguments": "-TargetPlatform=Windows -Map=/Game/SurvivalGame/Maps/Homestead -OutputDir=\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01/Cooked\" -CookProcessCount=1 -SkipZenStore -unattended -nop4",
+    "skipZenStore": true,
+    "cancelled": false,
+    "outputDirectory": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01/Cooked",
+    "targetPlatform": "Windows",
+    "cookByTheBook": true,
+    "cookGlobalsInitialized": true,
+    "isClient": true,
+    "isServer": true,
+    "cookProcessCount": 1,
+    "errors": [],
+    "passed": true
+  },
+  "trialIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\Fern02_20260920_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745031,
+    "Attributes": 16,
+    "CreationTime": 134344292261599283
+  },
+  "softSeconds": 0,
+  "hardSeconds": 0,
+  "supervisorReceiptSha256": "7348068DFF3AE9E9A60F2926F33F351FDF3B206FD1AA958D4E007B12CC6506D2",
+  "wrapperSha256": "0A054288785B1B3E28C304AF69A23D9884A26044BA1C4C714CA0416F1E17E52A",
+  "operationPolicy": {
+    "startupSeconds": 0,
+    "softSeconds": 0,
+    "hardSeconds": 0,
+    "profile": "CookCompletionDriven",
+    "ceilingSeconds": 0,
+    "captureSeconds": 0
+  },
+  "ddc": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+  "ddcIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745022,
+    "Attributes": 16,
+    "CreationTime": 134344292212644463
+  },
+  "limits": "One specifically reserved settings/import/offscreen-render operation. Sampled endpoints/processes, not continuous tracing or filesystem/network isolation. No cook/Pak/Shipping/4K/performance proof. Never click security Allow."
+}

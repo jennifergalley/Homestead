@@ -1,0 +1,112 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 0.2117238,
+  "samples": [
+    {
+      "queriedPids": [
+        52724
+      ],
+      "endpoints": [],
+      "elapsedMs": 15.3648
+    }
+  ],
+  "maximumSampleGapMs": 196.3447,
+  "exitedJob": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 0,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "jobMemberSamples": [
+    {
+      "Utc": "2026-09-21T15:48:08.3037673+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 52724,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cvtres.exe",
+          "Error": null,
+          "CreationTime": 134344792882989423,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    },
+    {
+      "Utc": "2026-09-21T15:48:08.3061540+00:00",
+      "Error": null,
+      "Members": [
+        {
+          "Pid": 52724,
+          "NativeError": 0,
+          "Image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cvtres.exe",
+          "Error": null,
+          "CreationTime": 134344792882989423,
+          "Member": true,
+          "Exited": false,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 259
+        }
+      ]
+    }
+  ],
+  "coff": {
+    "machine": "AMD64",
+    "bytes": 26288,
+    "sections": [
+      {
+        "flags": 1108344896,
+        "bytes": 524,
+        "name": ".debug$S"
+      },
+      {
+        "flags": 1073741888,
+        "bytes": 520,
+        "name": ".rsrc$01"
+      },
+      {
+        "flags": 1073741888,
+        "bytes": 24704,
+        "name": ".rsrc$02"
+      }
+    ],
+    "sha256": "8617FDFFFF5CD2C246547E4B27487AB553D1327A5BADEDD9A2E535E8569ED191",
+    "codeExecuted": false
+  },
+  "malformedCoffCases": 0,
+  "markerAfter": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\probe\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 131072,
+    "IndexLow": 723035,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344792880218193,
+    "LastWriteTime": 134344792880218193,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "compileActionId": -1,
+  "resourceLinkActionId": -1,
+  "producedItems": [
+    {
+      "sha256": "8617FDFFFF5CD2C246547E4B27487AB553D1327A5BADEDD9A2E535E8569ED191",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\probe-resource.obj",
+      "bytes": 26288,
+      "lastWriteUtc": "2026-09-21T15:48:08.3136762Z"
+    }
+  ],
+  "previousProductBackups": [],
+  "objectSha256": "8617FDFFFF5CD2C246547E4B27487AB553D1327A5BADEDD9A2E535E8569ED191",
+  "generatedManifest": null,
+  "stageCandidate": null,
+  "stageCookFileCount": 0,
+  "limits": "One explicitly selected guarded build leaf with exact approved Windows console host. No application helpers/UBT/Editor/global marker. Finite endpoint/member samples, not continuous tracing. Aggregate counters do not identify denied targets."
+}

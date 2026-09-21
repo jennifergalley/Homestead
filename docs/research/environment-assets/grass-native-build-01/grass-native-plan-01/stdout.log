@@ -1,0 +1,6 @@
+Log file: E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\grass-native-plan-01\ubt.log
+Determining max actions to execute in parallel (8 physical cores, 16 logical cores)
+  Executing up to 8 processes, one per physical core
+  Requested 1.5 GB memory per action, 9.89 GB available: limiting max parallel actions to 6
+UbaSessionServer - Disable remote execution (remote sessions will finish current processes)
+Invalidating makefile for SurvivalGameEditor (DefaultGame.ini modified)

@@ -1,0 +1,51 @@
+{
+  "pid": 51900,
+  "path": "E:\\Tools\\blender-4.5.14-windows-x64\\blender.exe",
+  "creationTime": 134344775655746706,
+  "executableSha256": "57FA1D294EA76448C3BEC84CA758CAF4629611330ABBA7DCF55BB0C56A0A15AB",
+  "arguments": [
+    "--background",
+    "--factory-startup",
+    "--disable-autoexec",
+    "--python-exit-code",
+    "17",
+    "--python",
+    "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\GrassPreparation.py"
+  ],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "flags": 525324,
+  "handles": 3,
+  "sourcePins": [
+    {
+      "sha256": "8BB90CD7F4787BACC6838AC4D6A5530E627FCEB8C206B6915EA95DE1A2B722A4",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\GrassPreparation.py"
+    },
+    {
+      "sha256": "7D5B3F61DD107DE1280B320822572F01E21D10D253F52685258119D43ACF3101",
+      "path": "E:\\Repos\\SurvivalGame\\Scripts\\Environment\\TreePreparation.py"
+    },
+    {
+      "sha256": "AACF677F7B8CA07A5656842EA80AFEDC80845E509AFE8731F198DA973F339ECF",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Environment\\woodland-preparation-01\\download-receipt.json"
+    },
+    {
+      "sha256": "B38DCE70440F97817B3A8C8372D25EFC6B72BEE47E7078FC1D8ED207C1C0AAF4",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Environment\\woodland-preparation-01\\source-inventory.json"
+    },
+    {
+      "sha256": "EF823EBA5C7114B98FB544A85AB7B17DD1C2DDD6F3E785CD232029B980AE7C44",
+      "path": "E:\\Repos\\SurvivalGame\\Assets\\Source\\woodland-preparation-20260920-182217-d1f84e39\\grass_medium_01\\grass_medium_01_1k.fbx"
+    }
+  ],
+  "realProgramDataMarkerUsed": false,
+  "softSeconds": 100,
+  "hardSeconds": 110,
+  "scope": "Existing Blender parser/encoder only; no scene import/image loading/render/engine. Fresh selected-source output."
+}

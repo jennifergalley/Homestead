@@ -28,6 +28,9 @@
 #include "Materials/MaterialExpressionConstant.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "Materials/MaterialExpressionLinearInterpolate.h"
+#include "Materials/MaterialExpressionNormalize.h"
+#include "Materials/MaterialExpressionVertexColor.h"
 #include "MaterialShared.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
@@ -181,6 +184,43 @@ UTexture2D* ImportMappedTexture(const FMap& Map, const FString& SourceRoot,
     Texture->bFlipGreenChannel = false;
     Texture->PostEditChange();
     return Texture;
+}
+
+UFbxFactory* StaticMeshFactory(bool bCombine)
+{
+    auto* Factory = NewObject<UFbxFactory>();
+    Factory->SetDetectImportTypeOnImport(false);
+    auto* Task = NewObject<UAssetImportTask>();
+    Task->bAutomated = true;
+    Task->bReplaceExisting = false;
+    Factory->SetAssetImportTask(Task);
+    UFbxImportUI* UI = Factory->ImportUI;
+    UI->MeshTypeToImport = FBXIT_StaticMesh;
+    UI->OriginalImportType = FBXIT_StaticMesh;
+    UI->bAutomatedImportShouldDetectType = false;
+    UI->bImportMesh = true;
+    UI->bImportAsSkeletal = false;
+    UI->bImportAnimations = false;
+    UI->bImportMaterials = false;
+    UI->bImportTextures = false;
+    UI->bOverrideFullName = bCombine;
+    UFbxStaticMeshImportData* Data = UI->StaticMeshImportData;
+    Data->bCombineMeshes = bCombine;
+    Data->bImportMeshLODs = false;
+    Data->bAutoGenerateCollision = false;
+    Data->bBuildNanite = false;
+    Data->bGenerateLightmapUVs = false;
+    Data->bRemoveDegenerates = false;
+    Data->bTransformVertexToAbsolute = true;
+    Data->bBakePivotInVertex = false;
+    Data->bConvertScene = true;
+    Data->bConvertSceneUnit = true;
+    Data->bForceFrontXAxis = false;
+    Data->ImportUniformScale = 1;
+    Data->ImportTranslation = FVector::ZeroVector;
+    Data->ImportRotation = FRotator::ZeroRotator;
+    Data->NormalImportMethod = FBXNIM_ImportNormals;
+    return Factory;
 }
 
 bool AuditAssetReferences(const FString& Root, const TArray<UObject*>& Assets,
@@ -1424,38 +1464,7 @@ namespace Tree
         }
         Result->SetStringField(TEXT("stage"), TEXT("one-lod2-fbx"));
         if (Feedback.ReceivedUserCancel()) return false;
-        auto* Factory = NewObject<UFbxFactory>();
-        Factory->SetDetectImportTypeOnImport(false);
-        auto* Task = NewObject<UAssetImportTask>();
-        Task->bAutomated = true;
-        Task->bReplaceExisting = false;
-        Factory->SetAssetImportTask(Task);
-        UFbxImportUI* UI = Factory->ImportUI;
-        UI->MeshTypeToImport = FBXIT_StaticMesh;
-        UI->OriginalImportType = FBXIT_StaticMesh;
-        UI->bAutomatedImportShouldDetectType = false;
-        UI->bImportMesh = true;
-        UI->bImportAsSkeletal = false;
-        UI->bImportAnimations = false;
-        UI->bImportMaterials = false;
-        UI->bImportTextures = false;
-        UI->bOverrideFullName = true;
-        UFbxStaticMeshImportData* Data = UI->StaticMeshImportData;
-        Data->bCombineMeshes = true;
-        Data->bImportMeshLODs = false;
-        Data->bAutoGenerateCollision = false;
-        Data->bBuildNanite = false;
-        Data->bGenerateLightmapUVs = false;
-        Data->bRemoveDegenerates = false;
-        Data->bTransformVertexToAbsolute = true;
-        Data->bBakePivotInVertex = false;
-        Data->bConvertScene = true;
-        Data->bConvertSceneUnit = true;
-        Data->bForceFrontXAxis = false;
-        Data->ImportUniformScale = 1;
-        Data->ImportTranslation = FVector::ZeroVector;
-        Data->ImportRotation = FRotator::ZeroRotator;
-        Data->NormalImportMethod = FBXNIM_ImportNormals;
+        auto* Factory = StaticMeshFactory(true);
         bool Cancelled = false;
         auto* Mesh = Cast<UStaticMesh>(Factory->ImportObject(UStaticMesh::StaticClass(),
             CreatePackage(*(Root + TEXT("/Meshes/") + MeshName)), MeshName, RF_Public | RF_Standalone,
@@ -1499,6 +1508,305 @@ namespace Tree
     }
 }
 
+namespace Grass
+{
+    const FString Root = TEXT("/Game/Trials/GrassGround_20260921_01");
+    const TCHAR* Names[] = { TEXT("mid_b"), TEXT("small_b"), TEXT("tall_a"), TEXT("tiny_a") };
+    const int32 Triangles[] = { 1257, 653, 290, 79 };
+    const FVector Sizes[] = {
+        FVector(18.778882, 20.102860, 17.772157), FVector(16.595670, 18.989212, 9.989528),
+        FVector(16.095641, 15.853148, 32.254639), FVector(6.734776, 7.376876, 11.245334)
+    };
+    const int64 Models[] = { 9907750, 854938463, 515132540, 99195606 };
+    const int64 Geometries[] = { 34972056, 556848324, 425513347, 697680708 };
+    const FMap TextureMaps[] = {
+        { TEXT("grass_medium_01_diff_1k.png"), TEXT("T_GrassMedium01_Diff"), MP_BaseColor, TC_Default, SAMPLERTYPE_Color, true },
+        { TEXT("grass_medium_01_nor_dx_1k.png"), TEXT("T_GrassMedium01_NormalDX"), MP_Normal, TC_Normalmap, SAMPLERTYPE_Normal, false },
+        { TEXT("grass_medium_01_rough_1k.png"), TEXT("T_GrassMedium01_Roughness"), MP_Roughness, TC_Masks, SAMPLERTYPE_Masks, false },
+        { TEXT("grass_medium_01_ao_1k.png"), TEXT("T_GrassMedium01_AO"), MP_AmbientOcclusion, TC_Masks, SAMPLERTYPE_Masks, false },
+        { TEXT("grass_medium_01_alpha_1k.png"), TEXT("T_GrassMedium01_Alpha"), MP_OpacityMask, TC_Masks, SAMPLERTYPE_Masks, false },
+        { TEXT("grass_ground_diff_2k.png"), TEXT("T_GrassGround_Diff"), MP_BaseColor, TC_Default, SAMPLERTYPE_Color, true },
+        { TEXT("grass_ground_nor_dx_2k.png"), TEXT("T_GrassGround_NormalDX"), MP_Normal, TC_Normalmap, SAMPLERTYPE_Normal, false },
+        { TEXT("grass_ground_rough_2k.png"), TEXT("T_GrassGround_Roughness"), MP_Roughness, TC_Masks, SAMPLERTYPE_Masks, false }
+    };
+    const TCHAR* ExistingMaps[] = {
+        TEXT("/Game/SurvivalGame/Textures/T_GroundColor"),
+        TEXT("/Game/SurvivalGame/Textures/T_GroundNormal"),
+        TEXT("/Game/SurvivalGame/Textures/T_GroundRoughness")
+    };
+
+    bool Reject(const TSharedRef<FJsonObject>& Result, const FString& Reason)
+    {
+        Result->SetStringField(TEXT("failure"), Reason);
+        UE_LOG(LogFernSpike, Error, TEXT("Grass/ground: %s"), *Reason);
+        return false;
+    }
+
+    FString MeshName(int32 Index) { return FString(TEXT("SM_GrassMedium01_")) + Names[Index]; }
+
+    TArray<FString> Packages()
+    {
+        TArray<FString> Value;
+        for (int32 Index = 0; Index < 4; ++Index) Value.Add(Root + TEXT("/Meshes/") + MeshName(Index));
+        for (const FMap& Map : TextureMaps) Value.Add(Root + TEXT("/Textures/") + Map.Name);
+        Value.Add(Root + TEXT("/Materials/M_GrassMedium01"));
+        Value.Add(Root + TEXT("/Materials/M_GrassGroundBlend"));
+        return Value;
+    }
+
+    template <typename T> T* Expression(UMaterial* Material)
+    {
+        return Cast<T>(UMaterialEditingLibrary::CreateMaterialExpression(Material, T::StaticClass()));
+    }
+
+    bool SampleMatches(const FExpressionInput* Input, UTexture2D* Texture, const FMap& Map)
+    {
+        const auto* Sample = Input ? Cast<UMaterialExpressionTextureSample>(Input->Expression) : nullptr;
+        return Sample && Sample->Texture == Texture && Sample->SamplerType == Map.Sampler
+            && Input->OutputIndex == (Map.Property == MP_BaseColor || Map.Property == MP_Normal ? 0 : 1)
+            && !Sample->Coordinates.Expression && Sample->ConstCoordinate == 0;
+    }
+
+    bool Inventory(TArray<UObject*>& Assets, const TSharedRef<FJsonObject>& Result)
+    {
+        auto* Material = LoadObject<UMaterial>(nullptr, *(Root + TEXT("/Materials/M_GrassMedium01")));
+        auto* Ground = LoadObject<UMaterial>(nullptr, *(Root + TEXT("/Materials/M_GrassGroundBlend")));
+        if (!Material || Material->BlendMode != BLEND_Masked || !Material->TwoSided
+            || Material->OpacityMaskClipValue != 0.333f || Material->GetExpressions().Num() != 5
+            || !Material->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit)
+            || !Material->CheckMaterialUsage_Concurrent(MATUSAGE_InstancedStaticMeshes)
+            || !Ground || Ground->BlendMode != BLEND_Opaque || Ground->TwoSided
+            || !Ground->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit) || Ground->GetExpressions().Num() != 11)
+            return Reject(Result, TEXT("Authored grass/ground material properties or instancing usage differ."));
+        Assets.Append({ Material, Ground });
+        TArray<TSharedPtr<FJsonValue>> TextureRecords, MeshRecords;
+        TArray<UTexture2D*> Textures;
+        for (int32 Index = 0; Index < UE_ARRAY_COUNT(TextureMaps); ++Index)
+        {
+            const FMap& Map = TextureMaps[Index];
+            auto* Texture = LoadObject<UTexture2D>(nullptr, *(Root + TEXT("/Textures/") + Map.Name));
+            const int32 Pixels = Index < 5 ? 1024 : 2048;
+            if (!Texture || Texture->Source.GetSizeX() != Pixels || Texture->Source.GetSizeY() != Pixels
+                || Texture->SRGB != Map.Srgb || Texture->CompressionSettings != Map.Compression || Texture->bFlipGreenChannel)
+                return Reject(Result, FString(TEXT("Texture identity/format differs: ")) + Map.Name);
+            if (Index < 5 && !SampleMatches(Material->GetExpressionInputForProperty(Map.Property), Texture, Map))
+                return Reject(Result, FString(TEXT("Grass material graph differs: ")) + Map.Name);
+            Assets.Add(Texture);
+            Textures.Add(Texture);
+            auto Record = MakeShared<FJsonObject>();
+            Record->SetStringField(TEXT("object"), Texture->GetPathName());
+            Record->SetStringField(TEXT("source"), Map.File);
+            Record->SetNumberField(TEXT("width"), Pixels);
+            Record->SetNumberField(TEXT("height"), Pixels);
+            Record->SetNumberField(TEXT("compression"), Texture->CompressionSettings);
+            Record->SetBoolField(TEXT("srgb"), Texture->SRGB);
+            Record->SetBoolField(TEXT("flipGreen"), Texture->bFlipGreenChannel);
+            TextureRecords.Add(MakeShared<FJsonValueObject>(Record));
+        }
+        TSet<FString> External;
+        const UMaterialExpressionVertexColor* SharedWeight = nullptr;
+        for (int32 Index = 0; Index < 3; ++Index)
+        {
+            const FMap& Map = TextureMaps[Index + 5];
+            auto* Existing = LoadObject<UTexture2D>(nullptr, ExistingMaps[Index]);
+            if (!Existing || Existing->SRGB != (Index == 0)
+                || Existing->CompressionSettings != (Index == 1 ? TC_Normalmap : TC_Default))
+                return Reject(Result, TEXT("Missing/different admitted read-only old-ground texture."));
+            FMap ExistingMap = Map;
+            ExistingMap.Sampler = Index == 2 ? SAMPLERTYPE_LinearColor : Map.Sampler;
+            External.Add(ExistingMaps[Index]);
+            const FExpressionInput* Input = Ground->GetExpressionInputForProperty(Map.Property);
+            if (Index == 1)
+            {
+                const auto* Normalized = Input ? Cast<UMaterialExpressionNormalize>(Input->Expression) : nullptr;
+                if (!Normalized || Input->OutputIndex != 0) return Reject(Result, TEXT("Ground normal must be normalized after blending."));
+                Input = &Normalized->VectorInput;
+            }
+            const auto* Blend = Input ? Cast<UMaterialExpressionLinearInterpolate>(Input->Expression) : nullptr;
+            const auto* Weight = Blend ? Cast<UMaterialExpressionVertexColor>(Blend->Alpha.Expression) : nullptr;
+            if (!Blend || Input->OutputIndex != 0 || !Weight || Blend->Alpha.OutputIndex != 1
+                || (SharedWeight && SharedWeight != Weight)
+                || !SampleMatches(&Blend->A, Existing, ExistingMap) || !SampleMatches(&Blend->B, Textures[Index + 5], Map))
+                return Reject(Result, TEXT("Ground graph must share vertex-red weight across exact old/new maps."));
+            SharedWeight = Weight;
+        }
+        for (int32 Index = 0; Index < 4; ++Index)
+        {
+            auto* Mesh = LoadObject<UStaticMesh>(nullptr, *(Root + TEXT("/Meshes/") + MeshName(Index)));
+            if (!Mesh) return Reject(Result, TEXT("Missing selected clump: ") + MeshName(Index));
+            FStaticMeshCompilingManager::Get().FinishCompilation({ Mesh });
+            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->AssetImportData);
+            const auto* Description = Mesh->GetMeshDescription(0);
+            const auto* Render = Mesh->GetRenderData();
+            if (Mesh->GetNumSourceModels() != 1 || !Description || Description->Triangles().Num() != Triangles[Index]
+                || !Render || Render->LODResources.Num() != 1 || Render->LODResources[0].GetNumTriangles() != Triangles[Index]
+                || Mesh->GetStaticMaterials().Num() != 1 || Mesh->GetStaticMaterials()[0].ImportedMaterialSlotName != TEXT("grass_medium_01")
+                || Mesh->GetMaterial(0) != Material || Mesh->GetNaniteSettings().bEnabled
+                || !Data || Data->ImportUniformScale != 1 || !Data->ImportTranslation.IsZero() || !Data->ImportRotation.IsZero()
+                || !Data->bConvertScene || !Data->bConvertSceneUnit || !Data->bTransformVertexToAbsolute
+                || Data->bBakePivotInVertex || Data->bAutoGenerateCollision
+                || (Mesh->GetBodySetup() && Mesh->GetBodySetup()->AggGeom.GetElementCount()))
+                return Reject(Result, TEXT("Clump topology/slot/material/unit/import/collision policy differs: ") + MeshName(Index));
+            const FBox Bounds = Mesh->GetBoundingBox();
+            const FVector Size = Bounds.GetSize();
+            if (!Bounds.IsValid || Bounds.Min.ContainsNaN() || Bounds.Max.ContainsNaN())
+                return Reject(Result, TEXT("Nonfinite clump bounds."));
+            TArray<double> Actual = { Size.X, Size.Y, Size.Z };
+            TArray<double> Expected = { Sizes[Index].X, Sizes[Index].Y, Sizes[Index].Z };
+            Actual.Sort(); Expected.Sort();
+            for (int32 Axis = 0; Axis < 3; ++Axis)
+                if (!FMath::IsNearlyEqual(Actual[Axis], Expected[Axis], 0.1))
+                    return Reject(Result, TEXT("Source units/baked clump dimensions differ: ") + MeshName(Index));
+            const FStaticMeshConstAttributes Attributes(*Description);
+            const auto Normals = Attributes.GetVertexInstanceNormals();
+            const auto UVs = Attributes.GetVertexInstanceUVs();
+            if (UVs.GetNumChannels() != 1) return Reject(Result, TEXT("Expected one retained source UV channel."));
+            for (FVertexInstanceID Corner : Description->VertexInstances().GetElementIDs())
+                if (Normals[Corner].ContainsNaN() || Normals[Corner].SizeSquared() < 0.5f || UVs.Get(Corner, 0).ContainsNaN())
+                    return Reject(Result, TEXT("Invalid referenced clump normal/UV."));
+            Assets.Add(Mesh);
+            auto Record = MakeShared<FJsonObject>();
+            Record->SetStringField(TEXT("object"), Mesh->GetPathName());
+            Record->SetStringField(TEXT("sourceNode"), FString(TEXT("grass_medium_01_")) + Names[Index] + TEXT("_LOD0"));
+            Record->SetNumberField(TEXT("sourceModelId"), Models[Index]);
+            Record->SetNumberField(TEXT("sourceGeometryId"), Geometries[Index]);
+            Record->SetNumberField(TEXT("sourceTriangles"), Description->Triangles().Num());
+            Record->SetNumberField(TEXT("renderTriangles"), Render->LODResources[0].GetNumTriangles());
+            Record->SetStringField(TEXT("importedSlot"), Mesh->GetStaticMaterials()[0].ImportedMaterialSlotName.ToString());
+            Record->SetStringField(TEXT("material"), Material->GetPathName());
+            Record->SetArrayField(TEXT("boundsMinCm"), Vector(Bounds.Min));
+            Record->SetArrayField(TEXT("boundsMaxCm"), Vector(Bounds.Max));
+            Record->SetArrayField(TEXT("sourceDimensionsTimes100Cm"), Vector(Sizes[Index]));
+            Record->SetArrayField(TEXT("placementGroundAnchorCm"), Vector(FVector(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z)));
+            Record->SetNumberField(TEXT("importUniformScale"), Data->ImportUniformScale);
+            Record->SetBoolField(TEXT("nanite"), Mesh->GetNaniteSettings().bEnabled);
+            Record->SetBoolField(TEXT("simpleCollision"), false);
+            MeshRecords.Add(MakeShared<FJsonValueObject>(Record));
+        }
+        Result->SetArrayField(TEXT("meshes"), MeshRecords);
+        Result->SetArrayField(TEXT("textures"), TextureRecords);
+        Result->SetNumberField(TEXT("totalMeshTriangles"), 2279);
+        Result->SetNumberField(TEXT("packages"), Assets.Num());
+        Result->SetStringField(TEXT("grassMaterial"), Material->GetPathName());
+        Result->SetStringField(TEXT("groundMaterial"), Ground->GetPathName());
+        Result->SetStringField(TEXT("groundBlend"), TEXT("Vertex red lerps original ground to grass-ground color/roughness/normal; normalize final normal; unchanged UV0 three-meter tiling."));
+        Result->SetStringField(TEXT("transformPolicy"), TEXT("Scene/unit conversion once and absolute source transform bake; authored scale1; runtime placement offsets measured ground anchor only."));
+        return Assets.Num() == 14 && AuditAssetReferences(Root, Assets, External, Result);
+    }
+
+    bool Import(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+    {
+        for (const FString& Package : Packages())
+            if (FindPackage(nullptr, *Package) || FPackageName::DoesPackageExist(Package))
+                return Reject(Result, TEXT("Fresh grass/ground package required: ") + Package);
+        Result->SetStringField(TEXT("stage"), TEXT("eight-explicit-textures"));
+        TArray<UTexture2D*> Textures;
+        const FString Source = FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Source/woodland-preparation-20260920-182217-d1f84e39"));
+        for (int32 Index = 0; Index < UE_ARRAY_COUNT(TextureMaps); ++Index)
+        {
+            auto* Texture = ImportMappedTexture(TextureMaps[Index],
+                FPaths::Combine(Source, Index < 5 ? TEXT("grass_medium_01") : TEXT("grass_ground")), Root, Feedback);
+            if (!Texture) return Reject(Result, FString(TEXT("Explicit texture import failed: ")) + TextureMaps[Index].File);
+            Textures.Add(Texture);
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("two-described-materials"));
+        auto* Material = NewObject<UMaterial>(CreatePackage(*(Root + TEXT("/Materials/M_GrassMedium01"))),
+            TEXT("M_GrassMedium01"), RF_Public | RF_Standalone);
+        Material->BlendMode = BLEND_Masked;
+        Material->TwoSided = true;
+        Material->OpacityMaskClipValue = 0.333f;
+        Material->SetShadingModel(MSM_DefaultLit);
+        for (int32 Index = 0; Index < 5; ++Index)
+        {
+            auto* Sample = Expression<UMaterialExpressionTextureSample>(Material);
+            if (!Sample) return Reject(Result, TEXT("Cannot allocate grass texture sample."));
+            Sample->Texture = Textures[Index];
+            Sample->SamplerType = TextureMaps[Index].Sampler;
+            Material->GetExpressionInputForProperty(TextureMaps[Index].Property)->Connect(Index < 2 ? 0 : 1, Sample);
+        }
+        if (!Material->SetMaterialUsage(MATUSAGE_InstancedStaticMeshes)) return Reject(Result, TEXT("Grass instancing usage failed."));
+        Material->PostEditChange();
+        auto* Ground = NewObject<UMaterial>(CreatePackage(*(Root + TEXT("/Materials/M_GrassGroundBlend"))),
+            TEXT("M_GrassGroundBlend"), RF_Public | RF_Standalone);
+        Ground->BlendMode = BLEND_Opaque;
+        Ground->TwoSided = false;
+        Ground->SetShadingModel(MSM_DefaultLit);
+        auto* Weight = Expression<UMaterialExpressionVertexColor>(Ground);
+        if (!Weight) return Reject(Result, TEXT("Cannot allocate ground blend weight."));
+        for (int32 Index = 0; Index < 3; ++Index)
+        {
+            auto* Existing = LoadObject<UTexture2D>(nullptr, ExistingMaps[Index]);
+            auto* Old = Expression<UMaterialExpressionTextureSample>(Ground);
+            auto* Fresh = Expression<UMaterialExpressionTextureSample>(Ground);
+            auto* Blend = Expression<UMaterialExpressionLinearInterpolate>(Ground);
+            if (!Existing || !Old || !Fresh || !Blend) return Reject(Result, TEXT("Cannot build admitted ground blend."));
+            const FMap& Map = TextureMaps[Index + 5];
+            Old->Texture = Existing;
+            Old->SamplerType = Index == 2 ? SAMPLERTYPE_LinearColor : Map.Sampler;
+            Fresh->Texture = Textures[Index + 5]; Fresh->SamplerType = Map.Sampler;
+            Blend->A.Connect(Index == 2 ? 1 : 0, Old);
+            Blend->B.Connect(Index == 2 ? 1 : 0, Fresh);
+            Blend->Alpha.Connect(1, Weight);
+            if (Index == 1)
+            {
+                auto* Normalized = Expression<UMaterialExpressionNormalize>(Ground);
+                if (!Normalized) return Reject(Result, TEXT("Cannot normalize ground normal."));
+                Normalized->VectorInput.Connect(0, Blend);
+                Ground->GetExpressionInputForProperty(Map.Property)->Connect(0, Normalized);
+            }
+            else Ground->GetExpressionInputForProperty(Map.Property)->Connect(0, Blend);
+        }
+        Ground->PostEditChange();
+        Result->SetStringField(TEXT("stage"), TEXT("four-selected-clumps"));
+        if (Feedback.ReceivedUserCancel()) return false;
+        auto* Factory = StaticMeshFactory(false);
+        bool Cancelled = false;
+        UObject* Imported = Factory->ImportObject(UStaticMesh::StaticClass(),
+            CreatePackage(*(Root + TEXT("/Unsaved/SelectedGrass"))), TEXT("SelectedGrass"), RF_Public | RF_Standalone,
+            FPaths::Combine(FPaths::ProjectDir(), TEXT("Assets/Environment/GrassMedium01Prepared/v1/GrassMedium01_Selected.fbx")),
+            nullptr, Cancelled);
+        if (!Imported || Cancelled) return Reject(Result, TEXT("Selected FBX factory failed."));
+        TArray<UObject*> Objects = Factory->GetAdditionalImportedObjects();
+        Objects.AddUnique(Imported);
+        if (Objects.Num() != 4) return Reject(Result, TEXT("Expected exactly four imported clump objects."));
+        for (int32 Index = 0; Index < 4; ++Index)
+        {
+            UStaticMesh* Match = nullptr;
+            const FString Node = FString(TEXT("grass_medium_01_")) + Names[Index] + TEXT("_LOD0");
+            for (UObject* Object : Objects)
+                if (Object->GetName().EndsWith(Node))
+                {
+                    if (Match) return Reject(Result, TEXT("Ambiguous selected FBX clump."));
+                    Match = Cast<UStaticMesh>(Object);
+                    if (!Match) return Reject(Result, TEXT("Non-static selected FBX object."));
+                }
+            if (!Match || !Match->Rename(*MeshName(Index), CreatePackage(*(Root + TEXT("/Meshes/") + MeshName(Index))),
+                REN_DontCreateRedirectors | REN_NonTransactional))
+                return Reject(Result, TEXT("Cannot identify/name selected clump: ") + Node);
+            Match->SetMaterial(0, Material);
+            Match->PostEditChange();
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("inventory-and-reference-audit"));
+        TArray<UObject*> Assets;
+        if (!Inventory(Assets, Result) || Feedback.ReceivedUserCancel()) return false;
+        Result->SetStringField(TEXT("stage"), TEXT("fourteen-explicit-package-saves"));
+        for (UObject* Asset : Assets)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            auto* Package = Asset->GetOutermost();
+            const FString File = FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension());
+            if (IFileManager::Get().FileExists(*File)) return Reject(Result, TEXT("Package output already exists: ") + File);
+            FSavePackageArgs Args;
+            Args.TopLevelFlags = RF_Public | RF_Standalone;
+            Args.Error = GWarn;
+            if (!UPackage::SavePackage(Package, Asset, *File, Args) || Feedback.ReceivedUserCancel())
+                return Reject(Result, TEXT("Grass/ground package save failed/cancelled: ") + File);
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("import-complete"));
+        return true;
+    }
+}
+
 bool Import(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
 {
     Result->SetStringField(TEXT("stage"), TEXT("explicit-texture-import"));
@@ -1529,38 +1837,7 @@ bool Import(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJs
     }
     Material->PostEditChange();
     Assets.Add(Material);
-    auto* Factory = NewObject<UFbxFactory>();
-    Factory->SetDetectImportTypeOnImport(false);
-    auto* Task = NewObject<UAssetImportTask>();
-    Task->bAutomated = true;
-    Task->bReplaceExisting = false;
-    Factory->SetAssetImportTask(Task);
-    UFbxImportUI* UI = Factory->ImportUI;
-    UI->MeshTypeToImport = FBXIT_StaticMesh;
-    UI->OriginalImportType = FBXIT_StaticMesh;
-    UI->bAutomatedImportShouldDetectType = false;
-    UI->bImportMesh = true;
-    UI->bImportAsSkeletal = false;
-    UI->bImportAnimations = false;
-    UI->bImportMaterials = false;
-    UI->bImportTextures = false;
-    UI->bOverrideFullName = false;
-    UFbxStaticMeshImportData* Data = UI->StaticMeshImportData;
-    Data->bCombineMeshes = false;
-    Data->bImportMeshLODs = false;
-    Data->bAutoGenerateCollision = false;
-    Data->bBuildNanite = false;
-    Data->bGenerateLightmapUVs = false;
-    Data->bRemoveDegenerates = false;
-    Data->bTransformVertexToAbsolute = true;
-    Data->bBakePivotInVertex = false;
-    Data->bConvertScene = true;
-    Data->bConvertSceneUnit = true;
-    Data->bForceFrontXAxis = false;
-    Data->ImportUniformScale = 1;
-    Data->ImportTranslation = FVector::ZeroVector;
-    Data->ImportRotation = FRotator::ZeroRotator;
-    Data->NormalImportMethod = FBXNIM_ImportNormals;
+    auto* Factory = StaticMeshFactory(false);
     bool Cancelled = false;
     Result->SetStringField(TEXT("stage"), TEXT("explicit-fbx-import"));
     if (Feedback.ReceivedUserCancel()) return false;
@@ -1984,4 +2261,25 @@ bool RunTreeSpike(const FString& Mode, const FString& Output, const FDateTime& D
     if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Tree %s failed at %s; retain evidence and partial outputs."),
         *Mode, *Result->GetStringField(TEXT("stage")));
     return WriteJson(FPaths::Combine(Output, TEXT("tree-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
+}
+
+bool RunGrassSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven)
+{
+    FStopFeedback Feedback(Output, Deadline, bCompletionDriven);
+    auto Result = MakeShared<FJsonObject>();
+    Result->SetStringField(TEXT("mode"), Mode);
+    Result->SetStringField(TEXT("namespace"), Grass::Root);
+    Result->SetStringField(TEXT("stage"), TEXT("persisted-inventory"));
+    bool Passed = false;
+    if (Mode == TEXT("GrassImport")) Passed = Grass::Import(Feedback, Result);
+    else if (Mode == TEXT("GrassVerify"))
+    {
+        TArray<UObject*> Assets;
+        Passed = Grass::Inventory(Assets, Result);
+    }
+    Result->SetBoolField(TEXT("passed"), Passed);
+    Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
+    if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Grass %s failed at %s; retain partial outputs."),
+        *Mode, *Result->GetStringField(TEXT("stage")));
+    return WriteJson(FPaths::Combine(Output, TEXT("grass-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
 }

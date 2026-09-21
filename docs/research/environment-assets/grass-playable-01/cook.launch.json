@@ -1,0 +1,219 @@
+{
+  "pid": 50948,
+  "creationTime": 134344801355704098,
+  "image": "E:\\Program Files\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+  "executableSha256": "AE92F55952A3C9A7DEF90983FCF5AEDCE52D8EE8E4565FBD923985E9D9D3E05E",
+  "moduleSha256": "6B130BC6DA04F2C75C2848FA0CB410EBB9A834C7813FF18F2E4FDCFE06384A55",
+  "arguments": [
+    "E:\\Repos\\SurvivalGame\\SurvivalGame.uproject",
+    "-run=HomesteadAuthoringProbe",
+    "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01",
+    "-notraceserver",
+    "-traceautostart=0",
+    "-unattended",
+    "-nop4",
+    "-nosplash",
+    "-stdout",
+    "-FullStdOutLogOutput",
+    "-DisablePython",
+    "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+    "-noshaderworker",
+    "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\EngineUser",
+    "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\editor.log",
+    "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+    "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+    "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+    "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+    "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+    "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+    "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+    "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\Engine.ini",
+    "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\Editor.ini",
+    "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\EditorSettings.ini",
+    "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\EditorPerProjectUserSettings.ini",
+    "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\GameUserSettings.ini",
+    "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\Game.ini",
+    "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\Config\\Input.ini",
+    "-FernMode=Cook",
+    "-nullrhi",
+    "-RunAsCookCommandlet",
+    "-TargetPlatform=Windows",
+    "-CookProcessCount=1",
+    "-SkipZenStore"
+  ],
+  "markerBefore": {
+    "Path": "C:\\ProgramData\\Epic\\NotAllowedUnattendedBugReports",
+    "Volume": 1086832636,
+    "IndexHigh": 6946816,
+    "IndexLow": 850384,
+    "Attributes": 8224,
+    "Size": 0,
+    "CreationTime": 134343200004107596,
+    "LastWriteTime": 134344752690114052,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "F3BB5E9A8DAD0EA63632BA22FA939408AE813300BC00B341D6657321207659E3"
+  },
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "explicitInheritedHandles": 3,
+  "expectedRules": [
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "TCP Query User{0A2FC548-73B9-422C-B077-058734737E11}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "TCP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    },
+    {
+      "program": "E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "name": "UDP Query User{C4984A9B-D060-40FD-8B40-E7089EBA10A5}E:\\program files\\ue_5.8\\engine\\binaries\\win64\\unrealeditor-cmd.exe",
+      "displayName": "UnrealEditor",
+      "enabled": "True",
+      "direction": "Inbound",
+      "action": "Allow",
+      "profile": "Private, Public",
+      "protocol": "UDP",
+      "localPort": [
+        "Any"
+      ],
+      "remotePort": [
+        "Any"
+      ],
+      "localAddress": [
+        "Any"
+      ],
+      "remoteAddress": [
+        "Any"
+      ]
+    }
+  ],
+  "deadlineUtc": "",
+  "creationFlags": 525324,
+  "buildReceiptSha256": "83558EBBBEF65B17C4EC5F563B98FA0E69D66FE14E0B1520E822422F38CDA30D",
+  "productPins": [
+    {
+      "sha256": "618C13B4C32393FCE3FFD3D001B9C15973C7DA17EE55D54D4F1D4B4C0D746FE9",
+      "bytes": 2743296,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "sha256": "94A1311EF41DCBEE7CFA12C4C4C576A18D49D2EB074AB6FE6110EE5368AF3CFF",
+      "bytes": 88829952,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "sha256": "6B130BC6DA04F2C75C2848FA0CB410EBB9A834C7813FF18F2E4FDCFE06384A55",
+      "bytes": 448512,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "sha256": "906E32E8F1B1AA2785913C2E62CC283207F8C724A2F09AD0253AE075D68AC5D1",
+      "bytes": 30314496,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "bytes": 166,
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "bytes": 945032,
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "supersession": {
+    "diagnosticApproval": "Grass/ground cook uses genuinely rebuilt current native products and the unchanged17 tree packages/persisted qualified verification. Exactly12 branch source-description tangent/binormal corners remain disclosed; original tree import03 stays FAILED. No tree reimport/asset rewrite, clean-mesh/full-woodland/performance/art-approval claim.",
+    "wardrobeFirstReservationSha256": "501A64A7585CCCE708D01D440F6F7AE7943089918D7B1056164AC3D8B197B02B",
+    "treeFirstReservationSha256": "A3415A967E94AC5861CC7CE1476C81FAD92E1369D2860A6A304CD32303981E62",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "treeSecondResultSha256": "405E75148269BC380520F26DC773B74A9773DEC790BD683F6765C60E52041B82",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "treeCorrection": "Coordinator approved referenced bounds, reversible branch-only UV routing and selective invalid-normal engine handling; distinct import02 reuses only the unchanged empty identified failed-before-save namespace. Frozen v3 and original failure remain unchanged.",
+    "slotCorrection": "Coordinator authorized root slot-name mapping correction after failed-before-save import01; only unchanged empty identified trial directory reused, distinct import02, no reset or deletion.",
+    "treeNormalCorrection": "Distinct import03 distinguishes orphan entries, retains grouped repair, and permits only referenced exact-zero single-face corners to use their valid engine-computed face normal. Nonzero custom normals preserved exactly; no group-cancellation claim without measurements.",
+    "currentApproval": "Completion-driven environment continuation after parent acceptance/promotion of provisional grove03. Four selected source clumps2279 total triangles, eight exact textures, two described materials, exactly14 fresh trial packages. Ground vertex-red blend retains original terrain geometry/collision/UVs and three read-only old maps. No selected candidate overwrite; root-only marker/Python/local-DDC/TraceControl controls unchanged.",
+    "treeSecondReservationSha256": "3103F180B725580E429BCA8D97044FB5C497CF140D7A1F0B0305558D68884569",
+    "wardrobeFirstResultSha256": "0E5E622AF3835C6A7E1F988C20060FFFDDBD2AD9794C3543D0381A0673E41261",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "treeFirstResultSha256": "377B6A6CDEAA110C90BF99D4A3717F0D15C35F4E4F0A474BECFE5EF8FAA0186C",
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7"
+  },
+  "buildMonitoringQualification": {
+    "actualExport": "Distinct grass-native-plan-02 passed existing observational allowlist/None working-set controls. ISPC1.24 --version is log/source-corroborated but absent from process samples; no full short-lived-child identity/endpoint-history claim. No new helper allowance.",
+    "links": "Two genuine import libraries, two resource conversions and resource-token-only DLL links passed under detached pre-resume limit1/no-breakaway jobs; no forged produced items. PE/PDB identities and actual UBT metadata verified.",
+    "failedExport": "grass-native-plan-01 FAILED: unidentified exited child20456, path unavailable; no retrospective identity or endpoint claim. Preserved failure is not superseded as a pass.",
+    "limit": "Build/source evidence only. New14-package import/reload, cook and actual ordinary gameplay remain separate unpassed gates. Selected grove03 untouched.",
+    "inherited": {
+      "inherited": {
+        "inherited": {
+          "inherited": "Genuine integrated strict native-menu/equipment/current-save/resume fixture game compile4/library6/DLL5 and metadata passed. Editor importer unchanged from previous genuine receipt. Raw guarded step evidence retained under exact paths/hash. Prior failed import01 and historical compiler/link/monitor qualifications remain unchanged. No new gameplay acceptance inferred from compilation.",
+          "current": "Genuine UBT exports/UHT, exact guarded native compiler/library/DLL leaves, resource-only substitutions, actual PE/PDB checks and real UBT metadata. UBT export/metadata remain sampled observational tools with the previously approved build-only conhost; not root-only leaf proofs. Original failed compiles and missing-RHI-dependency link remain failed. Global marker not used for these compiler leaves.",
+          "correction": "Typed TObjectPtr declarations, genuine UHT refresh after header movement, explicit RHI dependency for installed UE5.8 shader-platform material readiness. An attempted feature-level overload was rejected by the actual compiler and retained, not cast or claimed successful.",
+          "limit": "No tree import, persisted asset, Cook, Shipping or visual/runtime acceptance from this build."
+        },
+        "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+        "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+        "correction": "Importer only: referenced FBX bounds in UE frame; branch-only invertible UV swap; supported Tangents|UseMikkTSpace with exact nonzero-normal preservation; pre/post per-role basis measurements. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and actual metadata succeeded."
+      },
+      "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+      "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+      "correction": "Importer only: distinguish orphan vertex instances from referenced corners; permit only remaining exact-zero single-face referenced corners to use valid engine-computed face normals; regenerate Mikk tangents and compare nonzero normals exactly. Record intermediate/final per-role measurements and pre-adaptation actual bounds. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and metadata succeeded."
+    },
+    "compilers": "Five genuine root-only guarded compile actions passed; action5 first failed on TObjectPtr deduction/mixed SmoothStep types, corrected in source and passed as distinct compile5-02. Actual original failure retained."
+  },
+  "mode": "Cook",
+  "softSeconds": 0,
+  "hardSeconds": 0,
+  "ceilingSeconds": 0,
+  "trialIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Content\\Trials\\Fern02_20260920_01",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745031,
+    "Attributes": 16,
+    "CreationTime": 134344292261599283
+  },
+  "deadlineProfile": "CookCompletionDriven",
+  "supervisorReceiptSha256": "7348068DFF3AE9E9A60F2926F33F351FDF3B206FD1AA958D4E007B12CC6506D2",
+  "wrapperSha256": "0A054288785B1B3E28C304AF69A23D9884A26044BA1C4C714CA0416F1E17E52A",
+  "startupSeconds": 0,
+  "captureSeconds": 0,
+  "ddc": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+  "ddcIdentity": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-02\\DDC",
+    "Volume": 3222469187,
+    "IndexHigh": 65536,
+    "IndexLow": 745022,
+    "Attributes": 16,
+    "CreationTime": 134344292212644463
+  },
+  "completionDriven": true
+}

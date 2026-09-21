@@ -1,0 +1,71 @@
+Module.SurvivalGame.2.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(308,20): error C3535: cannot deduce type for 'auto *' from 'TObjectPtr<UStaticMesh>'
+        auto* Mesh = Batch->GetStaticMesh();
+                   ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(308,20): error C2440: 'initializing': cannot convert from 'TObjectPtr<UStaticMesh>' to '<error type> *'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(308,20): note: No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(310,29): error C3536: 'Data': cannot be used before it is initialized
+        const int32 Count = Data && Data->LODResources.Num() == 1 ? Data->LODResources[0].GetNumTriangles() : 0;
+                            ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(310,21): error C2737: 'Count': const object must be initialized
+        const int32 Count = Data && Data->LODResources.Num() == 1 ? Data->LODResources[0].GetNumTriangles() : 0;
+                    ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(315,20): error C2737: 'Ready': const object must be initialized
+        const bool Ready = Mesh && Mesh->GetStaticMaterials().Num() == 1
+                   ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(353,38): error C7595: 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,double,double,double,double,int,double,double,double,double,double,double,float,bool,bool>::TCheckedFormatStringPrivate': call to immediate function is not a constant expression
+            Rows.Add(FString::Printf(TEXT("%s,%d,%.6f,%.6f,%.6f,%.6f,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d"),
+                                     ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: failure was caused by call of undefined function or one not declared 'constexpr'
+X(SNeedsWideCharPtrArg, "'%s' expects `TCHAR*`.")
+^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: see usage of 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,double,double,double,double,int,double,double,double,double,double,double,float,bool,bool>::PRINTF_FORMAT_STRING_ERROR'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(353,38): note: the call stack of the evaluation (the oldest call first) is
+            Rows.Add(FString::Printf(TEXT("%s,%d,%.6f,%.6f,%.6f,%.6f,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d"),
+                                     ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadVisualPlaytest.cpp(353,38): note: while evaluating function 'UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,double,double,double,double,int,double,double,double,double,double,double,float,bool,bool>::TCheckedFormatStringPrivate<70>(const CharType (&)[70])'
+        with
+        [
+            CharType=FString::FmtCharType
+        ]
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\String\FormatStringSanErrors.inl(13,1): note: while evaluating function 'void UE::Core::Private::FormatStringSan::TCheckedFormatStringPrivate<FString::FmtCharType,int,double,double,double,double,int,double,double,double,double,double,double,float,bool,bool>::PRINTF_FORMAT_STRING_ERROR(const char *)'
+X(SNeedsWideCharPtrArg, "'%s' expects `TCHAR*`.")
+^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(211,31): error C2672: 'FMath::SmoothStep': no matching overloaded function found
+    const float Home = FMath::SmoothStep(650.0f, 1000.0f, FVector2D(X + 1000, Y).Size());
+                              ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\Math\UnrealMathUtility.h(2362,35): note: could be 'T FMath::SmoothStep(T,T,T)'
+	[[nodiscard]] static constexpr T SmoothStep(T A, T B, T X)
+	                                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(211,31): note: 'T FMath::SmoothStep(T,T,T)': template parameter 'T' is ambiguous
+    const float Home = FMath::SmoothStep(650.0f, 1000.0f, FVector2D(X + 1000, Y).Size());
+                              ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(211,31): note: could be 'T'
+        with
+        [
+            T=double
+        ]
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(211,31): note: or       'float'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(211,31): note: 'T FMath::SmoothStep(T,T,T)': could not deduce template argument for 'T' from 'T'
+        with
+        [
+            T=double
+        ]
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(211,17): error C2737: 'Home': const object must be initialized
+    const float Home = FMath::SmoothStep(650.0f, 1000.0f, FVector2D(X + 1000, Y).Size());
+                ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(212,31): error C2672: 'FMath::SmoothStep': no matching overloaded function found
+    const float Bank = FMath::SmoothStep(195.0f, 350.0f, FMath::Abs(X - Homestead::StreamX(Y)));
+                              ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\Core\Public\Math\UnrealMathUtility.h(2362,35): note: could be 'T FMath::SmoothStep(T,T,T)'
+	[[nodiscard]] static constexpr T SmoothStep(T A, T B, T X)
+	                                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(212,31): note: 'T FMath::SmoothStep(T,T,T)': template parameter 'T' is ambiguous
+    const float Bank = FMath::SmoothStep(195.0f, 350.0f, FMath::Abs(X - Homestead::StreamX(Y)));
+                              ^
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(212,31): note: could be 'double'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(212,31): note: or       'float'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(212,31): note: 'T FMath::SmoothStep(T,T,T)': could not deduce template argument for 'T' from 'double'
+E:\Repos\SurvivalGame\Source\SurvivalGame\HomesteadWorld.cpp(212,17): error C2737: 'Bank': const object must be initialized
+    const float Bank = FMath::SmoothStep(195.0f, 350.0f, FMath::Abs(X - Homestead::StreamX(Y)));
+                ^

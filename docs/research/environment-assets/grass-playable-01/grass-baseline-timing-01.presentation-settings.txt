@@ -1,0 +1,68 @@
+Opt-in observer only. Normal mapped game inputs; fresh test-sandbox world, no save injection, teleports or time edits.
+Output is GPU-rendered game framebuffer, NOT physical scanout. Actual DXGI Present flags/interval, DWM composition and VRR engagement are not observed.
+Timing records instrumented actor-tick wall intervals, NOT GPU duration or present timestamps. Only timing-* precedes all screenshot requests; capture-* is readback-disturbed and visits different positions, not a controlled performance A/B.
+Runtime CVars and user settings are recorded separately. output_target is not the internal temporal-upscaler input resolution; auto/default resolution policy may require further evidence.
+process_used_physical_bytes[start]=908574720
+[start] rhi=D3D12 render_offscreen=1 forced_windowed=1
+actual_viewport=1280,720 output_target=1280,720 actual_window_mode=2 (0=exclusive,1=borderless,2=windowed)
+heroine_mesh=/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave relative_scale=X=1.000 Y=1.000 Z=1.000
+heroine_material[0]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Skin_2147481328 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin
+heroine_material[1]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Modular_BaseBra_2147481327 base_material=/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra
+heroine_material[2]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Modular_BaseBriefs_2147481326 base_material=/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs
+heroine_material[3]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Hair_long01_Neutral_2147481325 base_material=/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral
+heroine_material[4]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_LightEyes_2147481324 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes
+heroine_material[5]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Eyebrows_2147481323 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows
+heroine_material[6]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Eyelashes_2147481322 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes
+heroine_material[7]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Teeth_2147481321 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth
+heroine_material[8]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Tongue_2147481320 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue
+user_settings_resolution=1920,1080 user_settings_mode=2 user_settings_vsync=0 user_settings_dynamic_resolution=0 user_settings_frame_limit=60.000 user_settings_scale=0.000
+cvar r.VSync=0 flags=0x03000160
+cvar t.MaxFPS=60 flags=0x02000000
+cvar r.FullScreenMode=1 flags=0x03000140
+cvar r.ScreenPercentage=0 flags=0x00000140
+cvar r.ScreenPercentage.Default=100 flags=0x00000140
+cvar r.ScreenPercentage.Default.Desktop.Mode=1 flags=0x00000140
+cvar r.DynamicRes.OperationMode=0 flags=0x00000020
+cvar r.AntiAliasingMethod=4 flags=0x04000020
+cvar sg.AntiAliasingQuality=3 flags=0x02000180
+cvar r.TemporalAA.Upsampling=1 flags=0x00000000
+cvar r.TSR.History.ScreenPercentage=200 flags=0x02000160
+cvar r.DefaultFeature.MotionBlur=0 flags=0x04000000
+cvar r.MotionBlurQuality=4 flags=0x02000160
+cvar r.Shadow.Virtual.Enable=1 flags=0x04000160
+cvar r.DynamicGlobalIlluminationMethod=1 flags=0x04000020
+cvar r.ReflectionMethod=1 flags=0x04000020
+cvar rhi.SyncInterval=1 flags=0x00000000
+cvar r.D3D12.UseAllowTearing=1 flags=0x00000024
+process_used_physical_bytes[end]=959627264
+[end] rhi=D3D12 render_offscreen=1 forced_windowed=1
+actual_viewport=1280,720 output_target=1280,720 actual_window_mode=2 (0=exclusive,1=borderless,2=windowed)
+heroine_mesh=/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave relative_scale=X=1.000 Y=1.000 Z=1.000
+heroine_material[0]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Skin_2147481328 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Skin.M_Heroine_Skin
+heroine_material[1]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Modular_BaseBra_2147481327 base_material=/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBra.M_Modular_BaseBra
+heroine_material[2]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Modular_BaseBriefs_2147481326 base_material=/Game/SurvivalGame/Characters/ModularClothing/Materials/M_Modular_BaseBriefs.M_Modular_BaseBriefs
+heroine_material[3]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Hair_long01_Neutral_2147481325 base_material=/Game/Trials/HeroineWave_20260921_01/Materials/M_Heroine_Hair_long01_Neutral.M_Heroine_Hair_long01_Neutral
+heroine_material[4]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_LightEyes_2147481324 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_LightEyes.M_Heroine_LightEyes
+heroine_material[5]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Eyebrows_2147481323 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyebrows.M_Heroine_Eyebrows
+heroine_material[6]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Eyelashes_2147481322 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Eyelashes.M_Heroine_Eyelashes
+heroine_material[7]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Teeth_2147481321 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Teeth.M_Heroine_Teeth
+heroine_material[8]=/Game/SurvivalGame/Maps/Homestead.Homestead:PersistentLevel.HomesteadCharacter_2147482409.MID_M_Heroine_Tongue_2147481320 base_material=/Game/SurvivalGame/Characters/Heroine/Materials/M_Heroine_Tongue.M_Heroine_Tongue
+user_settings_resolution=1920,1080 user_settings_mode=2 user_settings_vsync=0 user_settings_dynamic_resolution=0 user_settings_frame_limit=60.000 user_settings_scale=0.000
+cvar r.VSync=0 flags=0x03000160
+cvar t.MaxFPS=60 flags=0x02000000
+cvar r.FullScreenMode=1 flags=0x03000140
+cvar r.ScreenPercentage=0 flags=0x00000140
+cvar r.ScreenPercentage.Default=100 flags=0x00000140
+cvar r.ScreenPercentage.Default.Desktop.Mode=1 flags=0x00000140
+cvar r.DynamicRes.OperationMode=0 flags=0x00000020
+cvar r.AntiAliasingMethod=4 flags=0x04000020
+cvar sg.AntiAliasingQuality=3 flags=0x02000180
+cvar r.TemporalAA.Upsampling=1 flags=0x00000000
+cvar r.TSR.History.ScreenPercentage=200 flags=0x02000160
+cvar r.DefaultFeature.MotionBlur=0 flags=0x04000000
+cvar r.MotionBlurQuality=4 flags=0x02000160
+cvar r.Shadow.Virtual.Enable=1 flags=0x04000160
+cvar r.DynamicGlobalIlluminationMethod=1 flags=0x04000020
+cvar r.ReflectionMethod=1 flags=0x04000020
+cvar rhi.SyncInterval=1 flags=0x00000000
+cvar r.D3D12.UseAllowTearing=1 flags=0x00000024

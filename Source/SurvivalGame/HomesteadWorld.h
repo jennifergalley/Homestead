@@ -105,4 +105,5 @@ private:
     void UpdateLighting(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
     static float CellBase(int CellX, int CellY);
+    static float GrassGroundWeight(float X, float Y);
 };

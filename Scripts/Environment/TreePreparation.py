@@ -53,12 +53,51 @@ def verify_sources(source, receipt):
     return records
 
 
-def geometry_only_fbx(source, destination):
+def geometry_only_fbx(source, destination, model_names=None):
     """Strip image objects before IO; no original texture path reaches the importer."""
     root, version = parse_fbx.parse(str(source))
     objects = next(element for element in root.elems if element.id == b"Objects")
     image_ids = {element.props[0] for element in objects.elems
                  if element.id in {b"Texture", b"Video"}}
+    removed_ids = set(image_ids)
+    retained = None
+    if model_names is not None:
+        requested = set(model_names)
+        if not requested or len(requested) != len(model_names):
+            raise ValueError("Selected FBX model names must be nonempty and unique.")
+        by_id = {element.props[0]: element for element in objects.elems}
+        if len(by_id) != len(objects.elems) or any(
+                element.id not in {b"Model", b"Geometry", b"Material", b"Texture", b"Video"}
+                for element in objects.elems):
+            raise ValueError("Selected static FBX contains duplicate IDs or unsupported object types.")
+        models = {element.props[1].split(b"\x00", 1)[0].decode("utf-8"): element
+                  for element in objects.elems if element.id == b"Model"}
+        if len(models) != sum(element.id == b"Model" for element in objects.elems) or not requested <= models.keys():
+            raise ValueError("Selected FBX model names are missing or ambiguous.")
+        selected = {models[name].props[0] for name in requested}
+        connections = next(element for element in root.elems if element.id == b"Connections")
+        keep = set(selected)
+        for model_id in selected:
+            bindings = [element.props[1] for element in connections.elems
+                        if element.id == b"C" and element.props[0] == b"OO" and element.props[2] == model_id]
+            geometries = [value for value in bindings if by_id[value].id == b"Geometry"]
+            materials = [value for value in bindings if by_id[value].id == b"Material"]
+            if len(geometries) != 1 or len(materials) != 1 or len(bindings) != 2:
+                raise ValueError("Expected one geometry and one material per selected static clump.")
+            keep.update(bindings)
+        removed_ids.update(by_id.keys() - keep)
+        retained = [element for element in objects.elems if element.props[0] in keep]
+        definitions = next(element for element in root.elems if element.id == b"Definitions")
+        total = 0
+        original_types = {element.id for element in objects.elems}
+        for definition in definitions.elems:
+            if definition.id != b"ObjectType":
+                continue
+            count = next(element for element in definition.elems if element.id == b"Count")
+            if definition.props[0] in original_types:
+                count.props[0] = sum(element.id == definition.props[0] for element in retained)
+            total += count.props[0]
+        next(element for element in definitions.elems if element.id == b"Count").props[0] = total
     methods = {
         getattr(data_types, name): "add_" + name.lower()
         for name in (
@@ -73,16 +112,40 @@ def geometry_only_fbx(source, destination):
         for kind, value in zip(element.props_type, element.props):
             getattr(result, methods[kind])(value)
         for child in element.elems:
-            if element.id == b"Objects" and child.id in {b"Texture", b"Video"}:
+            if element.id == b"Objects" and child.props[0] in removed_ids:
                 continue
             if element.id == b"Connections" and child.id == b"C":
-                if any(value in image_ids for value in child.props[1:3]):
+                if any(value in removed_ids for value in child.props[1:3]):
                     continue
             result.elems.append(convert(child))
         return result
 
     encode_bin.write(str(destination), convert(root), version)
-    return {"fbxVersion": version, "removedImageObjects": len(image_ids)}
+    if retained is not None:
+        actual_root, actual_version = parse_fbx.parse(str(destination))
+        actual = next(element for element in actual_root.elems if element.id == b"Objects").elems
+
+        def identical(left, right):
+            if left.id != right.id or left.props_type != right.props_type or len(left.props) != len(right.props):
+                return False
+            for a, b in zip(left.props, right.props):
+                if hasattr(a, "tobytes"):
+                    if not hasattr(b, "tobytes") or a.tobytes() != b.tobytes():
+                        return False
+                elif isinstance(a, float):
+                    if not isinstance(b, float) or a.hex() != b.hex():
+                        return False
+                elif a != b:
+                    return False
+            return len(left.elems) == len(right.elems) and all(
+                identical(a, b) for a, b in zip(left.elems, right.elems))
+
+        if actual_version != version or len(actual) != len(retained) or not all(
+                identical(a, b) for a, b in zip(retained, actual)):
+            raise ValueError("Selected FBX roundtrip changed retained object data/arrays/transforms.")
+    return {"fbxVersion": version, "removedImageObjects": len(image_ids),
+            "selectedModels": sorted(model_names) if model_names is not None else None,
+            "retainedObjectDataVerified": retained is not None}
 
 
 def import_geometry(path):

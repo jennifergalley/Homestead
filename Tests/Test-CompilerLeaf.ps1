@@ -10,6 +10,7 @@ param(
     [switch]$UiActions,
     [switch]$WardrobeActions,
     [switch]$TreeActions,
+    [switch]$GrassActions,
     [switch]$WardrobeSlotCorrection,
     [switch]$WardrobeMenuChecks,
     [switch]$ShippingActions,
@@ -22,7 +23,8 @@ param(
     [switch]$TreeDiagnosticCandidate,
     [switch]$TreeContactCorrection,
     [switch]$GroveCandidate,
-    [switch]$GroveProxyCorrection
+    [switch]$GroveProxyCorrection,
+    [switch]$GrassGroundCandidate
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -35,11 +37,19 @@ if($TreeDiagnosticCandidate -and (-not $ShippingActions -or $HairWaveCandidate -
 if($TreeContactCorrection -and -not $TreeDiagnosticCandidate){throw 'Contact correction requires the explicit tree diagnostic candidate.'}
 if($GroveCandidate -and (-not $TreeDiagnosticCandidate -or $TreeContactCorrection)){throw 'Grove requires exclusive qualified tree Shipping selection.'}
 if($GroveProxyCorrection -and -not $GroveCandidate){throw 'Proxy correction requires the explicit grove candidate.'}
-$shippingBuildName=if($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
-$shippingLinkAction=if($TreeContactCorrection -or $GroveProxyCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
+if($GrassGroundCandidate -and (-not $TreeDiagnosticCandidate -or $GroveCandidate -or $TreeContactCorrection)){
+    throw 'Grass/ground requires exclusive qualified tree Shipping selection.'
+}
+$shippingBuildName=if($GrassGroundCandidate){'grass-shipping-build-01'}elseif($GroveProxyCorrection){'grove-shipping-build-03'}elseif($GroveCandidate){'grove-shipping-build-01'}elseif($TreeContactCorrection){'tree-shipping-build-04'}elseif($TreeDiagnosticCandidate){'tree-shipping-build-01'}elseif($WardrobeVisualCorrection){'wardrobe-shipping-build-02'}elseif($WardrobeCandidate){'wardrobe-shipping-build-01'}elseif($HairWaveCandidate){'hair-shipping-build-01'}else{'clearing-shipping-build-03'}
+$shippingLinkAction=if($GrassGroundCandidate){3}elseif($TreeContactCorrection -or $GroveProxyCorrection){1}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){2}else{1}
 $shippingLinkFolder="link$shippingLinkAction"
-$shippingCompiles=if($TreeContactCorrection -or $GroveProxyCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
+$shippingCompiles=if($GrassGroundCandidate){@(-1,0,1,2)}elseif($TreeContactCorrection -or $GroveProxyCorrection){@(-1,0)}elseif($WardrobeCandidate -or $TreeDiagnosticCandidate){@(-1,0,1)}else{@(-1,0)}
 . (Join-Path $authorityRoot 'Scripts\CompilerLeafEvidence.ps1')
+if($GrassActions -and ($FernActions -or $UiActions -or $WardrobeActions -or $TreeActions -or $ShippingActions -or
+    -not $DetachedConsole -or $CompileActionId -notin @(-1,0,1,4,5,6) -or $ResourceLinkActionId -notin @(-1,2,3,7,8) -or
+    ($CompileActionId -eq -1 -and $ResourceLinkActionId -eq -1 -and -not $ConvertResource))){
+    throw 'Only the exact grass native compile/library/DLL/resource leaves are admitted.'
+}
 if($TreeActions -and ($FernActions -or $UiActions -or $WardrobeActions -or $ShippingActions -or -not $DetachedConsole -or
     $CompileActionId -notin @(-1,0) -or $ResourceLinkActionId -notin @(-1,1,2) -or
     ($CompileActionId -eq -1 -and $ResourceLinkActionId -eq -1 -and -not $ConvertResource))){
@@ -57,7 +67,7 @@ if($WardrobeActions -and ($FernActions -or $UiActions -or $ShippingActions -or -
     $CompileActionId -notin @(-1,0,1,4) -or $ResourceLinkActionId -notin @(-1,2,3,5,6))) {
     throw 'Only exact integrated wardrobe compile/library/DLL leaves are admitted.'
 }
-if(-not $TreeActions -and -not $WardrobeActions -and ($CompileActionId -eq 4 -or $ResourceLinkActionId -eq 5)){throw 'Action requires the pinned wardrobe export.'}
+if(-not $GrassActions -and -not $TreeActions -and -not $WardrobeActions -and ($CompileActionId -eq 4 -or $ResourceLinkActionId -eq 5)){throw 'Action requires the pinned wardrobe export.'}
 if($UiActions) {
     if($FernActions -or $ShippingActions -or $CompileActionId -notin @(0,6) -or $ResourceLinkActionId -ne -1 -or
         $ConvertResource -or $DerivedDllResponse -or -not $DetachedConsole){throw 'Only the isolated UI PCH/game compile leaves are admitted.'}
@@ -65,7 +75,7 @@ if($UiActions) {
     if((& git -C $root rev-parse HEAD) -cne 'ea8a1800b7d4313413883fffd99fe89cd8fe1175'){throw 'Frozen UI source differs.'}
     & git -C $root diff --quiet HEAD -- Source
     if($LASTEXITCODE -ne 0){throw 'Frozen UI source has uncommitted edits.'}
-} elseif($CompileActionId -eq 6){throw 'Compile6 requires the pinned isolated UI plan.'}
+} elseif($CompileActionId -eq 6 -and -not $GrassActions){throw 'Compile6 requires the pinned isolated UI/grass plan.'}
 if($ShippingActions -and ($FernActions -or $UiActions -or $CompileActionId -notin $shippingCompiles -or
     $ResourceLinkActionId -notin @(-1,$shippingLinkAction) -or $ConvertResource -eq 'Probe' -or -not $DetachedConsole -or
     ($CompileActionId -eq -1 -and $ResourceLinkActionId -eq -1 -and -not $ConvertResource -and -not $EmbedShippingManifest -and -not $StageCooked))) {
@@ -89,9 +99,9 @@ $compiler='E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.ex
 $hash='FE251EF50A1545B1B0835EE17B1E785459712B38D79E45B5C1D3D28970A36619'
 if($CompileActionId -ne -1 -and $ResourceLinkActionId -ne -1){throw 'Select only one reviewed action.'}
 if($ConvertResource -and ($CompileActionId -ne -1 -or $ResourceLinkActionId -ne -1)){throw 'Conversion must be a separate leaf.'}
-$dllActionIds=if($TreeActions){@(1)}elseif($WardrobeActions){@(2,5)}elseif($ShippingActions){@($shippingLinkAction)}elseif($FernActions){@(2)}else{@(6,9)}
+$dllActionIds=if($GrassActions){@(2,7)}elseif($TreeActions){@(1)}elseif($WardrobeActions){@(2,5)}elseif($ShippingActions){@($shippingLinkAction)}elseif($FernActions){@(2)}else{@(6,9)}
 if($FernActions -and ($CompileActionId -notin @(-1,0,1) -or $ResourceLinkActionId -notin @(-1,2,3))){throw 'Only the two exported fern compiles/library/DLL are admitted.'}
-if(-not $TreeActions -and -not $FernActions -and -not $WardrobeActions -and -not($ShippingActions -and ($WardrobeCandidate -or $TreeDiagnosticCandidate)) -and $ResourceLinkActionId -in @(2,3)){throw 'Link IDs require an explicitly pinned action map.'}
+if(-not $GrassActions -and -not $TreeActions -and -not $FernActions -and -not $WardrobeActions -and -not($ShippingActions -and ($WardrobeCandidate -or $TreeDiagnosticCandidate)) -and $ResourceLinkActionId -in @(2,3)){throw 'Link IDs require an explicitly pinned action map.'}
 if($DerivedDllResponse -and $ResourceLinkActionId -notin $dllActionIds){throw 'Derived response requires an approved DLL link.'}
 $selectedId=if($ResourceLinkActionId -ne -1){$ResourceLinkActionId}else{$CompileActionId}
 if($EmbedShippingManifest) {
@@ -114,8 +124,8 @@ if($ConvertResource) {
     $hash='B5DA94E7B9FF60B388EA9013D9E0E3D4A2A68BFF7C668C7017583459DAC4E3C5'
 }
 if($ResourceLinkActionId -ne -1) {
-    $compiler=if($ResourceLinkActionId -eq 8){'C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe'}else{'E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\link.exe'}
-    $hash=if($ResourceLinkActionId -eq 8){'43DA1503C262C30894C851589BF0155F8365D77E63A5F7BC13982320E3A6B42D'}else{'A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F'}
+    $compiler=if($ResourceLinkActionId -eq 8 -and -not $GrassActions){'C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe'}else{'E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\link.exe'}
+    $hash=if($ResourceLinkActionId -eq 8 -and -not $GrassActions){'43DA1503C262C30894C851589BF0155F8365D77E63A5F7BC13982320E3A6B42D'}else{'A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F'}
     $busyFilter=if($ShippingActions){"Name='mspdbsrv.exe'"}else{"Name='mspdbsrv.exe' OR Name='UnrealEditor.exe' OR Name='UnrealEditor-Cmd.exe'"}
     if(@(Get-CimInstance Win32_Process -Filter $busyFilter).Count){throw 'Unowned PDB server or conflicting Editor prevents admission.'}
     if($ShippingActions -and @(Get-CimInstance Win32_Process -Filter "Name='SurvivalGame-Win64-Shipping.exe'" |
@@ -138,7 +148,7 @@ if($StageCooked) {
     . (Join-Path $authorityRoot 'Scripts\FernSpikePolicy.ps1')
     $source='E:\Program Files\UE_5.8\Engine\Binaries\DotNET\AutomationTool\AutomationTool.dll'
     if((Get-FileHash $source).Hash -cne 'DBE23866969B66071B7035E8D4B262ED3B646A67883442748652BA89B98DA2FD'){throw 'Installed AutomationTool identity differs.'}
-    $cookOutput=Join-Path $root ("Saved\Automation\20260921-033354-2d257ba0\"+$(if($TreeDiagnosticCandidate){'tree-diagnostic-cook-02'}elseif($WardrobeCandidate){'wardrobe-cook-01'}elseif($HairWaveCandidate){'hair-cook-01'}else{'clearing-cook-02'}))
+    $cookOutput=Join-Path $root ("Saved\Automation\20260921-033354-2d257ba0\"+$(if($GrassGroundCandidate){'grass-ground-cook-01'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-cook-02'}elseif($WardrobeCandidate){'wardrobe-cook-01'}elseif($HairWaveCandidate){'hair-cook-01'}else{'clearing-cook-02'}))
     $cookProof=Get-Content (Join-Path $cookOutput 'probe-result.json') -Raw|ConvertFrom-Json
     $expectedCookStatus=if($TreeDiagnosticCandidate){'passed-diagnostic-only'}else{'passed'}
     if($cookProof.status -cne $expectedCookStatus -or -not $cookProof.subjectExited -or $cookProof.hardTerminated -or
@@ -156,16 +166,28 @@ if($StageCooked) {
     }
     if($TreeDiagnosticCandidate){
         . (Join-Path $authorityRoot 'Scripts\TreeSpikePolicy.ps1')
+        $cookHash=if($GrassGroundCandidate){'6419F080A64F562B0B7A747030C4DF38AD23B168BBECD6834C5583FCCF3A4583'}else{'D7E7C3AA4E524AD562BE6006645BBEFFF335B0F6E036AB69CB29AB5AA8700A0B'}
         if(-not $cookProof.treeDiagnostic -or
-            (Get-FileHash (Join-Path $cookOutput 'probe-result.json')).Hash -cne 'D7E7C3AA4E524AD562BE6006645BBEFFF335B0F6E036AB69CB29AB5AA8700A0B'){
-            throw 'Only the exact completed qualified tree cook02 is admitted.'
+            (Get-FileHash (Join-Path $cookOutput 'probe-result.json')).Hash -cne $cookHash){
+            throw 'Only the exact completed selected qualified cook is admitted.'
         }
         $null=Get-TreeFailedImportDiagnosticAdmission $root
         $additional+=@(Get-TreePackageStems|ForEach-Object {"Content\Trials\TreeSmall02_20260921_01\$_.uasset"})
     }
+    if($GrassGroundCandidate){
+        . (Join-Path $authorityRoot 'Scripts\GrassGroundPolicy.ps1')
+        $assets=Join-Path $root 'docs\research\environment-assets\grass-assets-01\receipt.json'
+        if((Get-FileHash $assets).Hash -cne '698941DB6CAF37A3352AB00B8313AED07EA649D4B8D5C0AC2FBB1E5614E36E6C'){
+            throw 'Passed grass import/reload receipt differs.'
+        }
+        foreach($package in (Get-Content $assets -Raw|ConvertFrom-Json).packages){
+            if((Get-FileHash (Join-Path $root $package.path)).Hash -cne $package.sha256){throw 'Verified grass package differs.'}
+        }
+        $additional+=@(Get-GrassPackageStems|ForEach-Object {"Content\Trials\GrassGround_20260921_01\$_.uasset"})
+    }
     Assert-HomesteadCookOutput (Get-Content (Join-Path $cookOutput 'cook-result.json') -Raw|ConvertFrom-Json) $cookOutput -AdditionalPackages $additional
     $cooked=Join-Path $cookOutput 'Cooked'
-    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GroveProxyCorrection){'clearing-grove-03'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
+    $stageCandidate=Join-Path $root ("Build\Releases\$($run.id)\"+$(if($GrassGroundCandidate){'grass-ground-01'}elseif($GroveProxyCorrection){'clearing-grove-03'}elseif($GroveCandidate){'clearing-grove-01'}elseif($TreeContactCorrection){'tree-diagnostic-03'}elseif($TreeDiagnosticCandidate){'tree-diagnostic-01'}elseif($WardrobeVisualCorrection){'wardrobe-ui-02'}elseif($WardrobeCandidate){'wardrobe-ui-01'}elseif($HairWaveCandidate){'hair-waves-01'}else{'clearing-02'}))
     if(Test-Path $stageCandidate){throw 'Fresh candidate required; no overwrite of an earlier stage.'}
     $clone=Join-Path $output 'CookInput\Windows'
     $null=New-Item -ItemType Directory -Path $clone
@@ -268,6 +290,10 @@ if($StageCooked) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grove-shipping-plan-03\actions.json'
         $planHash='E2329563F407BED73D8982E7B12C5A1415BA5AEA821A1275B0C478E22650FE29'
     }
+    if($GrassGroundCandidate){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grass-shipping-plan-01\actions.json'
+        $planHash='0F48D68CEC9BBD5E516FED07DD1089734268CD0FBAC27BDEF732E9D9C4C3061A'
+    }
     if($WardrobeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\wardrobe-native-plan-01\actions.json'
         $planHash='5A801AC790664B9C17894AB1C730EBEC1DB5E541A8343D9B01E6CF1BE7A3E0AE'
@@ -275,6 +301,10 @@ if($StageCooked) {
     if($TreeActions) {
         $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\tree-native-plan-05\actions.json'
         $planHash='3A3D94AF587678B71DCC3F41FF6350660CDC4F1487EC115337399EEB939BDA92'
+    }
+    if($GrassActions){
+        $planPath=Join-Path $root 'Saved\Automation\20260921-033354-2d257ba0\grass-native-plan-02\actions.json'
+        $planHash='577B28BD42785B07E151648FFF10A32A0A95D5CBC5DD0960CE004132695D6C3E'
     }
     if((Get-FileHash $planPath).Hash -cne $planHash) { throw 'Reviewed action export changed.' }
     $plan=Get-Content $planPath -Raw|ConvertFrom-Json
@@ -338,6 +368,14 @@ if($StageCooked) {
                 if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Tree prerequisite product changed.'}
             }
         }
+        if($GrassActions){
+            $leaf=if($dependency -eq 5){'compile5-02'}else{"compile$dependency"}
+            $proof=Get-Content (Join-Path $root "Saved\Automation\20260921-033354-2d257ba0\grass-native-build-01\$leaf\result.json") -Raw|ConvertFrom-Json
+            if($proof.status -cne 'passed' -or $proof.compileActionId -ne $dependency){throw 'Actual grass prerequisite compile missing.'}
+            foreach($product in $proof.producedItems){
+                if((Get-FileHash $product.path).Hash -cne $product.sha256){throw 'Grass prerequisite product changed.'}
+            }
+        }
     }
     $exactArguments=$action.CommandArguments
     if($FernActions) {
@@ -355,7 +393,7 @@ if($StageCooked) {
     $pending=[Collections.Generic.Queue[string]]::new()
     if($action.CommandArguments -match '@"([^"]+)"') {
         $response=[IO.Path]::GetFullPath($Matches[1].Replace('/','\'));$pending.Enqueue($response)
-    } elseif($ResourceLinkActionId -ne 8){throw 'Missing reviewed response file.'}
+    } elseif($ResourceLinkActionId -ne 8 -or $GrassActions){throw 'Missing reviewed response file.'}
     $seen=[Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     while($pending.Count) {
         $path=$pending.Dequeue()
@@ -369,14 +407,14 @@ if($StageCooked) {
     if($CompileActionId -ne -1) {
         $first=(Get-Content $response -TotalCount 1).Trim('"').Replace('/','\')
         $source=[IO.Path]::GetFullPath($first)
-    } elseif($ResourceLinkActionId -eq 8) {
+    } elseif($ResourceLinkActionId -eq 8 -and -not $GrassActions) {
         $source='E:\Program Files\UE_5.8\Engine\Build\Windows\Resources\Default.rc2'
     } else { $source=$response }
     if($DerivedDllResponse) {
         $derived=[IO.Path]::GetFullPath($DerivedDllResponse,$root)
         if(-not $derived.StartsWith((Join-Path $root "Saved\Automation\$($run.id)")+'\',[StringComparison]::OrdinalIgnoreCase) -or
             (Split-Path (Split-Path $derived -Parent) -Leaf) -notmatch '^resource-conversion-[0-9]{2}$'){throw 'Derived response is outside the approved fresh recipe.'}
-        $gameLink=if($TreeActions){$false}elseif($WardrobeActions){$ResourceLinkActionId -eq 5}else{$ResourceLinkActionId -eq 6}
+        $gameLink=if($GrassActions){$ResourceLinkActionId -eq 7}elseif($TreeActions){$false}elseif($WardrobeActions){$ResourceLinkActionId -eq 5}else{$ResourceLinkActionId -eq 6}
         $which=if($ShippingActions -or $gameLink){'game'}else{'probe'}
         $module=if($gameLink){'SurvivalGame'}else{'SurvivalGameEditor'}
         $resource=Join-Path $root "Intermediate\Build\Win64\x64\UnrealEditor\Development\$module\Default.rc2.res"
@@ -470,7 +508,8 @@ try {
         treeContactCorrection=[bool]$TreeContactCorrection
         groveCandidate=[bool]$GroveCandidate
         groveProxyCorrection=[bool]$GroveProxyCorrection
-        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions;treeActions=[bool]$TreeActions
+        grassGroundCandidate=[bool]$GrassGroundCandidate
+        creationFlags=$guard.CreationFlags;detachedConsole=[bool]$DetachedConsole;fernActions=[bool]$FernActions;uiActions=[bool]$UiActions;shippingActions=[bool]$ShippingActions;wardrobeActions=[bool]$WardrobeActions;treeActions=[bool]$TreeActions;grassActions=[bool]$GrassActions
     }|ConvertTo-Json -Depth 8|Set-Content (Join-Path $output 'launch.json')
     $guard.Resume()
     $null=$observedPids.Add($guard.ProcessId)
@@ -554,6 +593,7 @@ try {
                 executable='SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe';status='Genuine loose-file stage; runtime acceptance pending';
                 cookedInput=$cooked;nativeExecutableSha256=$native.exe.sha256;containersUsed=$false;runtimeVerified=$false;
                 treeDiagnostic=[bool]$TreeDiagnosticCandidate;
+                grassGroundCandidate=[bool]$GrassGroundCandidate;
                 diagnosticQualification=$(if($TreeDiagnosticCandidate){'Retained failed import03: exactly12 branch source-description tangent/binormal corners. Ordinary-game diagnostic only; not clean acceptance or promotion.'}else{$null})} |
                 ConvertTo-Json|Set-Content (Join-Path $stageCandidate 'build-receipt.json')
         }

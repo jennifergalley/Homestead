@@ -1,0 +1,4 @@
+FernSpike.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\FernSpike.cpp(1638,67): warning C4996: 'UStaticMesh::AssetImportData': Please do not access this member directly, it will become private soon; use UStaticMesh::GetAssetImportData() or UStaticMesh::SetAssetImportData(). - Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile.
+            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->AssetImportData);
+                                                                  ^

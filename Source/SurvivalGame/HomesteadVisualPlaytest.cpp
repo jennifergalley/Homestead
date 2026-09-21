@@ -16,6 +16,8 @@
 #include "HardwareInfo.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "ProceduralMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/StaticMesh.h"
 #include "StaticMeshResources.h"
@@ -194,7 +196,11 @@ void AHomesteadVisualPlaytest::Prepare()
     }
     bTreeRoute = !bWaterRoute && !bClearRoute && !bWeedRoute && !bPresentationDiagnostics;
     if (bTreeRoute) PrepareTreeEncounter();
-    if (bTreeRoute || bPresentationDiagnostics) RecordGroveInventory();
+    if (bTreeRoute || bPresentationDiagnostics)
+    {
+        RecordGroveInventory();
+        RecordGrassGroundInventory();
+    }
     RecordPresentationSettings(TEXT("start"));
     LastWallTime = FPlatformTime::Seconds();
 }
@@ -277,6 +283,119 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
         Valid = false;
     Observations.Add(FString::Printf(TEXT("%sGrove inventory: trees=%d triangles=%lld valid=%d; shared qualified LOD2, not a whole-scene GPU cost."),
         Valid ? TEXT("") : TEXT("FAILED "), Trees.Num(), static_cast<long long>(TotalTriangles), Valid));
+}
+
+void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
+{
+    TArray<UHierarchicalInstancedStaticMeshComponent*> Batches;
+    if (PC->Landscape) PC->Landscape->GetComponents(Batches);
+    const FString Prefix = TEXT("/Game/Trials/GrassGround_20260921_01");
+    const auto MaterialReady = [&](UMaterialInterface* Interface, const TCHAR* Name)
+    {
+        auto* Material = Interface ? Interface->GetMaterial() : nullptr;
+        auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+        return Material && Material->GetPathName() == Prefix + TEXT("/Materials/") + Name + TEXT(".") + Name
+            && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
+    };
+    TArray<FString> Rows;
+    Rows.Add(TEXT("mesh,instance,x,y,z,yaw,triangles,scale_error,ground_error_cm,home_margin_cm,resource_margin_cm,structure_margin_cm,plot_margin_cm,grass_weight,materials_ready,nonblocking"));
+    bool Valid = PC->Landscape != nullptr;
+    int32 Clumps = 0, Triangles = 0, AuthoredBatches = 0;
+    for (auto* Batch : Batches)
+    {
+        if (!Batch->ComponentHasTag(TEXT("AuthoredGrassMedium01"))) continue;
+        ++AuthoredBatches;
+        UStaticMesh* Mesh = Batch->GetStaticMesh();
+        const auto* Data = Mesh ? Mesh->GetRenderData() : nullptr;
+        const int32 Count = Data && Data->LODResources.Num() == 1 ? Data->LODResources[0].GetNumTriangles() : 0;
+        const FBox Bounds = Mesh ? Mesh->GetBoundingBox() : FBox(ForceInit);
+        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+        const bool Nonblocking = Batch->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation();
+        const bool Ready = Mesh && Mesh->GetStaticMaterials().Num() == 1
+            && Batch->IsRenderStateCreated() && MaterialReady(Batch->GetMaterial(0), TEXT("M_GrassMedium01"));
+        const TCHAR* Names[] = { TEXT("mid_b"), TEXT("small_b"), TEXT("tall_a"), TEXT("tiny_a") };
+        const int32 Expected[] = { 1257, 653, 290, 79 };
+        bool Known = false;
+        for (int32 Index = 0; Index < 4; ++Index)
+            Known |= Mesh && Mesh->GetPathName() == Prefix + TEXT("/Meshes/SM_GrassMedium01_") + Names[Index]
+                + TEXT(".SM_GrassMedium01_") + Names[Index] && Count == Expected[Index];
+        Valid &= Known && Ready && Nonblocking && Batch->GetNumMaterials() == 1;
+        for (int32 Index = 0; Index < Batch->GetInstanceCount(); ++Index)
+        {
+            FTransform Transform;
+            if (!Batch->GetInstanceTransform(Index, Transform, true)) { Valid = false; continue; }
+            const FVector Position = Transform.TransformPosition(Anchor);
+            const double ScaleError = (Transform.GetScale3D() - FVector::OneVector).Size();
+            const double GroundError = Position.Z - AHomesteadWorld::GroundHeight(Position.X, Position.Y);
+            const double HomeMargin = FVector2D(Position.X + 1000, Position.Y).Size() - 670;
+            double ResourceMargin = 1e9, StructureMargin = 1e9, PlotMargin = 1e9;
+            for (const auto& Node : PC->State().resources)
+                ResourceMargin = FMath::Min(ResourceMargin,
+                    FVector2D::Distance(FVector2D(Position), FVector2D(Node.position.x, Node.position.y)) - 150);
+            for (const auto& Structure : PC->State().structures)
+            {
+                const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+                StructureMargin = FMath::Min(StructureMargin,
+                    FVector2D::Distance(FVector2D(Position), FVector2D(Center.x, Center.y)) - 245);
+            }
+            for (const auto& Plot : PC->State().plots)
+            {
+                const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                PlotMargin = FMath::Min(PlotMargin,
+                    FVector2D::Distance(FVector2D(Position), FVector2D(Center.x, Center.y)) - 195);
+            }
+            const float Weight = AHomesteadWorld::GrassGroundWeight(Position.X, Position.Y);
+            Valid &= ScaleError < 0.001 && FMath::Abs(GroundError) < 0.1 && HomeMargin >= -0.1
+                && ResourceMargin >= -0.1 && StructureMargin >= -0.1 && PlotMargin >= -0.1
+                && Weight >= 0.399 && HomeMargin <= 1930.1;
+            ++Clumps; Triangles += Count;
+            Rows.Add(FString::Printf(TEXT("%s,%d,%.6f,%.6f,%.6f,%.6f,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%d,%d"),
+                Mesh ? *Mesh->GetPathName() : TEXT("missing"), Index, Position.X, Position.Y, Position.Z,
+                Transform.Rotator().Yaw, Count, ScaleError, GroundError, HomeMargin, ResourceMargin,
+                StructureMargin, PlotMargin, Weight, Ready, Nonblocking));
+        }
+    }
+    Valid &= AuthoredBatches == 4 && Clumps == 512 && Triangles > 0 && Triangles <= 650000;
+    if (!FFileHelper::SaveStringArrayToFile(Rows, *FPaths::Combine(OutputDirectory, TEXT("grass-inventory.csv")))) Valid = false;
+    auto* Ground = PC->Landscape ? PC->Landscape->Ground.Get() : nullptr;
+    const auto* Section = Ground ? Ground->GetProcMeshSection(0) : nullptr;
+    bool TerrainValid = Section && Section->bEnableCollision && Ground->IsQueryCollisionEnabled()
+        && Section->ProcVertexBuffer.Num() == 103041 && Section->ProcIndexBuffer.Num() == 614400
+        && MaterialReady(Ground->GetMaterial(0), TEXT("M_GrassGroundBlend"));
+    double MaxPositionError = 0, MaxNormalError = 0, MaxUvError = 0, MaxWeightError = 0;
+    if (TerrainValid)
+    {
+        for (int32 Index = 0; Index < Section->ProcVertexBuffer.Num(); ++Index)
+        {
+            const auto& Vertex = Section->ProcVertexBuffer[Index];
+            const float X = -4000 + (Index % 321) * 25, Y = -4000 + (Index / 321) * 25;
+            const FVector Expected(X, Y, AHomesteadWorld::GroundHeight(X, Y));
+            const float DX = (AHomesteadWorld::GroundHeight(X + 1, Y) - AHomesteadWorld::GroundHeight(X - 1, Y)) * 0.5f;
+            const float DY = (AHomesteadWorld::GroundHeight(X, Y + 1) - AHomesteadWorld::GroundHeight(X, Y - 1)) * 0.5f;
+            MaxPositionError = FMath::Max(MaxPositionError, (FVector(Vertex.Position) - Expected).Size());
+            MaxNormalError = FMath::Max(MaxNormalError, (FVector(Vertex.Normal) - FVector(-DX, -DY, 1).GetSafeNormal()).Size());
+            MaxUvError = FMath::Max(MaxUvError, (FVector2D(Vertex.UV0) - FVector2D(X / 300.0f, Y / 300.0f)).Size());
+            MaxWeightError = FMath::Max(MaxWeightError, FMath::Abs(Vertex.Color.R / 255.0 - AHomesteadWorld::GrassGroundWeight(X, Y)));
+        }
+        int32 Offset = 0;
+        for (int32 Y = 0; Y < 320; ++Y)
+            for (int32 X = 0; X < 320; ++X)
+            {
+                const uint32 A = Y * 321 + X;
+                for (uint32 Index : { A, A + 321, A + 1, A + 1, A + 321, A + 322 })
+                    TerrainValid &= Section->ProcIndexBuffer[Offset++] == Index;
+            }
+        TerrainValid &= MaxPositionError < 0.001 && MaxNormalError < 0.001 && MaxUvError < 0.001 && MaxWeightError <= 1.0 / 255;
+    }
+    TArray<FString> GroundRows;
+    GroundRows.Add(TEXT("terrain_valid,vertices,triangles,max_position_error_cm,max_normal_error,max_uv_error,max_weight_error"));
+    GroundRows.Add(FString::Printf(TEXT("%d,%d,%d,%.9f,%.9f,%.9f,%.9f"), TerrainValid,
+        Section ? Section->ProcVertexBuffer.Num() : 0, Section ? Section->ProcIndexBuffer.Num() / 3 : 0,
+        MaxPositionError, MaxNormalError, MaxUvError, MaxWeightError));
+    if (!FFileHelper::SaveStringArrayToFile(GroundRows, *FPaths::Combine(OutputDirectory, TEXT("grass-ground-inventory.csv")))) TerrainValid = false;
+    Observations.Add(FString::Printf(TEXT("%sGrass/ground inventory: clumps=%d triangles=%d batches=%d placement_valid=%d terrain_valid=%d; current actor/mesh/material observations, not GPU timing."),
+        Valid && TerrainValid ? TEXT("") : TEXT("FAILED "), Clumps, Triangles, AuthoredBatches, Valid, TerrainValid));
 }
 
 void AHomesteadVisualPlaytest::PrepareTreeEncounter()

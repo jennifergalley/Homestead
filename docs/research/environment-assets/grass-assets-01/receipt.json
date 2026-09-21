@@ -1,0 +1,160 @@
+{
+  "status": "passed-grass-import-and-fresh-process-reload",
+  "createdUtc": "2026-09-21T16:03:43.6760730+00:00",
+  "nativeReceipt": {
+    "sha256": "83558EBBBEF65B17C4EC5F563B98FA0E69D66FE14E0B1520E822422F38CDA30D",
+    "path": "docs\\research\\environment-assets\\grass-native-build-01\\receipt.json"
+  },
+  "actual": {
+    "sourceUnitsBoundsSlotsAnchorsVerified": true,
+    "oldGroundMapsReadOnly": true,
+    "meshes": 4,
+    "packages": 14,
+    "exactMaterialGraphsAndReferencesVerified": true,
+    "sourceScalePreserved": true,
+    "totalMeshTriangles": 2279,
+    "sourceAndRenderTriangles": [
+      1257,
+      653,
+      290,
+      79
+    ],
+    "freshProcessReload": true,
+    "uniformImportScale": 1,
+    "simpleCollision": false,
+    "groundTextures": 3,
+    "nanite": false,
+    "grassTextures": 5
+  },
+  "source": "Exact reference-free4-model source selection, retained FBX coordinates/transforms and explicit measured placement anchors; no blind scaling/recentering or source geometry edits.",
+  "lifecycle": "Both real operations used pre-resume root-only/no-breakaway jobs, inherited existing-marker read protection, isolated configs/localDDC, execution-disabled Python measured at entry/exit. Both exited normally, observed dead before unchanged marker release; finite process/endpoint samples are not continuous history.",
+  "limits": [
+    "No actual ordinary-play grass/terrain/performance evidence yet. No promotion or Jenny art approval.",
+    "Retained tree import03 remains FAILED with exactly12 qualified branch source-description tangent/binormal corners; no tree package changes.",
+    "Native build retains export01 unidentified exited child20456, export02 short-lived ISPC sampling gap and earlier inherited monitoring qualifications."
+  ],
+  "packages": [
+    {
+      "sha256": "690047921E4281C947B25EE5E7AFCA13FC2E949A2B8364DB4784237AA034354D",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_mid_b.uasset",
+      "bytes": 61633
+    },
+    {
+      "sha256": "DE7E8021C8AEF1C6A114B2195105A5C96E18CF2309E80967219E20A065DAACAA",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_small_b.uasset",
+      "bytes": 41890
+    },
+    {
+      "sha256": "DB32D30832B31CAE90B11E555D50830736D95CB1B14F2C577681CEAFC3767775",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_tall_a.uasset",
+      "bytes": 26032
+    },
+    {
+      "sha256": "BC7D514E02700CA2340B539B100C5CE07D2AB639C74786D9640574958615E7CC",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_tiny_a.uasset",
+      "bytes": 16803
+    },
+    {
+      "sha256": "3ABD081BC19E9C526CBCA45F5A81E610491A898488B7CB5890CCA026A32F0359",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Materials\\M_GrassMedium01.uasset",
+      "bytes": 7857
+    },
+    {
+      "sha256": "8227111DC9473D9B9016CC833EEBB566FC88ADC21DCB2A7AC75CEFAA95CD0ACA",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Materials\\M_GrassGroundBlend.uasset",
+      "bytes": 10043
+    },
+    {
+      "sha256": "4EFE9AFC4CAC8B1D1C47C0A861A1A555BAD3AEEB9B7E068666EEF343EE8DF7C1",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Diff.uasset",
+      "bytes": 1990824
+    },
+    {
+      "sha256": "EA436A3C952B4332427975988544FA8B3F596B61E4E1F2FFB4C431B1D13CC5D8",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_NormalDX.uasset",
+      "bytes": 3877609
+    },
+    {
+      "sha256": "5369A2E5F0D67372C0CBF443779C7EAE484B887E2B541B3C2540133156BBE193",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Roughness.uasset",
+      "bytes": 1095264
+    },
+    {
+      "sha256": "E72663DBCD1473152ADFADCD4878B3883FD5847EC3916536E2E2082BFF4D9C29",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_AO.uasset",
+      "bytes": 608280
+    },
+    {
+      "sha256": "68A193749C1AF35E81C8A2B1698A7A1C1211EE94B7E04739A53F817F5BD7E142",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Alpha.uasset",
+      "bytes": 619672
+    },
+    {
+      "sha256": "6FB037438A143EC54A7D3FE30270E33413C66CA0C9051E7043909EC4A1473C0B",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_Diff.uasset",
+      "bytes": 24401886
+    },
+    {
+      "sha256": "01B9032418BEED691C300A03FBF7B49B720B54E9742F3FE2774BB3196D9DFFC5",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_NormalDX.uasset",
+      "bytes": 26069451
+    },
+    {
+      "sha256": "9DFDD26AD9395BD99C705C8C3A08488C4F1BFAF80B1787745F5CA83B179C811F",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_Roughness.uasset",
+      "bytes": 6812747
+    }
+  ],
+  "files": [
+    {
+      "sha256": "1B6A333B190F911139E8D3BE901218B551B21C45019E6451D8365D8EB0C934C6",
+      "copy": "grass-import-01.probe-result.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-import-01\\probe-result.json"
+    },
+    {
+      "sha256": "DE8DA23FBC6ACB4A4064122072AAF9FBB08D5DBF589A2EC05580C4EA7EF6176A",
+      "copy": "grass-import-01.grass-result.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-import-01\\grass-result.json"
+    },
+    {
+      "sha256": "89995ADB7D8145BCA5FA398C1E4831C14E47636F260F96A24FB3B266D80B716A",
+      "copy": "grass-import-01.effective-settings.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-import-01\\effective-settings.json"
+    },
+    {
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A",
+      "copy": "grass-import-01.native-exit.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-import-01\\native-exit.json"
+    },
+    {
+      "sha256": "A44032E0B74DEBE3C3F72EFD0A3F19E5C009547B811168EC82AE667D11B0EB74",
+      "copy": "grass-import-01.launch.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-import-01\\launch.json"
+    },
+    {
+      "sha256": "6DF068D14EC93AEFF0E98FE4FA86464923BCF6EB757FFE6F8E262892DD8B6E01",
+      "copy": "grass-verify-01.probe-result.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-verify-01\\probe-result.json"
+    },
+    {
+      "sha256": "5E782D1EEDF1F5B13B6758AC405954F8AC455D3340493FF50EE88B51F3EA0434",
+      "copy": "grass-verify-01.grass-result.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-verify-01\\grass-result.json"
+    },
+    {
+      "sha256": "FC90532D70F34CC7F9D61A3BB401E27C6254FC31BBC676DB82F058CD857368F9",
+      "copy": "grass-verify-01.effective-settings.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-verify-01\\effective-settings.json"
+    },
+    {
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A",
+      "copy": "grass-verify-01.native-exit.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-verify-01\\native-exit.json"
+    },
+    {
+      "sha256": "7EB8B17AFDEB6CB3EAB6226E0811499DAB91480E5E7D6BC853CF6E51A6BA7D0E",
+      "copy": "grass-verify-01.launch.json",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-verify-01\\launch.json"
+    }
+  ]
+}

@@ -206,6 +206,14 @@ void AHomesteadWorld::AddDecoration(UStaticMesh* Mesh, const FVector& Position, 
     Batch->AddInstance(FTransform(Rotation, Origin, Scale));
 }
 
+float AHomesteadWorld::GrassGroundWeight(float X, float Y)
+{
+    const float Home = FMath::SmoothStep(650.0, 1000.0, FVector2D(X + 1000, Y).Size());
+    const float Bank = FMath::SmoothStep(195.0, 350.0, FMath::Abs(X - Homestead::StreamX(Y)));
+    const float Patch = 0.5f + 0.5f * FMath::Sin(X * 0.0021f) * FMath::Cos(Y * 0.0017f);
+    return Home * Bank * FMath::Lerp(0.45f, 0.88f, Patch);
+}
+
 void AHomesteadWorld::BuildTerrain()
 {
     Ground = NewObject<UProceduralMeshComponent>(this, TEXT("OriginalMeadowTerrain"));
@@ -237,6 +245,7 @@ void AHomesteadWorld::BuildTerrain()
             const float DY = (GroundHeight(PX, PY + 1) - GroundHeight(PX, PY - 1)) * 0.5f;
             Normals.Add(FVector(-DX, -DY, 1.0f).GetSafeNormal());
             UV.Add(FVector2D(PX / 300.0f, PY / 300.0f));
+            Colors.Add(FLinearColor(GrassGroundWeight(PX, PY), 0, 0, 1));
             Tangents.Add(FProcMeshTangent(FVector(1, 0, DX).GetSafeNormal(), false));
             if (X < Cells && Y < Cells)
             {
@@ -255,6 +264,7 @@ void AHomesteadWorld::BuildTerrain()
         Triangles.Reset();
         Normals.Reset();
         UV.Reset();
+        Colors.Reset();
         Tangents.Reset();
         const int Columns = bWater ? 1 : 8;
         for (int Y = 0; Y <= Cells; ++Y)
@@ -614,7 +624,76 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
         }
     }
 
-    // Sparse instanced clumps leave the home site and interactive plants legible.
+    TArray<UStaticMesh*> GrassMeshes;
+    const TCHAR* GrassNames[] = { TEXT("mid_b"), TEXT("small_b"), TEXT("tall_a"), TEXT("tiny_a") };
+    const int32 GrassTriangles[] = { 1257, 653, 290, 79 };
+    for (int32 Index = 0; Index < 4; ++Index)
+    {
+        const FString Path = FString::Printf(
+            TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_%s.SM_GrassMedium01_%s"),
+            GrassNames[Index], GrassNames[Index]);
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
+        if (!Mesh || Mesh->GetStaticMaterials().Num() != 1 || !Mesh->GetMaterial(0)
+            || Mesh->GetMaterial(0)->GetPathName() != TEXT("/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01")
+            || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 1
+            || Mesh->GetRenderData()->LODResources[0].GetNumTriangles() != GrassTriangles[Index])
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted authored grass is missing or differs: %s"), *Path);
+            GrassMeshes.Reset();
+            break;
+        }
+        GrassMeshes.Add(Mesh);
+    }
+    int32 GrassCount = 0;
+    int32 GrassTriangleCount = 0;
+    if (GrassMeshes.Num() == 4)
+    {
+        for (int32 Attempt = 0; Attempt < 2048 && GrassCount < 512; ++Attempt)
+        {
+            FRandomStream GrassRandom(71039 + Attempt * 233);
+            const float Radius = FMath::Sqrt((Attempt + 0.5f) / 2048.0f) * 2600.0f;
+            const float Angle = Attempt * 2.39996323f;
+            const float X = -1000 + FMath::Cos(Angle) * Radius;
+            const float Y = FMath::Sin(Angle) * Radius;
+            if (Reserved(X, Y, 20) || GrassGroundWeight(X, Y) < 0.4f)
+            {
+                continue;
+            }
+            const int32 Index = Attempt % 4;
+            UStaticMesh* Mesh = GrassMeshes[Index];
+            const FName Key(*FString::Printf(TEXT("AuthoredGrass_%s"), GrassNames[Index]));
+            UHierarchicalInstancedStaticMeshComponent* Batch = nullptr;
+            if (auto* Existing = DecorationBatches.Find(Key))
+            {
+                Batch = Existing->Get();
+            }
+            else
+            {
+                Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+                Batch->SetupAttachment(GetRootComponent());
+                Batch->SetMobility(EComponentMobility::Static);
+                Batch->ComponentTags.Add(TEXT("AuthoredGrassMedium01"));
+                Batch->SetStaticMesh(Mesh);
+                Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+                Batch->SetGenerateOverlapEvents(false);
+                Batch->SetCanEverAffectNavigation(false);
+                Batch->SetCullDistances(2500, 3500);
+                Batch->bAutoRebuildTreeOnInstanceChanges = false;
+                Batch->RegisterComponent();
+                DecorationBatches.Add(Key, Batch);
+            }
+            const FBox Bounds = Mesh->GetBoundingBox();
+            const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+            const FRotator Rotation(0, GrassRandom.FRandRange(0, 360), 0);
+            Batch->AddInstance(FTransform(Rotation, AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+            ++GrassCount;
+            GrassTriangleCount += GrassTriangles[Index];
+        }
+    }
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing grass: %d nonblocking clumps, %d triangles, native scale/material."),
+        GrassCount, GrassTriangleCount);
+
+    // Retain outer meadow and flower-stem proxies outside the replaced clearing grass.
     for (int Patch = 0; Patch < 1150; ++Patch)
     {
         Random.Initialize(19271 + Patch * 199);
@@ -625,6 +704,10 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
             continue;
         }
         const bool bFlowers = Patch % 7 == 0;
+        if (!bFlowers && GrassCount > 0 && FVector2D(X + 1000, Y).Size() < 2600.0f)
+        {
+            continue;
+        }
         const FLinearColor FlowerColor = Patch % 3 == 0 ? FLinearColor(0.7f, 0.56f, 0.1f)
             : Patch % 3 == 1 ? FLinearColor(0.48f, 0.23f, 0.54f) : FLinearColor(0.83f, 0.79f, 0.59f);
         for (int Blade = 0; Blade < 3; ++Blade)
@@ -969,7 +1052,13 @@ void AHomesteadWorld::Initialize(const Homestead::State& State)
         FieldMaterial = LoadObject<UMaterialInterface>(nullptr,
             TEXT("/Game/SurvivalGame/Materials/M_Field.M_Field"));
         GroundMaterial = LoadObject<UMaterialInterface>(nullptr,
-            TEXT("/Game/SurvivalGame/Materials/M_Ground.M_Ground"));
+            TEXT("/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend"));
+        if (!GroundMaterial)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted grass-ground blend is missing; retaining original ground material."));
+            GroundMaterial = LoadObject<UMaterialInterface>(nullptr,
+                TEXT("/Game/SurvivalGame/Materials/M_Ground.M_Ground"));
+        }
         RockMaterial = LoadObject<UMaterialInterface>(nullptr,
             TEXT("/Game/SurvivalGame/Materials/M_Rock.M_Rock"));
         ImportedRock = LoadObject<UStaticMesh>(nullptr,

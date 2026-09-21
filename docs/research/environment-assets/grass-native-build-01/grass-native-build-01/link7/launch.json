@@ -1,0 +1,83 @@
+{
+  "pid": 43216,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+  "creationTime": 134344792928768643,
+  "executableSha256": "A364AF801A8539E4324D9489313DBF001D959128451FC99A27B24676BBAC058F",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-native-build-01\\link7\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 131072,
+    "IndexLow": 724369,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344792925604746,
+    "LastWriteTime": 134344792925604746,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "5218F847E372E2BED67CB9E978C508B9F28A3360D76A33D0B3F544092DE61A12",
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "allowedBuildOnlyConsole": {
+    "path": "C:\\Windows\\System32\\conhost.exe",
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "signature": "Valid"
+  },
+  "compileActionId": -1,
+  "workingDirectory": "E:\\Program Files\\UE_5.8\\Engine\\Source",
+  "responseFiles": [
+    {
+      "sha256": "5218F847E372E2BED67CB9E978C508B9F28A3360D76A33D0B3F544092DE61A12",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\UnrealEditor-SurvivalGame.dll.rsp"
+    },
+    {
+      "sha256": "C8CF436D768FE14B70C1F8211C3066560FDD1580D67D5B60152F8005E3CD554E",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\grass-game-link.rsp"
+    },
+    {
+      "sha256": "4DD7C666B3ECB7A693BEFAE11E1EAEE7EBB839B570DDB4F8EAB098EA42B32E3A",
+      "path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\game-resource.obj"
+    }
+  ],
+  "expectedProducedItems": [
+    "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+    "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+  ],
+  "resourceLinkActionId": 7,
+  "exactReviewedArguments": "@\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\grass-game-link.rsp\"",
+  "previousProductBackups": [
+    {
+      "backup": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\grass-native-build-01\\link7\\before-products\\UnrealEditor-SurvivalGame.dll",
+      "path": "E:\\Repos\\SurvivalGame\\Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "sha256": "2B69AE923A8FDF4A6163C7D947FF06B16FD7DB61876FDE62DFC18CCBBAD3C893"
+    }
+  ],
+  "resourceConversion": "",
+  "derivedDllResponse": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\grass-game-link.rsp",
+  "splitShippingManifest": false,
+  "embedShippingManifest": false,
+  "stageCooked": false,
+  "stageCandidate": null,
+  "treeDiagnosticCandidate": false,
+  "treeContactCorrection": false,
+  "groveCandidate": false,
+  "groveProxyCorrection": false,
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": false,
+  "uiActions": false,
+  "shippingActions": false,
+  "wardrobeActions": false,
+  "treeActions": false,
+  "grassActions": true
+}

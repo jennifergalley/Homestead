@@ -1,0 +1,41 @@
+Log started at 09/21/2026 08:35:08 (2026-09-21T15:35:08Z)
+Resolved project argument E:\Repos\SurvivalGame\SurvivalGame.uproject to E:\Repos\SurvivalGame\SurvivalGame.uproject
+No config file at C:\ProgramData\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Jenny\AppData\Local\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+No config file at C:\Users\Jenny\OneDrive\Documents\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Configuration will be read from:
+  C:\Users\Jenny\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): C:\Users\Jenny\AppData\Roaming\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): E:\Repos\SurvivalGame\Saved\UnrealBuildTool\BuildConfiguration.xml
+Reading configuration file from cache (E:\Repos\SurvivalGame\Intermediate\Build\XmlConfigCache.bin): C:\Users\Jenny\AppData\Local\UnrealEngine\Intermediate\Build\UnrealBuildTool.Env.BuildConfiguration.xml
+Log file: E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\grass-native-plan-01\ubt.log
+
+Setting temp directory to 'E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\grass-native-plan-01\Temp\UnrealBuildTool\863af17b'
+    Registering build platform: UnrealBuildTool.AndroidPlatformFactory
+    Registering build platform: UnrealBuildTool.IOSPlatformFactory
+    Registering build platform: UnrealBuildTool.LinuxPlatformFactory
+    Registering build platform: UnrealBuildTool.MacPlatformFactory
+    Registering build platform: UnrealBuildTool.TVOSPlatformFactory
+    Registering build platform: UnrealBuildTool.WindowsPlatformFactory
+Found Windows 10 SDK root at C:\Program Files (x86)\Windows Kits\10 (1)
+Found Windows 10 SDK root at C:\Program Files (x86)\Windows Kits\10 (2)
+Found Windows 10 SDK version 10.0.26100.0 at C:\Program Files (x86)\Windows Kits\10
+Found Universal CRT version 10.0.26100.0 at C:\Program Files (x86)\Windows Kits\10
+Win64 Installed SDK(s): MinVersion_Sdk=10.0.19041.0, MaxVersion_Sdk=10.9.99999.0, CurrentVersion_Sdk=10.0.26100.0, Version_AutoSdk=10.0.22621.0, CurrentVersion_AutoSdk=
+        Registering build platform: Win64 - buildable: True
+    Registering build platform: UnrealBuildTool.VisionOSPlatformFactory
+Command line: "E:\Program Files\UE_5.8\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll" SurvivalGameEditor Win64 Development -Project=E:\Repos\SurvivalGame\SurvivalGame.uproject -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild -NoSNDBS -NoArtifactReads -NoArtifactWrites -NoEngineChanges -Log=E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\grass-native-plan-01\ubt.log -WriteOutdatedActions=E:\Repos\SurvivalGame\Saved\Automation\20260921-033354-2d257ba0\grass-native-plan-01\actions.json
+Determining max actions to execute in parallel (8 physical cores, 16 logical cores)
+  Executing up to 8 processes, one per physical core
+  Requested 1.5 GB memory per action, 9.89 GB available: limiting max parallel actions to 6
+UbaSessionServer - Disable remote execution (remote sessions will finish current processes)
+Skipping E:\Program Files\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5Rules.dll: File is installed
+Skipping E:\Program Files\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5ProgramRules.dll: File is installed
+E:\Repos\SurvivalGame\Config\DefaultGame.ini has been modified since makefile was built.
+Invalidating makefile for SurvivalGameEditor (DefaultGame.ini modified)
+Compiler: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+Linker: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\link.exe
+Library Manager: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\link.exe
+Resource Compiler: C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe
+Resource Converter: E:\Tools\VSBuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cvtres.exe
+Using EngineIncludeOrderVersion.Unreal5_8 for target SurvivalGameEditor.Target.cs

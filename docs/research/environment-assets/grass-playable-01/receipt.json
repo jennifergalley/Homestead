@@ -1,0 +1,596 @@
+{
+  "status": "passed-qualified-grass-ground-ordinary-scenario-not-promoted",
+  "createdUtc": "2026-09-21T16:20:44.6275946+00:00",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01",
+  "executableSha256": "9F741A1F6AAD7102656DA366BD39153406C9F9EB702CC663B86382AC245806EE",
+  "sourceBaseCheckpoint": "54cc3ae8f22c2887290d2b9336418ca9888b1a45",
+  "actual": {
+    "grassTriangles": 297633,
+    "maxPositionErrorCm": 0,
+    "completedPasses": 23,
+    "trees": 15,
+    "clumpCounts": [
+      136,
+      123,
+      125,
+      128
+    ],
+    "clumps": 512,
+    "maxRedWeightQuantizationError": 0.001960745,
+    "treeBlocking": true,
+    "terrainVertices": 103041,
+    "dimensions": [
+      1280,
+      720
+    ],
+    "gathering": true,
+    "treeTriangles": 3476775,
+    "terrainTriangles": 204800,
+    "frames": 513,
+    "maxUvError": 0,
+    "batches": 4,
+    "ordinaryRetreatCm": 290.426689,
+    "plannedPasses": 23,
+    "maxNormalError": 0
+  },
+  "timing": {
+    "frameCap": 60,
+    "candidatePhysicalBytes": [
+      970379264,
+      1001316352
+    ],
+    "actualViewport": [
+      1280,
+      720
+    ],
+    "candidate": {
+      "timing-idle": {
+        "samples": 121,
+        "wall_seconds": 2.0166295,
+        "mean_tick_hz": 60.00110580550369,
+        "median_ms": 16.666699,
+        "p95_ms": 16.844001,
+        "p99_ms": 16.935501,
+        "max_ms": 16.937003,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 0.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-walk": {
+        "samples": 360,
+        "wall_seconds": 6.0003277950000005,
+        "mean_tick_hz": 59.996722229072816,
+        "median_ms": 16.6682505,
+        "p95_ms": 16.862497,
+        "p99_ms": 16.969997,
+        "max_ms": 17.0886,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 90.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-turn": {
+        "samples": 360,
+        "wall_seconds": 6.000045794,
+        "mean_tick_hz": 59.99954206349513,
+        "median_ms": 16.66555,
+        "p95_ms": 16.845398,
+        "p99_ms": 16.9589,
+        "max_ms": 17.0273,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 106.58099999999988
+      },
+      "timing-sweep": {
+        "samples": 360,
+        "wall_seconds": 6.0001039060000005,
+        "mean_tick_hz": 59.99896095799378,
+        "median_ms": 16.665,
+        "p95_ms": 16.865697,
+        "p99_ms": 16.9277,
+        "max_ms": 17.074998,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 319.7409999999994
+      }
+    },
+    "baseline": {
+      "timing-idle": {
+        "samples": 120,
+        "wall_seconds": 2.0000399950000003,
+        "mean_tick_hz": 59.998800173993516,
+        "median_ms": 16.6729505,
+        "p95_ms": 16.8433,
+        "p99_ms": 16.932499,
+        "max_ms": 16.957801,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 0.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-walk": {
+        "samples": 360,
+        "wall_seconds": 6.000080604,
+        "mean_tick_hz": 59.999193970828195,
+        "median_ms": 16.664801500000003,
+        "p95_ms": 16.859401,
+        "p99_ms": 16.980302,
+        "max_ms": 17.648999,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 90.0,
+        "camera_yaw_travel_degrees": 0.0
+      },
+      "timing-turn": {
+        "samples": 360,
+        "wall_seconds": 6.000127898,
+        "mean_tick_hz": 59.99872104726258,
+        "median_ms": 16.6646,
+        "p95_ms": 16.855501,
+        "p99_ms": 17.0044,
+        "max_ms": 17.0932,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 106.57899999999947
+      },
+      "timing-sweep": {
+        "samples": 361,
+        "wall_seconds": 6.0168811,
+        "mean_tick_hz": 59.99786168285758,
+        "median_ms": 16.6656,
+        "p95_ms": 16.873099,
+        "p99_ms": 17.008699,
+        "max_ms": 17.0778,
+        "over_33_33ms": 0,
+        "maximum_actor_speed_cm_s": 130.731,
+        "camera_yaw_travel_degrees": 320.62999999999937
+      }
+    },
+    "limitation": "One short matched route each; instrumented actor ticks, not GPU/Present/uncapped headroom/4K. Memory start/end snapshots are not peaks; temporal-upscaler internal input resolution unmeasured.",
+    "rhi": "D3D12",
+    "baselinePhysicalBytes": [
+      908574720,
+      959627264
+    ],
+    "baselineCandidate": "clearing-grove-03"
+  },
+  "visual": "Worker personally inspected wide frame149: textured ground and sparse vegetation under unchanged intensely golden dawn. Image quota prevented frame430 inspection. No lush-woodland/Jenny art approval; coordinator review separate.",
+  "qualification": "Original tree-import03 stays FAILED with exactly12 branch source-description tangent/binormal corners. Current17 tree packages unchanged; no clean-mesh claim.",
+  "tooling": "Native prerequisite check was accidentally nested under exclusive TreeActions at build time; independent seal verified all real successful compile outputs. Corrected and AST-regression-tested for future leaves, not retroactively claimed executed. Preserved export01 unidentified child and prior build monitoring qualifications remain.",
+  "creditsRefresh": {
+    "currentSha256": "34CBFE515F8EBBFEB19D07ADB2715DC7F1A9D5E7AFB68A085B45376353253449",
+    "scope": "Only candidate Windows asset-credits.md refreshed after staging to include actual grass authors; executable/cooked files unchanged.",
+    "priorStageSha256": "7048C4D4A84802A5D779A6281D22FE5E0B6769BD47E329A545348CCAF928B74C"
+  },
+  "selectedPreviewUnchanged": true,
+  "sourcePins": [
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "2C0450C0589184695EA7F0F0EB96F33071172644280AF47D15F77913E6F4BE1E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h",
+      "sha256": "C83288155C49BC741F69E311459D164053E51B42F109F77C7B33485013AB20EF"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp",
+      "sha256": "6750AD2D3CB17EB9D2F23CE6F78B80055FAB7FE411357D4F3533E05E8C40093E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h",
+      "sha256": "82E4C5592DA8D2B416A6A670C6F73D8AB645AC9F7DE5CA1AC32FD10A9C33DE7E"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp",
+      "sha256": "7862702B7B28CE1D1325E86B3371DE8D333248FE7D76B95200EE76393AE17F48"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h",
+      "sha256": "0F6F16766D6601FB91A17578606814C974C457B3F07623958B4BB0E125A4DBE4"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp",
+      "sha256": "A82E45418AC31992A364149C0941BDA31DF96D77D01D284D8557640951B80C5D"
+    },
+    {
+      "path": "Scripts\\Build-AuthoringProbe.ps1",
+      "sha256": "D0FF5939F8D4328088EDF533BA03136E4F9C0EA614B9A84716969B1D9BBDA2D0"
+    },
+    {
+      "path": "Scripts\\GrassGroundPolicy.ps1",
+      "sha256": "2BA1916BF4D57CEB78556B0C833EBBB1636EECFB50567644B001AD3D80D95791"
+    },
+    {
+      "path": "Scripts\\Test-AuthoringSettings.ps1",
+      "sha256": "0A054288785B1B3E28C304AF69A23D9884A26044BA1C4C714CA0416F1E17E52A"
+    },
+    {
+      "path": "Scripts\\Playtest-Visual.ps1",
+      "sha256": "8729D3B85750D69B966995457C94FBD0EFAB1E45F34273A8E77D4C6E562C8E18"
+    },
+    {
+      "path": "Tests\\Test-CompilerLeaf.ps1",
+      "sha256": "F2FE580F5CA907515FCFC84C2DD0BCC6F42B5D95D9E600C441A3D242CF81D0F6"
+    },
+    {
+      "path": "Tests\\Test-GrassShippingPolicy.ps1",
+      "sha256": "DDE26540B01016C9BD06DE670A3E962E1499956F6B9A0AC55F4C5AAFEDF9857E"
+    },
+    {
+      "path": "Tests\\Test-GrassGroundPolicy.ps1",
+      "sha256": "B219C9C72C4F768FEB2EC7F5C2E294CD6044741DE8F4A7070F6891437F016059"
+    },
+    {
+      "path": "Config\\DefaultGame.ini",
+      "sha256": "E58B0041B328179329674068406CE7E4DC9363A0A79ABC0CD01C196B226D3FDE"
+    }
+  ],
+  "packages": [
+    {
+      "sha256": "690047921E4281C947B25EE5E7AFCA13FC2E949A2B8364DB4784237AA034354D",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_mid_b.uasset",
+      "bytes": 61633
+    },
+    {
+      "sha256": "DE7E8021C8AEF1C6A114B2195105A5C96E18CF2309E80967219E20A065DAACAA",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_small_b.uasset",
+      "bytes": 41890
+    },
+    {
+      "sha256": "DB32D30832B31CAE90B11E555D50830736D95CB1B14F2C577681CEAFC3767775",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_tall_a.uasset",
+      "bytes": 26032
+    },
+    {
+      "sha256": "BC7D514E02700CA2340B539B100C5CE07D2AB639C74786D9640574958615E7CC",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Meshes\\SM_GrassMedium01_tiny_a.uasset",
+      "bytes": 16803
+    },
+    {
+      "sha256": "3ABD081BC19E9C526CBCA45F5A81E610491A898488B7CB5890CCA026A32F0359",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Materials\\M_GrassMedium01.uasset",
+      "bytes": 7857
+    },
+    {
+      "sha256": "8227111DC9473D9B9016CC833EEBB566FC88ADC21DCB2A7AC75CEFAA95CD0ACA",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Materials\\M_GrassGroundBlend.uasset",
+      "bytes": 10043
+    },
+    {
+      "sha256": "4EFE9AFC4CAC8B1D1C47C0A861A1A555BAD3AEEB9B7E068666EEF343EE8DF7C1",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Diff.uasset",
+      "bytes": 1990824
+    },
+    {
+      "sha256": "EA436A3C952B4332427975988544FA8B3F596B61E4E1F2FFB4C431B1D13CC5D8",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_NormalDX.uasset",
+      "bytes": 3877609
+    },
+    {
+      "sha256": "5369A2E5F0D67372C0CBF443779C7EAE484B887E2B541B3C2540133156BBE193",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Roughness.uasset",
+      "bytes": 1095264
+    },
+    {
+      "sha256": "E72663DBCD1473152ADFADCD4878B3883FD5847EC3916536E2E2082BFF4D9C29",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_AO.uasset",
+      "bytes": 608280
+    },
+    {
+      "sha256": "68A193749C1AF35E81C8A2B1698A7A1C1211EE94B7E04739A53F817F5BD7E142",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassMedium01_Alpha.uasset",
+      "bytes": 619672
+    },
+    {
+      "sha256": "6FB037438A143EC54A7D3FE30270E33413C66CA0C9051E7043909EC4A1473C0B",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_Diff.uasset",
+      "bytes": 24401886
+    },
+    {
+      "sha256": "01B9032418BEED691C300A03FBF7B49B720B54E9742F3FE2774BB3196D9DFFC5",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_NormalDX.uasset",
+      "bytes": 26069451
+    },
+    {
+      "sha256": "9DFDD26AD9395BD99C705C8C3A08488C4F1BFAF80B1787745F5CA83B179C811F",
+      "path": "Content\\Trials\\GrassGround_20260921_01\\Textures\\T_GrassGround_Roughness.uasset",
+      "bytes": 6812747
+    }
+  ],
+  "files": [
+    {
+      "copy": "grass-ordinary-01.observations.txt",
+      "sha256": "7CA841813D71A4907762DC9375A0978F43490177EDCB1A331B2CBEAD41444481",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\observations.txt"
+    },
+    {
+      "copy": "grass-ordinary-01.telemetry.csv",
+      "sha256": "4BD9784FAE3CF61D2365C99A6CAC53D7279412764267C28E7F38A1498F2CD607",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\telemetry.csv"
+    },
+    {
+      "copy": "grass-ordinary-01.presentation-settings.txt",
+      "sha256": "E053C4D9D09142DCC5182D15F474D6F3B5A5CE4459677D3841E54B72BD02349D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\presentation-settings.txt"
+    },
+    {
+      "copy": "grass-ordinary-01.qa-guard-result.json",
+      "sha256": "73BB2C59F745DFCCB89A767B935CCB7A8B70D89B509D68C3B881E32733237AD2",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\qa-guard-result.json"
+    },
+    {
+      "copy": "grass-ordinary-01.qa-launch.json",
+      "sha256": "0088C08B098C223BED684F0B93448BA5D10A5B63E485E2AFAA172C566087AB9C",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\qa-launch.json"
+    },
+    {
+      "copy": "grass-ordinary-01.qa-admission.txt",
+      "sha256": "28632ABAB7CF7A500A3F7138608F40350731BDD802F0C39C6B26B424FB5DA0C2",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\qa-admission.txt"
+    },
+    {
+      "copy": "grass-ordinary-01.grove-inventory.csv",
+      "sha256": "5A810A0C30EA0C30E2F1B8A1D1D90939DC696A75D0CEEE85E5EA408B0DAEFDEA",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\grove-inventory.csv"
+    },
+    {
+      "copy": "grass-ordinary-01.grass-inventory.csv",
+      "sha256": "5C1A1495D3A893FECEF8036911B9CA6D8F16E99D453635C1631FD0708A8E52AB",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\grass-inventory.csv"
+    },
+    {
+      "copy": "grass-ordinary-01.grass-ground-inventory.csv",
+      "sha256": "F7C89F6F95803FA08425072FA77C85DEC599F4B52B8D7403F867A0BA681765FB",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\grass-ground-inventory.csv"
+    },
+    {
+      "copy": "grass-timing-01.observations.txt",
+      "sha256": "09CCC4E1911F2D102009A39D89FADE4988AA87F1DCD6260053C349181C1E9E4D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\observations.txt"
+    },
+    {
+      "copy": "grass-timing-01.telemetry.csv",
+      "sha256": "EC08099380C79CAAA9E2CFFFE767836261DF882800D0B1419881873284CC1AB5",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\telemetry.csv"
+    },
+    {
+      "copy": "grass-timing-01.presentation-settings.txt",
+      "sha256": "46172231338712444115BE8C38E6D605DF6E959AA21C25B624AD89B21BD0D28C",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\presentation-settings.txt"
+    },
+    {
+      "copy": "grass-timing-01.qa-guard-result.json",
+      "sha256": "92956CFBBFC171EB5EF781D2BCA00A9F0A9908D6B8C7D6BD7BCE170C3EAF3617",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\qa-guard-result.json"
+    },
+    {
+      "copy": "grass-timing-01.qa-launch.json",
+      "sha256": "473DE0F3748D807320EDFFAB132B00AADDB67D2D1D9B05050BF1A2D3B92E2B2D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\qa-launch.json"
+    },
+    {
+      "copy": "grass-timing-01.qa-admission.txt",
+      "sha256": "BDB958637BE98DF00EC405BA54552267F81FE9FCCBD90DD09E55BFC413FDA211",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\qa-admission.txt"
+    },
+    {
+      "copy": "grass-timing-01.grove-inventory.csv",
+      "sha256": "5A810A0C30EA0C30E2F1B8A1D1D90939DC696A75D0CEEE85E5EA408B0DAEFDEA",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\grove-inventory.csv"
+    },
+    {
+      "copy": "grass-timing-01.grass-inventory.csv",
+      "sha256": "5C1A1495D3A893FECEF8036911B9CA6D8F16E99D453635C1631FD0708A8E52AB",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\grass-inventory.csv"
+    },
+    {
+      "copy": "grass-timing-01.grass-ground-inventory.csv",
+      "sha256": "F7C89F6F95803FA08425072FA77C85DEC599F4B52B8D7403F867A0BA681765FB",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\grass-ground-inventory.csv"
+    },
+    {
+      "copy": "grass-timing-01.presentation-timings.csv",
+      "sha256": "9CDDC52ECB832833A476845825E1A9EAF97E3266601BC4481B0B8C5DED078896",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\presentation-timings.csv"
+    },
+    {
+      "copy": "grass-timing-01.presentation-analysis.json",
+      "sha256": "89E82A0AF20598FFB9DCC761D73BEE1E5E4D42259CCEAF06E7390419FBA96830",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\presentation-analysis.json"
+    },
+    {
+      "copy": "grass-timing-01.display-mode-before.json",
+      "sha256": "045D06F21DEE3F647B12F4E8142C60C98DDB54196D7955BAE62270644504D854",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\display-mode-before.json"
+    },
+    {
+      "copy": "grass-timing-01.display-mode-after.json",
+      "sha256": "055C62FB86096AA8A5927BFA645F64D48413E73F0D984526C7C5AE57EBF9467F",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-timing-01\\display-mode-after.json"
+    },
+    {
+      "copy": "grass-baseline-timing-01.observations.txt",
+      "sha256": "8FF47F9B76C151A11EDA7D0F3B3B1057B56FF461D46E59288929061D6B52342D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\observations.txt"
+    },
+    {
+      "copy": "grass-baseline-timing-01.telemetry.csv",
+      "sha256": "7AFB9E54B40BC9E9875F409553E02D6321253CA7CECDD4E0CAB63C466F67D657",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\telemetry.csv"
+    },
+    {
+      "copy": "grass-baseline-timing-01.presentation-settings.txt",
+      "sha256": "604CF66F011FC5B670FC7B2965DD1DCA9E87A5E446470C5CAB2934817905994C",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\presentation-settings.txt"
+    },
+    {
+      "copy": "grass-baseline-timing-01.qa-guard-result.json",
+      "sha256": "224B1340FDBC11B74C74437CC728CF6E0135212F01A7882FB80F6AC7BD056A1F",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\qa-guard-result.json"
+    },
+    {
+      "copy": "grass-baseline-timing-01.qa-launch.json",
+      "sha256": "294FB72F715BC43B82FC2D6051B6B4411BAB5FD5DA2BB1508D5FDA845231922B",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\qa-launch.json"
+    },
+    {
+      "copy": "grass-baseline-timing-01.qa-admission.txt",
+      "sha256": "EAF6571D6394C078AA72613667E0A47550F2E3AB6E4643DA99927C5FC0FF7DA6",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\qa-admission.txt"
+    },
+    {
+      "copy": "grass-baseline-timing-01.grove-inventory.csv",
+      "sha256": "5A810A0C30EA0C30E2F1B8A1D1D90939DC696A75D0CEEE85E5EA408B0DAEFDEA",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\grove-inventory.csv"
+    },
+    {
+      "copy": "grass-baseline-timing-01.presentation-timings.csv",
+      "sha256": "BB5C1D2C397B19DB184F731B2FAE5272302C543A9AAABAE98414FF5DD73024BA",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\presentation-timings.csv"
+    },
+    {
+      "copy": "grass-baseline-timing-01.presentation-analysis.json",
+      "sha256": "05903BC3439018FDD3018EE259A8E8C140722F3CF96D9281E14E0FA23B7EF7AE",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\presentation-analysis.json"
+    },
+    {
+      "copy": "grass-baseline-timing-01.display-mode-before.json",
+      "sha256": "FD872B884E428B95AA903B5613EC56CC7A7810DECBD48898D8327A4EF6E5D730",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\display-mode-before.json"
+    },
+    {
+      "copy": "grass-baseline-timing-01.display-mode-after.json",
+      "sha256": "D3CDF5504F4900BC11BFB98C96BA02150CBD5DE698DBC75DD6256C6CE2CCF56D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-baseline-timing-01\\display-mode-after.json"
+    },
+    {
+      "copy": "ordinary.tree-contact.csv",
+      "sha256": "A2191A5851C0B346358108135843999B0F4E1D7D1E6A9DD998202DFE423BBC6D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\tree-contact.csv"
+    },
+    {
+      "copy": "frame-00017.png",
+      "sha256": "FB2A7AB36512B63CC98202A2750BB1593BD2BBE2C3B3DCA919A1FFB2FC34D956",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\Frames\\frame-00017.png"
+    },
+    {
+      "copy": "frame-00149.png",
+      "sha256": "CBB86C1F948F6345643E5855CBE868B492517D36605552F7C20A40198D7010BE",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\Frames\\frame-00149.png"
+    },
+    {
+      "copy": "frame-00430.png",
+      "sha256": "B298261A77311DB44BB63CB73942796549219CD0F30041A34162D546904E857D",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\Frames\\frame-00430.png"
+    },
+    {
+      "copy": "frame-00512.png",
+      "sha256": "776FF060C3E8D7A6F42270AA14EFA9ACC19DB665CC528F135F966EDA0D92BE65",
+      "source": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\grass-ordinary-01\\Frames\\frame-00512.png"
+    },
+    {
+      "copy": "shipping.compile0.result.json",
+      "sha256": "77AD867F5463F0AAB95F1E7B803FF149B841F76E475D00738E4A3400B16E5A48",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\compile0\\result.json"
+    },
+    {
+      "copy": "shipping.compile1.result.json",
+      "sha256": "D278046C02542E2CDF28A6BD5DF1F2B1A43EADB20AA41AE5506FEA187893BBCE",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\compile1\\result.json"
+    },
+    {
+      "copy": "shipping.compile2.result.json",
+      "sha256": "BDA6DB6B7C3D30B23B9B76B9083AAA9B0476A8D2A63F7A1F5925EBF4D2016B7E",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\compile2\\result.json"
+    },
+    {
+      "copy": "shipping.link3.result.json",
+      "sha256": "D5DD7B3F0C46206B1DB24D4C3E7B7AF24C7CBC61A866A423D31D37A0D7FC53C5",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\link3\\result.json"
+    },
+    {
+      "copy": "shipping.manifest-01.result.json",
+      "sha256": "69998D182CEA56BD5AD0F624C93DBB34144B8B07E7F60F4A1239561836FA4E1C",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\manifest-01\\result.json"
+    },
+    {
+      "copy": "shipping.metadata.result.json",
+      "sha256": "015BD817BBB10C9E5CB7B87EDF8E65F268AC8A1541949A480326B14C4C770322",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\metadata\\result.json"
+    },
+    {
+      "copy": "shipping.metadata.native-products.json",
+      "sha256": "F763C445E97B8BAAF4A8AF494100EB2BBB60577ED2D42CE9F841A157442BCF07",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\metadata\\native-products.json"
+    },
+    {
+      "copy": "shipping.final-native-product.json",
+      "sha256": "CC616D3B594D7B3986150C4D6D192D4B5B8658DEC3E9D011F8D4B546A606EEBE",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-build-01\\final-native-product.json"
+    },
+    {
+      "copy": "shipping-export.result.json",
+      "sha256": "9B5BABEA80BB0A56CCA22666A234E3ED13D185AF84DC23D2945D0E20F0454F3B",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-plan-01\\result.json"
+    },
+    {
+      "copy": "shipping-export.actions.json",
+      "sha256": "0F48D68CEC9BBD5E516FED07DD1089734268CD0FBAC27BDEF732E9D9C4C3061A",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-plan-01\\actions.json"
+    },
+    {
+      "copy": "shipping-export.launch.json",
+      "sha256": "C6ED08276CBB0FF62A19DD7E61143465E6F2AB718E6FC1F1209CFF79067A05A4",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-shipping-plan-01\\launch.json"
+    },
+    {
+      "copy": "resource.result.json",
+      "sha256": "148CBD8DACAA5479004F0F494CED2DBB0CA9C510842318C5CB21D25B3D4DE647",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-17\\game\\result.json"
+    },
+    {
+      "copy": "stage.result.json",
+      "sha256": "18ABB2674AC8D8E98321E3977AA52B5F3401ACA4E6909C61E1BE4241C9302F7D",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-stage-01\\result.json"
+    },
+    {
+      "copy": "cook.probe-result.json",
+      "sha256": "6419F080A64F562B0B7A747030C4DF38AD23B168BBECD6834C5583FCCF3A4583",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\probe-result.json"
+    },
+    {
+      "copy": "cook.cook-result.json",
+      "sha256": "CF5E13ABE71BA72E33166E1435F1D21D26F92EE7781BA652291CED8B620E54EA",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\cook-result.json"
+    },
+    {
+      "copy": "cook.launch.json",
+      "sha256": "076681C9BCAE04E82B9DC47BFA595D100E1CB3BDC684AB721CE15B4094BA0A79",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\launch.json"
+    },
+    {
+      "copy": "cook.native-exit.json",
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\native-exit.json"
+    },
+    {
+      "copy": "cook.effective-settings.json",
+      "sha256": "7FB715F47E2FDD478D3C711FEBEA4A8E9094D4A493DFAF45A9F2F7EAED73C1E1",
+      "source": "Saved\\Automation\\20260921-033354-2d257ba0\\grass-ground-cook-01\\effective-settings.json"
+    },
+    {
+      "copy": "asset-credits.md",
+      "sha256": "34CBFE515F8EBBFEB19D07ADB2715DC7F1A9D5E7AFB68A085B45376353253449",
+      "source": "docs\\asset-credits.md"
+    },
+    {
+      "copy": "stage.build-receipt.json",
+      "sha256": "83245D29081E535053B64DF5E7C3B4A066DAD7B7B81CC0C9123B5496F80EA015",
+      "source": "Build\\Releases\\20260921-033354-2d257ba0\\grass-ground-01\\build-receipt.json"
+    }
+  ],
+  "limits": [
+    "Qualified restrained clearing patch, not full woodland or human control/visual approval.",
+    "No constructed house/plot scenario; corresponding1e9 inventory margins mean empty sets, not coverage.",
+    "No full UI/save matrix rerun; samev5 profile retained and human saves not read/reset/migrated.",
+    "Screenshot runs perturb pacing; timing-* segments precede screenshot requests.",
+    "Finite process/socket samples and root-only jobs are not network/filesystem sandboxes."
+  ]
+}

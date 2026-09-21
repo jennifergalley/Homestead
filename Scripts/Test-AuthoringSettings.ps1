@@ -2,9 +2,9 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [switch]$ValidateOnly,
-    [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify')][string]$Mode='Settings',
+    [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify')][string]$Mode='Settings',
     [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard',
-    [ValidateSet('Clearing','HairWaves','Wardrobe','Tree')][string]$CookCandidate='Clearing',
+    [ValidateSet('Clearing','HairWaves','Wardrobe','Tree','GrassGround')][string]$CookCandidate='Clearing',
     [switch]$TreeDiagnostic
 )
 $ErrorActionPreference = 'Stop'
@@ -14,6 +14,7 @@ Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'HairWavePolicy.ps1')
 . (Join-Path $PSScriptRoot 'WardrobePolicy.ps1')
 . (Join-Path $PSScriptRoot 'TreeSpikePolicy.ps1')
+. (Join-Path $PSScriptRoot 'GrassGroundPolicy.ps1')
 Add-Type -Path (Join-Path $PSScriptRoot 'AuthoringLeafGuard.cs')
 $operationPolicy=Get-FernOperationPolicy -Mode $Mode -RenderProfile $RenderProfile
 $completionDriven=$RenderProfile -eq 'CompletionDriven'
@@ -21,16 +22,19 @@ $hairMode=$Mode -in @('HairImport','HairVerify')
 $wardrobeMode=$Mode -in @('WardrobeImport','WardrobeVerify')
 $characterMode=$hairMode -or $wardrobeMode
 $treeMode=$Mode -in @('TreeImport','TreeVerify')
+$grassMode=$Mode -in @('GrassImport','GrassVerify')
+$grassCook=$CookCandidate -eq 'GrassGround'
+if($grassCook -and -not $TreeDiagnostic){throw 'Grass cook must retain the qualified tree disclosure.'}
 $treeImportName='tree-import-03'
-$assetMode=$characterMode -or $treeMode
-$treeCook=$CookCandidate -eq 'Tree'
+$assetMode=$characterMode -or $treeMode -or $grassMode
+$treeCook=$CookCandidate -in @('Tree','GrassGround')
 if($TreeDiagnostic -and -not($Mode -eq 'TreeVerify' -or ($Mode -eq 'Cook' -and $treeCook))){
     throw 'Known tree defect admits only explicitly qualified read verification or tree cook.'
 }
 $treeVerifyName=if($TreeDiagnostic){'tree-diagnostic-verify-01'}else{'tree-verify-01'}
-$treeCookName=if($TreeDiagnostic){'tree-diagnostic-cook-02'}else{'tree-cook-01'}
+$treeCookName=if($grassCook){'grass-ground-cook-01'}elseif($TreeDiagnostic){'tree-diagnostic-cook-02'}else{'tree-cook-01'}
 $hairCook=$CookCandidate -eq 'HairWaves'
-$wardrobeCook=$CookCandidate -in @('Wardrobe','Tree')
+$wardrobeCook=$CookCandidate -in @('Wardrobe','Tree','GrassGround')
 $characterCook=$hairCook -or $wardrobeCook
 if($characterCook -and $Mode -ne 'Cook'){throw 'Character cook selection requires actual Cook mode.'}
 $retainedRender=$RenderProfile -ne 'Standard' -or $characterMode
@@ -100,6 +104,12 @@ if($treeMode -or $treeCook) {
     if($TreeDiagnostic){
         $supersession['diagnosticApproval']='Coordinator final proportional direction: use unchanged genuine receipt03 code/products, exact retained17 failed-import03 package pins, qualified read/reverify then existing cook/ordinary-game route. Exactly12 branch source-description tangent/binormal corners remain disclosed; every other geometry/normal/material/UV/identity/privacy gate unchanged. Import03 remains FAILED; no reimport, asset write, clean-pass or promotion.'
     }
+    if($grassMode -or $grassCook){
+        $supersession['currentApproval']='Completion-driven environment continuation after parent acceptance/promotion of provisional grove03. Four selected source clumps2279 total triangles, eight exact textures, two described materials, exactly14 fresh trial packages. Ground vertex-red blend retains original terrain geometry/collision/UVs and three read-only old maps. No selected candidate overwrite; root-only marker/Python/local-DDC/TraceControl controls unchanged.'
+        if($grassCook){
+            $supersession['diagnosticApproval']='Grass/ground cook uses genuinely rebuilt current native products and the unchanged17 tree packages/persisted qualified verification. Exactly12 branch source-description tangent/binormal corners remain disclosed; original tree import03 stays FAILED. No tree reimport/asset rewrite, clean-mesh/full-woodland/performance/art-approval claim.'
+        }
+    }
 }
 function Assert-NamedSupersession {
     if($treeCook -and $TreeDiagnostic){
@@ -117,7 +127,7 @@ function Assert-NamedSupersession {
     }
     $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
     if($run.id -cne $expectedRun -or
-        $output -ine (Join-Path $runRoot $(if($Mode -eq 'TreeImport'){$treeImportName}elseif($Mode -eq 'TreeVerify'){$treeVerifyName}elseif($treeCook){$treeCookName}elseif($Mode -eq 'WardrobeImport'){'wardrobe-import-02'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-01'}elseif($wardrobeCook){'wardrobe-cook-01'}elseif($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
+        $output -ine (Join-Path $runRoot $(if($Mode -eq 'GrassImport'){'grass-import-01'}elseif($Mode -eq 'GrassVerify'){'grass-verify-01'}elseif($Mode -eq 'TreeImport'){$treeImportName}elseif($Mode -eq 'TreeVerify'){$treeVerifyName}elseif($treeCook){$treeCookName}elseif($Mode -eq 'WardrobeImport'){'wardrobe-import-02'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-01'}elseif($wardrobeCook){'wardrobe-cook-01'}elseif($hairCook){'hair-cook-01'}elseif($Mode -eq 'HairImport'){'hair-import-01'}elseif($Mode -eq 'HairVerify'){'hair-verify-01'}elseif($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
@@ -180,6 +190,9 @@ if($characterCook) {
 }
 $attempt = Join-Path $runRoot $(if($Mode -eq 'TreeImport'){'tree-import-attempt-03.json'}elseif($Mode -eq 'TreeVerify'){'tree-verify-attempt-01.json'}elseif($treeCook){'tree-cook-attempt-01.json'}elseif($Mode -eq 'WardrobeImport'){'wardrobe-import-attempt-02.json'}elseif($Mode -eq 'WardrobeVerify'){'wardrobe-verify-attempt-01.json'}elseif($wardrobeCook){'wardrobe-cook-attempt-01.json'}elseif($hairCook){'hair-cook-attempt-01.json'}elseif($Mode -eq 'HairImport'){'hair-import-attempt-01.json'}elseif($Mode -eq 'HairVerify'){'hair-verify-attempt-01.json'}elseif($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
 if($TreeDiagnostic){$attempt=Join-Path $runRoot $(if($treeCook){'tree-diagnostic-cook-attempt-02.json'}else{'tree-diagnostic-verify-attempt-01.json'})}
+if($grassMode -or $grassCook){
+    $attempt=Join-Path $runRoot $(if($Mode -eq 'GrassImport'){'grass-import-attempt-01.json'}elseif($Mode -eq 'GrassVerify'){'grass-verify-attempt-01.json'}else{'grass-ground-cook-attempt-01.json'})
+}
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -221,6 +234,10 @@ if($treeMode -or $treeCook) {
     $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\tree-native-build-03\receipt.json'
     $buildReceiptHash='16BB7A09538FFC59D270794C5B522D1ACA9D3991A529FA111969D9F617FE9CFA'
 }
+if($grassMode -or $grassCook){
+    $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\grass-native-build-01\receipt.json'
+    $buildReceiptHash='83558EBBBEF65B17C4EC5F563B98FA0E69D66FE14E0B1520E822422F38CDA30D'
+}
 $pythonPins = @{
     'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
     'python311.dll'='3E5A5C012CDDB3D156D147ACAD59BB489C0716B87DAD274CB5BF20EEC3B68192'
@@ -259,6 +276,10 @@ if($Mode -ne 'Settings') {
         $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\tree-supervisor-06\receipt.json'
         $supervisorReceiptHash='97DCEF0A4DA7C7E8D511BC9B8575C2D4412026B03E6DCAB7EAD5B976F59CA2B9'
     }
+    if($grassMode -or $grassCook){
+        $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\grass-supervisor-01\receipt.json'
+        $supervisorReceiptHash='7348068DFF3AE9E9A60F2926F33F351FDF3B206FD1AA958D4E007B12CC6506D2'
+    }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
 }
@@ -296,8 +317,8 @@ function Assert-AcceptedNativeProducts {
     }
 }
 Assert-AcceptedNativeProducts
-$trial=Join-Path $root $(if($treeMode){'Content\Trials\TreeSmall02_20260921_01'}elseif($wardrobeMode){'Content\SurvivalGame\Characters\ModularClothing'}elseif($hairMode){'Content\Trials\HeroineWave_20260921_01'}else{'Content\Trials\Fern02_20260920_01'})
-$packageStems=if($treeMode){@(Get-TreePackageStems)}elseif($wardrobeMode){@(Get-WardrobePackageStems)}elseif($hairMode){@(Get-HairWavePackageStems)}else{@(Get-FernPackageStems)}
+$trial=Join-Path $root $(if($grassMode){'Content\Trials\GrassGround_20260921_01'}elseif($treeMode){'Content\Trials\TreeSmall02_20260921_01'}elseif($wardrobeMode){'Content\SurvivalGame\Characters\ModularClothing'}elseif($hairMode){'Content\Trials\HeroineWave_20260921_01'}else{'Content\Trials\Fern02_20260920_01'})
+$packageStems=if($grassMode){@(Get-GrassPackageStems)}elseif($treeMode){@(Get-TreePackageStems)}elseif($wardrobeMode){@(Get-WardrobePackageStems)}elseif($hairMode){@(Get-HairWavePackageStems)}else{@(Get-FernPackageStems)}
 function Get-ProbePackageFiles { @(Get-FernPackageFiles $trial -Complete -Stems $packageStems) }
 $trialIdentity=$null;$trialBefore=@();$fernResult=$null;$fernInputs=@();$fernSourceInventory=$null
 $contentBefore=@();$assetAdmission=$null
@@ -344,7 +365,7 @@ if($Mode -ne 'Settings' -and -not $assetMode) {
     }
 }
 if($assetMode) {
-    $fernInputs=if($treeMode){@(Get-TreeSourcePins $root)}elseif($wardrobeMode){@(Get-WardrobeSourcePins $root)}else{@(Get-HairWaveSourcePins $root)}
+    $fernInputs=if($grassMode){@(Get-GrassSourcePins $root)}elseif($treeMode){@(Get-TreeSourcePins $root)}elseif($wardrobeMode){@(Get-WardrobeSourcePins $root)}else{@(Get-HairWaveSourcePins $root)}
     Assert-FernOrdinaryTree (Join-Path $root 'Content')
     $contentBefore=@(Get-ChildItem (Join-Path $root 'Content') -Recurse -File -Force |
         Where-Object {-not $_.FullName.StartsWith($trial+'\',[StringComparison]::OrdinalIgnoreCase)} |
@@ -359,7 +380,7 @@ if($assetMode) {
         $trialIdentity=$failed.trialIdentity
         Assert-FernDirectoryIdentity $trialIdentity $trial
         if(@(Get-ChildItem $trial -Force).Count){throw 'Prior asset scope must remain completely empty.'}
-    } elseif($Mode -eq 'HairImport') {
+    } elseif($Mode -in @('HairImport','GrassImport')) {
         if(Test-Path -LiteralPath $trial){throw 'Fresh wave trial namespace required; no accepted asset overwrite.'}
     } elseif($TreeDiagnostic) {
         $assetAdmission=Get-TreeFailedImportDiagnosticAdmission $root
@@ -367,14 +388,15 @@ if($assetMode) {
         $trialBefore=@(Get-ProbePackageFiles)
         Assert-FernPackagePins @($assetAdmission.packages) $trialBefore
     } else {
-        $importOutput=Join-Path $runRoot $(if($treeMode){$treeImportName}elseif($wardrobeMode){'wardrobe-import-02'}else{'hair-import-01'})
+        $importOutput=Join-Path $runRoot $(if($grassMode){'grass-import-01'}elseif($treeMode){$treeImportName}elseif($wardrobeMode){'wardrobe-import-02'}else{'hair-import-01'})
         $importProof=Get-Content (Join-Path $importOutput 'probe-result.json') -Raw|ConvertFrom-Json
         $assetAdmission=Get-Content (Join-Path $importOutput 'asset-admission.json') -Raw|ConvertFrom-Json
         if($importProof.status -cne 'passed' -or -not $importProof.subjectExited -or
             -not $importProof.guardDisposed -or $importProof.hardTerminated -or @($importProof.cleanupErrors).Count) {
             throw 'Persisted wave verification requires an actually passed, released import.'
         }
-        if($treeMode){Assert-TreeNativeInventory $assetAdmission.inventory}
+        if($grassMode){Assert-GrassNativeInventory $assetAdmission.inventory}
+        elseif($treeMode){Assert-TreeNativeInventory $assetAdmission.inventory}
         elseif($wardrobeMode){Assert-WardrobeNativeInventory $assetAdmission.inventory $root}
         else{Assert-HairWaveNativeInventory $assetAdmission.inventory}
         $trialIdentity=$assetAdmission.directoryIdentity
@@ -427,6 +449,19 @@ if($treeCook -and $TreeDiagnostic) {
     Assert-FernPackagePins @($treeAdmission.packages) @(Get-FernPackageFiles $treeTrial -Complete -Stems @(Get-TreePackageStems))
     $null=@(Get-TreeSourcePins $root)
 }
+if($grassCook){
+    foreach($name in @('grass-import-01','grass-verify-01')){
+        $proof=Get-Content (Join-Path $runRoot "$name\probe-result.json") -Raw|ConvertFrom-Json
+        if($proof.status -cne 'passed' -or -not $proof.subjectExited -or -not $proof.guardDisposed -or
+            $proof.hardTerminated -or @($proof.cleanupErrors).Count){throw 'Grass cook requires actual released import/reload verification.'}
+        Assert-GrassNativeInventory $proof.fernInventory
+    }
+    $grassAdmission=Get-Content (Join-Path $runRoot 'grass-import-01\asset-admission.json') -Raw|ConvertFrom-Json
+    $grassTrial=Join-Path $root 'Content\Trials\GrassGround_20260921_01'
+    Assert-FernDirectoryIdentity $grassAdmission.directoryIdentity $grassTrial
+    Assert-FernPackagePins @($grassAdmission.packages) @(Get-FernPackageFiles $grassTrial -Complete -Stems @(Get-GrassPackageStems))
+    $null=@(Get-GrassSourcePins $root)
+}
 $baseline = Get-Content -LiteralPath (Join-Path $root 'docs\research\environment-assets\authoring-preflight-01\receipt.json') -Raw | ConvertFrom-Json
 $expectedRules = @($baseline.existingInboundAllowRules | Where-Object { $_.program -ieq $exe })
 function Assert-ExistingNetworkPermission {
@@ -469,7 +504,7 @@ $protected = @(Get-Content -LiteralPath (Join-Path $root 'Assets\Environment\woo
 $before = @($protected | ForEach-Object {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root $_.path)).Hash
     $selectedPreview=($assetMode -or $characterCook) -and $_.path -ceq 'Preview.json' -and
-        $hash -ceq $(if($treeMode -or $treeCook){'4AC315EDC7CC6C75F11ECE46E0B0ED30E574D533A04BA432CFBEDDAA470DE116'}elseif($wardrobeMode -or $wardrobeCook){'C1262ACE336ABDEFD3A564046DD4F233A4AFDA19B9E6C2460886ACD263820904'}else{'737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'})
+        $hash -ceq $(if($grassMode -or $grassCook){'22C01AFC137BE5C841887855EEC49B4B51CAC0A5F856D49E38C20E41B7E7FC3F'}elseif($treeMode -or $treeCook){'4AC315EDC7CC6C75F11ECE46E0B0ED30E574D533A04BA432CFBEDDAA470DE116'}elseif($wardrobeMode -or $wardrobeCook){'C1262ACE336ABDEFD3A564046DD4F233A4AFDA19B9E6C2460886ACD263820904'}else{'737816A76EC8C0D8D96579FBDB30408FE4F4B81E52DF22614EC1138726F1DDFB'})
     if ($hash -cne $_.sha256 -and -not $selectedPreview -and -not(($assetMode -or $characterCook) -and $_.path -cin $acceptedBuild.sources.path) -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
         'Scripts\Development-Run.ps1','Tests\DevelopmentRunTests.ps1',
         'Source\SurvivalGame\HomesteadWorld.cpp','Config\DefaultGame.ini')) {
@@ -487,7 +522,7 @@ foreach ($name in @('Engine','Editor','EditorSettings','EditorPerProjectUserSett
 $ddc = Join-Path $output 'DDC'
 $ddcIdentity=$null
 $retainedFiles=@();$ddcBefore=@()
-if($Mode -in @('Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify')) {
+if($Mode -in @('Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify')) {
     $ddc=Join-Path $evidenceRunRoot 'fern-import-02\DDC'
     if(-not $retainedRender){Assert-FernOrdinaryTree $ddc}
     $ddcIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($ddc)
@@ -580,7 +615,7 @@ try {
     if($Mode -in @('WardrobeImport','TreeImport')) {
         Assert-FernDirectoryIdentity $trialIdentity $trial
         if(@(Get-ChildItem $trial -Force).Count){throw 'Prior asset scope changed before reservation.'}
-    } elseif($Mode -in @('Import','HairImport')) {
+    } elseif($Mode -in @('Import','HairImport','GrassImport')) {
         if(Test-Path -LiteralPath $trial){throw 'Trial appeared before reservation.'}
         $null=New-Item -ItemType Directory -Path $trial
         $trialIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($trial)
@@ -666,6 +701,7 @@ try {
             $additional=if($characterCook){@(Get-HairWavePackageStems|ForEach-Object {"Content\Trials\HeroineWave_20260921_01\$_.uasset"})}else{@()}
             if($wardrobeCook){$additional+=@(Get-WardrobePackageStems|ForEach-Object {"Content\SurvivalGame\Characters\ModularClothing\$_.uasset"})}
             if($treeCook){$additional+=@(Get-TreePackageStems|ForEach-Object {"Content\Trials\TreeSmall02_20260921_01\$_.uasset"})}
+            if($grassCook){$additional+=@(Get-GrassPackageStems|ForEach-Object {"Content\Trials\GrassGround_20260921_01\$_.uasset"})}
             Assert-HomesteadCookOutput $fernResult $output -AdditionalPackages $additional
         }
         if($hairMode -and -not $fernResult -and (Test-Path (Join-Path $output 'hair-wave-result.json'))) {
@@ -685,6 +721,15 @@ try {
                 throw "Native tree operation failed at $($fernResult.stage): $detail"
             }
             Assert-TreeNativeInventory $fernResult -KnownTangentDiagnostic:$TreeDiagnostic
+            $null=Get-ProbePackageFiles
+        }
+        if($grassMode -and -not $fernResult -and (Test-Path (Join-Path $output 'grass-result.json'))) {
+            $fernResult=Get-Content (Join-Path $output 'grass-result.json') -Raw|ConvertFrom-Json
+            if(-not $fernResult.passed){
+                $detail=if($fernResult.PSObject.Properties['failure']){$fernResult.failure}else{'See native evidence.'}
+                throw "Native grass operation failed at $($fernResult.stage): $detail"
+            }
+            Assert-GrassNativeInventory $fernResult
             $null=Get-ProbePackageFiles
         }
         if($Mode -in @('Import','Render') -and -not $fernResult -and (Test-Path (Join-Path $output 'fern-result.json'))) {
@@ -756,6 +801,9 @@ try {
     if($TreeDiagnostic){
         try{$null=Get-TreeFailedImportDiagnosticAdmission $root}catch{$cleanupErrors.Add("Diagnostic tree pins changed:$_")}
     }
+    if($grassCook){
+        try{$null=@(Get-GrassSourcePins $root)}catch{$cleanupErrors.Add("Grass inputs changed:$_")}
+    }
     if($ddcIdentity) {
         try{Assert-FernDirectoryIdentity $ddcIdentity $ddc}catch{$cleanupErrors.Add("Retained cache identity changed:$_")}
     }
@@ -780,12 +828,12 @@ try {
             foreach($file in $contentBefore){if((Get-FileHash $file.path).Hash -cne $file.sha256){throw "Existing content changed:$($file.path)"}}
             if($trialIdentity) {
                 Assert-FernDirectoryIdentity $trialIdentity $trial
-                if($Mode -in @('Render','Cook','HairVerify','WardrobeVerify','TreeVerify')){Assert-FernPackagePins $trialBefore @(Get-ProbePackageFiles)}
+                if($Mode -in @('Render','Cook','HairVerify','WardrobeVerify','TreeVerify','GrassVerify')){Assert-FernPackagePins $trialBefore @(Get-ProbePackageFiles)}
             }
         } catch {$cleanupErrors.Add("Fern protection check failed:$_")}
     }
     if ($cleanupErrors.Count) { $failure=(@($failure)+@($cleanupErrors) | Where-Object { $_ }) -join ' | ' }
-    if($Mode -in @('Import','HairImport','WardrobeImport','TreeImport') -and $trialIdentity) {
+    if($Mode -in @('Import','HairImport','WardrobeImport','TreeImport','GrassImport') -and $trialIdentity) {
         try {
             Assert-FernDirectoryIdentity $trialIdentity $trial
             if($failure -and ($subjectExited -or -not $guard)) {

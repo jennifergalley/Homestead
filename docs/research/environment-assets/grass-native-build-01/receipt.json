@@ -1,0 +1,626 @@
+{
+  "status": "passed-current-editor-native-build",
+  "createdUtc": "2026-09-21T15:50:30.2888839+00:00",
+  "products": [
+    {
+      "sha256": "618C13B4C32393FCE3FFD3D001B9C15973C7DA17EE55D54D4F1D4B4C0D746FE9",
+      "bytes": 2743296,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll"
+    },
+    {
+      "sha256": "94A1311EF41DCBEE7CFA12C4C4C576A18D49D2EB074AB6FE6110EE5368AF3CFF",
+      "bytes": 88829952,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb"
+    },
+    {
+      "sha256": "6B130BC6DA04F2C75C2848FA0CB410EBB9A834C7813FF18F2E4FDCFE06384A55",
+      "bytes": 448512,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll"
+    },
+    {
+      "sha256": "906E32E8F1B1AA2785913C2E62CC283207F8C724A2F09AD0253AE075D68AC5D1",
+      "bytes": 30314496,
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb"
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "bytes": 166,
+      "path": "Binaries\\Win64\\UnrealEditor.modules"
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "bytes": 945032,
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target"
+    }
+  ],
+  "sources": [
+    {
+      "path": "Source\\SurvivalGame.Target.cs",
+      "sha256": "25472C1F739C28C801C1431AED26232E751BCC3C65A3553E82D5D3C23204E2C6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadActionTestState.h",
+      "sha256": "44E4A005C17600E77F0189E4A0B6A7609884F74E62DE2000B3F0C43A5C82737A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.cpp",
+      "sha256": "D66C9811BF092ABE3818315D07DC07A89C403862C2E32E6045DD47C34DF1EF0A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAnimInstance.h",
+      "sha256": "E28FE1088E89D9EBCF3C14746392995B5B5CAF2CA33B3B924A0A296F4D9E219B"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.cpp",
+      "sha256": "116418605A7433E7FBC64442C1D1316B02B81FF9A5D2D8276F7DB2A29064B029"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadAppearance.h",
+      "sha256": "7E77BE0FDD8410EA2AD68805B8902C9F9E83311E8CF85D4D8F469E0FBB093104"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadBookClarityTest.cpp",
+      "sha256": "CA2596A09E6FA5A2E3DEB03C17D946C06A522022AC62A5762EFDF702423B54ED"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.cpp",
+      "sha256": "F16752470150401138AC2F7AF1ECBBB0EA0F40C6B8DC7A08338FA5942660078C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadCharacter.h",
+      "sha256": "25C0E5745B1F983B9B15294AD856D7BE42FD3CE4698CB86DF5E09ED47569E74B"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadClearingTest.cpp",
+      "sha256": "8E43B03870EBDE195156D18CCC665998864B6B1D1320B357BD12847565FB7F4A"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadController.cpp",
+      "sha256": "4BE257374BE2061E2840779C569BFC00494D23B62C119B9863DF55E8A1E4D682"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadController.h",
+      "sha256": "B677BE355FF448582413E039E6CB08ADD4637DBC0D95CDED372385706A48150F"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadEndurancePlaytest.cpp",
+      "sha256": "3A8EAE217BD896B46A8C6B7145D016E4575A772D21C99A5F32D8CF5131130835"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadEnduranceState.h",
+      "sha256": "389ACD085E24E5321068BBA4F9E8AA65763EBE88F986E08BAB551072FED6D852"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackMeasurements.cpp",
+      "sha256": "AC41A627C3CC4AFF94CF9F214EEBA9E88BDFC67ACA7EF25189EE733DBBC1BFA6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFeedbackTest.cpp",
+      "sha256": "DB4C3EB29DFB3766D31A5E581DA3870344531DF0BC30A8D712ACEB855286FF44"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadForageRenewal.cpp",
+      "sha256": "B1E4F5A1B6FB4070B7E4D85BA089BF3C3593CC7AD12F3878EA7FFEBFB6204DC7"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadFullLoopTest.cpp",
+      "sha256": "42D9106C656FE0DDB61D332922E55E48707C4D10B7236C3DA1D48F24D897435F"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.cpp",
+      "sha256": "99AA97162D8F30EFFD763D5ADA97A7FBDA145768D66BEE1AC6C5135078DBFFC6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadGameMode.h",
+      "sha256": "BEA77510E11770942B0EF253692F39C55E1097AFB1D609AB106687655144AE38"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadGatheringTest.cpp",
+      "sha256": "6F8C8A0338241288538C99081820AB196DD225D73443EFB077211E13182AE9AD"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.cpp",
+      "sha256": "33AA1809BCC6F2DB444162BFBA9B09DF90AA022055DFF94C8C062296F9167A19"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHatchet.h",
+      "sha256": "F6963986887E11D2DF5B76D476E8F29F7525D2792BECE8D1CB10B27F12C5C230"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHotkeyTest.cpp",
+      "sha256": "C05F19BB6D359E769A54E256EFA9A5C39B3FA892ADDC8C6F75D693920C99A413"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHUD.cpp",
+      "sha256": "3FD335630DFC4B727BEAAE617BE40C44111B31AE5AAFEA3C9438141C0B60277C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadHUD.h",
+      "sha256": "4341DB951DEC95F4876BC559B9041D0856CB8E125173AD57C8C2F103E6A32868"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPresentationTest.cpp",
+      "sha256": "F07EB7E35A7E76BB8F820CD69CF75D5AF8F058B178676E5E975F691871E57A02"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.cpp",
+      "sha256": "09CCF9C06E5F9B428083BAC294DFC27ACB845BEF0ACD407F0D10D94625A542A6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPromptIntent.h",
+      "sha256": "B704619EC86B653B1E110A6582370F9F5592BB2175E1BB55010E97D5513961FA"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadPromptTest.cpp",
+      "sha256": "3B78A2B383AF0E90EEF431928F04A0C568EA118935C5698AE499224991C05659"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadRenewalState.h",
+      "sha256": "958DC048120BD20E9011B8394273B551B3080383F0F08780F0E05946073C5AF6"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSave.h",
+      "sha256": "CDBC705D5772C9690293EC6845DEB15B35B6952C5190F9723B5BFD0FFE2C3F3D"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.cpp",
+      "sha256": "9C2ABC921A58E05855C3219BA43ACE1DD79D21E2F9B2E47D8309E4B3E1C9BF8E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSaveRouting.h",
+      "sha256": "9597E28AA7F9C7E0448487EFA9DA8CC2A3B5B4B4ECDDEBE8CC35A94F90F8EC76"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSaveRoutingTest.cpp",
+      "sha256": "3A3CB868D064FBE67B875F85B7470A45D1AFC84AEA2B581FF4FE6EA4010646E0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.cpp",
+      "sha256": "CC3E9B4155168E4EDD8C3C7B51252351DC0B1F3A1F441E894C76E6252A1D8418"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadSmokeTest.h",
+      "sha256": "AE1A7D8B78D40A7277178F7A5F1BC2451626729AC1D5CE1E8EF57F8AFDB66839"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadStartupProbe.cpp",
+      "sha256": "24F7F33A5E5B99A86C1F6B87261A23F111E9AD1539D529DFF8E4C614BC546577"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadTestPaths.h",
+      "sha256": "B9E9D6A031AE30581C574D25993B71520C502F9B9FC9F949205F8FD0229B0C39"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadToolGeometry.h",
+      "sha256": "3CAFD675BC651886F1CBDF27795B40D9917887DB75A0720F03FBEE3D5310431E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVideoSyncTest.cpp",
+      "sha256": "0E89AB603A6BAB0DF1A319E0F8AE7C5648C3E0C9620F03D417DE1F47DDE9EDA9"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.cpp",
+      "sha256": "6750AD2D3CB17EB9D2F23CE6F78B80055FAB7FE411357D4F3533E05E8C40093E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadVisualPlaytest.h",
+      "sha256": "82E4C5592DA8D2B416A6A670C6F73D8AB645AC9F7DE5CA1AC32FD10A9C33DE7E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.cpp",
+      "sha256": "8129C57DFD5031F72DE790C9267DEED403036E86C8F00B12D2C4CA779FB849EC"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWardrobePresentation.h",
+      "sha256": "E705F5D49CDF4C605CABD97620E9EDCDD1C4CD05424384C231D9E64E5811FA06"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWardrobeSelection.h",
+      "sha256": "E4FA23EC3514593D90FCC344EBACCCF7BBEF25C120359047A1866C9FF41ADAC0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringPlaytest.cpp",
+      "sha256": "4BB77A6CE984EB0F2AA2DD93DA5B041A2839B4D9BD3D59692AE0E41E355CA5F7"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringTest.cpp",
+      "sha256": "5EC591C2E5DF7C0265153308118002D01FC457EC024DF4628D422D934BAD5B93"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.cpp",
+      "sha256": "9C1C58E81E2E89F9AD46673E6E145136576633E65DFFA04A9F5CD89BA2E2C0E0"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWateringTool.h",
+      "sha256": "301B4BBC8D00A9F3AC0236BE731D9D87836ACF7B25DFE0D2FBB616692FEDFF64"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWeedingPlaytest.cpp",
+      "sha256": "739D6C3C8DCDC123DE82B36C358B16E02A5ABD123DA50ED685E8DEE5CC2192DE"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWeedingTest.cpp",
+      "sha256": "4FFFAE84FF88204D7877BEE8AD8A8642AC3A8A2E6018EDCC6BDADF5FB2125C86"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "2C0450C0589184695EA7F0F0EB96F33071172644280AF47D15F77913E6F4BE1E"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.h",
+      "sha256": "C83288155C49BC741F69E311459D164053E51B42F109F77C7B33485013AB20EF"
+    },
+    {
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.cpp",
+      "sha256": "F593880C6C9801F9BAFAB406D36D914B873BCE76E60B9C8C329D6B9B0EDDAA1C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\Simulation\\HomesteadSimulation.h",
+      "sha256": "2EEB97DEBCF123D42E2E49AEDA0F5A84C3C8399BA1958C19E138D001B690F6D9"
+    },
+    {
+      "path": "Source\\SurvivalGame\\SurvivalGame.Build.cs",
+      "sha256": "677C6C15DCD9AF8D67B83B0C76EE712F39F021D71F41A6ED3D8081E294B86D6C"
+    },
+    {
+      "path": "Source\\SurvivalGame\\SurvivalGame.cpp",
+      "sha256": "876F67FAE339EB8036B94CA19ADC55CBFAE0A3A3E72B2E1D48D8761BFB911467"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuInventory.cpp",
+      "sha256": "52592BBBA0EAC6ACF65E982BA5FF6A32AED1E33AACE4270603D6F24DE28B7661"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuNavigation.h",
+      "sha256": "E0E4C23CA8650320BAA3DD57BE2F047548E72C94EC9B230B4DF6230AC89F16C1"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.cpp",
+      "sha256": "FB286AA1D89EE02373A87606880E10AC601729829372F0B33C6728E5B74A7146"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuPortrait.h",
+      "sha256": "95536A0CAB9AF545069DE1ADCB2E0FDF96C50E964B4CA6735377C4A0FBF897AF"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadMenuTests.cpp",
+      "sha256": "43211E5CB1B113A6A564A375FD527E9548CB01800831E35620D8F291EAEDD0A8"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\HomesteadNativeMenuTest.cpp",
+      "sha256": "641B7F0A5A511220F660D7E826B3D0B18A11208C3B21A1F71A2EEC46104FEC19"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.cpp",
+      "sha256": "2C0C2C7AD8A90DA07E9D272A89F536BDCD7C451D5660ADDDFA473509F735C78F"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadIcon.h",
+      "sha256": "C32CAE33B0A909D8C65D6EBC9A0CC2FEE3E4E74EF9089B554BE9ADAD238A36B3"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.cpp",
+      "sha256": "182A6DD1E0E2DE1B8CF8F97D6F941E6BECDD25B21CDBDC858060674DE4F18FAE"
+    },
+    {
+      "path": "Source\\SurvivalGame\\UI\\SHomesteadMenu.h",
+      "sha256": "02F44916734E0C0FA52678F2C7D63263E7530526C767B3DAD6C45AA1386590AF"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor.Target.cs",
+      "sha256": "1A3BA371827DF9262B7376169F1FE5BFB6372AA53A1D79A0114D6886B5592A05"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp",
+      "sha256": "7862702B7B28CE1D1325E86B3371DE8D333248FE7D76B95200EE76393AE17F48"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h",
+      "sha256": "0F6F16766D6601FB91A17578606814C974C457B3F07623958B4BB0E125A4DBE4"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp",
+      "sha256": "A82E45418AC31992A364149C0941BDA31DF96D77D01D284D8557640951B80C5D"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.h",
+      "sha256": "B934F6B7A5D50739D93104117483ABD4C40D464858E8C23C09D0CA688019D875"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs",
+      "sha256": "1C5C12CA144BAB9FDE9580026BCA827168576612C98F5A700EB34CE7890D70E4"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.cpp",
+      "sha256": "8F47E9C54BFAA78B79672022472962BD4B6E7548625F57A4409BA5CB09180A86"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\actions.json",
+      "sha256": "577B28BD42785B07E151648FFF10A32A0A95D5CBC5DD0960CE004132695D6C3E"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\launch.json",
+      "sha256": "52BE49A1F4A73F2E089F2D085E1BA3548ECA4A6EA3FF7E039EE98EA623223B28"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\result.json",
+      "sha256": "3820BB1A3929854C95AEB58AE04D3070A59D2CDFA1706F80777B55229BC2F054"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\stdout.log",
+      "sha256": "EC97D82B8E52EDE60FC996AAB39384CD00739FEBA73AFA15209DD3C88D98D75E"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\ubt.json",
+      "sha256": "CDD8E1CA178DD172632DA0BD5ACDC068C690361F824F9ACACA856EFF10389F5E"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-02\\ubt.log",
+      "sha256": "2FE8E54940FDA077586BE45B4B6D04B889C51A7224F05DAFF59862FD93731C69"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile0\\compiler.log",
+      "sha256": "52466B2C2FF3DBB460B990E7591573EFBAF0F6FC11C29D1CA714239F0C6262AA"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile0\\launch.json",
+      "sha256": "F2E08BBA77BC755D877CCA22213BBB2B8DB4DF57A26DF17D9AF7F92EC2ECE2F6"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile0\\result.json",
+      "sha256": "030822199155E8CEF034942CC69333C120836C6421B3FB0C87BAFD42233521F6"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile1\\compiler.log",
+      "sha256": "F4F2D76021C439AC1DB0C1A99337C00BC3925200B9CA636EEF4342DD2191FA5D"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile1\\launch.json",
+      "sha256": "10CCE56196E8A9DA2F26544E983E5B21D4BEC98FFF3A389BEA83039D91CC5997"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile1\\result.json",
+      "sha256": "47825655D7910E117FB5B4AA9BB7862B1199977D82232253971C09D9C9F75F93"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile4\\compiler.log",
+      "sha256": "DCE187B073A026DCAD52E064C1258ABA4135913B58CD1E73F8C8C891DB411CC5"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile4\\launch.json",
+      "sha256": "7977C4D8CFD940FD2293029A7ED2C710E24037688FA6814930F0FA222A81FB54"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile4\\result.json",
+      "sha256": "0BFB80B7F81E3E91B69EA1FDA28879590A1A04160A4A36E08E04408626E4E499"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile5-02\\compiler.log",
+      "sha256": "D9BA7E8EA11BDEF98395655215CD479C8099E41EB24C46B538298E4AE8952088"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile5-02\\launch.json",
+      "sha256": "26577E018BDA29AA9F45DD76F391AFF45C1CB2256FB05F76B29D07A02A1DC243"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile5-02\\result.json",
+      "sha256": "150F0FD8B9FEE73151DF5913F7319D651487631EE139CAC1F3682F5BCBC87AFC"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile6\\compiler.log",
+      "sha256": "159751B3B6CDC1CCEE3D5579964200E273CD668C25682B7ABCF617449C10D91C"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile6\\launch.json",
+      "sha256": "DDDE393E10C5BD63559AFC6F57A10654D79663AC13ECD49DA896AD5C1A3390B9"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile6\\result.json",
+      "sha256": "C6177E92F51C90B634E9FE192EEFFFE8CC0D862B49AA0005FDB1AE4CDB88663D"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\library3\\compiler.log",
+      "sha256": "6F66232D0189A0E95A8BB754039B0F816475713A892196E22A3BC0C0027F8A71"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\library3\\launch.json",
+      "sha256": "99DAD90CE8F0A42D73043781077EFA964727EF8136C0CFD4EB99A52AC206AFEB"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\library3\\result.json",
+      "sha256": "FC8346F9B028DF082B3FA16822E283DB87DF7041D2FEFD53E46B150409D06AB1"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\library8\\compiler.log",
+      "sha256": "DBB9C042EFF3C4DD8C9F2645BE764D28E267BD062F25C1F5B716378A3A5EE08C"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\library8\\launch.json",
+      "sha256": "B3D96A21768D01CC86D74ECF6221EC31FCF2B6101D91D2E90D7B9886561C0A60"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\library8\\result.json",
+      "sha256": "989B249007A1121702B7B1BD21D83D9DE55A686C20150CE008C639A5BD7467B9"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\link2\\compiler.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\link2\\launch.json",
+      "sha256": "BB27221A64B499DBD1C5F4E780BB9071BBC6DCFD8F8FCBAFBCE21E1029FBF626"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\link2\\result.json",
+      "sha256": "8429450D1F42FAD5559607A11BB38390268045E51D5C82FF61F017018EB522E3"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\link7\\compiler.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\link7\\launch.json",
+      "sha256": "0BF1C5421CA4A125BE846A949A54E5DD1D4F242B15C0A0D5759314D9A80D8003"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\link7\\result.json",
+      "sha256": "5DA08B12B1935B300930774E22C015C180D6CB22CA4B33A229E5779E3558487A"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\launch.json",
+      "sha256": "95E2B5A96421BF3164521968C577B2240C46444464D2E0430A6CC5561C68C566"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\metadata-products.json",
+      "sha256": "63EAF4F694EE3F462ECE57CD819C145DF17B34318CDFBE7DF147F835DDA6DB12"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\native-products.json",
+      "sha256": "2C8B4B66837B575054786308A5FE57485ECB0E93DAB24BA87733A78191BADA64"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\result.json",
+      "sha256": "1CAD8020CE9D29FE3AC610E11ED917B46409A906D2E905A66E7907C2772F4D01"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\stdout.log",
+      "sha256": "9FEBFB951DBD3C639451AA1D3AC21C32ACFECC48E476B62A657AA230F73CC148"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\ubt.json",
+      "sha256": "4EED53EED90A87067A54EDD6E728A2EFDE079F4BE59D2DA6416E903FB1D03DF2"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\metadata\\ubt.log",
+      "sha256": "C1700A252562E45715149E218E2001CB5D4295F224518F4E483391C937C689BA"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\resource-conversion-16\\game\\compiler.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\resource-conversion-16\\game\\launch.json",
+      "sha256": "357FA37B1BBDD1715DE4D585B3F73AC43B72B560A84EB31759B4849D7222B2FC"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\resource-conversion-16\\game\\result.json",
+      "sha256": "17FC600971C30AEEE0F20FC524B9F0BC815F4D99F8EED112EAF84A57499E2701"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\resource-conversion-16\\probe\\compiler.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\resource-conversion-16\\probe\\launch.json",
+      "sha256": "091F2FD876B7A594E1E9D0D3291448D788920185CB1E454C6907FDEF7EDF56C7"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\resource-conversion-16\\probe\\result.json",
+      "sha256": "5FE01B50455505B52F07DD327DFC84ACD195AC382545AF29E59946374C819898"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-01\\launch.json",
+      "sha256": "8B60CB908FE34739253A6FB87E58EA48232F4BCE929F1DFE97652FB7F2E820E2"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-01\\result.json",
+      "sha256": "79E3C66EC5314F6CD7755619A407C41F9170ABEC780AF7E9C07D0CA74B668579"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-01\\stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-01\\stdout.log",
+      "sha256": "4AC7E2DFDD4278B9C126C426394AB4DC21FF6A674A24FE096FB51C24AD779850"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-01\\ubt.json",
+      "sha256": "48E0DECB5033BDF0229B11BF7BECE880F3841103285AB13098BEAF145558B2FF"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-plan-01\\ubt.log",
+      "sha256": "4733CB42DA693F991D900E61FFF3D8C63594CC7B13B58C4111FB3FE08976A98B"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile5\\compiler.log",
+      "sha256": "99D057DDF269934EB240FB864A3C711D11610BB5EB425B06BD1FF2B5C6CCD278"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile5\\launch.json",
+      "sha256": "DCE5E15BDFCF0FD78677E5BA3BE89261050E5C684CD66F8C4A8F532C2E57FACC"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-native-build-01\\compile5\\result.json",
+      "sha256": "D50D8AFE2B57C70547DA93FE8D8CA900D6ADECEA84D14B5D15E532F64E6B879E"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-source-prep-01\\launch.json",
+      "sha256": "B7436A63A79A5B03209EB38770575B053847BD4633FDD7FB910BD33258AEC8B6"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-source-prep-01\\result.json",
+      "sha256": "97ADC0852D853E12B3B877C20EE4970410113E868277B1D9BD79ABE45E258441"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-source-prep-01\\source.log",
+      "sha256": "A1BB8BD14F6DFF0BD27E9A87829E058ADBE8C6D16BB795C2BFE73DD5E47681AF"
+    },
+    {
+      "path": "docs\\research\\environment-assets\\grass-native-build-01\\grass-shared-policy-tests-01\\result.json",
+      "sha256": "F4762955D38E75CB2D4465F18E2C1DDF5805FE92FFCF410C68C694FBB22DB321"
+    }
+  ],
+  "actualSuccessfulSteps": [
+    "grass-native-plan-02",
+    "grass-native-build-01\\compile0",
+    "grass-native-build-01\\compile1",
+    "grass-native-build-01\\compile4",
+    "grass-native-build-01\\compile5-02",
+    "grass-native-build-01\\compile6",
+    "grass-native-build-01\\library3",
+    "grass-native-build-01\\library8",
+    "grass-native-build-01\\link2",
+    "grass-native-build-01\\link7",
+    "grass-native-build-01\\metadata",
+    "resource-conversion-16\\game",
+    "resource-conversion-16\\probe"
+  ],
+  "previousReceipt": {
+    "path": "docs\\research\\environment-assets\\tree-native-build-03\\receipt.json",
+    "sha256": "16BB7A09538FFC59D270794C5B522D1ACA9D3991A529FA111969D9F617FE9CFA"
+  },
+  "qualification": {
+    "actualExport": "Distinct grass-native-plan-02 passed existing observational allowlist/None working-set controls. ISPC1.24 --version is log/source-corroborated but absent from process samples; no full short-lived-child identity/endpoint-history claim. No new helper allowance.",
+    "links": "Two genuine import libraries, two resource conversions and resource-token-only DLL links passed under detached pre-resume limit1/no-breakaway jobs; no forged produced items. PE/PDB identities and actual UBT metadata verified.",
+    "failedExport": "grass-native-plan-01 FAILED: unidentified exited child20456, path unavailable; no retrospective identity or endpoint claim. Preserved failure is not superseded as a pass.",
+    "limit": "Build/source evidence only. New14-package import/reload, cook and actual ordinary gameplay remain separate unpassed gates. Selected grove03 untouched.",
+    "inherited": {
+      "inherited": {
+        "inherited": {
+          "inherited": "Genuine integrated strict native-menu/equipment/current-save/resume fixture game compile4/library6/DLL5 and metadata passed. Editor importer unchanged from previous genuine receipt. Raw guarded step evidence retained under exact paths/hash. Prior failed import01 and historical compiler/link/monitor qualifications remain unchanged. No new gameplay acceptance inferred from compilation.",
+          "current": "Genuine UBT exports/UHT, exact guarded native compiler/library/DLL leaves, resource-only substitutions, actual PE/PDB checks and real UBT metadata. UBT export/metadata remain sampled observational tools with the previously approved build-only conhost; not root-only leaf proofs. Original failed compiles and missing-RHI-dependency link remain failed. Global marker not used for these compiler leaves.",
+          "correction": "Typed TObjectPtr declarations, genuine UHT refresh after header movement, explicit RHI dependency for installed UE5.8 shader-platform material readiness. An attempted feature-level overload was rejected by the actual compiler and retained, not cast or claimed successful.",
+          "limit": "No tree import, persisted asset, Cook, Shipping or visual/runtime acceptance from this build."
+        },
+        "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+        "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+        "correction": "Importer only: referenced FBX bounds in UE frame; branch-only invertible UV swap; supported Tangents|UseMikkTSpace with exact nonzero-normal preservation; pre/post per-role basis measurements. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and actual metadata succeeded."
+      },
+      "limit": "Actual native tree import/reload, shaded game review and candidate delivery still required. Build is not runtime acceptance.",
+      "sourceTrace": "FbxMainImport.cpp axis/cm conversion; FbxUtilsImport.cpp:63-84 Y handedness flip. StaticMeshOperations.cpp:1390+ clears tangents only without Normals flag;1639 fills invalid normals;1690 invokes MikkTSpace.",
+      "correction": "Importer only: distinguish orphan vertex instances from referenced corners; permit only remaining exact-zero single-face referenced corners to use valid engine-computed face normals; regenerate Mikk tangents and compare nonzero normals exactly. Record intermediate/final per-role measurements and pre-adaptation actual bounds. Frozen source unchanged. Genuine export, compile, resource-only DLL link, import library, PE/PDB checks and metadata succeeded."
+    },
+    "compilers": "Five genuine root-only guarded compile actions passed; action5 first failed on TObjectPtr deduction/mixed SmoothStep types, corrected in source and passed as distinct compile5-02. Actual original failure retained."
+  }
+}

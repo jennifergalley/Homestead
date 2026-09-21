@@ -1,0 +1,41 @@
+{
+  "status": "failed",
+  "error": "Unadmitted exited build child.",
+  "exitCode": -1,
+  "elapsedSeconds": 2.4147597,
+  "observedChildren": [
+    {
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "startUtc": "2026-09-21T15:35:08.2799675Z",
+      "path": "C:\\WINDOWS\\system32\\conhost.exe",
+      "admitted": true,
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "pid": 56312,
+      "parentPid": 25820
+    },
+    {
+      "pid": 20456,
+      "path": null,
+      "observation": "Exited before a process handle could be acquired; no retained-handle proof for this sample.",
+      "parentPid": 25820
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 626.906,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 1420.2707,
+      "tcp": [],
+      "udp": []
+    },
+    {
+      "elapsedMs": 1981.5803,
+      "tcp": [],
+      "udp": []
+    }
+  ],
+  "exportCorroboration": null
+}

@@ -54,6 +54,7 @@ private:
     TArray<FString> PresentationSettings;
     void RecordPresentationSettings(const TCHAR* Phase);
     void RecordGroveInventory();
+    void RecordGrassGroundInventory();
     TWeakObjectPtr<UStaticMeshComponent> ObservedTree;
     FVector2D TreeCenter = FVector2D::ZeroVector;
     FVector2D TreeStaging = FVector2D::ZeroVector;

@@ -1,0 +1,66 @@
+{
+  "pid": 51644,
+  "image": "E:\\Tools\\VSBuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cvtres.exe",
+  "creationTime": 134344792874804566,
+  "executableSha256": "B5DA94E7B9FF60B388EA9013D9E0E3D4A2A68BFF7C668C7017583459DAC4E3C5",
+  "arguments": [],
+  "job": {
+    "Flags": 8200,
+    "ProcessLimit": 1,
+    "ActiveProcesses": 1,
+    "TotalProcesses": 1,
+    "TerminatedForLimits": 0,
+    "HeldProcessIsMember": true
+  },
+  "resumed": false,
+  "marker": {
+    "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\game\\dummy-marker",
+    "Volume": 3222469187,
+    "IndexHigh": 131072,
+    "IndexLow": 721704,
+    "Attributes": 32,
+    "Size": 0,
+    "CreationTime": 134344792871709413,
+    "LastWriteTime": 134344792871709413,
+    "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+  },
+  "explicitHandles": 3,
+  "sourceSha256": "6D828337158C19C252836D9549BC41A1578DFD616844AB3D715EC95EB9C97143",
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "allowedBuildOnlyConsole": {
+    "path": "C:\\Windows\\System32\\conhost.exe",
+    "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+    "signature": "Valid"
+  },
+  "compileActionId": -1,
+  "workingDirectory": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\game",
+  "responseFiles": [
+    {
+      "sha256": "6D828337158C19C252836D9549BC41A1578DFD616844AB3D715EC95EB9C97143",
+      "path": "E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\Default.rc2.res"
+    }
+  ],
+  "expectedProducedItems": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\game-resource.obj",
+  "resourceLinkActionId": -1,
+  "exactReviewedArguments": "/MACHINE:X64 /READONLY /NOLOGO \"/OUT:E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\resource-conversion-16\\game-resource.obj\" \"E:\\Repos\\SurvivalGame\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SurvivalGame\\Default.rc2.res\"",
+  "previousProductBackups": [],
+  "resourceConversion": "Game",
+  "derivedDllResponse": "",
+  "splitShippingManifest": false,
+  "embedShippingManifest": false,
+  "stageCooked": false,
+  "stageCandidate": null,
+  "treeDiagnosticCandidate": false,
+  "treeContactCorrection": false,
+  "groveCandidate": false,
+  "groveProxyCorrection": false,
+  "creationFlags": 525324,
+  "detachedConsole": true,
+  "fernActions": false,
+  "uiActions": false,
+  "shippingActions": false,
+  "wardrobeActions": false,
+  "treeActions": false,
+  "grassActions": true
+}

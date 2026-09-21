@@ -1,0 +1,183 @@
+{
+  "state": "selected-source-only-not-unreal-imported",
+  "source": "Assets\\Source\\woodland-preparation-20260920-182217-d1f84e39\\grass_medium_01\\grass_medium_01_1k.fbx",
+  "sourceSha256": "EF823EBA5C7114B98FB544A85AB7B17DD1C2DDD6F3E785CD232029B980AE7C44",
+  "sourceReceiptSha256": "AACF677F7B8CA07A5656842EA80AFEDC80845E509AFE8731F198DA973F339ECF",
+  "sourceInventorySha256": "B38DCE70440F97817B3A8C8372D25EFC6B72BEE47E7078FC1D8ED207C1C0AAF4",
+  "toolSha256": "8BB90CD7F4787BACC6838AC4D6A5530E627FCEB8C206B6915EA95DE1A2B722A4",
+  "geometryHelperSha256": "7D5B3F61DD107DE1280B320822572F01E21D10D253F52685258119D43ACF3101",
+  "file": "GrassMedium01_Selected.fbx",
+  "sha256": "4D2E305A8166532EF5A3AB326E6FDF5F1E0F809D21C677A4FD7D3E14A623C142",
+  "bytes": 122268,
+  "selection": {
+    "fbxVersion": 7400,
+    "removedImageObjects": 8,
+    "selectedModels": [
+      "grass_medium_01_mid_b_LOD0",
+      "grass_medium_01_small_b_LOD0",
+      "grass_medium_01_tall_a_LOD0",
+      "grass_medium_01_tiny_a_LOD0"
+    ],
+    "retainedObjectDataVerified": true
+  },
+  "models": [
+    {
+      "id": 9907750,
+      "name": "grass_medium_01_mid_b_LOD0",
+      "type": "Mesh",
+      "parentIds": [
+        0
+      ],
+      "geometryIds": [
+        34972056
+      ],
+      "materialSlotsInConnectionOrder": [
+        "grass_medium_01"
+      ],
+      "properties": {
+        "Lcl Translation": [
+          -79.99996185302734,
+          0.0,
+          0.0
+        ],
+        "Lcl Rotation": [
+          -90.00000933466734,
+          0.0,
+          0.0
+        ],
+        "Lcl Scaling": [
+          100.0,
+          100.0,
+          100.0
+        ],
+        "DefaultAttributeIndex": [
+          0
+        ],
+        "InheritType": [
+          1
+        ]
+      }
+    },
+    {
+      "id": 854938463,
+      "name": "grass_medium_01_small_b_LOD0",
+      "type": "Mesh",
+      "parentIds": [
+        0
+      ],
+      "geometryIds": [
+        556848324
+      ],
+      "materialSlotsInConnectionOrder": [
+        "grass_medium_01"
+      ],
+      "properties": {
+        "Lcl Translation": [
+          40.000022888183594,
+          0.0,
+          0.0
+        ],
+        "Lcl Rotation": [
+          -90.00000933466734,
+          0.0,
+          0.0
+        ],
+        "Lcl Scaling": [
+          100.0,
+          100.0,
+          100.0
+        ],
+        "DefaultAttributeIndex": [
+          0
+        ],
+        "InheritType": [
+          1
+        ]
+      }
+    },
+    {
+      "id": 515132540,
+      "name": "grass_medium_01_tall_a_LOD0",
+      "type": "Mesh",
+      "parentIds": [
+        0
+      ],
+      "geometryIds": [
+        425513347
+      ],
+      "materialSlotsInConnectionOrder": [
+        "grass_medium_01"
+      ],
+      "properties": {
+        "Lcl Translation": [
+          79.99998474121094,
+          0.0,
+          0.0
+        ],
+        "Lcl Rotation": [
+          -90.00000933466734,
+          0.0,
+          0.0
+        ],
+        "Lcl Scaling": [
+          100.0,
+          100.0,
+          100.0
+        ],
+        "DefaultAttributeIndex": [
+          0
+        ],
+        "InheritType": [
+          1
+        ]
+      }
+    },
+    {
+      "id": 99195606,
+      "name": "grass_medium_01_tiny_a_LOD0",
+      "type": "Mesh",
+      "parentIds": [
+        0
+      ],
+      "geometryIds": [
+        697680708
+      ],
+      "materialSlotsInConnectionOrder": [
+        "grass_medium_01"
+      ],
+      "properties": {
+        "Lcl Translation": [
+          200.0000457763672,
+          0.0,
+          0.0
+        ],
+        "Lcl Rotation": [
+          -90.00000933466734,
+          0.0,
+          0.0
+        ],
+        "Lcl Scaling": [
+          100.0,
+          100.0,
+          100.0
+        ],
+        "DefaultAttributeIndex": [
+          0
+        ],
+        "InheritType": [
+          1
+        ]
+      }
+    }
+  ],
+  "sourceFanTriangles": {
+    "grass_medium_01_mid_b_LOD0": 1257,
+    "grass_medium_01_small_b_LOD0": 653,
+    "grass_medium_01_tall_a_LOD0": 290,
+    "grass_medium_01_tiny_a_LOD0": 79
+  },
+  "totalSourceFanTriangles": 2279,
+  "unchanged": "Retained object IDs, geometry arrays, UVs, normals, material and model transforms compared after FBX reparse.",
+  "operations": "Binary parser/encoder only; no bpy scene import, decimation, image load, shader/render or scale edit.",
+  "limits": "Source fan estimates and source transforms only; actual UE bounds/triangles/slots/units/materials/anchors remain unverified."
+}

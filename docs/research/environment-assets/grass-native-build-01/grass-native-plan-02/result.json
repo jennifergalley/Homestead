@@ -1,0 +1,86 @@
+{
+  "status": "passed",
+  "error": null,
+  "exitCode": 0,
+  "elapsedSeconds": 12.0044652,
+  "observedChildren": [
+    {
+      "pid": 14192,
+      "sha256": "E449BCE01F275CD08F3D4E64BB73B3B43AE845A0DBDB3E6131426E66537705E5",
+      "startUtc": "2026-09-21T15:41:39.7272144Z",
+      "admitted": true,
+      "arguments": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+      "parentPid": 55916,
+      "path": "C:\\WINDOWS\\system32\\conhost.exe"
+    }
+  ],
+  "samples": [
+    {
+      "elapsedMs": 681.0293,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 1523.1902,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 2191.9069,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 2839.7093,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 4387.3906,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 5833.632,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 7004.9581,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 8055.0539,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 9064.9961,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 10075.0216,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 10732.193,
+      "udp": [],
+      "tcp": []
+    },
+    {
+      "elapsedMs": 11751.9515,
+      "udp": [],
+      "tcp": []
+    }
+  ],
+  "exportCorroboration": {
+    "versionQueryReported": true,
+    "sampledIsNotCompleteHistory": true,
+    "observation": "A log-confirmed brief version-query child may be absent from process samples; no retroactive identity/endpoint claim.",
+    "source": "ISPCToolChain.cs233-247 invokes --version through a process-local Lazy cache",
+    "version": "1.24.0"
+  }
+}

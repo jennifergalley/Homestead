@@ -1,0 +1,313 @@
+{
+	"mode": "GrassImport",
+	"namespace": "/Game/Trials/GrassGround_20260921_01",
+	"stage": "import-complete",
+	"meshes": [
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b",
+			"sourceNode": "grass_medium_01_mid_b_LOD0",
+			"sourceModelId": 9907750,
+			"sourceGeometryId": 34972056,
+			"sourceTriangles": 1257,
+			"renderTriangles": 1257,
+			"importedSlot": "grass_medium_01",
+			"material": "/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+			"boundsMinCm": [
+				-87.645477294921875,
+				-8.7684755325317383,
+				-0.33443811535835266
+			],
+			"boundsMaxCm": [
+				-68.866592407226562,
+				11.334384918212891,
+				17.437719345092773
+			],
+			"sourceDimensionsTimes100Cm": [
+				18.778881999999999,
+				20.10286,
+				17.772157
+			],
+			"placementGroundAnchorCm": [
+				-78.256034851074219,
+				1.2829546928405762,
+				-0.33443811535835266
+			],
+			"importUniformScale": 1,
+			"nanite": false,
+			"simpleCollision": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b",
+			"sourceNode": "grass_medium_01_small_b_LOD0",
+			"sourceModelId": 854938463,
+			"sourceGeometryId": 556848324,
+			"sourceTriangles": 653,
+			"renderTriangles": 653,
+			"importedSlot": "grass_medium_01",
+			"material": "/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+			"boundsMinCm": [
+				30.784427642822266,
+				-9.7842340469360352,
+				-0.76562786102294922
+			],
+			"boundsMaxCm": [
+				47.380096435546875,
+				9.2049770355224609,
+				9.2238998413085938
+			],
+			"sourceDimensionsTimes100Cm": [
+				16.595669999999998,
+				18.989211999999998,
+				9.989528
+			],
+			"placementGroundAnchorCm": [
+				39.08226203918457,
+				-0.28962850570678711,
+				-0.76562786102294922
+			],
+			"importUniformScale": 1,
+			"nanite": false,
+			"simpleCollision": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a",
+			"sourceNode": "grass_medium_01_tall_a_LOD0",
+			"sourceModelId": 515132540,
+			"sourceGeometryId": 425513347,
+			"sourceTriangles": 290,
+			"renderTriangles": 290,
+			"importedSlot": "grass_medium_01",
+			"material": "/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+			"boundsMinCm": [
+				72.041580200195312,
+				-7.4502992630004883,
+				-0.55779796838760376
+			],
+			"boundsMaxCm": [
+				88.137222290039062,
+				8.4028491973876953,
+				31.696840286254883
+			],
+			"sourceDimensionsTimes100Cm": [
+				16.095641000000001,
+				15.853147999999999,
+				32.254638999999997
+			],
+			"placementGroundAnchorCm": [
+				80.089401245117188,
+				0.47627496719360352,
+				-0.55779796838760376
+			],
+			"importUniformScale": 1,
+			"nanite": false,
+			"simpleCollision": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a",
+			"sourceNode": "grass_medium_01_tiny_a_LOD0",
+			"sourceModelId": 99195606,
+			"sourceGeometryId": 697680708,
+			"sourceTriangles": 79,
+			"renderTriangles": 79,
+			"importedSlot": "grass_medium_01",
+			"material": "/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+			"boundsMinCm": [
+				197.66993713378906,
+				-5.1006526947021484,
+				-0.26543086767196655
+			],
+			"boundsMaxCm": [
+				204.40470886230469,
+				2.2762236595153809,
+				10.979902267456055
+			],
+			"sourceDimensionsTimes100Cm": [
+				6.7347760000000001,
+				7.3768760000000002,
+				11.245334
+			],
+			"placementGroundAnchorCm": [
+				201.03732299804688,
+				-1.4122145175933838,
+				-0.26543086767196655
+			],
+			"importUniformScale": 1,
+			"nanite": false,
+			"simpleCollision": false
+		}
+	],
+	"textures": [
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Diff.T_GrassMedium01_Diff",
+			"source": "grass_medium_01_diff_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_NormalDX.T_GrassMedium01_NormalDX",
+			"source": "grass_medium_01_nor_dx_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Roughness.T_GrassMedium01_Roughness",
+			"source": "grass_medium_01_rough_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_AO.T_GrassMedium01_AO",
+			"source": "grass_medium_01_ao_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Alpha.T_GrassMedium01_Alpha",
+			"source": "grass_medium_01_alpha_1k.png",
+			"width": 1024,
+			"height": 1024,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Diff.T_GrassGround_Diff",
+			"source": "grass_ground_diff_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"compression": 0,
+			"srgb": true,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_NormalDX.T_GrassGround_NormalDX",
+			"source": "grass_ground_nor_dx_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"compression": 1,
+			"srgb": false,
+			"flipGreen": false
+		},
+		{
+			"object": "/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Roughness.T_GrassGround_Roughness",
+			"source": "grass_ground_rough_2k.png",
+			"width": 2048,
+			"height": 2048,
+			"compression": 2,
+			"srgb": false,
+			"flipGreen": false
+		}
+	],
+	"totalMeshTriangles": 2279,
+	"packages": 14,
+	"grassMaterial": "/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+	"groundMaterial": "/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+	"groundBlend": "Vertex red lerps original ground to grass-ground color/roughness/normal; normalize final normal; unchanged UV0 three-meter tiling.",
+	"transformPolicy": "Scene/unit conversion once and absolute source transform bake; authored scale1; runtime placement offsets measured ground anchor only.",
+	"persistentObjectReferences": [
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a:HiResMeshDescription",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a:FbxStaticMeshImportData_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01:M_GrassMedium01EditorOnlyData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Diff.T_GrassMedium01_Diff",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_NormalDX.T_GrassMedium01_NormalDX",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Roughness.T_GrassMedium01_Roughness",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_AO.T_GrassMedium01_AO",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Alpha.T_GrassMedium01_Alpha",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Alpha.T_GrassMedium01_Alpha:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_AO.T_GrassMedium01_AO:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Roughness.T_GrassMedium01_Roughness:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_NormalDX.T_GrassMedium01_NormalDX:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Diff.T_GrassMedium01_Diff:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01:MaterialExpressionTextureSample_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01:MaterialExpressionTextureSample_2",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01:MaterialExpressionTextureSample_1",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01:MaterialExpressionTextureSample_4",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01:MaterialExpressionTextureSample_3",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_AO.T_GrassMedium01_AO",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Alpha.T_GrassMedium01_Alpha",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_NormalDX.T_GrassMedium01_NormalDX",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Roughness.T_GrassMedium01_Roughness",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassMedium01_Diff.T_GrassMedium01_Diff",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a:HiResMeshDescription",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a:FbxStaticMeshImportData_0",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b:HiResMeshDescription",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b:FbxStaticMeshImportData_0",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b:StaticMeshDescriptionBulkData_0",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b:HiResMeshDescription",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassMedium01.M_GrassMedium01",
+		"/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b:FbxStaticMeshImportData_0",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Roughness.T_GrassGround_Roughness:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_NormalDX.T_GrassGround_NormalDX:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Diff.T_GrassGround_Diff:AssetImportData",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:M_GrassGroundBlendEditorOnlyData",
+		"/Game/SurvivalGame/Textures/T_GroundColor.T_GroundColor",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Diff.T_GrassGround_Diff",
+		"/Game/SurvivalGame/Textures/T_GroundNormal.T_GroundNormal",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_NormalDX.T_GrassGround_NormalDX",
+		"/Game/SurvivalGame/Textures/T_GroundRoughness.T_GroundRoughness",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Roughness.T_GrassGround_Roughness",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionLinearInterpolate_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionLinearInterpolate_2",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionNormalize_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionVertexColor_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_1",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_2",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_3",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionLinearInterpolate_1",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_4",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_5",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Roughness.T_GrassGround_Roughness",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/SurvivalGame/Textures/T_GroundRoughness.T_GroundRoughness",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_2",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_3",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionVertexColor_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_NormalDX.T_GrassGround_NormalDX",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/SurvivalGame/Textures/T_GroundNormal.T_GroundNormal",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround_Diff.T_GrassGround_Diff",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/SurvivalGame/Textures/T_GroundColor.T_GroundColor",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionLinearInterpolate_1",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_4",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_5",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionVertexColor_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionTextureSample_1",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend:MaterialExpressionVertexColor_0",
+		"/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend"
+	],
+	"passed": true,
+	"cancelledAtPollingBoundary": false
+}

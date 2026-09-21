@@ -4,7 +4,7 @@
 
 Fern02 import and two real offscreen captures passed:
 `docs/research/environment-assets/fern-render-success-01`. This is pipeline
-proof, not finished world art or packaged/performance approval. Five of29
+proof, not finished world art or packaged/performance approval. Six of29
 top-level tasks are complete; partial evidence does not manufacture more.
 
 The first integrated fern Shipping route subsequently passed with 302 real
@@ -130,6 +130,108 @@ is the explicit rollback and prior UI candidates remain. This is not full
 woodland, clean-mesh, exact03 performance or Jenny's subjective approval.
 No further tree-image refinement is planned in this round; grass/ground is next.
 
+**Next tangible increment: selected grass clumps and ground blend.** Use the
+existing admitted Grass Medium01 FBX, not the publisher aggregate as geometry.
+Select only `mid_b_LOD0`, `small_b_LOD0`, `tall_a_LOD0`, `tiny_a_LOD0`:
+source fan estimates1,257/653/290/79, totaling2,279. Preserve their geometry,
+UVs, custom normals, material identity and source transforms. Prepare a fresh
+reference-free four-clump FBX by the established geometry-only FBX method,
+removing unused models/geometry and Texture/Video references, not simplifying,
+rescaling or loading author texture paths. Verify retained arrays/transforms and
+original input hashes; no blind reimport or17-clump-as-LOD assumption.
+
+Exactly14 new packages under `/Game/Trials/GrassGround_20260921_01`: four
+`Meshes/SM_GrassMedium01_{mid_b,small_b,tall_a,tiny_a}`, five explicit1k grass maps
+`Textures/T_GrassMedium01_{Diff,NormalDX,Roughness,AO,Alpha}`,
+`Materials/M_GrassMedium01`, three2k ground maps
+`Textures/T_GrassGround_{Diff,NormalDX,Roughness}` and
+`Materials/M_GrassGroundBlend`. Use green diffuse only (dry variant deferred),
+DX normals without a green flip, sRGB diffuse only, masked two-sided grass with
+separate alpha-R. Reuse original terrain UVs and explicitly admitted existing
+`T_GroundColor/T_GroundNormal/T_GroundRoughness` as read-only blend inputs; do not
+overwrite `M_Ground` or any accepted texture. Keep terrain topology, heights,
+collision and stream sections unchanged. Ground blend must be visible in actual
+clearing play, not only a material inspection.
+
+Use authored-material instancing for nonblocking grass, no prototype Tint or
+arbitrary mesh scaling; undo source layout offset only at ground anchoring as
+with Fern02. Bound initial placement to512 clumps with a650,000-triangle ceiling
+and preserve home/resource/build/plot/stream exclusions. Replace corresponding
+purely decorative grass proxies in the upgraded patch, not resource reeds or
+collectible plants. Record actual imported/runtime triangles, slots, bounds,
+units/anchors, package references, opacity/readiness and placement counts.
+Refresh genuine Editor products/receipts before guarded import and separate
+fresh-process verification. Then exact cook/fresh Shipping and real ordinary
+play evidence with proportional screenshot-free timing; no isolated showcase,
+new renderer, extra helpers, global settings changes or subjective approval claim.
+
+Source selection actually passed in4.23s under the existing exact-hashed Blender4.5
+root-only leaf:4 geometry/4 model/1 material,2,279 independently counted source
+fan triangles, no image objects/external image references, retained arrays and
+transforms identical. Fresh122,268-byte selected FBX:
+`4D2E305A8166532EF5A3AB326E6FDF5F1E0F809D21C677A4FD7D3E14A623C142`.
+This is source preparation, not an Unreal/runtime pass.
+
+The ground graph shares vertex-red weight for base color, roughness and normal
+and normalizes the blended normal. Original UV0 retains3m tiling. Weight varies
+0.45-0.88 with a deterministic broad sine/cosine patch mask, fading to the
+original ground inside the650cm home radius and195cm stream distance; transitions
+finish at1000cm/350cm respectively. Only section0 vertex colors/material change,
+not positions, indices, normals, UVs, tangents or collision; stream-section
+colors remain empty as before. Runtime inventory checks every section0 vertex,
+index and blend weight against that contract. Four authored-material HISM batches
+place up to512 native-scale clumps at deterministic safe sites within26m of home,
+requiring ground weight>=0.4, with no collision/navigation/overlaps. Corresponding
+nonflower clearing grass proxies are skipped; flower stems, outer meadow proxies
+and every interactive resource remain intentionally unchanged.
+
+The first genuine action
+export (`grass-native-plan-01`) stopped after2.41s on childPID20456, which exited
+before handle acquisition with no CIM executable path. It remains unidentified;
+three sampled owned endpoint observations were empty, not complete child history.
+The operation-local working-set provider override already applied to this Editor
+export. Installed source runs the known lazy ISPC version query before the last
+logged build-settings line, but that does not retrospectively identify the child.
+The failed result/log remain unchanged. Distinct export02 passed the unchanged
+observational controls, with its actual ISPC version query log-corroborated but
+not captured in process samples. Five exact root-only compile leaves, two import
+libraries, resource-only DLL links and genuine metadata now pass. First compile5
+failed on ordinary type errors, fixed in source and retained beside compile5-02.
+Native receipt `83558EBBBEF65B17C4EC5F563B98FA0E69D66FE14E0B1520E822422F38CDA30D`
+and supervisor receipt
+`7348068DFF3AE9E9A60F2926F33F351FDF3B206FD1AA958D4E007B12CC6506D2`
+retain those qualifications. Source/build passes do not satisfy the remaining
+import, reload, cook, gameplay or performance gates.
+
+**Grass/ground actual runtime evidence:** import and fresh-process reload passed
+all14 packages (`grass-assets-01` receipt
+`698941DB6CAF37A3352AB00B8313AED07EA649D4B8D5C0AC2FBB1E5614E36E6C`).
+Fresh cook, genuine three-leaf Shipping compilation, split link/manifest,
+metadata and loose staging then passed. `grass-ordinary-01` records513 real
+1280x720 frames and all23 ordinary stages, gathering, trunk blocking and
+290.426689cm retreat. Actual512 clumps across four batches cost297633 mesh
+triangles; all measured placement/readiness/exclusion checks passed.
+Every103041 ground vertex and614400 indices were checked: position, normal
+and UV errors0; intended red-weight quantization error at most0.001960745.
+Task4.3 is now complete for this restrained ground treatment. This does not
+complete the palette, woodland, construction coverage or art review.
+
+Fresh matched720p-output/60-capped screenshot-free routes of grass01 and
+selected grove03 both measured approximately60 actor ticks/second and no
+interval above33.33ms. End process physical memory was1001316352 versus
+959627264 bytes. These are single short runs and start/end snapshots, not
+GPU/Present timings, peak memory, uncapped headroom or a4K claim. Actual
+grass-ground images remain intensely golden under unchanged dawn lighting;
+the patch is sparse rather than lush. Selected candidate remains grove03
+until explicit delivery verification.
+
+The added native-grass prerequisite check was found nested beneath the
+mutually exclusive tree branch after the native build. Actual sealing had
+independently verified all successful compile products against disk; those
+products are genuine. The guard is now correctly independent, with an AST
+regression and actual Shipping/metadata-selector tests. Old tool evidence
+is not rewritten to claim that unreachable check ran.
+
 Follow `docs/game-plan.md`: completion-driven work, disposable test saves
 (report resets), proportional checks and latest usable delivery. Main owns
 environment/engine integration; isolated siblings own UI, wardrobe rules
@@ -166,7 +268,7 @@ renderer evidence is in `fern-completion-driven-run.md`.
 
 - [ ] 4.1 Integrate fern first, then trees/understory; preserve deterministic home/resource/structure/plot/stream exclusions.
 - [ ] 4.2 Preserve resource base/produce/cleared semantics, readability and reserved cleared/build sites.
-- [ ] 4.3 Add ground treatment without changing terrain topology, heights, collision or stream ribbons.
+- [x] 4.3 Add ground treatment without changing terrain topology, heights, collision or stream ribbons.
 - [ ] 4.4 Add restrained supported wind/distance behavior after static foliage works; verify stationary roots and bounds.
 - [ ] 4.5 Retain conventional rendering unless an actual LOD/Nanite comparison is warranted; record the chosen path.
 - [ ] 4.6 Evaluate optional native clouds only if justified after foliage, under the existing lighting owner; otherwise retain the current sky.

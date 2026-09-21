@@ -20,6 +20,8 @@ includes this credit. Include this document in any distributed build.
 | Rock Moss Set 02 | Kless Gyzen | https://polyhaven.com/a/rock_moss_set_02 | CC0 |
 | Fern 02 | Rob Tuytel (scanning), Rico Cilliers (modeling) | https://polyhaven.com/a/fern_02 | CC0 |
 | Tree Small 02 (qualified provisional grove) | Rico Cilliers | https://polyhaven.com/a/tree_small_02 | CC0 |
+| Grass Medium 01 (four selected clumps) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/grass_medium_01 | CC0 |
+| Grass Ground (ground blend) | Charlotte Baglioni | https://polyhaven.com/a/grass_ground | CC0 |
 | Forest Ambience | TinyWorlds | https://opengameart.org/content/forest-ambience | CC0 |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
@@ -41,6 +43,18 @@ diagnostic qualification; original import03 remains FAILED. The first two
 ordinary contact-observer scenarios failed and the corrected third scenario
 passed. Coordinator review accepted this limited playtest increment, not clean
 mesh, full woodland, performance or Jenny's art approval.
+
+The grass/ground increment retains four Grass Medium 01 objects (`mid_b`,
+`small_b`, `tall_a`, `tiny_a`): 2,279 source/render triangles in total, not the
+publisher's aggregate. The reference-free derivative preserves their geometry,
+normals, UVs and transforms; provenance is in
+`Assets\Environment\GrassMedium01Prepared\v1\provenance.json`. Five unchanged1K
+maps feed a project-wired masked two-sided material. Three Grass Ground2K maps
+blend with the existing ground maps through terrain vertex-red weights without
+changing terrain positions, topology, normals, UVs or collision. Actual import
+and separate reload evidence is in
+`docs\research\environment-assets\grass-assets-01`. There is no authored wind
+or claim that this restrained clearing patch is a complete woodland.
 
 ## Character prototype
 
