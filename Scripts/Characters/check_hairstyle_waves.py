@@ -1,6 +1,8 @@
 """Read-only waves-only publication check; no Bob, wardrobe or engine dependency."""
+import argparse
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,7 +14,25 @@ def sha(path):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--published-commit",help="Require current wave files/materials/palette to match this Git checkpoint.")
+    args = parser.parse_args()
     manifest = json.loads((OUT/"LongWave-manifest.json").read_text())
+    if args.published_commit:
+        def published(path):
+            relative = path.relative_to(ROOT).as_posix()
+            return subprocess.check_output(["git","show",args.published_commit+":"+relative],cwd=ROOT)
+        manifest = json.loads(published(OUT/"LongWave-manifest.json"))
+        for entry in manifest["entries"]:
+            path = OUT/entry["fbx"]
+            if sha(path)!=entry["sha256"]:
+                raise SystemExit(f"PUBLISHED_WAVE_MISMATCH: {path.name} differs from {args.published_commit}. "
+                                 "Do not substitute this working-copy candidate for the published checkpoint.")
+        assert json.loads((OUT/"LongWave-materials.json").read_text()) == json.loads(
+            published(OUT/"LongWave-materials.json")), "Published material contract mismatch"
+        for name in ["HomesteadAppearance.h","HomesteadAppearance.cpp"]:
+            path = ROOT/"Source"/"SurvivalGame"/name
+            assert path.read_text().splitlines()==published(path).decode().splitlines(), "Published palette mismatch: "+name
     assert manifest["style"] == "LongWave"
     assert len(manifest["entries"]) == 6
     assert {(e["body"],e["outfit"]) for e in manifest["entries"]} == {
@@ -46,6 +66,8 @@ def main():
     assert "int32 HairColor = 0;" in header
     assert "FLinearColor NeutralHairTint(int32 Index)" in cpp
     print("WAVES_ONLY_VERIFIED: 6 FBXs + neutral texture/material + Appearance; original inputs unchanged")
+    print("Publication scope: "+(args.published_commit if args.published_commit else
+          "working copy only; use --published-commit to validate an exact published checkpoint"))
     print("Source candidate only: task 1.1 cut-edge finish and cooked gameplay acceptance remain open.")
 
 

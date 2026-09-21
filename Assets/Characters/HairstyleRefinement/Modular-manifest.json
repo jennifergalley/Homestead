@@ -1,0 +1,406 @@
+{
+  "status": "final parity: latest local feather-tip waves plus stock-based Bob; not a3a6dee or visual acceptance",
+  "stable_base_authorization": "2026-09-20 23:53 Arizona; read-only modular source with separate permanent bra and briefs",
+  "source_namespace": "Assets\\Characters\\ModularClothing",
+  "skeleton": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Skeleton",
+  "protected_modular_inputs": {
+    "Assets\\Characters\\ModularClothing\\asset-hashes.json": "6dfbdb3770a46dc9cca7779e4612d1c624aab199e3cd7675654ebe1a8f35b774",
+    "Assets\\Characters\\ModularClothing\\manifest.json": "bc665adfc998898e69a44260258fdec609350b3374d88c21c9f2293af074ddb0",
+    "Assets\\Characters\\ModularClothing\\provenance.json": "7c6f59b09122d3eca7188ad2f0b50cd884ab617fb951228725fe82e75cd9b7c3",
+    "Assets\\Characters\\ModularClothing\\README.md": "5d7b6924f879a431d33cd7bb56d1fcd0bad4a8e9c960a06c40037e6c57bbaa0d",
+    "Assets\\Characters\\ModularClothing\\validation.json": "c10c6f45f3fc1543a45e98228febbb35e7591e779005f0ad0e8fdaf09436fe48",
+    "Assets\\Characters\\ModularClothing\\Hazel\\Hazel_Modular.blend": "fc182368f69343ad5c1364d08113281beb9240f267e02521da932cd0967bc6fa",
+    "Assets\\Characters\\ModularClothing\\Hazel\\Hazel_Modular.blend1": "9bae214cf07817033eea987d3054d30a0ab486894a8a229c6e5c6cce348a2122",
+    "Assets\\Characters\\ModularClothing\\Hazel\\materials.json": "da1037b1b3cf1c5c237bb007ba5fd3e951c04ea6c41ff3baba9b5a873916043a",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Apron.fbx": "3cf63aac0d347052684a1f9bd3ae8a685a2e2323cbf032fcf2bae6b6ec1635ec",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Base_Bob.fbx": "f9a425b0695aa1c3e011d3b054505669fc503b51fd15b739f62ec94172f00783",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Base_LongWave.fbx": "fd91ec24974ef97a24051aa311c3edb01e3b3c4b71d06e2ca395a0cf738652e0",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Base_Ponytail.fbx": "60b33f5ae8e22a47917c6460ea962336e21f8dd9e1dd7af0898c9492af9cdd46",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Footwraps.fbx": "a1f0e0f5838055365689ffc478ed82d7c40f5287bc52acbf233acbf5d8bbc987",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Shoes.fbx": "57851d492deb2c1b5267223a86e7c9a0dda3620f34e8d2a11166f4275bbb3647",
+    "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Tunic.fbx": "b9c408b3b00bacd0b5f646e2ad413c3058fb042cd454c40bb11668d9fb84bc18",
+    "Assets\\Characters\\ModularClothing\\Hazel\\source-report.json": "7d4fa9760e240fb42c84c8cdb56d96ae0e6267b33784d05df3b6deb047203bce",
+    "Assets\\Characters\\ModularClothing\\Preferred\\materials.json": "e8e2854faac11fa6ab7d81bf3c4f071980ad69fc638beff424b75789f859aa5a",
+    "Assets\\Characters\\ModularClothing\\Preferred\\Preferred_Modular.blend": "485d0fe95b074878b19350e876ce0232d9920313d4afbd724858dc3b4b658b73",
+    "Assets\\Characters\\ModularClothing\\Preferred\\Preferred_Modular.blend1": "a2fd44708341a4f41be3ed113d27be161ef0c90cc50e93ffe04a672a7ca444d9",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Apron.fbx": "a56b1f0e1f65d4765c329db06391443ad6babaf2971af227365e6dfbf25fee1b",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_Bob.fbx": "446bf8d9788287eefc9af579958d93dc066d365f0f1444b577d5480e09bc281f",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_LongWave.fbx": "6336521182abeb18cb7e16236d362b7cc27c323a5c309f2105ca96060a96d255",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_Ponytail.fbx": "4b01a51cb3eb9d86dd857ac7b0bfd22dc021a307a1b84d152d83c0bb07d7276f",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Footwraps.fbx": "04c2f2b631dab7055957f58f36182e751cdaa19cc096254a3a9be40e94c8df40",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Shoes.fbx": "9b7e65fa04abf174428f05d862d6a4b51a212b8a5688638be689167029f9ff94",
+    "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Tunic.fbx": "57f7121edb682a06e479e6ade33b9dee0a705f959511454e7ac4942252e7f833",
+    "Assets\\Characters\\ModularClothing\\Preferred\\source-report.json": "26f5e4bbdb19596076cd7f03fc375d40e4d3e1d128f6ef618392fa4262729364",
+    "Assets\\Characters\\ModularClothing\\Review\\Hazel-contact-sheet.png": "b5b62251e25658d43b39f98dfbba75b11994f3bd062d100fc1edf87c6c902f17",
+    "Assets\\Characters\\ModularClothing\\Review\\Preferred-contact-sheet.png": "46306efd0ea6ab594444cae2f338afc12eb20d0e8552b83d4fee6540167b00d3",
+    "Assets\\Characters\\ModularClothing\\Review\\Willow-contact-sheet.png": "ce20df97e4dc73c0c5c7ee9d6a97dda82d6afab2c4a24139d84327485bc3c01d",
+    "Assets\\Characters\\ModularClothing\\Textures\\blue_eye.png": "f89ac33fc6a94d05cdadffd27b2643ee16160608f9337b12da572084e3dd5920",
+    "Assets\\Characters\\ModularClothing\\Textures\\eyebrow001.png": "1b1f509b428528a42a4941b49ffd83924c96414b2f1d135879e175daa3d0e750",
+    "Assets\\Characters\\ModularClothing\\Textures\\eyelashes01.png": "cefe3aa06869e88c908c342984c624ada1f74c918fd67226ecba28d99502a239",
+    "Assets\\Characters\\ModularClothing\\Textures\\shoes01_diffuse.png": "49e2114ef411bf5f874713c1d27149ec9fa75251115b3923daf97fc40a7c98ea",
+    "Assets\\Characters\\ModularClothing\\Textures\\teeth.png": "f73c5936a40ea046f7fb136aa4857fb37a67702b1ef95ffa41db922e57afbf58",
+    "Assets\\Characters\\ModularClothing\\Textures\\tongue01_diffuse.png": "a6a1b883355eafba77e0764ace30c0c32b7c2a0e4e9943cb3599afad4d8458c9",
+    "Assets\\Characters\\ModularClothing\\Textures\\T_ApronLinen.png": "e3676eeb6e14d8811d3ae67fd996600d02b21038d1c111b4612c00ee68e0ea8f",
+    "Assets\\Characters\\ModularClothing\\Textures\\T_Bob_Chestnut.png": "e953d110d4c42fb2fec458176898baa6871917790c1ffbd90c396509dbeb7f4a",
+    "Assets\\Characters\\ModularClothing\\Textures\\T_LongWave_Chestnut.png": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2",
+    "Assets\\Characters\\ModularClothing\\Textures\\T_Long_Chestnut.png": "093cc944bbbbb93c28e96416f6b576497c29b1f7689f21e6a7a7a43247d67ce2",
+    "Assets\\Characters\\ModularClothing\\Textures\\T_ModularWeave.png": "5f503797b34804bfe06bb59df5ada2899d5160bcab4ae15b8aa982dd24a3da23",
+    "Assets\\Characters\\ModularClothing\\Textures\\T_Ponytail_Chestnut.png": "1d12cabbab25c6084f5ce6f7d46382fa8e626c24476407f9aad4015d73219bbf",
+    "Assets\\Characters\\ModularClothing\\Textures\\young_lightskinned_female_diffuse.png": "33fec958e0d40773e46d6f64b084871e40388c957e32930fc74c200e5e256934",
+    "Assets\\Characters\\ModularClothing\\Willow\\materials.json": "ad5df805c35af2355cd94d30a9cb374bedb8c430704a429ae59e03ca9699a9a8",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Apron.fbx": "b2a7d567bd42669c4823176186e58d228aacea80b3a866cfb398d36ae235cf33",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Base_Bob.fbx": "8b4c8acb53a6709930bb06c97f9d7103031d504730ccdc7a4536d67bc0941337",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Base_LongWave.fbx": "4c721f8f75b4611c75d6271dce36127f072b01375f06f1fe7884be16963309b4",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Base_Ponytail.fbx": "67ad75b06de1f07117c5853a75852672fb7415146d9d71b023ff30cfc4aa8ab0",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Footwraps.fbx": "ed5e0d19710af143619a02db5385f9875a8f1381b3ab1c7a47451be48a318f13",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Shoes.fbx": "ba28892795b9a7c465c9c4142b56781cbf91d7385168b901f00cfcb0f627b419",
+    "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Tunic.fbx": "4b539e9f5494db62744c8b0baead9cd1fb06ff0d4f44a5d605352a3aebf540e7",
+    "Assets\\Characters\\ModularClothing\\Willow\\source-report.json": "97bd7600958c18db259e49dc84f7e65d166f1556da9a8f764840ea754b58e2ff",
+    "Assets\\Characters\\ModularClothing\\Willow\\Willow_Modular.blend": "6d09c0fa5276f3809d2701ae79f116ee17d321df82d4449c8c3a7b126c9b8dd9",
+    "Assets\\Characters\\ModularClothing\\Willow\\Willow_Modular.blend1": "cd2014de9e5503821fe8751363648ca2252da1ea2c7c0fd402c9d2dcc7f12fc2"
+  },
+  "entries": [
+    {
+      "body": "Preferred",
+      "style": "LongWave",
+      "fbx": "Modular\\SK_Modular_Preferred_Base_LongWave.fbx",
+      "sha256": "af36592d2d5ccfc739d741055b3de763dea48b9df3d6bccd856ddca01d19870a",
+      "source": "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_LongWave.fbx",
+      "source_sha256": "6336521182abeb18cb7e16236d362b7cc27c323a5c309f2105ca96060a96d255",
+      "joined_hair_source": "Joined\\SK_Heroine_LongWave.fbx",
+      "joined_hair_sha256": "c788b57d969826006ae0ccf86c4ed5e025d71b26f7f83d3c605b538126006bc1",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave",
+      "material_slots": [
+        "M_Heroine_Skin",
+        "M_Modular_BaseBra",
+        "M_Modular_BaseBriefs",
+        "M_Heroine_Hair_long01_Neutral",
+        "M_Heroine_LightEyes",
+        "M_Heroine_Eyebrows",
+        "M_Heroine_Eyelashes",
+        "M_Heroine_Teeth",
+        "M_Heroine_Tongue"
+      ],
+      "hair_material_slot": 3,
+      "tint_helper": "HomesteadLook::NeutralHairTint",
+      "coverage_basis": {
+        "method": "Separate permanent opaque bra and briefs replace covered body surface faces; no underlying removable nude mesh.",
+        "materials": [
+          "M_Modular_BaseBra",
+          "M_Modular_BaseBriefs"
+        ],
+        "cloth_faces": {
+          "Bra": 2170,
+          "Briefs": 1144
+        },
+        "bra_z_m": [
+          1.08,
+          1.205
+        ],
+        "briefs_top_m": 0.91,
+        "briefs_lower_seam": "z = 0.74 + 0.38 * abs(x)",
+        "body_occlusion_masks": []
+      },
+      "checks": {
+        "nonhair_preexport_max_error": 0,
+        "nonhair_roundtrip_max_error": 6.332993507385254e-08,
+        "nonhair_normal_error": 0.0,
+        "nonhair_materials_values_links_texture_hashes_exact": true,
+        "bind_roundtrip_error": 1.4960765838623047e-05,
+        "joined_hair_surface_error": 3.91155481338501e-08,
+        "joined_hair_normal_error": 0.0003237128257751465,
+        "permanent_coverage_faces_unchanged": {
+          "M_Modular_BaseBra": 2426,
+          "M_Modular_BaseBriefs": 1144
+        },
+        "hair_head_only": true,
+        "roundtrip": {
+          "vertices": 72703,
+          "triangles": 133454,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": 9
+        }
+      }
+    },
+    {
+      "body": "Willow",
+      "style": "LongWave",
+      "fbx": "Modular\\SK_Modular_Willow_Base_LongWave.fbx",
+      "sha256": "dc1b5e9ca294296cf8bcb87fbd3a63aa23c247747a722ae089f131cbecd7e595",
+      "source": "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Base_LongWave.fbx",
+      "source_sha256": "4c721f8f75b4611c75d6271dce36127f072b01375f06f1fe7884be16963309b4",
+      "joined_hair_source": "Joined\\SK_Heroine_Willow_LongWave.fbx",
+      "joined_hair_sha256": "9d84abf573c7a47d620491e6bf7d753a98f05f77ad91c96bf60bb14203a0f8c1",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_LongWave.SK_Modular_Willow_Base_LongWave",
+      "material_slots": [
+        "M_Heroine_Skin",
+        "M_Modular_BaseBra",
+        "M_Modular_BaseBriefs",
+        "M_Heroine_Hair_long01_Neutral",
+        "M_Heroine_LightEyes",
+        "M_Heroine_Eyebrows",
+        "M_Heroine_Eyelashes",
+        "M_Heroine_Teeth",
+        "M_Heroine_Tongue"
+      ],
+      "hair_material_slot": 3,
+      "tint_helper": "HomesteadLook::NeutralHairTint",
+      "coverage_basis": {
+        "method": "Separate permanent opaque bra and briefs replace covered body surface faces; no underlying removable nude mesh.",
+        "materials": [
+          "M_Modular_BaseBra",
+          "M_Modular_BaseBriefs"
+        ],
+        "cloth_faces": {
+          "Bra": 2176,
+          "Briefs": 1152
+        },
+        "bra_z_m": [
+          1.08,
+          1.205
+        ],
+        "briefs_top_m": 0.91,
+        "briefs_lower_seam": "z = 0.74 + 0.38 * abs(x)",
+        "body_occlusion_masks": []
+      },
+      "checks": {
+        "nonhair_preexport_max_error": 0,
+        "nonhair_roundtrip_max_error": 6.332993507385254e-08,
+        "nonhair_normal_error": 0.0,
+        "nonhair_materials_values_links_texture_hashes_exact": true,
+        "bind_roundtrip_error": 1.4960765838623047e-05,
+        "joined_hair_surface_error": 3.91155481338501e-08,
+        "joined_hair_normal_error": 0.0003134608268737793,
+        "permanent_coverage_faces_unchanged": {
+          "M_Modular_BaseBra": 2432,
+          "M_Modular_BaseBriefs": 1152
+        },
+        "hair_head_only": true,
+        "roundtrip": {
+          "vertices": 72759,
+          "triangles": 133442,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": 9
+        }
+      }
+    },
+    {
+      "body": "Hazel",
+      "style": "LongWave",
+      "fbx": "Modular\\SK_Modular_Hazel_Base_LongWave.fbx",
+      "sha256": "14c6a5a10f2bf3f2e08d418db2024e762b9be5d2832fc54ae1fb34546c047430",
+      "source": "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Base_LongWave.fbx",
+      "source_sha256": "fd91ec24974ef97a24051aa311c3edb01e3b3c4b71d06e2ca395a0cf738652e0",
+      "joined_hair_source": "Joined\\SK_Heroine_Hazel_LongWave.fbx",
+      "joined_hair_sha256": "a514feb06d27750355d183382ddbdfe8bbb6168fdfa845cea300a21bc568bd42",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_LongWave.SK_Modular_Hazel_Base_LongWave",
+      "material_slots": [
+        "M_Heroine_Skin",
+        "M_Modular_BaseBra",
+        "M_Modular_BaseBriefs",
+        "M_Heroine_Hair_long01_Neutral",
+        "M_Heroine_LightEyes",
+        "M_Heroine_Eyebrows",
+        "M_Heroine_Eyelashes",
+        "M_Heroine_Teeth",
+        "M_Heroine_Tongue"
+      ],
+      "hair_material_slot": 3,
+      "tint_helper": "HomesteadLook::NeutralHairTint",
+      "coverage_basis": {
+        "method": "Separate permanent opaque bra and briefs replace covered body surface faces; no underlying removable nude mesh.",
+        "materials": [
+          "M_Modular_BaseBra",
+          "M_Modular_BaseBriefs"
+        ],
+        "cloth_faces": {
+          "Bra": 2154,
+          "Briefs": 1136
+        },
+        "bra_z_m": [
+          1.08,
+          1.205
+        ],
+        "briefs_top_m": 0.91,
+        "briefs_lower_seam": "z = 0.74 + 0.38 * abs(x)",
+        "body_occlusion_masks": []
+      },
+      "checks": {
+        "nonhair_preexport_max_error": 0,
+        "nonhair_roundtrip_max_error": 6.332993507385254e-08,
+        "nonhair_normal_error": 0.0,
+        "nonhair_materials_values_links_texture_hashes_exact": true,
+        "bind_roundtrip_error": 1.4960765838623047e-05,
+        "joined_hair_surface_error": 3.91155481338501e-08,
+        "joined_hair_normal_error": 0.0001970529556274414,
+        "permanent_coverage_faces_unchanged": {
+          "M_Modular_BaseBra": 2410,
+          "M_Modular_BaseBriefs": 1136
+        },
+        "hair_head_only": true,
+        "roundtrip": {
+          "vertices": 72822,
+          "triangles": 133478,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": 9
+        }
+      }
+    },
+    {
+      "body": "Preferred",
+      "style": "Bob",
+      "fbx": "Modular\\SK_Modular_Preferred_Base_Bob.fbx",
+      "sha256": "49ea4b879c3177bc1e734ed619d15f6fbbbdf21a9eae9cdf8745351b350ca996",
+      "blend_sha256": "940e2bf2e10913f9a5875dfd681cd133b6643a55225d2741dc8da52cb9a281e4",
+      "source": "Assets\\Characters\\ModularClothing\\Preferred\\SK_Modular_Preferred_Base_Bob.fbx",
+      "source_sha256": "446bf8d9788287eefc9af579958d93dc066d365f0f1444b577d5480e09bc281f",
+      "joined_hair_source": "Joined\\SK_Heroine_Bob.fbx",
+      "joined_hair_sha256": "3f0361707fd05c2ef5c3b42f0b38b80113b3b4b23f93a20131003c55ab27150c",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Bob.SK_Modular_Preferred_Base_Bob",
+      "material_slots": [
+        "M_Heroine_Skin",
+        "M_Modular_BaseBra",
+        "M_Modular_BaseBriefs",
+        "M_Heroine_Hair_bob01_Neutral",
+        "M_Heroine_LightEyes",
+        "M_Heroine_Eyebrows",
+        "M_Heroine_Eyelashes",
+        "M_Heroine_Teeth",
+        "M_Heroine_Tongue"
+      ],
+      "hair_material_slot": 3,
+      "tint_helper": "HomesteadLook::NeutralHairTint",
+      "checks": {
+        "nonhair_preexport_max_error": 0,
+        "nonhair_roundtrip_max_error": 6.332993507385254e-08,
+        "nonhair_normal_roundtrip_max_error": 0.0,
+        "nonhair_materials_values_links_texture_hashes_exact": true,
+        "bind_roundtrip_max_error": 1.4960765838623047e-05,
+        "donor_hair_surface_error": 3.91155481338501e-08,
+        "donor_hair_normal_error": 0.0006891489028930664,
+        "hair_head_only": true,
+        "material_slot": 3,
+        "roundtrip": {
+          "vertices": 100605,
+          "triangles": 151118,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": 9
+        },
+        "nonhair_normal_error": 0.0,
+        "bind_roundtrip_error": 1.4960765838623047e-05,
+        "joined_hair_surface_error": 3.91155481338501e-08,
+        "joined_hair_normal_error": 0.0006891489028930664,
+        "permanent_coverage_faces_unchanged": {
+          "M_Modular_BaseBra": 2426,
+          "M_Modular_BaseBriefs": 1144
+        }
+      }
+    },
+    {
+      "body": "Willow",
+      "style": "Bob",
+      "fbx": "Modular\\SK_Modular_Willow_Base_Bob.fbx",
+      "sha256": "34faee44083b2979e4c213cd007a5b5ea0fdcdffc9cdc5576eea7ec29ed8dea2",
+      "blend_sha256": "d40cea6f6a23e8c9358b4f83e7b2adbacc0108943a3249d5eea546d3ff1264dc",
+      "source": "Assets\\Characters\\ModularClothing\\Willow\\SK_Modular_Willow_Base_Bob.fbx",
+      "source_sha256": "8b4c8acb53a6709930bb06c97f9d7103031d504730ccdc7a4536d67bc0941337",
+      "joined_hair_source": "Joined\\SK_Heroine_Willow_Bob.fbx",
+      "joined_hair_sha256": "1f68deee6aaa7620bbae303d9a4b4b4ca48e8121b9ee44507e52310982262338",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Bob.SK_Modular_Willow_Base_Bob",
+      "material_slots": [
+        "M_Heroine_Skin",
+        "M_Modular_BaseBra",
+        "M_Modular_BaseBriefs",
+        "M_Heroine_Hair_bob01_Neutral",
+        "M_Heroine_LightEyes",
+        "M_Heroine_Eyebrows",
+        "M_Heroine_Eyelashes",
+        "M_Heroine_Teeth",
+        "M_Heroine_Tongue"
+      ],
+      "hair_material_slot": 3,
+      "tint_helper": "HomesteadLook::NeutralHairTint",
+      "checks": {
+        "nonhair_preexport_max_error": 0,
+        "nonhair_roundtrip_max_error": 6.332993507385254e-08,
+        "nonhair_normal_roundtrip_max_error": 0.0,
+        "nonhair_materials_values_links_texture_hashes_exact": true,
+        "bind_roundtrip_max_error": 1.4960765838623047e-05,
+        "donor_hair_surface_error": 3.91155481338501e-08,
+        "donor_hair_normal_error": 0.000521540641784668,
+        "hair_head_only": true,
+        "material_slot": 3,
+        "roundtrip": {
+          "vertices": 100839,
+          "triangles": 151157,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": 9
+        },
+        "nonhair_normal_error": 0.0,
+        "bind_roundtrip_error": 1.4960765838623047e-05,
+        "joined_hair_surface_error": 3.91155481338501e-08,
+        "joined_hair_normal_error": 0.000521540641784668,
+        "permanent_coverage_faces_unchanged": {
+          "M_Modular_BaseBra": 2432,
+          "M_Modular_BaseBriefs": 1152
+        }
+      }
+    },
+    {
+      "body": "Hazel",
+      "style": "Bob",
+      "fbx": "Modular\\SK_Modular_Hazel_Base_Bob.fbx",
+      "sha256": "b58997f09bbf6976cc138939e6409bf7d08c219cc3407b1830f4b07291fdf508",
+      "blend_sha256": "a416f00d76c8cbceaa0cb6ddccacde35a9d76ffe4bfee951319e11c626b12055",
+      "source": "Assets\\Characters\\ModularClothing\\Hazel\\SK_Modular_Hazel_Base_Bob.fbx",
+      "source_sha256": "f9a425b0695aa1c3e011d3b054505669fc503b51fd15b739f62ec94172f00783",
+      "joined_hair_source": "Joined\\SK_Heroine_Hazel_Bob.fbx",
+      "joined_hair_sha256": "b1e58bb1d5966629df29699de0d6e8113eddf00ebb845c94497d26ea55b28e6d",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Bob.SK_Modular_Hazel_Base_Bob",
+      "material_slots": [
+        "M_Heroine_Skin",
+        "M_Modular_BaseBra",
+        "M_Modular_BaseBriefs",
+        "M_Heroine_Hair_bob01_Neutral",
+        "M_Heroine_LightEyes",
+        "M_Heroine_Eyebrows",
+        "M_Heroine_Eyelashes",
+        "M_Heroine_Teeth",
+        "M_Heroine_Tongue"
+      ],
+      "hair_material_slot": 3,
+      "tint_helper": "HomesteadLook::NeutralHairTint",
+      "checks": {
+        "nonhair_preexport_max_error": 0,
+        "nonhair_roundtrip_max_error": 6.332993507385254e-08,
+        "nonhair_normal_roundtrip_max_error": 0.0,
+        "nonhair_materials_values_links_texture_hashes_exact": true,
+        "bind_roundtrip_max_error": 1.4960765838623047e-05,
+        "donor_hair_surface_error": 3.91155481338501e-08,
+        "donor_hair_normal_error": 0.0005103051662445068,
+        "hair_head_only": true,
+        "material_slot": 3,
+        "roundtrip": {
+          "vertices": 101126,
+          "triangles": 151311,
+          "bones": 53,
+          "max_influences": 4,
+          "material_slots": 9
+        },
+        "nonhair_normal_error": 0.0,
+        "bind_roundtrip_error": 1.4960765838623047e-05,
+        "joined_hair_surface_error": 3.91155481338501e-08,
+        "joined_hair_normal_error": 0.0005103051662445068,
+        "permanent_coverage_faces_unchanged": {
+          "M_Modular_BaseBra": 2410,
+          "M_Modular_BaseBriefs": 1136
+        }
+      }
+    }
+  ]
+}

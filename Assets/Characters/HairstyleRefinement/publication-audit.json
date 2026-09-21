@@ -1,0 +1,96 @@
+{
+  "published_wave_commit": "a3a6dee",
+  "published_palette_commit": "013c70b",
+  "scope": "Existing differences predate the freeze; this check never changes source assets.",
+  "files": [
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_LongWave.fbx",
+      "published_sha256": "1d3557d7b0b8f523278f7d72f3dfe815b9ec44190031185920cb3ef60a232b2e",
+      "working_sha256": "c788b57d969826006ae0ccf86c4ed5e025d71b26f7f83d3c605b538126006bc1",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_LongWave.blend",
+      "published_sha256": "abc78f5b4263bd92d9c104b1ba955156a9f850f9646946e5053dcc5b06502541",
+      "working_sha256": "3d1b636ab43d0dfa51c052577e4308f191e9f2450781eb2b95207e782f76ca87",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_LongWave_Apron.fbx",
+      "published_sha256": "07662e9d831aac30f68d59c8c08d225fdd1220ad4e53d9b529ab7d1cf69de5bb",
+      "working_sha256": "21978becf42d71136b9de5a97006e2048b247f3a244cd6c986b687442961580e",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_LongWave_Apron.blend",
+      "published_sha256": "2627da16fb8ad3486985497d04283b203f1af5f9f5275d40f221b0bea89b5d49",
+      "working_sha256": "95e73be6c7af1f45982d40c96ef3ceedf2ad22f5880016191ae374a9d79597c5",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Willow_LongWave.fbx",
+      "published_sha256": "e333c5bda624730086f6b0296cf18db8dcccfa0839c2f07e9b6848fdc566ad7f",
+      "working_sha256": "9d84abf573c7a47d620491e6bf7d753a98f05f77ad91c96bf60bb14203a0f8c1",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Willow_LongWave.blend",
+      "published_sha256": "2ae6d01ab0b689f167bc92524b86147727de6d73215d6f618289601fbfc2257e",
+      "working_sha256": "5bc8aaa23407e0be5bf340df29f27e71e7c86132f458ad1d5ec0a42e906edba9",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Willow_LongWave_Apron.fbx",
+      "published_sha256": "8c5158440f24e6c8fb5f4fc03fc8996fad222b2b6e9858c39cff5abe504e132c",
+      "working_sha256": "34ed06ee0103034b06bd81e604ba0a24af29891dd028c6f61974d8d05434a5a1",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Willow_LongWave_Apron.blend",
+      "published_sha256": "e664afe56cc7dc6a7494ac03874ad342026a34f8b15d02fe6390c3c14c64e111",
+      "working_sha256": "77af8ba78677e1847e8d79baeb7355c2af77ffe2fa8e77673684cfec3b6ad4f0",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Hazel_LongWave.fbx",
+      "published_sha256": "2e5e86949a662b4a719d01fc80bd425be96f58ec99c6fe4d1757c06b5c753c28",
+      "working_sha256": "a514feb06d27750355d183382ddbdfe8bbb6168fdfa845cea300a21bc568bd42",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Hazel_LongWave.blend",
+      "published_sha256": "30d88d9c84b93de04f872d8f195a935eb65f03ea8b1ac1d57daec1675b8085a4",
+      "working_sha256": "2383faeb6dbe3bae006cb3a191a75f6448b31c23cfa1bdde56924ed5f5db18fa",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Hazel_LongWave_Apron.fbx",
+      "published_sha256": "06355f40bdee5ac60fbf3573f5dc2672b7581869e10f553be86f9df3f6d79e95",
+      "working_sha256": "c4c9a0fd5596c6c5fdb2db51a6ab666cc4f76071088965ce1f50ed0b5281e046",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\Joined\\SK_Heroine_Hazel_LongWave_Apron.blend",
+      "published_sha256": "04ea25c7629e0d832bbf46b0fea862e4151f47546faf12d9d701412eecafae77",
+      "working_sha256": "af4f6d5f0c872f892ad0465b997707b1dff8bf5a97832376102602c5431e8f1f",
+      "same_bytes": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\LongWave-manifest.json",
+      "published_sha256": "f12292e5dd3a76f8d51724e1feda178b3b58e03a2215cf749cdec39d42e6fc5b",
+      "working_sha256": "cb6e61cd7624cc5535053ba2d503d3655a064bfa48d936aa61fed6bc8880cac8",
+      "same_normalized_content": false
+    },
+    {
+      "file": "Assets\\Characters\\HairstyleRefinement\\LongWave-materials.json",
+      "published_sha256": "66e4719a8a09f23b0cd9457eb1383b9b8fb53aa887a73925d3d5f00dc2c94e6d",
+      "working_sha256": "cec1e0e835009ee7db3a9b6ac785fcad32aec4e6c59ba1d9df9988fc6079fad0",
+      "same_normalized_content": true
+    }
+  ],
+  "neutral_texture_matches_published": true,
+  "palette_source_matches_published": {
+    "HomesteadAppearance.h": true,
+    "HomesteadAppearance.cpp": true
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "status": "technical interchange parity only; no art or gameplay acceptance",
+  "published_basis": {
+    "commit": "a3a6dee",
+    "asset": "Already-admitted fitted CC0 MakeHuman long01 wave hair",
+    "attribution": "MakeHuman Team / makehuman_system; Data Collection AB, Joel Palmius, Jonas Hauquier",
+    "license": "CC0-1.0",
+    "admission": "Assets\\Characters\\provenance.json",
+    "license_evidence": "Assets\\Characters\\Source\\Licenses\\LICENSE.ASSETS.md",
+    "acquisition": "Exact SHA-verified existing local Git LFS objects; no download or other-checkout modification",
+    "input_copies": "Joined FBXs and copied published manifest/material/texture records in this namespace"
+  },
+  "operation": {
+    "recipe": "Scripts\\Characters\\build_published_hairstyle_parity.py",
+    "geometry_authoring": "None. Transfer the exact published hair onto stable modular bases.",
+    "preserved": "Permanent bra/briefs, all nonhair surfaces/UVs/weights/normals/materials, original 53-bone bind, head-only hair weights",
+    "validation": "Modular-manifest.json records actual FBX round trips, donor parity and protected hashes.",
+    "limits": "Transferred custom-normal re-encoding bounded below 0.001 component error. Original broad-lock/cut-edge limitation unchanged."
+  },
+  "frozen_inputs": "Frozen local wave/palette and parent-owned handoff hashes are checked without modifying those files.",
+  "execution": "Offline factory-startup disable-autoexec Blender 4.5.14, two CPU threads, no renderer/compiler/Unreal.",
+  "private_or_game_references": "No private portrait access or copied/extracted game assets."
+}

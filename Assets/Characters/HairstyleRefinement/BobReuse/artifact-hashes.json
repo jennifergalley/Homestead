@@ -1,0 +1,110 @@
+{
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\CPU-source-contact.png": {
+    "sha256": "916a23f92ef9305b5a344363cea4e17ddba56c2d1caf4dccebde347867f1d61c",
+    "bytes": 1088946
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Bob.blend": {
+    "sha256": "9e483b1ea00dc25bf62fadf92e18e22a3a3b6f98f9253d5b3ae37d3426b22812",
+    "bytes": 14896764
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Bob.fbx": {
+    "sha256": "7460663338c87c2a32d74f7c1777e57efc5db147bacd2a603a54d0b5aeb0692b",
+    "bytes": 5255916
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Bob_Apron.blend": {
+    "sha256": "11af6a8871977d40fcea8681c102a8d479b0218a438bc68f7e231618cbada9df",
+    "bytes": 15309799
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Bob_Apron.fbx": {
+    "sha256": "705f95b5089b7e0b386a24be4f1e89af86e78527f7ae24e17513f4ea88f124ef",
+    "bytes": 5374444
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Hazel_Bob.blend": {
+    "sha256": "0262f1024fd8cf480b595709b00e1f0a9fddf96e3534999b0e947557d4e13f0a",
+    "bytes": 14941721
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Hazel_Bob.fbx": {
+    "sha256": "c63bf1556619de7f1c6f4d537b57344cb2c47703c5868b7cfbbc729dabbd9362",
+    "bytes": 5269948
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Hazel_Bob_Apron.blend": {
+    "sha256": "3464c00b2f7daf1b418fdcd0a7952039a1c75d33726c7bd1c347133581877f0c",
+    "bytes": 15354780
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Hazel_Bob_Apron.fbx": {
+    "sha256": "6ed7985bd740051983b7a437392dd8567bc04e93558cf258c24cabeb07245e1f",
+    "bytes": 5388812
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Willow_Bob.blend": {
+    "sha256": "974c3784edbb306825855aa9a1de9ca1de3796efabe894c8c4dc9a9be83273c0",
+    "bytes": 14930978
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Willow_Bob.fbx": {
+    "sha256": "b743eef0d09af1d8568c454b1903b706ccab4c1c45dcf289e867442e36392927",
+    "bytes": 5264236
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Willow_Bob_Apron.blend": {
+    "sha256": "c638a313535deacecdacc684223b9af86509f22db38f8e8068b663b707c2e1b7",
+    "bytes": 15344005
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Joined\\SK_Heroine_Willow_Bob_Apron.fbx": {
+    "sha256": "43cadce459ce9c9142329658e2c1958aac613f2cdeff9d2167846b65de444421",
+    "bytes": 5383436
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\manifest.json": {
+    "sha256": "ba3c8e1aa45f4d49aa352d6612f0171f2be9dc64584a40ce07255d78a0a82ff4",
+    "bytes": 37378
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\materials.json": {
+    "sha256": "e8944a6fe853ca430b8feefa9b2a5a1f280296a57cd54fe06b9a5fefaecd3334",
+    "bytes": 584
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Modular\\SK_Modular_Hazel_Base_Bob.blend": {
+    "sha256": "9942c276a0fbf1debfb0e9001911dbbc8d8c1f311093963c4021bcf696839ec5",
+    "bytes": 15934387
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Modular\\SK_Modular_Hazel_Base_Bob.fbx": {
+    "sha256": "58ab8910ecb098f52e7c0dc5f73f0d8fb25452529142730c9291132c33d7c00d",
+    "bytes": 5770204
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Modular\\SK_Modular_Preferred_Base_Bob.blend": {
+    "sha256": "752e267666513240aeced6ca4096625d95235f9a3b4604e9318dc0a74e790348",
+    "bytes": 15888372
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Modular\\SK_Modular_Preferred_Base_Bob.fbx": {
+    "sha256": "617b858f13b41c512a58b70098b2fc2dc5662629359bec3bafa1754bad01d898",
+    "bytes": 5752508
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Modular\\SK_Modular_Willow_Base_Bob.blend": {
+    "sha256": "f5a44ee3aa4ecb0137ab3648a193c44fc5f5c8d56c9d7fd62cfeae648b60fb92",
+    "bytes": 15906672
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Modular\\SK_Modular_Willow_Base_Bob.fbx": {
+    "sha256": "9d87e19e45ab6345db1398fe4f0215ee96fd5e9564e13807962cdc1913946c55",
+    "bytes": 5759452
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\provenance.json": {
+    "sha256": "45db0cdaf6b2a64a0a36e971a55b06a833eeb3570f52cb41fae49ca7483bcf5c",
+    "bytes": 2133
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\README.md": {
+    "sha256": "e0be6b93016d920a9ff752e3171b2657a6560eeb4e38f9b0751c08bffa2033d3",
+    "bytes": 3400
+  },
+  "Assets\\Characters\\HairstyleRefinement\\BobReuse\\Textures\\T_BobReuse_Neutral.png": {
+    "sha256": "8163b5ae9eff12540b533e56d54283c82ac1df601cde2fe3dfcc01f8b7257f0e",
+    "bytes": 1652290
+  },
+  "Assets\\Characters\\Source\\Licenses\\LICENSE.ASSETS.md": {
+    "sha256": "5f3ab0cf6f7ebe92efe4b83213131c617d308d164eeefd5da230373640b0c226",
+    "bytes": 7003
+  },
+  "Scripts\\Characters\\build_hairstyle_bob_reuse.py": {
+    "sha256": "976c1510bdcf96fb13aa7f8413405e0e32b02cc41da1aacc5dffef61fef619f3",
+    "bytes": 12799
+  },
+  "Scripts\\Characters\\check_hairstyle_bob_reuse.py": {
+    "sha256": "88390ecc7a760275354b0ee71a623f06a5909a04f41bc8226be1b7428590a18d",
+    "bytes": 2847
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "status": "final uncommitted technical source bundle; no gameplay or visual acceptance",
+  "wave_revision": "Latest feather-tip/local-reference candidate, explicitly different from immutable a3a6dee; parent requested this final revision.",
+  "joined_wave_manifest": "LongWave-manifest.json",
+  "joined_bob_manifest": "Bob-manifest.json",
+  "modular_manifest": "Modular-manifest.json",
+  "wave_materials": "LongWave-materials.json",
+  "bob_materials": "Bob-materials.json",
+  "reference_only": [
+    "BobReuse (stock-authoring donor/reference)",
+    "PublishedWaveParity (immutable a3a6dee inputs and technical parity)"
+  ],
+  "published_checkpoint_audit": "publication-audit.json",
+  "entries": [
+    {
+      "group": "joined_waves",
+      "fbx": "Joined\\SK_Heroine_LongWave.fbx",
+      "sha256": "c788b57d969826006ae0ccf86c4ed5e025d71b26f7f83d3c605b538126006bc1",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave.SK_Heroine_LongWave"
+    },
+    {
+      "group": "joined_waves",
+      "fbx": "Joined\\SK_Heroine_LongWave_Apron.fbx",
+      "sha256": "21978becf42d71136b9de5a97006e2048b247f3a244cd6c986b687442961580e",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave_Apron.SK_Heroine_LongWave_Apron"
+    },
+    {
+      "group": "joined_waves",
+      "fbx": "Joined\\SK_Heroine_Willow_LongWave.fbx",
+      "sha256": "9d84abf573c7a47d620491e6bf7d753a98f05f77ad91c96bf60bb14203a0f8c1",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave.SK_Heroine_Willow_LongWave"
+    },
+    {
+      "group": "joined_waves",
+      "fbx": "Joined\\SK_Heroine_Willow_LongWave_Apron.fbx",
+      "sha256": "34ed06ee0103034b06bd81e604ba0a24af29891dd028c6f61974d8d05434a5a1",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_LongWave_Apron.SK_Heroine_Willow_LongWave_Apron"
+    },
+    {
+      "group": "joined_waves",
+      "fbx": "Joined\\SK_Heroine_Hazel_LongWave.fbx",
+      "sha256": "a514feb06d27750355d183382ddbdfe8bbb6168fdfa845cea300a21bc568bd42",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave.SK_Heroine_Hazel_LongWave"
+    },
+    {
+      "group": "joined_waves",
+      "fbx": "Joined\\SK_Heroine_Hazel_LongWave_Apron.fbx",
+      "sha256": "c4c9a0fd5596c6c5fdb2db51a6ab666cc4f76071088965ce1f50ed0b5281e046",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_LongWave_Apron.SK_Heroine_Hazel_LongWave_Apron"
+    },
+    {
+      "group": "joined_bob",
+      "fbx": "Joined\\SK_Heroine_Bob.fbx",
+      "sha256": "3f0361707fd05c2ef5c3b42f0b38b80113b3b4b23f93a20131003c55ab27150c",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob.SK_Heroine_Bob"
+    },
+    {
+      "group": "joined_bob",
+      "fbx": "Joined\\SK_Heroine_Bob_Apron.fbx",
+      "sha256": "4a6c998f31519f80caedfac8ae111ba32068a51ebb67b45f4912c1ab735c34ad",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Bob_Apron.SK_Heroine_Bob_Apron"
+    },
+    {
+      "group": "joined_bob",
+      "fbx": "Joined\\SK_Heroine_Willow_Bob.fbx",
+      "sha256": "1f68deee6aaa7620bbae303d9a4b4b4ca48e8121b9ee44507e52310982262338",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_Bob.SK_Heroine_Willow_Bob"
+    },
+    {
+      "group": "joined_bob",
+      "fbx": "Joined\\SK_Heroine_Willow_Bob_Apron.fbx",
+      "sha256": "5c18e77e3b442c9897e835c0d3710a8e8417421877a8a897f8ba93b5c90d7252",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Willow_Bob_Apron.SK_Heroine_Willow_Bob_Apron"
+    },
+    {
+      "group": "joined_bob",
+      "fbx": "Joined\\SK_Heroine_Hazel_Bob.fbx",
+      "sha256": "b1e58bb1d5966629df29699de0d6e8113eddf00ebb845c94497d26ea55b28e6d",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_Bob.SK_Heroine_Hazel_Bob"
+    },
+    {
+      "group": "joined_bob",
+      "fbx": "Joined\\SK_Heroine_Hazel_Bob_Apron.fbx",
+      "sha256": "15795fcfb53ca928e904e03c7f2b31888ded776e73323e39d47f7c2ebaebfd55",
+      "object_path": "/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_Bob_Apron.SK_Heroine_Hazel_Bob_Apron"
+    },
+    {
+      "group": "modular",
+      "fbx": "Modular\\SK_Modular_Preferred_Base_LongWave.fbx",
+      "sha256": "af36592d2d5ccfc739d741055b3de763dea48b9df3d6bccd856ddca01d19870a",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_LongWave.SK_Modular_Preferred_Base_LongWave"
+    },
+    {
+      "group": "modular",
+      "fbx": "Modular\\SK_Modular_Willow_Base_LongWave.fbx",
+      "sha256": "dc1b5e9ca294296cf8bcb87fbd3a63aa23c247747a722ae089f131cbecd7e595",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_LongWave.SK_Modular_Willow_Base_LongWave"
+    },
+    {
+      "group": "modular",
+      "fbx": "Modular\\SK_Modular_Hazel_Base_LongWave.fbx",
+      "sha256": "14c6a5a10f2bf3f2e08d418db2024e762b9be5d2832fc54ae1fb34546c047430",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_LongWave.SK_Modular_Hazel_Base_LongWave"
+    },
+    {
+      "group": "modular",
+      "fbx": "Modular\\SK_Modular_Preferred_Base_Bob.fbx",
+      "sha256": "49ea4b879c3177bc1e734ed619d15f6fbbbdf21a9eae9cdf8745351b350ca996",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Preferred/SK_Modular_Preferred_Base_Bob.SK_Modular_Preferred_Base_Bob"
+    },
+    {
+      "group": "modular",
+      "fbx": "Modular\\SK_Modular_Willow_Base_Bob.fbx",
+      "sha256": "34faee44083b2979e4c213cd007a5b5ea0fdcdffc9cdc5576eea7ec29ed8dea2",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Willow/SK_Modular_Willow_Base_Bob.SK_Modular_Willow_Base_Bob"
+    },
+    {
+      "group": "modular",
+      "fbx": "Modular\\SK_Modular_Hazel_Base_Bob.fbx",
+      "sha256": "b58997f09bbf6976cc138939e6409bf7d08c219cc3407b1830f4b07291fdf508",
+      "object_path": "/Game/SurvivalGame/Characters/ModularClothing/Hazel/SK_Modular_Hazel_Base_Bob.SK_Modular_Hazel_Base_Bob"
+    }
+  ]
+}

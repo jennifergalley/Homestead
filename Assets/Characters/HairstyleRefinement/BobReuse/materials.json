@@ -1,0 +1,21 @@
+{
+  "M_Heroine_Hair_bob01_Neutral": {
+    "base_color": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "roughness": 0.7,
+    "metallic": 0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": true,
+    "sRGB": true,
+    "texture": "Textures\\T_BobReuse_Neutral.png",
+    "sha256": "8163b5ae9eff12540b533e56d54283c82ac1df601cde2fe3dfcc01f8b7257f0e",
+    "runtime_tint": "HomesteadLook::NeutralHairTint",
+    "derived_from": "Assets\\Characters\\Heroine\\Textures\\T_Bob_Chestnut.png",
+    "alpha": "original admitted bob01 alpha retained unchanged"
+  }
+}

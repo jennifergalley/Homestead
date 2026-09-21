@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "status": "isolated reuse-first source candidate; no runtime or art acceptance",
+  "admitted_basis": {
+    "asset": "MakeHuman system hair bob01, already fitted to Preferred/Willow/Hazel",
+    "license": "CC0-1.0",
+    "attribution": "MakeHuman Team / makehuman_system; Data Collection AB, Joel Palmius, Jonas Hauquier",
+    "admission_record": "Assets\\Characters\\provenance.json",
+    "license_evidence": "Assets\\Characters\\Source\\Licenses\\LICENSE.ASSETS.md",
+    "actual_inputs": "Existing local Heroine, Variants and BodyPresets Bob FBXs plus T_Bob_Chestnut.png; per-file hashes in manifest.json",
+    "reuse": "Original fitted cap, layered cards, UV layout, strand atlas and original game_engine head binding"
+  },
+  "essential_quality_gap": "The diagonal face-covering stock fringe was explicitly unapproved. Remove its central lower portion and shorten only the lowest chin/nape ends; do not rebuild the cap.",
+  "original_modifications": {
+    "author": "GitHub Copilot procedural authoring for Jenny's SurvivalGame project",
+    "recipe": "Scripts\\Characters\\build_hairstyle_bob_reuse.py",
+    "geometry": "Targeted face-window and chin-end topology clipping; all source crown coordinates at/above 155.5 cm retained",
+    "texture": "Neutralize existing admitted bob strand RGB for the existing five-color tint contract; retain original alpha byte-for-byte",
+    "modular": "Copy the same resulting hair onto read-only stable bases; preserve permanent bra/briefs and every nonhair surface"
+  },
+  "safety_and_scope": {
+    "frozen_wave_appearance": "Manifest protects every existing LongWave-named asset and Appearance.h/.cpp by SHA-256",
+    "other_inputs": "Original Heroine/Variants/BodyPresets/ModularClothing namespaces are hash-protected",
+    "private_reference": "No private image access or embedding",
+    "third_party_game_assets": "None copied or extracted",
+    "acquisition": "No new download, purchase, account or external upload",
+    "execution": "Offline factory-startup disable-autoexec Blender 4.5.14 CPU only; no compiler or Unreal execution"
+  }
+}

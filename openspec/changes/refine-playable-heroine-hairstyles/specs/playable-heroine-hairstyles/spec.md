@@ -4,6 +4,9 @@
 
 Let the player actually wear the requested shorter waves and original blonde
 bob in the current game while retaining her chosen body, face and animations.
+Prefer adaptation of already-admitted CC0 hair for implementation; "original"
+describes the authored silhouette, not a requirement to rebuild usable source
+from scratch. Custom geometry addresses documented essential gaps only.
 
 ## ADDED Requirements
 
