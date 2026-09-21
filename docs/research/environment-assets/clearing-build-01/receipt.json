@@ -1,0 +1,106 @@
+{
+  "status": "passed-clearing-game-and-cook-wrapper-build",
+  "createdUtc": "2026-09-21T06:16:01.3718712+00:00",
+  "products": [
+    {
+      "sha256": "F7A79E2EBAF70DE321275F45FD8A4542DC8486D5B18776B53C0FE93AA9091B23",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2103296
+    },
+    {
+      "sha256": "5324E83A5481C4D677B019FAD8A8C34537BC489ADABD9832091B2512333354D0",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90992640
+    },
+    {
+      "sha256": "80D505163BFCD0B6F5C3640E8F49E92C7B9BE47CBD4797DB050800C799494D69",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 254464
+    },
+    {
+      "sha256": "D6EEE8C998E0C4826E6168AB2970E5AD1C86182D18616B62B591C559BC456A9D",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 25350144
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032
+    }
+  ],
+  "sources": [
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp",
+      "sha256": "8432B73141A30E1CD40DB4C023125A2686DCF5F45B9D02A8F6FB779677800282"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h",
+      "sha256": "51B5AD34A7D790489690FCA7E596D6AF8CD7844FE9269417E5C1D76835FD3993"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp",
+      "sha256": "697351F503BB9D72CA27862E669724CD51E065F75071AC3AF4DEC0AD06DB4312"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs",
+      "sha256": "FA84CF8ACC7CD6D84766D8BF29E3979FF78489F0E2700944A289DE2C7A7B2BE5"
+    },
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "C47779AF1640BCC4409FFDAFE064075ED358CA76461681679AA5260738F8F1EE"
+    },
+    {
+      "path": "Config\\DefaultGame.ini",
+      "sha256": "0F7CFE87BC9203DA57565442422CB6D605463894BF132F485C4C0769461F6CC0"
+    }
+  ],
+  "steps": [
+    {
+      "step": "game-compile5",
+      "status": "passed",
+      "resultSha256": "D10AAF86ACF17FDF9288644BC820CBF8DAD6BB9E1611E76B149AEB97833D788A",
+      "exitCode": 0
+    },
+    {
+      "step": "game-link6",
+      "status": "passed",
+      "resultSha256": "B684EE498D9EF1E4C9DF1EABDA1D9580F425B966EC80BE26D0CA932EDBE1D98D",
+      "exitCode": 0
+    },
+    {
+      "step": "probe-compile1",
+      "status": "failed",
+      "resultSha256": "6E7F280A18EF502253615AB3A811BD540F8BDD2FD830C919951B945C1207B4E7",
+      "exitCode": 2
+    },
+    {
+      "step": "probe-compile1-fixed",
+      "status": "passed",
+      "resultSha256": "207DD90EC1782C91FD9B32B059B867A1E7984BEB9BF504BF6C7623659A4C4B36",
+      "exitCode": 0
+    },
+    {
+      "step": "probe-link2",
+      "status": "passed",
+      "resultSha256": "0D3D40497D254234143A72BFED82AD5A5BF73C75A76E9C93415E5127F7555E94",
+      "exitCode": 0
+    },
+    {
+      "step": "metadata-cook",
+      "status": "passed",
+      "resultSha256": "EE61CDDB3F358776AD19C65D269AD3569641EC295B7A99758D803D941A6167A3",
+      "exitCode": 0
+    }
+  ],
+  "priorReceiptSha256": "503386DAC6DEE1E8FA42894DEE1542CBED54EAC2AAE27A6673DA2C8D3E00FF36",
+  "qualification": "Actual world fern patch and standard native Cook wrapper built through existing exact game/probe compile/link actions and approved metadata. First probe compile failed on missing UPackage include, retained; corrected compile/link passed. Prior game-link/export/metadata sampling qualifications retained. External VCTIP appeared from strongly correlated sibling raw cl (exact parent not retained), refused our next compile before creation; parent identity-checked cleanup observed exit; no historical no-upload claim. No engine/cook run yet."
+}

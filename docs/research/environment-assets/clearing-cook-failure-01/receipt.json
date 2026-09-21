@@ -1,0 +1,17 @@
+{
+  "status": "failed-retained",
+  "cause": "Cook OUTPUT store defaulted to Zen; filesystem DDC was independently verified. Explicit inner Cook Main SkipZenStore was missing.",
+  "error": "Unexpected endpoint count/UDP in owned authoring leaf.",
+  "hardTerminated": true,
+  "subjectExited": true,
+  "cleanupErrors": [],
+  "endpoint": "Observed loopback SYN_SENT to ::1 and127.0.0.1 port8558, rejected without new allowance; zenserver child launches denied by pre-start root-only job",
+  "fixSource": {
+    "lines": "425-427",
+    "path": "Engine\\Source\\Editor\\UnrealEd\\Private\\Commandlets\\CookCommandlet.cpp",
+    "sha256": "258E531B54D33366848F7974769B8C9352D06E6692D036B3B60B9FA4D64E61D6"
+  },
+  "resultSha256": "3D96F79436A4A381B360FF260F7CDA4BD77DA09FA62B7E30377621ED09FE6885",
+  "reservationSha256": "C982CFD4C677321FA86BCCE26CF5089B144AC9AEC3FDDD853882765A69D07287",
+  "limits": "Job is not filesystem/network sandbox; finite observations only. No playable candidate; no general claim about global filesystem history."
+}

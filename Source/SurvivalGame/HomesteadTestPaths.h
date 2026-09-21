@@ -5,6 +5,17 @@
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 
+inline bool HomesteadAutomatedActorsEnabled()
+{
+#if UE_BUILD_SHIPPING
+    return FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"))
+        && (FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
+            != FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest")));
+#else
+    return true;
+#endif
+}
+
 inline FString HomesteadTestOutputDirectory()
 {
     FString Override;

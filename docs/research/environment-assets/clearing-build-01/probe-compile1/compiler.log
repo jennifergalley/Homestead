@@ -1,0 +1,28 @@
+HomesteadAuthoringProbeCommandlet.cpp
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(92,36): warning C4191: 'reinterpret_cast': unsafe conversion from 'FARPROC' to '`anonymous-namespace'::CapturePython::FIsInitialized'
+        Making a function call using the resulting pointer may cause your program to fail
+                const auto Query = reinterpret_cast<FIsInitialized>(GetProcAddress(Modules[Index], "Py_IsInitialized"));
+                                   ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(143,40): error C2672: 'NewObject': no matching overloaded function found
+    TStrongObjectPtr<UCommandlet> Cook(NewObject<UCommandlet>(GetTransientPackage(), CookClass));
+                                       ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\CoreUObject\Public\UObject\UObjectGlobals.h(1974,5): note: could be 'T *NewObject(UObject *,FName,EObjectFlags,UObject *,bool,FObjectInstancingGraph *,UPackage *)'
+	T* NewObject(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags, UObject* Template = nullptr, bool bCopyTransientsFromClassDefaults = false, FObjectInstancingGraph* InInstanceGraph = nullptr, UPackage* InExternalPackage = nullptr)
+	   ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(143,82): note: 'initializing': cannot convert from 'UPackage *' to 'UObject *'
+    TStrongObjectPtr<UCommandlet> Cook(NewObject<UCommandlet>(GetTransientPackage(), CookClass));
+                                                                                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(143,82): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+E:\Program Files\UE_5.8\Engine\Source\Runtime\CoreUObject\Public\UObject\UObjectGlobals.h(1959,5): note: or       'T *NewObject(UObject *)'
+	T* NewObject(UObject* Outer = GetTransientPackageAsObject())
+	   ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(143,40): note: 'T *NewObject(UObject *)': expects 1 arguments - 2 provided
+    TStrongObjectPtr<UCommandlet> Cook(NewObject<UCommandlet>(GetTransientPackage(), CookClass));
+                                       ^
+E:\Program Files\UE_5.8\Engine\Source\Runtime\CoreUObject\Public\UObject\UObjectGlobals.h(1931,5): note: or       'T *NewObject(UObject *,const UClass *,FName,EObjectFlags,UObject *,bool,FObjectInstancingGraph *,UPackage *)'
+	T* NewObject(UObject* Outer, const UClass* Class, FName Name = NAME_None, EObjectFlags Flags = RF_NoFlags, UObject* Template = nullptr, bool bCopyTransientsFromClassDefaults = false, FObjectInstancingGraph* InInstanceGraph = nullptr, UPackage* InExternalPackage = nullptr)
+	   ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(143,82): note: 'initializing': cannot convert from 'UPackage *' to 'UObject *'
+    TStrongObjectPtr<UCommandlet> Cook(NewObject<UCommandlet>(GetTransientPackage(), CookClass));
+                                                                                 ^
+E:\Repos\SurvivalGame\Source\SurvivalGameEditor\HomesteadAuthoringProbeCommandlet.cpp(143,82): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast

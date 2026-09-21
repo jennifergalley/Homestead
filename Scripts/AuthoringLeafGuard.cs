@@ -483,7 +483,7 @@ namespace Homestead.Authoring
         }
         public static void ValidateDeadlineProfile(int softMilliseconds, int hardMilliseconds, string profile)
         {
-            if (profile == "RenderCompletionDriven")
+            if (profile == "RenderCompletionDriven" || profile == "CookCompletionDriven")
             {
                 if (softMilliseconds != 0 || hardMilliseconds != 0)
                     throw new InvalidOperationException("Completion-driven rendering has no synthetic time limit.");
@@ -512,7 +512,7 @@ namespace Homestead.Authoring
                 DeadlineProfile = profile;
                 SoftDeadlineMilliseconds = softMilliseconds;
                 HardDeadlineMilliseconds = hardMilliseconds;
-                if (profile == "RenderCompletionDriven") return;
+                if (profile == "RenderCompletionDriven" || profile == "CookCompletionDriven") return;
                 deadlineClock.Start();
                 softDeadline = new Timer(_ =>
                 {

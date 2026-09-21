@@ -31,9 +31,7 @@
 
 AHomesteadSmokeTest::AHomesteadSmokeTest()
 {
-#if !UE_BUILD_SHIPPING
-    PrimaryActorTick.bCanEverTick = true;
-#endif
+    PrimaryActorTick.bCanEverTick = HomesteadAutomatedActorsEnabled();
 }
 
 void AHomesteadSmokeTest::Add(const FString& Name, TFunction<void()> Action, TFunction<bool()> Check, float Wait)
@@ -670,6 +668,12 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         Prepare();
     }
     if (bFinished) return;
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"))
+        && IFileManager::Get().FileExists(*FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("stop-qa.txt"))))
+    {
+        Finish(false, TEXT("Shipping QA cancelled by its owned supervisor."));
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadRequireLit")))
     {
         if (!GEngine || !GEngine->GameViewport || GEngine->GameViewport->ViewModeIndex != VMI_Lit

@@ -17,7 +17,18 @@ older planning constraints that conflict with this section.
   Do not impose arbitrary time, spending or iteration caps. Honor explicit
   stops and actual failures; do not confuse a quiet long-running build with
   a failure or repeat a failed approach without diagnosis.
-- **OpenSpec before each improvement round.** Keep proposal, design and tasks
+- **Research reuse before planning.** First check the project, existing research,
+  Unreal facilities and available free assets/libraries for work we can reuse.
+  Research external options only where needed. Verify the actual license,
+  attribution/distribution terms, source, access requirements, compatibility and
+  integration effort; "free to download" alone is not enough. Prefer suitable
+  existing work over hand-authoring its equivalent. Plan custom work only for
+  the concrete gaps, and record why reuse does not meet those needs. Keep this
+  research actionable rather than an exhaustive survey or repeated review of
+  unchanged admitted assets.
+- **OpenSpec before each improvement round.** After reuse research, orient the
+  proposal and design around the selected reusable pieces and necessary custom
+  gaps. Keep proposal, design and tasks
   current, including changes to scope or acceptance. Plan enough to implement
   coherently, not to eliminate all future debugging or refactoring.
 - **Deliver playable features, not an infrastructure project.** Prefer direct
@@ -51,6 +62,47 @@ private-reference uploads, or interference with unrelated applications.
 Current progress and the latest usable launch path are recorded in
 `docs\development-status.md` and `Preview.cmd`; the prototype snapshot below
 is historical, not the current build/authorization status.
+
+### Apply these lessons to every feature round
+
+1. Start with focused reuse research, consulting existing findings before
+   searching again. Select suitable free assets, code, libraries and native
+   engine features; identify only the gaps requiring custom work. Then define
+   the smallest observable end-to-end improvement in OpenSpec, its first
+   playable demonstration and each parallel lane's file/resource ownership.
+   Separate that first delivery from full-round acceptance.
+2. Integrate into the existing game early. Do not make a complete asset palette,
+   isolated showcase or generalized authoring framework a prerequisite for
+   demonstrating one useful change in the real clearing or menu.
+3. Reuse supported engine workflows, working helpers and compatible caches.
+   Do not repeatedly clear shader caches, rebuild unaffected code or reopen
+   unchanged tool-admission decisions. Resolve genuine new permission boundaries
+   explicitly, without treating ordinary implementation bugs as permission issues.
+4. Make infrastructure changes only for a reproduced blocker on the path to the
+   feature. Choose the smallest supported fix, verify the actual production
+   invocation, then return to feature integration. Do not build speculative
+   future-proofing or custom substitutes for existing engine facilities.
+5. Verify the changed behavior with the smallest relevant build/test route and
+   real visual/play evidence. Broaden regression coverage when risk or a failure
+   justifies it, not automatically before every increment. Preserve useful raw
+   diagnostic images/logs even when acceptance fails; never label them a pass.
+   A requested screenshot means the change integrated into the actual game,
+   captured during our ordinary playtest, as with the earlier animation work.
+   Isolated asset renders and test scenes are internal diagnostics, not that
+   deliverable. Capture and share in-game views when naturally available; do
+   not derail integration to manufacture a screenshot. Until then, report the
+   remaining integration/playtest steps and any timing uncertainty honestly.
+6. Log meaningful phases before expensive operations, keep reusable work after
+   failures, and diagnose before retrying. Neither quiet logs nor CPU activity
+   alone prove failure or useful progress. Do not kill healthy work solely
+   because an arbitrary estimate expired.
+7. Merge coherent parallel increments frequently. Coordinate shared interfaces
+   early and serialize only overlapping files, outputs or genuinely shared
+   execution resources, rather than whole independent workstreams.
+8. Report what changed in the playable game, what Jenny can try, and known
+   limitations. Keep the active task view concise, with history linked elsewhere.
+   Imported assets, passing tools and screenshots are supporting milestones,
+   not substitutes for integration, and task counts must remain honest.
 
 ## Historical prototype status
 
@@ -222,11 +274,18 @@ the current wavy hairstyle is too long. Retain the brunette waves and shorten
 them only in a separately authorized slice across all three bodies and both
 outfits. The 2026-09-20 `hair-length-01` attempt reached its measured length but
 bunched the waves into accordion-like ridges; it was rejected and restored.
-**The requested mid-back length is still unmet.** No further hair/face attempt
-is authorized by that rejected slice, and the blonde-bob redesign remains deferred.
+**The requested mid-back length is still unmet in the playable build.**
+Jenny explicitly reprioritized usable hairstyles on 2026-09-20 at 22:54 Arizona.
+The character lane will plan and implement `refine-playable-heroine-hairstyles`:
+mid-back waves first, then the requested bob, preserving the natural wave
+silhouette rather than reviving the rejected compressed-geometry trial.
+Source exports or isolated screenshots are not completion; import, package,
+expose through the actual appearance selector, and verify during ordinary
+in-game play. Deliver an early compatible hairstyle update where practical
+instead of waiting for the entire wardrobe/menu redesign.
 Jenny clarified the alternative as a short, straight blonde
 bob, with Melinoe's haircut in Hades II as the visual reference, rather than the
-current prototype's "karen hairstyle." This is deferred feedback, not approval
+current prototype's "karen hairstyle." This is not approval
 of the current bob or authorization to copy game assets. Inspect the reference
 when that work is scheduled before specifying technical cut details; create an
 original interpretation. It does not replace the long brown-haired default.

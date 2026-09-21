@@ -11,11 +11,14 @@
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
+#include "Misc/FeedbackContext.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 #include "Serialization/JsonSerializer.h"
 #include "ShaderCompiler.h"
+#include "UObject/Package.h"
+#include "UObject/StrongObjectPtr.h"
 #include "Windows/WindowsHWrapper.h"
 #include <Psapi.h>
 
@@ -119,15 +122,76 @@ void CaptureDdc(const FDerivedDataCacheStatsNode& Node, int32 Parent, TArray<TSh
 }
 }
 
+namespace
+{
+bool CookPlayableCandidate(const FString& Output)
+{
+    const FString Cooked = FPaths::Combine(Output, TEXT("Cooked"));
+    FString Platform;
+    FParse::Value(FCommandLine::Get(), TEXT("TargetPlatform="), Platform);
+    if (!IsRunningCookCommandlet() || !GIsClient || !GIsServer || Platform != TEXT("Windows") || !GWarn
+        || IFileManager::Get().DirectoryExists(*Cooked))
+    {
+        UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Fresh Windows cook admission is missing."));
+        return false;
+    }
+    UClass* CookClass = LoadClass<UCommandlet>(nullptr, TEXT("/Script/UnrealEd.CookCommandlet"));
+    if (!CookClass)
+    {
+        UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Installed standard CookCommandlet is unavailable."));
+        return false;
+    }
+    TStrongObjectPtr<UCommandlet> Cook(NewObject<UCommandlet>(GetTransientPackage(), CookClass));
+    const FString Args = FString::Printf(
+        TEXT("-TargetPlatform=Windows -Map=/Game/SurvivalGame/Maps/Homestead -OutputDir=\"%s\" -CookProcessCount=1 -SkipZenStore -unattended -nop4"),
+        *Cooked);
+    const bool SkipZenStore = FParse::Param(*Args, TEXT("SkipZenStore"));
+    auto Invocation = MakeShared<FJsonObject>();
+    Invocation->SetStringField(TEXT("arguments"), Args);
+    Invocation->SetBoolField(TEXT("skipZenStore"), SkipZenStore);
+    if (!SkipZenStore || !SaveEvidence(FPaths::Combine(Output, TEXT("cook-invocation.json")), Invocation))
+    {
+        UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Explicit loose-file cook invocation is missing."));
+        return false;
+    }
+    UE_LOG(LogHomesteadAuthoringProbe, Display, TEXT("Candidate cook begin: %s"), *Cooked);
+    const int32 Code = Cook->Main(Args);
+    TArray<FString> Errors;
+    GWarn->GetErrors(Errors);
+    const bool Cancelled = IFileManager::Get().FileExists(*FPaths::Combine(Output, TEXT("stop-probe.txt")))
+        || IsEngineExitRequested();
+    auto Result = MakeShared<FJsonObject>();
+    Result->SetNumberField(TEXT("exitCode"), Code);
+    Result->SetStringField(TEXT("arguments"), Args);
+    Result->SetBoolField(TEXT("skipZenStore"), SkipZenStore);
+    Result->SetBoolField(TEXT("cancelled"), Cancelled);
+    Result->SetStringField(TEXT("outputDirectory"), Cooked);
+    Result->SetStringField(TEXT("targetPlatform"), Platform);
+    Result->SetBoolField(TEXT("cookByTheBook"), true);
+    Result->SetBoolField(TEXT("cookGlobalsInitialized"), IsRunningCookCommandlet());
+    Result->SetBoolField(TEXT("isClient"), GIsClient);
+    Result->SetBoolField(TEXT("isServer"), GIsServer);
+    Result->SetNumberField(TEXT("cookProcessCount"), 1);
+    TArray<TSharedPtr<FJsonValue>> ErrorValues;
+    for (const FString& Error : Errors) ErrorValues.Add(MakeShared<FJsonValueString>(Error));
+    Result->SetArrayField(TEXT("errors"), ErrorValues);
+    const bool Passed = Code == 0 && Errors.IsEmpty() && !Cancelled;
+    Result->SetBoolField(TEXT("passed"), Passed);
+    UE_LOG(LogHomesteadAuthoringProbe, Display, TEXT("Candidate cook returned: code=%d errors=%d cancelled=%d"),
+        Code, Errors.Num(), Cancelled);
+    return SaveEvidence(FPaths::Combine(Output, TEXT("cook-result.json")), Result) && Passed;
+}
+}
+
 UHomesteadAuthoringProbeCommandlet::UHomesteadAuthoringProbeCommandlet()
 {
     FString FernMode;
     FParse::Value(FCommandLine::Get(), TEXT("FernMode="), FernMode);
     // AllocateScene otherwise creates a dummy scene even with a real RHI.
-    IsClient = FernMode == TEXT("Render")
+    IsClient = FernMode == TEXT("Cook") || (FernMode == TEXT("Render")
         && FParse::Param(FCommandLine::Get(), TEXT("AllowCommandletRendering"))
-        && FParse::Param(FCommandLine::Get(), TEXT("RenderOffScreen"));
-    IsServer = false;
+        && FParse::Param(FCommandLine::Get(), TEXT("RenderOffScreen")));
+    IsServer = FernMode == TEXT("Cook");
     IsEditor = true;
     LogToConsole = true;
 }
@@ -155,9 +219,9 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     FParse::Value(*Params, TEXT("FernMode="), FernMode);
     Require(CompletionPolicy.IsEmpty() || CompletionPolicy == TEXT("bounded") || bCompletionDriven,
         TEXT("Unknown native completion policy."));
-    Require(!bCompletionDriven || (FernMode == TEXT("Render")
+    Require(!bCompletionDriven || ((FernMode == TEXT("Render") || FernMode == TEXT("Cook"))
         && FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")).IsEmpty()),
-        TEXT("Completion-driven mode must be render-only without a synthetic deadline."));
+        TEXT("Completion-driven mode must be render/cook without a synthetic deadline."));
     Result->SetBoolField(TEXT("completionDriven"), bCompletionDriven);
     UE_LOG(LogHomesteadAuthoringProbe, Display, TEXT("Native Main entry: completionDriven=%s"),
         bCompletionDriven ? TEXT("true") : TEXT("false"));
@@ -309,7 +373,7 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         UE_LOG(LogHomesteadAuthoringProbe, Error, TEXT("Effective settings or guard admission failed."));
         return 4;
     }
-    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render")) return 8;
+    if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render") && FernMode != TEXT("Cook")) return 8;
     const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510 : FernMode == TEXT("Import") ? 180 : 90);
     FDateTime RunDeadline;
     if (!bCompletionDriven && !FDateTime::ParseIso8601(*FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")), RunDeadline))
@@ -334,7 +398,8 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         FString Admission;
         if (!FFileHelper::LoadFileToString(Admission, *AdmitPath) || Admission != FernMode
             || IFileManager::Get().FileExists(*StopPath) || !MayContinue()
-            || !RunFernSpike(FernMode, Output, RunDeadline, bCompletionDriven))
+            || !(FernMode == TEXT("Cook") ? CookPlayableCandidate(Output)
+                : RunFernSpike(FernMode, Output, RunDeadline, bCompletionDriven)))
         {
             Valid = false;
             Stop = TEXT("fern-operation-failed");

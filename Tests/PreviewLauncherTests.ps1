@@ -34,6 +34,9 @@ function Assert-Rejected([scriptblock]$Action,[string]$Message) {
 try {
     Write-Fixtures
     $plan = & $launcher -SelectionFile $selectionFile -ValidateOnly
+    $details = & (Join-Path $root 'Scripts\Resolve-PackageDirectory.ps1') -PackageDirectory $archive -Details
+    Assert-True ($details.executable -eq $binary -and $details.configuration -ceq 'Development' -and
+        $details.packageDirectory -eq $platform) 'Detailed package resolution preserves the Development path/configuration.'
     Assert-True ($plan.Executable -eq $binary -and $plan.WorkingDirectory -eq $platform) 'Archive and spaced path must resolve exactly.'
     Assert-True ($plan.Arguments.Count -eq 2 -and $plan.Arguments[0] -ceq '-HomesteadPreviewProfile=jenny-review' -and
         $plan.Arguments[1] -ceq '-Res=0x0wf') 'Human preview must have the validated profile and native monitor-sized borderless request only.'
@@ -91,6 +94,14 @@ try {
     Remove-Item -LiteralPath $binary
     Assert-True ((& $launcher -SelectionFile $selectionFile -ValidateOnly).Executable -eq $shippingBinary) 'Shipping executable must resolve explicitly with the same hash/receipt guards.'
     $shippingPlan = & $launcher -SelectionFile $selectionFile -ValidateOnly
+    $details = & (Join-Path $root 'Scripts\Resolve-PackageDirectory.ps1') -PackageDirectory $archive -Details
+    Assert-True ($details.executable -eq $shippingBinary -and $details.configuration -ceq 'Shipping') 'Detailed Shipping resolution uses the actual executable.'
+    foreach($runner in @('Test-Game.ps1','Playtest-Visual.ps1')) {
+        $qaOutput=Join-Path $fixture ("qa-rejected-"+$runner)
+        Assert-Rejected { & (Join-Path $root "Scripts\$runner") -Packaged -PackageDirectory $archive -OutputDirectory $qaOutput } 'Shipping route without explicit QA must fail before execution.'
+        $null=New-Item -ItemType Directory -Path $qaOutput -Force
+        Assert-Rejected { & (Join-Path $root "Scripts\$runner") -Packaged -ShippingQA -PackageDirectory $archive -OutputDirectory $qaOutput } 'Existing QA output must fail before execution.'
+    }
     Assert-True ($shippingPlan.Arguments.Count -eq 3 -and $shippingPlan.Arguments[2] -ceq "-UserDir=$(Join-Path $platform 'SurvivalGame')") 'Shipping must retain candidate-local generated config without moving fixed-root preview saves.'
     Move-Item -LiteralPath $shippingBinary -Destination $binary
     $ambiguous=Join-Path $archive 'SurvivalGame\Binaries\Win64'

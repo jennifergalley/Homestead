@@ -1,32 +1,43 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Homestead is a Windows-native Unreal Engine game, not a web application.
+  Read docs\game-plan.md, especially "Working policy: playable iteration first"
+  and "Apply these lessons to every feature round", before planning changes.
+  Deliver frequent, small playable improvements toward indie-game quality.
+  Research reuse FIRST for each feature round: existing project work and
+  findings, supported Unreal features, and suitable free assets/code/libraries.
+  Check license/distribution/attribution, actual access, compatibility and
+  integration effort. Then plan around the selected reusable pieces and build
+  custom work only for demonstrated gaps. Avoid exhaustive or repeated research
+  when existing verified findings already answer the question.
+  Jenny is playtesting: existing saves are disposable until she says otherwise.
+  Current-version saving must work, but elaborate legacy test-save migration is
+  not a prerequisite; report necessary resets and do not delete unrelated data.
+  Work autonomously through agreed scope without arbitrary time or credit caps.
+  Use independent worktrees and explicit file/interface ownership for parallel
+  work; coordinate shared engine/build resources and integrate frequently.
+  Reuse supported engine workflows, existing helpers and compatible caches.
+  Build new infrastructure only to fix a demonstrated feature-blocking problem.
+  Requested screenshots mean integrated in-game views from our ordinary
+  playtests, not isolated assets or test scenes. Share them when naturally
+  available; do not derail integration for a screenshot or invent an ETA.
+  Essential security, licensing, targeted correctness and truthful errors remain.
+  Modest disclosed bugs and later refactoring are preferable to delaying every
+  playable increment for exhaustive infrastructure or hypothetical future needs.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+rules:
+  proposal:
+    - Summarize the focused reuse research, selected existing or free components, license/access constraints and remaining custom gaps.
+    - Name the smallest useful in-game result and first playable demonstration.
+    - Distinguish first delivery from full-round acceptance and deferred scope.
+  design:
+    - Orient implementation around selected reusable components; explain any necessary custom assets or systems.
+    - Prefer existing game and engine facilities; justify any new infrastructure with a concrete blocker.
+    - Identify independent lanes, owned files, shared interfaces and actual integration dependencies.
+    - Reuse compatible build and shader caches; avoid unnecessary full rebuilds.
+  tasks:
+    - Order work around visible end-to-end increments, not completion of every supporting subsystem first.
+    - Include targeted behavior checks and actual visual or play evidence where relevant.
+    - Separate branch implementation from integrated acceptance; keep completed tasks and limitations truthful.
+    - Keep current progress concise and link historical evidence instead of burying the checklist in a running log.

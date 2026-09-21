@@ -1,0 +1,42 @@
+[start] rhi=D3D12 render_offscreen=1 forced_windowed=1
+actual_viewport=1280,720 output_target=1280,720 actual_window_mode=2 (0=exclusive,1=borderless,2=windowed)
+user_settings_resolution=1920,1080 user_settings_mode=2 user_settings_vsync=0 user_settings_dynamic_resolution=0 user_settings_frame_limit=60.000 user_settings_scale=0.000
+cvar r.VSync=0 flags=0x03000160
+cvar t.MaxFPS=60 flags=0x02000000
+cvar r.FullScreenMode=1 flags=0x03000140
+cvar r.ScreenPercentage=0 flags=0x00000140
+cvar r.ScreenPercentage.Default=100 flags=0x00000140
+cvar r.ScreenPercentage.Default.Desktop.Mode=1 flags=0x00000140
+cvar r.DynamicRes.OperationMode=0 flags=0x00000020
+cvar r.AntiAliasingMethod=4 flags=0x04000020
+cvar sg.AntiAliasingQuality=3 flags=0x02000180
+cvar r.TemporalAA.Upsampling=1 flags=0x00000000
+cvar r.TSR.History.ScreenPercentage=200 flags=0x02000160
+cvar r.DefaultFeature.MotionBlur=0 flags=0x04000000
+cvar r.MotionBlurQuality=4 flags=0x02000160
+cvar r.Shadow.Virtual.Enable=1 flags=0x04000160
+cvar r.DynamicGlobalIlluminationMethod=1 flags=0x04000020
+cvar r.ReflectionMethod=1 flags=0x04000020
+cvar rhi.SyncInterval=1 flags=0x00000000
+cvar r.D3D12.UseAllowTearing=1 flags=0x00000024
+[end] rhi=D3D12 render_offscreen=1 forced_windowed=1
+actual_viewport=1280,720 output_target=1280,720 actual_window_mode=2 (0=exclusive,1=borderless,2=windowed)
+user_settings_resolution=1920,1080 user_settings_mode=2 user_settings_vsync=0 user_settings_dynamic_resolution=0 user_settings_frame_limit=60.000 user_settings_scale=0.000
+cvar r.VSync=0 flags=0x03000160
+cvar t.MaxFPS=60 flags=0x02000000
+cvar r.FullScreenMode=1 flags=0x03000140
+cvar r.ScreenPercentage=0 flags=0x00000140
+cvar r.ScreenPercentage.Default=100 flags=0x00000140
+cvar r.ScreenPercentage.Default.Desktop.Mode=1 flags=0x00000140
+cvar r.DynamicRes.OperationMode=0 flags=0x00000020
+cvar r.AntiAliasingMethod=4 flags=0x04000020
+cvar sg.AntiAliasingQuality=3 flags=0x02000180
+cvar r.TemporalAA.Upsampling=1 flags=0x00000000
+cvar r.TSR.History.ScreenPercentage=200 flags=0x02000160
+cvar r.DefaultFeature.MotionBlur=0 flags=0x04000000
+cvar r.MotionBlurQuality=4 flags=0x02000160
+cvar r.Shadow.Virtual.Enable=1 flags=0x04000160
+cvar r.DynamicGlobalIlluminationMethod=1 flags=0x04000020
+cvar r.ReflectionMethod=1 flags=0x04000020
+cvar rhi.SyncInterval=1 flags=0x00000000
+cvar r.D3D12.UseAllowTearing=1 flags=0x00000024

@@ -1,12 +1,17 @@
 function Get-FernOperationPolicy {
     param(
-        [ValidateSet('Settings','Import','Render')][string]$Mode,
+        [ValidateSet('Settings','Import','Render','Cook')][string]$Mode,
         [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard'
     )
-    if($RenderProfile -ne 'Standard' -and $Mode -ne 'Render'){throw 'Extended profiles are render-only.'}
+    if($RenderProfile -ne 'Standard' -and $Mode -ne 'Render' -and
+        -not($Mode -eq 'Cook' -and $RenderProfile -eq 'CompletionDriven')){throw 'Unsupported extended profile/mode.'}
     $policy=switch($Mode) {
         'Settings' {@{profile='Default';softSeconds=100;hardSeconds=110;ceilingSeconds=120;startupSeconds=0;captureSeconds=0}}
         'Import' {@{profile='Import';softSeconds=150;hardSeconds=180;ceilingSeconds=210;startupSeconds=0;captureSeconds=0}}
+        'Cook' {
+            if($RenderProfile -ne 'CompletionDriven'){throw 'Cook requires explicit completion-driven policy.'}
+            @{profile='CookCompletionDriven';softSeconds=0;hardSeconds=0;ceilingSeconds=0;startupSeconds=0;captureSeconds=0}
+        }
         'Render' {
             if($RenderProfile -eq 'CompletionDriven') {
                 @{profile='RenderCompletionDriven';softSeconds=0;hardSeconds=0;ceilingSeconds=0;startupSeconds=0;captureSeconds=0}
@@ -21,7 +26,7 @@ function Get-FernOperationPolicy {
 
 function Assert-FernStageBudget($Policy,[double]$ElapsedSeconds,$EntrySeconds) {
     if(-not [double]::IsFinite($ElapsedSeconds) -or $ElapsedSeconds -lt 0){throw 'Invalid elapsed budget.'}
-    if($Policy.profile -eq 'RenderCompletionDriven'){return}
+    if($Policy.profile -in @('RenderCompletionDriven','CookCompletionDriven')){return}
     if($Policy.profile -eq 'RenderLongStartup') {
         if($null -eq $EntrySeconds) {
             if($ElapsedSeconds -ge $Policy.startupSeconds){throw '45-minute native entry boundary exceeded.'}
@@ -35,7 +40,7 @@ function Assert-FernStageBudget($Policy,[double]$ElapsedSeconds,$EntrySeconds) {
 }
 
 function Get-FernProbeArguments([string]$Project,[string]$Output,[string]$Ddc,$Configs,[string]$Mode) {
-    if($Mode -cnotin @('Settings','Import','Render') -or $Configs.Count -ne 7){throw 'Invalid native mode/config map.'}
+    if($Mode -cnotin @('Settings','Import','Render','Cook') -or $Configs.Count -ne 7){throw 'Invalid native mode/config map.'}
     $tokens=@($Project,'-run=HomesteadAuthoringProbe',"-EvidenceDirectory=$Output",
         '-notraceserver','-traceautostart=0','-unattended','-nop4','-nosplash','-stdout','-FullStdOutLogOutput',
         '-DisablePython','-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging',
@@ -56,7 +61,28 @@ function Get-FernProbeArguments([string]$Project,[string]$Output,[string]$Ddc,$C
     if($Mode -ne 'Settings'){$tokens+="-FernMode=$Mode"}
     if($Mode -eq 'Render'){$tokens+=@('-AllowCommandletRendering','-RenderOffScreen')}
     else{$tokens+='-nullrhi'}
+    if($Mode -eq 'Cook'){$tokens+=@('-RunAsCookCommandlet','-TargetPlatform=Windows','-CookProcessCount=1','-SkipZenStore')}
     return [string[]]$tokens
+}
+
+function Assert-HomesteadCookOutput($Value,[string]$Output) {
+    $cooked=Join-Path $Output 'Cooked'
+    if(-not $Value.passed -or $Value.exitCode -ne 0 -or $Value.cancelled -or @($Value.errors).Count -or
+        $Value.targetPlatform -cne 'Windows' -or -not $Value.cookByTheBook -or $Value.cookProcessCount -ne 1 -or
+        -not $Value.skipZenStore -or $Value.arguments -cnotmatch '(?:^|\s)-SkipZenStore(?:\s|$)' -or
+        $Value.outputDirectory.Replace('/','\').TrimEnd('\') -ine $cooked.TrimEnd('\')) {
+        throw 'Native Windows cook failed or its admitted output/mode differs.'
+    }
+    Assert-FernOrdinaryTree $cooked
+    $registries=@(Get-ChildItem $cooked -Recurse -File -Filter 'DevelopmentAssetRegistry.bin')
+    if($registries.Count -ne 1){throw 'Cook requires one actual development asset registry.'}
+    $gameRoot=Split-Path (Split-Path $registries[0].FullName -Parent) -Parent
+    foreach($relative in @('Metadata\CookMetadata.ucookmeta','Content\SurvivalGame\Maps\Homestead.umap') +
+        @(Get-FernPackageStems|ForEach-Object {"Content\Trials\Fern02_20260920_01\$_.uasset"})) {
+        $file=Join-Path $gameRoot $relative
+        if(-not(Test-Path $file -PathType Leaf) -or (Get-Item $file).Length -eq 0){throw "Missing real cooked output:$relative"}
+    }
+    if(@(Get-ChildItem $cooked -Recurse -File -Filter 'ue.projectstore').Count){throw 'Unexpected Zen cook output; file-based cook required.'}
 }
 
 function Get-FernPackageStems {

@@ -109,8 +109,39 @@ $render.views[0].greenPixelCount=50
 $path=Join-Path $images 'fern-a-front.png'
 $bytes=[IO.File]::ReadAllBytes($path);$bytes[18]=4;[IO.File]::WriteAllBytes($path,$bytes)
 Reject 'wrong-native-image-dimensions' {Assert-FernRenderImages $render $images}
+$cookOutput=Join-Path $output 'dummy-cook'
+$cooked=Join-Path $cookOutput 'Cooked'
+$gameRoot=Join-Path $cooked 'Windows\SurvivalGame'
+foreach($relative in @('Metadata\DevelopmentAssetRegistry.bin','Metadata\CookMetadata.ucookmeta',
+    'Content\SurvivalGame\Maps\Homestead.umap') + @(Get-FernPackageStems|ForEach-Object {"Content\Trials\Fern02_20260920_01\$_.uasset"})) {
+    $file=Join-Path $gameRoot $relative
+    $null=New-Item -ItemType Directory -Path (Split-Path $file -Parent) -Force
+    [IO.File]::WriteAllBytes($file,[byte[]]@(1))
+}
+$cook=@{passed=$true;exitCode=0;cancelled=$false;errors=@();targetPlatform='Windows';cookByTheBook=$true;
+    cookProcessCount=1;outputDirectory=$cooked;skipZenStore=$true;arguments='-SkipZenStore'}
+Assert-HomesteadCookOutput $cook $cookOutput
+foreach($field in @('passed','cookByTheBook','skipZenStore')) {
+    $cook[$field]=$false
+    Reject "cook-$field-false" {Assert-HomesteadCookOutput $cook $cookOutput}
+    $cook[$field]=$true
+}
+$cook.errors=@('actual cook error')
+Reject 'cook-error' {Assert-HomesteadCookOutput $cook $cookOutput}
+$cook.errors=@()
+$cook.arguments='-SkipZenStoreElse'
+Reject 'cook-missing-actual-skipzenstore-token' {Assert-HomesteadCookOutput $cook $cookOutput}
+$cook.arguments='-SkipZenStore'
+$cook.outputDirectory=$output
+Reject 'wrong-cook-output' {Assert-HomesteadCookOutput $cook $cookOutput}
+$cook.outputDirectory=$cooked
+$cook.cookProcessCount=2
+Reject 'unexpected-cook-workers' {Assert-HomesteadCookOutput $cook $cookOutput}
+$cook.cookProcessCount=1
+[IO.File]::WriteAllBytes((Join-Path $gameRoot 'Content\Trials\Fern02_20260920_01\Meshes\SM_Fern02_a.uasset'),[byte[]]@())
+Reject 'empty-cooked-fern' {Assert-HomesteadCookOutput $cook $cookOutput}
 @{status='passed';negativeCases=@($cases);positiveCases=@('directory-identity-across-writes-and-move','ten-dummy-package-file-gate',
     'order-independent-package-pins','source-sized-native-inventory','image-header-and-RHI-gates');
-    limit='Disposable mechanism/data tests only; dummy bytes are not real Unreal packages or decoded PNGs.'}|
+    limit='Disposable mechanism/data tests only; dummy bytes are not real Unreal packages, cooked data or decoded PNGs.'}|
     ConvertTo-Json -Depth 5|Set-Content (Join-Path $output 'result.json')
 Get-Content (Join-Path $output 'result.json') -Raw

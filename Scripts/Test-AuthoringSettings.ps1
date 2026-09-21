@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [switch]$ValidateOnly,
-    [ValidateSet('Settings','Import','Render')][string]$Mode='Settings',
+    [ValidateSet('Settings','Import','Render','Cook')][string]$Mode='Settings',
     [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard'
 )
 $ErrorActionPreference = 'Stop'
@@ -46,10 +46,13 @@ if($retainedRender) {
 if($completionDriven) {
     $supersession['currentApproval']='Jenny explicitly authorized until-complete environment then inventory work at21:19AZ. Coordinator approved diagnosed render-only corrections and separately named unaltered failed-frame diagnostics. Attempt05 corrects capture flags after registration; all prior failures, stop/pause, helpers and safety gates remain preserved.'
 }
+if($Mode -eq 'Cook') {
+    $supersession['currentApproval']='Until-complete playable-first continuation; coordinator explicitly authorized the diagnosed second cook with supported inner Cook Main SkipZenStore. Original Zen-output/loopback-connection failure remains failed and immutable; no Zen/helper/endpoint allowance. No Python/bootstrap/reimport. Prior renderer results remain internal diagnostics, not gameplay screenshots.'
+}
 function Assert-NamedSupersession {
     $expectedRun=if($retainedRender){'20260921-033354-2d257ba0'}else{'20260920-182217-d1f84e39'}
     if($run.id -cne $expectedRun -or
-        $output -ine (Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
+        $output -ine (Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-03'}elseif($Mode -eq 'Import'){'fern-import-02'}elseif($Mode -eq 'Cook'){'clearing-cook-02'}elseif($completionDriven){'fern-render-05'}else{'fern-render-01'})) -or
         (Get-FileHash $priorReservation).Hash -cne $supersession.reservationSha256 -or
         (Get-FileHash $priorResult).Hash -cne $supersession.resultSha256 -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'native-settings-attempt-02.json')).Hash -cne $supersession.secondReservationSha256 -or
@@ -66,7 +69,7 @@ function Assert-NamedSupersession {
         (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-01\probe-result.json')).Hash -cne '6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910')) {
         throw 'Original pre-resume fern failure changed.'
     }
-    if($Mode -eq 'Render' -and (
+    if($Mode -in @('Render','Cook') -and (
         (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-02\probe-result.json')).Hash -cne '31477873B75CC0BD90C7557E0A96D21BC474BE87D278D7787143D55A66720624' -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-02\asset-admission.json')).Hash -cne 'C818E55DBD142CA6AA28D26CEB9BA42E6ECAEBD81F2A5FDDD04D7C64B2846B33' -or
         (Get-FileHash (Join-Path $evidenceRunRoot 'fern-import-02\effective-settings.json')).Hash -cne 'C7CDD1D6653F17DE5F9B5800EA62F042059DABB95CAE549BE872F6E3D06EED2D' -or
@@ -90,9 +93,18 @@ function Assert-NamedSupersession {
         (Get-FileHash (Join-Path $runRoot 'fern-render-attempt-04.json')).Hash -cne '8844543BFEAF507D5EE59AF9FD9732061E1D407A6C6EDCCCA1A62864ED5165BA')) {
         throw 'Explicit completion continuation or preserved render failure changed.'
     }
+    if($Mode -eq 'Cook' -and
+        (Get-FileHash (Join-Path $runRoot 'fern-render-05\probe-result.json')).Hash -cne '5C87CEE4653F2DBB26CCE99D7D062A2F21078E65D6C19D8A9E68EA8AF44627AD') {
+        throw 'Accepted fern pipeline result changed.'
+    }
+    if($Mode -eq 'Cook' -and (
+        (Get-FileHash (Join-Path $runRoot 'clearing-cook-01\probe-result.json')).Hash -cne '3D96F79436A4A381B360FF260F7CDA4BD77DA09FA62B7E30377621ED09FE6885' -or
+        (Get-FileHash (Join-Path $runRoot 'clearing-cook-attempt-01.json')).Hash -cne 'C982CFD4C677321FA86BCCE26CF5089B144AC9AEC3FDDD853882765A69D07287')) {
+        throw 'Original failed Zen-output cook changed.'
+    }
 }
 Assert-NamedSupersession
-$attempt = Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
+$attempt = Join-Path $runRoot $(if($Mode -eq 'Settings'){'native-settings-attempt-03.json'}elseif($Mode -eq 'Import'){'fern-import-attempt-02.json'}elseif($Mode -eq 'Cook'){'clearing-cook-attempt-02.json'}elseif($completionDriven){'fern-render-attempt-05.json'}else{'fern-render-attempt-01.json'})
 if (Test-Path -LiteralPath $attempt) { throw 'The single native settings attempt is already reserved; no automatic retry.' }
 $engine = 'E:\Program Files\UE_5.8\Engine\Binaries\Win64'
 $exe = Join-Path $engine 'UnrealEditor-Cmd.exe'
@@ -118,6 +130,10 @@ if($completionDriven) {
     $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-native-build-05\receipt.json'
     $buildReceiptHash='503386DAC6DEE1E8FA42894DEE1542CBED54EAC2AAE27A6673DA2C8D3E00FF36'
 }
+if($Mode -eq 'Cook') {
+    $buildReceiptPath=Join-Path $root 'docs\research\environment-assets\clearing-build-02\receipt.json'
+    $buildReceiptHash='C6FC72993EB2BA1BDCF5C38EDD1512312AE9CAA9504D87C8D874A50462659632'
+}
 $pythonPins = @{
     'python3.dll'='3C7ECFB999333AAF5BA9DDF4C5BFB8676B63CFCEC3DC5370CBC255A83063962F'
     'python311.dll'='3E5A5C012CDDB3D156D147ACAD59BB489C0716B87DAD274CB5BF20EEC3B68192'
@@ -135,6 +151,10 @@ if($Mode -ne 'Settings') {
     if($completionDriven) {
         $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\fern-supervisor-07\receipt.json'
         $supervisorReceiptHash='CBE90D873DA1931399402080F190F306177B2B814711673C9AEAB652CB0A12D8'
+    }
+    if($Mode -eq 'Cook') {
+        $supervisorReceiptPath=Join-Path $root 'docs\research\environment-assets\clearing-cook-policy-02\receipt.json'
+        $supervisorReceiptHash='C2C06A84286CCAF19712C90DA6678D69E2D22762CDD36BF51599A7249105BD7A'
     }
     if((Get-FileHash $supervisorReceiptPath).Hash -cne $supervisorReceiptHash){throw 'Supervisor revision receipt differs.'}
     $supervisorReceipt=Get-Content $supervisorReceiptPath -Raw|ConvertFrom-Json
@@ -260,7 +280,8 @@ $protected = @(Get-Content -LiteralPath (Join-Path $root 'Assets\Environment\woo
 $before = @($protected | ForEach-Object {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root $_.path)).Hash
     if ($hash -cne $_.sha256 -and $_.path -notin @('SurvivalGame.uproject','Source\SurvivalGameEditor.Target.cs',
-        'Scripts\Development-Run.ps1','Tests\DevelopmentRunTests.ps1')) {
+        'Scripts\Development-Run.ps1','Tests\DevelopmentRunTests.ps1',
+        'Source\SurvivalGame\HomesteadWorld.cpp','Config\DefaultGame.ini')) {
         throw "Unrelated protected input changed:$($_.path)"
     }
     @{ path=$_.path;sha256=$hash }
@@ -275,7 +296,7 @@ foreach ($name in @('Engine','Editor','EditorSettings','EditorPerProjectUserSett
 $ddc = Join-Path $output 'DDC'
 $ddcIdentity=$null
 $retainedFiles=@();$ddcBefore=@()
-if($Mode -eq 'Render') {
+if($Mode -in @('Render','Cook')) {
     $ddc=Join-Path $evidenceRunRoot 'fern-import-02\DDC'
     Assert-FernOrdinaryTree $ddc
     $ddcIdentity=[Homestead.Authoring.LeafGuard]::InspectDirectory($ddc)
@@ -446,7 +467,11 @@ try {
                 [IO.File]::WriteAllText((Join-Path $output 'operation-admitted.txt'),$Mode)
             }
         }
-        if($Mode -ne 'Settings' -and -not $fernResult -and (Test-Path (Join-Path $output 'fern-result.json'))) {
+        if($Mode -eq 'Cook' -and -not $fernResult -and (Test-Path (Join-Path $output 'cook-result.json'))) {
+            $fernResult=Get-Content (Join-Path $output 'cook-result.json') -Raw|ConvertFrom-Json
+            Assert-HomesteadCookOutput $fernResult $output
+        }
+        if($Mode -in @('Import','Render') -and -not $fernResult -and (Test-Path (Join-Path $output 'fern-result.json'))) {
             $fernResult=Get-Content (Join-Path $output 'fern-result.json') -Raw|ConvertFrom-Json
             if(-not $fernResult.passed) {
                 $detail=if($fernResult.PSObject.Properties['failure']){$fernResult.failure}else{'See native log and readiness evidence.'}
@@ -534,7 +559,7 @@ try {
             foreach($file in $contentBefore){if((Get-FileHash $file.path).Hash -cne $file.sha256){throw "Existing content changed:$($file.path)"}}
             if($trialIdentity) {
                 Assert-FernDirectoryIdentity $trialIdentity $trial
-                if($Mode -eq 'Render'){Assert-FernPackagePins $trialBefore @(Get-FernPackageFiles $trial -Complete)}
+                if($Mode -in @('Render','Cook')){Assert-FernPackagePins $trialBefore @(Get-FernPackageFiles $trial -Complete)}
             }
         } catch {$cleanupErrors.Add("Fern protection check failed:$_")}
     }

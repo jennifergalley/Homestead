@@ -5,23 +5,57 @@ import json
 import pathlib
 import struct
 import uuid
+import xml.etree.ElementTree as ET
 
 
 def u32(data, offset):
     return struct.unpack_from("<I", data, offset)[0]
 
 
-def inspect(dll, pdb):
-    if not 512 <= dll.stat().st_size <= 64 * 1024 * 1024:
-        raise ValueError("DLL size outside inspection bounds")
+def require_manifest_inputs(actual, inputs):
+    def parse(value):
+        if not value or len(value) > 1024 * 1024 or b"<!DOCTYPE" in value.upper() or b"<!ENTITY" in value.upper():
+            raise ValueError("Manifest outside safe inspection bounds")
+        root = ET.fromstring(value)
+        if root.tag != "{urn:schemas-microsoft-com:asm.v1}assembly":
+            raise ValueError("Expected assembly manifest")
+        return root
+
+    def tag(element):
+        return element.tag.replace("urn:schemas-microsoft-com:asm.v2", "urn:schemas-microsoft-com:asm.v3")
+
+    def contains(have, need):
+        if tag(have) != tag(need) or any(have.get(k) != v for k, v in need.attrib.items()):
+            return False
+        if (need.text or "").strip() and (have.text or "").strip() != need.text.strip():
+            return False
+        remaining = list(have)
+        for child in need:
+            found = next((i for i, candidate in enumerate(remaining) if contains(candidate, child)), None)
+            if found is None:
+                return False
+            remaining.pop(found)
+        return True
+
+    final = parse(actual)
+    if not inputs:
+        raise ValueError("Manifest inputs required")
+    for value in inputs:
+        if not contains(final, parse(value)):
+            raise ValueError("Embedded manifest omits or changes an input contract")
+
+
+def inspect(dll, pdb, executable=False, manifest_inputs=()):
+    if not 512 <= dll.stat().st_size <= (512 if executable else 64) * 1024 * 1024:
+        raise ValueError("Image size outside inspection bounds")
     data = dll.read_bytes()
     pe = u32(data, 60)
     if data[:2] != b"MZ" or data[pe:pe + 6] != b"PE\0\0\x64\x86":
         raise ValueError("Not an AMD64 PE")
     count, = struct.unpack_from("<H", data, pe + 6)
     optional, flags = struct.unpack_from("<HH", data, pe + 20)
-    if not flags & 0x2000 or data[pe + 24:pe + 26] != b"\x0b\x02":
-        raise ValueError("Not a PE32+ DLL")
+    if bool(flags & 0x2000) == executable or not flags & 0x2 or data[pe + 24:pe + 26] != b"\x0b\x02":
+        raise ValueError("Unexpected PE32+ image kind")
     if not 1 <= count <= 96 or optional < 168:
         raise ValueError("Invalid PE sections/optional header")
     sections = []
@@ -44,14 +78,57 @@ def inspect(dll, pdb):
             raise ValueError("Unterminated PE string")
         return data[at:end].decode("ascii")
 
-    export = offset(u32(data, pe + 24 + 112), 40)
-    names_count = u32(data, export + 24)
-    if not 1 <= names_count <= 100000:
-        raise ValueError("Invalid export count")
-    names_at = offset(u32(data, export + 32), names_count * 4)
-    names = [text(offset(u32(data, names_at + i * 4))) for i in range(names_count)]
-    if "ThisIsAnUnrealEngineModule" not in names:
-        raise ValueError("Missing Unreal module marker")
+    names = []
+    module_name = dll.name
+    if not executable:
+        export = offset(u32(data, pe + 24 + 112), 40)
+        names_count = u32(data, export + 24)
+        if not 1 <= names_count <= 100000:
+            raise ValueError("Invalid export count")
+        names_at = offset(u32(data, export + 32), names_count * 4)
+        names = [text(offset(u32(data, names_at + i * 4))) for i in range(names_count)]
+        if "ThisIsAnUnrealEngineModule" not in names:
+            raise ValueError("Missing Unreal module marker")
+        module_name = text(offset(u32(data, export + 12)))
+    else:
+        offset(u32(data, pe + 24 + 16))
+    manifest = None
+    if manifest_inputs:
+        if not executable:
+            raise ValueError("This manifest contract requires an executable")
+        resource_rva, resource_size = struct.unpack_from("<II", data, pe + 24 + 112 + 2 * 8)
+        resource = offset(resource_rva, resource_size)
+
+        def entries(relative):
+            if relative < 0 or relative + 16 > resource_size:
+                raise ValueError("Invalid resource directory")
+            named, ids = struct.unpack_from("<HH", data, resource + relative + 12)
+            count = named + ids
+            if not 1 <= count <= 4096 or relative + 16 + count * 8 > resource_size:
+                raise ValueError("Invalid resource entry count")
+            return [struct.unpack_from("<II", data, resource + relative + 16 + i * 8) for i in range(count)]
+
+        def directory(parent, wanted):
+            matches = [child for name, child in entries(parent) if name == wanted]
+            if len(matches) != 1 or not matches[0] & 0x80000000:
+                raise ValueError("Missing unique manifest resource directory")
+            return matches[0] & 0x7fffffff
+
+        languages = entries(directory(directory(0, 24), 1))
+        if len(languages) != 1 or languages[0][1] & 0x80000000:
+            raise ValueError("Expected one RT_MANIFEST1 language")
+        leaf = languages[0][1]
+        if leaf + 16 > resource_size:
+            raise ValueError("Invalid manifest data entry")
+        rva, size = struct.unpack_from("<II", data, resource + leaf)
+        if not 1 <= size <= 1024 * 1024:
+            raise ValueError("Invalid embedded manifest size")
+        at = offset(rva, size)
+        content = data[at:at + size]
+        require_manifest_inputs(content, [path.read_bytes() for path in manifest_inputs])
+        manifest = {"resourceType": 24, "resourceId": 1, "language": languages[0][0],
+                    "bytes": size, "sha256": hashlib.sha256(content).hexdigest().upper(),
+                    "verifiedInputs": [str(path) for path in manifest_inputs]}
     debug_rva, debug_size = struct.unpack_from("<II", data, pe + 24 + 112 + 6 * 8)
     if debug_size % 28 or not 28 <= debug_size <= 4096:
         raise ValueError("Invalid PE debug directory")
@@ -109,9 +186,9 @@ def inspect(dll, pdb):
             digest = hashlib.file_digest(stream, "sha256").hexdigest().upper()
         return {"path": str(path), "bytes": path.stat().st_size, "sha256": digest}
 
-    return {"dll": receipt(dll), "pdb": receipt(pdb), "machine": "AMD64", "isDll": True,
-            "moduleName": text(offset(u32(data, export + 12))),
-            "moduleMarker": "ThisIsAnUnrealEngineModule", "exportCount": names_count,
+    return {"exe" if executable else "dll": receipt(dll), "pdb": receipt(pdb), "machine": "AMD64", "isDll": not executable,
+            "moduleName": module_name, "manifest": manifest,
+            "moduleMarker": None if executable else "ThisIsAnUnrealEngineModule", "exportCount": len(names),
             "probeExports": [name for name in names if "HomesteadAuthoringProbeCommandlet" in name],
             "debugGuid": str(uuid.UUID(bytes_le=guid)), "debugAge": age,
             "recordedPdb": records[0][2], "codeLoaded": False}
@@ -121,5 +198,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("dll", type=pathlib.Path)
     parser.add_argument("pdb", type=pathlib.Path)
+    parser.add_argument("--executable", action="store_true")
+    parser.add_argument("--manifest-input", type=pathlib.Path, action="append", default=[])
     args = parser.parse_args()
-    print(json.dumps(inspect(args.dll, args.pdb), indent=2))
+    print(json.dumps(inspect(args.dll, args.pdb, args.executable, args.manifest_input), indent=2))

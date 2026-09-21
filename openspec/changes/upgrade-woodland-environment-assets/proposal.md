@@ -24,8 +24,11 @@ without replacing the landscape or expanding gameplay.
 
 The exact recommended bundle, fallback, current publisher evidence and unknowns
 are maintained in `docs\research\environment-assets\2026-09-20-decision.md`.
-This request creates planning artifacts only. Starting implementation requires a
-new explicit request and an approved offline-safe editor/import workflow.
+Implementation is authorized and the representative fern import/render workflow
+has passed. Put the existing fern into the actual clearing first, then add
+tree/grass/ground improvements. Full palette completion and exhaustive
+performance work do not block the first usable candidate. Carry proven tool
+controls forward; new helper/network/security requirements remain boundaries.
 
 ## Capabilities
 
@@ -46,8 +49,10 @@ Existing product and gameplay behavior remains authoritative and unchanged.
 Future implementation affects `HomesteadWorld.cpp/.h` asset loading, decoration
 and material helpers; `Scripts\bootstrap_unreal.py`; environment assets and
 materials; the asset manifest/receipts/credits; and relevant visual/renewal tests.
-It must integrate the parent's accepted offline-startup/fullscreen work before
-any engine activity and must not alter personal saves or the accepted preview.
+It preserves the accepted offline-startup/fullscreen behavior. Old saves are
+disposable test data under current user policy: report necessary resets rather
+than delaying features for migration. The latest basically verified usable
+candidate may become the normal preview, retaining cheap rollback.
 
 No terrain replacement, new biome/actor framework, character/animation/tools,
 building-piece packs, audio changes, gameplay rules, recipe progression,

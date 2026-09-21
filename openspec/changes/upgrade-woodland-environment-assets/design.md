@@ -32,6 +32,69 @@ acceptance from a passing screenshot metric.
 
 ## Decisions
 
+### Current delivery order: visible fern clearing first
+
+Use the successful Fern02 assets in a small real-world patch now, before the
+rest of the palette. Preserve materials, uniform authored scale and an explicit
+ground anchor; leave mesh vertices, terrain and simulation untouched. Keep
+deterministic home/resource/structure/plot/stream exclusions and no collision.
+
+A modest static-component patch is acceptable before broad HISM conversion:
+the admitted material was proven on static meshes, not cooked instancing
+permutations. Keep counts explicit; do not build a new material/import framework
+to place the first patch. Evaluate dark undersides/detail in homestead lighting,
+not another isolated cosmetic scene.
+
+Then produce a clearing view and usable candidate, handling remaining cook/
+package tool boundaries at use. Add tree/grass/ground incrementally. Current
+policy permits necessary test-save resets and preview promotion after basic
+verified usability, with honest known defects. Full-palette/4K/performance gates
+are distinct from first delivery. Earlier serial narratives below are historical
+where superseded; security/licensing and owned-process controls remain.
+
+For this slice, cook the real new assets rather than reusing containers that
+lack them. Reuse the admitted native/settings supervisor and standard engine
+Cook commandlet with source-supported `RunAsCookCommandlet`, Windows target,
+one cook process and a fresh candidate `OutputDir`. Retain shader-worker
+denial, local cache, disabled Python, inherited marker lifetime and stop
+controls; preserve failed partial cook output. Do not invoke the existing
+unconditional Python/bootstrap/character reimport path. Package/build tools
+are handled directly when needed. User-facing images must come from ordinary
+gameplay of the resulting candidate, not another SceneCapture project.
+For first delivery, prefer supported loose-file staging of genuine new cooked
+data and Shipping code: omit the optional Pak request and explicitly skip
+IoStore. Installed `ProjectParams.cs:812-815` and
+`CopyBuildToStagingDirectory.Automation.cs:6243-6295` separate these choices;
+Windows inherits the optional-Pak platform policy. Verify the actual stage
+parameters/layout and runtime loading, not merely command success. An optional
+future container build must not block this usable first increment. Do not copy
+old containers or an entire engine/source tree, invent metadata, or admit
+otherwise excluded UAT helpers.
+
+The existing Shipping build deliberately excludes automated actor spawning and
+ticks. The coordinator approved a narrow opt-in on 2026-09-21: reuse the existing
+smoke/ordinary-control routes behind explicit `HomesteadShippingQA`, exactly one
+route, fresh explicit output and isolated graphics/user/save routing. Reject an
+invalid request before loading/saving/resetting a world; do not fall back to a
+normal human game. Keep ordinary Shipping QA-off, external-input isolation,
+console/debug/trace settings and current helper/network controls unchanged.
+Resolve the actual packaged executable/configuration instead of assuming the
+Development filename. Main owns this common gate; the UI lane retains its
+NativeMenu route. Implement only after the current cook releases source pins,
+then rebuild genuine Shipping products. Reuse that cook only if its content,
+config and reflected dependencies still match; code gating is not a reason to
+recook unchanged assets. First delivery needs basic actual controls and the
+ordinary capture, not every historical fixture suite.
+
+The first real cook selected Zen **output storage**, despite the separately
+verified filesystem DDC. Its denied service launches and loopback8558
+SYN_SENT sockets are retained as a failed, owned hard-stop operation with
+observed death and clean protection release. The corrected invocation asserts
+and exports `-SkipZenStore` in the actual inner Cook `Main` arguments before
+calling it. Installed `CookCommandlet.cpp:425-427` supports that switch directly;
+this is not a UAT-only flag or a new endpoint allowance. Require genuine loose
+cooked files from the fresh corrected attempt; no old-container substitution.
+
 ### 1. Admission before import, and a separate offline execution gate
 
 Current18:08 ordering clarification: the coordinator accepted the corrected

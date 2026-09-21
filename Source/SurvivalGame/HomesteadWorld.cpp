@@ -345,6 +345,17 @@ void AHomesteadWorld::BuildLighting()
 
 void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
 {
+    const FName FernTag(TEXT("AuthoredFern02"));
+    TArray<UStaticMeshComponent*> PreviousParts;
+    GetComponents(PreviousParts);
+    for (UStaticMeshComponent* Part : PreviousParts)
+    {
+        if (Part->ComponentHasTag(FernTag))
+        {
+            RemoveInstanceComponent(Part);
+            Part->DestroyComponent();
+        }
+    }
     for (auto& Entry : DecorationBatches)
     {
         Entry.Value->ClearInstances();
@@ -381,6 +392,57 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
         }
         return false;
     };
+
+    TArray<UStaticMesh*> FernMeshes;
+    for (const TCHAR* Suffix : {TEXT("a"), TEXT("b"), TEXT("c"), TEXT("d")})
+    {
+        const FString Path = FString::Printf(
+            TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_%s.SM_Fern02_%s"), Suffix, Suffix);
+        UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
+        if (!Mesh || Mesh->GetStaticMaterials().Num() != 1 || !Mesh->GetStaticMaterials()[0].MaterialInterface)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Authored clearing fern is unavailable or has no material: %s"), *Path);
+            FernMeshes.Reset();
+            break;
+        }
+        FernMeshes.Add(Mesh);
+    }
+    int32 FernCount = 0;
+    if (FernMeshes.Num() == 4)
+    {
+        for (int32 Index = 0; Index < 32; ++Index)
+        {
+            FRandomStream FernRandom(63017 + Index * 211);
+            const float Angle = Index * 2.39996323f;
+            const float Radius = FernRandom.FRandRange(820.0f, 1250.0f);
+            const float X = -1000.0f + FMath::Cos(Angle) * Radius;
+            const float Y = FMath::Sin(Angle) * Radius;
+            if (Reserved(X, Y, 75.0f) || FMath::Abs(X - Homestead::StreamX(Y)) < 270.0f)
+            {
+                continue;
+            }
+            UStaticMesh* Mesh = FernMeshes[Index % FernMeshes.Num()];
+            const FBox Bounds = Mesh->GetBoundingBox();
+            const FVector GroundAnchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+            const FRotator Rotation(0, FernRandom.FRandRange(0, 360), 0);
+            UStaticMeshComponent* Part = NewObject<UStaticMeshComponent>(this);
+            AddInstanceComponent(Part);
+            Part->ComponentTags.Add(FernTag);
+            Part->SetupAttachment(GetRootComponent());
+            Part->SetMobility(EComponentMobility::Static);
+            Part->SetStaticMesh(Mesh);
+            // Keep authored vertices/slots/scale; undo the baked layout offset at placement only.
+            Part->SetRelativeTransform(FTransform(Rotation,
+                AtGround(X, Y) - Rotation.RotateVector(GroundAnchor), FVector::OneVector));
+            Part->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+            Part->SetGenerateOverlapEvents(false);
+            Part->SetCanEverAffectNavigation(false);
+            Part->SetCullDistance(5000.0f);
+            Part->RegisterComponent();
+            ++FernCount;
+        }
+    }
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing fern patch: %d noncolliding plants; native materials and scale."), FernCount);
 
     for (int Index = 0; Index < 430; ++Index)
     {

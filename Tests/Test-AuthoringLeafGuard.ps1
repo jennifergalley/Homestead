@@ -6,7 +6,7 @@ param(
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')][string]$Case = 'normal',
     [switch]$ObserveAccountingOnly,
     [switch]$DetachedConsole,
-    [ValidateSet('Default','Import','Render','RenderLongStartup','RenderCompletionDriven')][string]$DeadlineProfile='Default',
+    [ValidateSet('Default','Import','Render','RenderLongStartup','RenderCompletionDriven','CookCompletionDriven')][string]$DeadlineProfile='Default',
     [ValidateSet('normal','pause','deadline','timeout','controller-failure','watchdog')]
     [string[]]$Scenarios = @('normal','pause','deadline','timeout','controller-failure','watchdog')
 )
@@ -125,15 +125,22 @@ public static class GuardFixtureNative {
         $environment['HOMESTEAD_TEST_CANARY_HIGH'] = $identity.IndexHigh.ToString()
         $environment['HOMESTEAD_TEST_CANARY_LOW'] = $identity.IndexLow.ToString()
         $fixtureArguments=[string[]]@('--token-fixture','argument with spaces','embedded"quote','E:\fixture path\')
-        if($DeadlineProfile -in @('RenderLongStartup','RenderCompletionDriven')) {
+        if($DeadlineProfile -in @('RenderLongStartup','RenderCompletionDriven','CookCompletionDriven')) {
             $configs=[ordered]@{}
             foreach($name in @('Engine','Editor','EditorSettings','EditorPerProjectUserSettings','GameUserSettings','Game','Input')) {
                 $configs[$name]=Join-Path $Root "Config\$name.ini"
             }
-            $fixtureArguments=[string[]]@(Get-FernProbeArguments (Join-Path $Root 'project with spaces.uproject') $Root (Join-Path $Root 'retained cache') $configs 'Render')
-            Assert ('-FernMode=Render' -cin $fixtureArguments -and '-RenderOffScreen' -cin $fixtureArguments -and
-                '-AllowCommandletRendering' -cin $fixtureArguments -and '-nullrhi' -cnotin $fixtureArguments -and
-                '-noshaderworker' -cin $fixtureArguments -and '-DisablePython' -cin $fixtureArguments) 'Production render tokens differ.'
+            $fixtureArguments=[string[]]@(Get-FernProbeArguments (Join-Path $Root 'project with spaces.uproject') $Root (Join-Path $Root 'retained cache') $configs $(if($DeadlineProfile -eq 'CookCompletionDriven'){'Cook'}else{'Render'}))
+            if($DeadlineProfile -eq 'CookCompletionDriven') {
+                Assert ('-FernMode=Cook' -cin $fixtureArguments -and '-RunAsCookCommandlet' -cin $fixtureArguments -and
+                    '-TargetPlatform=Windows' -cin $fixtureArguments -and '-CookProcessCount=1' -cin $fixtureArguments -and
+                    '-SkipZenStore' -cin $fixtureArguments -and
+                    '-nullrhi' -cin $fixtureArguments -and '-RenderOffScreen' -cnotin $fixtureArguments) 'Production cook tokens differ.'
+            } else {
+                Assert ('-FernMode=Render' -cin $fixtureArguments -and '-RenderOffScreen' -cin $fixtureArguments -and
+                    '-AllowCommandletRendering' -cin $fixtureArguments -and '-nullrhi' -cnotin $fixtureArguments) 'Production render tokens differ.'
+            }
+            Assert ('-noshaderworker' -cin $fixtureArguments -and '-DisablePython' -cin $fixtureArguments) 'Shared safety tokens differ.'
         }
         $guard = [Homestead.Authoring.LeafGuard]::new($Subject, (Get-FileHash -LiteralPath $Subject).Hash,
             $fixtureArguments, $Root, (Join-Path $Root 'marker'), (Join-Path $Root 'subject.log'), $environment, [bool]$DetachedConsole)
@@ -146,8 +153,8 @@ public static class GuardFixtureNative {
         Assert ($guard.CreationFlags -eq $(if($DetachedConsole){0x0008040C}else{0x08080404})) 'Actual creation flags differ.'
         $doubleArmRejected=$null
         if($DeadlineProfile -ne 'Default') {
-            $policy=Get-FernOperationPolicy -Mode $(if($DeadlineProfile -eq 'Import'){'Import'}else{'Render'}) `
-                -RenderProfile $(if($DeadlineProfile -eq 'RenderCompletionDriven'){'CompletionDriven'}elseif($DeadlineProfile -eq 'RenderLongStartup'){'LongStartup'}else{'Standard'})
+            $policy=Get-FernOperationPolicy -Mode $(if($DeadlineProfile -eq 'Import'){'Import'}elseif($DeadlineProfile -eq 'CookCompletionDriven'){'Cook'}else{'Render'}) `
+                -RenderProfile $(if($DeadlineProfile -in @('RenderCompletionDriven','CookCompletionDriven')){'CompletionDriven'}elseif($DeadlineProfile -eq 'RenderLongStartup'){'LongStartup'}else{'Standard'})
             $softSeconds=$policy.softSeconds
             $hardSeconds=$policy.hardSeconds
             [Homestead.Authoring.LeafGuard]::ValidateDeadlineProfile($softSeconds*1000,$hardSeconds*1000,$DeadlineProfile)
@@ -278,6 +285,8 @@ foreach($pair in @(
     @{name='long-profile-short-pair';soft=480000;hard=510000;profile='RenderLongStartup'},
     @{name='completion-soft-limit';soft=1;hard=0;profile='RenderCompletionDriven'},
     @{name='completion-hard-limit';soft=0;hard=1;profile='RenderCompletionDriven'},
+    @{name='cook-completion-soft-limit';soft=1;hard=0;profile='CookCompletionDriven'},
+    @{name='cook-completion-hard-limit';soft=0;hard=1;profile='CookCompletionDriven'},
     @{name='legacy-no-timer';soft=0;hard=0;profile='Render'},
     @{name='unknown-profile';soft=1;hard=2;profile='Unlimited'})) {
     $rejected=$false

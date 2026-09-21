@@ -1,0 +1,25 @@
+Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips.
+Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark.
+BEGIN 0.00s close-notes: The clearing
+BEGIN 1.19s idle: The clearing
+BEGIN 4.30s slow-walk: The clearing
+BEGIN 8.35s stop-from-slow-walk: The clearing
+BEGIN 10.34s full-walk: The clearing
+BEGIN 13.38s turn-while-moving: Sapling  (renewing)
+BEGIN 16.44s stop-from-turn: Berry bush
+BEGIN 18.50s orbit-standing-character: Stream reeds
+BEGIN 22.64s open-pack: Stream reeds
+BEGIN 23.04s open-look: Stream reeds
+BEGIN 26.16s portrait-idle: Stream reeds
+BEGIN 29.12s portrait-orbit: Stream reeds
+BEGIN 33.32s return-to-world: Stream reeds
+Forage target id=52 position=X=-100.000 Y=550.000
+BEGIN 34.48s walk-to-forage: Stream reeds
+BEGIN 35.37s settle-forage: Berry bush
+BEGIN 36.11s view-picking-side: Berry bush
+BEGIN 37.31s before-pick: Berry bush
+BEGIN 38.19s gather: Berry bush
+BEGIN 41.35s after-gather: Berry bush  (renewing)
+Forage target reached=1; resources actually gathered=1
+Picking action observed=1; recovered to idle=1
+This observational capture is not a visual-quality pass or a replacement for human feel/listening review.

@@ -1,0 +1,1515 @@
+{
+  "passed": true,
+  "diagnosticChecksPassed": true,
+  "observeAccountingOnly": false,
+  "cases": [
+    {
+      "case": "normal",
+      "passed": true,
+      "observations": 12,
+      "maximumObservationGapMs": 25.980999999999995,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 50816,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 756969,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 50816,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344444866355891,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 756969,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444853439880,
+          "LastWriteTime": 134344444853439880,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "jobMembers": [
+          {
+            "Pid": 50816,
+            "NativeError": 0,
+            "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+            "Error": null,
+            "CreationTime": 134344444866355891,
+            "Member": true,
+            "Exited": false,
+            "IdentityFromHeldRoot": true,
+            "ExitCode": 259
+          }
+        ],
+        "creationFlags": 525324,
+        "argumentTokens": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "actualCommandLine": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe\" \"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\project with spaces.uproject\" \"-run=HomesteadAuthoringProbe\" \"-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\" \"-notraceserver\" \"-traceautostart=0\" \"-unattended\" \"-nop4\" \"-nosplash\" \"-stdout\" \"-FullStdOutLogOutput\" \"-DisablePython\" \"-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging\" \"-noshaderworker\" \"-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\EngineUser\" \"-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\editor.log\" \"-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False\" \"-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True\" \"-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False\" \"-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0\" \"-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False\" \"-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False\" \"-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Engine.ini\" \"-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Editor.ini\" \"-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\EditorSettings.ini\" \"-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\EditorPerProjectUserSettings.ini\" \"-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\GameUserSettings.ini\" \"-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Game.ini\" \"-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Input.ini\" \"-FernMode=Cook\" \"-nullrhi\" \"-RunAsCookCommandlet\" \"-TargetPlatform=Windows\" \"-CookProcessCount=1\"",
+        "windowsParsedArguments": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "resumed": false,
+        "deadlineProfile": "CookCompletionDriven",
+        "softMilliseconds": 0,
+        "hardMilliseconds": 0,
+        "doubleArmRejected": true
+      },
+      "outcome": {
+        "outcome": "passed-cooperative",
+        "reason": "normal",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 756969,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444853439880,
+          "LastWriteTime": 134344444853439880,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "liveJobAccounting": [
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          }
+        ],
+        "exitedJob": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 0,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "liveJobMembers": [
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 5.1174
+          },
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 35.6527
+          },
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 73.469
+          },
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 98.5482
+          },
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 124.0225
+          },
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 151.5087
+          },
+          {
+            "members": [
+              {
+                "Pid": 50816,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444866355891,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 177.9816
+          }
+        ],
+        "exitedJobMembers": [],
+        "exitedRoot": {
+          "Pid": 50816,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "Error": null,
+          "CreationTime": 134344444866355891,
+          "Member": true,
+          "Exited": true,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        },
+        "postResumeArmRejected": true,
+        "captureBeforeResumeRejected": true,
+        "captureProfile": "CookCompletionDriven",
+        "captureTimer": {
+          "softMilliseconds": 0,
+          "hardMilliseconds": 0,
+          "armed": false
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 756969,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444853439880,
+        "LastWriteTime": 134344444853439880,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\normal\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 756969,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444853439880,
+        "LastWriteTime": 134344444853439880,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled checks are not continuous tracing. Delete/rename negative checks test required DELETE access without mutating after racing death; actual rename/delete positive controls run before lifetime, write/rename after release. Inherited handle identity and job-close semantics provide lifetime protection."
+    },
+    {
+      "case": "pause",
+      "passed": true,
+      "observations": 11,
+      "maximumObservationGapMs": 27.941900000000032,
+      "subjectExitCode": 0,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 43556,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 756982,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 43556,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344444883671829,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 756982,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444873066294,
+          "LastWriteTime": 134344444873066294,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "jobMembers": [
+          {
+            "Pid": 43556,
+            "NativeError": 0,
+            "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+            "Error": null,
+            "CreationTime": 134344444883671829,
+            "Member": true,
+            "Exited": false,
+            "IdentityFromHeldRoot": true,
+            "ExitCode": 259
+          }
+        ],
+        "creationFlags": 525324,
+        "argumentTokens": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "actualCommandLine": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe\" \"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\project with spaces.uproject\" \"-run=HomesteadAuthoringProbe\" \"-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\" \"-notraceserver\" \"-traceautostart=0\" \"-unattended\" \"-nop4\" \"-nosplash\" \"-stdout\" \"-FullStdOutLogOutput\" \"-DisablePython\" \"-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging\" \"-noshaderworker\" \"-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\EngineUser\" \"-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\editor.log\" \"-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False\" \"-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True\" \"-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False\" \"-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0\" \"-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False\" \"-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False\" \"-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Engine.ini\" \"-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Editor.ini\" \"-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\EditorSettings.ini\" \"-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\EditorPerProjectUserSettings.ini\" \"-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\GameUserSettings.ini\" \"-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Game.ini\" \"-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Input.ini\" \"-FernMode=Cook\" \"-nullrhi\" \"-RunAsCookCommandlet\" \"-TargetPlatform=Windows\" \"-CookProcessCount=1\"",
+        "windowsParsedArguments": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "resumed": false,
+        "deadlineProfile": "CookCompletionDriven",
+        "softMilliseconds": 0,
+        "hardMilliseconds": 0,
+        "doubleArmRejected": true
+      },
+      "outcome": {
+        "outcome": "cancelled-cooperative",
+        "reason": "pause",
+        "exitCode": 0,
+        "hardTerminated": false,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 756982,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444873066294,
+          "LastWriteTime": 134344444873066294,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "liveJobAccounting": [
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          }
+        ],
+        "exitedJob": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 0,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "liveJobMembers": [
+          {
+            "elapsedMs": 4.6034,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          },
+          {
+            "elapsedMs": 41.6655,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          },
+          {
+            "elapsedMs": 67.3122,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          },
+          {
+            "elapsedMs": 95.427,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          },
+          {
+            "elapsedMs": 123.5413,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          },
+          {
+            "elapsedMs": 149.8359,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          },
+          {
+            "elapsedMs": 176.8381,
+            "members": [
+              {
+                "Pid": 43556,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444883671829,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ]
+          }
+        ],
+        "exitedJobMembers": [],
+        "exitedRoot": {
+          "Pid": 43556,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "Error": null,
+          "CreationTime": 134344444883671829,
+          "Member": true,
+          "Exited": true,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 0
+        },
+        "postResumeArmRejected": true,
+        "captureBeforeResumeRejected": true,
+        "captureProfile": "CookCompletionDriven",
+        "captureTimer": {
+          "hardMilliseconds": 0,
+          "softMilliseconds": 0,
+          "armed": false
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 756982,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444873066294,
+        "LastWriteTime": 134344444873066294,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\pause\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 756982,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444873066294,
+        "LastWriteTime": 134344444873066294,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled checks are not continuous tracing. Delete/rename negative checks test required DELETE access without mutating after racing death; actual rename/delete positive controls run before lifetime, write/rename after release. Inherited handle identity and job-close semantics provide lifetime protection."
+    },
+    {
+      "case": "timeout",
+      "passed": true,
+      "observations": 42,
+      "maximumObservationGapMs": 28.66080000000011,
+      "subjectExitCode": 92,
+      "controllerExitCode": 0,
+      "ready": {
+        "pid": 44792,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 756994,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 44792,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344444902403782,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 756994,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444890713374,
+          "LastWriteTime": 134344444890713374,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "jobMembers": [
+          {
+            "Pid": 44792,
+            "NativeError": 0,
+            "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+            "Error": null,
+            "CreationTime": 134344444902403782,
+            "Member": true,
+            "Exited": false,
+            "IdentityFromHeldRoot": true,
+            "ExitCode": 259
+          }
+        ],
+        "creationFlags": 525324,
+        "argumentTokens": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "actualCommandLine": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe\" \"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\project with spaces.uproject\" \"-run=HomesteadAuthoringProbe\" \"-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\" \"-notraceserver\" \"-traceautostart=0\" \"-unattended\" \"-nop4\" \"-nosplash\" \"-stdout\" \"-FullStdOutLogOutput\" \"-DisablePython\" \"-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging\" \"-noshaderworker\" \"-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\EngineUser\" \"-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\editor.log\" \"-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False\" \"-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True\" \"-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False\" \"-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0\" \"-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False\" \"-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False\" \"-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Engine.ini\" \"-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Editor.ini\" \"-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\EditorSettings.ini\" \"-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\EditorPerProjectUserSettings.ini\" \"-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\GameUserSettings.ini\" \"-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Game.ini\" \"-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Input.ini\" \"-FernMode=Cook\" \"-nullrhi\" \"-RunAsCookCommandlet\" \"-TargetPlatform=Windows\" \"-CookProcessCount=1\"",
+        "windowsParsedArguments": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "resumed": false,
+        "deadlineProfile": "CookCompletionDriven",
+        "softMilliseconds": 0,
+        "hardMilliseconds": 0,
+        "doubleArmRejected": true
+      },
+      "outcome": {
+        "outcome": "cancelled-hard-stop",
+        "reason": "timeout",
+        "exitCode": 92,
+        "hardTerminated": true,
+        "markerAfter": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 756994,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444890713374,
+          "LastWriteTime": 134344444890713374,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "liveJobAccounting": [
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          },
+          {
+            "Flags": 8200,
+            "ProcessLimit": 1,
+            "ActiveProcesses": 1,
+            "TotalProcesses": 1,
+            "TerminatedForLimits": 0,
+            "HeldProcessIsMember": true
+          }
+        ],
+        "exitedJob": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 0,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "liveJobMembers": [
+          {
+            "members": [
+              {
+                "Pid": 44792,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444902403782,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 4.639
+          },
+          {
+            "members": [
+              {
+                "Pid": 44792,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444902403782,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 33.3033
+          },
+          {
+            "members": [
+              {
+                "Pid": 44792,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444902403782,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 58.7505
+          },
+          {
+            "members": [
+              {
+                "Pid": 44792,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444902403782,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 90.0489
+          },
+          {
+            "members": [
+              {
+                "Pid": 44792,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444902403782,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 117.4103
+          },
+          {
+            "members": [
+              {
+                "Pid": 44792,
+                "NativeError": 0,
+                "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+                "Error": null,
+                "CreationTime": 134344444902403782,
+                "Member": true,
+                "Exited": false,
+                "IdentityFromHeldRoot": true,
+                "ExitCode": 259
+              }
+            ],
+            "elapsedMs": 146.1263
+          }
+        ],
+        "exitedJobMembers": [],
+        "exitedRoot": {
+          "Pid": 44792,
+          "NativeError": 0,
+          "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "Error": null,
+          "CreationTime": 134344444902403782,
+          "Member": true,
+          "Exited": true,
+          "IdentityFromHeldRoot": true,
+          "ExitCode": 92
+        },
+        "postResumeArmRejected": true,
+        "captureBeforeResumeRejected": true,
+        "captureProfile": "CookCompletionDriven",
+        "captureTimer": {
+          "softMilliseconds": 0,
+          "armed": false,
+          "hardMilliseconds": 0
+        }
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 756994,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444890713374,
+        "LastWriteTime": 134344444890713374,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\timeout\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 756994,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444890713374,
+        "LastWriteTime": 134344444890713374,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled checks are not continuous tracing. Delete/rename negative checks test required DELETE access without mutating after racing death; actual rename/delete positive controls run before lifetime, write/rename after release. Inherited handle identity and job-close semantics provide lifetime protection."
+    },
+    {
+      "case": "controller-failure",
+      "passed": true,
+      "observations": 17,
+      "maximumObservationGapMs": 25.779800000000023,
+      "subjectExitCode": 0,
+      "controllerExitCode": 91,
+      "ready": {
+        "pid": 11388,
+        "volume": 3222469187,
+        "indexHigh": 131072,
+        "indexLow": 757048,
+        "readOnlyGuard": true,
+        "jobHandleExcluded": true,
+        "canaryExcluded": true,
+        "deniedChildren": 4
+      },
+      "launch": {
+        "pid": 11388,
+        "image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+        "creationTime": 134344444923393401,
+        "marker": {
+          "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\marker",
+          "Volume": 3222469187,
+          "IndexHigh": 131072,
+          "IndexLow": 757048,
+          "Attributes": 32,
+          "Size": 0,
+          "CreationTime": 134344444913490505,
+          "LastWriteTime": 134344444913490505,
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+        },
+        "job": {
+          "Flags": 8200,
+          "ProcessLimit": 1,
+          "ActiveProcesses": 1,
+          "TotalProcesses": 1,
+          "TerminatedForLimits": 0,
+          "HeldProcessIsMember": true
+        },
+        "explicitHandles": 3,
+        "jobMembers": [
+          {
+            "Pid": 11388,
+            "NativeError": 0,
+            "Image": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+            "Error": null,
+            "CreationTime": 134344444923393401,
+            "Member": true,
+            "Exited": false,
+            "IdentityFromHeldRoot": true,
+            "ExitCode": 259
+          }
+        ],
+        "creationFlags": 525324,
+        "argumentTokens": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "actualCommandLine": "\"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe\" \"E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\project with spaces.uproject\" \"-run=HomesteadAuthoringProbe\" \"-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\" \"-notraceserver\" \"-traceautostart=0\" \"-unattended\" \"-nop4\" \"-nosplash\" \"-stdout\" \"-FullStdOutLogOutput\" \"-DisablePython\" \"-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging\" \"-noshaderworker\" \"-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\EngineUser\" \"-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\editor.log\" \"-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False\" \"-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False\" \"-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True\" \"-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False\" \"-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0\" \"-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False\" \"-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False\" \"-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Engine.ini\" \"-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Editor.ini\" \"-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\EditorSettings.ini\" \"-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\EditorPerProjectUserSettings.ini\" \"-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\GameUserSettings.ini\" \"-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Game.ini\" \"-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Input.ini\" \"-FernMode=Cook\" \"-nullrhi\" \"-RunAsCookCommandlet\" \"-TargetPlatform=Windows\" \"-CookProcessCount=1\"",
+        "windowsParsedArguments": [
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260920-182217-d1f84e39\\leaf-guard-02\\AuthoringGuardSubject.exe",
+          "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\project with spaces.uproject",
+          "-run=HomesteadAuthoringProbe",
+          "-EvidenceDirectory=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure",
+          "-notraceserver",
+          "-traceautostart=0",
+          "-unattended",
+          "-nop4",
+          "-nosplash",
+          "-stdout",
+          "-FullStdOutLogOutput",
+          "-DisablePython",
+          "-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging",
+          "-noshaderworker",
+          "-UserDir=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\EngineUser",
+          "-abslog=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\editor.log",
+          "-DDC=(Local=(Type=FileSystem,Path=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\retained cache,ReadOnly=false,Clean=false,Flush=false,DeleteUnused=false))",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnabledByDefault=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/UdpMessaging.UdpMessagingSettings]:EnableTunnel=False",
+          "-ini:Engine:[/Script/TcpMessaging.TcpMessagingSettings]:EnableTransport=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRemoteExecution=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bRunPipInstallOnStartup=False",
+          "-ini:Engine:[/Script/PythonScriptPlugin.PythonScriptPluginSettings]:bIsolateInterpreterEnvironment=True",
+          "-ini:Engine:[DevOptions.Shaders]:bAllowCompilingThroughWorkers=False",
+          "-ini:Engine:[ConsoleVariables]:r.Shaders.AllowCompilingThroughWorkers=0",
+          "-ini:EditorSettings:[/Script/UnrealEd.CrashReportsPrivacySettings]:bSendUnattendedBugReports=False",
+          "-ini:EditorSettings:[/Script/UnrealEd.AnalyticsPrivacySettings]:bSendUsageData=False",
+          "-EngineINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Engine.ini",
+          "-EditorINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Editor.ini",
+          "-EditorSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\EditorSettings.ini",
+          "-EditorPerProjectUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\EditorPerProjectUserSettings.ini",
+          "-GameUserSettingsINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\GameUserSettings.ini",
+          "-GameINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Game.ini",
+          "-InputINI=E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\Config\\Input.ini",
+          "-FernMode=Cook",
+          "-nullrhi",
+          "-RunAsCookCommandlet",
+          "-TargetPlatform=Windows",
+          "-CookProcessCount=1"
+        ],
+        "resumed": false,
+        "deadlineProfile": "CookCompletionDriven",
+        "softMilliseconds": 0,
+        "hardMilliseconds": 0,
+        "doubleArmRejected": true
+      },
+      "outcome": {
+        "exitCode": 91,
+        "outcome": "failed-controller",
+        "cleanup": "kill-on-job-close, not graceful"
+      },
+      "observerMarkerBefore": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 757048,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444913490505,
+        "LastWriteTime": 134344444913490505,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "observerMarkerAfter": {
+        "Path": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-guard-01\\controller-failure\\marker",
+        "Volume": 3222469187,
+        "IndexHigh": 131072,
+        "IndexLow": 757048,
+        "Attributes": 32,
+        "Size": 0,
+        "CreationTime": 134344444913490505,
+        "LastWriteTime": 134344444913490505,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "SecuritySha256": "37AFDB9B4C9D9A4D3BCA7CED2EE46080F968B0E74FF8F5180F6270F4BC91CF2D"
+      },
+      "writeRenameDeletePositiveControls": true,
+      "compatibleRead": true,
+      "releaseVerified": true,
+      "limitation": "Sampled checks are not continuous tracing. Delete/rename negative checks test required DELETE access without mutating after racing death; actual rename/delete positive controls run before lifetime, write/rename after release. Inherited handle identity and job-close semantics provide lifetime protection."
+    }
+  ],
+  "rejections": [
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "zero-soft"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "invalid-order"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "legacy-over110"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "wrong-import-pair"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "wrong-render-pair"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "over-absolute-maximum"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "wrong-long-soft"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "wrong-long-hard"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "long-pair-legacy-profile"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "long-profile-short-pair"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "completion-soft-limit"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "completion-hard-limit"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "cook-completion-soft-limit"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "cook-completion-hard-limit"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "legacy-no-timer"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "unknown-profile"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "startup-boundary"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "late-entry"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "capture-boundary"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "future-entry"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "negative-time"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "long-startup-Settings"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "completion-driven-Settings"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "long-startup-Import"
+    },
+    {
+      "noProcessConstructed": true,
+      "rejected": true,
+      "case": "completion-driven-Import"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "wrong-hash",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Executable hash differs.\"\r\n ---> System.InvalidOperationException: Executable hash differs.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "nonempty-marker",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Marker must be an existing empty ordinary file.\"\r\n ---> System.InvalidOperationException: Marker must be an existing empty ordinary file.\r\n   at Homestead.Authoring.LeafGuard.Snapshot(IntPtr handle, String path)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "existing-writer",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"acquire existing read-only marker guard\"\r\n ---> System.ComponentModel.Win32Exception (32): acquire existing read-only marker guard\r\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "occupied-stdout",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"isolated standard handles\"\r\n ---> System.ComponentModel.Win32Exception (80): isolated standard handles\r\n   at Homestead.Authoring.LeafGuard.Check(Boolean okay, String operation)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "nul-argument",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Invalid process argument.\"\r\n ---> System.ArgumentException: Invalid process argument.\r\n   at Homestead.Authoring.LeafGuard.Quote(String value)\r\n   at System.Linq.Enumerable.SelectArrayIterator`2.MoveNext()\r\n   at System.String.Join(String separator, IEnumerable`1 values)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "invalid-environment",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"8\" argument(s): \"Invalid environment override.\"\r\n ---> System.InvalidOperationException: Invalid environment override.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    },
+    {
+      "rejected": true,
+      "guardReleased": true,
+      "case": "conflicting-arguments",
+      "error": "System.Management.Automation.MethodInvocationException: Exception calling \".ctor\" with \"9\" argument(s): \"Exact argument line cannot be combined with arguments or contain NUL.\"\r\n ---> System.InvalidOperationException: Exact argument line cannot be combined with arguments or contain NUL.\r\n   at Homestead.Authoring.LeafGuard..ctor(String executable, String expectedSha256, String[] arguments, String directory, String markerPath, String stdoutPath, IDictionary`2 overrides, String exactArgumentLine, Boolean detachedConsole)\r\n   at CallSite.Target(Closure, CallSite, Type, Object, Object, Object, Object, Object, Object, Object, String, Boolean)\r\n   --- End of inner exception stack trace ---\r\n   at System.Management.Automation.ExceptionHandlingOps.CheckActionPreference(FunctionContext funcContext, Exception exception)\r\n   at System.Management.Automation.Interpreter.ActionCallInstruction`2.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)\r\n   at System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(InterpretedFrame frame)"
+    }
+  ],
+  "guardSha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D",
+  "subjectSha256": "64C17468C34F18E7CB9EACA8B399E1E6B7B1C7777A7C11E0FFAA722C31BCCFA0",
+  "unrealExecuted": false,
+  "realMarkerAccessed": false
+}

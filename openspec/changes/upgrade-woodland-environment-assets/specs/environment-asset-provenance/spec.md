@@ -76,12 +76,16 @@ Technical checks SHALL NOT be labeled Jenny's aesthetic approval.
 
 ### Requirement: Candidate promotion is explicit and reversible
 
-The upgrade SHALL be packaged and reviewed in an isolated candidate without
-overwriting the accepted playable build, preview selection, personal saves or
-previous assets. Promotion SHALL require coordinator review of the candidate's
-own receipts and evidence; rejection SHALL retain the prior accepted selection.
+The upgrade SHALL be packaged to a fresh candidate with its own basic build,
+gameplay and visual evidence, keeping cheap rollback to the prior build. The
+latest basically verified usable slice MAY become the normal preview under
+the user's standing delivery authorization. Old test saves MAY be reset when
+necessary, with that reset reported; unrelated data SHALL NOT be deleted.
+Incomplete palette/performance work and modest known defects SHALL be disclosed,
+not represented as full acceptance or made universal blockers to first delivery.
 
 #### Scenario: Visual regression despite functional success
 - **WHEN** gameplay tests pass but the new foliage looks worse or obscures play
-- **THEN** the candidate is rejected or left unpromoted, and the previously
-  accepted playable environment and save profile remain available
+- **THEN** blocking readability regressions are corrected before promotion,
+  or the prior playable candidate remains selected; test-save preservation
+  does not supersede current user instructions

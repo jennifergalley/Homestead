@@ -18,9 +18,18 @@ includes this credit. Include this document in any distributed build.
 | --- | --- | --- | --- |
 | Brown Mud Leaves 01 | Rob Tuytel | https://polyhaven.com/a/brown_mud_leaves_01 | CC0 |
 | Rock Moss Set 02 | Kless Gyzen | https://polyhaven.com/a/rock_moss_set_02 | CC0 |
+| Fern 02 | Rob Tuytel (scanning), Rico Cilliers (modeling) | https://polyhaven.com/a/fern_02 | CC0 |
 | Forest Ambience | TinyWorlds | https://opengameart.org/content/forest-ambience | CC0 |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
+
+The Fern 02 clearing candidate uses four separately imported meshes and the
+publisher's 1K diffuse, DirectX normal, roughness, ambient-occlusion and alpha
+maps. Source-axis/unit conversion was baked once; the project-authored masked,
+two-sided material connects those maps. Exact source files, licenses and hashes
+are recorded in `Assets\Environment\woodland-preparation-01`; import and preview
+evidence is in `docs\research\environment-assets`. This does not imply that the
+other acquired woodland assets are included in the playable candidate.
 
 ## Character prototype
 

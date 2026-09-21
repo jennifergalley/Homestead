@@ -1,0 +1,18 @@
+{
+  "supersession": {
+    "secondResultSha256": "A671447286868FC3857FD39EC756DF6AB48F591A48CD45E227AC4F0B649F06F7",
+    "resultSha256": "F0AE7B69A68A2DA0A2261984F52B2321FFEF6569F7B4044F206ED34768D64DF7",
+    "secondReservationSha256": "D90A8DBF29952F7BDBF0322C85A20127EF54023F80285ABDE2B8490E459C9E8A",
+    "approval": "Coordinator explicit corrected settings-only third reservation, 2026-09-20 17:57 Arizona; Python execution disabled, dependency modules permitted; no retroactive pass",
+    "reservationSha256": "733810D16F65E4DCC00E83BF210E9E307CFD99DA64579DC12299672AE419402A",
+    "currentApproval": "Until-complete playable-first continuation; coordinator explicitly authorized genuine targeted direct cook/build/Pak through existing controls. First fresh clearing cook only: standard CookCommandlet, no Python/bootstrap/reimport or new helpers. Prior renderer results remain internal diagnostics, not gameplay screenshots."
+  },
+  "supervisorReceiptSha256": "3D3AE4025B12DBEDEEA2BB186EFFB7D178EFC7F56E2AEBA03D437C2224020E21",
+  "approval": "Explicit21:19 until-complete continuation; preserve bounded capture-timeout; no synthetic deadline; manual stop and genuine failures remain.",
+  "priorFernResultSha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+  "mode": "Cook",
+  "utc": "2026-09-21T06:20:28.2225095+00:00",
+  "output": "E:\\Repos\\SurvivalGame\\Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-01",
+  "priorFernReservationSha256": "3D799DBE1E344B703B468A7D5016E082C3271700A6C2E50D073EDD3BBC1508C2",
+  "runId": "20260921-033354-2d257ba0"
+}

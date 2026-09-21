@@ -42,6 +42,30 @@ To observe a separate standalone candidate, pass `-Packaged -PackageDirectory
 existing telemetry is rejected rather than overwritten. The script verifies
 process exit and every frame's requested dimensions, not just file presence.
 
+Shipping candidates require explicit `-ShippingQA` and an explicit, wholly
+fresh `-OutputDirectory`. They use the actual Shipping executable, not a
+Development fallback. Normal human launch remains QA-off. The native gate
+requires exactly one test route, isolated graphics/UserDir and a fresh
+`SmokeSave` sandbox before spawning test actors; invalid admission exits with
+failure rather than starting a normal game. Injected weeding fixtures are not
+admitted by this first Shipping gate.
+
+The short Shipping route reuses `AuthoringLeafGuard` through
+`Invoke-ShippingQA.ps1`: suspended root-only detached startup, existing empty
+privacy-marker read sharing/inherited lifetime, zero allowed TCP/UDP endpoints,
+100-second cooperative stop marker, 110-second owned-job fallback, and bounded
+cleanup. These are test-case limits, not the autonomous run's duration.
+An incomplete/cancelled route is failure. No console/debug/trace feature is
+enabled. `qa-guard-result.json` records actual exit, finite sampling gaps and
+unchanged marker release after observed death. It is not a sandbox or proof of
+continuous network history. These controls need the live development run and
+no competing authoring process; they do not affect an existing player window.
+Ordinary captures now also record actual RHI/viewport/default-resolution policy
+in `presentation-settings.txt`, without forcing screen percentage.
+
+The first integrated Shipping route is documented in
+`research\environment-assets\clearing-playable.md`.
+
 ## Evidence and limits
 
 - `Frames`: actual screenshots sampled at approximately 8 Hz.

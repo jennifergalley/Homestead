@@ -1,0 +1,131 @@
+{
+  "status": "passed-existing-cook-guard-and-policy-fixtures",
+  "createdUtc": "2026-09-21T06:16:01.6979558+00:00",
+  "runId": "20260921-033354-2d257ba0",
+  "nativeBuildReceiptSha256": "9F4AABA308212A7CAD6B5F69D150226D328000D8402B6AC8E994EC2E49FB81AA",
+  "supervisorSources": [
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Scripts\\FernSpikePolicy.ps1",
+      "sha256": "DAD58AD71F2463C58E47C3DA4C051E380D22F4DA7B71E001F3C2952173E27E5C"
+    },
+    {
+      "path": "Scripts\\AuthoringProbePolicy.ps1",
+      "sha256": "E2CC096F78EBD99493BC071DC3DD05A42B8986C77783F3674F1E8508B974B3F0"
+    },
+    {
+      "path": "Scripts\\Development-Run.ps1",
+      "sha256": "F27C833C5CA67705FEF8693876243421E6B3538EAA1401CB6F19F0CAD7547755"
+    },
+    {
+      "path": "Scripts\\Hold-DevelopmentAwake.ps1",
+      "sha256": "416169040462F0818AE420489FF7F51196EEEFE593B0F499138296130DBDEBC5"
+    },
+    {
+      "path": "Tests\\Test-AuthoringLeafGuard.ps1",
+      "sha256": "1217F4211FFE5A18791689CE3C457D4E6FFE9FB0F387293CFBD6C4E54E4D3D91"
+    },
+    {
+      "path": "Tests\\DevelopmentRunTests.ps1",
+      "sha256": "B564801275D0B11FA6D583BAE0ABD7F0511CF1F58189842FBA879BD6B4A4DF3F"
+    },
+    {
+      "path": "Tests\\Test-FernSpikePolicy.ps1",
+      "sha256": "32BAB663D6B1C8A39EF073A0BC3A6904254F858C533D26E0481EAD8DA3AA65F6"
+    }
+  ],
+  "originalAttemptFiles": [
+    {
+      "bytes": 47190,
+      "sha256": "6D6F56576EE6ECCABF0918B99D6168E7C410213387ED11EADE11FB00A49D3910",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\probe-result.json"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stdout.log"
+    },
+    {
+      "bytes": 9,
+      "sha256": "8B47045EB7B8CA42AA967F33EE1D014BA89F8D1AC207426B482D34B5C0D90935",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\stop-probe.txt"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Editor.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorPerProjectUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\EditorSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Engine.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Game.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\GameUserSettings.ini"
+    },
+    {
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "path": "Saved\\Automation\\20260920-182217-d1f84e39\\fern-import-01\\Config\\Input.ini"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "completion-guard-01",
+      "sha256": "ECC0834CEEF3BD2CC71353F68BEAE0448801E9F525D84B187529EF80D5C3E4B1",
+      "passed": true
+    },
+    {
+      "name": "completion-legacy-01",
+      "sha256": "3BB1A4DC7880D0D47A94FEBD24BF7161BAD80F26EB7937C351883C38455EEF42",
+      "passed": true
+    },
+    {
+      "name": "completion-legacy-render-01",
+      "sha256": "71E8AC75A79C8374ADAAED389D28CEC38688D1AD3A7BEC4A1A9758362D3797A1",
+      "passed": true
+    },
+    {
+      "name": "completion-legacy-import-01",
+      "sha256": "5A5C52298081B13A20DE74A728DBD7699F07CB09B00B4AD21DC6F039CEB02337",
+      "passed": true
+    },
+    {
+      "name": "completion-policy-01",
+      "sha256": "A6CEC45D254050EEA614B1A93C1D7744F81EA4B599F50085426FD5433736B263",
+      "passed": true
+    }
+  ],
+  "runControlTestOutputSha256": "856AEC518C9AE5FB589D3FABE931478A586DC8F4E59D89D9F282171C0F2FCC9D",
+  "profile": {
+    "softMs": 0,
+    "hardMs": 0,
+    "timerCreated": false,
+    "name": "CookCompletionDriven"
+  },
+  "qualification": "Existing guard exercised with exact production Cook token array/profile in normal/pause/hard-cancel/controller-failure dummy cases.32 policy negatives pass. Cook uses standard commandlet with RunAsCookCommandlet, Windows target, CookProcessCount1 and fresh file-based OutputDir; Python/worker/job/marker/DDC/endpoint controls preserved. Cook is synchronous; immediate cooperative cancellation is not promised, failed partial outputs retained. No new helpers/network or bootstrap. Actual ValidateOnly/cook pending.",
+  "priorReceiptSha256": "CBE90D873DA1931399402080F190F306177B2B814711673C9AEAB652CB0A12D8",
+  "readinessPolicySha256": "C3EB661F4784BC7E23268FE99FA79353AE52618B4240F4196D164A6AB4A278D6",
+  "entrypointProofSha256": "2C963A8A60FEE62BCC6ACA0E3C5EA8D1BE4B3CFE3794DA7B430C85A7C44E337C",
+  "cookGuardResultSha256": "455115384C2F964EAE49F5C034CD69D6DAC1195490B8585D77F30FF1BEC7479B"
+}

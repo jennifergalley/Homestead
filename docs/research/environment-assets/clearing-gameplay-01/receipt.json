@@ -1,0 +1,122 @@
+{
+  "scope": "First basically usable integrated fern increment, not full environment or appearance acceptance",
+  "runId": "20260921-033354-2d257ba0",
+  "candidate": "Build\\Releases\\20260921-033354-2d257ba0\\clearing-02",
+  "executableSha256": "A61B7E85F3FC579C8555762A1971FDFB801A9BF7008A464BE246FEA0C108025A",
+  "cook": {
+    "subjectExited": true,
+    "status": "passed",
+    "exitCode": 0,
+    "hardTerminated": false,
+    "guardDisposed": true,
+    "cleanupErrors": []
+  },
+  "stage": {
+    "cookedFileCount": 1239,
+    "status": "passed",
+    "exitedJob": {
+      "Flags": 8200,
+      "ProcessLimit": 1,
+      "ActiveProcesses": 0,
+      "TotalProcesses": 1,
+      "TerminatedForLimits": 0,
+      "HeldProcessIsMember": true
+    },
+    "exitCode": 0
+  },
+  "capture": {
+    "maximumSampleGapMs": 912.6516,
+    "frames": 302,
+    "rhi": "D3D12",
+    "endpointSamples": 185,
+    "sampledSeconds": 43.2728,
+    "observedEndpoints": 0,
+    "nativeViewport": "1280x720",
+    "teleportTravel": false,
+    "supervisedSeconds": 57.3310756
+  },
+  "evidence": [
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-02\\probe-result.json",
+      "bytes": 2478799,
+      "sha256": "42186AEDD5099F4497CB986CF440D38D9DA8F7C56AED5467B45DCB81ACF77739"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-02\\cook-result.json",
+      "bytes": 615,
+      "sha256": "1D421CEDE2066034D1D9F380DE4979DC4C91373D1D302B8415B104624522110D"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-cook-02\\native-exit.json",
+      "bytes": 654,
+      "sha256": "5221031BB31FABDAD3B651994B57AB367F613558C8ECD493D7CF01DCFF62EB8A"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-shipping-build-03\\compile0-stop\\result.json",
+      "bytes": 1598218,
+      "sha256": "49F1582A51C2F9962BD9C46EE3576B8A18C4A88232C5D908F3989FFE8178C80E"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-shipping-build-03\\link1\\result.json",
+      "bytes": 939685,
+      "sha256": "5218FF24E7559623615639279D4A087A9F4A084AF78C8B7DF7185D8512B6D44B"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-shipping-build-03\\manifest-02\\result.json",
+      "bytes": 28801,
+      "sha256": "C0A09A930FFD8A2CAFE5CB0415854E5633E7060C8625F80CC97D9567C72B8467"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-shipping-build-03\\metadata\\result.json",
+      "bytes": 602,
+      "sha256": "546B24B1E8B54603D5354A650C270C140CBF1198AC03EE65148F594F90C2F2A1"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-stage-01\\result.json",
+      "bytes": 525497,
+      "sha256": "BD489A60AA4ED6BFD661BFE36180199D1FE27083642FCDCAAC32074FB2DD97A8"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-stage-02\\result.json",
+      "bytes": 206599,
+      "sha256": "6A50C94FF59C64A24E8F254B11333F02F997A29D8A3DDA628E834FE599DB3398"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-stage-02\\stage-inputs.json",
+      "bytes": 365404,
+      "sha256": "029C0D6CC8B6732E9C2872187EADB6AF27508914C9A8FE9EF7CC49B6D4685376"
+    },
+    {
+      "path": "Saved\\Automation\\20260921-033354-2d257ba0\\clearing-stage-02\\Logs\\Log.txt",
+      "bytes": 926384,
+      "sha256": "BA0BA1D98B0E84D47943429E31A189649D87C836D5B8E06E69D849AA4C8A9DA3"
+    },
+    {
+      "path": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\clearing-01\\qa-guard-result.json",
+      "bytes": 234270,
+      "sha256": "88A8F05E3208C113A2AE76A295FCE098E20648EEB6C395AD0AF2E6D14DB7915C"
+    },
+    {
+      "path": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\clearing-01\\telemetry.csv",
+      "bytes": 113139,
+      "sha256": "D4FFC7A9ACC363C8ADA4ECB35EACD96023789CC2F0786EC391318C996ACA6D93"
+    },
+    {
+      "path": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\clearing-01\\Frames\\frame-00025.png",
+      "bytes": 1828112,
+      "sha256": "A32663D40B8DFEDD44C46E87D24DFE5764BCE8D54F8F4AD5071928E9DEF53682"
+    },
+    {
+      "path": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\clearing-01\\Frames\\frame-00285.png",
+      "bytes": 1840900,
+      "sha256": "F0B02C27B6B8B5FC31EA564BB6A4DE2F56AF7DE53BBD309F9BA7A6AF8C85A1FB"
+    }
+  ],
+  "pending": [
+    "Full woodland palette/art",
+    "In-game revised waves hair",
+    "UI integration",
+    "4K/performance/physical-controller quality",
+    "Full historical smoke suites"
+  ]
+}

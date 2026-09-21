@@ -3,7 +3,7 @@ param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [ValidateRange(720,2160)][int]$Height=720,
     [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [switch]$PresentationDiagnostics,
     [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
-    [string]$OutputDirectory)
+    [string]$OutputDirectory, [switch]$ShippingQA)
 $ErrorActionPreference='Stop'
 if($PresentationDiagnostics -and ($Watering -or $Weeding -or $Clearing)) { throw 'Presentation diagnostics require a separate motion route.' }
 if($Watering -and $Weeding) { throw 'Choose one ordinary action route.' }
@@ -13,6 +13,9 @@ $root=Split-Path $PSScriptRoot -Parent
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $output=Join-Path $root ('Saved\VisualPlaytests\' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 if($OutputDirectory) { $output=[IO.Path]::GetFullPath($OutputDirectory, $root) }
+if($ShippingQA -and (-not $Packaged -or -not $OutputDirectory -or $Weeding -or (Test-Path -LiteralPath $output))) {
+    throw 'Shipping QA requires a packaged route and explicit fresh output; injected weeding fixtures are not admitted.'
+}
 if(Test-Path -LiteralPath (Join-Path $output 'telemetry.csv')) {
     throw "Use a fresh output directory; a previous visual playtest exists at $output."
 }
@@ -20,8 +23,10 @@ $null=New-Item -ItemType Directory -Path $output -Force
 if($Weeding) { & (Join-Path $PSScriptRoot 'Initialize-TestWorldFixture.ps1') -SourceSave $FixtureSave -OutputDirectory $output }
 $project=Join-Path $root 'SurvivalGame.uproject'
 if($Packaged) {
-    $packageRoot=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-    $executable=Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+    $package=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+    $packageRoot=$package.packageDirectory
+    $executable=$package.executable
+    if(($package.configuration -eq 'Shipping') -ne [bool]$ShippingQA){throw 'Shipping automated capture requires explicit -ShippingQA; it is not a Development override.'}
     $prefix=''
     $workingDirectory=$packageRoot
 } else {
@@ -33,6 +38,12 @@ if($Packaged) {
 if(-not (Test-Path -LiteralPath $executable)) { throw "Missing game executable: $executable" }
 $log=Join-Path $output 'engine.log'
 $arguments=$prefix+"-HomesteadVisualPlaytest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$log`""
+if($ShippingQA) {
+    $graphics=Join-Path $output 'Graphics\GameUserSettings.ini'
+    $null=New-Item -ItemType Directory -Path (Split-Path $graphics -Parent)
+    Copy-Item (Join-Path $root 'Config\DefaultGameUserSettings.ini') $graphics
+    $arguments+=" -HomesteadShippingQA -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`""
+}
 if($Watering) { $arguments += ' -HomesteadWateringPlaytest' }
 if($Weeding) { $arguments += ' -HomesteadWeedingPlaytest' }
 if($Clearing) { $arguments += ' -HomesteadClearingPlaytest' }
@@ -47,16 +58,24 @@ if($PresentationDiagnostics) {
         pipeline='Offscreen game framebuffer only; no desktop capture, physical scanout or DXGI Present tracing.'
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'diagnostic-launch.json')
 }
-$process=Start-Process -FilePath $executable -WorkingDirectory $workingDirectory -ArgumentList $arguments -PassThru
-Write-Host "Isolated visual playtest PID=$($process.Id); output=$output"
-if(-not $process.WaitForExit(600000)) {
-    Stop-Process -Id $process.Id
-    throw 'Visual playtest timed out; only its own process was stopped.'
+if($ShippingQA) {
+    $process=& (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments
+} else {
+    $process=Start-Process -FilePath $executable -WorkingDirectory $workingDirectory -ArgumentList $arguments -PassThru
+    Write-Host "Isolated visual playtest PID=$($process.Id); output=$output"
+    if(-not $process.WaitForExit(600000)) {
+        Stop-Process -Id $process.Id
+        throw 'Visual playtest timed out; only its own process was stopped.'
+    }
 }
 $telemetry=Join-Path $output 'telemetry.csv'
 $observations=Join-Path $output 'observations.txt'
 if($process.ExitCode -ne 0 -or -not (Test-Path $telemetry) -or -not (Test-Path $observations)) {
+    if($ShippingQA -and $process.ExitCode -eq 2){throw 'Shipping QA admission rejected: explicit single route and fresh isolated output/graphics/user/save directories are required.'}
     throw "Playtest did not finish its capture. See $log."
+}
+if($ShippingQA -and (Get-Content (Join-Path $output 'qa-admission.txt') -Raw) -notmatch 'shipping=1\r?\ntrace_compiled=0\r?\nroute=visual') {
+    throw 'Actual Shipping QA/trace-disabled admission evidence is missing.'
 }
 $outcome=Get-Content -LiteralPath $observations -Raw
 $required=if($PresentationDiagnostics) {

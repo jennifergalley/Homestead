@@ -1,0 +1,85 @@
+{
+  "status": "passed-clearing-game-and-cook-wrapper-build",
+  "createdUtc": "2026-09-21T06:38:31.9196065+00:00",
+  "products": [
+    {
+      "sha256": "F7A79E2EBAF70DE321275F45FD8A4542DC8486D5B18776B53C0FE93AA9091B23",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.dll",
+      "bytes": 2103296
+    },
+    {
+      "sha256": "5324E83A5481C4D677B019FAD8A8C34537BC489ADABD9832091B2512333354D0",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGame.pdb",
+      "bytes": 90992640
+    },
+    {
+      "sha256": "31F449F1C313A9E5093C589BA2CF9548772B14F68F8CF0F39085090A7540992C",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.dll",
+      "bytes": 256000
+    },
+    {
+      "sha256": "4908155FD5834A2F0CDC635655543C5F17AB5333195ECA973201B29C12DEF665",
+      "path": "Binaries\\Win64\\UnrealEditor-SurvivalGameEditor.pdb",
+      "bytes": 25350144
+    },
+    {
+      "sha256": "DCB6A669262FBC473587F5C1B731F57AB7B1FCB7B088CCDAE827DFC6EE07425A",
+      "path": "Binaries\\Win64\\UnrealEditor.modules",
+      "bytes": 166
+    },
+    {
+      "sha256": "8A39936362B32F26E506BE8FDAD9D0681C5902BB2A7B79C1ADF1C4A2661CF2C1",
+      "path": "Binaries\\Win64\\SurvivalGameEditor.target",
+      "bytes": 945032
+    }
+  ],
+  "sources": [
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.cpp",
+      "sha256": "8432B73141A30E1CD40DB4C023125A2686DCF5F45B9D02A8F6FB779677800282"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\FernSpike.h",
+      "sha256": "51B5AD34A7D790489690FCA7E596D6AF8CD7844FE9269417E5C1D76835FD3993"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\HomesteadAuthoringProbeCommandlet.cpp",
+      "sha256": "F1E7469A93FB7A9C97D0D1BB7101C518A23AE39E297476018E3895FDC662464A"
+    },
+    {
+      "path": "Source\\SurvivalGameEditor\\SurvivalGameEditor.Build.cs",
+      "sha256": "FA84CF8ACC7CD6D84766D8BF29E3979FF78489F0E2700944A289DE2C7A7B2BE5"
+    },
+    {
+      "path": "Scripts\\AuthoringLeafGuard.cs",
+      "sha256": "3F9DDA313A273004B247635B01DE0FA341C1683DBC7464BAFF704862A950423D"
+    },
+    {
+      "path": "Source\\SurvivalGame\\HomesteadWorld.cpp",
+      "sha256": "C47779AF1640BCC4409FFDAFE064075ED358CA76461681679AA5260738F8F1EE"
+    },
+    {
+      "path": "Config\\DefaultGame.ini",
+      "sha256": "0F7CFE87BC9203DA57565442422CB6D605463894BF132F485C4C0769461F6CC0"
+    }
+  ],
+  "steps": [
+    {
+      "step": "probe-compile1",
+      "resultSha256": "07060507C3D938EA886BAD48AFA51D44C6455C2258E445B5E51EF9AE4AC9A5D1",
+      "status": "passed"
+    },
+    {
+      "step": "probe-link2",
+      "resultSha256": "47B4048F71F2AED46C65F0C82E3AC2C0ADAB0BF74699B991922663B9CA0E61DB",
+      "status": "passed"
+    },
+    {
+      "step": "metadata",
+      "resultSha256": "6120846A575802FAD3422059D566F6D049C3541969907E92995DB657E40CAB38",
+      "status": "passed"
+    }
+  ],
+  "priorReceiptSha256": "9F4AABA308212A7CAD6B5F69D150226D328000D8402B6AC8E994EC2E49FB81AA",
+  "qualification": "Targeted existing compile1/link2/metadata passed. Only native change: actual inner Cook Main arguments contain/assert/export SkipZenStore, supported by installed CookCommandlet.cpp425-427. Game products unchanged from clearing-build-01. All prior build/monitoring/failure qualifications retained; this is not a cook pass."
+}
