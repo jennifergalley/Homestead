@@ -1,0 +1,20 @@
+{
+  "M_Heroine_Hair_long01_Neutral": {
+    "base_color": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "roughness": 0.7,
+    "metallic": 0,
+    "specular": 0.5,
+    "two_sided": true,
+    "alpha_mask": true,
+    "texture": "Textures\\T_LongWave_Neutral.png",
+    "sha256": "df985d44b9b708e32c478b86f0717c775c15825971d1fb2980f600dc3a0d3a55",
+    "sRGB": true,
+    "runtime_tint": "HomesteadLook::NeutralHairTint",
+    "note": "Never assign neutral tint to legacy eyebrows or ponytail."
+  }
+}
