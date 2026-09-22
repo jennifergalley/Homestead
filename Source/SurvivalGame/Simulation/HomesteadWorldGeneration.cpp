@@ -102,6 +102,49 @@ std::uint64_t EntityHash(WorldDescriptor world, ChunkCoord chunk, EntityKind kin
         UINT64_C(0xd1b54a32d192ed03) ^ LocalId(kind, slot));
 }
 
+std::int64_t Clamp(std::int64_t value, std::int64_t low, std::int64_t high)
+{
+    return value < low ? low : (value > high ? high : value);
+}
+
+bool TreeCandidate(WorldDescriptor world, ChunkCoord chunk, int slot,
+    std::int64_t& xCm, std::int64_t& yCm)
+{
+    const auto hash = EntityHash(world, chunk, EntityKind::ForestTree, slot);
+    const auto originX = static_cast<std::int64_t>(chunk.x) * ChunkSizeCm;
+    const auto originY = static_cast<std::int64_t>(chunk.y) * ChunkSizeCm;
+    const int column = slot % 6;
+    const int row = slot / 6;
+    const int clusterX = column / 3;
+    const int clusterY = row / 3;
+    const auto cluster = Hash(world, chunk.x * 2LL + clusterX, chunk.y * 2LL + clusterY, 303);
+    const auto centerX = originX + clusterX * 1200 + 350 + static_cast<std::int64_t>(cluster % 501);
+    const auto centerY = originY + clusterY * 1200 + 350 +
+        static_cast<std::int64_t>((cluster >> 16) % 501);
+    const auto cellX = originX + column * 400;
+    const auto cellY = originY + row * 400;
+    xCm = cellX + 50 + static_cast<std::int64_t>(hash % 301);
+    yCm = cellY + 50 + static_cast<std::int64_t>((hash >> 16) % 301);
+    xCm = Clamp(xCm + Clamp((centerX - xCm) / 3, -100, 100), cellX + 50, cellX + 350);
+    yCm = Clamp(yCm + Clamp((centerY - yCm) / 3, -100, 100), cellY + 50, cellY + 350);
+
+    const auto woodland = Woodland(world, xCm, yCm);
+    if ((Mix(hash ^ 301) & 65535U) >= 62000U + woodland / 20U) return false;
+    if (std::abs(static_cast<double>(xCm) - StreamCenterCm(static_cast<double>(yCm))) < 250.0)
+        return false;
+
+    const auto opening = Hash(world, chunk.x, chunk.y, 304);
+    if (opening % 4 == 0)
+    {
+        const auto openingX = originX + 400 + static_cast<std::int64_t>((opening >> 8) % 1601);
+        const auto openingY = originY + 400 + static_cast<std::int64_t>((opening >> 32) % 1601);
+        const auto dx = xCm - openingX;
+        const auto dy = yCm - openingY;
+        if (dx * dx + dy * dy < 280 * 280) return false;
+    }
+    return true;
+}
+
 Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int slot,
     GeneratedEntity& output)
 {
@@ -113,12 +156,7 @@ Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int s
     entity.kind = kind;
     if (kind == EntityKind::ForestTree)
     {
-        entity.xCm = originX + (slot % 6) * 400 + 80 + static_cast<std::int64_t>(hash % 241);
-        entity.yCm = originY + (slot / 6) * 400 + 80 + static_cast<std::int64_t>((hash >> 16) % 241);
-        const auto woodland = Woodland(world, entity.xCm, entity.yCm);
-        if ((Mix(hash ^ 301) & 65535U) >= 59000U + woodland / 12U ||
-            std::abs(static_cast<double>(entity.xCm) -
-                StreamCenterCm(static_cast<double>(entity.yCm))) < 250.0)
+        if (!TreeCandidate(world, chunk, slot, entity.xCm, entity.yCm))
             return Status::NotFound;
     }
     else if (kind == EntityKind::Reeds)
