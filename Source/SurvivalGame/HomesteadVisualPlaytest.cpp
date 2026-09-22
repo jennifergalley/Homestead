@@ -113,10 +113,41 @@ void AHomesteadVisualPlaytest::RecordPresentationSettings(const TCHAR* Phase)
 void AHomesteadVisualPlaytest::Prepare()
 {
     OutputDirectory = HomesteadTestOutputDirectory();
-    if (const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
+    if (auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
     {
         AddTickPrerequisiteComponent(Avatar->GetWateringTool());
         AddTickPrerequisiteComponent(Avatar->GetHatchet());
+        int32 Body = -1, Hair = -1, Color = -1;
+        const bool HasBody = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualBodyPreset="), Body);
+        const bool HasHair = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualHairStyle="), Hair);
+        const bool HasColor = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualHairColor="), Color);
+        if (HasBody || HasHair || HasColor)
+        {
+            if (!(HasBody && HasHair && HasColor) || Body < 0 || Body >= 3
+                || Hair < 0 || Hair >= 3 || Color < 0 || Color >= HomesteadLook::HairColorCount)
+            {
+                Observations.Add(TEXT("FAILED invalid complete hair-review appearance."));
+                Finish();
+                return;
+            }
+            FHomesteadAppearance Look = PC->Appearance;
+            Look.BodyPreset = Body;
+            Look.HairStyle = Hair;
+            Look.HairColor = Color;
+            FString Error;
+            if (!Avatar->PrepareEquipment(PC->State(), Look, Error) || !Avatar->ApplyPreparedEquipment(Error))
+            {
+                Observations.Add(TEXT("FAILED hair-review production presentation: ") + Error);
+                Finish();
+                return;
+            }
+            PC->Appearance = Look;
+            const auto* Presentation = Avatar->GetEquipmentPresentation();
+            Observations.Add(FString::Printf(TEXT("Hair review body=%d style=%d color=%d base=%s garments=%d"),
+                Body, Hair, Color, Presentation && Presentation->Base.Mesh
+                    ? *Presentation->Base.Mesh->GetPathName() : TEXT("missing"),
+                Presentation ? Presentation->Garments.Num() : -1));
+        }
     }
     IFileManager::Get().MakeDirectory(*FPaths::Combine(OutputDirectory, TEXT("Frames")), true);
     bForageRenewal = FParse::Param(FCommandLine::Get(), TEXT("HomesteadForageRenewal"));

@@ -610,7 +610,7 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
         [this]() { Screenshot(TEXT("native-wardrobe-dyed")); },
         [this]() { return VerifyNativeMenuPresentation(); }, 0.8f);
 
-    for (int32 Id : {0, 1, 2, 3, 6})
+    for (int32 Id : {0, 1, 1, 1, 1, 2, 3, 6})
     {
         Add(FString::Printf(TEXT("Change real Appearance control %d before persistence"), Id),
             [this, Id, ExpectedLook, Expected]()

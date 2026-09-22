@@ -3,7 +3,9 @@ param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [ValidateRange(720,2160)][int]$Height=720,
     [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [switch]$PresentationDiagnostics,
     [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
-    [string]$OutputDirectory, [switch]$ShippingQA, [switch]$CompletionDriven)
+    [string]$OutputDirectory, [switch]$ShippingQA, [switch]$CompletionDriven,
+    [ValidateRange(-1,2)][int]$BodyPreset=-1, [ValidateRange(-1,2)][int]$HairStyle=-1,
+    [ValidateRange(-1,4)][int]$HairColor=-1)
 $ErrorActionPreference='Stop'
 function Assert-VisualPlaytestOutcome {
     param([string]$Outcome,[string]$Required,[switch]$RequireTree)
@@ -19,6 +21,9 @@ function Assert-VisualPlaytestOutcome {
     }
 }
 if($PresentationDiagnostics -and ($Watering -or $Weeding -or $Clearing)) { throw 'Presentation diagnostics require a separate motion route.' }
+if((@($BodyPreset,$HairStyle,$HairColor)|Where-Object {$_ -ge 0}).Count -notin 0,3) {
+    throw 'Hair review requires BodyPreset, HairStyle and HairColor together.'
+}
 if($CompletionDriven -and (-not $ShippingQA -or $Watering -or $Weeding -or $Clearing -or $PresentationDiagnostics)) {
     throw 'Completion-driven visual capture is only the ordinary isolated Shipping route.'
 }
@@ -73,6 +78,9 @@ if($PresentationDiagnostics) {
         setup='Fresh test-sandbox world; ordinary mapped input, no teleport/state/time edits.'
         pipeline='Offscreen game framebuffer only; no desktop capture, physical scanout or DXGI Present tracing.'
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'diagnostic-launch.json')
+}
+if($BodyPreset -ge 0) {
+    $arguments += " -HomesteadVisualBodyPreset=$BodyPreset -HomesteadVisualHairStyle=$HairStyle -HomesteadVisualHairColor=$HairColor"
 }
 if($ShippingQA) {
     $process=& (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:$CompletionDriven

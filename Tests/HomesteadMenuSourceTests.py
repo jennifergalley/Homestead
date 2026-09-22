@@ -311,6 +311,16 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("ProcessAnalogInputEvent(", fixture)
         self.assertIn("TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true)", fixture)
 
+    def test_visual_hair_review_uses_production_presentation(self):
+        visual = (SOURCE / "HomesteadVisualPlaytest.cpp").read_text()
+        script = (ROOT / "Scripts" / "Playtest-Visual.ps1").read_text()
+        self.assertIn("HomesteadVisualBodyPreset=", visual)
+        self.assertIn("Avatar->PrepareEquipment(PC->State(), Look, Error)", visual)
+        self.assertIn("Avatar->ApplyPreparedEquipment(Error)", visual)
+        self.assertIn("HomesteadVisualBodyPreset=$BodyPreset", script)
+        native = (SOURCE / "UI" / "HomesteadNativeMenuTest.cpp").read_text()
+        self.assertIn("for (int32 Id : {0, 1, 1, 1, 1, 2, 3, 6})", native)
+
     def test_full_loop_resolves_generated_keys_after_region_prepare(self):
         fixture = (SOURCE / "HomesteadFullLoopTest.cpp").read_text()
         gather = fixture[fixture.index("void AHomesteadSmokeTest::QueueGatherTo"):
