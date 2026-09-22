@@ -564,43 +564,90 @@ void AHomesteadVisualPlaytest::RecordCameraForeground()
 
 void AHomesteadVisualPlaytest::PrepareTreeEncounter()
 {
-    TArray<UStaticMeshComponent*> Parts;
-    if (PC->Landscape) PC->Landscape->GetComponents(Parts);
-    TArray<UStaticMeshComponent*> Trees;
-    for (auto* Part : Parts)
-        if (Part->ComponentHasTag(TEXT("GeneratedForestTree")) && Part->IsQueryCollisionEnabled()) Trees.Add(Part);
+    if (!PC->Landscape)
+    {
+        Observations.Add(TEXT("FAILED no world exists for ordinary tree encounter."));
+        return;
+    }
     const FVector Player = PC->GetPawn()->GetActorLocation();
-    Trees.Sort([&](const UStaticMeshComponent& A, const UStaticMeshComponent& B)
-    { return FVector::DistSquared2D(A.GetComponentLocation(), Player) < FVector::DistSquared2D(B.GetComponentLocation(), Player); });
-    if (Trees.IsEmpty())
+    FString TreeKey;
+    const FHomesteadActiveTreeInstance* TreeInstance = nullptr;
+    UCapsuleComponent* Tree = nullptr;
+    double BestDistance = TNumericLimits<double>::Max();
+    for (const auto& Entry : PC->Landscape->ActiveTreeInstances)
+    {
+        auto* Candidate = PC->Landscape->ActiveTreeCollisions.FindRef(Entry.Key).Get();
+        if (!Candidate) continue;
+        const double Distance = FVector::DistSquared2D(Candidate->GetComponentLocation(), Player);
+        if (Distance >= BestDistance) continue;
+        BestDistance = Distance;
+        TreeKey = Entry.Key;
+        TreeInstance = &Entry.Value;
+        Tree = Candidate;
+    }
+    if (!Tree || !TreeInstance)
     {
         Observations.Add(TEXT("FAILED no active generated tree exists for ordinary encounter."));
         return;
     }
-    auto* Tree = Trees[0];
-    UStaticMesh* Mesh = Tree->GetStaticMesh();
+    auto* Batch = PC->Landscape->ActiveTreeBatches.FindRef(TreeInstance->Visual.MeshPath).Get();
+    UStaticMesh* Mesh = Batch ? Batch->GetStaticMesh() : nullptr;
     auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
     const bool KnownGeneratedTree = Mesh && (Mesh->GetPathName()
         == TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland")
         || Mesh->GetPathName() == TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda")
         || Mesh->GetPathName() == TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"));
+    if (!KnownGeneratedTree || !Batch || !Body || Body->AggGeom.SphylElems.Num() != 1)
+    {
+        Observations.Add(TEXT("FAILED selected active tree has no exact batched mesh/capsule model."));
+        return;
+    }
     const int32 ExpectedTreeSlots = Mesh && Mesh->GetPathName().Contains(TEXT("/MatureFir_20260922_02/")) ? 4 : 3;
-    bTreeReady = KnownGeneratedTree
-        && Tree->GetComponentScale().X >= 0.899 && Tree->GetComponentScale().X <= 1.101
-        && Tree->GetComponentScale().Equals(FVector(Tree->GetComponentScale().X), 0.001)
+    const FName ExpectedKeyTag(*(FString(TEXT("TreeKey_")) + TreeKey));
+    const FName ExpectedResourceTag(*FString::Printf(TEXT("Resource_%d"), TreeInstance->ResourceId));
+    bool RenderInstanceFound = false;
+    for (int32 Index = 0; Batch && Index < Batch->GetInstanceCount(); ++Index)
+    {
+        FTransform Transform;
+        if (Batch->GetInstanceTransform(Index, Transform)
+            && Transform.Equals(TreeInstance->Visual.Transform, 0.001f))
+        {
+            RenderInstanceFound = true;
+            break;
+        }
+    }
+    bTreeReady = KnownGeneratedTree && Batch && Batch->IsRegistered() && !Batch->IsQueryCollisionEnabled()
+        && RenderInstanceFound
+        && TreeInstance->Visual.Transform.GetScale3D().X >= 0.899
+        && TreeInstance->Visual.Transform.GetScale3D().X <= 1.101
+        && TreeInstance->Visual.Transform.GetScale3D().Equals(
+            FVector(TreeInstance->Visual.Transform.GetScale3D().X), 0.001)
         && Mesh->GetStaticMaterials().Num() == ExpectedTreeSlots && Body && Body->AggGeom.SphylElems.Num() == 1
         && Body->AggGeom.GetElementCount() == 1 && Body->CollisionTraceFlag == CTF_UseSimpleAsComplex
+        && Tree->ComponentHasTag(TEXT("GeneratedForestTreeCollision"))
+        && Tree->ComponentHasTag(ExpectedKeyTag)
+        && Tree->ComponentHasTag(ExpectedResourceTag)
         && Tree->GetCollisionEnabled() != ECollisionEnabled::NoCollision
-        && Tree->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block;
-    const FVector Root = Tree->GetComponentLocation();
+        && Tree->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block
+        && Tree->GetCollisionResponseToChannel(ECC_Camera) == ECR_Block
+        && Tree->GetOwner() == PC->Landscape && PC->Landscape->GetActorEnableCollision();
+    const FVector Root = TreeInstance->Visual.Transform.GetLocation();
     const FVector Anchor = Mesh && Body && Body->AggGeom.SphylElems.Num() == 1
-        ? Tree->GetComponentTransform().TransformPosition(FVector(Body->AggGeom.SphylElems[0].Center.X,
+        ? TreeInstance->Visual.Transform.TransformPosition(FVector(Body->AggGeom.SphylElems[0].Center.X,
             Body->AggGeom.SphylElems[0].Center.Y, Mesh->GetBoundingBox().Min.Z)) : Root;
     const double GroundError = Anchor.Z - PC->GroundHeight(Anchor.X, Anchor.Y);
-    bTreeReady &= FMath::Abs(GroundError) < 0.1;
+    const auto& AuthoredCapsule = Body->AggGeom.SphylElems[0];
+    bTreeReady &= FMath::Abs(GroundError) < 0.1
+        && Tree->GetRelativeTransform().Equals(TreeInstance->CollisionTransform, 0.001f)
+        && FMath::IsNearlyEqual(Tree->GetUnscaledCapsuleRadius(), TreeInstance->CapsuleRadius, 0.001f)
+        && FMath::IsNearlyEqual(Tree->GetUnscaledCapsuleHalfHeight(), TreeInstance->CapsuleHalfHeight, 0.001f)
+        && FMath::IsNearlyEqual(TreeInstance->CapsuleRadius,
+            AuthoredCapsule.GetScaledRadius(TreeInstance->Visual.Transform.GetScale3D()), 0.001f)
+        && FMath::IsNearlyEqual(TreeInstance->CapsuleHalfHeight,
+            AuthoredCapsule.GetScaledHalfLength(TreeInstance->Visual.Transform.GetScale3D()), 0.001f);
     for (int32 Index = 0; Mesh && Index < Mesh->GetStaticMaterials().Num(); ++Index)
     {
-        const auto* Interface = Tree->GetMaterial(Index);
+        const auto* Interface = Batch->GetMaterial(Index);
         auto* Material = Interface ? Interface->GetMaterial() : nullptr;
         auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
         const FString MaterialRoot = Mesh->GetPathName().Contains(TEXT("/TreePalette_20260921_01/"))
@@ -612,17 +659,20 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
         PresentationSettings.Add(FString::Printf(TEXT("tree_material[%d]=%s imported_slot=%s shader_map_complete=%d"),
             Index, *GetPathNameSafe(Material), *Mesh->GetStaticMaterials()[Index].ImportedMaterialSlotName.ToString(), Ready));
     }
-    PresentationSettings.Add(FString::Printf(TEXT("tree_mesh=%s root=%s scale=%s ground_error_cm=%.6f ready=%d"),
-        *GetPathNameSafe(Mesh), *Root.ToString(), *Tree->GetComponentScale().ToString(), GroundError, bTreeReady));
+    PresentationSettings.Add(FString::Printf(TEXT("tree_key=%s tree_mesh=%s root=%s scale=%s ground_error_cm=%.6f ready=%d"),
+        *TreeKey,
+        *GetPathNameSafe(Mesh), *Root.ToString(), *TreeInstance->Visual.Transform.GetScale3D().ToString(),
+        GroundError, bTreeReady));
     if (!bTreeReady)
     {
         Observations.Add(TEXT("FAILED tree material/geometry/grounding/collision readiness."));
         return;
     }
     ObservedTree = Tree;
+    ObservedTreeBounds = Mesh->GetBoundingBox().TransformBy(TreeInstance->Visual.Transform);
     Tap(EKeys::Gamepad_RightThumbstick);
     Observations.Add(TEXT("Ordinary mapped camera-distance input selected the wide tree encounter view."));
-    TreeCenter = FVector2D(Tree->GetComponentTransform().TransformPosition(Body->AggGeom.SphylElems[0].Center));
+    TreeCenter = FVector2D(Tree->GetComponentLocation());
     TreeContactSamples.Add(TEXT("seconds,x,y,distance_cm,input_x,input_y,inward_intent,inward_velocity_cm_s,radial_progress_cm_s,total_speed_cm_s,hit_component,geometry_blocking_flag,start_penetrating,hit_distance_cm,blocked_seconds,geometry_hit,tree_query,pawn_query,tree_blocks_pawn,pawn_blocks_tree,tree_object_type,pawn_object_type,tree_actor_collision,pawn_actor_collision"));
     Observations.Add(FString::Printf(TEXT("Ordinary tree encounter: root=%s trunk_center_xy=%s radius_cm=%.6f capsule_cylinder_cm=%.6f"),
         *Root.ToString(), *TreeCenter.ToString(), Body->AggGeom.SphylElems[0].Radius, Body->AggGeom.SphylElems[0].Length));
@@ -653,7 +703,7 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
         FVector CameraPosition;
         FRotator CameraRotation;
         PC->GetPlayerViewPoint(CameraPosition, CameraRotation);
-        const FVector ToCenter = ObservedTree->Bounds.Origin - CameraPosition;
+        const FVector ToCenter = ObservedTreeBounds.GetCenter() - CameraPosition;
         const float DesiredPitch = FMath::RadiansToDegrees(FMath::Atan2(ToCenter.Z, ToCenter.Size2D()));
         const float PitchError = FMath::FindDeltaAngleDegrees(CameraRotation.Pitch, DesiredPitch);
         Look.Y = -FMath::Clamp(PitchError / 30.0f, -0.65f, 0.65f) * (PC->bInvertY ? -1.0f : 1.0f);
@@ -662,7 +712,7 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
             RecordCameraForeground();
             int32 Width = 0, Height = 0;
             PC->GetViewportSize(Width, Height);
-            const FBox Bounds = ObservedTree->Bounds.GetBox();
+            const FBox Bounds = ObservedTreeBounds;
             FVector2D Minimum(DBL_MAX, DBL_MAX), Maximum(-DBL_MAX, -DBL_MAX);
             int32 ProjectedCorners = 0;
             for (int32 Corner = 0; Corner < 8; ++Corner)

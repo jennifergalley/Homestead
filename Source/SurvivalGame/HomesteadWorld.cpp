@@ -3,6 +3,7 @@
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SceneComponent.h"
@@ -246,18 +247,17 @@ bool AHomesteadWorld::IsPreparedFor(const Homestead::State& State) const
 int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) const
 {
     int32 Count = 0;
-    for (const auto& Entry : ResourceVisuals)
-        for (const auto& Component : Entry.Value.Components)
-        {
-            const auto* Part = Cast<UStaticMeshComponent>(Component);
-            if (!Part || !Part->IsVisible() || !Part->ComponentHasTag(TEXT("GeneratedForestTree"))
-                || !Part->GetStaticMesh()) continue;
-            const FTransform Transform = Part->GetComponentTransform();
-            const FVector Start = Transform.InverseTransformPosition(Focus);
-            const FVector End = Transform.InverseTransformPosition(Camera);
-            const FBox Bounds = Part->GetStaticMesh()->GetBoundingBox().ExpandBy(20);
-            Count += FMath::LineBoxIntersection(Bounds, Start, End, End - Start) ? 1 : 0;
-        }
+    for (const auto& Entry : ActiveTreeInstances)
+    {
+        const auto* Batch = ActiveTreeBatches.FindRef(Entry.Value.Visual.MeshPath).Get();
+        const auto* Mesh = Batch ? Batch->GetStaticMesh() : nullptr;
+        if (!Mesh) continue;
+        const FTransform& Transform = Entry.Value.Visual.Transform;
+        const FVector Start = Transform.InverseTransformPosition(Focus);
+        const FVector End = Transform.InverseTransformPosition(Camera);
+        const FBox Bounds = Mesh->GetBoundingBox().ExpandBy(20);
+        Count += FMath::LineBoxIntersection(Bounds, Start, End, End - Start) ? 1 : 0;
+    }
     return Count;
 }
 
@@ -879,6 +879,148 @@ bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simul
     return true;
 }
 
+void AHomesteadWorld::ClearActiveTreeBatches()
+{
+    for (auto& Entry : ActiveTreeBatches)
+        if (IsValid(Entry.Value.Get()))
+            Entry.Value->DestroyComponent();
+    for (auto& Entry : ActiveTreeCollisions)
+        if (IsValid(Entry.Value.Get()))
+            Entry.Value->DestroyComponent();
+    ActiveTreeBatches.Reset();
+    ActiveTreeCollisions.Reset();
+    ActiveTreeInstances.Reset();
+}
+
+bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simulation)
+{
+    struct FBuildEntry
+    {
+        FString Key;
+        UStaticMesh* Mesh = nullptr;
+        FHomesteadActiveTreeInstance Instance;
+    };
+
+    TArray<FBuildEntry> Desired;
+    TSet<FString> DesiredKeys;
+    for (const auto& Node : Simulation.GetState().resources)
+    {
+        if (Node.kind != Homestead::ResourceKind::ForestTree || Node.cleared) continue;
+        FBuildEntry Entry;
+        Entry.Key = FString::Printf(TEXT("%d,%d,%u"),
+            Node.key.chunk.x, Node.key.chunk.y, Node.key.localId);
+        if (DesiredKeys.Contains(Entry.Key))
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Duplicate generated active tree key %s."), *Entry.Key);
+            return false;
+        }
+        if (!ResolveGeneratedTreeVisual(Node, Entry.Mesh, Entry.Instance.Visual))
+            return false;
+        const auto& Capsule = Entry.Mesh->GetBodySetup()->AggGeom.SphylElems[0];
+        const FVector Scale = Entry.Instance.Visual.Transform.GetScale3D();
+        Entry.Instance.CapsuleRadius = Capsule.GetScaledRadius(Scale);
+        Entry.Instance.CapsuleHalfHeight = Capsule.GetScaledHalfLength(Scale);
+        Entry.Instance.CollisionTransform = FTransform(
+            Entry.Instance.Visual.Transform.TransformRotation(Capsule.Rotation.Quaternion()),
+            Entry.Instance.Visual.Transform.TransformPosition(Capsule.Center));
+        Entry.Instance.ResourceId = Node.id;
+        DesiredKeys.Add(Entry.Key);
+        Desired.Add(MoveTemp(Entry));
+    }
+    Desired.Sort([](const FBuildEntry& A, const FBuildEntry& B)
+    {
+        const int32 PathOrder = A.Instance.Visual.MeshPath.Compare(
+            B.Instance.Visual.MeshPath, ESearchCase::CaseSensitive);
+        return PathOrder == 0 ? A.Key < B.Key : PathOrder < 0;
+    });
+
+    TMap<FString, UHierarchicalInstancedStaticMeshComponent*> PreparedBatches;
+    TMap<FString, UCapsuleComponent*> PreparedCollisions;
+    TMap<FString, FHomesteadActiveTreeInstance> PreparedInstances;
+    auto DiscardPrepared = [&PreparedBatches, &PreparedCollisions]()
+    {
+        for (auto& Entry : PreparedBatches)
+            if (IsValid(Entry.Value))
+                Entry.Value->DestroyComponent();
+        for (auto& Entry : PreparedCollisions)
+            if (IsValid(Entry.Value))
+                Entry.Value->DestroyComponent();
+    };
+    for (const FBuildEntry& Entry : Desired)
+    {
+        UHierarchicalInstancedStaticMeshComponent* Batch = nullptr;
+        if (auto** Existing = PreparedBatches.Find(Entry.Instance.Visual.MeshPath))
+            Batch = *Existing;
+        else
+        {
+            Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+            if (!Batch)
+            {
+                DiscardPrepared();
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Could not allocate active tree batch for %s."),
+                    *Entry.Instance.Visual.MeshPath);
+                return false;
+            }
+            Batch->SetupAttachment(GetRootComponent());
+            Batch->SetMobility(EComponentMobility::Static);
+            Batch->SetStaticMesh(Entry.Mesh);
+            Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+            Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Batch->SetCollisionResponseToAllChannels(ECR_Ignore);
+            Batch->SetGenerateOverlapEvents(false);
+            Batch->SetCanEverAffectNavigation(false);
+            Batch->ComponentTags.Add(TEXT("GeneratedActiveTreeBatch"));
+            Batch->bAutoRebuildTreeOnInstanceChanges = false;
+            PreparedBatches.Add(Entry.Instance.Visual.MeshPath, Batch);
+        }
+        Batch->AddInstance(Entry.Instance.Visual.Transform);
+
+        auto* Collision = NewObject<UCapsuleComponent>(this);
+        if (!Collision)
+        {
+            DiscardPrepared();
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Could not allocate active tree collision for %s."),
+                *Entry.Key);
+            return false;
+        }
+        Collision->SetupAttachment(GetRootComponent());
+        Collision->SetMobility(EComponentMobility::Static);
+        Collision->SetCapsuleSize(Entry.Instance.CapsuleRadius, Entry.Instance.CapsuleHalfHeight, false);
+        Collision->SetRelativeTransform(Entry.Instance.CollisionTransform);
+        Collision->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+        Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        Collision->SetGenerateOverlapEvents(false);
+        Collision->SetCanEverAffectNavigation(false);
+        Collision->SetCastShadow(false);
+        Collision->SetVisibility(false);
+        Collision->SetHiddenInGame(true);
+        Collision->ComponentTags.Add(TEXT("GeneratedForestTreeCollision"));
+        Collision->ComponentTags.Add(FName(*(FString(TEXT("TreeKey_")) + Entry.Key)));
+        Collision->ComponentTags.Add(*FString::Printf(TEXT("Resource_%d"), Entry.Instance.ResourceId));
+        PreparedCollisions.Add(Entry.Key, Collision);
+        PreparedInstances.Add(Entry.Key, Entry.Instance);
+    }
+
+    ClearActiveTreeBatches();
+    for (auto& Entry : PreparedBatches)
+    {
+        Entry.Value->bAutoRebuildTreeOnInstanceChanges = true;
+        Entry.Value->RegisterComponent();
+        Entry.Value->BuildTreeIfOutdated(false, true);
+        ActiveTreeBatches.Add(Entry.Key, Entry.Value);
+    }
+    for (auto& Entry : PreparedCollisions)
+    {
+        Entry.Value->RegisterComponent();
+        ActiveTreeCollisions.Add(Entry.Key, Entry.Value);
+    }
+    ActiveTreeInstances = MoveTemp(PreparedInstances);
+    UE_LOG(LogHomesteadWorld, Display,
+        TEXT("Generated active mature trees rebuilt: batches=%d instances=%d collisions=%d."),
+        ActiveTreeBatches.Num(), ActiveTreeInstances.Num(), ActiveTreeCollisions.Num());
+    return true;
+}
+
 void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly)
 {
     if (Node.cleared)
@@ -946,32 +1088,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     switch (Node.kind)
     {
     case Homestead::ResourceKind::ForestTree:
-    {
-        if (bProduceOnly) break;
-        UStaticMesh* Mesh = nullptr;
-        FHomesteadOuterTreeInstance Instance;
-        if (!ResolveGeneratedTreeVisual(Node, Mesh, Instance))
-        {
-            bVisualBuildFailed = true;
-            break;
-        }
-        auto* Component = NewObject<UStaticMeshComponent>(this);
-        Component->SetupAttachment(GetRootComponent());
-        Component->SetMobility(EComponentMobility::Static);
-        Component->SetStaticMesh(Mesh);
-        Component->SetRelativeTransform(Instance.Transform);
-        Component->SetCollisionProfileName(Node.id > 0 ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
-        Component->SetGenerateOverlapEvents(false);
-        Component->SetCanEverAffectNavigation(false);
-        Component->ComponentTags.Add(TEXT("GeneratedForestTree"));
-        Component->ComponentTags.Add(*FString::Printf(
-            TEXT("TreeRole_%d"), Instance.PaletteRole));
-        Component->ComponentTags.Add(*FString::Printf(TEXT("TreeVariant_%u"), Instance.VariantIndex));
-        Component->ComponentTags.Add(*FString::Printf(TEXT("Resource_%d"), Node.id));
-        Component->RegisterComponent();
-        Visual.Components.Add(Component);
         break;
-    }
     case Homestead::ResourceKind::Branches:
         if (bProduceOnly)
         {
@@ -1323,6 +1440,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         for (auto& Entry : StructureVisuals) ClearVisual(Entry.Value);
         for (auto& Entry : PlotVisuals) ClearVisual(Entry.Value);
         ClearOuterTreeBatches();
+        ClearActiveTreeBatches();
         ClearVisual(Preview);
     }
     FString Layout = FString::Printf(TEXT("%llu:%u:%d,%d;"), static_cast<unsigned long long>(State.world.seed),
@@ -1373,11 +1491,33 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         if (!RebuildOuterTreeBatches(Simulation)) return false;
         OuterTreeLayoutSignature = MoveTemp(OuterLayout);
     }
+    TArray<FString> ActiveTreeRows;
+    for (const auto& Node : State.resources)
+        if (Node.kind == Homestead::ResourceKind::ForestTree)
+            ActiveTreeRows.Add(FString::Printf(TEXT("%d:%d:%u:%d:%d;"),
+                Node.key.chunk.x, Node.key.chunk.y, Node.key.localId, Node.id, Node.cleared));
+    ActiveTreeRows.Sort();
+    const FString ActiveLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
+        static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
+        State.activeChunk.x, State.activeChunk.y) + FString::Join(ActiveTreeRows, TEXT(""));
+    if (ActiveTreeLayoutSignature != ActiveLayout)
+    {
+        if (!RebuildActiveTreeBatches(Simulation)) return false;
+        ActiveTreeLayoutSignature = ActiveLayout;
+    }
 
     RemoveMissing(ResourceVisuals, State.resources);
     RemoveMissing(ResourceProduceVisuals, State.resources);
     for (const auto& Node : State.resources)
     {
+        if (Node.kind == Homestead::ResourceKind::ForestTree)
+        {
+            if (auto* Visual = ResourceVisuals.Find(Node.id)) ClearVisual(*Visual);
+            ResourceVisuals.Remove(Node.id);
+            if (auto* Produce = ResourceProduceVisuals.Find(Node.id)) ClearVisual(*Produce);
+            ResourceProduceVisuals.Remove(Node.id);
+            continue;
+        }
         const bool bReady = Node.readyAtHour <= State.hour;
         const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
             static_cast<int>(Node.kind), Node.position.x, Node.position.y, Node.cleared);

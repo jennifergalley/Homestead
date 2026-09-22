@@ -8,7 +8,7 @@
 #include "HomesteadVisualPlaytest.generated.h"
 
 class AHomesteadController;
-class UStaticMeshComponent;
+class UCapsuleComponent;
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadVisualPlaytest : public AActor
@@ -57,7 +57,8 @@ private:
     void RecordGeneratedInventory();
     void RecordGrassGroundInventory();
     void RecordCameraForeground();
-    TWeakObjectPtr<UStaticMeshComponent> ObservedTree;
+    TWeakObjectPtr<UCapsuleComponent> ObservedTree;
+    FBox ObservedTreeBounds = FBox(ForceInit);
     FVector2D TreeCenter = FVector2D::ZeroVector;
     FVector2D TreeStaging = FVector2D::ZeroVector;
     FVector2D TreeRetreatStart = FVector2D::ZeroVector;
