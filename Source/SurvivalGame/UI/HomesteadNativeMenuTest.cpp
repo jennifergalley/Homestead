@@ -810,12 +810,10 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     Add(TEXT("Capture real stored transaction result"),
         [this]() { Screenshot(TEXT("native-storage-transactions")); },
         [this]() { return Controller->BookPage() == 0 && Controller->InventoryView() == 1; }, 0.8f);
-    const auto MenuIdentity = MakeShared<const SHomesteadMenu*>(nullptr);
-    Add(TEXT("Repeated menu open-close reuses one native shell and preserves committed state"),
-        [this, Snapshot, MenuIdentity]()
+    Add(TEXT("Repeated menu open-close rebuilds one valid shell and preserves committed state"),
+        [this, Snapshot]()
         {
             *Snapshot = Controller->Simulation().Serialize();
-            *MenuIdentity = Controller->NativeMenu.Get();
             for (int32 Index = 0; Index < 20; ++Index)
             {
                 Controller->CloseBook();
@@ -823,9 +821,9 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 Controller->OpenBook(0);
             }
         },
-        [this, Snapshot, MenuIdentity]() { return Controller->NativeMenu.Get() == *MenuIdentity
-            && Controller->IsBookOpen() && Controller->Simulation().Serialize() == *Snapshot
-            && VerifyNativeMenuPresentation(); }, 1.0f);
+        [this, Snapshot]() { return Controller->NativeMenu.IsValid() && Controller->IsBookOpen()
+            && Controller->NativeMenu->HasSynchronizedFocus()
+            && Controller->Simulation().Serialize() == *Snapshot && VerifyNativeMenuPresentation(); }, 1.0f);
 }
 
 void AHomesteadSmokeTest::PrepareNativeResetChecks()
