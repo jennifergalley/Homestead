@@ -964,6 +964,12 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                             Briefs |= Slot.MaterialSlotName == TEXT("M_Modular_BaseBriefs");
                         }
                     Ready &= Bra && Briefs;
+                    if (!Ready)
+                    {
+                        Finish(false, FString::Printf(TEXT("Base coverage failed for body %d hair %d: %s"),
+                            Body, Hair, *Error));
+                        return;
+                    }
                 }
             *Layered = *Original;
             while (Layered->Count(Homestead::Item::Fiber) < 14)
@@ -972,14 +978,24 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                 for (const auto& Node : Layered->GetState().resources)
                     if (Node.kind == Homestead::ResourceKind::Reeds && Layered->CanHarvest(Node.id))
                     { Gathered = Layered->Harvest(Node.id, Node.position).ok; break; }
-                if (!Gathered) { Ready = false; break; }
+                if (!Gathered)
+                {
+                    Finish(false, TEXT("Layered coverage could not gather 14 Fiber through real resource authority."));
+                    return;
+                }
             }
             if (Ready)
             {
-                Ready &= Layered->CraftGarment(Homestead::WearableDefinition::LinenApron,
-                    Controller->PlayerPoint(), Layered->GetRevision()).ok;
-                Ready &= Layered->CraftGarment(Homestead::WearableDefinition::WovenFootwraps,
-                    Controller->PlayerPoint(), Layered->GetRevision()).ok;
+                const auto ApronCraft = Layered->CraftGarment(Homestead::WearableDefinition::LinenApron,
+                    Controller->PlayerPoint(), Layered->GetRevision());
+                const auto FootwrapCraft = Layered->CraftGarment(Homestead::WearableDefinition::WovenFootwraps,
+                    Controller->PlayerPoint(), Layered->GetRevision());
+                if (!ApronCraft.ok || !FootwrapCraft.ok)
+                {
+                    Finish(false, FString::Printf(TEXT("Layered authority craft failed: %s / %s"),
+                        UTF8_TO_TCHAR(ApronCraft.message.c_str()), UTF8_TO_TCHAR(FootwrapCraft.message.c_str())));
+                    return;
+                }
                 int32 Apron = 0, Footwraps = 0;
                 for (const auto& Item : Layered->GetState().wearables)
                 {
@@ -1005,6 +1021,11 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                             && Surface.Definition == static_cast<int32>(Owned->definition)
                             && Surface.Dye == Owned->dye;
                     }
+                if (!Ready)
+                {
+                    Finish(false, TEXT("Layered tunic/apron/footwrap identity, slot, dye, or renderable parity failed."));
+                    return;
+                }
             }
             Homestead::Simulation Invalid = *Original;
             auto& InvalidState = const_cast<Homestead::State&>(Invalid.GetState());
@@ -1013,6 +1034,18 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             FString Error;
             Ready &= !Avatar->PrepareEquipment(Invalid.GetState(), *OriginalLook, Error)
                 && Controller->Simulation().Serialize() == Before;
+            if (!Ready)
+            {
+                Finish(false, TEXT("Invalid wearable candidate was not rejected atomically."));
+                return;
+            }
+            Error.Reset();
+            if (!Avatar->PrepareEquipment(Original->GetState(), *OriginalLook, Error)
+                || !Avatar->ApplyPreparedEquipment(Error))
+            {
+                Finish(false, TEXT("Could not restore live presentation after isolated coverage: ") + Error);
+                return;
+            }
             *CoverageReady = Ready;
         },
         [CoverageReady]() { return *CoverageReady; });
@@ -1078,8 +1111,25 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             { Finish(false, TEXT("Could not restore committed equipment: ") + Error); return; }
             Controller->CloseBook();
         },
-        [this, Original]() { return !Controller->NativeMenu.IsValid() && !Controller->MenuPortrait
-            && Controller->Simulation().Serialize() == Original->Serialize() && VerifyNativeMenuPresentation(); });
+        [this, Original]()
+        {
+            const auto& Current = Controller->State();
+            const auto& Expected = Original->GetState();
+            if (Current.equipment != Expected.equipment
+                || Current.wearables.size() != Expected.wearables.size()) return false;
+            for (const auto& Item : Expected.wearables)
+            {
+                const auto* Restored = Controller->Simulation().GetWearable(Item.id);
+                if (!Restored || Restored->definition != Item.definition || Restored->owner != Item.owner
+                    || Restored->chestId != Item.chestId || Restored->dye != Item.dye) return false;
+            }
+            return !Controller->NativeMenu.IsValid() && !Controller->MenuPortrait
+                && VerifyNativeMenuPresentation();
+        });
+    Add(TEXT("Reopen one fresh native shell after presentation cleanup"),
+        [this]() { Controller->OpenBook(0); },
+        [this]() { return Controller->IsBookOpen() && Controller->NativeMenu.IsValid()
+            && Controller->NativeMenu->HasSynchronizedFocus() && VerifyNativeMenuPresentation(); });
 }
 
 void AHomesteadSmokeTest::PrepareNativeResumeChecks(const FString& ProducerOutput)
