@@ -31,7 +31,7 @@ private:
     {
         Unknown, Pack, Craft, Build, Guide, Settings, Credits, Appearance,
         Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds, Hatchet,
-        DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
+        DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Timber, Firewood,
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,
         LinenTunic, LinenApron, LeatherShoes, WovenFootwraps
     };

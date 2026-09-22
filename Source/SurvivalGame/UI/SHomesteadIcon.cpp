@@ -213,6 +213,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("water")), EKind::Water},
         {FName(TEXT("roasted-roots")), EKind::RoastedRoots},
         {FName(TEXT("herbed-roots")), EKind::HerbedRoots},
+        {FName(TEXT("timber")), EKind::Timber},
+        {FName(TEXT("firewood")), EKind::Firewood},
         {FName(TEXT("foundation")), EKind::Foundation},
         {FName(TEXT("wall")), EKind::Wall},
         {FName(TEXT("doorway")), EKind::Doorway},
@@ -436,6 +438,25 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Leaf({40, 17}, {49, 10}, 3);
         P.Leaf({36, 25}, {47, 19}, 3);
         P.Line({{23, 42}, {33, 42}}, Wood, 2);
+        break;
+    case EKind::Timber:
+        P.Rect(10, 12, 36, 11, Wood);
+        P.Rect(7, 26, 38, 11, Gold);
+        P.Rect(12, 40, 36, 10, Wood);
+        P.Disc(10, 17, 5, Cream);
+        P.Disc(45, 31, 5, Cream);
+        P.Disc(12, 45, 4, Gold);
+        P.Line({{20, 14}, {39, 20}}, Gold, 2);
+        P.Line({{16, 29}, {36, 35}}, Cream, 2);
+        P.Line({{20, 43}, {40, 48}}, Gold, 2);
+        break;
+    case EKind::Firewood:
+        P.Line({{12, 44}, {42, 14}}, Wood, 8);
+        P.Line({{14, 14}, {44, 44}}, Gold, 8);
+        P.Line({{11, 43}, {40, 14}}, Cream, 2);
+        P.Line({{16, 15}, {45, 43}}, Cream, 2);
+        P.Shape({{22, 48}, {28, 34}, {34, 48}}, RootOrange);
+        P.Shape({{29, 49}, {34, 29}, {41, 49}}, Gold);
         break;
     case EKind::Foundation:
         P.Shape({{7, 28}, {29, 16}, {49, 27}, {27, 40}}, Gold);

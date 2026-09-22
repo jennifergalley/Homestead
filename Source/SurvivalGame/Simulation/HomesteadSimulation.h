@@ -12,17 +12,18 @@ namespace Homestead
 enum class Item : int
 {
     Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
-    Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Count
+    Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
+    Timber, Firewood, Count
 };
 enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, Count };
-enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, Count };
+enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, SplitFirewood, Count };
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Count };
 enum class CropKind : int { Roots, Berries, Count };
 
 constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 5;
+constexpr int SimulationSaveVersion = 6;
 constexpr double ChestReach = 280.0;
 constexpr double MaxWorldCoordinate = 1000000.0;
 constexpr int MaxResourceEdits = 16384;

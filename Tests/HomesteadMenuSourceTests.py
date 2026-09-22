@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "Source" / "SurvivalGame"
 CONTROLLER = (SOURCE / "HomesteadController.cpp").read_text()
 MENU = (SOURCE / "UI" / "SHomesteadMenu.cpp").read_text()
+ICONS = (SOURCE / "UI" / "SHomesteadIcon.cpp").read_text()
 
 
 def function_body(source, signature):
@@ -67,7 +68,19 @@ class MenuSourceContracts(unittest.TestCase):
     def test_icon_keys_cover_existing_items(self):
         declaration = re.search(r"const TCHAR\* ItemIcons\[\] = \{(.*?)\};", MENU, re.S)
         self.assertIsNotNone(declaration)
-        self.assertEqual(len(re.findall(r'TEXT\("([^"]+)"\)', declaration.group(1))), 14)
+        keys = re.findall(r'TEXT\("([^"]+)"\)', declaration.group(1))
+        self.assertEqual(len(keys), 16)
+        self.assertEqual(keys[-2:], ["timber", "firewood"])
+        recipes = re.search(r"const TCHAR\* RecipeIcons\[\] = \{(.*?)\};", MENU, re.S)
+        self.assertIsNotNone(recipes)
+        self.assertEqual(re.findall(r'TEXT\("([^"]+)"\)', recipes.group(1))[-1], "firewood")
+        self.assertIn('{FName(TEXT("timber")), EKind::Timber}', ICONS)
+        self.assertIn('{FName(TEXT("firewood")), EKind::Firewood}', ICONS)
+
+    def test_timber_recipe_and_dual_fuel_are_player_visible(self):
+        self.assertIn('TEXT(" Add firewood / branch")', CONTROLLER)
+        self.assertIn("Split timber with a carried hatchet.", CONTROLLER)
+        self.assertIn("Cookfires use prepared firewood first, then branches.", CONTROLLER)
 
     def test_current_schema_and_explicit_reset(self):
         body = function_body(CONTROLLER, "UHomesteadSave* AHomesteadController::ReadSave(")

@@ -198,6 +198,9 @@ void DefaultsAndValidation()
     CHECK(sim.GetState().dayMinutes == 60);
     CHECK(std::string(ResourceName(ResourceKind::Flowers)) == "Meadow herb");
     CHECK(std::string(ItemName(Item::Flowers)) == "Meadow herb");
+    CHECK(std::string(ItemName(Item::Timber)) == "Timber");
+    CHECK(std::string(ItemName(Item::Firewood)) == "Firewood");
+    CHECK(std::string(RecipeName(Recipe::SplitFirewood)) == "Split firewood");
     CHECK(sim.Count(static_cast<Item>(-1)) == 0);
     CHECK(std::string(RecipeName(static_cast<Recipe>(500))) == "Unknown recipe");
     CHECK(Close(StreamX(0), 1500));
@@ -253,8 +256,8 @@ void RequirementsMatchTransactions()
         BuildingStock(sim);
         OK(sim.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
         OK(sim.AddFuel(sim.GetState().structures.back().id, CellCenter(-3, -1)));
-        Stock(sim, {{Item::Knife, 1}, {Item::Branch, 40}, {Item::Stone, 20},
-            {Item::Fiber, 20}, {Item::Roots, 10}, {Item::Flowers, 10}});
+        Stock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}, {Item::Branch, 40}, {Item::Stone, 20},
+            {Item::Fiber, 20}, {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Timber, 1}});
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
@@ -584,6 +587,75 @@ void FireAndStorage()
     CHECK(restored.Serialize() == sim.Serialize());
 }
 
+void TimberAndFirewoodTransactions()
+{
+    static_assert(static_cast<int>(Item::HerbedRoots) == 13, "Existing item IDs are unchanged");
+    static_assert(static_cast<int>(Item::Timber) == 14, "Timber appends after existing items");
+    static_assert(static_cast<int>(Item::Firewood) == 15, "Firewood appends after Timber");
+    static_assert(ItemCount == 16, "Two processing materials are present");
+    static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
+    static_assert(static_cast<int>(Recipe::SplitFirewood) == 5, "Split Firewood appends after existing recipes");
+    static_assert(static_cast<int>(Recipe::Count) == 6, "One processing recipe is present");
+
+    Simulation sim;
+    BuildingStock(sim);
+    const Point firePosition = CellCenter(-3, -1);
+    const Point chestPosition = CellCenter(-4, 0);
+    OK(sim.Place(Piece::Fire, -3, -1, 0, firePosition));
+    OK(sim.Place(Piece::Chest, -4, 0, 0, chestPosition));
+    const int fire = StructureId(sim, Piece::Fire, firePosition);
+    const int chest = StructureId(sim, Piece::Chest, chestPosition);
+
+    CHECK(std::string(RecipeRequirements(Recipe::SplitFirewood)) ==
+        "1 Timber; crude hatchet required");
+    Stock(sim, {{Item::Hatchet, 1}, {Item::Timber, 1}, {Item::Branch, 2}});
+    OK(sim.Craft(Recipe::SplitFirewood, Home));
+    CHECK(sim.Count(Item::Timber) == 0 && sim.Count(Item::Firewood) == 4);
+    CHECK(sim.Count(Item::Hatchet) == 1 && sim.Count(Item::Branch) == 2);
+
+    auto fueled = sim.AddFuel(fire, firePosition);
+    OK(fueled);
+    CHECK(fueled.message.find("firewood") != std::string::npos);
+    CHECK(sim.Count(Item::Firewood) == 3 && sim.Count(Item::Branch) == 2);
+    CHECK(Close(sim.GetState().structures[0].fuelHours, 4));
+
+    Stock(sim, {{Item::Branch, 2}});
+    fueled = sim.AddFuel(fire, firePosition);
+    OK(fueled);
+    CHECK(fueled.message.find("branch") != std::string::npos);
+    CHECK(sim.Count(Item::Branch) == 1);
+    CHECK(Close(sim.GetState().structures[0].fuelHours, 8));
+    Stock(sim, {});
+    const auto noFuel = sim.AddFuel(fire, firePosition);
+    CHECK(!noFuel && noFuel.message.find("firewood or a branch") != std::string::npos);
+
+    Stock(sim, {{Item::Hatchet, 1}, {Item::Timber, 2}, {Item::Firewood, 3}});
+    OK(sim.Transfer(chest, Item::Timber, 1, chestPosition));
+    OK(sim.Transfer(chest, Item::Firewood, 2, chestPosition));
+    CHECK(sim.Count(Item::Timber) == 1 && sim.Count(Item::Firewood) == 1);
+    CHECK(sim.GetState().structures[1].storage[static_cast<int>(Item::Timber)] == 1);
+    CHECK(sim.GetState().structures[1].storage[static_cast<int>(Item::Firewood)] == 2);
+    Simulation restored;
+    OK(restored.Deserialize(sim.Serialize()));
+    CHECK(restored.Serialize() == sim.Serialize());
+    CHECK(restored.Count(Item::Timber) == 1 && restored.Count(Item::Firewood) == 1);
+
+    Stock(sim, {{Item::Timber, 1}});
+    const auto noHatchet = sim.Craft(Recipe::SplitFirewood, Home);
+    CHECK(!noHatchet && noHatchet.message.find("hatchet") != std::string::npos);
+    Stock(sim, {{Item::Hatchet, 1}});
+    const auto noTimber = sim.Craft(Recipe::SplitFirewood, Home);
+    CHECK(!noTimber && noTimber.message.find("Timber") != std::string::npos);
+    Stock(sim, {{Item::Hatchet, 1}, {Item::Timber, 1}, {Item::Stone, 118}});
+    UnchangedFailure(sim, [&] { return sim.Craft(Recipe::SplitFirewood, Home); });
+
+    Simulation current;
+    const auto before = current.Serialize();
+    CHECK(current.Deserialize(Encode(current.GetState(), SimulationSaveVersion - 1)).code ==
+        ResultCode::UnsupportedVersion);
+    CHECK(current.Serialize() == before);
+}
+
 void FarmingAndRain()
 {
     Simulation sim;
@@ -781,13 +853,15 @@ void CropKindPersistenceAndVersionRejection()
     OK(sim.Clear(berry.id, berry.position));
     sim.AdvanceGameHours(2, Home);
     const std::string expected = sim.Serialize();
-    CHECK(expected.rfind("HOMESTEAD 5 ", 0) == 0);
+    CHECK(expected.rfind("HOMESTEAD 6 ", 0) == 0);
     const std::string legacy = Encode(sim.GetState(), 2);
     Simulation migrated;
     const auto initial = migrated.Serialize();
     CHECK(migrated.Deserialize(legacy).code == ResultCode::UnsupportedVersion);
     CHECK(migrated.Serialize() == initial);
     CHECK(migrated.Deserialize(Encode(sim.GetState(), 3)).code == ResultCode::UnsupportedVersion);
+    CHECK(migrated.Serialize() == initial);
+    CHECK(migrated.Deserialize(Encode(sim.GetState(), 5)).code == ResultCode::UnsupportedVersion);
     CHECK(migrated.Serialize() == initial);
     OK(migrated.Deserialize(expected));
     CHECK(migrated.Serialize() == expected);
@@ -828,7 +902,7 @@ void CropKindPersistenceAndVersionRejection()
     const std::string payload = mixed.substr(mixed.find('\n') + 1);
     reject(Envelope(payload, 2));
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 6));
+    reject(Envelope(payload, 7));
     State malformedLegacy = sim.GetState();
     malformedLegacy.plots[0].growth = 1.1;
     reject(Encode(malformedLegacy, 2));
@@ -1008,7 +1082,7 @@ void PersistenceRejection()
     reject(original.substr(0, original.size() - 1));
     reject(original + "garbage");
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 6));
+    reject(Envelope(payload, 7));
     reject(Envelope(payload + "garbage"));
     reject(Envelope(payload.substr(0, payload.size() - 8)));
     reject(std::string(8 * 1024 * 1024 + 1, 'x'));
@@ -1105,8 +1179,8 @@ void InventoryRoundTrip(const Simulation& sim)
 }
 void WardrobeDefaultsAndCrafting()
 {
-    static_assert(ItemCount == 14, "Fungible save IDs are unchanged");
-    static_assert(static_cast<int>(Recipe::Count) == 5, "Existing recipe IDs are unchanged");
+    static_assert(static_cast<int>(Item::HerbedRoots) == 13, "Existing fungible save IDs are unchanged");
+    static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
     Simulation sim;
     CHECK(sim.GetState().wearables.size() == 2);
     CHECK(sim.GetState().equipment == (std::array<int, 4>{1, 1, 0, 2}));
@@ -1462,7 +1536,7 @@ void WardrobeSaveRejection()
     FixtureLayouts(dependent);
     CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
-    for (int version : {1, 2, 3, 4, 6, 999})
+    for (int version : {1, 2, 3, 4, 5, 7, 999})
     {
         CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
@@ -1580,7 +1654,8 @@ void GeneratedFellingAndPersistentTimers()
     UnchangedFailure(sim, [&] { return sim.Harvest(tree.id, {tree.position.x + 301, tree.position.y}); });
     const double hour = sim.GetState().hour;
     OK(sim.Harvest(tree.id, {tree.position.x + 300, tree.position.y}));
-    CHECK(sim.UsedCapacity() == 120 && sim.Count(Item::Branch) == 117 && sim.Count(Item::Fiber) == 2);
+    CHECK(sim.UsedCapacity() == 120 && sim.Count(Item::Branch) == 113 &&
+        sim.Count(Item::Timber) == 6 && sim.Count(Item::Fiber) == 0);
     CHECK(sim.GetState().hour == hour);
     CHECK(sim.GetState().resourceEdits.size() == 1);
     CHECK(sim.GetState().resourceEdits[0].key == tree.key && sim.GetState().resourceEdits[0].cleared);
@@ -2019,6 +2094,7 @@ int main()
     Run("multi-cell enclosure", MultiCellShelter);
     Run("ordinal cardinal edges and 700cm build reach", CardinalEdgesAndPlacementReach);
     Run("independent fires and chest storage", FireAndStorage);
+    Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);

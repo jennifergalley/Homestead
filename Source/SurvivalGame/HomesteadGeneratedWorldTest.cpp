@@ -34,7 +34,8 @@ struct FWoodlandFixture
 {
     Generation::WorldDescriptor World;
     Generation::GeneratedEntityKey SiteTree;
-    int32 BuildX = 0, BuildY = 0, PlotX = 0, PlotY = 0;
+    int32 BuildX = 0, BuildY = 0, PlotX = 0, PlotY = 0, StorageX = 0, StorageY = 0;
+    int32 TimberPack = 0, FirewoodPack = 0, TimberChest = 0, FirewoodChest = 0;
     TArray<ResourceNode> Clear;
     Point WalkStart{-3750, 0};
     FVector WalkBefore = FVector::ZeroVector, WalkAfter = FVector::ZeroVector;
@@ -104,6 +105,18 @@ bool SitePersists(const Simulation& Sim, const FWoodlandFixture& Fixture)
         && Plot->moisture > 0.8 && Sim.Count(Item::RoastedRoots) == 1;
 }
 
+bool ProcessingPersists(const Simulation& Sim, const FWoodlandFixture& Fixture)
+{
+    if (Sim.Count(Item::Timber) != Fixture.TimberPack
+        || Sim.Count(Item::Firewood) != Fixture.FirewoodPack) return false;
+    for (const auto& Structure : Sim.GetState().structures)
+        if (Structure.kind == Piece::Chest && Structure.cellX == Fixture.StorageX
+            && Structure.cellY == Fixture.StorageY)
+            return Structure.storage[static_cast<int32>(Item::Timber)] == Fixture.TimberChest
+                && Structure.storage[static_cast<int32>(Item::Firewood)] == Fixture.FirewoodChest;
+    return false;
+}
+
 bool ShadersReady()
 {
 #if WITH_EDITOR
@@ -143,17 +156,26 @@ bool ChooseSite(const Simulation& Sim, FWoodlandFixture& Fixture)
         for (const FIntPoint GardenOffset : GardenOffsets)
         {
             const int32 GardenX = X + GardenOffset.X, GardenY = Y + GardenOffset.Y;
-            if (CellRelief(GardenX, GardenY) > 80) continue;
+            const int32 StorageX = X - GardenOffset.X, StorageY = Y - GardenOffset.Y;
+            if (CellRelief(GardenX, GardenY) > 80 || CellRelief(StorageX, StorageY) > 80) continue;
             const Point Build = CellCenter(X, Y), Garden = CellCenter(GardenX, GardenY);
+            const Point Storage = CellCenter(StorageX, StorageY);
+            const double AwayX = Build.x - Storage.x, AwayY = Build.y - Storage.y;
+            const double AwayLength = FMath::Sqrt(AwayX * AwayX + AwayY * AwayY);
+            const Point FireApproach{Build.x - AwayY * 200.0 / AwayLength,
+                Build.y + AwayX * 200.0 / AwayLength};
             const Point TillApproach{Garden.x - 190, Garden.y};
             TArray<ResourceNode> Clear;
             for (const auto& Node : State.resources)
                 if (!Node.cleared && (Blocks(Node, X, Y) || Blocks(Node, GardenX, GardenY)
+                    || Blocks(Node, StorageX, StorageY)
                     || DistanceSquared(Node.position, TillApproach) < FMath::Square(300.0)
                     || DistanceSquared(Node.position, {Build.x - 350, Build.y}) < FMath::Square(140.0)
-                    || DistanceSquared(Node.position, {Build.x - 200, Build.y}) < FMath::Square(220.0)))
+                    || DistanceSquared(Node.position, {Build.x - 200, Build.y}) < FMath::Square(220.0)
+                    || DistanceSquared(Node.position, FireApproach) < FMath::Square(140.0)
+                    || DistanceSquared(Node.position, Storage) < FMath::Square(140.0)))
                     Clear.Add(Node);
-            if (Clear.Num() > 2 || !Clear.ContainsByPredicate(
+            if (Clear.Num() > 3 || !Clear.ContainsByPredicate(
                 [&Tree](const ResourceNode& Node) { return Node.key == Tree.key; })) continue;
             const double Score = Clear.Num() * 10000000.0 + DistanceSquared(Build, {-1000, 0});
             if (Score >= Best) continue;
@@ -162,6 +184,7 @@ bool ChooseSite(const Simulation& Sim, FWoodlandFixture& Fixture)
             Fixture.SiteTree = Tree.key;
             Fixture.BuildX = X; Fixture.BuildY = Y;
             Fixture.PlotX = GardenX; Fixture.PlotY = GardenY;
+            Fixture.StorageX = StorageX; Fixture.StorageY = StorageY;
             Fixture.Clear = MoveTemp(Clear);
         }
     }
@@ -205,7 +228,7 @@ TSharedRef<FJsonObject> ProofJson(const FWoodlandFixture& Fixture)
 {
     auto Json = MakeShared<FJsonObject>();
     Json->SetStringField(TEXT("route"), TEXT("HomesteadGeneratedWoodland"));
-    Json->SetNumberField(TEXT("schema"), 1);
+    Json->SetNumberField(TEXT("schema"), 2);
     Json->SetNumberField(TEXT("producerProcess"), Fixture.ProducerProcess);
     Json->SetStringField(TEXT("world"), Fixture.WorldId);
     Json->SetStringField(TEXT("seed"), UTF8_TO_TCHAR(std::to_string(Fixture.World.seed).c_str()));
@@ -215,6 +238,11 @@ TSharedRef<FJsonObject> ProofJson(const FWoodlandFixture& Fixture)
     Json->SetStringField(TEXT("regionalReachKey"), Fixture.RegionalReachKey);
     Json->SetNumberField(TEXT("buildX"), Fixture.BuildX); Json->SetNumberField(TEXT("buildY"), Fixture.BuildY);
     Json->SetNumberField(TEXT("plotX"), Fixture.PlotX); Json->SetNumberField(TEXT("plotY"), Fixture.PlotY);
+    Json->SetNumberField(TEXT("storageX"), Fixture.StorageX); Json->SetNumberField(TEXT("storageY"), Fixture.StorageY);
+    Json->SetNumberField(TEXT("timberPack"), Fixture.TimberPack);
+    Json->SetNumberField(TEXT("firewoodPack"), Fixture.FirewoodPack);
+    Json->SetNumberField(TEXT("timberChest"), Fixture.TimberChest);
+    Json->SetNumberField(TEXT("firewoodChest"), Fixture.FirewoodChest);
     for (const auto& Entry : {TPair<FString, Generation::GeneratedEntityKey>(TEXT("siteTree"), Fixture.SiteTree)})
     {
         auto Key = MakeShared<FJsonObject>();
@@ -229,7 +257,7 @@ TSharedRef<FJsonObject> ProofJson(const FWoodlandFixture& Fixture)
     Json->SetBoolField(TEXT("crossedOldBoundary"), Fixture.CrossedOldBoundary);
     Json->SetBoolField(TEXT("crossedChunkSeam"), Fixture.CrossedChunkSeam);
     Json->SetBoolField(TEXT("continuousGround"), Fixture.ContinuousGround);
-    Json->SetStringField(TEXT("classification"), TEXT("CONTROLLED: supplied tools/materials/water; setup/return teleports; mapped-input walk and actions"));
+    Json->SetStringField(TEXT("classification"), TEXT("CONTROLLED: supplied tools/build materials/water; earned timber split and fueled through mapped input; one earned timber stored; setup/return teleports; mapped-input walk and actions"));
     return Json;
 }
 
@@ -265,7 +293,7 @@ bool ReadProof(const FString& Producer, FWoodlandFixture& Fixture, TArray<uint8>
     };
     int64 Process = 0, Schema = 0, Version = 0;
     if (!Json->TryGetStringField(TEXT("route"), Route) || Route != TEXT("HomesteadGeneratedWoodland")
-        || !Integer(TEXT("schema"), 1, 1, Schema)
+        || !Integer(TEXT("schema"), 2, 2, Schema)
         || !Integer(TEXT("producerProcess"), 1, MAX_uint32, Process)
         || Process == FPlatformProcess::GetCurrentProcessId()
         || !Integer(TEXT("generationVersion"), Generation::WorldGenerationVersion,
@@ -283,13 +311,25 @@ bool ReadProof(const FString& Producer, FWoodlandFixture& Fixture, TArray<uint8>
         || Parsed.GetState().world.generationVersion != Version) return false;
     Fixture.World = Parsed.GetState().world;
     Fixture.ProducerProcess = static_cast<uint32>(Process);
-    int32* Cells[] = {&Fixture.BuildX, &Fixture.BuildY, &Fixture.PlotX, &Fixture.PlotY};
-    const TCHAR* Names[] = {TEXT("buildX"), TEXT("buildY"), TEXT("plotX"), TEXT("plotY")};
-    for (int32 I = 0; I < 4; ++I)
+    int32* Cells[] = {&Fixture.BuildX, &Fixture.BuildY, &Fixture.PlotX, &Fixture.PlotY,
+        &Fixture.StorageX, &Fixture.StorageY};
+    const TCHAR* Names[] = {TEXT("buildX"), TEXT("buildY"), TEXT("plotX"), TEXT("plotY"),
+        TEXT("storageX"), TEXT("storageY")};
+    for (int32 I = 0; I < 6; ++I)
     {
         int64 Value = 0;
         if (!Integer(Names[I], -3333, 3332, Value)) return false;
         *Cells[I] = static_cast<int32>(Value);
+    }
+    int32* Counts[] = {&Fixture.TimberPack, &Fixture.FirewoodPack,
+        &Fixture.TimberChest, &Fixture.FirewoodChest};
+    const TCHAR* CountNames[] = {TEXT("timberPack"), TEXT("firewoodPack"),
+        TEXT("timberChest"), TEXT("firewoodChest")};
+    for (int32 I = 0; I < 4; ++I)
+    {
+        int64 Value = 0;
+        if (!Integer(CountNames[I], 0, InventoryCapacity, Value)) return false;
+        *Counts[I] = static_cast<int32>(Value);
     }
     for (const auto& Entry : {TPair<FString, Generation::GeneratedEntityKey*>(TEXT("siteTree"), &Fixture.SiteTree)})
     {
@@ -307,7 +347,7 @@ bool ReadProof(const FString& Producer, FWoodlandFixture& Fixture, TArray<uint8>
     return Parsed.ResolveGeneratedResource(Fixture.SiteTree, SiteTree)
         && FMath::FloorToInt(SiteTree.position.x / CellSize) == Fixture.BuildX
         && FMath::FloorToInt(SiteTree.position.y / CellSize) == Fixture.BuildY
-        && SitePersists(Parsed, Fixture);
+        && SitePersists(Parsed, Fixture) && ProcessingPersists(Parsed, Fixture);
 }
 }
 
@@ -489,7 +529,9 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             {
                 const bool Good = *Loaded && !Controller->ToastIsError()
                     && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
-                    && Controller->WorldId == Fixture->WorldId && SitePersists(Controller->Simulation(), *Fixture);
+                    && Controller->WorldId == Fixture->WorldId
+                    && SitePersists(Controller->Simulation(), *Fixture)
+                    && ProcessingPersists(Controller->Simulation(), *Fixture);
                 if (Good) Results.Add(FString::Printf(TEXT("GENERATED_RESUME producer_pid=%u consumer_pid=%u save_md5=%s; controlled producer site, not a new untouched/walking claim"),
                     Fixture->ProducerProcess, FPlatformProcess::GetCurrentProcessId(), *Fixture->Fingerprint));
                 return Good;
@@ -538,6 +580,11 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     { Finish(false, TEXT("No naturally clear bounded old-edge/chunk-seam walking corridor exists for this generated descriptor; no reroll.")); return; }
     const Point Build = CellCenter(Fixture->BuildX, Fixture->BuildY);
     const Point Garden = CellCenter(Fixture->PlotX, Fixture->PlotY);
+    const Point Storage = CellCenter(Fixture->StorageX, Fixture->StorageY);
+    const double AwayX = Build.x - Storage.x, AwayY = Build.y - Storage.y;
+    const double AwayLength = FMath::Sqrt(AwayX * AwayX + AwayY * AwayY);
+    const Point FireApproach{Build.x - AwayY * 200.0 / AwayLength,
+        Build.y + AwayX * 200.0 / AwayLength};
     Add(TEXT("Untouched generated start has no edits, structures, plots or supplied tools"),
         []() {},
         [this]()
@@ -653,6 +700,7 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
         const bool Mature = Planned.kind == ResourceKind::ForestTree;
         const bool Primary = Key == Fixture->SiteTree;
         const auto BranchBefore = MakeShared<int32>(0), FiberBefore = MakeShared<int32>(0);
+        const auto TimberBefore = MakeShared<int32>(0);
         const auto Positioned = MakeShared<bool>(false);
         const auto ActiveBefore = MakeShared<FString>();
         const auto ActiveInstancesBefore = MakeShared<int32>(0);
@@ -707,20 +755,25 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 });
         Add(Primary ? TEXT("Fell mature build-site tree through production primary A")
                     : TEXT("Clear actual worksite obstruction through production secondary X"),
-            [this, Primary, BranchBefore, FiberBefore]()
+            [this, Primary, BranchBefore, FiberBefore, TimberBefore]()
             {
                 *BranchBefore = Controller->Simulation().Count(Item::Branch);
                 *FiberBefore = Controller->Simulation().Count(Item::Fiber);
+                *TimberBefore = Controller->Simulation().Count(Item::Timber);
                 Tap(Primary ? EKeys::Gamepad_FaceButton_Bottom : EKeys::Gamepad_FaceButton_Left);
             },
-            [this, Key, KeyText, Mature, BranchBefore, FiberBefore, ActiveBatchSnapshot,
+            [this, Key, KeyText, Mature, BranchBefore, FiberBefore, TimberBefore, ActiveBatchSnapshot,
                 ActiveInstancesBefore, ActivePointersBefore]()
             {
                 ResourceNode Node;
                 if (!Controller->Simulation().ResolveGeneratedResource(Key, Node) || !Node.cleared
                     || Node.readyAtHour != 0 || Controller->ToastIsError()
                     || Controller->Simulation().UsedCapacity() > InventoryCapacity) return false;
-                if (!Mature) return true;
+                if (!Mature)
+                    return Node.kind != ResourceKind::Sapling
+                        || (Controller->Simulation().Count(Item::Branch) == *BranchBefore + 8
+                            && Controller->Simulation().Count(Item::Fiber) == *FiberBefore + 2
+                            && Controller->Simulation().Count(Item::Timber) == *TimberBefore);
                 int32 Components = 0, Instances = 0, Collisions = 0;
                 const FString After = ActiveBatchSnapshot(Components, Instances, Collisions);
                 bool OldPointersRemoved = true;
@@ -732,17 +785,20 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                         && !Controller->Landscape->ActiveTreeInstances.Contains(KeyText)
                         && !Controller->Landscape->ActiveTreeCollisions.Contains(KeyText)
                         && OldPointersRemoved
-                        && Controller->Simulation().Count(Item::Branch) == *BranchBefore + 8
-                        && Controller->Simulation().Count(Item::Fiber) == *FiberBefore + 2;
+                        && Controller->Simulation().Count(Item::Branch) == *BranchBefore + 4
+                        && Controller->Simulation().Count(Item::Fiber) == *FiberBefore
+                        && Controller->Simulation().Count(Item::Timber) == *TimberBefore + 6;
             }, 0.8f);
     }
-    Add(TEXT("CONTROLLED post-felling supply: digging/watering tools, build stones, roots, seed and water; retain earned wood/fiber"),
+    QueueCraft(Recipe::SplitFirewood);
+    Add(TEXT("CONTROLLED post-felling supply: digging/watering tools, build materials, roots, seed and water; retain earned timber/firewood"),
         [this]()
         {
             Homestead::Simulation Supplied = Controller->Simulation();
             auto& Stock = const_cast<Homestead::State&>(Supplied.GetState());
             const TPair<Item, int32> Minimums[] = {{Item::DiggingStick, 1}, {Item::WateringCan, 1},
-                {Item::Branch, 8}, {Item::Stone, 6}, {Item::Roots, 2}, {Item::Seeds, 1}, {Item::Water, 1}};
+                {Item::Branch, 12}, {Item::Stone, 6}, {Item::Fiber, 2},
+                {Item::Roots, 2}, {Item::Seeds, 1}, {Item::Water, 1}};
             for (const auto& Supply : Minimums)
             {
                 const int32 Index = static_cast<int32>(Supply.Key);
@@ -755,11 +811,35 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
             Results.Add(TEXT("CONTROLLED post-felling materials supplied; earned tree rewards retained and later construction/cooking use production authority."));
         },
-        [this]() { return Controller->Simulation().Count(Item::Branch) >= 8
+        [this]() { return Controller->Simulation().Count(Item::Branch) >= 12
             && Controller->Simulation().Count(Item::Stone) >= 6
+            && Controller->Simulation().Count(Item::Fiber) >= 2
+            && Controller->Simulation().Count(Item::Firewood) >= 4
             && Controller->Simulation().Count(Item::DiggingStick) == 1
             && Controller->Simulation().Count(Item::WateringCan) == 1
             && Controller->Simulation().UsedCapacity() <= InventoryCapacity; });
+    QueuePlace(Piece::Chest, Fixture->StorageX, Fixture->StorageY);
+    Add(TEXT("CONTROLLED approach to the player-built storage chest"),
+        [this, Storage]() { Teleport(Storage); },
+        [this]() { return Controller->Focus == AHomesteadController::EFocus::Chest; }, 0.8f);
+    Add(TEXT("Store one earned Timber through production chest authority"),
+        [this, Storage]()
+        {
+            const int32 Chest = Controller->Simulation().FindNearestStructure(
+                Storage, Piece::Chest, 1);
+            const auto Result = Controller->Sim.Transfer(Chest, Item::Timber, 1, Storage);
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+            else Results.Add(TEXT("CONTROLLED one earned Timber stored in the player-built chest; no inventory fabrication."));
+        },
+        [this, Fixture]()
+        {
+            for (const auto& Structure : Controller->State().structures)
+                if (Structure.kind == Piece::Chest && Structure.cellX == Fixture->StorageX
+                    && Structure.cellY == Fixture->StorageY)
+                    return Structure.storage[static_cast<int32>(Item::Timber)] == 1
+                        && Controller->Simulation().Count(Item::Timber) >= 4;
+            return false;
+        });
     QueuePlace(Piece::Foundation, Fixture->BuildX, Fixture->BuildY);
     Add(TEXT("CONTROLLED teleport to the cleared tree plot approach; no ordinary-travel claim"),
         [this, Garden]()
@@ -787,11 +867,13 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 && !Controller->ToastIsError(); }, 0.8f);
     QueuePlace(Piece::Fire, Fixture->BuildX, Fixture->BuildY);
     Add(TEXT("CONTROLLED approach to the player-built cookfire"),
-        [this, Build]() { Teleport({Build.x - 200, Build.y}); },
+        [this, FireApproach]() { Teleport(FireApproach); },
         [this]() { return Controller->Focus == AHomesteadController::EFocus::Fire; }, 0.8f);
-    Add(TEXT("Fuel the actual cookfire with mapped X"),
+    Add(TEXT("Fuel the actual cookfire with earned Firewood through mapped X"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
-        [this]() { return !Controller->ToastIsError() && Controller->Simulation().IsNearFire(Controller->PlayerPoint()); });
+        [this]() { return !Controller->ToastIsError()
+            && Controller->Simulation().IsNearFire(Controller->PlayerPoint())
+            && Controller->Simulation().Count(Item::Firewood) == 3; });
     QueueCraft(Recipe::RoastedRoots);
     Add(TEXT("Frame the genuinely cleared build and watered plot with the gameplay camera"),
         [this, Garden]()
@@ -1119,6 +1201,19 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             const auto* Save = Controller->ReadSave(Manual);
             TArray<uint8> Bytes;
             if (!Save || !Save->IsCurrentVersion() || !FFileHelper::LoadFileToArray(Bytes, *Manual)) return;
+            Fixture->TimberPack = Controller->Simulation().Count(Item::Timber);
+            Fixture->FirewoodPack = Controller->Simulation().Count(Item::Firewood);
+            bool FoundChest = false;
+            for (const auto& Structure : Controller->State().structures)
+                if (Structure.kind == Piece::Chest && Structure.cellX == Fixture->StorageX
+                    && Structure.cellY == Fixture->StorageY)
+                {
+                    Fixture->TimberChest = Structure.storage[static_cast<int32>(Item::Timber)];
+                    Fixture->FirewoodChest = Structure.storage[static_cast<int32>(Item::Firewood)];
+                    FoundChest = true;
+                    break;
+                }
+            if (!FoundChest || Fixture->TimberChest != 1 || Fixture->FirewoodPack != 3) return;
             Fixture->WorldId = Save->WorldId;
             Fixture->SimulationText = Save->SimulationData;
             Fixture->ProducerProcess = FPlatformProcess::GetCurrentProcessId();
@@ -1152,6 +1247,8 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
         },
         [this, Fixture, Reloaded]() { return *Reloaded && !Controller->ToastIsError()
             && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
-            && Controller->WorldId == Fixture->WorldId && SitePersists(Controller->Simulation(), *Fixture); }, 1.0f);
+            && Controller->WorldId == Fixture->WorldId
+            && SitePersists(Controller->Simulation(), *Fixture)
+            && ProcessingPersists(Controller->Simulation(), *Fixture); }, 1.0f);
     Capture(TEXT("generated-reloaded"));
 }

@@ -127,7 +127,7 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Flowers: return Items({{Item::Flowers, 3}});
     case ResourceKind::Reeds: return Items({{Item::Fiber, 5}});
     case ResourceKind::Sapling: return Items({{Item::Branch, 8}, {Item::Fiber, 2}});
-    case ResourceKind::ForestTree: return Items({{Item::Branch, 8}, {Item::Fiber, 2}});
+    case ResourceKind::ForestTree: return Items({{Item::Timber, 6}, {Item::Branch, 4}});
     default: return {};
     }
 }
@@ -154,6 +154,7 @@ Inventory CraftChange(Recipe recipe)
     case Recipe::WateringCan: return Items({{Item::Branch, -3}, {Item::Fiber, -2}, {Item::WateringCan, 1}});
     case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::RoastedRoots, 1}});
     case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::HerbedRoots, 1}});
+    case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
     default: return {};
     }
 }
@@ -622,7 +623,7 @@ const char* ItemName(Item item)
 {
     static const char* names[] = {"Knife", "Branch", "Stone", "Fiber", "Berries", "Roots",
         "Meadow herb", "Seeds", "Crude hatchet", "Digging stick", "Watering can", "Water",
-        "Roasted roots", "Herbed roots"};
+        "Roasted roots", "Herbed roots", "Timber", "Firewood"};
     return ValidEnum(item, Item::Count) ? names[static_cast<int>(item)] : "Unknown item";
 }
 const char* ResourceName(ResourceKind kind)
@@ -634,7 +635,7 @@ const char* ResourceName(ResourceKind kind)
 const char* RecipeName(Recipe recipe)
 {
     static const char* names[] = {"Crude hatchet", "Digging stick", "Watering can",
-        "Roasted roots", "Herbed roots"};
+        "Roasted roots", "Herbed roots", "Split firewood"};
     return ValidEnum(recipe, Recipe::Count) ? names[static_cast<int>(recipe)] : "Unknown recipe";
 }
 const char* PieceName(Piece piece)
@@ -656,8 +657,12 @@ const char* RecipeRequirements(Recipe recipe)
         {
             const auto kind = static_cast<Recipe>(i);
             result[i] = DescribeCost(CraftChange(kind));
-            result[i] += kind == Recipe::RoastedRoots || kind == Recipe::HerbedRoots
-                ? "; nearby fueled fire (no pot needed)" : "; knife required";
+            if (kind == Recipe::RoastedRoots || kind == Recipe::HerbedRoots)
+                result[i] += "; nearby fueled fire (no pot needed)";
+            else if (kind == Recipe::SplitFirewood)
+                result[i] += "; crude hatchet required";
+            else
+                result[i] += "; knife required";
         }
         return result;
     }();
@@ -672,7 +677,7 @@ const char* PieceRequirements(Piece piece)
             const auto kind = static_cast<Piece>(i);
             result[i] = DescribeCost(BuildCost(kind));
             if (EdgePiece(kind) || kind == Piece::Roof) result[i] += "; foundation required";
-            if (kind == Piece::Fire) result[i] += "; add a branch after placement to light";
+            if (kind == Piece::Fire) result[i] += "; add firewood or a branch after placement to light";
         }
         return result;
     }();
@@ -1136,7 +1141,10 @@ Result Simulation::Craft(Recipe recipe, Point player)
     const Inventory change = CraftChange(recipe);
     const bool cooking = recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots;
     if (cooking && !IsNearFire(player)) return Bad("Move beside a fueled cookfire to cook roots; no pot is needed.");
-    if (!cooking && Count(Item::Knife) == 0) return Bad("Take your knife from storage to craft tools.");
+    if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
+        return Bad("Take your crude hatchet from storage to split firewood.");
+    if (!cooking && recipe != Recipe::SplitFirewood && Count(Item::Knife) == 0)
+        return Bad("Take your knife from storage to craft tools.");
     if (!TryAdjust(change)) return Bad(MissingMessage(change, state_.inventory));
     return Good(std::string("Made ") + RecipeName(recipe) + ".");
 }
@@ -1253,9 +1261,11 @@ Result Simulation::AddFuel(int structureId, Point player)
     if (!fire || fire->kind != Piece::Fire) return Bad("Choose a cookfire to fuel.");
     if (!Near(player, CellCenter(fire->cellX, fire->cellY))) return Bad("Move closer to fuel this cookfire.");
     if (fire->fuelHours > MaxFuel - 4.0) return Bad("This fire has enough fuel. Add more after it burns down.");
-    if (!TryAdjust(Items({{Item::Branch, -1}}))) return Bad("Gather a branch to fuel the fire.");
+    const Item fuel = Count(Item::Firewood) > 0 ? Item::Firewood : Item::Branch;
+    if (!TryAdjust(Items({{fuel, -1}}))) return Bad("Carry firewood or a branch to fuel the fire.");
     fire->fuelHours += 4.0;
-    return Good("Added a branch: four more hours of fire.");
+    return Good(fuel == Item::Firewood ? "Added firewood: four more hours of fire."
+        : "Added a branch: four more hours of fire.");
 }
 Result Simulation::Transfer(int chestId, Item item, int amount, Point player)
 {

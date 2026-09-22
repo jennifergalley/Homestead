@@ -689,7 +689,7 @@ FString AHomesteadController::FocusActions() const
                     ? A + (Plot.growth >= 1 ? TEXT(" Harvest") : TEXT(" Water")) + TEXT("   ") + X + TEXT(" Weed")
                     : A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
         break;
-    case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add a branch");
+    case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
     case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return A + TEXT(" Fill watering can");
@@ -974,7 +974,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({3, TEXT("3. Make a home"), TEXT("Craft a hatchet and fell the trees at your chosen site. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
         Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a digging stick. Till with F/X; bare plots offer roots with A/E or berry seeds with X/F.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill a watering can at the stream. F/X removes weeds from a plot.")});
-        Result.Add({6, TEXT("6. Cook and rest"), TEXT("Fuel a cookfire with branches. Roast roots; sleep in a sheltered bedroll.")});
+        Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried hatchet. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is owned and crafted.")});
         Result.Add({8, TEXT("Move naturally through the menu"), TEXT("Use the D-pad, left stick, or arrow keys within lists and across their edges to nearby sections. A/Enter activates; B/Esc backs out. LB/RB change tabs. Triggers or Tab are optional section shortcuts. Choose Amount and activate it before editing a quantity.")});
     }

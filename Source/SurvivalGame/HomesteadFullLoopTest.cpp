@@ -56,8 +56,14 @@ Homestead::Item CraftedItem(Homestead::Recipe Recipe)
     case Homestead::Recipe::WateringCan: return Homestead::Item::WateringCan;
     case Homestead::Recipe::RoastedRoots: return Homestead::Item::RoastedRoots;
     case Homestead::Recipe::HerbedRoots: return Homestead::Item::HerbedRoots;
+    case Homestead::Recipe::SplitFirewood: return Homestead::Item::Firewood;
     default: return Homestead::Item::Count;
     }
+}
+
+int32 CraftedQuantity(Homestead::Recipe Recipe)
+{
+    return Recipe == Homestead::Recipe::SplitFirewood ? 4 : 1;
 }
 
 bool SameAppearance(const FHomesteadAppearance& A, const FHomesteadAppearance& B)
@@ -132,6 +138,7 @@ void AHomesteadSmokeTest::QueueGatherTo(Homestead::Item Item, int32 TargetCount)
 void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
 {
     const auto Item = CraftedItem(Recipe);
+    const int32 Quantity = CraftedQuantity(Recipe);
     const auto Before = MakeShared<int32>(0);
     Add(FString::Printf(TEXT("Open crafting for %s"), UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))),
         [this]() { Tap(EKeys::C); },
@@ -147,9 +154,9 @@ void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
             *Before = Controller->Simulation().Count(Item);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, Before, Item]()
+        [this, Before, Item, Quantity]()
         {
-            return !Controller->ToastIsError() && Controller->Simulation().Count(Item) == *Before + 1;
+            return !Controller->ToastIsError() && Controller->Simulation().Count(Item) == *Before + Quantity;
         });
     Add(TEXT("Close the crafting book"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },

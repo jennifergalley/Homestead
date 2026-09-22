@@ -79,9 +79,10 @@ const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("gui
     TEXT("settings"), TEXT("credits"), TEXT("appearance")};
 const TCHAR* ItemIcons[] = {TEXT("knife"), TEXT("branch"), TEXT("stone"), TEXT("fiber"),
     TEXT("berries"), TEXT("roots"), TEXT("flowers"), TEXT("seeds"), TEXT("hatchet"),
-    TEXT("digging-stick"), TEXT("watering-can"), TEXT("water"), TEXT("roasted-roots"), TEXT("herbed-roots")};
+    TEXT("digging-stick"), TEXT("watering-can"), TEXT("water"), TEXT("roasted-roots"), TEXT("herbed-roots"),
+    TEXT("timber"), TEXT("firewood")};
 const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("watering-can"),
-    TEXT("roasted-roots"), TEXT("herbed-roots")};
+    TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
 const TCHAR* PieceIcons[] = {TEXT("foundation"), TEXT("wall"), TEXT("doorway"), TEXT("roof"),
     TEXT("fire"), TEXT("bed"), TEXT("chest")};
 constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
