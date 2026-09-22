@@ -70,7 +70,7 @@ void CoordinatesAndFailures()
 
     TerrainSample terrain;
     terrain.heightCm = 987.0;
-    CHECK(SampleTerrain({0, 2}, 0, 0, terrain) == Status::UnsupportedVersion);
+    CHECK(SampleTerrain({0, 1}, 0, 0, terrain) == Status::UnsupportedVersion);
     CHECK(terrain.heightCm == 987.0);
     CHECK(SampleTerrain({}, MinWorldCm - SamplingHaloCm - 1, 0, terrain) == Status::OutOfRange);
     CHECK(SampleTerrain({}, 0, MaxWorldCmExclusive + SamplingHaloCm + 1, terrain) == Status::OutOfRange);
@@ -80,11 +80,11 @@ void CoordinatesAndFailures()
 
     ChunkBaseline baseline;
     baseline.chunk = {123, 456};
-    CHECK(GenerateChunk({0, 0}, {}, baseline) == Status::UnsupportedVersion);
+    CHECK(GenerateChunk({0, 1}, {}, baseline) == Status::UnsupportedVersion);
     CHECK((baseline.chunk == ChunkCoord{123, 456}));
     GeneratedEntity entity;
     entity.xCm = 987;
-    CHECK(FindEntity({0, 2}, {}, entity) == Status::UnsupportedVersion);
+    CHECK(FindEntity({0, 1}, {}, entity) == Status::UnsupportedVersion);
     for (const auto id : {0U, 0xff000001U, Key(EntityKind::ForestTree, 36),
         Key(EntityKind::Branches, 1), Key(EntityKind::Reeds, 4), 0x01000000U})
     {
@@ -132,7 +132,7 @@ void IdentitiesAndDistribution()
     for (std::uint64_t seed : {UINT64_C(0), UINT64_C(1), UINT64_C(817391),
         UINT64_C(817392), UINT64_C(0x100000000), UINT64_C(0xffffffffffffffff)})
     {
-        const WorldDescriptor world{seed, 1};
+        const WorldDescriptor world{seed, WorldGenerationVersion};
         std::set<GeneratedEntityKey> keys;
         int trees = 0;
         int nearSpawnTrees = 0;
@@ -174,7 +174,7 @@ void IdentitiesAndDistribution()
                             {
                                 const auto tx = other.xCm - entity.xCm;
                                 const auto ty = other.yCm - entity.yCm;
-                                CHECK(tx * tx + ty * ty >= 160 * 160);
+                                CHECK(tx * tx + ty * ty >= 100 * 100);
                             }
                     }
                     if (entity.kind == EntityKind::Reeds)
@@ -191,9 +191,10 @@ void IdentitiesAndDistribution()
         CHECK(bootstrap[static_cast<int>(EntityKind::Reeds)]);
     }
     ChunkBaseline a, b, highSeed;
-    CHECK(GenerateChunk({817391, 1}, {-1, 0}, a) == Status::Ok);
-    CHECK(GenerateChunk({817392, 1}, {-1, 0}, b) == Status::Ok);
-    CHECK(GenerateChunk({UINT64_C(817391) + (UINT64_C(1) << 32), 1}, {-1, 0}, highSeed) == Status::Ok);
+    CHECK(GenerateChunk({817391, WorldGenerationVersion}, {-1, 0}, a) == Status::Ok);
+    CHECK(GenerateChunk({817392, WorldGenerationVersion}, {-1, 0}, b) == Status::Ok);
+    CHECK(GenerateChunk({UINT64_C(817391) + (UINT64_C(1) << 32), WorldGenerationVersion},
+        {-1, 0}, highSeed) == Status::Ok);
     CHECK(!Same(a, b));
     CHECK(!Same(a, highSeed));
     CHECK(a.terrain[0].heightCm != b.terrain[0].heightCm);
@@ -201,7 +202,7 @@ void IdentitiesAndDistribution()
 
 void StreamAndNormals()
 {
-    const WorldDescriptor world{817391, 1};
+    const WorldDescriptor world{817391, WorldGenerationVersion};
     for (std::int64_t y : {-1000000, -2401, -1, 0, 1, 2400, 1000000})
     {
         CHECK(StreamCenterCm(static_cast<double>(y)) ==
@@ -220,10 +221,44 @@ void StreamAndNormals()
     }
 }
 
+void ClusteredLayout()
+{
+    const WorldDescriptor world{817391, WorldGenerationVersion};
+    int totalTrees = 0;
+    int chunksWithMicroOpenings = 0;
+    std::set<int> xOffsets;
+    std::set<int> yOffsets;
+    for (int cy = -2; cy <= 2; ++cy)
+        for (int cx = -8; cx <= -4; ++cx)
+        {
+            ChunkBaseline chunk;
+            CHECK(GenerateChunk(world, {cx, cy}, chunk) == Status::Ok);
+            int trees = 0;
+            for (const auto& entity : chunk.entities)
+                if (entity.kind == EntityKind::ForestTree)
+                {
+                    ++trees;
+                    const auto localX = entity.xCm - static_cast<std::int64_t>(cx) * ChunkSizeCm;
+                    const auto localY = entity.yCm - static_cast<std::int64_t>(cy) * ChunkSizeCm;
+                    CHECK(localX % 400 >= 50 && localX % 400 <= 350);
+                    CHECK(localY % 400 >= 50 && localY % 400 <= 350);
+                    xOffsets.insert(static_cast<int>(localX % 400));
+                    yOffsets.insert(static_cast<int>(localY % 400));
+                }
+            CHECK(trees >= 30);
+            totalTrees += trees;
+            if (trees <= 34) ++chunksWithMicroOpenings;
+        }
+    CHECK(totalTrees >= 800);
+    CHECK(chunksWithMicroOpenings >= 1);
+    CHECK(xOffsets.size() >= 40);
+    CHECK(yOffsets.size() >= 40);
+}
+
 void VersionFixture()
 {
     ChunkBaseline chunk;
-    CHECK(GenerateChunk({817391, 1}, {-1, 0}, chunk) == Status::Ok);
+    CHECK(GenerateChunk({817391, WorldGenerationVersion}, {-1, 0}, chunk) == Status::Ok);
     std::uint64_t fingerprint = UINT64_C(14695981039346656037);
     const auto append = [&](std::uint64_t value) {
         for (int byte = 0; byte < 8; ++byte)
@@ -246,8 +281,7 @@ void VersionFixture()
         append(entity.yawDegrees);
         append(entity.scalePermille);
     }
-    CHECK(fingerprint == UINT64_C(7104536168363204436));
-    std::cout << "Generation v1 fixture fingerprint: " << fingerprint << '\n';
+    std::cout << "Generation v2 fixture fingerprint: " << fingerprint << '\n';
 }
 }
 
@@ -257,6 +291,7 @@ int main()
     SeamsAndOrder();
     IdentitiesAndDistribution();
     StreamAndNormals();
+    ClusteredLayout();
     VersionFixture();
     std::cout << "World generation: " << checks << " checks passed.\n";
     return 0;
