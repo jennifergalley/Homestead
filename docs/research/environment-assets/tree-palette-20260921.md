@@ -89,12 +89,26 @@ license URLs remain `https://polyhaven.com/about-contact`,
 No binary below exists locally; publisher MD5 is not a local SHA-256.
 MAIN decides/acquires and creates actual receipts before import.
 
+Acquisition status after MAIN review:
+
+| Asset | Status |
+| --- | --- |
+| `jacaranda_tree` | Authorized for MAIN's existing size/hash/license-gated acquisition path |
+| `island_tree_02` | Authorized for MAIN's existing size/hash/license-gated acquisition path |
+| `fir_sapling_medium` | Authorized for MAIN's existing size/hash/license-gated acquisition path |
+| `fir_tree_01` | **Conditional, not approved as the 249 MB FBX.** MAIN must first inspect a bounded Poly Haven archive/delivery alternative or choose a sub-128 MiB mature-conifer source. Raising the cap requires separate exact rationale. |
+
 ### `jacaranda_tree`
 
 - Authors: Rob Tuytel (guidance), Rico Cilliers (all).
 - Source: https://polyhaven.com/a/jacaranda_tree
+- Metadata API: https://api.polyhaven.com/info/jacaranda_tree and
+  https://api.polyhaven.com/files/jacaranda_tree; publisher files hash
+  `2841c124ea9e28651baa3b47ca8828907e19aee0`.
 - 1K FBX: https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/jacaranda_tree/jacaranda_tree_1k.fbx
   — 132,437,628 bytes, publisher MD5 `98f9827599dd42b18c1e9dfab3062d2f`.
+- Public descriptor: https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/jacaranda_tree/jacaranda_tree_1k.gltf
+  — 9,526 bytes, publisher MD5 `8fed93ff7cbdaac0f5c199ef1fd0f694`.
 - Descriptor evidence: one `jacaranda_tree_LOD0`, 3,863,832 indexed triangles;
   roles in order branches / trunk / leaves. glTF is metre/Y-up, identity node
   transform. Role accessor union is the approximate native extent above.
@@ -112,8 +126,13 @@ MAIN decides/acquires and creates actual receipts before import.
 
 - Authors: Rob Tuytel (scanning/processing), Rico Cilliers (cleanup/processing).
 - Source: https://polyhaven.com/a/island_tree_02
+- Metadata API: https://api.polyhaven.com/info/island_tree_02 and
+  https://api.polyhaven.com/files/island_tree_02; publisher files hash
+  `4292954a33702fc0809a2b2f17a310bb36fd1aca`.
 - 1K FBX: https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/island_tree_02/island_tree_02_1k.fbx
   — 32,258,924 bytes, publisher MD5 `52f6b7264dc026f9496d5cb7d51f7c04`.
+- Public descriptor: https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/island_tree_02/island_tree_02_1k.gltf
+  — 8,545 bytes, publisher MD5 `825057164e987894cbfc6c462977fa71`.
 - Descriptor evidence: one `island_tree_02_LOD0`, 1,072,213 indexed triangles;
   roles in order trunk/base / leaves / branches, metre/Y-up, identity transform.
 - Desired maps: trunk/base prefix `island_tree_02` plus `leaves` and `branches`;
@@ -127,8 +146,13 @@ MAIN decides/acquires and creates actual receipts before import.
 
 - Authors: Rob Tuytel (photography), Rico Cilliers (modeling).
 - Source: https://polyhaven.com/a/fir_tree_01
+- Metadata API: https://api.polyhaven.com/info/fir_tree_01 and
+  https://api.polyhaven.com/files/fir_tree_01; publisher files hash
+  `6b79f3da0de1d192fc78ab54efa5e8956af97749`.
 - 1K FBX: https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/fir_tree_01/fir_tree_01_1k.fbx
   — 249,300,492 bytes, publisher MD5 `ab79788fc818ce7eadd40ccbfe987918`.
+- Public descriptor: https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fir_tree_01/fir_tree_01_1k.gltf
+  — 30,279 bytes, publisher MD5 `0a184431efdba9e4bf76900d8d56504d`.
 - Select **only** `fir_tree_01_c_LOD0`: 505,494 indexed triangles. Roles are
   bark / twig / dead branches / trunk_c (source descriptor lists trunk_c last).
   The model node has layout translation `(12,0,0)` metres; preparation must
@@ -137,16 +161,22 @@ MAIN decides/acquires and creates actual receipts before import.
   and `trunk_c_{diff,nor_dx,rough,ao}`. Descriptor says trunk_c/dead branches
   reuse bark maps, but source inspection controls the native graph.
 - The FBX exceeds the established 128 MiB per-file acquisition cap. Do not
-  silently raise it: MAIN needs an explicit reviewed exception or a verified
-  alternate delivery. Public glTF includes a large external bin and is not an
-  automatic safer substitute.
+  silently raise it. This exact FBX is **not acquisition-approved**. MAIN first
+  checks a bounded publisher archive/delivery alternative or selects a verified
+  sub-128 MiB mature conifer. Public glTF includes a large external bin and is
+  not an automatic safer substitute or license/size bypass.
 
 ### `fir_sapling_medium`
 
 - Authors: Rob Tuytel (photography), Rico Cilliers (modeling).
 - Source: https://polyhaven.com/a/fir_sapling_medium
+- Metadata API: https://api.polyhaven.com/info/fir_sapling_medium and
+  https://api.polyhaven.com/files/fir_sapling_medium; publisher files hash
+  `0029476c186325a03c000bb1349ec299e43f9331`.
 - 1K FBX: https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/fir_sapling_medium/fir_sapling_medium_1k.fbx
   — 51,634,508 bytes, publisher MD5 `82d67e5714eab0c493c8c9260bba8d28`.
+- Public descriptor: https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fir_sapling_medium/fir_sapling_medium_1k.gltf
+  — 17,059 bytes, publisher MD5 `19e16469d9f085b6f9a8034ddab1c010`.
 - Select `fir_sapling_medium_c_LOD0`: 427,645 indexed triangles, 5.91 m high;
   roles branches / twigs / branches_dead. Model layout translation `(10,0,0)`
   metres must not become a gameplay offset.
@@ -163,6 +193,22 @@ Reference-only previews, personally viewed:
 - https://cdn.polyhaven.com/asset_img/thumbs/island_tree_02.png?width=630&quality=95&v=854bdc1f
 - https://cdn.polyhaven.com/asset_img/thumbs/fir_tree_01.png?width=630&quality=95&v=55f25e61
 - https://cdn.polyhaven.com/asset_img/thumbs/fir_sapling_medium.png?width=630&quality=95&v=e66bf476
+
+The exact downloaded preview responses used for selection were stored only in
+session reference space, not the repository or game. Their actual SHA-256 /
+bytes were:
+
+- Jacaranda: `1985D3566831F6F22D0CAF4A3EC8FF724167AF8195A6353DBCD26BA26316097C`
+  / 529,864.
+- Island Tree 02: `C09D51153794BAA50EEE54A41AF589923E637896367C4AA726036189C03D90B9`
+  / 437,890.
+- Fir Tree 01: `0E9F9F163DF752673B25FC2F190E827D5047582B7E64D35929EF79A3FF4DBDEA`
+  / 511,876.
+- Fir Sapling Medium: `8E700E671C26265AFE51B507F93707217433AA451DABE50F54DCE74F2952B3B9`
+  / 375,779.
+
+These hashes prove which preview bytes were inspected; they do not license
+preview-image redistribution or establish the binary model's appearance.
 
 These images support silhouette selection only and are not shipped. This is the
 entire bounded palette. Pine Tree 01 was excluded for an even larger 17.4M
