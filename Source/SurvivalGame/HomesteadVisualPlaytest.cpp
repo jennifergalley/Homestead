@@ -632,12 +632,18 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
         && Tree->GetCollisionResponseToChannel(ECC_Camera) == ECR_Block
         && Tree->GetOwner() == PC->Landscape && PC->Landscape->GetActorEnableCollision();
     const FVector Root = TreeInstance->Visual.Transform.GetLocation();
-    const FVector Anchor = Mesh && Body && Body->AggGeom.SphylElems.Num() == 1
-        ? TreeInstance->Visual.Transform.TransformPosition(FVector(Body->AggGeom.SphylElems[0].Center.X,
-            Body->AggGeom.SphylElems[0].Center.Y, Mesh->GetBoundingBox().Min.Z)) : Root;
-    const double GroundError = Anchor.Z - PC->GroundHeight(Anchor.X, Anchor.Y);
+    UStaticMesh* ExpectedMesh = nullptr;
+    FHomesteadOuterTreeInstance ExpectedVisual;
+    const Homestead::ResourceNode* ExpectedNode = nullptr;
+    for (const auto& Node : PC->State().resources)
+        if (Node.id == TreeInstance->ResourceId) { ExpectedNode = &Node; break; }
+    const bool GroundingReady = ExpectedNode
+        && PC->Landscape->ResolveGeneratedTreeVisual(*ExpectedNode, ExpectedMesh, ExpectedVisual)
+        && ExpectedMesh == Mesh
+        && ExpectedVisual.Transform.Equals(TreeInstance->Visual.Transform, 0.001f);
+    const double GroundError = Root.Z - PC->GroundHeight(Root.X, Root.Y);
     const auto& AuthoredCapsule = Body->AggGeom.SphylElems[0];
-    bTreeReady &= FMath::Abs(GroundError) < 0.1
+    bTreeReady &= GroundingReady
         && Tree->GetRelativeTransform().Equals(TreeInstance->CollisionTransform, 0.001f)
         && FMath::IsNearlyEqual(Tree->GetUnscaledCapsuleRadius(), TreeInstance->CapsuleRadius, 0.001f)
         && FMath::IsNearlyEqual(Tree->GetUnscaledCapsuleHalfHeight(), TreeInstance->CapsuleHalfHeight, 0.001f)
@@ -652,7 +658,9 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
         auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
         const FString MaterialRoot = Mesh->GetPathName().Contains(TEXT("/TreePalette_20260921_01/"))
             ? TEXT("/Game/Trials/TreePalette_20260921_01/Materials/")
-            : TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/");
+            : Mesh->GetPathName().Contains(TEXT("/MatureFir_20260922_02/"))
+                ? TEXT("/Game/Trials/MatureFir_20260922_02/Materials/")
+                : TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/");
         const bool Ready = Material && Material->GetPathName().StartsWith(MaterialRoot)
             && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
         bTreeReady &= Ready;
