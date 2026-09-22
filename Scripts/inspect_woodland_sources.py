@@ -20,8 +20,11 @@ KEEP_ARRAYS = {b"Vertices", b"PolygonVertexIndex", b"Materials"}
 
 
 class FbxReader:
+    MaxFileBytes = 128 * 1024**2
+    MaxDecodedBytes = 256 * 1024**2
+
     def __init__(self, stream, size):
-        if not 27 <= size <= 128 * 1024**2:
+        if not 27 <= size <= self.MaxFileBytes:
             raise ValueError("FBX size outside bounded reader policy.")
         self.stream, self.size = stream, size
         self.nodes = self.decoded_bytes = 0
@@ -75,7 +78,7 @@ class FbxReader:
             self.stream.seek(stored, 1)
             return {"arrayCount": count, "type": code, "decoded": False}
         self.decoded_bytes += expected
-        if self.decoded_bytes > 256 * 1024**2:
+        if self.decoded_bytes > self.MaxDecodedBytes:
             raise ValueError("Total decoded-array budget exceeded.")
         raw = self.read(stored, limit)
         if encoding == 1:

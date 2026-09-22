@@ -33,23 +33,6 @@ const FLinearColor Stone(0.32f, 0.36f, 0.34f);
 const FLinearColor Soil(0.16f, 0.085f, 0.039f);
 const FLinearColor Cloth(0.55f, 0.43f, 0.25f);
 const FLinearColor PreviewColor(0.65f, 0.79f, 0.77f);
-const FVector2D WoodlandBeds[] = {
-    {-2900, -2900}, {-1800, -2600}, {-500, -3000}, {650, -2600},
-    {2800, -2800}, {3200, -1300}, {3100, 400}, {2800, 2400},
-    {1500, 3000}, {100, 2800}, {-1300, 2800}, {-2700, 2400},
-    {-3100, 950}, {-2900, -500}, {-1500, -1350}, {250, 1250}
-};
-
-FVector2D CoverSite(FRandomStream& Random, bool bClearingEdge)
-{
-    const float Angle = Random.FRandRange(0, 2 * PI);
-    const float Radius = bClearingEdge
-        ? FMath::Sqrt(Random.FRandRange(300 * 300, 1100 * 1100))
-        : 550 * FMath::Sqrt(Random.FRand());
-    const FVector2D Center = bClearingEdge ? FVector2D(-1000, 0)
-        : WoodlandBeds[Random.RandRange(0, UE_ARRAY_COUNT(WoodlandBeds) - 1)];
-    return Center + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius;
-}
 
 FName MaterialKey(const FLinearColor& Color, float Roughness, float Glow)
 {
@@ -57,11 +40,6 @@ FName MaterialKey(const FLinearColor& Color, float Roughness, float Glow)
         FMath::RoundToInt(Color.R * 1000), FMath::RoundToInt(Color.G * 1000),
         FMath::RoundToInt(Color.B * 1000), FMath::RoundToInt(Roughness * 100),
         FMath::RoundToInt(Glow * 100)));
-}
-
-FVector AtGround(float X, float Y, float Offset = 0.0f)
-{
-    return FVector(X, Y, AHomesteadWorld::GroundHeight(X, Y) + Offset);
 }
 
 int Stage(double Value, int Steps)
@@ -111,19 +89,48 @@ AHomesteadWorld::AHomesteadWorld()
     Cone = ConeAsset.Object;
 }
 
-float AHomesteadWorld::GroundHeight(float X, float Y)
+float AHomesteadWorld::GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World)
 {
-    const float DistanceHome = FVector2D(X + 1000.0f, Y).Size();
-    const float HomeBlend = FMath::SmoothStep(350.0f, 1050.0f, DistanceHome);
-    const float Land = HomeBlend * (24.0f * FMath::Sin(X / 1550.0f)
-        + 18.0f * FMath::Sin(Y / 1250.0f) + 9.0f * FMath::Sin((X + Y) / 700.0f));
-    const float StreamDistance = FMath::Abs(X - static_cast<float>(Homestead::StreamX(Y)));
-    const float Channel = 1.0f - FMath::SmoothStep(45.0f, 175.0f, StreamDistance);
-    const float Bank = FMath::Exp(-FMath::Square((StreamDistance - 190.0f) / 85.0f));
-    return Land - 38.0f * Channel + 7.0f * Bank;
+    namespace Gen = Homestead::Generation;
+    if (!FMath::IsFinite(X) || !FMath::IsFinite(Y)
+        || FMath::Abs(X) > Homestead::MaxWorldCoordinate + Gen::ChunkSizeCm * 4
+        || FMath::Abs(Y) > Homestead::MaxWorldCoordinate + Gen::ChunkSizeCm * 4)
+    {
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Non-finite or unsupported runtime terrain coordinate."));
+        return std::numeric_limits<float>::quiet_NaN();
+    }
+    // Match the colliding mesh's triangles, rather than a smoother surface above/below it.
+    const int64 X0 = FMath::FloorToInt64(X / Gen::TerrainSpacingCm) * Gen::TerrainSpacingCm;
+    const int64 Y0 = FMath::FloorToInt64(Y / Gen::TerrainSpacingCm) * Gen::TerrainSpacingCm;
+    const double U = (X - X0) / Gen::TerrainSpacingCm;
+    const double V = (Y - Y0) / Gen::TerrainSpacingCm;
+    Gen::TerrainSample A, B, C, D;
+    Gen::TerrainSample* Samples[] = {&A, &B, &C, &D};
+    for (int Index = 0; Index < 4; ++Index)
+    {
+        const auto Status = Gen::SampleTerrain(World, X0 + (Index % 2) * Gen::TerrainSpacingCm,
+            Y0 + (Index / 2) * Gen::TerrainSpacingCm, *Samples[Index]);
+        if (Status != Gen::Status::Ok)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Terrain height rejected: %s"), UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
+            return std::numeric_limits<float>::quiet_NaN();
+        }
+    }
+    return U + V <= 1 ? A.heightCm + U * (B.heightCm - A.heightCm) + V * (C.heightCm - A.heightCm)
+        : D.heightCm + (1 - U) * (C.heightCm - D.heightCm) + (1 - V) * (B.heightCm - D.heightCm);
 }
 
-float AHomesteadWorld::CellBase(int CellX, int CellY)
+float AHomesteadWorld::GroundHeight(float X, float Y) const
+{
+    return GroundHeight(X, Y, Descriptor);
+}
+
+FVector AHomesteadWorld::AtGround(float X, float Y, float Offset) const
+{
+    return FVector(X, Y, GroundHeight(X, Y) + Offset);
+}
+
+float AHomesteadWorld::CellBase(int CellX, int CellY) const
 {
     const Homestead::Point Center = Homestead::CellCenter(CellX, CellY);
     float Height = GroundHeight(Center.x, Center.y);
@@ -225,46 +232,110 @@ void AHomesteadWorld::AddDecoration(UStaticMesh* Mesh, const FVector& Position, 
 
 float AHomesteadWorld::GrassGroundWeight(float X, float Y)
 {
-    const float Home = FMath::SmoothStep(300.0, 650.0, FVector2D(X + 1000, Y).Size());
     const float Bank = FMath::SmoothStep(195.0, 350.0, FMath::Abs(X - Homestead::StreamX(Y)));
     const float Patch = 0.5f + 0.5f * FMath::Sin(X * 0.0021f) * FMath::Cos(Y * 0.0017f);
-    return Home * Bank * FMath::Lerp(0.15f, 0.45f, Patch)
-        * FMath::Lerp(1.0f, 0.2f, WoodlandBedWeight(X, Y));
+    return Bank * FMath::Lerp(0.05f, 0.25f, Patch);
 }
 
-float AHomesteadWorld::WoodlandBedWeight(float X, float Y)
+bool AHomesteadWorld::IsPreparedFor(const Homestead::State& State) const
 {
-    float Weight = 0;
-    for (const auto& Center : WoodlandBeds)
+    return bTerrainReady && Descriptor.seed == State.world.seed
+        && Descriptor.generationVersion == State.world.generationVersion && PreparedChunk == State.activeChunk;
+}
+
+int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) const
+{
+    int32 Count = 0;
+    for (const auto& Entry : ResourceVisuals)
+        for (const auto& Component : Entry.Value.Components)
+        {
+            const auto* Part = Cast<UStaticMeshComponent>(Component);
+            if (!Part || !Part->IsVisible() || !Part->ComponentHasTag(TEXT("GeneratedForestTree"))
+                || !Part->GetStaticMesh()) continue;
+            const FTransform Transform = Part->GetComponentTransform();
+            const FVector Start = Transform.InverseTransformPosition(Focus);
+            const FVector End = Transform.InverseTransformPosition(Camera);
+            const FBox Bounds = Part->GetStaticMesh()->GetBoundingBox().ExpandBy(20);
+            Count += FMath::LineBoxIntersection(Bounds, Start, End, End - Start) ? 1 : 0;
+        }
+    return Count;
+}
+
+bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
+{
+    if (IsPreparedFor(State)) return true;
+    namespace Gen = Homestead::Generation;
+    const double Started = FPlatformTime::Seconds();
+    const bool SameWorld = bTerrainReady && Descriptor.seed == State.world.seed
+        && Descriptor.generationVersion == State.world.generationVersion;
+    TMap<FIntPoint, FHomesteadTerrainChunk> Prepared;
+    for (int Y = -2; Y <= 2; ++Y)
+        for (int X = -2; X <= 2; ++X)
+        {
+            const FIntPoint Key(State.activeChunk.x + X, State.activeChunk.y + Y);
+            if (SameWorld && TerrainChunks.Contains(Key)) continue;
+            Gen::ChunkBaseline Baseline;
+            const auto Status = Gen::GenerateChunk(State.world, {Key.X, Key.Y}, Baseline);
+            auto* Mesh = Status == Gen::Status::Ok
+                ? BuildTerrainChunk(Baseline, State.world, FMath::Abs(X) <= 1 && FMath::Abs(Y) <= 1) : nullptr;
+            if (!Mesh)
+            {
+                for (auto& Entry : Prepared) Entry.Value.Terrain->DestroyComponent();
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Chunk %d,%d preparation failed (%s); previous terrain retained."),
+                    Key.X, Key.Y, UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
+                return false;
+            }
+            FHomesteadTerrainChunk Chunk;
+            Chunk.Terrain = Mesh;
+            Chunk.bCollision = FMath::Abs(X) <= 1 && FMath::Abs(Y) <= 1;
+            Prepared.Add(Key, MoveTemp(Chunk));
+        }
+    // Every destination tile exists and its synchronous collision cook has completed.
+    for (auto It = TerrainChunks.CreateIterator(); It; ++It)
     {
-        const float Bed = 1.0f - FMath::SmoothStep(250.0, 650.0, FVector2D::Distance(FVector2D(X, Y), Center));
-        Weight = FMath::Max(Weight, Bed);
+        if (!SameWorld || FMath::Abs(It.Key().X - State.activeChunk.x) > 2
+            || FMath::Abs(It.Key().Y - State.activeChunk.y) > 2)
+        {
+            ClearVisual(It.Value().Cover);
+            It.Value().Terrain->DestroyComponent();
+            It.RemoveCurrent();
+        }
     }
-    return Weight;
+    for (auto& Entry : Prepared) TerrainChunks.Add(Entry.Key, MoveTemp(Entry.Value));
+    for (auto& Entry : TerrainChunks)
+    {
+        const bool Colliding = FMath::Abs(Entry.Key.X - State.activeChunk.x) <= 1
+            && FMath::Abs(Entry.Key.Y - State.activeChunk.y) <= 1;
+        Entry.Value.Terrain->SetCollisionEnabled(Colliding ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+        Entry.Value.bCollision = Colliding;
+    }
+    Descriptor = State.world;
+    PreparedChunk = State.activeChunk;
+    bTerrainReady = true;
+    Ground = TerrainChunks.FindChecked(FIntPoint(PreparedChunk.x, PreparedChunk.y)).Terrain;
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated terrain: seed=%llu version=%u center=%d,%d tiles=%d colliding=9 vertices_per_tile=625 prepare_ms=%.3f"),
+        static_cast<unsigned long long>(Descriptor.seed), Descriptor.generationVersion,
+        PreparedChunk.x, PreparedChunk.y, TerrainChunks.Num(), (FPlatformTime::Seconds() - Started) * 1000);
+    return true;
 }
 
-float AHomesteadWorld::LowCoverDensity(float X, float Y)
+UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
+    const Homestead::Generation::ChunkBaseline& Baseline, Homestead::Generation::WorldDescriptor World, bool bCollision)
 {
-    const float Home = FMath::SmoothStep(320.0, 600.0, FVector2D(X + 1000, Y).Size());
-    const float PathY = 75 * FMath::Sin((X + 1000) / 600.0f);
-    const float Path = X >= -1000 && X <= Homestead::StreamX(Y)
-        ? FMath::SmoothStep(90.0f, 220.0f, FMath::Abs(Y - PathY)) : 1.0f;
-    return Home * Path;
-}
+    namespace Gen = Homestead::Generation;
+    auto* Mesh = NewObject<UProceduralMeshComponent>(this);
+    Mesh->SetupAttachment(GetRootComponent());
+    Mesh->SetMobility(EComponentMobility::Static);
+    Mesh->bUseAsyncCooking = false;
+    Mesh->bUseComplexAsSimpleCollision = true;
+    Mesh->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+    Mesh->SetGenerateOverlapEvents(false);
+    Mesh->RegisterComponent();
 
-void AHomesteadWorld::BuildTerrain()
-{
-    Ground = NewObject<UProceduralMeshComponent>(this, TEXT("OriginalMeadowTerrain"));
-    Ground->SetupAttachment(GetRootComponent());
-    Ground->SetMobility(EComponentMobility::Static);
-    Ground->bUseAsyncCooking = false;
-    Ground->bUseComplexAsSimpleCollision = true;
-    Ground->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
-    Ground->SetGenerateOverlapEvents(false);
-    Ground->RegisterComponent();
-
-    constexpr int Cells = 320;
-    constexpr float Spacing = 25.0f;
+    constexpr int Cells = Gen::TerrainCellsPerChunk;
+    constexpr float Spacing = Gen::TerrainSpacingCm;
+    const double OriginX = static_cast<int64>(Baseline.chunk.x) * Gen::ChunkSizeCm;
+    const double OriginY = static_cast<int64>(Baseline.chunk.y) * Gen::ChunkSizeCm;
     TArray<FVector> Vertices;
     TArray<int32> Triangles;
     TArray<FVector> Normals;
@@ -276,15 +347,14 @@ void AHomesteadWorld::BuildTerrain()
     {
         for (int X = 0; X <= Cells; ++X)
         {
-            const float PX = -4000.0f + X * Spacing;
-            const float PY = -4000.0f + Y * Spacing;
-            Vertices.Add(AtGround(PX, PY));
-            const float DX = (GroundHeight(PX + 1, PY) - GroundHeight(PX - 1, PY)) * 0.5f;
-            const float DY = (GroundHeight(PX, PY + 1) - GroundHeight(PX, PY - 1)) * 0.5f;
-            Normals.Add(FVector(-DX, -DY, 1.0f).GetSafeNormal());
+            const double PX = OriginX + X * Spacing;
+            const double PY = OriginY + Y * Spacing;
+            const auto& Sample = Baseline.terrain[Y * (Cells + 1) + X];
+            Vertices.Add(FVector(PX, PY, Sample.heightCm));
+            Normals.Add(FVector(Sample.normalX, Sample.normalY, Sample.normalZ));
             UV.Add(FVector2D(PX / 300.0f, PY / 300.0f));
             Colors.Add(FLinearColor(GrassGroundWeight(PX, PY), 0, 0, 1));
-            Tangents.Add(FProcMeshTangent(FVector(1, 0, DX).GetSafeNormal(), false));
+            Tangents.Add(FProcMeshTangent(FVector(Sample.normalZ, 0, -Sample.normalX).GetSafeNormal(), false));
             if (X < Cells && Y < Cells)
             {
                 const int A = Y * (Cells + 1) + X;
@@ -292,8 +362,15 @@ void AHomesteadWorld::BuildTerrain()
             }
         }
     }
-    Ground->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UV, Colors, Tangents, true);
-    Ground->SetMaterial(0, GroundMaterial ? GroundMaterial.Get() : Material(Meadow));
+    Mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UV, Colors, Tangents, true);
+    Mesh->SetMaterial(0, GroundMaterial ? GroundMaterial.Get() : Material(Meadow));
+    if (!Mesh->GetBodySetup() || !Mesh->GetBodySetup()->bCreatedPhysicsMeshes
+        || Mesh->GetBodySetup()->bFailedToCreatePhysicsMeshes)
+    {
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Generated terrain collision cook did not produce physics meshes."));
+        Mesh->DestroyComponent();
+        return nullptr;
+    }
 
     // Separate non-colliding ribbons expose the shallow channel and its muddy banks.
     auto Ribbon = [&](int Section, float Left, float Right, bool bWater)
@@ -307,15 +384,23 @@ void AHomesteadWorld::BuildTerrain()
         const int Columns = bWater ? 1 : 8;
         for (int Y = 0; Y <= Cells; ++Y)
         {
-            const float PY = -4000.0f + Y * Spacing;
+            const float PY = OriginY + Y * Spacing;
             const float Center = Homestead::StreamX(PY);
             for (int X = 0; X <= Columns; ++X)
             {
-                const float Offset = FMath::Lerp(Left, Right, static_cast<float>(X) / Columns);
-                const float Z = bWater ? GroundHeight(Center, PY) + 19.0f : GroundHeight(Center + Offset, PY) + 2.0f;
-                Vertices.Add(FVector(Center + Offset, PY, Z));
+                const double PX = FMath::Clamp<double>(Center + FMath::Lerp(Left, Right, static_cast<float>(X) / Columns),
+                    OriginX, OriginX + Gen::ChunkSizeCm);
+                Gen::TerrainSample Sample;
+                const auto Status = Gen::SampleTerrain(World, FMath::RoundToInt64(PX), FMath::RoundToInt64(PY), Sample);
+                if (Status != Gen::Status::Ok)
+                {
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Generated ribbon sample failed: %s"), UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
+                    return false;
+                }
+                const float Z = bWater ? Sample.waterHeightCm : GroundHeight(PX, PY, World) + 2.0f;
+                Vertices.Add(FVector(PX, PY, Z));
                 Normals.Add(FVector::UpVector);
-                UV.Add(FVector2D(Offset / 100.0f, PY / 300.0f));
+                UV.Add(FVector2D((PX - Center) / 100.0f, PY / 300.0f));
                 Tangents.Add(FProcMeshTangent(1, 0, 0));
                 if (Y < Cells && X < Columns)
                 {
@@ -325,13 +410,23 @@ void AHomesteadWorld::BuildTerrain()
                 }
             }
         }
-        Ground->CreateMeshSection_LinearColor(Section, Vertices, Triangles, Normals, UV, Colors, Tangents, false);
-        Ground->SetMaterial(Section, bWater ? Material(FLinearColor(0.075f, 0.26f, 0.29f), 0.16f)
+        Mesh->CreateMeshSection_LinearColor(Section, Vertices, Triangles, Normals, UV, Colors, Tangents, false);
+        Mesh->SetMaterial(Section, bWater ? Material(FLinearColor(0.075f, 0.26f, 0.29f), 0.16f)
             : Material(FLinearColor(0.27f, 0.235f, 0.14f)));
+        return true;
     };
-    Ribbon(1, -125.0f, 125.0f, true);
-    Ribbon(2, -180.0f, -105.0f, false);
-    Ribbon(3, 105.0f, 180.0f, false);
+    if (OriginX <= 1680 + Gen::StreamBankOuterCm && OriginX + Gen::ChunkSizeCm >= 1320 - Gen::StreamBankOuterCm)
+    {
+        if (!Ribbon(1, -Gen::StreamWaterHalfWidthCm, Gen::StreamWaterHalfWidthCm, true)
+            || !Ribbon(2, -Gen::StreamBankOuterCm, -Gen::StreamWaterHalfWidthCm, false)
+            || !Ribbon(3, Gen::StreamWaterHalfWidthCm, Gen::StreamBankOuterCm, false))
+        {
+            Mesh->DestroyComponent();
+            return nullptr;
+        }
+    }
+    Mesh->SetCollisionEnabled(bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+    return Mesh;
 }
 
 void AHomesteadWorld::BuildLighting()
@@ -396,9 +491,6 @@ void AHomesteadWorld::BuildLighting()
 bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float X, float Y,
     float FootprintRadius, float CanopyRadius, bool bLowCover)
 {
-    if (FVector2D(X + 1000, Y).Size() < (bLowCover ? 300.0f : 650.0f) + FootprintRadius)
-        return true;
-    if (bLowCover && LowCoverDensity(X, Y) <= 0) return true;
     const float OccupiedRadius = FMath::Max(FootprintRadius, CanopyRadius);
     for (const auto& Node : State.resources)
     {
@@ -431,34 +523,11 @@ bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float 
     return false;
 }
 
-void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
+bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
 {
+    const auto& State = Simulation.GetState();
     const double Started = FPlatformTime::Seconds();
     const FName FernTag(TEXT("AuthoredFern02"));
-    const FName TreeTag(TEXT("AuthoredTreeSmall02"));
-    const FName GroveTag(TEXT("AuthoredTreeSmall02Grove"));
-    const FName FirTag(TEXT("AuthoredFirUnderstory"));
-    TArray<UStaticMeshComponent*> PreviousParts;
-    GetComponents(PreviousParts);
-    for (UStaticMeshComponent* Part : PreviousParts)
-    {
-        if (Part->ComponentHasTag(FernTag) || Part->ComponentHasTag(TreeTag)
-            || Part->ComponentHasTag(GroveTag) || Part->ComponentHasTag(FirTag))
-        {
-            RemoveInstanceComponent(Part);
-            Part->DestroyComponent();
-        }
-    }
-    for (auto& Entry : DecorationBatches)
-    {
-        Entry.Value->ClearInstances();
-    }
-    FRandomStream Random(817391);
-    auto Reserved = [&](float X, float Y, float Radius)
-    {
-        return IsDecorationReserved(State, X, Y, Radius);
-    };
-
     TArray<UStaticMesh*> FernMeshes;
     for (const TCHAR* Suffix : {TEXT("a"), TEXT("b"), TEXT("c"), TEXT("d")})
     {
@@ -467,219 +536,12 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
         UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
         if (!Mesh || Mesh->GetStaticMaterials().Num() != 1 || !Mesh->GetStaticMaterials()[0].MaterialInterface)
         {
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Authored clearing fern is unavailable or has no material: %s"), *Path);
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Authored woodland fern is unavailable or has no material: %s"), *Path);
             FernMeshes.Reset();
-            break;
+            return false;
         }
         FernMeshes.Add(Mesh);
     }
-    int32 FernCount = 0;
-    if (FernMeshes.Num() == 4)
-    {
-        for (int32 Index = 0; Index < 10000 && FernCount < 768; ++Index)
-        {
-            FRandomStream FernRandom(63017 + Index * 211);
-            const FVector2D Site = CoverSite(FernRandom, Index % 3 == 0);
-            const float X = Site.X, Y = Site.Y;
-            if (IsDecorationReserved(State, X, Y, 75, 0, true)
-                || FMath::Abs(X - Homestead::StreamX(Y)) < 270.0f
-                || FernRandom.FRand() > LowCoverDensity(X, Y))
-            {
-                continue;
-            }
-            UStaticMesh* Mesh = FernMeshes[Index % FernMeshes.Num()];
-            const FBox Bounds = Mesh->GetBoundingBox();
-            const FVector GroundAnchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-            const FRotator Rotation(0, FernRandom.FRandRange(0, 360), 0);
-            UStaticMeshComponent* Part = NewObject<UStaticMeshComponent>(this);
-            AddInstanceComponent(Part);
-            Part->ComponentTags.Add(FernTag);
-            Part->SetupAttachment(GetRootComponent());
-            Part->SetMobility(EComponentMobility::Static);
-            Part->SetStaticMesh(Mesh);
-            // Keep authored vertices/slots/scale; undo the baked layout offset at placement only.
-            Part->SetRelativeTransform(FTransform(Rotation,
-                AtGround(X, Y) - Rotation.RotateVector(GroundAnchor), FVector::OneVector));
-            Part->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-            Part->SetGenerateOverlapEvents(false);
-            Part->SetCanEverAffectNavigation(false);
-            Part->SetCullDistance(5000.0f);
-            Part->RegisterComponent();
-            ++FernCount;
-        }
-    }
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing fern patch: %d noncolliding plants; native materials and scale."), FernCount);
-
-    TArray<FVector2D> FirSites;
-    for (int32 Index = 0; Index < 2400 && FirSites.Num() < 96; ++Index)
-    {
-        FRandomStream FirRandom(51317 + Index * 199);
-        const FVector2D Site = CoverSite(FirRandom, Index % 4 == 0);
-        if (Reserved(Site.X, Site.Y, 90)
-            || LowCoverDensity(Site.X, Site.Y) <= 0
-            || FMath::Abs(Site.X - Homestead::StreamX(Site.Y)) < 285
-            || FirSites.ContainsByPredicate([&](const FVector2D& Other)
-                { return FVector2D::Distance(Other, Site) < 130; }))
-            continue;
-        const TCHAR* Name = Index % 2 ? TEXT("SM_FirSapling_a") : TEXT("SM_FirSapling_c");
-        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *FString::Printf(
-            TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/%s.%s"), Name, Name));
-        if (!Mesh || Mesh->GetStaticMaterials().Num() != 2 || !Mesh->GetMaterial(0) || !Mesh->GetMaterial(1)
-            || !Mesh->GetBodySetup() || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 2)
-        {
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Authored fir understory is unavailable: %s"), Name);
-            break;
-        }
-        const FBox Bounds = Mesh->GetBoundingBox();
-        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-        const FRotator Rotation(0, FirRandom.FRandRange(0, 360), 0);
-        auto* Part = NewObject<UStaticMeshComponent>(this);
-        AddInstanceComponent(Part);
-        Part->ComponentTags.Add(FirTag);
-        Part->SetupAttachment(GetRootComponent());
-        Part->SetMobility(EComponentMobility::Static);
-        Part->SetStaticMesh(Mesh);
-        Part->SetRelativeTransform(FTransform(Rotation,
-            AtGround(Site.X, Site.Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
-        Part->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-        Part->SetCollisionResponseToAllChannels(ECR_Ignore);
-        Part->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
-        Part->SetGenerateOverlapEvents(false);
-        Part->SetCanEverAffectNavigation(false);
-        Part->SetCullDistance(5000);
-        Part->RegisterComponent();
-        FirSites.Add(Site);
-    }
-
-    auto* AuthoredTree = LoadObject<UStaticMesh>(nullptr,
-        TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"));
-    struct FCanopySite
-    {
-        int32 Seed;
-        FVector2D Position;
-        float Yaw, Scale, Radius;
-    };
-    TArray<FCanopySite> Sites;
-    TArray<FCanopySite> SelectedSites;
-    int32 TreeIndex = INDEX_NONE;
-    if (AuthoredTree && AuthoredTree->GetStaticMaterials().Num() == 3 && AuthoredTree->GetBodySetup()
-        && AuthoredTree->GetBodySetup()->AggGeom.SphylElems.Num() == 1
-        && AuthoredTree->GetBodySetup()->AggGeom.GetElementCount() == 1
-        && AuthoredTree->GetRenderData() && AuthoredTree->GetRenderData()->LODResources.Num() == 3
-        && AuthoredTree->GetRenderData()->LODResources[0].GetNumTriangles() == 231785
-        && AuthoredTree->GetRenderData()->LODResources[1].GetNumTriangles() > 0
-        && AuthoredTree->GetRenderData()->LODResources[1].GetNumTriangles() <= 65000
-        && AuthoredTree->GetRenderData()->LODResources[2].GetNumTriangles() > 0
-        && AuthoredTree->GetRenderData()->LODResources[2].GetNumTriangles() <= 18000)
-    {
-        const FBox Bounds = AuthoredTree->GetBoundingBox();
-        const float Radius = FVector2D(FMath::Max(FMath::Abs(Bounds.Min.X), FMath::Abs(Bounds.Max.X)),
-            FMath::Max(FMath::Abs(Bounds.Min.Y), FMath::Abs(Bounds.Max.Y))).Size();
-        float Nearest = TNumericLimits<float>::Max();
-        for (int32 Index = 0; Index < 7200; ++Index)
-        {
-            FRandomStream Candidate(817391 + Index * 179);
-            const FVector2D Position = CoverSite(Candidate, false);
-            const float X = Position.X, Y = Position.Y;
-            const float Yaw = Candidate.FRandRange(0, 360);
-            const float Scale = Candidate.FRandRange(0.9f, 1.1f);
-            const float Edge = FMath::Max(FMath::Abs(X), FMath::Abs(Y));
-            if (IsDecorationReserved(State, X, Y, 90 * Scale, Radius * Scale)
-                || FMath::Abs(X - Homestead::StreamX(Y)) < 195 + 90 * Scale
-                || Edge > 3850 || Candidate.FRand() > WoodlandBedWeight(X, Y))
-                continue;
-            Sites.Add({Index, FVector2D(X, Y), Yaw, Scale, Radius * Scale});
-            const float Distance = FVector2D(X - 250, Y + 650).SizeSquared();
-            if (FVector2D(X + 1000, Y).Size() <= 1900 && Distance < Nearest
-                && !IsDecorationReserved(State, X, Y, 90, Radius)
-                && FMath::Abs(X - Homestead::StreamX(Y)) >= 285)
-            {
-                TreeIndex = Index;
-                Nearest = Distance;
-            }
-        }
-        for (const auto& Site : Sites)
-            if (Site.Seed == TreeIndex)
-            {
-                auto Focal = Site;
-                Focal.Scale = 1;
-                Focal.Radius = Radius;
-                SelectedSites.Add(Focal);
-            }
-        for (const auto& Site : Sites)
-        {
-            if (SelectedSites.Num() >= 192) break;
-            if (SelectedSites.ContainsByPredicate([&](const FCanopySite& Other)
-                { return FVector2D::Distance(Other.Position, Site.Position) < 115 * (Other.Scale + Site.Scale); }))
-                continue;
-            SelectedSites.Add(Site);
-        }
-    }
-    else
-    {
-        UE_LOG(LogHomesteadWorld, Error, TEXT("Woodland canopy LODs or measured trunk collision are unavailable; no primitive substitute."));
-    }
-    if (SelectedSites.IsEmpty())
-        UE_LOG(LogHomesteadWorld, Warning, TEXT("No admitted woodland canopy sites in this world state."));
-    for (const FCanopySite& Site : SelectedSites)
-    {
-        const FVector Base = AtGround(Site.Position.X, Site.Position.Y);
-        auto* Part = NewObject<UStaticMeshComponent>(this);
-        AddInstanceComponent(Part);
-        Part->ComponentTags.Add(GroveTag);
-        if (Site.Seed == TreeIndex) Part->ComponentTags.Add(TreeTag);
-        Part->SetupAttachment(GetRootComponent());
-        Part->SetMobility(EComponentMobility::Static);
-        Part->SetStaticMesh(AuthoredTree);
-        Part->SetRelativeTransform(FTransform(FRotator(0, Site.Yaw, 0), Base, FVector(Site.Scale)));
-        Part->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
-        Part->SetGenerateOverlapEvents(false);
-        Part->SetCullDistance(0);
-        Part->RegisterComponent();
-    }
-    UE_LOG(LogHomesteadWorld, Display,
-        TEXT("Woodland canopy: %d trees, three distance LODs, overlapping crowns with separate trunk/site buffers."),
-        SelectedSites.Num());
-
-    for (int Index = 0; Index < 140; ++Index)
-    {
-        Random.Initialize(37231 + Index * 193);
-        const float X = Random.FRandRange(-3800, 3800);
-        const float Y = Random.FRandRange(-3800, 3800);
-        const float Width = Random.FRandRange(50, 135);
-        if (Reserved(X, Y, Width * 0.5f) || FMath::Abs(X - Homestead::StreamX(Y)) < 210)
-        {
-            continue;
-        }
-        const FVector Position = AtGround(X, Y, Width * 0.22f);
-        const FVector Size(Width, Width * 0.82f, Width * 0.75f);
-        const FRotator RockRotation(Random.FRandRange(-15, 15), Random.FRandRange(0, 360), 12);
-        if (ImportedRock)
-        {
-            AddDecoration(ImportedRock, Position, Size, Stone, false, RockRotation);
-            // A simple invisible collider remains reliable even when FBX has no collision data.
-            AddDecoration(Sphere, Position, Size, Stone, true, RockRotation, true);
-        }
-        else
-        {
-            AddDecoration(Sphere, Position, Size, Stone, true, RockRotation);
-        }
-    }
-
-    for (int Index = 0; Index < 220; ++Index)
-    {
-        Random.Initialize(92731 + Index * 191);
-        const float Y = Random.FRandRange(-3920, 3920);
-        const float X = Homestead::StreamX(Y) + (Index % 2 ? -1 : 1) * Random.FRandRange(95, 230);
-        const float Width = Random.FRandRange(14, 47);
-        if (!Reserved(X, Y, 35))
-        {
-            AddDecoration(ImportedRock ? ImportedRock.Get() : Sphere.Get(), AtGround(X, Y, Width * 0.17f),
-                FVector(Width, Width * 0.8f, Width * 0.48f),
-                Stone, false, FRotator(0, Random.FRandRange(0, 360), 0));
-        }
-    }
-
     TArray<UStaticMesh*> GrassMeshes;
     const TCHAR* GrassNames[] = { TEXT("mid_b"), TEXT("small_b"), TEXT("tall_a"), TEXT("tiny_a") };
     const int32 GrassTriangles[] = { 1257, 653, 290, 79 };
@@ -696,37 +558,76 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
         {
             UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted authored grass is missing or differs: %s"), *Path);
             GrassMeshes.Reset();
-            break;
+            return false;
         }
         GrassMeshes.Add(Mesh);
     }
     int32 GrassCount = 0;
     int32 GrassTriangleCount = 0;
-    if (GrassMeshes.Num() == 4)
+    int32 FernCount = 0;
+    int32 RebuiltChunks = 0;
+    for (auto& Chunk : TerrainChunks)
     {
-        for (int32 Attempt = 0; Attempt < 64000 && GrassCount < 16000; ++Attempt)
+        const double OriginX = static_cast<int64>(Chunk.Key.X) * Homestead::Generation::ChunkSizeCm;
+        const double OriginY = static_cast<int64>(Chunk.Key.Y) * Homestead::Generation::ChunkSizeCm;
+        auto Nearby = [&](double X, double Y)
         {
-            FRandomStream GrassRandom(71039 + Attempt * 233);
-            const FVector2D Site = CoverSite(GrassRandom, Attempt % 4 == 0);
-            const float X = Site.X, Y = Site.Y;
-            if (IsDecorationReserved(State, X, Y, 20, 0, true)
-                || FMath::Abs(X - Homestead::StreamX(Y)) < 215
-                || GrassRandom.FRand() > LowCoverDensity(X, Y))
+            return X >= OriginX - 450 && X <= OriginX + 2850 && Y >= OriginY - 450 && Y <= OriginY + 2850;
+        };
+        FString Signature;
+        for (const auto& Edit : State.resourceEdits)
+            if (Edit.cleared)
             {
-                continue;
+                Homestead::Generation::GeneratedEntity Entity;
+                if (Homestead::Generation::FindEntity(State.world, Edit.key, Entity) == Homestead::Generation::Status::Ok
+                    && Nearby(Entity.xCm, Entity.yCm))
+                    Signature += FString::Printf(TEXT("R%d,%d,%u;"), Edit.key.chunk.x, Edit.key.chunk.y, Edit.key.localId);
             }
-            const int32 Variety = Attempt % 16;
-            const int32 Index = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
-            UStaticMesh* Mesh = GrassMeshes[Index];
-            const FName Key(*FString::Printf(TEXT("AuthoredGrass_%s"), GrassNames[Index]));
-            UHierarchicalInstancedStaticMeshComponent* Batch = nullptr;
-            if (auto* Existing = DecorationBatches.Find(Key))
+        for (const auto& Structure : State.structures)
+            if (Nearby((Structure.cellX + 0.5) * Homestead::CellSize, (Structure.cellY + 0.5) * Homestead::CellSize))
+                Signature += FString::Printf(TEXT("S%d;"), Structure.id);
+        for (const auto& Plot : State.plots)
+            if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
+                Signature += FString::Printf(TEXT("P%d;"), Plot.id);
+        Signature += TEXT("ready");
+        if (Chunk.Value.CoverSignature == Signature) continue;
+        Homestead::State CoverState;
+        CoverState.structures = State.structures;
+        CoverState.plots = State.plots;
+        for (int DY = -1; DY <= 1; ++DY)
+            for (int DX = -1; DX <= 1; ++DX)
             {
-                Batch = Existing->Get();
+                Homestead::Generation::ChunkBaseline Baseline;
+                const auto Status = Homestead::Generation::GenerateChunk(State.world,
+                    {Chunk.Key.X + DX, Chunk.Key.Y + DY}, Baseline);
+                if (Status != Homestead::Generation::Status::Ok)
+                {
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Cover resource generation failed: %s"),
+                        UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
+                    return false;
+                }
+                for (const auto& Entity : Baseline.entities)
+                {
+                    Homestead::ResourceNode Node;
+                    const auto Resolved = Simulation.ResolveGeneratedResource(Entity.key, Node);
+                    if (Resolved.code == Homestead::ResultCode::Unavailable) continue;
+                    if (!Resolved)
+                    {
+                        UE_LOG(LogHomesteadWorld, Error, TEXT("Cover resource resolution failed: %s"), UTF8_TO_TCHAR(Resolved.message.c_str()));
+                        return false;
+                    }
+                    CoverState.resources.push_back(Node);
+                }
             }
-            else
+        ClearVisual(Chunk.Value.Cover);
+        ++RebuiltChunks;
+        const uint32 Seed = GetTypeHash(State.world.seed) ^ GetTypeHash(Chunk.Key);
+        FRandomStream Random(static_cast<int32>(Seed));
+        TArray<UHierarchicalInstancedStaticMeshComponent*> Batches;
+        if (GrassMeshes.Num() == 4)
+            for (auto* Mesh : GrassMeshes)
             {
-                Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+                auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
                 Batch->SetupAttachment(GetRootComponent());
                 Batch->SetMobility(EComponentMobility::Static);
                 Batch->ComponentTags.Add(TEXT("AuthoredGrassMedium01"));
@@ -737,35 +638,55 @@ void AHomesteadWorld::BuildDecorations(const Homestead::State& State)
                 Batch->SetCullDistances(3500, 5000);
                 Batch->bAutoRebuildTreeOnInstanceChanges = false;
                 Batch->RegisterComponent();
-                DecorationBatches.Add(Key, Batch);
+                Chunk.Value.Cover.Components.Add(Batch);
+                Batches.Add(Batch);
             }
-            const FBox Bounds = Mesh->GetBoundingBox();
-            const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-            const FRotator Rotation(0, GrassRandom.FRandRange(0, 360), 0);
-            Batch->AddInstance(FTransform(Rotation, AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
-            ++GrassCount;
-            GrassTriangleCount += GrassTriangles[Index];
+        for (int32 Attempt = 0; Attempt < 1200; ++Attempt)
+        {
+            const double X = OriginX + Random.FRandRange(0, 2399.99f);
+            const double Y = OriginY + Random.FRandRange(0, 2399.99f);
+            const FRotator Rotation(0, Random.FRandRange(0, 360), 0);
+            if (IsDecorationReserved(CoverState, X, Y, 20, 0, true) || FMath::Abs(X - Homestead::StreamX(Y)) < 215)
+                continue;
+            const int32 Variety = Attempt % 16;
+            const int32 Index = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
+            if (Batches.Num() == 4)
+            {
+                const FBox Bounds = GrassMeshes[Index]->GetBoundingBox();
+                const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+                Batches[Index]->AddInstance(FTransform(Rotation,
+                    AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+                ++GrassCount;
+                GrassTriangleCount += GrassTriangles[Index];
+            }
+            if (Attempt % 32 == 0 && FernMeshes.Num() == 4 && !IsDecorationReserved(CoverState, X, Y, 75, 0, true))
+            {
+                auto* Mesh = FernMeshes[(Attempt / 32) % 4];
+                const FBox Bounds = Mesh->GetBoundingBox();
+                const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+                auto* Part = NewObject<UStaticMeshComponent>(this);
+                Part->SetupAttachment(GetRootComponent());
+                Part->SetMobility(EComponentMobility::Static);
+                Part->ComponentTags.Add(FernTag);
+                Part->SetStaticMesh(Mesh);
+                Part->SetRelativeTransform(FTransform(Rotation,
+                    AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+                Part->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+                Part->SetGenerateOverlapEvents(false);
+                Part->SetCanEverAffectNavigation(false);
+                Part->SetCullDistance(5000);
+                Part->RegisterComponent();
+                Chunk.Value.Cover.Components.Add(Part);
+                ++FernCount;
+            }
         }
-    }
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Authored clearing grass: %d nonblocking clumps, %d triangles, native scale/material."),
-        GrassCount, GrassTriangleCount);
-
-    // Invisible edge rails prevent falling off the finite collision mesh.
-    for (int Side = 0; Side < 4; ++Side)
-    {
-        const bool bAlongX = Side < 2;
-        const float Sign = Side % 2 ? 1.0f : -1.0f;
-        AddDecoration(Cube, FVector(bAlongX ? 0 : Sign * 4050, bAlongX ? Sign * 4050 : 0, 500),
-            FVector(bAlongX ? 8200 : 100, bAlongX ? 100 : 8200, 1200),
-            FLinearColor(0, 0, 0), true, FRotator::ZeroRotator, true);
-    }
-    for (auto& Entry : DecorationBatches)
-    {
-        Entry.Value->BuildTreeIfOutdated(false, true);
+        for (auto* Batch : Batches) Batch->BuildTreeIfOutdated(false, true);
+        Chunk.Value.CoverSignature = Signature;
     }
     DecorationBuildMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Woodland decoration refresh: trees=%d ferns=%d firs=%d grass=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
-        SelectedSites.Num(), FernCount, FirSites.Num(), GrassCount, DecorationBuildMilliseconds);
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_grass_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
+        RebuiltChunks, FernCount, GrassCount, GrassTriangleCount, DecorationBuildMilliseconds);
+    return true;
 }
 
 void AHomesteadWorld::ClearVisual(FHomesteadWorldVisual& Visual)
@@ -788,7 +709,9 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         return;
     }
     const FVector Base = AtGround(Node.position.x, Node.position.y);
-    FRandomStream Random(Node.id * 127 + 19);
+    const uint32 Variation = GetTypeHash(Descriptor.seed) ^ GetTypeHash(Node.key.chunk.x)
+        ^ (GetTypeHash(Node.key.chunk.y) * 127u) ^ Node.key.localId;
+    FRandomStream Random(static_cast<int32>(Variation));
     auto Part = [&](UStaticMesh* Mesh, FVector Offset, FVector Size, FLinearColor Color,
         FRotator Rotation = FRotator::ZeroRotator, bool bProduce = false)
     {
@@ -802,7 +725,11 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         const FString Path = FString(bGrass ? TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/")
             : TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/")) + Name;
         auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
-        if (!Mesh) UE_LOG(LogHomesteadWorld, Error, TEXT("Resource %d is missing authored mesh %s"), Node.id, *Path);
+        if (!Mesh)
+        {
+            bVisualBuildFailed = true;
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Resource %d is missing authored mesh %s"), Node.id, *Path);
+        }
         return Mesh;
     };
     auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f)
@@ -812,6 +739,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         if (!Bounds.IsValid || Bounds.Min.ContainsNaN() || Bounds.Max.ContainsNaN())
         {
             UE_LOG(LogHomesteadWorld, Error, TEXT("Resource %d has invalid authored bounds: %s"), Node.id, *Mesh->GetPathName());
+            bVisualBuildFailed = true;
             return;
         }
         const FRotator Rotation(0, Yaw, 0);
@@ -840,6 +768,78 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
 
     switch (Node.kind)
     {
+    case Homestead::ResourceKind::ForestTree:
+    {
+        if (bProduceOnly) break;
+        Homestead::Generation::GeneratedEntity Entity;
+        if (Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree key cannot resolve; no visual substitute."));
+            bVisualBuildFailed = true;
+            break;
+        }
+        FString Path;
+        switch (Entity.paletteRole)
+        {
+        case Homestead::Generation::TreePaletteRole::BroadleafMature:
+            Path = TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland");
+            break;
+        case Homestead::Generation::TreePaletteRole::ConiferMature:
+            Path = TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir");
+            break;
+        case Homestead::Generation::TreePaletteRole::WoodlandAccent:
+            Path = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
+            break;
+        default:
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated mature tree has illegal palette role %d."),
+                static_cast<int32>(Entity.paletteRole));
+            bVisualBuildFailed = true;
+            break;
+        }
+        if (bVisualBuildFailed) break;
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
+        const int32 ExpectedSlots = Entity.paletteRole
+            == Homestead::Generation::TreePaletteRole::ConiferMature ? 4 : 3;
+        if (!Mesh || !Mesh->GetBodySetup() || Mesh->GetBodySetup()->AggGeom.SphylElems.Num() != 1
+            || Mesh->GetStaticMaterials().Num() != ExpectedSlots
+            || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 3)
+        {
+            UE_LOG(LogHomesteadWorld, Error,
+                TEXT("Generated tree role=%d variant=%u has missing native material/LOD/collision at %s; no substitute."),
+                static_cast<int32>(Entity.paletteRole), Entity.variantIndex, *Path);
+            bVisualBuildFailed = true;
+            break;
+        }
+        for (int32 Slot = 0; Slot < ExpectedSlots; ++Slot)
+            if (!Mesh->GetMaterial(Slot))
+            {
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree material slot %d is missing at %s."),
+                    Slot, *Path);
+                bVisualBuildFailed = true;
+                break;
+            }
+        if (bVisualBuildFailed) break;
+        const FRotator Rotation(0, Entity.yawDegrees, 0);
+        const float Scale = Entity.scalePermille / 1000.0f;
+        const auto& Capsule = Mesh->GetBodySetup()->AggGeom.SphylElems[0];
+        const FVector Anchor(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
+        auto* Component = NewObject<UStaticMeshComponent>(this);
+        Component->SetupAttachment(GetRootComponent());
+        Component->SetMobility(EComponentMobility::Static);
+        Component->SetStaticMesh(Mesh);
+        Component->SetRelativeTransform(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
+        Component->SetCollisionProfileName(Node.id > 0 ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
+        Component->SetGenerateOverlapEvents(false);
+        Component->SetCanEverAffectNavigation(false);
+        Component->ComponentTags.Add(TEXT("GeneratedForestTree"));
+        Component->ComponentTags.Add(*FString::Printf(
+            TEXT("TreeRole_%d"), static_cast<int32>(Entity.paletteRole)));
+        Component->ComponentTags.Add(*FString::Printf(TEXT("TreeVariant_%u"), Entity.variantIndex));
+        Component->ComponentTags.Add(*FString::Printf(TEXT("Resource_%d"), Node.id));
+        Component->RegisterComponent();
+        Visual.Components.Add(Component);
+        break;
+    }
     case Homestead::ResourceKind::Branches:
         if (bProduceOnly)
         {
@@ -858,7 +858,11 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
                 if (ImportedRock && ImportedRock->GetBoundingBox().GetSize().GetMax() > 0)
                     Authored(ImportedRock, FVector2D(I * 17 - 17, I % 2 * 14), I * 79, true,
                         (24.0f + I * 4.0f) / ImportedRock->GetBoundingBox().GetSize().GetMax());
-                else UE_LOG(LogHomesteadWorld, Error, TEXT("Stone resource %d is missing admitted rock geometry."), Node.id);
+                else
+                {
+                    bVisualBuildFailed = true;
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Stone resource %d is missing admitted rock geometry."), Node.id);
+                }
             }
         }
         break;
@@ -907,10 +911,45 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         break;
     case Homestead::ResourceKind::Sapling:
-        Authored(LoadResource(TEXT("SM_GrassMedium01_tiny_a"), true), FVector2D::ZeroVector, Node.id * 37, false);
-        Authored(LoadResource(Node.id % 2 ? TEXT("SM_FirSapling_a") : TEXT("SM_FirSapling_c")),
-            FVector2D::ZeroVector, Node.id * 37, true);
+    {
+        Homestead::Generation::GeneratedEntity Entity;
+        if (Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
+        {
+            bVisualBuildFailed = true;
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated sapling key cannot resolve."));
+            break;
+        }
+        Authored(LoadResource(TEXT("SM_GrassMedium01_tiny_a"), true), FVector2D::ZeroVector,
+            Entity.yawDegrees, false);
+        if (Entity.paletteRole == Homestead::Generation::TreePaletteRole::BroadleafYoung)
+            Authored(LoadResource(TEXT("SM_TreeSmall02_Woodland")), FVector2D::ZeroVector,
+                Entity.yawDegrees, true, Entity.scalePermille / 1000.0f);
+        else if (Entity.paletteRole == Homestead::Generation::TreePaletteRole::ConiferYoung)
+        {
+            if (Entity.variantIndex == 2)
+            {
+                auto* Mesh = LoadObject<UStaticMesh>(nullptr,
+                    TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_FirPole.SM_FirPole"));
+                if (!Mesh)
+                {
+                    bVisualBuildFailed = true;
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Generated intermediate fir is missing; no substitute."));
+                }
+                Authored(Mesh, FVector2D::ZeroVector, Entity.yawDegrees, true,
+                    Entity.scalePermille / 1000.0f);
+            }
+            else
+                Authored(LoadResource(Entity.variantIndex % 2 ? TEXT("SM_FirSapling_a") : TEXT("SM_FirSapling_c")),
+                    FVector2D::ZeroVector, Entity.yawDegrees, true, Entity.scalePermille / 1000.0f);
+        }
+        else
+        {
+            bVisualBuildFailed = true;
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated sapling has illegal palette role %d."),
+                static_cast<int32>(Entity.paletteRole));
+        }
         break;
+    }
     default:
         break;
     }
@@ -1088,7 +1127,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
         : FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight));
 }
 
-void AHomesteadWorld::Initialize(const Homestead::State& State)
+bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
 {
     ClearVisual(Preview);
     if (!bInitialized)
@@ -1099,9 +1138,8 @@ void AHomesteadWorld::Initialize(const Homestead::State& State)
             TEXT("/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend"));
         if (!GroundMaterial)
         {
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted grass-ground blend is missing; retaining original ground material."));
-            GroundMaterial = LoadObject<UMaterialInterface>(nullptr,
-                TEXT("/Game/SurvivalGame/Materials/M_Ground.M_Ground"));
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted grass-ground blend is missing; world preparation stopped."));
+            return false;
         }
         RockMaterial = LoadObject<UMaterialInterface>(nullptr,
             TEXT("/Game/SurvivalGame/Materials/M_Rock.M_Rock"));
@@ -1109,45 +1147,55 @@ void AHomesteadWorld::Initialize(const Homestead::State& State)
             TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks"));
         if (!GroundMaterial || !RockMaterial || !ImportedRock)
         {
-            UE_LOG(LogHomesteadWorld, Warning,
-                TEXT("Optional CC0 assets: ground material=%s, rock material=%s, MossRocks mesh=%s. Missing assets use original provisional shapes/M_Field. Bootstrap must import or rename the rock mesh to /Game/SurvivalGame/Environment/MossRocks.MossRocks."),
+            UE_LOG(LogHomesteadWorld, Error,
+                TEXT("Required woodland assets: ground material=%s, rock material=%s, MossRocks mesh=%s. World preparation stopped."),
                 GroundMaterial ? TEXT("loaded") : TEXT("missing"),
                 RockMaterial ? TEXT("loaded") : TEXT("missing"),
                 ImportedRock ? TEXT("loaded") : TEXT("missing"));
+            return false;
         }
         if (!FieldMaterial)
         {
             UE_LOG(LogHomesteadWorld, Error,
-                TEXT("PROTOTYPE FALLBACK: M_Field is missing. Run the editor bootstrap before judging visuals; engine default material will be used."));
-            FieldMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
-            if (GEngine)
-            {
-                GEngine->AddOnScreenDebugMessage(INDEX_NONE, 30.0f, FColor::Yellow,
-                    TEXT("PROTOTYPE FALLBACK: M_Field missing. Run the editor bootstrap; these are not final visuals."));
-            }
+                TEXT("M_Field is missing; world preparation stopped without a default-material substitute."));
+            return false;
         }
         if (!Cube || !Sphere || !Cylinder || !Cone)
         {
             UE_LOG(LogHomesteadWorld, Error, TEXT("PROTOTYPE FALLBACK: required Engine/BasicShapes assets are missing."));
         }
-        BuildTerrain();
+        if (!FieldMaterial || !GroundMaterial || !RockMaterial || !ImportedRock || !Cube || !Sphere || !Cylinder || !Cone)
+            return false;
         BuildLighting();
         bInitialized = true;
         UE_LOG(LogHomesteadWorld, Display,
-            TEXT("Loaded original provisional meadow geometry. This is a technical scene, not approved final realistic art."));
+            TEXT("Preparing persistent generated woodland. Runtime evidence does not establish final art acceptance."));
     }
-    Refresh(State);
+    return Refresh(Simulation);
 }
 
-void AHomesteadWorld::Refresh(const Homestead::State& State)
+bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
 {
+    const auto& State = Simulation.GetState();
     if (!bInitialized)
     {
-        Initialize(State);
-        return;
+        return Initialize(Simulation);
     }
-
-    FString Layout;
+    const bool WorldChanged = Descriptor.seed != State.world.seed || Descriptor.generationVersion != State.world.generationVersion;
+    if (!BuildTerrain(State)) return false;
+    bVisualBuildFailed = false;
+    if (WorldChanged)
+    {
+        for (auto& Entry : ResourceVisuals) ClearVisual(Entry.Value);
+        for (auto& Entry : ResourceProduceVisuals) ClearVisual(Entry.Value);
+        for (auto& Entry : StructureVisuals) ClearVisual(Entry.Value);
+        for (auto& Entry : PlotVisuals) ClearVisual(Entry.Value);
+        for (auto& Entry : OuterTreeVisuals) ClearVisual(Entry.Value);
+        OuterTreeVisuals.Reset();
+        ClearVisual(Preview);
+    }
+    FString Layout = FString::Printf(TEXT("%llu:%u:%d,%d;"), static_cast<unsigned long long>(State.world.seed),
+        State.world.generationVersion, State.activeChunk.x, State.activeChunk.y);
     for (const auto& Node : State.resources)
     {
         Layout += FString::Printf(TEXT("%d:%.3f:%.3f:%d;"), Node.id, Node.position.x, Node.position.y, Node.cleared);
@@ -1160,9 +1208,50 @@ void AHomesteadWorld::Refresh(const Homestead::State& State)
     {
         Layout += FString::Printf(TEXT("P:%d:%d;"), Plot.cellX, Plot.cellY);
     }
-    if (ResourceLayoutSignature != Layout || DecorationBatches.IsEmpty())
+    if (ResourceLayoutSignature != Layout)
     {
-        BuildDecorations(State);
+        if (!BuildDecorations(Simulation)) return false;
+        TSet<FString> Present;
+        for (const auto& Chunk : TerrainChunks)
+        {
+            if (Chunk.Value.bCollision) continue;
+            Homestead::Generation::ChunkBaseline Baseline;
+            const auto Status = Homestead::Generation::GenerateChunk(State.world, {Chunk.Key.X, Chunk.Key.Y}, Baseline);
+            if (Status != Homestead::Generation::Status::Ok)
+            {
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree generation failed: %s"), UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
+                return false;
+            }
+            for (const auto& Entity : Baseline.entities)
+            {
+                if (Entity.kind != Homestead::Generation::EntityKind::ForestTree) continue;
+                Homestead::ResourceNode Node;
+                const auto Result = Simulation.ResolveGeneratedResource(Entity.key, Node);
+                if (Result.code == Homestead::ResultCode::Unavailable) continue;
+                if (!Result)
+                {
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree resolution failed: %s"), UTF8_TO_TCHAR(Result.message.c_str()));
+                    return false;
+                }
+                if (Node.cleared) continue;
+                const FString Key = FString::Printf(TEXT("%d,%d,%u"), Node.key.chunk.x, Node.key.chunk.y, Node.key.localId);
+                Present.Add(Key);
+                if (!OuterTreeVisuals.Contains(Key))
+                    BuildResource(OuterTreeVisuals.Add(Key), Node, false);
+                if (bVisualBuildFailed)
+                {
+                    ClearVisual(OuterTreeVisuals.FindChecked(Key));
+                    OuterTreeVisuals.Remove(Key);
+                    return false;
+                }
+            }
+        }
+        for (auto It = OuterTreeVisuals.CreateIterator(); It; ++It)
+            if (!Present.Contains(It.Key()))
+            {
+                ClearVisual(It.Value());
+                It.RemoveCurrent();
+            }
         ResourceLayoutSignature = MoveTemp(Layout);
     }
 
@@ -1178,6 +1267,7 @@ void AHomesteadWorld::Refresh(const Homestead::State& State)
         {
             ClearVisual(Visual);
             BuildResource(Visual, Node, false);
+            if (bVisualBuildFailed) return false;
             Visual.Signature = Signature;
         }
         const FString ProduceSignature = Signature + (bReady ? TEXT(":ready") : TEXT(":harvested"));
@@ -1188,13 +1278,26 @@ void AHomesteadWorld::Refresh(const Homestead::State& State)
             if (bReady)
             {
                 BuildResource(Produce, Node, true);
+                if (bVisualBuildFailed) return false;
             }
             Produce.Signature = ProduceSignature;
         }
     }
 
-    RemoveMissing(StructureVisuals, State.structures);
+    std::vector<Homestead::Structure> NearStructures;
+    std::vector<Homestead::Plot> NearPlots;
+    auto Near = [&](int X, int Y)
+    {
+        const auto Center = Homestead::CellCenter(X, Y);
+        return FMath::Abs(Center.x - (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm) <= 6000
+            && FMath::Abs(Center.y - (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm) <= 6000;
+    };
     for (const auto& Structure : State.structures)
+        if (Near(Structure.cellX, Structure.cellY)) NearStructures.push_back(Structure);
+    for (const auto& Plot : State.plots)
+        if (Near(Plot.cellX, Plot.cellY)) NearPlots.push_back(Plot);
+    RemoveMissing(StructureVisuals, NearStructures);
+    for (const auto& Structure : NearStructures)
     {
         const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d"),
             static_cast<int>(Structure.kind), Structure.cellX, Structure.cellY, Structure.rotation,
@@ -1208,8 +1311,8 @@ void AHomesteadWorld::Refresh(const Homestead::State& State)
         }
     }
 
-    RemoveMissing(PlotVisuals, State.plots);
-    for (const auto& Plot : State.plots)
+    RemoveMissing(PlotVisuals, NearPlots);
+    for (const auto& Plot : NearPlots)
     {
         const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d"),
             Plot.cellX, Plot.cellY, Plot.planted, Stage(Plot.growth, 12),
@@ -1223,6 +1326,7 @@ void AHomesteadWorld::Refresh(const Homestead::State& State)
         }
     }
     UpdateLighting(State);
+    return true;
 }
 
 void AHomesteadWorld::SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation)

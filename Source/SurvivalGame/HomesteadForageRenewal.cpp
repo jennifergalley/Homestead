@@ -150,7 +150,7 @@ bool AHomesteadVisualPlaytest::RenewalVisuals(int32 Id, bool Ready, bool Focused
     {
         FCollisionQueryParams Query(SCENE_QUERY_STAT(RenewalCleared), false, PC->GetPawn());
         const FVector Center(Node->position.x, Node->position.y,
-            AHomesteadWorld::GroundHeight(Node->position.x, Node->position.y) + 90);
+            PC->GroundHeight(Node->position.x, Node->position.y) + 90);
         if (!RenewalCheck(!GetWorld()->OverlapBlockingTestByChannel(Center, FQuat::Identity, ECC_Pawn,
             FCollisionShape::MakeSphere(20), Query), TEXT("Cleared sapling location regained a blocking collider."))) return false;
         if (!RenewalCheck(!PC->IsResourceFocused(Id), TEXT("Cleared sapling regained focus."))) return false;
@@ -167,7 +167,7 @@ bool AHomesteadVisualPlaytest::RenewalVisuals(int32 Id, bool Ready, bool Focused
     Row->SetNumberField(TEXT("hunger"), PC->State().hunger); Row->SetNumberField(TEXT("warmth"), PC->State().warmth);
     FVector2D Screen;
     PC->ProjectWorldLocationToScreen(FVector(Node->position.x, Node->position.y,
-        AHomesteadWorld::GroundHeight(Node->position.x, Node->position.y) + 35), Screen);
+        PC->GroundHeight(Node->position.x, Node->position.y) + 35), Screen);
     Row->SetNumberField(TEXT("screenX"), Screen.X); Row->SetNumberField(TEXT("screenY"), Screen.Y);
     FString Text; FJsonSerializer::Serialize(Row, TJsonWriterFactory<>::Create(&Text));
     Text.ReplaceInline(TEXT("\r"), TEXT("")); Text.ReplaceInline(TEXT("\n"), TEXT(""));

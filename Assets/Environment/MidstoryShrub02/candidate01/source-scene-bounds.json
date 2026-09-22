@@ -1,0 +1,101 @@
+{
+  "sourceSha256": "7BD42E635ED83A9341A9953280845DC2685615A4A4A5441E31EEDD39D5431EC8",
+  "modelId": 150516627,
+  "geometryId": 766590037,
+  "modelName": "shrub_02_a_LOD0",
+  "referencedPoints": 5035,
+  "sourceUnitScaleCm": 1,
+  "sourceUpAxis": "Y",
+  "sourceSceneBoundsCm": {
+    "min": [
+      -170.00625572478813,
+      -0.9440357545173909,
+      -71.78397568439941
+    ],
+    "max": [
+      -63.39481923801898,
+      136.29952887608187,
+      61.56157457126214
+    ],
+    "size": [
+      106.61143648676915,
+      137.24356463059925,
+      133.34555025566155
+    ]
+  },
+  "formula": "T + Rz * Ry * Rx * S * each referenced control point, default XYZ Euler, direct root parent.",
+  "checkedIdentityDefaults": {
+    "RotationOrder": [
+      0
+    ],
+    "PreRotation": [
+      0,
+      0,
+      0
+    ],
+    "PostRotation": [
+      0,
+      0,
+      0
+    ],
+    "RotationPivot": [
+      0,
+      0,
+      0
+    ],
+    "RotationOffset": [
+      0,
+      0,
+      0
+    ],
+    "ScalingPivot": [
+      0,
+      0,
+      0
+    ],
+    "ScalingOffset": [
+      0,
+      0,
+      0
+    ],
+    "GeometricTranslation": [
+      0,
+      0,
+      0
+    ],
+    "GeometricRotation": [
+      0,
+      0,
+      0
+    ],
+    "GeometricScaling": [
+      1,
+      1,
+      1
+    ]
+  },
+  "explicitModelProperties": {
+    "Lcl Translation": [
+      -125.77278900146484,
+      -0.42584511637687683,
+      -1.684815764427185
+    ],
+    "Lcl Rotation": [
+      -0.9761565489130593,
+      -80.22082451879905,
+      -78.27355807699593
+    ],
+    "Lcl Scaling": [
+      100.0,
+      100.00000762939453,
+      100.00000762939453
+    ],
+    "DefaultAttributeIndex": [
+      0
+    ],
+    "InheritType": [
+      1
+    ]
+  },
+  "limits": "Source-scene referenced-point measurement, not Unreal render bounds or visual density. No scene import, native axis conversion, enlargement or geometry edit."
+}

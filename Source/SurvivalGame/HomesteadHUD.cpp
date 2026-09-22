@@ -12,7 +12,7 @@ const FLinearColor Ink(0.93f, 0.93f, 0.84f, 1);
 const FLinearColor Muted(0.71f, 0.77f, 0.69f, 1);
 const FLinearColor HudGold(0.92f, 0.74f, 0.43f, 1);
 const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
-const FLinearColor Warning(1.0f, 0.67f, 0.48f, 1);
+const FLinearColor HudWarning(1.0f, 0.67f, 0.48f, 1);
 }
 
 void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLinearColor Color)
@@ -73,7 +73,7 @@ void AHomesteadHUD::Meter(const FString& Label, double Value, float X, float Y, 
     Panel(X - 12, Y - 8, 200, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
     ProtectFeedback(TEXT("need-meter"), X - 12, Y - 8, 200, 55);
     Write(Label, X, Y, 19, Ink);
-    Write(FString::Printf(TEXT("%.0f"), Value), X + 143, Y, 19, Value < 25 ? Warning : Muted);
+    Write(FString::Printf(TEXT("%.0f"), Value), X + 143, Y, 19, Value < 25 ? HudWarning : Muted);
     Panel(X, Y + 29, 174, 5, FLinearColor(0.2f, 0.25f, 0.2f, 1));
     Panel(X, Y + 29, 174 * FMath::Clamp(static_cast<float>(Value / 100), 0.0f, 1.0f), 5, Color);
 }
@@ -172,7 +172,7 @@ void AHomesteadHUD::DrawHUD()
         }
         Panel(X, Y, Width, Height, Pine);
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
-            Write(Lines[Index], X + 22, Y + 15 + Index * 30, 23, PC->ToastIsError() ? Warning : Ink);
+            Write(Lines[Index], X + 22, Y + 15 + Index * 30, 23, PC->ToastIsError() ? HudWarning : Ink);
         bDrawingToast = false;
     }
 }
@@ -235,7 +235,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     if (Rows.Num() == 0)
     {
         const FString EmptyTitle = TEXT("Your pack is empty.");
-        const FString EmptyDetail = TEXT("Gather supplies in the clearing, or take items from a nearby chest.");
+        const FString EmptyDetail = TEXT("Gather supplies in the woodland, or take items from a nearby chest.");
         MeasureBookLine(EmptyTitle, Width - 80, 25, TEXT("empty-title"));
         MeasureBookLine(EmptyDetail, Width - 80, 22, TEXT("empty-detail"));
         Write(EmptyTitle, X + 40, Y + RowTop + 19, 25, Ink);
@@ -275,7 +275,7 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
     ProtectFeedback(TEXT("look-panel"), X, Y, Width, Height);
     Write(TEXT("Your look"), X + 28, Y + 24, 35, Ink);
     Write(PC.HasHeroine() ? TEXT("An early, editable heroine") : TEXT("Character assets unavailable"),
-        X + 28, Y + 74, 18, PC.HasHeroine() ? Muted : Warning);
+        X + 28, Y + 74, 18, PC.HasHeroine() ? Muted : HudWarning);
     const auto Options = PC.Rows();
     const float RowHeight = 88;
     const int Visible = FMath::Max(1, FMath::FloorToInt((Height - 240) / RowHeight));

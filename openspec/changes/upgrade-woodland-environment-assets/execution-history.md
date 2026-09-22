@@ -792,3 +792,39 @@ scenery and a multi-depth forest belt are now explicitly in next scope; original
 playable topology/collision/stream/save coordinates remain protected.
 Technical evidence receipt `woodland-composition-02`:
 `E27E145E86990F67D3E3EEBC9DF3E72ACB94B6F8BF2A66D94EF628B6D3ED2274`.
+
+## September21 generated woodland first runtime and corrections
+
+Jenny superseded the fixed board/skirt with seeded persistent exploration and no
+prepared house clearing. The focused `add-persistent-generated-woodland` contract
+was published at8d1e3f6. Main integrated generator and sparse authority, then
+streamed25 terrain/visual chunks with9 colliding chunks, removed fixed edge rails,
+and made all substantial trees authoritative/fellable. Wrapper6 and a fresh
+profile are required; no old selected profile was changed.
+
+`generated-woodland-01` genuinely compiled, linked, embedded its manifest and
+staged from unchanged qualified cooked assets. Exact action graph15FEBCFF80A005B441033F52EDA4EF838EE36A20EAC97080C200429AF818213A;
+product receiptF633F303E15DCA9EAE12B131E4863251B19BBF6CC6F0391A54C9AC1543340642;
+executable55AD8D675B49D92B2191792A65C2F00AB5311FC483237D12261DFCA839B18350.
+Failed first compilation leaves remain beside diagnosed corrective leaves.
+
+`generated-gameplay-01` FAILED its overly constrained two-tree/empty-corridor
+fixture admission. Main also found its own dispatch mistakenly inside Screenshot
+rather than Prepare; no screenshots were produced by that attempt. Both are
+corrections to test integration, not permission to weaken actual gameplay checks.
+`generated-ordinary-01` produced actual frames and valid geometry inventory:
+25tiles/9collision,286active+535outer trees,26674grass,655ferns,zero measured vertex
+position error and1027784704 process physical bytes at the inventory snapshot.
+It actually gathered berries, blocked inward movement at a trunk, and retreated
+237.451826cm. The old100s supervisor cooperatively cancelled it at102.294s before
+its final pass: FAILED/cancelled, not a completed ordinary route. Owned death,
+guard disposal, unchanged marker and zero sampled endpoints were observed.
+
+Coordinator personally inspected frame00001: genuinely forested/no prepared
+site, but strongly orange dawn, foreground leaves and orchard-like spacing.
+No visual acceptance or promotion. The follow-up uses version2 clustered
+placement (old version1 saves explicitly unsupported), realistic mapped
+worksite preparation, fresh terrain-relative spawn height and a bounds-based
+initial camera-yaw heuristic without hiding/removing trees. Ordinary capture
+has an explicit completion-driven opt-in using the existing guarded lifetime;
+default short limits remain unchanged. Navigation06 remains selected.

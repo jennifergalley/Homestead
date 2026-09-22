@@ -27,6 +27,65 @@ function Get-WoodlandPackageStems {
         @(Get-WoodlandTextureMaps|ForEach-Object {"Textures\$($_.name)"})
 }
 
+function Get-TreePalettePackageStems {
+    @(@('SM_Jacaranda','SM_FirPole')|ForEach-Object {"Meshes\$_"})
+    @(@('Jacaranda_Branches','Jacaranda_Trunk','Jacaranda_Leaves',
+        'FirPole_Branches','FirPole_Twigs','FirPole_Dead')|ForEach-Object {"Materials\M_$_"})
+    @('Jacaranda_Branches','Jacaranda_Trunk','FirPole_Branches','FirPole_Dead') |
+        ForEach-Object {$role=$_;@('Diff','NormalDX','Roughness','AO')|ForEach-Object{"Textures\T_${role}_$_"}}
+    @('Jacaranda_Leaves','FirPole_Twigs') |
+        ForEach-Object {$role=$_;@('Diff','NormalDX','Roughness','AO','Alpha')|ForEach-Object{"Textures\T_${role}_$_"}}
+}
+
+function Get-TreePalettePackagePins([string]$Root) {
+    $receipt=Join-Path $Root 'docs\research\environment-assets\tree-palette-assets-01\receipt.json'
+    if((Get-FileHash $receipt).Hash -cne '7BC147268EC0FA5538024F9B4C72D769BAA7307A95336E77D4AD398B8925D2EA'){
+        throw 'Qualified tree palette receipt differs.'
+    }
+
+    $value=Get-Content $receipt -Raw|ConvertFrom-Json
+    if($value.status -cne 'qualified-native-inventory-passed-supervisor-shutdown-failed' -or $value.namespace -cne '/Game/Trials/TreePalette_20260921_01' -or @($value.packages).Count -ne 34){
+        throw 'Qualified tree palette package scope differs.'
+    }
+    $expected=@(Get-TreePalettePackageStems|ForEach-Object{"Content\Trials\TreePalette_20260921_01\$_.uasset"}|Sort-Object)
+    if(Compare-Object $expected @($value.packages.path|Sort-Object)){throw 'Qualified tree palette package names differ.'}
+    foreach($package in $value.packages){
+        $path=Join-Path $Root $package.path
+        if((Get-Item $path).Length -ne $package.bytes -or (Get-FileHash $path).Hash -cne $package.sha256){
+            throw "Tree palette package differs:$($package.path)"
+        }
+    }
+    @($value.packages)
+}
+
+function Get-MatureFirPackageStems {
+    @('Meshes\SM_MatureFir')
+    @('MatureFir_Bark','MatureFir_Twig','MatureFir_Trunk')|ForEach-Object{"Materials\M_$_"}
+    @('MatureFir_Bark','MatureFir_Trunk')|
+        ForEach-Object {$role=$_;@('Diff','NormalDX','Roughness','AO')|ForEach-Object{"Textures\T_${role}_$_"}}
+    @('Diff','NormalDX','Roughness','AO','Alpha')|ForEach-Object{"Textures\T_MatureFir_Twig_$_"}
+}
+
+function Get-MatureFirPackagePins([string]$Root) {
+    $receipt=Join-Path $Root 'docs\research\environment-assets\mature-fir-assets-02\receipt.json'
+    if((Get-FileHash $receipt).Hash -cne '8E67DA1CBDF92E7DAC04A70A26589A11B6C3801175DE913C6E644E9B0A72490C'){
+        throw 'Qualified mature-fir receipt differs.'
+    }
+    $value=Get-Content $receipt -Raw|ConvertFrom-Json
+    if($value.status -cne 'qualified-native-inventory-passed-supervisor-shutdown-failed' -or $value.namespace -cne '/Game/Trials/MatureFir_20260922_02' -or @($value.packages).Count -ne 17){
+        throw 'Qualified mature-fir package scope differs.'
+    }
+    $expected=@(Get-MatureFirPackageStems|ForEach-Object{"Content\Trials\MatureFir_20260922_02\$_.uasset"}|Sort-Object)
+    if(Compare-Object $expected @($value.packages.path|Sort-Object)){throw 'Qualified mature-fir package names differ.'}
+    foreach($package in $value.packages){
+        $path=Join-Path $Root $package.path
+        if((Get-Item $path).Length -ne $package.bytes -or (Get-FileHash $path).Hash -cne $package.sha256){
+            throw "Mature-fir package differs:$($package.path)"
+        }
+    }
+    @($value.packages)
+}
+
 function Get-WoodlandSourcePins([string]$Root) {
     $contract='Assets\Environment\WoodlandResources\candidate01'
     $pins=@(

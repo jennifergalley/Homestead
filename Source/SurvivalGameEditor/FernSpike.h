@@ -8,3 +8,5 @@ bool RunWardrobeSpike(const FString& Mode, const FString& Output, const FDateTim
 bool RunTreeSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
 bool RunGrassSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
 bool RunWoodlandSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
+bool RunTreePaletteSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
+bool RunMatureFirSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);

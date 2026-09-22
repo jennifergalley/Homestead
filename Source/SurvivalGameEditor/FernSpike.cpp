@@ -15,6 +15,7 @@
 #include "Factories/FbxFactory.h"
 #include "Factories/FbxImportUI.h"
 #include "Factories/FbxStaticMeshImportData.h"
+#include "FbxMeshUtils.h"
 #include "Factories/FbxSkeletalMeshImportData.h"
 #include "Factories/TextureFactory.h"
 #include "HAL/FileManager.h"
@@ -2318,6 +2319,535 @@ namespace Woodland
     }
 }
 
+namespace TreePalette
+{
+    const FString Root = TEXT("/Game/Trials/TreePalette_20260921_01");
+    const FString SourceRoot = FPaths::Combine(FPaths::ProjectDir(),
+        TEXT("Assets/Environment/TreePalette20260921/candidate01/Prepared"));
+    struct FRole
+    {
+        const TCHAR* Name;
+        const TCHAR* Slot;
+        const TCHAR* FilePrefix;
+        bool Masked;
+    };
+    const FRole Roles[] = {
+        {TEXT("Jacaranda_Branches"), TEXT("jacaranda_tree_branches"), TEXT("jacaranda_tree_branches"), false},
+        {TEXT("Jacaranda_Trunk"), TEXT("jacaranda_tree_trunk"), TEXT("jacaranda_tree_trunk"), false},
+        {TEXT("Jacaranda_Leaves"), TEXT("jacaranda_tree_leaves"), TEXT("jacaranda_tree_leaves"), true},
+        {TEXT("FirPole_Branches"), TEXT("fir_sapling_medium_branches"), TEXT("fir_sapling_medium_branches"), false},
+        {TEXT("FirPole_Twigs"), TEXT("fir_sapling_medium_twigs"), TEXT("fir_sapling_medium_twigs"), true},
+        {TEXT("FirPole_Dead"), TEXT("fir_sapling_medium_branches_dead"), TEXT("fir_sapling_medium_branches"), false}
+    };
+    struct FTree
+    {
+        const TCHAR* Name;
+        const TCHAR* FileStem;
+        int32 FirstRole;
+        int32 Triangles[3];
+        float Screens[3];
+        FVector CapsuleCenter;
+        float CapsuleRadius;
+        float CapsuleLength;
+    };
+    const FTree Trees[] = {
+        {TEXT("SM_Jacaranda"), TEXT("Jacaranda"), 0, {463657,188757,149270}, {1.0f,0.3f,0.08f},
+            FVector(-0.608f,34.717f,235.017f),75.0f,300.0f},
+        {TEXT("SM_FirPole"), TEXT("FirPole"), 3, {427645,106909,25915}, {1.0f,0.3f,0.08f},
+            FVector(9.176f,0.197f,250.357f),15.0f,400.0f}
+    };
+
+    FString TextureName(int32 Role, int32 Channel)
+    {
+        const TCHAR* Suffix[] = {TEXT("Diff"),TEXT("NormalDX"),TEXT("Roughness"),TEXT("AO"),TEXT("Alpha")};
+        return FString(TEXT("T_")) + Roles[Role].Name + TEXT("_") + Suffix[Channel];
+    }
+
+    FString TextureFile(int32 Role, int32 Channel)
+    {
+        const TCHAR* Suffix[] = {TEXT("diff"),TEXT("nor_dx"),TEXT("rough"),TEXT("ao"),TEXT("alpha")};
+        return FString(Roles[Role].FilePrefix) + TEXT("_") + Suffix[Channel] + TEXT("_1k.png");
+    }
+
+    TArray<FString> Packages()
+    {
+        TArray<FString> Result;
+        for (const auto& Tree : Trees) Result.Add(Root + TEXT("/Meshes/") + Tree.Name);
+        for (int32 Role = 0; Role < UE_ARRAY_COUNT(Roles); ++Role)
+        {
+            Result.Add(Root + TEXT("/Materials/M_") + Roles[Role].Name);
+            for (int32 Channel = 0; Channel < (Roles[Role].Masked ? 5 : 4); ++Channel)
+                Result.Add(Root + TEXT("/Textures/") + TextureName(Role, Channel));
+        }
+        return Result;
+    }
+
+    bool Reject(const TSharedRef<FJsonObject>& Result, const FString& Reason)
+    {
+        Result->SetStringField(TEXT("failure"), Reason);
+        UE_LOG(LogFernSpike, Error, TEXT("Tree palette: %s"), *Reason);
+        return false;
+    }
+
+    bool Inventory(TArray<UObject*>& Assets, const TSharedRef<FJsonObject>& Result, bool bRequireRenderScreens = true)
+    {
+        TArray<TSharedPtr<FJsonValue>> MaterialsJson, TexturesJson, MeshesJson;
+        TArray<UMaterial*> Materials;
+        for (int32 Role = 0; Role < UE_ARRAY_COUNT(Roles); ++Role)
+        {
+            const auto& Expected = Roles[Role];
+            auto* Material = LoadObject<UMaterial>(nullptr,
+                *(Root + TEXT("/Materials/M_") + Expected.Name));
+            const int32 Channels = Expected.Masked ? 5 : 4;
+            if (!Material || Material->BlendMode != (Expected.Masked ? BLEND_Masked : BLEND_Opaque)
+                || Material->TwoSided != Expected.Masked
+                || !Material->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit)
+                || Material->GetExpressions().Num() != Channels)
+                return Reject(Result, FString(TEXT("Material graph differs: ")) + Expected.Name);
+            Materials.Add(Material);
+            Assets.Add(Material);
+            auto Row = MakeShared<FJsonObject>();
+            Row->SetStringField(TEXT("object"), Material->GetPathName());
+            Row->SetStringField(TEXT("sourceRole"), Expected.Slot);
+            Row->SetBoolField(TEXT("masked"), Expected.Masked);
+            MaterialsJson.Add(MakeShared<FJsonValueObject>(Row));
+            for (int32 Channel = 0; Channel < Channels; ++Channel)
+            {
+                const FString Name = TextureName(Role, Channel);
+                FMap Map = Maps[Channel];
+                auto* Texture = LoadObject<UTexture2D>(nullptr, *(Root + TEXT("/Textures/") + Name));
+                if (!Texture || Texture->Source.GetSizeX() != 1024 || Texture->Source.GetSizeY() != 1024
+                    || Texture->SRGB != Map.Srgb || Texture->CompressionSettings != Map.Compression
+                    || Texture->bFlipGreenChannel
+                    || !Grass::SampleMatches(Material->GetExpressionInputForProperty(Map.Property), Texture, Map))
+                    return Reject(Result, TEXT("Texture/material connection differs: ") + Name);
+                Assets.Add(Texture);
+                auto TextureRow = MakeShared<FJsonObject>();
+                TextureRow->SetStringField(TEXT("object"), Texture->GetPathName());
+                TextureRow->SetStringField(TEXT("source"), TextureFile(Role, Channel));
+                TexturesJson.Add(MakeShared<FJsonValueObject>(TextureRow));
+            }
+        }
+        for (const auto& Expected : Trees)
+        {
+            auto* Mesh = LoadObject<UStaticMesh>(nullptr, *(Root + TEXT("/Meshes/") + Expected.Name));
+            if (!Mesh) return Reject(Result, FString(TEXT("Missing tree mesh: ")) + Expected.Name);
+            FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+            auto* Render = Mesh->GetRenderData();
+            auto* Body = Mesh->GetBodySetup();
+            if (!Render || Render->LODResources.Num() != 3 || Mesh->GetNumSourceModels() != 3
+                || Mesh->GetStaticMaterials().Num() != 3 || Mesh->GetNaniteSettings().bEnabled
+                || Mesh->GetAutoComputeLODScreenSize() || !Body
+                || Body->CollisionTraceFlag != CTF_UseSimpleAsComplex
+                || Body->AggGeom.SphylElems.Num() != 1 || Body->AggGeom.GetElementCount() != 1)
+                return Reject(Result, TEXT("Tree mesh/LOD/body contract differs."));
+            const auto& Capsule = Body->AggGeom.SphylElems[0];
+            if (!Capsule.Center.Equals(Expected.CapsuleCenter, 0.01)
+                || !FMath::IsNearlyEqual(Capsule.Radius, Expected.CapsuleRadius)
+                || !FMath::IsNearlyEqual(Capsule.Length, Expected.CapsuleLength))
+                return Reject(Result, TEXT("Model-specific lower-trunk capsule differs."));
+            TArray<TSharedPtr<FJsonValue>> Lods;
+            for (int32 Index = 0; Index < 3; ++Index)
+            {
+                const auto& Lod = Render->LODResources[Index];
+                const float SourceScreen = Mesh->GetSourceModel(Index).ScreenSize.Default;
+                if (Lod.GetNumTriangles() != Expected.Triangles[Index]
+                    || Lod.Sections.Num() != 3
+                    || !FMath::IsNearlyEqual(SourceScreen, Expected.Screens[Index])
+                    || (bRequireRenderScreens
+                        && !FMath::IsNearlyEqual(Render->ScreenSize[Index].Default, Expected.Screens[Index])))
+                    return Reject(Result, FString::Printf(
+                        TEXT("%s LOD%d differs: triangles=%d expected=%d sections=%d source_screen=%.6f render_screen=%.6f expected=%.6f."),
+                        Expected.Name, Index, Lod.GetNumTriangles(), Expected.Triangles[Index],
+                        Lod.Sections.Num(), SourceScreen, Render->ScreenSize[Index].Default, Expected.Screens[Index]));
+                TSet<int32> Slots;
+                for (const auto& Section : Lod.Sections)
+                {
+                    if (Section.NumTriangles <= 0 || Section.MaterialIndex < 0 || Section.MaterialIndex >= 3
+                        || Slots.Contains(Section.MaterialIndex)) return Reject(Result, TEXT("LOD material roles differ."));
+                    Slots.Add(Section.MaterialIndex);
+                }
+                for (int32 Vertex = 0; Vertex < Lod.GetNumVertices(); ++Vertex)
+                    if (Lod.VertexBuffers.PositionVertexBuffer.VertexPosition(Vertex).ContainsNaN()
+                        || Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(Vertex,0).ContainsNaN()
+                        || FVector3f(Lod.VertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(Vertex)).SizeSquared() < 0.5f)
+                        return Reject(Result, TEXT("Tree render vertex is invalid."));
+                auto LodRow = MakeShared<FJsonObject>();
+                LodRow->SetNumberField(TEXT("lod"), Index);
+                LodRow->SetNumberField(TEXT("triangles"), Lod.GetNumTriangles());
+                LodRow->SetNumberField(TEXT("vertices"), Lod.GetNumVertices());
+                LodRow->SetNumberField(TEXT("sourceScreenSize"), SourceScreen);
+                LodRow->SetNumberField(TEXT("renderScreenSize"), Render->ScreenSize[Index].Default);
+                Lods.Add(MakeShared<FJsonValueObject>(LodRow));
+            }
+            for (int32 Slot = 0; Slot < 3; ++Slot)
+                if (Mesh->GetMaterial(Slot) != Materials[Expected.FirstRole + Slot]
+                    || Mesh->GetStaticMaterials()[Slot].ImportedMaterialSlotName != Roles[Expected.FirstRole + Slot].Slot)
+                    return Reject(Result, TEXT("Tree material slot order differs."));
+            Assets.Add(Mesh);
+            auto MeshRow = MakeShared<FJsonObject>();
+            MeshRow->SetStringField(TEXT("object"), Mesh->GetPathName());
+            MeshRow->SetArrayField(TEXT("boundsMinCm"), Vector(Mesh->GetBoundingBox().Min));
+            MeshRow->SetArrayField(TEXT("boundsMaxCm"), Vector(Mesh->GetBoundingBox().Max));
+            MeshRow->SetArrayField(TEXT("lods"), Lods);
+            MeshRow->SetNumberField(TEXT("capsuleRadiusCm"), Capsule.Radius);
+            MeshRow->SetNumberField(TEXT("capsuleCylinderCm"), Capsule.Length);
+            MeshesJson.Add(MakeShared<FJsonValueObject>(MeshRow));
+        }
+        Result->SetArrayField(TEXT("materials"), MaterialsJson);
+        Result->SetArrayField(TEXT("textures"), TexturesJson);
+        Result->SetArrayField(TEXT("meshes"), MeshesJson);
+        Result->SetNumberField(TEXT("packages"), Assets.Num());
+        Result->SetStringField(TEXT("limits"),
+            TEXT("Prepared-source geometry and model-specific simple collision; actual gameplay appearance, selected LOD, GPU cost and art approval remain unmeasured."));
+        return Assets.Num() == 34 && AuditAssetReferences(Root, Assets, {}, Result);
+    }
+
+    bool Import(FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
+    {
+        for (const FString& Package : Packages())
+            if (FindPackage(nullptr, *Package) || FPackageName::DoesPackageExist(Package))
+                return Reject(Result, TEXT("Fresh tree-palette package required: ") + Package);
+        TArray<UMaterial*> Materials;
+        for (int32 Role = 0; Role < UE_ARRAY_COUNT(Roles); ++Role)
+        {
+            const auto& Expected = Roles[Role];
+            const FString MaterialName = FString(TEXT("M_")) + Expected.Name;
+            auto* Material = NewObject<UMaterial>(CreatePackage(*(Root + TEXT("/Materials/") + MaterialName)),
+                *MaterialName, RF_Public | RF_Standalone);
+            Material->BlendMode = Expected.Masked ? BLEND_Masked : BLEND_Opaque;
+            Material->TwoSided = Expected.Masked;
+            Material->OpacityMaskClipValue = 0.333f;
+            Material->SetShadingModel(MSM_DefaultLit);
+            for (int32 Channel = 0; Channel < (Expected.Masked ? 5 : 4); ++Channel)
+            {
+                if (Feedback.ReceivedUserCancel()) return false;
+                const FString Name = TextureName(Role, Channel);
+                const FString File = TextureFile(Role, Channel);
+                FMap Map = Maps[Channel]; Map.Name = *Name; Map.File = *File;
+                auto* Texture = ImportMappedTexture(Map, FPaths::Combine(SourceRoot, TEXT("Textures")),
+                    Root, Feedback);
+                auto* Sample = Grass::Expression<UMaterialExpressionTextureSample>(Material);
+                if (!Texture || !Sample) return Reject(Result, TEXT("Cannot import/connect tree texture: ") + Name);
+                Sample->Texture = Texture;
+                Sample->SamplerType = Map.Sampler;
+                Material->GetExpressionInputForProperty(Map.Property)->Connect(Channel < 2 ? 0 : 1, Sample);
+            }
+            Material->PostEditChange();
+            Materials.Add(Material);
+        }
+        for (const auto& Expected : Trees)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            auto* Factory = StaticMeshFactory(false);
+            bool Cancelled = false;
+            auto* Mesh = Cast<UStaticMesh>(Factory->ImportObject(UStaticMesh::StaticClass(),
+                CreatePackage(*(Root + TEXT("/Meshes/") + Expected.Name)), Expected.Name,
+                RF_Public | RF_Standalone, FPaths::Combine(SourceRoot,
+                    FString(Expected.FileStem) + TEXT("_LOD0.fbx")), nullptr, Cancelled));
+            if (!Mesh || Cancelled) return Reject(Result, FString(TEXT("Tree LOD0 import failed: ")) + Expected.Name);
+            if (Mesh->GetName() != Expected.Name
+                && !Mesh->Rename(Expected.Name, CreatePackage(*(Root + TEXT("/Meshes/") + Expected.Name)),
+                    REN_DontCreateRedirectors | REN_NonTransactional))
+                return Reject(Result, TEXT("Cannot normalize imported tree object identity."));
+            FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+            if (Mesh->GetStaticMaterials().Num() != 3) return Reject(Result, TEXT("Tree source slots differ."));
+            for (int32 Slot = 0; Slot < 3; ++Slot)
+            {
+                if (Mesh->GetStaticMaterials()[Slot].ImportedMaterialSlotName != Roles[Expected.FirstRole + Slot].Slot)
+                    return Reject(Result, TEXT("Tree source material order differs."));
+                Mesh->SetMaterial(Slot, Materials[Expected.FirstRole + Slot]);
+            }
+            for (int32 Lod = 1; Lod < 3; ++Lod)
+                if (!FbxMeshUtils::ImportStaticMeshLOD(Mesh,
+                    FPaths::Combine(SourceRoot, FString::Printf(TEXT("%s_LOD%d.fbx"), Expected.FileStem, Lod)),
+                    Lod, false)) return Reject(Result, TEXT("Authored tree LOD import failed."));
+            Mesh->SetAutoComputeLODScreenSize(false);
+            for (int32 Lod = 0; Lod < 3; ++Lod) Mesh->GetSourceModel(Lod).ScreenSize.Default = Expected.Screens[Lod];
+            Mesh->CreateBodySetup();
+            auto* Body = Mesh->GetBodySetup();
+            if (!Body) return Reject(Result, TEXT("Tree body setup unavailable."));
+            Body->AggGeom.EmptyElements();
+            Body->CollisionTraceFlag = CTF_UseSimpleAsComplex;
+            FKSphylElem Capsule;
+            Capsule.Center = Expected.CapsuleCenter;
+            Capsule.Radius = Expected.CapsuleRadius;
+            Capsule.Length = Expected.CapsuleLength;
+            Body->AggGeom.SphylElems.Add(Capsule);
+            Body->InvalidatePhysicsData();
+            Body->CreatePhysicsMeshes();
+            Mesh->PostEditChange();
+            FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+        }
+        TArray<UObject*> Assets;
+        if (!Inventory(Assets, Result, false) || Feedback.ReceivedUserCancel()) return false;
+        for (UObject* Asset : Assets)
+        {
+            if (Feedback.ReceivedUserCancel()) return false;
+            auto* Package = Asset->GetOutermost();
+            const FString File = FPackageName::LongPackageNameToFilename(
+                Package->GetName(), FPackageName::GetAssetPackageExtension());
+            if (IFileManager::Get().FileExists(*File)) return Reject(Result, TEXT("Package output exists: ") + File);
+            FSavePackageArgs Args;
+            Args.TopLevelFlags = RF_Public | RF_Standalone;
+            Args.Error = GWarn;
+            if (!UPackage::SavePackage(Package, Asset, *File, Args))
+                return Reject(Result, TEXT("Tree palette package save failed."));
+        }
+        Result->SetStringField(TEXT("stage"), TEXT("tree-palette-import-complete"));
+        return true;
+    }
+}
+
+namespace MatureFir
+{
+    const FString Root = TEXT("/Game/Trials/MatureFir_20260922_02");
+    const FString SourceRoot = FPaths::Combine(FPaths::ProjectDir(),
+        TEXT("Assets/Environment/MatureFir20260921/candidate02/Prepared-UV09"));
+    struct FTexture
+    {
+        const TCHAR* File;
+        const TCHAR* Name;
+        int32 Material;
+        EMaterialProperty Property;
+        TextureCompressionSettings Compression;
+        EMaterialSamplerType Sampler;
+        bool Srgb;
+    };
+    const TCHAR* MaterialNames[] = {TEXT("M_MatureFir_Bark"),TEXT("M_MatureFir_Twig"),TEXT("M_MatureFir_Trunk")};
+    const FTexture Textures[] = {
+        {TEXT("fir_tree_01_bark_diff_1k.png"),TEXT("T_MatureFir_Bark_Diff"),0,MP_BaseColor,TC_Default,SAMPLERTYPE_Color,true},
+        {TEXT("fir_tree_01_bark_nor_dx_1k.png"),TEXT("T_MatureFir_Bark_NormalDX"),0,MP_Normal,TC_Normalmap,SAMPLERTYPE_Normal,false},
+        {TEXT("fir_tree_01_bark_rough_1k.png"),TEXT("T_MatureFir_Bark_Roughness"),0,MP_Roughness,TC_Masks,SAMPLERTYPE_Masks,false},
+        {TEXT("fir_tree_01_bark_ao_1k.png"),TEXT("T_MatureFir_Bark_AO"),0,MP_AmbientOcclusion,TC_Masks,SAMPLERTYPE_Masks,false},
+        {TEXT("fir_tree_01_twig_diff_1k.png"),TEXT("T_MatureFir_Twig_Diff"),1,MP_BaseColor,TC_Default,SAMPLERTYPE_Color,true},
+        {TEXT("fir_tree_01_twig_nor_dx_1k.png"),TEXT("T_MatureFir_Twig_NormalDX"),1,MP_Normal,TC_Normalmap,SAMPLERTYPE_Normal,false},
+        {TEXT("fir_tree_01_twig_rough_1k.png"),TEXT("T_MatureFir_Twig_Roughness"),1,MP_Roughness,TC_Masks,SAMPLERTYPE_Masks,false},
+        {TEXT("fir_tree_01_twig_ao_1k.png"),TEXT("T_MatureFir_Twig_AO"),1,MP_AmbientOcclusion,TC_Masks,SAMPLERTYPE_Masks,false},
+        {TEXT("fir_tree_01_twig_alpha_1k.png"),TEXT("T_MatureFir_Twig_Alpha"),1,MP_OpacityMask,TC_Masks,SAMPLERTYPE_Masks,false},
+        {TEXT("fir_tree_01_trunk_c_diff_1k.png"),TEXT("T_MatureFir_Trunk_Diff"),2,MP_BaseColor,TC_Default,SAMPLERTYPE_Color,true},
+        {TEXT("fir_tree_01_trunk_c_nor_dx_1k.png"),TEXT("T_MatureFir_Trunk_NormalDX"),2,MP_Normal,TC_Normalmap,SAMPLERTYPE_Normal,false},
+        {TEXT("fir_tree_01_trunk_c_rough_1k.png"),TEXT("T_MatureFir_Trunk_Roughness"),2,MP_Roughness,TC_Masks,SAMPLERTYPE_Masks,false},
+        {TEXT("fir_tree_01_trunk_c_ao_1k.png"),TEXT("T_MatureFir_Trunk_AO"),2,MP_AmbientOcclusion,TC_Masks,SAMPLERTYPE_Masks,false}
+    };
+    const int32 Triangles[] = {505494,68879,31512};
+    const float Screens[] = {1.0f,0.35f,0.1f};
+
+    bool Reject(const TSharedRef<FJsonObject>& Result, const FString& Reason)
+    {
+        Result->SetStringField(TEXT("failure"), Reason);
+        UE_LOG(LogFernSpike, Error, TEXT("Mature fir: %s"), *Reason);
+        return false;
+    }
+
+    TArray<FString> Packages()
+    {
+        TArray<FString> Result = {Root + TEXT("/Meshes/SM_MatureFir")};
+        for(const TCHAR* Name : MaterialNames) Result.Add(Root + TEXT("/Materials/") + Name);
+        for(const auto& Texture : Textures) Result.Add(Root + TEXT("/Textures/") + Texture.Name);
+        return Result;
+    }
+
+    bool Inventory(TArray<UObject*>& Assets, const TSharedRef<FJsonObject>& Result, bool bRequireRenderScreens = true)
+    {
+        TArray<UMaterial*> Materials;
+        for(int32 Index=0;Index<3;++Index)
+        {
+            auto* Material=LoadObject<UMaterial>(nullptr,*(Root+TEXT("/Materials/")+MaterialNames[Index]));
+            const int32 ExpectedExpressions=Index==1?5:4;
+            if(!Material || Material->BlendMode!=(Index==1?BLEND_Masked:BLEND_Opaque)
+                || Material->TwoSided!=(Index==1) || Material->GetExpressions().Num()!=ExpectedExpressions
+                || !Material->GetShadingModels().HasOnlyShadingModel(MSM_DefaultLit))
+                return Reject(Result,TEXT("Mature-fir material differs."));
+            Materials.Add(Material);Assets.Add(Material);
+        }
+        for(const auto& Expected:Textures)
+        {
+            auto* Texture=LoadObject<UTexture2D>(nullptr,*(Root+TEXT("/Textures/")+Expected.Name));
+            FMap Map={Expected.File,Expected.Name,Expected.Property,Expected.Compression,Expected.Sampler,Expected.Srgb};
+            if(!Texture || Texture->Source.GetSizeX()!=1024 || Texture->Source.GetSizeY()!=1024
+                || Texture->SRGB!=Expected.Srgb || Texture->CompressionSettings!=Expected.Compression
+                || !Grass::SampleMatches(Materials[Expected.Material]->GetExpressionInputForProperty(Expected.Property),Texture,Map))
+                return Reject(Result,TEXT("Mature-fir texture/material graph differs."));
+            Assets.Add(Texture);
+        }
+        auto* Mesh=LoadObject<UStaticMesh>(nullptr,*(Root+TEXT("/Meshes/SM_MatureFir")));
+        if(!Mesh)return Reject(Result,TEXT("Mature-fir mesh missing."));
+        FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+        auto* Render=Mesh->GetRenderData();auto* Body=Mesh->GetBodySetup();
+        if(!Render || Render->LODResources.Num()!=3 || Mesh->GetNumSourceModels()!=3
+            || Mesh->GetStaticMaterials().Num()!=4 || Mesh->GetNaniteSettings().bEnabled
+            || Mesh->GetAutoComputeLODScreenSize() || !Body || Body->CollisionTraceFlag!=CTF_UseSimpleAsComplex
+            || Body->AggGeom.GetElementCount()!=1 || Body->AggGeom.SphylElems.Num()!=1)
+            return Reject(Result,TEXT("Mature-fir mesh/LOD/body contract differs."));
+        const TCHAR* Slots[]={TEXT("fir_tree_01_bark"),TEXT("fir_tree_01_twig"),TEXT("fir_tree_01_dead_branches"),TEXT("fir_tree_01_trunk_c")};
+        UMaterial* ExpectedMaterials[]={Materials[0],Materials[1],Materials[0],Materials[2]};
+        for(int32 Slot=0;Slot<4;++Slot)
+            if(Mesh->GetStaticMaterials()[Slot].ImportedMaterialSlotName!=Slots[Slot] || Mesh->GetMaterial(Slot)!=ExpectedMaterials[Slot])
+                return Reject(Result,TEXT("Mature-fir source slot/material mapping differs."));
+        TArray<TSharedPtr<FJsonValue>> Lods;
+        for(int32 Index=0;Index<3;++Index)
+        {
+            const auto& Lod=Render->LODResources[Index];
+            const float SourceScreen=Mesh->GetSourceModel(Index).ScreenSize.Default;
+            if(Lod.GetNumTriangles()!=Triangles[Index] || Lod.Sections.Num()!=4
+                || !FMath::IsNearlyEqual(SourceScreen,Screens[Index])
+                || (bRequireRenderScreens && !FMath::IsNearlyEqual(Render->ScreenSize[Index].Default,Screens[Index])))
+                return Reject(Result,FString::Printf(TEXT("Mature-fir LOD%d differs."),Index));
+            if(Lod.VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords()<1)
+                return Reject(Result,TEXT("Mature-fir render mesh has no UV channel."));
+            int64 DegenerateUv=0,NearZeroTangent=0,NearZeroBinormal=0,NearZeroNormal=0,TriangleTotal=0;
+            FString FirstInvalidBasis;
+            TArray<TSharedPtr<FJsonValue>> Sections;
+            for(const auto& Section:Lod.Sections)
+            {
+                int64 SectionDegenerate=0,SectionTangents=0,SectionBinormals=0,SectionNormals=0;
+                for(uint32 Triangle=0;Triangle<Section.NumTriangles;++Triangle)
+                {
+                    const uint32 Offset=Section.FirstIndex+Triangle*3;
+                    const uint32 A=Lod.IndexBuffer.GetIndex(Offset);
+                    const uint32 B=Lod.IndexBuffer.GetIndex(Offset+1);
+                    const uint32 C=Lod.IndexBuffer.GetIndex(Offset+2);
+                    const FVector2f Ua=Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(A,0);
+                    const FVector2f Ub=Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(B,0);
+                    const FVector2f Uc=Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(C,0);
+                    const FVector2f Ab=Ub-Ua,Ac=Uc-Ua;
+                    if(FMath::Abs(Ab.X*Ac.Y-Ab.Y*Ac.X)<=1.e-10f)++SectionDegenerate;
+                    const uint32 Vertices[]={A,B,C};
+                    for(int32 Corner=0;Corner<3;++Corner)
+                    {
+                        const uint32 Vertex=Vertices[Corner];
+                        const FVector2f VertexUv=Lod.VertexBuffers.StaticMeshVertexBuffer.GetVertexUV(Vertex,0);
+                        const FVector3f Tangent=Lod.VertexBuffers.StaticMeshVertexBuffer.VertexTangentX(Vertex);
+                        const FVector3f Binormal=Lod.VertexBuffers.StaticMeshVertexBuffer.VertexTangentY(Vertex);
+                        const FVector3f Normal=Lod.VertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(Vertex);
+                        const bool BadTangent=Tangent.ContainsNaN()||Tangent.SizeSquared()<0.5f;
+                        const bool BadBinormal=Binormal.ContainsNaN()||Binormal.SizeSquared()<0.5f;
+                        const bool BadNormal=Normal.ContainsNaN()||Normal.SizeSquared()<0.5f;
+                        if(BadTangent)++SectionTangents;
+                        if(BadBinormal)++SectionBinormals;
+                        if(BadNormal)++SectionNormals;
+                        if(FirstInvalidBasis.IsEmpty()&&(BadTangent||BadBinormal||BadNormal))
+                            FirstInvalidBasis=FString::Printf(
+                                TEXT("section=%d triangle=%u corner=%u vertex=%u uv=(%.9g,%.9g) tangent=(%.9g,%.9g,%.9g) binormal=(%.9g,%.9g,%.9g) normal=(%.9g,%.9g,%.9g)"),
+                                Section.MaterialIndex,Triangle,Corner,Vertex,VertexUv.X,VertexUv.Y,
+                                Tangent.X,Tangent.Y,Tangent.Z,Binormal.X,Binormal.Y,Binormal.Z,
+                                Normal.X,Normal.Y,Normal.Z);
+                    }
+                }
+                DegenerateUv+=SectionDegenerate;NearZeroTangent+=SectionTangents;
+                NearZeroBinormal+=SectionBinormals;NearZeroNormal+=SectionNormals;TriangleTotal+=Section.NumTriangles;
+                auto SectionRow=MakeShared<FJsonObject>();
+                SectionRow->SetNumberField(TEXT("materialIndex"),Section.MaterialIndex);
+                SectionRow->SetNumberField(TEXT("triangles"),Section.NumTriangles);
+                SectionRow->SetNumberField(TEXT("degenerateUvTriangles"),SectionDegenerate);
+                SectionRow->SetNumberField(TEXT("nearZeroTangentCorners"),SectionTangents);
+                SectionRow->SetNumberField(TEXT("nearZeroBinormalCorners"),SectionBinormals);
+                SectionRow->SetNumberField(TEXT("nearZeroNormalCorners"),SectionNormals);
+                Sections.Add(MakeShared<FJsonValueObject>(SectionRow));
+            }
+            if(TriangleTotal!=Lod.GetNumTriangles() || DegenerateUv!=0)
+                return Reject(Result,FString::Printf(TEXT("Mature-fir LOD%d has unusable UV coverage: %lld/%lld degenerate triangles."),
+                    Index,DegenerateUv,TriangleTotal));
+            if(NearZeroTangent || NearZeroBinormal || NearZeroNormal)
+                return Reject(Result,FString::Printf(
+                    TEXT("Mature-fir LOD%d has invalid basis corners: tangent=%lld binormal=%lld normal=%lld; %s."),
+                    Index,NearZeroTangent,NearZeroBinormal,NearZeroNormal,*FirstInvalidBasis));
+            auto Row=MakeShared<FJsonObject>();Row->SetNumberField(TEXT("lod"),Index);
+            Row->SetNumberField(TEXT("triangles"),Lod.GetNumTriangles());
+            Row->SetNumberField(TEXT("sourceScreenSize"),SourceScreen);
+            Row->SetNumberField(TEXT("renderScreenSize"),Render->ScreenSize[Index].Default);
+            Row->SetNumberField(TEXT("uvChannels"),Lod.VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords());
+            Row->SetNumberField(TEXT("degenerateUvTriangles"),DegenerateUv);
+            Row->SetNumberField(TEXT("nearZeroTangentCorners"),NearZeroTangent);
+            Row->SetNumberField(TEXT("nearZeroBinormalCorners"),NearZeroBinormal);
+            Row->SetNumberField(TEXT("nearZeroNormalCorners"),NearZeroNormal);
+            Row->SetArrayField(TEXT("sections"),Sections);
+            Lods.Add(MakeShared<FJsonValueObject>(Row));
+        }
+        const auto& Capsule=Body->AggGeom.SphylElems[0];
+        if(!Capsule.Center.Equals(FVector(-2.199757f,3.326131f,240.617717f),0.1)
+            || !FMath::IsNearlyEqual(Capsule.Radius,69.249409f,0.01f)
+            || !FMath::IsNearlyEqual(Capsule.Length,361.501183f,0.01f))
+            return Reject(Result,TEXT("Mature-fir lower-trunk capsule differs."));
+        Assets.Add(Mesh);
+        Result->SetNumberField(TEXT("packages"),Assets.Num());
+        Result->SetArrayField(TEXT("lods"),Lods);
+        Result->SetArrayField(TEXT("boundsMinCm"),Vector(Mesh->GetBoundingBox().Min));
+        Result->SetArrayField(TEXT("boundsMaxCm"),Vector(Mesh->GetBoundingBox().Max));
+        Result->SetStringField(TEXT("mesh"),Mesh->GetPathName());
+        Result->SetStringField(TEXT("limits"),TEXT("Selected provider-authored c LOD0/1/2 with recovered provider UV0 and model-specific trunk capsule; runtime/GPU/visual acceptance remains separate."));
+        return Assets.Num()==17 && AuditAssetReferences(Root,Assets,{},Result);
+    }
+
+    bool Import(FStopFeedback& Feedback,const TSharedRef<FJsonObject>& Result)
+    {
+        for(const FString& Package:Packages())if(FindPackage(nullptr,*Package)||FPackageName::DoesPackageExist(Package))
+            return Reject(Result,TEXT("Fresh mature-fir package required: ")+Package);
+        TArray<UMaterial*> Materials;
+        for(int32 Index=0;Index<3;++Index)
+        {
+            auto* Material=NewObject<UMaterial>(CreatePackage(*(Root+TEXT("/Materials/")+MaterialNames[Index])),
+                MaterialNames[Index],RF_Public|RF_Standalone);
+            Material->BlendMode=Index==1?BLEND_Masked:BLEND_Opaque;Material->TwoSided=Index==1;
+            Material->OpacityMaskClipValue=0.333f;Material->SetShadingModel(MSM_DefaultLit);
+            for(const auto& Expected:Textures)if(Expected.Material==Index)
+            {
+                FMap Map={Expected.File,Expected.Name,Expected.Property,Expected.Compression,Expected.Sampler,Expected.Srgb};
+                auto* Texture=ImportMappedTexture(Map,FPaths::Combine(SourceRoot,TEXT("Textures")),Root,Feedback);
+                auto* Sample=Grass::Expression<UMaterialExpressionTextureSample>(Material);
+                if(!Texture||!Sample)return Reject(Result,TEXT("Cannot import mature-fir texture."));
+                Sample->Texture=Texture;Sample->SamplerType=Map.Sampler;
+                Material->GetExpressionInputForProperty(Map.Property)->Connect(
+                    Expected.Property==MP_BaseColor||Expected.Property==MP_Normal?0:1,Sample);
+            }
+            Material->PostEditChange();Materials.Add(Material);
+        }
+        auto* Factory=StaticMeshFactory(false);bool Cancelled=false;
+        auto* Mesh=Cast<UStaticMesh>(Factory->ImportObject(UStaticMesh::StaticClass(),
+            CreatePackage(*(Root+TEXT("/Meshes/SM_MatureFir"))),TEXT("SM_MatureFir"),RF_Public|RF_Standalone,
+            FPaths::Combine(SourceRoot,TEXT("MatureFir_LOD0.fbx")),nullptr,Cancelled));
+        if(!Mesh||Cancelled)return Reject(Result,TEXT("Mature-fir LOD0 import failed."));
+        if(Mesh->GetName()!=TEXT("SM_MatureFir") && !Mesh->Rename(TEXT("SM_MatureFir"),
+            CreatePackage(*(Root+TEXT("/Meshes/SM_MatureFir"))),REN_DontCreateRedirectors|REN_NonTransactional))
+            return Reject(Result,TEXT("Cannot normalize mature-fir identity."));
+        FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+        if(Mesh->GetStaticMaterials().Num()!=4)return Reject(Result,TEXT("Mature-fir source slots differ."));
+        UMaterial* SlotMaterials[]={Materials[0],Materials[1],Materials[0],Materials[2]};
+        for(int32 Slot=0;Slot<4;++Slot)Mesh->SetMaterial(Slot,SlotMaterials[Slot]);
+        for(int32 Lod=1;Lod<3;++Lod)if(!FbxMeshUtils::ImportStaticMeshLOD(Mesh,
+            FPaths::Combine(SourceRoot,FString::Printf(TEXT("MatureFir_LOD%d.fbx"),Lod)),Lod,false))
+            return Reject(Result,TEXT("Mature-fir authored LOD import failed."));
+        Mesh->SetAutoComputeLODScreenSize(false);
+        for(int32 Lod=0;Lod<3;++Lod)
+        {
+            auto& Source=Mesh->GetSourceModel(Lod);
+            Source.ScreenSize.Default=Screens[Lod];
+            Source.BuildSettings.bRecomputeNormals=false;
+            Source.BuildSettings.bRecomputeTangents=false;
+            Source.BuildSettings.bUseMikkTSpace=true;
+            Source.BuildSettings.bRemoveDegenerates=false;
+            Source.BuildSettings.bUseFullPrecisionUVs=true;
+            Source.BuildSettings.bUseHighPrecisionTangentBasis=true;
+        }
+        Mesh->CreateBodySetup();auto* Body=Mesh->GetBodySetup();if(!Body)return Reject(Result,TEXT("Mature-fir body missing."));
+        Body->AggGeom.EmptyElements();Body->CollisionTraceFlag=CTF_UseSimpleAsComplex;
+        FKSphylElem Capsule;Capsule.Center=FVector(-2.199757f,3.326131f,240.617717f);
+        Capsule.Radius=69.249409f;Capsule.Length=361.501183f;
+        Body->AggGeom.SphylElems.Add(Capsule);Body->InvalidatePhysicsData();Body->CreatePhysicsMeshes();
+        Mesh->PostEditChange();FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+        TArray<UObject*> Assets;if(!Inventory(Assets,Result,false)||Feedback.ReceivedUserCancel())return false;
+        for(UObject* Asset:Assets)
+        {
+            auto* Package=Asset->GetOutermost();const FString File=FPackageName::LongPackageNameToFilename(Package->GetName(),FPackageName::GetAssetPackageExtension());
+            FSavePackageArgs Args;Args.TopLevelFlags=RF_Public|RF_Standalone;Args.Error=GWarn;
+            if(IFileManager::Get().FileExists(*File)||!UPackage::SavePackage(Package,Asset,*File,Args))
+                return Reject(Result,TEXT("Mature-fir package save failed."));
+        }
+        Result->SetStringField(TEXT("stage"),TEXT("mature-fir-import-complete"));return true;
+    }
+}
+
 bool Import(const FString& Output, FStopFeedback& Feedback, const TSharedRef<FJsonObject>& Result)
 {
     Result->SetStringField(TEXT("stage"), TEXT("explicit-texture-import"));
@@ -2809,9 +3339,42 @@ bool RunWoodlandSpike(const FString& Mode, const FString& Output, const FDateTim
         TArray<UObject*> Assets;
         Passed = Woodland::Inventory(Assets, Result);
     }
+
     Result->SetBoolField(TEXT("passed"), Passed);
     Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
     if (!Passed) UE_LOG(LogFernSpike, Error, TEXT("Woodland %s failed at %s; retain partial outputs."),
         *Mode, *Result->GetStringField(TEXT("stage")));
     return WriteJson(FPaths::Combine(Output, TEXT("woodland-result.json")), Result) && Passed && !Feedback.ReceivedUserCancel();
+}
+
+bool RunTreePaletteSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven)
+{
+    FStopFeedback Feedback(Output, Deadline, bCompletionDriven);
+    auto Result = MakeShared<FJsonObject>();
+    Result->SetStringField(TEXT("mode"), Mode);
+    Result->SetStringField(TEXT("namespace"), TreePalette::Root);
+    Result->SetStringField(TEXT("stage"), TEXT("persisted-inventory"));
+    bool Passed = false;
+    if (Mode == TEXT("TreePaletteImport")) Passed = TreePalette::Import(Feedback, Result);
+    else if (Mode == TEXT("TreePaletteVerify"))
+    {
+        TArray<UObject*> Assets;
+        Passed = TreePalette::Inventory(Assets, Result);
+    }
+
+    Result->SetBoolField(TEXT("passed"), Passed);
+    Result->SetBoolField(TEXT("cancelledAtPollingBoundary"), Feedback.ReceivedUserCancel());
+    return WriteJson(FPaths::Combine(Output, TEXT("tree-palette-result.json")), Result)
+        && Passed && !Feedback.ReceivedUserCancel();
+}
+
+bool RunMatureFirSpike(const FString& Mode,const FString& Output,const FDateTime& Deadline,bool bCompletionDriven)
+{
+    FStopFeedback Feedback(Output,Deadline,bCompletionDriven);auto Result=MakeShared<FJsonObject>();
+    Result->SetStringField(TEXT("mode"),Mode);Result->SetStringField(TEXT("namespace"),MatureFir::Root);
+    Result->SetStringField(TEXT("stage"),TEXT("persisted-inventory"));bool Passed=false;
+    if(Mode==TEXT("MatureFirImport"))Passed=MatureFir::Import(Feedback,Result);
+    else if(Mode==TEXT("MatureFirVerify")){TArray<UObject*> Assets;Passed=MatureFir::Inventory(Assets,Result);}
+    Result->SetBoolField(TEXT("passed"),Passed);Result->SetBoolField(TEXT("cancelledAtPollingBoundary"),Feedback.ReceivedUserCancel());
+    return WriteJson(FPaths::Combine(Output,TEXT("mature-fir-result.json")),Result)&&Passed&&!Feedback.ReceivedUserCancel();
 }

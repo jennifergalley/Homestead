@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "status": "qualified-native-inventory-passed-supervisor-shutdown-failed",
+  "namespace": "/Game/Trials/MatureFir_20260921_01",
+  "packages": [
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Materials\\M_MatureFir_Bark.uasset",
+      "bytes": 7021,
+      "sha256": "18744AE065A44DE3AE363538257AE9B43ACBE08280FAB0AF8A7A8E894222597B"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Materials\\M_MatureFir_Trunk.uasset",
+      "bytes": 7034,
+      "sha256": "51AC7DA14CA390BCF8548C45EDE2D3295BA45D81BCB37CE65B0748A507D875B3"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Materials\\M_MatureFir_Twig.uasset",
+      "bytes": 7794,
+      "sha256": "AA3E7DD485FBDCB6194619D66A7703459CB4DC962DA43FC184663FC1D92C08EF"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Meshes\\SM_MatureFir.uasset",
+      "bytes": 22403098,
+      "sha256": "79BDF15452F40A29206937A69773ACFD24014571F88FC2CE66213D03CED5AA52"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Bark_AO.uasset",
+      "bytes": 1929977,
+      "sha256": "EA491E69207F4B6920793FCF36B04EA55543DEEC6928DB2158951D7A5054CBDF"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Bark_Diff.uasset",
+      "bytes": 5847165,
+      "sha256": "936AD61E10B90930AC1DD85B2C22073A156006F38B7D69456526F17DF6EEC66C"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Bark_NormalDX.uasset",
+      "bytes": 6128268,
+      "sha256": "46ECA0FD45EB55D355917C79EC55368FA9782AD7AF1E21931DD84B11F0743E8A"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Bark_Roughness.uasset",
+      "bytes": 1794084,
+      "sha256": "1D9A3CC74B37D9E7AD5EC7DAC5210203E543ADAB9EFAA4CCC244A8100D779AB1"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Trunk_AO.uasset",
+      "bytes": 1789345,
+      "sha256": "76CBD470E2267F1299F930FCB4847A6677FF8E56086D8203DB68304E9815063B"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Trunk_Diff.uasset",
+      "bytes": 5237719,
+      "sha256": "48D6568A8D3DE3138174BB471847E83C8C981EA71FDAD6ED66BDCE8D86ABAFF5"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Trunk_NormalDX.uasset",
+      "bytes": 4647774,
+      "sha256": "C00E88C072B90D358AE5F6EA9A9B514E3BC2CC5D3DEE0141C1D51481F7D091E9"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Trunk_Roughness.uasset",
+      "bytes": 1706304,
+      "sha256": "93E246868A17F7D2BF0F005B8ABFAB063C9D4F84EC1DB6845E709640ED93AA0B"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Twig_Alpha.uasset",
+      "bytes": 730682,
+      "sha256": "A79D5C00B01C91BFFBA420B7383FBBA692BABE29773F0032F79136A45812D04A"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Twig_AO.uasset",
+      "bytes": 310500,
+      "sha256": "A2FA7468C5837F6EE5570EFF06A708D3B7990E3B3F41D1A8128F9D3BE3657278"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Twig_Diff.uasset",
+      "bytes": 3391226,
+      "sha256": "4B67B826D548AC3E23E35EE8990E236B3354EC51FAA73BFB2266363C26598929"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Twig_NormalDX.uasset",
+      "bytes": 1833325,
+      "sha256": "DC5F72FEFAA25EE6522C6A91AD13FA495E3F47869701C54FCD4126F157ABD5EF"
+    },
+    {
+      "path": "Content\\Trials\\MatureFir_20260921_01\\Textures\\T_MatureFir_Twig_Roughness.uasset",
+      "bytes": 1096505,
+      "sha256": "1DDA741599A144B37E22E40CB57C52C917B91C271B2C7BBA8AAC8443755D01D5"
+    }
+  ],
+  "nativeImportResultSha256": "DECF337CD43DD2E628446E9992689FB41FDCE3BF116356BD1F8A8B23FE3E8DD7",
+  "nativeVerifyResultSha256": "BF1CDC5C12C09C0661AECD584B26F31B30ED85C35AA063A8C1EC806839E70336",
+  "importSupervisorResultSha256": "4DB21F13AFB610943CDA8122C3EBC0E3BDE65BDAF8B0835080EEB5CB1AACAEBA",
+  "verifySupervisorResultSha256": "062B85C6677CDF37ECAF3DCBD9DEBE6D59BDFA62C88C3E6AB2B0B48FD4F8F6F9",
+  "sourceManifestSha256": "C5E5A72954988B4DCB9217245BF138199B82E93000A391B967AEA6E3F7306ADC",
+  "sourceDownloadReceiptSha256": "93EFA5244A355EC0E395562F18E505A5CE44D23C8078359DF7EA8772218D0655",
+  "sourceInventorySha256": "D98D37854FD6C90F82F0D345D54628912A7C4CA9618483D8ED3EEF5F9D6F8F0C",
+  "preparationSha256": "711A850106941676F6604044FFCD972BE1DCD232B7BD35503AF6791E8AC11650",
+  "qualification": "Import and fresh-process inventory passed for17 packages and exact LOD/material/collision data. Both Unreal processes hung only after writing results and were terminated by exact owned PID; supervisors remain failed0xFFFFFFFF with observed death, disposed guard and unchanged marker. Runtime and visual acceptance remain separate."
+}

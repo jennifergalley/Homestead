@@ -3,6 +3,7 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
+from unittest.mock import MagicMock
 
 import numpy as np
 
@@ -50,6 +51,22 @@ def fixture():
 
 
 class SourceRoleTests(unittest.TestCase):
+    def test_large_tree_basic_profile_defers_attribute_arrays(self):
+        reader = MagicMock()
+        reader.inspect_fbx.return_value = {"models": 1}
+        result = inspect.inspect_fbx(reader, Path("tree.fbx"), lambda: None, detailed=False)
+        self.assertEqual(result["roleSpecificAttributes"], [])
+        self.assertIn("must pass detailed UV/normal inspection", result["preparationBoundary"])
+
+    def test_mature_fir_reader_limits_are_opt_in(self):
+        path = Path(__file__).resolve().parents[1] / "inspect_woodland_sources.py"
+        sha = inspect.digest(path)
+        standard = inspect.load_reader(path, sha, detailed=False)
+        self.assertEqual(standard.FbxReader.MaxFileBytes, 128 * 1024**2)
+        mature = inspect.load_reader(path, sha, detailed=False, mature_fir=True)
+        self.assertEqual(mature.FbxReader.MaxFileBytes, 256 * 1024**2)
+        self.assertEqual(mature.FbxReader.MaxDecodedBytes, 768 * 1024**2)
+
     def test_role_specific_uvs_and_zero_normal(self):
         result = inspect.geometry_roles(SimpleNamespace(child=child), fixture())
         branch = result["rolesByMaterialSlot"]["0"]

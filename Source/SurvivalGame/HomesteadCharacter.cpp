@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
+#include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -352,6 +353,40 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     if (bAppearancePreview) UpdateAppearanceFraming();
 }
 
+FRotator AHomesteadCharacter::ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred)
+{
+    const FVector Origin = GetActorLocation() + CameraArm->TargetOffset;
+    const FVector Focus = GetActorLocation() + FVector(0, 0, 45);
+    int32 BestScore = MAX_int32, InitialObstructions = -1, BestObstructions = -1;
+    FRotator Best = Preferred;
+    for (int32 Index = 0; Index < 24; ++Index)
+    {
+        const int32 Offset = Index == 0 ? 0 : (Index % 2 ? (Index + 1) / 2 : -Index / 2);
+        const FRotator Rotation(Preferred.Pitch, Preferred.Yaw + Offset * 15, 0);
+        const FVector Desired = Origin - Rotation.Vector() * CameraArm->TargetArmLength
+            + FRotationMatrix(Rotation).TransformVector(CameraArm->SocketOffset);
+        FHitResult Hit;
+        const FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadStartingView), false, this);
+        const bool Blocked = GetWorld()->SweepSingleByChannel(Hit, Origin, Desired, FQuat::Identity,
+            CameraArm->ProbeChannel, FCollisionShape::MakeSphere(CameraArm->ProbeSize), Query);
+        const FVector CameraPosition = Blocked ? Hit.Location : Desired;
+        const int32 Obstructions = Landscape.StartingViewObstructions(Focus, CameraPosition);
+        if (Index == 0) InitialObstructions = Obstructions;
+        const int32 Score = Obstructions * 1000
+            + FMath::RoundToInt(FMath::Max(0.0, 250.0 - FVector::Dist(Origin, CameraPosition)));
+        if (Score < BestScore)
+        {
+            BestScore = Score;
+            BestObstructions = Obstructions;
+            Best = Rotation;
+        }
+    }
+    InitialViewEvidence = FString::Printf(
+        TEXT("fresh_start=1 preferred_yaw=%.1f chosen_yaw=%.1f bounds_hits_before=%d bounds_hits_after=%d; bounds heuristic, not pixel visibility"),
+        Preferred.Yaw, Best.Yaw, InitialObstructions, BestObstructions);
+    return Best;
+}
+
 void AHomesteadCharacter::PlayGather()
 {
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
@@ -443,7 +478,7 @@ void AHomesteadCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void AHomesteadCharacter::Move(const FInputActionValue& Value)
 {
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
-    if (!PC || PC->IsBookOpen() || PC->IsFailed()) return;
+    if (!PC || !PC->IsWorldReady() || PC->IsBookOpen() || PC->IsFailed()) return;
     const FVector2D Axis = Value.Get<FVector2D>();
     if (!Axis.IsNearlyZero()) CancelAction();
     if (bPlanning)

@@ -191,7 +191,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 ++CameraBlockers;
             }
             const FVector Center = Probe->CameraCenter;
-            if (Center.ContainsNaN() || Center.Z <= AHomesteadWorld::GroundHeight(Tree.position.x, Tree.position.y) + 20)
+            if (Center.ContainsNaN() || Center.Z <= Controller->GroundHeight(Tree.position.x, Tree.position.y) + 20)
                 return false;
             FHitResult Hit;
             FCollisionQueryParams Query(SCENE_QUERY_STAT(SaplingCameraLifecycle), false, Controller->GetPawn());
@@ -244,7 +244,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                             return false;
                         FCollisionQueryParams Query(SCENE_QUERY_STAT(WoodlandClearedCell), false, Controller->GetPawn());
                         if (GetWorld()->OverlapBlockingTestByChannel(
-                            FVector(PX, PY, AHomesteadWorld::GroundHeight(PX, PY) + 100), FQuat::Identity,
+                            FVector(PX, PY, Controller->GroundHeight(PX, PY) + 100), FQuat::Identity,
                             ECC_Pawn, FCollisionShape::MakeSphere(40), Query)) return false;
                     }
                 return true;

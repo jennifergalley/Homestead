@@ -1,0 +1,60 @@
+{
+  "status": "bounded candidate probe only; not verified as the required dense midstory bush",
+  "date": "2026-09-21",
+  "asset": "shrub_02",
+  "name": "Shrub 02",
+  "author": "Rico Cilliers",
+  "source": "https://polyhaven.com/a/shrub_02",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "publisherLicenseUrl": "https://polyhaven.com/license",
+  "access": "Previously verified public free/no-account Poly Haven offering; no acquisition performed by this lane.",
+  "preview": "https://cdn.polyhaven.com/asset_img/thumbs/shrub_02.png?width=630&quality=95&v=0224a75c",
+  "previewAssessment": "Viewed. Four irregular upright broadleaf/twiggy variants with open gaps and visible woody stems. Real midstory scale is plausible, but dense living broadleaf mass is NOT established; do not present this as an ideal match.",
+  "publisherFilesHash": "b8a0252030e27a0d209db5e564cd6aa62e2bb9db",
+  "publisherAggregateDimensionsMm": [5340.904712677002, 2060.703456401825, 2070.5229938030243],
+  "publisherAggregateDimensionsQualification": "Multi-model arranged asset, not one bush's native bounds.",
+  "descriptor": {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/shrub_02/shrub_02_1k.gltf",
+    "bytes": 8083,
+    "publisherMd5": "8f7254d279c0c49c0b3edfe260aa5c86",
+    "observedFormat": "glTF 2.0, Blender I/O 3.5.30",
+    "coordinates": "glTF right-handed, Y-up, metre units; accessor bounds are mesh-local, not rotated world bounds.",
+    "selectedNode": "shrub_02_a",
+    "selectedMesh": "Plane.024",
+    "positionCount": 5125,
+    "indexCount": 22770,
+    "indexedTriangles": 7590,
+    "localPositionMinMeters": [-0.9439988136291504, -0.03012576885521412, -0.863244354724884],
+    "localPositionMaxMeters": [0.6156559586524963, 1.6821810007095337, 0.42684367299079895],
+    "nodeQuaternionXYZW": [0.12589912116527557, -0.6947680711746216, 0.006097283214330673, 0.708102822303772],
+    "nodeTranslationMeters": [-1.5478131771087646, -0.005240630358457565, -0.02073405683040619],
+    "nodeScale": "Omitted, identity under glTF specification.",
+    "material": {"name": "shrub_02", "count": 1, "alphaMode": "MASK", "alphaCutoff": 0.5, "doubleSided": true},
+    "uv": "TEXCOORD_0 declared on selected primitive; FBX channel mapping not yet inspected.",
+    "limits": "Descriptor fields verified; no binary buffer/FBX acquired or read. Exact transformed referenced bounds and FBX topology/slots/normals remain unmeasured. A transformed local AABB would be conservative, not exact geometry bounds.",
+    "otherVariantIndexedTriangles": {"shrub_02_b": 5242, "shrub_02_c": 9234, "shrub_02_d": 5188},
+    "lod": "No glTF LOD chain/extensions; publisher LOD flag does not establish an FBX LOD chain."
+  },
+  "proposedMainOwnedSourceProbe": {
+    "stage1": "Acquire only the FBX and inspect using the established source reader; keep file/model identities distinct from glTF.",
+    "stage2": "Only if native size and artistic assessment warrant a game trial, acquire the five selected 1K maps and import one selected model into a fresh namespace chosen by MAIN.",
+    "sourceAndMapsDeclaredBytes": 5504976,
+    "files": [
+      {"name": "shrub_02_1k.fbx", "bytes": 832300, "publisherMd5": "f4d00cbfa3dd3a6594e5b63c6324cb42", "channel": "fbx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/shrub_02/shrub_02_1k.fbx"},
+      {"name": "shrub_02_diff_1k.png", "bytes": 1737013, "publisherMd5": "ec92c3af4603a2266215f58aa0096784", "channel": "Diffuse", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_02/shrub_02_diff_1k.png"},
+      {"name": "shrub_02_nor_dx_1k.png", "bytes": 1750592, "publisherMd5": "5787a61cc1615d97d7f61ad00280dced", "channel": "nor_dx", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_02/shrub_02_nor_dx_1k.png"},
+      {"name": "shrub_02_rough_1k.png", "bytes": 571392, "publisherMd5": "12acf3caedd96538a331ff946924eee6", "channel": "Rough", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_02/shrub_02_rough_1k.png"},
+      {"name": "shrub_02_ao_1k.png", "bytes": 521938, "publisherMd5": "4a33a98bbe6e16ba78015dd2821eb97f", "channel": "AO", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_02/shrub_02_ao_1k.png"},
+      {"name": "shrub_02_alpha_1k.png", "bytes": 91741, "publisherMd5": "64a1f609d80ea076b43412498a3d2db5", "channel": "Alpha", "url": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_02/shrub_02_alpha_1k.png"}
+    ],
+    "colorSpace": "Diffuse sRGB; DirectX normal, roughness, AO and alpha linear. No GL/EXR automatic dependency lookup.",
+    "excluded": "No mask/displacement/alternate resolutions or glTF buffer/textures are required by this proposed FBX route.",
+    "ownership": "MAIN downloads, inspects, prepares and imports only after accepting the candidate; no source-lane engine or duplicate acquisition."
+  },
+  "rejectedSearchLeads": [
+    {"claim": "ambientCG Bush 01 / Bush001", "evidence": "Provider API query q=Bush returned numberOfResults=0; candidate asset page Bush001 returned404. Search-generated scale/availability claim is unsupported."},
+    {"claim": "Sj Dense Woodland Corner Bush", "evidence": "Search-cited exact Sketchfab page returned404; no verified license/download/scale."},
+    {"claim": "BlendSwap Realistic Bush, blend23224", "evidence": "Actual page describes a stylized female rig, not a bush. Discarded."}
+  ]
+}

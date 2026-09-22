@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "profile": "mature-fir-source-01",
+  "phase": "exact asset-specific source-size exception; no scene import",
+  "provider": "Poly Haven",
+  "refreshedDate": "2026-09-21",
+  "runId": "20260921-033354-2d257ba0",
+  "sourceRoot": "Assets\\Source\\mature-fir-20260921",
+  "assets": [
+    {
+      "id": "fir_tree_01",
+      "name": "Fir Tree 01",
+      "authors": {"Rob Tuytel": "Photography", "Rico Cilliers": "Modeling"},
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/fir_tree_01",
+      "resolution": "1k",
+      "files": [
+        {"name":"fir_tree_01_1k.fbx","bytes":249300492,"publisherMd5":"ab79788fc818ce7eadd40ccbfe987918","url":"https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/fir_tree_01/fir_tree_01_1k.fbx"},
+        {"name":"fir_tree_01_bark_ao_1k.png","bytes":1902560,"publisherMd5":"308fc32c1b41c7c1d2624c9674fe5a88","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_ao_1k.png"},
+        {"name":"fir_tree_01_bark_diff_1k.png","bytes":5652976,"publisherMd5":"3a0fa82c548618135f9d64af79a3fcd1","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_diff_1k.png"},
+        {"name":"fir_tree_01_bark_nor_dx_1k.png","bytes":5778911,"publisherMd5":"06e2274c521b940eb00bc45180dbd963","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_nor_dx_1k.png"},
+        {"name":"fir_tree_01_bark_rough_1k.png","bytes":1778413,"publisherMd5":"cf3118cd7ab3e3993f7a8e60d01903a5","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_rough_1k.png"},
+        {"name":"fir_tree_01_twig_ao_1k.png","bytes":328899,"publisherMd5":"0ad3288a37e67e92f80c1f9005a28e6f","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_ao_1k.png"},
+        {"name":"fir_tree_01_twig_alpha_1k.png","bytes":371026,"publisherMd5":"02ab808c8b2ff77ad9fdb2f92892db80","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_alpha_1k.png"},
+        {"name":"fir_tree_01_twig_diff_1k.png","bytes":3411459,"publisherMd5":"3791a2e595b63410ed0bd054633373de","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_diff_1k.png"},
+        {"name":"fir_tree_01_twig_nor_dx_1k.png","bytes":1825078,"publisherMd5":"40953c43e0bc8a84ef57a4be3adc44a8","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_nor_dx_1k.png"},
+        {"name":"fir_tree_01_twig_rough_1k.png","bytes":1155354,"publisherMd5":"2b0e9158d4038029171651371668a8ee","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_rough_1k.png"},
+        {"name":"fir_tree_01_trunk_c_ao_1k.png","bytes":1795918,"publisherMd5":"e4e1de68d6b44b42877a001ee330b71c","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_ao_1k.png"},
+        {"name":"fir_tree_01_trunk_c_diff_1k.png","bytes":5140137,"publisherMd5":"bbf00b9de62c4d7c7b3d66a9f74d57d4","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_diff_1k.png"},
+        {"name":"fir_tree_01_trunk_c_nor_dx_1k.png","bytes":4450550,"publisherMd5":"8c9ae873e74f92b0912d7b097965d869","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_nor_dx_1k.png"},
+        {"name":"fir_tree_01_trunk_c_rough_1k.png","bytes":1722380,"publisherMd5":"bb1f564376e3863ffa0fe91564f146e9","url":"https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_rough_1k.png"}
+      ]
+    }
+  ]
+}

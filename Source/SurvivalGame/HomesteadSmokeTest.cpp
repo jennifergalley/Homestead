@@ -87,9 +87,14 @@ void AHomesteadSmokeTest::Axis(FKey Key, float Value)
 
 void AHomesteadSmokeTest::Teleport(Homestead::Point Position)
 {
+    if (!Controller->PrepareWorldAt(Position))
+    {
+        Finish(false, TEXT("Controlled teleport destination could not be prepared."));
+        return;
+    }
     if (auto* Avatar = Cast<ACharacter>(Controller->GetPawn()))
         Avatar->GetCharacterMovement()->StopMovementImmediately();
-    FVector Location(Position.x, Position.y, AHomesteadWorld::GroundHeight(Position.x, Position.y) + 100);
+    FVector Location(Position.x, Position.y, Controller->GroundHeight(Position.x, Position.y) + 100);
     Controller->GetPawn()->SetActorLocation(Location, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
@@ -142,6 +147,7 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
     }
     if (const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn()))
     {
+        Framing += TEXT("starting_view=") + Avatar->StartingViewEvidence() + TEXT("\n");
         const USkeletalMeshComponent* Visual = Avatar->GetMesh();
         FVector2D CenterPixel, HeadPixel;
         const bool CenterVisible = Controller->ProjectWorldLocationToScreen(Visual->Bounds.Origin, CenterPixel);
@@ -170,6 +176,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland")))
+    {
+        PrepareGeneratedWorldChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadDirectionalNavigationTest")))
     {
         PrepareDirectionalNavigationChecks();
@@ -855,6 +866,7 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest"))

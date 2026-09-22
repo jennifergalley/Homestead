@@ -224,7 +224,9 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         || FernMode == TEXT("WardrobeImport") || FernMode == TEXT("WardrobeVerify")
         || FernMode == TEXT("TreeImport") || FernMode == TEXT("TreeVerify")
         || FernMode == TEXT("GrassImport") || FernMode == TEXT("GrassVerify")
-        || FernMode == TEXT("WoodlandImport") || FernMode == TEXT("WoodlandVerify"))
+        || FernMode == TEXT("WoodlandImport") || FernMode == TEXT("WoodlandVerify")
+        || FernMode == TEXT("TreePaletteImport") || FernMode == TEXT("TreePaletteVerify")
+        || FernMode == TEXT("MatureFirImport") || FernMode == TEXT("MatureFirVerify"))
         && FPlatformMisc::GetEnvironmentVariable(TEXT("HOMESTEAD_PROBE_DEADLINE")).IsEmpty()),
         TEXT("Completion-driven mode must be render/cook/hair without a synthetic deadline."));
     Result->SetBoolField(TEXT("completionDriven"), bCompletionDriven);
@@ -383,9 +385,11 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
     const bool bTreeMode = FernMode == TEXT("TreeImport") || FernMode == TEXT("TreeVerify");
     const bool bGrassMode = FernMode == TEXT("GrassImport") || FernMode == TEXT("GrassVerify");
     const bool bWoodlandMode = FernMode == TEXT("WoodlandImport") || FernMode == TEXT("WoodlandVerify");
-    if ((bWardrobeMode || bTreeMode || bGrassMode || bWoodlandMode) && !bCompletionDriven) return 8;
+    const bool bTreePaletteMode = FernMode == TEXT("TreePaletteImport") || FernMode == TEXT("TreePaletteVerify");
+    const bool bMatureFirMode = FernMode == TEXT("MatureFirImport") || FernMode == TEXT("MatureFirVerify");
+    if ((bWardrobeMode || bTreeMode || bGrassMode || bWoodlandMode || bTreePaletteMode || bMatureFirMode) && !bCompletionDriven) return 8;
     if (!FernMode.IsEmpty() && FernMode != TEXT("Import") && FernMode != TEXT("Render") && FernMode != TEXT("Cook")
-        && !bHairMode && !bWardrobeMode && !bTreeMode && !bGrassMode && !bWoodlandMode) return 8;
+        && !bHairMode && !bWardrobeMode && !bTreeMode && !bGrassMode && !bWoodlandMode && !bTreePaletteMode && !bMatureFirMode) return 8;
     const double Deadline = FPlatformTime::Seconds() + (FernMode == TEXT("Render") ? 510
         : (FernMode == TEXT("Import") || FernMode == TEXT("HairImport")) ? 180 : 90);
     FDateTime RunDeadline;
@@ -412,6 +416,8 @@ int32 UHomesteadAuthoringProbeCommandlet::Main(const FString& Params)
         if (!FFileHelper::LoadFileToString(Admission, *AdmitPath) || Admission != FernMode
             || IFileManager::Get().FileExists(*StopPath) || !MayContinue()
             || !(FernMode == TEXT("Cook") ? CookPlayableCandidate(Output)
+                : bMatureFirMode ? RunMatureFirSpike(FernMode, Output, RunDeadline, bCompletionDriven)
+                : bTreePaletteMode ? RunTreePaletteSpike(FernMode, Output, RunDeadline, bCompletionDriven)
                 : bWoodlandMode ? RunWoodlandSpike(FernMode, Output, RunDeadline, bCompletionDriven)
                 : bGrassMode ? RunGrassSpike(FernMode, Output, RunDeadline, bCompletionDriven)
                 : bTreeMode ? RunTreeSpike(FernMode, Output, RunDeadline, bCompletionDriven)

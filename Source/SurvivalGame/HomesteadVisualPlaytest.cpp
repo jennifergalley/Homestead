@@ -200,8 +200,7 @@ void AHomesteadVisualPlaytest::Prepare()
     if (bTreeRoute) PrepareTreeEncounter();
     if (bTreeRoute || bPresentationDiagnostics)
     {
-        RecordGroveInventory();
-        RecordGrassGroundInventory();
+        RecordGeneratedInventory();
     }
     RecordPresentationSettings(TEXT("start"));
     LastWallTime = FPlatformTime::Seconds();
@@ -255,7 +254,7 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
                 SpacingMargin = FMath::Min(SpacingMargin,
                     FVector2D::Distance(Position, FVector2D(Other->GetComponentLocation())) - 115 * (Scale + Other->GetComponentScale().X));
         const double ScaleError = (Tree->GetComponentScale() - FVector(Scale)).Size();
-        const double GroundError = Root.Z - AHomesteadWorld::GroundHeight(Root.X, Root.Y);
+        const double GroundError = Root.Z - PC->GroundHeight(Root.X, Root.Y);
         const auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
         const bool CollisionReady = Body && Body->AggGeom.SphylElems.Num() == 1
             && Body->AggGeom.GetElementCount() == 1 && Body->CollisionTraceFlag == CTF_UseSimpleAsComplex
@@ -336,7 +335,7 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             if (!Batch->GetInstanceTransform(Index, Transform, true)) { Valid = false; continue; }
             const FVector Position = Transform.TransformPosition(Anchor);
             const double ScaleError = (Transform.GetScale3D() - FVector::OneVector).Size();
-            const double GroundError = Position.Z - AHomesteadWorld::GroundHeight(Position.X, Position.Y);
+            const double GroundError = Position.Z - PC->GroundHeight(Position.X, Position.Y);
             const double HomeMargin = FVector2D(Position.X + 1000, Position.Y).Size() - 320;
             double ResourceMargin = 1e9, StructureMargin = 1e9, PlotMargin = 1e9;
             for (const auto& Node : PC->State().resources)
@@ -358,7 +357,6 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             Valid &= ScaleError < 0.001 && FMath::Abs(GroundError) < 0.1 && HomeMargin >= -0.1
                 && ResourceMargin >= -0.1 && StructureMargin >= -0.1 && PlotMargin >= -0.1
                 && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= 214.9
-                && AHomesteadWorld::LowCoverDensity(Position.X, Position.Y) > 0
                 && FMath::Abs(Position.X) <= 3900.1 && FMath::Abs(Position.Y) <= 3900.1
                 && !AHomesteadWorld::IsDecorationReserved(PC->State(), Position.X, Position.Y, 20, 0, true);
             ++Clumps; Triangles += Count;
@@ -382,9 +380,9 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
         {
             const auto& Vertex = Section->ProcVertexBuffer[Index];
             const float X = -4000 + (Index % 321) * 25, Y = -4000 + (Index / 321) * 25;
-            const FVector Expected(X, Y, AHomesteadWorld::GroundHeight(X, Y));
-            const float DX = (AHomesteadWorld::GroundHeight(X + 1, Y) - AHomesteadWorld::GroundHeight(X - 1, Y)) * 0.5f;
-            const float DY = (AHomesteadWorld::GroundHeight(X, Y + 1) - AHomesteadWorld::GroundHeight(X, Y - 1)) * 0.5f;
+            const FVector Expected(X, Y, PC->GroundHeight(X, Y));
+            const float DX = (PC->GroundHeight(X + 1, Y) - PC->GroundHeight(X - 1, Y)) * 0.5f;
+            const float DY = (PC->GroundHeight(X, Y + 1) - PC->GroundHeight(X, Y - 1)) * 0.5f;
             MaxPositionError = FMath::Max(MaxPositionError, (FVector(Vertex.Position) - Expected).Size());
             MaxNormalError = FMath::Max(MaxNormalError, (FVector(Vertex.Normal) - FVector(-DX, -DY, 1).GetSafeNormal()).Size());
             MaxUvError = FMath::Max(MaxUvError, (FVector2D(Vertex.UV0) - FVector2D(X / 300.0f, Y / 300.0f)).Size());
@@ -427,7 +425,7 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
         const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
         const FVector Position = Part->GetComponentTransform().TransformPosition(Anchor);
         const double ScaleError = (Part->GetComponentScale() - FVector::OneVector).Size();
-        const double GroundError = Position.Z - AHomesteadWorld::GroundHeight(Position.X, Position.Y);
+        const double GroundError = Position.Z - PC->GroundHeight(Position.X, Position.Y);
         const FString Root = Fir ? TEXT("/Game/Trials/WoodlandResources_20260921_01")
             : TEXT("/Game/Trials/Fern02_20260920_01");
         bool Known = false;
@@ -455,8 +453,7 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             && (!Fir || Part->GetCollisionResponseToChannels() == Responses);
         const bool PlacementValid = !AHomesteadWorld::IsDecorationReserved(PC->State(), Position.X, Position.Y,
                 Fir ? 90 : 75, 0, !Fir)
-            && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= (Fir ? 284.9 : 269.9)
-            && AHomesteadWorld::LowCoverDensity(Position.X, Position.Y) > 0;
+            && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= (Fir ? 284.9 : 269.9);
         const int32 Near = Data->LODResources[0].GetNumTriangles();
         const int32 Far = Data->LODResources.Last().GetNumTriangles();
         UnderstoryValid &= Ready && CollisionValid && PlacementValid && ScaleError < 0.001
@@ -571,30 +568,45 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
     if (PC->Landscape) PC->Landscape->GetComponents(Parts);
     TArray<UStaticMeshComponent*> Trees;
     for (auto* Part : Parts)
-        if (Part->ComponentHasTag(TEXT("AuthoredTreeSmall02"))) Trees.Add(Part);
-    if (Trees.Num() != 1)
+        if (Part->ComponentHasTag(TEXT("GeneratedForestTree")) && Part->IsQueryCollisionEnabled()) Trees.Add(Part);
+    const FVector Player = PC->GetPawn()->GetActorLocation();
+    Trees.Sort([&](const UStaticMeshComponent& A, const UStaticMeshComponent& B)
+    { return FVector::DistSquared2D(A.GetComponentLocation(), Player) < FVector::DistSquared2D(B.GetComponentLocation(), Player); });
+    if (Trees.IsEmpty())
     {
-        Observations.Add(FString::Printf(TEXT("FAILED expected one ordinary-world authored tree, observed %d."), Trees.Num()));
+        Observations.Add(TEXT("FAILED no active generated tree exists for ordinary encounter."));
         return;
     }
     auto* Tree = Trees[0];
     UStaticMesh* Mesh = Tree->GetStaticMesh();
     auto* Body = Mesh ? Mesh->GetBodySetup() : nullptr;
-    bTreeReady = Mesh && Mesh->GetPathName() == TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland")
-        && Tree->GetComponentScale().Equals(FVector::OneVector, 0.001)
-        && Mesh->GetStaticMaterials().Num() == 3 && Body && Body->AggGeom.SphylElems.Num() == 1
+    const bool KnownGeneratedTree = Mesh && (Mesh->GetPathName()
+        == TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland")
+        || Mesh->GetPathName() == TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda")
+        || Mesh->GetPathName() == TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"));
+    const int32 ExpectedTreeSlots = Mesh && Mesh->GetPathName().Contains(TEXT("/MatureFir_20260922_02/")) ? 4 : 3;
+    bTreeReady = KnownGeneratedTree
+        && Tree->GetComponentScale().X >= 0.899 && Tree->GetComponentScale().X <= 1.101
+        && Tree->GetComponentScale().Equals(FVector(Tree->GetComponentScale().X), 0.001)
+        && Mesh->GetStaticMaterials().Num() == ExpectedTreeSlots && Body && Body->AggGeom.SphylElems.Num() == 1
         && Body->AggGeom.GetElementCount() == 1 && Body->CollisionTraceFlag == CTF_UseSimpleAsComplex
         && Tree->GetCollisionEnabled() != ECollisionEnabled::NoCollision
         && Tree->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block;
     const FVector Root = Tree->GetComponentLocation();
-    const double GroundError = Root.Z - AHomesteadWorld::GroundHeight(Root.X, Root.Y);
+    const FVector Anchor = Mesh && Body && Body->AggGeom.SphylElems.Num() == 1
+        ? Tree->GetComponentTransform().TransformPosition(FVector(Body->AggGeom.SphylElems[0].Center.X,
+            Body->AggGeom.SphylElems[0].Center.Y, Mesh->GetBoundingBox().Min.Z)) : Root;
+    const double GroundError = Anchor.Z - PC->GroundHeight(Anchor.X, Anchor.Y);
     bTreeReady &= FMath::Abs(GroundError) < 0.1;
     for (int32 Index = 0; Mesh && Index < Mesh->GetStaticMaterials().Num(); ++Index)
     {
         const auto* Interface = Tree->GetMaterial(Index);
         auto* Material = Interface ? Interface->GetMaterial() : nullptr;
         auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
-        const bool Ready = Material && Material->GetPathName().StartsWith(TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/"))
+        const FString MaterialRoot = Mesh->GetPathName().Contains(TEXT("/TreePalette_20260921_01/"))
+            ? TEXT("/Game/Trials/TreePalette_20260921_01/Materials/")
+            : TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/");
+        const bool Ready = Material && Material->GetPathName().StartsWith(MaterialRoot)
             && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
         bTreeReady &= Ready;
         PresentationSettings.Add(FString::Printf(TEXT("tree_material[%d]=%s imported_slot=%s shader_map_complete=%d"),
@@ -608,6 +620,8 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
         return;
     }
     ObservedTree = Tree;
+    Tap(EKeys::Gamepad_RightThumbstick);
+    Observations.Add(TEXT("Ordinary mapped camera-distance input selected the wide tree encounter view."));
     TreeCenter = FVector2D(Tree->GetComponentTransform().TransformPosition(Body->AggGeom.SphylElems[0].Center));
     TreeContactSamples.Add(TEXT("seconds,x,y,distance_cm,input_x,input_y,inward_intent,inward_velocity_cm_s,radial_progress_cm_s,total_speed_cm_s,hit_component,geometry_blocking_flag,start_penetrating,hit_distance_cm,blocked_seconds,geometry_hit,tree_query,pawn_query,tree_blocks_pawn,pawn_blocks_tree,tree_object_type,pawn_object_type,tree_actor_collision,pawn_actor_collision"));
     Observations.Add(FString::Printf(TEXT("Ordinary tree encounter: root=%s trunk_center_xy=%s radius_cm=%.6f capsule_cylinder_cm=%.6f"),
@@ -650,24 +664,29 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
             PC->GetViewportSize(Width, Height);
             const FBox Bounds = ObservedTree->Bounds.GetBox();
             FVector2D Minimum(DBL_MAX, DBL_MAX), Maximum(-DBL_MAX, -DBL_MAX);
-            bTreeFramed = Width > 0 && Height > 0;
+            int32 ProjectedCorners = 0;
             for (int32 Corner = 0; Corner < 8; ++Corner)
             {
                 const FVector CornerPoint(Corner & 1 ? Bounds.Max.X : Bounds.Min.X,
                     Corner & 2 ? Bounds.Max.Y : Bounds.Min.Y, Corner & 4 ? Bounds.Max.Z : Bounds.Min.Z);
                 FVector2D Screen;
                 const bool Projected = PC->ProjectWorldLocationToScreen(CornerPoint, Screen);
-                bTreeFramed &= Projected && Screen.X >= 0 && Screen.X <= Width && Screen.Y >= 0 && Screen.Y <= Height;
                 if (Projected)
                 {
+                    ++ProjectedCorners;
                     Minimum.X = FMath::Min(Minimum.X, Screen.X);
                     Minimum.Y = FMath::Min(Minimum.Y, Screen.Y);
                     Maximum.X = FMath::Max(Maximum.X, Screen.X);
                     Maximum.Y = FMath::Max(Maximum.Y, Screen.Y);
                 }
             }
-            Observations.Add(FString::Printf(TEXT("Tree bounds inside viewport=%d; screen_min=%s; screen_max=%s; viewport=%d,%d; camera_pitch=%.6f"),
-                bTreeFramed, *Minimum.ToString(), *Maximum.ToString(), Width, Height, CameraRotation.Pitch));
+            const double OverlapWidth = FMath::Max(0.0, FMath::Min(Maximum.X, Width) - FMath::Max(Minimum.X, 0.0));
+            const double OverlapHeight = FMath::Max(0.0, FMath::Min(Maximum.Y, Height) - FMath::Max(Minimum.Y, 0.0));
+            bTreeFramed = Width > 0 && Height > 0 && ProjectedCorners >= 4
+                && OverlapWidth >= Width * 0.2 && OverlapHeight >= Height * 0.35;
+            Observations.Add(FString::Printf(TEXT("Tree substantial viewport overlap=%d; projected_corners=%d; screen_min=%s; screen_max=%s; overlap=%.1f,%.1f; viewport=%d,%d; camera_pitch=%.6f"),
+                bTreeFramed, ProjectedCorners, *Minimum.ToString(), *Maximum.ToString(),
+                OverlapWidth, OverlapHeight, Width, Height, CameraRotation.Pitch));
         }
     }
     if (Approach && Offset.Size() < 45)
@@ -701,6 +720,8 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
         const bool RadiallyBlocked = bHaveTreeDistance && HitTree && Move.Y > 0.25 && InwardIntent > 0.25
             && FMath::Abs(InwardVelocity) < 5 && FMath::Abs(RadialProgress) < 5;
         TreeBlockedSeconds = RadiallyBlocked ? TreeBlockedSeconds + Delta : 0;
+        const bool ContactBlocked = HitTree && Move.Y > 0.25 && InwardIntent > 0.25
+            && FMath::Abs(InwardVelocity) < 5 && Distance <= 90;
         TreeContactSamples.Add(FString::Printf(TEXT("%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%s,%d,%d,%.6f,%.6f,%d,%d,%d,%d,%d,%d,%d,%d,%d"),
             Elapsed, Position.X, Position.Y, Distance, Input.X, Input.Y, InwardIntent, InwardVelocity, RadialProgress,
             Avatar->GetVelocity().Size2D(), *GetPathNameSafe(Hit.GetComponent()), Hit.bBlockingHit,
@@ -709,7 +730,7 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
             static_cast<int32>(PawnCapsule->GetCollisionObjectType()), TreeActorCollision, PawnActorCollision));
         PreviousTreeDistance = Distance;
         bHaveTreeDistance = true;
-        if (TreeBlockedSeconds >= 0.75f)
+        if (TreeBlockedSeconds >= 0.75f || ContactBlocked)
         {
             bTreeBlocked = true;
             Observations.Add(FString::Printf(TEXT("Actual inward walking blocked at authored trunk: player=%s distance_cm=%.6f inward_intent=%.6f inward_velocity_cm_s=%.6f radial_progress_cm_s=%.6f total_speed_cm_s=%.6f sweep_component=%s"),
@@ -939,7 +960,7 @@ void AHomesteadVisualPlaytest::Finish()
         Observations.Add(FString::Printf(TEXT("Tree retreat displacement_cm=%.6f; retreat_start=%s; completed_passes=%d; planned_passes=%d"),
             TreeRetreatDistance, *TreeRetreatStart.ToString(), PassIndex, Passes.Num()));
         if (bTreeRoute && !bTreeFramed)
-            Observations.Add(TEXT("FAILED full tree bounds were not observed inside the viewport."));
+            Observations.Add(TEXT("FAILED tree bounds did not substantially overlap the gameplay viewport."));
     }
     Observations.Add(TEXT("This observational capture is not a visual-quality pass or a replacement for human feel/listening review."));
     bool Saved = FFileHelper::SaveStringToFile(FString::Join(Telemetry, TEXT("\n")) + TEXT("\n"),

@@ -17,6 +17,12 @@ finite terrain edge. Another cosmetic skirt would not deliver this request.
   actual occupied/cleared sites and coherent stream access.
 - Render dense standing woodland and layer cover with trees, not a radial ring.
   Standing playable trunks are reachable, tool-gated and permanently fellable.
+- Render a small license-verified palette of distinct mature/young tree forms,
+  deterministically assigned from durable generated identity. One repeated
+  TreeSmall02 mesh or arbitrary scale-only variety does not meet acceptance.
+- Make rolling terrain relief visibly legible from the gameplay camera while
+  preserving walkable spawn safety, seam-correct collision/normals and flatter
+  pockets that can actually be cleared and built on.
 - Introduce an explicit current-generation save schema/fresh test profile.
 - Stage large mountains, regional drainage/rivers/lakes as later work; no voxel
   digging, unlimited-state promise, legacy-seed migration or engine rewrite.

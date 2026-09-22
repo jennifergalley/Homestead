@@ -1,0 +1,1165 @@
+{
+  "schema": 1,
+  "blenderVersion": "4.5.14 LTS",
+  "manifestSha256": "ED00C13141D954731A8C010686C785BE585E94FFDECF1779E8BB9FBC8891888E",
+  "receiptSha256": "38DF4AFD4E4C2EF4E03975F733DD7F1A5ADB01BF3ED119CFB6338006C227BA89",
+  "toolSha256": "0DD052B72E1E78900D0850AD84AEB778EED3A70736A295A86B50096CF77F6489",
+  "assets": [
+    {
+      "asset": "fir_tree_01",
+      "model": "fir_tree_01_c_LOD0",
+      "selection": {
+        "sourceFormat": "Blend",
+        "selectedModels": [
+          "fir_tree_01_c_LOD0",
+          "fir_tree_01_c_LOD1",
+          "fir_tree_01_c_LOD2"
+        ],
+        "selectionMode": "bpy.data.libraries.load exact object only; scripts disabled",
+        "modifiers": []
+      },
+      "sourceTransformsBeforeLayoutRemoval": [
+        {
+          "location": [
+            12.0,
+            0.0,
+            0.0
+          ],
+          "rotationEuler": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "location": [
+            12.0,
+            0.0,
+            0.0
+          ],
+          "rotationEuler": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "location": [
+            12.0,
+            0.0,
+            0.0
+          ],
+          "rotationEuler": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "conversion": "Selected provider-authored c LOD0/1/2 objects; removed each 12m display-layout translation once; copied every provider UVMap corner XY exactly into active/render UV0.",
+      "providerNativeUvRecovery": [
+        {
+          "source": "provider-native CORNER FLOAT_VECTOR attribute UVMap; XY copied exactly, Z required zero",
+          "loops": 1016858,
+          "min": [
+            0.0,
+            -1.0000001192092896
+          ],
+          "max": [
+            5.000000476837158,
+            1.266947865486145
+          ],
+          "thirdComponentMaxAbs": 0.0,
+          "sourceVectorSha256": "49FC05343ECDA1DAEE1B5218E529B2904FE2FBDF4F5CD3B99126BC0CA257A486",
+          "sourceXySha256": "9B47C51467EA56A930EA9D20A216F4403AAD7B2AB45D314541C3AED0A4B1F779",
+          "recoveredLayer": "UVMap",
+          "recoveredLayerIndex": 0,
+          "activeRender": true,
+          "recoveredXySha256": "9B47C51467EA56A930EA9D20A216F4403AAD7B2AB45D314541C3AED0A4B1F779",
+          "exactValueEquality": true,
+          "preservation": {
+            "positionsSha256": "31ECB76217EAA25C82ED5D685CE31B674FC46B4EEEF1FBEAA5985EE9D34BF16D",
+            "loopVertexIndicesSha256": "FA1EE33613B941883B6CCBDCB80EBE9DE949FF323A36EF412ABBA807D27A43A0",
+            "polygonLoopStartsSha256": "77811B127A86BFDFC950A64C51FAB5BE51099B76782F72C67BEEC5681FFFCB0D",
+            "polygonLoopTotalsSha256": "BA2CD64D8F4E090A106B574E859A3AC210108C8FDACFB490069CDEB805BB65A5",
+            "sourceMaterialIndicesSha256": "227D0146059EBD564FF54AB968E686A248BE7CC5B0FDBDF9078E2793BA7A1B86",
+            "recoveredMaterialIndicesSha256": "F1D2342A81E2FF9BA64F8F3FA7F0C540F9C05282B08D922E6BC6811621EA0919",
+            "sourceCornerNormalsSha256": "5D7D74523AED85D780EFC76B0D94AB7B82CAD4386771F5CE8AF5D266D0B7240E",
+            "recoveredCornerNormalsSha256": "5D7D74523AED85D780EFC76B0D94AB7B82CAD4386771F5CE8AF5D266D0B7240E",
+            "positionsExact": true,
+            "topologyExact": true,
+            "normalsExact": true,
+            "materialIndicesChangedOnlyByEmptyLeadingSlotRemoval": true
+          }
+        },
+        {
+          "source": "provider-native CORNER FLOAT_VECTOR attribute UVMap; XY copied exactly, Z required zero",
+          "loops": 138191,
+          "min": [
+            0.0,
+            -1.0000001192092896
+          ],
+          "max": [
+            5.000000476837158,
+            0.9929043054580688
+          ],
+          "thirdComponentMaxAbs": 0.0,
+          "sourceVectorSha256": "FF59E305AD124DFAA1E20C332289B8C9FF853995773952E4010F4B9BA75587F6",
+          "sourceXySha256": "7F26F33BB9C3895804A53FCEB276297AE87E295C755699A4FE35C4046B661DF1",
+          "recoveredLayer": "UVMap",
+          "recoveredLayerIndex": 0,
+          "activeRender": true,
+          "recoveredXySha256": "7F26F33BB9C3895804A53FCEB276297AE87E295C755699A4FE35C4046B661DF1",
+          "exactValueEquality": true,
+          "preservation": {
+            "positionsSha256": "9659077B3C31189773E941778E4B2D4F4E2CB21A7079BC8CA51C2477DE05731B",
+            "loopVertexIndicesSha256": "AF7B819A67CA4CE6174688970C67ABBC33BBB2734E32CA80735AA87EB135683D",
+            "polygonLoopStartsSha256": "A9B9A3EE9F38BD836FF56A83125DCFFAC8C39D631D51C83B3FF83DC55241F57A",
+            "polygonLoopTotalsSha256": "05618C458E1C8CFD403705D65137AD1F1AFFD8994904D945D43A60568D99BCE0",
+            "sourceMaterialIndicesSha256": "F061B4A3816BA29F417E9BB74F8E5470CC856B16B75E569EB2222B6A9C69B7E5",
+            "recoveredMaterialIndicesSha256": "F061B4A3816BA29F417E9BB74F8E5470CC856B16B75E569EB2222B6A9C69B7E5",
+            "sourceCornerNormalsSha256": "A2C34B4D6D02EA06261D4718569DAA837355CE5C434F1AF4A4DFEEE9BE5D2A03",
+            "recoveredCornerNormalsSha256": "A2C34B4D6D02EA06261D4718569DAA837355CE5C434F1AF4A4DFEEE9BE5D2A03",
+            "positionsExact": true,
+            "topologyExact": true,
+            "normalsExact": true,
+            "materialIndicesChangedOnlyByEmptyLeadingSlotRemoval": false
+          }
+        },
+        {
+          "source": "provider-native CORNER FLOAT_VECTOR attribute UVMap; XY copied exactly, Z required zero",
+          "loops": 75670,
+          "min": [
+            0.0,
+            -1.0000001192092896
+          ],
+          "max": [
+            5.000000476837158,
+            0.9891930818557739
+          ],
+          "thirdComponentMaxAbs": 0.0,
+          "sourceVectorSha256": "9BCED692450D22B48E3A9A167980B98DDDD1BC40072CFA414836F27D7CB09B3C",
+          "sourceXySha256": "A9814DEFCB290B4DA76D4C1FC29BA1C385998AB6924129F123804F4B9EECE7AA",
+          "recoveredLayer": "UVMap",
+          "recoveredLayerIndex": 0,
+          "activeRender": true,
+          "recoveredXySha256": "A9814DEFCB290B4DA76D4C1FC29BA1C385998AB6924129F123804F4B9EECE7AA",
+          "exactValueEquality": true,
+          "preservation": {
+            "positionsSha256": "8062E5CBCC3FCD3D9DD8B6A1732586D24F67DDA058D49CC426CC94FCAC4D1905",
+            "loopVertexIndicesSha256": "8474C022F534822BD9B5696B8A52683D64E21DAFE8059255F6E2E4DBCBF12322",
+            "polygonLoopStartsSha256": "30FB48D95C72910C73AE7546872080F445EF5A2FF29B48F79FF9EB9071AFA428",
+            "polygonLoopTotalsSha256": "8CED9CB80D4A178B29C3A6344B7503F0B4039D285F826E5EE6C2978E69692D05",
+            "sourceMaterialIndicesSha256": "9EFD9D7BFE3DA41E31A2F43A7EA22E8D0A3EFBCC6C5DBD230EA7FC0BC320BD22",
+            "recoveredMaterialIndicesSha256": "9EFD9D7BFE3DA41E31A2F43A7EA22E8D0A3EFBCC6C5DBD230EA7FC0BC320BD22",
+            "sourceCornerNormalsSha256": "F086DDEE6FDED69FFFCAD68A8EAEFF53CE9C835424378843BF8765E61BEA65C2",
+            "recoveredCornerNormalsSha256": "F086DDEE6FDED69FFFCAD68A8EAEFF53CE9C835424378843BF8765E61BEA65C2",
+            "positionsExact": true,
+            "topologyExact": true,
+            "normalsExact": true,
+            "materialIndicesChangedOnlyByEmptyLeadingSlotRemoval": false
+          }
+        }
+      ],
+      "materialSlots": [
+        "fir_tree_01_bark",
+        "fir_tree_01_twig",
+        "fir_tree_01_dead_branches",
+        "fir_tree_01_trunk_c"
+      ],
+      "levels": [
+        {
+          "vertices": 620039,
+          "triangles": 505494,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_tree_01_bark",
+              "triangles": 9536
+            },
+            {
+              "slot": 1,
+              "name": "fir_tree_01_twig",
+              "triangles": 446074
+            },
+            {
+              "slot": 2,
+              "name": "fir_tree_01_dead_branches",
+              "triangles": 3616
+            },
+            {
+              "slot": 3,
+              "name": "fir_tree_01_trunk_c",
+              "triangles": 46268
+            }
+          ],
+          "uv": {
+            "name": "UVMap",
+            "loops": 1016858,
+            "min": [
+              0.0,
+              -1.0000001192092896
+            ],
+            "max": [
+              5.000000476837158,
+              1.266947865486145
+            ],
+            "degenerateTriangles": 0,
+            "degenerateTrianglesAt1e10": 0,
+            "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+            "perMaterial": [
+              {
+                "slot": 0,
+                "name": "fir_tree_01_bark",
+                "triangles": 9536,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 4.8410882300231606e-05,
+                "min": [
+                  0.0,
+                  0.20000000298023224
+                ],
+                "max": [
+                  1.0,
+                  0.800000011920929
+                ],
+                "uniqueSample": 3807
+              },
+              {
+                "slot": 1,
+                "name": "fir_tree_01_twig",
+                "triangles": 446074,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 2.0254046830814332e-05,
+                "min": [
+                  0.00954437255859375,
+                  0.007795747369527817
+                ],
+                "max": [
+                  0.26327380537986755,
+                  1.266947865486145
+                ],
+                "uniqueSample": 507
+              },
+              {
+                "slot": 2,
+                "name": "fir_tree_01_dead_branches",
+                "triangles": 3616,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 1.1325137165840715e-05,
+                "min": [
+                  0.1596347540616989,
+                  0.21454006433486938
+                ],
+                "max": [
+                  0.5843070149421692,
+                  0.7854599356651306
+                ],
+                "uniqueSample": 421
+              },
+              {
+                "slot": 3,
+                "name": "fir_tree_01_trunk_c",
+                "triangles": 46268,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+                "min": [
+                  0.005346514750272036,
+                  -1.0000001192092896
+                ],
+                "max": [
+                  5.000000476837158,
+                  0.9929043054580688
+                ],
+                "uniqueSample": 18274
+              }
+            ]
+          },
+          "geometry": {
+            "zeroAreaTrianglesAt1e12": 0,
+            "nearZeroAreaTrianglesAt1e10": 0,
+            "minimumDoubledArea": 8.795491339697037e-07
+          },
+          "basis": {
+            "nearZeroTangents": 0,
+            "nearZeroTangentsAt1e4": 0,
+            "nonFiniteTangents": 0,
+            "invalidBitangentSigns": 0,
+            "nearZeroNormals": 0,
+            "nearZeroNormalsAt1e4": 0,
+            "nonFiniteNormals": 0
+          },
+          "boundsMeters": {
+            "min": [
+              -2.747030735015869,
+              -2.9699645042419434,
+              -0.09382282942533493
+            ],
+            "max": [
+              3.558908462524414,
+              2.9962728023529053,
+              14.426758766174316
+            ]
+          },
+          "exportVerification": {
+            "layerElementUvCount": 1,
+            "layerElementUvValueCount": 1260628,
+            "layerElementTangentCount": 1,
+            "layerElementTangentValueCount": 3050574,
+            "layerElementBinormalCount": 1,
+            "layerElementBinormalValueCount": 3050574,
+            "exportedMaterials": [
+              "fir_tree_01_bark",
+              "fir_tree_01_twig",
+              "fir_tree_01_dead_branches",
+              "fir_tree_01_trunk_c"
+            ],
+            "freshImportMaterials": [
+              "fir_tree_01_bark.001",
+              "fir_tree_01_twig.001",
+              "fir_tree_01_dead_branches.001",
+              "fir_tree_01_trunk_c.001"
+            ],
+            "freshImport": {
+              "vertices": 620039,
+              "triangles": 505494,
+              "materials": [
+                {
+                  "slot": 0,
+                  "name": "fir_tree_01_bark",
+                  "triangles": 9536
+                },
+                {
+                  "slot": 1,
+                  "name": "fir_tree_01_twig",
+                  "triangles": 446074
+                },
+                {
+                  "slot": 2,
+                  "name": "fir_tree_01_dead_branches",
+                  "triangles": 3616
+                },
+                {
+                  "slot": 3,
+                  "name": "fir_tree_01_trunk_c",
+                  "triangles": 46268
+                }
+              ],
+              "uv": {
+                "name": "UVMap",
+                "loops": 1016858,
+                "min": [
+                  0.0,
+                  -1.0000001192092896
+                ],
+                "max": [
+                  5.000000476837158,
+                  1.266947865486145
+                ],
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+                "perMaterial": [
+                  {
+                    "slot": 0,
+                    "name": "fir_tree_01_bark",
+                    "triangles": 9536,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 4.8410882300231606e-05,
+                    "min": [
+                      0.0,
+                      0.20000000298023224
+                    ],
+                    "max": [
+                      1.0,
+                      0.800000011920929
+                    ],
+                    "uniqueSample": 3807
+                  },
+                  {
+                    "slot": 1,
+                    "name": "fir_tree_01_twig",
+                    "triangles": 446074,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 2.0254046830814332e-05,
+                    "min": [
+                      0.00954437255859375,
+                      0.007795747369527817
+                    ],
+                    "max": [
+                      0.26327380537986755,
+                      1.266947865486145
+                    ],
+                    "uniqueSample": 507
+                  },
+                  {
+                    "slot": 2,
+                    "name": "fir_tree_01_dead_branches",
+                    "triangles": 3616,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 1.1325137165840715e-05,
+                    "min": [
+                      0.1596347540616989,
+                      0.21454006433486938
+                    ],
+                    "max": [
+                      0.5843070149421692,
+                      0.7854599356651306
+                    ],
+                    "uniqueSample": 421
+                  },
+                  {
+                    "slot": 3,
+                    "name": "fir_tree_01_trunk_c",
+                    "triangles": 46268,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+                    "min": [
+                      0.005346514750272036,
+                      -1.0000001192092896
+                    ],
+                    "max": [
+                      5.000000476837158,
+                      0.9929043054580688
+                    ],
+                    "uniqueSample": 18274
+                  }
+                ]
+              },
+              "geometry": {
+                "zeroAreaTrianglesAt1e12": 0,
+                "nearZeroAreaTrianglesAt1e10": 0,
+                "minimumDoubledArea": 8.795491339697037e-07
+              },
+              "basis": {
+                "nearZeroTangents": 0,
+                "nearZeroTangentsAt1e4": 0,
+                "nonFiniteTangents": 0,
+                "invalidBitangentSigns": 0,
+                "nearZeroNormals": 0,
+                "nearZeroNormalsAt1e4": 0,
+                "nonFiniteNormals": 0
+              },
+              "boundsMeters": {
+                "min": [
+                  -2.747030735015869,
+                  -2.9699645042419434,
+                  -0.09382282942533493
+                ],
+                "max": [
+                  3.558908462524414,
+                  2.9962728023529053,
+                  14.426758766174316
+                ]
+              }
+            }
+          },
+          "lod": 0,
+          "sourceModel": "fir_tree_01_c_LOD0",
+          "file": "MatureFir_LOD0.fbx",
+          "bytes": 39319148,
+          "sha256": "6F1BCE54BB914C40C3A6D01C5A20D709BD0DA6174E1FFFC1B913664B4940861B"
+        },
+        {
+          "vertices": 43277,
+          "triangles": 68879,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_tree_01_bark",
+              "triangles": 9536
+            },
+            {
+              "slot": 1,
+              "name": "fir_tree_01_twig",
+              "triangles": 9459
+            },
+            {
+              "slot": 2,
+              "name": "fir_tree_01_dead_branches",
+              "triangles": 3616
+            },
+            {
+              "slot": 3,
+              "name": "fir_tree_01_trunk_c",
+              "triangles": 46268
+            }
+          ],
+          "uv": {
+            "name": "UVMap",
+            "loops": 138191,
+            "min": [
+              0.0,
+              -1.0000001192092896
+            ],
+            "max": [
+              5.000000476837158,
+              0.9929043054580688
+            ],
+            "degenerateTriangles": 0,
+            "degenerateTrianglesAt1e10": 0,
+            "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+            "perMaterial": [
+              {
+                "slot": 0,
+                "name": "fir_tree_01_bark",
+                "triangles": 9536,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 4.8410882300231606e-05,
+                "min": [
+                  0.0,
+                  0.20000000298023224
+                ],
+                "max": [
+                  1.0,
+                  0.800000011920929
+                ],
+                "uniqueSample": 3807
+              },
+              {
+                "slot": 1,
+                "name": "fir_tree_01_twig",
+                "triangles": 9459,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 0.0007882207864895463,
+                "min": [
+                  0.1839204728603363,
+                  0.5981792211532593
+                ],
+                "max": [
+                  0.9476327896118164,
+                  0.9631060361862183
+                ],
+                "uniqueSample": 83
+              },
+              {
+                "slot": 2,
+                "name": "fir_tree_01_dead_branches",
+                "triangles": 3616,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 1.1325137165840715e-05,
+                "min": [
+                  0.1596347540616989,
+                  0.21454006433486938
+                ],
+                "max": [
+                  0.5843070149421692,
+                  0.7854599356651306
+                ],
+                "uniqueSample": 421
+              },
+              {
+                "slot": 3,
+                "name": "fir_tree_01_trunk_c",
+                "triangles": 46268,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+                "min": [
+                  0.005346514750272036,
+                  -1.0000001192092896
+                ],
+                "max": [
+                  5.000000476837158,
+                  0.9929043054580688
+                ],
+                "uniqueSample": 18274
+              }
+            ]
+          },
+          "geometry": {
+            "zeroAreaTrianglesAt1e12": 0,
+            "nearZeroAreaTrianglesAt1e10": 0,
+            "minimumDoubledArea": 8.795491339697037e-07
+          },
+          "basis": {
+            "nearZeroTangents": 0,
+            "nearZeroTangentsAt1e4": 0,
+            "nonFiniteTangents": 0,
+            "invalidBitangentSigns": 0,
+            "nearZeroNormals": 0,
+            "nearZeroNormalsAt1e4": 0,
+            "nonFiniteNormals": 0
+          },
+          "boundsMeters": {
+            "min": [
+              -2.761598587036133,
+              -2.982006311416626,
+              -0.09382282942533493
+            ],
+            "max": [
+              3.5874412059783936,
+              3.023411273956299,
+              14.451992988586426
+            ]
+          },
+          "exportVerification": {
+            "layerElementUvCount": 1,
+            "layerElementUvValueCount": 89224,
+            "layerElementTangentCount": 1,
+            "layerElementTangentValueCount": 414573,
+            "layerElementBinormalCount": 1,
+            "layerElementBinormalValueCount": 414573,
+            "exportedMaterials": [
+              "fir_tree_01_bark",
+              "fir_tree_01_twig",
+              "fir_tree_01_dead_branches",
+              "fir_tree_01_trunk_c"
+            ],
+            "freshImportMaterials": [
+              "fir_tree_01_bark.001",
+              "fir_tree_01_twig.001",
+              "fir_tree_01_dead_branches.001",
+              "fir_tree_01_trunk_c.001"
+            ],
+            "freshImport": {
+              "vertices": 43277,
+              "triangles": 68879,
+              "materials": [
+                {
+                  "slot": 0,
+                  "name": "fir_tree_01_bark",
+                  "triangles": 9536
+                },
+                {
+                  "slot": 1,
+                  "name": "fir_tree_01_twig",
+                  "triangles": 9459
+                },
+                {
+                  "slot": 2,
+                  "name": "fir_tree_01_dead_branches",
+                  "triangles": 3616
+                },
+                {
+                  "slot": 3,
+                  "name": "fir_tree_01_trunk_c",
+                  "triangles": 46268
+                }
+              ],
+              "uv": {
+                "name": "UVMap",
+                "loops": 138191,
+                "min": [
+                  0.0,
+                  -1.0000001192092896
+                ],
+                "max": [
+                  5.000000476837158,
+                  0.9929043054580688
+                ],
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+                "perMaterial": [
+                  {
+                    "slot": 0,
+                    "name": "fir_tree_01_bark",
+                    "triangles": 9536,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 4.8410882300231606e-05,
+                    "min": [
+                      0.0,
+                      0.20000000298023224
+                    ],
+                    "max": [
+                      1.0,
+                      0.800000011920929
+                    ],
+                    "uniqueSample": 3807
+                  },
+                  {
+                    "slot": 1,
+                    "name": "fir_tree_01_twig",
+                    "triangles": 9459,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 0.0007882207864895463,
+                    "min": [
+                      0.1839204728603363,
+                      0.5981792211532593
+                    ],
+                    "max": [
+                      0.9476327896118164,
+                      0.9631060361862183
+                    ],
+                    "uniqueSample": 83
+                  },
+                  {
+                    "slot": 2,
+                    "name": "fir_tree_01_dead_branches",
+                    "triangles": 3616,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 1.1325137165840715e-05,
+                    "min": [
+                      0.1596347540616989,
+                      0.21454006433486938
+                    ],
+                    "max": [
+                      0.5843070149421692,
+                      0.7854599356651306
+                    ],
+                    "uniqueSample": 421
+                  },
+                  {
+                    "slot": 3,
+                    "name": "fir_tree_01_trunk_c",
+                    "triangles": 46268,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 4.876577577306307e-07,
+                    "min": [
+                      0.005346514750272036,
+                      -1.0000001192092896
+                    ],
+                    "max": [
+                      5.000000476837158,
+                      0.9929043054580688
+                    ],
+                    "uniqueSample": 18274
+                  }
+                ]
+              },
+              "geometry": {
+                "zeroAreaTrianglesAt1e12": 0,
+                "nearZeroAreaTrianglesAt1e10": 0,
+                "minimumDoubledArea": 8.795491339697037e-07
+              },
+              "basis": {
+                "nearZeroTangents": 0,
+                "nearZeroTangentsAt1e4": 0,
+                "nonFiniteTangents": 0,
+                "invalidBitangentSigns": 0,
+                "nearZeroNormals": 0,
+                "nearZeroNormalsAt1e4": 0,
+                "nonFiniteNormals": 0
+              },
+              "boundsMeters": {
+                "min": [
+                  -2.761598587036133,
+                  -2.982006311416626,
+                  -0.09382282942533493
+                ],
+                "max": [
+                  3.5874412059783936,
+                  3.023411273956299,
+                  14.451992988586426
+                ]
+              }
+            }
+          },
+          "lod": 1,
+          "sourceModel": "fir_tree_01_c_LOD1",
+          "file": "MatureFir_LOD1.fbx",
+          "bytes": 3870716,
+          "sha256": "08D706DABD21239307141CAC9D19008D19D9289A75CFD6C9FA255D978E427405"
+        },
+        {
+          "vertices": 22574,
+          "triangles": 31512,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_tree_01_bark",
+              "triangles": 8050
+            },
+            {
+              "slot": 1,
+              "name": "fir_tree_01_twig",
+              "triangles": 5016
+            },
+            {
+              "slot": 2,
+              "name": "fir_tree_01_dead_branches",
+              "triangles": 2900
+            },
+            {
+              "slot": 3,
+              "name": "fir_tree_01_trunk_c",
+              "triangles": 15546
+            }
+          ],
+          "uv": {
+            "name": "UVMap",
+            "loops": 75670,
+            "min": [
+              0.0,
+              -1.0000001192092896
+            ],
+            "max": [
+              5.000000476837158,
+              0.9891930818557739
+            ],
+            "degenerateTriangles": 0,
+            "degenerateTrianglesAt1e10": 0,
+            "minimumAbsoluteDeterminant": 7.022072168183513e-07,
+            "perMaterial": [
+              {
+                "slot": 0,
+                "name": "fir_tree_01_bark",
+                "triangles": 8050,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 0.002195765031501651,
+                "min": [
+                  0.0,
+                  0.3333333134651184
+                ],
+                "max": [
+                  1.0,
+                  0.6666666269302368
+                ],
+                "uniqueSample": 3177
+              },
+              {
+                "slot": 1,
+                "name": "fir_tree_01_twig",
+                "triangles": 5016,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 0.0014446747954934835,
+                "min": [
+                  0.1839204728603363,
+                  0.6076303720474243
+                ],
+                "max": [
+                  0.9476327896118164,
+                  0.9631060361862183
+                ],
+                "uniqueSample": 71
+              },
+              {
+                "slot": 2,
+                "name": "fir_tree_01_dead_branches",
+                "triangles": 2900,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 1.0589552402962e-05,
+                "min": [
+                  0.1596347540616989,
+                  0.21454006433486938
+                ],
+                "max": [
+                  0.5843070149421692,
+                  0.7854599356651306
+                ],
+                "uniqueSample": 420
+              },
+              {
+                "slot": 3,
+                "name": "fir_tree_01_trunk_c",
+                "triangles": 15546,
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 7.022072168183513e-07,
+                "min": [
+                  0.0066361152566969395,
+                  -1.0000001192092896
+                ],
+                "max": [
+                  5.000000476837158,
+                  0.9891930818557739
+                ],
+                "uniqueSample": 19318
+              }
+            ]
+          },
+          "geometry": {
+            "zeroAreaTrianglesAt1e12": 0,
+            "nearZeroAreaTrianglesAt1e10": 0,
+            "minimumDoubledArea": 1.3767747759629856e-06
+          },
+          "basis": {
+            "nearZeroTangents": 0,
+            "nearZeroTangentsAt1e4": 0,
+            "nonFiniteTangents": 0,
+            "invalidBitangentSigns": 0,
+            "nearZeroNormals": 0,
+            "nearZeroNormalsAt1e4": 0,
+            "nonFiniteNormals": 0
+          },
+          "boundsMeters": {
+            "min": [
+              -2.761598587036133,
+              -2.982006311416626,
+              -0.09382282942533493
+            ],
+            "max": [
+              3.5883054733276367,
+              3.023411273956299,
+              14.45848560333252
+            ]
+          },
+          "exportVerification": {
+            "layerElementUvCount": 1,
+            "layerElementUvValueCount": 69512,
+            "layerElementTangentCount": 1,
+            "layerElementTangentValueCount": 227010,
+            "layerElementBinormalCount": 1,
+            "layerElementBinormalValueCount": 227010,
+            "exportedMaterials": [
+              "fir_tree_01_bark",
+              "fir_tree_01_twig",
+              "fir_tree_01_dead_branches",
+              "fir_tree_01_trunk_c"
+            ],
+            "freshImportMaterials": [
+              "fir_tree_01_bark.001",
+              "fir_tree_01_twig.001",
+              "fir_tree_01_dead_branches.001",
+              "fir_tree_01_trunk_c.001"
+            ],
+            "freshImport": {
+              "vertices": 22574,
+              "triangles": 31512,
+              "materials": [
+                {
+                  "slot": 0,
+                  "name": "fir_tree_01_bark",
+                  "triangles": 8050
+                },
+                {
+                  "slot": 1,
+                  "name": "fir_tree_01_twig",
+                  "triangles": 5016
+                },
+                {
+                  "slot": 2,
+                  "name": "fir_tree_01_dead_branches",
+                  "triangles": 2900
+                },
+                {
+                  "slot": 3,
+                  "name": "fir_tree_01_trunk_c",
+                  "triangles": 15546
+                }
+              ],
+              "uv": {
+                "name": "UVMap",
+                "loops": 75670,
+                "min": [
+                  0.0,
+                  -1.0000001192092896
+                ],
+                "max": [
+                  5.000000476837158,
+                  0.9891930818557739
+                ],
+                "degenerateTriangles": 0,
+                "degenerateTrianglesAt1e10": 0,
+                "minimumAbsoluteDeterminant": 7.022072168183513e-07,
+                "perMaterial": [
+                  {
+                    "slot": 0,
+                    "name": "fir_tree_01_bark",
+                    "triangles": 8050,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 0.002195765031501651,
+                    "min": [
+                      0.0,
+                      0.3333333134651184
+                    ],
+                    "max": [
+                      1.0,
+                      0.6666666269302368
+                    ],
+                    "uniqueSample": 3177
+                  },
+                  {
+                    "slot": 1,
+                    "name": "fir_tree_01_twig",
+                    "triangles": 5016,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 0.0014446747954934835,
+                    "min": [
+                      0.1839204728603363,
+                      0.6076303720474243
+                    ],
+                    "max": [
+                      0.9476327896118164,
+                      0.9631060361862183
+                    ],
+                    "uniqueSample": 71
+                  },
+                  {
+                    "slot": 2,
+                    "name": "fir_tree_01_dead_branches",
+                    "triangles": 2900,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 1.0589552402962e-05,
+                    "min": [
+                      0.1596347540616989,
+                      0.21454006433486938
+                    ],
+                    "max": [
+                      0.5843070149421692,
+                      0.7854599356651306
+                    ],
+                    "uniqueSample": 420
+                  },
+                  {
+                    "slot": 3,
+                    "name": "fir_tree_01_trunk_c",
+                    "triangles": 15546,
+                    "degenerateTriangles": 0,
+                    "degenerateTrianglesAt1e10": 0,
+                    "minimumAbsoluteDeterminant": 7.022072168183513e-07,
+                    "min": [
+                      0.0066361152566969395,
+                      -1.0000001192092896
+                    ],
+                    "max": [
+                      5.000000476837158,
+                      0.9891930818557739
+                    ],
+                    "uniqueSample": 19318
+                  }
+                ]
+              },
+              "geometry": {
+                "zeroAreaTrianglesAt1e12": 0,
+                "nearZeroAreaTrianglesAt1e10": 0,
+                "minimumDoubledArea": 1.3767747759629856e-06
+              },
+              "basis": {
+                "nearZeroTangents": 0,
+                "nearZeroTangentsAt1e4": 0,
+                "nonFiniteTangents": 0,
+                "invalidBitangentSigns": 0,
+                "nearZeroNormals": 0,
+                "nearZeroNormalsAt1e4": 0,
+                "nonFiniteNormals": 0
+              },
+              "boundsMeters": {
+                "min": [
+                  -2.761598587036133,
+                  -2.982006311416626,
+                  -0.09382282942533493
+                ],
+                "max": [
+                  3.5883054733276367,
+                  3.023411273956299,
+                  14.45848560333252
+                ]
+              }
+            }
+          },
+          "lod": 2,
+          "sourceModel": "fir_tree_01_c_LOD2",
+          "file": "MatureFir_LOD2.fbx",
+          "bytes": 2722076,
+          "sha256": "FBC6A2FF090E63642F4E34FC88D81D18E7BEE64D91EB618ECC19FD0C6248D45A"
+        }
+      ],
+      "collisionProxy": {
+        "shape": "capsule",
+        "centerMeters": [
+          -0.021997570991516113,
+          0.03326130658388138,
+          2.406177170574665
+        ],
+        "radiusMeters": 0.6924940857077233,
+        "cylinderHeightMeters": 3.6150118285845534,
+        "source": "95th percentile radius of selected lower-trunk material vertices plus5cm; provisional until game contact review"
+      },
+      "textures": [
+        {
+          "file": "Textures\\fir_tree_01_bark_ao_1k.png",
+          "sha256": "2AE7540F84CB6F1FF36AC5F0E489E84E6DCC762B030E3393EF33ED7AA3A16031",
+          "bytes": 1902560
+        },
+        {
+          "file": "Textures\\fir_tree_01_bark_diff_1k.png",
+          "sha256": "508CA0A40D118BEEC98E8375B4611E8A16123EEC94B5D2B4870617CF4D24E6FA",
+          "bytes": 5652976
+        },
+        {
+          "file": "Textures\\fir_tree_01_bark_nor_dx_1k.png",
+          "sha256": "B66100CC1291804E2226EB1AFE551787A75058685E5AFA188AC6E44364BC5FDC",
+          "bytes": 5778911
+        },
+        {
+          "file": "Textures\\fir_tree_01_bark_rough_1k.png",
+          "sha256": "B198105D3022DB6C459AE9C307ECDB7B644832EE20BCBFD89C3741CECC77881F",
+          "bytes": 1778413
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_ao_1k.png",
+          "sha256": "3B5D966F74899B43BC272EA16073816304B4601A41027289C88A42302CFA6FBB",
+          "bytes": 328899
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_alpha_1k.png",
+          "sha256": "3F399629337E7AC3AF27A01B08FFB9C0D60224A9DD374A1427761A5C2EEA9D6E",
+          "bytes": 371026
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_diff_1k.png",
+          "sha256": "76F6D0C0044D76BAC08FBBD3D2AC1C9B66BB046DE7D0B1A22AA9B319308F3833",
+          "bytes": 3411459
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_nor_dx_1k.png",
+          "sha256": "CAD3079F4A0FB07C5821F6C877E5A7155261B5971EE7B9392A89988DB584DACB",
+          "bytes": 1825078
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_rough_1k.png",
+          "sha256": "A4F0A4C8BC93946DEA229DEF779FFE5D32C555C717E4BF7B0E4B4D86BC21987A",
+          "bytes": 1155354
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_ao_1k.png",
+          "sha256": "2E45294DD6E9997E95DEE1128E2372E7E04208174923ACC82A3B91E873354080",
+          "bytes": 1795918
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_diff_1k.png",
+          "sha256": "EDBCEB8657A036E98831A3550433AB2D78928FCF9060E400CA84748CEDCAF962",
+          "bytes": 5140137
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_nor_dx_1k.png",
+          "sha256": "840ECE7E7C33BBC0C199D363F333217100CD6060968AA5B98CE0212321F037C2",
+          "bytes": 4450550
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_rough_1k.png",
+          "sha256": "48FCCED840B4BEED4E03E09A352A67DD36185C9CD4247090069391BFB9746DE9",
+          "bytes": 1722380
+        }
+      ]
+    }
+  ],
+  "limits": "Derived source meshes/material copies only; no Unreal import, shader/runtime/GPU or visual acceptance."
+}

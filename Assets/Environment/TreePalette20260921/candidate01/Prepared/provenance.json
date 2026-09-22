@@ -1,0 +1,448 @@
+{
+  "schema": 1,
+  "blenderVersion": "4.5.14 LTS",
+  "manifestSha256": "85BA83F678A57262EB446FB4DECD1004D2DD60563CF28D28C261B30AC9908CD5",
+  "receiptSha256": "01DAA0636A9CE962C91AF5C9FBC51B159BD753126160138DFD8C6E00FB35C274",
+  "toolSha256": "769CD99A8BC074BAFDE0C38B80D11E275AEE436BA723469BF0268FCBA1DC08AA",
+  "assets": [
+    {
+      "asset": "jacaranda_tree",
+      "model": "jacaranda_tree_LOD0",
+      "selection": {
+        "fbxVersion": 7400,
+        "removedImageObjects": 20,
+        "selectedModels": [
+          "jacaranda_tree_LOD0"
+        ],
+        "retainedObjectDataVerified": true
+      },
+      "sourceTransformBeforeLayoutRemoval": {
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotationEuler": [
+          -1.6292067073209182e-07,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "conversion": "Removed publisher display-layout translation once; baked imported axis/unit rotation and scale once.",
+      "materialSlots": [
+        "jacaranda_tree_branches",
+        "jacaranda_tree_trunk",
+        "jacaranda_tree_leaves"
+      ],
+      "levels": [
+        {
+          "vertices": 696496,
+          "triangles": 463657,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "jacaranda_tree_branches",
+              "triangles": 147753
+            },
+            {
+              "slot": 1,
+              "name": "jacaranda_tree_trunk",
+              "triangles": 27612
+            },
+            {
+              "slot": 2,
+              "name": "jacaranda_tree_leaves",
+              "triangles": 288292
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -12.91603946685791,
+              -9.172203063964844,
+              -0.1498340219259262
+            ],
+            "max": [
+              11.466564178466797,
+              9.980585098266602,
+              19.330984115600586
+            ]
+          },
+          "lod": 0,
+          "ratio": 0.12,
+          "file": "Jacaranda_LOD0.fbx",
+          "bytes": 26561292,
+          "sha256": "70C4D3226A26EA5415965EA9130505EE807CF66F7CD9522B2D04AB90CB122CA9"
+        },
+        {
+          "vertices": 475829,
+          "triangles": 188757,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "jacaranda_tree_branches",
+              "triangles": 96620
+            },
+            {
+              "slot": 1,
+              "name": "jacaranda_tree_trunk",
+              "triangles": 8052
+            },
+            {
+              "slot": 2,
+              "name": "jacaranda_tree_leaves",
+              "triangles": 84085
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -12.908135414123535,
+              -9.14163875579834,
+              -0.1547725945711136
+            ],
+            "max": [
+              11.433196067810059,
+              9.96737003326416,
+              19.303077697753906
+            ]
+          },
+          "lod": 1,
+          "ratio": 0.035,
+          "file": "Jacaranda_LOD1.fbx",
+          "bytes": 12957708,
+          "sha256": "6F5EF0F131213F531A03991A7A342876E08592A5324ED9276247544240E26A20"
+        },
+        {
+          "vertices": 448402,
+          "triangles": 149270,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "jacaranda_tree_branches",
+              "triangles": 96620
+            },
+            {
+              "slot": 1,
+              "name": "jacaranda_tree_trunk",
+              "triangles": 4602
+            },
+            {
+              "slot": 2,
+              "name": "jacaranda_tree_leaves",
+              "triangles": 48048
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -12.908135414123535,
+              -9.146888732910156,
+              -0.1547725945711136
+            ],
+            "max": [
+              11.433196067810059,
+              9.96737003326416,
+              19.317604064941406
+            ]
+          },
+          "lod": 2,
+          "ratio": 0.02,
+          "file": "Jacaranda_LOD2.fbx",
+          "bytes": 10692540,
+          "sha256": "769882B13DA34C0D35B830695240CAD32E3B1B8ABC2261BC79AB88FEC80933D0"
+        }
+      ],
+      "collisionProxy": {
+        "shape": "capsule",
+        "centerMeters": [
+          -0.006082348525524139,
+          0.3471720665693283,
+          2.350165978074074
+        ],
+        "radiusMeters": 1.5501391307236985,
+        "cylinderHeightMeters": 1.899721738552603,
+        "source": "95th percentile radius of selected lower-trunk material vertices plus5cm; provisional until game contact review"
+      },
+      "textures": [
+        {
+          "file": "Textures\\jacaranda_tree_branches_ao_1k.png",
+          "sha256": "E9E7F624504A589FEB2613C5F9864FBE484A636DE2C1ECB4041D94FBC1A6E4C2",
+          "bytes": 1709788
+        },
+        {
+          "file": "Textures\\jacaranda_tree_branches_diff_1k.png",
+          "sha256": "FE671F7FAE88E269E4A517B6FF7BE74AE3C2D1FDEDFEA206EBFA9941AF0D9E20",
+          "bytes": 5223386
+        },
+        {
+          "file": "Textures\\jacaranda_tree_branches_nor_dx_1k.png",
+          "sha256": "93EC63093FBF36E098E20A41D9CB7AE300B5EBC86FAD9DC30BA6DC86301589CF",
+          "bytes": 5400494
+        },
+        {
+          "file": "Textures\\jacaranda_tree_branches_rough_1k.png",
+          "sha256": "C6DB3C33F23654A8D31DCF5609D19D97AB1036B36B3D9A6BCD50ECC975F8FB3C",
+          "bytes": 1625206
+        },
+        {
+          "file": "Textures\\jacaranda_tree_leaves_ao_1k.png",
+          "sha256": "7F9353C74FAA3CCF9FAC48C2DE2A576E7EF522C04D00E20014F778015EADDEC1",
+          "bytes": 1133496
+        },
+        {
+          "file": "Textures\\jacaranda_tree_leaves_alpha_1k.png",
+          "sha256": "C708A7E928A2E4D26981B021A22DEEEFC0EBB0E467F60B53CFA636A7E24D68F7",
+          "bytes": 506043
+        },
+        {
+          "file": "Textures\\jacaranda_tree_leaves_diff_1k.png",
+          "sha256": "5729978E92649EE6CC70BDC457AAC1B28B16A10BDE0A55004B659A1923C8861B",
+          "bytes": 2364526
+        },
+        {
+          "file": "Textures\\jacaranda_tree_leaves_nor_dx_1k.png",
+          "sha256": "ECADBBA090A80A6945543F0E9E4042F8ED1FD6E1DB44335679FF6F691FA6E652",
+          "bytes": 4151582
+        },
+        {
+          "file": "Textures\\jacaranda_tree_leaves_rough_1k.png",
+          "sha256": "2F6B89E7A1983CFA6FC2050F993C2C91C9AFC86CE285607FA5A5F8F6B1B4C879",
+          "bytes": 992522
+        },
+        {
+          "file": "Textures\\jacaranda_tree_trunk_ao_1k.png",
+          "sha256": "5D68619E527AD207B427AA5DAA3F6D1A839FE8A99C01798303B5508DD870735E",
+          "bytes": 1872620
+        },
+        {
+          "file": "Textures\\jacaranda_tree_trunk_diff_1k.png",
+          "sha256": "9BA4A3AF9D38D54638DF35A2BAE4F30455F5FB25C080825F6E22AF4E5D65C7F2",
+          "bytes": 5450061
+        },
+        {
+          "file": "Textures\\jacaranda_tree_trunk_nor_dx_1k.png",
+          "sha256": "1F4C951100C34BA379FD7833203163AFC64DE07E14F26EEC51E206D67A48D0DD",
+          "bytes": 5486441
+        },
+        {
+          "file": "Textures\\jacaranda_tree_trunk_rough_1k.png",
+          "sha256": "9262A1D4E8CC848A29BFC93333E8AD844C7E470E592787604B7E090E0ED149F2",
+          "bytes": 1747236
+        }
+      ]
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "model": "fir_sapling_medium_c_LOD0",
+      "selection": {
+        "fbxVersion": 7400,
+        "removedImageObjects": 17,
+        "selectedModels": [
+          "fir_sapling_medium_c_LOD0"
+        ],
+        "retainedObjectDataVerified": true
+      },
+      "sourceTransformBeforeLayoutRemoval": {
+        "location": [
+          10.0,
+          0.0,
+          0.0
+        ],
+        "rotationEuler": [
+          -1.6292067073209182e-07,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "conversion": "Removed publisher display-layout translation once; baked imported axis/unit rotation and scale once.",
+      "materialSlots": [
+        "fir_sapling_medium_branches",
+        "fir_sapling_medium_twigs",
+        "fir_sapling_medium_branches_dead"
+      ],
+      "levels": [
+        {
+          "vertices": 479804,
+          "triangles": 427645,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_sapling_medium_branches",
+              "triangles": 3780
+            },
+            {
+              "slot": 1,
+              "name": "fir_sapling_medium_twigs",
+              "triangles": 422055
+            },
+            {
+              "slot": 2,
+              "name": "fir_sapling_medium_branches_dead",
+              "triangles": 1810
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -2.0658557415008545,
+              -2.0708863735198975,
+              -0.15227435529232025
+            ],
+            "max": [
+              2.240671157836914,
+              1.9424172639846802,
+              5.7544779777526855
+            ]
+          },
+          "lod": 0,
+          "ratio": 1.0,
+          "file": "FirPole_LOD0.fbx",
+          "bytes": 14766876,
+          "sha256": "22B4C2F687D0B415DA8A736490D23CC0EB6CF4C0735C4EA5FBB8666606E07721"
+        },
+        {
+          "vertices": 192786,
+          "triangles": 106909,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_sapling_medium_branches",
+              "triangles": 944
+            },
+            {
+              "slot": 1,
+              "name": "fir_sapling_medium_twigs",
+              "triangles": 105513
+            },
+            {
+              "slot": 2,
+              "name": "fir_sapling_medium_branches_dead",
+              "triangles": 452
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -2.0664186477661133,
+              -2.0712082386016846,
+              -0.14327505230903625
+            ],
+            "max": [
+              2.2410075664520264,
+              1.9417541027069092,
+              5.753900527954102
+            ]
+          },
+          "lod": 1,
+          "ratio": 0.25,
+          "file": "FirPole_LOD1.fbx",
+          "bytes": 6377660,
+          "sha256": "A204DD3919FD67EEF0DBF495B43386C9E38E878CE79D804B31269B193A7CF2AB"
+        },
+        {
+          "vertices": 113638,
+          "triangles": 25915,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_sapling_medium_branches",
+              "triangles": 484
+            },
+            {
+              "slot": 1,
+              "name": "fir_sapling_medium_twigs",
+              "triangles": 25323
+            },
+            {
+              "slot": 2,
+              "name": "fir_sapling_medium_branches_dead",
+              "triangles": 108
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -2.0664186477661133,
+              -2.071469306945801,
+              -0.1384172886610031
+            ],
+            "max": [
+              2.2410075664520264,
+              1.9417541027069092,
+              5.753900527954102
+            ]
+          },
+          "lod": 2,
+          "ratio": 0.06,
+          "file": "FirPole_LOD2.fbx",
+          "bytes": 2123740,
+          "sha256": "B619A792325E5A453FEB29F30CD6A4BE56D7459C2E23D998DAA79F6CCBBAAB0C"
+        }
+      ],
+      "collisionProxy": {
+        "shape": "capsule",
+        "centerMeters": [
+          0.09176089242100716,
+          0.0019705662853084505,
+          2.5035660858266056
+        ],
+        "radiusMeters": 1.4745498168405253,
+        "cylinderHeightMeters": 2.0509003663189493,
+        "source": "95th percentile radius of selected lower-trunk material vertices plus5cm; provisional until game contact review"
+      },
+      "textures": [
+        {
+          "file": "Textures\\fir_sapling_medium_branches_ao_1k.png",
+          "sha256": "2AE7540F84CB6F1FF36AC5F0E489E84E6DCC762B030E3393EF33ED7AA3A16031",
+          "bytes": 1902560
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_branches_diff_1k.png",
+          "sha256": "508CA0A40D118BEEC98E8375B4611E8A16123EEC94B5D2B4870617CF4D24E6FA",
+          "bytes": 5652976
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_branches_nor_dx_1k.png",
+          "sha256": "B66100CC1291804E2226EB1AFE551787A75058685E5AFA188AC6E44364BC5FDC",
+          "bytes": 5778911
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_branches_rough_1k.png",
+          "sha256": "B198105D3022DB6C459AE9C307ECDB7B644832EE20BCBFD89C3741CECC77881F",
+          "bytes": 1778413
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_twigs_ao_1k.png",
+          "sha256": "3B5D966F74899B43BC272EA16073816304B4601A41027289C88A42302CFA6FBB",
+          "bytes": 328899
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_twigs_alpha_1k.png",
+          "sha256": "3F399629337E7AC3AF27A01B08FFB9C0D60224A9DD374A1427761A5C2EEA9D6E",
+          "bytes": 371026
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_twigs_diff_1k.png",
+          "sha256": "581DF52E36FA3EA1D348DF6B84E276FB3C88EE33CC182C2987EFF61BF3DAA513",
+          "bytes": 1745129
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_twigs_nor_dx_1k.png",
+          "sha256": "CAD3079F4A0FB07C5821F6C877E5A7155261B5971EE7B9392A89988DB584DACB",
+          "bytes": 1825078
+        },
+        {
+          "file": "Textures\\fir_sapling_medium_twigs_rough_1k.png",
+          "sha256": "A4F0A4C8BC93946DEA229DEF779FFE5D32C555C717E4BF7B0E4B4D86BC21987A",
+          "bytes": 1155354
+        }
+      ]
+    }
+  ],
+  "limits": "Derived source meshes/material copies only; no Unreal import, shader/runtime/GPU or visual acceptance."
+}

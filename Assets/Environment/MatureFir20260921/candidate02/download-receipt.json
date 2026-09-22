@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "sourceRoot": "E:\\Repos\\SurvivalGame\\Assets\\Source\\mature-fir-uv-20260922",
+  "acquiredUtc": "2026-09-22T06:08:46.463453+00:00",
+  "manifestSha256": "ED00C13141D954731A8C010686C785BE585E94FFDECF1779E8BB9FBC8891888E",
+  "totalBytes": 218986261,
+  "files": [
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_1k.blend",
+      "bytes": 218986261,
+      "sha256": "153D20AAE6D7C63A4C52689D91E8BEAD78F6D17A70E11EF4D03D19953383DE00",
+      "publisherMd5": "a08031ea8ffb49711b294e1c8213a909",
+      "actualMd5": "A08031EA8FFB49711B294E1C8213A909",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/blend/1k/fir_tree_01/fir_tree_01_1k.blend",
+      "license": "CC0-1.0"
+    }
+  ]
+}

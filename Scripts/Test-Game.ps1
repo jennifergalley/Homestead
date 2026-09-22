@@ -1,11 +1,24 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA)
 $ErrorActionPreference = 'Stop'
+if ($GeneratedWoodland) {
+    if (-not $ShippingQA -or $FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or
+        $Weeding -or $Clearing -or $CameraLifecycle -or $Prompts -or $BookClarity -or $NativeMenu -or
+        $DirectionalNavigation -or $NativeMenuQuit -or $NativeResumeFrom -or $FixtureSave -or $WithAudio) {
+        throw 'Generated woodland is one isolated controlled Shipping gameplay route, not another fixture combination.'
+    }
+    $RequireLit = $true
+}
+if ($PSBoundParameters.ContainsKey('GeneratedResumeFrom') -and
+    (-not $GeneratedWoodland -or [string]::IsNullOrWhiteSpace($GeneratedResumeFrom) -or
+        -not [IO.Path]::IsPathFullyQualified($GeneratedResumeFrom) -or $GeneratedResumeFrom -match '["\r\n]')) {
+    throw 'Generated resume requires its explicit woodland route and a quoted-safe absolute producer directory.'
+}
 if ($DirectionalNavigation) {
     if ($NativeMenuQuit -or $PSBoundParameters.ContainsKey('NativeResumeFrom')) {
         throw 'Directional navigation is a separate native menu fixture, not a quit/resume route.'
@@ -89,6 +102,8 @@ if ($Gathering) { $captures = @('gather-reach.png','gather-recovered.png') }
 if ($Watering) { $captures = @('watering-pour.png','watering-recovered.png') }
 if ($Weeding) { $captures = @('weeding-pull.png','weeding-recovered.png') }
 if ($Clearing) { $captures = @('clearing-swing.png','clearing-recovered.png') }
+if ($GeneratedWoodland) { $captures = @('generated-untouched.png','generated-cleared-site.png','generated-boundary.png','generated-reloaded.png') }
+if ($GeneratedResumeFrom) { $captures = @('generated-reloaded.png') }
 if ($Prompts) {
     $captures = @('prompts-book-before.png','prompts-book-after.png','prompts-book-keyboard.png')
     foreach ($surface in @('context','settings','look','planning')) {
@@ -135,6 +150,8 @@ if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
 if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($CameraLifecycle) { $loopArguments += ' -HomesteadCameraLifecycle' }
+if ($GeneratedWoodland) { $loopArguments = '-HomesteadGeneratedWoodland' }
+if ($GeneratedResumeFrom) { $loopArguments += " -HomesteadGeneratedResumeFrom=`"$([IO.Path]::GetFullPath($GeneratedResumeFrom))`"" }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }
@@ -146,7 +163,7 @@ $scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 if ($ShippingQA) { $arguments += ' -HomesteadShippingQA' }
 if ($ShippingQA) {
-    $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments
+    $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:$GeneratedWoodland
 } else {
     $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
     Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"

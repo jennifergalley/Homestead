@@ -79,6 +79,10 @@ public:
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
+    float GroundHeight(float X, float Y) const;
+    bool PrepareWorldAt(Homestead::Point Position);
+    bool IsWorldReady() const { return bWorldReady; }
+    uint32 WorldRecoveryCount() const { return WorldRecoveries; }
     void NudgePlacement(FVector2D Axis);
     bool HasNativeMenu() const { return NativeMenu.IsValid(); }
     void MenuPage(int32 TargetPage);
@@ -140,6 +144,10 @@ private:
     bool bGamepad = true;
     FHomesteadPromptIntent PromptIntent;
     bool bPendingSpawn = true;
+    bool bFreshTerrainSpawn = true;
+    bool bWorldReady = false;
+    uint32 WorldRecoveries = 0;
+    FVector LastSafeWorldPosition = FVector(-1000, 0, 180);
     bool bConfirmRestart = false;
     bool bMusicFading = false;
     bool bWasFailed = false;

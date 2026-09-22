@@ -121,7 +121,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Teleport({-1160, 150});
             Controller->GetPawn()->SetActorRotation(FRotator(0, 180, 0));
             Controller->SetControlRotation(FRotator(-20, 180, 0));
-        }, [this]() { return Controller->FocusTitle() == TEXT("The clearing"); }, 0.7f);
+        }, [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.7f);
     Add(TEXT("Till with the real crafted digging stick"), [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
         [this]()
         {

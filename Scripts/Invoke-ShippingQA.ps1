@@ -11,6 +11,28 @@ $root=Split-Path $PSScriptRoot -Parent
 function Assert-QACompletionRoute([string]$CommandLine,[bool]$Completion,[string]$Policy) {
     if(-not $Completion){return}
     if($Policy -cne 'until-complete'){throw 'Completion-driven Shipping QA requires live until-complete authority.'}
+    if($CommandLine -match '(?i)(?:^|\s)-HomesteadGeneratedWoodland(?=\s|$)'){
+        foreach($flag in 'HomesteadGeneratedWoodland','HomesteadSmokeTest','HomesteadShippingQA'){
+            if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){
+                throw "Generated woodland QA requires one explicit $flag."
+            }
+        }
+        if($CommandLine -match '(?i)(?:^|\s)-Homestead(VisualPlaytest|Endurance|NativeMenuTest|FullLoop|ClearingTest|PresentationTest|ForageRenewal)(?:\s|$)'){
+            throw 'Generated woodland QA cannot mix another acceptance route.'
+        }
+        return
+    }
+    if($CommandLine -notmatch '(?i)(?:^|\s)-HomesteadEndurance(?=\s|$)'){
+        foreach($flag in 'HomesteadVisualPlaytest','HomesteadShippingQA'){
+            if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){
+                throw "Ordinary completion-driven capture requires one explicit $flag."
+            }
+        }
+        if($CommandLine -match '(?i)(?:^|\s)-Homestead(SmokeTest|EnduranceFresh|ForageRenewal|NativeMenuTest|NativeQuitTest|FullLoop|ClearingTest|PresentationTest|WateringPlaytest|WeedingPlaytest|ClearingPlaytest|PresentationDiagnostics)(?:\s|$)'){
+            throw 'Ordinary completion-driven capture cannot mix another route.'
+        }
+        return
+    }
     foreach($flag in 'HomesteadEndurance','HomesteadEnduranceFresh','HomesteadVisualPlaytest','HomesteadShippingQA'){
         if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){
             throw "Completion-driven Shipping QA requires one explicit $flag."
@@ -20,14 +42,19 @@ function Assert-QACompletionRoute([string]$CommandLine,[bool]$Completion,[string
         throw 'Completion-driven Shipping QA cannot mix endurance with another route.'
     }
 }
-function Get-NativeResumeSource([string]$CommandLine,[string]$Output,[string]$AutomationRoot) {
-    $tokens=[regex]::Matches($CommandLine,'(?i)(?:^|\s)-HomesteadNativeResumeFrom(?=[=\s]|$)')
+function Get-NativeResumeSource([string]$CommandLine,[string]$Output,[string]$AutomationRoot,[switch]$Generated) {
+    $flag=if($Generated){'HomesteadGeneratedResumeFrom'}else{'HomesteadNativeResumeFrom'}
+    $other=if($Generated){'HomesteadNativeResumeFrom'}else{'HomesteadGeneratedResumeFrom'}
+    if($CommandLine -match "(?i)(?:^|\s)-$other(?=[=\s]|$)"){throw 'Resume source flag does not match the selected route.'}
+    $tokens=[regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=[=\s]|$)")
     if(-not $tokens.Count){return $null}
-    $match=[regex]::Match($CommandLine,'(?i)(?:^|\s)-HomesteadNativeResumeFrom="([^"\r\n]+)"(?=\s|$)')
+    $match=[regex]::Match($CommandLine,"(?i)(?:^|\s)-$flag="+ '"([^"\r\n]+)"(?=\s|$)')
+    $route=if($Generated){'HomesteadGeneratedWoodland'}else{'HomesteadNativeMenuTest'}
+    $forbidden=if($Generated){'NativeMenuTest|NativeQuitTest|VisualPlaytest|FullLoop|ClearingTest'}else{'NativeQuitTest|GeneratedWoodland'}
     if($tokens.Count -ne 1 -or -not $match.Success -or
-        $CommandLine -notmatch '(?i)(?:^|\s)-HomesteadNativeMenuTest(?:\s|$)' -or
-        $CommandLine -match '(?i)(?:^|\s)-HomesteadNativeQuitTest(?:\s|$)'){
-        throw 'Resume requires one explicit quoted producer path and NativeMenu without NativeQuit.'
+        [regex]::Matches($CommandLine,"(?i)(?:^|\s)-$route(?=\s|$)").Count -ne 1 -or
+        $CommandLine -match "(?i)(?:^|\s)-Homestead($forbidden)(?:\s|$)"){
+        throw 'Resume requires one explicit quoted producer path and one unmixed matching route.'
     }
     $source=$match.Groups[1].Value
     if(-not [IO.Path]::IsPathFullyQualified($source)){throw 'Resume producer must be absolute.'}
@@ -39,9 +66,10 @@ function Get-NativeResumeSource([string]$CommandLine,[string]$Output,[string]$Au
         [IO.DriveInfo]::new([IO.Path]::GetPathRoot($source)).DriveType -ne [IO.DriveType]::Fixed){
         throw 'Resume requires distinct producer/consumer paths within the same fixed local Automation root.'
     }
-    foreach($name in @('native-wardrobe-fixture.json','native-wardrobe-fixture.sav')){
+    $names=if($Generated){@('generated-woodland-fixture.json','generated-woodland-fixture.sav')}else{@('native-wardrobe-fixture.json','native-wardrobe-fixture.sav')}
+    foreach($name in $names){
         $file=Get-Item -LiteralPath (Join-Path $source $name)
-        $limit=if($name.EndsWith('.sav')){4MB}else{8MB}
+        $limit=if($name.EndsWith('.sav')){if($Generated){20MB}else{4MB}}else{8MB}
         if($file -is [IO.DirectoryInfo] -or $file.Length -le 0 -or $file.Length -gt $limit){throw 'Resume fixture size/type differs.'}
         for($item=$file;$null -ne $item;$item=if($item -is [IO.DirectoryInfo]){$item.Parent}else{$item.Directory}){
             if($item.Attributes -band ([IO.FileAttributes]::ReparsePoint -bor [IO.FileAttributes]::Device)){
@@ -57,8 +85,10 @@ if(-not $run.allowWork -or ($run.completionPolicy -ne 'until-complete' -and
 Assert-QACompletionRoute $Arguments ([bool]$CompletionDriven) $run.completionPolicy
 $package=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
 $output=[IO.Path]::GetFullPath($OutputDirectory,$root)
-$resumeSource=Get-NativeResumeSource $Arguments $output (Join-Path $root 'Saved\Automation')
-$resumePins=@(if($resumeSource){foreach($name in @('native-wardrobe-fixture.json','native-wardrobe-fixture.sav')){
+$generatedRoute=$Arguments -match '(?i)(?:^|\s)-HomesteadGeneratedWoodland(?=\s|$)'
+$resumeSource=Get-NativeResumeSource $Arguments $output (Join-Path $root 'Saved\Automation') -Generated:$generatedRoute
+$resumeNames=if($generatedRoute){@('generated-woodland-fixture.json','generated-woodland-fixture.sav')}else{@('native-wardrobe-fixture.json','native-wardrobe-fixture.sav')}
+$resumePins=@(if($resumeSource){foreach($name in $resumeNames){
     $path=Join-Path $resumeSource $name
     @{path=$path;sha256=(Get-FileHash $path).Hash}
 }})

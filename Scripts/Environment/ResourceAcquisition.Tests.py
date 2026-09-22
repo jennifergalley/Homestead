@@ -26,12 +26,73 @@ class AcquisitionTests(unittest.TestCase):
         self.assertEqual(sum(len(asset["files"]) for asset in manifest["assets"]), 29)
         self.assertGreater(fetch.validate_manifest(manifest), 0)
 
+    def test_exact_tree_palette_manifest(self):
+        root = Path(__file__).resolve().parents[2]
+        manifest = json.loads((root / "Assets/Environment/TreePalette20260921/candidate01/asset-manifest.json").read_text())
+        self.assertEqual(tuple(a["id"] for a in manifest["assets"]), fetch.TREE_PALETTE)
+        self.assertEqual(sum(len(asset["files"]) for asset in manifest["assets"]), 38)
+        self.assertGreater(fetch.validate_manifest(manifest), 0)
+        for change in ("profile", "asset", "fbx-size", "fbx-hash", "missing-map"):
+            value = copy.deepcopy(manifest)
+            if change == "profile":
+                value.pop("profile")
+            elif change == "asset":
+                value["assets"][0]["id"] = "fir_tree_01"
+            elif change == "fbx-size":
+                value["assets"][0]["files"][0]["bytes"] += 1
+            elif change == "fbx-hash":
+                value["assets"][1]["files"][0]["publisherMd5"] = "0" * 32
+            else:
+                value["assets"][2]["files"].pop()
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                fetch.validate_manifest(value)
+
+    def test_exact_mature_fir_exception(self):
+        root = Path(__file__).resolve().parents[2]
+        manifest = json.loads((root / "Assets/Environment/MatureFir20260921/candidate01/asset-manifest.json").read_text())
+        self.assertEqual(fetch.validate_manifest(manifest), 284614153)
+        fbx = manifest["assets"][0]["files"][0]
+        fetch.validate_file("fir_tree_01", fbx, allow_large_fir=True)
+        with self.assertRaises(ValueError):
+            fetch.validate_file("fir_tree_01", fbx)
+        for change in ("profile", "size", "hash", "extra"):
+            value = copy.deepcopy(manifest)
+            if change == "profile":
+                value.pop("profile")
+            elif change == "size":
+                value["assets"][0]["files"][0]["bytes"] -= 1
+            elif change == "hash":
+                value["assets"][0]["files"][0]["publisherMd5"] = "0" * 32
+            else:
+                value["assets"][0]["files"].append(copy.deepcopy(value["assets"][0]["files"][-1]))
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                fetch.validate_manifest(value)
+
     def test_unsafe_names_and_paths(self):
         for name in ("..", "../x.png", r"..\x.png", r"C:\x.png", r"\\host\x", "x:ads.png", "CON.png", "trailing."):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 fetch.leaf_name(name)
         with tempfile.TemporaryDirectory() as directory, self.assertRaises(ValueError):
             fetch.contained(Path(directory), "..", "outside")
+
+    def test_exact_midstory_source_only_probe(self):
+        root = Path(__file__).resolve().parents[2]
+        manifest = json.loads((root / "Assets/Environment/MidstoryShrub02/candidate01/asset-manifest.json").read_text())
+        self.assertEqual(fetch.validate_manifest(manifest), 832300)
+        for change in ("profile", "extra-map", "size", "hash", "wrong-asset"):
+            value = copy.deepcopy(manifest)
+            if change == "profile":
+                value.pop("profile")
+            elif change == "extra-map":
+                value["assets"][0]["files"].append(self.item())
+            elif change == "size":
+                value["assets"][0]["files"][0]["bytes"] += 1
+            elif change == "hash":
+                value["assets"][0]["files"][0]["publisherMd5"] = "0" * 32
+            else:
+                value["assets"][0]["id"] = "shrub_04"
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                fetch.validate_manifest(value)
 
     def test_url_and_redirect_rejection(self):
         for url in ("http://dl.polyhaven.org/x", "https://evil.invalid/x",

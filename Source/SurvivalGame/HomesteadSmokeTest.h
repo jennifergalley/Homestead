@@ -59,6 +59,7 @@ private:
     int32 GardenPlotId = -1;
 
     void Prepare();
+    void PrepareGeneratedWorldChecks();
     void PrepareDirectionalNavigationChecks();
     void PrepareNativeMenuChecks();
     void PrepareNativeWardrobeChecks();

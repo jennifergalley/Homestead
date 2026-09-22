@@ -1,4 +1,4 @@
-"""Acquire the four agreed resource sources; reuse the established bounded HTTPS recipe."""
+"""Acquire exact admitted resource palettes through the bounded HTTPS recipe."""
 import argparse
 from datetime import datetime, timezone
 import hashlib
@@ -11,6 +11,8 @@ from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 ASSETS = ("shrub_04", "dry_branches_medium_01", "fir_sapling", "flower_empodium")
+TREE_PALETTE = ("jacaranda_tree", "island_tree_02", "fir_sapling_medium")
+MATURE_FIR = ("fir_tree_01",)
 ROOT = Path(__file__).resolve().parents[2]
 USER_AGENT = "HomesteadSourcePreparation/1.0 (Poly Haven asset acquisition)"
 
@@ -79,39 +81,79 @@ def validate_url(url, host="dl.polyhaven.org"):
     return parsed
 
 
-def validate_file(asset, item):
-    if asset not in ASSETS:
-        raise ValueError("Asset outside the agreed four-source palette.")
+def validate_file(asset, item, allow_large_fir=False):
+    if asset not in (*ASSETS, *TREE_PALETTE, *MATURE_FIR, "shrub_02"):
+        raise ValueError("Asset outside the agreed source palettes.")
     name = leaf_name(item["name"])
     parsed = validate_url(item["url"])
     extension = Path(name).suffix
     expected = f"/file/ph-assets/Models/{extension[1:]}/1k/{asset}/{name}"
-    if extension not in (".fbx", ".png", ".jpg") or parsed.path != expected:
+    allowed_extensions = (".fbx", ".png", ".jpg", ".blend") if allow_large_fir and asset == "fir_tree_01" else (".fbx", ".png", ".jpg")
+    if extension not in allowed_extensions or parsed.path != expected:
         raise ValueError("Source format/path/resolution differs from admission.")
     if not name.endswith("_1k" + extension) or not name.startswith(asset + "_"):
         raise ValueError("Source basename differs from asset/resolution.")
-    if type(item["bytes"]) is not int or not 0 < item["bytes"] <= 128 * 1024**2:
+    maximum = 256 * 1024**2 if allow_large_fir and asset == "fir_tree_01" else 128 * 1024**2
+    if type(item["bytes"]) is not int or not 0 < item["bytes"] <= maximum:
         raise ValueError("Invalid or excessive source bytes.")
     if not re.fullmatch(r"[0-9a-fA-F]{1,32}", item["publisherMd5"]):
         raise ValueError("Invalid publisher MD5.")
 
 
 def validate_manifest(manifest):
-    if manifest["version"] != 1 or tuple(a["id"] for a in manifest["assets"]) != ASSETS:
+    probe = manifest.get("profile") == "midstory-shrub02-source-probe"
+    tree_palette = manifest.get("profile") == "tree-palette-source-01"
+    mature_fir = manifest.get("profile") == "mature-fir-source-01"
+    mature_fir_blend = manifest.get("profile") == "mature-fir-uv-source-02"
+    expected = ("shrub_02",) if probe else TREE_PALETTE if tree_palette else MATURE_FIR if mature_fir or mature_fir_blend else ASSETS
+    if (manifest["version"] != 1 or tuple(a["id"] for a in manifest["assets"]) != expected
+            or manifest.get("profile") not in (None, "midstory-shrub02-source-probe", "tree-palette-source-01",
+                                                "mature-fir-source-01", "mature-fir-uv-source-02")):
         raise ValueError("Manifest palette/order/version differs from admission.")
+    if probe:
+        files = manifest["assets"][0]["files"]
+        if (len(files) != 1 or files[0]["name"] != "shrub_02_1k.fbx"
+                or files[0]["bytes"] != 832300
+                or files[0]["publisherMd5"].lower() != "f4d00cbfa3dd3a6594e5b63c6324cb42"):
+            raise ValueError("Shrub02 probe admits only the exact original FBX, not maps or other models.")
+    if tree_palette:
+        exact = {
+            "jacaranda_tree": (14, "jacaranda_tree_1k.fbx", 132437628, "98f9827599dd42b18c1e9dfab3062d2f"),
+            "island_tree_02": (14, "island_tree_02_1k.fbx", 32258924, "52f6b7264dc026f9496d5cb7d51f7c04"),
+            "fir_sapling_medium": (10, "fir_sapling_medium_1k.fbx", 51634508, "82d67e5714eab0c493c8c9260bba8d28"),
+        }
+        for asset in manifest["assets"]:
+            count, name, size, md5 = exact[asset["id"]]
+            files = asset["files"]
+            if (len(files) != count or files[0]["name"] != name or files[0]["bytes"] != size
+                    or files[0]["publisherMd5"].lower() != md5):
+                raise ValueError("Tree palette admits only the exact reviewed FBX and one-kilometer map set.")
+    if mature_fir:
+        files = manifest["assets"][0]["files"]
+        if (len(files) != 14 or files[0]["name"] != "fir_tree_01_1k.fbx"
+                or files[0]["bytes"] != 249300492
+                or files[0]["publisherMd5"].lower() != "ab79788fc818ce7eadd40ccbfe987918"):
+            raise ValueError("Mature-fir exception admits only the exact reviewed FBX/map closure.")
+    if mature_fir_blend:
+        files = manifest["assets"][0]["files"]
+        if (len(files) != 1 or files[0]["name"] != "fir_tree_01_1k.blend"
+                or files[0]["bytes"] != 218986261
+                or files[0]["publisherMd5"].lower() != "a08031ea8ffb49711b294e1c8213a909"):
+            raise ValueError("Mature-fir UV repair admits only the exact reviewed provider Blend source.")
     seen = set()
     total = 0
     for asset in manifest["assets"]:
         if asset["license"] != "CC0-1.0" or asset["resolution"] != "1k":
             raise ValueError("Unexpected source license/resolution.")
         for item in asset["files"]:
-            validate_file(asset["id"], item)
+            validate_file(asset["id"], item, mature_fir or mature_fir_blend)
             key = (asset["id"], item["name"])
             if key in seen:
                 raise ValueError("Duplicate source destination.")
             seen.add(key)
             total += item["bytes"]
-    if not 0 < total <= 512 * 1024**2:
+    maximum_total = 384 * 1024**2 if mature_fir or mature_fir_blend else 512 * 1024**2
+    if not 0 < total <= maximum_total:
         raise ValueError("Invalid total source size.")
     return total
 

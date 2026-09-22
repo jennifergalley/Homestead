@@ -3,7 +3,7 @@ param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [ValidateRange(720,2160)][int]$Height=720,
     [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [switch]$PresentationDiagnostics,
     [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
-    [string]$OutputDirectory, [switch]$ShippingQA)
+    [string]$OutputDirectory, [switch]$ShippingQA, [switch]$CompletionDriven)
 $ErrorActionPreference='Stop'
 function Assert-VisualPlaytestOutcome {
     param([string]$Outcome,[string]$Required,[switch]$RequireTree)
@@ -19,6 +19,9 @@ function Assert-VisualPlaytestOutcome {
     }
 }
 if($PresentationDiagnostics -and ($Watering -or $Weeding -or $Clearing)) { throw 'Presentation diagnostics require a separate motion route.' }
+if($CompletionDriven -and (-not $ShippingQA -or $Watering -or $Weeding -or $Clearing -or $PresentationDiagnostics)) {
+    throw 'Completion-driven visual capture is only the ordinary isolated Shipping route.'
+}
 if($Watering -and $Weeding) { throw 'Choose one ordinary action route.' }
 if($Clearing -and ($Watering -or $Weeding)) { throw 'Choose one ordinary action route.' }
 if([bool]$Weeding -ne [bool]$FixtureSave) { throw 'Use -Weeding together with its explicit -FixtureSave.' }
@@ -72,7 +75,7 @@ if($PresentationDiagnostics) {
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $output 'diagnostic-launch.json')
 }
 if($ShippingQA) {
-    $process=& (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments
+    $process=& (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:$CompletionDriven
 } else {
     $process=Start-Process -FilePath $executable -WorkingDirectory $workingDirectory -ArgumentList $arguments -PassThru
     Write-Host "Isolated visual playtest PID=$($process.Id); output=$output"

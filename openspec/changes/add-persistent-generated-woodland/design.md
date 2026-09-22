@@ -14,10 +14,10 @@ Generation45e owns only `Simulation/HomesteadWorldGeneration.h/.cpp` and
 Main owns canonical docs, World/Controller/save wrapper, shared native adapters
 and all shared compiler/engine integration. Progression0a owns docs/catalog only.
 
-## Approved joint contract, version1
+## Current joint contract, generation version4 palette correction
 
 - Namespace `Homestead::Generation`: `WorldDescriptor{uint64_t seed,
-  uint32_t generationVersion=1}`, `ChunkCoord{int32_t x,y}`,
+  uint32_t generationVersion=4}`, `ChunkCoord{int32_t x,y}`,
   `GeneratedEntityKey{ChunkCoord chunk,uint32_t localId}` with exact comparison.
   Durable identity includes descriptor plus composite key, never a hash alone.
 - Chunk size2400cm,24x24 terrain cells (100cm NEW-world quads),625 row-major
@@ -25,14 +25,37 @@ and all shared compiler/engine integration. Progression0a owns docs/catalog only
   Global integer-cm/int64 intermediate coordinates; negative ownership uses floor
   and half-open intervals. Height and +/-50cm normal samples use the same global
   function so shared edges do not depend on load order.
-- Integer-hash/fixed-point rolling terrain noise. Initial octaves19200/7200/2400cm,
-  amplitudes480/180/40cm; no origin flattening. Version the algorithm. Unsupported
-  version/range returns explicit status without mutating output.
+- Integer-hash/fixed-point rolling terrain noise. Version3 must produce plainly
+  legible rolling slopes and valleys at gameplay scale, not merely a nonzero
+  numeric range that looks flat. Keep bounded walkable slopes, exact global seam
+  sampling/normals/collision, stream agreement and a safe spawn/camera segment.
+  Flatter pockets are discovered from the same authoritative height function for
+  building; they are not visual-only flattening or a prepared home clearing.
+  Unsupported version/range returns explicit status without mutating output.
 - `GenerateChunk` and `FindEntity` expose the same immutable baseline.
   `TerrainSample` includes height, normal and woodland weight. Max36 mature-tree
-  candidate slots/chunk at400cm spacing with jitter and high occupancy, plus
+  candidate slots/chunk with bounded clustered jitter and high occupancy, plus
   at most28 forage candidates. Stable local IDs encode kind/candidate BEFORE
   filtering, independent of acceptance order, rewards or economy values.
+  The first real version1 image showed orchard-like rows. Version2 retains slot
+  identity but varies offsets toward deterministic macro-clusters and permits
+  occasional small natural openings; it does not create a prepared house site.
+  Old version1 saves are rejected explicitly, not silently regenerated as version2.
+- Version3 also carries a stable visual species/variant identifier derived from
+  world descriptor plus generated key, independent of load order and transient
+  handles. It maps to a small license-verified palette with genuinely different
+  silhouettes/ages/sizes; random scale of one mesh is not diversity. Durable
+  resource keys, felling edits and current provisional rewards remain unchanged,
+  leaving room for later species-specific yields without rekeying cleared trees.
+  Each mapped mesh uses its own measured pivot/trunk anchor/collision and LOD/
+  material readiness checks. TreeSmall02 is one role, not the whole canopy.
+- Version4 retains version3 terrain and key positions, but changes the stable
+  mature-role distribution after firsthand v3 review: ordinary broadleaf60%,
+  ordinary conifer35%, landmark/accent5%. Accent keys in the protected start-view
+  neighborhood are reassigned to ordinary broadleaf rather than removed. Runtime
+  maps ordinary broadleaf to TreeSmall02, ordinary conifer to FirPole, and the
+  rare accent to Jacaranda. This prevents giant-canopy clusters near spawn while
+  preserving deterministic identity and density.
 - All seven existing forage kinds and appended `ForestTree=7` derive from
   generated keys. No fixed98-node population in the new world. Keep loose branch
   scatter restrained (initially at most one branch patch/chunk); other kinds
@@ -74,7 +97,14 @@ exclusion and a60cm-radius rear-camera segment from(-1300,-80) to(-1000,0).
 No home-site disk, row of cleared house cells or equivalent disguised clearing.
 Apply exclusions consistently in authority, occupancy and render resolution.
 
-Portable savev5, generation version1, wrapper6/new disclosed test profile.
+Fresh-start camera correction uses actual loaded tree bounds and the normal camera
+sweep to select a less-obstructed initial yaw. It does not hide trees, alter their
+collision/materials, clear vegetation or constrain later manual orbit. Bounding-box
+scores are only an initial-view heuristic; actual images remain the acceptance.
+Fresh starts snap to their generated ground; saved views/structure heights remain
+authoritative on load. Continuous camera-foliage handling remains a separate limit.
+
+Portable savev5, generation version4, wrapper6/new disclosed test profile.
 Do not append invented trees/seeds to old saves. Persist edits, structures and
 plots independently of live chunks; leave/return/restart reapplies them.
 First runtime supported coordinates are+/-1000000cm (10km each direction), not
@@ -110,7 +140,9 @@ survives travel away/return plus process save/reload. Capture untouched-start an
 actual player-cleared site views. Disclosed resource provisioning is allowed
 for a controlled build fixture, never labelled ordinary or untouched-start.
 Inspect lushness, seamless terrain and readable resources, not only counters.
+Neutral-daylight images must show a close mixed grove with multiple silhouettes
+and a wide ordinary gameplay-camera slope/valley view with visible elevation.
 
-Later stages: coherent regional relief/mountains, drainage-connected rivers and
-lakes, expanded biomes and progression/economy integration. No claims of those
-from the initial rolling-noise/legacy-stream slice.
+Later stages: mountains, drainage-connected rivers and lakes, expanded biomes
+and progression/economy integration. Version3 rolling woodland relief is required
+now, but is not evidence those broader regional systems are complete.

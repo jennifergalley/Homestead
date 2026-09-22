@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "blenderVersion": "4.5.14 LTS",
+  "manifestSha256": "C5E5A72954988B4DCB9217245BF138199B82E93000A391B967AEA6E3F7306ADC",
+  "receiptSha256": "93EFA5244A355EC0E395562F18E505A5CE44D23C8078359DF7EA8772218D0655",
+  "toolSha256": "8B870B9ECCD88B9469AD6EFB4D387570AA07FC45BA8FE48871C45090D6B079A2",
+  "assets": [
+    {
+      "asset": "fir_tree_01",
+      "model": "fir_tree_01_c_LOD0",
+      "selection": {
+        "fbxVersion": 7400,
+        "removedImageObjects": 22,
+        "selectedModels": [
+          "fir_tree_01_c_LOD0"
+        ],
+        "retainedObjectDataVerified": true
+      },
+      "sourceTransformBeforeLayoutRemoval": {
+        "location": [
+          12.0,
+          0.0,
+          0.0
+        ],
+        "rotationEuler": [
+          -1.6292067073209182e-07,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "conversion": "Removed publisher display-layout translation once; baked imported axis/unit rotation and scale once.",
+      "materialSlots": [
+        "fir_tree_01_bark",
+        "fir_tree_01_twig",
+        "fir_tree_01_dead_branches",
+        "fir_tree_01_trunk_c"
+      ],
+      "levels": [
+        {
+          "vertices": 620039,
+          "triangles": 505494,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_tree_01_bark",
+              "triangles": 9536
+            },
+            {
+              "slot": 1,
+              "name": "fir_tree_01_twig",
+              "triangles": 446074
+            },
+            {
+              "slot": 2,
+              "name": "fir_tree_01_dead_branches",
+              "triangles": 3616
+            },
+            {
+              "slot": 3,
+              "name": "fir_tree_01_trunk_c",
+              "triangles": 46268
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -2.747030735015869,
+              -2.9699628353118896,
+              -0.09382274746894836
+            ],
+            "max": [
+              3.558908462524414,
+              2.99627423286438,
+              14.426758766174316
+            ]
+          },
+          "lod": 0,
+          "ratio": 1.0,
+          "file": "MatureFir_LOD0.fbx",
+          "bytes": 17477212,
+          "sha256": "55B8C91A03F0A30A378BDFBD1755F5FE85DEE02FB38B510E2C50D37C8F4DDEBE"
+        },
+        {
+          "vertices": 301606,
+          "triangles": 128247,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_tree_01_bark",
+              "triangles": 4260
+            },
+            {
+              "slot": 1,
+              "name": "fir_tree_01_twig",
+              "triangles": 111518
+            },
+            {
+              "slot": 2,
+              "name": "fir_tree_01_dead_branches",
+              "triangles": 903
+            },
+            {
+              "slot": 3,
+              "name": "fir_tree_01_trunk_c",
+              "triangles": 11566
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -2.7463290691375732,
+              -2.9691004753112793,
+              -0.09382274746894836
+            ],
+            "max": [
+              3.5580575466156006,
+              2.9951789379119873,
+              14.426383018493652
+            ]
+          },
+          "lod": 1,
+          "ratio": 0.25,
+          "file": "MatureFir_LOD1.fbx",
+          "bytes": 7409820,
+          "sha256": "63F1EE732E489322FF0EBA730161FF49C8EB33F59503D7C6C265733882B59051"
+        },
+        {
+          "vertices": 212255,
+          "triangles": 34015,
+          "materials": [
+            {
+              "slot": 0,
+              "name": "fir_tree_01_bark",
+              "triangles": 4260
+            },
+            {
+              "slot": 1,
+              "name": "fir_tree_01_twig",
+              "triangles": 26764
+            },
+            {
+              "slot": 2,
+              "name": "fir_tree_01_dead_branches",
+              "triangles": 216
+            },
+            {
+              "slot": 3,
+              "name": "fir_tree_01_trunk_c",
+              "triangles": 2775
+            }
+          ],
+          "boundsMeters": {
+            "min": [
+              -2.7463290691375732,
+              -2.9691004753112793,
+              -0.09361684322357178
+            ],
+            "max": [
+              3.5580575466156006,
+              2.9951789379119873,
+              14.426383018493652
+            ]
+          },
+          "lod": 2,
+          "ratio": 0.06,
+          "file": "MatureFir_LOD2.fbx",
+          "bytes": 3399244,
+          "sha256": "A20FB5756149DB8354BA51986686063A1116505BC99F82D736090B348F5A7F6D"
+        }
+      ],
+      "collisionProxy": {
+        "shape": "capsule",
+        "centerMeters": [
+          -0.021997570991516113,
+          0.03326133266091347,
+          2.4061772525310516
+        ],
+        "radiusMeters": 0.6924941165668961,
+        "cylinderHeightMeters": 3.615011766866208,
+        "source": "95th percentile radius of selected lower-trunk material vertices plus5cm; provisional until game contact review"
+      },
+      "textures": [
+        {
+          "file": "Textures\\fir_tree_01_bark_ao_1k.png",
+          "sha256": "2AE7540F84CB6F1FF36AC5F0E489E84E6DCC762B030E3393EF33ED7AA3A16031",
+          "bytes": 1902560
+        },
+        {
+          "file": "Textures\\fir_tree_01_bark_diff_1k.png",
+          "sha256": "508CA0A40D118BEEC98E8375B4611E8A16123EEC94B5D2B4870617CF4D24E6FA",
+          "bytes": 5652976
+        },
+        {
+          "file": "Textures\\fir_tree_01_bark_nor_dx_1k.png",
+          "sha256": "B66100CC1291804E2226EB1AFE551787A75058685E5AFA188AC6E44364BC5FDC",
+          "bytes": 5778911
+        },
+        {
+          "file": "Textures\\fir_tree_01_bark_rough_1k.png",
+          "sha256": "B198105D3022DB6C459AE9C307ECDB7B644832EE20BCBFD89C3741CECC77881F",
+          "bytes": 1778413
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_ao_1k.png",
+          "sha256": "3B5D966F74899B43BC272EA16073816304B4601A41027289C88A42302CFA6FBB",
+          "bytes": 328899
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_alpha_1k.png",
+          "sha256": "3F399629337E7AC3AF27A01B08FFB9C0D60224A9DD374A1427761A5C2EEA9D6E",
+          "bytes": 371026
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_diff_1k.png",
+          "sha256": "76F6D0C0044D76BAC08FBBD3D2AC1C9B66BB046DE7D0B1A22AA9B319308F3833",
+          "bytes": 3411459
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_nor_dx_1k.png",
+          "sha256": "CAD3079F4A0FB07C5821F6C877E5A7155261B5971EE7B9392A89988DB584DACB",
+          "bytes": 1825078
+        },
+        {
+          "file": "Textures\\fir_tree_01_twig_rough_1k.png",
+          "sha256": "A4F0A4C8BC93946DEA229DEF779FFE5D32C555C717E4BF7B0E4B4D86BC21987A",
+          "bytes": 1155354
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_ao_1k.png",
+          "sha256": "2E45294DD6E9997E95DEE1128E2372E7E04208174923ACC82A3B91E873354080",
+          "bytes": 1795918
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_diff_1k.png",
+          "sha256": "EDBCEB8657A036E98831A3550433AB2D78928FCF9060E400CA84748CEDCAF962",
+          "bytes": 5140137
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_nor_dx_1k.png",
+          "sha256": "840ECE7E7C33BBC0C199D363F333217100CD6060968AA5B98CE0212321F037C2",
+          "bytes": 4450550
+        },
+        {
+          "file": "Textures\\fir_tree_01_trunk_c_rough_1k.png",
+          "sha256": "48FCCED840B4BEED4E03E09A352A67DD36185C9CD4247090069391BFB9746DE9",
+          "bytes": 1722380
+        }
+      ]
+    }
+  ],
+  "limits": "Derived source meshes/material copies only; no Unreal import, shader/runtime/GPU or visual acceptance."
+}

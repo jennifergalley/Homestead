@@ -91,12 +91,27 @@ if(-not $policy){throw 'Production completion-route policy missing'}
 $good='-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadEndurance -HomesteadEnduranceFresh'
 Assert-QACompletionRoute $good $true 'until-complete'
 Assert-QACompletionRoute '-HomesteadShippingQA -HomesteadVisualPlaytest' $false 'deadline'
+Assert-QACompletionRoute '-HomesteadShippingQA -HomesteadVisualPlaytest' $true 'until-complete'
+$generated='-HomesteadShippingQA -HomesteadSmokeTest -HomesteadGeneratedWoodland'
+Assert-QACompletionRoute $generated $true 'until-complete'
 foreach($case in @(
     @{line=$good;policy='deadline'},
     @{line=$good.Replace(' -HomesteadEnduranceFresh','');policy='until-complete'},
     @{line=$good+' -HomesteadSmokeTest';policy='until-complete'},
     @{line=$good+' -HomesteadWateringPlaytest';policy='until-complete'},
-    @{line=$good+' -HomesteadEndurance';policy='until-complete'}
+    @{line=$good+' -HomesteadEndurance';policy='until-complete'},
+    @{line=$generated;policy='deadline'},
+    @{line=$generated.Replace(' -HomesteadSmokeTest','');policy='until-complete'},
+    @{line=$generated+' -HomesteadGeneratedWoodland';policy='until-complete'},
+    @{line=$generated+' -HomesteadVisualPlaytest';policy='until-complete'},
+    @{line=$generated+' -HomesteadNativeMenuTest';policy='until-complete'},
+    @{line=$generated+' -HomesteadClearingTest';policy='until-complete'},
+    @{line=$generated+' -HomesteadFullLoop';policy='until-complete'}
+    @{line='-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadEnduranceFresh';policy='until-complete'},
+    @{line='-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadPresentationDiagnostics';policy='until-complete'},
+    @{line='-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadFullLoop';policy='until-complete'},
+    @{line='-HomesteadShippingQA -HomesteadVisualPlaytest';policy='deadline'},
+    @{line='-HomesteadShippingQA -HomesteadVisualPlaytest -HomesteadVisualPlaytest';policy='until-complete'}
 )){
     $failed=$false
     try{Assert-QACompletionRoute $case.line $true $case.policy}catch{$failed=$true}
@@ -130,3 +145,77 @@ foreach($flags in @(
     if(-not $failed){throw 'Mixed directional smoke route admitted'}
 }
 'Passed production directional smoke selector and six incompatible route rejections without launching a game.'
+$generatedAdmission=[scriptblock]::Create($smoke.Substring(0,$smoke.IndexOf('$root = Split-Path'))+';[bool]$RequireLit')
+if(-not (& $generatedAdmission -GeneratedWoodland -ShippingQA)){throw 'Generated gameplay route must require actual Lit checks'}
+foreach($flags in @(
+    @{GeneratedWoodland=$true},
+    @{GeneratedWoodland=$true;ShippingQA=$true;NativeMenu=$true},
+    @{GeneratedWoodland=$true;ShippingQA=$true;Clearing=$true},
+    @{GeneratedWoodland=$true;ShippingQA=$true;FullLoop=$true},
+    @{GeneratedWoodland=$true;ShippingQA=$true;GeneratedResumeFrom=''},
+    @{GeneratedWoodland=$true;ShippingQA=$true;GeneratedResumeFrom='relative'},
+    @{ShippingQA=$true;GeneratedResumeFrom='E:\producer'}
+)){
+    $failed=$false
+    try{$null=& $generatedAdmission @flags}catch{$failed=$true}
+    if(-not $failed){throw 'Invalid generated smoke admission accepted'}
+}
+'Passed production generated-world selector and seven incompatible/invalid route rejections without a game.'
+$resumePolicy=$ast.Find({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and
+    $node.Name -ceq 'Get-NativeResumeSource'},$true)
+if(-not $resumePolicy){throw 'Production generated resume admission missing'}
+. ([scriptblock]::Create($resumePolicy.Extent.Text))
+$automation=Join-Path $root 'Saved\Automation'
+$scratch=Join-Path $automation ('generated-resume-policy-'+[guid]::NewGuid().ToString('N'))
+$producer=Join-Path $scratch 'producer with space'
+$consumer=Join-Path $scratch 'consumer'
+$names=@('generated-woodland-fixture.json','generated-woodland-fixture.sav')
+$null=New-Item -ItemType Directory $producer -Force
+try {
+    foreach($name in $names){[IO.File]::WriteAllText((Join-Path $producer $name),'disposable path fixture, not a save')}
+    $good="$generated -HomesteadGeneratedResumeFrom=`"$producer`""
+    if((Get-NativeResumeSource $good $consumer $automation -Generated) -cne $producer){throw 'Generated quoted producer rejected'}
+    if($null -ne (Get-NativeResumeSource $generated $consumer $automation -Generated)){throw 'Generated no-resume route changed'}
+    foreach($line in @(
+        "$generated -HomesteadGeneratedResumeFrom",
+        "$generated -HomesteadGeneratedResumeFrom=`"`"",
+        "$generated -HomesteadGeneratedResumeFrom=`"relative`"",
+        "$good -HomesteadGeneratedResumeFrom=`"$producer`"",
+        "$good -HomesteadNativeMenuTest",
+        "$good -HomesteadNativeResumeFrom=`"$producer`"",
+        $good.Replace(' -HomesteadGeneratedWoodland',''),
+        "$generated -HomesteadGeneratedResumeFrom=$producer"
+    )){
+        $failed=$false
+        try{$null=Get-NativeResumeSource $line $consumer $automation -Generated}catch{$failed=$true}
+        if(-not $failed){throw "Invalid generated resume admitted:$line"}
+    }
+    foreach($destination in @($producer,(Join-Path $root 'outside-automation'))){
+        $failed=$false
+        try{$null=Get-NativeResumeSource $good $destination $automation -Generated}catch{$failed=$true}
+        if(-not $failed){throw 'Invalid generated resume destination admitted'}
+    }
+    [IO.File]::WriteAllBytes((Join-Path $producer $names[1]),[byte[]]::new(0))
+    $failed=$false
+    try{$null=Get-NativeResumeSource $good $consumer $automation -Generated}catch{$failed=$true}
+    if(-not $failed){throw 'Empty generated save admitted'}
+    Remove-Item -LiteralPath (Join-Path $producer $names[1])
+    $failed=$false
+    try{$null=Get-NativeResumeSource $good $consumer $automation -Generated}catch{$failed=$true}
+    if(-not $failed){throw 'Missing generated save admitted'}
+} finally {
+    foreach($name in $names){$path=Join-Path $producer $name;if(Test-Path -LiteralPath $path){Remove-Item -LiteralPath $path}}
+    Remove-Item -LiteralPath $producer
+    Remove-Item -LiteralPath $scratch
+}
+'Passed actual generated resume source admission and twelve malformed/mixed/path/empty/missing negatives.'
+$nativeSmoke=Get-Content (Join-Path $root 'Source\SurvivalGame\HomesteadSmokeTest.cpp') -Raw
+$prepareAt=$nativeSmoke.IndexOf('void AHomesteadSmokeTest::Prepare()')
+$screenshotAt=$nativeSmoke.IndexOf('void AHomesteadSmokeTest::Screenshot(')
+$dispatchAt=$nativeSmoke.IndexOf('PrepareGeneratedWorldChecks();')
+if($prepareAt -lt 0 -or $screenshotAt -lt 0 -or $dispatchAt -le $prepareAt -or
+    $nativeSmoke.Substring($screenshotAt,$prepareAt-$screenshotAt).Contains('PrepareGeneratedWorldChecks();') -or
+    [regex]::Matches($nativeSmoke,'PrepareGeneratedWorldChecks\(\);').Count -ne 1){
+    throw 'Generated fixture dispatch must occur once in Prepare, never in screenshot capture'
+}
+'Passed generated fixture dispatch placement regression.'

@@ -1,0 +1,16 @@
+{
+  "reason": "Jacaranda far LOD removed one material role; retained partials are not importable",
+  "sourceEvidence": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-palette-prep-04",
+  "files": [
+    {
+      "path": "Jacaranda_LOD0.fbx",
+      "bytes": 27389980,
+      "sha256": "93E29922A007558CE39A26428B65E4661CB3CDCE64BE3A1B2D85770FBFE8EA58"
+    },
+    {
+      "path": "Jacaranda_LOD1.fbx",
+      "bytes": 9975788,
+      "sha256": "516E36A15BEA9543C7B5A90047A4337F1AF4E597DDDE9D02AF152463200D67DC"
+    }
+  ]
+}

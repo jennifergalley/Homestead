@@ -125,7 +125,7 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     int32 Amount, uint64 ExpectedRevision)
 {
     if (bMenuSaveInProgress || IsFailed() || bTestResetRequired)
-    { Notify(TEXT("This action is unavailable until you return to a playable clearing."), true); return false; }
+    { Notify(TEXT("This action is unavailable until you return to a playable world."), true); return false; }
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Select the item again before confirming."), true); return false; }
     Homestead::Result Result{false, "That action is not available for this item."};

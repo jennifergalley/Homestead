@@ -14,7 +14,7 @@ param(
     [switch]$GroveProxyCorrection,
     [switch]$GrassGroundCandidate,
     [switch]$WoodlandCandidate,
-    [ValidateSet(1,2)][int]$WoodlandRevision=1,
+    [ValidateSet(1,2,3,4,5,6)][int]$WoodlandRevision=1,
     [switch]$ReadabilityDiagnostic,
     [switch]$ReadabilityCorrection,
     [switch]$ReadabilityLifecycle,
@@ -47,8 +47,12 @@ $shippingLinkFolder=if($ReadabilityLifecycle){'link1'}elseif($ReadabilityDiagnos
 if($NavigationCandidate){$shippingBuildName='navigation-shipping-build-{0:D2}' -f $NavigationRevision}
 if($WoodlandCandidate){$shippingBuildName='woodland-shipping-build-{0:D2}' -f $WoodlandRevision}
 if($WoodlandCandidate -and $WoodlandRevision -eq 2){$shippingLinkFolder='link2'}
+if($WoodlandCandidate -and $WoodlandRevision -eq 5){$shippingLinkFolder='link3-13'}
+if($WoodlandCandidate -and $WoodlandRevision -eq 6){$shippingLinkFolder='link2-02'}
 if($NavigationCandidate -and $NavigationRevision -ge 4){$shippingLinkFolder='link2'}
 $manifestAttempt=if($HairWaveCandidate -or $WardrobeCandidate -or $TreeDiagnosticCandidate){'manifest-01'}else{'manifest-02'}
+if($WoodlandCandidate -and $WoodlandRevision -eq 5){$manifestAttempt='manifest-13'}
+if($WoodlandCandidate -and $WoodlandRevision -eq 6){$manifestAttempt='manifest-02'}
 $root = [IO.Path]::GetFullPath($ProjectDirectory).TrimEnd('\')
 if ($root -ine $authorityRoot -and
     (-not $ExportActions -or $WriteMetadataOnly -or

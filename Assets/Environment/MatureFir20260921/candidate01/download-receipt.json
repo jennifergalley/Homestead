@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "sourceRoot": "E:\\Repos\\SurvivalGame\\Assets\\Source\\mature-fir-20260921",
+  "acquiredUtc": "2026-09-22T04:39:48.630103+00:00",
+  "manifestSha256": "C5E5A72954988B4DCB9217245BF138199B82E93000A391B967AEA6E3F7306ADC",
+  "totalBytes": 284614153,
+  "files": [
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_1k.fbx",
+      "bytes": 249300492,
+      "sha256": "281D26C46E97DF3FA803F8EF0FC17C6BCCF8B6F6868C093A62E032F259A16438",
+      "publisherMd5": "ab79788fc818ce7eadd40ccbfe987918",
+      "actualMd5": "AB79788FC818CE7EADD40CCBFE987918",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/fir_tree_01/fir_tree_01_1k.fbx",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_bark_ao_1k.png",
+      "bytes": 1902560,
+      "sha256": "2AE7540F84CB6F1FF36AC5F0E489E84E6DCC762B030E3393EF33ED7AA3A16031",
+      "publisherMd5": "308fc32c1b41c7c1d2624c9674fe5a88",
+      "actualMd5": "308FC32C1B41C7C1D2624C9674FE5A88",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_ao_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_bark_diff_1k.png",
+      "bytes": 5652976,
+      "sha256": "508CA0A40D118BEEC98E8375B4611E8A16123EEC94B5D2B4870617CF4D24E6FA",
+      "publisherMd5": "3a0fa82c548618135f9d64af79a3fcd1",
+      "actualMd5": "3A0FA82C548618135F9D64AF79A3FCD1",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_diff_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_bark_nor_dx_1k.png",
+      "bytes": 5778911,
+      "sha256": "B66100CC1291804E2226EB1AFE551787A75058685E5AFA188AC6E44364BC5FDC",
+      "publisherMd5": "06e2274c521b940eb00bc45180dbd963",
+      "actualMd5": "06E2274C521B940EB00BC45180DBD963",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_nor_dx_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_bark_rough_1k.png",
+      "bytes": 1778413,
+      "sha256": "B198105D3022DB6C459AE9C307ECDB7B644832EE20BCBFD89C3741CECC77881F",
+      "publisherMd5": "cf3118cd7ab3e3993f7a8e60d01903a5",
+      "actualMd5": "CF3118CD7AB3E3993F7A8E60D01903A5",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_bark_rough_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_twig_ao_1k.png",
+      "bytes": 328899,
+      "sha256": "3B5D966F74899B43BC272EA16073816304B4601A41027289C88A42302CFA6FBB",
+      "publisherMd5": "0ad3288a37e67e92f80c1f9005a28e6f",
+      "actualMd5": "0AD3288A37E67E92F80C1F9005A28E6F",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_ao_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_twig_alpha_1k.png",
+      "bytes": 371026,
+      "sha256": "3F399629337E7AC3AF27A01B08FFB9C0D60224A9DD374A1427761A5C2EEA9D6E",
+      "publisherMd5": "02ab808c8b2ff77ad9fdb2f92892db80",
+      "actualMd5": "02AB808C8B2FF77AD9FDB2F92892DB80",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_alpha_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_twig_diff_1k.png",
+      "bytes": 3411459,
+      "sha256": "76F6D0C0044D76BAC08FBBD3D2AC1C9B66BB046DE7D0B1A22AA9B319308F3833",
+      "publisherMd5": "3791a2e595b63410ed0bd054633373de",
+      "actualMd5": "3791A2E595B63410ED0BD054633373DE",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_diff_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_twig_nor_dx_1k.png",
+      "bytes": 1825078,
+      "sha256": "CAD3079F4A0FB07C5821F6C877E5A7155261B5971EE7B9392A89988DB584DACB",
+      "publisherMd5": "40953c43e0bc8a84ef57a4be3adc44a8",
+      "actualMd5": "40953C43E0BC8A84EF57A4BE3ADC44A8",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_nor_dx_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_twig_rough_1k.png",
+      "bytes": 1155354,
+      "sha256": "A4F0A4C8BC93946DEA229DEF779FFE5D32C555C717E4BF7B0E4B4D86BC21987A",
+      "publisherMd5": "2b0e9158d4038029171651371668a8ee",
+      "actualMd5": "2B0E9158D4038029171651371668A8EE",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_twig_rough_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_trunk_c_ao_1k.png",
+      "bytes": 1795918,
+      "sha256": "2E45294DD6E9997E95DEE1128E2372E7E04208174923ACC82A3B91E873354080",
+      "publisherMd5": "e4e1de68d6b44b42877a001ee330b71c",
+      "actualMd5": "E4E1DE68D6B44B42877A001EE330B71C",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_ao_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_trunk_c_diff_1k.png",
+      "bytes": 5140137,
+      "sha256": "EDBCEB8657A036E98831A3550433AB2D78928FCF9060E400CA84748CEDCAF962",
+      "publisherMd5": "bbf00b9de62c4d7c7b3d66a9f74d57d4",
+      "actualMd5": "BBF00B9DE62C4D7C7B3D66A9F74D57D4",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_diff_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_trunk_c_nor_dx_1k.png",
+      "bytes": 4450550,
+      "sha256": "840ECE7E7C33BBC0C199D363F333217100CD6060968AA5B98CE0212321F037C2",
+      "publisherMd5": "8c9ae873e74f92b0912d7b097965d869",
+      "actualMd5": "8C9AE873E74F92B0912D7B097965D869",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_nor_dx_1k.png",
+      "license": "CC0-1.0"
+    },
+    {
+      "asset": "fir_tree_01",
+      "file": "fir_tree_01_trunk_c_rough_1k.png",
+      "bytes": 1722380,
+      "sha256": "48FCCED840B4BEED4E03E09A352A67DD36185C9CD4247090069391BFB9746DE9",
+      "publisherMd5": "bb1f564376e3863ffa0fe91564f146e9",
+      "actualMd5": "BB1F564376E3863FFA0FE91564F146E9",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fir_tree_01/fir_tree_01_trunk_c_rough_1k.png",
+      "license": "CC0-1.0"
+    }
+  ]
+}

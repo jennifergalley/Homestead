@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "profile": "mature-fir-uv-source-02",
+  "phase": "exact provider-native UV repair source; no scene import",
+  "provider": "Poly Haven",
+  "refreshedDate": "2026-09-22",
+  "runId": "20260921-033354-2d257ba0",
+  "sourceRoot": "Assets\\Source\\mature-fir-uv-20260922",
+  "assets": [
+    {
+      "id": "fir_tree_01",
+      "name": "Fir Tree 01",
+      "authors": {"Rob Tuytel": "Photography", "Rico Cilliers": "Modeling"},
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/fir_tree_01",
+      "resolution": "1k",
+      "files": [
+        {
+          "name": "fir_tree_01_1k.blend",
+          "bytes": 218986261,
+          "publisherMd5": "a08031ea8ffb49711b294e1c8213a909",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/blend/1k/fir_tree_01/fir_tree_01_1k.blend"
+        }
+      ]
+    }
+  ]
+}

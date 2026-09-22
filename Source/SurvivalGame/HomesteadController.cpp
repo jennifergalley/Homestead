@@ -146,6 +146,12 @@ void AHomesteadController::BeginPlay()
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
+    {
+        const FGuid Seed = FGuid::NewGuid();
+        const auto Result = Sim.NewGame((static_cast<uint64>(Seed.A) << 32) | Seed.B);
+        if (!Result) { Notify(Result); return; }
+    }
     Landscape = GetWorld()->SpawnActor<AHomesteadWorld>();
     if (!Landscape)
     {
@@ -153,7 +159,8 @@ void AHomesteadController::BeginPlay()
         Notify(TEXT("The world could not be created. Check the game log."), true);
         return;
     }
-    Landscape->Initialize(Sim.GetState());
+    bWorldReady = Landscape->Initialize(Sim);
+    if (!bWorldReady) { Notify(TEXT("The generated woodland could not be prepared. Movement is disabled; no save was changed."), true); return; }
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     bAutomatedInputOnly = (HomesteadAutomatedActorsEnabled() && (SmokeTest || VisualPlaytest)) || bSaveRoutingTestPending;
     bAutomatedInputOnly |= !StartupProbeDirectory.IsEmpty();
@@ -422,6 +429,41 @@ Homestead::Point AHomesteadController::PlayerPoint() const
     return { Position.X, Position.Y };
 }
 
+float AHomesteadController::GroundHeight(float X, float Y) const
+{
+    return AHomesteadWorld::GroundHeight(X, Y, State().world);
+}
+
+bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
+{
+    Homestead::Generation::ChunkCoord Chunk;
+    if (!FMath::IsFinite(Position.x) || !FMath::IsFinite(Position.y)
+        || FMath::Abs(Position.x) > Homestead::MaxWorldCoordinate
+        || FMath::Abs(Position.y) > Homestead::MaxWorldCoordinate
+        || Homestead::Generation::ChunkAt(FMath::FloorToInt64(Position.x), FMath::FloorToInt64(Position.y), Chunk)
+            != Homestead::Generation::Status::Ok)
+    {
+        Notify(TEXT("This position exceeds the supported 10 km coordinate range. Your world changes are retained."), true);
+        return false;
+    }
+    if (bWorldReady && State().activeChunk == Chunk && Landscape && Landscape->IsPreparedFor(State())) return true;
+    Homestead::Simulation Candidate = Sim;
+    const auto Result = Candidate.SetActiveWorldRegion(Position);
+    if (!Result) { Notify(Result); return false; }
+    if (!Landscape || !Landscape->Refresh(Candidate))
+    {
+        bWorldReady = false;
+        Notify(TEXT("The next woodland region could not be prepared. Movement stopped; existing saves are untouched."), true);
+        return false;
+    }
+    Sim = MoveTemp(Candidate);
+    bWorldReady = true;
+    Focus = EFocus::None;
+    FocusId = -1;
+    RefreshRemaining = 0;
+    return true;
+}
+
 bool AHomesteadController::HasHeroine() const
 {
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -443,14 +485,21 @@ void AHomesteadController::Tick(float DeltaSeconds)
 #endif
     if (bPendingSpawn && GetPawn())
     {
-        const float Ground = AHomesteadWorld::GroundHeight(PendingLocation.X, PendingLocation.Y);
-        PendingLocation.Z = FMath::Max(PendingLocation.Z, Ground + 100.0f);
+        if (!PrepareWorldAt({PendingLocation.X, PendingLocation.Y})) return;
+        const float Ground = GroundHeight(PendingLocation.X, PendingLocation.Y);
+        PendingLocation.Z = bFreshTerrainSpawn ? Ground + 100.0f : FMath::Max(PendingLocation.Z, Ground + 100.0f);
         GetPawn()->SetActorLocation(PendingLocation, false, nullptr, ETeleportType::TeleportPhysics);
         LastStepPosition = PendingLocation;
+        LastSafeWorldPosition = PendingLocation;
         StepDistance = 0;
+        if (bFreshTerrainSpawn)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                PendingRotation = Avatar->ChooseStartingView(*Landscape, PendingRotation);
         SetControlRotation(PendingRotation);
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         {
+            Avatar->GetCharacterMovement()->StopMovementImmediately();
+            Avatar->GetCharacterMovement()->AddTickPrerequisiteActor(this);
             FString Error;
             if (Avatar->PrepareEquipment(State(), Appearance, Error))
             {
@@ -464,18 +513,29 @@ void AHomesteadController::Tick(float DeltaSeconds)
             Avatar->SetAppearancePreview(false);
         }
         bPendingSpawn = false;
+        if (bFreshTerrainSpawn) CaptureSessionCheckpoint(PendingLocation, PendingRotation);
+        bFreshTerrainSpawn = false;
         RefreshMenuPortrait();
     }
     if (APawn* ControlledPawn = GetPawn())
     {
         const FVector Position = ControlledPawn->GetActorLocation();
-        if (FMath::Abs(Position.X) > 3900 || FMath::Abs(Position.Y) > 3900 || Position.Z < -1000)
+        if (!PrepareWorldAt({Position.X, Position.Y}))
         {
-            FVector Safe(FMath::Clamp(Position.X, -3850.0, 3850.0), FMath::Clamp(Position.Y, -3850.0, 3850.0), 0);
-            Safe.Z = AHomesteadWorld::GroundHeight(Safe.X, Safe.Y) + 100;
-            ControlledPawn->SetActorLocation(Safe, false, nullptr, ETeleportType::TeleportPhysics);
-            Notify(TEXT("The prototype ends here. Back to the clearing."));
+            if (auto* Avatar = Cast<AHomesteadCharacter>(ControlledPawn))
+                Avatar->GetCharacterMovement()->StopMovementImmediately();
+            ControlledPawn->SetActorLocation(LastSafeWorldPosition, false, nullptr, ETeleportType::TeleportPhysics);
+            return;
         }
+        const float Surface = GroundHeight(Position.X, Position.Y);
+        if (Position.Z < Surface - 200)
+        {
+            ++WorldRecoveries;
+            ControlledPawn->SetActorLocation(FVector(Position.X, Position.Y, Surface + 100),
+                false, nullptr, ETeleportType::TeleportPhysics);
+            Notify(TEXT("Recovered the character above the generated terrain; this traversal needs review."), true);
+        }
+        LastSafeWorldPosition = ControlledPawn->GetActorLocation();
     }
 
     Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired);
@@ -509,7 +569,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
     RefreshRemaining -= DeltaSeconds;
     if (RefreshRemaining <= 0)
     {
-        Landscape->Refresh(Sim.GetState());
+        bWorldReady = Landscape->Refresh(Sim);
+        if (!bWorldReady) { Notify(TEXT("World refresh failed. Movement is disabled; existing saves are retained."), true); return; }
         UpdateFocus();
         RefreshRemaining = 0.25f;
     }
@@ -581,7 +642,15 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Resource:
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
-                return Text(Homestead::ResourceName(Node.kind)) + (Sim.CanHarvest(Node.id) ? TEXT("") : TEXT("  (renewing)"));
+            {
+                FString Status;
+                if (Node.readyAtHour > State().hour) Status = TEXT("  (renewing)");
+                else if ((Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree)
+                    && Sim.Count(Homestead::Item::Hatchet) == 0) Status = TEXT("  (hatchet required)");
+                else if (Node.kind != Homestead::ResourceKind::Sapling && Node.kind != Homestead::ResourceKind::ForestTree
+                    && Sim.Count(Homestead::Item::Knife) == 0) Status = TEXT("  (knife required)");
+                return Text(Homestead::ResourceName(Node.kind)) + Status;
+            }
         break;
     case EFocus::Plot:
         for (const auto& Plot : State().plots)
@@ -599,7 +668,7 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Water: return TEXT("Fresh stream water");
     default: break;
     }
-    return TEXT("The clearing");
+    return TEXT("Woodland");
 }
 
 FString AHomesteadController::FocusActions() const
@@ -608,7 +677,11 @@ FString AHomesteadController::FocusActions() const
     const FString X = bGamepad ? TEXT("[X]") : TEXT("[F]");
     switch (Focus)
     {
-    case EFocus::Resource: return A + TEXT(" Gather   ") + X + TEXT(" Clear");
+    case EFocus::Resource:
+        for (const auto& Node : State().resources)
+            if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
+                return A + TEXT(" Chop tree   ") + X + TEXT(" Fell tree (hatchet)");
+        return A + TEXT(" Gather   ") + X + TEXT(" Clear");
     case EFocus::Plot:
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
@@ -645,6 +718,7 @@ void AHomesteadController::Interact()
     if (IsFailed()) { RetryCheckpoint(); return; }
     if (bBookOpen) { ActivateRow(); return; }
     const auto Position = PlayerPoint();
+    if (!bWorldReady || !PrepareWorldAt(Position)) return;
     if (bPlanning)
     {
         const auto Result = Sim.Place(BuildKind, BuildCellX, BuildCellY, BuildRotation, Position);
@@ -658,12 +732,20 @@ void AHomesteadController::Interact()
     case EFocus::Resource:
     {
         bool Forage = false;
+        bool Tree = false;
         for (const auto& Node : State().resources)
-            if (Node.id == FocusId) { Forage = Node.kind != Homestead::ResourceKind::Sapling; break; }
+            if (Node.id == FocusId)
+            {
+                Tree = Node.kind == Homestead::ResourceKind::ForestTree;
+                Forage = !Tree && Node.kind != Homestead::ResourceKind::Sapling;
+                break;
+            }
         const auto Result = Sim.Harvest(FocusId, Position);
-        Notify(Result, GrassStepA);
+        Notify(Result, Tree ? WoodTapB.Get() : GrassStepA.Get());
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
+        if (Result.ok && Tree)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear();
         break;
     }
     case EFocus::Plot:
@@ -720,12 +802,14 @@ void AHomesteadController::Secondary()
         return;
     }
     if (bPlanning) { RotatePlacement(); return; }
+    if (!bWorldReady || !PrepareWorldAt(PlayerPoint())) return;
     UpdateFocus();
     if (Focus == EFocus::Resource)
     {
         bool Sapling = false;
         for (const auto& Node : State().resources)
-            if (Node.id == FocusId) { Sapling = Node.kind == Homestead::ResourceKind::Sapling; break; }
+            if (Node.id == FocusId)
+            { Sapling = Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree; break; }
         const auto Result = Sim.Clear(FocusId, PlayerPoint());
         Notify(Result, WoodTapB);
         if (Result.ok && Sapling)
@@ -884,10 +968,10 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     }
     else if (Page == 3)
     {
-        Result.Add({0, TEXT("A place to spend the night"), TEXT("Start with the plants and materials around the clearing.")});
+        Result.Add({0, TEXT("Choose your own home"), TEXT("Explore the seeded woodland. There is no prepared house clearing; find a place you like and make room.")});
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
         Result.Add({2, TEXT("2. Make your first tools"), TEXT("Branches, loose stones and reeds supply wood, stone and fiber.")});
-        Result.Add({3, TEXT("3. Make a home"), TEXT("Craft a hatchet. Clear saplings, then place a floor, walls, doorway and roof.")});
+        Result.Add({3, TEXT("3. Make a home"), TEXT("Craft a hatchet and fell the trees at your chosen site. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
         Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a digging stick. Till with F/X; bare plots offer roots with A/E or berry seeds with X/F.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill a watering can at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Fuel a cookfire with branches. Roast roots; sleep in a sheltered bedroll.")});
@@ -904,7 +988,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Cycle volume; nature continues between pieces.")});
         Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind and woodland ambience.")});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
-        Result.Add({8, TEXT("Start a new clearing"), TEXT("Open a confirmation before replacing this test session. Cancel keeps your current clearing.")});
+        Result.Add({8, TEXT("Start a new woodland"), TEXT("Create a new seed after confirmation. Cancel keeps your current woodland. This build uses a new test-save version.")});
         Result.Add({9, TEXT("Save and quit"), TEXT("Save this homestead and close the game. Failed saves leave the game open.")});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {
@@ -967,6 +1051,8 @@ FString AHomesteadController::BookSummary() const
     case 0: return TEXT("Carried counts are in your pack; Chest counts are in nearby storage.");
     case 1: return TEXT("Recipes show what you can make, not what you carry.");
     case 2: return TEXT("Choose a plan to preview placement. Materials are spent when you place it.");
+    case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
+        static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
     default: return {};
     }
 }
@@ -1237,7 +1323,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 {
     bReadIncompatible = false;
     TArray<uint8> Data;
-    if (IFileManager::Get().FileSize(*Filename) > 4 * 1024 * 1024) return nullptr;
+    if (IFileManager::Get().FileSize(*Filename) > 20 * 1024 * 1024) return nullptr;
     if (!FFileHelper::LoadFileToArray(Data, *Filename)) return nullptr;
     const char Magic[] = "HOMESAV1";
     if (Data.Num() < 16 || FMemory::Memcmp(Data.GetData(), Magic, 8) != 0) return nullptr;
@@ -1251,7 +1337,8 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     if (!Save || Save->SavedAtUtc < 0 || Save->SavedAtUtc > 253402300799LL
         || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
         || !FGuid::Parse(Save->WorldId, ParsedWorld) || !ParsedWorld.IsValid()
-        || FMath::Abs(Save->PlayerLocation.X) > 4000 || FMath::Abs(Save->PlayerLocation.Y) > 4000
+        || FMath::Abs(Save->PlayerLocation.X) > Homestead::MaxWorldCoordinate
+        || FMath::Abs(Save->PlayerLocation.Y) > Homestead::MaxWorldCoordinate
         || FMath::Abs(Save->PlayerLocation.Z) > 5000 || !FMath::IsFinite(Save->CameraSensitivity)
         || Save->CameraSensitivity < 0.2 || Save->CameraSensitivity > 3
         || !FMath::IsFinite(Save->MusicVolume) || Save->MusicVolume < 0 || Save->MusicVolume > 1
@@ -1275,7 +1362,8 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 
 bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
 {
-    if (bTestResetRequired) { Notify(TEXT("Choose an explicit test reset before saving a new clearing."), true); return false; }
+    if (bTestResetRequired) { Notify(TEXT("Choose an explicit test reset before saving a new woodland."), true); return false; }
+    if (!bWorldReady) { Notify(TEXT("The world is not ready; no save files were changed."), true); return false; }
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
     if (!Save) { Notify(TEXT("Could not create a save record."), true); return false; }
@@ -1288,6 +1376,8 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     Save->Outfit = Appearance.Outfit;
     Save->BodyPreset = Appearance.BodyPreset;
     Save->SimulationData = UTF8_TO_TCHAR(Sim.Serialize().c_str());
+    if (Save->SimulationData.IsEmpty())
+    { Notify(TEXT("World serialization failed; previous saves are untouched."), true); return false; }
     Save->PlayerLocation = GetPawn() ? GetPawn()->GetActorLocation() : PendingLocation;
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     Save->ViewRotation = Avatar ? Avatar->GameplayViewRotation() : GetControlRotation();
@@ -1340,6 +1430,8 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Homestead::Simulation Candidate = Sim;
     const auto Result = Candidate.Deserialize(TCHAR_TO_UTF8(*Save.SimulationData));
     if (!Result) { Notify(Result); return false; }
+    const auto Region = Candidate.SetActiveWorldRegion({Save.PlayerLocation.X, Save.PlayerLocation.Y});
+    if (!Region) { Notify(Region); return false; }
     FHomesteadAppearance Look;
     Look.HairStyle = Save.HairStyle; Look.HairColor = Save.HairColor;
     Look.SkinTone = Save.SkinTone; Look.EyeColor = Save.EyeColor;
@@ -1353,11 +1445,19 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
         Notify(LoadProblem, true);
         return false;
     }
+    if (!Landscape || !Landscape->Refresh(Candidate))
+    {
+        bWorldReady = false;
+        if (Avatar) Avatar->ClearPreparedEquipment();
+        Notify(TEXT("Saved woodland terrain could not be prepared. The save was not applied."), true);
+        return false;
+    }
     const Homestead::Simulation Previous = Sim;
     Sim = MoveTemp(Candidate);
     if (Avatar && !Avatar->ApplyPreparedEquipment(Error))
     {
         Sim = Previous;
+        bWorldReady = Landscape->Refresh(Sim);
         Avatar->ClearPreparedEquipment();
         LoadProblem = TEXT("Save loading was canceled because its prepared appearance could not be displayed. ") + Error;
         bTestResetRequired = !bHasPlayableSession;
@@ -1365,6 +1465,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
         return false;
     }
     bTestResetRequired = false;
+    bWorldReady = true;
     bHasPlayableSession = true;
     LoadProblem.Reset();
     if (Avatar) Avatar->CancelAction();
@@ -1379,6 +1480,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Appearance.BodyPreset = Save.BodyPreset;
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
+    bFreshTerrainSpawn = false;
     bPendingSpawn = true;
     bWasFailed = false;
     Sensitivity = Save.CameraSensitivity;
@@ -1391,7 +1493,6 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Ambience->SetVolumeMultiplier(AmbienceVolume);
     EndPlacement();
     CloseBook();
-    Landscape->Refresh(State());
     RefreshRemaining = 0;
     return true;
 }
@@ -1449,7 +1550,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     if (Corrupt || Incompatible)
     {
         LoadProblem = Incompatible && !Corrupt
-            ? TEXT("These test saves use an incompatible version. Start a new test clearing to use this build.")
+            ? TEXT("These test saves use an incompatible version. Start a new seeded woodland to use this build; old files are retained.")
             : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
         Notify(LoadProblem, true);
         // Do not let a fresh startup silently autosave over an unsuccessful load.
@@ -1462,13 +1563,20 @@ void AHomesteadController::RetryCheckpoint()
 {
     if (LoadLatest(true)) return;
     if (SessionWorld != WorldId)
-    { Notify(TEXT("No checkpoint belongs to this world. You can start a new test clearing or quit from Settings."), true); return; }
-    const auto Result = Sim.Deserialize(TCHAR_TO_UTF8(*SessionCheckpoint));
+    { Notify(TEXT("No checkpoint belongs to this world. You can start a new test woodland or quit from Settings."), true); return; }
+    Homestead::Simulation Candidate = Sim;
+    const auto Result = Candidate.Deserialize(TCHAR_TO_UTF8(*SessionCheckpoint));
     if (!Result) { Notify(Result); return; }
+    const auto Region = Candidate.SetActiveWorldRegion({SessionLocation.X, SessionLocation.Y});
+    if (!Region) { Notify(Region); return; }
+    if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("Checkpoint terrain could not be prepared."), true); return; }
+    Sim = MoveTemp(Candidate);
+    bWorldReady = true;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
     Appearance = SessionAppearance;
     PendingLocation = SessionLocation;
     PendingRotation = SessionRotation;
+    bFreshTerrainSpawn = false;
     bPendingSpawn = true;
     bWasFailed = false;
     RefreshRemaining = 0;
@@ -1486,15 +1594,22 @@ void AHomesteadController::CaptureSessionCheckpoint(FVector Location, FRotator R
 
 void AHomesteadController::NewGame()
 {
+    Homestead::Simulation Candidate = Sim;
+    const FGuid Seed = FGuid::NewGuid();
+    const auto Result = Candidate.NewGame((static_cast<uint64>(Seed.A) << 32) | Seed.B);
+    if (!Result) { Notify(Result); return; }
+    if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("The new woodland could not be prepared. Your current session is retained."), true); return; }
+    Sim = MoveTemp(Candidate);
+    bWorldReady = true;
     bTestResetRequired = false;
     bHasPlayableSession = true;
     LastSuccessfulSave = FDateTime();
     LoadProblem.Reset();
-    Sim.NewGame();
     Appearance = FHomesteadAppearance();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);
+    bFreshTerrainSpawn = true;
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     bPendingSpawn = true;
     bWasFailed = false;
@@ -1502,7 +1617,7 @@ void AHomesteadController::NewGame()
     AutosaveRemaining = 240;
     EndPlacement();
     OpenBook(3);
-    Notify(TEXT("A new clearing. Previous save files are still available."));
+    Notify(TEXT("A new seeded woodland. Choose where to build; previous save files are still available."));
 }
 void AHomesteadController::QuickSave()
 {

@@ -1,0 +1,2851 @@
+{
+  "scope": "Read-only admitted resource source inventory; no bpy scene, image-reference traversal or Unreal.",
+  "manifestSha256": "85BA83F678A57262EB446FB4DECD1004D2DD60563CF28D28C261B30AC9908CD5",
+  "sourceReceiptSha256": "01DAA0636A9CE962C91AF5C9FBC51B159BD753126160138DFD8C6E00FB35C274",
+  "inspectionToolSha256": "2B99889A5BF3B83B0E81332482FA563CC50290AD079AA54777186057C10723E1",
+  "existingReaderSha256": "FE2D9FBC43AC56F810F7E70912F9C606EE9F5B144CB73E8D2AB348B71E6AA7DE",
+  "files": [
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_1k.fbx",
+      "sha256": "392C74D85100EFC8EE045FED820EC4FBE79D62E154E4C54156EF1E0EC0465A5A",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 510,
+        "decodedArrayBytes": 115584048,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 1,
+          "Model": 1,
+          "Material": 3,
+          "Texture": 10,
+          "Video": 10
+        },
+        "geometries": [
+          {
+            "id": 546796105,
+            "name": "tree.016",
+            "vertices": 3055019,
+            "faces": 2234022,
+            "faceVertexHistogram": {
+              "4": 1629810,
+              "3": 604212
+            },
+            "fanTriangleEstimate": 3863832,
+            "localBounds": {
+              "min": [
+                -12.92025089263916,
+                -9.200760841369629,
+                -0.146615132689476
+              ],
+              "max": [
+                11.496798515319824,
+                9.953813552856445,
+                19.3222599029541
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 661117,
+                  "1": 115056,
+                  "2": 1457849
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 957396559,
+            "name": "jacaranda_tree_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              546796105
+            ],
+            "materialSlotsInConnectionOrder": [
+              "jacaranda_tree_branches",
+              "jacaranda_tree_trunk",
+              "jacaranda_tree_leaves"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "37573109": "jacaranda_tree_branches",
+          "68217796": "jacaranda_tree_trunk",
+          "159364697": "jacaranda_tree_leaves"
+        },
+        "uniqueGeometryFaces": 2234022,
+        "uniqueGeometryFanTriangles": 3863832,
+        "geometryModelBindings": 1,
+        "modelBoundFanTriangles": 3863832,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "jacaranda_tree_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_trunk_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_trunk_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_trunk_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_trunk_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_trunk_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_trunk_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_trunk_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_trunk_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_trunk_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_trunk_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_trunk_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_trunk_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\jacaranda_tree\\textures\\jacaranda_tree_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\jacaranda_tree_leaves_rough_1k.png"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [],
+        "preparationBoundary": "Large-tree source profile: bounded parser inspected geometry, hierarchy, transforms, material slots and raw bounds without decoding UV/normal arrays. Selected prepared geometry must pass detailed UV/normal inspection before import."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_branches_ao_1k.png",
+      "sha256": "E9E7F624504A589FEB2613C5F9864FBE484A636DE2C1ECB4041D94FBC1A6E4C2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          25142,
+          64744
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_branches_diff_1k.png",
+      "sha256": "FE671F7FAE88E269E4A517B6FF7BE74AE3C2D1FDEDFEA206EBFA9941AF0D9E20",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            10,
+            180
+          ],
+          [
+            6,
+            160
+          ],
+          [
+            2,
+            126
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_branches_nor_dx_1k.png",
+      "sha256": "93EC63093FBF36E098E20A41D9CB7AE300B5EBC86FAD9DC30BA6DC86301589CF",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            39,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_branches_rough_1k.png",
+      "sha256": "C6DB3C33F23654A8D31DCF5609D19D97AB1036B36B3D9A6BCD50ECC975F8FB3C",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          46056,
+          62194
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_leaves_ao_1k.png",
+      "sha256": "7F9353C74FAA3CCF9FAC48C2DE2A576E7EF522C04D00E20014F778015EADDEC1",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          42795,
+          64764
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_leaves_alpha_1k.png",
+      "sha256": "C708A7E928A2E4D26981B021A22DEEEFC0EBB0E467F60B53CFA636A7E24D68F7",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            239,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_leaves_diff_1k.png",
+      "sha256": "5729978E92649EE6CC70BDC457AAC1B28B16A10BDE0A55004B659A1923C8861B",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_leaves_nor_dx_1k.png",
+      "sha256": "ECADBBA090A80A6945543F0E9E4042F8ED1FD6E1DB44335679FF6F691FA6E652",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            1,
+            252
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            87,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_leaves_rough_1k.png",
+      "sha256": "2F6B89E7A1983CFA6FC2050F993C2C91C9AFC86CE285607FA5A5F8F6B1B4C879",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          24580,
+          43803
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_trunk_ao_1k.png",
+      "sha256": "5D68619E527AD207B427AA5DAA3F6D1A839FE8A99C01798303B5508DD870735E",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          7967,
+          64797
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_trunk_diff_1k.png",
+      "sha256": "9BA4A3AF9D38D54638DF35A2BAE4F30455F5FB25C080825F6E22AF4E5D65C7F2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            1,
+            189
+          ],
+          [
+            0,
+            160
+          ],
+          [
+            1,
+            152
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_trunk_nor_dx_1k.png",
+      "sha256": "1F4C951100C34BA379FD7833203163AFC64DE07E14F26EEC51E206D67A48D0DD",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            128,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "jacaranda_tree",
+      "file": "jacaranda_tree_trunk_rough_1k.png",
+      "sha256": "9262A1D4E8CC848A29BFC93333E8AD844C7E470E592787604B7E090E0ED149F2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          42706,
+          64989
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_1k.fbx",
+      "sha256": "AC2489D7C5B76CBE050A4F78D1984D614C2A7B0CFBE617B95836859613AB6D76",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 520,
+        "decodedArrayBytes": 30466024,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 1,
+          "Model": 1,
+          "Material": 3,
+          "Texture": 10,
+          "Video": 10
+        },
+        "geometries": [
+          {
+            "id": 357736701,
+            "name": "mesh.001",
+            "vertices": 818396,
+            "faces": 544639,
+            "faceVertexHistogram": {
+              "4": 527574,
+              "3": 17065
+            },
+            "fanTriangleEstimate": 1072213,
+            "localBounds": {
+              "min": [
+                -2.052337884902954,
+                -2.956543207168579,
+                -0.017011718824505806
+              ],
+              "max": [
+                2.155407428741455,
+                1.1141542196273804,
+                3.389594078063965
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 13654,
+                  "1": 357372,
+                  "2": 173613
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementEdgeCrease",
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 65297305,
+            "name": "island_tree_02_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              357736701
+            ],
+            "materialSlotsInConnectionOrder": [
+              "island_tree_02",
+              "island_tree_02_leaves",
+              "island_tree_02_branches"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "606240391": "island_tree_02",
+          "336082840": "island_tree_02_leaves",
+          "496662119": "island_tree_02_branches"
+        },
+        "uniqueGeometryFaces": 544639,
+        "uniqueGeometryFanTriangles": 1072213,
+        "geometryModelBindings": 1,
+        "modelBoundFanTriangles": 1072213,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "island_tree_02_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_diff_1k.jpg"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_nor_gl_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_rough_1k.exr"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_leaves_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\island_tree_02\\textures\\island_tree_02_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\island_tree_02_branches_rough_1k.png"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [],
+        "preparationBoundary": "Large-tree source profile: bounded parser inspected geometry, hierarchy, transforms, material slots and raw bounds without decoding UV/normal arrays. Selected prepared geometry must pass detailed UV/normal inspection before import."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_ao_1k.png",
+      "sha256": "566C811ED95232092C2BDCB043F865FEAE7D28C1FF49202B4820C9ED01A7FE20",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_diff_1k.png",
+      "sha256": "398424083D2DB299F5445E7C6422498688643F634767383BA8CD8BBFBFB0B27B",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            1,
+            184
+          ],
+          [
+            1,
+            180
+          ],
+          [
+            3,
+            173
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_nor_dx_1k.png",
+      "sha256": "1DC9D0C862AC667347D6B88A12F2FE5AE22706564866CEA0036BDECC059A9E43",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            9,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_rough_1k.png",
+      "sha256": "59ADD752A4DC6D898C54BEF061E31A92B1632BE6CDB638B15EA446F2D2D03603",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          40104,
+          58436
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_branches_ao_1k.png",
+      "sha256": "E9E7F624504A589FEB2613C5F9864FBE484A636DE2C1ECB4041D94FBC1A6E4C2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          25142,
+          64744
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_branches_diff_1k.png",
+      "sha256": "4485125D88B9DCCE618220E8850F8B3EC586D9CDEBE08E28ACA777206EEF56E2",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            41,
+            209
+          ],
+          [
+            33,
+            205
+          ],
+          [
+            26,
+            196
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_branches_nor_dx_1k.png",
+      "sha256": "93EC63093FBF36E098E20A41D9CB7AE300B5EBC86FAD9DC30BA6DC86301589CF",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            39,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_branches_rough_1k.png",
+      "sha256": "C6DB3C33F23654A8D31DCF5609D19D97AB1036B36B3D9A6BCD50ECC975F8FB3C",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          46056,
+          62194
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_leaves_ao_1k.png",
+      "sha256": "BC3A165C6BA04EC309405F5AED2CA4E06FC1711DDA7A3CD94133C4C1AE5E4B32",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          49991,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_leaves_alpha_1k.png",
+      "sha256": "F4341F147988DBE6B58D9CA841A8F0E4BCFF25BC40D05F9877DA82006D489C39",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_leaves_diff_1k.png",
+      "sha256": "63D3563A22A62151F338CEB4E992DE7C31B62E8E3582E2762D5071F02D286349",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_leaves_nor_dx_1k.png",
+      "sha256": "C1587E728DB4578FB0049D6AEF4A54F6F4A655DAE513CAD4FEB1ACA80D28F0D4",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            6,
+            255
+          ],
+          [
+            85,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "island_tree_02",
+      "file": "island_tree_02_leaves_rough_1k.png",
+      "sha256": "B7E9A1857F63617344968BB43693786BFED7DD15BEDCA3193CE333F233FBAB78",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          0,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_1k.fbx",
+      "sha256": "F09677355367E2A4A29B9542474049FCEE311A2CC8AA561F9D316153CF5C33C4",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 567,
+        "decodedArrayBytes": 56674308,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 3,
+          "Model": 3,
+          "Material": 3,
+          "Texture": 10,
+          "Video": 7
+        },
+        "geometries": [
+          {
+            "id": 154009108,
+            "name": "NurbsPath.007",
+            "vertices": 767387,
+            "faces": 345278,
+            "faceVertexHistogram": {
+              "4": 339768,
+              "3": 5510
+            },
+            "fanTriangleEstimate": 685046,
+            "localBounds": {
+              "min": [
+                -2.5522518157958984,
+                -2.720205783843994,
+                -0.08824774622917175
+              ],
+              "max": [
+                2.4356377124786377,
+                2.5556671619415283,
+                8.738079071044922
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 4245,
+                  "1": 340058,
+                  "2": 975
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 443030583,
+            "name": "NurbsPath.005",
+            "vertices": 472166,
+            "faces": 212126,
+            "faceVertexHistogram": {
+              "4": 208696,
+              "3": 3430
+            },
+            "fanTriangleEstimate": 420822,
+            "localBounds": {
+              "min": [
+                -2.0442657470703125,
+                -2.0210678577423096,
+                -0.1179756447672844
+              ],
+              "max": [
+                2.2243492603302,
+                1.9368314743041992,
+                7.677277565002441
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1855,
+                  "1": 209296,
+                  "2": 975
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 638018119,
+            "name": "NurbsPath.006",
+            "vertices": 479804,
+            "faces": 215570,
+            "faceVertexHistogram": {
+              "4": 212075,
+              "3": 3495
+            },
+            "fanTriangleEstimate": 427645,
+            "localBounds": {
+              "min": [
+                -2.0658557415008545,
+                -2.0708866119384766,
+                -0.15227434039115906
+              ],
+              "max": [
+                2.240671157836914,
+                1.9424171447753906,
+                5.7544779777526855
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "ByPolygon"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1890,
+                  "1": 212705,
+                  "2": 975
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 236420522,
+            "name": "fir_sapling_medium_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              154009108
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fir_sapling_medium_branches",
+              "fir_sapling_medium_twigs",
+              "fir_sapling_medium_branches_dead"
+            ],
+            "properties": {
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 315619402,
+            "name": "fir_sapling_medium_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              443030583
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fir_sapling_medium_branches",
+              "fir_sapling_medium_twigs",
+              "fir_sapling_medium_branches_dead"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                500.0,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 538507493,
+            "name": "fir_sapling_medium_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              638018119
+            ],
+            "materialSlotsInConnectionOrder": [
+              "fir_sapling_medium_branches",
+              "fir_sapling_medium_twigs",
+              "fir_sapling_medium_branches_dead"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                1000.0,
+                0.0,
+                0.0
+              ],
+              "Lcl Rotation": [
+                -90.00000933466734,
+                0.0,
+                0.0
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "628206738": "fir_sapling_medium_branches",
+          "650987999": "fir_sapling_medium_twigs",
+          "705453673": "fir_sapling_medium_branches_dead"
+        },
+        "uniqueGeometryFaces": 772974,
+        "uniqueGeometryFanTriangles": 1533513,
+        "geometryModelBindings": 3,
+        "modelBoundFanTriangles": 1533513,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "fir_sapling_medium_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "fir_sapling_medium_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "fir_sapling_medium_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/FileName",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Texture/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_branches_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_diff_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_alpha_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_nor_gl_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/Filename",
+            "values": [
+              "C:\\Poly Haven\\admin.polyhaven.com\\tmp\\Staging\\Models\\fir_sapling_medium\\textures\\fir_sapling_medium_twigs_rough_1k.png"
+            ],
+            "followed": false
+          },
+          {
+            "field": "/Objects/Video/RelativeFilename",
+            "values": [
+              "..\\..\\..\\..\\textures\\fir_sapling_medium_twigs_rough_1k.png"
+            ],
+            "followed": false
+          }
+        ],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [],
+        "preparationBoundary": "Large-tree source profile: bounded parser inspected geometry, hierarchy, transforms, material slots and raw bounds without decoding UV/normal arrays. Selected prepared geometry must pass detailed UV/normal inspection before import."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_branches_ao_1k.png",
+      "sha256": "2AE7540F84CB6F1FF36AC5F0E489E84E6DCC762B030E3393EF33ED7AA3A16031",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          12191,
+          65436
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_branches_diff_1k.png",
+      "sha256": "508CA0A40D118BEEC98E8375B4611E8A16123EEC94B5D2B4870617CF4D24E6FA",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            30,
+            141
+          ],
+          [
+            27,
+            136
+          ],
+          [
+            18,
+            129
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_branches_nor_dx_1k.png",
+      "sha256": "B66100CC1291804E2226EB1AFE551787A75058685E5AFA188AC6E44364BC5FDC",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            2,
+            254
+          ],
+          [
+            3,
+            249
+          ],
+          [
+            139,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_branches_rough_1k.png",
+      "sha256": "B198105D3022DB6C459AE9C307ECDB7B644832EE20BCBFD89C3741CECC77881F",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          51315,
+          63874
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_twigs_ao_1k.png",
+      "sha256": "3B5D966F74899B43BC272EA16073816304B4601A41027289C88A42302CFA6FBB",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          4883,
+          65535
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_twigs_alpha_1k.png",
+      "sha256": "3F399629337E7AC3AF27A01B08FFB9C0D60224A9DD374A1427761A5C2EEA9D6E",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_twigs_diff_1k.png",
+      "sha256": "581DF52E36FA3EA1D348DF6B84E276FB3C88EE33CC182C2987EFF61BF3DAA513",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGBA",
+        "decodedBands": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ],
+          [
+            0,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": true,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 6,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_twigs_nor_dx_1k.png",
+      "sha256": "CAD3079F4A0FB07C5821F6C877E5A7155261B5971EE7B9392A89988DB584DACB",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "RGB",
+        "decodedBands": [
+          "R",
+          "G",
+          "B"
+        ],
+        "decodedExtrema": [
+          [
+            0,
+            254
+          ],
+          [
+            1,
+            254
+          ],
+          [
+            132,
+            255
+          ]
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 2,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    },
+    {
+      "asset": "fir_sapling_medium",
+      "file": "fir_sapling_medium_twigs_rough_1k.png",
+      "sha256": "A4F0A4C8BC93946DEA229DEF779FFE5D32C555C717E4BF7B0E4B4D86BC21987A",
+      "sourceInspection": {
+        "format": "PNG",
+        "size": [
+          1024,
+          1024
+        ],
+        "decodedMode": "I;16",
+        "decodedBands": [
+          "I"
+        ],
+        "decodedExtrema": [
+          11951,
+          62812
+        ],
+        "hasEmbeddedAlpha": false,
+        "pngHeader": {
+          "width": 1024,
+          "height": 1024,
+          "bitDepth": 16,
+          "colorType": 0,
+          "compression": 0,
+          "filter": 0,
+          "interlace": 0
+        },
+        "note": "Pillow decoded extrema may be downconverted for multichannel16-bit PNG; IHDR bit depth is authoritative. Separate alpha-map values are data, not an embedded alpha channel."
+      }
+    }
+  ],
+  "limits": "Parser cancellation is checked before each file/pass/geometry; the reused parser has its existing node/depth/120-second bounds. Raw local bounds are not transformed native render bounds."
+}

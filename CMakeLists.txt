@@ -6,6 +6,7 @@ if(MSVC)
 endif()
 
 add_library(HomesteadSimulation STATIC
+    Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
@@ -26,3 +27,12 @@ else()
     target_compile_options(HomesteadSimulationTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadSimulationTests COMMAND HomesteadSimulationTests)
+
+add_executable(HomesteadWorldGenerationTests Tests/HomesteadWorldGenerationTests.cpp)
+target_link_libraries(HomesteadWorldGenerationTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadWorldGenerationTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadWorldGenerationTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadWorldGenerationTests COMMAND HomesteadWorldGenerationTests)

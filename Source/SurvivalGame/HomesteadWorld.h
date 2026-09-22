@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "Simulation/HomesteadWorldGeneration.h"
 #include "HomesteadWorld.generated.h"
 
 class UStaticMesh;
@@ -28,6 +29,21 @@ struct FHomesteadWorldVisual
     FString Signature;
 };
 
+USTRUCT()
+struct FHomesteadTerrainChunk
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    TObjectPtr<UProceduralMeshComponent> Terrain;
+
+    UPROPERTY()
+    FHomesteadWorldVisual Cover;
+
+    FString CoverSignature;
+    bool bCollision = false;
+};
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadWorld : public AActor
 {
@@ -35,10 +51,13 @@ class SURVIVALGAME_API AHomesteadWorld : public AActor
 
 public:
     AHomesteadWorld();
-    void Initialize(const Homestead::State& State);
-    void Refresh(const Homestead::State& State);
+    bool Initialize(const Homestead::Simulation& Simulation);
+    bool Refresh(const Homestead::Simulation& Simulation);
     void SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation);
-    static float GroundHeight(float X, float Y);
+    static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
+    float GroundHeight(float X, float Y) const;
+    bool IsPreparedFor(const Homestead::State& State) const;
+    int32 StartingViewObstructions(FVector Focus, FVector Camera) const;
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -66,6 +85,10 @@ private:
     UPROPERTY()
     TObjectPtr<UProceduralMeshComponent> Ground;
     UPROPERTY()
+    TMap<FIntPoint, FHomesteadTerrainChunk> TerrainChunks;
+    UPROPERTY()
+    TMap<FString, FHomesteadWorldVisual> OuterTreeVisuals;
+    UPROPERTY()
     TObjectPtr<UDirectionalLightComponent> Sun;
     UPROPERTY()
     TObjectPtr<UDirectionalLightComponent> Moon;
@@ -89,6 +112,10 @@ private:
     bool bInitialized = false;
     FString ResourceLayoutSignature;
     double DecorationBuildMilliseconds = 0;
+    Homestead::Generation::WorldDescriptor Descriptor;
+    Homestead::Generation::ChunkCoord PreparedChunk;
+    bool bTerrainReady = false;
+    bool bVisualBuildFailed = false;
 
     UMaterialInterface* Material(FLinearColor Color, float Roughness = 0.85f, float Glow = 0.0f);
     UStaticMeshComponent* AddPart(FHomesteadWorldVisual& Visual, UStaticMesh* Mesh,
@@ -98,18 +125,19 @@ private:
     void AddDecoration(UStaticMesh* Mesh, const FVector& Position, const FVector& Size,
         FLinearColor Color, bool bCollision = false,
         const FRotator& Rotation = FRotator::ZeroRotator, bool bHideMesh = false);
-    void BuildTerrain();
+    bool BuildTerrain(const Homestead::State& State);
+    UProceduralMeshComponent* BuildTerrainChunk(const Homestead::Generation::ChunkBaseline& Baseline,
+        Homestead::Generation::WorldDescriptor World, bool bCollision);
+    FVector AtGround(float X, float Y, float Offset = 0) const;
     void BuildLighting();
-    void BuildDecorations(const Homestead::State& State);
+    bool BuildDecorations(const Homestead::Simulation& Simulation);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
     void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void UpdateLighting(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
-    static float CellBase(int CellX, int CellY);
+    float CellBase(int CellX, int CellY) const;
     static float GrassGroundWeight(float X, float Y);
-    static float WoodlandBedWeight(float X, float Y);
-    static float LowCoverDensity(float X, float Y);
     static bool IsDecorationReserved(const Homestead::State& State, float X, float Y,
         float FootprintRadius, float CanopyRadius = 0, bool bLowCover = false);
 };

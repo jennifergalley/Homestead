@@ -9,7 +9,7 @@ class SURVIVALGAME_API UHomesteadSave : public USaveGame
 {
     GENERATED_BODY()
 public:
-    static constexpr int32 CurrentVersion = 5;
+    static constexpr int32 CurrentVersion = 6;
     UPROPERTY() int32 Version = CurrentVersion;
     bool IsCurrentVersion() const { return Version == CurrentVersion; }
     UPROPERTY() FString WorldId;

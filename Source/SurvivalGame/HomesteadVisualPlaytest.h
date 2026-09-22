@@ -54,6 +54,7 @@ private:
     TArray<FString> PresentationSettings;
     void RecordPresentationSettings(const TCHAR* Phase);
     void RecordGroveInventory();
+    void RecordGeneratedInventory();
     void RecordGrassGroundInventory();
     void RecordCameraForeground();
     TWeakObjectPtr<UStaticMeshComponent> ObservedTree;

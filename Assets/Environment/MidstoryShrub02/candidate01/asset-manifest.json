@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "runId": "20260921-033354-2d257ba0",
+  "profile": "midstory-shrub02-source-probe",
+  "scope": "One original FBX for read-only inspection. No automatic preparation, import, maps or dense-source acceptance.",
+  "assets": [
+    {
+      "id": "shrub_02",
+      "name": "Shrub 02",
+      "author": "Rico Cilliers",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/shrub_02",
+      "resolution": "1k",
+      "files": [
+        {
+          "name": "shrub_02_1k.fbx",
+          "bytes": 832300,
+          "publisherMd5": "f4d00cbfa3dd3a6594e5b63c6324cb42",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/shrub_02/shrub_02_1k.fbx"
+        }
+      ]
+    }
+  ]
+}

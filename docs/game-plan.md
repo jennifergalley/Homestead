@@ -125,6 +125,25 @@ is historical, not the current build/authorization status.
   felling and processing. Existing rewards are provisional, not final balance.
 - Dense, attractive integrated woodland remains an acceptance gate. A working
   noise/chunk demo or unchoppable decorative forest is not the requested result.
+- Jenny's September21 17:16 review adds two promotion gates: the canopy cannot be
+  one copied tree model, and terrain relief must be plainly visible in ordinary
+  gameplay. Use a small coherent palette of genuinely distinct mature/young
+  silhouettes, sizes and varieties (including deciduous and conifer roles where
+  the licensed source palette supports them), assigned deterministically from
+  stable generated identity. TreeSmall02 remains one role; the existing FirSapling
+  may remain a young-conifer role. Each mature form needs model-specific trunk
+  anchoring/collision rather than inheriting one mesh's capsule blindly.
+- Advance the generation version for any terrain/species semantic change. Current
+  scope is rolling, walkable woodland with visible slopes/valleys, seam-correct
+  normals/collision, minimal safe spawn/camera space and discoverable flatter
+  building pockets. Mountains and watershed-connected rivers/lakes remain staged
+  roadmap work. Neutral-daylight acceptance images must include a close mixed
+  grove and a wide gameplay-camera slope/valley view; counts alone do not pass.
+- First v3 gameplay review confirmed visible rolling relief and multiple trunk
+  silhouettes, but rejected the giant Jacaranda frequency/proximity as oppressive.
+  Version4 reserves Jacaranda for occasional landmark/accent keys away from the
+  protected starting-camera neighborhood; TreeSmall02 and FirPole carry ordinary
+  canopy frequency, with the two FirSapling forms remaining young understory.
 
 Current implementation plan: `openspec/changes/add-persistent-generated-woodland`.
 This supersedes fixed home-clearance and finite-background-skirt proposals;

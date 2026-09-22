@@ -10,14 +10,18 @@ import numpy as np
 from ResourceAcquisition import ASSETS, contained, digest, run_guard, validate_manifest, write_new
 
 
-def load_reader(path, expected_sha):
+def load_reader(path, expected_sha, detailed=True, mature_fir=False):
     if digest(path) != expected_sha.upper():
         raise ValueError("Existing source inspector differs from the admitted hash.")
     sys.path.insert(0, str(path.parent))
     spec = importlib.util.spec_from_file_location("resource_existing_reader", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.KEEP_ARRAYS = module.KEEP_ARRAYS | {b"Normals", b"NormalsIndex", b"UV", b"UVIndex"}
+    if detailed:
+        module.KEEP_ARRAYS = module.KEEP_ARRAYS | {b"Normals", b"NormalsIndex", b"UV", b"UVIndex"}
+    if mature_fir:
+        module.FbxReader.MaxFileBytes = 256 * 1024**2
+        module.FbxReader.MaxDecodedBytes = 768 * 1024**2
     return module
 
 
@@ -136,8 +140,15 @@ def geometry_roles(reader, node):
     }
 
 
-def inspect_fbx(reader, path, guard):
+def inspect_fbx(reader, path, guard, detailed=True):
     basic = reader.inspect_fbx(path)
+    if not detailed:
+        basic["roleSpecificAttributes"] = []
+        basic["preparationBoundary"] = (
+            "Large-tree source profile: bounded parser inspected geometry, hierarchy, transforms, "
+            "material slots and raw bounds without decoding UV/normal arrays. Selected prepared "
+            "geometry must pass detailed UV/normal inspection before import.")
+        return basic
     guard()
     with path.open("rb") as stream:
         parsed = reader.FbxReader(stream, path.stat().st_size).parse()
@@ -152,7 +163,7 @@ def inspect_fbx(reader, path, guard):
     return basic
 
 
-def inspect_sources(manifest_path, receipt_path, source_root, output, reader, guard):
+def inspect_sources(manifest_path, receipt_path, source_root, output, reader, guard, detailed=True):
     manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
     validate_manifest(manifest)
     receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
@@ -160,9 +171,9 @@ def inspect_sources(manifest_path, receipt_path, source_root, output, reader, gu
         raise ValueError("Acquired receipt differs from the manifest.")
     expected = [(asset["id"], item["name"]) for asset in manifest["assets"] for item in asset["files"]]
     if [(entry["asset"], entry["file"]) for entry in receipt["files"]] != expected:
-        raise ValueError("Receipt does not identify the exact four-asset palette.")
+        raise ValueError("Receipt does not identify the exact admitted source palette.")
     result = {
-        "scope": "Read-only four-resource source inventory; no bpy scene, image-reference traversal or Unreal.",
+        "scope": "Read-only admitted resource source inventory; no bpy scene, image-reference traversal or Unreal.",
         "manifestSha256": digest(manifest_path), "sourceReceiptSha256": digest(receipt_path),
         "inspectionToolSha256": digest(Path(__file__)),
         "existingReaderSha256": digest(Path(reader.__file__)),
@@ -174,7 +185,7 @@ def inspect_sources(manifest_path, receipt_path, source_root, output, reader, gu
         path = contained(source_root, entry["asset"], entry["file"])
         if path.stat().st_size != entry["bytes"] or digest(path) != entry["sha256"].upper():
             raise ValueError("Acquired source changed: " + entry["file"])
-        info = inspect_fbx(reader, path, guard) if path.suffix == ".fbx" else reader.inspect_image(path)
+        info = inspect_fbx(reader, path, guard, detailed) if path.suffix == ".fbx" else reader.inspect_image(path)
         if digest(path) != entry["sha256"].upper():
             raise ValueError("Source changed during inspection.")
         result["files"].append({
@@ -202,8 +213,11 @@ def main():
     guard()
     if json.loads(args.manifest.read_text(encoding="utf-8-sig"))["runId"] != args.run_id:
         raise ValueError("Inspection run ID differs from the admitted manifest.")
-    reader = load_reader(args.inspector, args.inspector_sha256)
-    result = inspect_sources(args.manifest, args.receipt, args.source_root, args.output, reader, guard)
+    manifest = json.loads(args.manifest.read_text(encoding="utf-8-sig"))
+    profile = manifest.get("profile")
+    detailed = profile not in ("tree-palette-source-01", "mature-fir-source-01")
+    reader = load_reader(args.inspector, args.inspector_sha256, detailed, profile == "mature-fir-source-01")
+    result = inspect_sources(args.manifest, args.receipt, args.source_root, args.output, reader, guard, detailed)
     print(f"Inspected {len(result['files'])} receipted files; no preparation or import.")
 
 

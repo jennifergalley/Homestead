@@ -25,6 +25,8 @@ includes this credit. Include this document in any distributed build.
 | Shrub 04 (two selected shoots) | Rico Cilliers | https://polyhaven.com/a/shrub_04 | CC0 |
 | Dry Branches Medium 01 (three pieces) | Rico Cilliers | https://polyhaven.com/a/dry_branches_medium_01 | CC0 |
 | Fir Sapling (two small conifers) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/fir_sapling | CC0 |
+| Jacaranda Tree (one spreading canopy) | Rob Tuytel (guidance), Rico Cilliers (modeling) | https://polyhaven.com/a/jacaranda_tree | CC0 |
+| Fir Sapling Medium (one pole conifer) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/fir_sapling_medium | CC0 |
 | Flower Empodium (two clumps) | Jenelle van Heerden (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/flower_empodium | CC0 |
 | Forest Ambience | TinyWorlds | https://opengameart.org/content/forest-ambience | CC0 |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
@@ -71,6 +73,16 @@ independent reload are sealed in
 `docs\research\environment-assets\woodland-assets-01`. Shrub04 contains no fruit:
 separate prototype berries remain gameplay produce. Fir is a small conifer,
 not a mature canopy tree. Visual woodland acceptance remains separate.
+
+The generated version-three palette additionally uses one selected Jacaranda
+LOD0 and one selected Fir Sapling Medium `c` form. Project-derived distance
+LODs preserve all three material roles; the publisher catalog's `lods:true`
+flag was not treated as proof of authored FBX LODs. Exact CC0 provenance,
+source hashes, preparation records, model-specific collision qualifications,
+and the deferred Island Tree 02 source are recorded in
+`docs\research\environment-assets\tree-palette-20260921.md` and
+`tree-palette-assets-01`. Fir Tree 01 was not acquired because its FBX exceeds
+the established per-file cap.
 
 ## Character prototype
 

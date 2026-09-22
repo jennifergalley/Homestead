@@ -82,8 +82,8 @@ def geometry_only_fbx(source, destination, model_names=None):
                         if element.id == b"C" and element.props[0] == b"OO" and element.props[2] == model_id]
             geometries = [value for value in bindings if by_id[value].id == b"Geometry"]
             materials = [value for value in bindings if by_id[value].id == b"Material"]
-            if len(geometries) != 1 or len(materials) != 1 or len(bindings) != 2:
-                raise ValueError("Expected one geometry and one material per selected static clump.")
+            if len(geometries) != 1 or not materials or len(bindings) != 1 + len(materials):
+                raise ValueError("Expected one geometry and one or more materials per selected static model.")
             keep.update(bindings)
         removed_ids.update(by_id.keys() - keep)
         retained = [element for element in objects.elems if element.props[0] in keep]

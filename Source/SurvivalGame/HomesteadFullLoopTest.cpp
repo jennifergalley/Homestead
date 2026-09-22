@@ -405,7 +405,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Controller->GetPawn()->SetActorRotation(FRotator(0, 180, 0));
             Controller->SetControlRotation(FRotator(-20, 180, 0));
         },
-        [this]() { return Controller->FocusTitle() == TEXT("The clearing"); }, 0.65f);
+        [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.65f);
     Add(TEXT("Till the garden using gamepad X and the crafted digging stick"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
         [this]()
@@ -442,7 +442,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
             Controller->SetControlRotation(FRotator(-20, 0, 0));
         },
-        [this]() { return Controller->FocusTitle() == TEXT("The clearing"); }, 0.65f);
+        [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.65f);
     Add(TEXT("Till the second food plot through gamepad X"),
         [this, SecondaryStarts, PickingStarts]() { *SecondaryStarts = PickingStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
         [this, BerryPlotId, SecondaryStarts, PickingStarts]()

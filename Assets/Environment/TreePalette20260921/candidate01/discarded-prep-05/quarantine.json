@@ -1,0 +1,16 @@
+{
+  "reason": "Global Jacaranda decimation removed minority material role even at2%; retained partials not importable",
+  "sourceEvidence": "Saved\\Automation\\20260921-033354-2d257ba0\\tree-palette-prep-05",
+  "files": [
+    {
+      "path": "Jacaranda_LOD0.fbx",
+      "bytes": 27389980,
+      "sha256": "D4E54665FFAD8149CE5206CE989B70085AA23200BE3E05DB1808B7FB31A614D7"
+    },
+    {
+      "path": "Jacaranda_LOD1.fbx",
+      "bytes": 9975788,
+      "sha256": "94FE07B7A81CE53EFF365CD038BF95919ED1880ABDD2EC502B103E0292B48398"
+    }
+  ]
+}

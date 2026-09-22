@@ -1,14 +1,14 @@
 function Get-FernOperationPolicy {
     param(
-        [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify')][string]$Mode,
+        [ValidateSet('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify','TreePaletteImport','TreePaletteVerify','MatureFirImport','MatureFirVerify')][string]$Mode,
         [ValidateSet('Standard','LongStartup','CompletionDriven')][string]$RenderProfile='Standard'
     )
     if($RenderProfile -ne 'Standard' -and $Mode -ne 'Render' -and
-        -not($Mode -in @('Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify') -and $RenderProfile -eq 'CompletionDriven')){throw 'Unsupported extended profile/mode.'}
+        -not($Mode -in @('Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify','TreePaletteImport','TreePaletteVerify','MatureFirImport','MatureFirVerify') -and $RenderProfile -eq 'CompletionDriven')){throw 'Unsupported extended profile/mode.'}
     $policy=switch($Mode) {
         'Settings' {@{profile='Default';softSeconds=100;hardSeconds=110;ceilingSeconds=120;startupSeconds=0;captureSeconds=0}}
         'Import' {@{profile='Import';softSeconds=150;hardSeconds=180;ceilingSeconds=210;startupSeconds=0;captureSeconds=0}}
-        {$_ -in @('HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify')} {
+        {$_ -in @('HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify','TreePaletteImport','TreePaletteVerify','MatureFirImport','MatureFirVerify')} {
             if($RenderProfile -ne 'CompletionDriven'){throw 'Targeted asset work requires explicit completion-driven policy.'}
             @{profile='CookCompletionDriven';softSeconds=0;hardSeconds=0;ceilingSeconds=0;startupSeconds=0;captureSeconds=0}
         }
@@ -44,7 +44,7 @@ function Assert-FernStageBudget($Policy,[double]$ElapsedSeconds,$EntrySeconds) {
 }
 
 function Get-FernProbeArguments([string]$Project,[string]$Output,[string]$Ddc,$Configs,[string]$Mode) {
-    if($Mode -cnotin @('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify') -or $Configs.Count -ne 7){throw 'Invalid native mode/config map.'}
+    if($Mode -cnotin @('Settings','Import','Render','Cook','HairImport','HairVerify','WardrobeImport','WardrobeVerify','TreeImport','TreeVerify','GrassImport','GrassVerify','WoodlandImport','WoodlandVerify','TreePaletteImport','TreePaletteVerify','MatureFirImport','MatureFirVerify') -or $Configs.Count -ne 7){throw 'Invalid native mode/config map.'}
     $tokens=@($Project,'-run=HomesteadAuthoringProbe',"-EvidenceDirectory=$Output",
         '-notraceserver','-traceautostart=0','-unattended','-nop4','-nosplash','-stdout','-FullStdOutLogOutput',
         '-DisablePython','-DisablePlugins=PythonScriptPlugin,EditorScriptingUtilities,UdpMessaging,TcpMessaging',

@@ -17,6 +17,7 @@ class UAnimSequence;
 class UMaterialInstanceDynamic;
 class UHomesteadWateringTool;
 class UHomesteadHatchet;
+class AHomesteadWorld;
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -54,6 +55,8 @@ public:
     void PlayWater();
     void PlayClear();
     void CancelAction();
+    FRotator ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred);
+    const FString& StartingViewEvidence() const { return InitialViewEvidence; }
 
 private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<USpringArmComponent> CameraArm;
@@ -85,6 +88,7 @@ private:
     bool bAppearancePreview = false;
     float SavedCameraDistance = 470;
     FRotator SavedViewRotation = FRotator::ZeroRotator;
+    FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
 
     bool LoadHeroineAssets();
     float InferMeshYaw(const USkeletalMesh& Asset) const;

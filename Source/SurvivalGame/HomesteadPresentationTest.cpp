@@ -55,7 +55,9 @@ void AHomesteadSmokeTest::PreparePresentation()
     if (auto* HUD = Controller->GetHUD()) HUD->bShowHUD = false;
     Avatar->GetCharacterMovement()->StopMovementImmediately();
     Avatar->GetCharacterMovement()->DisableMovement();
-    Avatar->SetActorLocation(FVector(-880, 200, AHomesteadWorld::GroundHeight(-880, 200) + 86));
+    if (!Controller->PrepareWorldAt({-880, 200}))
+    { Finish(false, TEXT("Presentation destination could not be prepared.")); return; }
+    Avatar->SetActorLocation(FVector(-880, 200, Controller->GroundHeight(-880, 200) + 86));
     Avatar->SetActorRotation(FRotator(0, 215, 0));
     Camera->GetCameraComponent()->SetFieldOfView(40);
     Controller->SetViewTarget(Camera);
@@ -127,7 +129,11 @@ void AHomesteadSmokeTest::PreparePresentation()
                 State.structures.clear();
                 if (Case.Hour == 22)
                     State.structures.push_back({State.nextId++, Homestead::Piece::Fire, -4, 0, 2, 2, {}});
-                Landscape->Refresh(State);
+                Homestead::Simulation LightingFixture = Controller->Simulation();
+                auto& FixtureState = const_cast<Homestead::State&>(LightingFixture.GetState());
+                FixtureState = State;
+                *Ready = Landscape->Refresh(LightingFixture);
+                if (!*Ready) return;
                 const FVector Target = Mesh->GetBoneLocation(TEXT("head")) + FVector(0, 0, HairReview ? -22 : 8);
                 const FVector Direction = FRotator(0, 215 + Case.Orbit, 0).Vector();
                 Camera->SetActorLocation(Target + Direction * (HairReview ? 260 : 150));

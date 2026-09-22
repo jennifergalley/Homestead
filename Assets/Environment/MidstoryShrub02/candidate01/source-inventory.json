@@ -1,0 +1,640 @@
+{
+  "scope": "Read-only admitted resource source inventory; no bpy scene, image-reference traversal or Unreal.",
+  "manifestSha256": "7AC6726EBB667B998F612FB99A2A464B17E2CD7C99F25A4461C34C2DD35FA131",
+  "sourceReceiptSha256": "82297B8BC484F9FBA183D7C6B69CCAAAFE1D2CEA4C73A36339F487D5B2D9C588",
+  "inspectionToolSha256": "AFAC23E8580FF6F2AD2ECD74B7247F1BB38E12D936F5261ACE32A84071D8CD19",
+  "existingReaderSha256": "FE2D9FBC43AC56F810F7E70912F9C606EE9F5B144CB73E8D2AB348B71E6AA7DE",
+  "files": [
+    {
+      "asset": "shrub_02",
+      "file": "shrub_02_1k.fbx",
+      "sha256": "7BD42E635ED83A9341A9953280845DC2685615A4A4A5441E31EEDD39D5431EC8",
+      "sourceInspection": {
+        "fbxVersion": 7400,
+        "parsedNodes": 411,
+        "decodedArrayBytes": 2494568,
+        "globalSettings": {
+          "UpAxis": [
+            1
+          ],
+          "UpAxisSign": [
+            1
+          ],
+          "FrontAxis": [
+            2
+          ],
+          "FrontAxisSign": [
+            1
+          ],
+          "CoordAxis": [
+            0
+          ],
+          "CoordAxisSign": [
+            1
+          ],
+          "OriginalUpAxis": [
+            -1
+          ],
+          "OriginalUpAxisSign": [
+            1
+          ],
+          "UnitScaleFactor": [
+            1.0
+          ],
+          "OriginalUnitScaleFactor": [
+            1.0
+          ],
+          "AmbientColor": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "DefaultCamera": [
+            "Producer Perspective"
+          ],
+          "TimeMode": [
+            11
+          ],
+          "TimeSpanStart": [
+            0
+          ],
+          "TimeSpanStop": [
+            46186158000
+          ],
+          "CustomFrameRate": [
+            24.0
+          ]
+        },
+        "objectTypes": {
+          "Geometry": 4,
+          "Model": 4,
+          "Material": 1
+        },
+        "geometries": [
+          {
+            "id": 766590037,
+            "name": "Plane.024",
+            "vertices": 5035,
+            "faces": 3852,
+            "faceVertexHistogram": {
+              "4": 3738,
+              "3": 114
+            },
+            "fanTriangleEstimate": 7590,
+            "localBounds": {
+              "min": [
+                -0.7670781016349792,
+                -0.3468462824821472,
+                -0.024479709565639496
+              ],
+              "max": [
+                0.5002720355987549,
+                0.7014584541320801,
+                1.3669129610061646
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 853175158,
+            "name": "Plane.029",
+            "vertices": 3546,
+            "faces": 2660,
+            "faceVertexHistogram": {
+              "4": 2582,
+              "3": 78
+            },
+            "fanTriangleEstimate": 5242,
+            "localBounds": {
+              "min": [
+                -0.3281225860118866,
+                -0.25067082047462463,
+                -0.08309606462717056
+              ],
+              "max": [
+                0.7839503288269043,
+                0.8754615187644958,
+                0.8812281489372253
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 146861574,
+            "name": "Plane.041",
+            "vertices": 6256,
+            "faces": 4692,
+            "faceVertexHistogram": {
+              "4": 4542,
+              "3": 150
+            },
+            "fanTriangleEstimate": 9234,
+            "localBounds": {
+              "min": [
+                -0.7240308523178101,
+                -0.19618743658065796,
+                -0.23947666585445404
+              ],
+              "max": [
+                1.0465896129608154,
+                0.9966265559196472,
+                0.7085703611373901
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          },
+          {
+            "id": 43960323,
+            "name": "Plane.036",
+            "vertices": 3474,
+            "faces": 2630,
+            "faceVertexHistogram": {
+              "4": 2558,
+              "3": 72
+            },
+            "fanTriangleEstimate": 5188,
+            "localBounds": {
+              "min": [
+                -0.8544211387634277,
+                -0.4599308967590332,
+                -0.07326287776231766
+              ],
+              "max": [
+                0.18589623272418976,
+                0.34055399894714355,
+                0.9369679689407349
+              ]
+            },
+            "materialLayers": [
+              {
+                "mapping": [
+                  "AllSame"
+                ],
+                "reference": [
+                  "IndexToDirect"
+                ],
+                "indexCounts": {
+                  "0": 1
+                }
+              }
+            ],
+            "layerTypes": [
+              "LayerElementNormal",
+              "LayerElementUV",
+              "LayerElementMaterial"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "id": 150516627,
+            "name": "shrub_02_a_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              766590037
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                -125.77278900146484,
+                -0.42584511637687683,
+                -1.684815764427185
+              ],
+              "Lcl Rotation": [
+                -0.9761565489130593,
+                -80.22082451879905,
+                -78.27355807699593
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.00000762939453,
+                100.00000762939453
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 17936012,
+            "name": "shrub_02_b_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              853175158
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                0.05788634344935417,
+                -0.5152538418769836,
+                -1.3657902479171753
+              ],
+              "Lcl Rotation": [
+                -23.93291284228569,
+                -108.52527187330446,
+                -37.372746081558766
+              ],
+              "Lcl Scaling": [
+                100.00000762939453,
+                100.0,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 126539731,
+            "name": "shrub_02_c_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              146861574
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                126.43390655517578,
+                -0.44565367698669434,
+                -0.49583181738853455
+              ],
+              "Lcl Rotation": [
+                -6.62122209367715,
+                -114.96541626057446,
+                -39.053194598529934
+              ],
+              "Lcl Scaling": [
+                100.0,
+                99.99999237060547,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          },
+          {
+            "id": 696030976,
+            "name": "shrub_02_d_LOD0",
+            "type": "Mesh",
+            "parentIds": [
+              0
+            ],
+            "geometryIds": [
+              43960323
+            ],
+            "materialSlotsInConnectionOrder": [
+              "shrub_02"
+            ],
+            "properties": {
+              "Lcl Translation": [
+                264.79376220703125,
+                -0.3873704969882965,
+                -0.4426921606063843
+              ],
+              "Lcl Rotation": [
+                10.714422128350622,
+                -59.36750566194142,
+                -122.09654356541797
+              ],
+              "Lcl Scaling": [
+                100.0,
+                100.00000762939453,
+                100.0
+              ],
+              "DefaultAttributeIndex": [
+                0
+              ],
+              "InheritType": [
+                1
+              ]
+            }
+          }
+        ],
+        "materials": {
+          "682962058": "shrub_02"
+        },
+        "uniqueGeometryFaces": 13834,
+        "uniqueGeometryFanTriangles": 27254,
+        "geometryModelBindings": 4,
+        "modelBoundFanTriangles": 27254,
+        "lodWindNameIndicators": [
+          {
+            "field": "/Definitions/ObjectType/PropertyTemplate/Properties70/P",
+            "strings": [
+              "LODBox",
+              "bool",
+              "",
+              ""
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_02_a_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_02_b_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_02_c_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          },
+          {
+            "field": "/Objects/Model",
+            "strings": [
+              "shrub_02_d_LOD0\u0000\u0001Model",
+              "Mesh"
+            ]
+          }
+        ],
+        "externalTextureReferencesNotFollowed": [],
+        "runtimeEvidence": "Unmeasured; source polygons/fan estimates and raw local transforms only. No evaluated scene, imported LOD, wind or render proof.",
+        "roleSpecificAttributes": [
+          {
+            "geometryId": 766590037,
+            "controlPoints": 5035,
+            "referencedControlPoints": 5035,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.7670781016349792,
+                -0.3468462824821472,
+                -0.024479709565639496
+              ],
+              "max": [
+                0.5002720355987549,
+                0.7014584541320801,
+                1.3669129610061646
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 3852,
+                "fanTriangleEstimate": 7590,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.06726211309432983,
+                      0.14244584739208221
+                    ],
+                    "max": [
+                      0.945476233959198,
+                      0.9773418307304382
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 15294,
+                    "referencedDirectVectors": 15294
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 853175158,
+            "controlPoints": 3546,
+            "referencedControlPoints": 3546,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.3281225860118866,
+                -0.25067082047462463,
+                -0.08309606462717056
+              ],
+              "max": [
+                0.7839503288269043,
+                0.8754615187644958,
+                0.8812281489372253
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 2660,
+                "fanTriangleEstimate": 5242,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.06726211309432983,
+                      0.14244584739208221
+                    ],
+                    "max": [
+                      0.945476233959198,
+                      0.9773418307304382
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 10562,
+                    "referencedDirectVectors": 10562
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 146861574,
+            "controlPoints": 6256,
+            "referencedControlPoints": 6256,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.7240308523178101,
+                -0.19618743658065796,
+                -0.23947666585445404
+              ],
+              "max": [
+                1.0465896129608154,
+                0.9966265559196472,
+                0.7085703611373901
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 4692,
+                "fanTriangleEstimate": 9234,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.06726211309432983,
+                      0.14244584739208221
+                    ],
+                    "max": [
+                      0.945476233959198,
+                      0.9773418307304382
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 18618,
+                    "referencedDirectVectors": 18618
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          },
+          {
+            "geometryId": 43960323,
+            "controlPoints": 3474,
+            "referencedControlPoints": 3474,
+            "unusedControlPoints": 0,
+            "referencedLocalBounds": {
+              "min": [
+                -0.8544211387634277,
+                -0.4599308967590332,
+                -0.07326287776231766
+              ],
+              "max": [
+                0.18589623272418976,
+                0.34055399894714355,
+                0.9369679689407349
+              ]
+            },
+            "rolesByMaterialSlot": {
+              "0": {
+                "polygons": 2630,
+                "fanTriangleEstimate": 5188,
+                "areaAtMost1eMinus12RawUnitsSquared": 0,
+                "uvLayers": [
+                  {
+                    "layerIndex": 0,
+                    "name": "UVMap",
+                    "min": [
+                      0.06726211309432983,
+                      0.14244584739208221
+                    ],
+                    "max": [
+                      0.945476233959198,
+                      0.9773418307304382
+                    ],
+                    "fanTrianglesWithDeterminantAtMost1eMinus12": 0
+                  }
+                ],
+                "normalLayers": [
+                  {
+                    "layerIndex": 0,
+                    "nearZeroReferencedCorners": 0,
+                    "directVectors": 10448,
+                    "referencedDirectVectors": 10448
+                  }
+                ]
+              }
+            },
+            "measurement": "Float64 raw local coordinates; area <=1e-12 raw units squared, normal length <=1e-4, abs UV determinant <=1e-12. Non-triangle polygons use a diagnostic fan estimate, not native triangulation."
+          }
+        ],
+        "preparationBoundary": "Original mesh/model IDs, transforms and material slots only. No evaluated world axes/scale or automatic merging/reduction. Check UV per role, not only layer presence."
+      }
+    }
+  ],
+  "limits": "Parser cancellation is checked before each file/pass/geometry; the reused parser has its existing node/depth/120-second bounds. Raw local bounds are not transformed native render bounds."
+}

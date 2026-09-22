@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "status": "qualified-native-inventory-passed-supervisor-shutdown-failed",
+  "namespace": "/Game/Trials/TreePalette_20260921_01",
+  "packages": [
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Materials\\M_FirPole_Branches.uasset",
+      "bytes": 7059,
+      "sha256": "7B2DCE3E22BA8277BEE97A7C8EDD4BFD399B962BFAA88E97975038793C5E8FDE"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Materials\\M_FirPole_Dead.uasset",
+      "bytes": 7007,
+      "sha256": "CE07698C603A57BB498D4ED5B4320F2F53ED5A145255B7906B167795E4FBC013"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Materials\\M_FirPole_Twigs.uasset",
+      "bytes": 7793,
+      "sha256": "62F178D6F28FFB0867932EB80EB58EA04ACB89611028920328C7787B0793D49E"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Materials\\M_Jacaranda_Branches.uasset",
+      "bytes": 7085,
+      "sha256": "DE5E762A8EF46B8D4D71718CB33C2C9436293B9C7B7EA6DD511616DE42C7800D"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Materials\\M_Jacaranda_Leaves.uasset",
+      "bytes": 7838,
+      "sha256": "835F3E23CD5A72EF34FE0C89C90B9A168327340DDBF535DC7D042C764021190A"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Materials\\M_Jacaranda_Trunk.uasset",
+      "bytes": 7046,
+      "sha256": "CC451EDE877B5D68C686293BD596CE5EFA861210C42BB0507BE72FABA15B4C07"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Meshes\\SM_FirPole.uasset",
+      "bytes": 19754154,
+      "sha256": "11C8D31E9BF8DF89FF566EB2B96B6320152BA762530F90906C2082DC00A1B047"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Meshes\\SM_Jacaranda.uasset",
+      "bytes": 47113699,
+      "sha256": "A81E39F407F8F104EF3D0975A788E5646C1F0CD52BBACEE77B3A0FCD4541A059"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Branches_AO.uasset",
+      "bytes": 1930015,
+      "sha256": "F4FD4F233810F4279B2974BED16BE7A1609E1C1DD07C4CFDB1D373F77BBD60EE"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Branches_Diff.uasset",
+      "bytes": 5847203,
+      "sha256": "4A9E33AD7341C330777F45F4E6A7430DE80D002581DF6D6B5ADF53DB7C414E81"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Branches_NormalDX.uasset",
+      "bytes": 6128306,
+      "sha256": "A13EEE8F1887582985A21489F4EC786D870A0D5E7D4E980E6F7C0480927F4EC8"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Branches_Roughness.uasset",
+      "bytes": 1794122,
+      "sha256": "04420F376F56AE3AC8D38399F3E3354947606FE2DCA74C87BBE0897421A5752A"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Dead_AO.uasset",
+      "bytes": 1929999,
+      "sha256": "4ACF47510879F49A3A6BD4477806D049D3DDFD469B99E96757357DB32C21AC61"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Dead_Diff.uasset",
+      "bytes": 5847187,
+      "sha256": "C798BE648F5E3F09458C99BBB57B15EE81D9519853187BC1895F2F5D33E8CCFA"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Dead_NormalDX.uasset",
+      "bytes": 6128290,
+      "sha256": "14DEAA42C82791E556D3DF1E7BA64BFD61BF211447FAD82BA030E026D3849A49"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Dead_Roughness.uasset",
+      "bytes": 1794106,
+      "sha256": "B7F02AAAA829C50252D333A4F4871E4F0181AFE4264A0C9AA0665B35074572C3"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Twigs_Alpha.uasset",
+      "bytes": 730702,
+      "sha256": "EAE85F079611475F3E53B8094ADD9C8042D58D03AB6B86C4497CAA5AAB327C0C"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Twigs_AO.uasset",
+      "bytes": 310520,
+      "sha256": "A193B9F93D47EA366F335FDB14C531CA9002798B8789A7D26D16042DB4F13AB9"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Twigs_Diff.uasset",
+      "bytes": 1647328,
+      "sha256": "2E6A804142E3C163F4610DB2849D83872061157AB6998C0FAFB2C5D807D64AF3"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Twigs_NormalDX.uasset",
+      "bytes": 1833345,
+      "sha256": "C8B0DD6D821C7776DA82E1AD3399622C3F290925A304F505A498A86528B3CBB6"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_FirPole_Twigs_Roughness.uasset",
+      "bytes": 1096525,
+      "sha256": "74B8D1C4CB765273DC842C926F8A47B648240B5B414AEA52D0D927B306F3D587"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Branches_AO.uasset",
+      "bytes": 1681549,
+      "sha256": "8196B360B591515F0FEA6C6B388634E7EDBDC6398740E736A449D2F04FFE61C5"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Branches_Diff.uasset",
+      "bytes": 5381111,
+      "sha256": "A976E0AB25DF5C37ACD54F9AE176153CFC211E3AFF3D0C97D04CE4BFDD1C5EFE"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Branches_NormalDX.uasset",
+      "bytes": 6065116,
+      "sha256": "07FC7F61AC7234551926E68DCCD96DA3029849AA22367B42B07B32C576741352"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Branches_Roughness.uasset",
+      "bytes": 1522926,
+      "sha256": "4EE8212A567B8EB379D1DD4F45488619892C2C25226195E75898FE51CCC96C17"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Leaves_Alpha.uasset",
+      "bytes": 994169,
+      "sha256": "5D8119102955DCBF26896032D1AB1A0FF4FFDBA31D3D58474389F76157CD3686"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Leaves_AO.uasset",
+      "bytes": 1061414,
+      "sha256": "0B71171D1C92A1F5C27E510F51336127FD0EF423C89177A44BDC9648F48FED25"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Leaves_Diff.uasset",
+      "bytes": 2300523,
+      "sha256": "B67675C270CE5D5FA9667670B4D7BAA021B84984A5176CB908EB40F8F6E070F2"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Leaves_NormalDX.uasset",
+      "bytes": 4034241,
+      "sha256": "96E5C96AB4D11EC40FDA4384AB65C30BA833542DF010668B5A421694969924A6"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Leaves_Roughness.uasset",
+      "bytes": 920497,
+      "sha256": "896047D2A2C93761A367DB4507DFFC993A1B9E7495CAC72B2B8A1B61A7417447"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Trunk_AO.uasset",
+      "bytes": 1872979,
+      "sha256": "99F711B44EF553B5D29710C82E815F3DA27FAC7684127096D6A5FEFE2C7CC53E"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Trunk_Diff.uasset",
+      "bytes": 5692883,
+      "sha256": "5EA5C8D0EFD3B608E102A3C06F7AA6613D93B3FFA355D3B8B1C0186C8B8AC0A2"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Trunk_NormalDX.uasset",
+      "bytes": 5722541,
+      "sha256": "CFC24977330380A4259B8C43BB7BABB61BC6F9A34126F02EE1C837FAC8396E33"
+    },
+    {
+      "path": "Content\\Trials\\TreePalette_20260921_01\\Textures\\T_Jacaranda_Trunk_Roughness.uasset",
+      "bytes": 1753989,
+      "sha256": "AA4F23B1F079F0CC9F7246338BEDB919D3321E0F1A1624B0F914C2F6DAA8402C"
+    }
+  ],
+  "nativeImportResultSha256": "5AB9B94B0483AC43D44AFFE0C3368CF8602563FF2477B3EAFCBFA0049819C12E",
+  "nativeVerifyResultSha256": "93188111EE75E1505B400A510DAEF334B5B44E90FD64883B7D3594705CA8208D",
+  "importSupervisorResultSha256": "22F2FA40F9E5D99E121A8A5516AE3FCD07136465025E928DF74B652B6D33B40C",
+  "verifySupervisorResultSha256": "5F98E7462BE338A6A6310512231F312E021891F60B82933396AB188DD159990D",
+  "sourceManifestSha256": "85BA83F678A57262EB446FB4DECD1004D2DD60563CF28D28C261B30AC9908CD5",
+  "sourceDownloadReceiptSha256": "01DAA0636A9CE962C91AF5C9FBC51B159BD753126160138DFD8C6E00FB35C274",
+  "sourceInventorySha256": "48E0ADC0212DABB9B6DFD72FBCFCDF7D68FA068846D01AF74992A8C17668CF97",
+  "preparationSha256": "FC03B5213BE0A52D24122C66C4A36300AA1208A896BC1AF1BE6D228FC4DA7451",
+  "qualification": "Import and separate fresh-process inventory both completed and wrote passed native results. Unreal failed to terminate cooperatively after each result; exact owned PIDs were terminated after prolonged waits. Both supervisors therefore remain failed (0xFFFFFFFF), then observed death, disposed guards and verified unchanged marker. This is package/source verification, not clean authoring lifecycle, gameplay, selected LOD, GPU, visual or art acceptance."
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "sourceRoot": "E:\\Repos\\SurvivalGame\\Assets\\Source\\midstory-shrub02-20260921",
+  "acquiredUtc": "2026-09-21T23:11:13.069555+00:00",
+  "manifestSha256": "7AC6726EBB667B998F612FB99A2A464B17E2CD7C99F25A4461C34C2DD35FA131",
+  "totalBytes": 832300,
+  "files": [
+    {
+      "asset": "shrub_02",
+      "file": "shrub_02_1k.fbx",
+      "bytes": 832300,
+      "sha256": "7BD42E635ED83A9341A9953280845DC2685615A4A4A5441E31EEDD39D5431EC8",
+      "publisherMd5": "f4d00cbfa3dd3a6594e5b63c6324cb42",
+      "actualMd5": "F4D00CBFA3DD3A6594E5B63C6324CB42",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/fbx/1k/shrub_02/shrub_02_1k.fbx",
+      "license": "CC0-1.0"
+    }
+  ]
+}
