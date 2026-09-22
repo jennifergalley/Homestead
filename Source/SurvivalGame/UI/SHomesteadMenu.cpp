@@ -1353,7 +1353,6 @@ void SHomesteadMenu::DialogAction(int32 Index)
     if (!Controller.IsValid() || bSaving) return;
     if (Index == 0)
     {
-        if (Dialog == EDialog::TestReset) bResetPromptShown = false;
         SetDialog(EDialog::None);
         return;
     }

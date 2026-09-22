@@ -37,6 +37,7 @@ public:
     void RequestExit();
     void ShowSaveFailure(const FString& Error);
     void ShowGraphicsSaveFailure(const FString& Error);
+    void RequestTestResetPrompt() { bResetPromptShown = false; }
     void Back();
     void Refresh();
     bool PrepareQuickAction();

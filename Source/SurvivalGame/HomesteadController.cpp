@@ -1629,7 +1629,11 @@ void AHomesteadController::QuickLoad()
     if (bAutomatedInputOnly) ++TestQuickLoads;
     if (!LoadLatest())
     {
-        if (bTestResetRequired) OpenBook(4);
+        if (bTestResetRequired)
+        {
+            if (NativeMenu.IsValid()) NativeMenu->RequestTestResetPrompt();
+            OpenBook(4);
+        }
         else if (LoadProblem.IsEmpty()) Notify(TEXT("There is no usable save to load yet."), true);
     }
 }
