@@ -204,8 +204,14 @@ void AssignTreePalette(GeneratedEntity& entity, std::uint64_t hash)
     const auto detail = Mix(hash ^ UINT64_C(0x4f1bbcdc6762c7ad));
     if (entity.kind == EntityKind::ForestTree)
     {
-        entity.paletteRole = roleValue < 55 ? TreePaletteRole::BroadleafMature :
-            (roleValue < 85 ? TreePaletteRole::ConiferMature : TreePaletteRole::WoodlandAccent);
+        entity.paletteRole = roleValue < 60 ? TreePaletteRole::BroadleafMature :
+            (roleValue < 95 ? TreePaletteRole::ConiferMature : TreePaletteRole::WoodlandAccent);
+        const double spawnX = static_cast<double>(entity.xCm) + 1000.0;
+        const double spawnY = static_cast<double>(entity.yCm);
+        if (entity.paletteRole == TreePaletteRole::WoodlandAccent &&
+            (spawnX * spawnX + spawnY * spawnY <= 1200.0 * 1200.0 ||
+                DistanceToSpawnSegment(entity.xCm, entity.yCm) <= 500.0))
+            entity.paletteRole = TreePaletteRole::BroadleafMature;
         const std::uint16_t low = 900;
         const std::uint16_t high = entity.paletteRole == TreePaletteRole::BroadleafMature ? 1040 :
             (entity.paletteRole == TreePaletteRole::ConiferMature ? 1050 : 1060);

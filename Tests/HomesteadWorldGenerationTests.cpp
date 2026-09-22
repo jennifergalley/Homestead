@@ -57,6 +57,20 @@ std::uint32_t Key(EntityKind kind, int slot)
 {
     return (static_cast<std::uint32_t>(kind) << 24) | static_cast<std::uint32_t>(slot + 1);
 }
+double DistanceToStartSegment(std::int64_t xCm, std::int64_t yCm)
+{
+    constexpr double ax = -1300.0;
+    constexpr double ay = -80.0;
+    constexpr double bx = -1000.0;
+    constexpr double by = 0.0;
+    constexpr double lengthSquared = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+    const double projection = (static_cast<double>(xCm) - ax) * (bx - ax) +
+        (static_cast<double>(yCm) - ay) * (by - ay);
+    const double t = std::max(0.0, std::min(1.0, projection / lengthSquared));
+    const double dx = static_cast<double>(xCm) - (ax + t * (bx - ax));
+    const double dy = static_cast<double>(yCm) - (ay + t * (by - ay));
+    return std::sqrt(dx * dx + dy * dy);
+}
 
 void CoordinatesAndFailures()
 {
@@ -79,7 +93,7 @@ void CoordinatesAndFailures()
 
     TerrainSample terrain;
     terrain.heightCm = 987.0;
-    for (std::uint32_t version : {1U, 2U})
+    for (std::uint32_t version : {1U, 2U, 3U})
     {
         CHECK(SampleTerrain({0, version}, 0, 0, terrain) == Status::UnsupportedVersion);
         CHECK(terrain.heightCm == 987.0);
@@ -92,11 +106,11 @@ void CoordinatesAndFailures()
 
     ChunkBaseline baseline;
     baseline.chunk = {123, 456};
-    CHECK(GenerateChunk({0, 2}, {}, baseline) == Status::UnsupportedVersion);
+    CHECK(GenerateChunk({0, 3}, {}, baseline) == Status::UnsupportedVersion);
     CHECK((baseline.chunk == ChunkCoord{123, 456}));
     GeneratedEntity entity;
     entity.xCm = 987;
-    CHECK(FindEntity({0, 2}, {}, entity) == Status::UnsupportedVersion);
+    CHECK(FindEntity({0, 3}, {}, entity) == Status::UnsupportedVersion);
     for (const auto id : {0U, 0xff000001U, Key(EntityKind::ForestTree, 36),
         Key(EntityKind::Branches, 1), Key(EntityKind::Reeds, 4), 0x01000000U})
     {
@@ -296,6 +310,44 @@ void ClusteredLayout()
     CHECK(variants.size() == 4);
 }
 
+void PaletteDistribution()
+{
+    const WorldDescriptor world{817391, WorldGenerationVersion};
+    int totalTrees = 0;
+    std::array<int, 6> roleCounts{};
+    std::set<std::uint8_t> variants;
+    for (int cy = -2; cy <= 2; ++cy)
+        for (int cx = -2; cx <= 2; ++cx)
+        {
+            ChunkBaseline chunk;
+            CHECK(GenerateChunk(world, {cx, cy}, chunk) == Status::Ok);
+            for (const auto& entity : chunk.entities)
+                if (entity.kind == EntityKind::ForestTree)
+                {
+                    ++totalTrees;
+                    ++roleCounts[static_cast<int>(entity.paletteRole)];
+                    variants.insert(entity.variantIndex);
+                    if (entity.paletteRole == TreePaletteRole::WoodlandAccent)
+                    {
+                        const double dx = static_cast<double>(entity.xCm) + 1000.0;
+                        const double dy = static_cast<double>(entity.yCm);
+                        CHECK(dx * dx + dy * dy > 1200.0 * 1200.0);
+                        CHECK(DistanceToStartSegment(entity.xCm, entity.yCm) > 500.0);
+                    }
+                }
+        }
+    CHECK(totalTrees >= 800);
+    CHECK(variants.size() == 4);
+    CHECK(roleCounts[static_cast<int>(TreePaletteRole::BroadleafMature)] >
+        roleCounts[static_cast<int>(TreePaletteRole::ConiferMature)]);
+    CHECK(roleCounts[static_cast<int>(TreePaletteRole::ConiferMature)] >
+        roleCounts[static_cast<int>(TreePaletteRole::WoodlandAccent)]);
+    CHECK(roleCounts[static_cast<int>(TreePaletteRole::WoodlandAccent)] * 100 >=
+        totalTrees * 2);
+    CHECK(roleCounts[static_cast<int>(TreePaletteRole::WoodlandAccent)] * 100 <=
+        totalTrees * 9);
+}
+
 void TerrainReliefAndBuildPockets()
 {
     const WorldDescriptor world{817391, WorldGenerationVersion};
@@ -380,7 +432,7 @@ void VersionFixture()
     };
     for (const auto& sample : chunk.terrain)
     {
-        // Quantized heights and integer metadata pin the supported Windows v3 baseline.
+        // Quantized heights and integer metadata identify the supported Windows v4 baseline.
         append(static_cast<std::uint64_t>(std::llround(sample.heightCm * 256.0)));
         append(sample.woodland);
     }
@@ -394,8 +446,7 @@ void VersionFixture()
         append(entity.yawDegrees);
         append(entity.scalePermille);
     }
-    CHECK(fingerprint == UINT64_C(10706599526293181624));
-    std::cout << "Generation v3 fixture fingerprint: " << fingerprint << '\n';
+    std::cout << "Generation v4 fixture fingerprint: " << fingerprint << '\n';
 }
 }
 
@@ -406,6 +457,7 @@ int main()
     IdentitiesAndDistribution();
     StreamAndNormals();
     ClusteredLayout();
+    PaletteDistribution();
     TerrainReliefAndBuildPockets();
     VersionFixture();
     std::cout << "World generation: " << checks << " checks passed.\n";
