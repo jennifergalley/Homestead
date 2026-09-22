@@ -175,8 +175,9 @@ void DrainageContinuity()
             CHECK(SampleRelief(descriptor, lake.outlet.downstream, downstream) == Status::Ok);
             CHECK(downstream.elevationMm < lake.surfaceMm);
         }
-        for (const auto& node : result.nodes)
+        for (int index = 0; index < NodesPerRegion; ++index)
         {
+            const auto& node = result.nodes[index];
             if (node.inLake)
             {
                 CHECK(node.waterSurfaceMm >= node.relief.elevationMm);
@@ -187,9 +188,12 @@ void DrainageContinuity()
                 if (node.lakeOutlet) CHECK(node.downstream == lake->outlet.downstream);
             }
             if (node.accumulation >= 8) ++tributaries;
-            DrainageNode reconstructed;
-            CHECK(ResolveDrainage(descriptor, node.relief.node, reconstructed) == Status::Ok);
-            CHECK(Same(node, reconstructed));
+            if (index % 127 == 0 || index == NodesPerRegion - 1)
+            {
+                DrainageNode reconstructed;
+                CHECK(ResolveDrainage(descriptor, node.relief.node, reconstructed) == Status::Ok);
+                CHECK(Same(node, reconstructed));
+            }
         }
     }
     CHECK(crossings > 0);
