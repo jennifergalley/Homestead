@@ -669,6 +669,7 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
         return;
     }
     ObservedTree = Tree;
+    ObservedTreeKey = TreeKey;
     ObservedTreeBounds = Mesh->GetBoundingBox().TransformBy(TreeInstance->Visual.Transform);
     Tap(EKeys::Gamepad_RightThumbstick);
     Observations.Add(TEXT("Ordinary mapped camera-distance input selected the wide tree encounter view."));
@@ -690,6 +691,24 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
     const bool View = Pass.Label == TEXT("view-authored-tree");
     const bool Contact = Pass.Label == TEXT("walk-into-authored-trunk");
     const bool Retreat = Pass.Label == TEXT("retreat-from-authored-trunk");
+    if (bTreeReady && !ObservedTree.IsValid() && PC->Landscape && !ObservedTreeKey.IsEmpty())
+    {
+        auto* Collision = PC->Landscape->ActiveTreeCollisions.FindRef(ObservedTreeKey).Get();
+        const auto* Instance = PC->Landscape->ActiveTreeInstances.Find(ObservedTreeKey);
+        auto* Batch = Instance ? PC->Landscape->ActiveTreeBatches.FindRef(Instance->Visual.MeshPath).Get() : nullptr;
+        UStaticMesh* Mesh = Batch ? Batch->GetStaticMesh().Get() : nullptr;
+        if (Collision && Instance && Mesh)
+        {
+            ObservedTree = Collision;
+            ObservedTreeBounds = Mesh->GetBoundingBox().TransformBy(Instance->Visual.Transform);
+            TreeCenter = FVector2D(Collision->GetComponentLocation());
+        }
+        else
+        {
+            bTreeReady = false;
+            Observations.Add(TEXT("FAILED selected stable tree key was unavailable after active-window rebuild."));
+        }
+    }
     if (!bTreeReady || !(Approach || View || Contact || Retreat)) return;
     const auto Point = PC->PlayerPoint();
     const FVector2D Position(Point.x, Point.y);

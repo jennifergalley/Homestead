@@ -58,6 +58,7 @@ private:
     void RecordGrassGroundInventory();
     void RecordCameraForeground();
     TWeakObjectPtr<UCapsuleComponent> ObservedTree;
+    FString ObservedTreeKey;
     FBox ObservedTreeBounds = FBox(ForceInit);
     FVector2D TreeCenter = FVector2D::ZeroVector;
     FVector2D TreeStaging = FVector2D::ZeroVector;
