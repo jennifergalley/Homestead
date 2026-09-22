@@ -38,6 +38,8 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     uint16 RegionalValleyMin = MAX_uint16, RegionalValleyMax = 0;
     int32 RegionalReadyChunks = 0, RegionalPartialChunks = 0, RegionalIncompleteChunks = 0;
     int32 RegionalReachReferences = 0, RegionalLakeReferences = 0;
+    int32 RegionalWaterComponents = 0;
+    bool RegionalWaterPoliciesValid = true;
     bool RegionalDescriptorsConsistent = true;
     TMap<FString, FString> RegionalReachSignatures;
     TMap<FString, FString> RegionalLakeSignatures;
@@ -572,6 +574,19 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetBoolField(TEXT("ready"), Ready);
         OuterBatches.Add(MakeShared<FJsonValueObject>(Row));
     }
+    for (const auto& Entry : Landscape->RegionalWaterMeshes)
+    {
+        auto* Water = Entry.Value.Get();
+        const auto* Section = Water ? Water->GetProcMeshSection(0) : nullptr;
+        RegionalWaterPoliciesValid &= Water && Water->IsRegistered()
+            && Water->ComponentHasTag(TEXT("GeneratedRegionalWater"))
+            && !Water->IsQueryCollisionEnabled() && !Water->GetGenerateOverlapEvents()
+            && !Water->CanEverAffectNavigation() && !Water->CastShadow
+            && Section && Section->ProcVertexBuffer.Num() >= 4
+            && Section->ProcIndexBuffer.Num() >= 6
+            && MaterialReady(Water->GetMaterial(0));
+        ++RegionalWaterComponents;
+    }
     Valid &= Colliding == 9 && PositionError < 0.15 && NormalError < 0.0001
         && ActiveTrees > 0 && ActiveTrees == Landscape->ActiveTreeInstances.Num()
         && ActiveTrees == ActiveBatchInstances && ActiveTrees == ActiveCollisions
@@ -591,7 +606,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         && Landscape->RegionalDescriptors.LoadedRegionCount() <= 4
         && Landscape->RegionalDescriptors.CachedRegionCount()
             <= Landscape->RegionalDescriptors.LoadedRegionCount()
-        && RegionalDescriptorsConsistent;
+        && RegionalDescriptorsConsistent
+        && RegionalWaterComponents == Landscape->RenderedRegionalReachReferences
+        && Landscape->RenderedRegionalReachReferences <= 2
+        && Landscape->UnrenderedRegionalReachReferences >= 0
+        && Landscape->UnrenderedRegionalLakeReferences >= 0
+        && RegionalWaterPoliciesValid;
     auto Evidence = MakeShared<FJsonObject>();
     Evidence->SetStringField(TEXT("seed"), FString::Printf(TEXT("%llu"), static_cast<unsigned long long>(State.world.seed)));
     Evidence->SetNumberField(TEXT("generationVersion"), State.world.generationVersion);
@@ -629,6 +649,15 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     Evidence->SetNumberField(TEXT("regionalLakeReferenceCount"), RegionalLakeReferences);
     Evidence->SetNumberField(TEXT("regionalDistinctLakeCount"), RegionalLakeSignatures.Num());
     Evidence->SetBoolField(TEXT("regionalDescriptorsConsistent"), RegionalDescriptorsConsistent);
+    Evidence->SetStringField(TEXT("renderedRegionalReachKey"), Landscape->RenderedRegionalReachKey);
+    Evidence->SetNumberField(TEXT("regionalWaterComponents"), RegionalWaterComponents);
+    Evidence->SetNumberField(TEXT("renderedRegionalReachReferences"),
+        Landscape->RenderedRegionalReachReferences);
+    Evidence->SetNumberField(TEXT("unrenderedRegionalReachReferences"),
+        Landscape->UnrenderedRegionalReachReferences);
+    Evidence->SetNumberField(TEXT("unrenderedRegionalLakeReferences"),
+        Landscape->UnrenderedRegionalLakeReferences);
+    Evidence->SetBoolField(TEXT("regionalWaterPoliciesValid"), RegionalWaterPoliciesValid);
     Evidence->SetBoolField(TEXT("regionalWaterRendered"), false);
     Evidence->SetNumberField(TEXT("activeTrees"), ActiveTrees); Evidence->SetNumberField(TEXT("outerTrees"), OuterTrees);
     Evidence->SetNumberField(TEXT("activeBatchComponents"), Landscape->ActiveTreeBatches.Num());

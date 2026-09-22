@@ -7,7 +7,7 @@ namespace Homestead::Generation
 {
 namespace
 {
-std::int64_t FloorDivide(std::int64_t value, std::int64_t divisor)
+std::int64_t RegionalCacheFloorDivide(std::int64_t value, std::int64_t divisor)
 {
     return value / divisor - (value % divisor < 0 ? 1 : 0);
 }
@@ -143,11 +143,11 @@ RegionalChunkDescriptorStatus LoadedRegionalDescriptorCache::DescribeChunkWater(
     const std::int64_t expandedHighY = highY + DrainageSpacingCm - 1;
 
     const RegionCoord requiredLow{
-        static_cast<std::int32_t>(FloorDivide(expandedLowX, RegionSizeCm)),
-        static_cast<std::int32_t>(FloorDivide(expandedLowY, RegionSizeCm))};
+        static_cast<std::int32_t>(RegionalCacheFloorDivide(expandedLowX, RegionSizeCm)),
+        static_cast<std::int32_t>(RegionalCacheFloorDivide(expandedLowY, RegionSizeCm))};
     const RegionCoord requiredHigh{
-        static_cast<std::int32_t>(FloorDivide(expandedHighX, RegionSizeCm)),
-        static_cast<std::int32_t>(FloorDivide(expandedHighY, RegionSizeCm))};
+        static_cast<std::int32_t>(RegionalCacheFloorDivide(expandedHighX, RegionSizeCm)),
+        static_cast<std::int32_t>(RegionalCacheFloorDivide(expandedHighY, RegionSizeCm))};
     std::vector<RegionCoord> requiredRegions;
     bool complete = true;
     for (std::int64_t regionY = requiredLow.y; regionY <= requiredHigh.y; ++regionY)

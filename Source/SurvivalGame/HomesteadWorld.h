@@ -128,6 +128,8 @@ private:
     UPROPERTY()
     TMap<FIntPoint, FHomesteadTerrainChunk> TerrainChunks;
     UPROPERTY()
+    TMap<FIntPoint, TObjectPtr<UProceduralMeshComponent>> RegionalWaterMeshes;
+    UPROPERTY()
     TMap<FString, TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> OuterTreeBatches;
     TMap<FString, FHomesteadOuterTreeInstance> OuterTreeInstances;
     UPROPERTY()
@@ -160,6 +162,11 @@ private:
     FString ResourceLayoutSignature;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
+    FString RegionalWaterSignature;
+    FString RenderedRegionalReachKey;
+    int32 RenderedRegionalReachReferences = 0;
+    int32 UnrenderedRegionalReachReferences = 0;
+    int32 UnrenderedRegionalLakeReferences = 0;
     double DecorationBuildMilliseconds = 0;
     Homestead::Generation::WorldDescriptor Descriptor;
     Homestead::Generation::LoadedRegionalDescriptorCache RegionalDescriptors;
@@ -183,6 +190,8 @@ private:
     bool BuildTerrain(const Homestead::State& State);
     bool RefreshRegionalDescriptors(Homestead::Generation::WorldDescriptor World,
         const std::vector<Homestead::RegionalGeneration::RegionCoord>& Regions);
+    bool RebuildRegionalWater();
+    void ClearRegionalWater();
     void QueueRegionalDescriptorBuild();
     UProceduralMeshComponent* BuildTerrainChunk(const Homestead::Generation::ChunkBaseline& Baseline,
         Homestead::Generation::WorldDescriptor World, bool bCollision);
