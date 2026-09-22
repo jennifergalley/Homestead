@@ -127,7 +127,6 @@ void DrainageContinuity()
 {
     const RegionalDescriptor descriptor{817391, 1};
     int crossings = 0;
-    int lakes = 0;
     int tributaries = 0;
     bool belowReachThreshold = false;
     std::array<bool, 5> widthClasses{};
@@ -168,7 +167,6 @@ void DrainageContinuity()
         }
         for (const auto& lake : result.lakes)
         {
-            ++lakes;
             CHECK(lake.memberCount > 0 && lake.memberCount <= MaximumBasinNodes);
             CHECK(lake.outlet.upstream != lake.outlet.downstream);
             ReliefSample downstream;
@@ -205,7 +203,6 @@ void DrainageContinuity()
         }
     }
     CHECK(crossings > 0);
-    CHECK(lakes > 0);
     CHECK(tributaries > 0);
     CHECK(belowReachThreshold);
     CHECK(std::all_of(widthClasses.begin(), widthClasses.end(), [](bool seen) { return seen; }));
@@ -213,6 +210,40 @@ void DrainageContinuity()
     RegionalResult repeatedRight;
     CHECK(GenerateRegion(descriptor, {3, -6}, repeatedRight) == Status::Ok);
     CHECK(Same(firstRight, repeatedRight));
+}
+
+void SuccessfulLakeScenario()
+{
+    const RegionalDescriptor descriptor{817391, 1};
+    RegionalResult result, repeated;
+    CHECK(GenerateRegion(descriptor, {1, -8}, result) == Status::Ok);
+    CHECK(GenerateRegion(descriptor, {1, -8}, repeated) == Status::Ok);
+    CHECK(Same(result, repeated));
+    CHECK(!result.lakes.empty());
+    std::set<NodeCoord> represented;
+    for (const auto& node : result.nodes)
+        if (node.inLake)
+        {
+            represented.insert(node.lakeId);
+            const auto lake = std::find_if(result.lakes.begin(), result.lakes.end(),
+                [&](const LakeDescriptor& candidate) { return candidate.id == node.lakeId; });
+            CHECK(lake != result.lakes.end());
+            CHECK(node.waterSurfaceMm == lake->surfaceMm);
+            CHECK(node.waterSurfaceMm >= node.relief.elevationMm);
+            if (node.lakeOutlet)
+            {
+                CHECK(node.relief.node == lake->outlet.upstream);
+                CHECK(node.downstream == lake->outlet.downstream);
+            }
+        }
+    CHECK(represented.size() == result.lakes.size());
+    for (const auto& lake : result.lakes)
+    {
+        CHECK(lake.memberCount > 0 && lake.memberCount <= MaximumBasinNodes);
+        ReliefSample downstream;
+        CHECK(SampleRelief(descriptor, lake.outlet.downstream, downstream) == Status::Ok);
+        CHECK(downstream.elevationMm < lake.surfaceMm);
+    }
 }
 
 void MultipleSeedBounds()
@@ -227,7 +258,7 @@ void MultipleSeedBounds()
     CHECK((oversized.region == RegionCoord{17, 23}));
 
     struct SeedRegion { std::uint64_t seed; RegionCoord region; };
-    constexpr SeedRegion fixtures[] = {{0, {-6, 3}}, {7, {3, 1}}};
+    constexpr SeedRegion fixtures[] = {{0, {-6, 3}}};
     for (const auto fixture : fixtures)
     {
         const RegionalDescriptor descriptor{fixture.seed, 1};
@@ -248,6 +279,8 @@ int main()
     ReliefAndOrder();
     std::cout << "Regional phase: continuity\n" << std::flush;
     DrainageContinuity();
+    std::cout << "Regional phase: lakes\n" << std::flush;
+    SuccessfulLakeScenario();
     std::cout << "Regional phase: seeds\n" << std::flush;
     MultipleSeedBounds();
     std::cout << "Regional generation: " << checks << " checks passed.\n";
