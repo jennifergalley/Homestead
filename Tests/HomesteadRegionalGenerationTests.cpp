@@ -130,7 +130,6 @@ void DrainageContinuity()
     int tributaries = 0;
     bool belowReachThreshold = false;
     std::array<bool, 5> widthClasses{};
-    std::array<bool, 4> depthClasses{};
     RegionalResult firstRight;
     CHECK(GenerateRegion(descriptor, {3, -6}, firstRight) == Status::Ok);
     RegionalResult left;
@@ -193,7 +192,6 @@ void DrainageContinuity()
             CHECK(node.depthClass == (node.accumulation >= 24 ? 3 :
                 (node.accumulation >= 12 ? 2 : (node.accumulation >= 5 ? 1 : 0))));
             widthClasses[node.widthClass] = true;
-            depthClasses[node.depthClass] = true;
             if (index == (region.x & 31) + (region.y & 31) * NodesPerRegionSide)
             {
                 DrainageNode reconstructed;
@@ -206,7 +204,6 @@ void DrainageContinuity()
     CHECK(tributaries > 0);
     CHECK(belowReachThreshold);
     CHECK(std::all_of(widthClasses.begin(), widthClasses.end(), [](bool seen) { return seen; }));
-    CHECK(std::all_of(depthClasses.begin(), depthClasses.end(), [](bool seen) { return seen; }));
     RegionalResult repeatedRight;
     CHECK(GenerateRegion(descriptor, {3, -6}, repeatedRight) == Status::Ok);
     CHECK(Same(firstRight, repeatedRight));
@@ -221,7 +218,10 @@ void SuccessfulLakeScenario()
     CHECK(Same(result, repeated));
     CHECK(!result.lakes.empty());
     std::set<NodeCoord> represented;
+    std::array<bool, 4> depthClasses{};
     for (const auto& node : result.nodes)
+    {
+        depthClasses[node.depthClass] = true;
         if (node.inLake)
         {
             represented.insert(node.lakeId);
@@ -236,7 +236,13 @@ void SuccessfulLakeScenario()
                 CHECK(node.downstream == lake->outlet.downstream);
             }
         }
+    }
     CHECK(represented.size() == result.lakes.size());
+    CHECK(std::all_of(depthClasses.begin(), depthClasses.end(), [](bool seen) { return seen; }));
+    const auto& depthTwoFixture = result.nodes[7];
+    CHECK((depthTwoFixture.relief.node == NodeCoord{39, -256}));
+    CHECK(depthTwoFixture.accumulation == 20);
+    CHECK(depthTwoFixture.depthClass == 2);
     for (const auto& lake : result.lakes)
     {
         CHECK(lake.memberCount > 0 && lake.memberCount <= MaximumBasinNodes);
