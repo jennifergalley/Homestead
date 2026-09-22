@@ -1,6 +1,7 @@
 #include "HomesteadWorld.h"
 
 #include "Async/Async.h"
+#include "Async/ParallelFor.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
@@ -632,15 +633,15 @@ void AHomesteadWorld::QueueRegionalDescriptorBuild()
             Build.World = World;
             const Homestead::RegionalGeneration::RegionalDescriptor RegionalWorld{
                 World.seed, Homestead::RegionalGeneration::RegionalGenerationVersion};
-            Build.Entries.reserve(Missing.size());
-            for (const auto Region : Missing)
+            Build.Entries.resize(Missing.size());
+            ParallelFor(static_cast<int32>(Missing.size()), [&](int32 Index)
             {
-                FHomesteadRegionalDescriptorBuildEntry Entry;
+                auto& Entry = Build.Entries[Index];
+                const auto Region = Missing[Index];
                 Entry.Region = Region;
                 Entry.ResultStatus = Homestead::RegionalGeneration::GenerateRegion(
                     RegionalWorld, Region, Entry.Result);
-                Build.Entries.push_back(std::move(Entry));
-            }
+            });
             return Build;
         }));
 }

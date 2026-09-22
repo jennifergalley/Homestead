@@ -42,6 +42,8 @@ struct FWoodlandFixture
     bool CrossedOldBoundary = false, CrossedChunkSeam = false, ContinuousGround = true;
     size_t EditCount = 0;
     FString WorldId, SimulationText, Fingerprint, RegionalReachKey;
+    std::string PreWaterCaptureSimulation;
+    double PreWaterCaptureHour = 0.0;
     FString ActiveBatchSnapshot;
     int32 ActiveBatchComponents = 0, ActiveBatchInstances = 0, ActiveCollisionCapsules = 0;
     FString OuterBatchSnapshot;
@@ -592,7 +594,42 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 && !Controller->Landscape->RegionalWaterMeshes.IsEmpty()
                 && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0;
         }, 1.0f);
+    Add(TEXT("CONTROLLED set neutral daylight for regional-water visual evidence only"),
+        [this, Fixture]()
+        {
+            Fixture->PreWaterCaptureSimulation = Controller->Simulation().Serialize();
+            Fixture->PreWaterCaptureHour = Controller->State().hour;
+            auto& State = const_cast<Homestead::State&>(Controller->Simulation().GetState());
+            State.hour = 10.0;
+            if (!Controller->Landscape)
+                Finish(false, TEXT("Neutral regional-water visual refresh failed."));
+            else
+                Controller->Landscape->UpdateLighting(Controller->State());
+            Results.Add(TEXT("CONTROLLED visual-only hour change to10.0; exact simulation restored after capture; no natural-time claim."));
+        },
+        [this, Fixture]()
+        {
+            return !Fixture->PreWaterCaptureSimulation.empty();
+        }, 30.0f);
     Capture(TEXT("generated-regional-water"));
+    Add(TEXT("CONTROLLED restore exact pre-capture simulation after neutral daylight evidence"),
+        [this, Fixture]()
+        {
+            const auto Result = Controller->Sim.Deserialize(Fixture->PreWaterCaptureSimulation);
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+            else if (!Controller->Landscape)
+                Finish(false, TEXT("Regional-water post-capture restore refresh failed."));
+            else
+                Controller->Landscape->UpdateLighting(Controller->State());
+        },
+        [this, Fixture]()
+        {
+            return !Fixture->PreWaterCaptureSimulation.empty()
+                && FMath::Abs(Controller->State().hour - Fixture->PreWaterCaptureHour) < 0.2
+                && Controller->State().resourceEdits.empty()
+                && Controller->State().structures.empty() && Controller->State().plots.empty()
+                && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0;
+        }, 30.0f);
     Add(TEXT("CONTROLLED initial supply: one hatchet only; no world outcomes fabricated"),
         [this]()
         {
