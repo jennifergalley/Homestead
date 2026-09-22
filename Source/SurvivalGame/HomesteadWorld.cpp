@@ -702,6 +702,183 @@ void AHomesteadWorld::ClearVisual(FHomesteadWorldVisual& Visual)
     Visual.Signature.Reset();
 }
 
+bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,
+    FHomesteadOuterTreeInstance& Instance)
+{
+    Homestead::Generation::GeneratedEntity Entity;
+    if (Node.kind != Homestead::ResourceKind::ForestTree
+        || Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
+    {
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree key cannot resolve; no visual substitute."));
+        return false;
+    }
+    FString RequestedPath;
+    switch (Entity.paletteRole)
+    {
+    case Homestead::Generation::TreePaletteRole::BroadleafMature:
+        RequestedPath = TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland");
+        break;
+    case Homestead::Generation::TreePaletteRole::ConiferMature:
+        RequestedPath = TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir");
+        break;
+    case Homestead::Generation::TreePaletteRole::WoodlandAccent:
+        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
+        break;
+    default:
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Generated mature tree has illegal palette role %d."),
+            static_cast<int32>(Entity.paletteRole));
+        return false;
+    }
+    Mesh = LoadObject<UStaticMesh>(nullptr, *RequestedPath);
+    const int32 ExpectedSlots = Entity.paletteRole
+        == Homestead::Generation::TreePaletteRole::ConiferMature ? 4 : 3;
+    if (!Mesh || !Mesh->GetBodySetup() || Mesh->GetBodySetup()->AggGeom.SphylElems.Num() != 1
+        || Mesh->GetStaticMaterials().Num() != ExpectedSlots
+        || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 3)
+    {
+        UE_LOG(LogHomesteadWorld, Error,
+            TEXT("Generated tree role=%d variant=%u has missing native material/LOD/collision at %s; no substitute."),
+            static_cast<int32>(Entity.paletteRole), Entity.variantIndex, *RequestedPath);
+        return false;
+    }
+    for (int32 Slot = 0; Slot < ExpectedSlots; ++Slot)
+        if (!Mesh->GetMaterial(Slot))
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree material slot %d is missing at %s."),
+                Slot, *RequestedPath);
+            return false;
+        }
+    const FRotator Rotation(0, Entity.yawDegrees, 0);
+    const float Scale = Entity.scalePermille / 1000.0f;
+    const auto& Capsule = Mesh->GetBodySetup()->AggGeom.SphylElems[0];
+    const FVector Anchor(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
+    const FVector Base = AtGround(Node.position.x, Node.position.y);
+    Instance.MeshPath = Mesh->GetPathName();
+    Instance.Transform = FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Scale), FVector(Scale));
+    Instance.PaletteRole = static_cast<int32>(Entity.paletteRole);
+    Instance.VariantIndex = Entity.variantIndex;
+    return true;
+}
+
+void AHomesteadWorld::ClearOuterTreeBatches()
+{
+    for (auto& Entry : OuterTreeBatches)
+        if (IsValid(Entry.Value.Get()))
+            Entry.Value->DestroyComponent();
+    OuterTreeBatches.Reset();
+    OuterTreeInstances.Reset();
+}
+
+bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simulation)
+{
+    struct FBuildEntry
+    {
+        FString Key;
+        UStaticMesh* Mesh = nullptr;
+        FHomesteadOuterTreeInstance Instance;
+    };
+
+    TArray<FBuildEntry> Desired;
+    TSet<FString> DesiredKeys;
+    for (const auto& Chunk : TerrainChunks)
+    {
+        if (Chunk.Value.bCollision) continue;
+        Homestead::Generation::ChunkBaseline Baseline;
+        const auto Status = Homestead::Generation::GenerateChunk(
+            Simulation.GetState().world, {Chunk.Key.X, Chunk.Key.Y}, Baseline);
+        if (Status != Homestead::Generation::Status::Ok)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree generation failed: %s"),
+                UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
+            return false;
+        }
+        for (const auto& Entity : Baseline.entities)
+        {
+            if (Entity.kind != Homestead::Generation::EntityKind::ForestTree) continue;
+            Homestead::ResourceNode Node;
+            const auto Result = Simulation.ResolveGeneratedResource(Entity.key, Node);
+            if (Result.code == Homestead::ResultCode::Unavailable) continue;
+            if (!Result)
+            {
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree resolution failed: %s"),
+                    UTF8_TO_TCHAR(Result.message.c_str()));
+                return false;
+            }
+            if (Node.cleared) continue;
+            FBuildEntry Entry;
+            Entry.Key = FString::Printf(TEXT("%d,%d,%u"),
+                Node.key.chunk.x, Node.key.chunk.y, Node.key.localId);
+            if (DesiredKeys.Contains(Entry.Key))
+            {
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Duplicate generated outer tree key %s."), *Entry.Key);
+                return false;
+            }
+            if (!ResolveGeneratedTreeVisual(Node, Entry.Mesh, Entry.Instance))
+                return false;
+            DesiredKeys.Add(Entry.Key);
+            Desired.Add(MoveTemp(Entry));
+        }
+    }
+    Desired.Sort([](const FBuildEntry& A, const FBuildEntry& B)
+    {
+        const int32 PathOrder = A.Instance.MeshPath.Compare(B.Instance.MeshPath, ESearchCase::CaseSensitive);
+        return PathOrder == 0 ? A.Key < B.Key : PathOrder < 0;
+    });
+
+    TMap<FString, UHierarchicalInstancedStaticMeshComponent*> PreparedBatches;
+    TMap<FString, FHomesteadOuterTreeInstance> PreparedInstances;
+    auto DiscardPrepared = [&PreparedBatches]()
+    {
+        for (auto& Entry : PreparedBatches)
+            if (IsValid(Entry.Value))
+                Entry.Value->DestroyComponent();
+    };
+    for (const FBuildEntry& Entry : Desired)
+    {
+        UHierarchicalInstancedStaticMeshComponent* Batch = nullptr;
+        if (auto** Existing = PreparedBatches.Find(Entry.Instance.MeshPath))
+            Batch = *Existing;
+        else
+        {
+            Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+            if (!Batch)
+            {
+                DiscardPrepared();
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Could not allocate outer tree batch for %s."),
+                    *Entry.Instance.MeshPath);
+                return false;
+            }
+            Batch->SetupAttachment(GetRootComponent());
+            Batch->SetMobility(EComponentMobility::Static);
+            Batch->SetStaticMesh(Entry.Mesh);
+            Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+            Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Batch->SetCollisionResponseToAllChannels(ECR_Ignore);
+            Batch->SetGenerateOverlapEvents(false);
+            Batch->SetCanEverAffectNavigation(false);
+            Batch->ComponentTags.Add(TEXT("GeneratedOuterTreeBatch"));
+            Batch->bAutoRebuildTreeOnInstanceChanges = false;
+            PreparedBatches.Add(Entry.Instance.MeshPath, Batch);
+        }
+        Batch->AddInstance(Entry.Instance.Transform);
+        PreparedInstances.Add(Entry.Key, Entry.Instance);
+    }
+
+    ClearOuterTreeBatches();
+    for (auto& Entry : PreparedBatches)
+    {
+        Entry.Value->bAutoRebuildTreeOnInstanceChanges = true;
+        Entry.Value->RegisterComponent();
+        Entry.Value->BuildTreeIfOutdated(false, true);
+        OuterTreeBatches.Add(Entry.Key, Entry.Value);
+    }
+    OuterTreeInstances = MoveTemp(PreparedInstances);
+    UE_LOG(LogHomesteadWorld, Display,
+        TEXT("Generated outer mature trees rebuilt: batches=%d instances=%d; collision/navigation/overlap disabled."),
+        OuterTreeBatches.Num(), OuterTreeInstances.Num());
+    return true;
+}
+
 void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly)
 {
     if (Node.cleared)
@@ -771,70 +948,25 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     case Homestead::ResourceKind::ForestTree:
     {
         if (bProduceOnly) break;
-        Homestead::Generation::GeneratedEntity Entity;
-        if (Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
+        UStaticMesh* Mesh = nullptr;
+        FHomesteadOuterTreeInstance Instance;
+        if (!ResolveGeneratedTreeVisual(Node, Mesh, Instance))
         {
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree key cannot resolve; no visual substitute."));
             bVisualBuildFailed = true;
             break;
         }
-        FString Path;
-        switch (Entity.paletteRole)
-        {
-        case Homestead::Generation::TreePaletteRole::BroadleafMature:
-            Path = TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland");
-            break;
-        case Homestead::Generation::TreePaletteRole::ConiferMature:
-            Path = TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir");
-            break;
-        case Homestead::Generation::TreePaletteRole::WoodlandAccent:
-            Path = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
-            break;
-        default:
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated mature tree has illegal palette role %d."),
-                static_cast<int32>(Entity.paletteRole));
-            bVisualBuildFailed = true;
-            break;
-        }
-        if (bVisualBuildFailed) break;
-        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
-        const int32 ExpectedSlots = Entity.paletteRole
-            == Homestead::Generation::TreePaletteRole::ConiferMature ? 4 : 3;
-        if (!Mesh || !Mesh->GetBodySetup() || Mesh->GetBodySetup()->AggGeom.SphylElems.Num() != 1
-            || Mesh->GetStaticMaterials().Num() != ExpectedSlots
-            || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 3)
-        {
-            UE_LOG(LogHomesteadWorld, Error,
-                TEXT("Generated tree role=%d variant=%u has missing native material/LOD/collision at %s; no substitute."),
-                static_cast<int32>(Entity.paletteRole), Entity.variantIndex, *Path);
-            bVisualBuildFailed = true;
-            break;
-        }
-        for (int32 Slot = 0; Slot < ExpectedSlots; ++Slot)
-            if (!Mesh->GetMaterial(Slot))
-            {
-                UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree material slot %d is missing at %s."),
-                    Slot, *Path);
-                bVisualBuildFailed = true;
-                break;
-            }
-        if (bVisualBuildFailed) break;
-        const FRotator Rotation(0, Entity.yawDegrees, 0);
-        const float Scale = Entity.scalePermille / 1000.0f;
-        const auto& Capsule = Mesh->GetBodySetup()->AggGeom.SphylElems[0];
-        const FVector Anchor(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
         auto* Component = NewObject<UStaticMeshComponent>(this);
         Component->SetupAttachment(GetRootComponent());
         Component->SetMobility(EComponentMobility::Static);
         Component->SetStaticMesh(Mesh);
-        Component->SetRelativeTransform(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
+        Component->SetRelativeTransform(Instance.Transform);
         Component->SetCollisionProfileName(Node.id > 0 ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
         Component->SetGenerateOverlapEvents(false);
         Component->SetCanEverAffectNavigation(false);
         Component->ComponentTags.Add(TEXT("GeneratedForestTree"));
         Component->ComponentTags.Add(*FString::Printf(
-            TEXT("TreeRole_%d"), static_cast<int32>(Entity.paletteRole)));
-        Component->ComponentTags.Add(*FString::Printf(TEXT("TreeVariant_%u"), Entity.variantIndex));
+            TEXT("TreeRole_%d"), Instance.PaletteRole));
+        Component->ComponentTags.Add(*FString::Printf(TEXT("TreeVariant_%u"), Instance.VariantIndex));
         Component->ComponentTags.Add(*FString::Printf(TEXT("Resource_%d"), Node.id));
         Component->RegisterComponent();
         Visual.Components.Add(Component);
@@ -1190,8 +1322,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         for (auto& Entry : ResourceProduceVisuals) ClearVisual(Entry.Value);
         for (auto& Entry : StructureVisuals) ClearVisual(Entry.Value);
         for (auto& Entry : PlotVisuals) ClearVisual(Entry.Value);
-        for (auto& Entry : OuterTreeVisuals) ClearVisual(Entry.Value);
-        OuterTreeVisuals.Reset();
+        ClearOuterTreeBatches();
         ClearVisual(Preview);
     }
     FString Layout = FString::Printf(TEXT("%llu:%u:%d,%d;"), static_cast<unsigned long long>(State.world.seed),
@@ -1208,50 +1339,15 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     {
         Layout += FString::Printf(TEXT("P:%d:%d;"), Plot.cellX, Plot.cellY);
     }
+    for (const auto& Edit : State.resourceEdits)
+    {
+        Layout += FString::Printf(TEXT("E:%d:%d:%u:%d:%.3f;"), Edit.key.chunk.x,
+            Edit.key.chunk.y, Edit.key.localId, Edit.cleared, Edit.readyAtHour);
+    }
     if (ResourceLayoutSignature != Layout)
     {
         if (!BuildDecorations(Simulation)) return false;
-        TSet<FString> Present;
-        for (const auto& Chunk : TerrainChunks)
-        {
-            if (Chunk.Value.bCollision) continue;
-            Homestead::Generation::ChunkBaseline Baseline;
-            const auto Status = Homestead::Generation::GenerateChunk(State.world, {Chunk.Key.X, Chunk.Key.Y}, Baseline);
-            if (Status != Homestead::Generation::Status::Ok)
-            {
-                UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree generation failed: %s"), UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
-                return false;
-            }
-            for (const auto& Entity : Baseline.entities)
-            {
-                if (Entity.kind != Homestead::Generation::EntityKind::ForestTree) continue;
-                Homestead::ResourceNode Node;
-                const auto Result = Simulation.ResolveGeneratedResource(Entity.key, Node);
-                if (Result.code == Homestead::ResultCode::Unavailable) continue;
-                if (!Result)
-                {
-                    UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree resolution failed: %s"), UTF8_TO_TCHAR(Result.message.c_str()));
-                    return false;
-                }
-                if (Node.cleared) continue;
-                const FString Key = FString::Printf(TEXT("%d,%d,%u"), Node.key.chunk.x, Node.key.chunk.y, Node.key.localId);
-                Present.Add(Key);
-                if (!OuterTreeVisuals.Contains(Key))
-                    BuildResource(OuterTreeVisuals.Add(Key), Node, false);
-                if (bVisualBuildFailed)
-                {
-                    ClearVisual(OuterTreeVisuals.FindChecked(Key));
-                    OuterTreeVisuals.Remove(Key);
-                    return false;
-                }
-            }
-        }
-        for (auto It = OuterTreeVisuals.CreateIterator(); It; ++It)
-            if (!Present.Contains(It.Key()))
-            {
-                ClearVisual(It.Value());
-                It.RemoveCurrent();
-            }
+        if (!RebuildOuterTreeBatches(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
     }
 

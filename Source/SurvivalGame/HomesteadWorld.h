@@ -44,6 +44,14 @@ struct FHomesteadTerrainChunk
     bool bCollision = false;
 };
 
+struct FHomesteadOuterTreeInstance
+{
+    FString MeshPath;
+    FTransform Transform;
+    int32 PaletteRole = 0;
+    uint32 VariantIndex = 0;
+};
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadWorld : public AActor
 {
@@ -87,7 +95,8 @@ private:
     UPROPERTY()
     TMap<FIntPoint, FHomesteadTerrainChunk> TerrainChunks;
     UPROPERTY()
-    TMap<FString, FHomesteadWorldVisual> OuterTreeVisuals;
+    TMap<FString, TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> OuterTreeBatches;
+    TMap<FString, FHomesteadOuterTreeInstance> OuterTreeInstances;
     UPROPERTY()
     TObjectPtr<UDirectionalLightComponent> Sun;
     UPROPERTY()
@@ -132,6 +141,10 @@ private:
     void BuildLighting();
     bool BuildDecorations(const Homestead::Simulation& Simulation);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
+    bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,
+        FHomesteadOuterTreeInstance& Instance);
+    bool RebuildOuterTreeBatches(const Homestead::Simulation& Simulation);
+    void ClearOuterTreeBatches();
     void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void UpdateLighting(const Homestead::State& State);
