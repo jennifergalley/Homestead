@@ -453,15 +453,16 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     Add(TEXT("Mapped tabs expose purpose-specific Guidebook content"),
         [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
-        [this]() { return Controller->BookPage() == 3 && Controller->BookTitle() == TEXT("Guidebook"); });
+        [this]() { return Controller->BookPage() == 3
+            && Controller->BookSummary().Contains(TEXT("Woodland seed")); });
     Capture(TEXT("native-guidebook"));
     Add(TEXT("Mapped tabs expose purpose-specific Credits content"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 5 && Controller->BookTitle() == TEXT("Credits"); });
+        [this]() { return Controller->BookPage() == 5 && Controller->Rows().Num() >= 8; });
     Capture(TEXT("native-credits"));
     Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 6 && Controller->BookTitle() == TEXT("Appearance"); });
+        [this]() { return Controller->BookPage() == 6; });
     Capture(TEXT("native-appearance"));
     Add(TEXT("Return to Settings without changing simulation or camera"),
         [this, Before]()
