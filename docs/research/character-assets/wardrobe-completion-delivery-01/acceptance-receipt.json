@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "candidate": "wardrobe-complete-10",
+  "profile": "wardrobe-complete-v12",
+  "checkpoint": "3f0f87399c8b7f22a512a5c0897928414ae436b4",
+  "latestFixtureCheckpoint": "814a43cbfb2bcc827d3076ef8f32b59d5170d706",
+  "executableSha256": "F2BC5A6CB929B58C85D187A54FF1CC4020DEEA8B821861F4E93AD61618C581DA",
+  "proofIndexSha256": "FD866623012075C045022CC7735A8C10035DDE619245D6562A7F0802C44576EC",
+  "openSpecProgress": "44/44",
+  "archiveReady": true,
+  "rollback": "wardrobe-presentation-08 / wardrobe-presentation-v11"
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-presentation-08",
-  "profile": "wardrobe-presentation-v11",
-  "executableSha256": "58344BE924DEAE9DFB622830F69FCC0DD344625415E9B73DBB834EE81E2BAC75"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-complete-10",
+  "profile": "wardrobe-complete-v12",
+  "executableSha256": "F2BC5A6CB929B58C85D187A54FF1CC4020DEEA8B821861F4E93AD61618C581DA"
 }

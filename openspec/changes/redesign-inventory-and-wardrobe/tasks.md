@@ -2,11 +2,12 @@
 
 ## Current state and next visible goal
 
-Final presentation milestone selects `wardrobe-presentation-08` /
-`wardrobe-presentation-v11` at42/44 complete. Tasks5.2 and7.4 remain open:
-broad deliberate mouse switching/general held-stick comfort were not proved,
-and the modern full-loop wardrobe section passes but its later generated-resource
-focus tail still fails at resource1000130.
+Final completion milestone verifies `wardrobe-complete-10` at44/44. The real
+Shipping input fixture proves deliberate mouse/keyboard/controller switching,
+noise immunity and held-stick release. The completion-driven Shipping full loop
+passes stable generated-resource focus, rewards, construction, cooking, gardens,
+save/reload and recovery; the first100-second supervisor-cancelled attempt remains
+preserved and disclosed.
 
 September21 read-only evidence reconciliation had19/44 tasks complete. The delivered
 `wardrobe-ui-02` proof includes actual720p/4K producers, separate-process consumers,
@@ -72,7 +73,7 @@ need current selected-world evidence.
 ## 5. Native shell, input and page integration
 
 - [x] 5.1 Add narrow native UMG/Slate shell and dependencies; verify shared build succeeds and no duplicate Canvas menu drawing.
-- [ ] 5.2 Route accepted menu input once through existing prompt classifier; verify noise/held-stick stability, deliberate switching and test input isolation.
+- [x] 5.2 Route accepted menu input once through existing prompt classifier; verify noise/held-stick stability, deliberate switching and test input isolation.
 - [x] 5.3 Implement labeled icon tabs, regions and four-way grid navigation; verify scroll/partial rows/empty states/focus restoration on controller and keyboard.
 - [x] 5.4 Build real carried/chest grids and hover/focus details, then equipment/preview; verify truthful counts/capacity and no hover mutation.
 - [x] 5.5 Wire Move/Split/Merge/amount/equip/recolor to typed real authority; verify cancel/failure/repeated confirm and no click-through.
@@ -92,7 +93,7 @@ need current selected-world evidence.
 - [x] 7.1 Run permitted portable rules/current-save tests; verify ownership conservation and existing gameplay semantics.
 - [x] 7.2 Run approved focused menu/prompt/feedback/settings/lifecycle tests; verify real semantics rather than obsolete row-index assumptions.
 - [x] 7.3 Run current save/load/reset/quit tests and existing route guards in shared slot; verify truthful results independently of process exit code.
-- [ ] 7.4 Run affected action/full-loop/hotkey cases with actual Lit/LightingOn/ShaderComplexityOff checks; verify unchanged rewards and materials.
+- [x] 7.4 Run affected action/full-loop/hotkey cases with actual Lit/LightingOn/ShaderComplexityOff checks; verify unchanged rewards and materials.
 - [x] 7.5 Review matched baseline/candidate 720p/4K menu states and ordinary character movement; verify legible icons/details/feedback and coverage.
 - [x] 7.6 Batch demonstrated corrections and recheck them; verify scoped defects are resolved without arbitrary iteration/time/cost work-stop caps.
 - [x] 7.7 Measure meaningful menu/gameplay timing and repeated open/close cleanup; verify no material regression and report actual 60 FPS evidence/limits.

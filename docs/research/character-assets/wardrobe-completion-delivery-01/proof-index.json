@@ -1,0 +1,11 @@
+{
+  "status": "passed-archive-ready",
+  "checkpoint": "3f0f87399c8b7f22a512a5c0897928414ae436b4",
+  "latestFixtureCheckpoint": "814a43cbfb2bcc827d3076ef8f32b59d5170d706",
+  "candidate": "wardrobe-complete-10",
+  "executableSha256": "F2BC5A6CB929B58C85D187A54FF1CC4020DEEA8B821861F4E93AD61618C581DA",
+  "shippingInput": "PASS: deliberate controller/keyboard/mouse transitions, noise immunity, exact transition counts, click safety, held-stick repeat/release and isolation; p95 17.51ms/p99 17.79ms.",
+  "shippingFullLoop": "PASS: stable generated keys, authoritative clearing/storage/supply, complete construction/cooking/gardens/water/rest/harvest/save/reload/failure/recovery and Lit guard; p95 17.54ms/p99 18.10ms over11748 samples.",
+  "hotkey": "PASS: write/reload/normal-preview relaunch,38 checks,0 screenshots. Tiny-sample p99604ms is not cadence evidence.",
+  "failedAttempt": "The first short-supervisor Shipping full-loop attempt was cancelled at100s before completion; preserved and not recast as pass."
+}
