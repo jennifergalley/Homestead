@@ -37,13 +37,12 @@ class WoodlandPolishSourceTests(unittest.TestCase):
         self.assertGreaterEqual(resolve.count("GroundHeight("), 2)
         self.assertIn("RootGround - Embed", resolve)
 
-    def test_broadleaf_close_render_keeps_authored_lod0_detail(self):
+    def test_tree_lod_policy_remains_bounded(self):
         active = WORLD[WORLD.index("bool AHomesteadWorld::RebuildActiveTreeBatches"):
                        WORLD.index("void AHomesteadWorld::BuildResource")]
         outer = WORLD[WORLD.index("bool AHomesteadWorld::RebuildOuterTreeBatches"):
                       WORLD.index("void AHomesteadWorld::ClearActiveTreeBatches")]
-        self.assertIn("TreePaletteRole::ConiferMature", active)
-        self.assertIn("? ActiveMatureTreeMinLOD : 2", active)
+        self.assertIn("Batch->MinLOD = ActiveMatureTreeMinLOD", active)
         self.assertIn("Batch->MinLOD = OuterMatureTreeMinLOD", outer)
 
     def test_lighting_preserves_authored_role_colors_at_dawn_and_day(self):

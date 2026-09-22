@@ -481,8 +481,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         const int32 Expected = ExpectedActiveByMesh.FindRef(Entry.Key);
         const int32 Actual = Batch ? Batch->GetInstanceCount() : -1;
         ActiveBatchInstances += FMath::Max(Actual, 0);
-        const int32 ExpectedMinLOD = Entry.Key.Contains(TEXT("SM_MatureFir"))
-            ? AHomesteadWorld::ActiveMatureTreeMinLOD : 2;
+        const int32 ExpectedMinLOD = AHomesteadWorld::ActiveMatureTreeMinLOD;
         bool Ready = Batch && Batch->GetStaticMesh() && Batch->GetStaticMesh()->GetPathName() == Entry.Key
             && Expected > 0 && Actual == Expected && !Batch->IsQueryCollisionEnabled()
             && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation()

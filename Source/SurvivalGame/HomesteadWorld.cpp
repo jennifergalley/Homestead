@@ -1141,13 +1141,13 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
     switch (Entity.paletteRole)
     {
     case Homestead::Generation::TreePaletteRole::BroadleafMature:
-        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
+        RequestedPath = TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland");
         break;
     case Homestead::Generation::TreePaletteRole::ConiferMature:
         RequestedPath = TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir");
         break;
     case Homestead::Generation::TreePaletteRole::WoodlandAccent:
-        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_FirPole.SM_FirPole");
+        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
         break;
     default:
         UE_LOG(LogHomesteadWorld, Error, TEXT("Generated mature tree has illegal palette role %d."),
@@ -1404,9 +1404,7 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
             Batch->SetMobility(EComponentMobility::Static);
             Batch->SetStaticMesh(Entry.Mesh);
             Batch->bOverrideMinLOD = true;
-            Batch->MinLOD = Entry.Instance.Visual.PaletteRole
-                == static_cast<int32>(Homestead::Generation::TreePaletteRole::ConiferMature)
-                ? ActiveMatureTreeMinLOD : 2;
+            Batch->MinLOD = ActiveMatureTreeMinLOD;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Batch->SetCollisionResponseToAllChannels(ECR_Ignore);

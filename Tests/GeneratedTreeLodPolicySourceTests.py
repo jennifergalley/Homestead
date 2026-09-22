@@ -42,8 +42,7 @@ class GeneratedTreeLodPolicySourceTests(unittest.TestCase):
             "void AHomesteadWorld::BuildStructure",
         )
         self.assertIn("Batch->bOverrideMinLOD = true;", active)
-        self.assertIn("TreePaletteRole::ConiferMature", active)
-        self.assertIn("? ActiveMatureTreeMinLOD : 2;", active)
+        self.assertIn("Batch->MinLOD = ActiveMatureTreeMinLOD;", active)
         self.assertIn("Batch->bOverrideMinLOD = true;", outer)
         self.assertIn("Batch->MinLOD = OuterMatureTreeMinLOD;", outer)
         self.assertNotIn("MinLOD", decorations)
@@ -84,7 +83,6 @@ class GeneratedTreeLodPolicySourceTests(unittest.TestCase):
         for contract in (
             "Batch->GetOverrideMinLOD()",
             "Batch->GetMinLOD() == ExpectedMinLOD",
-            'Entry.Key.Contains(TEXT("SM_MatureFir"))',
             "Batch->GetMinLOD() == AHomesteadWorld::OuterMatureTreeMinLOD",
             "Batch->GetForcedLodModel() == 0",
             'TEXT("overrideMinLOD")',

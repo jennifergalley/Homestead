@@ -3378,3 +3378,39 @@ bool RunMatureFirSpike(const FString& Mode,const FString& Output,const FDateTime
     Result->SetBoolField(TEXT("passed"),Passed);Result->SetBoolField(TEXT("cancelledAtPollingBoundary"),Feedback.ReceivedUserCancel());
     return WriteJson(FPaths::Combine(Output,TEXT("mature-fir-result.json")),Result)&&Passed&&!Feedback.ReceivedUserCancel();
 }
+
+bool RunWoodlandMaterialUsage(const FString& Output)
+{
+    const TCHAR* Paths[] = {
+        TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Branches"),
+        TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Leaves"),
+        TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/M_TreeSmall02_Trunk"),
+        TEXT("/Game/Trials/TreePalette_20260921_01/Materials/M_Jacaranda_Branches"),
+        TEXT("/Game/Trials/TreePalette_20260921_01/Materials/M_Jacaranda_Leaves"),
+        TEXT("/Game/Trials/TreePalette_20260921_01/Materials/M_Jacaranda_Trunk"),
+        TEXT("/Game/Trials/TreePalette_20260921_01/Materials/M_FirPole_Branches"),
+        TEXT("/Game/Trials/TreePalette_20260921_01/Materials/M_FirPole_Twigs"),
+        TEXT("/Game/Trials/TreePalette_20260921_01/Materials/M_FirPole_Dead"),
+        TEXT("/Game/Trials/MatureFir_20260922_02/Materials/M_MatureFir_Bark"),
+        TEXT("/Game/Trials/MatureFir_20260922_02/Materials/M_MatureFir_Twig"),
+        TEXT("/Game/Trials/MatureFir_20260922_02/Materials/M_MatureFir_Trunk")
+    };
+    TArray<FString> Saved;
+    for (const TCHAR* Path : Paths)
+    {
+        auto* Material = LoadObject<UMaterial>(nullptr, Path);
+        if (!Material || !Material->SetMaterialUsage(MATUSAGE_InstancedStaticMeshes))
+            return false;
+        Material->PostEditChange();
+        const FString File = FPackageName::LongPackageNameToFilename(
+            Material->GetOutermost()->GetName(), FPackageName::GetAssetPackageExtension());
+        FSavePackageArgs Args;
+        Args.TopLevelFlags = RF_Public | RF_Standalone;
+        Args.Error = GWarn;
+        if (!UPackage::SavePackage(Material->GetOutermost(), Material, *File, Args)) return false;
+        Saved.Add(Material->GetPathName());
+    }
+    FString Json = TEXT("{\"status\":\"passed\",\"materials\":12,\"usage\":\"InstancedStaticMeshes\"}\n");
+    return IFileManager::Get().MakeDirectory(*Output, true)
+        && FFileHelper::SaveStringToFile(Json, *FPaths::Combine(Output, TEXT("woodland-material-usage.json")));
+}

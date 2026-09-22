@@ -10,3 +10,4 @@ bool RunGrassSpike(const FString& Mode, const FString& Output, const FDateTime& 
 bool RunWoodlandSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
 bool RunTreePaletteSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
 bool RunMatureFirSpike(const FString& Mode, const FString& Output, const FDateTime& Deadline, bool bCompletionDriven);
+bool RunWoodlandMaterialUsage(const FString& Output);
