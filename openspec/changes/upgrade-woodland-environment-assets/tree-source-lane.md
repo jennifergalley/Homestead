@@ -164,3 +164,35 @@ objects, preserves exact selected bindings/arrays/transforms, and reparses to
 check identity. It writes only fresh `candidate01\Prepared\*_selected.fbx` inputs
 and provenance. Actual execution/containment and native beauty acceptance remain
 MAIN's responsibilities, not source-lane claims.
+
+## September 21 tree-variety continuation
+
+Jenny explicitly rejected a forest built from one copied tree and requested
+distinct models, sizes, varieties/species. Main retained acquisition/import/
+engine ownership and asked this lane for a bounded source palette only.
+
+The local inventory contains only Tree Small 02 and Fir Sapling (`a`/`c`).
+No other tree FBX/glTF/GLB/Blend exists in the known project asset roots;
+resource shrubs are not reclassified as trees and LODs are not variants.
+The truthful ready palette is therefore three forms, not four-to-six species.
+
+The frozen complete palette and exact limitations live in
+`docs\research\environment-assets\tree-palette-20260921.md`. It retains those
+ready forms and recommends four acquisition-required additions:
+Jacaranda Tree, Island Tree 02, Fir Tree 01 `c`, and Fir Sapling Medium `c`.
+They provide spreading mature broadleaf, gnarled low broadleaf, tall mature
+conifer and intermediate conifer-pole silhouettes. Public descriptors supplied
+native metre bounds, indexed triangle/material facts and layout transforms;
+publisher previews were personally compared.
+
+Roles are stable silhouette/age strata, not botanical species. The result is
+a fictional warm mixed woodland, explicitly not a European ecology: existing
+Tree Small 02 is African *Burkea africana*, Jacaranda is subtropical South
+American, and Island Tree 02 is coastal/unspecified. No species claim is hidden.
+
+No recommended addition exists locally, so none is import-ready. Main must
+approve/acquire and establish actual hashes before any preparation. Catalog
+`lods:true` is not treated as a measured FBX LOD chain. Fir Tree 01's 249 MB
+FBX exceeds the established per-file cap and requires an explicit acquisition
+decision, not a silent policy relaxation. No files were downloaded, prepared
+or imported by this continuation.
