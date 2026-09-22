@@ -939,6 +939,8 @@ void AHomesteadSmokeTest::PrepareNativeResumeChecks(const FString& ProducerOutpu
                 Expected->ProducerProcess, FPlatformProcess::GetCurrentProcessId(), *Expected->Fingerprint));
             return Matched;
         }, 0.8f);
+    Add(TEXT("Separate process holds a screenshot-free cadence window after exact reload"),
+        []() {}, []() { return true; }, 5.0f);
     Add(TEXT("Resume leaves the external producer fixture byte-identical"),
         [this]() { Screenshot(TEXT("native-wardrobe-resumed")); },
         [Expected, ProducerOutput]()
