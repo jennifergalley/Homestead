@@ -81,6 +81,12 @@ struct FHomesteadRegionalDescriptorBuild
     std::vector<FHomesteadRegionalDescriptorBuildEntry> Entries;
 };
 
+struct FHomesteadChunkBaselineBuild
+{
+    Homestead::Generation::WorldDescriptor World;
+    std::vector<Homestead::Generation::ChunkBaseline> Chunks;
+};
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadWorld : public AActor
 {
@@ -174,7 +180,17 @@ private:
     std::map<Homestead::RegionalGeneration::RegionCoord,
         Homestead::RegionalGeneration::Status> RegionalDescriptorFailures;
     TUniquePtr<TFuture<FHomesteadRegionalDescriptorBuild>> RegionalDescriptorBuild;
+    TUniquePtr<TFuture<FHomesteadChunkBaselineBuild>> ChunkBaselineBuild;
+    std::map<Homestead::Generation::ChunkCoord, Homestead::Generation::ChunkBaseline> ChunkBaselineCache;
     uint64 RegionalDescriptorBuildCount = 0;
+    uint64 ChunkBaselineBuildCount = 0;
+    uint64 ChunkBaselineCacheHits = 0;
+    uint64 ChunkBaselineCacheMisses = 0;
+    double LastTerrainPrepareMilliseconds = 0;
+    double LastCoverPrepareMilliseconds = 0;
+    double LastOuterTreePrepareMilliseconds = 0;
+    double LastActiveTreePrepareMilliseconds = 0;
+    double LastRefreshMilliseconds = 0;
     Homestead::Generation::ChunkCoord PreparedChunk;
     bool bTerrainReady = false;
     bool bVisualBuildFailed = false;
@@ -188,6 +204,10 @@ private:
         FLinearColor Color, bool bCollision = false,
         const FRotator& Rotation = FRotator::ZeroRotator, bool bHideMesh = false);
     bool BuildTerrain(const Homestead::State& State);
+    bool GetChunkBaseline(Homestead::Generation::WorldDescriptor World,
+        Homestead::Generation::ChunkCoord Chunk, Homestead::Generation::ChunkBaseline& Baseline);
+    void QueueChunkBaselineBuild(Homestead::Generation::WorldDescriptor World,
+        Homestead::Generation::ChunkCoord Center);
     bool RefreshRegionalDescriptors(Homestead::Generation::WorldDescriptor World,
         const std::vector<Homestead::RegionalGeneration::RegionCoord>& Regions);
     bool RebuildRegionalWater();

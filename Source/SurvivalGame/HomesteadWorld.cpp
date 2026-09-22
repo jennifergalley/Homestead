@@ -44,6 +44,24 @@ bool RegionalReachLess(const Homestead::RegionalGeneration::RiverReach& A,
         : A.key.downstream < B.key.downstream;
 }
 
+Homestead::ResourceKind ResourceKindFor(Homestead::Generation::EntityKind Kind)
+{
+    using Entity = Homestead::Generation::EntityKind;
+    using Resource = Homestead::ResourceKind;
+    switch (Kind)
+    {
+    case Entity::Branches: return Resource::Branches;
+    case Entity::Stones: return Resource::Stones;
+    case Entity::BerryBush: return Resource::BerryBush;
+    case Entity::Roots: return Resource::Roots;
+    case Entity::Flowers: return Resource::Flowers;
+    case Entity::Reeds: return Resource::Reeds;
+    case Entity::Sapling: return Resource::Sapling;
+    case Entity::ForestTree: return Resource::ForestTree;
+    default: return Resource::Count;
+    }
+}
+
 bool ClipRegionalSegment(FVector2D& A, FVector2D& B,
     double LowX, double LowY, double HighX, double HighY)
 {
@@ -125,8 +143,16 @@ AHomesteadWorld::AHomesteadWorld()
 void AHomesteadWorld::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if (!RegionalDescriptorBuild || !RegionalDescriptorBuild->IsReady())
-        return;
+    if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
+    {
+        FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();
+        ChunkBaselineBuild.Reset();
+        if (Descriptor.seed == Completed.World.seed
+            && Descriptor.generationVersion == Completed.World.generationVersion)
+            for (auto& Chunk : Completed.Chunks)
+                ChunkBaselineCache.emplace(Chunk.chunk, MoveTemp(Chunk));
+    }
+    if (!RegionalDescriptorBuild || !RegionalDescriptorBuild->IsReady()) return;
 
     FHomesteadRegionalDescriptorBuild Completed = RegionalDescriptorBuild->Get();
     RegionalDescriptorBuild.Reset();
@@ -188,6 +214,55 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
             UE_LOG(LogHomesteadWorld, Error, TEXT("Regional water rebuild failed."));
     }
     QueueRegionalDescriptorBuild();
+}
+
+bool AHomesteadWorld::GetChunkBaseline(Homestead::Generation::WorldDescriptor World,
+    Homestead::Generation::ChunkCoord Chunk, Homestead::Generation::ChunkBaseline& Baseline)
+{
+    const bool DisableCache = FParse::Param(FCommandLine::Get(), TEXT("HomesteadDisableChunkPreparation"));
+    if (!DisableCache)
+        if (const auto Found = ChunkBaselineCache.find(Chunk); Found != ChunkBaselineCache.end())
+        {
+            Baseline = Found->second;
+            ++ChunkBaselineCacheHits;
+            return true;
+        }
+    ++ChunkBaselineCacheMisses;
+    const auto Status = Homestead::Generation::GenerateChunk(World, Chunk, Baseline);
+    if (Status != Homestead::Generation::Status::Ok) return false;
+    if (!DisableCache) ChunkBaselineCache[Chunk] = Baseline;
+    return true;
+}
+
+void AHomesteadWorld::QueueChunkBaselineBuild(Homestead::Generation::WorldDescriptor World,
+    Homestead::Generation::ChunkCoord Center)
+{
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadDisableChunkPreparation"))
+        || ChunkBaselineBuild) return;
+    std::vector<Homestead::Generation::ChunkCoord> Missing;
+    for (int Y = -4; Y <= 4; ++Y)
+        for (int X = -4; X <= 4; ++X)
+        {
+            const Homestead::Generation::ChunkCoord Chunk{Center.x + X, Center.y + Y};
+            if (ChunkBaselineCache.find(Chunk) == ChunkBaselineCache.end()) Missing.push_back(Chunk);
+        }
+    if (Missing.empty()) return;
+    ChunkBaselineBuildCount += Missing.size();
+    ChunkBaselineBuild = MakeUnique<TFuture<FHomesteadChunkBaselineBuild>>(
+        Async(EAsyncExecution::ThreadPool, [World, Missing = std::move(Missing)]()
+        {
+            FHomesteadChunkBaselineBuild Build;
+            Build.World = World;
+            Build.Chunks.reserve(Missing.size());
+            for (const auto Chunk : Missing)
+            {
+                Homestead::Generation::ChunkBaseline Baseline;
+                if (Homestead::Generation::GenerateChunk(World, Chunk, Baseline)
+                    == Homestead::Generation::Status::Ok)
+                    Build.Chunks.push_back(MoveTemp(Baseline));
+            }
+            return Build;
+        }));
 }
 
 void AHomesteadWorld::ClearRegionalWater()
@@ -501,7 +576,11 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
     const double Started = FPlatformTime::Seconds();
     const bool SameWorld = bTerrainReady && Descriptor.seed == State.world.seed
         && Descriptor.generationVersion == State.world.generationVersion;
-    if (!SameWorld) ClearRegionalWater();
+    if (!SameWorld)
+    {
+        ClearRegionalWater();
+        ChunkBaselineCache.clear();
+    }
     TMap<FIntPoint, FHomesteadTerrainChunk> Prepared;
     for (int Y = -2; Y <= 2; ++Y)
         for (int X = -2; X <= 2; ++X)
@@ -509,14 +588,14 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
             const FIntPoint Key(State.activeChunk.x + X, State.activeChunk.y + Y);
             if (SameWorld && TerrainChunks.Contains(Key)) continue;
             Gen::ChunkBaseline Baseline;
-            const auto Status = Gen::GenerateChunk(State.world, {Key.X, Key.Y}, Baseline);
-            auto* Mesh = Status == Gen::Status::Ok
+            const bool Generated = GetChunkBaseline(State.world, {Key.X, Key.Y}, Baseline);
+            auto* Mesh = Generated
                 ? BuildTerrainChunk(Baseline, State.world, FMath::Abs(X) <= 1 && FMath::Abs(Y) <= 1) : nullptr;
             if (!Mesh)
             {
                 for (auto& Entry : Prepared) Entry.Value.Terrain->DestroyComponent();
-                UE_LOG(LogHomesteadWorld, Error, TEXT("Chunk %d,%d preparation failed (%s); previous terrain retained."),
-                    Key.X, Key.Y, UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Chunk %d,%d preparation failed; previous terrain retained."),
+                    Key.X, Key.Y);
                 return false;
             }
             FHomesteadTerrainChunk Chunk;
@@ -569,9 +648,14 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
     }
     if (!RefreshRegionalDescriptors(State.world, LoadedRegions)) return false;
     if (!RebuildRegionalWater()) return false;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated terrain: seed=%llu version=%u center=%d,%d tiles=%d colliding=9 vertices_per_tile=625 prepare_ms=%.3f"),
+    LastTerrainPrepareMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
+    QueueChunkBaselineBuild(State.world, State.activeChunk);
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated terrain: seed=%llu version=%u center=%d,%d tiles=%d colliding=9 vertices_per_tile=625 prepare_ms=%.3f baseline_hits=%llu baseline_misses=%llu baseline_async_builds=%llu"),
         static_cast<unsigned long long>(Descriptor.seed), Descriptor.generationVersion,
-        PreparedChunk.x, PreparedChunk.y, TerrainChunks.Num(), (FPlatformTime::Seconds() - Started) * 1000);
+        PreparedChunk.x, PreparedChunk.y, TerrainChunks.Num(), LastTerrainPrepareMilliseconds,
+        static_cast<unsigned long long>(ChunkBaselineCacheHits),
+        static_cast<unsigned long long>(ChunkBaselineCacheMisses),
+        static_cast<unsigned long long>(ChunkBaselineBuildCount));
     return true;
 }
 
@@ -772,7 +856,7 @@ void AHomesteadWorld::BuildLighting()
     Settings.bOverride_AutoExposureMaxBrightness = true;
     Settings.AutoExposureMaxBrightness = 16.0f;
     Settings.bOverride_AutoExposureBias = true;
-    Settings.AutoExposureBias = 0.5f;
+    Settings.AutoExposureBias = 0.15f;
     Settings.bOverride_AutoExposureSpeedUp = true;
     Settings.AutoExposureSpeedUp = 3.0f;
     Settings.bOverride_AutoExposureSpeedDown = true;
@@ -783,7 +867,7 @@ void AHomesteadWorld::BuildLighting()
     Sun->SetupAttachment(GetRootComponent());
     Sun->SetMobility(EComponentMobility::Movable);
     Sun->bAtmosphereSunLight = true;
-    Sun->SetIntensity(65000.0f);
+    Sun->SetIntensity(52000.0f);
     Sun->RegisterComponent();
 
     Moon = NewObject<UDirectionalLightComponent>(this, TEXT("MeadowMoonlight"));
@@ -799,7 +883,7 @@ void AHomesteadWorld::BuildLighting()
     Sky->SetupAttachment(GetRootComponent());
     Sky->SetMobility(EComponentMobility::Movable);
     Sky->bRealTimeCapture = true;
-    Sky->SetIntensity(0.85f);
+    Sky->SetIntensity(1.0f);
     Sky->RegisterComponent();
 
     USkyAtmosphereComponent* Atmosphere = NewObject<USkyAtmosphereComponent>(this, TEXT("MeadowAtmosphere"));
@@ -926,23 +1010,32 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
             for (int DX = -1; DX <= 1; ++DX)
             {
                 Homestead::Generation::ChunkBaseline Baseline;
-                const auto Status = Homestead::Generation::GenerateChunk(State.world,
-                    {Chunk.Key.X + DX, Chunk.Key.Y + DY}, Baseline);
-                if (Status != Homestead::Generation::Status::Ok)
+                if (!GetChunkBaseline(State.world,
+                    {Chunk.Key.X + DX, Chunk.Key.Y + DY}, Baseline))
                 {
-                    UE_LOG(LogHomesteadWorld, Error, TEXT("Cover resource generation failed: %s"),
-                        UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Cover resource generation failed."));
                     return false;
                 }
                 for (const auto& Entity : Baseline.entities)
                 {
                     Homestead::ResourceNode Node;
-                    const auto Resolved = Simulation.ResolveGeneratedResource(Entity.key, Node);
-                    if (Resolved.code == Homestead::ResultCode::Unavailable) continue;
-                    if (!Resolved)
+                    const auto Active = std::find_if(State.resources.begin(), State.resources.end(),
+                        [&](const Homestead::ResourceNode& Value) { return Value.key == Entity.key; });
+                    if (Active != State.resources.end()) Node = *Active;
+                    else
                     {
-                        UE_LOG(LogHomesteadWorld, Error, TEXT("Cover resource resolution failed: %s"), UTF8_TO_TCHAR(Resolved.message.c_str()));
-                        return false;
+                        Node.key = Entity.key;
+                        Node.position = {static_cast<double>(Entity.xCm), static_cast<double>(Entity.yCm)};
+                        Node.kind = ResourceKindFor(Entity.kind);
+                        if (Node.kind == Homestead::ResourceKind::Count) continue;
+                        const auto Edit = std::lower_bound(State.resourceEdits.begin(), State.resourceEdits.end(),
+                            Entity.key, [](const Homestead::ResourceEdit& Value,
+                                const Homestead::Generation::GeneratedEntityKey& Key) { return Value.key < Key; });
+                        if (Edit != State.resourceEdits.end() && Edit->key == Entity.key)
+                        {
+                            Node.cleared = Edit->cleared;
+                            Node.readyAtHour = Edit->readyAtHour;
+                        }
                     }
                     CoverState.resources.push_back(Node);
                 }
@@ -1015,6 +1108,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         Chunk.Value.CoverSignature = Signature;
     }
     DecorationBuildMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
+    LastCoverPrepareMilliseconds = DecorationBuildMilliseconds;
     UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_grass_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
         RebuiltChunks, FernCount, GrassCount, GrassTriangleCount, DecorationBuildMilliseconds);
     return true;
@@ -1083,7 +1177,16 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
     const float Scale = Entity.scalePermille / 1000.0f;
     const auto& Capsule = Mesh->GetBodySetup()->AggGeom.SphylElems[0];
     const FVector Anchor(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
-    const FVector Base = AtGround(Node.position.x, Node.position.y);
+    const float Radius = Capsule.Radius * Scale;
+    const float Embed = Entity.paletteRole == Homestead::Generation::TreePaletteRole::ConiferMature ? 14.0f
+        : Entity.paletteRole == Homestead::Generation::TreePaletteRole::WoodlandAccent ? 9.0f : 7.0f;
+    float RootGround = GroundHeight(Node.position.x, Node.position.y);
+    for (const FVector2D Direction : {FVector2D(1,0), FVector2D(-1,0), FVector2D(0,1),
+        FVector2D(0,-1), FVector2D(0.7071f,0.7071f), FVector2D(-0.7071f,0.7071f),
+        FVector2D(0.7071f,-0.7071f), FVector2D(-0.7071f,-0.7071f)})
+        RootGround = FMath::Min(RootGround, GroundHeight(
+            Node.position.x + Direction.X * Radius, Node.position.y + Direction.Y * Radius));
+    const FVector Base(Node.position.x, Node.position.y, RootGround - Embed);
     Instance.MeshPath = Mesh->GetPathName();
     Instance.Transform = FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Scale), FVector(Scale));
     Instance.PaletteRole = static_cast<int32>(Entity.paletteRole);
@@ -1102,6 +1205,7 @@ void AHomesteadWorld::ClearOuterTreeBatches()
 
 bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simulation)
 {
+    const double Started = FPlatformTime::Seconds();
     struct FBuildEntry
     {
         FString Key;
@@ -1115,26 +1219,25 @@ bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simul
     {
         if (Chunk.Value.bCollision) continue;
         Homestead::Generation::ChunkBaseline Baseline;
-        const auto Status = Homestead::Generation::GenerateChunk(
-            Simulation.GetState().world, {Chunk.Key.X, Chunk.Key.Y}, Baseline);
-        if (Status != Homestead::Generation::Status::Ok)
+        if (!GetChunkBaseline(Simulation.GetState().world,
+            {Chunk.Key.X, Chunk.Key.Y}, Baseline))
         {
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree generation failed: %s"),
-                UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree generation failed."));
             return false;
         }
         for (const auto& Entity : Baseline.entities)
         {
             if (Entity.kind != Homestead::Generation::EntityKind::ForestTree) continue;
             Homestead::ResourceNode Node;
-            const auto Result = Simulation.ResolveGeneratedResource(Entity.key, Node);
-            if (Result.code == Homestead::ResultCode::Unavailable) continue;
-            if (!Result)
-            {
-                UE_LOG(LogHomesteadWorld, Error, TEXT("Outer tree resolution failed: %s"),
-                    UTF8_TO_TCHAR(Result.message.c_str()));
-                return false;
-            }
+            Node.key = Entity.key;
+            Node.kind = Homestead::ResourceKind::ForestTree;
+            Node.position = {static_cast<double>(Entity.xCm), static_cast<double>(Entity.yCm)};
+            const auto Edit = std::lower_bound(Simulation.GetState().resourceEdits.begin(),
+                Simulation.GetState().resourceEdits.end(), Entity.key,
+                [](const Homestead::ResourceEdit& Value,
+                    const Homestead::Generation::GeneratedEntityKey& Key) { return Value.key < Key; });
+            if (Edit != Simulation.GetState().resourceEdits.end() && Edit->key == Entity.key)
+                Node.cleared = Edit->cleared;
             if (Node.cleared) continue;
             FBuildEntry Entry;
             Entry.Key = FString::Printf(TEXT("%d,%d,%u"),
@@ -1206,6 +1309,7 @@ bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simul
         OuterTreeBatches.Add(Entry.Key, Entry.Value);
     }
     OuterTreeInstances = MoveTemp(PreparedInstances);
+    LastOuterTreePrepareMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
     UE_LOG(LogHomesteadWorld, Display,
         TEXT("Generated outer mature trees rebuilt: batches=%d instances=%d; collision/navigation/overlap disabled."),
         OuterTreeBatches.Num(), OuterTreeInstances.Num());
@@ -1228,6 +1332,7 @@ void AHomesteadWorld::ClearActiveTreeBatches()
 
 bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simulation)
 {
+    const double Started = FPlatformTime::Seconds();
     struct FBuildEntry
     {
         FString Key;
@@ -1299,7 +1404,9 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
             Batch->SetMobility(EComponentMobility::Static);
             Batch->SetStaticMesh(Entry.Mesh);
             Batch->bOverrideMinLOD = true;
-            Batch->MinLOD = ActiveMatureTreeMinLOD;
+            Batch->MinLOD = Entry.Instance.Visual.PaletteRole
+                == static_cast<int32>(Homestead::Generation::TreePaletteRole::BroadleafMature)
+                ? 0 : ActiveMatureTreeMinLOD;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Batch->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -1351,6 +1458,7 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
         ActiveTreeCollisions.Add(Entry.Key, Entry.Value);
     }
     ActiveTreeInstances = MoveTemp(PreparedInstances);
+    LastActiveTreePrepareMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
     UE_LOG(LogHomesteadWorld, Display,
         TEXT("Generated active mature trees rebuilt: batches=%d instances=%d collisions=%d."),
         ActiveTreeBatches.Num(), ActiveTreeInstances.Num(), ActiveTreeCollisions.Num());
@@ -1701,12 +1809,12 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // Matches the simulation's deterministic three-day spring weather cycle.
     const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
     Sun->SetRelativeRotation(FRotator(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0));
-    Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 19000.0f : 65000.0f, Daylight));
-    Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.49f, 0.24f),
-        FLinearColor(1.0f, 0.94f, 0.81f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
+    Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 18000.0f : 52000.0f, Daylight));
+    Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.62f, 0.38f),
+        FLinearColor(1.0f, 0.98f, 0.92f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
     Moon->SetRelativeRotation(FRotator(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0));
     Moon->SetIntensity(0.5f * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(0.3f, 0.85f, Daylight));
+    Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight));
     Fog->SetFogDensity(bRaining ? 0.035f : FMath::Lerp(0.016f, 0.007f, Daylight));
     Fog->SetFogInscatteringColor(bRaining ? FLinearColor(0.43f, 0.49f, 0.52f)
         : FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight));
@@ -1761,6 +1869,7 @@ bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
 
 bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
 {
+    const double RefreshStarted = FPlatformTime::Seconds();
     const auto& State = Simulation.GetState();
     if (!bInitialized)
     {
@@ -1921,6 +2030,15 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         }
     }
     UpdateLighting(State);
+    LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
+    if (LastRefreshMilliseconds > 25.0)
+        UE_LOG(LogHomesteadWorld, Display,
+            TEXT("Woodland refresh timing: center=%d,%d total_ms=%.3f terrain_ms=%.3f cover_ms=%.3f outer_trees_ms=%.3f active_trees_ms=%.3f baseline_hits=%llu baseline_misses=%llu"),
+            State.activeChunk.x, State.activeChunk.y, LastRefreshMilliseconds,
+            LastTerrainPrepareMilliseconds, LastCoverPrepareMilliseconds,
+            LastOuterTreePrepareMilliseconds, LastActiveTreePrepareMilliseconds,
+            static_cast<unsigned long long>(ChunkBaselineCacheHits),
+            static_cast<unsigned long long>(ChunkBaselineCacheMisses));
     return true;
 }
 

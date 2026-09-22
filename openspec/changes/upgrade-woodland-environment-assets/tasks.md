@@ -2,10 +2,13 @@
 
 ## Current state and next visible goal
 
-Baseline: selected `directional-navigation-06` / `5ccddea`, samev5 and current
-graphics. Fourteen of29 tasks complete; earlier delivery history is retained in
-`execution-history.md`. Tree import03 remains FAILED with twelve qualified
-branch basis corners. Earlier technical promotion is not Jenny's art approval.
+Baseline for the next user-authorized round: selected `timber-firewood-03` /
+`timber-processing-v8`, executable SHA
+`66FDE291CC29A563D95B21664F92E09BA9CE556750ED7B9F3D53B359083C34EE`;
+`regional-water-17` remains rollback. Fifteen of34 prior tasks are complete;
+earlier delivery history is retained in `execution-history.md`. Tree import03
+remains FAILED with twelve qualified branch basis corners. Earlier technical
+promotion is not Jenny's art approval.
 
 **Current priority, Jenny September21 16:19-16:26AZ:** dense woodland with no
 pre-cleared house site; seeded exploration and persistent player-cleared building
@@ -105,3 +108,13 @@ and connected-water round; they do not interrupt that acceptance run.
 - [ ] 7.4 Stage a fresh woodland-polish candidate and verify ordinary camera,
   felling, collision, clearing persistence, cadence, and close/wide daylight
   images before replacing the selected regional or woodland build.
+- [ ] 7.5 Reproduce the user-observed multi-second terrain-generation hitch on
+  ordinary mapped chunk crossings and record worst wall-frame plus scoped
+  simulation/terrain/decoration/regional preparation timings; implement a
+  bounded supported async/preparation or cache reuse change only where the
+  measurements justify it, never call full `GenerateRegion` synchronously, and
+  verify the same-route candidate materially lowers the worst preparation spike
+  without regressing steady p95/p99 cadence, stable keys, collision, felling,
+  clearing replay, regional reach or saves. If the dominant phase requires a
+  broader architecture change, record the exact measured limit and follow-up
+  scope rather than claiming the hitch is fixed.

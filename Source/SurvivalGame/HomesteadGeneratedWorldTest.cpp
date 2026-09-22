@@ -931,6 +931,17 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             Results.Add(FString::Printf(TEXT("GENERATED_WALK mapped_axis_only from=%s to=%s old_edge=%d seam=%d grounded_continuous=%d recoveries=%u"),
                 *Fixture->WalkBefore.ToString(), *Fixture->WalkAfter.ToString(), Fixture->CrossedOldBoundary,
                 Fixture->CrossedChunkSeam, Fixture->ContinuousGround, Controller->WorldRecoveryCount()));
+            Results.Add(FString::Printf(
+                TEXT("CHUNK_PREP total_ms=%.3f terrain_ms=%.3f cover_ms=%.3f outer_trees_ms=%.3f active_trees_ms=%.3f cache_hits=%llu cache_misses=%llu async_builds=%llu cache_disabled=%d"),
+                Controller->Landscape->LastRefreshMilliseconds,
+                Controller->Landscape->LastTerrainPrepareMilliseconds,
+                Controller->Landscape->LastCoverPrepareMilliseconds,
+                Controller->Landscape->LastOuterTreePrepareMilliseconds,
+                Controller->Landscape->LastActiveTreePrepareMilliseconds,
+                static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineCacheHits),
+                static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineCacheMisses),
+                static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineBuildCount),
+                FParse::Param(FCommandLine::Get(), TEXT("HomesteadDisableChunkPreparation"))));
             return Fixture->WalkBefore.X > -4000 && Fixture->WalkAfter.X < -4900
                 && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
                 && Fixture->WalkAfter.X > -5550 && FMath::Abs(Fixture->WalkAfter.Y - Fixture->WalkStart.y) < 70

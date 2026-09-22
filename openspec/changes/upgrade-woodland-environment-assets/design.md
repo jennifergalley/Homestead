@@ -32,6 +32,55 @@ acceptance from a passing screenshot metric.
 
 ## Decisions
 
+### Post-regional polish and player-visible preparation hitch
+
+The selected rollback entering this round is `timber-firewood-03` /
+`timber-processing-v8`. Preserve its regional water, generated-tree stable keys,
+felling/collision, Timber/Firewood economy, saves, controls and native menu while
+correcting the four user-observed woodland defects.
+
+Diagnose trunk rectangles by exact mesh, material slot, section and effective
+LOD before changing materials. Compare authored base-color/normal/roughness/AO
+connections, UV channel use, tangent basis and section assignment at the
+observed LOD. Fix the demonstrated role-specific cause; do not remove normal or
+roughness detail globally to make the artifact disappear.
+
+Ground each generated tree through admitted per-mesh root metadata rather than
+one shared Z offset. Derive the render transform from the generated terrain
+sample plus that mesh/role's root bound, and apply the same rule to active and
+outer instances. Collision remains model-derived and aligned to the same stable
+key; grounding may not change authoritative XY placement or clearing identity.
+
+Keep foliage diversity role-specific: broadleaf, conifer, young-tree and accent
+roles retain their authored PBR graphs and receive distinct, restrained
+material-instance color treatment only where the admitted source supports it.
+Judge the palette in controlled neutral daylight and warm dawn so the existing
+lighting grade is not mistaken for source sameness. Do not route foliage
+through one global prototype tint.
+
+For the reported multi-second hitch, instrument the ordinary mapped boundary
+route before optimizing. Record wall-frame spikes and scoped durations around
+simulation region activation, terrain mesh preparation/commit, active/outer
+tree and low-cover preparation/commit, and regional descriptor scheduling/store.
+Treat startup, screenshot readback and test teleports as separate categories.
+
+Reuse immutable `GenerateChunk` results and current descriptor caches. Bounded
+preparation may run pure generation/transform assembly on the engine thread pool
+for the next movement-adjacent chunks, but UObject/component mutation, collision
+registration and final authoritative commit stay on the game thread after world
+identity validation. Never call full `GenerateRegion` synchronously; retain the
+existing async regional descriptor owner. Discard stale prepared results when
+world seed/version or desired chunk identity changes.
+
+Acceptance compares the same ordinary mapped route on the selected baseline and
+candidate with no concurrent build/test load. A material improvement requires
+both a lower worst player-visible preparation spike and no regression in steady
+p95/p99 cadence, stable keys, collision, felling, cleared-tree replay, regional
+reach or saves. If the dominant cost is unavoidable synchronous UObject
+construction and a bounded preparation split cannot materially improve it,
+record the measured architectural limit and leave promotion contingent on the
+visual polish still being a genuine overall improvement.
+
 ### Governing supersession: September21 16:19-16:26
 
 Jenny now requires no initial house clearing and real seeded exploration with

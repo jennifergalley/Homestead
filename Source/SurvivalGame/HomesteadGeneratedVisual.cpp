@@ -481,10 +481,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         const int32 Expected = ExpectedActiveByMesh.FindRef(Entry.Key);
         const int32 Actual = Batch ? Batch->GetInstanceCount() : -1;
         ActiveBatchInstances += FMath::Max(Actual, 0);
+        const int32 ExpectedMinLOD = Entry.Key.Contains(TEXT("SM_TreeSmall02_Woodland"))
+            ? 0 : AHomesteadWorld::ActiveMatureTreeMinLOD;
         bool Ready = Batch && Batch->GetStaticMesh() && Batch->GetStaticMesh()->GetPathName() == Entry.Key
             && Expected > 0 && Actual == Expected && !Batch->IsQueryCollisionEnabled()
             && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation()
-            && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == AHomesteadWorld::ActiveMatureTreeMinLOD
+            && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == ExpectedMinLOD
             && Batch->GetForcedLodModel() == 0 && Batch->GetStaticMesh()->GetRenderData()
             && Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() == 3;
         if (Batch && Batch->GetStaticMesh())
@@ -511,6 +513,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetNumberField(TEXT("actualInstances"), Actual);
         Row->SetBoolField(TEXT("overrideMinLOD"), Batch && Batch->GetOverrideMinLOD());
         Row->SetNumberField(TEXT("minLOD"), Batch ? Batch->GetMinLOD() : -1);
+        Row->SetNumberField(TEXT("expectedMinLOD"), ExpectedMinLOD);
         Row->SetNumberField(TEXT("forcedLODModel"), Batch ? Batch->GetForcedLodModel() : -1);
         Row->SetNumberField(TEXT("lodCount"), Batch && Batch->GetStaticMesh()
             && Batch->GetStaticMesh()->GetRenderData()

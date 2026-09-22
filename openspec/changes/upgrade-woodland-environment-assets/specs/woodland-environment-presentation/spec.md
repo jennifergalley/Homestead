@@ -104,3 +104,36 @@ SHALL NOT remain luminous through night or override the current dynamic lights.
 - **WHEN** the cloud candidate fails its visual or performance gate and is disabled
 - **THEN** the existing atmosphere, sun, moon, skylight and fog remain functional
   without a second lighting owner or a change to weather gameplay
+
+### Requirement: Streamed woodland preparation avoids multi-second game-thread hitches
+
+The generated woodland SHALL measure player-visible chunk preparation by
+separating main-thread refresh work, reusable preparation work and asynchronous
+regional descriptor work. Entering a new chunk SHALL NOT synchronously execute a
+full regional `GenerateRegion`. A candidate SHALL materially reduce the
+reproduced multi-second player-visible hitch when a bounded supported
+preparation/cache change can do so, while preserving stable entity keys,
+collision, clearing persistence, regional reach identity and save behavior.
+
+#### Scenario: Baseline chunk transition is profiled
+- **WHEN** ordinary mapped movement crosses into uncached generated chunks
+- **THEN** evidence records the longest player-visible frame, main-thread
+  preparation duration and relevant terrain/decoration/descriptor phases
+- **AND** screenshot readback, startup and controlled teleports are identified
+  separately rather than attributed to terrain generation
+
+#### Scenario: Prepared chunk transition
+- **WHEN** the player approaches and crosses a chunk boundary covered by the
+  bounded preparation window
+- **THEN** required immutable terrain/entity data is reused from current caches
+  or prepared off the game thread before commit
+- **AND** the game-thread commit does not call full regional generation or
+  introduce invisible blockers, stale collision, duplicate entities or changed
+  stable keys
+
+#### Scenario: Architectural limit remains
+- **WHEN** measurement shows the hitch cannot be materially reduced without a
+  broader streaming or rendering architecture change
+- **THEN** the candidate is not described as hitch-free
+- **AND** the exact dominant phase, measured spikes and required follow-up scope
+  are recorded without weakening the gameplay or persistence gates

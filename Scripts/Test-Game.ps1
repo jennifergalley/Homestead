@@ -4,13 +4,17 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
-    [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA)
+    [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA,
+    [switch]$DisableChunkPreparation)
 $ErrorActionPreference = 'Stop'
 if ($GeneratedWoodland) {
     if (-not $ShippingQA -or $FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or
         $Weeding -or $Clearing -or $CameraLifecycle -or $Prompts -or $BookClarity -or $NativeMenu -or
         $DirectionalNavigation -or $NativeMenuQuit -or $NativeResumeFrom -or $FixtureSave -or $WithAudio) {
         throw 'Generated woodland is one isolated controlled Shipping gameplay route, not another fixture combination.'
+    }
+    if ($DisableChunkPreparation -and -not $GeneratedWoodland) {
+        throw 'Chunk-preparation baseline switch is limited to the generated woodland route.'
     }
     $RequireLit = $true
 }
@@ -151,6 +155,7 @@ if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($CameraLifecycle) { $loopArguments += ' -HomesteadCameraLifecycle' }
 if ($GeneratedWoodland) { $loopArguments = '-HomesteadGeneratedWoodland' }
+if ($DisableChunkPreparation) { $loopArguments += ' -HomesteadDisableChunkPreparation' }
 if ($GeneratedResumeFrom) { $loopArguments += " -HomesteadGeneratedResumeFrom=`"$([IO.Path]::GetFullPath($GeneratedResumeFrom))`"" }
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
