@@ -367,6 +367,8 @@ void TerrainReliefAndBuildPockets()
                 sample.normalY * sample.normalY) / sample.normalZ);
         }
     std::sort(slopes.begin(), slopes.end());
+    std::cout << "Combined v5 relief range/max/q95: " << maximum - minimum << '/'
+        << slopes.back() << '/' << slopes[slopes.size() * 95 / 100] << '\n';
     CHECK(maximum - minimum >= 500.0);
     CHECK(slopes.back() <= 0.20);
     CHECK(slopes[slopes.size() * 95 / 100] <= 0.14);

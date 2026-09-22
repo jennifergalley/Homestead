@@ -20,7 +20,7 @@
 - [ ] 2.2 Add native loaded-region/descriptor caching keyed only by immutable
   world and region identity; verify active-window refresh does not accumulate
   durable exploration state or rebuild unchanged regions.
-- [ ] 2.3 Extend generated inventory with regional ridge/valley/lowland metrics
+- [x] 2.3 Extend generated inventory with regional ridge/valley/lowland metrics
   and exact border samples; verify the selected test seed visibly changes relief
   without removing the woodland density, tree authority, or no-clearing policy.
 - [ ] 2.4 Build and stage a Shipping relief-only candidate, then verify ordinary

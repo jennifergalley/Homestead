@@ -129,8 +129,7 @@ Status LandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y, double&
     if (regionalStatus != RegionalGeneration::Status::Ok) return RegionalStatus(regionalStatus);
     const double safeHeight = PocketLandHeight(world, -1000, 0);
     const double localHeight = PocketLandHeight(world, x, y);
-    const double height = safeHeight + (localHeight - safeHeight)
-        + regional.heightOffsetCm;
+    const double height = localHeight + regional.heightOffsetCm;
     const double safety = 1.0 - Smooth(100.0, 250.0, DistanceToSpawnSegment(x, y));
     output = height + (safeHeight - height) * safety;
     return Status::Ok;
