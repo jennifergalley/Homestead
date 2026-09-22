@@ -84,3 +84,24 @@ candidate is inspected. Counts, hashes and passes alone do not establish beauty.
 - [x] 6.2 Stage genuine fresh executable/cooked content/registry/shaders to a fresh candidate (supported loose files or containers) and checkpoint content/code; report smoke results, known issues and test-save resets.
 - [x] 6.3 Select the latest basically verified usable candidate for playtesting without claiming subjective approval or full environment completion.
 - [ ] 6.4 Keep cheap rollback and report remaining work; honor explicit stop controls without new schedules.
+
+## 7. Post-regional woodland polish (low priority)
+
+Jenny's September22 playtest found the generated woodland substantially better
+overall. Schedule these visual corrections after the active regional-landform
+and connected-water round; they do not interrupt that acceptance run.
+
+- [ ] 7.1 Reproduce and identify the rectangular patches visible on some tree
+  trunks, distinguishing source geometry, UV/material, shadow, and LOD causes;
+  fix the demonstrated cause without flattening authored bark detail.
+- [ ] 7.2 Ground every generated tree role on sloped terrain using its own
+  admitted pivot/root bounds and generated terrain sample; verify no trunk base
+  floats above or sinks implausibly below the colliding ground at active and
+  outer LODs.
+- [ ] 7.3 Restore visibly distinct foliage colors across the admitted broadleaf,
+  conifer, young-tree, and accent roles using authored PBR/material inputs
+  rather than one global brown cast; inspect neutral daylight as well as warm
+  dawn so lighting color is not mistaken for missing palette diversity.
+- [ ] 7.4 Stage a fresh woodland-polish candidate and verify ordinary camera,
+  felling, collision, clearing persistence, cadence, and close/wide daylight
+  images before replacing the selected regional or woodland build.
