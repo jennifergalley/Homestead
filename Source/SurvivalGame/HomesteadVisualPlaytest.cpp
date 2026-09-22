@@ -879,7 +879,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         if (Pass.Label == TEXT("walk-to-authored-tree"))
         {
             const auto Point = PC->PlayerPoint();
-            TreeStaging = TreeCenter + (FVector2D(Point.x, Point.y) - TreeCenter).GetSafeNormal() * 750;
+            TreeStaging = TreeCenter + (FVector2D(Point.x, Point.y) - TreeCenter).GetSafeNormal() * 600;
         }
         if (Pass.Label == TEXT("retreat-from-authored-trunk"))
         {
