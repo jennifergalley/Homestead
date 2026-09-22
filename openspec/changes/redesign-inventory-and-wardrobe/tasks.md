@@ -2,10 +2,11 @@
 
 ## Current state and next visible goal
 
-Final presentation milestone begins from selected `inventory-safety-08` /
-`inventory-safety-v10` at32/44 complete. It owns tasks4.1,4.3-4.5,5.6,5.7,
-7.4,7.5,7.7,8.1 and8.4. Task5.2 remains open unless broad deliberate mouse
-switching and general held-stick comfort are actually demonstrated.
+Final presentation milestone selects `wardrobe-presentation-08` /
+`wardrobe-presentation-v11` at42/44 complete. Tasks5.2 and7.4 remain open:
+broad deliberate mouse switching/general held-stick comfort were not proved,
+and the modern full-loop wardrobe section passes but its later generated-resource
+focus tail still fails at resource1000130.
 
 September21 read-only evidence reconciliation had19/44 tasks complete. The delivered
 `wardrobe-ui-02` proof includes actual720p/4K producers, separate-process consumers,
@@ -62,11 +63,11 @@ need current selected-world evidence.
 
 ## 4. Compatible modular clothing and icons
 
-- [ ] 4.1 Reconstruct retained adult bases with permanent modest coverage/complete feet; verify supported presets have no deleted-geometry holes.
+- [x] 4.1 Reconstruct retained adult bases with permanent modest coverage/complete feet; verify supported presets have no deleted-geometry holes.
 - [x] 4.2 Export/import tunic, apron, shoes/socks and original footwraps with compatible fits; verify rig/material/scale and provenance.
-- [ ] 4.3 Bind prepared garment components to real equipped IDs; verify supported combinations, dye/skin/tool separation and missing-content error before commit.
-- [ ] 4.4 Add shared real character preview with explicit orbit focus; verify equipment parity and cleanup on close/load/recovery.
-- [ ] 4.5 Supply original or verified-license icons for items/recipes/plans/tabs/slots; verify complete recognizable coverage and names at grid size.
+- [x] 4.3 Bind prepared garment components to real equipped IDs; verify supported combinations, dye/skin/tool separation and missing-content error before commit.
+- [x] 4.4 Add shared real character preview with explicit orbit focus; verify equipment parity and cleanup on close/load/recovery.
+- [x] 4.5 Supply original or verified-license icons for items/recipes/plans/tabs/slots; verify complete recognizable coverage and names at grid size.
 
 ## 5. Native shell, input and page integration
 
@@ -75,8 +76,8 @@ need current selected-world evidence.
 - [x] 5.3 Implement labeled icon tabs, regions and four-way grid navigation; verify scroll/partial rows/empty states/focus restoration on controller and keyboard.
 - [x] 5.4 Build real carried/chest grids and hover/focus details, then equipment/preview; verify truthful counts/capacity and no hover mutation.
 - [x] 5.5 Wire Move/Split/Merge/amount/equip/recolor to typed real authority; verify cancel/failure/repeated confirm and no click-through.
-- [ ] 5.6 Integrate Craft/Build/Guidebook/Credits/Settings/Appearance purpose-specific content; verify existing actions/settings and separate body/hair versus owned clothing.
-- [ ] 5.7 Integrate pause/modal lifecycle, feedback and camera restoration; verify action costs remain, browsing pauses and feedback doesn't cover controls.
+- [x] 5.6 Integrate Craft/Build/Guidebook/Credits/Settings/Appearance purpose-specific content; verify existing actions/settings and separate body/hair versus owned clothing.
+- [x] 5.7 Integrate pause/modal lifecycle, feedback and camera restoration; verify action costs remain, browsing pauses and feedback doesn't cover controls.
 
 ## 6. Discoverable reliable exit
 
@@ -92,16 +93,16 @@ need current selected-world evidence.
 - [x] 7.2 Run approved focused menu/prompt/feedback/settings/lifecycle tests; verify real semantics rather than obsolete row-index assumptions.
 - [x] 7.3 Run current save/load/reset/quit tests and existing route guards in shared slot; verify truthful results independently of process exit code.
 - [ ] 7.4 Run affected action/full-loop/hotkey cases with actual Lit/LightingOn/ShaderComplexityOff checks; verify unchanged rewards and materials.
-- [ ] 7.5 Review matched baseline/candidate 720p/4K menu states and ordinary character movement; verify legible icons/details/feedback and coverage.
+- [x] 7.5 Review matched baseline/candidate 720p/4K menu states and ordinary character movement; verify legible icons/details/feedback and coverage.
 - [x] 7.6 Batch demonstrated corrections and recheck them; verify scoped defects are resolved without arbitrary iteration/time/cost work-stop caps.
-- [ ] 7.7 Measure meaningful menu/gameplay timing and repeated open/close cleanup; verify no material regression and report actual 60 FPS evidence/limits.
+- [x] 7.7 Measure meaningful menu/gameplay timing and repeated open/close cleanup; verify no material regression and report actual 60 FPS evidence/limits.
 
 ## 8. Integrated playable delivery
 
-- [ ] 8.1 Update directly affected setup/design/playtest/test/provenance docs from actual implementation; verify controls and save-reset guidance are accurate.
+- [x] 8.1 Update directly affected setup/design/playtest/test/provenance docs from actual implementation; verify controls and save-reset guidance are accurate.
 - [x] 8.2 Checkpoint/push only owned coherent source and integrate via coordinator after environment; verify exact commits and approved shared build.
 - [x] 8.3 Deliver latest playable UI/wardrobe candidate with actual basic visual/controller/gameplay/current-save evidence; verify no inferred human aesthetic approval.
-- [ ] 8.4 Report completed scope and remaining issues truthfully, with no automatic PR/schedule; verify final OpenSpec progress matches implemented and tested behavior.
+- [x] 8.4 Report completed scope and remaining issues truthfully, with no automatic PR/schedule; verify final OpenSpec progress matches implemented and tested behavior.
 
 ## Historical UI lane evidence
 

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "0edcf2992303e89b10ffc81cd85ca09addbb8f94",
+  "candidate": "wardrobe-presentation-08",
+  "executableSha256": "58344BE924DEAE9DFB622830F69FCC0DD344625415E9B73DBB834EE81E2BAC75",
+  "actualRuntime": [
+    "Shipping 720p native producer with all nine base combinations and real layered tunic/apron/footwrap capture",
+    "Development 4K native producer with identical cooked content",
+    "Shipping separate-process current-save consumer with byte-identical producer fixture",
+    "405-frame ordinary mapped idle/walk/turn/orbit/portrait/gather route"
+  ],
+  "performance": {
+    "shipping720": "52.81 mean FPS; p95 17.54 ms; p99 17.89 ms",
+    "development4k": "48.08 mean FPS; p95 20.42 ms; p99 21.57 ms",
+    "shippingConsumer": "48.02 mean FPS; p95 17.50 ms; p99 17.96 ms over 377 samples"
+  },
+  "review": "Base-only Preferred/Willow/Hazel images show permanent bra/brief coverage and complete feet. Layered portrait shows distinct tunic, apron and footwraps. Slot, item, recipe and purpose-page icons are readable at 720p and 4K. Ordinary gather preserves the selected tunic/shoes presentation.",
+  "limits": [
+    "Task 5.2 remains open for broad deliberate mouse switching and general held-stick comfort.",
+    "Task 7.4 remains open because full-loop passes the modern wardrobe section but fails later at generated resource 1000130 focus.",
+    "No human aesthetic approval, physical controller comfort, target-aware IK or 60 FPS at 4K is claimed."
+  ]
+}

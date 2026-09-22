@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "verificationStatus": "passed",
+  "candidate": "wardrobe-presentation-08",
+  "profile": "wardrobe-presentation-v11",
+  "checkpoint": "0edcf2992303e89b10ffc81cd85ca09addbb8f94",
+  "executableSha256": "58344BE924DEAE9DFB622830F69FCC0DD344625415E9B73DBB834EE81E2BAC75",
+  "proofIndexSha256": "750B8571C067E5F5C353297F7E238A5A886015C4C304381B66A62FFC67454876",
+  "completedTasks": ["4.1","4.3","4.4","4.5","5.6","5.7","7.5","7.7","8.1","8.4"],
+  "remainingTasks": {
+    "5.2": "Broad deliberate mouse switching and general held-stick comfort are not proved.",
+    "7.4": "Modern wardrobe/full-loop semantics pass, but the unrelated late generated-resource focus tail fails at resource 1000130."
+  },
+  "reviewBoundary": "Actual images were inspected for coverage, complete feet, layered footwrap/apron/tunic identity, icon readability and purpose pages. This is not human aesthetic approval."
+}

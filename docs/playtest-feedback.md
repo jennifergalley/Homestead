@@ -278,6 +278,15 @@ fresh `jenny-review-v5` test profile for schema5/portable4. Old profiles/saves
 were not read, migrated or deleted. Prior candidate-local graphics preferences
 were copied unchanged; no human game/window was launched or manipulated.
 
+The later `wardrobe-presentation-08` increment verifies all nine permanent
+modest bases, complete feet, a real tunic/apron/footwrap layered state, 37
+explicit original icon keys, purpose-specific pages and preview cleanup at
+720p/4K. A separate Shipping process reloads exact wardrobe IDs, slots, dyes and
+appearance. The fresh `wardrobe-presentation-v11` profile does not modify
+`inventory-safety-v10` or personal saves. Task 5.2 remains open for broad mouse
+switching/held-stick comfort, and task 7.4 remains open because the full-loop
+route later hits an unrelated generated-resource focus failure at node 1000130.
+
 ## Deferred feedback - 2026-09-19
 
 Jenny explicitly marked the following as feedback for later, not an instruction

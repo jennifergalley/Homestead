@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\inventory-safety-08",
-  "profile": "inventory-safety-v10",
-  "executableSha256": "E3B4856EEEF1EAF1AE5C908590D11E51B866F68704EC567AEB49E6F799A7900E"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\wardrobe-presentation-08",
+  "profile": "wardrobe-presentation-v11",
+  "executableSha256": "58344BE924DEAE9DFB622830F69FCC0DD344625415E9B73DBB834EE81E2BAC75"
 }

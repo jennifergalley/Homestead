@@ -114,9 +114,9 @@ The runtime uses the fixed Windows user-settings root:
 `%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-<id>\SaveGames`.
 The `profile-` prefix also avoids Windows reserved device-directory names.
 All manual/rotating-auto/recovery files and their `.bak`/atomic `.tmp` siblings
-stay in that directory. The current selected profile is `jenny-review-v5`.
-This is a deliberately fresh test clearing for wardrobe UE schema5/portable4.
-Old `jenny-review` progress and original saves remain untouched, not migrated
+stay in that directory. The current selected profile is `wardrobe-presentation-v11`.
+This is a deliberately fresh test clearing for wardrobe UE schema6/portable6.
+The prior `inventory-safety-v10`, old `jenny-review` progress and original saves remain untouched, not migrated
 or silently reset. Prior wave-candidate graphics preferences were copied
 byte-for-byte into the new candidate's local graphics file.
 

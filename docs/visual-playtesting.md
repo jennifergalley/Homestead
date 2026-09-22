@@ -102,6 +102,21 @@ playback can look choppier than the game; do not call capture jitter a game bug.
 Physical-controller comfort, continuous animation smoothness and listening
 still benefit from a human playtest or denser video capture.
 
+## Wardrobe presentation delivery
+
+`wardrobe-presentation-08` retains the ordinary 23-stage mapped route and adds
+native 720p/4K captures for all three visible base-only body presets plus an
+authority-built tunic/apron/footwrap combination. The base-only images show
+permanent bra/brief coverage and complete feet; the layered image shows the same
+real equipment IDs in the portrait, Wearing grid and slot bar. The ordinary
+405-frame route verifies idle, walk, turn, stop, orbit, portrait, gather and
+recovery with the accepted tunic/shoes. These captures establish coverage and
+parity, not aesthetic approval or physical-controller comfort.
+
+The selected Shipping 720p native route measured p95 17.54 ms/p99 17.89 ms.
+The matched Development 4K route measured 48.08 mean FPS, p95 20.42 ms and
+p99 21.57 ms; it is explicitly not a 60 FPS claim.
+
 ## Initial run
 
 `Saved\VisualPlaytests\20260919-211901` contains 290 frames covering approximately

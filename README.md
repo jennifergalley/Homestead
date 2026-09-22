@@ -56,17 +56,18 @@ Fresh matched grass01/grove03 screenshot-free routes measured approximately
 this is not GPU/Present timing,4K performance or uncapped-headroom evidence.
 Camera02, grass01, grove03 and all earlier candidates remain available.
 
-The candidate retains the native inventory/wardrobe integration from
-`wardrobe-ui-02`. Actual720p/4K directional routes cover visible native focus,
+The selected `wardrobe-presentation-08` candidate completes the native
+inventory/wardrobe presentation. Actual720p/4K routes cover visible native focus,
 held-stick repeat/release/reversal, short/full/empty grids and explicit quantity
 editing/cancel. Existing4K equipment/dye/save, separate-process F9 and genuine
 save-and-quit passed, followed by180s of fresh mapped gathering/eating/save/load.
 Sealed results, failed attempts and image-review limits are in
 `docs\research\character-assets\directional-navigation-01\receipt.json`.
-Full mouse/removal-focus/quantity-confirm coverage remains open. Compact item
-cards and the larger portrait remain; lower-body portrait lighting is provisional.
-`Preview.json` is the authority for the human build, with the samev5 profile and
-byte-identical prior graphics preferences; no existing save was reset.
+Broad deliberate mouse switching and general held-stick comfort remain open.
+All nine base combinations, real tunic/apron/footwrap layering, complete feet,
+37 original icon keys, purpose pages and preview cleanup are verified. `Preview.json`
+is the authority for the human build, with a fresh `wardrobe-presentation-v11`
+profile and byte-identical graphics defaults; no existing save was reset.
 
 In the native menu, D-pad, left stick or arrows move within grids and across
 their edges to nearby sections; triggers are not required. LB/RB or
@@ -86,9 +87,9 @@ open. In-game Settings includes **Save and quit**.
 To review the separately verified movement and action improvements, double-click
 **`Preview.cmd`** (requires PowerShell 7). It selects only the explicit candidate
 in `Preview.json`, checks its acceptance receipt/executable hash, and uses the
-persistent **`jenny-review-v5`** save profile. This promotion keeps this
-existing profile and its progress; no reset or migration was performed. It uses
-UE save schema5 / portable4; old `jenny-review` progress remains
+persistent **`wardrobe-presentation-v11`** save profile. This promotion starts
+a separate profile; no reset or migration was performed. It uses
+UE save schema6 / portable6; `inventory-safety-v10` and old `jenny-review` progress remain
 untouched rather than being migrated or silently reset. It does not replace `Play.cmd`, import
 your original world, run automated inputs, or quit automatically.
 
@@ -101,7 +102,7 @@ proof; it is not selected until coordinator review. See
 `docs\offline-startup.md` for evidence, preserved preferences and limitations.
 
 Preview saves live in
-`%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-jenny-review-v5\SaveGames`.
+`%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-wardrobe-presentation-v11\SaveGames`.
 Manual saves, all three autosaves, recovery and backups stay there. Relaunch
 `Preview.cmd` to continue; use `Play.cmd` to return to the untouched original.
 Prior selected-build graphics preferences were copied byte-for-byte; the old wave
