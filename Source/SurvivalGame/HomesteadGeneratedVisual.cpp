@@ -28,9 +28,25 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     bool Valid = Landscape->IsPreparedFor(State) && Landscape->TerrainChunks.Num() == 25;
     int32 Colliding = 0, ActiveTrees = 0, ActiveBatchInstances = 0, ActiveCollisions = 0;
     int32 OuterTrees = 0, OuterBatchInstances = 0;
-    int32 Grass = 0, Ferns = 0;
+    int32 Grass = 0, Ferns = 0, ExpectedGrass = 0, ExpectedFerns = 0;
+    int32 GrassBatchComponents = 0, FernBatchComponents = 0;
+    bool CoverPoliciesValid = true, CoverRepresentativeTransformsExact = true;
     double PositionError = 0, NormalError = 0;
     TArray<TSharedPtr<FJsonValue>> Tiles, Trees, ActiveBatches, OuterBatches;
+    const FName GrassTag(TEXT("AuthoredGrassMedium01"));
+    const FName FernTag(TEXT("AuthoredFern02"));
+    const TCHAR* GrassPaths[] = {
+        TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b"),
+        TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b"),
+        TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a"),
+        TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a")
+    };
+    const TCHAR* FernPaths[] = {
+        TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a.SM_Fern02_a"),
+        TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_b.SM_Fern02_b"),
+        TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_c.SM_Fern02_c"),
+        TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_d.SM_Fern02_d")
+    };
     auto MaterialReady = [](UMaterialInterface* Interface)
     {
         auto* Material = Interface ? Interface->GetMaterial() : nullptr;
@@ -67,18 +83,148 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetNumberField(TEXT("x"), Entry.Key.X); Row->SetNumberField(TEXT("y"), Entry.Key.Y);
         Row->SetBoolField(TEXT("valid"), TileValid); Row->SetBoolField(TEXT("collision"), ExpectedCollision);
         Tiles.Add(MakeShared<FJsonValueObject>(Row));
+        TMap<FString, const UHierarchicalInstancedStaticMeshComponent*> GrassBatches;
+        TMap<FString, const UHierarchicalInstancedStaticMeshComponent*> FernBatches;
+        int32 ChunkGrassBatches = 0, ChunkFernBatches = 0;
         for (const auto& Component : Entry.Value.Cover.Components)
         {
             if (const auto* Batch = Cast<UHierarchicalInstancedStaticMeshComponent>(Component))
             {
-                Grass += Batch->GetInstanceCount();
-                Valid &= !Batch->IsQueryCollisionEnabled() && MaterialReady(Batch->GetMaterial(0));
+                const bool IsGrass = Batch->ComponentHasTag(GrassTag);
+                const bool IsFern = Batch->ComponentHasTag(FernTag);
+                UStaticMesh* Mesh = Batch->GetStaticMesh();
+                const FString MeshPath = Mesh ? Mesh->GetPathName() : FString();
+                bool PolicyReady = IsGrass != IsFern && Batch->IsRegistered() && Mesh
+                    && Batch->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+                    && !Batch->IsQueryCollisionEnabled() && !Batch->GetGenerateOverlapEvents()
+                    && !Batch->CanEverAffectNavigation()
+                    && Batch->GetCollisionProfileName() == UCollisionProfile::NoCollision_ProfileName
+                    && Batch->GetVisibleFlag() && Batch->IsVisible() && !Batch->bHiddenInGame
+                    && !Batch->CastShadow
+                    && MaterialReady(Batch->GetMaterial(0))
+                    && Batch->GetMaterial(0) == Mesh->GetMaterial(0);
+                if (IsGrass)
+                {
+                    ++ChunkGrassBatches;
+                    ++GrassBatchComponents;
+                    Grass += Batch->GetInstanceCount();
+                    PolicyReady &= Batch->InstanceStartCullDistance == 3500
+                        && Batch->InstanceEndCullDistance == 5000 && !GrassBatches.Contains(MeshPath);
+                    GrassBatches.Add(MeshPath, Batch);
+                }
+                else if (IsFern)
+                {
+                    ++ChunkFernBatches;
+                    ++FernBatchComponents;
+                    Ferns += Batch->GetInstanceCount();
+                    PolicyReady &= Batch->InstanceStartCullDistance == 0
+                        && Batch->InstanceEndCullDistance == 5000 && !FernBatches.Contains(MeshPath);
+                    FernBatches.Add(MeshPath, Batch);
+                }
+                CoverPoliciesValid &= PolicyReady;
             }
-            else if (const auto* Mesh = Cast<UStaticMeshComponent>(Component))
+            else CoverPoliciesValid = false;
+        }
+        CoverPoliciesValid &= ChunkGrassBatches == 4 && ChunkFernBatches == 4;
+        Homestead::State CoverState;
+        CoverState.structures = State.structures;
+        CoverState.plots = State.plots;
+        bool ExpectedReady = true;
+        for (int DY = -1; DY <= 1 && ExpectedReady; ++DY)
+            for (int DX = -1; DX <= 1 && ExpectedReady; ++DX)
             {
-                ++Ferns;
-                Valid &= !Mesh->IsQueryCollisionEnabled() && MaterialReady(Mesh->GetMaterial(0));
+                Gen::ChunkBaseline Baseline;
+                ExpectedReady = Gen::GenerateChunk(State.world,
+                    {Entry.Key.X + DX, Entry.Key.Y + DY}, Baseline) == Gen::Status::Ok;
+                if (!ExpectedReady) break;
+                for (const auto& Entity : Baseline.entities)
+                {
+                    Homestead::ResourceNode Node;
+                    const auto Resolved = PC->Simulation().ResolveGeneratedResource(Entity.key, Node);
+                    if (Resolved.code == Homestead::ResultCode::Unavailable) continue;
+                    if (!Resolved)
+                    {
+                        ExpectedReady = false;
+                        break;
+                    }
+                    CoverState.resources.push_back(Node);
+                }
             }
+        TMap<FString, int32> ExpectedGrassByMesh, ExpectedFernsByMesh;
+        TMap<FString, FTransform> RepresentativeGrassByMesh, RepresentativeFernByMesh;
+        if (ExpectedReady)
+        {
+            const double OriginX = static_cast<int64>(Entry.Key.X) * Gen::ChunkSizeCm;
+            const double OriginY = static_cast<int64>(Entry.Key.Y) * Gen::ChunkSizeCm;
+            const uint32 Seed = GetTypeHash(State.world.seed) ^ GetTypeHash(Entry.Key);
+            FRandomStream Random(static_cast<int32>(Seed));
+            for (int32 Attempt = 0; Attempt < 1200; ++Attempt)
+            {
+                const double X = OriginX + Random.FRandRange(0, 2399.99f);
+                const double Y = OriginY + Random.FRandRange(0, 2399.99f);
+                const FRotator Rotation(0, Random.FRandRange(0, 360), 0);
+                if (Landscape->IsDecorationReserved(CoverState, X, Y, 20, 0, true)
+                    || FMath::Abs(X - Homestead::StreamX(Y)) < 215)
+                    continue;
+                const int32 Variety = Attempt % 16;
+                const int32 GrassIndex = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
+                const FString GrassPath(GrassPaths[GrassIndex]);
+                const auto* GrassBatch = GrassBatches.FindRef(GrassPath);
+                const int32 GrassIndexInBatch = ExpectedGrassByMesh.FindOrAdd(GrassPath)++;
+                ++ExpectedGrass;
+                if (GrassBatch && GrassIndexInBatch == 0)
+                {
+                    UStaticMesh* Mesh = GrassBatch->GetStaticMesh();
+                    const FBox Bounds = Mesh->GetBoundingBox();
+                    const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+                    RepresentativeGrassByMesh.Add(GrassPath, FTransform(Rotation,
+                        Landscape->AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+                }
+                if (Attempt % 32 == 0 && !Landscape->IsDecorationReserved(CoverState, X, Y, 75, 0, true))
+                {
+                    const FString FernPath(FernPaths[(Attempt / 32) % 4]);
+                    const auto* FernBatch = FernBatches.FindRef(FernPath);
+                    const int32 FernIndexInBatch = ExpectedFernsByMesh.FindOrAdd(FernPath)++;
+                    ++ExpectedFerns;
+                    if (FernBatch && FernIndexInBatch == 0)
+                    {
+                        UStaticMesh* Mesh = FernBatch->GetStaticMesh();
+                        const FBox Bounds = Mesh->GetBoundingBox();
+                        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+                        RepresentativeFernByMesh.Add(FernPath, FTransform(Rotation,
+                            Landscape->AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+                    }
+                }
+            }
+        }
+        CoverRepresentativeTransformsExact &= ExpectedReady;
+        auto HasRepresentative = [](const UHierarchicalInstancedStaticMeshComponent* Batch,
+            const FTransform* Expected)
+        {
+            if (!Batch || !Expected) return false;
+            for (int32 InstanceIndex = 0; InstanceIndex < Batch->GetInstanceCount(); ++InstanceIndex)
+            {
+                FTransform Actual;
+                if (Batch->GetInstanceTransform(InstanceIndex, Actual)
+                    && Actual.Equals(*Expected, 0.001f))
+                    return true;
+            }
+            return false;
+        };
+        for (int32 Index = 0; Index < 4; ++Index)
+        {
+            const auto* GrassBatch = GrassBatches.FindRef(GrassPaths[Index]);
+            const auto* FernBatch = FernBatches.FindRef(FernPaths[Index]);
+            const int32 ExpectedGrassInstances = ExpectedGrassByMesh.FindRef(GrassPaths[Index]);
+            const int32 ExpectedFernInstances = ExpectedFernsByMesh.FindRef(FernPaths[Index]);
+            CoverRepresentativeTransformsExact &= GrassBatch
+                && GrassBatch->GetInstanceCount() == ExpectedGrassInstances
+                && (ExpectedGrassInstances == 0
+                    || HasRepresentative(GrassBatch, RepresentativeGrassByMesh.Find(GrassPaths[Index])));
+            CoverRepresentativeTransformsExact &= FernBatch
+                && FernBatch->GetInstanceCount() == ExpectedFernInstances
+                && (ExpectedFernInstances == 0
+                    || HasRepresentative(FernBatch, RepresentativeFernByMesh.Find(FernPaths[Index])));
         }
     }
     TSet<FString> Keys, TreeMeshes;
@@ -357,7 +503,11 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         && OuterTrees == Landscape->OuterTreeInstances.Num()
         && OuterTrees == OuterBatchInstances && Landscape->OuterTreeBatches.Num() == ExpectedOuterByMesh.Num()
         && RegisteredOuterBatches.Num() == Landscape->OuterTreeBatches.Num()
-        && TreeMeshes.Num() >= 3 && Grass > 0 && Ferns > 0;
+        && TreeMeshes.Num() >= 3 && Grass > 0 && Ferns > 0
+        && Grass == ExpectedGrass && Ferns == ExpectedFerns
+        && GrassBatchComponents == Landscape->TerrainChunks.Num() * 4
+        && FernBatchComponents == Landscape->TerrainChunks.Num() * 4
+        && CoverPoliciesValid && CoverRepresentativeTransformsExact;
     auto Evidence = MakeShared<FJsonObject>();
     Evidence->SetStringField(TEXT("seed"), FString::Printf(TEXT("%llu"), static_cast<unsigned long long>(State.world.seed)));
     Evidence->SetNumberField(TEXT("generationVersion"), State.world.generationVersion);
@@ -376,6 +526,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     for (const FString& Path : TreeMeshes) MeshPaths.Add(MakeShared<FJsonValueString>(Path));
     Evidence->SetArrayField(TEXT("matureTreeMeshes"), MeshPaths);
     Evidence->SetNumberField(TEXT("grass"), Grass); Evidence->SetNumberField(TEXT("ferns"), Ferns);
+    Evidence->SetNumberField(TEXT("expectedGrass"), ExpectedGrass);
+    Evidence->SetNumberField(TEXT("expectedFerns"), ExpectedFerns);
+    Evidence->SetNumberField(TEXT("grassBatchComponents"), GrassBatchComponents);
+    Evidence->SetNumberField(TEXT("fernBatchComponents"), FernBatchComponents);
+    Evidence->SetBoolField(TEXT("coverPoliciesValid"), CoverPoliciesValid);
+    Evidence->SetBoolField(TEXT("coverRepresentativeTransformsExact"), CoverRepresentativeTransformsExact);
     Evidence->SetNumberField(TEXT("processPhysicalBytes"), FPlatformMemory::GetStats().UsedPhysical);
     Evidence->SetArrayField(TEXT("tiles"), Tiles); Evidence->SetArrayField(TEXT("trees"), Trees);
     Evidence->SetArrayField(TEXT("activeBatches"), ActiveBatches);
@@ -385,8 +541,9 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     const bool Written = FJsonSerializer::Serialize(Evidence, TJsonWriterFactory<>::Create(&Text))
         && FFileHelper::SaveStringToFile(Text, *FPaths::Combine(OutputDirectory, TEXT("generated-inventory.json")));
     if (!Valid || !Written) Observations.Add(TEXT("FAILED generated terrain/tree/cover inventory or persistence."));
-    Observations.Add(FString::Printf(TEXT("Generated inventory valid=%d; chunks=%d collision=%d active_trees=%d active_batches=%d active_capsules=%d outer_trees=%d outer_batches=%d grass=%d ferns=%d"),
+    Observations.Add(FString::Printf(TEXT("Generated inventory valid=%d; chunks=%d collision=%d active_trees=%d active_batches=%d active_capsules=%d outer_trees=%d outer_batches=%d grass=%d/%d grass_batches=%d ferns=%d/%d fern_batches=%d"),
         Valid && Written, Landscape->TerrainChunks.Num(), Colliding, ActiveTrees,
         Landscape->ActiveTreeBatches.Num(), ActiveCollisions, OuterTrees,
-        Landscape->OuterTreeBatches.Num(), Grass, Ferns));
+        Landscape->OuterTreeBatches.Num(), Grass, ExpectedGrass, GrassBatchComponents,
+        Ferns, ExpectedFerns, FernBatchComponents));
 }

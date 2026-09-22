@@ -528,6 +528,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
     const auto& State = Simulation.GetState();
     const double Started = FPlatformTime::Seconds();
     const FName FernTag(TEXT("AuthoredFern02"));
+    const FName GrassTag(TEXT("AuthoredGrassMedium01"));
     TArray<UStaticMesh*> FernMeshes;
     for (const TCHAR* Suffix : {TEXT("a"), TEXT("b"), TEXT("c"), TEXT("d")})
     {
@@ -623,24 +624,37 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         ++RebuiltChunks;
         const uint32 Seed = GetTypeHash(State.world.seed) ^ GetTypeHash(Chunk.Key);
         FRandomStream Random(static_cast<int32>(Seed));
-        TArray<UHierarchicalInstancedStaticMeshComponent*> Batches;
+        auto CreateCoverBatch = [&](UStaticMesh* Mesh, FName Tag, int32 StartCullDistance,
+            int32 EndCullDistance)
+        {
+            auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+            Batch->SetupAttachment(GetRootComponent());
+            Batch->SetMobility(EComponentMobility::Static);
+            Batch->ComponentTags.Add(Tag);
+            Batch->SetStaticMesh(Mesh);
+            Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+            Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Batch->SetGenerateOverlapEvents(false);
+            Batch->SetCanEverAffectNavigation(false);
+            Batch->SetCullDistances(StartCullDistance, EndCullDistance);
+            Batch->SetVisibility(true);
+            Batch->SetHiddenInGame(false);
+            Batch->SetCastShadow(false);
+            Batch->bAutoRebuildTreeOnInstanceChanges = false;
+            Batch->RegisterComponent();
+            Chunk.Value.Cover.Components.Add(Batch);
+            return Batch;
+        };
+        TArray<UHierarchicalInstancedStaticMeshComponent*> GrassBatches;
         if (GrassMeshes.Num() == 4)
             for (auto* Mesh : GrassMeshes)
             {
-                auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
-                Batch->SetupAttachment(GetRootComponent());
-                Batch->SetMobility(EComponentMobility::Static);
-                Batch->ComponentTags.Add(TEXT("AuthoredGrassMedium01"));
-                Batch->SetStaticMesh(Mesh);
-                Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-                Batch->SetGenerateOverlapEvents(false);
-                Batch->SetCanEverAffectNavigation(false);
-                Batch->SetCullDistances(3500, 5000);
-                Batch->bAutoRebuildTreeOnInstanceChanges = false;
-                Batch->RegisterComponent();
-                Chunk.Value.Cover.Components.Add(Batch);
-                Batches.Add(Batch);
+                GrassBatches.Add(CreateCoverBatch(Mesh, GrassTag, 3500, 5000));
             }
+        TMap<FString, UHierarchicalInstancedStaticMeshComponent*> FernBatches;
+        if (FernMeshes.Num() == 4)
+            for (auto* Mesh : FernMeshes)
+                FernBatches.Add(Mesh->GetPathName(), CreateCoverBatch(Mesh, FernTag, 0, 5000));
         for (int32 Attempt = 0; Attempt < 1200; ++Attempt)
         {
             const double X = OriginX + Random.FRandRange(0, 2399.99f);
@@ -650,11 +664,11 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
                 continue;
             const int32 Variety = Attempt % 16;
             const int32 Index = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
-            if (Batches.Num() == 4)
+            if (GrassBatches.Num() == 4)
             {
                 const FBox Bounds = GrassMeshes[Index]->GetBoundingBox();
                 const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-                Batches[Index]->AddInstance(FTransform(Rotation,
+                GrassBatches[Index]->AddInstance(FTransform(Rotation,
                     AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
                 ++GrassCount;
                 GrassTriangleCount += GrassTriangles[Index];
@@ -664,23 +678,13 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
                 auto* Mesh = FernMeshes[(Attempt / 32) % 4];
                 const FBox Bounds = Mesh->GetBoundingBox();
                 const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-                auto* Part = NewObject<UStaticMeshComponent>(this);
-                Part->SetupAttachment(GetRootComponent());
-                Part->SetMobility(EComponentMobility::Static);
-                Part->ComponentTags.Add(FernTag);
-                Part->SetStaticMesh(Mesh);
-                Part->SetRelativeTransform(FTransform(Rotation,
+                FernBatches.FindChecked(Mesh->GetPathName())->AddInstance(FTransform(Rotation,
                     AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
-                Part->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-                Part->SetGenerateOverlapEvents(false);
-                Part->SetCanEverAffectNavigation(false);
-                Part->SetCullDistance(5000);
-                Part->RegisterComponent();
-                Chunk.Value.Cover.Components.Add(Part);
                 ++FernCount;
             }
         }
-        for (auto* Batch : Batches) Batch->BuildTreeIfOutdated(false, true);
+        for (auto* Batch : GrassBatches) Batch->BuildTreeIfOutdated(false, true);
+        for (const auto& Batch : FernBatches) Batch.Value->BuildTreeIfOutdated(false, true);
         Chunk.Value.CoverSignature = Signature;
     }
     DecorationBuildMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
