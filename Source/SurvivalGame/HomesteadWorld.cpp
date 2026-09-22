@@ -890,6 +890,7 @@ void AHomesteadWorld::ClearActiveTreeBatches()
     ActiveTreeBatches.Reset();
     ActiveTreeCollisions.Reset();
     ActiveTreeInstances.Reset();
+    ActiveTreeLayoutSignature.Reset();
 }
 
 bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simulation)
