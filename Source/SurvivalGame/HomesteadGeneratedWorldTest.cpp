@@ -4,6 +4,7 @@
 #include "HomesteadSave.h"
 #include "HomesteadTestPaths.h"
 #include "Dom/JsonObject.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -39,6 +40,8 @@ struct FWoodlandFixture
     bool CrossedOldBoundary = false, CrossedChunkSeam = false, ContinuousGround = true;
     size_t EditCount = 0;
     FString WorldId, SimulationText, Fingerprint;
+    FString ActiveBatchSnapshot;
+    int32 ActiveBatchComponents = 0, ActiveBatchInstances = 0, ActiveCollisionCapsules = 0;
     FString OuterBatchSnapshot;
     int32 OuterBatchComponents = 0, OuterBatchInstances = 0;
     uint32 ProducerProcess = 0;
@@ -351,6 +354,66 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             return FString();
         return FString::Join(Rows, TEXT("\n"));
     };
+    auto ActiveBatchSnapshot = [this](int32& ComponentCount, int32& InstanceCount, int32& CollisionCount)
+    {
+        ComponentCount = 0;
+        InstanceCount = 0;
+        CollisionCount = 0;
+        if (!Controller->Landscape) return FString();
+        TArray<FString> Rows;
+        for (const auto& Entry : Controller->Landscape->ActiveTreeInstances)
+            Rows.Add(Entry.Key + TEXT("|") + Entry.Value.Visual.MeshPath + TEXT("|")
+                + Entry.Value.Visual.Transform.ToString() + TEXT("|")
+                + Entry.Value.CollisionTransform.ToString());
+        for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+        {
+            if (!IsValid(Entry.Value.Get()) || !Entry.Value->IsRegistered()
+                || !Entry.Value->GetStaticMesh() || Entry.Value->GetStaticMesh()->GetPathName() != Entry.Key
+                || Entry.Value->IsQueryCollisionEnabled())
+                return FString();
+            ++ComponentCount;
+            InstanceCount += Entry.Value->GetInstanceCount();
+            for (int32 Index = 0; Index < Entry.Value->GetInstanceCount(); ++Index)
+            {
+                FTransform Transform;
+                if (!Entry.Value->GetInstanceTransform(Index, Transform)) return FString();
+                Rows.Add(TEXT("B|") + Entry.Key + TEXT("|") + Transform.ToString());
+            }
+        }
+        for (const auto& Entry : Controller->Landscape->ActiveTreeCollisions)
+        {
+            if (!IsValid(Entry.Value.Get()) || !Entry.Value->IsRegistered()
+                || !Entry.Value->ComponentHasTag(TEXT("GeneratedForestTreeCollision"))
+                || !Entry.Value->ComponentHasTag(
+                    FName(*(FString(TEXT("TreeKey_")) + Entry.Key)))
+                || !Entry.Value->IsQueryCollisionEnabled()
+                || Entry.Value->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block
+                || Entry.Value->GetCollisionResponseToChannel(ECC_Camera) != ECR_Block)
+                return FString();
+            ++CollisionCount;
+            Rows.Add(TEXT("C|") + Entry.Key + TEXT("|") + Entry.Value->GetRelativeTransform().ToString()
+                + FString::Printf(TEXT("|%.6f|%.6f"), Entry.Value->GetUnscaledCapsuleRadius(),
+                    Entry.Value->GetUnscaledCapsuleHalfHeight()));
+        }
+        TArray<UHierarchicalInstancedStaticMeshComponent*> RegisteredBatches;
+        Controller->Landscape->GetComponents(RegisteredBatches);
+        RegisteredBatches.RemoveAll([](const UHierarchicalInstancedStaticMeshComponent* Batch)
+        {
+            return !Batch || !Batch->ComponentHasTag(TEXT("GeneratedActiveTreeBatch"));
+        });
+        TArray<UCapsuleComponent*> RegisteredCollisions;
+        Controller->Landscape->GetComponents(RegisteredCollisions);
+        RegisteredCollisions.RemoveAll([](const UCapsuleComponent* Collision)
+        {
+            return !Collision || !Collision->ComponentHasTag(TEXT("GeneratedForestTreeCollision"));
+        });
+        if (RegisteredBatches.Num() != ComponentCount || RegisteredCollisions.Num() != CollisionCount
+            || InstanceCount != Controller->Landscape->ActiveTreeInstances.Num()
+            || CollisionCount != Controller->Landscape->ActiveTreeInstances.Num())
+            return FString();
+        Rows.Sort();
+        return FString::Join(Rows, TEXT("\n"));
+    };
     Add(TEXT("Generated woodland uses the isolated native test sandbox"),
         []() {},
         [this]()
@@ -424,6 +487,16 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                     Fixture->ProducerProcess, FPlatformProcess::GetCurrentProcessId(), *Fixture->Fingerprint));
                 return Good;
             }, 1.0f);
+        Add(TEXT("Reloaded active tree batches and capsules match authoritative active trees"),
+            []() {}, [this, ActiveBatchSnapshot]()
+            {
+                int32 Components = 0, Instances = 0, Collisions = 0, Expected = 0;
+                for (const auto& Node : Controller->State().resources)
+                    Expected += Node.kind == ResourceKind::ForestTree && !Node.cleared ? 1 : 0;
+                return !ActiveBatchSnapshot(Components, Instances, Collisions).IsEmpty()
+                    && Components > 0 && Components <= 3
+                    && Instances == Expected && Collisions == Expected;
+            });
         Capture(TEXT("generated-reloaded"));
         Add(TEXT("External generated producer save remains byte-identical"),
             []() {}, [Producer, Fixture]()
@@ -476,9 +549,15 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     for (const auto& Planned : Fixture->Clear)
     {
         const auto Key = Planned.key;
+        const FString KeyText = FString::Printf(TEXT("%d,%d,%u"), Key.chunk.x, Key.chunk.y, Key.localId);
+        const bool Mature = Planned.kind == ResourceKind::ForestTree;
         const bool Primary = Key == Fixture->SiteTree;
         const auto BranchBefore = MakeShared<int32>(0), FiberBefore = MakeShared<int32>(0);
         const auto Positioned = MakeShared<bool>(false);
+        const auto ActiveBefore = MakeShared<FString>();
+        const auto ActiveInstancesBefore = MakeShared<int32>(0);
+        const auto ActivePointersBefore =
+            MakeShared<TSet<const UHierarchicalInstancedStaticMeshComponent*>>();
         Add(FString::Printf(TEXT("CONTROLLED worksite approach to generated key (%d,%d,%u), resolving current handle"),
             Key.chunk.x, Key.chunk.y, Key.localId),
             [this, Key, Positioned]()
@@ -511,6 +590,21 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 return *Positioned && Controller->Simulation().ResolveGeneratedResource(Key, Node)
                     && Node.id > 0 && !Node.cleared && Controller->IsResourceFocused(Node.id);
             }, 0.8f);
+        if (Mature)
+            Add(TEXT("Pin active tree batch/collision state before mapped felling"),
+                [this, ActiveBatchSnapshot, ActiveBefore, ActiveInstancesBefore, ActivePointersBefore]()
+                {
+                    int32 Components = 0, Collisions = 0;
+                    *ActiveBefore = ActiveBatchSnapshot(Components, *ActiveInstancesBefore, Collisions);
+                    for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+                        ActivePointersBefore->Add(Entry.Value.Get());
+                },
+                [this, KeyText, ActiveBefore, ActiveInstancesBefore]()
+                {
+                    return !ActiveBefore->IsEmpty() && *ActiveInstancesBefore > 0
+                        && Controller->Landscape->ActiveTreeInstances.Contains(KeyText)
+                        && Controller->Landscape->ActiveTreeCollisions.Contains(KeyText);
+                });
         Add(Primary ? TEXT("Fell mature build-site tree through production primary A")
                     : TEXT("Clear actual worksite obstruction through production secondary X"),
             [this, Primary, BranchBefore, FiberBefore]()
@@ -519,16 +613,27 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 *FiberBefore = Controller->Simulation().Count(Item::Fiber);
                 Tap(Primary ? EKeys::Gamepad_FaceButton_Bottom : EKeys::Gamepad_FaceButton_Left);
             },
-            [this, Key, BranchBefore, FiberBefore]()
+            [this, Key, KeyText, Mature, BranchBefore, FiberBefore, ActiveBatchSnapshot,
+                ActiveInstancesBefore, ActivePointersBefore]()
             {
                 ResourceNode Node;
                 if (!Controller->Simulation().ResolveGeneratedResource(Key, Node) || !Node.cleared
                     || Node.readyAtHour != 0 || Controller->ToastIsError()
                     || Controller->Simulation().UsedCapacity() > InventoryCapacity) return false;
-                return Node.kind != ResourceKind::ForestTree
-                    || (ClearedKey(Controller->Simulation(), Key, true)
+                if (!Mature) return true;
+                int32 Components = 0, Instances = 0, Collisions = 0;
+                const FString After = ActiveBatchSnapshot(Components, Instances, Collisions);
+                bool OldPointersRemoved = true;
+                for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+                    OldPointersRemoved &= !ActivePointersBefore->Contains(Entry.Value.Get());
+                return ClearedKey(Controller->Simulation(), Key, true)
+                        && !After.IsEmpty() && Instances == *ActiveInstancesBefore - 1
+                        && Collisions == Instances && Components > 0 && Components <= 3
+                        && !Controller->Landscape->ActiveTreeInstances.Contains(KeyText)
+                        && !Controller->Landscape->ActiveTreeCollisions.Contains(KeyText)
+                        && OldPointersRemoved
                         && Controller->Simulation().Count(Item::Branch) == *BranchBefore + 8
-                        && Controller->Simulation().Count(Item::Fiber) == *FiberBefore + 2);
+                        && Controller->Simulation().Count(Item::Fiber) == *FiberBefore + 2;
             }, 0.8f);
     }
     Add(TEXT("CONTROLLED post-felling supply: digging/watering tools, build stones, roots, seed and water; retain earned wood/fiber"),
@@ -596,6 +701,19 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
         },
         [this, Fixture]() { return SitePersists(Controller->Simulation(), *Fixture); }, 1.0f);
     Capture(TEXT("generated-cleared-site"));
+    Add(TEXT("Active mature trees use bounded exact-mesh batches and per-key capsules"),
+        [Fixture, ActiveBatchSnapshot]()
+        {
+            Fixture->ActiveBatchSnapshot = ActiveBatchSnapshot(Fixture->ActiveBatchComponents,
+                Fixture->ActiveBatchInstances, Fixture->ActiveCollisionCapsules);
+        },
+        [Fixture]()
+        {
+            return !Fixture->ActiveBatchSnapshot.IsEmpty()
+                && Fixture->ActiveBatchComponents > 0 && Fixture->ActiveBatchComponents <= 3
+                && Fixture->ActiveBatchInstances > Fixture->ActiveBatchComponents
+                && Fixture->ActiveCollisionCapsules == Fixture->ActiveBatchInstances;
+        });
     Add(TEXT("Outer mature trees use bounded exact-mesh batches before travel"),
         [Fixture, OuterBatchSnapshot]()
         {
@@ -663,12 +781,42 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             Teleport(Garden);
             Controller->SetControlRotation(FRotator(-25, -90, 0));
         },
-        [this, Fixture]() { return SitePersists(Controller->Simulation(), *Fixture)
-            && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
-            && Controller->State().resourceEdits.size() == Fixture->EditCount; }, 1.0f);
+        [this, Fixture, ActiveBatchSnapshot]()
+        {
+            int32 Components = 0, Instances = 0, Collisions = 0;
+            return SitePersists(Controller->Simulation(), *Fixture)
+                && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
+                && Controller->State().resourceEdits.size() == Fixture->EditCount
+                && ActiveBatchSnapshot(Components, Instances, Collisions)
+                    == Fixture->ActiveBatchSnapshot
+                && Components == Fixture->ActiveBatchComponents
+                && Instances == Fixture->ActiveBatchInstances
+                && Collisions == Fixture->ActiveCollisionCapsules;
+        }, 1.0f);
+    const auto ActiveLayoutStable = MakeShared<bool>(false);
+    Add(TEXT("Same active layout preserves batch and capsule component identities"),
+        [this, Fixture, ActiveBatchSnapshot, ActiveLayoutStable]()
+        {
+            TSet<const UHierarchicalInstancedStaticMeshComponent*> Batches;
+            TSet<const UCapsuleComponent*> Collisions;
+            for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+                Batches.Add(Entry.Value.Get());
+            for (const auto& Entry : Controller->Landscape->ActiveTreeCollisions)
+                Collisions.Add(Entry.Value.Get());
+            if (!Controller->Landscape->Refresh(Controller->Simulation())) return;
+            int32 Components = 0, Instances = 0, CollisionCount = 0;
+            bool Stable = ActiveBatchSnapshot(Components, Instances, CollisionCount)
+                == Fixture->ActiveBatchSnapshot;
+            for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+                Stable &= Batches.Contains(Entry.Value.Get());
+            for (const auto& Entry : Controller->Landscape->ActiveTreeCollisions)
+                Stable &= Collisions.Contains(Entry.Value.Get());
+            *ActiveLayoutStable = Stable;
+        },
+        [ActiveLayoutStable]() { return *ActiveLayoutStable; });
     const auto BatchLifecycleValid = MakeShared<bool>(false);
     Add(TEXT("Outer batches ignore renewable timers, omit cleared trees and rebuild without accumulation"),
-        [this, Fixture, OuterBatchSnapshot, BatchLifecycleValid]()
+        [this, Fixture, ActiveBatchSnapshot, OuterBatchSnapshot, BatchLifecycleValid]()
         {
             int32 ReturnedComponents = 0, ReturnedInstances = 0;
             const FString Returned = OuterBatchSnapshot(ReturnedComponents, ReturnedInstances);
@@ -770,12 +918,28 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
                 if (ShiftedPointers.Contains(Entry.Value.Get())) return;
 
+            TSet<const UHierarchicalInstancedStaticMeshComponent*> PreviousActiveBatches;
+            TSet<const UCapsuleComponent*> PreviousActiveCollisions;
+            for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+                PreviousActiveBatches.Add(Entry.Value.Get());
+            for (const auto& Entry : Controller->Landscape->ActiveTreeCollisions)
+                PreviousActiveCollisions.Add(Entry.Value.Get());
             Homestead::Simulation Alternate;
             if (!Alternate.NewGame(Controller->State().world.seed ^ 0x9e3779b97f4a7c15ULL)
                 || !Alternate.SetActiveWorldRegion(ShiftedCenter)
                 || !Controller->Landscape->Refresh(Alternate)
                 || Controller->Landscape->Descriptor.seed != Alternate.GetState().world.seed)
                 return;
+            int32 AlternateActiveComponents = 0, AlternateActiveInstances = 0;
+            int32 AlternateActiveCollisions = 0;
+            if (ActiveBatchSnapshot(AlternateActiveComponents, AlternateActiveInstances,
+                    AlternateActiveCollisions).IsEmpty()
+                || AlternateActiveInstances != AlternateActiveCollisions)
+                return;
+            for (const auto& Entry : Controller->Landscape->ActiveTreeBatches)
+                if (PreviousActiveBatches.Contains(Entry.Value.Get())) return;
+            for (const auto& Entry : Controller->Landscape->ActiveTreeCollisions)
+                if (PreviousActiveCollisions.Contains(Entry.Value.Get())) return;
             int32 AlternateComponents = 0, AlternateInstances = 0;
             if (OuterBatchSnapshot(AlternateComponents, AlternateInstances).IsEmpty()
                 || AlternateComponents <= 0 || AlternateComponents > 3
@@ -784,10 +948,17 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
 
             if (!Controller->Landscape->Refresh(Controller->Simulation())) return;
             int32 RestoredComponents = 0, RestoredInstances = 0;
+            int32 RestoredActiveComponents = 0, RestoredActiveInstances = 0;
+            int32 RestoredActiveCollisions = 0;
             *BatchLifecycleValid = OuterBatchSnapshot(RestoredComponents, RestoredInstances)
                     == Fixture->OuterBatchSnapshot
                 && RestoredComponents == Fixture->OuterBatchComponents
                 && RestoredInstances == Fixture->OuterBatchInstances
+                && ActiveBatchSnapshot(RestoredActiveComponents, RestoredActiveInstances,
+                    RestoredActiveCollisions) == Fixture->ActiveBatchSnapshot
+                && RestoredActiveComponents == Fixture->ActiveBatchComponents
+                && RestoredActiveInstances == Fixture->ActiveBatchInstances
+                && RestoredActiveCollisions == Fixture->ActiveCollisionCapsules
                 && Controller->Landscape->Descriptor.generationVersion
                     == Controller->State().world.generationVersion;
         },

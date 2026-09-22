@@ -9,6 +9,7 @@
 class UStaticMesh;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
+class UCapsuleComponent;
 class UStaticMeshComponent;
 class UHierarchicalInstancedStaticMeshComponent;
 class UProceduralMeshComponent;
@@ -50,6 +51,15 @@ struct FHomesteadOuterTreeInstance
     FTransform Transform;
     int32 PaletteRole = 0;
     uint32 VariantIndex = 0;
+};
+
+struct FHomesteadActiveTreeInstance
+{
+    FHomesteadOuterTreeInstance Visual;
+    FTransform CollisionTransform;
+    float CapsuleRadius = 0;
+    float CapsuleHalfHeight = 0;
+    int32 ResourceId = 0;
 };
 
 UCLASS()
@@ -98,6 +108,11 @@ private:
     TMap<FString, TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> OuterTreeBatches;
     TMap<FString, FHomesteadOuterTreeInstance> OuterTreeInstances;
     UPROPERTY()
+    TMap<FString, TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> ActiveTreeBatches;
+    UPROPERTY()
+    TMap<FString, TObjectPtr<UCapsuleComponent>> ActiveTreeCollisions;
+    TMap<FString, FHomesteadActiveTreeInstance> ActiveTreeInstances;
+    UPROPERTY()
     TObjectPtr<UDirectionalLightComponent> Sun;
     UPROPERTY()
     TObjectPtr<UDirectionalLightComponent> Moon;
@@ -121,6 +136,7 @@ private:
     bool bInitialized = false;
     FString ResourceLayoutSignature;
     FString OuterTreeLayoutSignature;
+    FString ActiveTreeLayoutSignature;
     double DecorationBuildMilliseconds = 0;
     Homestead::Generation::WorldDescriptor Descriptor;
     Homestead::Generation::ChunkCoord PreparedChunk;
@@ -146,6 +162,8 @@ private:
         FHomesteadOuterTreeInstance& Instance);
     bool RebuildOuterTreeBatches(const Homestead::Simulation& Simulation);
     void ClearOuterTreeBatches();
+    bool RebuildActiveTreeBatches(const Homestead::Simulation& Simulation);
+    void ClearActiveTreeBatches();
     void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void UpdateLighting(const Homestead::State& State);
