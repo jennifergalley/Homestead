@@ -72,6 +72,43 @@ Central plan is UI-owned; siblings use uniquely named lane addenda.
 
 ## Decisions
 
+### Current integrated milestone: save/reset safety and real inventory transactions
+
+The selected rollback entering this milestone is `woodland-polish-06` /
+`woodland-polish-v9`. Preserve its generated woodland, regional water,
+Timber/Firewood, controls, saves and performance while completing the current
+native menu rather than introducing another UI framework.
+
+Reconcile `improve-menu-directional-navigation` from exact delivered evidence.
+Candidate06 proves controller/keyboard directional grids, short/full/scrolled
+and empty content, quantity edit/cancel, focus restoration and separate-process
+resume at 720p/4K. That satisfies this change's grid-navigation integration
+task. It does not prove full mouse/device switching, every held-stick comfort
+case or the separate change's complete upper-boundary matrix; keep the broader
+stable-input task open and disclose those limits.
+
+Use the current `Simulation` typed APIs and `HomesteadMenuInventory` adapter for
+the visible transaction slice. Pack/chest/equipment cards and details remain
+views over real layout/ownership. Move, split, merge, amount, equip, unequip and
+recolor capture the current revision and commit once through authority.
+Cancellation, stale revision and repeated confirm must leave state unchanged;
+menu routing consumes activation before Slate buttons can click through.
+
+Current-version save/reset work stays in the existing Controller/save wrapper:
+validate complete candidate simulation, world identity, wardrobe presentation
+and routing before replacing live state. Manual, autosave, recovery and session
+snapshots replace rather than merge. Exercise temporary write, readback,
+backup, final replacement and retry through sandbox-only failure injection.
+Unsupported test versions show an explicit reset dialog that defaults to
+cancel; reset creates a fresh test world without deleting unrelated profiles.
+
+Acceptance uses synthetic portable fixtures first, then the serialized engine
+slot. Run 720p and 4K producers plus separate consumers, explicit incompatible
+reset, save-failure/retry, unsaved/recovery/Settings routes, ordinary gameplay,
+and repeated menu open/close cleanup. Mouse is required only for already
+implemented click/hover equivalents; no unsupported drag-and-drop or broad
+device-parity claim is introduced.
+
 ### Native shell, not another UI framework
 
 Use a narrow C++-authored Slate widget directly in the game viewport. The early

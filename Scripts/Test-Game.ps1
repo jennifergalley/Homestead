@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
-    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [switch]$NativeSaveRetry, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
@@ -29,9 +29,9 @@ if ($DirectionalNavigation) {
     }
     $NativeMenu = $true
 }
-if ($NativeMenuQuit) { $NativeMenu = $true }
+if ($NativeMenuQuit -or $NativeSaveRetry) { $NativeMenu = $true }
 if ($PSBoundParameters.ContainsKey('NativeResumeFrom') -and
-    (-not $NativeMenu -or $NativeMenuQuit -or [string]::IsNullOrWhiteSpace($NativeResumeFrom) -or
+    (-not $NativeMenu -or $NativeMenuQuit -or $NativeSaveRetry -or [string]::IsNullOrWhiteSpace($NativeResumeFrom) -or
         -not [IO.Path]::IsPathFullyQualified($NativeResumeFrom) -or $NativeResumeFrom -match '["\r\n]')) {
     throw 'Native resume requires NativeMenu, a quoted-safe absolute producer directory, and no NativeMenuQuit.'
 }
@@ -128,6 +128,7 @@ if ($DirectionalNavigation) {
 }
 if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
+if ($NativeSaveRetry) { $captures = @() }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -160,6 +161,7 @@ if ($GeneratedResumeFrom) { $loopArguments += " -HomesteadGeneratedResumeFrom=`"
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }
+if ($NativeSaveRetry) { $loopArguments += ' -HomesteadNativeSaveRetryTest' }
 if ($DirectionalNavigation) { $loopArguments += ' -HomesteadDirectionalNavigationTest' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }
 if ($NativeResumeFrom) { $loopArguments += " -HomesteadNativeResumeFrom=`"$([IO.Path]::GetFullPath($NativeResumeFrom))`"" }

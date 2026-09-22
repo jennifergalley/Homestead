@@ -947,6 +947,27 @@ bool SHomesteadMenu::FocusLegacySubject(int32 Id)
     bFocusPending = true;
     return true;
 }
+bool SHomesteadMenu::FocusSubject(EHomesteadMenuSubject Subject, int32 SubjectId, int32 ContainerId)
+{
+    const int32 Index = Entries.IndexOfByPredicate([=](const FHomesteadRow& Row)
+        { return Row.Subject == Subject && Row.SubjectId == SubjectId && Row.ContainerId == ContainerId; });
+    if (Index < 0) return false;
+    Select(Index);
+    Region = ERegion::Content;
+    bFocusPending = true;
+    SynchronizeFocus();
+    return true;
+}
+bool SHomesteadMenu::FocusItemAction(EHomesteadItemAction Action)
+{
+    const int32 Index = Actions.IndexOfByKey(Action);
+    if (Index < 0) return false;
+    Region = ERegion::Actions;
+    ActionSelection = Index;
+    bFocusPending = true;
+    SynchronizeFocus();
+    return true;
+}
 void SHomesteadMenu::CycleRegion(int32 Direction)
 {
     TArray<ERegion> Regions = {ERegion::Tabs};
@@ -1330,7 +1351,12 @@ void SHomesteadMenu::BuildDialog()
 void SHomesteadMenu::DialogAction(int32 Index)
 {
     if (!Controller.IsValid() || bSaving) return;
-    if (Index == 0) { SetDialog(EDialog::None); return; }
+    if (Index == 0)
+    {
+        if (Dialog == EDialog::TestReset) bResetPromptShown = false;
+        SetDialog(EDialog::None);
+        return;
+    }
     if (Dialog == EDialog::Amount)
     {
         if (Index == 2) { Amount = 1; BuildDialog(); return; }

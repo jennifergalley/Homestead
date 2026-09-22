@@ -63,6 +63,8 @@ private:
     void PrepareDirectionalNavigationChecks();
     void PrepareNativeMenuChecks();
     void PrepareNativeWardrobeChecks();
+    void PrepareNativeInventoryTransactionChecks();
+    void PrepareNativeResetChecks();
     void PrepareNativeResumeChecks(const FString& ProducerOutput);
     bool VerifyNativeMenuPresentation() const;
     void PreparePresentation();

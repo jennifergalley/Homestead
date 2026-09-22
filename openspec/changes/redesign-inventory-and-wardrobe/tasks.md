@@ -2,7 +2,9 @@
 
 ## Current state and next visible goal
 
-September21 read-only evidence reconciliation:19/44 tasks complete. The delivered
+September22 integrated milestone begins from selected `woodland-polish-06` /
+`woodland-polish-v9`. September21 read-only evidence reconciliation had19/44
+tasks complete. The delivered
 `wardrobe-ui-02` proof includes actual720p/4K producers, separate-process consumers,
 real save-and-quit and ordinary gameplay; accepted portable evidence is23 scenarios
 /1882 checks. This reconciliation records completed work, not new certification.
@@ -11,6 +13,11 @@ Jenny says the menu looks pretty good; next visible goal is natural D-pad/left-s
 section traversal, especially Down, without requiring LT/RT. The isolated UI owner
 owns `improve-menu-directional-navigation`; main retains world/camera/endurance and
 the serialized compiler/runtime slot. Current natural endurance stays uninterrupted.
+
+Candidate06 now closes task5.3 from exact720p/4K controller/keyboard evidence:
+real directional short/full/scrolled/empty grids, quantity edit/cancel and focus
+restoration passed. Task5.2 remains open because full mouse/device switching and
+general held-stick comfort were not proved; do not infer them.
 
 Actual Failed-dialog Retry-button success, incompatible-save reset, broader
 nonstarter clothing/storage/quantity/mouse flows, held-stick/human comfort and
@@ -54,7 +61,7 @@ saves still require truthful current-save behavior; no migration project is impl
 
 - [x] 5.1 Add narrow native UMG/Slate shell and dependencies; verify shared build succeeds and no duplicate Canvas menu drawing.
 - [ ] 5.2 Route accepted menu input once through existing prompt classifier; verify noise/held-stick stability, deliberate switching and test input isolation.
-- [ ] 5.3 Implement labeled icon tabs, regions and four-way grid navigation; verify scroll/partial rows/empty states/focus restoration on controller and keyboard.
+- [x] 5.3 Implement labeled icon tabs, regions and four-way grid navigation; verify scroll/partial rows/empty states/focus restoration on controller and keyboard.
 - [ ] 5.4 Build real carried/chest grids and hover/focus details, then equipment/preview; verify truthful counts/capacity and no hover mutation.
 - [ ] 5.5 Wire Move/Split/Merge/amount/equip/recolor to typed real authority; verify cancel/failure/repeated confirm and no click-through.
 - [ ] 5.6 Integrate Craft/Build/Guidebook/Credits/Settings/Appearance purpose-specific content; verify existing actions/settings and separate body/hair versus owned clothing.

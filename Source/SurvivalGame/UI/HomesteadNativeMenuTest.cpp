@@ -18,6 +18,7 @@
 #include "Misc/SecureHash.h"
 #include "HAL/PlatformProcess.h"
 #include "Engine/SkeletalMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "Dom/JsonObject.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
@@ -151,6 +152,20 @@ bool ReadFixture(const FString& Directory, FSaveFixture& Fixture, TArray<uint8>&
     { Error = TEXT("Resume fixture expected world/appearance/current simulation is invalid."); return false; }
     return true;
 }
+
+bool WriteEnvelope(UHomesteadSave& Save, const FString& Path)
+{
+    TArray<uint8> Data;
+    if (!UGameplayStatics::SaveGameToMemory(&Save, Data)) return false;
+    TArray<uint8> Envelope;
+    Envelope.SetNumUninitialized(Data.Num() + 12);
+    const char Magic[] = "HOMESAV1";
+    const uint32 Checksum = FCrc::MemCrc32(Data.GetData(), Data.Num());
+    FMemory::Memcpy(Envelope.GetData(), Magic, 8);
+    FMemory::Memcpy(Envelope.GetData() + 8, &Checksum, sizeof(Checksum));
+    FMemory::Memcpy(Envelope.GetData() + 12, Data.GetData(), Data.Num());
+    return FFileHelper::SaveArrayToFile(Envelope, *Path);
+}
 }
 
 bool AHomesteadSmokeTest::VerifyNativeMenuPresentation() const
@@ -283,6 +298,40 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("First exit-path press opens Settings"),
         [this]() { Tap(EKeys::Escape); PausedHour = Controller->State().hour; },
         [this]() { return Controller->HasNativeMenu() && Controller->BookPage() == 4; });
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeSaveRetryTest")))
+    {
+        Add(TEXT("Prepare an existing valid manual save before retry fixture"),
+            [this]() { Tap(EKeys::F5); },
+            [this]() { return Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual"))) != nullptr; });
+        Add(TEXT("Open exit confirmation for save-failure retry"),
+            [this]() { Tap(EKeys::Right); Tap(EKeys::Enter); },
+            [this]() { return Controller->NativeMenu->IsExitPrompt(); });
+        Add(TEXT("Owned temporary-path failure keeps process open and paused"),
+            [this, Before, OriginalRoute, Blocker]()
+            {
+                *Before = Controller->Simulation().Serialize();
+                *OriginalRoute = Controller->SaveRoute.Directory;
+                FFileHelper::SaveStringToFile(TEXT("owned retry blocker"), **Blocker);
+                Controller->SaveRoute.Directory = *Blocker;
+                Tap(EKeys::Down); Tap(EKeys::Enter);
+            },
+            [this, Before]() { return Controller->NativeMenu->IsSaveError()
+                && Controller->Simulation().Serialize() == *Before && !IsEngineExitRequested(); });
+        Add(TEXT("Explicit Retry succeeds, saves exact current state, then requests exit"),
+            [this, Before, OriginalRoute, Blocker]()
+            {
+                Controller->SaveRoute.Directory = *OriginalRoute;
+                if (!IFileManager::Get().Delete(**Blocker, false, true))
+                { Finish(false, TEXT("Could not remove owned retry blocker.")); return; }
+                Tap(EKeys::Down); Tap(EKeys::Enter);
+                const auto* Saved = Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual")));
+                const bool Passed = Saved && Saved->SimulationData == UTF8_TO_TCHAR(Before->c_str())
+                    && IsEngineExitRequested();
+                Finish(Passed, Passed ? TEXT("Save failure retry durably replaced the manual save before exit.")
+                    : TEXT("Retry did not verify both durable save and exit request."));
+            }, []() { return true; }, 0);
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeQuitTest")))
     {
         Add(TEXT("Reach the real save-and-quit confirmation"),
@@ -368,6 +417,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("Carried: 1"));
         });
     Capture(TEXT("native-inventory"));
+    PrepareNativeInventoryTransactionChecks();
     Add(TEXT("Mouse noise does not steal controller hints"),
         [this]() { Axis(EKeys::MouseX, 0.01f); },
         [this]() { return Controller->UsesGamepad(); });
@@ -398,6 +448,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { Tap(EKeys::Escape); Tap(EKeys::Escape); },
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     PrepareNativeWardrobeChecks();
+    PrepareNativeResetChecks();
     Add(TEXT("Prepare disclosed survival-failure fixture"),
         [this]() { Controller->Sim.AdvanceGameHours(120, Controller->PlayerPoint()); },
         [this]() { return Controller->IsFailed() && Controller->HasNativeMenu() && !Controller->IsBookOpen(); }, 0.8f);
@@ -466,13 +517,38 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
             return Subject && Subject->Subject == EHomesteadMenuSubject::Wearable && Subject->SubjectId == *Tunic
                 && Subject->ContainerId == 0;
         });
+    Add(TEXT("Move the owned tunic into the real reachable chest through mapped UI"),
+        [this, Tunic]()
+        {
+            if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Wearable, *Tunic, 0)
+                || !Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer))
+            { Finish(false, TEXT("Owned tunic transfer action is unavailable.")); return; }
+            Tap(EKeys::Enter);
+        },
+        [this, Tunic]() { const auto* Owned = Controller->Simulation().GetWearable(*Tunic);
+            return !Controller->ToastIsError() && Owned && Owned->owner == Homestead::WearableOwner::Chest; });
+    Add(TEXT("Take the same owned tunic back from chest without duplication"),
+        [this, Tunic, OpenInventory]()
+        {
+            OpenInventory(1);
+            const auto* Owned = Controller->Simulation().GetWearable(*Tunic);
+            if (!Owned || !Controller->NativeMenu->FocusSubject(
+                EHomesteadMenuSubject::Wearable, *Tunic, Owned->chestId)
+                || !Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer))
+            { Finish(false, TEXT("Stored tunic transfer action is unavailable.")); return; }
+            Tap(EKeys::Enter);
+        },
+        [this, Tunic]() { const auto* Owned = Controller->Simulation().GetWearable(*Tunic);
+            return !Controller->ToastIsError() && Owned && Owned->owner == Homestead::WearableOwner::Carried; });
     Add(TEXT("Mapped UI equip restores the same ID and committed garment mesh"),
         [this, Tunic, Expected]()
         {
+            Controller->CloseBook(); Controller->MenuInventoryView(0); Controller->OpenBook(0);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Wearable, *Tunic, 0);
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Equip);
             *Expected = Controller->Simulation();
             if (!Expected->EquipWearable(*Tunic, Expected->GetRevision()))
             { Finish(false, TEXT("The independent equip expectation was invalid.")); return; }
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, Expected, Tunic]()
@@ -606,6 +682,177 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
     Add(TEXT("Capture restored admitted wardrobe"),
         [this]() { Screenshot(TEXT("native-wardrobe-restored")); },
         [this]() { return VerifyNativeMenuPresentation(); }, 0.8f);
+}
+
+void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
+{
+    const auto Chest = MakeShared<int32>(-1);
+    const auto Branches = MakeShared<int32>(0);
+    const auto Snapshot = MakeShared<std::string>();
+    const auto ChestCapacity = MakeShared<int32>(0);
+    const auto Group = [this](int32 Container, int32 Quantity = -1)
+    {
+        const auto* Layout = Controller->Simulation().GetLayout(Container);
+        if (!Layout) return 0;
+        for (const auto& Entry : *Layout)
+            if (!Entry.wearableId && Entry.item == Homestead::Item::Branch
+                && (Quantity < 0 || Entry.quantity == Quantity)) return Entry.groupId;
+        return 0;
+    };
+    Add(TEXT("Gather real transaction stock and place one reachable chest through authority"),
+        [this, Chest, Branches, Group]()
+        {
+            auto Gather = [this](Homestead::ResourceKind Kind, Homestead::Item Item, int32 Target)
+            {
+                while (Controller->Simulation().Count(Item) < Target)
+                {
+                    bool Done = false;
+                    for (const auto& Node : Controller->State().resources)
+                        if (Node.kind == Kind && Controller->Simulation().CanHarvest(Node.id))
+                        { Done = Controller->Sim.Harvest(Node.id, Node.position).ok; break; }
+                    if (!Done) return false;
+                }
+                return true;
+            };
+            if (!Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 12)
+                || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2))
+            { Finish(false, TEXT("Could not gather real transaction stock.")); return; }
+            for (const FIntPoint Cell : {FIntPoint(-4,0), FIntPoint(-3,0), FIntPoint(-4,-1), FIntPoint(-3,-1)})
+            {
+                const auto Center = Homestead::CellCenter(Cell.X, Cell.Y);
+                if (Controller->Sim.Place(Homestead::Piece::Chest, Cell.X, Cell.Y, 0, Center))
+                {
+                    *Chest = Controller->Sim.FindNearestStructure(Center, Homestead::Piece::Chest, 1);
+                    Teleport(Center);
+                    break;
+                }
+            }
+            *Branches = Group(0);
+            Controller->MenuInventoryView(0); Controller->OpenBook(0);
+        },
+        [this, Chest, Branches]() { return *Chest > 0 && *Branches > 0
+            && Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0); });
+    Add(TEXT("Cancel amount transfer preserves exact current state"),
+        [this, Snapshot]()
+        {
+            *Snapshot = Controller->Simulation().Serialize();
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer);
+            Tap(EKeys::Enter); Tap(EKeys::Escape);
+        },
+        [this, Snapshot]() { return !Controller->NativeMenu->HasActiveDialog()
+            && Controller->Simulation().Serialize() == *Snapshot; });
+    Add(TEXT("Stale amount confirmation rejects without transfer"),
+        [this, Chest, Branches, ChestCapacity]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer);
+            Tap(EKeys::Enter);
+            *ChestCapacity = Controller->Simulation().ChestUsedCapacity(*Chest);
+            if (!Controller->Sim.ReorderEntry(0, 0, 1, Controller->PlayerPoint(), Controller->Sim.GetRevision()))
+            { Finish(false, TEXT("Could not create stale revision through real reorder.")); return; }
+            Tap(EKeys::Down); Tap(EKeys::Enter);
+        },
+        [this, Chest, ChestCapacity]() { return Controller->ToastIsError()
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == *ChestCapacity; });
+    Add(TEXT("Amount three transfers once; repeated confirm opens a new draft without double apply"),
+        [this, Branches, Chest, Group]()
+        {
+            *Branches = Group(0);
+            Controller->CloseBook(); Controller->MenuInventoryView(0); Controller->OpenBook(0);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer);
+            Tap(EKeys::Enter);
+            Tap(EKeys::Up); Tap(EKeys::Enter); Tap(EKeys::Right); Tap(EKeys::Right);
+            Tap(EKeys::Escape); Tap(EKeys::Down); Tap(EKeys::Down);
+            Tap(EKeys::Enter); Tap(EKeys::Enter);
+        },
+        [this, Chest]() { return Controller->Simulation().ChestUsedCapacity(*Chest) == 3
+            && Controller->NativeMenu->HasActiveDialog(); });
+    Add(TEXT("Cancel repeated draft then split stored stack through mapped confirmation"),
+        [this, Chest, Group]()
+        {
+            Tap(EKeys::Escape);
+            Controller->CloseBook(); Controller->MenuInventoryView(1); Controller->OpenBook(0);
+            const int32 Stored = Group(*Chest, 3);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Stored, *Chest);
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Split);
+            Tap(EKeys::Enter); Tap(EKeys::Down); Tap(EKeys::Enter);
+        },
+        [this, Chest]() { const auto* Layout = Controller->Simulation().GetLayout(*Chest);
+            return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
+    Add(TEXT("Merge stored stacks through mapped destination and conserve capacity"),
+        [this, Chest, Group]()
+        {
+            Controller->CloseBook(); Controller->MenuInventoryView(1); Controller->OpenBook(0);
+            const int32 Split = Group(*Chest, 1);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Split, *Chest);
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Merge);
+            Tap(EKeys::Enter); Tap(EKeys::Down); Tap(EKeys::Enter);
+        },
+        [this, Chest]() { const auto* Layout = Controller->Simulation().GetLayout(*Chest);
+            return Layout && Controller->Simulation().ChestUsedCapacity(*Chest) == 3
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                    { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
+}
+
+void AHomesteadSmokeTest::PrepareNativeResetChecks()
+{
+    const auto Before = MakeShared<std::string>();
+    const auto World = MakeShared<FString>();
+    const auto Incompatible = MakeShared<FString>();
+    Add(TEXT("Invalid ownership candidate is rejected before live mutation"),
+        [this, Before]()
+        {
+            *Before = Controller->Simulation().Serialize();
+            Homestead::Simulation Invalid = Controller->Simulation();
+            auto& State = const_cast<Homestead::State&>(Invalid.GetState());
+            State.wearables[0].owner = static_cast<Homestead::WearableOwner>(99);
+            auto* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
+            Save->WorldId = Controller->WorldId;
+            Save->SimulationData = UTF8_TO_TCHAR(Invalid.Serialize().c_str());
+            Save->SavedAtUtc = FDateTime::UtcNow().ToUnixTimestamp();
+            const FString Path = Controller->SavePath(TEXT("invalid-owner"));
+            if (!HomesteadNativeMenuProof::WriteEnvelope(*Save, Path)
+                || Controller->ReadSave(Path) || !IFileManager::Get().Delete(*Path))
+                Finish(false, TEXT("Invalid ownership fixture was not rejected and cleaned."));
+        },
+        [this, Before]() { return Controller->Simulation().Serialize() == *Before; });
+    Add(TEXT("Only incompatible sandbox save triggers explicit reset without mutation"),
+        [this, Before, World, Incompatible]()
+        {
+            *Before = Controller->Simulation().Serialize();
+            *World = Controller->WorldId;
+            for (const FString& Slot : {TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"),
+                TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")})
+                for (const FString& Suffix : {FString(), FString(TEXT(".bak"))})
+                    IFileManager::Get().Delete(*(Controller->SavePath(Slot) + Suffix), false, true);
+            auto* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
+            Save->Version = UHomesteadSave::CurrentVersion - 1;
+            Save->WorldId = *World; Save->SimulationData = UTF8_TO_TCHAR(Before->c_str());
+            Save->SavedAtUtc = FDateTime::UtcNow().ToUnixTimestamp();
+            *Incompatible = Controller->SavePath(TEXT("Homestead_Manual"));
+            if (!HomesteadNativeMenuProof::WriteEnvelope(*Save, *Incompatible))
+            { Finish(false, TEXT("Could not write incompatible fixture.")); return; }
+            Controller->QuickLoad();
+        },
+        [this, Before]() { return Controller->MenuNeedsTestReset()
+            && Controller->Simulation().Serialize() == *Before && Controller->NativeMenu->IsTestResetPrompt(); });
+    Add(TEXT("Reset cancel preserves state and incompatible test file"),
+        [this]() { Tap(EKeys::Enter); },
+        [this, Before, Incompatible]() { return Controller->MenuNeedsTestReset()
+            && !Controller->NativeMenu->HasActiveDialog() && Controller->Simulation().Serialize() == *Before
+            && IFileManager::Get().FileExists(**Incompatible); });
+    Add(TEXT("Explicit reset is separately requested after cancel"),
+        [this]() { Controller->QuickLoad(); },
+        [this]() { return Controller->NativeMenu->IsTestResetPrompt(); });
+    Add(TEXT("Confirmed reset replaces, never merges, and keeps old test file"),
+        [this]() { Tap(EKeys::Down); Tap(EKeys::Enter); },
+        [this, Before, World, Incompatible]() { return !Controller->MenuNeedsTestReset()
+            && Controller->WorldId != *World && Controller->Simulation().Serialize() != *Before
+            && Controller->Simulation().Count(Homestead::Item::Knife) == 1
+            && Controller->State().wearables.size() == 2
+            && IFileManager::Get().FileExists(**Incompatible); });
 }
 
 void AHomesteadSmokeTest::PrepareNativeResumeChecks(const FString& ProducerOutput)

@@ -32,6 +32,8 @@ public:
     bool HandleKey(FKey Key, EInputEvent Event, float InputAmount);
     void ChangePage(int32 Page);
     bool FocusLegacySubject(int32 Id);
+    bool FocusSubject(EHomesteadMenuSubject Subject, int32 SubjectId, int32 ContainerId);
+    bool FocusItemAction(EHomesteadItemAction Action);
     void RequestExit();
     void ShowSaveFailure(const FString& Error);
     void ShowGraphicsSaveFailure(const FString& Error);
@@ -42,6 +44,7 @@ public:
     bool IsExitPrompt() const { return Dialog == EDialog::Exit; }
     bool IsSaveError() const { return Dialog == EDialog::SaveFailed; }
     bool IsUnsavedPrompt() const { return Dialog == EDialog::Unsaved; }
+    bool IsTestResetPrompt() const { return Dialog == EDialog::TestReset; }
     const FHomesteadRow* GetSelectedSubject() const
     {
         const bool SubjectFocused = Region == ERegion::Content || Region == ERegion::Details || Region == ERegion::Actions;
