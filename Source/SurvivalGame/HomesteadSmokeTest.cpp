@@ -393,156 +393,101 @@ void AHomesteadSmokeTest::Prepare()
                 && Head.Y > 30 * Scale && Head.Y < Height * 0.65f;
         });
     Add(TEXT("Switch to the bob preset through the appearance menu"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]()
+        {
+            if (!Controller->NativeMenu.IsValid() || !Controller->NativeMenu->FocusLegacySubject(0))
+            { Finish(false, TEXT("The hairstyle control is unavailable in the native Appearance page.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
         [this]() { return Controller->HasHeroine() && Controller->GetAppearance().HairStyle == 1; }, 0.8f);
     Add(TEXT("Capture the bob-haired heroine"),
         [this]() { Screenshot(TEXT("heroine-bob")); },
         []() { return true; }, 0.8f);
-    for (int32 Row = 1; Row <= 4; ++Row)
+    const auto ActivateAppearance = [this](int32 Id)
+    {
+        if (!Controller->NativeMenu.IsValid() || !Controller->NativeMenu->FocusLegacySubject(Id))
+        { Finish(false, TEXT("A required native Appearance control is unavailable.")); return; }
+        Tap(EKeys::Gamepad_FaceButton_Bottom);
+        Tap(EKeys::Gamepad_FaceButton_Bottom);
+    };
+    for (int32 Row = 1; Row <= 3; ++Row)
     {
         Add(FString::Printf(TEXT("Select appearance color row %d"), Row),
-            [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+            [this, Row]()
+            {
+                if (!Controller->NativeMenu.IsValid() || !Controller->NativeMenu->FocusLegacySubject(Row))
+                { Finish(false, TEXT("An appearance color control is unavailable.")); }
+            },
             [this, Row]() { return Controller->SelectedRow() == Row; });
         Add(FString::Printf(TEXT("Change appearance color row %d"), Row),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this]()
+            {
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
+            },
             [this, Row]()
             {
                 const auto& Look = Controller->GetAppearance();
-                const int Value = Row == 1 ? Look.HairColor : Row == 2 ? Look.SkinTone : Row == 3 ? Look.EyeColor : Look.TunicColor;
+                const int Value = Row == 1 ? Look.HairColor : Row == 2 ? Look.SkinTone : Look.EyeColor;
                 return Value == 1 && Controller->HasHeroine();
             });
     }
     Add(TEXT("Capture editable colors"),
         [this]() { Screenshot(TEXT("heroine-colors")); },
         []() { return true; }, 0.8f);
-    for (int32 Row = 3; Row >= 0; --Row)
-        Add(TEXT("Return to the hairstyle selector"), [this]() { Tap(EKeys::Gamepad_DPad_Up); },
-            [this, Row]() { return Controller->SelectedRow() == Row; });
-    Add(TEXT("Select the third hairstyle without changing outfit"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Select the third hairstyle without changing owned clothing"),
+        [ActivateAppearance]() { ActivateAppearance(0); },
         [this]()
         {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->GetAppearance().HairStyle == 2 && Controller->GetAppearance().Outfit == 0
-                && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == TEXT("SK_Heroine_Ponytail");
+            const auto* Presentation = Avatar ? Avatar->GetEquipmentPresentation() : nullptr;
+            return Presentation && Presentation->Base.Mesh && Controller->GetAppearance().HairStyle == 2
+                && Presentation->Base.Mesh->GetName() == TEXT("SK_Modular_Preferred_Base_Ponytail");
         }, 0.8f);
     Add(TEXT("Capture the ponytail"), [this]() { Screenshot(TEXT("heroine-ponytail")); },
         []() { return true; }, 0.8f);
-    Add(TEXT("Cycle back to long hair"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Cycle back to long hair"), [ActivateAppearance]() { ActivateAppearance(0); },
         [this]() { return Controller->GetAppearance().HairStyle == 0; });
-    Add(TEXT("Return to the bob"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Return to the bob"), [ActivateAppearance]() { ActivateAppearance(0); },
         [this]() { return Controller->GetAppearance().HairStyle == 1; });
-    for (int32 Row = 1; Row <= 5; ++Row)
-        Add(TEXT("Navigate to the outfit selector"), [this]() { Tap(EKeys::Gamepad_DPad_Down); },
-            [this, Row]() { return Controller->SelectedRow() == Row; });
-    Add(TEXT("Choose the apron without changing the hair selection"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->GetAppearance().Outfit == 1 && Controller->GetAppearance().HairStyle == 1
-                && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == TEXT("SK_Heroine_Bob_Apron");
-        }, 0.8f);
-    Add(TEXT("Capture the apron outfit"), [this]() { Screenshot(TEXT("heroine-apron")); },
-        []() { return true; }, 0.8f);
-    for (int32 Row = 4; Row >= 0; --Row)
-        Add(TEXT("Return to hair while wearing the apron"), [this]() { Tap(EKeys::Gamepad_DPad_Up); },
-            [this, Row]() { return Controller->SelectedRow() == Row; });
-    const TCHAR* ApronNames[] = {TEXT("SK_Heroine_Ponytail_Apron"), TEXT("SK_Heroine_LongWave_Apron"), TEXT("SK_Heroine_Bob_Apron")};
-    for (int32 Index = 0; Index < 3; ++Index)
-    {
-        const FString Expected = ApronNames[Index];
-        const int32 Style = (Index + 2) % 3;
-        Add(TEXT("Each hairstyle keeps its matching apron mesh"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this, Expected, Style]()
-            {
-                const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-                return Avatar && Controller->GetAppearance().Outfit == 1 && Controller->GetAppearance().HairStyle == Style
-                    && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == Expected;
-            });
-    }
-    for (int32 Row = 1; Row <= 4; ++Row)
-        Add(TEXT("Return to the dye selector"), [this]() { Tap(EKeys::Gamepad_DPad_Down); },
-            [this, Row]() { return Controller->SelectedRow() == Row; });
-    int32 CurrentHair = 1;
-    int32 CurrentOutfit = 1;
     const TCHAR* BodyNames[] = {TEXT("Preferred"), TEXT("Willow"), TEXT("Hazel")};
-    const TCHAR* HairNames[] = {TEXT("LongWave"), TEXT("Bob"), TEXT("Ponytail")};
     for (int32 Body = 1; Body <= 2; ++Body)
     {
-        QueueSelectRow(6);
         Add(TEXT("Choose an independently authored face/body preset"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this, Body]() { return Controller->GetAppearance().BodyPreset == Body && Controller->HasHeroine(); });
-        for (int32 Outfit = 0; Outfit < 2; ++Outfit)
+            [ActivateAppearance]() { ActivateAppearance(6); },
+            [this, Body, BodyNames]()
         {
-            if (CurrentOutfit != Outfit)
-            {
-                QueueSelectRow(5);
-                Add(TEXT("Keep the chosen outfit on each body preset"),
-                    [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-                    [this, Outfit]() { return Controller->GetAppearance().Outfit == Outfit; });
-                CurrentOutfit = Outfit;
-            }
-            for (int32 Hair = 0; Hair < 3; ++Hair)
-            {
-                QueueSelectRow(0);
-                while (CurrentHair != Hair)
-                {
-                    CurrentHair = (CurrentHair + 1) % 3;
-                    const int32 ExpectedHair = CurrentHair;
-                    Add(TEXT("Cycle a hairstyle on the selected body"),
-                        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-                        [this, ExpectedHair]() { return Controller->GetAppearance().HairStyle == ExpectedHair; });
-                }
-                const FString Expected = FString::Printf(TEXT("SK_Heroine_%s_%s%s"), BodyNames[Body], HairNames[Hair], Outfit ? TEXT("_Apron") : TEXT(""));
-                Add(TEXT("The selected body, hair and outfit resolve to the correct mesh"),
-                    []() {},
-                    [this, Expected, Body, Hair, Outfit]()
-                    {
-                        const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-                        const auto& Look = Controller->GetAppearance();
-                        return Avatar && Look.BodyPreset == Body && Look.HairStyle == Hair && Look.Outfit == Outfit
-                            && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == Expected;
-                    });
-                if (Hair == 0 && Outfit == 0)
-                {
-                    const FString Name = Body == 1 ? TEXT("heroine-willow") : TEXT("heroine-hazel");
-                    Add(TEXT("Capture the alternate face/body preset"), [this, Name]() { Screenshot(Name); },
-                        []() { return true; }, 0.8f);
-                }
-            }
-        }
+                const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+                const auto* Presentation = Avatar ? Avatar->GetEquipmentPresentation() : nullptr;
+                const FString Expected = FString::Printf(TEXT("SK_Modular_%s_Base_Bob"), BodyNames[Body]);
+                return Presentation && Presentation->Base.Mesh && Controller->GetAppearance().BodyPreset == Body
+                    && Presentation->Base.Mesh->GetName() == Expected;
+            });
+        const FString Name = Body == 1 ? TEXT("heroine-willow") : TEXT("heroine-hazel");
+        Add(TEXT("Capture the alternate face/body preset"), [this, Name]() { Screenshot(Name); },
+            []() { return true; }, 0.8f);
     }
-    QueueSelectRow(6);
     Add(TEXT("Cycle body selection back through the preferred preset"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [ActivateAppearance]() { ActivateAppearance(6); },
         [this]() { return Controller->GetAppearance().BodyPreset == 0; });
     Add(TEXT("Choose Willow for appearance persistence verification"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [ActivateAppearance]() { ActivateAppearance(6); },
         [this]() { return Controller->GetAppearance().BodyPreset == 1; });
-    QueueSelectRow(0);
-    Add(TEXT("Cycle hair back through long waves"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->GetAppearance().HairStyle == 0; });
-    Add(TEXT("Restore the bob with the selected body and apron"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->GetAppearance().HairStyle == 1 && Controller->GetAppearance().Outfit == 1; });
-    QueueSelectRow(4);
     Add(TEXT("Save appearance without saving the temporary portrait camera"),
         [this]() { Tap(EKeys::F5); },
         [this]() { return !Controller->ToastIsError(); });
-    Add(TEXT("Change the tunic again before restoring"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->GetAppearance().TunicColor == 2; });
+    Add(TEXT("Change the body preset again before restoring"),
+        [ActivateAppearance]() { ActivateAppearance(6); },
+        [this]() { return Controller->GetAppearance().BodyPreset == 2; });
     Add(TEXT("Restore appearance and gameplay camera"),
         [this]() { Tap(EKeys::F9); },
         [this]()
         {
             const auto& Look = Controller->GetAppearance();
             return !Controller->IsBookOpen() && Controller->HasHeroine()
-                && Look.HairStyle == 1 && Look.HairColor == 1 && Look.SkinTone == 1 && Look.EyeColor == 1 && Look.TunicColor == 1 && Look.Outfit == 1 && Look.BodyPreset == 1
+                && Look.HairStyle == 1 && Look.HairColor == 1 && Look.SkinTone == 1
+                && Look.EyeColor == 1 && Look.BodyPreset == 1
                 && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) < 0.1f;
         }, 0.6f);
 
@@ -554,19 +499,18 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Keyboard opens the pack"),
         [this]() { Tap(EKeys::I); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
-    Add(TEXT("Select the harvested food"),
+    Add(TEXT("Record the harvested food before native pack navigation"),
         [this]()
         {
             BerriesBeforeFood = Controller->Simulation().Count(Homestead::Item::Berries);
             HungerBeforeFood = Controller->State().hunger;
-            Tap(EKeys::Gamepad_DPad_Down);
         },
-        [this]()
-        {
-            const auto Rows = Controller->Rows();
-            return Rows.IsValidIndex(Controller->SelectedRow())
-                && Rows[Controller->SelectedRow()].Id == static_cast<int>(Homestead::Item::Berries);
-        });
+        [this]() { return BerriesBeforeFood > 0; });
+    QueueSelectRow(static_cast<int32>(Homestead::Item::Berries));
+    Add(TEXT("Enter the harvested food's native actions"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return Controller->NativeMenu.IsValid()
+            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(TEXT("Eat forage through the actual inventory control"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]()
