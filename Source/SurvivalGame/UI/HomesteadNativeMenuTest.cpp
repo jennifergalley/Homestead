@@ -789,6 +789,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Split, *Chest);
             Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Merge);
             Tap(EKeys::Enter); Tap(EKeys::Down); Tap(EKeys::Enter);
+            Tap(EKeys::Gamepad_DPad_Left);
         },
         [this, Chest]() { const auto* Layout = Controller->Simulation().GetLayout(*Chest);
             return Layout && Controller->Simulation().ChestUsedCapacity(*Chest) == 3
