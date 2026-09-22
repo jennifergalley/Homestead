@@ -38,12 +38,12 @@
 - [x] 3.3 Add collision/traversal behavior only for rendered water and verify no
   invisible blockers, terrain recovery, false swimming, or disconnected uphill
   surface appears in ordinary gameplay.
-- [ ] 3.4 Verify mapped save/load and separate-process replay preserve regional
+- [x] 3.4 Verify mapped save/load and separate-process replay preserve regional
   identity plus tree, structure, plot, inventory, and rendered-water behavior.
 
 ## 4. Acceptance and delivery
 
-- [ ] 4.1 Compare the same Shipping cadence route against selected woodland32
+- [x] 4.1 Compare the same Shipping cadence route against selected woodland32
   and report instrumented/offscreen limits without a GPU, Present, or locked-FPS
   claim.
 - [ ] 4.2 Inspect ordinary dawn and neutral-daylight frames for ridge/valley

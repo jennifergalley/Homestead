@@ -41,7 +41,7 @@ struct FWoodlandFixture
     FVector Previous = FVector::ZeroVector;
     bool CrossedOldBoundary = false, CrossedChunkSeam = false, ContinuousGround = true;
     size_t EditCount = 0;
-    FString WorldId, SimulationText, Fingerprint;
+    FString WorldId, SimulationText, Fingerprint, RegionalReachKey;
     FString ActiveBatchSnapshot;
     int32 ActiveBatchComponents = 0, ActiveBatchInstances = 0, ActiveCollisionCapsules = 0;
     FString OuterBatchSnapshot;
@@ -210,6 +210,7 @@ TSharedRef<FJsonObject> ProofJson(const FWoodlandFixture& Fixture)
     Json->SetNumberField(TEXT("generationVersion"), Fixture.World.generationVersion);
     Json->SetStringField(TEXT("simulation"), Fixture.SimulationText);
     Json->SetStringField(TEXT("saveMd5"), Fixture.Fingerprint);
+    Json->SetStringField(TEXT("regionalReachKey"), Fixture.RegionalReachKey);
     Json->SetNumberField(TEXT("buildX"), Fixture.BuildX); Json->SetNumberField(TEXT("buildY"), Fixture.BuildY);
     Json->SetNumberField(TEXT("plotX"), Fixture.PlotX); Json->SetNumberField(TEXT("plotY"), Fixture.PlotY);
     for (const auto& Entry : {TPair<FString, Generation::GeneratedEntityKey>(TEXT("siteTree"), Fixture.SiteTree)})
@@ -271,6 +272,8 @@ bool ReadProof(const FString& Producer, FWoodlandFixture& Fixture, TArray<uint8>
         || !Json->TryGetStringField(TEXT("world"), Fixture.WorldId)
         || !Json->TryGetStringField(TEXT("simulation"), Fixture.SimulationText)
         || !Json->TryGetStringField(TEXT("saveMd5"), Fixture.Fingerprint)
+        || !Json->TryGetStringField(TEXT("regionalReachKey"), Fixture.RegionalReachKey)
+        || Fixture.RegionalReachKey.IsEmpty()
         || Fixture.Fingerprint != FMD5::HashBytes(Bytes.GetData(), Bytes.Num())) return false;
     Homestead::Simulation Parsed;
     if (!Parsed.Deserialize(TCHAR_TO_UTF8(*Fixture.SimulationText))
@@ -418,7 +421,7 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     };
     Add(TEXT("Generated woodland uses the isolated native test sandbox"),
         []() {},
-        [this]()
+        [this, Fixture]()
         {
             return Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
                 && Controller->SaveRoute.Mode == TEXT("test-sandbox")
@@ -500,10 +503,10 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                     && Instances == Expected && Collisions == Expected;
             });
         Add(TEXT("Reloaded regional reach rematerializes with the same nonblocking policy"),
-            []() {}, [this]()
+            []() {}, [this, Fixture]()
             {
                 if (!Controller->Landscape
-                    || Controller->Landscape->RenderedRegionalReachKey != TEXT("0,-1>1,0")
+                    || Controller->Landscape->RenderedRegionalReachKey != Fixture->RegionalReachKey
                     || Controller->Landscape->RegionalWaterMeshes.IsEmpty())
                     return false;
                 for (const auto& Entry : Controller->Landscape->RegionalWaterMeshes)
@@ -550,7 +553,7 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     Capture(TEXT("generated-untouched"));
     Add(TEXT("Render one coherent canonical regional reach without blocking traversal"),
         []() {},
-        [this]()
+        [this, Fixture]()
         {
             if (!Controller->Landscape
                 || Controller->Landscape->RegionalDescriptors.CachedRegionCount() < 1
@@ -567,7 +570,8 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                     || !Water->ComponentHasTag(TEXT("GeneratedRegionalWater")))
                     return false;
             }
-            return true;
+            Fixture->RegionalReachKey = Controller->Landscape->RenderedRegionalReachKey;
+            return !Fixture->RegionalReachKey.IsEmpty();
         }, 30.0f);
     Add(TEXT("CONTROLLED frame the actual rendered regional reach"),
         [this]()

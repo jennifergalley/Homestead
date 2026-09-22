@@ -500,7 +500,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
     const double Started = FPlatformTime::Seconds();
     const bool SameWorld = bTerrainReady && Descriptor.seed == State.world.seed
         && Descriptor.generationVersion == State.world.generationVersion;
-    if (!SameWorld || PreparedChunk != State.activeChunk) ClearRegionalWater();
+    if (!SameWorld) ClearRegionalWater();
     TMap<FIntPoint, FHomesteadTerrainChunk> Prepared;
     for (int Y = -2; Y <= 2; ++Y)
         for (int X = -2; X <= 2; ++X)
@@ -567,6 +567,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
             }
     }
     if (!RefreshRegionalDescriptors(State.world, LoadedRegions)) return false;
+    if (!RebuildRegionalWater()) return false;
     UE_LOG(LogHomesteadWorld, Display, TEXT("Generated terrain: seed=%llu version=%u center=%d,%d tiles=%d colliding=9 vertices_per_tile=625 prepare_ms=%.3f"),
         static_cast<unsigned long long>(Descriptor.seed), Descriptor.generationVersion,
         PreparedChunk.x, PreparedChunk.y, TerrainChunks.Num(), (FPlatformTime::Seconds() - Started) * 1000);
