@@ -948,8 +948,14 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                         && Avatar->ApplyPreparedEquipment(Error);
                     const auto* Presentation = Avatar->GetEquipmentPresentation();
                     Ready &= Presentation && Presentation->Ready && Presentation->Garments.IsEmpty()
-                        && Presentation->Base.Mesh && Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("foot_l")) >= 0
-                        && Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("toe_l")) >= 0;
+                        && Presentation->Base.Mesh
+                        && (Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("foot_l")) >= 0
+                            || Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("foot.L")) >= 0
+                            || Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("LeftFoot")) >= 0)
+                        && (Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("ball_l")) >= 0
+                            || Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("toe_l")) >= 0
+                            || Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("toe.L")) >= 0
+                            || Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("LeftToeBase")) >= 0);
                     bool Bra = false, Briefs = false;
                     if (Presentation && Presentation->Base.Mesh)
                         for (const auto& Slot : Presentation->Base.Mesh->GetMaterials())
