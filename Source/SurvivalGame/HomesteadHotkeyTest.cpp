@@ -191,7 +191,13 @@ void AHomesteadSmokeTest::PrepareHotkeyChecks()
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
             [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
         Action(EKeys::Gamepad_FaceButton_Bottom, false);
-        QueueSelectRow(1);
+        Add(TEXT("Focus semantic Load latest in native Settings"),
+            [this]()
+            {
+                if (!Controller->NativeMenu->FocusLegacySubject(1))
+                    Finish(false, TEXT("Native Settings Load latest is unavailable."));
+            },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
         Add(TEXT("Enter native Load latest actions"),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
             [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
