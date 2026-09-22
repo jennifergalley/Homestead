@@ -544,6 +544,19 @@ to regenerate a map or revise an imported material.
 
 ## Persistence
 
+Current preview builds use current-version wardrobe/layout saves only. If a
+startup profile contains only an incompatible test-save version, Settings opens
+an explicit confirmation that defaults to **Stay in Settings**. Choosing
+**Start a new test woodland** replaces the in-memory test session with a fresh
+seed; it does not migrate, overwrite, or delete the incompatible files.
+
+Manual, rotating autosave, recovery, and session-checkpoint loads replace the
+candidate state after complete validation; they never merge inventories or
+wearable ownership. Save writes serialize and validate a `.tmp` file, retain
+the prior `.bak`, and replace the primary only after both steps succeed. A save
+failure remains paused with **Retry save and quit**, **Return to Settings**, and
+separately confirmed **Quit without saving** choices.
+
 The Unreal integration stores checksummed save records beneath `Saved\SaveGames`.
 It writes and verifies a temporary record before replacement, retains the prior
 file as `.bak`, and surfaces failed writes. Three automatic slots, a manual slot,

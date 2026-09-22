@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\woodland-polish-06",
-  "profile": "woodland-polish-v9",
-  "executableSha256": "648A3F36685146D5618B0736DC1120CED74290EBF7F2374511B1A6D7A8305CC1"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\inventory-safety-08",
+  "profile": "inventory-safety-v10",
+  "executableSha256": "E3B4856EEEF1EAF1AE5C908590D11E51B866F68704EC567AEB49E6F799A7900E"
 }

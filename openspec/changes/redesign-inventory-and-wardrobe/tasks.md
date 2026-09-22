@@ -28,7 +28,7 @@ saves still require truthful current-save behavior; no migration project is impl
 
 - [x] 1.1 Record isolated UI/backend/asset source ownership and current authorization; verify no competing engine execution or main-checkout edits.
 - [x] 1.2 Reconcile source/API changes against the accepted environment before integration; verify delivery order remains environment then UI.
-- [ ] 1.3 Register synthetic current-version save fixtures and explicit incompatible-test reset cases; verify they do not require historical migration infrastructure.
+- [x] 1.3 Register synthetic current-version save fixtures and explicit incompatible-test reset cases; verify they do not require historical migration infrastructure.
 - [x] 1.4 Register useful 720p/4K visual/controller/gameplay states and shared runtime slot; verify source-only evidence is not called runtime proof.
 
 ## 2. Portable item authority and conservation
@@ -43,11 +43,11 @@ saves still require truthful current-save behavior; no migration project is impl
 ## 3. Current-version saves and explicit test reset
 
 - [x] 3.1 Encode/decode current portable wardrobe and layout state with integrity/bounds; verify valid roundtrip and corrupt/future schema rejection.
-- [ ] 3.2 Update UE wrapper for current wardrobe data; verify incompatible disposable tests show explicit reset rather than fabricated migration.
-- [ ] 3.3 Validate whole save before live mutation; verify invalid IDs/owners/slots/layout leave live state unchanged.
-- [ ] 3.4 Keep current manual/auto/recovery/session snapshots coherent; verify same-world recovery replaces rather than merges possessions.
-- [ ] 3.5 Preserve protected temp/backup/replacement and truthful failures; verify failed write/retry and separate-process current save reload.
-- [ ] 3.6 Wire clear incompatible-test reset through the coordinated Controller adapter; verify deliberate fresh start and no silent load success or profile-preservation project.
+- [x] 3.2 Update UE wrapper for current wardrobe data; verify incompatible disposable tests show explicit reset rather than fabricated migration.
+- [x] 3.3 Validate whole save before live mutation; verify invalid IDs/owners/slots/layout leave live state unchanged.
+- [x] 3.4 Keep current manual/auto/recovery/session snapshots coherent; verify same-world recovery replaces rather than merges possessions.
+- [x] 3.5 Preserve protected temp/backup/replacement and truthful failures; verify failed write/retry and separate-process current save reload.
+- [x] 3.6 Wire clear incompatible-test reset through the coordinated Controller adapter; verify deliberate fresh start and no silent load success or profile-preservation project.
 
 ## 4. Compatible modular clothing and icons
 
@@ -62,24 +62,24 @@ saves still require truthful current-save behavior; no migration project is impl
 - [x] 5.1 Add narrow native UMG/Slate shell and dependencies; verify shared build succeeds and no duplicate Canvas menu drawing.
 - [ ] 5.2 Route accepted menu input once through existing prompt classifier; verify noise/held-stick stability, deliberate switching and test input isolation.
 - [x] 5.3 Implement labeled icon tabs, regions and four-way grid navigation; verify scroll/partial rows/empty states/focus restoration on controller and keyboard.
-- [ ] 5.4 Build real carried/chest grids and hover/focus details, then equipment/preview; verify truthful counts/capacity and no hover mutation.
-- [ ] 5.5 Wire Move/Split/Merge/amount/equip/recolor to typed real authority; verify cancel/failure/repeated confirm and no click-through.
+- [x] 5.4 Build real carried/chest grids and hover/focus details, then equipment/preview; verify truthful counts/capacity and no hover mutation.
+- [x] 5.5 Wire Move/Split/Merge/amount/equip/recolor to typed real authority; verify cancel/failure/repeated confirm and no click-through.
 - [ ] 5.6 Integrate Craft/Build/Guidebook/Credits/Settings/Appearance purpose-specific content; verify existing actions/settings and separate body/hair versus owned clothing.
 - [ ] 5.7 Integrate pause/modal lifecycle, feedback and camera restoration; verify action costs remain, browsing pauses and feedback doesn't cover controls.
 
 ## 6. Discoverable reliable exit
 
 - [x] 6.1 Pin Settings exit with cancel-default confirmation; verify three-press gameplay route and labeled Settings path from every page.
-- [ ] 6.2 Report actual save success/failure and config persistence status; verify no attempted save is reported durable.
+- [x] 6.2 Report actual save success/failure and config persistence status; verify no attempted save is reported durable.
 - [x] 6.3 Implement Saving/Failed/Retry handling; verify actual failure stays open/paused and successful save precedes exit.
-- [ ] 6.4 Add explicit unsaved confirmation and independent recovery Settings/quit; verify no forced retry/checkpoint overwrite or accidental discard.
-- [ ] 6.5 Keep invalid startup routes explicit and restart separately confirmed; verify cancel preserves state and reset clears stale focus.
+- [x] 6.4 Add explicit unsaved confirmation and independent recovery Settings/quit; verify no forced retry/checkpoint overwrite or accidental discard.
+- [x] 6.5 Keep invalid startup routes explicit and restart separately confirmed; verify cancel preserves state and reset clears stale focus.
 
 ## 7. Integrated evidence
 
 - [x] 7.1 Run permitted portable rules/current-save tests; verify ownership conservation and existing gameplay semantics.
 - [x] 7.2 Run approved focused menu/prompt/feedback/settings/lifecycle tests; verify real semantics rather than obsolete row-index assumptions.
-- [ ] 7.3 Run current save/load/reset/quit tests and existing route guards in shared slot; verify truthful results independently of process exit code.
+- [x] 7.3 Run current save/load/reset/quit tests and existing route guards in shared slot; verify truthful results independently of process exit code.
 - [ ] 7.4 Run affected action/full-loop/hotkey cases with actual Lit/LightingOn/ShaderComplexityOff checks; verify unchanged rewards and materials.
 - [ ] 7.5 Review matched baseline/candidate 720p/4K menu states and ordinary character movement; verify legible icons/details/feedback and coverage.
 - [x] 7.6 Batch demonstrated corrections and recheck them; verify scoped defects are resolved without arbitrary iteration/time/cost work-stop caps.
