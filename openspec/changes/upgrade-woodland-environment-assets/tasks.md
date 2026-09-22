@@ -68,6 +68,7 @@ candidate is inspected. Counts, hashes and passes alone do not establish beauty.
 - [x] 4.5 Retain conventional rendering unless an actual LOD/Nanite comparison is warranted; record the chosen path.
 - [ ] 4.6 Evaluate optional native clouds only if justified after foliage, under the existing lighting owner; otherwise retain the current sky.
 - [x] 4.7 Batch generated grass and ferns per streamed chunk, disable shadows only for those low-cover batches, and preserve exact seeded instances, materials, culling, nonblocking policy and chunk-owned cleanup with source/inventory verification.
+- [x] 4.8 Apply per-component minimum authored LODs only to generated mature-tree HISM batches (active LOD1, outer noncolliding LOD2), retaining automatic farther-LOD selection, exact instances/materials, active collision capsules and rebuild/cleanup behavior; verify through source and runtime inventory contracts without claiming FPS or visual acceptance.
 
 ## 5. Gameplay and visual checks
 

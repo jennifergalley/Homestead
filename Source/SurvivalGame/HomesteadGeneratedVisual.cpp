@@ -422,7 +422,11 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         ActiveBatchInstances += FMath::Max(Actual, 0);
         bool Ready = Batch && Batch->GetStaticMesh() && Batch->GetStaticMesh()->GetPathName() == Entry.Key
             && Expected > 0 && Actual == Expected && !Batch->IsQueryCollisionEnabled()
-            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation();
+            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation()
+            && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == AHomesteadWorld::ActiveMatureTreeMinLOD
+            && Batch->GetForcedLodModel() == 0
+            && Batch->GetStaticMesh()->GetRenderData()
+            && Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() == 3;
         if (Batch && Batch->GetStaticMesh())
             for (int32 Slot = 0; Slot < Batch->GetStaticMesh()->GetStaticMaterials().Num(); ++Slot)
                 Ready &= MaterialReady(Batch->GetMaterial(Slot));
@@ -447,6 +451,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetNumberField(TEXT("actualInstances"), Actual);
         Row->SetStringField(TEXT("representativeKey"), RepresentativeKey);
         Row->SetBoolField(TEXT("representativeTransformFound"), RepresentativeFound);
+        Row->SetBoolField(TEXT("overrideMinLOD"), Batch && Batch->GetOverrideMinLOD());
+        Row->SetNumberField(TEXT("minLOD"), Batch ? Batch->GetMinLOD() : -1);
+        Row->SetNumberField(TEXT("forcedLODModel"), Batch ? Batch->GetForcedLodModel() : -1);
+        Row->SetNumberField(TEXT("lodCount"), Batch && Batch->GetStaticMesh()
+            && Batch->GetStaticMesh()->GetRenderData()
+            ? Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() : 0);
         Row->SetBoolField(TEXT("ready"), Ready);
         ActiveBatches.Add(MakeShared<FJsonValueObject>(Row));
     }
@@ -464,7 +474,11 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         OuterBatchInstances += FMath::Max(Actual, 0);
         bool Ready = Batch && Batch->GetStaticMesh() && Batch->GetStaticMesh()->GetPathName() == Entry.Key
             && Expected > 0 && Actual == Expected && !Batch->IsQueryCollisionEnabled()
-            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation();
+            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation()
+            && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == AHomesteadWorld::OuterMatureTreeMinLOD
+            && Batch->GetForcedLodModel() == 0
+            && Batch->GetStaticMesh()->GetRenderData()
+            && Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() == 3;
         if (Batch && Batch->GetStaticMesh())
             for (int32 Slot = 0; Slot < Batch->GetStaticMesh()->GetStaticMaterials().Num(); ++Slot)
                 Ready &= MaterialReady(Batch->GetMaterial(Slot));
@@ -472,6 +486,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetStringField(TEXT("mesh"), Entry.Key);
         Row->SetNumberField(TEXT("expectedInstances"), Expected);
         Row->SetNumberField(TEXT("actualInstances"), Actual);
+        Row->SetBoolField(TEXT("overrideMinLOD"), Batch && Batch->GetOverrideMinLOD());
+        Row->SetNumberField(TEXT("minLOD"), Batch ? Batch->GetMinLOD() : -1);
+        Row->SetNumberField(TEXT("forcedLODModel"), Batch ? Batch->GetForcedLodModel() : -1);
+        Row->SetNumberField(TEXT("lodCount"), Batch && Batch->GetStaticMesh()
+            && Batch->GetStaticMesh()->GetRenderData()
+            ? Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() : 0);
         const FString RepresentativeKey = RepresentativeOuterKey.FindRef(Entry.Key);
         Row->SetStringField(TEXT("representativeKey"), RepresentativeKey);
         bool RepresentativeFound = false;
