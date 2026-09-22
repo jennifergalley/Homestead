@@ -2,12 +2,15 @@
 
 ## Current state and next visible goal
 
-Selected `directional-navigation-06` passes actual720p/4K directional input,
-4K menu/wardrobe, separate-process resume, genuine save-and-quit and180s fresh
-mapped gathering/eating. Four of8 tasks complete. Normal launch was validated,
-not human-launched; samev5/current graphics and camera rollback are retained.
-Next visible goal: fuller item transactions and pointer/focus coverage for the
-remaining clauses below. No asset/world changes.
+Final evidence reconciliation adds the Shipping
+`wardrobe-complete-10-input` route to `directional-navigation-06`. Five of8
+tasks complete. Task2.2 now has exact controller/keyboard/mouse intent,
+left-stick repeat/release, pawn/portrait isolation, LB/RB and quit-path evidence.
+Tasks1.2,1.3 and2.1 remain open at their exact uncovered clauses: complete
+top-boundary/upper-control navigation, selected-subject removal/rebuild/tab-return
+focus identity, and a confirmed amount transaction inside the scoped
+directional route. No code, engine run, visual promotion or physical-controller
+comfort claim is part of this reconciliation.
 
 ## 1. Directional browsing increment
 
@@ -18,7 +21,7 @@ remaining clauses below. No asset/world changes.
 ## 2. Modal and input consistency
 
 - [ ] 2.1 Trap modal focus and add explicit quantity edit entry/exit; verify directions do not edit while browsing, Back leaves edit before cancel, and cancel/confirm preserve transaction semantics.
-- [ ] 2.2 Route D-pad, left stick and keyboard arrows consistently without world movement or implicit portrait rotation; verify the existing intent classifier, mouse behavior, LB/RB and three-press quit path remain intact.
+- [x] 2.2 Route D-pad, left stick and keyboard arrows consistently without world movement or implicit portrait rotation; verify the existing intent classifier, mouse behavior, LB/RB and three-press quit path remain intact.
 - [x] 2.3 Update footer and guide guidance to directional-first navigation with optional trigger/Tab convenience; verify hints describe the actual active browsing/edit context.
 
 ## 3. Integrated acceptance
@@ -59,8 +62,35 @@ metadata resolves the current eligible remembered Content target, not a QA jump.
 
 Open clauses are deliberate:1.2 lacks the complete upper-boundary matrix;1.3
 lacks explicit focused-widget removal/rebuild/tab-return coverage;2.1 lacks an
-actual quantity-confirm transaction;2.2 lacks full mouse/device switching.
-These are not failures of the passed routes or human controller comfort claims.
+actual quantity-confirm transaction. The later September22 evidence below
+supersedes candidate06's mouse/device gap for2.2. These are not failures of the
+passed routes or human controller comfort claims.
 Image quota allowed worker firsthand review of720p amount editing and coordinator
 review of one scrolled-grid original with uncertain resolution, not all six PNGs.
 Dark lower-body portrait lighting and prior environment qualifications remain.
+
+## September22 final evidence reconciliation
+
+The later Shipping `wardrobe-complete-10-input` route passes50 native steps at
+1280x720. It proves one accepted controller/keyboard/mouse intent path,
+subthreshold mouse-noise immunity, one deliberate mouse transition, a real
+mouse click without wrong activation/click-through, keyboard retention, one
+controller transition, D-pad/left-stick/keyboard boundary parity, held-stick
+repeat/neutral stop/reversal, unchanged pawn position and portrait rotation,
+unadmitted-input isolation, and the cancel-default three-press quit path.
+Measured cadence was60.05 mean FPS, p9517.51ms and p9917.79ms; this is an
+offscreen fixture, not physical-controller comfort.
+
+Together with candidate06's actual LB/RB tab routes,720p/4K navigation,
+separate-process resume, save-and-quit and ordinary mapped endurance, this
+completes2.2.
+
+The evidence does not close1.2: Left/Right, lower equipment and reverse routes
+pass, but no complete item-top-boundary route to upper controls is asserted.
+It does not close1.3: fixture rebuilds and modal cancel preserve valid focus,
+but there is no explicit selected-subject removal followed by semantic-ID
+restoration and tab-return agreement among ID, highlight and focused widget.
+It does not close2.1: amount browsing, explicit edit, draft-only change,
+Back-before-cancel and cancel focus return pass, but neither scoped evidence
+route commits Confirm and verifies the resulting transaction. Those clauses
+remain implementation/evidence work, not inferred completion.
