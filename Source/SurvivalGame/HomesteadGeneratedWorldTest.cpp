@@ -499,6 +499,22 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                     && Components > 0 && Components <= 3
                     && Instances == Expected && Collisions == Expected;
             });
+        Add(TEXT("Reloaded regional reach rematerializes with the same nonblocking policy"),
+            []() {}, [this]()
+            {
+                if (!Controller->Landscape
+                    || Controller->Landscape->RenderedRegionalReachKey != TEXT("0,-1>1,0")
+                    || Controller->Landscape->RegionalWaterMeshes.IsEmpty())
+                    return false;
+                for (const auto& Entry : Controller->Landscape->RegionalWaterMeshes)
+                {
+                    const auto* Water = Entry.Value.Get();
+                    if (!Water || !Water->IsRegistered() || Water->IsQueryCollisionEnabled()
+                        || Water->GetGenerateOverlapEvents() || Water->CanEverAffectNavigation())
+                        return false;
+                }
+                return true;
+            }, 30.0f);
         Capture(TEXT("generated-reloaded"));
         Add(TEXT("External generated producer save remains byte-identical"),
             []() {}, [Producer, Fixture]()
@@ -553,6 +569,25 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             }
             return true;
         }, 30.0f);
+    Add(TEXT("CONTROLLED frame the actual rendered regional reach"),
+        [this]()
+        {
+            if (!Controller->Landscape || Controller->Landscape->RegionalWaterMeshes.IsEmpty())
+                return;
+            const auto* Water = Controller->Landscape->RegionalWaterMeshes.CreateConstIterator().Value().Get();
+            const FVector Center = Water->Bounds.Origin;
+            const FVector2D Viewpoint(Center.X - 450.0, Center.Y - 300.0);
+            Teleport({Viewpoint.X, Viewpoint.Y});
+            Controller->SetControlRotation(FRotator(-22.0,
+                FMath::RadiansToDegrees(FMath::Atan2(
+                    Center.Y - Viewpoint.Y, Center.X - Viewpoint.X)), 0));
+        },
+        [this]()
+        {
+            return Controller->Landscape
+                && !Controller->Landscape->RegionalWaterMeshes.IsEmpty()
+                && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0;
+        }, 1.0f);
     Capture(TEXT("generated-regional-water"));
     Add(TEXT("CONTROLLED initial supply: one hatchet only; no world outcomes fabricated"),
         [this]()

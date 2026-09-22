@@ -32,10 +32,10 @@
 - [x] 3.1 Materialize stable loaded-chunk reach/lake descriptors from canonical
   regional identities; verify neighboring chunks agree on outlet/downstream
   keys and `BasinTooLarge` leaves prior descriptors unchanged.
-- [ ] 3.2 Render one bounded continuous reach or lake surface using existing
+- [x] 3.2 Render one bounded continuous reach or lake surface using existing
   procedural mesh/material facilities only where descriptors support coherent
   geometry; mark all other descriptors explicitly unrendered in inventory.
-- [ ] 3.3 Add collision/traversal behavior only for rendered water and verify no
+- [x] 3.3 Add collision/traversal behavior only for rendered water and verify no
   invisible blockers, terrain recovery, false swimming, or disconnected uphill
   surface appears in ordinary gameplay.
 - [ ] 3.4 Verify mapped save/load and separate-process replay preserve regional
