@@ -86,13 +86,13 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     TMap<FString, FString> RepresentativeActiveKey;
     TMap<FString, int32> ExpectedOuterByMesh;
     TMap<FString, FString> RepresentativeOuterKey;
-    auto ExpectedTreePath = [](Gen::TreePaletteRole Role)
+    auto ExpectedTreePath = [](Gen::TreePaletteRole PaletteRole)
     {
-        return Role == Gen::TreePaletteRole::BroadleafMature
+        return PaletteRole == Gen::TreePaletteRole::BroadleafMature
             ? FString(TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"))
-            : Role == Gen::TreePaletteRole::ConiferMature
+            : PaletteRole == Gen::TreePaletteRole::ConiferMature
                 ? FString(TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"))
-                : Role == Gen::TreePaletteRole::WoodlandAccent
+                : PaletteRole == Gen::TreePaletteRole::WoodlandAccent
                     ? FString(TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda"))
                     : FString();
     };

@@ -3,6 +3,7 @@
 #include "HomesteadController.h"
 #include "HomesteadSave.h"
 #include "HomesteadTestPaths.h"
+#include "HomesteadWorld.h"
 #include "Dom/JsonObject.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"

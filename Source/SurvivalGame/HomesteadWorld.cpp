@@ -250,7 +250,7 @@ int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) c
     for (const auto& Entry : ActiveTreeInstances)
     {
         const auto* Batch = ActiveTreeBatches.FindRef(Entry.Value.Visual.MeshPath).Get();
-        const auto* Mesh = Batch ? Batch->GetStaticMesh() : nullptr;
+        const UStaticMesh* Mesh = Batch ? Batch->GetStaticMesh().Get() : nullptr;
         if (!Mesh) continue;
         const FTransform& Transform = Entry.Value.Visual.Transform;
         const FVector Start = Transform.InverseTransformPosition(Focus);
