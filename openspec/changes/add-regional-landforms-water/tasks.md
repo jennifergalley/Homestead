@@ -23,7 +23,7 @@
 - [x] 2.3 Extend generated inventory with regional ridge/valley/lowland metrics
   and exact border samples; verify the selected test seed visibly changes relief
   without removing the woodland density, tree authority, or no-clearing policy.
-- [ ] 2.4 Build and stage a Shipping relief-only candidate, then verify ordinary
+- [x] 2.4 Build and stage a Shipping relief-only candidate, then verify ordinary
   traversal, old-boundary/chunk seams, felling/build-site persistence, and
   daylight wide-elevation imagery before any water-render claim.
 
