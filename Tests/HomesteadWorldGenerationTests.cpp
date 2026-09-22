@@ -97,7 +97,7 @@ void CoordinatesAndFailures()
 
 void SeamsAndOrder()
 {
-    const WorldDescriptor world{UINT64_C(0xfedcba9876543210), 1};
+    const WorldDescriptor world{UINT64_C(0xfedcba9876543210), WorldGenerationVersion};
     for (const ChunkCoord origin : {ChunkCoord{-2, -2}, ChunkCoord{-1, -1},
         ChunkCoord{0, 0}, ChunkCoord{417, -419},
         ChunkCoord{MinChunkCoordinate, MinChunkCoordinate},
