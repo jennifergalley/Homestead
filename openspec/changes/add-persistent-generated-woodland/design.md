@@ -135,12 +135,13 @@ placement and save surfaces, preserve controller/camera/audio/day-night work.
 Outer visual-only mature trees use one hierarchical instanced batch per exact
 loaded mesh path. Active3x3 actionable trees remain individual static-mesh
 components so focus, collision, felling and observer behavior do not change.
-The outer5x5 ring is rebuilt from generated keys, persistent edits and exact
-ground-anchored transforms whenever the world descriptor, active chunk or layout
-signature changes; mutable instance indices never become authority. Rebuilds
-destroy prior batches, omit cleared keys and retain no stale components across
-travel, return or reload. Inventory evidence compares expected outer keys to
-total batch instances, exact representative transforms and distinct mesh paths.
+The outer5x5 ring is rebuilt from generated keys, relevant permanent tree edits
+and exact ground-anchored transforms whenever the world descriptor, active chunk
+or outer layout signature changes; renewable forage timers do not churn tree
+batches, and mutable instance indices never become authority. Rebuilds destroy
+prior batches, omit cleared keys and retain no stale components across travel,
+return or reload. Inventory evidence compares expected outer keys to total batch
+instances, exact representative transforms and distinct mesh paths.
 Active-tree batching is a separate reviewable layer only if runtime measurement
 shows the outer-only optimization is insufficient.
 

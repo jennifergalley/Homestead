@@ -120,6 +120,7 @@ private:
 
     bool bInitialized = false;
     FString ResourceLayoutSignature;
+    FString OuterTreeLayoutSignature;
     double DecorationBuildMilliseconds = 0;
     Homestead::Generation::WorldDescriptor Descriptor;
     Homestead::Generation::ChunkCoord PreparedChunk;
