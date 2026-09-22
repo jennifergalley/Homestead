@@ -814,6 +814,58 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             *ActiveLayoutStable = Stable;
         },
         [ActiveLayoutStable]() { return *ActiveLayoutStable; });
+    const auto ActiveWindowRebuildValid = MakeShared<bool>(false);
+    Add(TEXT("Active-window rebuild replaces capsule pointer while preserving overlapping stable key"),
+        [this, Fixture, ActiveBatchSnapshot, ActiveWindowRebuildValid]()
+        {
+            const auto& CurrentState = Controller->State();
+            const ResourceNode* Selected = nullptr;
+            for (const auto& Node : CurrentState.resources)
+                if (Node.kind == ResourceKind::ForestTree && !Node.cleared
+                    && Node.key.chunk.x >= CurrentState.activeChunk.x
+                    && Node.key.chunk.x <= CurrentState.activeChunk.x + 1
+                    && FMath::Abs(Node.key.chunk.y - CurrentState.activeChunk.y) <= 1)
+                {
+                    Selected = &Node;
+                    break;
+                }
+            if (!Selected) return;
+            const FString Key = FString::Printf(TEXT("%d,%d,%u"),
+                Selected->key.chunk.x, Selected->key.chunk.y, Selected->key.localId);
+            const auto* BeforeInstance = Controller->Landscape->ActiveTreeInstances.Find(Key);
+            auto* BeforeCollision = Controller->Landscape->ActiveTreeCollisions.FindRef(Key).Get();
+            if (!BeforeInstance || !IsValid(BeforeCollision) || !BeforeCollision->IsRegistered())
+                return;
+            const FHomesteadActiveTreeInstance Expected = *BeforeInstance;
+
+            Homestead::Simulation Shifted = Controller->Simulation();
+            const Point Destination{
+                (CurrentState.activeChunk.x + 1.5) * Generation::ChunkSizeCm,
+                (CurrentState.activeChunk.y + 0.5) * Generation::ChunkSizeCm};
+            if (!Shifted.SetActiveWorldRegion(Destination)
+                || !Controller->Landscape->Refresh(Shifted))
+                return;
+            const auto* ShiftedInstance = Controller->Landscape->ActiveTreeInstances.Find(Key);
+            auto* ShiftedCollision = Controller->Landscape->ActiveTreeCollisions.FindRef(Key).Get();
+            if (!ShiftedInstance || !IsValid(ShiftedCollision) || !ShiftedCollision->IsRegistered()
+                || ShiftedCollision == BeforeCollision
+                || !ShiftedInstance->Visual.Transform.Equals(Expected.Visual.Transform, 0.001f)
+                || !ShiftedInstance->CollisionTransform.Equals(Expected.CollisionTransform, 0.001f))
+                return;
+
+            if (!Controller->Landscape->Refresh(Controller->Simulation())) return;
+            int32 Components = 0, Instances = 0, Collisions = 0;
+            *ActiveWindowRebuildValid = ActiveBatchSnapshot(Components, Instances, Collisions)
+                    == Fixture->ActiveBatchSnapshot
+                && Components == Fixture->ActiveBatchComponents
+                && Instances == Fixture->ActiveBatchInstances
+                && Collisions == Fixture->ActiveCollisionCapsules;
+        },
+        [this, ActiveWindowRebuildValid]()
+        {
+            return *ActiveWindowRebuildValid && Controller->IsWorldReady()
+                && Controller->WorldRecoveryCount() == 0;
+        });
     const auto ActiveRollbackValid = MakeShared<bool>(false);
     Add(TEXT("Failed destination refresh invalidates active signature before prior-world recovery"),
         [this, Fixture, ActiveBatchSnapshot, ActiveRollbackValid]()

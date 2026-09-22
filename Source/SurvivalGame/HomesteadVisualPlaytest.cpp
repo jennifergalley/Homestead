@@ -669,6 +669,7 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
         return;
     }
     ObservedTree = Tree;
+    ObservedTreeKey = TreeKey;
     ObservedTreeBounds = Mesh->GetBoundingBox().TransformBy(TreeInstance->Visual.Transform);
     Tap(EKeys::Gamepad_RightThumbstick);
     Observations.Add(TEXT("Ordinary mapped camera-distance input selected the wide tree encounter view."));
@@ -684,6 +685,94 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
     });
 }
 
+bool AHomesteadVisualPlaytest::RefreshObservedTree(bool bAllowReselect, const TCHAR* Phase)
+{
+    if (!PC->Landscape) return false;
+    auto Resolve = [this](const FString& Key)
+    {
+        const auto* Instance = PC->Landscape->ActiveTreeInstances.Find(Key);
+        auto* Collision = PC->Landscape->ActiveTreeCollisions.FindRef(Key).Get();
+        auto* Batch = Instance
+            ? PC->Landscape->ActiveTreeBatches.FindRef(Instance->Visual.MeshPath).Get() : nullptr;
+        auto* Mesh = Batch ? Batch->GetStaticMesh() : nullptr;
+        const FName ExpectedKeyTag(*(FString(TEXT("TreeKey_")) + Key));
+        if (!Instance || !IsValid(Collision) || !Collision->IsRegistered()
+            || PC->Landscape->ActiveTreeCollisions.FindRef(Key).Get() != Collision
+            || !Collision->ComponentHasTag(ExpectedKeyTag)
+            || !Batch || !Batch->IsRegistered() || !Mesh)
+            return false;
+        ObservedTree = Collision;
+        ObservedTreeKey = Key;
+        ObservedTreeBounds = Mesh->GetBoundingBox().TransformBy(Instance->Visual.Transform);
+        TreeCenter = FVector2D(Collision->GetComponentLocation());
+        return true;
+    };
+
+    auto* Current = ObservedTree.Get();
+    const FName CurrentKeyTag(*(FString(TEXT("TreeKey_")) + ObservedTreeKey));
+    if (!ObservedTreeKey.IsEmpty() && IsValid(Current) && Current->IsRegistered()
+        && PC->Landscape->ActiveTreeCollisions.FindRef(ObservedTreeKey).Get() == Current
+        && Current->ComponentHasTag(CurrentKeyTag)
+        && PC->Landscape->ActiveTreeInstances.Contains(ObservedTreeKey))
+        return true;
+
+    const FString PreviousKey = ObservedTreeKey;
+    if (!PreviousKey.IsEmpty() && Resolve(PreviousKey))
+    {
+        bTreeReacquireFailureReported = false;
+        Observations.Add(FString::Printf(
+            TEXT("Reacquired selected generated tree key %s after active-window rebuild before %s."),
+            *PreviousKey, Phase));
+        return true;
+    }
+    if (!bAllowReselect)
+    {
+        if (!bTreeReacquireFailureReported)
+        {
+            Observations.Add(FString::Printf(
+                TEXT("FAILED selected generated tree key %s is outside the active window before %s; reselection is deferred until contact."),
+                *PreviousKey, Phase));
+            bTreeReacquireFailureReported = true;
+        }
+        return false;
+    }
+
+    const FVector Player = PC->GetPawn()->GetActorLocation();
+    TArray<FString> Keys;
+    PC->Landscape->ActiveTreeInstances.GetKeys(Keys);
+    Keys.Sort([this, Player](const FString& A, const FString& B)
+    {
+        const auto* ACapsule = PC->Landscape->ActiveTreeCollisions.FindRef(A).Get();
+        const auto* BCapsule = PC->Landscape->ActiveTreeCollisions.FindRef(B).Get();
+        const double ADistance = ACapsule
+            ? FVector::DistSquared2D(ACapsule->GetComponentLocation(), Player)
+            : TNumericLimits<double>::Max();
+        const double BDistance = BCapsule
+            ? FVector::DistSquared2D(BCapsule->GetComponentLocation(), Player)
+            : TNumericLimits<double>::Max();
+        return ADistance == BDistance ? A < B : ADistance < BDistance;
+    });
+    for (const FString& Key : Keys)
+        if (Resolve(Key))
+        {
+            bTreeReacquireFailureReported = false;
+            Observations.Add(FString::Printf(
+                TEXT("Selected deterministic nearest active generated tree key %s before %s because prior key %s left the active window."),
+                *Key, Phase, *PreviousKey));
+            bHaveTreeDistance = false;
+            TreeBlockedSeconds = 0;
+            return true;
+        }
+    if (!bTreeReacquireFailureReported)
+    {
+        Observations.Add(FString::Printf(
+            TEXT("FAILED no current active generated tree can replace key %s before %s."),
+            *PreviousKey, Phase));
+        bTreeReacquireFailureReported = true;
+    }
+    return false;
+}
+
 void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta, FVector2D& Move, FVector2D& Look)
 {
     const bool Approach = Pass.Label == TEXT("walk-to-authored-tree");
@@ -691,6 +780,8 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
     const bool Contact = Pass.Label == TEXT("walk-into-authored-trunk");
     const bool Retreat = Pass.Label == TEXT("retreat-from-authored-trunk");
     if (!bTreeReady || !(Approach || View || Contact || Retreat)) return;
+    if (View && !RefreshObservedTree(false, TEXT("view"))) return;
+    if (Contact && !RefreshObservedTree(true, TEXT("contact"))) return;
     const auto Point = PC->PlayerPoint();
     const FVector2D Position(Point.x, Point.y);
     const FVector2D Offset = (Approach ? TreeStaging : TreeCenter) - Position;

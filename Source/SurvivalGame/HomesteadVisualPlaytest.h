@@ -58,6 +58,7 @@ private:
     void RecordGrassGroundInventory();
     void RecordCameraForeground();
     TWeakObjectPtr<UCapsuleComponent> ObservedTree;
+    FString ObservedTreeKey;
     FBox ObservedTreeBounds = FBox(ForceInit);
     FVector2D TreeCenter = FVector2D::ZeroVector;
     FVector2D TreeStaging = FVector2D::ZeroVector;
@@ -74,7 +75,9 @@ private:
     bool bTreeRetreated = false;
     float TreeBlockedSeconds = 0;
     void PrepareTreeEncounter();
+    bool RefreshObservedTree(bool bAllowReselect, const TCHAR* Phase);
     void TickTreeEncounter(const FPass& Pass, float Delta, FVector2D& Move, FVector2D& Look);
+    bool bTreeReacquireFailureReported = false;
     bool bWaterRoute = false;
     bool bClearRoute = false;
     bool bCleared = false;
