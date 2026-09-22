@@ -133,8 +133,13 @@ Remove fixed edge rails/home-clearance assumptions, update labels/startup/focus/
 placement and save surfaces, preserve controller/camera/audio/day-night work.
 
 Outer visual-only mature trees use one hierarchical instanced batch per exact
-loaded mesh path. Active3x3 actionable trees remain individual static-mesh
-components so focus, collision, felling and observer behavior do not change.
+loaded mesh path. After measured outer-only batching improved controlled cadence
+but remained materially below target, active3x3 mature-tree rendering also uses
+one hierarchical instanced batch per exact loaded mesh path. Each active tree
+retains a separate lightweight blocking capsule derived from that mesh's authored
+collision element, plus stable key/id/transform metadata for focus, felling,
+camera and observer evidence. Simulation remains interaction authority; mutable
+instance indices are never persisted or used as generated identity.
 The outer5x5 ring is rebuilt from generated keys, relevant permanent tree edits
 and exact ground-anchored transforms whenever the world descriptor, active chunk
 or outer layout signature changes; renewable forage timers do not churn tree
@@ -142,8 +147,9 @@ batches, and mutable instance indices never become authority. Rebuilds destroy
 prior batches, omit cleared keys and retain no stale components across travel,
 return or reload. Inventory evidence compares expected outer keys to total batch
 instances, exact representative transforms and distinct mesh paths.
-Active-tree batching is a separate reviewable layer only if runtime measurement
-shows the outer-only optimization is insufficient.
+Active batches rebuild deterministically after active-window or felling changes,
+destroying prior render batches and blocking capsules without changing density,
+mesh roles, transforms, materials or LODs.
 
 ## Stages and acceptance
 
