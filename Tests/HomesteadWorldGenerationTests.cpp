@@ -561,6 +561,23 @@ void LoadedRegionalDescriptorCaching()
         == RegionalChunkDescriptorStatus::Ready);
     CHECK(lakeChunk.lakes.size() == 1 && lakeChunk.lakes[0].id == lake.id);
 
+    LoadedRegionalDescriptorCache quadrantCache;
+    CHECK(quadrantCache.RefreshLoadedRegions(world,
+        {{-1, -1}, {-1, 0}, {0, -1}, {0, 0}})
+        == Homestead::RegionalGeneration::Status::Ok);
+    RegionalResult southeast;
+    southeast.region = {0, -1};
+    RiverReach diagonal;
+    diagonal.key = {{0, -1}, {1, 0}};
+    diagonal.upstreamSurfaceMm = 50;
+    diagonal.downstreamSurfaceMm = 40;
+    southeast.reaches.push_back(diagonal);
+    CHECK(quadrantCache.Store(world, southeast) == RegionalCacheStoreResult::Stored);
+    LoadedChunkWaterDescriptors quadrant;
+    CHECK(quadrantCache.DescribeChunkWater(world, {0, -1}, quadrant)
+        == RegionalChunkDescriptorStatus::Partial);
+    CHECK(quadrant.reaches.size() == 1 && quadrant.reaches[0].key == diagonal.key);
+
     RegionalResult unloaded;
     unloaded.region = {1, 0};
     CHECK(cache.Store(world, unloaded) == RegionalCacheStoreResult::Rejected);

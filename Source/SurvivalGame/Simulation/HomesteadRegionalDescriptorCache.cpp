@@ -158,6 +158,7 @@ RegionalChunkDescriptorStatus LoadedRegionalDescriptorCache::DescribeChunkWater(
             requiredRegions.push_back(region);
             complete &= Find(world, region) != nullptr;
         }
+    std::sort(requiredRegions.begin(), requiredRegions.end());
     const bool anyAvailable = std::any_of(requiredRegions.begin(), requiredRegions.end(),
         [&](RegionCoord region) { return Find(world, region) != nullptr; });
     if (!anyAvailable) return RegionalChunkDescriptorStatus::Incomplete;
