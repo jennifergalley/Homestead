@@ -80,6 +80,9 @@ public:
 private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    static constexpr int32 ActiveMatureTreeMinLOD = 1;
+    static constexpr int32 OuterMatureTreeMinLOD = 2;
+
     UPROPERTY()
     TObjectPtr<UStaticMesh> Cube;
     UPROPERTY()

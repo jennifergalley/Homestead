@@ -856,7 +856,7 @@ bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simul
             Batch->SetMobility(EComponentMobility::Static);
             Batch->SetStaticMesh(Entry.Mesh);
             Batch->bOverrideMinLOD = true;
-            Batch->MinLOD = 2;
+            Batch->MinLOD = OuterMatureTreeMinLOD;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Batch->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -972,7 +972,7 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
             Batch->SetMobility(EComponentMobility::Static);
             Batch->SetStaticMesh(Entry.Mesh);
             Batch->bOverrideMinLOD = true;
-            Batch->MinLOD = 1;
+            Batch->MinLOD = ActiveMatureTreeMinLOD;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Batch->SetCollisionResponseToAllChannels(ECR_Ignore);
