@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\generated-woodland-32",
-  "profile": "jenny-review-v6",
-  "executableSha256": "7339F15A789CB67A650504441BD2173EACAD10BC285DA1C08E96B5337644A747"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\regional-water-17",
+  "profile": "regional-review-v7",
+  "executableSha256": "503CC1F64C84B25207BEDF35F2A12DD49B88F526860CF16F8C543976CA8F2424"
 }

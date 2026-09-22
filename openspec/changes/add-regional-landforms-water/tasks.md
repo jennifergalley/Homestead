@@ -46,9 +46,9 @@
 - [x] 4.1 Compare the same Shipping cadence route against selected woodland32
   and report instrumented/offscreen limits without a GPU, Present, or locked-FPS
   claim.
-- [ ] 4.2 Inspect ordinary dawn and neutral-daylight frames for ridge/valley
+- [x] 4.2 Inspect ordinary dawn and neutral-daylight frames for ridge/valley
   legibility, connected visible water where claimed, canopy/readability, seams,
   and prototype art limitations.
-- [ ] 4.3 Checkpoint/private-push and promote only a useful regional Shipping
+- [x] 4.3 Checkpoint/private-push and promote only a useful regional Shipping
   increment under fresh v7; retain woodland32/v6 as rollback and document
   descriptor-only water, bounded basins, and deferred full hydrology.
