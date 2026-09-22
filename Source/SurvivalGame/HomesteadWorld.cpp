@@ -856,7 +856,7 @@ void AHomesteadWorld::BuildLighting()
     Settings.bOverride_AutoExposureMaxBrightness = true;
     Settings.AutoExposureMaxBrightness = 16.0f;
     Settings.bOverride_AutoExposureBias = true;
-    Settings.AutoExposureBias = 0.15f;
+    Settings.AutoExposureBias = -0.15f;
     Settings.bOverride_AutoExposureSpeedUp = true;
     Settings.AutoExposureSpeedUp = 3.0f;
     Settings.bOverride_AutoExposureSpeedDown = true;
@@ -867,7 +867,7 @@ void AHomesteadWorld::BuildLighting()
     Sun->SetupAttachment(GetRootComponent());
     Sun->SetMobility(EComponentMobility::Movable);
     Sun->bAtmosphereSunLight = true;
-    Sun->SetIntensity(52000.0f);
+    Sun->SetIntensity(46000.0f);
     Sun->RegisterComponent();
 
     Moon = NewObject<UDirectionalLightComponent>(this, TEXT("MeadowMoonlight"));
@@ -1141,13 +1141,13 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
     switch (Entity.paletteRole)
     {
     case Homestead::Generation::TreePaletteRole::BroadleafMature:
-        RequestedPath = TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland");
+        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
         break;
     case Homestead::Generation::TreePaletteRole::ConiferMature:
         RequestedPath = TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir");
         break;
     case Homestead::Generation::TreePaletteRole::WoodlandAccent:
-        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda");
+        RequestedPath = TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_FirPole.SM_FirPole");
         break;
     default:
         UE_LOG(LogHomesteadWorld, Error, TEXT("Generated mature tree has illegal palette role %d."),
@@ -1405,8 +1405,8 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
             Batch->SetStaticMesh(Entry.Mesh);
             Batch->bOverrideMinLOD = true;
             Batch->MinLOD = Entry.Instance.Visual.PaletteRole
-                == static_cast<int32>(Homestead::Generation::TreePaletteRole::BroadleafMature)
-                ? 0 : ActiveMatureTreeMinLOD;
+                == static_cast<int32>(Homestead::Generation::TreePaletteRole::ConiferMature)
+                ? ActiveMatureTreeMinLOD : 2;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Batch->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -1809,9 +1809,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // Matches the simulation's deterministic three-day spring weather cycle.
     const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
     Sun->SetRelativeRotation(FRotator(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0));
-    Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 18000.0f : 52000.0f, Daylight));
-    Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.62f, 0.38f),
-        FLinearColor(1.0f, 0.98f, 0.92f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
+    Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 17000.0f : 46000.0f, Daylight));
+    Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.76f, 0.56f),
+        FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
     Moon->SetRelativeRotation(FRotator(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0));
     Moon->SetIntensity(0.5f * (1.0f - Daylight));
     Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight));
@@ -1875,6 +1875,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     {
         return Initialize(Simulation);
     }
+    const bool Transition = !IsPreparedFor(State);
     const bool WorldChanged = Descriptor.seed != State.world.seed || Descriptor.generationVersion != State.world.generationVersion;
     if (!BuildTerrain(State)) return false;
     bVisualBuildFailed = false;
@@ -2031,6 +2032,14 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     }
     UpdateLighting(State);
     LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
+    if (Transition)
+    {
+        LastTransitionRefreshMilliseconds = LastRefreshMilliseconds;
+        LastTransitionTerrainMilliseconds = LastTerrainPrepareMilliseconds;
+        LastTransitionCoverMilliseconds = LastCoverPrepareMilliseconds;
+        LastTransitionOuterTreeMilliseconds = LastOuterTreePrepareMilliseconds;
+        LastTransitionActiveTreeMilliseconds = LastActiveTreePrepareMilliseconds;
+    }
     if (LastRefreshMilliseconds > 25.0)
         UE_LOG(LogHomesteadWorld, Display,
             TEXT("Woodland refresh timing: center=%d,%d total_ms=%.3f terrain_ms=%.3f cover_ms=%.3f outer_trees_ms=%.3f active_trees_ms=%.3f baseline_hits=%llu baseline_misses=%llu"),

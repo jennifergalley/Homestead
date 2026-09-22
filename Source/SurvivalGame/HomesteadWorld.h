@@ -191,6 +191,11 @@ private:
     double LastOuterTreePrepareMilliseconds = 0;
     double LastActiveTreePrepareMilliseconds = 0;
     double LastRefreshMilliseconds = 0;
+    double LastTransitionRefreshMilliseconds = 0;
+    double LastTransitionTerrainMilliseconds = 0;
+    double LastTransitionCoverMilliseconds = 0;
+    double LastTransitionOuterTreeMilliseconds = 0;
+    double LastTransitionActiveTreeMilliseconds = 0;
     Homestead::Generation::ChunkCoord PreparedChunk;
     bool bTerrainReady = false;
     bool bVisualBuildFailed = false;

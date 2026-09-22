@@ -933,11 +933,11 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 Fixture->CrossedChunkSeam, Fixture->ContinuousGround, Controller->WorldRecoveryCount()));
             Results.Add(FString::Printf(
                 TEXT("CHUNK_PREP total_ms=%.3f terrain_ms=%.3f cover_ms=%.3f outer_trees_ms=%.3f active_trees_ms=%.3f cache_hits=%llu cache_misses=%llu async_builds=%llu cache_disabled=%d"),
-                Controller->Landscape->LastRefreshMilliseconds,
-                Controller->Landscape->LastTerrainPrepareMilliseconds,
-                Controller->Landscape->LastCoverPrepareMilliseconds,
-                Controller->Landscape->LastOuterTreePrepareMilliseconds,
-                Controller->Landscape->LastActiveTreePrepareMilliseconds,
+                Controller->Landscape->LastTransitionRefreshMilliseconds,
+                Controller->Landscape->LastTransitionTerrainMilliseconds,
+                Controller->Landscape->LastTransitionCoverMilliseconds,
+                Controller->Landscape->LastTransitionOuterTreeMilliseconds,
+                Controller->Landscape->LastTransitionActiveTreeMilliseconds,
                 static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineCacheHits),
                 static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineCacheMisses),
                 static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineBuildCount),

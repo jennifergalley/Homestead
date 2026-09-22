@@ -42,14 +42,14 @@ class WoodlandPolishSourceTests(unittest.TestCase):
                        WORLD.index("void AHomesteadWorld::BuildResource")]
         outer = WORLD[WORLD.index("bool AHomesteadWorld::RebuildOuterTreeBatches"):
                       WORLD.index("void AHomesteadWorld::ClearActiveTreeBatches")]
-        self.assertIn("TreePaletteRole::BroadleafMature", active)
-        self.assertIn("? 0 : ActiveMatureTreeMinLOD", active)
+        self.assertIn("TreePaletteRole::ConiferMature", active)
+        self.assertIn("? ActiveMatureTreeMinLOD : 2", active)
         self.assertIn("Batch->MinLOD = OuterMatureTreeMinLOD", outer)
 
     def test_lighting_preserves_authored_role_colors_at_dawn_and_day(self):
-        self.assertIn("AutoExposureBias = 0.15f", WORLD)
-        self.assertIn("FLinearColor(1.0f, 0.62f, 0.38f)", WORLD)
-        self.assertIn("FLinearColor(1.0f, 0.98f, 0.92f)", WORLD)
+        self.assertIn("AutoExposureBias = -0.15f", WORLD)
+        self.assertIn("FLinearColor(1.0f, 0.76f, 0.56f)", WORLD)
+        self.assertIn("FLinearColor(1.0f, 0.99f, 0.95f)", WORLD)
         self.assertIn("Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight))", WORLD)
 
 
