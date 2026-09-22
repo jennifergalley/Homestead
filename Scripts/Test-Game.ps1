@@ -121,6 +121,7 @@ if ($BookClarity) {
 if ($NativeMenu) {
     $captures = @('native-settings.png','native-exit-confirm.png','native-save-error.png',
         'native-inventory.png','native-crafting.png','native-recovery-exit.png',
+        'native-transfer-amount.png','native-storage-transactions.png','native-test-reset.png',
         'native-wardrobe-dyed.png','native-wardrobe-restored.png')
 }
 if ($DirectionalNavigation) {

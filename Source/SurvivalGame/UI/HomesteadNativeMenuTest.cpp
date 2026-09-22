@@ -737,13 +737,20 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         },
         [this, Chest, Branches]() { return *Chest > 0 && *Branches > 0
             && Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0); });
-    Add(TEXT("Cancel amount transfer preserves exact current state"),
+    Add(TEXT("Open amount transfer without mutating current state"),
         [this, Snapshot]()
         {
             *Snapshot = Controller->Simulation().Serialize();
             Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer);
-            Tap(EKeys::Enter); Tap(EKeys::Escape);
+            Tap(EKeys::Enter);
         },
+        [this, Snapshot]() { return Controller->NativeMenu->HasActiveDialog()
+            && Controller->Simulation().Serialize() == *Snapshot; });
+    Add(TEXT("Capture real amount confirmation"),
+        [this]() { Screenshot(TEXT("native-transfer-amount")); },
+        [this]() { return Controller->NativeMenu->HasActiveDialog(); }, 0.8f);
+    Add(TEXT("Cancel amount transfer preserves exact current state"),
+        [this]() { Tap(EKeys::Escape); },
         [this, Snapshot]() { return !Controller->NativeMenu->HasActiveDialog()
             && Controller->Simulation().Serialize() == *Snapshot; });
     Add(TEXT("Stale amount confirmation rejects without transfer"),
@@ -800,6 +807,25 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             return Layout && Controller->Simulation().ChestUsedCapacity(*Chest) == 3
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                     { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
+    Add(TEXT("Capture real stored transaction result"),
+        [this]() { Screenshot(TEXT("native-storage-transactions")); },
+        [this]() { return Controller->BookPage() == 0 && Controller->InventoryView() == 1; }, 0.8f);
+    const auto MenuIdentity = MakeShared<const SHomesteadMenu*>(nullptr);
+    Add(TEXT("Repeated menu open-close reuses one native shell and preserves committed state"),
+        [this, Snapshot, MenuIdentity]()
+        {
+            *Snapshot = Controller->Simulation().Serialize();
+            *MenuIdentity = Controller->NativeMenu.Get();
+            for (int32 Index = 0; Index < 20; ++Index)
+            {
+                Controller->CloseBook();
+                Controller->MenuInventoryView(Index % 3);
+                Controller->OpenBook(0);
+            }
+        },
+        [this, Snapshot, MenuIdentity]() { return Controller->NativeMenu.Get() == *MenuIdentity
+            && Controller->IsBookOpen() && Controller->Simulation().Serialize() == *Snapshot
+            && VerifyNativeMenuPresentation(); }, 1.0f);
 }
 
 void AHomesteadSmokeTest::PrepareNativeResetChecks()
@@ -846,6 +872,9 @@ void AHomesteadSmokeTest::PrepareNativeResetChecks()
         },
         [this, Before]() { return Controller->MenuNeedsTestReset()
             && Controller->Simulation().Serialize() == *Before && Controller->NativeMenu->IsTestResetPrompt(); });
+    Add(TEXT("Capture explicit incompatible test reset confirmation"),
+        [this]() { Screenshot(TEXT("native-test-reset")); },
+        [this]() { return Controller->NativeMenu->IsTestResetPrompt(); }, 0.8f);
     Add(TEXT("Reset cancel preserves state and incompatible test file"),
         [this]() { Tap(EKeys::Enter); },
         [this, Before, Incompatible]() { return Controller->MenuNeedsTestReset()
