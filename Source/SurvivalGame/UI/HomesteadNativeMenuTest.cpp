@@ -1074,7 +1074,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             [this, Body]() { Screenshot(FString::Printf(TEXT("native-base-only-%d"), Body)); },
             [this]() { return Controller->MenuPortraitBrush() != nullptr; }, 0.8f);
     }
-    Add(TEXT("Representative layered equipment stays bound through walk and hand actions"),
+    Add(TEXT("Apply representative layered equipment to shared gameplay and portrait presentation"),
         [this, Layered, OriginalLook]()
         {
             Controller->Sim = *Layered;
@@ -1085,6 +1085,23 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             if (!Avatar || !Avatar->PrepareEquipment(Controller->State(), Controller->Appearance, Error)
                 || !Avatar->ApplyPreparedEquipment(Error))
             { Finish(false, TEXT("Layered equipment could not be applied: ") + Error); return; }
+            Controller->MenuInventoryView(2); Controller->OpenBook(0);
+            Controller->RefreshMenuPortrait();
+        },
+        [this]()
+        {
+            const auto* Presentation = Cast<AHomesteadCharacter>(
+                Controller->GetPawn())->GetEquipmentPresentation();
+            return Presentation && Presentation->Garments.Num() == 3
+                && Controller->MenuPortraitBrush() != nullptr && VerifyNativeMenuPresentation();
+        }, 0.8f);
+    Add(TEXT("Capture real tunic apron and footwrap presentation"),
+        [this]() { Screenshot(TEXT("native-wardrobe-layered")); },
+        [this]() { return Controller->MenuPortraitBrush() != nullptr
+            && VerifyNativeMenuPresentation(); }, 0.8f);
+    Add(TEXT("Representative layered equipment stays bound through walk"),
+        [this]()
+        {
             Controller->CloseBook();
             Axis(EKeys::Gamepad_LeftY, 1);
         },
