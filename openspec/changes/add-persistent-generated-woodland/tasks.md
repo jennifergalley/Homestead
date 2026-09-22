@@ -19,8 +19,9 @@ gather/tree-contact route with three mature mesh paths. Corrected mature-fir
 packages preserve provider UVs and explicit tangent basis across three authored
 LODs. Active and outer mature trees plus grass/fern cover are batched without
 density changes. A natural route captured accepted qualified 09:59 daylight
-before cooperative cancellation. Generated30 remains unselected while a bounded
-tree LOD policy experiment is evaluated; regional water is not yet integrated.
+before cooperative cancellation. Generated32 is selected with a fresh v6 test
+profile after the bounded tree LOD policy materially improved measured cadence;
+regional water is not yet integrated.
 
 ## 1. Contracts and portable implementation
 - [x] 1.1 Validate focused OpenSpec and publish the shared header/ownership contract.
@@ -53,4 +54,4 @@ portable proofs, not native traversal/art passes.
 - [x] 3.1 Build and exercise actual boundary-crossing/return, chop/build-site and process-save/reload behavior, including negative coordinates and safe chunk replacement.
 - [x] 3.2 Inspect untouched-start and actual cleared-site images for dense woodland, seams, readability and missing materials; retain daylight/weather limits.
 - [x] 3.3 Record proportionate live chunk/asset/memory/timing evidence without GPU/uncapped/infinite-world claims.
-- [ ] 3.4 Checkpoint/private-push and promote only the genuinely improved usable candidate; document fresh profile, rollback and remaining hydrology/progression work.
+- [x] 3.4 Checkpoint/private-push and promote only the genuinely improved usable candidate; document fresh profile, rollback and remaining hydrology/progression work.
