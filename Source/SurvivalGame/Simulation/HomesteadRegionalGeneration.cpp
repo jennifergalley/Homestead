@@ -130,11 +130,6 @@ bool LowestNeighbor(RegionalDescriptor descriptor, NodeCoord node, NodeCoord& ou
     return true;
 }
 
-bool Contains(const std::vector<NodeCoord>& values, NodeCoord value)
-{
-    return std::find(values.begin(), values.end(), value) != values.end();
-}
-
 struct Frontier
 {
     std::int64_t cost = 0;
@@ -156,12 +151,14 @@ struct Basin
 {
     LakeDescriptor lake;
     std::vector<NodeCoord> members;
+    std::set<NodeCoord> memberSet;
 };
 
 Status ResolveBasin(RegionalDescriptor descriptor, NodeCoord sink, Basin& output)
 {
     Basin basin;
     basin.members.push_back(sink);
+    basin.memberSet.insert(sink);
     std::set<NodeCoord> settled{sink};
     std::map<NodeCoord, Frontier> best;
     std::priority_queue<Frontier, std::vector<Frontier>, FrontierLater> frontier;
@@ -204,6 +201,7 @@ Status ResolveBasin(RegionalDescriptor descriptor, NodeCoord sink, Basin& output
         if (basin.members.size() >= MaximumBasinNodes) return Status::BasinTooLarge;
         settled.insert(next.node);
         basin.members.push_back(next.node);
+        basin.memberSet.insert(next.node);
         addNeighbors(next.node, next.cost, frontier, settled, best);
     }
     return Status::BasinTooLarge;
@@ -321,7 +319,7 @@ Status ResolveDrainage(RegionalDescriptor descriptor, NodeCoord node, DrainageNo
     result.waterSurfaceMm = result.relief.elevationMm;
     NodeCoord direct;
     const bool hasDirect = LowestNeighbor(descriptor, node, direct);
-    if (Contains(basin.members, node))
+    if (basin.memberSet.count(node) != 0)
     {
         result.inLake = true;
         result.lakeId = basin.lake.id;
@@ -394,7 +392,7 @@ Status GenerateRegion(RegionalDescriptor descriptor, RegionCoord region, Regiona
             node.waterSurfaceMm = node.relief.elevationMm;
             NodeCoord direct;
             const bool hasDirect = LowestNeighbor(descriptor, coordinate, direct);
-            if (Contains(basin->second.members, coordinate))
+            if (basin->second.memberSet.count(coordinate) != 0)
             {
                 node.inLake = true;
                 node.lakeId = basin->second.lake.id;
