@@ -180,8 +180,21 @@ void AHomesteadSmokeTest::PrepareHotkeyChecks()
         for (int32 Page = 1; Page <= 4; ++Page)
             Add(TEXT("Controller opens Settings for ordinary menu save/load"),
                 [this]() { Tap(EKeys::Gamepad_RightShoulder); }, [this, Page]() { return Controller->BookPage() == Page; });
+        Add(TEXT("Focus semantic Save progress in native Settings"),
+            [this]()
+            {
+                if (!Controller->NativeMenu->FocusLegacySubject(0))
+                    Finish(false, TEXT("Native Settings Save progress is unavailable."));
+            },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
+        Add(TEXT("Enter native Save progress actions"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
         Action(EKeys::Gamepad_FaceButton_Bottom, false);
         QueueSelectRow(1);
+        Add(TEXT("Enter native Load latest actions"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
         Action(EKeys::Gamepad_FaceButton_Bottom, true);
         const FString Temporary = Controller->SavePath(TEXT("Homestead_Manual")) + TEXT(".tmp");
         const auto SavedHash = MakeShared<FString>();
