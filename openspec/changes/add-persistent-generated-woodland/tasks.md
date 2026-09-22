@@ -14,14 +14,17 @@ failed because Unreal required exact owned-PID termination after writing results
 Firsthand v3 review accepted visible relief but rejected frequent nearby giant
 Jacarandas. Version4 now passes119005 generator checks and uses60/35/5 ordinary
 broadleaf/conifer/accent roles with no accent in the protected start view.
-Generated13 passes the mapped producer, separate-process consumer and ordinary
-gather/tree-contact route with three mature mesh paths. A natural45-minute
-endurance/daylight run is active; visual review and promotion remain open.
-Navigation06 stays selected. No promotion from counts or orange dawn.
+Generated30 passes the mapped producer, separate-process consumer and ordinary
+gather/tree-contact route with three mature mesh paths. Corrected mature-fir
+packages preserve provider UVs and explicit tangent basis across three authored
+LODs. Active and outer mature trees plus grass/fern cover are batched without
+density changes. A natural route captured accepted qualified 09:59 daylight
+before cooperative cancellation. Generated30 remains unselected while a bounded
+tree LOD policy experiment is evaluated; regional water is not yet integrated.
 
 ## 1. Contracts and portable implementation
 - [x] 1.1 Validate focused OpenSpec and publish the shared header/ownership contract.
-- [ ] 1.2 Implement deterministic seeded terrain/chunk/entity/species generation with visible relief, seam, negative-coordinate, order-independence and invalid-input tests.
+- [x] 1.2 Implement deterministic seeded terrain/chunk/entity/species generation with visible relief, seam, negative-coordinate, order-independence and invalid-input tests.
 - [x] 1.3 Implement moving active cache, permanent felling, sparse edits and current-version transactional save/load with targeted portable tests.
 
 Portable proof: authority's guarded `seeded-authority-01` generator run passed
@@ -38,14 +41,16 @@ portable proofs, not native traversal/art passes.
 
 ## 2. Integrated woodland
 - [x] 2.1 Stream safe colliding terrain and bounded visual chunks beyond the old square without fixed edge rails or house clearing.
-- [ ] 2.2 Render dense authoritative trees/resources and layered native cover with correct materials, LOD/instance budgets and no duplicate decorative playable blockers.
+- [x] 2.2 Render dense authoritative trees/resources and layered native cover with correct materials, LOD/instance budgets and no duplicate decorative playable blockers.
 - [x] 2.2a Batch only noncolliding outer mature trees by exact mesh path, with deterministic key-derived transforms, bounded rebuild lifecycle and batch-aware inventory evidence.
 - [x] 2.2b Batch active mature-tree rendering by exact mesh path after measured outer-only improvement, retaining model-derived blocking capsules, stable key authority and fell/rebuild evidence.
+- [x] 2.2c Batch generated grass and fern cover without changing density, transforms, materials or cull ranges; disable dynamic shadows only for low cover.
+- [x] 2.2d Apply component-local minimum authored LODs to mature-tree batches only (active LOD1, outer LOD2), preserving automatic selection above those floors and validating the runtime policy.
 - [x] 2.3 Wire focus/chop/tool/reward/placement/tilling/startup labels and destination-first load/teleport preparation.
-- [ ] 2.4 Handle seed/generation/save versions and the explicitly disclosed fresh test profile without silently changing old saves.
+- [x] 2.4 Handle seed/generation/save versions and the explicitly disclosed fresh test profile without silently changing old saves.
 
 ## 3. Real acceptance and delivery
 - [x] 3.1 Build and exercise actual boundary-crossing/return, chop/build-site and process-save/reload behavior, including negative coordinates and safe chunk replacement.
-- [ ] 3.2 Inspect untouched-start and actual cleared-site images for dense woodland, seams, readability and missing materials; retain daylight/weather limits.
-- [ ] 3.3 Record proportionate live chunk/asset/memory/timing evidence without GPU/uncapped/infinite-world claims.
+- [x] 3.2 Inspect untouched-start and actual cleared-site images for dense woodland, seams, readability and missing materials; retain daylight/weather limits.
+- [x] 3.3 Record proportionate live chunk/asset/memory/timing evidence without GPU/uncapped/infinite-world claims.
 - [ ] 3.4 Checkpoint/private-push and promote only the genuinely improved usable candidate; document fresh profile, rollback and remaining hydrology/progression work.

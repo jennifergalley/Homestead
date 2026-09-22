@@ -422,7 +422,9 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         ActiveBatchInstances += FMath::Max(Actual, 0);
         bool Ready = Batch && Batch->GetStaticMesh() && Batch->GetStaticMesh()->GetPathName() == Entry.Key
             && Expected > 0 && Actual == Expected && !Batch->IsQueryCollisionEnabled()
-            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation();
+            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation()
+            && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == 1
+            && Batch->GetForcedLodModel() == 0;
         if (Batch && Batch->GetStaticMesh())
             for (int32 Slot = 0; Slot < Batch->GetStaticMesh()->GetStaticMaterials().Num(); ++Slot)
                 Ready &= MaterialReady(Batch->GetMaterial(Slot));
@@ -445,6 +447,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetStringField(TEXT("mesh"), Entry.Key);
         Row->SetNumberField(TEXT("expectedInstances"), Expected);
         Row->SetNumberField(TEXT("actualInstances"), Actual);
+        Row->SetNumberField(TEXT("minimumLod"), Batch ? Batch->GetMinLOD() : -1);
         Row->SetStringField(TEXT("representativeKey"), RepresentativeKey);
         Row->SetBoolField(TEXT("representativeTransformFound"), RepresentativeFound);
         Row->SetBoolField(TEXT("ready"), Ready);
@@ -464,7 +467,9 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         OuterBatchInstances += FMath::Max(Actual, 0);
         bool Ready = Batch && Batch->GetStaticMesh() && Batch->GetStaticMesh()->GetPathName() == Entry.Key
             && Expected > 0 && Actual == Expected && !Batch->IsQueryCollisionEnabled()
-            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation();
+            && !Batch->GetGenerateOverlapEvents() && !Batch->CanEverAffectNavigation()
+            && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == 2
+            && Batch->GetForcedLodModel() == 0;
         if (Batch && Batch->GetStaticMesh())
             for (int32 Slot = 0; Slot < Batch->GetStaticMesh()->GetStaticMaterials().Num(); ++Slot)
                 Ready &= MaterialReady(Batch->GetMaterial(Slot));
@@ -472,6 +477,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Row->SetStringField(TEXT("mesh"), Entry.Key);
         Row->SetNumberField(TEXT("expectedInstances"), Expected);
         Row->SetNumberField(TEXT("actualInstances"), Actual);
+        Row->SetNumberField(TEXT("minimumLod"), Batch ? Batch->GetMinLOD() : -1);
         const FString RepresentativeKey = RepresentativeOuterKey.FindRef(Entry.Key);
         Row->SetStringField(TEXT("representativeKey"), RepresentativeKey);
         bool RepresentativeFound = false;
