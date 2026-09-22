@@ -25,8 +25,11 @@ test profile MUST be disclosed rather than silently reinterpreting saved edits.
 
 Loaded terrain chunks SHALL derive bounded ridge, valley, and lowland influence
 from deterministic global regional descriptors. Shared chunk vertices MUST
-remain identical from either side, and traversable slopes, spawn protection, and
-terrain recovery limits MUST remain explicitly validated.
+remain identical from either side. The selected first slice MUST contribute at
+least 300 cm across its 120 m fixture while retaining at least 490 cm combined
+non-stream relief, maximum sampled slope no greater than 0.22, q95 slope no
+greater than 0.14, deterministic low-relief build pockets, spawn protection, and
+zero terrain recoveries in the mapped traversal route.
 
 #### Scenario: Walk across a regional influence boundary
 

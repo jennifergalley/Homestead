@@ -60,9 +60,13 @@ woodland density, local playable relief, and per-vertex seams. A narrow regional
 adapter samples the tested authority in global coordinates and contributes a
 bounded low-frequency relief offset plus loaded-chunk water descriptors.
 
-The first blend clamps influence near protected spawn/camera segments and
-against the current maximum traversal slope. The same global sample is used for
-every shared vertex.
+The first blend clamps influence near protected spawn/camera segments and uses
+a fixed relief budget: 90% of the prior local deviation plus regional influence.
+The selected fixture MUST contribute at least 300 cm across 120 m while keeping
+maximum sampled non-stream slope at or below 0.22 and q95 at or below 0.14.
+This deliberately revises the prior 0.20 maximum by less than ten percent and
+requires native grounded traversal plus build-pocket evidence before acceptance.
+The same global sample is used for every shared vertex.
 
 **Alternative:** replace `LandHeight` with regional elevation. Rejected because
 it would invalidate established terrain metrics, visual acceptance, and every

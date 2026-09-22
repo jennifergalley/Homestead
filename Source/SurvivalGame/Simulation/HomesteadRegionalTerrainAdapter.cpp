@@ -7,7 +7,7 @@ namespace Homestead::Generation
 namespace
 {
 constexpr std::int64_t RegionalFixedOne = 65536;
-constexpr double RegionalHeightDivisor = 50.0;
+constexpr double RegionalHeightDivisor = 9.0;
 constexpr double MaximumRegionalOffsetCm = 800.0;
 
 std::int64_t RegionalFloorDivide(std::int64_t value, std::int64_t divisor)

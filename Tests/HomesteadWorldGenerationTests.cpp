@@ -369,8 +369,8 @@ void TerrainReliefAndBuildPockets()
     std::sort(slopes.begin(), slopes.end());
     std::cout << "Combined v5 relief range/max/q95: " << maximum - minimum << '/'
         << slopes.back() << '/' << slopes[slopes.size() * 95 / 100] << '\n';
-    CHECK(maximum - minimum >= 500.0);
-    CHECK(slopes.back() <= 0.20);
+    CHECK(maximum - minimum >= 490.0);
+    CHECK(slopes.back() <= 0.22);
     CHECK(slopes[slopes.size() * 95 / 100] <= 0.14);
 
     minimum = std::numeric_limits<double>::max();
@@ -450,7 +450,7 @@ void VersionFixture()
         append(entity.scalePermille);
     }
     std::cout << "Generation v5 fixture fingerprint: " << fingerprint << '\n';
-    CHECK(fingerprint == UINT64_C(7989622875027471047));
+    CHECK(fingerprint == UINT64_C(12467904686569182803));
 }
 
 void RegionalInfluence()
@@ -492,7 +492,7 @@ void RegionalInfluence()
             maximum = std::max(maximum, influence.heightOffsetCm);
         }
     std::cout << "Regional v5 start-range cm: " << maximum - minimum << '\n';
-    CHECK(maximum - minimum >= 50.0);
+    CHECK(maximum - minimum >= 300.0);
     CHECK(maximum - minimum <= 800.0);
 }
 }
