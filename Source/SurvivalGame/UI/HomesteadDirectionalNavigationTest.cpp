@@ -26,6 +26,28 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         FSlateApplication::Get().ProcessAnalogInputEvent(
             FAnalogInputEvent(Key, FModifierKeysState(), static_cast<uint32>(0), false, 0, 0, Value));
     };
+    const auto SlateMouseMove = [this](FVector2D Delta)
+    {
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        const FVector2D From = Slate.GetCursorPos();
+        const FVector2D To = From + Delta;
+        Slate.SetCursorPos(To);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, To, From, TSet<FKey>(),
+            EKeys::Invalid, 0, FModifierKeysState()));
+    };
+    const auto SlateMouseClick = [this]()
+    {
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        const FVector2D Position = Slate.GetCursorPos();
+        TSet<FKey> Pressed;
+        Pressed.Add(EKeys::LeftMouseButton);
+        Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+    };
     const auto PortraitPose = [this]()
     {
         TArray<USkeletalMeshComponent*> Parts;
@@ -90,6 +112,54 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             *PortraitRotation = PortraitPose();
             return Focused(TEXT("Content")) && Controller->NativeMenu->GetSelectedSubject() != nullptr;
         });
+    const auto DeviceChanges = MakeShared<uint32>(0);
+    const auto PointerSubject = MakeShared<int32>(0);
+    Add(TEXT("Controller focus establishes one accepted device transition baseline"),
+        [this, DeviceChanges, PointerSubject]()
+        {
+            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (Widget)
+            {
+                const auto Geometry = Widget->GetCachedGeometry();
+                FSlateApplication::Get().SetCursorPos(
+                    Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f);
+            }
+            *DeviceChanges = Controller->PromptDeviceChangeCount();
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            *PointerSubject = Subject ? Subject->SubjectId : 0;
+        },
+        [this]() { return Controller->UsesGamepad(); });
+    Add(TEXT("Subthreshold real Slate mouse noise does not steal controller intent"),
+        [SlateMouseMove]() { SlateMouseMove(FVector2D(0.1f, 0.1f)); },
+        [this, DeviceChanges]() { return Controller->UsesGamepad()
+            && Controller->PromptDeviceChangeCount() == *DeviceChanges; });
+    Add(TEXT("Deliberate real Slate mouse movement switches intent exactly once without activation"),
+        [SlateMouseMove]() { SlateMouseMove(FVector2D(2.0f, 0.0f)); },
+        [this, DeviceChanges, Before, Location]() { return !Controller->UsesGamepad()
+            && Controller->PromptDeviceChangeCount() == *DeviceChanges + 1
+            && Controller->Sim.Serialize() == *Before
+            && Controller->GetPawn()->GetActorLocation().Equals(*Location, 0.01); });
+    Add(TEXT("Real mouse click selects the intended cell without action or click-through"),
+        [SlateMouseClick]() { SlateMouseClick(); },
+        [this, DeviceChanges, PointerSubject, Before, Location]()
+        {
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return !Controller->UsesGamepad() && Controller->PromptDeviceChangeCount() == *DeviceChanges + 1
+                && Subject && Subject->SubjectId == *PointerSubject && Controller->BookPage() == 0
+                && Controller->Sim.Serialize() == *Before
+                && Controller->GetPawn()->GetActorLocation().Equals(*Location, 0.01);
+        });
+    Add(TEXT("Keyboard navigation retains keyboard-mouse intent without duplicate transition"),
+        [SlateTap]() { SlateTap(EKeys::Right); },
+        [this, DeviceChanges]() { return !Controller->UsesGamepad()
+            && Controller->PromptDeviceChangeCount() == *DeviceChanges + 1; });
+    Add(TEXT("Deliberate controller navigation switches intent exactly once"),
+        [SlateTap]() { SlateTap(EKeys::Gamepad_DPad_Left); },
+        [this, DeviceChanges]() { return Controller->UsesGamepad()
+            && Controller->PromptDeviceChangeCount() == *DeviceChanges + 2; });
+    Add(TEXT("Device switching leaves a fresh stable native content focus"),
+        [Open]() { Open(0); },
+        [Focused]() { return Focused(TEXT("Content")); });
     Add(TEXT("Real D-pad Down crosses final carried row into equipment without trigger"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });

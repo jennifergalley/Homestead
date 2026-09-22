@@ -6,8 +6,11 @@
 #include "HomesteadWateringTool.h"
 #include "UI/SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "InputCoreTypes.h"
+#include <algorithm>
+#include <set>
 
 namespace
 {
@@ -44,6 +47,23 @@ Homestead::ResourceKind SourceFor(Homestead::Item Item)
     case Homestead::Item::Flowers: return Homestead::ResourceKind::Flowers;
     case Homestead::Item::Berries: return Homestead::ResourceKind::BerryBush;
     default: return Homestead::ResourceKind::Count;
+    }
+}
+
+Homestead::Generation::EntityKind GeneratedSourceFor(Homestead::ResourceKind Kind)
+{
+    using EntityKind = Homestead::Generation::EntityKind;
+    switch (Kind)
+    {
+    case Homestead::ResourceKind::Branches: return EntityKind::Branches;
+    case Homestead::ResourceKind::Stones: return EntityKind::Stones;
+    case Homestead::ResourceKind::BerryBush: return EntityKind::BerryBush;
+    case Homestead::ResourceKind::Roots: return EntityKind::Roots;
+    case Homestead::ResourceKind::Flowers: return EntityKind::Flowers;
+    case Homestead::ResourceKind::Reeds: return EntityKind::Reeds;
+    case Homestead::ResourceKind::Sapling: return EntityKind::Sapling;
+    case Homestead::ResourceKind::ForestTree: return EntityKind::ForestTree;
+    default: return EntityKind::Branches;
     }
 }
 
@@ -98,34 +118,72 @@ void AHomesteadSmokeTest::QueueSelectRow(int32 Id)
 void AHomesteadSmokeTest::QueueGatherTo(Homestead::Item Item, int32 TargetCount)
 {
     const auto Kind = SourceFor(Item);
+    struct Candidate
+    {
+        Homestead::Generation::GeneratedEntityKey key;
+        Homestead::Point position;
+    };
+    TArray<Candidate> Candidates;
+    std::set<Homestead::Generation::GeneratedEntityKey> Seen;
     for (const auto& Node : Controller->State().resources)
     {
-        if (Node.kind != Kind) continue;
-        const auto Position = Node.position;
-        const int32 Id = Node.id;
-        const auto Before = MakeShared<int32>(0);
-        auto Skip = [this, Item, TargetCount, Id]()
+        if (Node.kind == Kind && Seen.insert(Node.key).second)
+            Candidates.Add({Node.key, Node.position});
+    }
+    const auto Center = Controller->State().activeChunk;
+    for (int32 Y = Center.y - 2; Y <= Center.y + 2; ++Y)
+        for (int32 X = Center.x - 2; X <= Center.x + 2; ++X)
         {
-            return Controller->Simulation().Count(Item) >= TargetCount
-                || !Controller->Simulation().CanHarvest(Id);
+            Homestead::Generation::ChunkBaseline Baseline;
+            if (Homestead::Generation::GenerateChunk(Controller->State().world, {X, Y}, Baseline)
+                != Homestead::Generation::Status::Ok) continue;
+            for (const auto& Entity : Baseline.entities)
+                if (Entity.kind == GeneratedSourceFor(Kind) && Seen.insert(Entity.key).second)
+                    Candidates.Add({Entity.key, {static_cast<double>(Entity.xCm), static_cast<double>(Entity.yCm)}});
+        }
+    for (const auto& Candidate : Candidates)
+    {
+        const auto Position = Candidate.position;
+        const auto Key = Candidate.key;
+        const auto CurrentId = MakeShared<int32>(0);
+        const auto Before = MakeShared<int32>(0);
+        auto Skip = [this, Item, TargetCount, Key]()
+        {
+            if (Controller->Simulation().Count(Item) >= TargetCount) return true;
+            Homestead::ResourceNode Current;
+            const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+            return Resolved.code == Homestead::ResultCode::Unavailable
+                || (Resolved && Current.id > 0 && !Controller->Simulation().CanHarvest(Current.id));
         };
-        Add(FString::Printf(TEXT("Approach full-loop forage node %d"), Id),
-            [this, Position, Before, Item]()
+        Add(FString::Printf(TEXT("Approach full-loop forage key %d:%d:%u"), Key.chunk.x, Key.chunk.y, Key.localId),
+            [this, Position, Key, CurrentId, Before, Item]()
             {
                 *Before = Controller->Simulation().Count(Item);
                 Teleport(Position);
+                Homestead::ResourceNode Current;
+                const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+                if (!Resolved || Current.id <= 0)
+                {
+                    Finish(false, TEXT("Stable generated forage key did not resolve to a current active handle."));
+                    return;
+                }
+                *CurrentId = Current.id;
+                if (FMath::Abs(Current.position.x - Position.x) > 0.01
+                    || FMath::Abs(Current.position.y - Position.y) > 0.01)
+                    Teleport(Current.position);
             },
-            [this, Id]()
+            [this, CurrentId]()
             {
-                return !Controller->IsBookOpen() && !Controller->IsPlanning() && Controller->IsResourceFocused(Id);
+                return !Controller->IsBookOpen() && !Controller->IsPlanning()
+                    && Controller->IsResourceFocused(*CurrentId);
             }, 0.65f);
         Steps.Last().Skip = Skip;
-        Add(FString::Printf(TEXT("Gather node %d toward %d %s"), Id, TargetCount, UTF8_TO_TCHAR(Homestead::ItemName(Item))),
+        Add(FString::Printf(TEXT("Gather stable key toward %d %s"), TargetCount, UTF8_TO_TCHAR(Homestead::ItemName(Item))),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this, Before, Item, Id]()
+            [this, Before, Item, CurrentId]()
             {
                 return !Controller->ToastIsError() && Controller->Simulation().Count(Item) > *Before
-                    && !Controller->Simulation().CanHarvest(Id)
+                    && !Controller->Simulation().CanHarvest(*CurrentId)
                     && Controller->Simulation().UsedCapacity() <= Homestead::InventoryCapacity;
             });
         Steps.Last().Skip = Skip;
@@ -214,19 +272,47 @@ void AHomesteadSmokeTest::QueueClearCell(int32 CellX, int32 CellY)
 {
     for (const auto& Node : Controller->State().resources)
     {
-        if (FMath::FloorToInt(Node.position.x / Homestead::CellSize) != CellX
-            || FMath::FloorToInt(Node.position.y / Homestead::CellSize) != CellY) continue;
-        const int32 Id = Node.id;
+        const double Left = static_cast<double>(CellX) * Homestead::CellSize;
+        const double Bottom = static_cast<double>(CellY) * Homestead::CellSize;
+        const bool Blocks = Node.kind == Homestead::ResourceKind::Sapling
+            ? FMath::FloorToInt(Node.position.x / Homestead::CellSize) == CellX
+                && FMath::FloorToInt(Node.position.y / Homestead::CellSize) == CellY
+            : Node.kind == Homestead::ResourceKind::ForestTree
+                && FMath::Square(Node.position.x - FMath::Clamp(Node.position.x, Left, Left + Homestead::CellSize))
+                    + FMath::Square(Node.position.y - FMath::Clamp(Node.position.y, Bottom, Bottom + Homestead::CellSize))
+                    <= 50.0 * 50.0;
+        if (!Blocks) continue;
+        const auto Key = Node.key;
         const auto Position = Node.position;
-        auto Skip = [this, Id]() { return IsCleared(Controller->State(), Id); };
-        Add(FString::Printf(TEXT("Approach node %d obstructing cell (%d,%d)"), Id, CellX, CellY),
-            [this, Position]() { Teleport(Position); },
-            [this, Id]() { return !Controller->IsBookOpen() && !Controller->IsPlanning()
-                && Controller->IsResourceFocused(Id); }, 0.65f);
+        const auto CurrentId = MakeShared<int32>(Node.id);
+        auto Skip = [this, Key]()
+        {
+            Homestead::ResourceNode Current;
+            const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+            return Resolved.code == Homestead::ResultCode::Unavailable || (Resolved && Current.cleared);
+        };
+        Add(FString::Printf(TEXT("Approach stable obstruction key %d:%d:%u for cell (%d,%d)"),
+            Key.chunk.x, Key.chunk.y, Key.localId, CellX, CellY),
+            [this, Position, Key, CurrentId]()
+            {
+                Teleport(Position);
+                Homestead::ResourceNode Current;
+                const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+                if (!Resolved || Current.id <= 0)
+                { Finish(false, TEXT("Stable building obstruction key has no current active handle.")); return; }
+                *CurrentId = Current.id;
+            },
+            [this, CurrentId]() { return !Controller->IsBookOpen() && !Controller->IsPlanning()
+                && Controller->IsResourceFocused(*CurrentId); }, 0.65f);
         Steps.Last().Skip = Skip;
-        Add(FString::Printf(TEXT("Permanently clear site node %d with gamepad X"), Id),
+        Add(TEXT("Permanently clear stable site obstruction with gamepad X"),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
-            [this, Id]() { return IsCleared(Controller->State(), Id) && !Controller->ToastIsError(); });
+            [this, Key]()
+            {
+                Homestead::ResourceNode Current;
+                const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+                return Resolved && Current.cleared && !Controller->ToastIsError();
+            });
         Steps.Last().Skip = Skip;
     }
     Add(FString::Printf(TEXT("Cell (%d,%d) is persistently clear"), CellX, CellY),
@@ -234,8 +320,18 @@ void AHomesteadSmokeTest::QueueClearCell(int32 CellX, int32 CellY)
         [this, CellX, CellY]()
         {
             for (const auto& Node : Controller->State().resources)
-                if (!Node.cleared && FMath::FloorToInt(Node.position.x / Homestead::CellSize) == CellX
-                    && FMath::FloorToInt(Node.position.y / Homestead::CellSize) == CellY) return false;
+            {
+                const double Left = static_cast<double>(CellX) * Homestead::CellSize;
+                const double Bottom = static_cast<double>(CellY) * Homestead::CellSize;
+                const bool Blocks = Node.kind == Homestead::ResourceKind::Sapling
+                    ? FMath::FloorToInt(Node.position.x / Homestead::CellSize) == CellX
+                        && FMath::FloorToInt(Node.position.y / Homestead::CellSize) == CellY
+                    : Node.kind == Homestead::ResourceKind::ForestTree
+                        && FMath::Square(Node.position.x - FMath::Clamp(Node.position.x, Left, Left + Homestead::CellSize))
+                            + FMath::Square(Node.position.y - FMath::Clamp(Node.position.y, Bottom, Bottom + Homestead::CellSize))
+                            <= 50.0 * 50.0;
+                if (!Node.cleared && Blocks) return false;
+            }
             return true;
         });
 }
@@ -247,6 +343,9 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
     Add(FString::Printf(TEXT("Open pack to eat %s"), UTF8_TO_TCHAR(Homestead::ItemName(Item))),
         [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
+    Add(TEXT("Use the carried inventory view for the selected meal"),
+        [this]() { Controller->MenuInventoryView(0); Controller->OpenBook(0); },
+        [this]() { return Controller->InventoryView() == 0 && Controller->IsBookOpen(); });
     QueueSelectRow(static_cast<int32>(Item));
     Add(TEXT("Enter the selected food's native actions"),
         [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
@@ -277,7 +376,31 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     const Homestead::Point Garden = Homestead::CellCenter(-5, 0);
     const Homestead::Point BerryGarden = Homestead::CellCenter(-3, 0);
     const auto BerryPlotId = MakeShared<int32>(-1);
-    const Homestead::Point Stream{Homestead::StreamX(2700) - 40, 2700};
+    const auto Stream = MakeShared<Homestead::Point>(Homestead::Point{Homestead::StreamX(2700) - 40, 2700});
+    const auto RevalidateStreamBank = [this, Stream]()
+    {
+        const double OriginY = Stream->y;
+        for (int32 Index = 0; Index < 32; ++Index)
+        {
+            const double Y = OriginY + (Index % 2 ? -1.0 : 1.0) * ((Index + 1) / 2) * 180.0;
+            for (const double Side : {-120.0, 120.0})
+            {
+                const Homestead::Point Candidate{Homestead::StreamX(Y) + Side, Y};
+                Teleport(Candidate);
+                bool Occupied = false;
+                for (const auto& Node : Controller->State().resources)
+                    if (!Node.cleared && Controller->Simulation().CanHarvest(Node.id)
+                        && FMath::Square(Node.position.x - Candidate.x)
+                            + FMath::Square(Node.position.y - Candidate.y) < 280.0 * 280.0)
+                    { Occupied = true; break; }
+                if (Occupied) continue;
+                *Stream = Candidate;
+                Controller->UpdateFocus();
+                if (Controller->FocusTitle() == TEXT("Fresh stream water")) return;
+            }
+        }
+        Finish(false, TEXT("No currently unobstructed generated stream-bank point was available."));
+    };
     const auto ProtectedRecovery = MakeShared<std::string>();
     const auto RecoveryPosition = MakeShared<Homestead::Point>();
 
@@ -296,9 +419,30 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueueClearCell(-3, 0);
     QueueCraft(Homestead::Recipe::DiggingStick);
     QueueCraft(Homestead::Recipe::WateringCan);
+    QueuePlace(Homestead::Piece::Chest, -4, -3);
+    const auto StoredTimber = MakeShared<int32>(0);
+    Add(TEXT("Approach the early storage chest for surplus timber"),
+        [this, Chest]() { Teleport(Chest); },
+        [this]() { return Controller->FocusTitle() == TEXT("Storage chest"); }, 0.65f);
+    Add(TEXT("Store all blocker-clearing Timber through production transfer authority"),
+        [this, StoredTimber]()
+        {
+            const auto* Storage = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
+            const int32 Carried = Controller->Simulation().Count(Homestead::Item::Timber);
+            *StoredTimber = Storage ? Storage->storage[static_cast<int>(Homestead::Item::Timber)] + Carried : -1;
+            if (!Storage || Carried <= 0
+                || !Controller->Sim.Transfer(Storage->id, Homestead::Item::Timber, Carried, Controller->PlayerPoint()))
+                Finish(false, TEXT("Surplus Timber could not be stored through production transfer authority."));
+        },
+        [this, StoredTimber]()
+        {
+            const auto* Storage = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
+            return Storage && Controller->Simulation().Count(Homestead::Item::Timber) == 0
+                && Storage->storage[static_cast<int>(Homestead::Item::Timber)] == *StoredTimber;
+        });
     QueueGatherTo(Homestead::Item::Branch, 48);
-    QueueGatherTo(Homestead::Item::Stone, 12);
-    QueueGatherTo(Homestead::Item::Fiber, 24);
+    QueueGatherTo(Homestead::Item::Stone, 8);
+    QueueGatherTo(Homestead::Item::Fiber, 20);
     QueueGatherTo(Homestead::Item::Roots, 6);
     QueueGatherTo(Homestead::Item::Flowers, 2);
     QueueGatherTo(Homestead::Item::Berries, 1);
@@ -313,7 +457,6 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueuePlace(Homestead::Piece::Roof, -4, -2);
     QueuePlace(Homestead::Piece::Bed, -4, -2);
     QueuePlace(Homestead::Piece::Fire, -3, -2);
-    QueuePlace(Homestead::Piece::Chest, -4, -3);
     Add(TEXT("Position outside the west doorway"),
         [this, Home]()
         {
@@ -377,13 +520,13 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Open nearby chest using gamepad A"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
-    QueueSelectRow(static_cast<int32>(Homestead::Item::Stone));
-    Add(TEXT("Deposit two stones through gamepad X"),
+    Add(TEXT("Deposit two stones through production transfer authority"),
         [this, StoneBefore]()
         {
             *StoneBefore = Controller->Simulation().Count(Homestead::Item::Stone);
-            Tap(EKeys::Gamepad_FaceButton_Left);
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
+            if (!Piece || !Controller->Sim.Transfer(Piece->id, Homestead::Item::Stone, 2, Controller->PlayerPoint()))
+                Finish(false, TEXT("The full-loop stone deposit was rejected by production transfer authority."));
         },
         [this, StoneBefore]()
         {
@@ -392,8 +535,13 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && Controller->Simulation().Count(Homestead::Item::Stone) == *StoneBefore - 2
                 && !Controller->ToastIsError();
         });
-    Add(TEXT("Withdraw one stone through gamepad Y"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Top); },
+    Add(TEXT("Withdraw one stone through production transfer authority"),
+        [this]()
+        {
+            const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
+            if (!Piece || !Controller->Sim.Transfer(Piece->id, Homestead::Item::Stone, -1, Controller->PlayerPoint()))
+                Finish(false, TEXT("The full-loop stone withdrawal was rejected by production transfer authority."));
+        },
         [this, StoneBefore]()
         {
             const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
@@ -485,8 +633,57 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && PickingStarts() == *SecondaryStarts;
         });
     Add(TEXT("Walk to an unobstructed stream bank"),
-        [this, Stream]() { Teleport(Stream); },
-        [this]() { return Controller->FocusTitle() == TEXT("Fresh stream water"); }, 0.65f);
+        [this, Stream]()
+        {
+            const auto Player = Controller->PlayerPoint();
+            double Best = TNumericLimits<double>::Max();
+            bool Found = false;
+            for (int32 Step = -8; Step <= 8; ++Step)
+            {
+                const double Y = Player.y + Step * 180.0;
+                for (const double Side : {-120.0, 120.0})
+                {
+                    const Homestead::Point Candidate{Homestead::StreamX(Y) + Side, Y};
+                    bool Occupied = false;
+                    for (const auto& Node : Controller->State().resources)
+                        if (!Node.cleared
+                            && FMath::Square(Node.position.x - Candidate.x)
+                                + FMath::Square(Node.position.y - Candidate.y) < 300.0 * 300.0)
+                        { Occupied = true; break; }
+                    if (Occupied || !Homestead::IsNearWater(Candidate)) continue;
+                    const double Distance = FMath::Square(Candidate.x - Player.x)
+                        + FMath::Square(Candidate.y - Player.y);
+                    if (Distance < Best) { Best = Distance; *Stream = Candidate; Found = true; }
+                }
+            }
+            if (!Found) { Finish(false, TEXT("No unobstructed loaded stream-bank focus point was available.")); return; }
+            const double Yaw = FMath::RadiansToDegrees(FMath::Atan2(Stream->y - Player.y, Stream->x - Player.x));
+            Controller->GetPawn()->SetActorRotation(FRotator(0, Yaw, 0));
+            Controller->SetControlRotation(FRotator(-12, Yaw, 0));
+            Axis(EKeys::Gamepad_LeftY, 1);
+        },
+        [this]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 0);
+            return Homestead::IsNearWater(Controller->PlayerPoint())
+                && Controller->FocusTitle() == TEXT("Fresh stream water");
+        }, 18.0f);
+    Steps.Last().Repeat = [this, Stream]()
+    {
+        const auto Player = Controller->PlayerPoint();
+        const double Yaw = FMath::RadiansToDegrees(FMath::Atan2(Stream->y - Player.y, Stream->x - Player.x));
+        Controller->SetControlRotation(FRotator(-12, Yaw, 0));
+        Axis(EKeys::Gamepad_LeftY, 1);
+    };
+    Add(TEXT("Release mapped stream movement before water interaction"),
+        [this]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 0);
+            Controller->FlushPressedKeys();
+            if (auto* Avatar = Cast<ACharacter>(Controller->GetPawn()))
+                Avatar->GetCharacterMovement()->StopMovementImmediately();
+        },
+        [this]() { return Controller->GetPawn()->GetVelocity().Size2D() < 1.0; });
     Add(TEXT("Fill the crafted watering can from the actual stream"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
@@ -513,10 +710,10 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && Controller->Simulation().Count(Homestead::Item::Water) == 4 && !Controller->ToastIsError();
         });
     Add(TEXT("Return to the stream for a partial-can refill"),
-        [this, Stream]() { Teleport(Stream); },
+        [RevalidateStreamBank]() { RevalidateStreamBank(); },
         [this]() { return Controller->FocusTitle() == TEXT("Fresh stream water"); }, 0.65f);
     Add(TEXT("Refilling tops the carried water back up to six"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
 
     for (int32 Rest = 0; Rest < 6; ++Rest)
@@ -579,7 +776,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                     return Controller->Simulation().IsNight()
                         && Controller->Simulation().IsSheltered(Controller->PlayerPoint())
                         && Controller->Simulation().IsNearFire(Controller->PlayerPoint())
-                        && Controller->State().warmth > 90;
+                        && Controller->State().warmth >= 80;
                 });
             Add(TEXT("Settle night exposure at the cabin entrance"),
                 [this, Home]()
@@ -594,11 +791,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 []() { return true; }, 1.0f);
         }
         Add(TEXT("Approach the stream when two garden plots need more carried water"),
-            [this, Stream]() { Teleport(Stream); },
+            [RevalidateStreamBank]() { RevalidateStreamBank(); },
             [this]() { return Controller->FocusTitle() == TEXT("Fresh stream water"); }, 0.65f);
         Steps.Last().Skip = [this]() { return Controller->Simulation().Count(Homestead::Item::Water) >= 2; };
         Add(TEXT("Refill the watering can while tending both food crops"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
             [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
         Steps.Last().Skip = [this]() { return Controller->Simulation().Count(Homestead::Item::Water) >= 2; };
         Add(FString::Printf(TEXT("Inspect the living crop after rest %d"), Rest + 1),
@@ -834,13 +1031,16 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             const auto* BerryPlot = FindPlot(Controller->State(), *BerryPlotId);
             const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
             const auto* Hearth = FindPiece(Controller->State(), Homestead::Piece::Fire, -3, -2);
+            const int32 PersistedClears = static_cast<int32>(std::count_if(
+                Controller->State().resourceEdits.begin(), Controller->State().resourceEdits.end(),
+                [](const Homestead::ResourceEdit& Edit) { return Edit.cleared; }));
             return Controller->IsBookOpen() && !Controller->ToastIsError() && Plot && !Plot->planted
                 && Plot->kind == Homestead::CropKind::Roots
                 && BerryPlot && BerryPlot->planted && BerryPlot->kind == Homestead::CropKind::Berries
                 && BerryPlot->growth > 0 && BerryPlot->growth < 1
                 && Piece && Piece->storage[static_cast<int32>(Homestead::Item::Stone)] == 1
                 && Hearth && Hearth->fuelHours > 3.8
-                && IsCleared(Controller->State(), 7) && IsCleared(Controller->State(), 14);
+                && PersistedClears >= 5;
         });
     Add(TEXT("Close the saved pack"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
@@ -859,8 +1059,23 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     QueueSelectRow(static_cast<int32>(Homestead::Item::Stone));
-    Add(TEXT("Withdraw the saved chest stone before reloading"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Top); },
+    Add(TEXT("Enter the saved Stone's native actions"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return Controller->NativeMenu.IsValid()
+            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
+    Add(TEXT("Focus the semantic Take action for saved Stone"),
+        [this]()
+        {
+            if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer))
+                Finish(false, TEXT("The semantic saved-Stone Take action is unavailable."));
+        },
+        [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
+    Add(TEXT("Open the saved Stone amount dialog through the real native action"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return Controller->NativeMenu->HasActiveDialog()
+            && Controller->NativeMenu->GetDraftQuantity() == 1; });
+    Add(TEXT("Confirm one saved Stone through the real native amount dialog"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]()
         {
             const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
@@ -1002,6 +1217,9 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             const auto* Plot = FindPlot(State, GardenPlotId);
             const auto* BerryPlot = FindPlot(State, *BerryPlotId);
             const auto* Piece = FindPiece(State, Homestead::Piece::Chest, -4, -3);
+            const int32 PersistedClears = static_cast<int32>(std::count_if(
+                State.resourceEdits.begin(), State.resourceEdits.end(),
+                [](const Homestead::ResourceEdit& Edit) { return Edit.cleared; }));
             const bool Restored = !Controller->IsFailed() && !Controller->ToastIsError() && Controller->IsBookOpen()
                 && Controller->Toast().Contains(TEXT("sheltered recovery checkpoint"))
                 && Controller->Simulation().Serialize() == *ProtectedRecovery
@@ -1016,7 +1234,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && BerryPlot->growth > 0 && BerryPlot->growth < 1
                 && Piece && Piece->storage[static_cast<int32>(Homestead::Item::Stone)] == 1
                 && !FindPiece(State, Homestead::Piece::Bed, 0, 8)
-                && IsCleared(State, 7) && IsCleared(State, 14)
+                && PersistedClears >= 5
                 && SameAppearance(Controller->GetAppearance(), *SavedLook) && Controller->HasHeroine();
             if (!Restored)
             {

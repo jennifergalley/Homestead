@@ -101,17 +101,30 @@ void AHomesteadSmokeTest::Teleport(Homestead::Point Position)
 void AHomesteadSmokeTest::QueueHarvest(int32 ResourceId, Homestead::Item ExpectedItem)
 {
     Homestead::Point Position;
+    Homestead::Generation::GeneratedEntityKey Key;
     for (const auto& Node : Controller->State().resources)
-        if (Node.id == ResourceId) Position = Node.position;
+        if (Node.id == ResourceId) { Position = Node.position; Key = Node.key; }
     TSharedRef<int32> Before = MakeShared<int32>(0);
-    Add(FString::Printf(TEXT("Approach resource %d"), ResourceId),
-        [this, Position, Before, ExpectedItem]()
+    TSharedRef<int32> CurrentId = MakeShared<int32>(ResourceId);
+    Add(FString::Printf(TEXT("Approach stable resource key %d:%d:%u"), Key.chunk.x, Key.chunk.y, Key.localId),
+        [this, Position, Key, CurrentId, Before, ExpectedItem]()
         {
             *Before = Controller->Simulation().Count(ExpectedItem);
             Teleport(Position);
+            Homestead::ResourceNode Current;
+            const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+            if (!Resolved || Current.id <= 0)
+            {
+                Finish(false, TEXT("Stable smoke resource key did not resolve to a current active handle."));
+                return;
+            }
+            *CurrentId = Current.id;
+            if (FMath::Abs(Current.position.x - Position.x) > 0.01
+                || FMath::Abs(Current.position.y - Position.y) > 0.01)
+                Teleport(Current.position);
         },
-        [this, ResourceId]() { return Controller->IsResourceFocused(ResourceId); }, 0.65f);
-    Add(FString::Printf(TEXT("Gather resource %d through gamepad A"), ResourceId),
+        [this, CurrentId]() { return Controller->IsResourceFocused(*CurrentId); }, 0.65f);
+    Add(TEXT("Gather stable resource through gamepad A"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before, ExpectedItem]() { return Controller->Simulation().Count(ExpectedItem) > *Before; });
 }
@@ -563,6 +576,10 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Open crafting with the keyboard"),
         [this]() { Tap(EKeys::C); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 1; });
+    Add(TEXT("Enter the selected hatchet recipe's native actions"),
+        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return !Controller->HasNativeMenu()
+            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(TEXT("Craft a hatchet using the same gamepad action"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; });
@@ -571,21 +588,37 @@ void AHomesteadSmokeTest::Prepare()
         [this]() { return !Controller->IsBookOpen(); });
     for (const auto& Node : Controller->State().resources)
     {
-        if (Node.kind != Homestead::ResourceKind::Sapling
-            || FMath::FloorToInt(Node.position.x / Homestead::CellSize) != -4
-            || FMath::FloorToInt(Node.position.y / Homestead::CellSize) != -2) continue;
+        const double Left = -4 * Homestead::CellSize;
+        const double Bottom = -2 * Homestead::CellSize;
+        const bool Blocks = Node.kind == Homestead::ResourceKind::Sapling
+            ? FMath::FloorToInt(Node.position.x / Homestead::CellSize) == -4
+                && FMath::FloorToInt(Node.position.y / Homestead::CellSize) == -2
+            : Node.kind == Homestead::ResourceKind::ForestTree
+                && FMath::Square(Node.position.x - FMath::Clamp(Node.position.x, Left, Left + Homestead::CellSize))
+                    + FMath::Square(Node.position.y - FMath::Clamp(Node.position.y, Bottom, Bottom + Homestead::CellSize))
+                    <= 50.0 * 50.0;
+        if (!Blocks) continue;
         const auto Position = Node.position;
-        const int ResourceId = Node.id;
-        Add(TEXT("Approach the sapling on the building site"),
-            [this, Position]() { Teleport(Position); },
-            []() { return true; }, 0.6f);
-        Add(TEXT("Clear the building site through gamepad X"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
-            [this, ResourceId]()
+        const auto Key = Node.key;
+        const auto CurrentId = MakeShared<int32>(Node.id);
+        Add(TEXT("Approach a generated tree blocking the building site"),
+            [this, Position, Key, CurrentId]()
             {
-                for (const auto& Resource : Controller->State().resources)
-                    if (Resource.id == ResourceId) return Resource.cleared;
-                return false;
+                Teleport(Position);
+                Homestead::ResourceNode Current;
+                const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+                if (!Resolved || Current.id <= 0)
+                { Finish(false, TEXT("Blocking generated tree key did not resolve to a current handle.")); return; }
+                *CurrentId = Current.id;
+            },
+            [this, CurrentId]() { return Controller->IsResourceFocused(*CurrentId); }, 0.65f);
+        Add(TEXT("Clear the generated building-site tree through gamepad X"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+            [this, Key]()
+            {
+                Homestead::ResourceNode Current;
+                const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Key, Current);
+                return Resolved && Current.cleared;
             });
     }
     Add(TEXT("Prepare a clear building location"),
@@ -600,6 +633,10 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Open the building page"),
         [this]() { Tap(EKeys::B); },
         [this]() { return Controller->BookPage() == 2 && Controller->SelectedRow() == 0; });
+    Add(TEXT("Enter the selected foundation's native actions"),
+        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return !Controller->HasNativeMenu()
+            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(TEXT("Enter construction preview"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && !Controller->IsBookOpen(); });

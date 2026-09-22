@@ -55,6 +55,7 @@ public:
     bool IsFailed() const { return Sim.GetState().failed; }
     bool IsPlanning() const { return bPlanning; }
     bool UsesGamepad() const { return bGamepad; }
+    uint32 PromptDeviceChangeCount() const { return PromptDeviceChanges; }
     uint32 IgnoredExternalInputCount() const { return IgnoredExternalInputs; }
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
@@ -142,6 +143,7 @@ private:
     bool bBookOpen = false;
     bool bPlanning = false;
     bool bGamepad = true;
+    uint32 PromptDeviceChanges = 0;
     FHomesteadPromptIntent PromptIntent;
     bool bPendingSpawn = true;
     bool bFreshTerrainSpawn = true;

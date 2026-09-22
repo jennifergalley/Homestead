@@ -194,7 +194,12 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
     const bool HasAxisProperties = Params.Key.IsGamepadKey() && Params.Key.IsAnalog() && PlayerInput
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
     const EHomesteadPromptDevice Intent = PromptIntent.Classify(Params, FPlatformTime::Seconds(), HasAxisProperties ? &AxisProperties : nullptr);
-    if (Intent != EHomesteadPromptDevice::None) bGamepad = Intent == EHomesteadPromptDevice::Gamepad;
+    if (Intent != EHomesteadPromptDevice::None)
+    {
+        const bool NextGamepad = Intent == EHomesteadPromptDevice::Gamepad;
+        if (NextGamepad != bGamepad) ++PromptDeviceChanges;
+        bGamepad = NextGamepad;
+    }
     if (NativeMenu.IsValid()) bShowMouseCursor = !bGamepad;
     if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
     {

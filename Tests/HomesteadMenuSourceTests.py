@@ -30,6 +30,7 @@ class MenuSourceContracts(unittest.TestCase):
         body = function_body(CONTROLLER, "bool AHomesteadController::InputKey(")
         self.assertLess(body.index("bAutomatedInputOnly"), body.index("PromptIntent.Classify("))
         self.assertLess(body.index("PromptIntent.Classify("), body.index("Menu->HandleKey("))
+        self.assertIn("++PromptDeviceChanges", body)
 
     def test_exit_gated_on_real_save(self):
         body = function_body(CONTROLLER, "void AHomesteadController::MenuSaveAndQuit(")
@@ -299,6 +300,9 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("Tap(EKeys::Gamepad_DPad_Down)", fixture)
         self.assertIn("SlateAxis(EKeys::Gamepad_LeftY, -0.9f)", fixture)
         self.assertIn("Axis(EKeys::Gamepad_LeftX, 0.9f)", fixture)
+        self.assertIn("ProcessMouseMoveEvent", fixture)
+        self.assertIn("ProcessMouseButtonDownEvent", fixture)
+        self.assertIn("PromptDeviceChangeCount()", fixture)
         self.assertIn("HasSynchronizedFocus()", fixture)
         self.assertIn("IsFocusedControlVisible()", fixture)
         self.assertNotIn("CycleRegion(", fixture)
@@ -306,6 +310,22 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("ProcessKeyDownEvent(Event)", fixture)
         self.assertIn("ProcessAnalogInputEvent(", fixture)
         self.assertIn("TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true)", fixture)
+
+    def test_full_loop_resolves_generated_keys_after_region_prepare(self):
+        fixture = (SOURCE / "HomesteadFullLoopTest.cpp").read_text()
+        gather = fixture[fixture.index("void AHomesteadSmokeTest::QueueGatherTo"):
+                         fixture.index("void AHomesteadSmokeTest::QueueCraft")]
+        self.assertIn("const auto Key = Candidate.key", gather)
+        self.assertLess(gather.index("Teleport(Position)"), gather.rindex("ResolveGeneratedResource(Key, Current)"))
+        self.assertIn("Controller->IsResourceFocused(*CurrentId)", gather)
+        self.assertIn("!Controller->Simulation().CanHarvest(*CurrentId)", gather)
+        smoke = (SOURCE / "HomesteadSmokeTest.cpp").read_text()
+        harvest = smoke[smoke.index("void AHomesteadSmokeTest::QueueHarvest"):
+                        smoke.index("void AHomesteadSmokeTest::Screenshot")]
+        self.assertIn("Key = Node.key", harvest)
+        self.assertLess(harvest.index("Teleport(Position)"),
+                        harvest.index("ResolveGeneratedResource(Key, Current)"))
+        self.assertIn("Controller->IsResourceFocused(*CurrentId)", harvest)
 
 
 if __name__ == "__main__":
