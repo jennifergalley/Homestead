@@ -1,4 +1,5 @@
 #include "HomesteadWorldGeneration.h"
+#include "HomesteadRegionalTerrainAdapter.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -93,7 +94,7 @@ void CoordinatesAndFailures()
 
     TerrainSample terrain;
     terrain.heightCm = 987.0;
-    for (std::uint32_t version : {1U, 2U, 3U})
+    for (std::uint32_t version : {1U, 2U, 3U, 4U})
     {
         CHECK(SampleTerrain({0, version}, 0, 0, terrain) == Status::UnsupportedVersion);
         CHECK(terrain.heightCm == 987.0);
@@ -106,11 +107,11 @@ void CoordinatesAndFailures()
 
     ChunkBaseline baseline;
     baseline.chunk = {123, 456};
-    CHECK(GenerateChunk({0, 3}, {}, baseline) == Status::UnsupportedVersion);
+    CHECK(GenerateChunk({0, 4}, {}, baseline) == Status::UnsupportedVersion);
     CHECK((baseline.chunk == ChunkCoord{123, 456}));
     GeneratedEntity entity;
     entity.xCm = 987;
-    CHECK(FindEntity({0, 3}, {}, entity) == Status::UnsupportedVersion);
+    CHECK(FindEntity({0, 4}, {}, entity) == Status::UnsupportedVersion);
     for (const auto id : {0U, 0xff000001U, Key(EntityKind::ForestTree, 36),
         Key(EntityKind::Branches, 1), Key(EntityKind::Reeds, 4), 0x01000000U})
     {
@@ -446,8 +447,51 @@ void VersionFixture()
         append(entity.yawDegrees);
         append(entity.scalePermille);
     }
-    CHECK(fingerprint == UINT64_C(16163922850582052463));
-    std::cout << "Generation v4 fixture fingerprint: " << fingerprint << '\n';
+    std::cout << "Generation v5 fixture fingerprint: " << fingerprint << '\n';
+    CHECK(fingerprint == UINT64_C(7989622875027471047));
+}
+
+void RegionalInfluence()
+{
+    RegionalTerrainInfluence sentinel;
+    sentinel.heightOffsetCm = 123.0;
+    CHECK(SampleRegionalTerrainInfluence({817391, 4}, 0, 0, sentinel)
+        == Homestead::RegionalGeneration::Status::UnsupportedVersion);
+    CHECK(sentinel.heightOffsetCm == 123.0);
+
+    const WorldDescriptor world{817391, WorldGenerationVersion};
+    RegionalTerrainInfluence spawn, negative, borderA, borderB, distant;
+    CHECK(SampleRegionalTerrainInfluence(world, -1000, 0, spawn)
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(std::abs(spawn.heightOffsetCm) < 0.000001);
+    CHECK(SampleRegionalTerrainInfluence(world, -3001, -3001, negative)
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(SampleRegionalTerrainInfluence(world, -3000, -3000, borderA)
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(SampleRegionalTerrainInfluence(world, -3000, -3000, borderB)
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(borderA.heightOffsetCm == borderB.heightOffsetCm);
+    CHECK(borderA.mountain == borderB.mountain && borderA.ridge == borderB.ridge
+        && borderA.valley == borderB.valley && borderA.wetness == borderB.wetness);
+    CHECK(SampleRegionalTerrainInfluence(world, 12000, 12000, distant)
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(std::abs(distant.heightOffsetCm) > 1.0);
+    for (const auto value : {negative.heightOffsetCm, borderA.heightOffsetCm, distant.heightOffsetCm})
+        CHECK(std::isfinite(value) && std::abs(value) <= 800.0);
+
+    double minimum = 1e9, maximum = -1e9;
+    for (std::int64_t y = -6000; y <= 6000; y += 3000)
+        for (std::int64_t x = -6000; x <= 6000; x += 3000)
+        {
+            RegionalTerrainInfluence influence;
+            CHECK(SampleRegionalTerrainInfluence(world, x, y, influence)
+                == Homestead::RegionalGeneration::Status::Ok);
+            minimum = std::min(minimum, influence.heightOffsetCm);
+            maximum = std::max(maximum, influence.heightOffsetCm);
+        }
+    std::cout << "Regional v5 start-range cm: " << maximum - minimum << '\n';
+    CHECK(maximum - minimum >= 50.0);
+    CHECK(maximum - minimum <= 800.0);
 }
 }
 
@@ -460,6 +504,7 @@ int main()
     ClusteredLayout();
     PaletteDistribution();
     TerrainReliefAndBuildPockets();
+    RegionalInfluence();
     VersionFixture();
     std::cout << "World generation: " << checks << " checks passed.\n";
     return 0;

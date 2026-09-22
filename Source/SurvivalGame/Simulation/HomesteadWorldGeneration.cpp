@@ -1,4 +1,5 @@
 #include "HomesteadWorldGeneration.h"
+#include "HomesteadRegionalTerrainAdapter.h"
 
 #include <cmath>
 #include <utility>
@@ -115,12 +116,24 @@ double DistanceToSpawnSegment(std::int64_t x, std::int64_t y)
     return std::sqrt(dx * dx + dy * dy);
 }
 
-double LandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y)
+Status RegionalStatus(RegionalGeneration::Status status)
 {
-    const double height = PocketLandHeight(world, x, y);
-    const double safety = 1.0 - Smooth(100.0, 250.0, DistanceToSpawnSegment(x, y));
+    return status == RegionalGeneration::Status::UnsupportedVersion
+        ? Status::UnsupportedVersion : Status::OutOfRange;
+}
+
+Status LandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y, double& output)
+{
+    RegionalTerrainInfluence regional;
+    const auto regionalStatus = SampleRegionalTerrainInfluence(world, x, y, regional);
+    if (regionalStatus != RegionalGeneration::Status::Ok) return RegionalStatus(regionalStatus);
     const double safeHeight = PocketLandHeight(world, -1000, 0);
-    return height + (safeHeight - height) * safety;
+    const double localHeight = PocketLandHeight(world, x, y);
+    const double height = safeHeight + (localHeight - safeHeight)
+        + regional.heightOffsetCm;
+    const double safety = 1.0 - Smooth(100.0, 250.0, DistanceToSpawnSegment(x, y));
+    output = height + (safeHeight - height) * safety;
+    return Status::Ok;
 }
 
 std::uint16_t Woodland(WorldDescriptor world, std::int64_t x, std::int64_t y)
@@ -129,12 +142,16 @@ std::uint16_t Woodland(WorldDescriptor world, std::int64_t x, std::int64_t y)
         (3 * Noise(world, x, y, 9600, 201) + Noise(world, x, y, 2400, 202)) / 4 + 32768);
 }
 
-double Height(WorldDescriptor world, std::int64_t x, std::int64_t y)
+Status Height(WorldDescriptor world, std::int64_t x, std::int64_t y, double& output)
 {
     const double distance = std::abs(static_cast<double>(x) - StreamCenterCm(static_cast<double>(y)));
     const double bank = (distance - 190.0) / 85.0;
-    return LandHeight(world, x, y) - 38.0 * (1.0 - Smooth(45.0, StreamBankOuterCm, distance))
+    double landHeight = 0.0;
+    const auto status = LandHeight(world, x, y, landHeight);
+    if (status != Status::Ok) return status;
+    output = landHeight - 38.0 * (1.0 - Smooth(45.0, StreamBankOuterCm, distance))
         + 7.0 * std::exp(-bank * bank);
+    return Status::Ok;
 }
 
 bool InSamplingRange(std::int64_t value)
@@ -270,7 +287,8 @@ Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int s
             entity.xCm = static_cast<std::int64_t>(std::llround(center)) +
                 (static_cast<double>(entity.xCm) < center ? -250 : 250);
     }
-    entity.heightCm = Height(world, entity.xCm, entity.yCm);
+    const auto heightStatus = Height(world, entity.xCm, entity.yCm, entity.heightCm);
+    if (heightStatus != Status::Ok) return heightStatus;
     entity.yawDegrees = static_cast<std::uint16_t>(Mix(hash ^ 401) % 360);
     entity.scalePermille = static_cast<std::uint16_t>(900 + Mix(hash ^ 402) % 201);
     AssignTreePalette(entity, hash);
@@ -323,9 +341,15 @@ Status SampleTerrain(WorldDescriptor world, std::int64_t xCm, std::int64_t yCm,
     if (world.generationVersion != WorldGenerationVersion) return Status::UnsupportedVersion;
     if (!InSamplingRange(xCm) || !InSamplingRange(yCm)) return Status::OutOfRange;
     TerrainSample sample;
-    sample.heightCm = Height(world, xCm, yCm);
-    const double dx = (Height(world, xCm + 50, yCm) - Height(world, xCm - 50, yCm)) / 100.0;
-    const double dy = (Height(world, xCm, yCm + 50) - Height(world, xCm, yCm - 50)) / 100.0;
+    auto heightStatus = Height(world, xCm, yCm, sample.heightCm);
+    if (heightStatus != Status::Ok) return heightStatus;
+    double right = 0, left = 0, top = 0, bottom = 0;
+    if ((heightStatus = Height(world, xCm + 50, yCm, right)) != Status::Ok) return heightStatus;
+    if ((heightStatus = Height(world, xCm - 50, yCm, left)) != Status::Ok) return heightStatus;
+    if ((heightStatus = Height(world, xCm, yCm + 50, top)) != Status::Ok) return heightStatus;
+    if ((heightStatus = Height(world, xCm, yCm - 50, bottom)) != Status::Ok) return heightStatus;
+    const double dx = (right - left) / 100.0;
+    const double dy = (top - bottom) / 100.0;
     const double length = std::sqrt(dx * dx + dy * dy + 1.0);
     sample.normalX = -dx / length;
     sample.normalY = -dy / length;
@@ -333,7 +357,8 @@ Status SampleTerrain(WorldDescriptor world, std::int64_t xCm, std::int64_t yCm,
     sample.woodland = Woodland(world, xCm, yCm);
     sample.streamCenterXCm = StreamCenterCm(static_cast<double>(yCm));
     const auto streamX = static_cast<std::int64_t>(std::llround(sample.streamCenterXCm));
-    sample.waterHeightCm = Height(world, streamX, yCm) + 19.0;
+    if ((heightStatus = Height(world, streamX, yCm, sample.waterHeightCm)) != Status::Ok) return heightStatus;
+    sample.waterHeightCm += 19.0;
     output = sample;
     return Status::Ok;
 }

@@ -2,18 +2,18 @@
 
 ## 1. Adopt bounded regional authority
 
-- [ ] 1.1 Integrate only the exact regional source/test tip that passes guarded
+- [x] 1.1 Integrate only the exact regional source/test tip that passes guarded
   C++17 `/W4 /WX` compile, link, and tests; retain the complete stdout, hashes,
   bounds, and explicit `BasinTooLarge` regression.
-- [ ] 1.2 Add the regional source to the project build without changing its
+- [x] 1.2 Add the regional source to the project build without changing its
   tested API, and verify editor plus Shipping compilation succeeds.
-- [ ] 1.3 Introduce an explicit integrated generation version and fresh v7 test
+- [x] 1.3 Introduce an explicit integrated generation version and fresh v7 test
   profile; verify prior generated saves reject transactionally before world
   materialization.
 
 ## 2. First visible regional relief increment
 
-- [ ] 2.1 Implement a narrow global-coordinate adapter from regional relief to
+- [x] 2.1 Implement a narrow global-coordinate adapter from regional relief to
   existing chunk vertices, clamped for spawn protection and traversal slope;
   verify shared vertices, signed coordinates, order independence, and current
   terrain recovery thresholds.

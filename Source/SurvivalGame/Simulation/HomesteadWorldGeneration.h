@@ -7,7 +7,7 @@
 
 namespace Homestead::Generation
 {
-constexpr std::uint32_t WorldGenerationVersion = 4;
+constexpr std::uint32_t WorldGenerationVersion = 5;
 constexpr std::int64_t ChunkSizeCm = 2400;
 constexpr int TerrainCellsPerChunk = 24;
 constexpr int TerrainVerticesPerSide = TerrainCellsPerChunk + 1;

@@ -1,6 +1,7 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadController.h"
 #include "HomesteadWorld.h"
+#include "Simulation/HomesteadRegionalTerrainAdapter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -32,6 +33,9 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     int32 GrassBatchComponents = 0, FernBatchComponents = 0;
     bool CoverPoliciesValid = true, CoverRepresentativeTransformsExact = true;
     double PositionError = 0, NormalError = 0;
+    double RegionalOffsetMin = DBL_MAX, RegionalOffsetMax = -DBL_MAX;
+    uint16 RegionalRidgeMin = MAX_uint16, RegionalRidgeMax = 0;
+    uint16 RegionalValleyMin = MAX_uint16, RegionalValleyMax = 0;
     TArray<TSharedPtr<FJsonValue>> Tiles, Trees, ActiveBatches, OuterBatches;
     const FName GrassTag(TEXT("AuthoredGrassMedium01"));
     const FName FernTag(TEXT("AuthoredFern02"));
@@ -73,6 +77,15 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     + (Index / Gen::TerrainVerticesPerSide) * Gen::TerrainSpacingCm;
                 Gen::TerrainSample Sample;
                 TileValid &= Gen::SampleTerrain(State.world, X, Y, Sample) == Gen::Status::Ok;
+                Gen::RegionalTerrainInfluence Influence;
+                TileValid &= Gen::SampleRegionalTerrainInfluence(State.world, X, Y, Influence)
+                    == Homestead::RegionalGeneration::Status::Ok;
+                RegionalOffsetMin = FMath::Min(RegionalOffsetMin, Influence.heightOffsetCm);
+                RegionalOffsetMax = FMath::Max(RegionalOffsetMax, Influence.heightOffsetCm);
+                RegionalRidgeMin = FMath::Min(RegionalRidgeMin, Influence.ridge);
+                RegionalRidgeMax = FMath::Max(RegionalRidgeMax, Influence.ridge);
+                RegionalValleyMin = FMath::Min(RegionalValleyMin, Influence.valley);
+                RegionalValleyMax = FMath::Max(RegionalValleyMax, Influence.valley);
                 const auto& Vertex = Section->ProcVertexBuffer[Index];
                 PositionError = FMath::Max(PositionError, FVector::Dist(FVector(Vertex.Position), FVector(X, Y, Sample.heightCm)));
                 NormalError = FMath::Max(NormalError, FVector::Dist(FVector(Vertex.Normal),
@@ -525,7 +538,9 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         && Grass == ExpectedGrass && Ferns == ExpectedFerns
         && GrassBatchComponents == Landscape->TerrainChunks.Num() * 4
         && FernBatchComponents == Landscape->TerrainChunks.Num() * 4
-        && CoverPoliciesValid && CoverRepresentativeTransformsExact;
+        && CoverPoliciesValid && CoverRepresentativeTransformsExact
+        && RegionalOffsetMin <= RegionalOffsetMax
+        && RegionalRidgeMin <= RegionalRidgeMax && RegionalValleyMin <= RegionalValleyMax;
     auto Evidence = MakeShared<FJsonObject>();
     Evidence->SetStringField(TEXT("seed"), FString::Printf(TEXT("%llu"), static_cast<unsigned long long>(State.world.seed)));
     Evidence->SetNumberField(TEXT("generationVersion"), State.world.generationVersion);
@@ -533,6 +548,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     Evidence->SetNumberField(TEXT("collidingChunks"), Colliding);
     Evidence->SetNumberField(TEXT("terrainPositionErrorCm"), PositionError);
     Evidence->SetNumberField(TEXT("terrainNormalError"), NormalError);
+    Evidence->SetNumberField(TEXT("regionalOffsetMinCm"), RegionalOffsetMin);
+    Evidence->SetNumberField(TEXT("regionalOffsetMaxCm"), RegionalOffsetMax);
+    Evidence->SetNumberField(TEXT("regionalRidgeMin"), RegionalRidgeMin);
+    Evidence->SetNumberField(TEXT("regionalRidgeMax"), RegionalRidgeMax);
+    Evidence->SetNumberField(TEXT("regionalValleyMin"), RegionalValleyMin);
+    Evidence->SetNumberField(TEXT("regionalValleyMax"), RegionalValleyMax);
     Evidence->SetNumberField(TEXT("activeTrees"), ActiveTrees); Evidence->SetNumberField(TEXT("outerTrees"), OuterTrees);
     Evidence->SetNumberField(TEXT("activeBatchComponents"), Landscape->ActiveTreeBatches.Num());
     Evidence->SetNumberField(TEXT("activeBatchInstances"), ActiveBatchInstances);
