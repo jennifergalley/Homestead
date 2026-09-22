@@ -814,6 +814,41 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             *ActiveLayoutStable = Stable;
         },
         [ActiveLayoutStable]() { return *ActiveLayoutStable; });
+    const auto ActiveRollbackValid = MakeShared<bool>(false);
+    Add(TEXT("Failed destination refresh invalidates active signature before prior-world recovery"),
+        [this, Fixture, ActiveBatchSnapshot, ActiveRollbackValid]()
+        {
+            Homestead::Simulation FailedDestination = Controller->Simulation();
+            auto& FailedState = const_cast<Homestead::State&>(FailedDestination.GetState());
+            FailedState.world.seed ^= 0x517cc1b727220a95ULL;
+            auto Tree = FailedState.resources.end();
+            for (auto It = FailedState.resources.begin(); It != FailedState.resources.end(); ++It)
+                if (It->kind == ResourceKind::ForestTree && !It->cleared)
+                {
+                    Tree = It;
+                    break;
+                }
+            if (Tree == FailedState.resources.end()) return;
+            Tree->key.localId = MAX_uint32;
+            if (Controller->Landscape->Refresh(FailedDestination)
+                || !Controller->Landscape->ActiveTreeBatches.IsEmpty()
+                || !Controller->Landscape->ActiveTreeCollisions.IsEmpty()
+                || !Controller->Landscape->ActiveTreeInstances.IsEmpty()
+                || !Controller->Landscape->ActiveTreeLayoutSignature.IsEmpty())
+                return;
+            if (!Controller->Landscape->Refresh(Controller->Simulation())) return;
+            int32 Components = 0, Instances = 0, Collisions = 0;
+            *ActiveRollbackValid = ActiveBatchSnapshot(Components, Instances, Collisions)
+                    == Fixture->ActiveBatchSnapshot
+                && Components == Fixture->ActiveBatchComponents
+                && Instances == Fixture->ActiveBatchInstances
+                && Collisions == Fixture->ActiveCollisionCapsules;
+        },
+        [this, ActiveRollbackValid]()
+        {
+            return *ActiveRollbackValid && Controller->IsWorldReady()
+                && Controller->WorldRecoveryCount() == 0;
+        });
     const auto BatchLifecycleValid = MakeShared<bool>(false);
     Add(TEXT("Outer batches ignore renewable timers, omit cleared trees and rebuild without accumulation"),
         [this, Fixture, ActiveBatchSnapshot, OuterBatchSnapshot, BatchLifecycleValid]()
