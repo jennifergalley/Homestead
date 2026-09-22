@@ -341,17 +341,13 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
             {
                 TreeMeshes.Add(Mesh->GetPathName());
                 const auto& Capsule = Body->AggGeom.SphylElems[0];
-                const float Scale = Entity.scalePermille / 1000.0f;
-                const FRotator Rotation(0, Entity.yawDegrees, 0);
-                const FVector AnchorLocal(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
-                const FTransform ExpectedTransform(Rotation,
-                    FVector(Node.position.x, Node.position.y, PC->GroundHeight(Node.position.x, Node.position.y))
-                        - Rotation.RotateVector(AnchorLocal * Scale),
-                    FVector(Scale));
-                const FVector Anchor = Instance->Visual.Transform.TransformPosition(
-                    FVector(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z));
-                AnchorError = FVector::Dist(Anchor, FVector(Node.position.x, Node.position.y,
-                    PC->GroundHeight(Node.position.x, Node.position.y)));
+                UStaticMesh* ExpectedMesh = nullptr;
+                FHomesteadOuterTreeInstance ExpectedVisual;
+                Ready &= Landscape->ResolveGeneratedTreeVisual(Node, ExpectedMesh, ExpectedVisual)
+                    && ExpectedMesh == Mesh;
+                const FTransform& ExpectedTransform = ExpectedVisual.Transform;
+                AnchorError = FVector::Dist(
+                    Instance->Visual.Transform.GetLocation(), ExpectedTransform.GetLocation());
                 for (int32 Index = 0; Index < Batch->GetInstanceCount(); ++Index)
                 {
                     FTransform Actual;
@@ -432,14 +428,11 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
             bool TransformExact = false;
             if (Ready)
             {
-                const auto& Capsule = Body->AggGeom.SphylElems[0];
-                const float Scale = Entity.scalePermille / 1000.0f;
-                const FRotator Rotation(0, Entity.yawDegrees, 0);
-                const FVector Anchor(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
-                const FTransform Expected(Rotation,
-                    FVector(Node.position.x, Node.position.y, PC->GroundHeight(Node.position.x, Node.position.y))
-                        - Rotation.RotateVector(Anchor * Scale),
-                    FVector(Scale));
+                UStaticMesh* ExpectedMesh = nullptr;
+                FHomesteadOuterTreeInstance ExpectedVisual;
+                Ready &= Landscape->ResolveGeneratedTreeVisual(Node, ExpectedMesh, ExpectedVisual)
+                    && ExpectedMesh == Mesh;
+                const FTransform& Expected = ExpectedVisual.Transform;
                 AnchorError = FVector::Dist(Instance->Transform.GetLocation(), Expected.GetLocation());
                 TransformExact = Instance->Transform.Equals(Expected, 0.001f);
                 Ready &= TransformExact;
