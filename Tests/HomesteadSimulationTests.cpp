@@ -1562,7 +1562,8 @@ void GeneratedWorldIdentityAndActivation()
     CHECK(sim.Serialize() == same.Serialize());
     const auto saved = sim.Serialize();
     UnchangedFailure(sim, [&] { return sim.Deserialize(saved, {0, Generation::WorldGenerationVersion}); });
-    UnchangedFailure(sim, [&] { return sim.Deserialize(saved, {987654321, 2}); });
+    UnchangedFailure(sim, [&] { return sim.Deserialize(saved,
+        {987654321, Generation::WorldGenerationVersion + 1}); });
     OK(sim.Deserialize(saved, {987654321, Generation::WorldGenerationVersion}));
 }
 void GeneratedFellingAndPersistentTimers()
@@ -1711,7 +1712,8 @@ void GeneratedSaveValidationAndEditLimit()
         mutate(state);
         UnchangedFailure(sim, [&] { return sim.Deserialize(Encode(state)); });
     }
-    for (auto version : {0u, 2u, std::numeric_limits<std::uint32_t>::max()})
+    for (auto version : {0u, Generation::WorldGenerationVersion - 1,
+        Generation::WorldGenerationVersion + 1, std::numeric_limits<std::uint32_t>::max()})
     {
         State state = sim.GetState();
         state.world.generationVersion = version;
