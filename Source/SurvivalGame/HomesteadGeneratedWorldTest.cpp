@@ -15,6 +15,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
+#include <algorithm>
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -666,7 +667,7 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
             && Controller->State().resourceEdits.size() == Fixture->EditCount; }, 1.0f);
     const auto BatchLifecycleValid = MakeShared<bool>(false);
-    Add(TEXT("Outer batches omit cleared edits and rebuild deterministically without component accumulation"),
+    Add(TEXT("Outer batches ignore renewable timers, omit cleared trees and rebuild without accumulation"),
         [this, Fixture, OuterBatchSnapshot, BatchLifecycleValid]()
         {
             int32 ReturnedComponents = 0, ReturnedInstances = 0;
@@ -701,6 +702,73 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 return;
             for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
                 if (!ShiftedPointers.Contains(Entry.Value.Get())) return;
+
+            Homestead::Simulation Renewed = Shifted;
+            auto& RenewedState = const_cast<Homestead::State&>(Renewed.GetState());
+            auto Renewable = RenewedState.resources.end();
+            for (auto It = RenewedState.resources.begin(); It != RenewedState.resources.end(); ++It)
+                if (It->kind != ResourceKind::ForestTree && It->kind != ResourceKind::Sapling
+                    && !It->cleared)
+                {
+                    Renewable = It;
+                    break;
+                }
+            if (Renewable == RenewedState.resources.end()) return;
+            Renewable->readyAtHour = RenewedState.hour + 1.0;
+            auto RenewableEdit = std::lower_bound(RenewedState.resourceEdits.begin(),
+                RenewedState.resourceEdits.end(), Renewable->key,
+                [](const ResourceEdit& Value, const Generation::GeneratedEntityKey& Key)
+                {
+                    return Value.key < Key;
+                });
+            if (RenewableEdit != RenewedState.resourceEdits.end()
+                && RenewableEdit->key == Renewable->key)
+                *RenewableEdit = {Renewable->key, false, Renewable->readyAtHour};
+            else
+                RenewedState.resourceEdits.insert(
+                    RenewableEdit, {Renewable->key, false, Renewable->readyAtHour});
+            if (!Controller->Landscape->Refresh(Renewed)) return;
+            int32 RenewedComponents = 0, RenewedInstances = 0;
+            if (OuterBatchSnapshot(RenewedComponents, RenewedInstances) != ShiftedSnapshot
+                || RenewedComponents != ShiftedComponents || RenewedInstances != ShiftedInstances)
+                return;
+            for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
+                if (!ShiftedPointers.Contains(Entry.Value.Get())) return;
+
+            FString OuterKeyText;
+            for (const auto& Entry : Controller->Landscape->OuterTreeInstances)
+            {
+                OuterKeyText = Entry.Key;
+                break;
+            }
+            TArray<FString> KeyParts;
+            OuterKeyText.ParseIntoArray(KeyParts, TEXT(","));
+            if (KeyParts.Num() != 3) return;
+            const Generation::GeneratedEntityKey OuterKey{
+                {FCString::Atoi(*KeyParts[0]), FCString::Atoi(*KeyParts[1])},
+                static_cast<uint32>(FCString::Atoi(*KeyParts[2]))};
+            Homestead::Simulation ClearedOuter = Renewed;
+            auto& ClearedState = const_cast<Homestead::State&>(ClearedOuter.GetState());
+            auto OuterEdit = std::lower_bound(ClearedState.resourceEdits.begin(),
+                ClearedState.resourceEdits.end(), OuterKey,
+                [](const ResourceEdit& Value, const Generation::GeneratedEntityKey& Key)
+                {
+                    return Value.key < Key;
+                });
+            if (OuterEdit != ClearedState.resourceEdits.end() && OuterEdit->key == OuterKey)
+                *OuterEdit = {OuterKey, true, 0.0};
+            else
+                ClearedState.resourceEdits.insert(OuterEdit, {OuterKey, true, 0.0});
+            if (!Controller->Landscape->Refresh(ClearedOuter)
+                || Controller->Landscape->OuterTreeInstances.Contains(OuterKeyText)
+                || Controller->Landscape->OuterTreeInstances.Num() != ShiftedInstances - 1)
+                return;
+            int32 ClearedComponents = 0, ClearedInstances = 0;
+            if (OuterBatchSnapshot(ClearedComponents, ClearedInstances).IsEmpty()
+                || ClearedInstances != ShiftedInstances - 1)
+                return;
+            for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
+                if (ShiftedPointers.Contains(Entry.Value.Get())) return;
 
             Homestead::Simulation Alternate;
             if (!Alternate.NewGame(Controller->State().world.seed ^ 0x9e3779b97f4a7c15ULL)

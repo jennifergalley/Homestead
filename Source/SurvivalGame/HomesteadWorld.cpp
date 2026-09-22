@@ -1339,16 +1339,39 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     {
         Layout += FString::Printf(TEXT("P:%d:%d;"), Plot.cellX, Plot.cellY);
     }
-    for (const auto& Edit : State.resourceEdits)
-    {
-        Layout += FString::Printf(TEXT("E:%d:%d:%u:%d:%.3f;"), Edit.key.chunk.x,
-            Edit.key.chunk.y, Edit.key.localId, Edit.cleared, Edit.readyAtHour);
-    }
     if (ResourceLayoutSignature != Layout)
     {
         if (!BuildDecorations(Simulation)) return false;
-        if (!RebuildOuterTreeBatches(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
+    }
+    FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
+        static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
+        State.activeChunk.x, State.activeChunk.y);
+    TArray<FString> ClearedOuterTreeEdits;
+    for (const auto& Edit : State.resourceEdits)
+    {
+        const int32 DeltaX = FMath::Abs(Edit.key.chunk.x - State.activeChunk.x);
+        const int32 DeltaY = FMath::Abs(Edit.key.chunk.y - State.activeChunk.y);
+        if (!Edit.cleared || DeltaX > 2 || DeltaY > 2 || (DeltaX <= 1 && DeltaY <= 1))
+            continue;
+        Homestead::Generation::GeneratedEntity Entity;
+        const auto Status = Homestead::Generation::FindEntity(State.world, Edit.key, Entity);
+        if (Status != Homestead::Generation::Status::Ok)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Generated resource edit key cannot resolve: %s"),
+                UTF8_TO_TCHAR(Homestead::Generation::StatusMessage(Status)));
+            return false;
+        }
+        if (Entity.kind == Homestead::Generation::EntityKind::ForestTree)
+            ClearedOuterTreeEdits.Add(FString::Printf(TEXT("%d:%d:%u;"),
+                Edit.key.chunk.x, Edit.key.chunk.y, Edit.key.localId));
+    }
+    ClearedOuterTreeEdits.Sort();
+    OuterLayout += FString::Join(ClearedOuterTreeEdits, TEXT(""));
+    if (OuterTreeLayoutSignature != OuterLayout)
+    {
+        if (!RebuildOuterTreeBatches(Simulation)) return false;
+        OuterTreeLayoutSignature = MoveTemp(OuterLayout);
     }
 
     RemoveMissing(ResourceVisuals, State.resources);
