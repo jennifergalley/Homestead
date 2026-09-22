@@ -221,8 +221,22 @@ bool AHomesteadWorld::RebuildRegionalWater()
                 { return Existing.key == Reach.key; }))
                 Reaches.Add(Reach);
     }
-    Reaches.Sort([](const RiverReach& A, const RiverReach& B)
-        { return RegionalReachLess(A, B); });
+    const FVector2D ActiveCenter(
+        (static_cast<double>(PreparedChunk.x) + 0.5) * ChunkSizeCm,
+        (static_cast<double>(PreparedChunk.y) + 0.5) * ChunkSizeCm);
+    Reaches.Sort([ActiveCenter](const RiverReach& A, const RiverReach& B)
+    {
+        const FVector2D MidA(
+            (A.key.upstream.x + A.key.downstream.x) * DrainageSpacingCm * 0.5,
+            (A.key.upstream.y + A.key.downstream.y) * DrainageSpacingCm * 0.5);
+        const FVector2D MidB(
+            (B.key.upstream.x + B.key.downstream.x) * DrainageSpacingCm * 0.5,
+            (B.key.upstream.y + B.key.downstream.y) * DrainageSpacingCm * 0.5);
+        const double DistanceA = FVector2D::DistSquared(MidA, ActiveCenter);
+        const double DistanceB = FVector2D::DistSquared(MidB, ActiveCenter);
+        return !FMath::IsNearlyEqual(DistanceA, DistanceB)
+            ? DistanceA < DistanceB : RegionalReachLess(A, B);
+    });
     FString Signature = FString::Printf(TEXT("%llu:%u;"),
         static_cast<unsigned long long>(Descriptor.seed), Descriptor.generationVersion);
     for (const auto& Terrain : TerrainChunks)
