@@ -55,18 +55,12 @@ std::int64_t Noise(WorldDescriptor world, std::int64_t x, std::int64_t y,
         LerpFixed(value(cellX, cellY + 1), value(cellX + 1, cellY + 1), tx), ty);
 }
 
-double LandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y)
+double RollingLandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y)
 {
-    const auto height = Noise(world, x, y, 19200, 101) * (480 * 256) / 32768 +
-        Noise(world, x, y, 7200, 102) * (180 * 256) / 32768 +
-        Noise(world, x, y, 2400, 103) * (40 * 256) / 32768;
+    const auto height = Noise(world, x, y, 19200, 101) * (650 * 256) / 32768 +
+        Noise(world, x, y, 7200, 102) * (320 * 256) / 32768 +
+        Noise(world, x, y, 2400, 103) * (80 * 256) / 32768;
     return static_cast<double>(height) / 256.0;
-}
-
-std::uint16_t Woodland(WorldDescriptor world, std::int64_t x, std::int64_t y)
-{
-    return static_cast<std::uint16_t>(
-        (3 * Noise(world, x, y, 9600, 201) + Noise(world, x, y, 2400, 202)) / 4 + 32768);
 }
 
 double Smooth(double low, double high, double value)
@@ -75,6 +69,64 @@ double Smooth(double low, double high, double value)
     if (value >= high) return 1.0;
     const double t = (value - low) / (high - low);
     return t * t * (3.0 - 2.0 * t);
+}
+
+double PocketLandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y)
+{
+    constexpr std::int64_t PocketPeriodCm = 4800;
+    const auto cellX = FloorDivide(x, PocketPeriodCm);
+    const auto cellY = FloorDivide(y, PocketPeriodCm);
+    double height = RollingLandHeight(world, x, y);
+    double strongest = 0.0;
+    double target = height;
+    for (std::int64_t py = cellY - 1; py <= cellY + 1; ++py)
+        for (std::int64_t px = cellX - 1; px <= cellX + 1; ++px)
+        {
+            const auto hash = Hash(world, px, py, 104);
+            const auto centerX = px * PocketPeriodCm + 1200 +
+                static_cast<std::int64_t>(hash % 2401);
+            const auto centerY = py * PocketPeriodCm + 1200 +
+                static_cast<std::int64_t>((hash >> 16) % 2401);
+            const double dx = static_cast<double>(x - centerX);
+            const double dy = static_cast<double>(y - centerY);
+            const double weight = 1.0 - Smooth(650.0, 1800.0, std::sqrt(dx * dx + dy * dy));
+            if (weight > strongest)
+            {
+                strongest = weight;
+                target = RollingLandHeight(world, centerX, centerY);
+            }
+        }
+    return height + (target - height) * strongest;
+}
+
+double DistanceToSpawnSegment(std::int64_t x, std::int64_t y)
+{
+    constexpr double ax = -1300.0;
+    constexpr double ay = -80.0;
+    constexpr double bx = -1000.0;
+    constexpr double by = 0.0;
+    constexpr double lengthSquared = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+    const double px = static_cast<double>(x);
+    const double py = static_cast<double>(y);
+    const double t = (px - ax) * (bx - ax) + (py - ay) * (by - ay);
+    const double clamped = t <= 0.0 ? 0.0 : (t >= lengthSquared ? 1.0 : t / lengthSquared);
+    const double dx = px - (ax + clamped * (bx - ax));
+    const double dy = py - (ay + clamped * (by - ay));
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+double LandHeight(WorldDescriptor world, std::int64_t x, std::int64_t y)
+{
+    const double height = PocketLandHeight(world, x, y);
+    const double safety = 1.0 - Smooth(100.0, 250.0, DistanceToSpawnSegment(x, y));
+    const double safeHeight = PocketLandHeight(world, -1000, 0);
+    return height + (safeHeight - height) * safety;
+}
+
+std::uint16_t Woodland(WorldDescriptor world, std::int64_t x, std::int64_t y)
+{
+    return static_cast<std::uint16_t>(
+        (3 * Noise(world, x, y, 9600, 201) + Noise(world, x, y, 2400, 202)) / 4 + 32768);
 }
 
 double Height(WorldDescriptor world, std::int64_t x, std::int64_t y)
@@ -145,6 +197,31 @@ bool TreeCandidate(WorldDescriptor world, ChunkCoord chunk, int slot,
     return true;
 }
 
+void AssignTreePalette(GeneratedEntity& entity, std::uint64_t hash)
+{
+    if (entity.kind != EntityKind::ForestTree && entity.kind != EntityKind::Sapling) return;
+    const auto roleValue = Mix(hash ^ UINT64_C(0x8cb92baa3f3d8dd7)) % 100;
+    const auto detail = Mix(hash ^ UINT64_C(0x4f1bbcdc6762c7ad));
+    if (entity.kind == EntityKind::ForestTree)
+    {
+        entity.paletteRole = roleValue < 55 ? TreePaletteRole::BroadleafMature :
+            (roleValue < 85 ? TreePaletteRole::ConiferMature : TreePaletteRole::WoodlandAccent);
+        const std::uint16_t low = 900;
+        const std::uint16_t high = entity.paletteRole == TreePaletteRole::BroadleafMature ? 1040 :
+            (entity.paletteRole == TreePaletteRole::ConiferMature ? 1050 : 1060);
+        entity.scalePermille = static_cast<std::uint16_t>(low + detail % (high - low + 1));
+    }
+    else
+    {
+        entity.paletteRole = roleValue < 45 ? TreePaletteRole::BroadleafYoung :
+            TreePaletteRole::ConiferYoung;
+        const std::uint16_t low = entity.paletteRole == TreePaletteRole::BroadleafYoung ? 900 : 920;
+        const std::uint16_t high = 1080;
+        entity.scalePermille = static_cast<std::uint16_t>(low + detail % (high - low + 1));
+    }
+    entity.variantIndex = static_cast<std::uint8_t>((detail >> 16) % 4);
+}
+
 Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int slot,
     GeneratedEntity& output)
 {
@@ -190,6 +267,7 @@ Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int s
     entity.heightCm = Height(world, entity.xCm, entity.yCm);
     entity.yawDegrees = static_cast<std::uint16_t>(Mix(hash ^ 401) % 360);
     entity.scalePermille = static_cast<std::uint16_t>(900 + Mix(hash ^ 402) % 201);
+    AssignTreePalette(entity, hash);
     output = entity;
     return Status::Ok;
 }
