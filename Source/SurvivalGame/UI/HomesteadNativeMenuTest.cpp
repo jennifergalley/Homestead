@@ -510,7 +510,12 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
                 && VerifyNativeMenuPresentation();
         });
     Add(TEXT("Select that same nonduplicated garment from the carried grid"),
-        [this, OpenInventory]() { OpenInventory(0); Tap(EKeys::Gamepad_DPad_Right); },
+        [this, Tunic, OpenInventory]()
+        {
+            OpenInventory(0);
+            if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Wearable, *Tunic, 0))
+                Finish(false, TEXT("The same carried tunic identity is unavailable."));
+        },
         [this, Tunic]()
         {
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
