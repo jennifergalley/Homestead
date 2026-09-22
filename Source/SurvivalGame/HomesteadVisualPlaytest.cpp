@@ -691,22 +691,76 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
     const bool View = Pass.Label == TEXT("view-authored-tree");
     const bool Contact = Pass.Label == TEXT("walk-into-authored-trunk");
     const bool Retreat = Pass.Label == TEXT("retreat-from-authored-trunk");
-    if (bTreeReady && !ObservedTree.IsValid() && PC->Landscape && !ObservedTreeKey.IsEmpty())
+    if (bTreeReady && (View || Contact) && PC->Landscape && !ObservedTreeKey.IsEmpty())
     {
-        auto* Collision = PC->Landscape->ActiveTreeCollisions.FindRef(ObservedTreeKey).Get();
-        const auto* Instance = PC->Landscape->ActiveTreeInstances.Find(ObservedTreeKey);
-        auto* Batch = Instance ? PC->Landscape->ActiveTreeBatches.FindRef(Instance->Visual.MeshPath).Get() : nullptr;
-        UStaticMesh* Mesh = Batch ? Batch->GetStaticMesh().Get() : nullptr;
-        if (Collision && Instance && Mesh)
+        auto BindCurrentTree = [&](const FString& Key)
         {
+            auto* Collision = PC->Landscape->ActiveTreeCollisions.FindRef(Key).Get();
+            const auto* Instance = PC->Landscape->ActiveTreeInstances.Find(Key);
+            auto* Batch = Instance ? PC->Landscape->ActiveTreeBatches.FindRef(Instance->Visual.MeshPath).Get() : nullptr;
+            UStaticMesh* Mesh = Batch ? Batch->GetStaticMesh().Get() : nullptr;
+            const FName KeyTag(*(FString(TEXT("TreeKey_")) + Key));
+            if (!Collision || !Collision->IsRegistered() || !Collision->ComponentHasTag(KeyTag)
+                || !Instance || !Mesh)
+                return false;
             ObservedTree = Collision;
+            ObservedTreeKey = Key;
             ObservedTreeBounds = Mesh->GetBoundingBox().TransformBy(Instance->Visual.Transform);
             TreeCenter = FVector2D(Collision->GetComponentLocation());
-        }
-        else
+            return true;
+        };
+        auto* Current = PC->Landscape->ActiveTreeCollisions.FindRef(ObservedTreeKey).Get();
+        const bool CurrentMatches = ObservedTree.IsValid() && ObservedTree->IsRegistered()
+            && ObservedTree.Get() == Current
+            && PC->Landscape->ActiveTreeInstances.Contains(ObservedTreeKey)
+            && ObservedTree->ComponentHasTag(FName(*(FString(TEXT("TreeKey_")) + ObservedTreeKey)));
+        if (!CurrentMatches)
         {
-            bTreeReady = false;
-            Observations.Add(TEXT("FAILED selected stable tree key was unavailable after active-window rebuild."));
+            const FString PreviousKey = ObservedTreeKey;
+            if (BindCurrentTree(PreviousKey))
+            {
+                Observations.Add(FString::Printf(
+                    TEXT("Reacquired selected tree capsule after active-window rebuild: key=%s."), *PreviousKey));
+            }
+            else if (Contact)
+            {
+                const FVector2D Player(PC->PlayerPoint().x, PC->PlayerPoint().y);
+                FString ReplacementKey;
+                double BestDistance = TNumericLimits<double>::Max();
+                for (const auto& Entry : PC->Landscape->ActiveTreeCollisions)
+                {
+                    auto* Candidate = Entry.Value.Get();
+                    if (!Candidate || !Candidate->IsRegistered()
+                        || !PC->Landscape->ActiveTreeInstances.Contains(Entry.Key))
+                        continue;
+                    const double Distance = FVector2D::DistSquared(
+                        FVector2D(Candidate->GetComponentLocation()), Player);
+                    if (Distance < BestDistance
+                        || (FMath::IsNearlyEqual(Distance, BestDistance) && Entry.Key < ReplacementKey))
+                    {
+                        BestDistance = Distance;
+                        ReplacementKey = Entry.Key;
+                    }
+                }
+                if (ReplacementKey.IsEmpty() || !BindCurrentTree(ReplacementKey))
+                {
+                    bTreeReady = false;
+                    Observations.Add(TEXT("FAILED no current active tree capsule was available for contact."));
+                }
+                else
+                {
+                    bHaveTreeDistance = false;
+                    TreeBlockedSeconds = 0;
+                    Observations.Add(FString::Printf(
+                        TEXT("Selected tree left active window; contact deterministically reselected key=%s from key=%s."),
+                        *ReplacementKey, *PreviousKey));
+                }
+            }
+            else
+            {
+                bTreeReady = false;
+                Observations.Add(TEXT("FAILED selected stable tree key was unavailable during framing."));
+            }
         }
     }
     if (!bTreeReady || !(Approach || View || Contact || Retreat)) return;
