@@ -840,7 +840,9 @@ void AHomesteadSmokeTest::PrepareNativeResetChecks()
             *Incompatible = Controller->SavePath(TEXT("Homestead_Manual"));
             if (!HomesteadNativeMenuProof::WriteEnvelope(*Save, *Incompatible))
             { Finish(false, TEXT("Could not write incompatible fixture.")); return; }
+            Controller->bHasPlayableSession = false;
             Controller->QuickLoad();
+            Controller->NativeMenu->Refresh();
         },
         [this, Before]() { return Controller->MenuNeedsTestReset()
             && Controller->Simulation().Serialize() == *Before && Controller->NativeMenu->IsTestResetPrompt(); });
@@ -850,7 +852,7 @@ void AHomesteadSmokeTest::PrepareNativeResetChecks()
             && !Controller->NativeMenu->HasActiveDialog() && Controller->Simulation().Serialize() == *Before
             && IFileManager::Get().FileExists(**Incompatible); });
     Add(TEXT("Explicit reset is separately requested after cancel"),
-        [this]() { Controller->QuickLoad(); },
+        [this]() { Controller->QuickLoad(); Controller->NativeMenu->Refresh(); },
         [this]() { return Controller->NativeMenu->IsTestResetPrompt(); });
     Add(TEXT("Confirmed reset replaces, never merges, and keeps old test file"),
         [this]() { Tap(EKeys::Down); Tap(EKeys::Enter); },
