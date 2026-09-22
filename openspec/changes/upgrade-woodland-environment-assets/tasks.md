@@ -118,3 +118,27 @@ and connected-water round; they do not interrupt that acceptance run.
   clearing replay, regional reach or saves. If the dominant phase requires a
   broader architecture change, record the exact measured limit and follow-up
   scope rather than claiming the hitch is fixed.
+
+## 8. Deferred incremental component streaming
+
+The selected woodland-polish round reduced measured transition preparation from
+1128.699 ms to 690.414 ms, but synchronous UObject, HISM and collision
+publication still causes a visible pause. Jenny explicitly queued a broader
+frame-budget streaming round for later; it is not part of the active wardrobe
+transaction milestone.
+
+- [ ] 8.1 Profile game-thread UObject creation, procedural terrain publication,
+  HISM instance/tree rebuild, collision cooking/enabling and old-chunk teardown
+  separately during ordinary boundary travel; retain the existing same-route
+  690.414 ms measurement as the comparison baseline.
+- [ ] 8.2 Design and implement bounded incremental publication across frames
+  with explicit ownership/cancellation for superseded destinations; preserve
+  stable keys, exact terrain seams, active collision readiness and atomic
+  failure without exposing partial authoritative state.
+- [ ] 8.3 Verify ordinary controller travel no longer produces a visible
+  multi-frame stall at the tested boundary while retaining felling, building,
+  regional water, save/revisit and cadence behavior; report measured
+  game-thread and offscreen limits without claiming GPU/Present timing.
+- [ ] 8.4 Package and promote the streaming candidate only after fresh
+  producer/consumer, transition timing and visual checks pass; retain
+  woodland-polish-06 as rollback until then.
