@@ -5,7 +5,19 @@ This is not an in-game visual or performance acceptance.
 
 ## Inputs and identity
 
-Read only from MAIN's exact current files:
+The first section records the rejected FBX route. The accepted replacement
+contract uses MAIN's exact `candidate02` files:
+
+- Blend-source manifest SHA-256
+  `ED00C13141D954731A8C010686C785BE585E94FFDECF1779E8BB9FBC8891888E`.
+- Blend-source receipt SHA-256
+  `38DF4AFD4E4C2EF4E03975F733DD7F1A5ADB01BF3ED119CFB6338006C227BA89`.
+- Provider Blend original SHA-256
+  `153D20AAE6D7C63A4C52689D91E8BEAD78F6D17A70E11EF4D03D19953383DE00`.
+- Accepted prepared provenance SHA-256
+  `0327C21332E75B0C549A44F6D034125702FE8D06A57BB56C162B77C1DE9EFEDB`.
+
+Rejected route evidence was read from:
 
 - Prepared provenance:
   `Assets\Environment\MatureFir20260921\candidate01\Prepared\provenance.json`,
@@ -72,33 +84,76 @@ provider glTF descriptor contains `TEXCOORD_0` on all selected c primitives,
 but its geometry dependency `fir_tree_01.bin` is 478,462,204 bytes. USD is
 443,961,681 bytes. Neither is a smaller practical repair path.
 
-The Blend path must still prove selected `fir_tree_01_c` model identity,
-authored UV0 per material role, valid normals/tangents, source transforms and
-material order before a new export. Acquisition alone is not repair acceptance.
+The first generated-reduction repair route was abandoned: its fresh-import LOD1
+had 498 zero-normal corners despite valid UVs and geometric area. Repeating
+smoothing/export switches did not repair it.
+
+The Blend file also contains provider-authored objects
+`fir_tree_01_c_LOD1` and `fir_tree_01_c_LOD2`. MAIN selected those instead and
+completed a fresh `Prepared-UV07` export. Its exact provenance is:
+
+`Assets\Environment\MatureFir20260921\candidate02\Prepared-UV07\provenance.json`
+
+- SHA-256 `0327C21332E75B0C549A44F6D034125702FE8D06A57BB56C162B77C1DE9EFEDB`.
+- Current production tool SHA-256
+  `BFA4CBDD4CC3C3DB2E8A3334306226E3EB0E85B4319677529171959433A2A373`.
+
+The source repair contract passes:
+
+- All three exact c objects have location `(12,0,0)` m, identity rotation/scale;
+  display layout is removed once.
+- Each has a provider-native `CORNER` / `FLOAT_VECTOR` `UVMap` attribute whose
+  Z value is zero. The attribute length equals mesh loops.
+- On a copy, the source attribute is renamed, exact XY values are copied into
+  active/render UV layer 0, and every-corner source/recovered SHA-256 matches:
+  LOD0 `9B47C514...B1F779`, LOD1 `7F26F33B...661DF1`,
+  LOD2 `A9814DEF...CE7AA`.
+- Positions, loop vertex indices, polygon starts/totals, source/recovered material
+  indices and corner normals are hash-bound. They remain exactly equal except
+  LOD0's documented empty leading material slot removal.
+- Each exported FBX contains exactly one `LayerElementUV`; fresh reimport reports
+  zero per-role degenerate UV triangles, zero near-zero tangent/normal corners at
+  `1e-4`, zero invalid binormal signs and zero tiny geometry.
+
+This is preservation/conversion of publisher UV data, not a generated unwrap.
 
 ## LOD and canopy-retention risks
 
-| LOD / screen size | Total triangles | Green twig triangles | Twig retention | Geometry-centroid occupancy retention XZ / YZ |
+The rejected generated levels above are no longer the source contract. The
+accepted provider-authored levels are:
+
+| LOD / proposed screen size | Source model | Total triangles | Green twig triangles | Geometry-centroid occupancy retention XZ / YZ |
 | --- | ---: | ---: | ---: | --- |
-| 0 / 1.0 | 505,494 | 446,074 | 100% | 100% / 100% |
-| 1 / 0.30 | 128,247 | 111,518 | 25% | 84.96% / 84.23% |
-| 2 / 0.08 | 34,015 | 26,764 | 6% | 47.92% / 48.12% |
+| 0 / 1.0 | `fir_tree_01_c_LOD0` | 505,494 | 446,074 | 100% / 100% |
+| 1 / 0.30 | `fir_tree_01_c_LOD1` | 68,879 | 9,459 | 54.20% / 51.02% |
+| 2 / 0.08 | `fir_tree_01_c_LOD2` | 31,512 | 5,016 | 35.57% / 33.19% |
+
+Accepted FBX SHA-256 values are LOD0
+`FF9A5E8BF8673370F8225D6879008D7060ED0C340994C47B4A36AE28F4A24F9A`,
+LOD1 `032622AEE17276978FD7B27B92C881942E7AC9F66BF650051B96948540650E9B`,
+and LOD2 `496CC17FE04AD16CFB52E29EC2A331376D74DB439B367830B5341E996F7D05BA`.
 
 The occupancy proxy bins projected triangle centroids into 256x256 XZ/YZ grids.
 It ignores the alpha mask and is not a rendered silhouette, but it is useful
 for relative source-geometry loss.
 
-The first green twig geometry is elevated:
+The first green twig geometry remains elevated and stable:
 
 - LOD0 minimum Z 6.9085 m; 1st/5th centroid percentiles 7.166/8.322 m.
-- LOD1 minimum Z 6.9091 m; 1st/5th percentiles 7.226/8.349 m.
-- LOD2 minimum Z 6.9254 m; 1st/5th percentiles 7.942/8.383 m.
+- Authored LOD1 minimum Z about 6.90 m; 1st/5th percentiles 7.18/8.31 m.
+- Authored LOD2 minimum Z about 6.90 m; 1st/5th percentiles 7.17/8.31 m.
 - No twig triangle in any LOD has any vertex below 6 m.
 
-Twig triangles touching the lower crown below 8 m fall from 14,469 to 3,038
-to 292: 21.0% and 2.02% retention. LOD2 therefore has a concrete risk of
-thinning the lower edge and reopening distant horizon gaps at screen size 0.08.
-LOD1 also needs an ordinary-camera transition comparison at 0.30.
+Twig triangles touching the lower crown below 8 m retain only 2.28% / 1.27%
+of the LOD0 triangle count in authored LOD1/2. Because these are provider-authored
+larger-card levels, triangle/centroid loss alone does not establish visible
+silhouette loss; alpha-masked card area matters. It does establish a focused
+review requirement: compare ordinary-camera lower-crown/horizon transitions at
+0.30 and especially 0.08. Do not assume authored automatically means acceptable.
+
+Bounds/root remain coherent. LOD1/2 retain minimum Z `-0.093823` m; maximum Z
+changes by at most 3.18 cm and horizontal extrema by roughly 3 cm from LOD0.
+There is no meaningful ground-anchor or pivot jump between levels.
 
 This tree is appropriate as a tall mature-conifer silhouette, not as low
 enclosure. It must be layered with poles, saplings, shrubs and/or the background
@@ -148,11 +203,12 @@ consistent. Native import and fresh inventory passed, but both supervised
 processes later hung during shutdown and were terminated by owned PID; that is
 recorded in MAIN's receipt and is not erased here.
 
-Status: **current FBX path rejected; Blend-source replacement in progress**.
-If the new source/export passes UV/basis proof, LOD2 lower-crown retention and
-the 50 cm collision
-radius remain visual/gameplay review items. Runtime package use, performance
-and Jenny's aesthetic acceptance are not established by this check.
+Status: **Blend-source provider-authored LOD source contract passed**.
+The previous FBX/generated-level candidate remains rejected and must not be
+silently reused. The new source is ready for fresh native import with the
+enhanced UV/basis verifier. Authored LOD lower-crown retention and the 50 cm
+collision radius remain visual/gameplay review items. Runtime package use,
+performance and Jenny's aesthetic acceptance are not established by this check.
 
 Full machine-readable read-only measurements are in this session's
 `mature-fir-qa.json`; the script and logs remain session artifacts, not repo
