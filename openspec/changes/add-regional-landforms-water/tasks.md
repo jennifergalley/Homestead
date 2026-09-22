@@ -17,7 +17,7 @@
   existing chunk vertices, clamped for spawn protection and traversal slope;
   verify shared vertices, signed coordinates, order independence, and current
   terrain recovery thresholds.
-- [ ] 2.2 Add native loaded-region/descriptor caching keyed only by immutable
+- [x] 2.2 Add native loaded-region/descriptor caching keyed only by immutable
   world and region identity; verify active-window refresh does not accumulate
   durable exploration state or rebuild unchanged regions.
 - [x] 2.3 Extend generated inventory with regional ridge/valley/lowland metrics
@@ -29,7 +29,7 @@
 
 ## 3. Connected water foundation
 
-- [ ] 3.1 Materialize stable loaded-chunk reach/lake descriptors from canonical
+- [x] 3.1 Materialize stable loaded-chunk reach/lake descriptors from canonical
   regional identities; verify neighboring chunks agree on outlet/downstream
   keys and `BasinTooLarge` leaves prior descriptors unchanged.
 - [ ] 3.2 Render one bounded continuous reach or lake surface using existing

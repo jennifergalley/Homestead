@@ -79,6 +79,15 @@ Procedural mesh sections and collision components are derived caches rebuilt
 from those identities; mutable component or section indices are never persisted.
 Sparse player edits remain the only durable world deltas.
 
+Loaded regional results are generated on the engine thread pool and published
+atomically into a bounded in-memory cache keyed by world seed, integrated
+generation version, and region coordinate. Active-window refresh prunes regions
+that leave the window, reuses unchanged entries, and records bounded
+`BasinTooLarge` failures without replacing prior descriptors or writing
+exploration state to saves. Loaded-chunk views retain canonical reach and lake
+keys and explicitly report partial coverage when a neighboring bounded region
+is unavailable.
+
 **Alternative:** serialize active water component indices. Rejected because
 streaming/rebuild order would make saves unstable.
 

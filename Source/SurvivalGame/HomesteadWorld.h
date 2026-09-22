@@ -1,9 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Async/Future.h"
 #include "GameFramework/Actor.h"
+#include "Simulation/HomesteadRegionalDescriptorCache.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "Simulation/HomesteadWorldGeneration.h"
+#include <map>
+#include <vector>
+
 #include "HomesteadWorld.generated.h"
 
 class UStaticMesh;
@@ -62,6 +67,20 @@ struct FHomesteadActiveTreeInstance
     int32 ResourceId = 0;
 };
 
+struct FHomesteadRegionalDescriptorBuildEntry
+{
+    Homestead::RegionalGeneration::RegionCoord Region;
+    Homestead::RegionalGeneration::Status ResultStatus =
+        Homestead::RegionalGeneration::Status::OutOfRange;
+    Homestead::RegionalGeneration::RegionalResult Result;
+};
+
+struct FHomesteadRegionalDescriptorBuild
+{
+    Homestead::Generation::WorldDescriptor World;
+    std::vector<FHomesteadRegionalDescriptorBuildEntry> Entries;
+};
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadWorld : public AActor
 {
@@ -69,6 +88,7 @@ class SURVIVALGAME_API AHomesteadWorld : public AActor
 
 public:
     AHomesteadWorld();
+    virtual void Tick(float DeltaSeconds) override;
     bool Initialize(const Homestead::Simulation& Simulation);
     bool Refresh(const Homestead::Simulation& Simulation);
     void SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation);
@@ -142,6 +162,12 @@ private:
     FString ActiveTreeLayoutSignature;
     double DecorationBuildMilliseconds = 0;
     Homestead::Generation::WorldDescriptor Descriptor;
+    Homestead::Generation::LoadedRegionalDescriptorCache RegionalDescriptors;
+    std::vector<Homestead::RegionalGeneration::RegionCoord> DesiredRegionalDescriptors;
+    std::map<Homestead::RegionalGeneration::RegionCoord,
+        Homestead::RegionalGeneration::Status> RegionalDescriptorFailures;
+    TUniquePtr<TFuture<FHomesteadRegionalDescriptorBuild>> RegionalDescriptorBuild;
+    uint64 RegionalDescriptorBuildCount = 0;
     Homestead::Generation::ChunkCoord PreparedChunk;
     bool bTerrainReady = false;
     bool bVisualBuildFailed = false;
@@ -155,6 +181,9 @@ private:
         FLinearColor Color, bool bCollision = false,
         const FRotator& Rotation = FRotator::ZeroRotator, bool bHideMesh = false);
     bool BuildTerrain(const Homestead::State& State);
+    bool RefreshRegionalDescriptors(Homestead::Generation::WorldDescriptor World,
+        const std::vector<Homestead::RegionalGeneration::RegionCoord>& Regions);
+    void QueueRegionalDescriptorBuild();
     UProceduralMeshComponent* BuildTerrainChunk(const Homestead::Generation::ChunkBaseline& Baseline,
         Homestead::Generation::WorldDescriptor World, bool bCollision);
     FVector AtGround(float X, float Y, float Offset = 0) const;

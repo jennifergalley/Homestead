@@ -36,6 +36,11 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     double RegionalOffsetMin = DBL_MAX, RegionalOffsetMax = -DBL_MAX;
     uint16 RegionalRidgeMin = MAX_uint16, RegionalRidgeMax = 0;
     uint16 RegionalValleyMin = MAX_uint16, RegionalValleyMax = 0;
+    int32 RegionalReadyChunks = 0, RegionalPartialChunks = 0, RegionalIncompleteChunks = 0;
+    int32 RegionalReachReferences = 0, RegionalLakeReferences = 0;
+    bool RegionalDescriptorsConsistent = true;
+    TMap<FString, FString> RegionalReachSignatures;
+    TMap<FString, FString> RegionalLakeSignatures;
     TArray<TSharedPtr<FJsonValue>> Tiles, Trees, ActiveBatches, OuterBatches;
     const FName GrassTag(TEXT("AuthoredGrassMedium01"));
     const FName FernTag(TEXT("AuthoredFern02"));
@@ -139,6 +144,47 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
             else CoverPoliciesValid = false;
         }
         CoverPoliciesValid &= ChunkGrassBatches == 4 && ChunkFernBatches == 4;
+        Gen::LoadedChunkWaterDescriptors Water;
+        const auto WaterStatus = Landscape->RegionalDescriptors.DescribeChunkWater(
+            State.world, {Entry.Key.X, Entry.Key.Y}, Water);
+        if (WaterStatus == Gen::RegionalChunkDescriptorStatus::Ready) ++RegionalReadyChunks;
+        else if (WaterStatus == Gen::RegionalChunkDescriptorStatus::Partial) ++RegionalPartialChunks;
+        else ++RegionalIncompleteChunks;
+        for (const auto& Reach : Water.reaches)
+        {
+            ++RegionalReachReferences;
+            const FString Key = FString::Printf(TEXT("%lld,%lld>%lld,%lld"),
+                static_cast<long long>(Reach.key.upstream.x),
+                static_cast<long long>(Reach.key.upstream.y),
+                static_cast<long long>(Reach.key.downstream.x),
+                static_cast<long long>(Reach.key.downstream.y));
+            const FString Signature = FString::Printf(TEXT("%lld:%lld:%u:%u:%u"),
+                static_cast<long long>(Reach.upstreamSurfaceMm),
+                static_cast<long long>(Reach.downstreamSurfaceMm), Reach.accumulation,
+                Reach.widthClass, Reach.depthClass);
+            if (const FString* Existing = RegionalReachSignatures.Find(Key))
+                RegionalDescriptorsConsistent &= *Existing == Signature;
+            else
+                RegionalReachSignatures.Add(Key, Signature);
+            RegionalDescriptorsConsistent &= Reach.key.upstream != Reach.key.downstream
+                && Reach.downstreamSurfaceMm < Reach.upstreamSurfaceMm;
+        }
+        for (const auto& Lake : Water.lakes)
+        {
+            ++RegionalLakeReferences;
+            const FString Key = FString::Printf(TEXT("%lld,%lld"),
+                static_cast<long long>(Lake.id.x), static_cast<long long>(Lake.id.y));
+            const FString Signature = FString::Printf(TEXT("%lld,%lld>%lld,%lld:%lld:%u"),
+                static_cast<long long>(Lake.outlet.upstream.x),
+                static_cast<long long>(Lake.outlet.upstream.y),
+                static_cast<long long>(Lake.outlet.downstream.x),
+                static_cast<long long>(Lake.outlet.downstream.y),
+                static_cast<long long>(Lake.surfaceMm), Lake.memberCount);
+            if (const FString* Existing = RegionalLakeSignatures.Find(Key))
+                RegionalDescriptorsConsistent &= *Existing == Signature;
+            else
+                RegionalLakeSignatures.Add(Key, Signature);
+        }
         Homestead::State CoverState;
         CoverState.structures = State.structures;
         CoverState.plots = State.plots;
@@ -540,7 +586,12 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         && FernBatchComponents == Landscape->TerrainChunks.Num() * 4
         && CoverPoliciesValid && CoverRepresentativeTransformsExact
         && RegionalOffsetMin <= RegionalOffsetMax
-        && RegionalRidgeMin <= RegionalRidgeMax && RegionalValleyMin <= RegionalValleyMax;
+        && RegionalRidgeMin <= RegionalRidgeMax && RegionalValleyMin <= RegionalValleyMax
+        && Landscape->RegionalDescriptors.LoadedRegionCount() >= 1
+        && Landscape->RegionalDescriptors.LoadedRegionCount() <= 4
+        && Landscape->RegionalDescriptors.CachedRegionCount()
+            <= Landscape->RegionalDescriptors.LoadedRegionCount()
+        && RegionalDescriptorsConsistent;
     auto Evidence = MakeShared<FJsonObject>();
     Evidence->SetStringField(TEXT("seed"), FString::Printf(TEXT("%llu"), static_cast<unsigned long long>(State.world.seed)));
     Evidence->SetNumberField(TEXT("generationVersion"), State.world.generationVersion);
@@ -554,6 +605,31 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     Evidence->SetNumberField(TEXT("regionalRidgeMax"), RegionalRidgeMax);
     Evidence->SetNumberField(TEXT("regionalValleyMin"), RegionalValleyMin);
     Evidence->SetNumberField(TEXT("regionalValleyMax"), RegionalValleyMax);
+    Evidence->SetNumberField(TEXT("regionalLoadedRegionCount"),
+        Landscape->RegionalDescriptors.LoadedRegionCount());
+    Evidence->SetNumberField(TEXT("regionalCachedDescriptorCount"),
+        Landscape->RegionalDescriptors.CachedRegionCount());
+    Evidence->SetNumberField(TEXT("regionalCacheRefreshCount"),
+        Landscape->RegionalDescriptors.RefreshCount());
+    Evidence->SetNumberField(TEXT("regionalCacheStoreCount"),
+        Landscape->RegionalDescriptors.StoreCount());
+    Evidence->SetNumberField(TEXT("regionalCacheEvictionCount"),
+        Landscape->RegionalDescriptors.EvictionCount());
+    Evidence->SetNumberField(TEXT("regionalDescriptorBuildCount"),
+        Landscape->RegionalDescriptorBuildCount);
+    Evidence->SetNumberField(TEXT("regionalDescriptorFailureCount"),
+        Landscape->RegionalDescriptorFailures.size());
+    Evidence->SetBoolField(TEXT("regionalDescriptorBuildPending"),
+        Landscape->RegionalDescriptorBuild != nullptr);
+    Evidence->SetNumberField(TEXT("regionalReadyChunkCount"), RegionalReadyChunks);
+    Evidence->SetNumberField(TEXT("regionalPartialChunkCount"), RegionalPartialChunks);
+    Evidence->SetNumberField(TEXT("regionalIncompleteChunkCount"), RegionalIncompleteChunks);
+    Evidence->SetNumberField(TEXT("regionalReachReferenceCount"), RegionalReachReferences);
+    Evidence->SetNumberField(TEXT("regionalDistinctReachCount"), RegionalReachSignatures.Num());
+    Evidence->SetNumberField(TEXT("regionalLakeReferenceCount"), RegionalLakeReferences);
+    Evidence->SetNumberField(TEXT("regionalDistinctLakeCount"), RegionalLakeSignatures.Num());
+    Evidence->SetBoolField(TEXT("regionalDescriptorsConsistent"), RegionalDescriptorsConsistent);
+    Evidence->SetBoolField(TEXT("regionalWaterRendered"), false);
     Evidence->SetNumberField(TEXT("activeTrees"), ActiveTrees); Evidence->SetNumberField(TEXT("outerTrees"), OuterTrees);
     Evidence->SetNumberField(TEXT("activeBatchComponents"), Landscape->ActiveTreeBatches.Num());
     Evidence->SetNumberField(TEXT("activeBatchInstances"), ActiveBatchInstances);

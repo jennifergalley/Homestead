@@ -1,4 +1,5 @@
 #include "HomesteadWorldGeneration.h"
+#include "HomesteadRegionalDescriptorCache.h"
 #include "HomesteadRegionalTerrainAdapter.h"
 
 #include <cmath>
@@ -495,6 +496,103 @@ void RegionalInfluence()
     CHECK(maximum - minimum >= 300.0);
     CHECK(maximum - minimum <= 800.0);
 }
+
+void LoadedRegionalDescriptorCaching()
+{
+    using namespace Homestead::RegionalGeneration;
+    LoadedRegionalDescriptorCache cache;
+    const WorldDescriptor world{817391, WorldGenerationVersion};
+    const std::vector<RegionCoord> initial{{0, 0}, {-1, 0}, {0, 0}};
+    CHECK(cache.RefreshLoadedRegions(world, initial)
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(cache.LoadedRegionCount() == 2);
+    CHECK(cache.CachedRegionCount() == 0);
+
+    RegionalResult first;
+    first.region = {-1, 0};
+    first.nodes[0].relief.node = {-32, 0};
+    RiverReach crossing;
+    crossing.key = {{-2, 2}, {-1, 2}};
+    crossing.upstreamSurfaceMm = 100;
+    crossing.downstreamSurfaceMm = 90;
+    first.reaches.push_back(crossing);
+    LakeDescriptor lake;
+    lake.id = {-4, 4};
+    lake.outlet = {{-4, 4}, {-3, 4}};
+    lake.surfaceMm = 120;
+    lake.memberCount = 1;
+    first.lakes.push_back(lake);
+    first.nodes[1].relief.node = lake.id;
+    first.nodes[1].lakeId = lake.id;
+    first.nodes[1].inLake = true;
+    CHECK(cache.Store(world, first) == RegionalCacheStoreResult::Stored);
+    CHECK(cache.Store(world, first) == RegionalCacheStoreResult::Unchanged);
+    LoadedChunkWaterDescriptors partial;
+    CHECK(cache.DescribeChunkWater(world, {-2, 2}, partial)
+        == RegionalChunkDescriptorStatus::Partial);
+    CHECK(partial.reaches.size() == 1);
+    RegionalResult neighbor;
+    neighbor.region = {0, 0};
+    CHECK(cache.Store(world, neighbor) == RegionalCacheStoreResult::Stored);
+    CHECK(cache.StoreCount() == 2);
+    CHECK(cache.CachedRegionCount() == 2);
+    CHECK(cache.Find(world, {-1, 0}) != nullptr);
+    const NodeCoord expectedNode{-32, 0};
+    RegionalResult failedReplacement;
+    failedReplacement.region = {-1, 0};
+    failedReplacement.nodes[0].relief.node = {999, 999};
+    CHECK(cache.StoreGenerated(world, Homestead::RegionalGeneration::Status::BasinTooLarge,
+        failedReplacement) == RegionalCacheStoreResult::Rejected);
+    CHECK(cache.Find(world, {-1, 0})->nodes[0].relief.node == expectedNode);
+
+    CHECK(cache.RefreshLoadedRegions(world, {{0, 0}, {-1, 0}})
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(cache.StoreCount() == 2);
+    CHECK(cache.CachedRegionCount() == 2);
+    CHECK(cache.Find(world, {-1, 0})->nodes[0].relief.node == expectedNode);
+    LoadedChunkWaterDescriptors upstream, downstream, lakeChunk;
+    CHECK(cache.DescribeChunkWater(world, {-3, 2}, upstream)
+        == RegionalChunkDescriptorStatus::Ready);
+    CHECK(cache.DescribeChunkWater(world, {-2, 2}, downstream)
+        == RegionalChunkDescriptorStatus::Ready);
+    CHECK(upstream.reaches.size() == 1 && downstream.reaches.size() == 1);
+    CHECK(upstream.reaches[0].key == downstream.reaches[0].key);
+    CHECK(cache.DescribeChunkWater(world, {-5, 5}, lakeChunk)
+        == RegionalChunkDescriptorStatus::Ready);
+    CHECK(lakeChunk.lakes.size() == 1 && lakeChunk.lakes[0].id == lake.id);
+
+    RegionalResult unloaded;
+    unloaded.region = {1, 0};
+    CHECK(cache.Store(world, unloaded) == RegionalCacheStoreResult::Rejected);
+    CHECK(cache.RefreshLoadedRegions(world, {{0, 0}})
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(cache.CachedRegionCount() == 1);
+    CHECK(cache.EvictionCount() == 1);
+    LoadedChunkWaterDescriptors unchangedChunk;
+    unchangedChunk.chunk = {77, 88};
+    CHECK(cache.DescribeChunkWater(world, {-3, 2}, unchangedChunk)
+        == RegionalChunkDescriptorStatus::Incomplete);
+    CHECK((unchangedChunk.chunk == ChunkCoord{77, 88}));
+
+    const WorldDescriptor nextWorld{817392, WorldGenerationVersion};
+    CHECK(cache.RefreshLoadedRegions(nextWorld, {{0, 0}})
+        == Homestead::RegionalGeneration::Status::Ok);
+    CHECK(cache.Find(world, {0, 0}) == nullptr);
+    CHECK(cache.Store(world, unloaded) == RegionalCacheStoreResult::Rejected);
+    CHECK(cache.RefreshCount() == 4);
+
+    LoadedRegionalDescriptorCache unchanged;
+    CHECK(unchanged.RefreshLoadedRegions(world, {{0, 0}})
+        == Homestead::RegionalGeneration::Status::Ok);
+    RegionalResult retained;
+    retained.region = {0, 0};
+    CHECK(unchanged.Store(world, retained) == RegionalCacheStoreResult::Stored);
+    CHECK(unchanged.RefreshLoadedRegions(
+        {world.seed, WorldGenerationVersion + 1}, {{1, 0}})
+        == Homestead::RegionalGeneration::Status::UnsupportedVersion);
+    CHECK(unchanged.CachedRegionCount() == 1);
+    CHECK(unchanged.Find(world, {0, 0}) != nullptr);
+}
 }
 
 int main()
@@ -507,6 +605,7 @@ int main()
     PaletteDistribution();
     TerrainReliefAndBuildPockets();
     RegionalInfluence();
+    LoadedRegionalDescriptorCaching();
     VersionFixture();
     std::cout << "World generation: " << checks << " checks passed.\n";
     return 0;

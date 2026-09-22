@@ -1,5 +1,6 @@
 #include "HomesteadWorld.h"
 
+#include "Async/Async.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
@@ -75,7 +76,7 @@ void RemoveMissing(TMap<int32, FHomesteadWorldVisual>& Visuals, const T& Entries
 
 AHomesteadWorld::AHomesteadWorld()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
     USceneComponent* SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WorldRoot"));
     SceneRoot->SetMobility(EComponentMobility::Static);
     SetRootComponent(SceneRoot);
@@ -88,6 +89,72 @@ AHomesteadWorld::AHomesteadWorld()
     Sphere = SphereAsset.Object;
     Cylinder = CylinderAsset.Object;
     Cone = ConeAsset.Object;
+}
+
+void AHomesteadWorld::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if (!RegionalDescriptorBuild || !RegionalDescriptorBuild->IsReady())
+        return;
+
+    FHomesteadRegionalDescriptorBuild Completed = RegionalDescriptorBuild->Get();
+    RegionalDescriptorBuild.Reset();
+    if (Descriptor.seed == Completed.World.seed
+        && Descriptor.generationVersion == Completed.World.generationVersion)
+    {
+        for (const auto& Entry : Completed.Entries)
+        {
+            if (RegionalDescriptors.StoreGenerated(
+                Completed.World, Entry.ResultStatus, Entry.Result)
+                != Homestead::Generation::RegionalCacheStoreResult::Rejected)
+            {
+                continue;
+            }
+            if (Entry.ResultStatus != Homestead::RegionalGeneration::Status::Ok)
+            {
+                RegionalDescriptorFailures[Entry.Region] = Entry.ResultStatus;
+                UE_LOG(LogHomesteadWorld, Warning,
+                    TEXT("Regional descriptor %d,%d unavailable: %s"),
+                    Entry.Region.x, Entry.Region.y,
+                    UTF8_TO_TCHAR(Homestead::RegionalGeneration::StatusMessage(Entry.ResultStatus)));
+            }
+        }
+        int32 ReadyChunks = 0;
+        int32 PartialChunks = 0;
+        int32 IncompleteChunks = 0;
+        int32 ReachDescriptors = 0;
+        int32 LakeDescriptors = 0;
+        for (const auto& Terrain : TerrainChunks)
+        {
+            Homestead::Generation::LoadedChunkWaterDescriptors Water;
+            const auto Status = RegionalDescriptors.DescribeChunkWater(Descriptor,
+                {Terrain.Key.X, Terrain.Key.Y}, Water);
+            if (Status == Homestead::Generation::RegionalChunkDescriptorStatus::Ready)
+            {
+                ++ReadyChunks;
+                ReachDescriptors += static_cast<int32>(Water.reaches.size());
+                LakeDescriptors += static_cast<int32>(Water.lakes.size());
+            }
+            else if (Status == Homestead::Generation::RegionalChunkDescriptorStatus::Partial)
+            {
+                ++PartialChunks;
+                ReachDescriptors += static_cast<int32>(Water.reaches.size());
+                LakeDescriptors += static_cast<int32>(Water.lakes.size());
+            }
+            else
+            {
+                ++IncompleteChunks;
+            }
+        }
+        UE_LOG(LogHomesteadWorld, Display,
+            TEXT("Regional descriptor cache: loaded=%llu cached=%llu failures=%llu ready_chunks=%d partial_chunks=%d incomplete_chunks=%d reaches=%d lakes=%d builds=%llu"),
+            static_cast<unsigned long long>(RegionalDescriptors.LoadedRegionCount()),
+            static_cast<unsigned long long>(RegionalDescriptors.CachedRegionCount()),
+            static_cast<unsigned long long>(RegionalDescriptorFailures.size()),
+            ReadyChunks, PartialChunks, IncompleteChunks, ReachDescriptors, LakeDescriptors,
+            static_cast<unsigned long long>(RegionalDescriptorBuildCount));
+    }
+    QueueRegionalDescriptorBuild();
 }
 
 float AHomesteadWorld::GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World)
@@ -313,10 +380,102 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
     PreparedChunk = State.activeChunk;
     bTerrainReady = true;
     Ground = TerrainChunks.FindChecked(FIntPoint(PreparedChunk.x, PreparedChunk.y)).Terrain;
+    std::vector<Homestead::RegionalGeneration::RegionCoord> LoadedRegions;
+    for (const auto& Entry : TerrainChunks)
+    {
+        const int64 OriginX = static_cast<int64>(Entry.Key.X) * Gen::ChunkSizeCm;
+        const int64 OriginY = static_cast<int64>(Entry.Key.Y) * Gen::ChunkSizeCm;
+        for (const int64 X : {OriginX, OriginX + Gen::ChunkSizeCm - 1})
+            for (const int64 Y : {OriginY, OriginY + Gen::ChunkSizeCm - 1})
+            {
+                Homestead::RegionalGeneration::RegionCoord Region;
+                const auto RegionStatus = Homestead::RegionalGeneration::RegionAtCm(X, Y, Region);
+                if (RegionStatus != Homestead::RegionalGeneration::Status::Ok)
+                {
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Loaded regional identity failed: %s"),
+                        UTF8_TO_TCHAR(Homestead::RegionalGeneration::StatusMessage(RegionStatus)));
+                    return false;
+                }
+                if (std::find(LoadedRegions.begin(), LoadedRegions.end(), Region) == LoadedRegions.end())
+                    LoadedRegions.push_back(Region);
+            }
+    }
+    if (!RefreshRegionalDescriptors(State.world, LoadedRegions)) return false;
     UE_LOG(LogHomesteadWorld, Display, TEXT("Generated terrain: seed=%llu version=%u center=%d,%d tiles=%d colliding=9 vertices_per_tile=625 prepare_ms=%.3f"),
         static_cast<unsigned long long>(Descriptor.seed), Descriptor.generationVersion,
         PreparedChunk.x, PreparedChunk.y, TerrainChunks.Num(), (FPlatformTime::Seconds() - Started) * 1000);
     return true;
+}
+
+bool AHomesteadWorld::RefreshRegionalDescriptors(
+    Homestead::Generation::WorldDescriptor World,
+    const std::vector<Homestead::RegionalGeneration::RegionCoord>& Regions)
+{
+    const bool SameWorld = RegionalDescriptors.IsForWorld(World);
+    const auto Status = RegionalDescriptors.RefreshLoadedRegions(World, Regions);
+    if (Status != Homestead::RegionalGeneration::Status::Ok)
+    {
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Loaded regional cache refresh failed: %s"),
+            UTF8_TO_TCHAR(Homestead::RegionalGeneration::StatusMessage(Status)));
+        return false;
+    }
+
+    DesiredRegionalDescriptors = Regions;
+    std::sort(DesiredRegionalDescriptors.begin(), DesiredRegionalDescriptors.end());
+    DesiredRegionalDescriptors.erase(
+        std::unique(DesiredRegionalDescriptors.begin(), DesiredRegionalDescriptors.end()),
+        DesiredRegionalDescriptors.end());
+    if (!SameWorld)
+    {
+        RegionalDescriptorFailures.clear();
+    }
+    else
+    {
+        for (auto Iterator = RegionalDescriptorFailures.begin();
+            Iterator != RegionalDescriptorFailures.end();)
+        {
+            if (!std::binary_search(DesiredRegionalDescriptors.begin(),
+                DesiredRegionalDescriptors.end(), Iterator->first))
+                Iterator = RegionalDescriptorFailures.erase(Iterator);
+            else
+                ++Iterator;
+        }
+    }
+    QueueRegionalDescriptorBuild();
+    return true;
+}
+
+void AHomesteadWorld::QueueRegionalDescriptorBuild()
+{
+    if (RegionalDescriptorBuild) return;
+
+    std::vector<Homestead::RegionalGeneration::RegionCoord> Missing;
+    for (const auto Region : DesiredRegionalDescriptors)
+        if (!RegionalDescriptors.Find(Descriptor, Region)
+            && RegionalDescriptorFailures.find(Region) == RegionalDescriptorFailures.end())
+            Missing.push_back(Region);
+    if (Missing.empty()) return;
+
+    const auto World = Descriptor;
+    RegionalDescriptorBuildCount += Missing.size();
+    RegionalDescriptorBuild = MakeUnique<TFuture<FHomesteadRegionalDescriptorBuild>>(
+        Async(EAsyncExecution::ThreadPool, [World, Missing = std::move(Missing)]()
+        {
+            FHomesteadRegionalDescriptorBuild Build;
+            Build.World = World;
+            const Homestead::RegionalGeneration::RegionalDescriptor RegionalWorld{
+                World.seed, Homestead::RegionalGeneration::RegionalGenerationVersion};
+            Build.Entries.reserve(Missing.size());
+            for (const auto Region : Missing)
+            {
+                FHomesteadRegionalDescriptorBuildEntry Entry;
+                Entry.Region = Region;
+                Entry.ResultStatus = Homestead::RegionalGeneration::GenerateRegion(
+                    RegionalWorld, Region, Entry.Result);
+                Build.Entries.push_back(std::move(Entry));
+            }
+            return Build;
+        }));
 }
 
 UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(

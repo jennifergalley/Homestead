@@ -7,6 +7,7 @@ endif()
 
 add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadRegionalGeneration.cpp
+    Source/SurvivalGame/Simulation/HomesteadRegionalDescriptorCache.cpp
     Source/SurvivalGame/Simulation/HomesteadRegionalTerrainAdapter.cpp
     Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp)
