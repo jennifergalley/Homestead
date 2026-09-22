@@ -123,9 +123,9 @@ void ReliefAndOrder()
 
     const RegionalDescriptor descriptor{817391, 1};
     RegionalResult first, other, again;
-    CHECK(GenerateRegion(descriptor, {-2, -1}, first) == Status::Ok);
-    CHECK(GenerateRegion(descriptor, {0, 0}, other) == Status::Ok);
-    CHECK(GenerateRegion(descriptor, {-2, -1}, again) == Status::Ok);
+    CHECK(GenerateRegion(descriptor, {-3, -1}, first) == Status::Ok);
+    CHECK(GenerateRegion(descriptor, {-3, 0}, other) == Status::Ok);
+    CHECK(GenerateRegion(descriptor, {-3, -1}, again) == Status::Ok);
     CHECK(Same(first, again));
     CHECK(!Same(first, other));
 }
@@ -136,8 +136,8 @@ void DrainageContinuity()
     int crossings = 0;
     int lakes = 0;
     int tributaries = 0;
-    for (const RegionCoord region : {RegionCoord{-1, -1}, RegionCoord{0, -1},
-        RegionCoord{-1, 0}, RegionCoord{0, 0}})
+    for (const RegionCoord region : {RegionCoord{2, -6}, RegionCoord{3, -6},
+        RegionCoord{2, -5}, RegionCoord{3, -5}})
     {
         RegionalResult result;
         CHECK(GenerateRegion(descriptor, region, result) == Status::Ok);
@@ -203,6 +203,10 @@ void MultipleSeedBounds()
     unchanged.waterSurfaceMm = 314159;
     CHECK(ResolveDrainage({817391, 1}, {32, 69}, unchanged) == Status::BasinTooLarge);
     CHECK(unchanged.waterSurfaceMm == 314159);
+    RegionalResult oversized;
+    oversized.region = {17, 23};
+    CHECK(GenerateRegion({817391, 1}, {-2, -1}, oversized) == Status::BasinTooLarge);
+    CHECK((oversized.region == RegionCoord{17, 23}));
 
     constexpr RegionCoord candidates[] = {
         {-4, -4}, {-2, -1}, {0, 0}, {3, 1}, {5, -2}, {-6, 3}};
