@@ -65,6 +65,7 @@ private:
     void PrepareNativeWardrobeChecks();
     void PrepareNativeInventoryTransactionChecks();
     void PrepareNativeResetChecks();
+    void PrepareNativePresentationCoverageChecks();
     void PrepareNativeResumeChecks(const FString& ProducerOutput);
     bool VerifyNativeMenuPresentation() const;
     void PreparePresentation();

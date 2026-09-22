@@ -122,6 +122,8 @@ if ($NativeMenu) {
     $captures = @('native-settings.png','native-exit-confirm.png','native-save-error.png',
         'native-inventory.png','native-crafting.png','native-recovery-exit.png',
         'native-transfer-amount.png','native-storage-transactions.png','native-test-reset.png',
+        'native-build.png','native-guidebook.png','native-credits.png','native-appearance.png',
+        'native-base-only-0.png','native-base-only-1.png','native-base-only-2.png',
         'native-wardrobe-dyed.png','native-wardrobe-restored.png')
 }
 if ($DirectionalNavigation) {

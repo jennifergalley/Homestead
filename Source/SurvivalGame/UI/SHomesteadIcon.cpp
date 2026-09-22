@@ -225,7 +225,10 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("linen-tunic")), EKind::LinenTunic},
         {FName(TEXT("linen-apron")), EKind::LinenApron},
         {FName(TEXT("leather-shoes")), EKind::LeatherShoes},
-        {FName(TEXT("woven-footwraps")), EKind::WovenFootwraps}
+        {FName(TEXT("woven-footwraps")), EKind::WovenFootwraps},
+        {FName(TEXT("slot-torso")), EKind::SlotTorso},
+        {FName(TEXT("slot-apron")), EKind::SlotApron},
+        {FName(TEXT("slot-feet")), EKind::SlotFeet}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -557,6 +560,25 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{21, 14}, {10, 20}, {21, 26}, {10, 32}}, Wood, 2);
         P.Line({{33, 11}, {44, 17}, {33, 23}, {44, 29}, {33, 35}, {46, 38}}, Wood, 2);
         P.Line({{44, 11}, {33, 17}, {44, 23}}, Wood, 2);
+        break;
+    case EKind::SlotTorso:
+        P.Shape({{16, 10}, {24, 7}, {32, 7}, {40, 10}, {48, 22}, {42, 28},
+            {38, 22}, {38, 49}, {18, 49}, {18, 22}, {14, 28}, {8, 22}}, Cream);
+        P.Line({{24, 8}, {28, 16}, {32, 8}}, Gold, 2);
+        P.Line({{20, 34}, {36, 34}}, Wood, 3);
+        break;
+    case EKind::SlotApron:
+        P.Line({{20, 8}, {28, 15}, {36, 8}}, Gold, 3);
+        P.Shape({{20, 14}, {36, 14}, {42, 48}, {14, 48}}, Cream);
+        P.Rect(23, 30, 12, 10, Gold);
+        P.Line({{14, 22}, {7, 27}}, Wood, 2);
+        P.Line({{42, 22}, {49, 27}}, Wood, 2);
+        break;
+    case EKind::SlotFeet:
+        P.Shape({{10, 32}, {22, 28}, {29, 39}, {27, 47}, {9, 47}, {6, 42}}, Cream);
+        P.Shape({{31, 22}, {42, 25}, {50, 39}, {47, 45}, {31, 45}, {27, 39}}, Gold);
+        P.Line({{11, 39}, {25, 39}}, Wood, 2);
+        P.Line({{33, 35}, {47, 35}}, Cream, 2);
         break;
     case EKind::Unknown:
         P.Unknown();

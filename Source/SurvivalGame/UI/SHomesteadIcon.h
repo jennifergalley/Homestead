@@ -33,7 +33,8 @@ private:
         Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds, Hatchet,
         DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Timber, Firewood,
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,
-        LinenTunic, LinenApron, LeatherShoes, WovenFootwraps
+        LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
+        SlotTorso, SlotApron, SlotFeet
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{FLinearColor(0.92f, 0.74f, 0.43f, 1.0f)};

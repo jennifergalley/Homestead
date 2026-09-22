@@ -53,7 +53,7 @@ selection, hover, and controller navigation.
 ## Stable keys and authored silhouettes
 
 Keys are explicit `FName` lookups, with normal case-insensitive `FName`
-comparison. All 32 keys below remain explicitly resolved on each paint.
+comparison. All 37 keys below remain explicitly resolved on each paint.
 Unsupported names, including `NAME_None`, display a charcoal `?` on a
 Gold/accent backing for contrast. Other icons contain no text; menu label
 colors remain the host's responsibility.
@@ -92,6 +92,9 @@ colors remain the host's responsibility.
 | `linen-apron` | Sleeveless bib apron, neck loop, ties and patch pocket |
 | `leather-shoes` | Two offset low shoes with laces and soles |
 | `woven-footwraps` | Two tall wraps with diagonal woven bindings |
+| `slot-torso` | Torso-and-legs tunic silhouette with neckline and belt |
+| `slot-apron` | Bib apron silhouette with neck loop, ties and pocket |
+| `slot-feet` | Paired offset footwear silhouettes with distinct soles |
 
 The palette preserves `DESIGN.md`'s linear Pine `(0.055, 0.09, 0.075)`,
 cream/Ink `(0.93, 0.93, 0.84)`, and Gold `(0.92, 0.74, 0.43)`.
@@ -106,7 +109,7 @@ document. The main writer owns menu/controller integration and module
 dependencies; the hosting Unreal module needs `Slate` and `SlateCore`.
 No build configuration, menu, controller, or reference document is changed here.
 
-Static checks cover explicit key/enum/paint-case parity, documented coverage,
+Static checks cover explicit 37-key enum/lookup/paint-case parity, documented coverage,
 source whitespace, and use of the intended draw primitives. **Uncompiled**:
 no Unreal, UBT, UAT, MSVC, build, or Blender process was launched. No tools were
 installed or modified. Runtime rendering, DPI/disabled appearance, small-size

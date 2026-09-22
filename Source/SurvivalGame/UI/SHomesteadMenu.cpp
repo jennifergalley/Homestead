@@ -548,12 +548,25 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Text(TEXT("Equipped slots"), 16) ];
         InventoryColumn->AddSlot().AutoHeight()[ SAssignNew(EquipmentBar, SHorizontalBox) ];
         for (int32 Index = 0; Index < 3; ++Index)
+        {
+            const TCHAR* SlotIcons[] = {TEXT("slot-torso"), TEXT("slot-apron"), TEXT("slot-feet")};
             EquipmentBar->AddSlot().FillWidth(1).Padding(3, 0)
             [
-                RegisterButton(MakeButton(EquipmentLabel(Index), [this, Index]() { FocusEquipment(Index); },
-                    TAttribute<FSlateColor>::CreateLambda([this, Index]()
-                        { return Region == ERegion::Equipment && EquipmentSelection == Index ? Gold : Selected; })), ERegion::Equipment, Index)
+                RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(8)
+                    .ButtonColorAndOpacity_Lambda([this, Index]()
+                        { return Region == ERegion::Equipment && EquipmentSelection == Index ? Gold : Selected; })
+                    .OnClicked_Lambda([this, Index]()
+                        { if (PointerAction()) FocusEquipment(Index); return FReply::Handled(); })
+                    [
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)
+                        [ SNew(SBox).WidthOverride(36).HeightOverride(36)
+                            [ SNew(SHomesteadIcon).Kind(FName(SlotIcons[Index])) ] ]
+                        + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                        [ Text(EquipmentLabel(Index), 15) ]
+                    ], ERegion::Equipment, Index)
             ];
+        }
     }
     ColumnsBox->AddSlot().AutoWidth()
         [

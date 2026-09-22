@@ -76,6 +76,9 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertEqual(re.findall(r'TEXT\("([^"]+)"\)', recipes.group(1))[-1], "firewood")
         self.assertIn('{FName(TEXT("timber")), EKind::Timber}', ICONS)
         self.assertIn('{FName(TEXT("firewood")), EKind::Firewood}', ICONS)
+        for key, kind in (("slot-torso", "SlotTorso"), ("slot-apron", "SlotApron"), ("slot-feet", "SlotFeet")):
+            self.assertIn(f'{{FName(TEXT("{key}")), EKind::{kind}}}', ICONS)
+            self.assertIn(f"case EKind::{kind}:", ICONS)
 
     def test_timber_recipe_and_dual_fuel_are_player_visible(self):
         self.assertIn('TEXT(" Add firewood / branch")', CONTROLLER)
@@ -188,6 +191,11 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("Surface.Dye != Owned->dye", verify)
         self.assertIn("VisibleComponents != Presentation->Garments.Num() + 1", verify)
         self.assertIn("HomesteadLook::TunicTint(Owned->dye)", verify)
+
+    def test_equipment_slots_use_original_explicit_icons(self):
+        for key in ("slot-torso", "slot-apron", "slot-feet"):
+            self.assertIn(f'TEXT("{key}")', MENU)
+        self.assertIn("SNew(SHomesteadIcon).Kind(FName(SlotIcons[Index]))", MENU)
 
     def test_native_wardrobe_checks_use_ui_and_real_save_keys(self):
         fixture = (SOURCE / "UI" / "HomesteadNativeMenuTest.cpp").read_text()

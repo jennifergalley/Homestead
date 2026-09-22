@@ -27,6 +27,7 @@ private:
     UPROPERTY() TArray<TObjectPtr<USkeletalMeshComponent>> Garments;
     UPROPERTY() TObjectPtr<USceneCaptureComponent2D> Capture;
     UPROPERTY() TObjectPtr<UPointLightComponent> Light;
+    UPROPERTY() TObjectPtr<UPointLightComponent> FillLight;
     UPROPERTY() TObjectPtr<UTextureRenderTarget2D> Target;
     bool bCapturePending = false;
     float Yaw = 0;

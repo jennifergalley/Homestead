@@ -75,6 +75,14 @@ AHomesteadMenuPortrait::AHomesteadMenuPortrait()
     Light->SetAttenuationRadius(700);
     Light->SetCastShadows(false);
     Light->SetLightingChannels(false, false, true);
+    FillLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("PortraitFillLight"));
+    FillLight->SetupAttachment(RootComponent);
+    FillLight->SetRelativeLocation(FVector(110, 155, 65));
+    FillLight->SetIntensityUnits(ELightUnits::Lumens);
+    FillLight->SetIntensity(1800);
+    FillLight->SetAttenuationRadius(650);
+    FillLight->SetCastShadows(false);
+    FillLight->SetLightingChannels(false, false, true);
 }
 
 bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)

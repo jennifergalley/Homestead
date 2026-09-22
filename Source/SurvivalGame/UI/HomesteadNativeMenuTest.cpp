@@ -434,10 +434,14 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this, Before]() { return Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
             && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("4 Branch + 3 Stone + 2 Fiber")); });
     Capture(TEXT("native-crafting"));
+    Add(TEXT("Mapped tab opens purpose-specific building plans"),
+        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
+        [this]() { return Controller->BookPage() == 2
+            && Controller->BookTitle() == TEXT("Building plans"); });
+    Capture(TEXT("native-build"));
     Add(TEXT("Real building plan enters placement without charging"),
         [this, Before]()
         {
-            Tap(EKeys::Gamepad_RightShoulder);
             *Before = Controller->Simulation().Serialize();
             Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
@@ -447,7 +451,28 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Cancel placement and return to Settings"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::Escape); },
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
+    Add(TEXT("Mapped tabs expose purpose-specific Guidebook content"),
+        [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { return Controller->BookPage() == 3 && Controller->BookTitle() == TEXT("Guidebook"); });
+    Capture(TEXT("native-guidebook"));
+    Add(TEXT("Mapped tabs expose purpose-specific Credits content"),
+        [this]() { Tap(EKeys::Gamepad_RightShoulder); Tap(EKeys::Gamepad_RightShoulder); },
+        [this]() { return Controller->BookPage() == 5 && Controller->BookTitle() == TEXT("Credits"); });
+    Capture(TEXT("native-credits"));
+    Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
+        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
+        [this]() { return Controller->BookPage() == 6 && Controller->BookTitle() == TEXT("Appearance"); });
+    Capture(TEXT("native-appearance"));
+    Add(TEXT("Return to Settings without changing simulation or camera"),
+        [this, Before]()
+        {
+            *Before = Controller->Simulation().Serialize();
+            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+        },
+        [this, Before]() { return Controller->BookPage() == 4
+            && Controller->Simulation().Serialize() == *Before; });
     PrepareNativeWardrobeChecks();
+    PrepareNativePresentationCoverageChecks();
     PrepareNativeResetChecks();
     Add(TEXT("Prepare disclosed survival-failure fixture"),
         [this]() { Controller->Sim.AdvanceGameHours(120, Controller->PlayerPoint()); },
@@ -888,6 +913,166 @@ void AHomesteadSmokeTest::PrepareNativeResetChecks()
             && Controller->Simulation().Count(Homestead::Item::Knife) == 1
             && Controller->State().wearables.size() == 2
             && IFileManager::Get().FileExists(**Incompatible); });
+}
+
+void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
+{
+    const auto Original = MakeShared<Homestead::Simulation>();
+    const auto BaseOnly = MakeShared<Homestead::Simulation>();
+    const auto OriginalLook = MakeShared<FHomesteadAppearance>();
+    const auto Layered = MakeShared<Homestead::Simulation>();
+    const auto CoverageReady = MakeShared<bool>(false);
+    Add(TEXT("Validate all nine permanent modest bases and complete feet before live mutation"),
+        [this, Original, BaseOnly, Layered, OriginalLook, CoverageReady]()
+        {
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            if (!Avatar) { Finish(false, TEXT("Heroine unavailable for base coverage.")); return; }
+            *Original = Controller->Simulation();
+            *BaseOnly = *Original;
+            *OriginalLook = Controller->GetAppearance();
+            TSet<int32> Equipped;
+            for (int32 Id : BaseOnly->GetState().equipment) if (Id) Equipped.Add(Id);
+            for (int32 Id : Equipped)
+                if (BaseOnly->GetWearable(Id)
+                    && !BaseOnly->UnequipWearable(Id, BaseOnly->GetRevision()))
+                { Finish(false, TEXT("Could not create base-only state through authority.")); return; }
+            bool Ready = BaseOnly->GetState().equipment == (std::array<int, Homestead::EquipmentSlotCount>{});
+            for (int32 Body = 0; Body < 3 && Ready; ++Body)
+                for (int32 Hair = 0; Hair < 3 && Ready; ++Hair)
+                {
+                    FHomesteadAppearance Look = *OriginalLook;
+                    Look.BodyPreset = Body; Look.HairStyle = Hair;
+                    FString Error;
+                    Ready &= Avatar->PrepareEquipment(BaseOnly->GetState(), Look, Error)
+                        && Avatar->ApplyPreparedEquipment(Error);
+                    const auto* Presentation = Avatar->GetEquipmentPresentation();
+                    Ready &= Presentation && Presentation->Ready && Presentation->Garments.IsEmpty()
+                        && Presentation->Base.Mesh && Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("foot_l")) >= 0
+                        && Presentation->Base.Mesh->GetRefSkeleton().FindBoneIndex(TEXT("toe_l")) >= 0;
+                    bool Bra = false, Briefs = false;
+                    if (Presentation && Presentation->Base.Mesh)
+                        for (const auto& Slot : Presentation->Base.Mesh->GetMaterials())
+                        {
+                            Bra |= Slot.MaterialSlotName == TEXT("M_Modular_BaseBra");
+                            Briefs |= Slot.MaterialSlotName == TEXT("M_Modular_BaseBriefs");
+                        }
+                    Ready &= Bra && Briefs;
+                }
+            *Layered = *Original;
+            while (Layered->Count(Homestead::Item::Fiber) < 14)
+            {
+                bool Gathered = false;
+                for (const auto& Node : Layered->GetState().resources)
+                    if (Node.kind == Homestead::ResourceKind::Reeds && Layered->CanHarvest(Node.id))
+                    { Gathered = Layered->Harvest(Node.id, Node.position).ok; break; }
+                if (!Gathered) { Ready = false; break; }
+            }
+            if (Ready)
+            {
+                Ready &= Layered->CraftGarment(Homestead::WearableDefinition::LinenApron,
+                    Controller->PlayerPoint(), Layered->GetRevision()).ok;
+                Ready &= Layered->CraftGarment(Homestead::WearableDefinition::WovenFootwraps,
+                    Controller->PlayerPoint(), Layered->GetRevision()).ok;
+                int32 Apron = 0, Footwraps = 0;
+                for (const auto& Item : Layered->GetState().wearables)
+                {
+                    if (Item.definition == Homestead::WearableDefinition::LinenApron) Apron = Item.id;
+                    if (Item.definition == Homestead::WearableDefinition::WovenFootwraps) Footwraps = Item.id;
+                }
+                Ready &= Apron > 0 && Footwraps > 0
+                    && Layered->EquipWearable(Apron, Layered->GetRevision()).ok
+                    && Layered->EquipWearable(Footwraps, Layered->GetRevision()).ok
+                    && Layered->RecolorWearable(Apron, 2, Controller->PlayerPoint(), Layered->GetRevision()).ok;
+                FHomesteadAppearance Look = *OriginalLook;
+                Look.BodyPreset = 1; Look.HairStyle = 1;
+                FString Error;
+                Ready &= Avatar->PrepareEquipment(Layered->GetState(), Look, Error)
+                    && Avatar->ApplyPreparedEquipment(Error);
+                const auto* Presentation = Avatar->GetEquipmentPresentation();
+                Ready &= Presentation && Presentation->Garments.Num() == 3;
+                if (Presentation)
+                    for (const auto& Surface : Presentation->Garments)
+                    {
+                        const auto* Owned = Layered->GetWearable(Surface.WearableId);
+                        Ready &= Owned && Owned->owner == Homestead::WearableOwner::Equipped
+                            && Surface.Definition == static_cast<int32>(Owned->definition)
+                            && Surface.Dye == Owned->dye;
+                    }
+            }
+            Homestead::Simulation Invalid = *Original;
+            auto& InvalidState = const_cast<Homestead::State&>(Invalid.GetState());
+            InvalidState.wearables[0].definition = static_cast<Homestead::WearableDefinition>(99);
+            const std::string Before = Controller->Simulation().Serialize();
+            FString Error;
+            Ready &= !Avatar->PrepareEquipment(Invalid.GetState(), *OriginalLook, Error)
+                && Controller->Simulation().Serialize() == Before;
+            *CoverageReady = Ready;
+        },
+        [CoverageReady]() { return *CoverageReady; });
+    for (int32 Body = 0; Body < 3; ++Body)
+    {
+        Add(FString::Printf(TEXT("Apply base-only body preset %d through prepared presentation"), Body),
+            [this, BaseOnly, OriginalLook, Body]()
+            {
+                Controller->Sim = *BaseOnly;
+                Controller->Appearance = *OriginalLook;
+                Controller->Appearance.BodyPreset = Body;
+                Controller->Appearance.HairStyle = Body;
+                auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+                FString Error;
+                if (!Avatar || !Avatar->PrepareEquipment(Controller->State(), Controller->Appearance, Error)
+                    || !Avatar->ApplyPreparedEquipment(Error))
+                { Finish(false, TEXT("Base-only preset could not be displayed: ") + Error); return; }
+                Controller->CloseBook(); Controller->MenuInventoryView(2); Controller->OpenBook(0);
+                Controller->RefreshMenuPortrait();
+            },
+            [this]() { const auto* Presentation = Cast<AHomesteadCharacter>(
+                Controller->GetPawn())->GetEquipmentPresentation();
+                return Presentation && Presentation->Ready && Presentation->Garments.IsEmpty()
+                    && Controller->MenuPortraitBrush() != nullptr; }, 0.8f);
+        Add(FString::Printf(TEXT("Capture base-only supported preset %d"), Body),
+            [this, Body]() { Screenshot(FString::Printf(TEXT("native-base-only-%d"), Body)); },
+            [this]() { return Controller->MenuPortraitBrush() != nullptr; }, 0.8f);
+    }
+    Add(TEXT("Representative layered equipment stays bound through walk and hand actions"),
+        [this, Layered, OriginalLook]()
+        {
+            Controller->Sim = *Layered;
+            Controller->Appearance = *OriginalLook;
+            Controller->Appearance.BodyPreset = 1; Controller->Appearance.HairStyle = 1;
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            FString Error;
+            if (!Avatar || !Avatar->PrepareEquipment(Controller->State(), Controller->Appearance, Error)
+                || !Avatar->ApplyPreparedEquipment(Error))
+            { Finish(false, TEXT("Layered equipment could not be applied: ") + Error); return; }
+            Controller->CloseBook();
+            Axis(EKeys::Gamepad_LeftY, 1);
+        },
+        [this]() { return Controller->GetPawn()->GetVelocity().Size2D() > 20
+            && VerifyNativeMenuPresentation(); }, 0.6f);
+    Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 1); };
+    Add(TEXT("Layered equipment remains exact during gather/water/weed/clear presentation"),
+        [this]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 0);
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            Avatar->PlayGather(); Avatar->PlayWater(); Avatar->PlayClear();
+        },
+        [this]() { return VerifyNativeMenuPresentation(); }, 0.6f);
+    Add(TEXT("Restore exact committed equipment after base-only coverage and clear portrait resources"),
+        [this, Original, OriginalLook]()
+        {
+            Controller->Sim = *Original;
+            Controller->Appearance = *OriginalLook;
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            FString Error;
+            if (!Avatar || !Avatar->PrepareEquipment(Controller->State(), Controller->Appearance, Error)
+                || !Avatar->ApplyPreparedEquipment(Error))
+            { Finish(false, TEXT("Could not restore committed equipment: ") + Error); return; }
+            Controller->CloseBook();
+        },
+        [this, Original]() { return !Controller->NativeMenu.IsValid() && !Controller->MenuPortrait
+            && Controller->Simulation().Serialize() == Original->Serialize() && VerifyNativeMenuPresentation(); });
 }
 
 void AHomesteadSmokeTest::PrepareNativeResumeChecks(const FString& ProducerOutput)

@@ -2,9 +2,12 @@
 
 ## Current state and next visible goal
 
-September22 integrated milestone begins from selected `woodland-polish-06` /
-`woodland-polish-v9`. September21 read-only evidence reconciliation had19/44
-tasks complete. The delivered
+Final presentation milestone begins from selected `inventory-safety-08` /
+`inventory-safety-v10` at32/44 complete. It owns tasks4.1,4.3-4.5,5.6,5.7,
+7.4,7.5,7.7,8.1 and8.4. Task5.2 remains open unless broad deliberate mouse
+switching and general held-stick comfort are actually demonstrated.
+
+September21 read-only evidence reconciliation had19/44 tasks complete. The delivered
 `wardrobe-ui-02` proof includes actual720p/4K producers, separate-process consumers,
 real save-and-quit and ordinary gameplay; accepted portable evidence is23 scenarios
 /1882 checks. This reconciliation records completed work, not new certification.
@@ -23,6 +26,14 @@ Actual Failed-dialog Retry-button success, incompatible-save reset, broader
 nonstarter clothing/storage/quantity/mouse flows, held-stick/human comfort and
 GPU/menu-cleanup evidence remain open. Freshv5 is not reset proof. Disposable test
 saves still require truthful current-save behavior; no migration project is implied.
+
+Current exact gaps: all nine modest base meshes and twelve garment fits are
+installed, but base-only coverage/feet and action-motion combinations are not
+fully exercised. Gameplay/portrait share prepared equipment but cleanup across
+close/load/recovery needs explicit evidence. Original icon source covers current
+items/recipes/plans/tabs/garments; equipment slots remain text-only and the
+provenance inventory is stale at32 keys. Purpose-page and lifecycle regressions
+need current selected-world evidence.
 
 ## 1. Authorization and integration baseline
 

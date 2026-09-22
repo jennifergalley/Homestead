@@ -72,6 +72,42 @@ Central plan is UI-owned; siblings use uniquely named lane addenda.
 
 ## Decisions
 
+### Final presentation and integration milestone
+
+The selected rollback entering this round is `inventory-safety-08` /
+`inventory-safety-v10`. Preserve its current-version save/reset and real
+transaction evidence while finishing the already-imported presentation stack;
+no new framework, asset purchase or replacement inventory authority is needed.
+
+Validate the nine supported modest bases (three body presets by three hairstyles)
+as genuine base-only renderables: shared admitted skeleton/bind, complete bounds,
+skin/eyes/hair plus explicit bra and briefs material roles, and complete feet.
+Exercise base-only and representative tunic/apron/shoes/footwrap combinations
+through idle, walk, gather, water, weed and clear. Missing or incompatible
+content must fail `PrepareEquipment` before authority commit.
+
+The gameplay heroine and menu portrait continue to share one prepared equipment
+presentation. Evidence must compare committed wearable IDs, definition, dye,
+slot and dynamic materials on both surfaces, then verify close/load/recovery
+removes stale portrait capture/input/components without altering gameplay
+equipment. Improve the existing neutral portrait lighting only where actual
+720p/4K images show a blocking darkness or clipping defect.
+
+Complete icon coverage from the existing original Slate illustrations. The
+current runtime has explicit keys for all 16 fungible items, six recipes, seven
+plans, seven tabs and four garment definitions. Add explicit slot illustrations
+for torso/legs, apron and feet rather than leaving equipment as text-only
+diagnostics. Source/runtime validation must reject unknown fallback icons for
+every currently playable row and prove labels remain available independently.
+Update `docs/ui-icon-provenance.md` from 32 to the exact final key inventory.
+
+Exercise each purpose-specific page with real content and preserve action costs,
+pause, feedback reserve, placement cancellation, camera restoration and separate
+Appearance versus owned clothing. Run the retained full-loop/hotkey/Lit routes,
+720p/4K matched captures, ordinary action motion, repeated open/close and
+closed/open/orbit cadence. Task 5.2 remains open unless broad deliberate mouse
+switching and general held-stick comfort are separately demonstrated.
+
 ### Current integrated milestone: save/reset safety and real inventory transactions
 
 The selected rollback entering this milestone is `woodland-polish-06` /
