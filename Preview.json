@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\timber-firewood-03",
-  "profile": "timber-processing-v8",
-  "executableSha256": "66FDE291CC29A563D95B21664F92E09BA9CE556750ED7B9F3D53B359083C34EE"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\woodland-polish-06",
+  "profile": "woodland-polish-v9",
+  "executableSha256": "648A3F36685146D5618B0736DC1120CED74290EBF7F2374511B1A6D7A8305CC1"
 }

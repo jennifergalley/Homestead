@@ -94,21 +94,21 @@ Jenny's September22 playtest found the generated woodland substantially better
 overall. Schedule these visual corrections after the active regional-landform
 and connected-water round; they do not interrupt that acceptance run.
 
-- [ ] 7.1 Reproduce and identify the rectangular patches visible on some tree
+- [x] 7.1 Reproduce and identify the rectangular patches visible on some tree
   trunks, distinguishing source geometry, UV/material, shadow, and LOD causes;
   fix the demonstrated cause without flattening authored bark detail.
-- [ ] 7.2 Ground every generated tree role on sloped terrain using its own
+- [x] 7.2 Ground every generated tree role on sloped terrain using its own
   admitted pivot/root bounds and generated terrain sample; verify no trunk base
   floats above or sinks implausibly below the colliding ground at active and
   outer LODs.
-- [ ] 7.3 Restore visibly distinct foliage colors across the admitted broadleaf,
+- [x] 7.3 Restore visibly distinct foliage colors across the admitted broadleaf,
   conifer, young-tree, and accent roles using authored PBR/material inputs
   rather than one global brown cast; inspect neutral daylight as well as warm
   dawn so lighting color is not mistaken for missing palette diversity.
-- [ ] 7.4 Stage a fresh woodland-polish candidate and verify ordinary camera,
+- [x] 7.4 Stage a fresh woodland-polish candidate and verify ordinary camera,
   felling, collision, clearing persistence, cadence, and close/wide daylight
   images before replacing the selected regional or woodland build.
-- [ ] 7.5 Reproduce the user-observed multi-second terrain-generation hitch on
+- [x] 7.5 Reproduce the user-observed multi-second terrain-generation hitch on
   ordinary mapped chunk crossings and record worst wall-frame plus scoped
   simulation/terrain/decoration/regional preparation timings; implement a
   bounded supported async/preparation or cache reuse change only where the
