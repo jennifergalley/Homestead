@@ -6,23 +6,24 @@ namespace Homestead::Generation
 {
 namespace
 {
-constexpr std::int64_t FixedOne = 65536;
+constexpr std::int64_t RegionalFixedOne = 65536;
 constexpr double RegionalHeightDivisor = 50.0;
 constexpr double MaximumRegionalOffsetCm = 800.0;
 
-std::int64_t FloorDivide(std::int64_t value, std::int64_t divisor)
+std::int64_t RegionalFloorDivide(std::int64_t value, std::int64_t divisor)
 {
     return value / divisor - (value % divisor < 0 ? 1 : 0);
 }
 
-std::int64_t SmoothFixed(std::int64_t value)
+std::int64_t RegionalSmoothFixed(std::int64_t value)
 {
-    return value * value * (3 * FixedOne - 2 * value) / (FixedOne * FixedOne);
+    return value * value * (3 * RegionalFixedOne - 2 * value)
+        / (RegionalFixedOne * RegionalFixedOne);
 }
 
-std::int64_t LerpFixed(std::int64_t a, std::int64_t b, std::int64_t weight)
+std::int64_t RegionalLerpFixed(std::int64_t a, std::int64_t b, std::int64_t weight)
 {
-    return a + (b - a) * weight / FixedOne;
+    return a + (b - a) * weight / RegionalFixedOne;
 }
 
 struct InterpolatedRelief
@@ -39,10 +40,12 @@ RegionalGeneration::Status Interpolate(
     std::int64_t xCm, std::int64_t yCm, InterpolatedRelief& output)
 {
     using namespace RegionalGeneration;
-    const auto nodeX = FloorDivide(xCm, DrainageSpacingCm);
-    const auto nodeY = FloorDivide(yCm, DrainageSpacingCm);
-    const auto tx = SmoothFixed((xCm - nodeX * DrainageSpacingCm) * FixedOne / DrainageSpacingCm);
-    const auto ty = SmoothFixed((yCm - nodeY * DrainageSpacingCm) * FixedOne / DrainageSpacingCm);
+    const auto nodeX = RegionalFloorDivide(xCm, DrainageSpacingCm);
+    const auto nodeY = RegionalFloorDivide(yCm, DrainageSpacingCm);
+    const auto tx = RegionalSmoothFixed(
+        (xCm - nodeX * DrainageSpacingCm) * RegionalFixedOne / DrainageSpacingCm);
+    const auto ty = RegionalSmoothFixed(
+        (yCm - nodeY * DrainageSpacingCm) * RegionalFixedOne / DrainageSpacingCm);
     ReliefSample samples[2][2];
     for (int y = 0; y < 2; ++y)
         for (int x = 0; x < 2; ++x)
@@ -51,9 +54,9 @@ RegionalGeneration::Status Interpolate(
             if (status != RegionalGeneration::Status::Ok) return status;
         }
     const auto blend = [&](auto member) {
-        const auto low = LerpFixed(samples[0][0].*member, samples[0][1].*member, tx);
-        const auto high = LerpFixed(samples[1][0].*member, samples[1][1].*member, tx);
-        return LerpFixed(low, high, ty);
+        const auto low = RegionalLerpFixed(samples[0][0].*member, samples[0][1].*member, tx);
+        const auto high = RegionalLerpFixed(samples[1][0].*member, samples[1][1].*member, tx);
+        return RegionalLerpFixed(low, high, ty);
     };
     output.elevationMm = blend(&ReliefSample::elevationMm);
     output.mountain = blend(&ReliefSample::mountain);
