@@ -347,35 +347,112 @@ Status GenerateRegion(RegionalDescriptor descriptor, RegionCoord region, Regiona
     result.region = region;
     const auto originX = static_cast<std::int64_t>(region.x) * NodesPerRegionSide;
     const auto originY = static_cast<std::int64_t>(region.y) * NodesPerRegionSide;
+    std::map<NodeCoord, NodeCoord> sinks;
+    std::map<NodeCoord, Basin> basins;
+    const auto findSink = [&](NodeCoord start, NodeCoord& sink) {
+        std::vector<NodeCoord> path;
+        auto current = start;
+        for (int step = 0; step < MaximumBasinNodes; ++step)
+        {
+            const auto cached = sinks.find(current);
+            if (cached != sinks.end())
+            {
+                sink = cached->second;
+                for (const auto node : path) sinks[node] = sink;
+                return Status::Ok;
+            }
+            path.push_back(current);
+            NodeCoord next;
+            if (!LowestNeighbor(descriptor, current, next))
+            {
+                sink = current;
+                for (const auto node : path) sinks[node] = sink;
+                return Status::Ok;
+            }
+            current = next;
+        }
+        return Status::BasinTooLarge;
+    };
     for (int y = 0; y < NodesPerRegionSide; ++y)
         for (int x = 0; x < NodesPerRegionSide; ++x)
         {
             auto& node = result.nodes[y * NodesPerRegionSide + x];
-            const auto status = ResolveDrainage(descriptor, {originX + x, originY + y}, node);
-            if (status != Status::Ok) return status;
+            const NodeCoord coordinate{originX + x, originY + y};
+            NodeCoord sink;
+            const auto sinkStatus = findSink(coordinate, sink);
+            if (sinkStatus != Status::Ok) return sinkStatus;
+            auto basin = basins.find(sink);
+            if (basin == basins.end())
+            {
+                Basin resolved;
+                const auto basinStatus = ResolveBasin(descriptor, sink, resolved);
+                if (basinStatus != Status::Ok) return basinStatus;
+                basin = basins.emplace(sink, std::move(resolved)).first;
+            }
+
+            node.relief = Relief(descriptor, coordinate);
+            node.waterSurfaceMm = node.relief.elevationMm;
+            NodeCoord direct;
+            const bool hasDirect = LowestNeighbor(descriptor, coordinate, direct);
+            if (Contains(basin->second.members, coordinate))
+            {
+                node.inLake = true;
+                node.lakeId = basin->second.lake.id;
+                node.waterSurfaceMm = basin->second.lake.surfaceMm;
+                node.lakeOutlet = coordinate == basin->second.lake.outlet.upstream;
+                node.downstream = node.lakeOutlet ? basin->second.lake.outlet.downstream :
+                    (hasDirect ? direct : sink);
+            }
+            else
+            {
+                node.downstream = hasDirect ? direct : basin->second.lake.outlet.downstream;
+            }
             if (node.inLake)
             {
                 const auto found = std::find_if(result.lakes.begin(), result.lakes.end(),
                     [&](const LakeDescriptor& lake) { return lake.id == node.lakeId; });
                 if (found == result.lakes.end())
-                {
-                    NodeCoord sink;
-                    if (FindSink(descriptor, node.relief.node, sink) != Status::Ok)
-                        return Status::BasinTooLarge;
-                    Basin basin;
-                    if (ResolveBasin(descriptor, sink, basin) != Status::Ok)
-                        return Status::BasinTooLarge;
-                    result.lakes.push_back(basin.lake);
-                }
-            }
-            if (node.accumulation >= 4 && (!node.inLake || node.lakeOutlet))
-            {
-                const auto downstreamElevation = Elevation(descriptor, node.downstream);
-                result.reaches.push_back({{node.relief.node, node.downstream},
-                    node.waterSurfaceMm, downstreamElevation, node.accumulation,
-                    node.widthClass, node.depthClass});
+                    result.lakes.push_back(basin->second.lake);
             }
         }
+
+    // Accumulate every bounded upstream path once instead of retracing the same
+    // candidates independently for all 1,024 owned nodes.
+    for (std::int64_t sourceY = originY - UpstreamRadiusNodes;
+        sourceY < originY + NodesPerRegionSide + UpstreamRadiusNodes; ++sourceY)
+        for (std::int64_t sourceX = originX - UpstreamRadiusNodes;
+            sourceX < originX + NodesPerRegionSide + UpstreamRadiusNodes; ++sourceX)
+        {
+            const NodeCoord source{sourceX, sourceY};
+            auto current = source;
+            for (int step = 0; step < UpstreamRadiusNodes * 2; ++step)
+            {
+                NodeCoord next;
+                if (!LowestNeighbor(descriptor, current, next)) break;
+                if (next.x >= originX && next.x < originX + NodesPerRegionSide &&
+                    next.y >= originY && next.y < originY + NodesPerRegionSide &&
+                    std::abs(source.x - next.x) <= UpstreamRadiusNodes &&
+                    std::abs(source.y - next.y) <= UpstreamRadiusNodes)
+                {
+                    auto& target = result.nodes[
+                        static_cast<int>(next.y - originY) * NodesPerRegionSide +
+                        static_cast<int>(next.x - originX)];
+                    if (target.accumulation < 65535) ++target.accumulation;
+                }
+                current = next;
+            }
+        }
+    for (auto& node : result.nodes)
+    {
+        SetFlowClasses(node);
+        if (node.accumulation >= 4 && (!node.inLake || node.lakeOutlet))
+        {
+            const auto downstreamElevation = Elevation(descriptor, node.downstream);
+            result.reaches.push_back({{node.relief.node, node.downstream},
+                node.waterSurfaceMm, downstreamElevation, node.accumulation,
+                node.widthClass, node.depthClass});
+        }
+    }
     output = std::move(result);
     return Status::Ok;
 }
