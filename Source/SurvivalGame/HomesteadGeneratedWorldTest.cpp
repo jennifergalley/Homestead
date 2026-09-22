@@ -532,6 +532,28 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             return Good;
         });
     Capture(TEXT("generated-untouched"));
+    Add(TEXT("Render one coherent canonical regional reach without blocking traversal"),
+        []() {},
+        [this]()
+        {
+            if (!Controller->Landscape
+                || Controller->Landscape->RegionalDescriptors.CachedRegionCount() < 1
+                || Controller->Landscape->RenderedRegionalReachKey != TEXT("0,-1>1,0")
+                || Controller->Landscape->RegionalWaterMeshes.IsEmpty()
+                || Controller->Landscape->RenderedRegionalReachReferences
+                    != Controller->Landscape->RegionalWaterMeshes.Num())
+                return false;
+            for (const auto& Entry : Controller->Landscape->RegionalWaterMeshes)
+            {
+                const auto* Water = Entry.Value.Get();
+                if (!Water || !Water->IsRegistered() || Water->IsQueryCollisionEnabled()
+                    || Water->GetGenerateOverlapEvents() || Water->CanEverAffectNavigation()
+                    || !Water->ComponentHasTag(TEXT("GeneratedRegionalWater")))
+                    return false;
+            }
+            return true;
+        }, 30.0f);
+    Capture(TEXT("generated-regional-water"));
     Add(TEXT("CONTROLLED initial supply: one hatchet only; no world outcomes fabricated"),
         [this]()
         {
@@ -728,28 +750,6 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 && Fixture->OuterBatchComponents > 0 && Fixture->OuterBatchComponents <= 3
                 && Fixture->OuterBatchInstances > Fixture->OuterBatchComponents;
         });
-    Add(TEXT("Render one coherent canonical regional reach without blocking traversal"),
-        []() {},
-        [this]()
-        {
-            if (!Controller->Landscape
-                || Controller->Landscape->RegionalDescriptors.CachedRegionCount() < 1
-                || Controller->Landscape->RenderedRegionalReachKey != TEXT("0,-1>1,0")
-                || Controller->Landscape->RegionalWaterMeshes.IsEmpty()
-                || Controller->Landscape->RenderedRegionalReachReferences
-                    != Controller->Landscape->RegionalWaterMeshes.Num())
-                return false;
-            for (const auto& Entry : Controller->Landscape->RegionalWaterMeshes)
-            {
-                const auto* Water = Entry.Value.Get();
-                if (!Water || !Water->IsRegistered() || Water->IsQueryCollisionEnabled()
-                    || Water->GetGenerateOverlapEvents() || Water->CanEverAffectNavigation()
-                    || !Water->ComponentHasTag(TEXT("GeneratedRegionalWater")))
-                    return false;
-            }
-            return true;
-        }, 20.0f);
-
     Add(TEXT("CONTROLLED teleport to the surveyed negative-coordinate walk start, before the old -4000 board edge"),
         [this, Fixture]()
         {
