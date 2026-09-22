@@ -8,8 +8,9 @@ $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $output=[IO.Path]::GetFullPath($OutputDirectory,$root)
 if(Test-Path -LiteralPath $output){throw 'Use a fresh hotkey fixture output.'}
-$package=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-$exe=Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+$details=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+$package=$details.packageDirectory
+$exe=$details.executable
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $null=New-Item -ItemType Directory -Path (Join-Path $output 'Graphics')
 $config=Join-Path $output 'Graphics\GameUserSettings.ini'

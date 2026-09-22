@@ -11,6 +11,17 @@ $root=Split-Path $PSScriptRoot -Parent
 function Assert-QACompletionRoute([string]$CommandLine,[bool]$Completion,[string]$Policy) {
     if(-not $Completion){return}
     if($Policy -cne 'until-complete'){throw 'Completion-driven Shipping QA requires live until-complete authority.'}
+    if($CommandLine -match '(?i)(?:^|\s)-HomesteadFullLoop(?=\s|$)'){
+        foreach($flag in 'HomesteadFullLoop','HomesteadSmokeTest','HomesteadShippingQA'){
+            if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){
+                throw "Full-loop QA requires one explicit $flag."
+            }
+        }
+        if($CommandLine -match '(?i)(?:^|\s)-Homestead(VisualPlaytest|Endurance|GeneratedWoodland|NativeMenuTest|ClearingTest|PresentationTest|ForageRenewal)(?:\s|$)'){
+            throw 'Full-loop QA cannot mix another acceptance route.'
+        }
+        return
+    }
     if($CommandLine -match '(?i)(?:^|\s)-HomesteadGeneratedWoodland(?=\s|$)'){
         foreach($flag in 'HomesteadGeneratedWoodland','HomesteadSmokeTest','HomesteadShippingQA'){
             if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){

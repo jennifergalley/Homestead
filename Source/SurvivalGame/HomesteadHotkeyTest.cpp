@@ -1,5 +1,6 @@
 #include "HomesteadSmokeTest.h"
 #include "HomesteadController.h"
+#include "UI/SHomesteadMenu.h"
 #include "HomesteadSave.h"
 #include "HomesteadTestPaths.h"
 #include "Engine/Engine.h"
@@ -165,6 +166,10 @@ void AHomesteadSmokeTest::PrepareHotkeyChecks()
         Add(TEXT("Open Look through existing controller pages"), [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
             [this]() { return Controller->BookPage() == 6; });
         QueueSelectRow(1);
+        Add(TEXT("Enter the selected appearance control's native actions"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this]() { return Controller->NativeMenu.IsValid()
+                && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
         Add(TEXT("Choose a real nondefault appearance value for persistence"),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
             [this]() { return Controller->Appearance.HairColor == 1; });
