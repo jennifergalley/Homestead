@@ -5,9 +5,17 @@
 #include <iostream>
 #include <limits>
 #include <set>
+#include <algorithm>
 #include <vector>
 
 using namespace Homestead::Generation;
+
+static_assert(static_cast<int>(TreePaletteRole::None) == 0);
+static_assert(static_cast<int>(TreePaletteRole::BroadleafMature) == 1);
+static_assert(static_cast<int>(TreePaletteRole::BroadleafYoung) == 2);
+static_assert(static_cast<int>(TreePaletteRole::ConiferMature) == 3);
+static_assert(static_cast<int>(TreePaletteRole::ConiferYoung) == 4);
+static_assert(static_cast<int>(TreePaletteRole::WoodlandAccent) == 5);
 
 namespace
 {
@@ -32,7 +40,8 @@ bool Same(const TerrainSample& a, const TerrainSample& b)
 bool Same(const GeneratedEntity& a, const GeneratedEntity& b)
 {
     return a.key == b.key && a.kind == b.kind && a.xCm == b.xCm && a.yCm == b.yCm &&
-        a.heightCm == b.heightCm && a.yawDegrees == b.yawDegrees &&
+        a.heightCm == b.heightCm && a.paletteRole == b.paletteRole &&
+        a.variantIndex == b.variantIndex && a.yawDegrees == b.yawDegrees &&
         a.scalePermille == b.scalePermille;
 }
 bool Same(const ChunkBaseline& a, const ChunkBaseline& b)
@@ -70,8 +79,11 @@ void CoordinatesAndFailures()
 
     TerrainSample terrain;
     terrain.heightCm = 987.0;
-    CHECK(SampleTerrain({0, 1}, 0, 0, terrain) == Status::UnsupportedVersion);
-    CHECK(terrain.heightCm == 987.0);
+    for (std::uint32_t version : {1U, 2U})
+    {
+        CHECK(SampleTerrain({0, version}, 0, 0, terrain) == Status::UnsupportedVersion);
+        CHECK(terrain.heightCm == 987.0);
+    }
     CHECK(SampleTerrain({}, MinWorldCm - SamplingHaloCm - 1, 0, terrain) == Status::OutOfRange);
     CHECK(SampleTerrain({}, 0, MaxWorldCmExclusive + SamplingHaloCm + 1, terrain) == Status::OutOfRange);
     CHECK(terrain.heightCm == 987.0);
@@ -80,11 +92,11 @@ void CoordinatesAndFailures()
 
     ChunkBaseline baseline;
     baseline.chunk = {123, 456};
-    CHECK(GenerateChunk({0, 1}, {}, baseline) == Status::UnsupportedVersion);
+    CHECK(GenerateChunk({0, 2}, {}, baseline) == Status::UnsupportedVersion);
     CHECK((baseline.chunk == ChunkCoord{123, 456}));
     GeneratedEntity entity;
     entity.xCm = 987;
-    CHECK(FindEntity({0, 1}, {}, entity) == Status::UnsupportedVersion);
+    CHECK(FindEntity({0, 2}, {}, entity) == Status::UnsupportedVersion);
     for (const auto id : {0U, 0xff000001U, Key(EntityKind::ForestTree, 36),
         Key(EntityKind::Branches, 1), Key(EntityKind::Reeds, 4), 0x01000000U})
     {
@@ -159,6 +171,7 @@ void IdentitiesAndDistribution()
                     CHECK(terrain.heightCm == entity.heightCm);
                     CHECK(entity.yawDegrees < 360);
                     CHECK(entity.scalePermille >= 900 && entity.scalePermille <= 1100);
+                    CHECK(entity.variantIndex <= 3);
                     ++counts[static_cast<int>(entity.kind)];
                     const double dx = static_cast<double>(entity.xCm) + 1000.0;
                     const double dy = static_cast<double>(entity.yCm);
@@ -166,6 +179,15 @@ void IdentitiesAndDistribution()
                         bootstrap[static_cast<int>(entity.kind)] = true;
                     if (entity.kind == EntityKind::ForestTree)
                     {
+                        CHECK(entity.paletteRole == TreePaletteRole::BroadleafMature ||
+                            entity.paletteRole == TreePaletteRole::ConiferMature ||
+                            entity.paletteRole == TreePaletteRole::WoodlandAccent);
+                        if (entity.paletteRole == TreePaletteRole::BroadleafMature)
+                            CHECK(entity.scalePermille >= 900 && entity.scalePermille <= 1040);
+                        else if (entity.paletteRole == TreePaletteRole::ConiferMature)
+                            CHECK(entity.scalePermille >= 900 && entity.scalePermille <= 1050);
+                        else
+                            CHECK(entity.scalePermille >= 900 && entity.scalePermille <= 1060);
                         ++trees;
                         if (dx * dx + dy * dy < 700.0 * 700.0) ++nearSpawnTrees;
                         CHECK(std::abs(static_cast<double>(entity.xCm) - terrain.streamCenterXCm) >= 250.0);
@@ -176,6 +198,19 @@ void IdentitiesAndDistribution()
                                 const auto ty = other.yCm - entity.yCm;
                                 CHECK(tx * tx + ty * ty >= 100 * 100);
                             }
+                    }
+                    else if (entity.kind == EntityKind::Sapling)
+                    {
+                        CHECK(entity.paletteRole == TreePaletteRole::BroadleafYoung ||
+                            entity.paletteRole == TreePaletteRole::ConiferYoung);
+                        CHECK(entity.scalePermille >= (entity.paletteRole ==
+                            TreePaletteRole::BroadleafYoung ? 900 : 920));
+                        CHECK(entity.scalePermille <= 1080);
+                    }
+                    else
+                    {
+                        CHECK(entity.paletteRole == TreePaletteRole::None);
+                        CHECK(entity.variantIndex == 0);
                     }
                     if (entity.kind == EntityKind::Reeds)
                         CHECK(std::abs(std::abs(static_cast<double>(entity.xCm) -
@@ -228,6 +263,8 @@ void ClusteredLayout()
     int chunksWithMicroOpenings = 0;
     std::set<int> xOffsets;
     std::set<int> yOffsets;
+    std::set<TreePaletteRole> roles;
+    std::set<std::uint8_t> variants;
     for (int cy = -2; cy <= 2; ++cy)
         for (int cx = -8; cx <= -4; ++cx)
         {
@@ -244,6 +281,8 @@ void ClusteredLayout()
                     CHECK(localY % 400 >= 50 && localY % 400 <= 350);
                     xOffsets.insert(static_cast<int>(localX % 400));
                     yOffsets.insert(static_cast<int>(localY % 400));
+                    roles.insert(entity.paletteRole);
+                    variants.insert(entity.variantIndex);
                 }
             CHECK(trees >= 30);
             totalTrees += trees;
@@ -253,6 +292,78 @@ void ClusteredLayout()
     CHECK(chunksWithMicroOpenings >= 1);
     CHECK(xOffsets.size() >= 40);
     CHECK(yOffsets.size() >= 40);
+    CHECK(roles.size() == 3);
+    CHECK(variants.size() == 4);
+}
+
+void TerrainReliefAndBuildPockets()
+{
+    const WorldDescriptor world{817391, WorldGenerationVersion};
+    std::vector<double> slopes;
+    double minimum = std::numeric_limits<double>::max();
+    double maximum = std::numeric_limits<double>::lowest();
+    for (std::int64_t y = -6000; y <= 6000; y += 100)
+        for (std::int64_t x = -6000; x <= 6000; x += 100)
+        {
+            TerrainSample sample;
+            CHECK(SampleTerrain(world, x, y, sample) == Status::Ok);
+            if (std::abs(static_cast<double>(x) - sample.streamCenterXCm) <= 300.0) continue;
+            minimum = std::min(minimum, sample.heightCm);
+            maximum = std::max(maximum, sample.heightCm);
+            slopes.push_back(std::sqrt(sample.normalX * sample.normalX +
+                sample.normalY * sample.normalY) / sample.normalZ);
+        }
+    std::sort(slopes.begin(), slopes.end());
+    CHECK(maximum - minimum >= 500.0);
+    CHECK(slopes.back() <= 0.20);
+    CHECK(slopes[slopes.size() * 95 / 100] <= 0.14);
+
+    minimum = std::numeric_limits<double>::max();
+    maximum = std::numeric_limits<double>::lowest();
+    for (std::int64_t y = -4800; y <= 4800; y += 2400)
+        for (std::int64_t x = -4800; x <= 4800; x += 2400)
+        {
+            TerrainSample sample;
+            CHECK(SampleTerrain(world, x, y, sample) == Status::Ok);
+            minimum = std::min(minimum, sample.heightCm);
+            maximum = std::max(maximum, sample.heightCm);
+        }
+    CHECK(maximum - minimum >= 350.0);
+
+    // Discoverable build pockets use a deterministic 3m center lattice and
+    // center/cardinal/diagonal samples over a 6m radius.
+    int pockets = 0;
+    constexpr std::int64_t diagonal = 424;
+    constexpr std::int64_t offsets[][2] = {
+        {0, 0}, {600, 0}, {-600, 0}, {0, 600}, {0, -600},
+        {diagonal, diagonal}, {diagonal, -diagonal},
+        {-diagonal, diagonal}, {-diagonal, -diagonal}};
+    for (std::int64_t y = -5400; y <= 5400 && pockets < 3; y += 300)
+        for (std::int64_t x = -5400; x <= 5400 && pockets < 3; x += 300)
+        {
+            double low = std::numeric_limits<double>::max();
+            double high = std::numeric_limits<double>::lowest();
+            for (const auto& offset : offsets)
+            {
+                TerrainSample sample;
+                CHECK(SampleTerrain(world, x + offset[0], y + offset[1], sample) == Status::Ok);
+                low = std::min(low, sample.heightCm);
+                high = std::max(high, sample.heightCm);
+            }
+            if (high - low <= 60.0) ++pockets;
+        }
+    CHECK(pockets >= 3);
+
+    minimum = std::numeric_limits<double>::max();
+    maximum = std::numeric_limits<double>::lowest();
+    for (int step = 0; step <= 10; ++step)
+    {
+        TerrainSample sample;
+        CHECK(SampleTerrain(world, -1300 + step * 30, -80 + step * 8, sample) == Status::Ok);
+        minimum = std::min(minimum, sample.heightCm);
+        maximum = std::max(maximum, sample.heightCm);
+    }
+    CHECK(maximum - minimum <= 45.0);
 }
 
 void VersionFixture()
@@ -269,7 +380,7 @@ void VersionFixture()
     };
     for (const auto& sample : chunk.terrain)
     {
-        // This fixture is wholly west of the stream; its heights are exact Q8 noise.
+        // Quantized heights and integer metadata pin the supported Windows v3 baseline.
         append(static_cast<std::uint64_t>(std::llround(sample.heightCm * 256.0)));
         append(sample.woodland);
     }
@@ -278,6 +389,8 @@ void VersionFixture()
         append(entity.key.localId);
         append(static_cast<std::uint64_t>(entity.xCm));
         append(static_cast<std::uint64_t>(entity.yCm));
+        append(static_cast<std::uint64_t>(entity.paletteRole));
+        append(entity.variantIndex);
         append(entity.yawDegrees);
         append(entity.scalePermille);
     }
@@ -293,6 +406,7 @@ int main()
     IdentitiesAndDistribution();
     StreamAndNormals();
     ClusteredLayout();
+    TerrainReliefAndBuildPockets();
     VersionFixture();
     std::cout << "World generation: " << checks << " checks passed.\n";
     return 0;

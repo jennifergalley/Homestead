@@ -7,7 +7,7 @@
 
 namespace Homestead::Generation
 {
-constexpr std::uint32_t WorldGenerationVersion = 2;
+constexpr std::uint32_t WorldGenerationVersion = 3;
 constexpr std::int64_t ChunkSizeCm = 2400;
 constexpr int TerrainCellsPerChunk = 24;
 constexpr int TerrainVerticesPerSide = TerrainCellsPerChunk + 1;
@@ -54,6 +54,13 @@ enum class EntityKind : std::uint8_t
     Roots = 5, Flowers = 6, Reeds = 7, Sapling = 8
 };
 
+// Stable silhouette/age strata, not botanical species or asset identities.
+enum class TreePaletteRole : std::uint8_t
+{
+    None = 0, BroadleafMature = 1, BroadleafYoung = 2,
+    ConiferMature = 3, ConiferYoung = 4, WoodlandAccent = 5
+};
+
 enum class Status { Ok, UnsupportedVersion, OutOfRange, InvalidKey, NotFound };
 const char* StatusMessage(Status status);
 
@@ -77,6 +84,8 @@ struct GeneratedEntity
     double heightCm = 0.0;
     std::uint16_t yawDegrees = 0;
     std::uint16_t scalePermille = 1000;
+    TreePaletteRole paletteRole = TreePaletteRole::None;
+    std::uint8_t variantIndex = 0;
 };
 
 struct ChunkBaseline
