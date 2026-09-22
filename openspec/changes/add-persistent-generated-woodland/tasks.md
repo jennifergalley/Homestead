@@ -39,6 +39,7 @@ portable proofs, not native traversal/art passes.
 ## 2. Integrated woodland
 - [x] 2.1 Stream safe colliding terrain and bounded visual chunks beyond the old square without fixed edge rails or house clearing.
 - [ ] 2.2 Render dense authoritative trees/resources and layered native cover with correct materials, LOD/instance budgets and no duplicate decorative playable blockers.
+- [x] 2.2a Batch only noncolliding outer mature trees by exact mesh path, with deterministic key-derived transforms, bounded rebuild lifecycle and batch-aware inventory evidence.
 - [x] 2.3 Wire focus/chop/tool/reward/placement/tilling/startup labels and destination-first load/teleport preparation.
 - [ ] 2.4 Handle seed/generation/save versions and the explicitly disclosed fresh test profile without silently changing old saves.
 

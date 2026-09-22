@@ -4,6 +4,7 @@
 #include "HomesteadSave.h"
 #include "HomesteadTestPaths.h"
 #include "Dom/JsonObject.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/FileManager.h"
@@ -37,6 +38,8 @@ struct FWoodlandFixture
     bool CrossedOldBoundary = false, CrossedChunkSeam = false, ContinuousGround = true;
     size_t EditCount = 0;
     FString WorldId, SimulationText, Fingerprint;
+    FString OuterBatchSnapshot;
+    int32 OuterBatchComponents = 0, OuterBatchInstances = 0;
     uint32 ProducerProcess = 0;
 };
 
@@ -311,6 +314,42 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             [this]() { return ShadersReady() && VerifyPresentationMaterials()
                 && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0; }, 0.8f);
     };
+    auto OuterBatchSnapshot = [this](int32& ComponentCount, int32& InstanceCount)
+    {
+        ComponentCount = 0;
+        InstanceCount = 0;
+        if (!Controller->Landscape) return FString();
+        TArray<FString> Rows;
+        for (const auto& Entry : Controller->Landscape->OuterTreeInstances)
+            Rows.Add(Entry.Key + TEXT("|") + Entry.Value.MeshPath + TEXT("|") + Entry.Value.Transform.ToString());
+        Rows.Sort();
+        for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
+        {
+            if (!IsValid(Entry.Value.Get()) || !Entry.Value->IsRegistered()
+                || !Entry.Value->GetStaticMesh() || Entry.Value->GetStaticMesh()->GetPathName() != Entry.Key
+                || Entry.Value->IsQueryCollisionEnabled() || Entry.Value->GetGenerateOverlapEvents()
+                || Entry.Value->CanEverAffectNavigation())
+                return FString();
+            ++ComponentCount;
+            InstanceCount += Entry.Value->GetInstanceCount();
+            for (int32 Index = 0; Index < Entry.Value->GetInstanceCount(); ++Index)
+            {
+                FTransform Transform;
+                if (!Entry.Value->GetInstanceTransform(Index, Transform)) return FString();
+                Rows.Add(TEXT("B|") + Entry.Key + TEXT("|") + Transform.ToString());
+            }
+        }
+        TArray<UHierarchicalInstancedStaticMeshComponent*> Registered;
+        Controller->Landscape->GetComponents(Registered);
+        Registered.RemoveAll([](const UHierarchicalInstancedStaticMeshComponent* Batch)
+        {
+            return !Batch || !Batch->ComponentHasTag(TEXT("GeneratedOuterTreeBatch"));
+        });
+        if (Registered.Num() != ComponentCount
+            || InstanceCount != Controller->Landscape->OuterTreeInstances.Num())
+            return FString();
+        return FString::Join(Rows, TEXT("\n"));
+    };
     Add(TEXT("Generated woodland uses the isolated native test sandbox"),
         []() {},
         [this]()
@@ -556,6 +595,18 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
         },
         [this, Fixture]() { return SitePersists(Controller->Simulation(), *Fixture); }, 1.0f);
     Capture(TEXT("generated-cleared-site"));
+    Add(TEXT("Outer mature trees use bounded exact-mesh batches before travel"),
+        [Fixture, OuterBatchSnapshot]()
+        {
+            Fixture->OuterBatchSnapshot = OuterBatchSnapshot(
+                Fixture->OuterBatchComponents, Fixture->OuterBatchInstances);
+        },
+        [Fixture]()
+        {
+            return !Fixture->OuterBatchSnapshot.IsEmpty()
+                && Fixture->OuterBatchComponents > 0 && Fixture->OuterBatchComponents <= 3
+                && Fixture->OuterBatchInstances > Fixture->OuterBatchComponents;
+        });
 
     Add(TEXT("CONTROLLED teleport to the surveyed negative-coordinate walk start, before the old -4000 board edge"),
         [this, Fixture]()
@@ -614,6 +665,69 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
         [this, Fixture]() { return SitePersists(Controller->Simulation(), *Fixture)
             && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
             && Controller->State().resourceEdits.size() == Fixture->EditCount; }, 1.0f);
+    const auto BatchLifecycleValid = MakeShared<bool>(false);
+    Add(TEXT("Outer batches omit cleared edits and rebuild deterministically without component accumulation"),
+        [this, Fixture, OuterBatchSnapshot, BatchLifecycleValid]()
+        {
+            int32 ReturnedComponents = 0, ReturnedInstances = 0;
+            const FString Returned = OuterBatchSnapshot(ReturnedComponents, ReturnedInstances);
+            if (Returned != Fixture->OuterBatchSnapshot
+                || ReturnedComponents != Fixture->OuterBatchComponents
+                || ReturnedInstances != Fixture->OuterBatchInstances)
+                return;
+
+            Homestead::Simulation Shifted = Controller->Simulation();
+            const Point ShiftedCenter{
+                (Fixture->SiteTree.chunk.x + 2.5) * Generation::ChunkSizeCm,
+                (Fixture->SiteTree.chunk.y + 0.5) * Generation::ChunkSizeCm};
+            if (!Shifted.SetActiveWorldRegion(ShiftedCenter)
+                || !Controller->Landscape->Refresh(Shifted))
+                return;
+            const FString ClearedKey = FString::Printf(TEXT("%d,%d,%u"),
+                Fixture->SiteTree.chunk.x, Fixture->SiteTree.chunk.y, Fixture->SiteTree.localId);
+            if (Controller->Landscape->OuterTreeInstances.Contains(ClearedKey)
+                || FMath::Abs(Shifted.GetState().activeChunk.x - Fixture->SiteTree.chunk.x) != 2)
+                return;
+            int32 ShiftedComponents = 0, ShiftedInstances = 0;
+            const FString ShiftedSnapshot = OuterBatchSnapshot(ShiftedComponents, ShiftedInstances);
+            if (ShiftedSnapshot.IsEmpty()) return;
+            TSet<const UHierarchicalInstancedStaticMeshComponent*> ShiftedPointers;
+            for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
+                ShiftedPointers.Add(Entry.Value.Get());
+            if (!Controller->Landscape->Refresh(Shifted)) return;
+            int32 RepeatedComponents = 0, RepeatedInstances = 0;
+            if (OuterBatchSnapshot(RepeatedComponents, RepeatedInstances) != ShiftedSnapshot
+                || RepeatedComponents != ShiftedComponents || RepeatedInstances != ShiftedInstances)
+                return;
+            for (const auto& Entry : Controller->Landscape->OuterTreeBatches)
+                if (!ShiftedPointers.Contains(Entry.Value.Get())) return;
+
+            Homestead::Simulation Alternate;
+            if (!Alternate.NewGame(Controller->State().world.seed ^ 0x9e3779b97f4a7c15ULL)
+                || !Alternate.SetActiveWorldRegion(ShiftedCenter)
+                || !Controller->Landscape->Refresh(Alternate)
+                || Controller->Landscape->Descriptor.seed != Alternate.GetState().world.seed)
+                return;
+            int32 AlternateComponents = 0, AlternateInstances = 0;
+            if (OuterBatchSnapshot(AlternateComponents, AlternateInstances).IsEmpty()
+                || AlternateComponents <= 0 || AlternateComponents > 3
+                || AlternateInstances != Controller->Landscape->OuterTreeInstances.Num())
+                return;
+
+            if (!Controller->Landscape->Refresh(Controller->Simulation())) return;
+            int32 RestoredComponents = 0, RestoredInstances = 0;
+            *BatchLifecycleValid = OuterBatchSnapshot(RestoredComponents, RestoredInstances)
+                    == Fixture->OuterBatchSnapshot
+                && RestoredComponents == Fixture->OuterBatchComponents
+                && RestoredInstances == Fixture->OuterBatchInstances
+                && Controller->Landscape->Descriptor.generationVersion
+                    == Controller->State().world.generationVersion;
+        },
+        [this, BatchLifecycleValid]()
+        {
+            return *BatchLifecycleValid && Controller->IsWorldReady()
+                && Controller->WorldRecoveryCount() == 0;
+        }, 1.0f);
     const auto Saved = MakeShared<bool>(false);
     const auto SavesBefore = MakeShared<uint32>(0);
     Add(TEXT("Save the real controlled worksite through mapped F5"),
