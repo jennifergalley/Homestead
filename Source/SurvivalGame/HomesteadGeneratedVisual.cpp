@@ -603,7 +603,8 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
             <= Landscape->RegionalDescriptors.LoadedRegionCount()
         && RegionalDescriptorsConsistent
         && RegionalWaterComponents == Landscape->RenderedRegionalReachReferences
-        && Landscape->RenderedRegionalReachReferences <= 2
+        && Landscape->RenderedRegionalReachReferences > 0
+        && Landscape->RenderedRegionalReachReferences <= 5
         && Landscape->UnrenderedRegionalReachReferences >= 0
         && Landscape->UnrenderedRegionalLakeReferences >= 0
         && RegionalWaterPoliciesValid;
