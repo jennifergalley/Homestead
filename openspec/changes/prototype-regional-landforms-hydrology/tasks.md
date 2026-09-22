@@ -29,7 +29,7 @@
 - [x] 3.2 Validate the complete OpenSpec change strictly and inspect the branch
   diff to confirm version-three woodland, current tests, CMake and runtime files
   remain untouched.
-- [ ] 3.3 Commit and privately push the isolated artifacts/source/tests, then
+- [x] 3.3 Commit and privately push the isolated artifacts/source/tests, then
   hand main the API, limits and unexecuted/guarded-test status without claiming
   playable mountains, rivers, lakes or visual acceptance.
 
