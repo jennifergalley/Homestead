@@ -136,6 +136,9 @@ void DrainageContinuity()
     int crossings = 0;
     int lakes = 0;
     int tributaries = 0;
+    bool belowReachThreshold = false;
+    std::array<bool, 5> widthClasses{};
+    std::array<bool, 4> depthClasses{};
     for (const RegionCoord region : {RegionCoord{2, -6}, RegionCoord{3, -6},
         RegionCoord{2, -5}, RegionCoord{3, -5}})
     {
@@ -188,6 +191,14 @@ void DrainageContinuity()
                 if (node.lakeOutlet) CHECK(node.downstream == lake->outlet.downstream);
             }
             if (node.accumulation >= 8) ++tributaries;
+            belowReachThreshold = belowReachThreshold || node.accumulation < 4;
+            CHECK(node.widthClass == (node.accumulation >= 32 ? 4 :
+                (node.accumulation >= 16 ? 3 : (node.accumulation >= 8 ? 2 :
+                    (node.accumulation >= 4 ? 1 : 0)))));
+            CHECK(node.depthClass == (node.accumulation >= 24 ? 3 :
+                (node.accumulation >= 12 ? 2 : (node.accumulation >= 5 ? 1 : 0))));
+            widthClasses[node.widthClass] = true;
+            depthClasses[node.depthClass] = true;
             if (index % 127 == 0 || index == NodesPerRegion - 1)
             {
                 DrainageNode reconstructed;
@@ -199,6 +210,9 @@ void DrainageContinuity()
     CHECK(crossings > 0);
     CHECK(lakes > 0);
     CHECK(tributaries > 0);
+    CHECK(belowReachThreshold);
+    CHECK(std::all_of(widthClasses.begin(), widthClasses.end(), [](bool seen) { return seen; }));
+    CHECK(std::all_of(depthClasses.begin(), depthClasses.end(), [](bool seen) { return seen; }));
 }
 
 void MultipleSeedBounds()
