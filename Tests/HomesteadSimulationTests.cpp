@@ -1751,6 +1751,255 @@ void GeneratedSaveValidationAndEditLimit()
     InventoryRoundTrip(sim);
 }
 
+Point ChunkCenter(int x, int y)
+{
+    return {x * static_cast<double>(Generation::ChunkSizeCm) + Generation::ChunkSizeCm / 2.0,
+        y * static_cast<double>(Generation::ChunkSizeCm) + Generation::ChunkSizeCm / 2.0};
+}
+std::vector<Generation::GeneratedEntityKey> ChunkKeys(const Simulation& sim, Generation::ChunkCoord chunk)
+{
+    std::vector<Generation::GeneratedEntityKey> keys;
+    for (const auto& node : sim.GetState().resources)
+        if (node.key.chunk == chunk) keys.push_back(node.key);
+    std::sort(keys.begin(), keys.end());
+    return keys;
+}
+ResourceNode ChunkNode(const Simulation& sim, Generation::ChunkCoord chunk, ResourceKind kind)
+{
+    for (const auto& node : sim.GetState().resources)
+        if (node.key.chunk == chunk && node.kind == kind && !node.cleared) return node;
+    CHECK(false);
+    return {};
+}
+void LongDeterministicChunkWalk()
+{
+    Simulation sim;
+    const auto startingInventory = sim.GetState().inventory;
+    const int startingNextId = sim.GetState().nextId;
+    std::size_t smallestSave = std::numeric_limits<std::size_t>::max();
+    std::size_t largestSave = 0;
+    int visited = 0;
+    std::vector<Generation::GeneratedEntityKey> rememberedKeys;
+    int rememberedMaxHandle = 0;
+    for (int row = -8; row <= 8; ++row)
+    {
+        const int first = row % 2 == 0 ? -8 : 8;
+        const int last = -first;
+        const int step = first < last ? 1 : -1;
+        for (int column = first;; column += step)
+        {
+            const Point center = ChunkCenter(column, row);
+            OK(sim.SetActiveWorldRegion(center));
+            CHECK(sim.GetState().activeChunk == (Generation::ChunkCoord{column, row}));
+            CHECK(sim.GetState().resources.size() <= 9 * Generation::MaxEntitiesPerChunk);
+            CHECK(sim.GetState().resourceEdits.empty());
+            CHECK(sim.GetState().inventory == startingInventory);
+            CHECK(sim.GetState().nextId == startingNextId);
+            for (const auto& node : sim.GetState().resources)
+                CHECK(node.id >= TransientResourceIdBase);
+            const auto save = sim.Serialize();
+            smallestSave = std::min(smallestSave, save.size());
+            largestSave = std::max(largestSave, save.size());
+            if (visited % 31 == 0)
+            {
+                Simulation loaded;
+                OK(loaded.Deserialize(save));
+                CHECK(loaded.Serialize() == save);
+                CHECK(ChunkKeys(loaded, {column, row}) == ChunkKeys(sim, {column, row}));
+                for (const auto& node : loaded.GetState().resources)
+                {
+                    CHECK(node.id >= TransientResourceIdBase);
+                    ResourceNode resolved;
+                    OK(loaded.ResolveGeneratedResource(node.key, resolved));
+                    CHECK(resolved.id == node.id && resolved.position.x == node.position.x &&
+                        resolved.position.y == node.position.y);
+                }
+            }
+            if (column == 0 && row == 0)
+            {
+                rememberedKeys = ChunkKeys(sim, {0, 0});
+                for (const auto& node : sim.GetState().resources)
+                    rememberedMaxHandle = std::max(rememberedMaxHandle, node.id);
+            }
+            ++visited;
+            if (column == last) break;
+        }
+    }
+    CHECK(visited == 289);
+    CHECK(largestSave - smallestSave <= 8);
+    CHECK(largestSave < 1024);
+    CHECK(sim.GetState().resourceEdits.empty());
+    OK(sim.SetActiveWorldRegion(ChunkCenter(0, 0)));
+    CHECK(ChunkKeys(sim, {0, 0}) == rememberedKeys);
+    // Current implementation guarantees no handle reuse during this Simulation lifetime.
+    for (const auto& node : sim.GetState().resources) CHECK(node.id > rememberedMaxHandle);
+    const auto save = sim.Serialize();
+    Simulation loaded;
+    OK(loaded.Deserialize(save));
+    CHECK(loaded.Serialize() == save);
+    CHECK(ChunkKeys(loaded, {0, 0}) == rememberedKeys);
+    CHECK(loaded.GetState().resourceEdits.empty());
+}
+void MixedPersistentWorldChurn()
+{
+    Simulation sim;
+    WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}, {Item::DiggingStick, 1}});
+    struct Remembered
+    {
+        Generation::GeneratedEntityKey tree;
+        Generation::GeneratedEntityKey branches;
+        double branchesReady = 0.0;
+    };
+    std::vector<Remembered> edits;
+    for (const auto chunk : {Generation::ChunkCoord{-12, -9}, {-12, 9}, {12, -9}, {12, 9}})
+    {
+        OK(sim.SetActiveWorldRegion(ChunkCenter(chunk.x, chunk.y)));
+        const auto tree = ChunkNode(sim, chunk, ResourceKind::ForestTree);
+        const auto branches = ChunkNode(sim, chunk, ResourceKind::Branches);
+        OK(sim.Clear(tree.id, tree.position));
+        OK(sim.Harvest(branches.id, branches.position));
+        ResourceNode resolved;
+        OK(sim.ResolveGeneratedResource(branches.key, resolved));
+        edits.push_back({tree.key, branches.key, resolved.readyAtHour});
+        WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}, {Item::DiggingStick, 1}});
+    }
+    CHECK(sim.GetState().resourceEdits.size() == 8);
+    OK(sim.SetActiveWorldRegion(ChunkCenter(-12, -9)));
+    const auto buildTree = ChunkNode(sim, {-12, -9}, ResourceKind::ForestTree);
+    const int cellX = static_cast<int>(std::floor(buildTree.position.x / CellSize));
+    const int cellY = static_cast<int>(std::floor(buildTree.position.y / CellSize));
+    WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}, {Item::DiggingStick, 1},
+        {Item::Branch, 30}, {Item::Stone, 20}});
+    FellFixtureCell(sim, cellX, cellY);
+    OK(sim.Place(Piece::Foundation, cellX, cellY, 0, CellCenter(cellX, cellY)));
+    const int structureId = sim.GetState().structures.back().id;
+    int plotX = cellX + 2;
+    FellFixtureCell(sim, plotX, cellY);
+    OK(sim.Till(plotX, cellY, CellCenter(plotX, cellY)));
+    const int plotId = sim.GetState().plots.back().id;
+    const auto beforeTravel = sim.Serialize();
+    for (int i = -20; i <= 20; ++i)
+        OK(sim.SetActiveWorldRegion(ChunkCenter(i, i % 2 ? -15 : 15)));
+    CHECK(sim.GetState().resourceEdits.size() >= 8);
+    CHECK(sim.GetState().structures.back().id == structureId);
+    CHECK(sim.GetState().plots.back().id == plotId);
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.Serialize() == sim.Serialize());
+    for (const auto& edit : edits)
+    {
+        ResourceNode tree, branches;
+        OK(loaded.ResolveGeneratedResource(edit.tree, tree));
+        OK(loaded.ResolveGeneratedResource(edit.branches, branches));
+        CHECK(tree.id == 0 && tree.cleared);
+        CHECK(branches.id == 0 && !branches.cleared && branches.readyAtHour == edit.branchesReady);
+    }
+    Edit(loaded, [](State& state) { state.hour += 25; }, false);
+    for (const auto& edit : edits)
+    {
+        OK(loaded.SetActiveWorldRegion(ChunkCenter(edit.branches.chunk.x, edit.branches.chunk.y)));
+        ResourceNode tree, branches;
+        OK(loaded.ResolveGeneratedResource(edit.tree, tree));
+        OK(loaded.ResolveGeneratedResource(edit.branches, branches));
+        CHECK(tree.cleared && !loaded.CanHarvest(tree.id));
+        CHECK(loaded.CanHarvest(branches.id));
+    }
+    CHECK(loaded.FindNearestStructure(CellCenter(cellX, cellY), Piece::Foundation, 1) == structureId);
+    CHECK(loaded.FindNearestPlot(CellCenter(plotX, cellY), 1) == plotId);
+    CHECK(beforeTravel.size() <= loaded.Serialize().size() + 32);
+}
+void SparseEditScaleAndPayloadBounds()
+{
+    Simulation sim;
+    WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}});
+    const std::size_t untouchedSize = sim.Serialize().size();
+    std::size_t lastSize = untouchedSize;
+    int actions = 0;
+    for (int row = -8; row < 8; ++row)
+        for (int column = -8; column < 8; ++column)
+        {
+            const Generation::ChunkCoord chunk{column * 2, row * 2};
+            OK(sim.SetActiveWorldRegion(ChunkCenter(chunk.x, chunk.y)));
+            const auto branches = ChunkNode(sim, chunk, ResourceKind::Branches);
+            OK(sim.Harvest(branches.id, branches.position));
+            ++actions;
+            CHECK(static_cast<int>(sim.GetState().resourceEdits.size()) == actions);
+            if (actions % 20 == 0)
+                WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}});
+            const auto size = sim.Serialize().size();
+            CHECK(size >= lastSize - 4);
+            lastSize = size;
+        }
+    CHECK(actions == 256);
+    CHECK(sim.GetState().resourceEdits.size() == 256);
+    CHECK(lastSize > untouchedSize);
+    CHECK(lastSize < 32 * 1024);
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.Serialize() == sim.Serialize());
+    State nearlyFull = sim.GetState();
+    for (int y = 100; nearlyFull.resourceEdits.size() < MaxResourceEdits; ++y)
+        for (int x = -100; x < 100 && nearlyFull.resourceEdits.size() < MaxResourceEdits; ++x)
+        {
+            Generation::ChunkBaseline chunk;
+            CHECK(Generation::GenerateChunk(nearlyFull.world, {x, y}, chunk) == Generation::Status::Ok);
+            for (const auto& entity : chunk.entities)
+            {
+                if (nearlyFull.resourceEdits.size() == MaxResourceEdits) break;
+                nearlyFull.resourceEdits.push_back({entity.key, true, 0});
+            }
+        }
+    std::sort(nearlyFull.resourceEdits.begin(), nearlyFull.resourceEdits.end(),
+        [](const ResourceEdit& a, const ResourceEdit& b) { return a.key < b.key; });
+    nearlyFull.resourceEdits.erase(std::unique(nearlyFull.resourceEdits.begin(), nearlyFull.resourceEdits.end(),
+        [](const ResourceEdit& a, const ResourceEdit& b) { return a.key == b.key; }), nearlyFull.resourceEdits.end());
+    CHECK(nearlyFull.resourceEdits.size() == MaxResourceEdits);
+    OK(sim.Deserialize(Encode(nearlyFull)));
+    const auto fullSave = sim.Serialize();
+    CHECK(fullSave.size() > lastSize);
+    CHECK(fullSave.size() < 8 * 1024 * 1024);
+    const auto revision = sim.GetRevision();
+    const auto inventory = sim.GetState().inventory;
+    ResourceNode existing;
+    for (const auto& node : sim.GetState().resources)
+    {
+        if (node.kind != ResourceKind::Branches) continue;
+        const auto found = std::lower_bound(sim.GetState().resourceEdits.begin(), sim.GetState().resourceEdits.end(),
+            node.key, [](const ResourceEdit& edit, const Generation::GeneratedEntityKey& key) { return edit.key < key; });
+        if (found != sim.GetState().resourceEdits.end() && found->key == node.key)
+        {
+            existing = node;
+            break;
+        }
+    }
+    CHECK(existing.id != 0);
+    OK(sim.Clear(existing.id, existing.position));
+    CHECK(sim.GetState().resourceEdits.size() == MaxResourceEdits);
+    CHECK(sim.GetRevision() == revision + 1);
+    CHECK(sim.GetState().inventory == inventory);
+    const auto beforeReject = sim.Serialize();
+    ResourceNode fresh;
+    for (const auto& node : sim.GetState().resources)
+    {
+        const auto found = std::lower_bound(sim.GetState().resourceEdits.begin(), sim.GetState().resourceEdits.end(),
+            node.key, [](const ResourceEdit& edit, const Generation::GeneratedEntityKey& key) { return edit.key < key; });
+        if (found == sim.GetState().resourceEdits.end() || found->key != node.key) { fresh = node; break; }
+    }
+    CHECK(fresh.id != 0);
+    UnchangedFailure(sim, [&] {
+        return fresh.kind == ResourceKind::ForestTree ? sim.Clear(fresh.id, fresh.position) :
+            sim.Harvest(fresh.id, fresh.position);
+    });
+    CHECK(sim.Serialize() == beforeReject);
+    const std::string oversized(8 * 1024 * 1024 + 1, 'x');
+    UnchangedFailure(sim, [&] { return sim.Deserialize(oversized); });
+    std::string corrupt = fullSave;
+    corrupt[corrupt.size() / 2] ^= 1;
+    UnchangedFailure(sim, [&] { return sim.Deserialize(corrupt); });
+    std::cout << "Persistent world stress: visited=289 unedited, edited=256, maxEdits="
+        << MaxResourceEdits << ", fullSaveBytes=" << fullSave.size() << ".\n";
+}
+
 void Run(const char* name, void (*test)())
 {
     test();
@@ -1788,6 +2037,9 @@ int main()
     Run("permanent generated felling and persistent renewable timers", GeneratedFellingAndPersistentTimers);
     Run("cross-cell trunk footprint, chosen building sites and reload", GeneratedBuildingFootprintAndReload);
     Run("generated save validation and explicit sparse edit limit", GeneratedSaveValidationAndEditLimit);
+    Run("long deterministic negative and positive chunk walk", LongDeterministicChunkWalk);
+    Run("mixed distant edits, cache churn and exact reload", MixedPersistentWorldChurn);
+    Run("sparse edit scale, payload bounds and atomic rejection", SparseEditScaleAndPayloadBounds);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }
