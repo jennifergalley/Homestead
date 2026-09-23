@@ -10,7 +10,7 @@
 
 - [x] 2.1 Author original straight bob and strand material, coordinating explicit blonde selection with UI; verify supported color choices and unchanged face/body/rig in source previews.
 - [x] 2.2 Export six existing joined Bob body/outfit variants; verify non-hair preservation, rig/weight/material round trips and publish current-selector import paths.
-- [ ] 2.3 Main imports and exercises the bob in game; verify actual blonde silhouette, selection, saved appearance and ordinary movement for all body fits.
+- [x] 2.3 Main imports and exercises the bob in game; verify actual blonde silhouette, selection, saved appearance and ordinary movement for all body fits.
 
 ## 3. Modular parity and handoff
 
@@ -86,3 +86,40 @@ author's earlier "no commit/push" statements describe that subagent's boundary,
 not the final published handoff. All 18 canonical source FBXs and receipts pass
 the final checker; original modular clothing remains unchanged. This completes
 3.2, not the open wave-quality or in-game acceptance tasks.
+
+## September22 selected-content runtime review
+
+Current Content and the selected `wardrobe-complete-10` cooked containers already
+use the final canonical bundle: `final-bundle.json` SHA256
+`68E70D4F6C39495756321BDE18FA0C6F9B22C10CC777E540E3760DA90FBCAFA5`.
+Its exact three modular wave and three modular Bob FBX hashes match the persisted
+wardrobe import receipt and current uasset identities. No reimport was needed.
+
+Task1.1 remains open. Actual close production-path back/three-quarter images for
+Preferred, Willow and Hazel show the latest wave lower edge as a conspicuous
+repeated triangular/sawtooth shelf around the shoulder-blade/mid-back region.
+The ordinary all-body routes pass movement and gather, but foliage-obscured
+frames do not improve that visual result. This is not a natural feather-tip
+acceptance. Task1.3 therefore also remains open and no hairstyle candidate is
+promoted over `wardrobe-complete-10`.
+
+Task2.3 is complete from the combined exact evidence:
+
+- `hair-review-03-native` passes the real production presentation for Bob with
+  Blonde color index4 on all three modular bodies, close back/side/three-quarter
+  captures, actual F5 save, Ponytail mutation and F9 restoration with equipment,
+  IDs and dye retained.
+- `hair-review-01-bob-blonde-body0/1/2` each pass the ordinary mapped
+  walk/turn/orbit/portrait/gather route using the exact Bob base path and two
+  starter garments.
+- The final Shipping full loop exercises the same Bob geometry through real
+  gathering, watering, weeding, clearing, save/reload and recovery, but uses
+  its saved non-Blonde tint. That distinction is disclosed rather than called
+  all-action Blonde evidence.
+- The dedicated Bob/Blonde watering attempt is preserved as incomplete:
+  it gathered real setup stock but stopped during setup, with
+  `Watered real planted plot=0`. It is not counted as a pass.
+
+The Bob reads as a short stock-based straight silhouette with layered strand
+contrast and a dark-golden Blonde tint. This is technical/runtime completion,
+not Jenny's aesthetic approval. OpenSpec progress is6/8.

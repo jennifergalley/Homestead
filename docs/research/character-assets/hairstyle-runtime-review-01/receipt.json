@@ -1,0 +1,27 @@
+{
+  "status": "bob-passed-waves-rejected",
+  "selectedPreviewUnchanged": "wardrobe-complete-10 / wardrobe-complete-v12",
+  "sourceCheckpoints": ["deac97d", "b74699a", "472f5f4"],
+  "finalBundleSha256": "68E70D4F6C39495756321BDE18FA0C6F9B22C10CC777E540E3760DA90FBCAFA5",
+  "tasks": {
+    "1.1": "open: actual close wave backs show repeated sawtooth/shelf ends",
+    "1.3": "open: movement passes, but wave visual requirement fails",
+    "2.3": "passed: all-body Bob Blonde close/ordinary, save-mutate-reload, representative full-loop actions"
+  },
+  "evidence": [
+    {"path":"Saved\\Automation\\20260921-033354-2d257ba0\\hair-review-03-native\\smoke-result.txt","sha256":"2BC806782F95523C98C337695150049246511D6E13E9ADB7AC3D9D2816B7672A"},
+    {"path":"Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\hair-review-01-bob-blonde-body0\\observations.txt","sha256":"F511B62B7F58F5C1774EE3A7F894FF44E9A164681F6076E0EC32DA419B16C85E"},
+    {"path":"Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\hair-review-01-bob-blonde-body1\\observations.txt","sha256":"E92DEF58657B781A2BFA76D0AB4CF487CA654091AC5FF570E1DAA4C81FADCA29"},
+    {"path":"Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\hair-review-01-bob-blonde-body2\\observations.txt","sha256":"83247DA23AC599DEF3BE4CE79B36E002B1B7D10D1F6C655DE94AB69CEE78C8E4"},
+    {"path":"Saved\\Automation\\20260921-033354-2d257ba0\\wardrobe-complete-10-full-loop-02\\smoke-result.txt","sha256":"052895A41197E9DB7FDB88FDC74D721871E196A8C8586D291043423BB29EBAD0"}
+  ],
+  "failedEvidence": {
+    "path": "Saved\\VisualPlaytests\\20260921-033354-2d257ba0\\hair-review-bob-body0-water",
+    "result": "incomplete setup; Watered real planted plot=0"
+  },
+  "limits": [
+    "No new content import or source reauthoring occurred.",
+    "Full-loop action coverage uses the same Bob geometry at a non-Blonde saved tint.",
+    "Technical evidence is not human aesthetic approval."
+  ]
+}
