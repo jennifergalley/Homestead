@@ -495,6 +495,7 @@ on playtesting rather than building every system to completion in isolation.
 | Woodland scavenging | Find abandoned carcasses, assess usable remains, recover substantial bone/raw hide/freshness-dependent meat, and craft simple bone/hide items | Animal resources are obtainable without hunting; freshness is readable, harvesting restrained, and yields persistent |
 | First winter | Spring-to-winter progression, seasonal forage, storage/preservation, clothing warmth, weather, and improved shelter | Preparation matters without creating unwanted anxiety or unavoidable failure |
 | Landscape expansion | More meadows, richer forest, larger rivers, lakes, waterfalls, and habitat-specific plants | New walks are beautiful, readable, and rewarding without bloating travel or reducing performance |
+| Living woodland ambience (later) | Add bounded birds, squirrels, mice, and rabbits with habitat-aware idle movement and approach-scatter behavior after core gameplay is established | The woodland feels inhabited without turning animals into clutter, blockers, chores, prey, or a performance burden |
 | Village edge | Small cast, conversation, trade, optional requests, and useful alternate acquisition paths | Ignoring villagers remains a viable and emotionally neutral choice |
 | Quiet hunting | Bow crafting, rabbits and squirrels as small prey, deer as larger quarry, aiming assistance, tracking, restrained harvesting | Small targets work comfortably with a controller; hunting is readable and not distressing |
 | Wilderness predators | Occasional territorial encounters deeper in the wilds, warning cues, reliable retreat, and a defensive crafted spear | Home/village routes remain safe; danger adds stakes without constant harassment or mandatory combat |
@@ -585,6 +586,13 @@ for the patch she has cultivated.
 - Use coherent lighting, plant groupings, ambient wildlife/water sounds, and
   readable landmarks to support exploration. Beauty and atmosphere are part of
   the playtest, not substitutes for accessible paths or stable frame times.
+- After the core homestead loop is strong, add ambient woodland life: birds,
+  squirrels, mice, and rabbits occupying appropriate habitat and scattering at
+  the heroine's approach. The first ambience slice is noninteractive world life,
+  not hunting, loot, companionship, a daily task, or a prerequisite for food or
+  materials. Birds can take short cover-seeking flights; ground animals should
+  scamper toward nearby vegetation, burrows, trees, or out-of-view cover without
+  blocking paths, camera, gathering targets, or building.
 - Keep ordinary near-home foraging routes within the peaceful part of the map.
   Basic food, fiber, and planting stock must not require entering predator
   territory. Deeper excursions are optional additions, not a daily survival toll.
@@ -783,6 +791,26 @@ and are not currently planned systems.
 ## Wildlife expansion: hunting and occasional danger
 
 This is roadmap design, not additional MVP implementation.
+
+### Ambient woodland creatures before hunting
+
+- Defer live ambient fauna until the core gather/craft/build/farm/cook/save loop
+  is satisfying and stable. Do not create an active OpenSpec implementation round
+  merely because the species list is known.
+- Start with birds, squirrels, mice, and rabbits as bounded ambient populations.
+  Give each simple habitat/cover preferences, calm idle movement, awareness, and
+  a reliable scatter response when the heroine approaches.
+- Keep this first slice noninteractive and nonharvestable. Ambient animals do not
+  take focus, drop resources, consume player crops, require feeding, create quests,
+  become companions, attract predators, or gate progression.
+- Scatter behavior must be readable without distress: no injury, screaming,
+  panicked collision loops, prolonged pursuit, or despawning in full view. Animals
+  choose nearby cover or leave the camera view, then settle/repopulate under a
+  bounded population budget.
+- Reuse navigation/animation/perception pieces later where suitable, but keep
+  ambient identity separate from future huntable wildlife and befriended companion
+  state so adding those systems does not retroactively make every decorative animal
+  targetable or persistent.
 
 ### Small game and deer
 
