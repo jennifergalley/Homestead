@@ -148,6 +148,7 @@ private:
     int32 Columns() const;
     int32 DetailIndex() const;
     void Select(int32 Index, bool KeepDesiredColumn = false);
+    void SplitSelectedHalf();
     bool StartCraftHold(ECraftInput Input);
     void StopCraftHold();
     bool IsHoldingRecipe(int32 Recipe) const;

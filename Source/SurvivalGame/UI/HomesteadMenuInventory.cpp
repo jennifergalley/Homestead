@@ -206,3 +206,19 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     Notify(Result);
     return Result.ok;
 }
+
+bool AHomesteadController::MenuSplitHalf(const FHomesteadRow& Row)
+{
+    if (Row.Subject != EHomesteadMenuSubject::ItemGroup || Row.ContainerId < 0)
+    { Notify(TEXT("Only ordinary item stacks can be split."), true); return false; }
+    const auto Result = Sim.SplitHalf(Row.ContainerId, Row.SubjectId, PlayerPoint(), Sim.GetRevision());
+    Notify(Result);
+    return Result.ok;
+}
+
+bool AHomesteadController::MenuSortPack()
+{
+    const auto Result = Sim.SortPack(Sim.GetRevision());
+    Notify(Result);
+    return Result.ok;
+}

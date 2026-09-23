@@ -212,6 +212,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
 {
     static const TPair<FName, EKind> Kinds[] = {
         {FName(TEXT("pack")), EKind::Pack},
+        {FName(TEXT("sort")), EKind::Sort},
         {FName(TEXT("craft")), EKind::Craft},
         {FName(TEXT("build")), EKind::Build},
         {FName(TEXT("guide")), EKind::Guide},
@@ -279,6 +280,12 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Rect(24, 26, 7, 10, Pine);
         P.Rect(26, 28, 3, 5, Cream);
         P.Line({{17, 38}, {17, 43}, {38, 43}, {38, 38}}, Cream, 1.5f);
+        break;
+    case EKind::Sort:
+        P.Line({{12, 16}, {42, 16}}, Cream, 4);
+        P.Line({{12, 28}, {34, 28}}, Gold, 4);
+        P.Line({{12, 40}, {26, 40}}, Wood, 4);
+        P.Shape({{43, 25}, {50, 33}, {46, 33}, {46, 45}, {40, 45}, {40, 33}, {36, 33}}, Gold);
         break;
     case EKind::Craft:
         P.Line({{13, 44}, {39, 13}}, Wood, 6);

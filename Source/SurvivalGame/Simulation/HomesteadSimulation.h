@@ -232,6 +232,8 @@ public:
     Result MergeGroups(int containerId, int sourceGroupId, int targetGroupId, Point player,
         std::uint64_t expectedRevision);
     Result ReorderEntry(int containerId, int index, int targetIndex, Point player, std::uint64_t expectedRevision);
+    Result SplitHalf(int containerId, int groupId, Point player, std::uint64_t expectedRevision);
+    Result SortPack(std::uint64_t expectedRevision);
     Result Sleep(double hours, Point player);
     Result SetDayMinutes(double minutes);
     void SetWarmOutfit(bool enabled);

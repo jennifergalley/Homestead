@@ -64,7 +64,7 @@ const FLinearColor Pine(0.025f, 0.05f, 0.038f, 0.97f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f);
 constexpr float PortraitWidth = 240;
 constexpr float DetailsWidth = 340;
-constexpr float ItemCellWidth = 112;
+constexpr float ItemCellWidth = 76;
 const FButtonStyle& MenuButtonStyle()
 {
     static const FButtonStyle Style = FButtonStyle()
@@ -475,7 +475,7 @@ bool SHomesteadMenu::IsHoldingRecipe(int32 Recipe) const
 
 int32 SHomesteadMenu::Columns() const
 {
-    return SeenPage == 0 && Controller.IsValid() && Controller->MenuPortraitBrush() ? 4
+    return SeenPage == 0 ? 7
         : SeenPage <= 2 ? 6 : SeenPage == 4 || SeenPage == 6 ? 2 : 1;
 }
 
@@ -735,8 +735,33 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 SAssignNew(InventoryColumn, SVerticalBox)
             ]
         ];
-    InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
-    [ Text(SeenPage <= 2 ? Controller->BookTitle() : Tabs[SeenPage], 26) ];
+    if (SeenPage == 0)
+    {
+        InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)
+            [
+                SNew(SBox).WidthOverride(42).HeightOverride(42)
+                [
+                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+                    .ContentPadding(5).ButtonColorAndOpacity(Selected)
+                    .ToolTipText(FText::FromString(TEXT("Sort pack")))
+                    .OnClicked_Lambda([this]()
+                    {
+                        if (PointerAction() && Controller->MenuSortPack()) Refresh();
+                        return FReply::Handled();
+                    })
+                    [ SNew(SHomesteadIcon).Kind(FName(TEXT("sort"))).Tint(Gold) ]
+                ]
+            ]
+            + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+            [ Text(Controller->BookTitle(), 26) ]
+        ];
+    }
+    else
+        InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
+        [ Text(SeenPage <= 2 ? Controller->BookTitle() : Tabs[SeenPage], 26) ];
     const FString Summary = SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary();
     if (!Summary.IsEmpty())
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)[ Text(Summary, 17) ];
@@ -835,6 +860,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 {
                     Region = ERegion::Content;
                     Select(Index);
+                    if (SeenPage == 0 && bControl) SplitSelectedHalf();
                     if (Entries.IsValidIndex(ContentSelection)
                         && IsDirectCameraSetting(Entries[ContentSelection]))
                         RunAction(EHomesteadItemAction::Primary);
@@ -842,7 +868,30 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 return FReply::Handled();
             })
             [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
-        if (SeenPage <= 2)
+        if (SeenPage == 0)
+        {
+            Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
+            [
+                SNew(SBox).WidthOverride(58).HeightOverride(58)
+                [
+                    SNew(SOverlay)
+                    + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
+                    [ SNew(SBox).WidthOverride(48).HeightOverride(48)
+                        [ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ]
+                    + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                        .BorderBackgroundColor(Pine).Padding(FMargin(4, 1))
+                        [
+                            SNew(STextBlock).Text(FText::AsNumber(FMath::Max(1, Row.Quantity)))
+                            .ColorAndOpacity(Ink)
+                            .Font(FCoreStyle::GetDefaultFontStyle("Bold", 15))
+                        ]
+                    ]
+                ]
+            ];
+        }
+        else if (SeenPage <= 2)
         {
             if (Row.Subject == EHomesteadMenuSubject::Recipe)
             {
@@ -882,15 +931,11 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [ SNew(SBox).WidthOverride(48).HeightOverride(48)[ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ];
             }
         }
-        if (SeenPage != 1)
+        if (SeenPage > 1)
             Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
-        if (SeenPage == 0)
-        {
-            Contents->AddSlot().AutoHeight()[ Text(FString::Printf(TEXT("%s %d"), *Row.Location, Row.Quantity), 15) ];
-        }
         Cell = SNew(SBox).WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth) : FOptionalSize())
             .MinDesiredWidth(SeenPage <= 2 ? ItemCellWidth : SeenPage == 4 ? 330 : SeenPage == 6 ? 250 : 670)
-            .MinDesiredHeight(SeenPage == 1 ? 96 : SeenPage <= 2 ? 144 : 72)
+            .MinDesiredHeight(SeenPage == 0 ? 76 : SeenPage == 1 ? 96 : SeenPage <= 2 ? 144 : 72)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this, Index]() { return Index == ContentSelection ? Gold : FLinearColor::Transparent; })
@@ -1242,6 +1287,14 @@ void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
         ScrollActionIntoView();
     }
 }
+void SHomesteadMenu::SplitSelectedHalf()
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None || SeenPage != 0
+        || Region != ERegion::Content || !Entries.IsValidIndex(ContentSelection))
+        return;
+    const auto Row = Entries[ContentSelection];
+    if (Controller->MenuSplitHalf(Row)) Refresh();
+}
 bool SHomesteadMenu::PointerAction()
 {
     return Controller.IsValid() && Controller->MenuAcceptsPhysicalInput();
@@ -1555,6 +1608,13 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::I || Key == EKeys::Gamepad_Special_Right) { Back(); return true; }
     if (ActivateKey)
     {
+        if (SeenPage == 0 && bControl && Region == ERegion::Content
+            && Entries.IsValidIndex(ContentSelection)
+            && Entries[ContentSelection].Subject == EHomesteadMenuSubject::ItemGroup)
+        {
+            SplitSelectedHalf();
+            return true;
+        }
         const ECraftInput Input = Key == EKeys::LeftMouseButton ? ECraftInput::Pointer
             : Key == EKeys::Gamepad_FaceButton_Bottom ? ECraftInput::Controller : ECraftInput::Keyboard;
         if (SeenPage == 1 && Region == ERegion::Content && Entries.IsValidIndex(ContentSelection)
@@ -1587,7 +1647,20 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     }
     if (Key == EKeys::Gamepad_LeftTrigger) { CycleRegion(-1); return true; }
     if (Key == EKeys::Gamepad_RightTrigger) { CycleRegion(1); return true; }
-    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left) { if (SeenPage == 0 && GetSelectedSubject()) RunAction(EHomesteadItemAction::Transfer); return true; }
+    if (SeenPage == 0 && Key == EKeys::S)
+    {
+        if (Controller->MenuSortPack()) Refresh();
+        return true;
+    }
+    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left)
+    {
+        if (SeenPage == 0 && GetSelectedSubject())
+        {
+            if (Key == EKeys::Gamepad_FaceButton_Left) SplitSelectedHalf();
+            else RunAction(EHomesteadItemAction::Transfer);
+        }
+        return true;
+    }
     if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0 && GetSelectedSubject()) RunAction(EHomesteadItemAction::Split); return true; }
     if (Dx || Dy) { LeftStick.Reset(); NavigateDirection({Dx, Dy}); }
     return true;

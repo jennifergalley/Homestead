@@ -946,6 +946,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     const auto Branches = MakeShared<int32>(0);
     const auto Snapshot = MakeShared<std::string>();
     const auto ChestCapacity = MakeShared<int32>(0);
+    const auto BranchTotal = MakeShared<int32>(0);
     const auto Group = [this](int32 Container, int32 Quantity = -1)
     {
         const auto* Layout = Controller->Simulation().GetLayout(Container);
@@ -956,7 +957,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         return 0;
     };
     Add(TEXT("Gather real transaction stock and place one reachable chest through authority"),
-        [this, Chest, Branches, Group]()
+        [this, Chest, Branches, BranchTotal, Group]()
         {
             auto Gather = [this](Homestead::ResourceKind Kind, Homestead::Item Item, int32 Target)
             {
@@ -984,10 +985,47 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 }
             }
             *Branches = Group(0);
+            *BranchTotal = Controller->Simulation().Count(Homestead::Item::Branch);
             Controller->MenuInventoryView(0); Controller->OpenBook(0);
         },
         [this, Chest, Branches]() { return *Chest > 0 && *Branches > 0
             && Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0); });
+    Add(TEXT("Ctrl Enter splits the focused odd stack in half beside its source"),
+        [this]()
+        {
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Pressed, 1));
+            Tap(EKeys::Enter);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Released, 0));
+        },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            if (!Layout) return false;
+            TArray<int32> Quantities;
+            for (const auto& Entry : *Layout)
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Branch)
+                    Quantities.Add(Entry.quantity);
+            return Quantities.Num() == 2 && Quantities[0] == (*BranchTotal + 1) / 2
+                && Quantities[1] == *BranchTotal / 2; });
+    Add(TEXT("Pack Sort collapses split groups and preserves exact totals"),
+        [this]() { Tap(EKeys::S); },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                    { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
+    Add(TEXT("Controller X directly splits the focused stack without an action button"),
+        [this, Branches]() { *Branches = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Branch) { *Branches = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            Tap(EKeys::Gamepad_FaceButton_Left); },
+        [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
+    Add(TEXT("Sort restores one authoritative branch stack for legacy transaction regression"),
+        [this]() { Tap(EKeys::S); },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                    { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
     Add(TEXT("Open amount transfer without mutating current state"),
         [this, Snapshot]()
         {

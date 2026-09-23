@@ -139,9 +139,11 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("Empty - choose from pack", MENU)
 
     def test_item_grid_has_fixed_compact_cells_without_single_column_stretch(self):
-        self.assertIn("constexpr float ItemCellWidth = 112", MENU)
+        self.assertIn("constexpr float ItemCellWidth = 76", MENU)
         self.assertIn("HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)", MENU)
         self.assertIn("WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth)", MENU)
+        self.assertIn("FText::AsNumber(FMath::Max(1, Row.Quantity))", MENU)
+        self.assertIn('Kind(FName(TEXT("sort")))', MENU)
 
     def test_detail_actions_are_inside_the_clipped_scroll_region(self):
         details = function_body(MENU, "TSharedRef<SWidget> SHomesteadMenu::BuildDetails(")

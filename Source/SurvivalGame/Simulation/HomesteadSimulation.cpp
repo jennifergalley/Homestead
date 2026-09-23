@@ -435,6 +435,34 @@ Result ContainerAccess(const State& state, int container, Point player)
     return Good("");
 }
 bool CanAllocate(int next) { return next > 0 && next < std::numeric_limits<int>::max() - 1; }
+int InventoryCategory(Item item)
+{
+    switch (item)
+    {
+    case Item::Knife:
+    case Item::Hatchet:
+    case Item::DiggingStick:
+    case Item::WateringCan:
+        return 0;
+    case Item::Branch:
+    case Item::Stone:
+    case Item::Fiber:
+    case Item::Timber:
+    case Item::Firewood:
+        return 1;
+    case Item::Berries:
+    case Item::Roots:
+    case Item::Flowers:
+    case Item::RoastedRoots:
+    case Item::HerbedRoots:
+        return 2;
+    case Item::Seeds:
+    case Item::Water:
+        return 3;
+    default:
+        return 5;
+    }
+}
 
 bool ReconcileLayout(State& state, int container)
 {
@@ -973,6 +1001,68 @@ Result Simulation::ReorderEntry(int containerId, int index, int targetIndex, Poi
     layout->erase(layout->begin() + index);
     layout->insert(layout->begin() + targetIndex, entry);
     return CommitInventory(std::move(candidate), "Inventory order updated.");
+}
+Result Simulation::SplitHalf(int containerId, int groupId, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    const auto access = ContainerAccess(state_, containerId, player);
+    if (!access) return access;
+    const auto* layout = ContainerLayout(state_, containerId);
+    if (!layout) return Bad("Choose an existing inventory container.");
+    const auto entry = std::find_if(layout->begin(), layout->end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == layout->end() || entry->quantity < 2)
+        return Bad("Choose an ordinary stack containing at least two items.");
+    return SplitGroup(containerId, groupId, entry->quantity / 2, player, expectedRevision);
+}
+Result Simulation::SortPack(std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    State candidate = state_;
+    auto& layout = candidate.inventoryLayout;
+    for (auto first = layout.begin(); first != layout.end(); ++first)
+    {
+        if (first->wearableId != 0) continue;
+        for (auto duplicate = first + 1; duplicate != layout.end();)
+        {
+            if (duplicate->wearableId == 0 && duplicate->item == first->item)
+            {
+                first->quantity += duplicate->quantity;
+                duplicate = layout.erase(duplicate);
+            }
+            else ++duplicate;
+        }
+    }
+    const auto key = [&](const LayoutEntry& entry)
+    {
+        if (entry.wearableId == 0)
+            return std::tuple<int, int, int, int, int>{
+                InventoryCategory(entry.item), static_cast<int>(entry.item), 0, 0, entry.groupId};
+        const auto* wearable = Find(candidate.wearables, entry.wearableId);
+        return std::tuple<int, int, int, int, int>{4,
+            wearable ? static_cast<int>(wearable->definition) : std::numeric_limits<int>::max(),
+            wearable ? wearable->dye : 0, entry.wearableId, 0};
+    };
+    std::stable_sort(layout.begin(), layout.end(),
+        [&](const LayoutEntry& left, const LayoutEntry& right) { return key(left) < key(right); });
+    const auto sameLayout = [&]()
+    {
+        if (layout.size() != state_.inventoryLayout.size()) return false;
+        for (std::size_t index = 0; index < layout.size(); ++index)
+        {
+            const auto& left = layout[index];
+            const auto& right = state_.inventoryLayout[index];
+            if (left.groupId != right.groupId || left.item != right.item
+                || left.quantity != right.quantity || left.wearableId != right.wearableId)
+                return false;
+        }
+        return true;
+    };
+    if (sameLayout())
+        return {true, "Pack is already sorted.", ResultCode::None, revision_};
+    return CommitInventory(std::move(candidate), "Pack sorted.");
 }
 bool Simulation::IsNight() const
 {

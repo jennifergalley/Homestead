@@ -83,6 +83,8 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    bool MenuSplitHalf(const FHomesteadRow& Row);
+    bool MenuSortPack();
     bool MenuCraftRecipe(Homestead::Recipe Recipe);
     void MenuCraftBeat(int32 Beat);
     FString MenuInventorySummary() const;

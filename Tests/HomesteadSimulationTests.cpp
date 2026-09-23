@@ -1495,6 +1495,41 @@ void QuantityMutationReconciliation()
     CHECK(sim.Count(Item::Branch) == 119 && sim.UsedCapacity() == 120);
     InventoryRoundTrip(sim);
 }
+void DirectSplitAndDeterministicSort()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Knife, 1}, {Item::Seeds, 2}, {Item::Berries, 4},
+        {Item::Fiber, 5}, {Item::Hatchet, 1}, {Item::Stone, 3}});
+    const int fiber = Group(sim, Item::Fiber);
+    OK(sim.SplitHalf(0, fiber, Home, sim.GetRevision()));
+    CHECK(sim.GetLayout(0)->at(2).groupId == fiber);
+    CHECK(sim.GetLayout(0)->at(2).quantity == 3);
+    CHECK(sim.GetLayout(0)->at(3).quantity == 2);
+    const int split = sim.GetLayout(0)->at(3).groupId;
+    CHECK(split != fiber);
+    UnchangedFailure(sim, [&] { return sim.SplitHalf(0, Group(sim, Item::Knife), Home, sim.GetRevision()); });
+    const auto stale = sim.GetRevision() - 1;
+    UnchangedFailure(sim, [&] { return sim.SplitHalf(0, fiber, Home, stale); });
+
+    const int used = sim.UsedCapacity();
+    const auto totals = sim.GetState().inventory;
+    OK(sim.SortPack(sim.GetRevision()));
+    CHECK(sim.UsedCapacity() == used && sim.GetState().inventory == totals);
+    CHECK(sim.GetLayout(0)->size() == 6);
+    const Item expected[] = {Item::Knife, Item::Hatchet, Item::Stone,
+        Item::Fiber, Item::Berries, Item::Seeds};
+    for (int index = 0; index < 6; ++index)
+        CHECK(sim.GetLayout(0)->at(index).item == expected[index]);
+    CHECK(sim.GetLayout(0)->at(3).groupId == fiber);
+    CHECK(sim.GetLayout(0)->at(3).quantity == 5);
+    CHECK(std::none_of(sim.GetLayout(0)->begin(), sim.GetLayout(0)->end(),
+        [split](const LayoutEntry& entry) { return entry.groupId == split; }));
+    const auto sorted = sim.Serialize();
+    const auto revision = sim.GetRevision();
+    OK(sim.SortPack(revision));
+    CHECK(sim.Serialize() == sorted && sim.GetRevision() == revision);
+    InventoryRoundTrip(sim);
+}
 void SelectedFoodGroupTransactions()
 {
     for (const auto food : {std::pair<Item, double>{Item::Berries, 12.0},
@@ -2197,6 +2232,7 @@ int main()
     Run("wardrobe storage, shared capacity and exact 280cm reach", WardrobeStorageAndReach);
     Run("persistent layout and stale transaction rejection", PersistentLayoutTransactions);
     Run("existing quantity mutations and 120 groups without slot cost", QuantityMutationReconciliation);
+    Run("direct split-half and deterministic pack sort", DirectSplitAndDeterministicSort);
     Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
     Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
     Run("seeded resource identity and bounded region activation", GeneratedWorldIdentityAndActivation);
