@@ -979,6 +979,7 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
 void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
 {
     const auto Chest = MakeShared<int32>(-1);
+    const auto OtherChest = MakeShared<int32>(-1);
     const auto Branches = MakeShared<int32>(0);
     const auto Snapshot = MakeShared<std::string>();
     const auto BranchTotal = MakeShared<int32>(0);
@@ -1008,7 +1009,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             EKeys::LeftMouseButton, 0, FModifierKeysState()));
     };
     Add(TEXT("Gather real transaction stock and place one reachable chest through authority"),
-        [this, Chest, Branches, BranchTotal, Group]()
+        [this, Chest, OtherChest, Branches, BranchTotal, Group]()
         {
             auto Gather = [this](Homestead::ResourceKind Kind, Homestead::Item Item, int32 Target)
             {
@@ -1025,26 +1026,73 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             if (!Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 12)
                 || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2))
             { Finish(false, TEXT("Could not gather real transaction stock.")); return; }
+            FIntPoint FirstCell(0, 0);
             for (const FIntPoint Cell : {FIntPoint(-4,0), FIntPoint(-3,0), FIntPoint(-4,-1), FIntPoint(-3,-1)})
             {
                 const auto Center = Homestead::CellCenter(Cell.X, Cell.Y);
                 if (Controller->Sim.Place(Homestead::Piece::Chest, Cell.X, Cell.Y, 0, Center))
                 {
                     *Chest = Controller->Sim.FindNearestStructure(Center, Homestead::Piece::Chest, 1);
-                    Teleport(Center);
+                    FirstCell = Cell;
                     break;
                 }
             }
+            if (*Chest <= 0 || !Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 20)
+                || !Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 3)
+                || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 7)
+                || !Controller->Sim.Craft(Homestead::Recipe::Hatchet, Controller->PlayerPoint()))
+            { Finish(false, TEXT("Could not gather the second-chest fixture stock.")); return; }
+            const FIntPoint Neighbors[] = {
+                {FirstCell.X + 1, FirstCell.Y}, {FirstCell.X - 1, FirstCell.Y},
+                {FirstCell.X, FirstCell.Y + 1}, {FirstCell.X, FirstCell.Y - 1},
+                {FirstCell.X + 1, FirstCell.Y + 1}, {FirstCell.X - 1, FirstCell.Y - 1},
+                {FirstCell.X + 1, FirstCell.Y - 1}, {FirstCell.X - 1, FirstCell.Y + 1}};
+            FIntPoint SecondCell(0, 0);
+            for (const FIntPoint Cell : Neighbors)
+            {
+                const auto Nodes = Controller->State().resources;
+                const double Left = Cell.X * Homestead::CellSize;
+                const double Bottom = Cell.Y * Homestead::CellSize;
+                for (const auto& Node : Nodes)
+                {
+                    if (Node.cleared || (Node.kind != Homestead::ResourceKind::Sapling
+                        && Node.kind != Homestead::ResourceKind::ForestTree)) continue;
+                    const bool Blocks = Node.kind == Homestead::ResourceKind::Sapling
+                        ? FMath::FloorToInt(Node.position.x / Homestead::CellSize) == Cell.X
+                            && FMath::FloorToInt(Node.position.y / Homestead::CellSize) == Cell.Y
+                        : FMath::Square(Node.position.x - FMath::Clamp(Node.position.x,
+                            Left, Left + Homestead::CellSize))
+                            + FMath::Square(Node.position.y - FMath::Clamp(Node.position.y,
+                                Bottom, Bottom + Homestead::CellSize)) <= 50.0 * 50.0;
+                    if (Blocks) Controller->Sim.Harvest(Node.id, Node.position);
+                }
+                const auto Center = Homestead::CellCenter(Cell.X, Cell.Y);
+                if (Controller->Sim.Place(Homestead::Piece::Chest, Cell.X, Cell.Y, 0, Center))
+                {
+                    *OtherChest = Controller->Sim.FindNearestStructure(Center, Homestead::Piece::Chest, 1);
+                    SecondCell = Cell;
+                    break;
+                }
+            }
+            if (*OtherChest <= 0)
+            { Finish(false, TEXT("Could not place a second reachable chest.")); return; }
+            const auto FirstCenter = Homestead::CellCenter(FirstCell.X, FirstCell.Y);
+            const auto SecondCenter = Homestead::CellCenter(SecondCell.X, SecondCell.Y);
+            Teleport({(FirstCenter.x + SecondCenter.x) * 0.5, (FirstCenter.y + SecondCenter.y) * 0.5});
             *Branches = Group(0);
             *BranchTotal = Controller->Simulation().Count(Homestead::Item::Branch);
             Controller->MenuInventoryView(0); Controller->OpenBook(0);
         },
-        [this, Chest, Branches]() { return *Chest > 0 && *Branches > 0; });
+        [this, Chest, OtherChest, Branches]() { return *Chest > 0 && *OtherChest > 0
+            && *OtherChest != *Chest && *Branches > 0; });
     Add(TEXT("Focused chest interaction binds one exact storage session ID"),
         [this]() { Controller->CloseBook(); Tap(EKeys::RightMouseButton); },
-        [this, Chest]() { return Controller->IsBookOpen() && Controller->InventoryView() == 1
+        [this, Chest, OtherChest]() { const auto Rows = Controller->MenuRows();
+            return Controller->IsBookOpen() && Controller->InventoryView() == 1
             && Controller->ActiveStorageChest().IsSet()
-            && Controller->ActiveStorageChest().GetValue() == *Chest; });
+            && Controller->ActiveStorageChest().GetValue() == *Chest
+            && Rows.IndexOfByPredicate([OtherChest](const FHomesteadRow& Row)
+                { return Row.ContainerId == *OtherChest; }) == INDEX_NONE; });
     Add(TEXT("Capture exact Chest and Pack storage surface"),
         [this]() { Screenshot(TEXT("native-storage-two-grid")); },
         [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);
@@ -1298,8 +1346,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->CloseBook();
             Controller->OpenChestStorage(*Chest);
         },
-        [this, Chest]() { return Controller->ActiveStorageChest().IsSet()
-            && Controller->Simulation().Count(Homestead::Item::Branch) == 9
+        [this, Chest, BranchTotal]() { return Controller->ActiveStorageChest().IsSet()
+            && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal - 1
             && Controller->Simulation().ChestUsedCapacity(*Chest) == 1; });
     Add(TEXT("Virtual drag transfers the whole Pack Branch stack into exact Chest"),
         [this, Chest, Group]()
@@ -1311,8 +1359,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, ChestBranch, *Chest);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, Chest]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 0
-            && Controller->Simulation().ChestUsedCapacity(*Chest) == 10
+        [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 0
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == *BranchTotal
             && !Controller->NativeMenu->IsVirtualDraggingItem(); });
     Add(TEXT("Virtual drag returns exact Chest Branch stack to Pack using any Pack tile"),
         [this, Chest, Group]()
@@ -1326,7 +1374,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PackTarget, 0);
             Tap(EKeys::Enter);
         },
-        [this, Chest]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 10
+        [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
             && Controller->Simulation().ChestUsedCapacity(*Chest) == 0
             && !Controller->NativeMenu->IsVirtualDraggingItem(); });
     Add(TEXT("Seed one exact-chest target then split Pack for partial direct transfer"),
@@ -1342,18 +1390,18 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PackBranch, 0);
             Tap(EKeys::Gamepad_FaceButton_Left);
         },
-        [this, Chest]() { const auto* Layout = Controller->Simulation().GetLayout(0);
-            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == 9
+        [this, Chest, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal - 1
                 && Controller->Simulation().ChestUsedCapacity(*Chest) == 1
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                     { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
     Add(TEXT("Virtual drag transfers only the split Pack stack into exact Chest"),
-        [this, Chest, Group]()
+        [this, Chest, BranchTotal, Group]()
         {
             int32 Split = 0;
             for (const auto& Entry : *Controller->Simulation().GetLayout(0))
                 if (!Entry.wearableId && Entry.item == Homestead::Item::Branch
-                    && Entry.quantity == 4) { Split = Entry.groupId; break; }
+                    && Entry.quantity == (*BranchTotal - 1) / 2) { Split = Entry.groupId; break; }
             Controller->CloseBook();
             Controller->OpenChestStorage(*Chest);
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Split, 0);
@@ -1361,8 +1409,10 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Group(*Chest), *Chest);
             Tap(EKeys::Enter);
         },
-        [this, Chest]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 5
-            && Controller->Simulation().ChestUsedCapacity(*Chest) == 5; });
+        [this, Chest, BranchTotal]() {
+            const int32 Split = (*BranchTotal - 1) / 2;
+            return Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal - 1 - Split
+                && Controller->Simulation().ChestUsedCapacity(*Chest) == 1 + Split; });
     Add(TEXT("Virtual drag returns partial Chest stack and auto-stacks in Pack"),
         [this, Chest, Group]()
         {
@@ -1371,8 +1421,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Group(0), 0);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, Chest]() { const auto* Layout = Controller->Simulation().GetLayout(0);
-            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == 10
+        [this, Chest, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
                 && Controller->Simulation().ChestUsedCapacity(*Chest) == 0
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                     { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
