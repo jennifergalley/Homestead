@@ -47,24 +47,46 @@ SHALL retain their roles.
 - **WHEN** the left stick moves down from the final grid row
 - **THEN** focus crosses the same boundary as D-pad Down, with no pawn movement, portrait rotation, item mutation or noisy-device hint change
 
-### Requirement: Dialog navigation and quantity editing are distinct
-Dialogs SHALL trap focus until explicitly closed. Quantity controls SHALL
-require explicit entry into editing before directions change the draft amount;
-Back SHALL leave editing before canceling the dialog. Focus movement and editor
-exit SHALL not submit a transaction or activate destructive defaults.
+### Requirement: Dialog navigation and quantity adjustment are intuitive
+Dialogs SHALL trap focus until explicitly closed. Quantity controls SHALL use a
+visible minus/value/plus stepper. While that control is focused, Left/Right
+SHALL adjust the draft amount and Up/Down SHALL leave the control. Back SHALL
+cancel the dialog without committing. Focus movement and adjustment SHALL not
+submit a transaction or activate destructive defaults.
 
 #### Scenario: Browse a quantity dialog
-- **WHEN** the player navigates from Cancel toward the amount control
-- **THEN** focus changes without modifying the amount until explicit activation enters editing, and Confirm alone commits
+- **WHEN** the player focuses the amount stepper
+- **THEN** Left/Right changes only the draft amount, Up/Down reaches adjacent controls, and Confirm alone commits
 
 #### Scenario: Cancel and focus return
-- **WHEN** a quantity edit, exit prompt or save-failure dialog is canceled
+- **WHEN** a quantity adjustment, exit prompt or save-failure dialog is canceled
 - **THEN** focus returns to a valid initiating control or nearest surviving subject, without escaping the modal early or unpausing its parent menu
 
-### Requirement: Existing shortcuts remain truthful and reachable
+### Requirement: Menu chrome relies on intuitive affordances instead of coaching
+Menus SHALL NOT display persistent generic instructions for standard navigation,
+selection, activation, tabs, or Back. Headers, summaries, empty states, details,
+buttons, values, requirement states, errors, and confirmations SHALL contain
+only information specific to the current game state or action. The Guidebook
+MUST NOT contain an entry whose purpose is to explain ordinary menu controls.
+
+#### Scenario: Open a normal field-book page
+- **WHEN** Inventory, Craft, Build, Guidebook, Appearance, or Settings is open
+- **THEN** no footer or banner says how to move, select, activate, change tabs, or go back
+- **AND** visible focus, layout, labels, buttons, values, and controls remain sufficient to navigate and act
+
+#### Scenario: No transient message exists
+- **WHEN** a menu is paused and there is no current toast, error, confirmation, or other state-specific message
+- **THEN** the message area is empty or shows only concise state such as `Time paused`
+- **AND** it does not fill the space with generic advice
+
+#### Scenario: Inspect Guidebook topics
+- **WHEN** the player browses every Guidebook entry
+- **THEN** no topic explains D-pad, stick, arrow, activation, tab, or Back controls
+
+### Requirement: Existing shortcuts remain reachable without instruction prose
 LB/RB tab shortcuts and the three-press gameplay-to-Settings-exit path SHALL
-remain. Trigger/Tab region cycling MAY remain optional, but hints and guide text
-SHALL describe directions as the primary way to move between sections.
+remain. Trigger/Tab region cycling MAY remain optional. Removing their on-screen
+instructions MUST NOT remove or remap the actual inputs.
 
 #### Scenario: Quit remains discoverable
 - **WHEN** the player opens Settings from gameplay, moves Right and activates

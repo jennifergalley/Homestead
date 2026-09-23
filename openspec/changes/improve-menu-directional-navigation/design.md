@@ -50,15 +50,28 @@ Empty content has an actual focus anchor. Outer scope and modal boundaries
 stop focus escape into the world. Unavailable controls remain explanatory and
 nonmutating; truly disabled/hidden widgets are skipped.
 
-Quantity dialogs begin with the existing safe Cancel default. A separate
-focusable amount control enters editing on A/Enter. Only then do Left/Right
-change amount (LB/RB retain large increments). Back first leaves editing;
-directional browsing among Cancel/Confirm/One/All does not edit or commit.
-Other dialogs retain cancel defaults and directionally reachable controls.
+Quantity dialogs begin with the existing safe Cancel default and use a
+conventional stepper composed of explicit minus, current value, and plus
+affordances. When the stepper has focus, Left/Right changes only the draft;
+Up/Down leaves it for Cancel/Confirm/One/All. Pointer minus/plus clicks perform
+the same bounded adjustment. Confirm alone commits and Back cancels. This removes
+the hidden edit-mode state and its explanatory paragraph rather than replacing
+that paragraph with different instructions.
 
-LB/RB keeps tab switching. Triggers and Tab can remain optional convenience,
-but footer and guide wording lead with D-pad/left stick/arrows. Preserve
-Settings initial Resume focus, Right to Quit, then Activate.
+LB/RB keeps tab switching. Triggers and Tab can remain optional conveniences,
+but no persistent footer advertises navigation, activation, tabs, or Back.
+Remove the default `Choose a tab to manage your homestead` filler, the Guidebook
+menu-controls lesson, and generic action-key prose. Keep only stateful content:
+page identity, selected object details, values, Have/Need requirements, labeled
+buttons/steppers, meaningful empty states, errors, confirmations, and concise
+pause state. Contextual hotkey badges MAY remain inside an actual labeled action
+button when they reduce ambiguity; they are not repeated in a global legend.
+Preserve Settings initial Resume focus, Right to Quit, then Activate.
+
+**Alternative considered:** shorten the existing footer and tutorial text.
+Rejected because Jenny's direction is that intuitive navigation should make
+generic onscreen explanation unnecessary; merely compressing it leaves the same
+design failure and visual noise.
 
 ## Verification and integration
 
@@ -84,3 +97,6 @@ test routes at true edges rather than preserving awkward UX for fixtures.
   first; scroll focused targets into view; scoped native boundary routing.
 - Initial viewport geometry is not ready -> defer spatial focus work until
   valid layout, without inventing a hardcoded region-cycle substitute.
+- Removing coaching exposes weak affordances -> verify first-look navigation
+  through visible focus, grouping, controls and labels; repair the affordance
+  rather than restoring instructions when a route is unclear.

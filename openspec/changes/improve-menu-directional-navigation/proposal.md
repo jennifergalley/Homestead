@@ -13,10 +13,14 @@ inventory work feel disconnected.
 - Give semantic selection real Slate focus, with focus-following scrolling and
   stable item IDs across refreshes. Focus movement never activates a control.
 - Route left-stick, D-pad and keyboard directions through the same behavior.
-  Keep LB/RB tab shortcuts and optional triggers, but stop advertising triggers
-  as the required region-navigation mechanism.
-- Keep modal focus trapped; make quantity editing an explicit entered mode,
-  distinct from moving among dialog controls.
+  Keep LB/RB tab shortcuts and optional triggers without persistent menu
+  coaching or footer instructions.
+- Remove generic explanatory notes such as "Choose a tab", "Move between
+  sections", and "Enter Activate"; rely on visible hierarchy, focus, labels,
+  affordances, and contextual state instead.
+- Keep modal focus trapped; present quantity as a conventional visible
+  minus/value/plus stepper whose focused left/right adjustment does not need a
+  separate edit mode or instructional paragraph.
 - Preserve visuals, mouse behavior, the sole input-intent classifier, world
   controls, transactions and the three-press Settings exit path.
 
@@ -49,7 +53,9 @@ not CommonUI or a new focus framework. No external package, asset or license
 admission is needed. Custom work is limited to bridging semantic item selection,
 logical offscreen grid edges and the existing accepted-input path to Slate focus.
 
-First demonstration: open Inventory, move down through the last carried row
+First demonstration: open Inventory into quiet, breathable menu chrome; move down through the last carried row
 into equipment using only D-pad/left stick, reverse up, then move sideways to
-details/actions and portrait controls. Full acceptance also covers empty/full/
-short grids, dialogs, focus restoration and both input devices in the real game.
+details/actions and portrait controls without reading navigation instructions.
+Full acceptance also covers empty/full/short grids, the quantity stepper,
+dialogs, focus restoration, concise state-only copy, and both input devices in
+the real game.

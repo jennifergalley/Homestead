@@ -3,14 +3,15 @@
 ## Current state and next visible goal
 
 Final evidence reconciliation adds the Shipping
-`wardrobe-complete-10-input` route to `directional-navigation-06`. Five of8
+`wardrobe-complete-10-input` route to `directional-navigation-06`. Four of8
 tasks complete. Task2.2 now has exact controller/keyboard/mouse intent,
 left-stick repeat/release, pawn/portrait isolation, LB/RB and quit-path evidence.
 Tasks1.2,1.3 and2.1 remain open at their exact uncovered clauses: complete
 top-boundary/upper-control navigation, selected-subject removal/rebuild/tab-return
-focus identity, and a confirmed amount transaction inside the scoped
-directional route. No code, engine run, visual promotion or physical-controller
-comfort claim is part of this reconciliation.
+focus identity, and a confirmed amount transaction through the revised visible
+stepper. User feedback reopens2.3: persistent footer/banner/Guidebook coaching
+must now be removed rather than rewritten. No code, engine run, visual promotion
+or physical-controller comfort claim is part of this reconciliation.
 
 ## 1. Directional browsing increment
 
@@ -20,9 +21,9 @@ comfort claim is part of this reconciliation.
 
 ## 2. Modal and input consistency
 
-- [ ] 2.1 Trap modal focus and add explicit quantity edit entry/exit; verify directions do not edit while browsing, Back leaves edit before cancel, and cancel/confirm preserve transaction semantics.
+- [ ] 2.1 Trap modal focus and replace hidden quantity edit mode with a visible minus/value/plus stepper; verify focused Left/Right and pointer minus/plus adjust only the draft, Up/Down leaves the stepper, Back cancels, Confirm commits once, and focus return preserves transaction semantics.
 - [x] 2.2 Route D-pad, left stick and keyboard arrows consistently without world movement or implicit portrait rotation; verify the existing intent classifier, mouse behavior, LB/RB and three-press quit path remain intact.
-- [x] 2.3 Update footer and guide guidance to directional-first navigation with optional trigger/Tab convenience; verify hints describe the actual active browsing/edit context.
+- [ ] 2.3 Remove persistent generic menu coaching, including default `Choose a tab` filler, global navigation/activation/tab/Back footers, the Guidebook menu-controls lesson, and quantity-edit prose; verify page identity, stateful summaries/details, controls, errors and confirmations remain clear through visible affordances without a replacement instruction legend.
 
 ## 3. Integrated acceptance
 
@@ -94,3 +95,8 @@ It does not close2.1: amount browsing, explicit edit, draft-only change,
 Back-before-cancel and cancel focus return pass, but neither scoped evidence
 route commits Confirm and verifies the resulting transaction. Those clauses
 remain implementation/evidence work, not inferred completion.
+
+The prior completion of2.3 is intentionally superseded by Jenny's later
+feedback: directional-first instructional prose is still too much instruction.
+Task2.3 is open again until the generic banner/footer/Guidebook/dialog coaching
+is absent and ordinary menu routes remain understandable through their controls.
