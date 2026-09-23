@@ -930,6 +930,17 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
                 Avatar->GetVelocity().Size2D(), *GetPathNameSafe(Hit.GetComponent())));
             PassElapsed = Pass.Duration;
         }
+        else if (PassElapsed + Delta >= Pass.Duration && Distance <= 80
+            && Move.Y > 0.25 && InwardIntent > 0.25
+            && TreeQuery && PawnQuery && TreeBlocksPawn && PawnBlocksTree
+            && TreeActorCollision && PawnActorCollision)
+        {
+            bTreeBlocked = true;
+            Observations.Add(FString::Printf(
+                TEXT("Sustained mapped inward walking remained at solid trunk contact: player=%s distance_cm=%.6f inward_intent=%.6f total_speed_cm_s=%.6f"),
+                *Position.ToString(), Distance, InwardIntent,
+                Avatar->GetVelocity().Size2D()));
+        }
     }
     if (Retreat)
     {
