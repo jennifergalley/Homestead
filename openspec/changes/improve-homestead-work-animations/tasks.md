@@ -24,10 +24,10 @@
 - [x] 2.2 Author and verify a dedicated downward till/recover clip distinct from
   gathering/chopping, with grounded feet and representative cell-height contact
   through source/interchange checks.
-- [ ] 2.3 Route only successful `Till` transactions to target-directed tilling;
+- [x] 2.3 Route only successful `Till` transactions to target-directed tilling;
   verify one plot commit, missing-tool/occupied/out-of-range rejection, rapid
   input arbitration, menu/load/failure cancellation and no orphaned prop.
-- [ ] 2.4 Exercise actual cleared-site tilling through controller input across
+- [x] 2.4 Exercise actual cleared-site tilling through controller input across
   representative appearance/equipment combinations; inspect close/ordinary
   views and verify plots, action costs, persistence and cadence remain exact.
 
@@ -61,9 +61,33 @@ bones, maximum bind error0, idle endpoint error0.0006418, maximum scale
 error6.56e-7, root/foot travel0cm, right-wrist travel32.84cm and zero notifies.
 Runtime selected-plot targeting, can lifecycle and contact review remain tasks
 3.2/3.3 and are not inferred from this analytical flat-ground check.
-- [ ] 3.2 Pass the successful selected-plot target into presentation and keep
+
+Tasks 2.3 and 2.4 passed through native
+`work-animation-till-water-editor-09` and ordinary mapped
+`work-animation-till-water-editor-08`. Production commits the plot first and
+only then requests the cell-center presentation target. The native route
+verified missing-stick and occupied-cell rejection, one plot/action start,
+competing-request coalescing, scale-one collision-free prop, target yaw,
+stationary pawn/camera/feet, natural recovery, movement/menu/load cancellation,
+save/load plot persistence and all 18 supported appearance combinations through
+the shared presentation layer. The ordinary route used no state/time injection:
+it gathered supplies, crafted both tools, refilled at a generated unobstructed
+stream bank, walked to a trial-feasible cleared site, tilled, planted and
+watered. Inspected 8Hz Till frames show overhead lift, visible vertical stick
+drive toward the new plot, settle and full recovery. Exact soil deformation,
+particles and terrain-height IK are not claimed.
+- [x] 3.2 Pass the successful selected-plot target into presentation and keep
   the existing can bound/hidden lifecycle; verify one water cost/moisture change,
   full/dry/missing/out-of-range rejection, interruption and no queued replay.
+
+Task 3.2 passed in `work-animation-till-water-editor-09`: the successful
+selected plot center supplies presentation yaw only after authoritative Water,
+with one debit/moisture change and one action start. Missing/empty/exhausted
+water, fully watered and out-of-range paths preserved state and started no
+pose. Competing requests, movement, menu, planning, appearance changes and load
+cancelled without replay or orphaned can. Tool scale, hand attachment,
+collision/overlap/navigation, actor/toe/camera stability and exact target yaw
+passed across the full native appearance matrix.
 - [ ] 3.3 Exercise watering on root and berry plots with controller input across
   representative bodies/hair/garments; inspect side/three-quarter/gameplay
   views and verify garden, save/reload and action arbitration regressions pass.
