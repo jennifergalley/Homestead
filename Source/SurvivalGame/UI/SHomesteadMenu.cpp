@@ -1368,7 +1368,15 @@ void SHomesteadMenu::EndPointerItemDrag()
 {
     const bool WasDragging = bPointerDraggingItem;
     const int32 Source = PointerDragSource;
-    const int32 Target = PointerDragTarget;
+    int32 Target = INDEX_NONE;
+    if (WasDragging && FSlateApplication::IsInitialized())
+    {
+        const FVector2D Position = FSlateApplication::Get().GetCursorPos();
+        for (int32 Index = 0; Index < Cells.Num(); ++Index)
+            if (Index != Source && Cells[Index]
+                && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
+            { Target = Index; break; }
+    }
     bPointerItemDown = false;
     bPointerDraggingItem = false;
     PointerDragSource = INDEX_NONE;

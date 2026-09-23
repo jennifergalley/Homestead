@@ -985,6 +985,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     const auto BranchTotal = MakeShared<int32>(0);
     const auto DragSource = MakeShared<FVector2D>();
     const auto DragTarget = MakeShared<FVector2D>();
+    const auto FullSnapshot = MakeShared<std::string>();
+    const auto FullPackGroup = MakeShared<int32>(0);
     const auto Group = [this](int32 Container, int32 Quantity = -1)
     {
         const auto* Layout = Controller->Simulation().GetLayout(Container);
@@ -1498,6 +1500,81 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     Add(TEXT("Capture real stored transaction result"),
         [this]() { Screenshot(TEXT("native-storage-transactions")); },
         [this]() { return Controller->BookPage() == 0 && Controller->InventoryView() == 1; }, 0.8f);
+    Add(TEXT("Prepare valid full Pack and Chest scrolling fixture"),
+        [this, Chest, FullSnapshot, FullPackGroup]()
+        {
+            *FullSnapshot = Controller->Simulation().Serialize();
+            auto& State = const_cast<Homestead::State&>(Controller->Sim.GetState());
+            Homestead::Structure* Storage = nullptr;
+            for (auto& Piece : State.structures) if (Piece.id == *Chest) { Storage = &Piece; break; }
+            if (!Storage) { Finish(false, TEXT("Exact chest disappeared before full-grid fixture.")); return; }
+            State.inventory.fill(0);
+            State.inventory[static_cast<int32>(Homestead::Item::Knife)] = 1;
+            State.inventory[static_cast<int32>(Homestead::Item::Branch)] = 119;
+            State.inventoryLayout.clear();
+            Storage->storage.fill(0);
+            Storage->storage[static_cast<int32>(Homestead::Item::Stone)] = 120;
+            Storage->layout.clear();
+            int32 GroupId = State.nextGroupId;
+            State.inventoryLayout.push_back({GroupId++, Homestead::Item::Knife, 1, 0});
+            for (int32 Index = 0; Index < 119; ++Index)
+            {
+                if (Index == 0) *FullPackGroup = GroupId;
+                State.inventoryLayout.push_back({GroupId++, Homestead::Item::Branch, 1, 0});
+            }
+            for (int32 Index = 0; Index < 120; ++Index)
+                Storage->layout.push_back({GroupId++, Homestead::Item::Stone, 1, 0});
+            State.nextGroupId = GroupId;
+            const auto Reloaded = Controller->Sim.Deserialize(Controller->Sim.Serialize());
+            if (!Reloaded)
+            { Finish(false, TEXT("Full-grid fixture did not satisfy current save validation.")); return; }
+            Controller->NativeMenu->Refresh();
+        },
+        [this, Chest]() { return Controller->Simulation().UsedCapacity() == 120
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == 120
+            && Controller->MenuRows().Num() == 240; });
+    Add(TEXT("Capture full scrolling Chest and Pack grids"),
+        [this]() { Screenshot(TEXT("native-storage-full")); },
+        [this]() { return Controller->NativeMenu->IsFocusedControlVisible(); }, 0.8f);
+    Add(TEXT("Pointer edge drag autoscrolls without committing an invalid drop"),
+        [this, FullPackGroup]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *FullPackGroup, 0);
+            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Full Pack drag source is unavailable.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            const FVector2D From = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            const FVector2D To(From.X, 715.0f);
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            Slate.SetCursorPos(From);
+            TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, From, From, Pressed,
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            for (int32 Index = 0; Index < 12; ++Index)
+            {
+                Slate.ProcessMouseMoveEvent(FPointerEvent(0, To, From, Pressed,
+                    EKeys::Invalid, 0, FModifierKeysState()));
+                Controller->NativeMenu->PointerItemDragMove(To);
+            }
+            Slate.SetCursorPos(FVector2D(2, 2));
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, FVector2D(2, 2), To, TSet<FKey>(),
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        },
+        [this]() { return Controller->NativeMenu->GetContentScrollOffset() > 0
+            && !Controller->NativeMenu->IsPointerDraggingItem()
+            && Controller->Simulation().UsedCapacity() == 120; });
+    Add(TEXT("Restore exact pre-fixture inventory and chest state"),
+        [this, Chest, FullSnapshot]()
+        {
+            if (!Controller->Sim.Deserialize(*FullSnapshot))
+            { Finish(false, TEXT("Could not restore pre-fixture inventory state.")); return; }
+            Controller->CloseBook();
+            Controller->OpenChestStorage(*Chest);
+            Tap(EKeys::Gamepad_DPad_Left);
+        },
+        [this, Chest]() { return Controller->Simulation().UsedCapacity() < 120
+            && Controller->Simulation().ChestUsedCapacity(*Chest) < 120; });
     Add(TEXT("Repeated menu open-close rebuilds one valid shell and preserves committed state"),
         [this, Snapshot]()
         {

@@ -63,6 +63,7 @@ public:
     int32 GetDraftQuantity() const { return Amount; }
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
     bool IsVirtualDraggingItem() const { return bVirtualDraggingItem; }
+    float GetContentScrollOffset() const { return Scroll ? Scroll->GetScrollOffset() : 0.0f; }
     void PointerItemDragMove(FVector2D Position);
     float GetCraftProgress() const { return CraftHoldRecipe >= 0 ? CraftHoldElapsed / CraftCycleSeconds : 0.0f; }
 
