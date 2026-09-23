@@ -1556,7 +1556,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             if (!Widget) { Finish(false, TEXT("Full Pack drag source is unavailable.")); return; }
             const auto Geometry = Widget->GetCachedGeometry();
             const FVector2D From = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
-            const FVector2D To(From.X, 715.0f);
+            const FVector2D To(From.X, Controller->NativeMenu->GetContentScrollBottom() - 2.0f);
             TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
             auto& Slate = FSlateApplication::Get();
             Slate.SetCursorPos(From);

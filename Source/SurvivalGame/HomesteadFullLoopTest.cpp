@@ -352,16 +352,15 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
         [this]() { Controller->MenuInventoryView(0); Controller->OpenBook(0); },
         [this]() { return Controller->InventoryView() == 0 && Controller->IsBookOpen(); });
     QueueSelectRow(static_cast<int32>(Item));
-    Add(TEXT("Enter the selected food's native actions"),
-        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return !Controller->HasNativeMenu()
-            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(FString::Printf(TEXT("Eat %s through the pack menu"), UTF8_TO_TCHAR(Homestead::ItemName(Item))),
         [this, Before, Hunger, Item]()
         {
             *Before = Controller->Simulation().Count(Item);
             *Hunger = Controller->State().hunger;
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            if (!Row || !Controller->MenuItemAction(*Row, EHomesteadItemAction::Primary,
+                1, Controller->Simulation().GetRevision()))
+                Finish(false, TEXT("The selected food action is unavailable."));
         },
         [this, Before, Hunger, Item]()
         {
@@ -1065,28 +1064,40 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Open the saved storage"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
-    QueueSelectRow(static_cast<int32>(Homestead::Item::Stone));
-    Add(TEXT("Enter the saved Stone's native actions"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->NativeMenu.IsValid()
-            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
-    Add(TEXT("Focus the semantic Take action for saved Stone"),
+    Add(TEXT("Focus saved Stone in the exact Chest grid"),
         [this]()
         {
-            if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Transfer))
-                Finish(false, TEXT("The semantic saved-Stone Take action is unavailable."));
+            const auto Rows = Controller->MenuRows();
+            const auto* Stone = Rows.FindByPredicate([](const FHomesteadRow& Row)
+                { return Row.ContainerId > 0
+                    && Row.Id == static_cast<int32>(Homestead::Item::Stone); });
+            if (!Stone || !Controller->NativeMenu->FocusSubject(
+                Stone->Subject, Stone->SubjectId, Stone->ContainerId))
+                Finish(false, TEXT("Saved Stone is unavailable in the exact Chest grid."));
         },
-        [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
-    Add(TEXT("Open the saved Stone amount dialog through the real native action"),
+        [this]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Subject && Subject->ContainerId > 0
+                && Subject->Id == static_cast<int32>(Homestead::Item::Stone); });
+    Add(TEXT("Pick up saved Stone through controller virtual drag"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->NativeMenu->HasActiveDialog()
-            && Controller->NativeMenu->GetDraftQuantity() == 1; });
-    Add(TEXT("Confirm one saved Stone through the real native amount dialog"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Down); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return Controller->NativeMenu.IsValid()
+            && Controller->NativeMenu->IsVirtualDraggingItem(); });
+    Add(TEXT("Drop saved Stone into Pack through exact two-grid authority"),
+        [this]()
+        {
+            const auto Rows = Controller->MenuRows();
+            const auto* Target = Rows.FindByPredicate([](const FHomesteadRow& Row)
+                { return Row.ContainerId == 0; });
+            if (!Target || !Controller->NativeMenu->FocusSubject(
+                Target->Subject, Target->SubjectId, 0))
+            { Finish(false, TEXT("The saved-Stone Pack target is unavailable.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
         [this]()
         {
             const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Chest, -4, -3);
-            return Piece && Piece->storage[static_cast<int32>(Homestead::Item::Stone)] == 0 && !Controller->ToastIsError();
+            return Piece && Piece->storage[static_cast<int32>(Homestead::Item::Stone)] == 0
+                && !Controller->NativeMenu->IsVirtualDraggingItem() && !Controller->ToastIsError();
         });
     Add(TEXT("Close storage and approach the saved fire"),
         [this, Fire]() { Tap(EKeys::Gamepad_FaceButton_Right); Teleport(Fire); },

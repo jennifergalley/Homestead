@@ -557,12 +557,14 @@ void AHomesteadSmokeTest::Prepare()
         },
         [this]() { return BerriesBeforeFood > 0; });
     QueueSelectRow(static_cast<int32>(Homestead::Item::Berries));
-    Add(TEXT("Enter the harvested food's native actions"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->NativeMenu.IsValid()
-            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
     Add(TEXT("Eat forage through the actual inventory control"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]()
+        {
+            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            if (!Row || !Controller->MenuItemAction(*Row, EHomesteadItemAction::Primary,
+                1, Controller->Simulation().GetRevision()))
+                Finish(false, TEXT("The harvested food action is unavailable."));
+        },
         [this]()
         {
             return Controller->Simulation().Count(Homestead::Item::Berries) == BerriesBeforeFood - 1
