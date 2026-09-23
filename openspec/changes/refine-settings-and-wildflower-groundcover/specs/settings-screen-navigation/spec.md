@@ -85,6 +85,39 @@ Settings SHALL contain distinct `Save` and `Quit game` rows. Activating Save SHA
 - **WHEN** the quit-choice dialog is open and the player presses Back
 - **THEN** the dialog closes and focus returns to `Quit game` in Settings
 
+### Requirement: Autosave is optional and configurable
+Settings SHALL contain an `Autosave` On/Off control and an `Autosave interval` choice with 5, 10, 20, and 30 real unpaused gameplay minutes. The user-level default SHALL be On with a 5-minute interval. These preferences SHALL persist independently from homestead saves.
+
+#### Scenario: Disable autosave
+- **WHEN** the player sets Autosave to Off
+- **THEN** no new periodic or sleep-triggered rotating autosave is written
+- **AND** existing autosave files are retained
+- **AND** manual Save, Save & Quit, and eligible recovery checkpoints remain available
+
+#### Scenario: Enable autosave
+- **WHEN** the player changes Autosave from Off to On
+- **THEN** a fresh full interval countdown begins without writing an immediate save
+
+#### Scenario: Change the interval
+- **WHEN** the player selects 20 minutes
+- **THEN** the periodic countdown resets to 20 real unpaused gameplay minutes and the preference survives relaunch without a world save
+
+#### Scenario: Gameplay is paused
+- **WHEN** a menu, planning, failure, load/recovery, or save-in-progress state pauses eligible gameplay
+- **THEN** the autosave countdown does not advance
+
+#### Scenario: Autosave succeeds
+- **WHEN** the enabled interval elapses during eligible gameplay
+- **THEN** one valid save writes to the next of three rotating autosave slots and the countdown resets to the configured interval
+
+#### Scenario: Autosave fails
+- **WHEN** a rotating autosave cannot be written/read back safely
+- **THEN** no success is reported, existing valid saves are retained, one clear error is shown, and retries are rate-limited rather than attempted every frame
+
+#### Scenario: Autosave settings are invalid or read-only
+- **WHEN** persisted enabled/interval data is malformed or a preference write cannot be read back exactly
+- **THEN** startup uses safe On/5-minute defaults or restores the previous valid preference with an explicit error
+
 ### Requirement: Credits is removed from the game menu
 The in-game Credits tab, page, focus target, navigation stop, and icon SHALL be absent. Removing the tab MUST NOT remove the packaged attribution file.
 

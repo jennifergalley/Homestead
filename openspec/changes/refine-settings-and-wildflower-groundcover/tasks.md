@@ -12,15 +12,21 @@
 - [ ] 2.2 Implement labeled 0-100% sliders with continuous pointer runtime preview, commit-on-release persistence and 5% keyboard/controller left/right increments; verify min/max, device switching, exact one-property readback, read-only rollback and no stuck capture/edit state
 - [ ] 2.3 Run fresh write/read/invalid separate-process settings routes without a world save, verifying all three runtime components and sliders persist exactly while unrelated graphics/camera preferences and world state remain unchanged
 
-## 3. Decorative Wildflower Groundcover
+## 3. Configurable Autosave
 
-- [ ] 3.1 Reconfirm exact admitted Flower Empodium mesh/material/triangle/license identities and record ordinary resource-flower versus flower-free ground baselines before integrating decorative instances
-- [ ] 3.2 Add two bounded deterministic chunk-owned DecorativeWildflower HISM batches using restrained scale/pocket density and existing low-cover plus stream/resource/plot/structure/path exclusions; verify no collision, overlap, navigation, focus, reward, save edit or component accumulation
-- [ ] 3.3 Exercise ordinary woodland walks, active-window churn, cleared resource sites, building/tilling and save/revisit across representative lighting; inspect close/gameplay/wide frames for readable but non-misleading color and compare count/triangles/transition/clean cadence against the selected build
+- [ ] 3.1 Record the selected build's hidden fixed 240-second ordinary-play countdown, three-slot rotation, sleep autosave, pause/failure/test-reset guards, load priority, backup/readback and failure behavior so current safety semantics are reproducible
+- [ ] 3.2 Add exact user-level Autosave On/Off and 5/10/20/30-minute interval persistence with On/5 defaults, direct Settings controls, reset-on-enable/change behavior and read-only/malformed rollback; verify separate-process relaunch without a world save and no unrelated preference/world mutation
+- [ ] 3.3 Apply the preference to periodic and sleep rotating autosaves while preserving manual Save/Save & Quit/F5, existing files/backups/loadability and sheltered recovery checkpoints; verify timer pause states, three-slot rotation, one write per interval, disable/re-enable, rate-limited failure retry and long endurance counts
 
-## 4. Integrated Acceptance and Promotion
+## 4. Decorative Wildflower Groundcover
 
-- [ ] 4.1 Run focused menu/audio/flower source contracts, full portable simulation/world/regional suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
-- [ ] 4.2 Build one immutable Shipping candidate under the serialized engine slot, verify exact source/package/attribution identity and retain `work-animation-complete-02-shipping / work-actions-v13` as rollback
-- [ ] 4.3 Run Shipping native-menu, directional input, settings write/read/invalid, feedback layout at720p/4K, ordinary flower traversal, full-loop, generated-world, save/reload and fresh consumer routes, rejecting UI, input, attribution, persistence, collision, visual or performance regressions
-- [ ] 4.4 Inspect final Settings/sliders and decorative flower evidence, update design/playtest/setup documentation, seal preview-routing proof, and promote only if Settings is visibly simpler and the flowers improve the ground without becoming clutter or fake resources
+- [ ] 4.1 Reconfirm exact admitted Flower Empodium mesh/material/triangle/license identities and record ordinary resource-flower versus flower-free ground baselines before integrating decorative instances
+- [ ] 4.2 Add two bounded deterministic chunk-owned DecorativeWildflower HISM batches using restrained scale/pocket density and existing low-cover plus stream/resource/plot/structure/path exclusions; verify no collision, overlap, navigation, focus, reward, save edit or component accumulation
+- [ ] 4.3 Exercise ordinary woodland walks, active-window churn, cleared resource sites, building/tilling and save/revisit across representative lighting; inspect close/gameplay/wide frames for readable but non-misleading color and compare count/triangles/transition/clean cadence against the selected build
+
+## 5. Integrated Acceptance and Promotion
+
+- [ ] 5.1 Run focused menu/audio/autosave/flower source contracts, full portable simulation/world/regional suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
+- [ ] 5.2 Build one immutable Shipping candidate under the serialized engine slot, verify exact source/package/attribution identity and retain `work-animation-complete-02-shipping / work-actions-v13` as rollback
+- [ ] 5.3 Run Shipping native-menu, directional input, settings write/read/invalid, configurable rotating autosave/failure/recovery, feedback layout at720p/4K, ordinary flower traversal, full-loop, generated-world, save/reload and fresh consumer routes, rejecting UI, input, attribution, persistence, collision, visual or performance regressions
+- [ ] 5.4 Inspect final Settings/sliders/autosave and decorative flower evidence, update design/playtest/setup documentation, seal preview-routing proof, and promote only if Settings is visibly simpler, save controls remain trustworthy and flowers improve the ground without becoming clutter or fake resources

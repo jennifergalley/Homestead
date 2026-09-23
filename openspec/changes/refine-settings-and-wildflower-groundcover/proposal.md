@@ -14,6 +14,7 @@ The native menu still treats Settings like an inventory grid inside the field bo
 - Replace the Settings two-column inventory-like grid with a vertically scrolling labeled list designed for preferences and session actions.
 - Replace raw `Day length: 30/60/120 minutes` copy with a clear `Game speed` three-choice control: `Leisurely` (120-minute day), `Balanced` (60-minute default), and `Fast` (30-minute day), without displaying implementation minutes in the normal Settings UI.
 - Provide direct `Save` and `Quit game` rows in Settings. Save writes a manual checkpoint and remains in Settings; Quit game opens one dialog containing only `Save & Quit` and `Quit without Saving`, with Back as cancel and no follow-up confirmation for either choice.
+- Replace the hidden always-on four-minute autosave with user-level `Autosave` On/Off and `Autosave interval` choices of 5, 10, 20, or 30 unpaused gameplay minutes. Default to On / 5 minutes, retain three rotating slots, and keep the separate recovery checkpoint available even when periodic autosave is Off.
 - Replace Music, Ambience, and Effects volume cycling buttons with focusable continuous sliders, including pointer drag and keyboard/controller left/right adjustment.
 - Persist audio volumes immediately as user-level settings independent from world saves, with exact-property write/readback and rollback behavior matching camera/video preferences.
 - Remove the Credits tab, Credits page, navigation target, and in-game Credits icon entirely. The packaged `asset-credits.md` remains the durable attribution surface.
@@ -28,7 +29,7 @@ Deferred scope includes key rebinding, graphics preset dropdowns, advanced audio
 
 ### New Capabilities
 
-- `settings-screen-navigation`: Separate Settings overlay, vertical preference list, direct Save and one-dialog Quit flow, friendly Game speed choices, direct Esc/Menu access, direct G-to-Guidebook routing, Settings-only preview metadata, and removal of the Credits tab.
+- `settings-screen-navigation`: Separate Settings overlay, vertical preference list, direct Save/one-dialog Quit, configurable autosave, friendly Game speed choices, direct Esc/Menu access, direct G-to-Guidebook routing, Settings-only preview metadata, and removal of the Credits tab.
 - `audio-volume-controls`: Immediate persistent Music/Ambience/Effects sliders with pointer and controller/keyboard parity.
 - `decorative-wildflower-groundcover`: Sparse deterministic noninteractive wildflower decoration using admitted project assets.
 
@@ -39,7 +40,7 @@ None.
 ## Impact
 
 - `HomesteadController`, `SHomesteadMenu`, `HomesteadHUD`, menu icons, input/prompt/navigation/native-menu tests: separate Settings routing, six-or-fewer field-book pages, vertical list layout, and Credits removal.
-- User-settings persistence: camera-style exact-property handling for three audio values; legacy world-save fields may remain compatible but cease to be authoritative.
+- User-settings persistence: camera-style exact-property handling for three audio values plus Autosave enabled/interval; legacy world-save audio fields may remain compatible but cease to be authoritative.
 - `HomesteadWorld` cover generation and environment tests: one or two Flower Empodium HISM batches with deterministic exclusions and bounded density.
 - Existing Flower Empodium assets are Poly Haven CC0 and already imported, verified, cooked, and credited. No new license, account, purchase, download, or attribution is required.
 - Packaged `asset-credits.md` remains available even though the in-game Credits tab is removed.
