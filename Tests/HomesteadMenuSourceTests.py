@@ -347,6 +347,16 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("SetCanEverAffectNavigation(false)", prop)
         self.assertNotIn("SetActorRotation", character[character.index("void AHomesteadCharacter::PlayTill(Homestead::Point"):])
 
+    def test_water_target_is_presentation_only(self):
+        character = (SOURCE / "HomesteadCharacter.cpp").read_text()
+        controller = CONTROLLER
+        tool = (SOURCE / "HomesteadWateringTool.cpp").read_text()
+        self.assertIn("HomesteadWork_20260923_01/Animations/AN_Heroine_WaterRefined", character)
+        self.assertIn("WaterYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X))", character)
+        self.assertIn("Avatar->PlayWater(Homestead::CellCenter(Plot.cellX, Plot.cellY))", controller)
+        self.assertIn("Avatar->WaterTargetYaw()", tool)
+        self.assertNotIn("SetActorRotation", character[character.index("void AHomesteadCharacter::PlayWater(Homestead::Point"):])
+
     def test_full_loop_resolves_generated_keys_after_region_prepare(self):
         fixture = (SOURCE / "HomesteadFullLoopTest.cpp").read_text()
         gather = fixture[fixture.index("void AHomesteadSmokeTest::QueueGatherTo"):
