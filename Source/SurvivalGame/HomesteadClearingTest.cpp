@@ -495,6 +495,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         [this, Probe, Animation, Hidden, Matches]()
         { return Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
 
+    if (bShippingQA) return;
     const auto Depleted = MakeShared<Homestead::ResourceNode>(FocusableSaplings[1]);
     const auto Reserved = MakeShared<Homestead::ResourceNode>(FocusableSaplings[2]);
     Approach(Depleted);

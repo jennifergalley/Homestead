@@ -332,7 +332,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         if (WaterStageElapsed > 0.65f) ++WaterStage;
         break;
     case 19:
-        Look.X = -0.65f;
+        Look.X = 0.65f;
         if (WaterStageElapsed > 1.15f) { Look.X = 0; ++WaterStage; }
         break;
     case 20:
