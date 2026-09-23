@@ -46,6 +46,9 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - HUD scale is `clamp(viewport height / 1080, 0.4, 3.0)`; virtual width/height divide actual pixels by that scale. This is height-based scaling, not a fixed 1920-wide canvas.
 - Calendar/weather occupies the upper left `(30,26)`, size `460×73`. Current-device book/camera hints have upper-right Pine backing.
 - Food, Energy, Warmth occupy the lower left in three 200-wide backed meters; numeric values accompany 174×5 bars.
+- A gameplay-only ten-slot Pine/cream/Gold tool hotbar is centered along the
+  bottom. It references carried Knife, Hatchet, Digging Stick, and Watering Can
+  without adding capacity; unavailable references remain ghosted.
 - Normal focus/action context sits lower right: width `min(650, 38% of virtual width)`, right inset 32, top at `height−225`.
 - Planning instead uses a lower centered panel up to 880 wide. World/planning toasts remain centered below the top band, up to 900 wide. While the book or Look is open, feedback moves to the free upper-right band at Y26/right inset30, beside the calendar rather than across the book heading. The existing 92-high backing grows if measured lines require it; book rows and footer never move with feedback.
 - Field book is centered, up to `1180×810`, with seven tabs, 74-high rows, a selected-row-following visible window, and a footer. Pack/Craft/Build use purpose-specific titles and a short scope line at panel Y+144; their rows start at Y+180 rather than Y+148. Both supported 16:9 verification sizes still show seven rows. Font sizes and tab/selection behavior are unchanged.
@@ -55,7 +58,8 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 ### Camera and Look
 
 - Gameplay uses a collision-tested spring arm, default distance 470 cm, socket offset `(0,45,55)`, FOV 75°, and camera lag speed 12.
-- Mouse-wheel distance changes by 80 cm per unit, clamped to 250–1000 cm; gameplay R3 toggles 380/740 cm.
+- Ctrl+mouse-wheel distance changes by 80 cm per unit, clamped to 250–1000 cm;
+  unmodified wheel cycles hotbar slots; gameplay R3 toggles 380/740 cm.
 - Look saves the gameplay view/distance, enters at 280 cm and pitch −6°, facing back toward the character; closing restores the saved view and normal offset.
 - While Look is open, framing recomputes from actual viewport size, sidebar width, FOV, and arm length: a negative lateral socket offset places the heroine in the unobscured right region; vertical socket offset is 10 cm.
 - Look allows mouse/right-stick orbit; R3 selects 190/320 cm views. Wheel zoom retains its separate 250–1000 cm clamp.
@@ -88,6 +92,9 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - Wall orientation is `0 north (+Y), 1 east (+X), 2 south, 3 west`. Preview uses the same geometry, pale neutral tint, no collision/shadow, and no red/green validity promise; controller feedback explains rejection.
 - **Field book:** Pack, Craft, Build, Notes, Settings, Credits, Look. Selected labels are Gold on a darker opaque row; active tabs also have an underline. The first three page titles are "Your pack", "Crafting recipes" and "Building plans". Pack rows label Carried and nearby Chest quantities separately; recipes/plans label authoritative costs "Needs". The selected footer names eat/take/craft/plan, with store/take hints only when stock exists. Inert tools/materials advertise no primary pack action. Empty Pack copy describes the actual empty state, not missing recipe knowledge. No unlocks, new screens or item reordering are implied.
 - **State/input:** menus and construction planning pause simulation and expose that state in text. Movement is blocked in the book; camera orbit remains enabled specifically in Look. Hints switch between gamepad and keyboard/mouse bindings.
+- **Tool hotbar:** `1-9/0`, wheel, pointer, and gameplay LB/RB select ten
+  world-specific tool references. Left mouse/controller RT uses the selected
+  carried tool through existing authority. Menu LB/RB remains tab navigation.
 - **Feedback:** errors use warning text and explanatory messages, not color alone. Need bars retain labels/numbers. Recovery provides explicit checkpoint retry copy. Key hints and the prototype label have their own backing.
 - **Vertical sync:** appended Settings row 11 uses the same scrolling rows, On/Off text and selected-device toggle hint. It separates the saved preference from a conflicting active engine override. Copy notes possible tearing reduction/input delay without claiming every flicker is fixed; there is no new panel or default change.
 - **Heroine:** runtime supports long-wave/bob skeletal variants, shared idle/walk clips, and material-based appearance changes. Missing required assets keep an explicitly labeled cylinder; the HUD calls a loaded heroine a character prototype.

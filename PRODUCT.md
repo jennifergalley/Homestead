@@ -33,6 +33,8 @@ Menus and construction planning pause simulation. No online gameplay services.
 - Use Coral Island, Minecraft, and Disney Dreamlight Valley as primary comparative
   references for relevant life-sim, character, world, interaction, and UI decisions.
 - Preserve progress reliably and provide checkpoint retries.
+- Keep repeated tool work immediate through a visible ten-slot carried-tool
+  hotbar with mouse/keyboard and controller parity.
 - Ship small playable increments; do not build the entire roadmap at once.
 
 ## Evidence and constraints

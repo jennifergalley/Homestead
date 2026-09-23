@@ -146,6 +146,21 @@ and p99 18.07 ms. Native 4K measured p95/p99 17.48/17.64 ms versus
 full-screen foliage, trunk fading, dither trail, or cadence regression was
 observed in reviewed frames.
 
+## Tool hotbar delivery, 2026-09-23
+
+`hotbar-02-shipping` adds ten compact bottom-center slots labeled `1-9/0`.
+The 1280x720 bar occupies x=462.84–817.15 with 30.64-pixel slots, clear of the
+needs and context panels. At 3840x2160 it scales to x=1388–2452 with 92-pixel
+slots. Owned tools use original Homestead icons; stored/unowned references
+remain visibly ghosted and unusable.
+
+Shipping routes verify number `0`, wheel wrap, pointer selection without world
+click-through, Ctrl+wheel zoom, R3, gameplay/menu LB/RB ownership, chest
+ghost/restore, schema-7 save/reload, new-world reset, and left mouse/controller
+RT Knife, Hatchet, Digging Stick, and Watering Can authority. The full loop
+measured p95 17.49 ms and p99 17.97 ms, effectively identical to
+`foliage-camera-v15` at 17.50/17.97 ms.
+
 ## Wardrobe presentation delivery
 
 `wardrobe-presentation-08` retains the ordinary 23-stage mapped route and adds

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\foliage-camera-05-shipping",
-  "profile": "foliage-camera-v15",
-  "executableSha256": "B81E0D80F338655510FF7228F2D7CADAF44FD018A4339507A800218BC9E19E0E"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\hotbar-02-shipping",
+  "profile": "hotbar-v16",
+  "executableSha256": "42912B6522B039F1D87F138D9A35EFB93B12A30CC7EA7F9FAFC4D7E74BD17D79"
 }
