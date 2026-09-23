@@ -1,7 +1,9 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadAnimInstance.h"
 #include "HomesteadActionTestState.h"
+#include "UI/SHomesteadMenu.h"
 
 bool AHomesteadVisualPlaytest::WalkWaterTarget(FVector2D Target, float Tolerance, float Delta, FVector2D& Move, FVector2D& Look)
 {
@@ -124,11 +126,28 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
             if (bClearRoute) { WaterStage = 16; ForageId = -1; }
             break;
         }
-        if (Entered && !PC->IsBookOpen()) Tap(EKeys::C);
+        if (!PC->IsBookOpen())
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            if (Animation && Animation->ActionWeight() > 0.001f) break;
+            if (WaterStageElapsed > 0.3f) { Tap(EKeys::C); WaterStageElapsed = 0; }
+            break;
+        }
         if (WaterStageElapsed < 0.3f) break;
         const auto Rows = PC->Rows();
-        if (!PC->IsBookOpen() || PC->BookPage() != 1 || !Rows.IsValidIndex(PC->SelectedRow())) { Fail(TEXT("Craft book navigation failed.")); return; }
-        if (Rows[PC->SelectedRow()].Id != Recipe) { Tap(EKeys::Gamepad_DPad_Down); WaterStageElapsed = 0; break; }
+        if (!PC->IsBookOpen() || PC->BookPage() != 1 || Rows.IsEmpty())
+        { Fail(TEXT("Craft book navigation failed.")); return; }
+        const auto* Focused = PC->NativeMenu.IsValid() ? PC->NativeMenu->GetSelectedSubject() : nullptr;
+        const int32 FocusedId = Focused ? Focused->Id
+            : Rows.IsValidIndex(PC->SelectedRow()) ? Rows[PC->SelectedRow()].Id : INDEX_NONE;
+        if (FocusedId != Recipe)
+        {
+            Tap(FocusedId < Recipe ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+            WaterStageElapsed = 0;
+            break;
+        }
         if (PC->HasNativeMenu() && !bWaterActionEntered)
         {
             Tap(EKeys::Gamepad_FaceButton_Bottom);
@@ -200,23 +219,33 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         if (WalkWaterTarget(GardenCenter + FVector2D(0, -220), 10, WallDelta, Move, Look)) ++WaterStage;
         break;
     case 8:
-        if (!bWaterInputPending)
+        if (WaterPlotId < 0 && !bWaterInputPending)
         {
             Tap(EKeys::Gamepad_FaceButton_Left);
             bWaterInputPending = true;
             WaterStageElapsed = 0;
             break;
         }
-        if (WaterStageElapsed < 0.3f) break;
-        if (PC->ToastIsError() || PC->State().plots.empty()) { Fail(PC->Toast()); return; }
-        for (const auto& Plot : PC->State().plots)
+        if (bWaterInputPending)
         {
-            const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
-            if (FVector2D::Distance(GardenCenter, FVector2D(Center.x, Center.y)) < 1) WaterPlotId = Plot.id;
+            if (WaterStageElapsed < 0.3f) break;
+            if (PC->ToastIsError() || PC->State().plots.empty()) { Fail(PC->Toast()); return; }
+            for (const auto& Plot : PC->State().plots)
+            {
+                const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                if (FVector2D::Distance(GardenCenter, FVector2D(Center.x, Center.y)) < 1) WaterPlotId = Plot.id;
+            }
+            if (WaterPlotId < 0) { Fail(TEXT("Mapped tilling did not create the chosen plot.")); return; }
+            bWaterInputPending = false;
         }
-        if (WaterPlotId < 0) { Fail(TEXT("Mapped tilling did not create the chosen plot.")); return; }
-        bWaterInputPending = false;
-        ++WaterStage;
+        else if (WaterStageElapsed > 2.1f)
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            if (!Animation || Animation->TillWeight() > 0.001f) break;
+            ++WaterStage;
+        }
         break;
     case 9:
         if (WalkWaterTarget(GardenCenter + FVector2D(0, -55), 12, WallDelta, Move, Look)) ++WaterStage;

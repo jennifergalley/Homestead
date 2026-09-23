@@ -103,6 +103,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             [this, Avatar, Probe, Animation, Matches, DoubleTap]()
             {
                 const auto* Tool = Avatar->GetWateringTool();
+                const auto Target = Homestead::CellCenter(-5, 0);
+                const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
+                    Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
                 return Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap
                     && Animation()->WaterStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
                     && Animation()->ClearStarts() == Probe->ClearStarts && !Avatar->GetHatchet()->IsPresented()
@@ -116,6 +119,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                     && FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
                     && FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
                     && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
+                    && FMath::Abs(FMath::FindDeltaAngleDegrees(
+                        Avatar->WaterTargetYaw(), ExpectedYaw)) < 0.1f
                     && Controller->State().hour - Probe->Hour < 0.02;
             }, 0.55f);
     };
@@ -232,6 +237,24 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             && Animation()->ClearStarts() == Probe->ClearStarts
             && Animation()->WaterStarts() == Probe->Starts; }, 0.12f);
     Add(TEXT("Tilling recovers with no orphaned prop"), []() {}, Hidden, 1.9f);
+    Add(TEXT("Occupied plot rejects a second mapped Till without presentation"),
+        [this, Probe, Animation]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
+            Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
+        [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
+            && Animation()->TillStarts() == Probe->TillStarts; });
+    Add(TEXT("Movement cancels a till presentation without replay"),
+        [this, Avatar, Garden]() { Avatar->PlayTill(Garden); Axis(EKeys::Gamepad_LeftY, 0.8f); },
+        [Avatar, Hidden]() { return Hidden() && Avatar->GetVelocity().Size2D() > 1; }, 0.35f);
+    Add(TEXT("Stop after till cancellation"), [this]() { Axis(EKeys::Gamepad_LeftY, 0); }, Hidden, 0.5f);
+    Add(TEXT("Menu cancels a till presentation and leaves no prop"),
+        [this, Avatar, Garden]() { Avatar->PlayTill(Garden); Tap(EKeys::I); },
+        [this, Hidden]() { return Controller->IsBookOpen() && Hidden(); }, 0.35f);
+    Add(TEXT("Close menu after till cancellation"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); }, Hidden);
+    Add(TEXT("Save the committed plot before load cancellation"), [this]() { Tap(EKeys::F5); },
+        [this]() { return !Controller->ToastIsError(); });
+    Add(TEXT("Load cancels a till presentation without another plot"),
+        [this, Avatar, Garden]() { Avatar->PlayTill(Garden); Tap(EKeys::F9); },
+        [this, Hidden]() { return !Controller->ToastIsError() && Hidden(); }, 0.8f);
     Add(TEXT("Approach and plant actual wild-root seeds"), [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.7f);
     Add(TEXT("Plant with gamepad A; no watering prop"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
