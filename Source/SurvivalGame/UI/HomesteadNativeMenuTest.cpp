@@ -1098,6 +1098,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                         { Finish(false, TEXT("Close hairstyle review could not apply production presentation: ") + Error); return; }
                         Controller->CloseBook(); Controller->MenuInventoryView(2); Controller->OpenBook(0);
                         Controller->RefreshMenuPortrait();
+                        Controller->ZoomMenuPortrait();
                         Controller->OrbitMenuPortrait(ViewAngles[View]);
                     },
                     [this, Hair, Body]()
