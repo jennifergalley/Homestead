@@ -1362,34 +1362,58 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest, BranchTotal]() { return Controller->ActiveStorageChest().IsSet()
             && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal - 1
             && Controller->Simulation().ChestUsedCapacity(*Chest) == 1; });
-    Add(TEXT("Virtual drag transfers the whole Pack Branch stack into exact Chest"),
-        [this, Chest, Group]()
+    Add(TEXT("Record Pack Branch source and focus exact Chest pointer target"),
+        [this, Chest, Group, DragSource]()
         {
             const int32 PackBranch = Group(0);
             const int32 ChestBranch = Group(*Chest);
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PackBranch, 0);
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            const auto SourceWidget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!SourceWidget) { Finish(false, TEXT("Pack Branch drag source is unavailable.")); return; }
+            const auto Geometry = SourceWidget->GetCachedGeometry();
+            *DragSource = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, ChestBranch, *Chest);
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Pointer drag transfers the whole Pack Branch stack into exact Chest"),
+        [this, DragSource, DragTarget, PointerDrag]()
+        {
+            const auto TargetWidget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!TargetWidget) { Finish(false, TEXT("Chest drag target is unavailable.")); return; }
+            const auto Geometry = TargetWidget->GetCachedGeometry();
+            *DragTarget = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            PointerDrag(*DragSource, *DragTarget);
         },
         [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 0
             && Controller->Simulation().ChestUsedCapacity(*Chest) == *BranchTotal
-            && !Controller->NativeMenu->IsVirtualDraggingItem(); });
-    Add(TEXT("Virtual drag returns exact Chest Branch stack to Pack using any Pack tile"),
-        [this, Chest, Group]()
+            && !Controller->NativeMenu->IsPointerDraggingItem(); });
+    Add(TEXT("Record exact Chest Branch source and focus any Pack pointer target"),
+        [this, Chest, Group, DragSource]()
         {
             const int32 ChestBranch = Group(*Chest);
             int32 PackTarget = 0;
             for (const auto& Entry : *Controller->Simulation().GetLayout(0))
                 if (!Entry.wearableId) { PackTarget = Entry.groupId; break; }
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, ChestBranch, *Chest);
-            Tap(EKeys::Enter);
+            const auto SourceWidget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!SourceWidget) { Finish(false, TEXT("Chest Branch drag source is unavailable.")); return; }
+            const auto Geometry = SourceWidget->GetCachedGeometry();
+            *DragSource = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PackTarget, 0);
-            Tap(EKeys::Enter);
+        },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Pointer drag returns exact Chest Branch stack to Pack"),
+        [this, DragSource, DragTarget, PointerDrag]()
+        {
+            const auto TargetWidget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!TargetWidget) { Finish(false, TEXT("Pack drag target is unavailable.")); return; }
+            const auto Geometry = TargetWidget->GetCachedGeometry();
+            *DragTarget = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            PointerDrag(*DragSource, *DragTarget);
         },
         [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
             && Controller->Simulation().ChestUsedCapacity(*Chest) == 0
-            && !Controller->NativeMenu->IsVirtualDraggingItem(); });
+            && !Controller->NativeMenu->IsPointerDraggingItem(); });
     Add(TEXT("Seed one exact-chest target then split Pack for partial direct transfer"),
         [this, Chest, Group]()
         {

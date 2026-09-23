@@ -14,7 +14,7 @@
 
 - [x] 2.1 Add an exact active-chest storage session opened only from valid focused E/A/mouse-secondary chest interaction; verify standing near a chest or opening Inventory cannot expose storage and two nearby chests never substitute for the focused ID
 - [ ] 2.2 Build separate responsive Chest and Pack compact icon/count grids with concise container labels and one shared details/actions surface; verify empty/full/scrolling containers, duplicate stacks, wearables and 720p/4K side-by-side/fallback layout
-- [ ] 2.3 Route same-grid reorder/merge and whole-stack cross-grid transfer through the shared drag/virtual-drag target model, auto-stacking destination quantities; verify partial transfer via split-then-drag, expected revision, capacity, ownership, exact active chest and atomic two-grid refresh without action buttons
+- [x] 2.3 Route same-grid reorder/merge and whole-stack cross-grid transfer through the shared drag/virtual-drag target model, auto-stacking destination quantities; verify partial transfer via split-then-drag, expected revision, capacity, ownership, exact active chest and atomic two-grid refresh without action buttons
 - [x] 2.4 Close and clear storage safely on Back, load/recovery, new world, invalid chest/session state and UI destruction; verify no stale chest reference, replay, wrong-container transfer, world unpause, or click-through
 - [ ] 2.5 Exercise pointer, keyboard and controller focus/direct manipulation between both grids, Sort, details, remaining actions and dialogs without a global controls legend; verify mouse secondary open, drag/virtual-drag cancel, hotbar/tool isolation, directional reverse paths and cancel-default behavior
 
