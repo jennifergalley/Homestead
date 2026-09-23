@@ -15,6 +15,7 @@ class UStaticMeshComponent;
 class USkeletalMesh;
 class UAnimSequence;
 class UMaterialInstanceDynamic;
+class UMaterialParameterCollection;
 class UHomesteadWateringTool;
 class UHomesteadHatchet;
 class UHomesteadDiggingStick;
@@ -91,6 +92,7 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadDiggingStick> DiggingStick;
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
+    UPROPERTY() TObjectPtr<UMaterialParameterCollection> CameraFoliageParameters;
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> GarmentComponents;
     UPROPERTY() FHomesteadEquipmentPresentation PreparedEquipment;
     UPROPERTY() FHomesteadEquipmentPresentation ActiveEquipment;

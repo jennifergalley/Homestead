@@ -2,15 +2,15 @@
 
 ## 1. Reproduce and Classify Camera Interference
 
-- [ ] 1.1 Reproduce the private screenshot route in the selected build around focused saplings and dense foliage, recording desired/resolved spring-arm distance, camera/hero transforms, blocking component/material slots and frames without committing the private screenshot
-- [ ] 1.2 Inventory camera responses and exact material slots for resource saplings/shrubs/reeds/flowers, generated young/mature trees, groundcover HISM, creek-bank cover and planned decorative/far foliage; verify every foliage surface is classified separately from trunks/rocks/structures
+- [x] 1.1 Reproduce the private screenshot route in the selected build around focused saplings and dense foliage, recording desired/resolved spring-arm distance, camera/hero transforms, blocking component/material slots and frames without committing the private screenshot
+- [x] 1.2 Inventory camera responses and exact material slots for resource saplings/shrubs/reeds/flowers, generated young/mature trees, groundcover HISM, creek-bank cover and planned decorative/far foliage; verify every foliage surface is classified separately from trunks/rocks/structures
 
 ## 2. Collision and Camera-Fade Foundation
 
-- [ ] 2.1 Remove camera-channel blocking from whole foliage-bearing resource/render components while retaining solid terrain/trunk/rock/structure proxies; verify saplings no longer compress the spring arm into the heroine and representative solid obstacles still resolve safely
-- [ ] 2.2 Create and verify a project-owned camera-safe foliage material function/parameter collection with bounded near-camera sphere and finite camera-to-hero corridor dither, preserving authored alpha/PBR appearance outside the fade region
-- [ ] 2.3 Build exact foliage wrapper materials from admitted texture identities and explicit per-mesh material-slot contracts; verify leaf/twig/grass/fern/flower/shrub/reed slots fade while bark/trunk/rock/soil slots never do and missing coverage fails explicitly
-- [ ] 2.4 Update actual post-camera and heroine-target positions once per gameplay frame with degenerate/math/menu/portrait guards; verify rapid orbit, zoom and camera lag do not leave a one-frame opaque trail or let portrait capture overwrite gameplay parameters
+- [x] 2.1 Remove camera-channel blocking from whole foliage-bearing resource/render components while retaining solid terrain/trunk/rock/structure proxies; verify saplings no longer compress the spring arm into the heroine and representative solid obstacles still resolve safely
+- [x] 2.2 Create and verify a project-owned camera-safe foliage material function/parameter collection with bounded near-camera sphere and finite camera-to-hero corridor dither, preserving authored alpha/PBR appearance outside the fade region
+- [x] 2.3 Build exact foliage wrapper materials from admitted texture identities and explicit per-mesh material-slot contracts; verify leaf/twig/grass/fern/flower/shrub/reed slots fade while bark/trunk/rock/soil slots never do and missing coverage fails explicitly
+- [x] 2.4 Update actual post-camera and heroine-target positions once per gameplay frame with degenerate/math/menu/portrait guards; verify rapid orbit, zoom and camera lag do not leave a one-frame opaque trail or let portrait capture overwrite gameplay parameters
 
 ## 3. World Coverage and Lifecycle
 

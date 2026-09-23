@@ -6,6 +6,7 @@
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/MeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SceneComponent.h"
@@ -43,7 +44,111 @@ bool RegionalReachLess(const Homestead::RegionalGeneration::RiverReach& A,
     return A.key.upstream != B.key.upstream ? A.key.upstream < B.key.upstream
         : A.key.downstream < B.key.downstream;
 }
+}
 
+bool AHomesteadWorld::LoadCameraSafeFoliageMaterials()
+{
+    if (CameraSafeFoliageMaterials.Num() == 10) return true;
+    CameraSafeFoliageMaterials.Reset();
+    const TCHAR* Names[] = {
+        TEXT("FirSaplingBranches"), TEXT("FirSaplingTwigs"), TEXT("Shrub"), TEXT("Flower"),
+        TEXT("Grass"), TEXT("Fern"), TEXT("TreeSmallLeaves"), TEXT("MatureFirTwig"),
+        TEXT("JacarandaLeaves"), TEXT("FirPoleTwigs")
+    };
+    for (const TCHAR* Name : Names)
+    {
+        const FString Path = FString::Printf(
+            TEXT("/Game/SurvivalGame/Environment/CameraSafeFoliage/MI_CameraSafe_%s.MI_CameraSafe_%s"),
+            Name, Name);
+        auto* Material = LoadObject<UMaterialInterface>(nullptr, *Path);
+        if (!Material)
+        {
+            UE_LOG(LogHomesteadWorld, Error,
+                TEXT("Required camera-safe foliage material is missing: %s"), *Path);
+            CameraSafeFoliageMaterials.Reset();
+            return false;
+        }
+        CameraSafeFoliageMaterials.Add(FName(Name), Material);
+    }
+    return true;
+}
+
+bool AHomesteadWorld::ApplyCameraSafeFoliageMaterials(UMeshComponent& Component)
+{
+    UStaticMesh* Mesh = Cast<UStaticMeshComponent>(&Component)
+        ? CastChecked<UStaticMeshComponent>(&Component)->GetStaticMesh()
+        : Cast<UHierarchicalInstancedStaticMeshComponent>(&Component)
+            ? CastChecked<UHierarchicalInstancedStaticMeshComponent>(&Component)->GetStaticMesh()
+            : nullptr;
+    if (!Mesh) return true;
+
+    struct FContract
+    {
+        const TCHAR* MeshPath;
+        TArray<TPair<int32, FName>> Slots;
+    };
+    const TArray<FContract> Contracts = {
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a"),
+            {{0, TEXT("FirSaplingBranches")}, {1, TEXT("FirSaplingTwigs")}}},
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c"),
+            {{0, TEXT("FirSaplingBranches")}, {1, TEXT("FirSaplingTwigs")}}},
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a"),
+            {{0, TEXT("Shrub")}}},
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_c.SM_Shrub04_c"),
+            {{0, TEXT("Shrub")}}},
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a"),
+            {{0, TEXT("Flower")}}},
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b"),
+            {{0, TEXT("Flower")}}},
+        {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b"),
+            {{0, TEXT("Grass")}}},
+        {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b"),
+            {{0, TEXT("Grass")}}},
+        {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a"),
+            {{0, TEXT("Grass")}}},
+        {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a"),
+            {{0, TEXT("Grass")}}},
+        {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a.SM_Fern02_a"),
+            {{0, TEXT("Fern")}}},
+        {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_b.SM_Fern02_b"),
+            {{0, TEXT("Fern")}}},
+        {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_c.SM_Fern02_c"),
+            {{0, TEXT("Fern")}}},
+        {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_d.SM_Fern02_d"),
+            {{0, TEXT("Fern")}}},
+        {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"),
+            {{1, TEXT("TreeSmallLeaves")}}},
+        {TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"),
+            {{1, TEXT("MatureFirTwig")}}},
+        {TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda"),
+            {{2, TEXT("JacarandaLeaves")}}},
+        {TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_FirPole.SM_FirPole"),
+            {{1, TEXT("FirPoleTwigs")}}}
+    };
+
+    const FContract* Contract = Contracts.FindByPredicate(
+        [Mesh](const FContract& Value) { return Mesh->GetPathName() == Value.MeshPath; });
+    if (!Contract) return true;
+    if (!LoadCameraSafeFoliageMaterials()) return false;
+    for (const auto& Slot : Contract->Slots)
+    {
+        const TObjectPtr<UMaterialInterface>* Material = CameraSafeFoliageMaterials.Find(Slot.Value);
+        if (!Material || !Material->Get() || Slot.Key < 0 || Slot.Key >= Mesh->GetStaticMaterials().Num())
+        {
+            UE_LOG(LogHomesteadWorld, Error,
+                TEXT("Camera-safe foliage contract differs for %s slot %d (%s)."),
+                *Mesh->GetPathName(), Slot.Key, *Slot.Value.ToString());
+            return false;
+        }
+        Component.SetMaterial(Slot.Key, Material->Get());
+    }
+    Component.SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+    Component.ComponentTags.AddUnique(TEXT("CameraSafeFoliage"));
+    return true;
+}
+
+namespace
+{
 Homestead::ResourceKind ResourceKindFor(Homestead::Generation::EntityKind Kind)
 {
     using Entity = Homestead::Generation::EntityKind;
@@ -1068,6 +1173,8 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
             Batch->SetMobility(EComponentMobility::Static);
             Batch->ComponentTags.Add(Tag);
             Batch->SetStaticMesh(Mesh);
+            if (!ApplyCameraSafeFoliageMaterials(*Batch))
+                bVisualBuildFailed = true;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Batch->SetGenerateOverlapEvents(false);
@@ -1094,6 +1201,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         TArray<UHierarchicalInstancedStaticMeshComponent*> FlowerBatches;
         for (auto* Mesh : FlowerMeshes)
             FlowerBatches.Add(CreateCoverBatch(Mesh, FlowerTag, 3000, 4800));
+        if (bVisualBuildFailed) return false;
         for (int32 Attempt = 0; Attempt < 1200; ++Attempt)
         {
             const double X = OriginX + Random.FRandRange(0, 2399.99f);
@@ -1325,6 +1433,12 @@ bool AHomesteadWorld::RebuildOuterTreeBatches(const Homestead::Simulation& Simul
             Batch->SetupAttachment(GetRootComponent());
             Batch->SetMobility(EComponentMobility::Static);
             Batch->SetStaticMesh(Entry.Mesh);
+            if (!ApplyCameraSafeFoliageMaterials(*Batch))
+            {
+                Batch->DestroyComponent();
+                DiscardPrepared();
+                return false;
+            }
             Batch->bOverrideMinLOD = true;
             Batch->MinLOD = OuterMatureTreeMinLOD;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
@@ -1443,6 +1557,12 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
             Batch->SetupAttachment(GetRootComponent());
             Batch->SetMobility(EComponentMobility::Static);
             Batch->SetStaticMesh(Entry.Mesh);
+            if (!ApplyCameraSafeFoliageMaterials(*Batch))
+            {
+                Batch->DestroyComponent();
+                DiscardPrepared();
+                return false;
+            }
             Batch->bOverrideMinLOD = true;
             Batch->MinLOD = ActiveMatureTreeMinLOD;
             Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
@@ -1550,14 +1670,15 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         Component->SetupAttachment(GetRootComponent());
         Component->SetMobility(EComponentMobility::Movable);
         Component->SetStaticMesh(Mesh);
+        if (!ApplyCameraSafeFoliageMaterials(*Component))
+        {
+            Component->DestroyComponent();
+            bVisualBuildFailed = true;
+            return;
+        }
         Component->SetRelativeTransform(FTransform(Rotation, Ground - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
         Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Component->SetCollisionResponseToAllChannels(ECR_Ignore);
-        if (bProduce && Node.kind == Homestead::ResourceKind::Sapling)
-        {
-            Component->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-            Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Block);
-        }
         if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial)
             Component->SetMaterial(0, RockMaterial);
         Component->SetGenerateOverlapEvents(false);
@@ -1896,6 +2017,8 @@ bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
             UE_LOG(LogHomesteadWorld, Error, TEXT("PROTOTYPE FALLBACK: required Engine/BasicShapes assets are missing."));
         }
         if (!FieldMaterial || !GroundMaterial || !RockMaterial || !ImportedRock || !Cube || !Sphere || !Cylinder || !Cone)
+            return false;
+        if (!LoadCameraSafeFoliageMaterials())
             return false;
         BuildLighting();
         bInitialized = true;

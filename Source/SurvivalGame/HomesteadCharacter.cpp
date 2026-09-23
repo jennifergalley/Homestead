@@ -13,6 +13,8 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -25,6 +27,7 @@
 AHomesteadCharacter::AHomesteadCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.TickGroup = TG_PostUpdateWork;
     GetCapsuleComponent()->InitCapsuleSize(32.0f, 86.0f);
     bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -45,6 +48,9 @@ AHomesteadCharacter::AHomesteadCharacter()
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(CameraArm);
     Camera->FieldOfView = 75;
+    static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> CameraFoliageCollection(
+        TEXT("/Game/SurvivalGame/Environment/CameraSafeFoliage/MPC_CameraSafeFoliage.MPC_CameraSafeFoliage"));
+    CameraFoliageParameters = CameraFoliageCollection.Object;
 
     // An explicit fallback, never a silent substitute for a missing character asset.
     StandIn = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TechnicalStandIn"));
@@ -357,6 +363,21 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bAppearancePreview) UpdateAppearanceFraming();
+    if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
+    {
+        const FVector CameraPosition = Camera->GetComponentLocation();
+        const FVector HeroTarget = GetActorLocation() + FVector(0, 0, 65);
+        if (!CameraPosition.ContainsNaN() && !HeroTarget.ContainsNaN()
+            && FVector::DistSquared(CameraPosition, HeroTarget) > 1.0)
+            if (auto* Parameters = GetWorld()->GetParameterCollectionInstance(
+                CameraFoliageParameters))
+            {
+                Parameters->SetVectorParameterValue(TEXT("CameraPosition"),
+                    FLinearColor(CameraPosition));
+                Parameters->SetVectorParameterValue(TEXT("HeroTargetPosition"),
+                    FLinearColor(HeroTarget));
+            }
+    }
 }
 
 FRotator AHomesteadCharacter::ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred)

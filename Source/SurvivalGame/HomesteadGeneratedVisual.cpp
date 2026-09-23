@@ -67,9 +67,37 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     auto MaterialReady = [](UMaterialInterface* Interface)
     {
         auto* Material = Interface ? Interface->GetMaterial() : nullptr;
-        auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+        auto* Resource = Interface ? Interface->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
         return Material && Material->GetPathName().StartsWith(TEXT("/Game/"))
             && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
+    };
+    const auto TreeMaterialsReady = [MaterialReady](
+        const UHierarchicalInstancedStaticMeshComponent* Batch)
+    {
+        const UStaticMesh* Mesh = Batch ? Batch->GetStaticMesh() : nullptr;
+        if (!Mesh || !Batch->ComponentHasTag(TEXT("CameraSafeFoliage"))
+            || Batch->GetCollisionResponseToChannel(ECC_Camera) != ECR_Ignore)
+            return false;
+        int32 FoliageSlot = 1;
+        FString Wrapper = TEXT("MI_CameraSafe_TreeSmallLeaves");
+        if (Mesh->GetPathName().Contains(TEXT("/MatureFir_20260922_02/")))
+            Wrapper = TEXT("MI_CameraSafe_MatureFirTwig");
+        else if (Mesh->GetPathName().Contains(TEXT("/TreePalette_20260921_01/Meshes/SM_Jacaranda")))
+        {
+            FoliageSlot = 2;
+            Wrapper = TEXT("MI_CameraSafe_JacarandaLeaves");
+        }
+        for (int32 Slot = 0; Slot < Mesh->GetStaticMaterials().Num(); ++Slot)
+        {
+            auto* Material = Batch->GetMaterial(Slot);
+            if (!MaterialReady(Material)) return false;
+            if (Slot == FoliageSlot)
+            {
+                if (!GetPathNameSafe(Material).Contains(Wrapper)) return false;
+            }
+            else if (Material != Mesh->GetMaterial(Slot)) return false;
+        }
+        return true;
     };
     for (const auto& Entry : Landscape->TerrainChunks)
     {
@@ -127,18 +155,20 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     && Batch->GetCollisionEnabled() == ECollisionEnabled::NoCollision
                     && !Batch->IsQueryCollisionEnabled() && !Batch->GetGenerateOverlapEvents()
                     && !Batch->CanEverAffectNavigation()
+                    && Batch->GetCollisionResponseToChannel(ECC_Camera) == ECR_Ignore
+                    && Batch->ComponentHasTag(TEXT("CameraSafeFoliage"))
                     && Batch->GetCollisionProfileName() == UCollisionProfile::NoCollision_ProfileName
                     && Batch->GetVisibleFlag() && Batch->IsVisible() && !Batch->bHiddenInGame
                     && !Batch->CastShadow
-                    && MaterialReady(Batch->GetMaterial(0))
-                    && Batch->GetMaterial(0) == Mesh->GetMaterial(0);
+                    && MaterialReady(Batch->GetMaterial(0));
                 if (IsGrass)
                 {
                     ++ChunkGrassBatches;
                     ++GrassBatchComponents;
                     Grass += Batch->GetInstanceCount();
                     PolicyReady &= Batch->InstanceStartCullDistance == 3500
-                        && Batch->InstanceEndCullDistance == 5000 && !GrassBatches.Contains(MeshPath);
+                        && Batch->InstanceEndCullDistance == 5000 && !GrassBatches.Contains(MeshPath)
+                        && GetPathNameSafe(Batch->GetMaterial(0)).Contains(TEXT("MI_CameraSafe_Grass"));
                     GrassBatches.Add(MeshPath, Batch);
                 }
                 else if (IsFern)
@@ -147,7 +177,8 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     ++FernBatchComponents;
                     Ferns += Batch->GetInstanceCount();
                     PolicyReady &= Batch->InstanceStartCullDistance == 0
-                        && Batch->InstanceEndCullDistance == 5000 && !FernBatches.Contains(MeshPath);
+                        && Batch->InstanceEndCullDistance == 5000 && !FernBatches.Contains(MeshPath)
+                        && GetPathNameSafe(Batch->GetMaterial(0)).Contains(TEXT("MI_CameraSafe_Fern"));
                     FernBatches.Add(MeshPath, Batch);
                 }
                 else if (IsFlower)
@@ -157,6 +188,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     Flowers += Batch->GetInstanceCount();
                     PolicyReady &= Batch->InstanceStartCullDistance == 3000
                         && Batch->InstanceEndCullDistance == 4800
+                        && GetPathNameSafe(Batch->GetMaterial(0)).Contains(TEXT("MI_CameraSafe_Flower"))
                         && MeshPath.StartsWith(
                             TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_"));
                     FlowerBatches.Add(MeshPath, Batch);
@@ -428,8 +460,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     && Collision->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block
                     && Collision->GetCollisionResponseToChannel(ECC_Camera) == ECR_Block
                     && Collision->GetOwner() == Landscape && Landscape->GetActorEnableCollision();
-                for (int Slot = 0; Slot < ExpectedSlots; ++Slot)
-                    Ready &= MaterialReady(Batch->GetMaterial(Slot));
+                Ready &= TreeMaterialsReady(Batch);
             }
             Valid &= Ready;
             Keys.Add(Key);
@@ -490,8 +521,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                 AnchorError = FVector::Dist(Instance->Transform.GetLocation(), Expected.GetLocation());
                 TransformExact = Instance->Transform.Equals(Expected, 0.001f);
                 Ready &= TransformExact;
-                for (int Slot = 0; Slot < ExpectedSlots; ++Slot)
-                    Ready &= MaterialReady(Batch->GetMaterial(Slot));
+                Ready &= TreeMaterialsReady(Batch);
             }
             Valid &= Ready;
             Keys.Add(Key);
@@ -535,9 +565,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
             && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == ExpectedMinLOD
             && Batch->GetForcedLodModel() == 0 && Batch->GetStaticMesh()->GetRenderData()
             && Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() == 3;
-        if (Batch && Batch->GetStaticMesh())
-            for (int32 Slot = 0; Slot < Batch->GetStaticMesh()->GetStaticMaterials().Num(); ++Slot)
-                Ready &= MaterialReady(Batch->GetMaterial(Slot));
+        Ready &= TreeMaterialsReady(Batch);
         const FString RepresentativeKey = RepresentativeActiveKey.FindRef(Entry.Key);
         bool RepresentativeFound = false;
         if (const auto* Representative = Landscape->ActiveTreeInstances.Find(RepresentativeKey))
@@ -587,9 +615,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
             && Batch->GetOverrideMinLOD() && Batch->GetMinLOD() == AHomesteadWorld::OuterMatureTreeMinLOD
             && Batch->GetForcedLodModel() == 0 && Batch->GetStaticMesh()->GetRenderData()
             && Batch->GetStaticMesh()->GetRenderData()->LODResources.Num() == 3;
-        if (Batch && Batch->GetStaticMesh())
-            for (int32 Slot = 0; Slot < Batch->GetStaticMesh()->GetStaticMaterials().Num(); ++Slot)
-                Ready &= MaterialReady(Batch->GetMaterial(Slot));
+        Ready &= TreeMaterialsReady(Batch);
         auto Row = MakeShared<FJsonObject>();
         Row->SetStringField(TEXT("mesh"), Entry.Key);
         Row->SetNumberField(TEXT("expectedInstances"), Expected);

@@ -28,7 +28,7 @@ Remove `ECC_Camera` blocking from whole young-tree/resource visuals and assert a
 
 ### 2. Use one project-owned foliage camera-fade material function
 
-Create a material function and parameter collection containing actual camera position, heroine visibility target, near-camera radius, corridor radius, and fade-band width. In world space, compute distance to the finite camera-target segment plus a near-camera sphere. Multiply the existing authored alpha mask by a temporally dithered visibility value: clear inside the inner region, blend through a bounded band, remain unchanged outside.
+Create a Material function and parameter collection containing actual camera position, heroine visibility target, near-camera radius, corridor radius, and fade-band width. In world space, compute distance to the finite camera-target segment plus a near-camera sphere. Multiply the existing authored alpha mask by a stable world-space dithered visibility value: clear inside the inner region, blend through a bounded band, remain unchanged outside. Stable spatial dithering is preferred over frame-varying noise here because it avoids a shimmering/ghosted trail while TSR resolves the bounded pattern.
 
 Create project-owned camera-safe wrapper materials/material instances for each admitted foliage family, preserving their exact CC0 diffuse/normal/roughness/AO/alpha textures and two-sided/masked behavior. Apply the function only to leaf/twig/grass/fern/flower/shrub/reed slots; bark/trunk/rock/soil slots keep incumbent materials.
 
@@ -69,4 +69,3 @@ Material/camera work owns no Simulation/save data. The foliage-material lane and
 4. Cover resource/generated/HISM/bank/decorative/far-ring creation/rebuild paths and run lifecycle/material tests.
 5. Run ordinary visual, camera, clearing, save/reload, day/night/rain and matched cadence acceptance.
 6. Build one immutable Shipping candidate and retain the current selected build as rollback until explicit promotion.
-

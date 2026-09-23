@@ -14,6 +14,7 @@
 class UStaticMesh;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
+class UMeshComponent;
 class UCapsuleComponent;
 class UStaticMeshComponent;
 class UHierarchicalInstancedStaticMeshComponent;
@@ -128,6 +129,8 @@ private:
     UPROPERTY()
     TMap<FName, TObjectPtr<UMaterialInstanceDynamic>> Materials;
     UPROPERTY()
+    TMap<FName, TObjectPtr<UMaterialInterface>> CameraSafeFoliageMaterials;
+    UPROPERTY()
     TMap<FName, TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> DecorationBatches;
     UPROPERTY()
     TObjectPtr<UProceduralMeshComponent> Ground;
@@ -222,6 +225,8 @@ private:
         Homestead::Generation::WorldDescriptor World, bool bCollision);
     FVector AtGround(float X, float Y, float Offset = 0) const;
     void BuildLighting();
+    bool LoadCameraSafeFoliageMaterials();
+    bool ApplyCameraSafeFoliageMaterials(UMeshComponent& Component);
     bool BuildDecorations(const Homestead::Simulation& Simulation);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
     bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,

@@ -112,6 +112,7 @@ if ($Watering) { $captures = @('watering-pour.png','watering-recovered.png') }
 if ($Creek) { $captures = @('creek-approach.png','creek-bank.png','creek-along.png','creek-crossed.png') }
 if ($Weeding) { $captures = @('weeding-pull.png','weeding-recovered.png') }
 if ($Clearing) { $captures = @('clearing-swing.png','clearing-recovered.png') }
+if ($CameraLifecycle) { $captures += 'camera-safe-sapling.png' }
 if ($GeneratedWoodland) { $captures = @('generated-untouched.png','generated-cleared-site.png','generated-boundary.png','generated-reloaded.png') }
 if ($GeneratedResumeFrom) { $captures = @('generated-reloaded.png') }
 if ($Prompts) {

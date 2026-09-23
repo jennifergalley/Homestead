@@ -296,8 +296,11 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
         {
             const auto* Interface = Tree->GetMaterial(Slot);
             auto* Material = Interface ? Interface->GetMaterial() : nullptr;
-            auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
-            MaterialsReady &= Material && Material->GetPathName().StartsWith(TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/"))
+            auto* Resource = Interface ? Interface->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+            const bool ExpectedMaterial = Slot == 1
+                ? GetPathNameSafe(Interface).Contains(TEXT("MI_CameraSafe_TreeSmallLeaves"))
+                : Interface == Mesh->GetMaterial(Slot);
+            MaterialsReady &= ExpectedMaterial && Material
                 && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
         }
         Valid &= Triangles == 231785 && Mesh
@@ -332,8 +335,8 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
     const auto MaterialReady = [&](UMaterialInterface* Interface, const TCHAR* Name)
     {
         auto* Material = Interface ? Interface->GetMaterial() : nullptr;
-        auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
-        return Material && Material->GetPathName() == Prefix + TEXT("/Materials/") + Name + TEXT(".") + Name
+        auto* Resource = Interface ? Interface->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+        return Material && GetPathNameSafe(Interface).Contains(TEXT("MI_CameraSafe_Grass"))
             && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
     };
     TArray<FString> Rows;
@@ -473,17 +476,19 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
         {
             auto* Interface = Part->GetMaterial(Slot);
             auto* Material = Interface ? Interface->GetMaterial() : nullptr;
-            auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
-            const FString Name = Fir ? (Slot == 0 ? TEXT("M_FirSapling_Branches") : TEXT("M_FirSapling_Twigs"))
-                : TEXT("M_Fern02");
-            Ready &= Material && Material->GetPathName() == Root + TEXT("/Materials/") + Name + TEXT(".") + Name
+            auto* Resource = Interface ? Interface->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+            const bool ExpectedMaterial = GetPathNameSafe(Interface).Contains(Fir
+                ? (Slot == 0 ? TEXT("MI_CameraSafe_FirSaplingBranches")
+                    : TEXT("MI_CameraSafe_FirSaplingTwigs"))
+                : TEXT("MI_CameraSafe_Fern"));
+            Ready &= ExpectedMaterial && Material
                 && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
         }
         FCollisionResponseContainer Responses(ECR_Ignore);
-        if (Fir) Responses.SetResponse(ECC_Camera, ECR_Block);
         const bool CollisionValid = !Part->GetGenerateOverlapEvents() && !Part->CanEverAffectNavigation()
-            && Part->GetCollisionEnabled() == (Fir ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision)
-            && (!Fir || Part->GetCollisionResponseToChannels() == Responses);
+            && Part->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+            && Part->GetCollisionResponseToChannels() == Responses
+            && Part->ComponentHasTag(TEXT("CameraSafeFoliage"));
         const bool PlacementValid = !AHomesteadWorld::IsDecorationReserved(PC->State(), Position.X, Position.Y,
                 Fir ? 90 : 75, 0, !Fir)
             && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= (Fir ? 284.9 : 269.9);
@@ -514,6 +519,8 @@ void AHomesteadVisualPlaytest::RecordCameraForeground()
     PC->GetViewportSize(Width, Height);
     auto Evidence = MakeShared<FJsonObject>();
     Evidence->SetStringField(TEXT("camera"), Camera.ToString());
+    Evidence->SetStringField(TEXT("heroTarget"),
+        (PC->GetPawn()->GetActorLocation() + FVector(0, 0, 65)).ToString());
     Evidence->SetStringField(TEXT("rotation"), Rotation.ToString());
     Evidence->SetNumberField(TEXT("gameHour"), PC->State().hour);
     Evidence->SetNumberField(TEXT("width"), Width);
@@ -527,6 +534,10 @@ void AHomesteadVisualPlaytest::RecordCameraForeground()
         Evidence->SetNumberField(TEXT("probeRadius"), Boom->ProbeSize);
         Evidence->SetBoolField(TEXT("collisionFixApplied"), Boom->IsCollisionFixApplied());
         Evidence->SetStringField(TEXT("unfixedCamera"), Boom->GetUnfixedCameraPosition().ToString());
+        Evidence->SetNumberField(TEXT("desiredArmDistanceCm"),
+            FVector::Dist(Boom->PreviousArmOrigin, Boom->GetUnfixedCameraPosition()));
+        Evidence->SetNumberField(TEXT("resolvedArmDistanceCm"),
+            FVector::Dist(Boom->PreviousArmOrigin, Camera));
         FHitResult Hit;
         FCollisionQueryParams Query(SCENE_QUERY_STAT(CameraForeground), false, PC->GetPawn());
         const bool Blocked = GetWorld()->SweepSingleByChannel(Hit, Boom->PreviousArmOrigin,
@@ -580,6 +591,13 @@ void AHomesteadVisualPlaytest::RecordCameraForeground()
                 Row->SetBoolField(TEXT("queryEnabled"), Part->IsQueryCollisionEnabled());
                 Row->SetNumberField(TEXT("cameraResponse"), Part->GetCollisionResponseToChannel(ECC_Camera));
                 Row->SetNumberField(TEXT("pawnResponse"), Part->GetCollisionResponseToChannel(ECC_Pawn));
+                Row->SetBoolField(TEXT("cameraSafeFoliage"),
+                    Part->ComponentHasTag(TEXT("CameraSafeFoliage")));
+                TArray<TSharedPtr<FJsonValue>> MaterialSlots;
+                for (int32 Slot = 0; Slot < Part->GetNumMaterials(); ++Slot)
+                    MaterialSlots.Add(MakeShared<FJsonValueString>(
+                        GetPathNameSafe(Part->GetMaterial(Slot))));
+                Row->SetArrayField(TEXT("materials"), MaterialSlots);
                 FLinearColor Tint;
                 const bool HasTint = Part->GetMaterial(0) && Part->GetMaterial(0)->GetVectorParameterValue(FMaterialParameterInfo(TEXT("Tint")), Tint);
                 Row->SetStringField(TEXT("tint"), HasTint ? Tint.ToString() : TEXT("unavailable"));
@@ -688,18 +706,27 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
     {
         const auto* Interface = Batch->GetMaterial(Index);
         auto* Material = Interface ? Interface->GetMaterial() : nullptr;
-        auto* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
-        const FString MaterialRoot = Mesh->GetPathName().Contains(TEXT("/TreePalette_20260921_01/"))
-            ? TEXT("/Game/Trials/TreePalette_20260921_01/Materials/")
-            : Mesh->GetPathName().Contains(TEXT("/MatureFir_20260922_02/"))
-                ? TEXT("/Game/Trials/MatureFir_20260922_02/Materials/")
-                : TEXT("/Game/Trials/TreeSmall02_20260921_01/Materials/");
-        const bool Ready = Material && Material->GetPathName().StartsWith(MaterialRoot)
+        auto* Resource = Interface ? Interface->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+        int32 FoliageSlot = 1;
+        FString Wrapper = TEXT("MI_CameraSafe_TreeSmallLeaves");
+        if (Mesh->GetPathName().Contains(TEXT("/MatureFir_20260922_02/")))
+            Wrapper = TEXT("MI_CameraSafe_MatureFirTwig");
+        else if (Mesh->GetPathName().Contains(TEXT("/TreePalette_20260921_01/Meshes/SM_Jacaranda")))
+        {
+            FoliageSlot = 2;
+            Wrapper = TEXT("MI_CameraSafe_JacarandaLeaves");
+        }
+        const bool ExpectedMaterial = Index == FoliageSlot
+            ? GetPathNameSafe(Interface).Contains(Wrapper)
+            : Interface == Mesh->GetMaterial(Index);
+        const bool Ready = ExpectedMaterial && Material
             && Resource && Resource->GetGameThreadShaderMap() && Resource->IsGameThreadShaderMapComplete();
         bTreeReady &= Ready;
         PresentationSettings.Add(FString::Printf(TEXT("tree_material[%d]=%s imported_slot=%s shader_map_complete=%d"),
             Index, *GetPathNameSafe(Material), *Mesh->GetStaticMaterials()[Index].ImportedMaterialSlotName.ToString(), Ready));
     }
+    bTreeReady &= Batch->ComponentHasTag(TEXT("CameraSafeFoliage"))
+        && Batch->GetCollisionResponseToChannel(ECC_Camera) == ECR_Ignore;
     PresentationSettings.Add(FString::Printf(TEXT("tree_key=%s tree_mesh=%s root=%s scale=%s ground_error_cm=%.6f ready=%d"),
         *TreeKey,
         *GetPathNameSafe(Mesh), *Root.ToString(), *TreeInstance->Visual.Transform.GetScale3D().ToString(),

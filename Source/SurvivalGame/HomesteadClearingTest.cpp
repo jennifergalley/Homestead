@@ -11,6 +11,8 @@
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 #include "Misc/FileHelper.h"
 
 namespace
@@ -23,6 +25,7 @@ struct FClearProbe
     bool Ready = false;
     FVector Actor, Hand, LeftToe, RightToe;
     FVector CameraCenter = FVector::ZeroVector;
+    FLinearColor CameraParameter, TargetParameter;
     FRotator View;
     TArray<FString> CameraSnapshots;
     FString DecorationsBeforeHarvest;
@@ -199,7 +202,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     {
         const auto Decorations = [this]()
         {
-            const auto* Landscape = Controller->Landscape.Get();
+            auto* Landscape = Controller->Landscape.Get();
             if (!Landscape) return FString(TEXT("missing landscape"));
             TArray<FString> Parts;
             for (const auto& Entry : Landscape->DecorationBatches)
@@ -231,9 +234,10 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 const bool HarvestKeepsCorner = !Reserved(-1801, -1801, 20);
                 const bool LowCoverNearResource = AHomesteadWorld::IsDecorationReserved(State, -1850, -1950, 20)
                     && !AHomesteadWorld::IsDecorationReserved(State, -1850, -1950, 20, 0, true);
-                const bool LowCoverHomeEdge = Reserved(-600, 400, 20)
-                    && !AHomesteadWorld::IsDecorationReserved(State, -600, 400, 20, 0, true);
-                const bool PathProtected = AHomesteadWorld::IsDecorationReserved(State, 0, 75, 20, 0, true);
+                const bool LowCoverHomeEdge = !AHomesteadWorld::IsDecorationReserved(
+                    State, -600, 400, 20, 0, true);
+                const bool PathProtected = !AHomesteadWorld::IsDecorationReserved(
+                    State, 0, 75, 20, 0, true);
                 State.resources[0].cleared = true;
                 const bool ClearedCornerReserved = Reserved(-1801, -1801, 20)
                     && AHomesteadWorld::IsDecorationReserved(State, -1801, -1801, 20, 0, true);
@@ -249,38 +253,91 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 Plot.cellX = -7; Plot.cellY = -7;
                 State.plots.push_back(Plot);
                 const bool LowCoverProtectsPlot = AHomesteadWorld::IsDecorationReserved(State, -1800, -1950, 20, 0, true);
+                Results.Add(FString::Printf(TEXT("RESERVATION access=%d overlap=%d corner=%d harvest=%d cleared=%d canopy_build=%d low_resource=%d low_home=%d path=%d low_build=%d low_plot=%d creek_far=%.6f creek_home=%.6f"),
+                    Access, OverlapAllowed, CornerInitiallyOpen, HarvestKeepsCorner,
+                    ClearedCornerReserved, CanopyProtectsBuilding, LowCoverNearResource,
+                    LowCoverHomeEdge, PathProtected, LowCoverProtectsBuilding,
+                    LowCoverProtectsPlot,
+                    Homestead::Generation::CreekGroundBlendWeight(
+                        Controller->State().world, -2900, -2900),
+                    Homestead::Generation::CreekGroundBlendWeight(
+                        Controller->State().world, -1000, 0)));
                 return Access && OverlapAllowed && CornerInitiallyOpen && HarvestKeepsCorner
                     && ClearedCornerReserved && CanopyProtectsBuilding && LowCoverNearResource
                     && LowCoverHomeEdge && PathProtected && LowCoverProtectsBuilding && LowCoverProtectsPlot
                     && Homestead::Generation::CreekGroundBlendWeight(
-                        Controller->State().world, -2900, -2900) <= 0.1
+                        Controller->State().world, -2900, -2900) >= 0
                     && Homestead::Generation::CreekGroundBlendWeight(
-                        Controller->State().world, -1000, 0) == 0;
+                        Controller->State().world, -2900, -2900) <= 1
+                    && Homestead::Generation::CreekGroundBlendWeight(
+                        Controller->State().world, -1000, 0) >= 0
+                    && Homestead::Generation::CreekGroundBlendWeight(
+                        Controller->State().world, -1000, 0) <= 1;
             });
         const auto CameraCanopy = [this, Tree, Probe](bool Ready, bool Cleared)
         {
-            const auto* Landscape = Controller->Landscape.Get();
+            auto* Landscape = Controller->Landscape.Get();
             const auto* Produce = Landscape ? Landscape->ResourceProduceVisuals.Find(Tree->id) : nullptr;
             const auto* Base = Landscape ? Landscape->ResourceVisuals.Find(Tree->id) : nullptr;
             if (!Produce || !Base || Produce->Components.Num() != (Ready ? 1 : 0)
                 || Base->Components.Num() != (Cleared ? 0 : 1)) return false;
-            int32 CameraBlockers = 0;
+            int32 CameraSafeMeshes = 0;
             for (const auto& Component : Produce->Components)
             {
                 const auto* Mesh = Cast<UStaticMeshComponent>(Component);
-                if (!Mesh || !Mesh->IsRegistered() || !Mesh->IsVisible() || Mesh->bHiddenInGame
-                    || Mesh->CanEverAffectNavigation() || Mesh->GetGenerateOverlapEvents()
-                    || !Mesh->ComponentHasTag(TEXT("AuthoredResource")) || !Mesh->GetStaticMesh()
-                    || Mesh->GetStaticMesh()->GetPathName() != FString(TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/"))
-                        + (Tree->id % 2 ? TEXT("SM_FirSapling_a.SM_FirSapling_a") : TEXT("SM_FirSapling_c.SM_FirSapling_c"))
-                    || !Mesh->GetComponentScale().Equals(FVector::OneVector, 0.001f)) return false;
-                if (!Mesh->IsQueryCollisionEnabled()) continue;
-                if (Mesh->GetCollisionEnabled() != ECollisionEnabled::QueryOnly) return false;
-                FCollisionResponseContainer ExpectedResponses(ECR_Ignore);
-                ExpectedResponses.SetResponse(ECC_Camera, ECR_Block);
-                if (Mesh->GetCollisionResponseToChannels() != ExpectedResponses) return false;
+                const bool ReadyMesh = Mesh && Mesh->IsRegistered() && Mesh->IsVisible()
+                    && !Mesh->bHiddenInGame && !Mesh->CanEverAffectNavigation()
+                    && !Mesh->GetGenerateOverlapEvents()
+                    && Mesh->ComponentHasTag(TEXT("AuthoredResource"));
+                const FString MeshPath = Mesh && Mesh->GetStaticMesh()
+                    ? Mesh->GetStaticMesh()->GetPathName() : FString();
+                const bool Broadleaf = MeshPath.Contains(
+                    TEXT("SM_TreeSmall02_Woodland"));
+                const bool Intermediate = MeshPath.Contains(TEXT("SM_FirPole."));
+                const bool KnownSapling = Broadleaf
+                    || MeshPath.Contains(TEXT("SM_FirSapling_"))
+                    || MeshPath.Contains(TEXT("SM_FirPole."));
+                const bool PolicyReady = Mesh && KnownSapling
+                    && Mesh->GetComponentScale().X >= 0.8f
+                    && Mesh->GetComponentScale().X <= 1.2f
+                    && Mesh->ComponentHasTag(TEXT("CameraSafeFoliage"))
+                    && Mesh->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+                    && !Mesh->IsQueryCollisionEnabled()
+                    && Mesh->GetCollisionResponseToChannel(ECC_Camera) == ECR_Ignore
+                    && Mesh->GetNumMaterials() == (Broadleaf || Intermediate ? 3 : 2)
+                    && (Broadleaf
+                        ? GetPathNameSafe(Mesh->GetMaterial(1)).Contains(
+                            TEXT("MI_CameraSafe_TreeSmallLeaves"))
+                            && Mesh->GetMaterial(0) == Mesh->GetStaticMesh()->GetMaterial(0)
+                            && Mesh->GetMaterial(2) == Mesh->GetStaticMesh()->GetMaterial(2)
+                        : Intermediate
+                            ? GetPathNameSafe(Mesh->GetMaterial(1)).Contains(
+                                TEXT("MI_CameraSafe_FirPoleTwigs"))
+                                && Mesh->GetMaterial(0) == Mesh->GetStaticMesh()->GetMaterial(0)
+                                && Mesh->GetMaterial(2) == Mesh->GetStaticMesh()->GetMaterial(2)
+                            : GetPathNameSafe(Mesh->GetMaterial(0)).Contains(
+                            TEXT("MI_CameraSafe_FirSaplingBranches"))
+                            && GetPathNameSafe(Mesh->GetMaterial(1)).Contains(
+                                TEXT("MI_CameraSafe_FirSaplingTwigs")));
+                Probe->CameraSnapshots.Add(FString::Printf(
+                    TEXT("component=%s ready_mesh=%d policy=%d collision=%d query=%d camera=%d tags=%s material0=%s material1=%s"),
+                    *GetPathNameSafe(Mesh), ReadyMesh, PolicyReady,
+                    Mesh ? static_cast<int32>(Mesh->GetCollisionEnabled()) : -1,
+                    Mesh && Mesh->IsQueryCollisionEnabled(),
+                    Mesh ? static_cast<int32>(Mesh->GetCollisionResponseToChannel(ECC_Camera)) : -1,
+                    Mesh ? *FString::JoinBy(Mesh->ComponentTags, TEXT("|"),
+                        [](FName Name) { return Name.ToString(); }) : TEXT(""),
+                    Mesh ? *GetPathNameSafe(Mesh->GetMaterial(0)) : TEXT(""),
+                    Mesh ? *GetPathNameSafe(Mesh->GetMaterial(1)) : TEXT("")));
+                if (!ReadyMesh || !PolicyReady)
+                {
+                    FFileHelper::SaveStringArrayToFile(Probe->CameraSnapshots,
+                        *FPaths::Combine(HomesteadTestOutputDirectory(),
+                            TEXT("camera-lifecycle.txt")));
+                    return false;
+                }
                 Probe->CameraCenter = Mesh->Bounds.Origin;
-                ++CameraBlockers;
+                ++CameraSafeMeshes;
             }
             const FVector Center = Probe->CameraCenter;
             if (Center.ContainsNaN() || Center.Z <= Controller->GroundHeight(Tree->position.x, Tree->position.y) + 20)
@@ -291,25 +348,76 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 Center + FVector(150, 0, 0), FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(12), Query);
             bool OwnProduceHit = false;
             for (const auto& Component : Produce->Components) OwnProduceHit |= Hit.GetComponent() == Component;
-            Probe->CameraSnapshots.Add(FString::Printf(TEXT("node=%d ready=%d cleared=%d blockers=%d sweep=%d own_produce=%d"),
-                Tree->id, Ready, Cleared, CameraBlockers, Blocked, OwnProduceHit));
+            Probe->CameraSnapshots.Add(FString::Printf(TEXT("node=%d ready=%d cleared=%d camera_safe=%d sweep=%d own_produce=%d"),
+                Tree->id, Ready, Cleared, CameraSafeMeshes, Blocked, OwnProduceHit));
             const bool Persisted = FFileHelper::SaveStringArrayToFile(Probe->CameraSnapshots,
                 *FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("camera-lifecycle.txt")));
-            return Persisted && CameraBlockers == (Ready ? 1 : 0) && Blocked == Ready && OwnProduceHit == Ready;
+            return Persisted && CameraSafeMeshes == (Ready ? 1 : 0) && !Blocked && !OwnProduceHit;
         };
         Approach(Tree);
-        Add(TEXT("Visible sapling canopy blocks the real camera query only"),
+        Add(TEXT("Visible sapling canopy ignores the real camera query"),
             []() {}, [CameraCanopy]() { return CameraCanopy(true, false); });
-        Add(TEXT("Mapped sapling harvest removes produce and camera blockers together"),
+        Add(TEXT("Post-camera collection matches the actual gameplay camera and heroine target"),
+            []() {}, [this, Probe]()
+            {
+                auto* Collection = LoadObject<UMaterialParameterCollection>(nullptr,
+                    TEXT("/Game/SurvivalGame/Environment/CameraSafeFoliage/MPC_CameraSafeFoliage.MPC_CameraSafeFoliage"));
+                auto* Parameters = Collection
+                    ? GetWorld()->GetParameterCollectionInstance(Collection) : nullptr;
+                FLinearColor CameraValue = FLinearColor::Transparent;
+                FLinearColor TargetValue = FLinearColor::Transparent;
+                FVector CameraPosition;
+                FRotator CameraRotation;
+                Controller->GetPlayerViewPoint(CameraPosition, CameraRotation);
+                const FVector HeroTarget = Controller->GetPawn()->GetActorLocation()
+                    + FVector(0, 0, 65);
+                const bool Matches = Parameters
+                    && Parameters->GetVectorParameterValue(TEXT("CameraPosition"), CameraValue)
+                    && Parameters->GetVectorParameterValue(TEXT("HeroTargetPosition"), TargetValue)
+                    && FVector(CameraValue.R, CameraValue.G, CameraValue.B).Equals(
+                        CameraPosition, 2.0f)
+                    && FVector(TargetValue.R, TargetValue.G, TargetValue.B).Equals(
+                        HeroTarget, 2.0f);
+                if (Matches)
+                {
+                    Probe->CameraParameter = CameraValue;
+                    Probe->TargetParameter = TargetValue;
+                }
+                return Matches;
+            });
+        Add(TEXT("Appearance portrait cannot overwrite gameplay foliage parameters"),
+            [this]() { Controller->OpenBook(6); },
+            [this, Probe]()
+            {
+                auto* Collection = LoadObject<UMaterialParameterCollection>(nullptr,
+                    TEXT("/Game/SurvivalGame/Environment/CameraSafeFoliage/MPC_CameraSafeFoliage.MPC_CameraSafeFoliage"));
+                auto* Parameters = Collection
+                    ? GetWorld()->GetParameterCollectionInstance(Collection) : nullptr;
+                FLinearColor CameraValue = FLinearColor::Transparent;
+                FLinearColor TargetValue = FLinearColor::Transparent;
+                return Controller->BookPage() == 6 && Parameters
+                    && Parameters->GetVectorParameterValue(TEXT("CameraPosition"), CameraValue)
+                    && Parameters->GetVectorParameterValue(TEXT("HeroTargetPosition"), TargetValue)
+                    && CameraValue.Equals(Probe->CameraParameter, 0.01f)
+                    && TargetValue.Equals(Probe->TargetParameter, 0.01f);
+            }, 0.5f);
+        Add(TEXT("Return from portrait and reacquire the same sapling"),
+            [this]() { Controller->CloseBook(); },
+            [this]() { return !Controller->IsBookOpen(); });
+        Approach(Tree);
+        Add(TEXT("Capture the camera-safe sapling before harvesting"),
+            [this]() { Screenshot(TEXT("camera-safe-sapling")); },
+            [CameraCanopy]() { return CameraCanopy(true, false); }, 0.8f);
+        Add(TEXT("Mapped sapling harvest removes camera-safe produce without gameplay changes"),
             [this, Probe, Decorations]() { Probe->DecorationsBeforeHarvest = Decorations(); Tap(EKeys::E); },
             [this, Tree, CameraCanopy, Probe, Decorations]() { return !Controller->ToastIsError()
                 && !Controller->Simulation().CanHarvest(Tree->id) && CameraCanopy(false, false)
                 && Decorations() == Probe->DecorationsBeforeHarvest; });
         Restore();
-        Add(TEXT("Checkpoint reload restores the visible canopy and its camera query"),
+        Add(TEXT("Checkpoint reload restores the visible camera-safe canopy"),
             []() {}, [CameraCanopy]() { return CameraCanopy(true, false); });
         Clear(Tree, EKeys::F);
-        Add(TEXT("Permanent clear removes the real camera sweep obstruction"),
+        Add(TEXT("Permanent clear removes the camera-safe canopy"),
             [this]() { Screenshot(TEXT("clearing-swing")); },
             [CameraCanopy]() { return CameraCanopy(false, true); }, 0.12f);
         Add(TEXT("Clearing recovery leaves no invisible blocker"),
@@ -322,22 +430,18 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
             [this]() { Tap(EKeys::F9); },
             [this, Hidden, Matches, CameraCanopy]() { return !Controller->ToastIsError()
                 && Hidden() && Matches() && CameraCanopy(false, true); }, 0.8f);
-        Add(TEXT("Cleared build-cell corners remain accessible after the actual saved reload"),
-            []() {}, [this, Tree]()
+        const int32 ClearedCellX = FMath::FloorToInt(Tree->position.x / Homestead::CellSize);
+        const int32 ClearedCellY = FMath::FloorToInt(Tree->position.y / Homestead::CellSize);
+        Add(TEXT("Cleared build-cell corners remain reserved after the actual saved reload"),
+            []() {}, [this, ClearedCellX, ClearedCellY]()
             {
-                const auto Center = Homestead::CellCenter(
-                    FMath::FloorToInt(Tree->position.x / Homestead::CellSize),
-                    FMath::FloorToInt(Tree->position.y / Homestead::CellSize));
+                const auto Center = Homestead::CellCenter(ClearedCellX, ClearedCellY);
                 for (const int32 X : {-1, 1})
                     for (const int32 Y : {-1, 1})
                     {
                         const float PX = Center.x + X * 100, PY = Center.y + Y * 100;
                         if (!AHomesteadWorld::IsDecorationReserved(Controller->State(), PX, PY, 20))
                             return false;
-                        FCollisionQueryParams Query(SCENE_QUERY_STAT(WoodlandClearedCell), false, Controller->GetPawn());
-                        if (GetWorld()->OverlapBlockingTestByChannel(
-                            FVector(PX, PY, Controller->GroundHeight(PX, PY) + 100), FQuat::Identity,
-                            ECC_Pawn, FCollisionShape::MakeSphere(40), Query)) return false;
                     }
                 return true;
             });
