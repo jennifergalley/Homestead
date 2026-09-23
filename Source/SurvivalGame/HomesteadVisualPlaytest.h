@@ -101,6 +101,7 @@ private:
     int32 WaterPlotId = -1;
     int32 WaterBefore = 0;
     bool bWaterInputPending = false;
+    bool bWaterActionEntered = false;
     int32 WaterSupplyItem = 0;
     int32 WaterSupplyBefore = 0;
 

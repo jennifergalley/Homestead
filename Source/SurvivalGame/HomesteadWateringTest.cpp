@@ -328,7 +328,30 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             }, [this, Probe, Matches]() { return Probe->Ready && !Controller->ToastIsError() && Matches(); }, 0.12f);
     Add(TEXT("Wait for repeated watering to recover"), []() {}, Hidden, 2.3f);
     Rejected(TEXT("Exhausted water follows the existing refill rejection without a pose"));
-    Add(TEXT("Move beyond all plots"), [this]() { Teleport({3500, -3400}); }, Hidden, 0.7f);
+    Add(TEXT("Move to a valid empty context beyond all plot/resource focus"),
+        [this, Garden]()
+        {
+            for (int32 Radius = 500; Radius <= 2000; Radius += 250)
+                for (int32 Direction = 0; Direction < 16; ++Direction)
+                {
+                    const double Angle = 2.0 * PI * Direction / 16.0;
+                    const Homestead::Point Candidate{Garden.x + Radius * FMath::Cos(Angle),
+                        Garden.y + Radius * FMath::Sin(Angle)};
+                    bool Occupied = false;
+                    for (const auto& Node : Controller->State().resources)
+                        if (!Node.cleared && FMath::Square(Node.position.x - Candidate.x)
+                            + FMath::Square(Node.position.y - Candidate.y) < FMath::Square(300.0))
+                        { Occupied = true; break; }
+                    for (const auto& Plot : Controller->State().plots)
+                    {
+                        const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                        if (FMath::Square(Center.x - Candidate.x) + FMath::Square(Center.y - Candidate.y)
+                            < FMath::Square(300.0)) Occupied = true;
+                    }
+                    if (!Occupied) { Teleport(Candidate); return; }
+                }
+        },
+        [this, Hidden]() { return Controller->FocusTitle() == TEXT("Woodland") && Hidden(); }, 0.7f);
     Add(TEXT("Out-of-range interaction has no water debit or presentation"),
         [this, Probe]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour; Tap(EKeys::E); },
         [this, Hidden, Matches]() { return Controller->Toast().Contains(TEXT("Walk closer")) && Hidden() && Matches(); });

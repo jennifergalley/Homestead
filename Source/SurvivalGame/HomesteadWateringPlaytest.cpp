@@ -117,8 +117,9 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
             { Fail(PC->Toast()); return; }
             Observations.Add(FString::Printf(TEXT("Crafted %s through mapped recipe selection; current hour %.6f."),
                 bClearRoute ? TEXT("wood/stone/fiber hatchet") : Digging ? TEXT("digging stick") : TEXT("wood/fiber watering can"), PC->State().hour));
-            if (!Digging || bClearRoute) Tap(EKeys::Gamepad_FaceButton_Right);
+            Tap(EKeys::Gamepad_FaceButton_Right);
             bWaterInputPending = false;
+            bWaterActionEntered = false;
             ++WaterStage;
             if (bClearRoute) { WaterStage = 16; ForageId = -1; }
             break;
@@ -128,8 +129,13 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         const auto Rows = PC->Rows();
         if (!PC->IsBookOpen() || PC->BookPage() != 1 || !Rows.IsValidIndex(PC->SelectedRow())) { Fail(TEXT("Craft book navigation failed.")); return; }
         if (Rows[PC->SelectedRow()].Id != Recipe) { Tap(EKeys::Gamepad_DPad_Down); WaterStageElapsed = 0; break; }
-        // Native recipe selection enters its action region before activation.
-        Tap(EKeys::Gamepad_FaceButton_Bottom);
+        if (PC->HasNativeMenu() && !bWaterActionEntered)
+        {
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            bWaterActionEntered = true;
+            WaterStageElapsed = 0;
+            break;
+        }
         Tap(EKeys::Gamepad_FaceButton_Bottom);
         bWaterInputPending = true;
         WaterStageElapsed = 0;
@@ -360,7 +366,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
     if (WaterStageElapsed > 90) { Fail(TEXT("Bounded ordinary approach timed out; no teleport fallback.")); return; }
     ApplyAxes(Move, Look);
     CaptureElapsed += WallDelta;
-    if (CaptureElapsed >= ((bClearRoute ? WaterStage >= 18 : WaterStage >= 11) ? 0.125f : 1.0f))
+    if (CaptureElapsed >= ((bClearRoute ? WaterStage >= 18 : WaterStage >= 8) ? 0.125f : 5.0f))
     {
         Capture(Label);
         CaptureElapsed = 0;
