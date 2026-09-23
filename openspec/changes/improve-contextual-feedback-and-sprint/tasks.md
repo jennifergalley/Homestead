@@ -2,9 +2,9 @@
 
 ## 1. Quiet Contextual HUD
 
-- [ ] 1.1 Record selected-build 720p and 4K gameplay frames plus measured HUD geometry for empty woodland, focused resource, successful one/multi-item gather, rejection, and device switching so the always-on panels and verbose renewal message are reproducible
-- [ ] 1.2 Gate the context panel on real focus, remove the permanent top-right shortcut guide, and emit exact concise inventory-delta gather results; verify focused controller/keyboard prompts, no-focus absence, renewable silence, errors, toast lifetime, wrapping, and protected-region layout through focused source/native tests
-- [ ] 1.3 Run one ordinary mapped gather route and inspect before/near/after frames, verifying the HUD stays quiet while exploring, shows relevant controls only near a target, and briefly reports every item actually added to the pack
+- [ ] 1.1 Record selected-build 720p and 4K gameplay frames plus measured HUD geometry for empty woodland, the horizontal labeled survival meters, focused resource, successful one/multi-item gather, ordinary action rejection, critical failure, and device switching so the always-on panels, eight-second blanket error lifetime, and verbose renewal message are reproducible
+- [ ] 1.2 Gate the context panel on real focus, remove the permanent top-right shortcut guide, classify ordinary world-action rejections at six seconds while retaining longer critical failures, stack compact original icon-led Food/Energy/Warmth meters in the lower-left, and emit exact concise inventory-delta gather results; verify semantic meter identity/values/warnings, focused controller/keyboard prompts, no-focus absence, renewable silence, toast categories/lifetimes, wrapping, and protected-region layout through focused source/native tests
+- [ ] 1.3 Run ordinary mapped traversal/gather/rejection routes and inspect before/near/after frames, verifying the HUD stays quiet while exploring, the three icon meters remain distinct and readable at 720p/4K, relevant controls appear only near a target, missing-hatchet guidance clears after six seconds, critical failures remain longer, and pickup feedback briefly reports every item actually added to the pack
 
 ## 2. Finite Fallen Branches
 

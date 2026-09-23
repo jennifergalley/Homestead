@@ -53,3 +53,26 @@ Context prompts and pickup/error toasts SHALL preserve the existing responsive H
 #### Scenario: Device changes near a target
 - **WHEN** the player switches between controller and keyboard/mouse while a target remains focused
 - **THEN** the visible interaction hint updates to the active device without duplicating panels
+
+### Requirement: Ordinary action rejections clear sooner than critical failures
+World-action rejection toasts such as missing-tool, out-of-range, capacity, depletion, and renewal guidance SHALL remain visible for six seconds before clearing. Critical save, recovery, preference-persistence, and startup failures SHALL retain their longer existing lifetime.
+
+#### Scenario: Try to fell a tree without a hatchet
+- **WHEN** the action is rejected with missing-hatchet guidance
+- **THEN** the guidance remains readable and clears after six seconds without requiring another action
+
+#### Scenario: User-setting persistence fails
+- **WHEN** a camera, audio, or graphics preference cannot be saved
+- **THEN** the critical failure remains visible for the longer failure lifetime and is not shortened as an ordinary action rejection
+
+### Requirement: Survival meters use a compact vertical icon stack
+Food, Energy, and Warmth SHALL be shown as three vertically stacked compact meters in the lower-left corner. Each meter SHALL use a distinct original icon instead of a persistent text label while preserving its numeric value, fill level, low-state warning, and semantic identity for tests/accessibility metadata.
+
+#### Scenario: Read survival state during gameplay
+- **WHEN** the ordinary gameplay HUD is visible
+- **THEN** Food, Energy, and Warmth appear in a stable top-to-bottom icon stack in the lower-left corner
+- **AND** no `Food`, `Energy`, or `Warmth` text label is drawn beside the meters
+
+#### Scenario: A survival value becomes low
+- **WHEN** any survival value drops below the existing warning threshold
+- **THEN** that meter retains its warning treatment without moving or obscuring another HUD region

@@ -28,7 +28,9 @@ The admitted Flower Empodium CC0 asset already supplies two 758-triangle clumps,
 
 ### 1. Separate overlay mode from field-book page identity
 
-Controller will distinguish gameplay overlays semantically: FieldBook, Settings, and Recovery. Esc from ordinary gameplay opens Settings; Esc/B/Menu inside Settings closes it. If placement planning is active, the first Esc retains existing safe cancellation and a subsequent Esc opens Settings. Controller Menu/Start opens Settings; controller View/Back retains Guidebook. `I`/Tab, `C`, `B`, and `H` continue opening Inventory, Craft, Build, and Guidebook.
+Controller will distinguish gameplay overlays semantically: FieldBook, Settings, and Recovery. Esc from ordinary gameplay opens Settings; Esc/B/Menu inside Settings closes it. If placement planning is active, the first Esc retains existing safe cancellation and a subsequent Esc opens Settings. Controller Menu/Start opens Settings; controller View/Back retains Guidebook. `I`/Tab, `C`, and `B` continue opening Inventory, Craft, and Build; `G` opens Guidebook directly during gameplay.
+
+`G` remains state-aware: `InputKey` already lets the open native menu consume physical input before gameplay bindings, so contextual menu withdrawal/secondary behavior can remain available while `G` routes to Guidebook only when no menu owns the key.
 
 The field-book tab bar becomes Inventory, Craft, Build, Guidebook, and Appearance. Internal page IDs may remain noncontiguous to minimize save/test churn; tab navigation uses an explicit ordered page list rather than modulo seven. Settings and Recovery render outside that list.
 
@@ -54,7 +56,13 @@ Credits is removed from tab labels/icons, controller row generation, navigation 
 
 This is a UI removal, not removal of copyright/license notices from distributed files.
 
-### 5. Reuse Flower Empodium as distinct decorative HISM cover
+### 5. Show preview identity only in Settings
+
+The existing `PreviewLabel()` remains the single source for isolated preview profile/save-routing identity, but the gameplay Canvas footer stops drawing it. Settings conditionally adds a noninteractive build-information row only when `PreviewLabel()` is nonempty. The generic heroine/technical-stand-in gameplay footer is removed with the same permanent chrome; character maturity remains documented in project/release notes rather than occupying the HUD.
+
+**Alternative considered:** retain a shortened version watermark. Rejected because Jenny wants preview/version information only in Settings.
+
+### 6. Reuse Flower Empodium as distinct decorative HISM cover
 
 The cover builder loads `SM_FlowerEmpodium_a/b` through their admitted authored material and creates at most two chunk-owned HISM components tagged `DecorativeWildflower`. A bounded deterministic subset (target approximately 12-20 accepted clumps per intersecting 24 m chunk) uses modest 0.55-0.8 uniform scale and small pocket clustering. Interactive flower resources retain larger grouped presentation and separate focus/produce state.
 
@@ -62,7 +70,7 @@ Placement calls the existing low-cover reservation authority and additionally ke
 
 **Alternative considered:** create primitive colored flower dots. Rejected because the verified authored CC0 mesh/material already exists and visually belongs to the world.
 
-### 6. Separate independent lanes and serialize integration
+### 7. Separate independent lanes and serialize integration
 
 The settings lane owns controller overlay routing, Slate list/sliders, audio config, and menu tests. The flower lane owns only world-cover batching/exclusions and environment tests. Shared Editor/cook/package execution and final full-loop/menu acceptance remain serialized. Both reuse selected build caches and `work-actions-v13` rollback.
 
@@ -75,11 +83,13 @@ The settings lane owns controller overlay routing, Slate list/sliders, audio con
 - **[Decorative flowers look gatherable]** -> Keep them smaller/sparser than interactive grouped patches, never focus them, and inspect ordinary approach behavior.
 - **[Flower overdraw or cover rebuild regresses cadence]** -> Cap accepted instances/components, use existing cull distances/HISM, record triangle/count metrics, and reject on matched performance evidence.
 - **[Credits removal weakens attribution]** -> Gate packaging on the existing `asset-credits.md` copy and receipt checks.
+- **[G conflicts with contextual menu actions]** -> Route the open native menu before gameplay bindings and test storage/recovery/quantity contexts separately from ordinary gameplay.
+- **[Preview build identity becomes hard to inspect]** -> Keep exact routing/profile metadata in Settings and automated receipts while removing it only from gameplay chrome.
 
 ## Migration Plan
 
 1. Record current Settings grid, Credits navigation, Esc/controller routes, volume cycling/persistence, and representative flower-free ground baselines.
-2. Deliver separate Esc/Menu Settings with vertical action/toggle rows and remove Credits while preserving every modal and field-book route.
+2. Deliver separate Esc/Menu Settings with vertical action/toggle rows, direct gameplay G-to-Guidebook routing, Settings-only preview metadata, and remove Credits while preserving every modal and contextual menu route.
 3. Add persistent audio sliders with pointer/controller/keyboard and read-only rollback coverage.
 4. Add decorative flower batches and verify visual distinction, exclusions, lifecycle, and performance.
 5. Run Editor native-menu/directional/input/HUD/environment/full-loop/save tests and inspect 720p/4K Settings plus ordinary flower walks.

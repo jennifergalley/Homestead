@@ -2,9 +2,9 @@
 
 ## 1. Separate Settings Screen
 
-- [ ] 1.1 Record selected-build Esc/controller menu routes, seven-tab traversal, Settings grid/focus/action behavior, every modal/recovery path, Credits content, and 720p/4K frames so the navigation and layout baseline is reproducible
-- [ ] 1.2 Separate Settings from the field-book tab order, bind gameplay Esc and controller Menu/Start directly to Settings, retain planning cancel and field-book purpose bindings, remove Credits page/tab/icon, and render all Settings controls/actions as one vertical scrolling list; verify source/native navigation and focus contracts
-- [ ] 1.3 Exercise keyboard, controller and pointer Settings entry/exit, every adjustable/action row, field-book wrap, Appearance, quantity editing, planning, recovery, restart, unsaved exit and save/graphics failure modals, verifying pause, safe defaults, synchronized visible focus and no Credits surface
+- [ ] 1.1 Record selected-build Esc/controller menu routes, gameplay/menu `G` behavior, seven-tab traversal, Settings grid/focus/action behavior, preview/gameplay footers, every modal/recovery path, Credits content, and 720p/4K frames so the navigation and layout baseline is reproducible
+- [ ] 1.2 Separate Settings from the field-book tab order, bind gameplay Esc and controller Menu/Start directly to Settings, bind gameplay `G` directly to Guidebook while preserving menu-owned `G`, retain planning cancel and other field-book purpose bindings, move preview identity to a conditional Settings-only row, remove gameplay prototype/version footers and Credits page/tab/icon, and render all Settings controls/actions as one vertical scrolling list; verify source/native navigation and focus contracts
+- [ ] 1.3 Exercise keyboard, controller and pointer Settings entry/exit, direct `G` Guidebook entry, contextual menu `G`, every adjustable/action row, field-book wrap, Appearance, quantity editing, planning, recovery, restart, unsaved exit and save/graphics failure modals, verifying pause, safe defaults, synchronized visible focus, Settings-only preview metadata and no Credits surface
 
 ## 2. Persistent Audio Sliders
 

@@ -22,15 +22,19 @@ Pressing Esc on keyboard/mouse or controller Menu/Start during ordinary gameplay
 - **THEN** Settings closes and gameplay resumes without changing another menu page
 
 ### Requirement: Field book and Settings are separate
-Inventory, Crafting, Building, Guidebook, and Appearance SHALL remain field-book destinations on their purpose-specific bindings. Settings MUST NOT appear as a field-book tab.
+Inventory, Crafting, Building, Guidebook, and Appearance SHALL remain field-book destinations on their purpose-specific bindings. During ordinary gameplay, `G` SHALL open Guidebook directly. Settings MUST NOT appear as a field-book tab.
 
 #### Scenario: Open inventory
 - **WHEN** the player presses the inventory binding
 - **THEN** the field book opens to inventory and does not open Settings
 
 #### Scenario: Open guidebook
-- **WHEN** the player presses the guidebook binding
+- **WHEN** the player presses `G` during ordinary gameplay
 - **THEN** guidebook content opens without routing through Settings
+
+#### Scenario: Preserve contextual menu action
+- **WHEN** a native menu is already open and `G` is offered as that menu's contextual take/withdraw action
+- **THEN** `G` performs the focused menu action rather than changing pages
 
 ### Requirement: Settings uses a vertical list
 The Settings screen SHALL present preferences and session actions as a single vertically scrolling labeled list rather than an inventory-style multi-column grid. Focus, pointer hover, scrolling, and activation MUST remain synchronized.
@@ -53,6 +57,19 @@ The in-game Credits tab, page, focus target, navigation stop, and icon SHALL be 
 #### Scenario: Inspect packaged attribution
 - **WHEN** the game is packaged
 - **THEN** `asset-credits.md` remains included even though no in-game Credits page exists
+
+### Requirement: Preview metadata is confined to Settings
+Preview profile/version metadata SHALL be absent from the ordinary gameplay HUD and SHALL appear only in Settings when the running build has preview metadata. A normal build without preview metadata MUST NOT show an empty or generic version row.
+
+#### Scenario: Play an isolated preview build
+- **WHEN** gameplay is visible outside Settings
+- **THEN** no preview/version footer is drawn
+- **AND WHEN** Settings opens
+- **THEN** the preview profile/version and isolated-save status are visible there
+
+#### Scenario: Play a normal build
+- **WHEN** Settings opens without preview metadata
+- **THEN** no preview/version row is shown
 
 ### Requirement: Session and recovery actions remain safe
 Save, load, new woodland, resume, save-and-quit, quit-without-saving, retry, save failure, graphics failure, restart, and unsaved confirmations SHALL remain available through Settings/recovery with current safety behavior.
