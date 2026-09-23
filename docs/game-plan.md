@@ -66,8 +66,11 @@ is historical, not the current build/authorization status.
 ### Apply these lessons to every feature round
 
 1. Start with focused reuse research, consulting existing findings before
-   searching again. Select suitable free assets, code, libraries and native
-   engine features; identify only the gaps requiring custom work. Then define
+   searching again. For player-facing design, include the applicable primary
+   comparative references above and identify the specific convention or hierarchy
+   being adapted without copying its branded expression. Select suitable free
+   assets, code, libraries and native engine features; identify only the gaps
+   requiring custom work. Then define
    the smallest observable end-to-end improvement in OpenSpec, its first
    playable demonstration and each parallel lane's file/resource ownership.
    Separate that first delivery from full-round acceptance.
@@ -210,6 +213,27 @@ collecting flowers. Dreamlight Valley is specifically a reference for enjoyable
 daily maintenance and tending; Coral Island also informs the foraging loop.
 These are experience references, not requests to copy their settings, characters,
 magic, or quest structures.
+
+Coral Island, Minecraft, and Disney Dreamlight Valley are the primary comparative
+reference set for future feature rounds because Jenny enjoys them and wants a
+character-focused life-sim experience with familiar, polished interactions.
+Before designing a relevant HUD, menu, tool flow, inventory/crafting surface,
+character presentation, gathering/farming loop, decoration system, daily rhythm,
+or progression feature, inspect current reputable screenshots plus official or
+well-supported descriptions/controls from the applicable games. Record what each
+reference contributes: information hierarchy, interaction convention, feedback,
+state visibility, pacing, or player expectation. Factorio remains a selective
+reference for systems clarity, shortcuts, automation, and scalable information
+density rather than the target character/life-sim tone.
+
+Adapt principles, not expression. Homestead must use original artwork, icons,
+frames, typography, animation, copy, sounds, exact geometry, and branded visual
+language. Link or cite external reference pages and keep concise comparison notes;
+do not commit copyrighted screenshots or extracted proprietary assets merely to
+make the reference durable. A reference does not override Jenny's direct
+playtest feedback, Homestead's grounded/cozy identity, accessibility, performance,
+licensing, or the requirement to verify behavior in the actual game.
+
 Begin as a young adult woman in spring with almost nothing.
 Clear land, gather resources, grow and cook food, craft tools and clothing, build
 shelter, and turn it into a home worth spending winter in.
