@@ -14,8 +14,8 @@
 
 ## 3. World Coverage and Lifecycle
 
-- [ ] 3.1 Apply the shared camera-safe assignment helper to resource visuals, generated tree batches and active groundcover/creek-bank components; verify create/rebuild/clear/regrow/chunk churn leaves no stale materials, collisions, components or full-screen foliage
-- [ ] 3.2 Integrate the same contract into decorative wildflowers and farther visual-ring plans before those features land; verify their tests assert the classification rather than reintroducing independent camera behavior
+- [x] 3.1 Apply the shared camera-safe assignment helper to resource visuals, generated tree batches and active groundcover/creek-bank components; verify create/rebuild/clear/regrow/chunk churn leaves no stale materials, collisions, components or full-screen foliage
+- [x] 3.2 Integrate the same contract into decorative wildflowers and farther visual-ring plans before those features land; verify their tests assert the classification rather than reintroducing independent camera behavior
 - [ ] 3.3 Run ordinary sapling/shrub/reed/flower/fern/grass/mature-canopy/slope routes across close/default/far zoom, day/night/rain and 720p/4K; inspect heroine/target readability, fade boundaries, temporal noise, preserved woodland density and solid-trunk behavior
 
 ## 4. Integrated Acceptance and Promotion

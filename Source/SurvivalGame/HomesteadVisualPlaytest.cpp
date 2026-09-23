@@ -1030,7 +1030,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     Elapsed += WallDelta;
     if (bWeedRoute) { TickWeeding(WallDelta); return; }
     if (bWaterRoute || bClearRoute) { TickWatering(WallDelta); return; }
-    if (!Passes.IsValidIndex(PassIndex) || Elapsed > 100) { Finish(); return; }
+    if (!Passes.IsValidIndex(PassIndex) || Elapsed > 180) { Finish(); return; }
     FPass& Pass = Passes[PassIndex];
     if (!bEntered)
     {
