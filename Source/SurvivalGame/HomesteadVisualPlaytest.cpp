@@ -748,7 +748,7 @@ void AHomesteadVisualPlaytest::PrepareTreeEncounter()
     Passes.Append({
         {TEXT("walk-to-authored-tree"), 18},
         {TEXT("view-authored-tree"), 3},
-        {TEXT("walk-into-authored-trunk"), 18},
+        {TEXT("walk-into-authored-trunk"), 24},
         {TEXT("retreat-from-authored-trunk"), 6}
     });
 }
