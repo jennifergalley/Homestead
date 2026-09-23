@@ -64,6 +64,7 @@ if ($ReuseCooked) {
         packagedUtc=[DateTimeOffset]::UtcNow.ToString('o'); engineRoot=$engine; configuration='Shipping'
         archiveDirectory=$archive; packageDirectory=$packageRoot
         executable='SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe'
+        nativeExecutableSha256=(Get-FileHash -LiteralPath (Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe')).Hash
         reusedCook=$cook; reusedContainers=$pakSource; containers=$containerHashes
         editorLaunched=$false; cookerLaunched=$false; unrealPakLaunched=$false
         status='Shipping build using unchanged existing cooked containers; runtime acceptance is separate.'
