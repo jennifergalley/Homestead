@@ -17,4 +17,4 @@
 
 - [x] 3.1 Add a guarded two-process camera-preference route using explicit synthetic config/user/save destinations, then verify direct left-row activation, absence of `Change setting`, toggle/cycle persistence without a world save, and rejection of any access to normal player settings
 - [x] 3.2 Run strict OpenSpec validation, focused source/native tests, and SurvivalGameEditor Win64 Development build after integrating with the work-animation checkpoint, recording exact results
-- [ ] 3.3 Build one immutable Shipping candidate and verify ordinary mouse-up behavior, controller parity, quit-without-saving relaunch persistence, world-load independence, and existing work-animation camera routes before promotion
+- [x] 3.3 Build one immutable Shipping candidate and verify ordinary mouse-up behavior, controller parity, quit-without-saving relaunch persistence, world-load independence, and existing work-animation camera routes before promotion

@@ -88,27 +88,52 @@ pose. Competing requests, movement, menu, planning, appearance changes and load
 cancelled without replay or orphaned can. Tool scale, hand attachment,
 collision/overlap/navigation, actor/toe/camera stability and exact target yaw
 passed across the full native appearance matrix.
-- [ ] 3.3 Exercise watering on root and berry plots with controller input across
+- [x] 3.3 Exercise watering on root and berry plots with controller input across
   representative bodies/hair/garments; inspect side/three-quarter/gameplay
   views and verify garden, save/reload and action arbitration regressions pass.
 
 ## 4. Cross-action acceptance and delivery
 
-- [ ] 4.1 Run focused portable/source checks and native lifecycle tests for
+- [x] 4.1 Run focused portable/source checks and native lifecycle tests for
   chop/till/water success, rejection, targeting, prop contracts, cancellation,
   rapid input and missing-presentation errors; verify gameplay authority remains
   independent from clips, notifies and props.
-- [ ] 4.2 Compile Editor and package a fresh immutable Shipping candidate under
+- [x] 4.2 Compile Editor and package a fresh immutable Shipping candidate under
   the serialized engine slot; verify exact source/package identity and preserve
   the selected hairstyle/wardrobe build as rollback.
-- [ ] 4.3 Run ordinary controller chop/till/water routes, full-loop, input,
+- [x] 4.3 Run ordinary controller chop/till/water routes, full-loop, input,
   hotkey/save and separate-process replay checks with Lit/Lighting-on/
   ShaderComplexity-off evidence; verify no reward, world, UI or persistence
   regression and report instrumented cadence limits honestly.
-- [ ] 4.4 Inspect bounded close and gameplay-camera motion frames/video for all
+- [x] 4.4 Inspect bounded close and gameplay-camera motion frames/video for all
   three actions, fix demonstrated contact/clipping/readability defects, update
   animation/design/playtest/provenance docs, and promote only a genuinely
   improved candidate with receipt/proof/`Start-Preview -ValidateOnly`.
+
+Tasks 3.3 and 4.1-4.4 passed with immutable Shipping candidate
+`work-animation-complete-02-shipping`, executable SHA-256
+`73FAB8EAFB40BAC46535DA19E48439D794E07825ACFD5C1DD702F04092AEFAFA`.
+Shipping full-loop watered both root and berry plots repeatedly through mapped
+controller input, then preserved their distinct crop state through save/load
+and separate failure recovery. The native lifecycle retained the full 18-look
+matrix; ordinary gameplay frames document three-quarter/gameplay-distance
+till and refined-water arcs.
+
+Shipping focused clearing, completion-driven full-loop, guarded three-process
+camera preferences, Lit creek traversal and clean input/cadence routes passed.
+Full-loop cadence was mean40.59fps, p95 28.67ms and p99 30.68ms over10798
+samples. The comparable clean input route was mean52.68fps, p95 17.47ms and
+p99 17.64ms over2233 samples, effectively matching the selected woodland
+baseline52.78/17.46/17.60. Matching Development cooked hotkey write/reload and
+normal-preview consumption passed in separate processes. The proof index and
+acceptance receipt preserve exact evidence hashes and rollback
+`wardrobe-complete-10 / wardrobe-complete-v12`.
+
+Visual inspection accepts the clearer overhead chop, vertical till drive and
+plot-directed 44-degree pour as materially more readable while retaining the
+disclosed limits: immediate tree removal prevents exact contact proof, and no
+soil particles, terrain deformation or terrain-height IK are claimed. Project
+animation pipeline, visual-playtest and provenance documentation were updated.
 
 ## Chopping baseline
 

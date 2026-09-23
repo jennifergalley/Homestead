@@ -4,6 +4,11 @@ This project uses original prototype geometry and the following licensed sources
 `Assets\asset-manifest.json` records the exact download URLs and license references.
 `Assets\download-receipt.json` records file sizes and SHA-256 hashes after fetching.
 
+The heroine chopping, tilling and refined watering clips, procedural hatchet,
+digging stick and watering can are project-authored original prototype content.
+They reuse the admitted heroine skeleton and existing project materials; they
+introduce no external asset or license dependency.
+
 ## Music
 
 **Evening Fall (Harp)** by **Kevin MacLeod** (incompetech.com).

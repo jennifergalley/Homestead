@@ -22,6 +22,16 @@ Build the editor target, then run:
 python .\Scripts\Review-VisualPlaytest.py .\Saved\VisualPlaytests\<run-folder>
 ```
 
+For ordinary mapped work-action review, add `-Clearing` for chopping or
+`-Watering` for the combined till/plant/water route. Setup frames are sampled
+sparsely, while the action phases are sampled at 8 Hz. These routes gather and
+craft through gameplay, walk to generated targets and perform real
+transactions; they do not inject inventory, plots, time or rewards. Review the
+anticipation, drive/pour, follow-through and recovery frames individually.
+Authoritative simulation removes a cleared tree immediately, so chopping
+evidence does not claim exact trunk contact. Tilling and watering similarly do
+not claim soil particles, terrain deformation or terrain-height IK.
+
 Open the generated `review.html` locally to play, pause, scrub, or step through
 the recording. It replays captured engine frames at their recorded timestamps;
 it is a review artifact, not a browser version of the game.

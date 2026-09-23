@@ -10,12 +10,12 @@
 
 - [x] 2.1 Add bounded global-coordinate water-edge variation and exact tests for repeat generation, minimum/maximum width, finite geometry, and agreement at adjacent chunk boundaries
 - [x] 2.2 Admit a sparse deterministic subset of existing grass, fern, reeds, and optional moss-rock dressing through current HISM batches and reservation checks, then verify it is noncolliding, bounded, reproducible, and absent from reserved sites
-- [ ] 2.3 Exercise active-window rebuild, chunk crossing, current-save reload, valid refill, out-of-range rejection, and creek-adjacent structure/plot/resource cases, verifying no orphan components, hidden blockers, authority changes, or save-schema changes
-- [ ] 2.4 Capture ordinary gameplay-camera approaches, along-creek views, bank crossings, and representative neutral/dawn lighting, then reject or tune any repeated border, exposed shelf, obscured water, or remaining canal read
+- [x] 2.3 Exercise active-window rebuild, chunk crossing, current-save reload, valid refill, out-of-range rejection, and creek-adjacent structure/plot/resource cases, verifying no orphan components, hidden blockers, authority changes, or save-schema changes
+- [x] 2.4 Capture ordinary gameplay-camera approaches, along-creek views, bank crossings, and representative neutral/dawn lighting, then reject or tune any repeated border, exposed shelf, obscured water, or remaining canal read
 
 ## 3. Integrated Acceptance and Promotion
 
 - [x] 3.1 Run the focused source contracts, native simulation/world suites, strict OpenSpec validation, and SurvivalGameEditor Win64 Development build from the integrated checkpoint, recording exact results
-- [ ] 3.2 Build one immutable Shipping candidate and run ordinary controller traversal/refill plus generated-world/full-loop/save routes, verifying current water authority, collision, cover lifecycle, and current-version persistence
-- [ ] 3.3 Compare representative active-window preparation and sustained cadence evidence with the selected woodland build, rejecting material transition or frame-cadence regressions and stating the remaining synchronous streaming limitation exactly
-- [ ] 3.4 Run a fresh separate-process consumer against the same executable/save, inspect final creek evidence, preserve the prior selected build as rollback, and promote only if the naturalized presentation and all required behavior checks pass
+- [x] 3.2 Build one immutable Shipping candidate and run ordinary controller traversal/refill plus generated-world/full-loop/save routes, verifying current water authority, collision, cover lifecycle, and current-version persistence
+- [x] 3.3 Compare representative active-window preparation and sustained cadence evidence with the selected woodland build, rejecting material transition or frame-cadence regressions and stating the remaining synchronous streaming limitation exactly
+- [x] 3.4 Run a fresh separate-process consumer against the same executable/save, inspect final creek evidence, preserve the prior selected build as rollback, and promote only if the naturalized presentation and all required behavior checks pass

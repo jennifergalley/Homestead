@@ -74,6 +74,23 @@ instead of calling `PlayAnimation` whenever speed crosses a threshold.
 Maximum walking speed remains 180 cm/s; acceleration is 700 cm/s2, braking
 900 cm/s2, and movement-facing rotation 300 degrees/s.
 
+## Homestead work actions (2026-09-23)
+
+Three fresh animation-only clips reuse the same 53-bone heroine skeleton:
+`AN_Heroine_Chop`, `AN_Heroine_Till` and `AN_Heroine_WaterRefined`. Analytical
+FBX checks preserve bind matrices, unit scale, idle endpoints, planted feet,
+zero root travel and zero notifies. Runtime transactions remain authoritative:
+successful Clear, Till and Water calls commit first, then pass only a transient
+target yaw into the shared action evaluator. Props cannot grant rewards.
+
+The hatchet, original procedural digging stick and existing procedural watering
+can remain scale one, collision/overlap/navigation disabled and attached to
+`hand_r` only while their action is active. Movement, menus, planning,
+appearance application, load and failure cancel presentation without queued
+replay. Fresh trial assets live under
+`/Game/Trials/HomesteadWork_20260923_01/Animations`; source contracts and
+verifiers are under `Assets/Characters/Heroine` and `Scripts/Characters`.
+
 Run the two Blender scripts with the existing isolated authoring profile:
 
 ```powershell
