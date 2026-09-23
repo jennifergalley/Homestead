@@ -24,7 +24,7 @@ Simulation already owns every relevant rule in one transaction: `CraftChange` de
 
 ### 1. Add a read-only Simulation recipe assessment
 
-Simulation will expose a `RecipeAssessment` value for a valid recipe and player point. It contains output identity/count, one entry per consumed item with `have` and `need`, retained requirements with met state, nearby-station requirements with met state, capacity viability, and an overall `craftable` flag. The implementation derives consumed/output quantities from the same internal `CraftChange` used by `Craft` and shares small predicates for cooking/tool rules so UI and transaction cannot drift through duplicated constants.
+Simulation will expose a `RecipeAssessment` value for a valid recipe and player point. It contains output identity/count, one entry per consumed item with `have`, `need`, and primary acquisition hint, retained requirements with met state, nearby-station requirements with met state, capacity viability, and an overall `craftable` flag. The implementation derives consumed/output quantities from the same internal `CraftChange` used by `Craft` and shares small predicates for cooking/tool rules so UI and transaction cannot drift through duplicated constants.
 
 Assessment is pure: it does not call `Craft`, modify inventory, increment revisions, emit messages, or approximate future state. Invalid recipe/position and failed player state return unavailable assessments with an explicit blocking reason.
 
@@ -50,16 +50,32 @@ The action list includes Craft only for an available assessment. Details always 
 
 The selected recipe details use compact rows:
 
-- consumed ingredient: icon/name, `Have N / Need M`, met or shortage color;
+- consumed ingredient: icon/name, `Have N / Need M`, met or shortage color, plus a concise source only while short;
 - retained tool: icon/name, `Carried` versus `Missing`, explicitly marked retained;
 - nearby station: station name, `Nearby` versus `Move closer`;
 - output and capacity: expected result plus a specific capacity blocker only when relevant.
 
 Rows use current item/recipe names and existing icons. Color supplements but does not replace text. The current details scroll box handles overflow at 720p; no new panel or modal is introduced.
 
-### 5. Validate display/authority parity as a table
+### 5. Back acquisition hints with current source contracts
 
-Portable simulation tests iterate every recipe across satisfied, each-missing, retained-tool, station, capacity, failed, invalid-position, and stale-display cases. Native tests verify card tint/focus, exact Have/Need values, disabled Craft affordance, immediate refresh, and no mutation from unavailable activation for pointer, keyboard, and controller. Ordinary Editor/Shipping evidence covers the six-recipe progression at 720p and 4K.
+Add read-only item-acquisition metadata for current recipe inputs and test it against real authority:
+
+- Branch: fallen branches;
+- Stone: loose stone patches;
+- Fiber: reeds near water as the pre-hatchet source, with saplings only as a later secondary source;
+- Roots and Flowers: their matching forage patches;
+- Timber: mature trees with a carried hatchet.
+
+The displayed line stays short (`Reeds near water`); details may include the later sapling alternative without obscuring the bootstrap path. Retained tools use action hints such as `Craft a crude hatchet`, and stations retain specific state such as `Fueled cookfire nearby`.
+
+Tests must prove the named gather source currently yields the item and that its prerequisites do not create a bootstrap cycle. This metadata is explanatory only: it neither chooses a target nor grants resources.
+
+**Alternative considered:** put all acquisition guidance in the Guidebook. Rejected because Jenny encountered the uncertainty while reading a blocked recipe; the answer belongs beside that unmet requirement.
+
+### 6. Validate display/authority parity as a table
+
+Portable simulation tests iterate every recipe across satisfied, each-missing, retained-tool, station, capacity, failed, invalid-position, stale-display, and source-hint parity cases. Native tests verify card tint/focus, exact Have/Need/source values, disabled Craft affordance, immediate refresh, and no mutation from unavailable activation for pointer, keyboard, and controller. Ordinary Editor/Shipping evidence covers the six-recipe progression at 720p and 4K.
 
 The simulation/query lane owns `HomesteadSimulation` and portable tests. The menu lane owns controller row mapping, Slate styling/details, and native tests after the assessment shape is stable. Editor, cook, package, and full-loop acceptance remain serialized and reuse compatible caches.
 
@@ -70,11 +86,12 @@ The simulation/query lane owns `HomesteadSimulation` and portable tests. The men
 - **[Movement makes cookfire status stale]** -> Include nearby-station state in the open-page refresh signature and verify approach/leave without reopening Craft.
 - **[Capacity messaging is confusing when ingredients are consumed]** -> Assess the exact post-transaction inventory delta rather than output size alone and show capacity only when it is the actual blocker.
 - **[Details become dense at 720p]** -> Use one compact row per requirement in the existing scroll pane and verify the largest current recipe without truncation.
+- **[Source hints become stale or circular]** -> Validate every named source against real yields/prerequisites and keep the pre-hatchet Fiber route explicitly noncircular.
 
 ## Migration Plan
 
 1. Capture current six-card/details/action behavior with empty, partial, sufficient, cooking, and firewood inventories.
-2. Add the pure recipe assessment and portable parity tests without changing Craft behavior.
+2. Add the pure recipe assessment, tested acquisition metadata and portable parity checks without changing Craft behavior.
 3. Wire craft-specific rows, grey availability treatment, structured details, and unavailable-action behavior.
 4. Exercise immediate refresh across gathering/crafting/load/new-world and cookfire approach/leave.
 5. Run full menu, simulation, full-loop, 720p/4K, Editor, Shipping, and separate-process acceptance.

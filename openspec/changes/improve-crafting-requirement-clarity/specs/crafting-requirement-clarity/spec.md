@@ -19,12 +19,18 @@ Each Craft recipe card SHALL visibly distinguish whether that recipe can be craf
 - **THEN** its card uses the normal available treatment and its Craft action is enabled
 
 ### Requirement: Details show Have and Need for every requirement
-The selected recipe details SHALL show each consumed ingredient as a separate requirement with its carried `Have` amount, required `Need` amount, and met/short state. Retained tools and nearby station requirements SHALL be shown separately and identified as retained or nearby rather than consumed.
+The selected recipe details SHALL show each consumed ingredient as a separate requirement with its carried `Have` amount, required `Need` amount, and met/short state. An unmet ingredient row SHALL also show one concise current acquisition hint backed by authoritative resource/recipe behavior. Retained tools and nearby station requirements SHALL be shown separately and identified as retained or nearby rather than consumed.
 
 #### Scenario: Inspect a partially supplied recipe
 - **WHEN** the player selects a recipe with some but not all required ingredients
 - **THEN** every ingredient row shows its current carried amount and required amount
 - **AND** only insufficient rows use shortage treatment
+- **AND** each insufficient row names a current primary way to obtain that item
+
+#### Scenario: Find Fiber for the first hatchet
+- **WHEN** the crude hatchet is selected without enough Fiber
+- **THEN** the Fiber row identifies reeds near water as the bootstrap source
+- **AND** it does not imply that the hatchet-gated sapling source is required first
 
 #### Scenario: Inspect cooking requirements
 - **WHEN** the player selects a cooking recipe away from a fueled cookfire
@@ -60,6 +66,10 @@ Pre-activation availability SHALL be derived from the same current recipe costs,
 - **WHEN** a nearby chest contains ingredients that are absent from the carried pack
 - **THEN** those stored items do not satisfy the recipe Have amount
 - **AND** the player is directed by the displayed shortage to move supplies into the pack
+
+#### Scenario: A source rule changes
+- **WHEN** an item no longer comes from the source named by its acquisition hint
+- **THEN** source-contract validation fails rather than leaving misleading guidance in the Craft page
 
 ### Requirement: Craft clarity works across supported input and layout
 Availability styling, semantic requirement rows, selection, focus, scrolling, and disabled-action behavior SHALL remain readable and synchronized for pointer, keyboard, and controller at supported 720p and 4K layouts.
