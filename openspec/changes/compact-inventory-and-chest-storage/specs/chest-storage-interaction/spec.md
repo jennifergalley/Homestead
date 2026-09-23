@@ -25,11 +25,15 @@ The storage surface SHALL show the exact chest's contents and the carried pack a
 - **THEN** only that chest's authoritative contents appear beside the pack
 
 ### Requirement: Storage transactions remain atomic and exact
-Transfer, split, merge, reorder where supported, capacity rejection, wearable ownership, expected revision, and current quantity confirmation SHALL continue using the existing authoritative container transactions. Opening, closing, selecting, or focusing MUST NOT mutate either container.
+Whole-stack transfer, split, merge, reorder, automatic stacking, capacity rejection, wearable ownership, and expected revision SHALL continue using authoritative container transactions. Opening, closing, selecting, focusing, dragging without a valid drop, or canceling a virtual drag MUST NOT mutate either container. Storage MUST NOT expose Transfer, Split, Merge, Move earlier, or Move later action buttons.
 
-#### Scenario: Transfer a partial stack
-- **WHEN** the player confirms a valid partial transfer
-- **THEN** the exact quantity moves once between the active chest and pack and both grids refresh together
+#### Scenario: Transfer a stack by dragging
+- **WHEN** the player drags one pack stack into the active Chest grid
+- **THEN** that whole stack moves once, automatically joins the earliest compatible chest stack when present, and both grids refresh together
+
+#### Scenario: Transfer part of a stack
+- **WHEN** the player first Ctrl+clicks to split a pack stack and then drags the new stack into Chest
+- **THEN** only that split quantity moves and no amount dialog/action button is required
 
 #### Scenario: Capacity rejects transfer
 - **WHEN** the destination cannot hold the requested quantity
@@ -43,9 +47,8 @@ Back SHALL close storage and return to gameplay without changing Inventory mode.
 - **THEN** storage closes, no stale chest remains addressable, and no transaction is replayed
 
 ### Requirement: Storage is readable across inputs and resolutions
-Pointer, keyboard, and controller focus SHALL move predictably within and between chest grid, pack grid, details, actions, quantity controls, and close behavior at 720p and 4K. The surface SHALL not restore generic controls legends.
+Pointer, keyboard, and controller focus/direct manipulation SHALL move predictably within and between chest grid, pack grid, details, remaining actions, Sort, and close behavior at 720p and 4K. The surface SHALL not restore generic controls legends.
 
 #### Scenario: Cross between containers
 - **WHEN** directional input leaves a grid toward the other visible container
 - **THEN** focus reaches the nearest sensible tile/control without activating or transferring an item
-
