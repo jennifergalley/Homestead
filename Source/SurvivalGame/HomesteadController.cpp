@@ -1455,7 +1455,7 @@ void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
         PersistAudioVolume(Id, Previous + Direction * 0.05f, Previous);
     }
     else if (Id == 12) MenuSetAutosaveEnabled(Direction > 0);
-    else if (Id == 13)
+    else if (Id == 13 && bAutosaveEnabled)
     {
         const int32 Values[] = {5, 10, 20, 30};
         int32 Index = 0;

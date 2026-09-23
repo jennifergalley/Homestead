@@ -38,6 +38,9 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
     Results.Add(TEXT("CAMERA_CONFIG=") + Expected);
     Results.Add(TEXT("DISCLOSURE mapped offscreen input and native menu proof; physical mouse feel remains ordinary-play acceptance."));
     const auto World = MakeShared<std::string>();
+    const auto AutosaveRoute = MakeShared<FString>();
+    const auto AutosaveBlocker = MakeShared<FString>(
+        FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("autosave-write-blocker")));
     const auto Stable = [this, World]()
     {
         return !World->empty() && Controller->Simulation().Serialize() == *World;
@@ -367,11 +370,60 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
                 && Disk.GetFloat(AudioSection, TEXT("Effects"), Effects)
                 && FMath::IsNearlyEqual(Ambience, 0.65f) && FMath::IsNearlyEqual(Effects, 0.85f);
         });
+    Add(TEXT("Audio slider preview updates its visible runtime value without an early disk commit"),
+        [this]() { Controller->MenuPreviewAudioVolume(5, 0.42f); },
+        [this, Stable]()
+        {
+            FConfigFile Disk; float Value = 0;
+            return FMath::IsNearlyEqual(Controller->MusicVolume, 0.42f) && Stable()
+                && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
+                && Disk.GetFloat(AudioSection, TEXT("Music"), Value)
+                && FMath::IsNearlyEqual(Value, 0.70f);
+        });
+    Add(TEXT("Audio slider capture release commits the previewed value"),
+        [this]()
+        {
+            if (!Controller->MenuCommitAudioVolume(5, 0.42f, 0.70f))
+                Finish(false, TEXT("Audio slider commit unexpectedly failed."));
+        },
+        [this, Stable]()
+        {
+            FConfigFile Disk; float Value = 0;
+            return FMath::IsNearlyEqual(Controller->MusicVolume, 0.42f) && Stable()
+                && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
+                && Disk.GetFloat(AudioSection, TEXT("Music"), Value)
+                && FMath::IsNearlyEqual(Value, 0.42f);
+        });
+    Add(TEXT("Read-only audio commit restores the pre-drag runtime and disk value"),
+        [this, Expected]()
+        {
+            FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Expected, true);
+            Controller->MenuPreviewAudioVolume(5, 0.90f);
+            Controller->MenuCommitAudioVolume(5, 0.90f, 0.42f);
+        },
+        [this, Expected, Stable]()
+        {
+            FConfigFile Disk; float Value = 0;
+            const bool Passed = Controller->ToastIsError()
+                && FMath::IsNearlyEqual(Controller->MusicVolume, 0.42f) && Stable()
+                && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
+                && Disk.GetFloat(AudioSection, TEXT("Music"), Value)
+                && FMath::IsNearlyEqual(Value, 0.42f);
+            FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Expected, false);
+            return Passed;
+        });
+    Add(TEXT("Restore final Music value for the separate-process consumer"),
+        [this]()
+        {
+            if (!Controller->MenuCommitAudioVolume(5, 0.70f, 0.42f))
+                Finish(false, TEXT("Could not restore final Music preference."));
+        },
+        [this, Stable]() { return FMath::IsNearlyEqual(Controller->MusicVolume, 0.70f) && Stable(); });
     Add(TEXT("Autosave controls persist Off and ten-minute interval independently"),
         [this]()
         {
-            Controller->NativeMenu->FocusLegacySubject(12); Tap(EKeys::Left);
             Controller->NativeMenu->FocusLegacySubject(13); Tap(EKeys::Right);
+            Controller->NativeMenu->FocusLegacySubject(12); Tap(EKeys::Left);
         },
         [this, Stable]()
         {
@@ -380,6 +432,103 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
                 && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
                 && Disk.GetBool(AutosaveSection, TEXT("Enabled"), Enabled) && !Enabled
                 && Disk.GetInt(AutosaveSection, TEXT("IntervalMinutes"), Minutes) && Minutes == 10;
+        });
+    Add(TEXT("Paused Settings holds the enabled autosave countdown"),
+        [this]()
+        {
+            Controller->MenuSetAutosaveEnabled(true);
+            Controller->AutosaveRemaining = 0.05f;
+        },
+        [this]()
+        {
+            return Controller->AutoSaveIndex == 0
+                && FMath::IsNearlyEqual(Controller->AutosaveRemaining, 0.05f, 0.001f)
+                && !IFileManager::Get().FileExists(
+                    *Controller->SavePath(TEXT("Homestead_Auto_0")));
+        }, 0.5f);
+    Add(TEXT("Eligible gameplay writes exactly one rotating autosave and resets the interval"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this]()
+        {
+            return !Controller->IsBookOpen() && Controller->AutoSaveIndex == 1
+                && Controller->AutosaveRemaining > 599.0f
+                && Controller->AutosaveRemaining <= 600.0f
+                && Controller->ReadSave(
+                    Controller->SavePath(TEXT("Homestead_Auto_0"))) != nullptr
+                && !IFileManager::Get().FileExists(
+                    *Controller->SavePath(TEXT("Homestead_Auto_1")));
+        }, 0.5f);
+    Add(TEXT("Disabled autosave retains existing slots and writes no next slot"),
+        [this]()
+        {
+            Tap(EKeys::Escape);
+            Controller->MenuSetAutosaveEnabled(false);
+            Controller->AutosaveRemaining = 0.05f;
+            Tap(EKeys::Gamepad_FaceButton_Right);
+        },
+        [this]()
+        {
+            return !Controller->IsBookOpen() && !Controller->IsAutosaveEnabled()
+                && Controller->AutoSaveIndex == 1
+                && IFileManager::Get().FileExists(
+                    *Controller->SavePath(TEXT("Homestead_Auto_0")))
+                && !IFileManager::Get().FileExists(
+                    *Controller->SavePath(TEXT("Homestead_Auto_1")));
+        }, 0.5f);
+    Add(TEXT("Re-enabling and changing interval starts a fresh full countdown"),
+        [this]()
+        {
+            Tap(EKeys::Escape);
+            Controller->MenuSetAutosaveEnabled(true);
+            Controller->MenuSetAutosaveInterval(20);
+        },
+        [this]()
+        {
+            return Controller->IsBookOpen() && Controller->IsAutosaveEnabled()
+                && Controller->AutosaveIntervalMinutes() == 20
+                && FMath::IsNearlyEqual(Controller->AutosaveRemaining, 1200.0f, 0.01f)
+                && Controller->AutoSaveIndex == 1
+                && !IFileManager::Get().FileExists(
+                    *Controller->SavePath(TEXT("Homestead_Auto_1")));
+        });
+    Add(TEXT("Failed periodic autosave preserves rotation and schedules one bounded retry"),
+        [this, AutosaveRoute, AutosaveBlocker]()
+        {
+            *AutosaveRoute = Controller->SaveRoute.Directory;
+            if (!FFileHelper::SaveStringToFile(TEXT("owned autosave blocker"), **AutosaveBlocker))
+            {
+                Finish(false, TEXT("Could not prepare the owned autosave failure fixture."));
+                return;
+            }
+            Controller->SaveRoute.Directory = *AutosaveBlocker;
+            Controller->AutosaveRemaining = 0.05f;
+            Tap(EKeys::Gamepad_FaceButton_Right);
+        },
+        [this]()
+        {
+            return !Controller->IsBookOpen() && Controller->AutoSaveIndex == 1
+                && Controller->AutosaveRemaining > 59.0f
+                && Controller->AutosaveRemaining <= 60.0f && Controller->ToastIsError()
+                && !IFileManager::Get().FileExists(
+                    *Controller->SavePath(TEXT("Homestead_Auto_1")));
+        }, 0.5f);
+    Add(TEXT("Restore final autosave preference after the failure fixture"),
+        [this, AutosaveRoute, AutosaveBlocker]()
+        {
+            Controller->SaveRoute.Directory = *AutosaveRoute;
+            if (!IFileManager::Get().Delete(**AutosaveBlocker, false, true))
+            {
+                Finish(false, TEXT("Could not remove the owned autosave failure fixture."));
+                return;
+            }
+            Tap(EKeys::Escape);
+            Controller->MenuSetAutosaveEnabled(false);
+            Controller->MenuSetAutosaveInterval(10);
+        },
+        [this]()
+        {
+            return Controller->IsBookOpen() && !Controller->IsAutosaveEnabled()
+                && Controller->AutosaveIntervalMinutes() == 10;
         });
     Add(TEXT("New woodland preserves user-level camera preferences"),
         [this]() { Controller->NewGame(); },

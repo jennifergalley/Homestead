@@ -499,11 +499,24 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         for (int32 Index = 0; Index < Entries.Num(); ++Index)
         {
             const FHomesteadRow& Row = Entries[Index];
+            TAttribute<FText> RowLabel = FText::FromString(Row.Label);
+            if (Row.Id >= 5 && Row.Id <= 7)
+            {
+                const int32 AudioId = Row.Id;
+                const FString Prefix = Row.Id == 5 ? TEXT("Music volume")
+                    : Row.Id == 6 ? TEXT("Ambience volume") : TEXT("Effects volume");
+                RowLabel = TAttribute<FText>::CreateLambda([this, AudioId, Prefix]()
+                {
+                    return FText::FromString(FString::Printf(TEXT("%s: %d%%"), *Prefix,
+                        FMath::RoundToInt(Controller->MenuAudioVolume(AudioId) * 100)));
+                });
+            }
             TSharedPtr<SVerticalBox> RowContent;
             auto Content = SNew(SVerticalBox)
                 + SVerticalBox::Slot().AutoHeight()
                 [
-                    SNew(STextBlock).Text(FText::FromString(Row.Label)).ColorAndOpacity(Ink)
+                    SNew(STextBlock).Text(RowLabel)
+                    .ColorAndOpacity(Row.Id == 13 && !Controller->IsAutosaveEnabled() ? Muted : Ink)
                     .Font(FCoreStyle::GetDefaultFontStyle("Bold", 18))
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 3, 0, 0)
@@ -562,7 +575,11 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             else if (Row.Id == 13)
             {
                 TSharedPtr<SHorizontalBox> Choices;
-                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
+                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+                [
+                    SAssignNew(Choices, SHorizontalBox)
+                    .IsEnabled(Controller->IsAutosaveEnabled())
+                ];
                 for (const int32 Minutes : {5, 10, 20, 30})
                     Choices->AddSlot().AutoWidth().Padding(0, 0, 6, 0)
                     [OptionButton(FString::Printf(TEXT("%d min"), Minutes), Controller->AutosaveIntervalMinutes() == Minutes,

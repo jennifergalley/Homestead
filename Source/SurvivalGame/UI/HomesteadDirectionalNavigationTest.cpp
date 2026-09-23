@@ -331,10 +331,38 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });
-    Add(TEXT("Existing Right then Activate still reaches quit confirmation"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Right); Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->NativeMenu->IsExitPrompt() && Controller->NativeMenu->HasSynchronizedFocus(); });
-    Add(TEXT("Quit modal remains trapped and defaults to staying"),
+    Add(TEXT("Down enters the first row of the vertical Settings list"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        [this, Focused, Before]()
+        {
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Focused(TEXT("Content")) && Subject && Subject->Id == 0
+                && Controller->Sim.Serialize() == *Before;
+        });
+    Add(TEXT("Directional input reaches the direct Quit game row"),
+        [this]()
+        {
+            for (int32 Index = 0; Index < 32; ++Index)
+            {
+                const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+                if (Subject && Subject->Id == 9) break;
+                Tap(EKeys::Gamepad_DPad_Down);
+            }
+        },
+        [this, Focused]()
+        {
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Focused(TEXT("Content")) && Subject && Subject->Id == 9;
+        });
+    Add(TEXT("Activating Quit game reaches the one two-choice confirmation"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this, Focused]() { return Controller->IsBookOpen() && !Controller->NativeMenu->HasActiveDialog() && Focused(TEXT("Session")); });
+        [this]() { return Controller->NativeMenu->IsExitPrompt() && Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Back cancels Quit and returns focus to the direct Quit game row"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this, Focused]()
+        {
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Controller->IsBookOpen() && !Controller->NativeMenu->HasActiveDialog()
+                && Focused(TEXT("Content")) && Subject && Subject->Id == 9;
+        });
 }
