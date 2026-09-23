@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\work-animation-complete-02-shipping",
-  "profile": "work-actions-v13",
-  "executableSha256": "73FAB8EAFB40BAC46535DA19E48439D794E07825ACFD5C1DD702F04092AEFAFA"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\settings-wildflowers-03-shipping",
+  "profile": "settings-wildflowers-v14",
+  "executableSha256": "2AC96E8CE44B2C46804B86F0B99462BBF6DCB496C318DB8D2CA046DA5563B580"
 }

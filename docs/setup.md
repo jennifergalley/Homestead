@@ -111,9 +111,16 @@ the generated-config convention rather than silently switching to AppData.
 `-Windowed` replaces the borderless argument with `-windowed`.
 Normal controller, keyboard/mouse, sound and game
 flow remain enabled. There is no smoke/visual actor, synthetic route, input
-isolation or automatic quit. The existing prototype footer identifies the active
-preview profile. Settings **Save and quit**, F5/F9, autosaves and recovery behave
+isolation or automatic quit. The active preview profile is shown only in
+Settings. Settings **Save and quit**, F5/F9, autosaves and recovery behave
 normally within that profile.
+
+The current preview selection is `settings-wildflowers-v14`, backed by immutable
+Shipping candidate `settings-wildflowers-03-shipping`. Settings is now a separate
+vertical screen opened by Esc or controller Menu/Start; `G` opens Guidebook.
+Music, ambience, effects and autosave cadence persist as user settings rather
+than world-save state. The previous `work-actions-v13` candidate remains intact
+as rollback.
 
 Profile IDs are **1-32 ASCII lowercase letters, digits or hyphens, starting with
 a letter**. Empty, duplicate, malformed, uppercase, absolute-path and traversal
@@ -122,11 +129,13 @@ The runtime uses the fixed Windows user-settings root:
 `%LOCALAPPDATA%\SurvivalGame\PreviewProfiles\profile-<id>\SaveGames`.
 The `profile-` prefix also avoids Windows reserved device-directory names.
 All manual/rotating-auto/recovery files and their `.bak`/atomic `.tmp` siblings
-stay in that directory. The current selected profile is `wardrobe-complete-v12`.
-This is a deliberately fresh test clearing for wardrobe UE schema6/portable6.
-The prior `inventory-safety-v10`, old `jenny-review` progress and original saves remain untouched, not migrated
-or silently reset. Prior wave-candidate graphics preferences were copied
-byte-for-byte into the new candidate's local graphics file.
+stay in that directory. The current selected profile is
+`settings-wildflowers-v14`. This is a deliberately fresh test clearing using
+the current world/save schema. The prior `work-actions-v13`,
+`wardrobe-complete-v12`, `inventory-safety-v10`, old `jenny-review` progress and
+original saves remain untouched, not migrated or silently reset. The selected
+rollback's graphics preferences were copied byte-for-byte into the new
+candidate's local graphics file.
 
 The same profile persists across relaunches and explicitly selected compatible
 preview packages. A different ID starts a separate preview world; it does not

@@ -112,6 +112,24 @@ playback can look choppier than the game; do not call capture jitter a game bug.
 Physical-controller comfort, continuous animation smoothness and listening
 still benefit from a human playtest or denser video capture.
 
+## Settings and wildflower delivery, 2026-09-23
+
+`settings-wildflowers-03-shipping` adds a separate vertical Settings screen,
+live 0-100% audio sliders, optional 5/10/20/30-minute autosaves, direct Save and
+one-dialog Quit, and sparse decorative Flower Empodium groundcover. The ordinary
+Shipping traversal validated exactly 368 expected flower instances in 50
+collision-free HISM batches across 25 loaded chunks, then gathered a real berry
+bush and contacted/retreated from a real tree through mapped controls. Reviewed
+frames show small ground accents rather than resource-sized flower patches.
+
+The final Shipping menu routes passed at 1280x720 and 3840x2160. The complete
+homestead loop measured 46.30 mean FPS, p95 17.49 ms and p99 18.07 ms over
+11,773 clean samples; the selected rollback measured p95 28.67 ms and p99
+30.68 ms on its comparable full-loop route. Generated-world producer/consumer,
+native save consumer, Save & Quit, save-failure retry, directional navigation,
+and three-process valid/invalid preference routes also passed. These offscreen
+checks do not replace human mouse/controller feel, listening, or final art taste.
+
 ## Wardrobe presentation delivery
 
 `wardrobe-presentation-08` retains the ordinary 23-stage mapped route and adds
