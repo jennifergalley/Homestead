@@ -67,9 +67,9 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         FocusableMatureTrees.Add(Node);
     }
     const auto CenterChunk = Controller->State().activeChunk;
-    for (int32 Y = CenterChunk.y - 2; Y <= CenterChunk.y + 2
+    for (int32 Y = CenterChunk.y - 6; Y <= CenterChunk.y + 6
         && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty()); ++Y)
-        for (int32 X = CenterChunk.x - 2; X <= CenterChunk.x + 2
+        for (int32 X = CenterChunk.x - 6; X <= CenterChunk.x + 6
             && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty()); ++X)
         {
             Homestead::Generation::ChunkBaseline Baseline;
