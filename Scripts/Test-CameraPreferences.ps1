@@ -29,8 +29,9 @@ sg.ViewDistanceQuality=2
 Copy-Item -LiteralPath $config -Destination (Join-Path $output 'initial-fixture.ini')
 
 if ($Packaged) {
-    $working = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-    $exe = Join-Path $working 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+    $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+    $working = $package.packageDirectory
+    $exe = $package.executable
     $prefix = ''
 } else {
     $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
@@ -42,13 +43,21 @@ if ($Packaged) {
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 
 function Invoke-CameraPhase([string]$Name, [string]$Root, [string]$Ini) {
+    $null = New-Item -ItemType Directory -Path $Root -Force
     $log = Join-Path $Root "$Name.log"
     $arguments = $prefix + "-HomesteadSmokeTest -HomesteadCameraPreferenceTest -HomesteadCameraPreferencePhase=$Name " +
         "-HomesteadTestOutput=`"$Root`" -GameUserSettingsINI=`"$Ini`" -UserDir=`"$(Join-Path $Root 'EngineUser')`" " +
         "-unattended -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -nosplash -abslog=`"$log`""
-    $process = Start-Process -FilePath $exe -WorkingDirectory $working -ArgumentList $arguments -PassThru
+    if ($Packaged -and $package.configuration -eq 'Shipping') { $arguments += ' -HomesteadShippingQA' }
+    $shipping = $Packaged -and $package.configuration -eq 'Shipping'
+    $process = if ($shipping) {
+        & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $working `
+            -OutputDirectory $Root -Arguments $arguments
+    } else {
+        Start-Process -FilePath $exe -WorkingDirectory $working -ArgumentList $arguments -PassThru
+    }
     try {
-        if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+        if (-not $shipping -and -not $process.WaitForExit($TimeoutSeconds * 1000)) {
             throw "Camera preference phase timed out: $Name PID$($process.Id)"
         }
         $resultPath = Join-Path $Root 'smoke-result.txt'
@@ -71,16 +80,30 @@ function Invoke-CameraPhase([string]$Name, [string]$Root, [string]$Ini) {
             arguments = $arguments
         }
     } finally {
-        if (-not $process.HasExited) { Stop-Process -Id $process.Id }
-        $process.Dispose()
+        if (-not $shipping) {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id }
+            $process.Dispose()
+        }
         if (Test-Path -LiteralPath $Ini) { (Get-Item -LiteralPath $Ini).IsReadOnly = $false }
     }
 }
 
 $runs = @()
-$runs += Invoke-CameraPhase 'write' $output $config
-$runs += Invoke-CameraPhase 'read' $output $config
-$saved = Get-Content -LiteralPath $config -Raw
+$writeRoot = if ($Packaged) { Join-Path $output 'write' } else { $output }
+$readRoot = if ($Packaged) { Join-Path $output 'read' } else { $output }
+$writeConfig = if ($Packaged) { Join-Path $writeRoot 'Graphics\GameUserSettings.ini' } else { $config }
+$readConfig = if ($Packaged) { Join-Path $readRoot 'Graphics\GameUserSettings.ini' } else { $config }
+if ($Packaged) {
+    $null = New-Item -ItemType Directory -Path (Split-Path $writeConfig -Parent) -Force
+    Copy-Item -LiteralPath (Join-Path $output 'initial-fixture.ini') -Destination $writeConfig
+}
+$runs += Invoke-CameraPhase 'write' $writeRoot $writeConfig
+if ($Packaged) {
+    $null = New-Item -ItemType Directory -Path (Split-Path $readConfig -Parent) -Force
+    Copy-Item -LiteralPath $writeConfig -Destination $readConfig
+}
+$runs += Invoke-CameraPhase 'read' $readRoot $readConfig
+$saved = Get-Content -LiteralPath $readConfig -Raw
 $sensitivityMatch = [regex]::Match($saved, '(?ms)\[Homestead\.Camera\].*?^Sensitivity=([0-9.]+)\s*$')
 $savedSensitivity = $sensitivityMatch.Success -and
     [Math]::Abs([double]::Parse($sensitivityMatch.Groups[1].Value,
@@ -115,7 +138,7 @@ if (-not ($invalidSensitivity -and $invalidInversion)) {
     runs = $runs
     finalSensitivity = 1.2
     finalInvertY = $true
-    settingsFile = $config
+    settingsFile = $readConfig
     isolation = 'Explicit synthetic GameUserSettingsINI, UserDir and smoke save routes only.'
     limits = 'Mapped offscreen input and real native Slate controls; physical mouse feel remains ordinary-play acceptance.'
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $output 'camera-preference-result.json')
