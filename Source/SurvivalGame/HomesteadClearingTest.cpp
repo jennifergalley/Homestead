@@ -64,7 +64,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 + FMath::Square(Other.position.y - ApproachPoint.y));
             if (Distance < Best) { Best = Distance; Winner = &Other; }
         }
-        if (Winner && Winner->id == Node.id) FocusableMatureTrees.Add(Node);
+        FocusableMatureTrees.Add(Node);
     }
     if (!Avatar || !Avatar->HasHeroine() || Saplings.Num() < 3
         || FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty())
@@ -89,7 +89,27 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
             {
                 Homestead::ResourceNode Current{};
                 if (Controller->Simulation().ResolveGeneratedResource(Node->key, Current)) *Node = Current;
-                Avatar->CancelAction(); Teleport({Node->position.x, Node->position.y - 110});
+                Homestead::Point ApproachPoint{Node->position.x, Node->position.y - 110};
+                bool Found = false;
+                for (const double Radius : {110.0, 150.0, 190.0})
+                    for (int32 Offset = 0; Offset < 16 && !Found; ++Offset)
+                    {
+                        const int32 Direction = (12 + Offset) % 16;
+                        const double Angle = 2.0 * PI * Direction / 16.0;
+                        const Homestead::Point Candidate{Node->position.x + Radius * FMath::Cos(Angle),
+                            Node->position.y + Radius * FMath::Sin(Angle)};
+                        const Homestead::ResourceNode* Winner = nullptr;
+                        double Best = 280.0;
+                        for (const auto& Other : Controller->State().resources)
+                        {
+                            if (Other.cleared) continue;
+                            const double Distance = FMath::Sqrt(FMath::Square(Other.position.x - Candidate.x)
+                                + FMath::Square(Other.position.y - Candidate.y));
+                            if (Distance < Best) { Best = Distance; Winner = &Other; }
+                        }
+                        if (Winner && Winner->id == Node->id) { ApproachPoint = Candidate; Found = true; }
+                    }
+                Avatar->CancelAction(); Teleport(ApproachPoint);
             },
             [this, Node, Hidden]() { return Controller->IsResourceFocused(Node->id) && Hidden(); }, 0.7f);
     };
