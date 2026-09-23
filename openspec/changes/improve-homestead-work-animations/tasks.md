@@ -46,9 +46,21 @@ and recovery; the broader 2.3 rejection/cancellation matrix remains open.
 
 ## 3. Refined watering contact
 
-- [ ] 3.1 Measure the incumbent watering arc/can path against representative
+- [x] 3.1 Measure the incumbent watering arc/can path against representative
   plots and author only the demonstrated lift/aim/pour/recover correction;
   verify skeleton, scale, grounded feet, can tilt and no root motion/notifies.
+
+Task 3.1 source verification passed for fresh
+`Assets/Characters/Heroine/RefinedWatering/AN_Heroine_WaterRefined.fbx`.
+The incumbent contract is a generic forward 2.2s lift with a 32-degree can
+tilt and explicitly no plot contact; inspected native evidence
+`work-animation-till-water-editor-08/watering-pour.png` shows the can held
+beside the heroine rather than aimed toward the selected plot. The corrected
+2.0s clip has explicit lift/aim/44-degree pour/recover phases, 53 retained
+bones, maximum bind error0, idle endpoint error0.0006418, maximum scale
+error6.56e-7, root/foot travel0cm, right-wrist travel32.84cm and zero notifies.
+Runtime selected-plot targeting, can lifecycle and contact review remain tasks
+3.2/3.3 and are not inferred from this analytical flat-ground check.
 - [ ] 3.2 Pass the successful selected-plot target into presentation and keep
   the existing can bound/hidden lifecycle; verify one water cost/moisture change,
   full/dry/missing/out-of-range rejection, interruption and no queued replay.
