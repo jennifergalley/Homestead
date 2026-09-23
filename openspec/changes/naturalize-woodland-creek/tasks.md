@@ -4,7 +4,7 @@
 
 - [x] 1.1 Record the selected build's ordinary creek approach, upstream/downstream views, refill result, collision behavior, and relevant timing/component counts so the sandy-canal baseline is reproducible
 - [x] 1.2 Remove the continuous tan bank overlays and refine the existing global terrain material weights into a narrow damp mud/leaf-litter transition, then verify targeted source/native tests preserve terrain collision and deterministic shared vertices
-- [ ] 1.3 Run an integrated Editor gameplay route at the same creek location and verify the smallest playable result visibly removes the broad sand strips while refill and traversal still pass
+- [x] 1.3 Run an integrated Editor gameplay route at the same creek location and verify the smallest playable result visibly removes the broad sand strips while refill and traversal still pass
 
 ## 2. Natural Edge and Bank Dressing
 
