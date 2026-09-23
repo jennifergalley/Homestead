@@ -85,6 +85,7 @@ public:
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
     bool MenuSplitHalf(const FHomesteadRow& Row);
     bool MenuSortPack();
+    bool MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target, uint64 ExpectedRevision);
     bool OpenChestStorage(int32 ChestId);
     TOptional<int32> ActiveStorageChest() const { return ActiveChestId; }
     bool MenuCraftRecipe(Homestead::Recipe Recipe);

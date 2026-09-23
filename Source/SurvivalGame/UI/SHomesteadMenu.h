@@ -61,6 +61,8 @@ public:
     int32 GetActionCount() const { return Actions.Num(); }
     bool IsEditingQuantity() const { return bEditingAmount; }
     int32 GetDraftQuantity() const { return Amount; }
+    bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
+    void PointerItemDragMove(FVector2D Position);
     float GetCraftProgress() const { return CraftHoldRecipe >= 0 ? CraftHoldElapsed / CraftCycleSeconds : 0.0f; }
 
 private:
@@ -124,6 +126,13 @@ private:
     TArray<int32> MergeTargets;
     int32 AudioEditId = -1;
     float AudioEditStart = 0;
+    int32 PointerDragSource = INDEX_NONE;
+    int32 PointerDragTarget = INDEX_NONE;
+    FVector2D PointerDragStart = FVector2D::ZeroVector;
+    uint64 PointerDragRevision = 0;
+    bool bPointerItemDown = false;
+    bool bPointerDraggingItem = false;
+    bool bSuppressItemClick = false;
     enum class ECraftInput { None, Pointer, Keyboard, Controller };
     static constexpr float CraftCycleSeconds = 1.2f;
     int32 CraftHoldRecipe = INDEX_NONE;
@@ -149,6 +158,9 @@ private:
     int32 DetailIndex() const;
     void Select(int32 Index, bool KeepDesiredColumn = false);
     void SplitSelectedHalf();
+    void BeginPointerItemDrag(int32 Index);
+    void EndPointerItemDrag();
+    void CancelPointerItemDrag();
     bool StartCraftHold(ECraftInput Input);
     void StopCraftHold();
     bool IsHoldingRecipe(int32 Recipe) const;

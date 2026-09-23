@@ -384,6 +384,8 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
 {
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
+    if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
+        CancelPointerItemDrag();
     if (CraftInput != ECraftInput::None)
     {
         if (Dialog != EDialog::None || SeenPage != 1 || Region != ERegion::Content
@@ -482,6 +484,7 @@ int32 SHomesteadMenu::Columns() const
 void SHomesteadMenu::Refresh()
 {
     if (!Controller.IsValid() || !ContentHost) return;
+    CancelPointerItemDrag();
     const int32 OldPage = SeenPage;
     const bool WasRecovery = bRecovery;
     bRecovery = Controller->IsFailed() && !Controller->IsBookOpen();
@@ -849,15 +852,25 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     Select(Index);
                     StartCraftHold(ECraftInput::Pointer);
                 }
+                else if (PointerAction() && SeenPage == 0 && Entries.IsValidIndex(Index)
+                    && (Entries[Index].Subject == EHomesteadMenuSubject::ItemGroup
+                        || Entries[Index].Subject == EHomesteadMenuSubject::Wearable))
+                {
+                    Region = ERegion::Content;
+                    Select(Index);
+                    BeginPointerItemDrag(Index);
+                }
             })
             .OnReleased_Lambda([this]()
             {
                 if (CraftInput == ECraftInput::Pointer) StopCraftHold();
+                if (bPointerItemDown) EndPointerItemDrag();
             })
             .OnClicked_Lambda([this, Index]()
             {
                 if (PointerAction() && Dialog == EDialog::None)
                 {
+                    if (bSuppressItemClick) { bSuppressItemClick = false; return FReply::Handled(); }
                     Region = ERegion::Content;
                     Select(Index);
                     if (SeenPage == 0 && bControl) SplitSelectedHalf();
@@ -1270,6 +1283,10 @@ void SHomesteadMenu::FocusEquipment(int32 Index)
 }
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
 {
+    if (bPointerDraggingItem && Index == PointerDragSource)
+        return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+    if (bPointerDraggingItem && Index == PointerDragTarget)
+        return Gold;
     return Index == ContentSelection ? Selected
         : Index == Hover ? Selected : FLinearColor(0.055f, 0.09f, 0.075f);
 }
@@ -1294,6 +1311,37 @@ void SHomesteadMenu::SplitSelectedHalf()
         return;
     const auto Row = Entries[ContentSelection];
     if (Controller->MenuSplitHalf(Row)) Refresh();
+}
+void SHomesteadMenu::BeginPointerItemDrag(int32 Index)
+{
+    CancelPointerItemDrag();
+    if (!Entries.IsValidIndex(Index)) return;
+    PointerDragSource = Index;
+    PointerDragStart = FSlateApplication::Get().GetCursorPos();
+    PointerDragRevision = Controller->Simulation().GetRevision();
+    bPointerItemDown = true;
+}
+void SHomesteadMenu::EndPointerItemDrag()
+{
+    const bool WasDragging = bPointerDraggingItem;
+    const int32 Source = PointerDragSource;
+    const int32 Target = PointerDragTarget;
+    bPointerItemDown = false;
+    bPointerDraggingItem = false;
+    PointerDragSource = INDEX_NONE;
+    PointerDragTarget = INDEX_NONE;
+    bSuppressItemClick = WasDragging;
+    if (WasDragging && Entries.IsValidIndex(Source) && Entries.IsValidIndex(Target)
+        && Source != Target)
+        Controller->MenuDrop(Entries[Source], Entries[Target], PointerDragRevision);
+}
+void SHomesteadMenu::CancelPointerItemDrag()
+{
+    bPointerItemDown = false;
+    bPointerDraggingItem = false;
+    PointerDragSource = INDEX_NONE;
+    PointerDragTarget = INDEX_NONE;
+    bSuppressItemClick = false;
 }
 bool SHomesteadMenu::PointerAction()
 {
@@ -1366,6 +1414,7 @@ void SHomesteadMenu::Activate()
 void SHomesteadMenu::ChangePage(int32 Page)
 {
     if (!Controller.IsValid() || Dialog != EDialog::None) return;
+    CancelPointerItemDrag();
     StopCraftHold();
     Controller->MenuPage(Page);
     Refresh();
@@ -1688,7 +1737,25 @@ FReply SHomesteadMenu::OnAnalogValueChanged(const FGeometry&, const FAnalogInput
 }
 FReply SHomesteadMenu::OnMouseMove(const FGeometry&, const FPointerEvent& Event)
 {
+    PointerItemDragMove(Event.GetScreenSpacePosition());
     return FReply::Handled();
+}
+void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
+{
+    if (bPointerItemDown && Entries.IsValidIndex(PointerDragSource))
+    {
+        if (!bPointerDraggingItem
+            && FVector2D::Distance(Position, PointerDragStart) >= 7.0f)
+            bPointerDraggingItem = true;
+        if (bPointerDraggingItem)
+        {
+            PointerDragTarget = INDEX_NONE;
+            for (int32 Index = 0; Index < Cells.Num(); ++Index)
+                if (Index != PointerDragSource && Cells[Index]
+                    && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
+                { PointerDragTarget = Index; break; }
+        }
+    }
 }
 FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event)
 {
@@ -1699,6 +1766,7 @@ FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event
 void SHomesteadMenu::Back()
 {
     if (bSaving) return;
+    CancelPointerItemDrag();
     StopCraftHold();
     if (Dialog == EDialog::Amount && bEditingAmount) { bEditingAmount = false; BuildDialog(); return; }
     if (Dialog != EDialog::None) { SetDialog(EDialog::None); return; }
@@ -1727,6 +1795,7 @@ void SHomesteadMenu::ShowGraphicsSaveFailure(const FString& Error)
 }
 void SHomesteadMenu::SetDialog(EDialog Value)
 {
+    CancelPointerItemDrag();
     StopCraftHold();
     Dialog = Value; DialogSelection = 0;
     bEditingAmount = false;

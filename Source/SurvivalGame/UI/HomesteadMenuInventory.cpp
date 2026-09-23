@@ -222,3 +222,41 @@ bool AHomesteadController::MenuSortPack()
     Notify(Result);
     return Result.ok;
 }
+
+bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target,
+    uint64 ExpectedRevision)
+{
+    if (ExpectedRevision != Sim.GetRevision())
+    { Notify(TEXT("Your inventory changed. Pick up the item again."), true); return false; }
+    if (Source.ContainerId != Target.ContainerId || Source.ContainerId < 0)
+    { Notify(TEXT("Choose a valid destination in this container."), true); return false; }
+    if (Source.Subject == EHomesteadMenuSubject::ItemGroup
+        && Target.Subject == EHomesteadMenuSubject::ItemGroup
+        && Source.Id == Target.Id && Source.SubjectId != Target.SubjectId)
+    {
+        const auto Result = Sim.MergeGroups(Source.ContainerId, Source.SubjectId,
+            Target.SubjectId, PlayerPoint(), ExpectedRevision);
+        Notify(Result);
+        return Result.ok;
+    }
+    const auto* Layout = Sim.GetLayout(Source.ContainerId);
+    if (!Layout) return false;
+    const auto FindIndex = [Layout](const FHomesteadRow& Row)
+    {
+        for (int32 Index = 0; Index < static_cast<int32>(Layout->size()); ++Index)
+            if ((Row.Subject == EHomesteadMenuSubject::ItemGroup
+                    && (*Layout)[Index].groupId == Row.SubjectId)
+                || (Row.Subject == EHomesteadMenuSubject::Wearable
+                    && (*Layout)[Index].wearableId == Row.SubjectId))
+                return Index;
+        return static_cast<int32>(INDEX_NONE);
+    };
+    const int32 SourceIndex = FindIndex(Source);
+    const int32 TargetIndex = FindIndex(Target);
+    if (SourceIndex == INDEX_NONE || TargetIndex == INDEX_NONE || SourceIndex == TargetIndex)
+        return false;
+    const auto Result = Sim.ReorderEntry(Source.ContainerId, SourceIndex, TargetIndex,
+        PlayerPoint(), ExpectedRevision);
+    Notify(Result);
+    return Result.ok;
+}

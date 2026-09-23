@@ -948,6 +948,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     const auto Snapshot = MakeShared<std::string>();
     const auto ChestCapacity = MakeShared<int32>(0);
     const auto BranchTotal = MakeShared<int32>(0);
+    const auto DragSource = MakeShared<FVector2D>();
+    const auto DragTarget = MakeShared<FVector2D>();
     const auto Group = [this](int32 Container, int32 Quantity = -1)
     {
         const auto* Layout = Controller->Simulation().GetLayout(Container);
@@ -956,6 +958,20 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             if (!Entry.wearableId && Entry.item == Homestead::Item::Branch
                 && (Quantity < 0 || Entry.quantity == Quantity)) return Entry.groupId;
         return 0;
+    };
+    const auto PointerDrag = [this](FVector2D From, FVector2D To)
+    {
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        Slate.SetCursorPos(From);
+        TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+        Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, From, From, Pressed,
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        Slate.SetCursorPos(To);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, To, From, Pressed,
+            EKeys::Invalid, 0, FModifierKeysState()));
+        Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, To, To, TSet<FKey>(),
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
     };
     Add(TEXT("Gather real transaction stock and place one reachable chest through authority"),
         [this, Chest, Branches, BranchTotal, Group]()
@@ -1006,6 +1022,49 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this]() { return !Controller->ActiveStorageChest().IsSet()
             && Controller->InventoryView() == 0
             && Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Record the compact Branch tile and focus Fiber as a pointer reorder target"),
+        [this, Branches, DragSource]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Branch tile geometry is unavailable.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            *DragSource = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            int32 Fiber = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Fiber) { Fiber = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Fiber, 0);
+        },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Drag Branch onto Fiber position to reorder without changing quantities"),
+        [this, DragSource, DragTarget, PointerDrag]()
+        {
+            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Fiber tile geometry is unavailable.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            *DragTarget = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            PointerDrag(*DragSource, *DragTarget);
+        },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            if (!Layout || Controller->Simulation().Count(Homestead::Item::Branch) != *BranchTotal) return false;
+            int BranchIndex = -1, FiberIndex = -1;
+            for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
+            {
+                if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+            }
+            return BranchIndex > FiberIndex && !Controller->NativeMenu->IsPointerDraggingItem(); });
+    Add(TEXT("Sort restores deterministic order after pointer reorder"),
+        [this]() { Tap(EKeys::S); },
+        [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            if (!Layout) return false;
+            int BranchIndex = -1, FiberIndex = -1;
+            for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
+            {
+                if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+            }
+            return BranchIndex >= 0 && BranchIndex < FiberIndex; });
     Add(TEXT("Ctrl Enter splits the focused odd stack in half beside its source"),
         [this]()
         {
@@ -1069,12 +1128,53 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                 { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
+    Add(TEXT("Record the original Branch merge target and focus its split source"),
+        [this, Branches, DragTarget]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            const auto TargetWidget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!TargetWidget) { Finish(false, TEXT("Original Branch merge target is unavailable.")); return; }
+            const auto Geometry = TargetWidget->GetCachedGeometry();
+            *DragTarget = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            int32 Split = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Branch
+                    && Entry.groupId != *Branches) { Split = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Split, 0);
+        },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Drag one Branch stack onto the other to merge exact quantities"),
+        [this, DragSource, DragTarget, PointerDrag]()
+        {
+            const auto SourceWidget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!SourceWidget) { Finish(false, TEXT("Split Branch source is unavailable.")); return; }
+            const auto Geometry = SourceWidget->GetCachedGeometry();
+            *DragSource = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            PointerDrag(*DragSource, *DragTarget);
+        },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                    { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
     Add(TEXT("Sort restores the pointer-split stack before transfer regression"),
         [this]() { Tap(EKeys::S); },
         [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                     { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
+    Add(TEXT("Pointer drag released outside any tile cancels without mutation"),
+        [this, Branches, Snapshot, DragSource, PointerDrag]()
+        {
+            *Snapshot = Controller->Simulation().Serialize();
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Branch source is unavailable for cancel drag.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            *DragSource = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            PointerDrag(*DragSource, FVector2D(2.0f, 2.0f));
+        },
+        [this, Snapshot]() { return Controller->Simulation().Serialize() == *Snapshot
+            && !Controller->NativeMenu->IsPointerDraggingItem(); });
     Add(TEXT("Open amount transfer without mutating current state"),
         [this, Snapshot]()
         {

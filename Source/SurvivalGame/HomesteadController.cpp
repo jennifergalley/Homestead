@@ -381,6 +381,8 @@ bool AHomesteadController::MenuPointerIntent(float X, float Y)
 {
     MenuPhysicalInput(EKeys::MouseX, IE_Axis, X);
     MenuPhysicalInput(EKeys::MouseY, IE_Axis, Y);
+    if (NativeMenu.IsValid() && FSlateApplication::IsInitialized())
+        NativeMenu->PointerItemDragMove(FSlateApplication::Get().GetCursorPos());
     return !bAutomatedInputOnly && !bGamepad;
 }
 
