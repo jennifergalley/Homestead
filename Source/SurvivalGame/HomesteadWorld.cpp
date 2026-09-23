@@ -1059,6 +1059,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         ++RebuiltChunks;
         const uint32 Seed = GetTypeHash(State.world.seed) ^ GetTypeHash(Chunk.Key);
         FRandomStream Random(static_cast<int32>(Seed));
+        FRandomStream FlowerRandom(static_cast<int32>(Seed ^ 0x8DA6B343u));
         auto CreateCoverBatch = [&](UStaticMesh* Mesh, FName Tag, int32 StartCullDistance,
             int32 EndCullDistance)
         {
@@ -1132,7 +1133,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
                 const int32 FlowerIndex = (Attempt / 64) % 2;
                 auto* Mesh = FlowerMeshes[FlowerIndex];
                 const FBox Bounds = Mesh->GetBoundingBox();
-                const float Scale = Random.FRandRange(0.55f, 0.80f);
+                const float Scale = FlowerRandom.FRandRange(0.55f, 0.80f);
                 const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
                 FlowerBatches[FlowerIndex]->AddInstance(FTransform(Rotation,
                     AtGround(X, Y) - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));

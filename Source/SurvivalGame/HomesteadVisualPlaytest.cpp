@@ -820,7 +820,8 @@ void AHomesteadVisualPlaytest::TickTreeEncounter(const FPass& Pass, float Delta,
         const FVector ToCenter = ObservedTreeBounds.GetCenter() - CameraPosition;
         const float DesiredPitch = FMath::RadiansToDegrees(FMath::Atan2(ToCenter.Z, ToCenter.Size2D()));
         const float PitchError = FMath::FindDeltaAngleDegrees(CameraRotation.Pitch, DesiredPitch);
-        Look.Y = -FMath::Clamp(PitchError / 30.0f, -0.65f, 0.65f) * (PC->bInvertY ? -1.0f : 1.0f);
+        Look.Y = FMath::Clamp(PitchError / 30.0f, -0.65f, 0.65f)
+            * (PC->bInvertY ? -1.0f : 1.0f);
         if (PassElapsed + Delta >= Pass.Duration)
         {
             RecordCameraForeground();

@@ -29,7 +29,8 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     bool Valid = Landscape->IsPreparedFor(State) && Landscape->TerrainChunks.Num() == 25;
     int32 Colliding = 0, ActiveTrees = 0, ActiveBatchInstances = 0, ActiveCollisions = 0;
     int32 OuterTrees = 0, OuterBatchInstances = 0;
-    int32 Grass = 0, Ferns = 0, Flowers = 0, ExpectedGrass = 0, ExpectedFerns = 0;
+    int32 Grass = 0, Ferns = 0, Flowers = 0;
+    int32 ExpectedGrass = 0, ExpectedFerns = 0, ExpectedFlowers = 0;
     int32 GrassBatchComponents = 0, FernBatchComponents = 0, FlowerBatchComponents = 0;
     bool CoverPoliciesValid = true, CoverRepresentativeTransformsExact = true;
     double PositionError = 0, NormalError = 0;
@@ -58,6 +59,10 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_b.SM_Fern02_b"),
         TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_c.SM_Fern02_c"),
         TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_d.SM_Fern02_d")
+    };
+    const TCHAR* FlowerPaths[] = {
+        TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a"),
+        TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b")
     };
     auto MaterialReady = [](UMaterialInterface* Interface)
     {
@@ -106,6 +111,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         Tiles.Add(MakeShared<FJsonValueObject>(Row));
         TMap<FString, const UHierarchicalInstancedStaticMeshComponent*> GrassBatches;
         TMap<FString, const UHierarchicalInstancedStaticMeshComponent*> FernBatches;
+        TMap<FString, const UHierarchicalInstancedStaticMeshComponent*> FlowerBatches;
         int32 ChunkGrassBatches = 0, ChunkFernBatches = 0, ChunkFlowerBatches = 0;
         for (const auto& Component : Entry.Value.Cover.Components)
         {
@@ -151,7 +157,9 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     Flowers += Batch->GetInstanceCount();
                     PolicyReady &= Batch->InstanceStartCullDistance == 3000
                         && Batch->InstanceEndCullDistance == 4800
-                        && MeshPath.StartsWith(TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_"));
+                        && MeshPath.StartsWith(
+                            TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_"));
+                    FlowerBatches.Add(MeshPath, Batch);
                 }
                 CoverPoliciesValid &= PolicyReady;
             }
@@ -223,21 +231,26 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                     CoverState.resources.push_back(Node);
                 }
             }
-        TMap<FString, int32> ExpectedGrassByMesh, ExpectedFernsByMesh;
-        TMap<FString, FTransform> RepresentativeGrassByMesh, RepresentativeFernByMesh;
+        TMap<FString, int32> ExpectedGrassByMesh, ExpectedFernsByMesh, ExpectedFlowersByMesh;
+        TMap<FString, FTransform> RepresentativeGrassByMesh, RepresentativeFernByMesh,
+            RepresentativeFlowersByMesh;
         if (ExpectedReady)
         {
             const double OriginX = static_cast<int64>(Entry.Key.X) * Gen::ChunkSizeCm;
             const double OriginY = static_cast<int64>(Entry.Key.Y) * Gen::ChunkSizeCm;
             const uint32 Seed = GetTypeHash(State.world.seed) ^ GetTypeHash(Entry.Key);
             FRandomStream Random(static_cast<int32>(Seed));
+            FRandomStream FlowerRandom(static_cast<int32>(Seed ^ 0x8DA6B343u));
             for (int32 Attempt = 0; Attempt < 1200; ++Attempt)
             {
                 const double X = OriginX + Random.FRandRange(0, 2399.99f);
                 const double Y = OriginY + Random.FRandRange(0, 2399.99f);
                 const FRotator Rotation(0, Random.FRandRange(0, 360), 0);
+                const double StreamDistance = FMath::Abs(X - Homestead::StreamX(Y));
+                const bool bCreekBank = StreamDistance >= 100.0 && StreamDistance < 215.0
+                    && Attempt % 5 == 0;
                 if (Landscape->IsDecorationReserved(CoverState, X, Y, 20, 0, true)
-                    || FMath::Abs(X - Homestead::StreamX(Y)) < 215)
+                    || (StreamDistance < 215.0 && !bCreekBank))
                     continue;
                 const int32 Variety = Attempt % 16;
                 const int32 GrassIndex = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
@@ -266,6 +279,25 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                         const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
                         RepresentativeFernByMesh.Add(FernPath, FTransform(Rotation,
                             Landscape->AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
+                    }
+                }
+                if (Attempt % 64 == 17 && StreamDistance >= 260.0
+                    && !Landscape->IsDecorationReserved(CoverState, X, Y, 55, 0, true))
+                {
+                    const int32 FlowerIndex = (Attempt / 64) % 2;
+                    const FString FlowerPath(FlowerPaths[FlowerIndex]);
+                    const auto* FlowerBatch = FlowerBatches.FindRef(FlowerPath);
+                    const int32 FlowerIndexInBatch = ExpectedFlowersByMesh.FindOrAdd(FlowerPath)++;
+                    ++ExpectedFlowers;
+                    const float Scale = FlowerRandom.FRandRange(0.55f, 0.80f);
+                    if (FlowerBatch && FlowerIndexInBatch == 0)
+                    {
+                        UStaticMesh* Mesh = FlowerBatch->GetStaticMesh();
+                        const FBox Bounds = Mesh->GetBoundingBox();
+                        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+                        RepresentativeFlowersByMesh.Add(FlowerPath, FTransform(Rotation,
+                            Landscape->AtGround(X, Y) - Rotation.RotateVector(Anchor * Scale),
+                            FVector(Scale)));
                     }
                 }
             }
@@ -298,6 +330,16 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
                 && FernBatch->GetInstanceCount() == ExpectedFernInstances
                 && (ExpectedFernInstances == 0
                     || HasRepresentative(FernBatch, RepresentativeFernByMesh.Find(FernPaths[Index])));
+        }
+        for (int32 Index = 0; Index < 2; ++Index)
+        {
+            const auto* FlowerBatch = FlowerBatches.FindRef(FlowerPaths[Index]);
+            const int32 ExpectedFlowerInstances = ExpectedFlowersByMesh.FindRef(FlowerPaths[Index]);
+            CoverRepresentativeTransformsExact &= FlowerBatch
+                && FlowerBatch->GetInstanceCount() == ExpectedFlowerInstances
+                && (ExpectedFlowerInstances == 0
+                    || HasRepresentative(FlowerBatch,
+                        RepresentativeFlowersByMesh.Find(FlowerPaths[Index])));
         }
     }
     TSet<FString> Keys, TreeMeshes;
@@ -603,7 +645,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         && OuterTrees == OuterBatchInstances && Landscape->OuterTreeBatches.Num() == ExpectedOuterByMesh.Num()
         && RegisteredOuterBatches.Num() == Landscape->OuterTreeBatches.Num()
         && TreeMeshes.Num() >= 3 && Grass > 0 && Ferns > 0 && Flowers > 0
-        && Grass == ExpectedGrass && Ferns == ExpectedFerns
+        && Grass == ExpectedGrass && Ferns == ExpectedFerns && Flowers == ExpectedFlowers
         && GrassBatchComponents == Landscape->TerrainChunks.Num() * 4
         && FernBatchComponents == Landscape->TerrainChunks.Num() * 4
         && FlowerBatchComponents == Landscape->TerrainChunks.Num() * 2
@@ -682,6 +724,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     Evidence->SetNumberField(TEXT("decorativeFlowers"), Flowers);
     Evidence->SetNumberField(TEXT("expectedGrass"), ExpectedGrass);
     Evidence->SetNumberField(TEXT("expectedFerns"), ExpectedFerns);
+    Evidence->SetNumberField(TEXT("expectedDecorativeFlowers"), ExpectedFlowers);
     Evidence->SetNumberField(TEXT("grassBatchComponents"), GrassBatchComponents);
     Evidence->SetNumberField(TEXT("fernBatchComponents"), FernBatchComponents);
     Evidence->SetNumberField(TEXT("flowerBatchComponents"), FlowerBatchComponents);
@@ -696,9 +739,10 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
     const bool Written = FJsonSerializer::Serialize(Evidence, TJsonWriterFactory<>::Create(&Text))
         && FFileHelper::SaveStringToFile(Text, *FPaths::Combine(OutputDirectory, TEXT("generated-inventory.json")));
     if (!Valid || !Written) Observations.Add(TEXT("FAILED generated terrain/tree/cover inventory or persistence."));
-    Observations.Add(FString::Printf(TEXT("Generated inventory valid=%d; chunks=%d collision=%d active_trees=%d active_batches=%d active_capsules=%d outer_trees=%d outer_batches=%d grass=%d/%d grass_batches=%d ferns=%d/%d fern_batches=%d flowers=%d flower_batches=%d"),
+    Observations.Add(FString::Printf(TEXT("Generated inventory valid=%d; chunks=%d collision=%d active_trees=%d active_batches=%d active_capsules=%d outer_trees=%d outer_batches=%d grass=%d/%d grass_batches=%d ferns=%d/%d fern_batches=%d flowers=%d/%d flower_batches=%d"),
         Valid && Written, Landscape->TerrainChunks.Num(), Colliding, ActiveTrees,
         Landscape->ActiveTreeBatches.Num(), ActiveCollisions, OuterTrees,
         Landscape->OuterTreeBatches.Num(), Grass, ExpectedGrass, GrassBatchComponents,
-        Ferns, ExpectedFerns, FernBatchComponents, Flowers, FlowerBatchComponents));
+        Ferns, ExpectedFerns, FernBatchComponents, Flowers, ExpectedFlowers,
+        FlowerBatchComponents));
 }
