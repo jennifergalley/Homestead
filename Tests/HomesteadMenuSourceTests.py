@@ -326,7 +326,7 @@ class MenuSourceContracts(unittest.TestCase):
         controller = CONTROLLER
         hatchet = (SOURCE / "HomesteadHatchet.cpp").read_text()
         self.assertIn("HomesteadWork_20260923_01/Animations/AN_Heroine_Chop", character)
-        self.assertIn("ClearYaw = Delta.Rotation().Yaw", character)
+        self.assertIn("ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X))", character)
         self.assertIn("Avatar->PlayClear(ActionTarget)", controller)
         self.assertIn("Avatar->ClearTargetYaw()", hatchet)
         self.assertNotIn("SetActorRotation", character[character.index("void AHomesteadCharacter::PlayClear(Homestead::Point"):])

@@ -310,6 +310,7 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         UE_LOG(LogTemp, Error, TEXT("Wardrobe apply rejected: %s"), *Error);
         return false;
     }
+    CancelAction();
     USkeletalMeshComponent* VisualMesh = GetMesh();
     HomesteadWardrobePresentation::ApplySurface(PreparedEquipment.Base, *VisualMesh);
     VisualMesh->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));

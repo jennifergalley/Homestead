@@ -8,7 +8,7 @@
 - [x] 1.2 Author and verify a planted-foot anticipation/swing/impact/recover
   clip on the retained skeleton, preserving bind, scale, nonanimated bones,
   disabled root motion and zero gameplay notifies through source/FBX checks.
-- [ ] 1.3 Integrate target-directed chopping through the existing one-action
+- [x] 1.3 Integrate target-directed chopping through the existing one-action
   evaluator and hatchet prop; verify successful mature/sapling transactions
   start once, rejected actions do not animate, rapid input coalesces, movement
   cancels cleanly and pawn/camera/feet remain stable.
@@ -87,3 +87,15 @@ maximum bind error0, idle endpoint matrix error0.00044305, maximum scale error
 7.15e-7, root travel0cm, foot drift0cm, right-wrist travel66.33cm and zero
 notifies. The target-facing runtime layer and ordinary contact remain separate
 task1.3 evidence.
+
+Task 1.3 passed in `work-animation-chop-clearing-focused-editor-13`. The
+focused native route resolves generated saplings by stable key before every
+approach, validates the selected target yaw, one authoritative Clear start,
+fixed scale/collision-free hand prop, zero pawn/camera/foot displacement,
+rejected/no-target/capacity paths, rapid request coalescing, natural recovery,
+movement/book/planning/appearance/load cancellation, all 18 supported
+body/hair/outfit combinations, save/reload persistence, and depleted-sapling
+clearing. The route also exposed and fixed prepared wardrobe application not
+cancelling an active hand action. The optional combined camera-lifecycle route
+still has a separately preserved stale woodland-reservation expectation and is
+not counted as chopping acceptance.
