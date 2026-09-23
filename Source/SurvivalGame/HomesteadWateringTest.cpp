@@ -39,7 +39,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         && !Avatar->GetHatchet()->IsPresented() && !Avatar->GetDiggingStick()->IsPresented(); };
     const Homestead::Point Garden = Homestead::CellCenter(-5, 0);
     const auto TillApproach = MakeShared<Homestead::Point>(Homestead::Point{-1160, 150});
-    const Homestead::Point Stream{Homestead::StreamX(2700) - 40, 2700};
+    const auto Stream = MakeShared<Homestead::Point>(
+        Homestead::Point{Homestead::StreamX(2700) - 120, 2700});
     auto Probe = MakeShared<FWaterProbe>();
     auto Matches = [this, Probe]()
     {
@@ -52,7 +53,29 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     };
     auto Refill = [this, Stream, Hidden, Approach]()
     {
-        Add(TEXT("Approach stream for ordinary mapped refill"), [this, Stream]() { Teleport(Stream); },
+        Add(TEXT("Approach stream for ordinary mapped refill"), [this, Stream]()
+        {
+            const double OriginY = Stream->y;
+            for (int32 Index = 0; Index < 32; ++Index)
+            {
+                const double Y = OriginY + (Index % 2 ? -1.0 : 1.0) * ((Index + 1) / 2) * 180.0;
+                for (const double Side : {-120.0, 120.0})
+                {
+                    const Homestead::Point Candidate{Homestead::StreamX(Y) + Side, Y};
+                    Teleport(Candidate);
+                    bool Occupied = false;
+                    for (const auto& Node : Controller->State().resources)
+                        if (!Node.cleared && Controller->Simulation().CanHarvest(Node.id)
+                            && FMath::Square(Node.position.x - Candidate.x)
+                                + FMath::Square(Node.position.y - Candidate.y) < FMath::Square(280.0))
+                        { Occupied = true; break; }
+                    if (Occupied) continue;
+                    *Stream = Candidate;
+                    Controller->UpdateFocus();
+                    if (Controller->FocusTitle() == TEXT("Fresh stream water")) return;
+                }
+            }
+        },
             [this, Hidden]() { return Controller->FocusTitle() == TEXT("Fresh stream water") && Hidden(); }, 0.7f);
         Add(TEXT("Refill changes water stock but does not start a watering pose"),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
@@ -163,6 +186,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
             Probe->Ready = Probe->Expected.Till(-5, 0, Controller->PlayerPoint()).ok;
             Probe->TillStarts = Animation()->TillStarts();
+            Probe->GatherStarts = Animation()->GatherStarts();
+            Probe->ClearStarts = Animation()->ClearStarts();
+            Probe->Starts = Animation()->WaterStarts();
             Probe->Actor = Avatar->GetActorLocation();
             Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
             Probe->View = Controller->GetControlRotation();
@@ -180,6 +206,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                         Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
                     return Probe->Ready && !Controller->ToastIsError() && Matches()
                         && Animation()->TillStarts() == Probe->TillStarts + 1
+                        && Animation()->GatherStarts() == Probe->GatherStarts
+                        && Animation()->ClearStarts() == Probe->ClearStarts
+                        && Animation()->WaterStarts() == Probe->Starts
                         && Animation()->TillWeight() > 0.99f && Tool->IsPresented()
                         && Tool->GetAttachParent() == Avatar->GetMesh()
                         && Tool->GetAttachSocketName() == TEXT("hand_r")
@@ -195,6 +224,13 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 }
             return false;
         }, 0.45f);
+    Add(TEXT("Rapid competing hand requests cannot stack onto tilling"),
+        [Animation]() { Animation()->RequestGather(); Animation()->RequestWater(); Animation()->RequestClear(); },
+        [Probe, Animation, Matches]() { return Matches()
+            && Animation()->TillStarts() == Probe->TillStarts + 1
+            && Animation()->GatherStarts() == Probe->GatherStarts
+            && Animation()->ClearStarts() == Probe->ClearStarts
+            && Animation()->WaterStarts() == Probe->Starts; }, 0.12f);
     Add(TEXT("Tilling recovers with no orphaned prop"), []() {}, Hidden, 1.9f);
     Add(TEXT("Approach and plant actual wild-root seeds"), [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.7f);
@@ -251,7 +287,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                         auto Look = Controller->GetAppearance();
                         Look.BodyPreset = Body; Look.HairStyle = Hair; Look.Outfit = Outfit;
                         Look.HairColor = 2; Look.TunicColor = 1;
-                        Probe->Ready = Avatar->ApplyAppearance(Look);
+                        FString Error;
+                        Probe->Ready = Avatar->PrepareEquipment(Controller->State(), Look, Error)
+                            && Avatar->ApplyPreparedEquipment(Error);
                     }, [Probe, Hidden]() { return Probe->Ready && Hidden(); });
                 Refill();
                 Water(EKeys::Gamepad_FaceButton_Bottom);
@@ -261,7 +299,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                         auto Look = Controller->GetAppearance();
                         Look.BodyPreset = Body; Look.HairStyle = Hair; Look.Outfit = Outfit;
                         Look.HairColor = 3; Look.TunicColor = 2;
-                        Probe->Ready = Avatar->ApplyAppearance(Look);
+                        FString Error;
+                        Probe->Ready = Avatar->PrepareEquipment(Controller->State(), Look, Error)
+                            && Avatar->ApplyPreparedEquipment(Error);
                     }, [Avatar, Probe, Hidden]()
                     {
                         const auto* Material = Cast<UMaterialInstanceDynamic>(Avatar->GetWateringTool()->GetMaterial(0));
@@ -270,7 +310,12 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                             && Tint.Equals(FLinearColor(0.27f, 0.145f, 0.065f));
                     });
             }
-    Add(TEXT("Restore saved appearance"), [this, Avatar]() { Avatar->ApplyAppearance(Controller->GetAppearance()); }, Hidden);
+    Add(TEXT("Restore saved appearance"), [this, Avatar]()
+        {
+            FString Error;
+            Avatar->PrepareEquipment(Controller->State(), Controller->GetAppearance(), Error);
+            Avatar->ApplyPreparedEquipment(Error);
+        }, Hidden);
     Refill();
     for (int32 Portion = 0; Portion < 6; ++Portion)
         Add(TEXT("Each allowed repeat consumes exactly one real water portion"),
