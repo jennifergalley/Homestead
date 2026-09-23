@@ -22,5 +22,5 @@
 
 - [x] 4.1 Run ordinary mouse/keyboard routes selecting and using all current tools by number, wheel and click, with Ctrl+wheel camera changes and rapid switching; inspect selection clarity, tool response and heroine/context visibility at 720p/4K
 - [x] 4.2 Run controller parity, storage/craft/save/reload/new-world, menu/planning/recovery and full-loop routes; verify LB/RB/R3/RT behavior, authoritative state, current settings and unrelated UI remain stable
-- [ ] 4.3 Run focused hotbar/input/save/source contracts, full portable simulation/world/regional suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
+- [x] 4.3 Run focused hotbar/input/save/source contracts, full portable simulation/world/regional suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
 - [ ] 4.4 Build one immutable Shipping candidate under the serialized engine slot, run fresh consumer and comparable cadence routes, update PRODUCT/DESIGN/setup/playtest docs, and promote only if the bar is useful without clutter, input conflict, copied styling or performance regression

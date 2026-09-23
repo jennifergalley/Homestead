@@ -234,6 +234,20 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             return Avatar && Controller->SelectedHotbarIndex() == 2
                 && Avatar->CameraArm->TargetArmLength < *CameraDistance;
         });
+    Add(TEXT("R3 still toggles camera distance without changing selected slot"),
+        [this, CameraDistance]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            *CameraDistance = Avatar ? Avatar->CameraArm->TargetArmLength : 0;
+            Tap(EKeys::Gamepad_RightThumbstick);
+        },
+        [this, CameraDistance]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 2
+                && !FMath::IsNearlyEqual(
+                    Avatar->CameraArm->TargetArmLength, *CameraDistance);
+        });
     Add(TEXT("Gameplay RB cycles the selected tool"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
         [this]() { return Controller->SelectedHotbarIndex() == 3; });
