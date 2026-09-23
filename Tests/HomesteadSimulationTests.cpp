@@ -85,6 +85,13 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
         if (version >= 3) out << ' ' << static_cast<int>(p.kind);
         out << '\n';
     }
+    if (version >= 7)
+    {
+        out << s.worldDrops.size() << '\n';
+        for (const auto& drop : s.worldDrops)
+            out << drop.id << ' ' << drop.position.x << ' ' << drop.position.y << ' '
+                << static_cast<int>(drop.item) << ' ' << drop.quantity << ' ' << drop.wearableId << '\n';
+    }
     if (version >= 4)
     {
         out << s.nextWearableId << ' ' << s.nextGroupId << '\n' << s.wearables.size() << '\n';
@@ -942,7 +949,7 @@ void CropKindPersistenceAndVersionRejection()
     OK(sim.Clear(berry.id, berry.position));
     sim.AdvanceGameHours(2, Home);
     const std::string expected = sim.Serialize();
-    CHECK(expected.rfind("HOMESTEAD 6 ", 0) == 0);
+    CHECK(expected.rfind("HOMESTEAD 7 ", 0) == 0);
     const std::string legacy = Encode(sim.GetState(), 2);
     Simulation migrated;
     const auto initial = migrated.Serialize();
@@ -951,6 +958,7 @@ void CropKindPersistenceAndVersionRejection()
     CHECK(migrated.Deserialize(Encode(sim.GetState(), 3)).code == ResultCode::UnsupportedVersion);
     CHECK(migrated.Serialize() == initial);
     CHECK(migrated.Deserialize(Encode(sim.GetState(), 5)).code == ResultCode::UnsupportedVersion);
+    CHECK(migrated.Deserialize(Encode(sim.GetState(), 6)).code == ResultCode::UnsupportedVersion);
     CHECK(migrated.Serialize() == initial);
     OK(migrated.Deserialize(expected));
     CHECK(migrated.Serialize() == expected);
@@ -991,7 +999,7 @@ void CropKindPersistenceAndVersionRejection()
     const std::string payload = mixed.substr(mixed.find('\n') + 1);
     reject(Envelope(payload, 2));
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 7));
+    reject(Envelope(payload, 8));
     State malformedLegacy = sim.GetState();
     malformedLegacy.plots[0].growth = 1.1;
     reject(Encode(malformedLegacy, 2));
@@ -1171,7 +1179,7 @@ void PersistenceRejection()
     reject(original.substr(0, original.size() - 1));
     reject(original + "garbage");
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 7));
+    reject(Envelope(payload, 8));
     reject(Envelope(payload + "garbage"));
     reject(Envelope(payload.substr(0, payload.size() - 8)));
     reject(std::string(8 * 1024 * 1024 + 1, 'x'));
@@ -1540,6 +1548,87 @@ void DirectSplitAndDeterministicSort()
     CHECK(sim.GetWearable(tunic.id)->definition == tunic.definition
         && sim.GetWearable(tunic.id)->dye == tunic.dye);
 }
+void PersistentWorldDropTransactions()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 5}});
+    const int branches = Group(sim, Item::Branch);
+    const auto before = sim.GetRevision();
+    OK(sim.DropGroup(branches, 2, Home, Home, before));
+    CHECK(sim.Count(Item::Branch) == 3 && sim.GetState().worldDrops.size() == 1);
+    CHECK(sim.GetState().worldDrops[0].item == Item::Branch
+        && sim.GetState().worldDrops[0].quantity == 2);
+    const int drop = sim.GetState().worldDrops[0].id;
+    CHECK(sim.FindNearestDrop(Home, 1) == drop);
+    UnchangedFailure(sim, [&] { return sim.PickUpDrop(drop, {Home.x + 301, Home.y}); });
+    UnchangedFailure(sim, [&] { return sim.DropGroup(branches, 0, Home, Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.DropGroup(branches, 1, WaterSource, WaterSource, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.DropGroup(branches, 1, Home, Home, before); });
+    OK(sim.DropGroup(branches, 3, {Home.x + 50, Home.y}, Home, sim.GetRevision()));
+    CHECK(sim.Count(Item::Branch) == 0 && sim.GetState().worldDrops.size() == 1
+        && sim.GetState().worldDrops[0].quantity == 5);
+
+    const auto persisted = sim.Serialize();
+    Simulation loaded;
+    OK(loaded.Deserialize(persisted));
+    CHECK(loaded.Serialize() == persisted && loaded.FindNearestDrop(Home, 100) == drop);
+    Stock(loaded, {{Item::Knife, 1}, {Item::Stone, 119}});
+    UnchangedFailure(loaded, [&] { return loaded.PickUpDrop(drop, Home); });
+    CHECK(loaded.GetState().worldDrops.size() == 1);
+    Stock(loaded, {{Item::Knife, 1}});
+    OK(loaded.PickUpDrop(drop, Home));
+    CHECK(loaded.Count(Item::Branch) == 5 && loaded.GetState().worldDrops.empty());
+    UnchangedFailure(loaded, [&] { return loaded.PickUpDrop(drop, Home); });
+
+    Simulation clothing;
+    OK(clothing.UnequipWearable(1, clothing.GetRevision()));
+    OK(clothing.RecolorWearable(1, 2, Home, clothing.GetRevision()));
+    const auto tunic = *clothing.GetWearable(1);
+    OK(clothing.DropWearable(tunic.id, Home, Home, clothing.GetRevision()));
+    CHECK(clothing.GetWearable(tunic.id)->owner == WearableOwner::World);
+    CHECK(clothing.GetState().worldDrops.size() == 1
+        && clothing.GetState().worldDrops[0].wearableId == tunic.id);
+    const int garmentDrop = clothing.GetState().worldDrops[0].id;
+    InventoryRoundTrip(clothing);
+    OK(clothing.PickUpDrop(garmentDrop, Home));
+    CHECK(clothing.GetWearable(tunic.id)->owner == WearableOwner::Carried
+        && clothing.GetWearable(tunic.id)->definition == tunic.definition
+        && clothing.GetWearable(tunic.id)->dye == tunic.dye);
+
+    State malformed = clothing.GetState();
+    malformed.worldDrops.push_back({malformed.nextId++, Home, Item::Count, 1, 9999});
+    Simulation rejected;
+    UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
+    malformed = clothing.GetState();
+    malformed.worldDrops.push_back({malformed.nextId++, {MaxWorldCoordinate + 1, 0}, Item::Branch, 1, 0});
+    UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
+    malformed = clothing.GetState();
+    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, 121, 0});
+    ++malformed.nextId;
+    UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
+    malformed = clothing.GetState();
+    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Count, 1, tunic.id});
+    ++malformed.nextId;
+    UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
+
+    Simulation blocked;
+    BuildingStock(blocked);
+    OK(blocked.Place(Piece::Chest, -3, 0, 0, Home));
+    Stock(blocked, {{Item::Knife, 1}, {Item::Branch, 1}});
+    UnchangedFailure(blocked, [&] { return blocked.DropGroup(Group(blocked, Item::Branch),
+        1, CellCenter(-3, 0), CellCenter(-3, 0), blocked.GetRevision()); });
+
+    Simulation capped;
+    Stock(capped, {{Item::Knife, 1}, {Item::Branch, 1}});
+    Edit(capped, [](State& state) {
+        for (int index = 0; index < MaxWorldDrops; ++index)
+            state.worldDrops.push_back({state.nextId++, {10000, 10000}, Item::Stone, 1, 0});
+    });
+    UnchangedFailure(capped, [&] { return capped.DropGroup(Group(capped, Item::Branch),
+        1, Home, Home, capped.GetRevision()); });
+    const auto oldVersion = rejected.Deserialize(Encode(clothing.GetState(), 6));
+    CHECK(!oldVersion && oldVersion.code == ResultCode::UnsupportedVersion);
+}
 void SelectedFoodGroupTransactions()
 {
     for (const auto food : {std::pair<Item, double>{Item::Berries, 12.0},
@@ -1670,7 +1759,7 @@ void WardrobeSaveRejection()
     FixtureLayouts(dependent);
     CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
-    for (int version : {1, 2, 3, 4, 5, 7, 999})
+    for (int version : {1, 2, 3, 4, 5, 6, 8, 999})
     {
         CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
@@ -2243,6 +2332,7 @@ int main()
     Run("persistent layout and stale transaction rejection", PersistentLayoutTransactions);
     Run("existing quantity mutations and 120 groups without slot cost", QuantityMutationReconciliation);
     Run("direct split-half and deterministic pack sort", DirectSplitAndDeterministicSort);
+    Run("persistent atomic world drop transactions", PersistentWorldDropTransactions);
     Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
     Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
     Run("seeded resource identity and bounded region activation", GeneratedWorldIdentityAndActivation);

@@ -23,15 +23,16 @@ enum class CropKind : int { Roots, Berries, Count };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 6;
+constexpr int SimulationSaveVersion = 7;
 constexpr double ChestReach = 280.0;
 constexpr double MaxWorldCoordinate = 1000000.0;
 constexpr int MaxResourceEdits = 16384;
+constexpr int MaxWorldDrops = 512;
 constexpr int TransientResourceIdBase = 1000000;
 
 enum class WearableDefinition : int { LinenTunic, LinenApron, LeatherShoes, WovenFootwraps, Count };
 enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Count };
-enum class WearableOwner : int { Carried, Chest, Equipped };
+enum class WearableOwner : int { Carried, Chest, Equipped, World };
 enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
 
@@ -140,6 +141,15 @@ struct Plot
     CropKind kind = CropKind::Roots;
 };
 
+struct WorldDrop
+{
+    int id = 0;
+    Point position;
+    Item item = Item::Count;
+    int quantity = 0;
+    int wearableId = 0;
+};
+
 struct State
 {
     double hour = 6.0;
@@ -154,6 +164,7 @@ struct State
     std::vector<ResourceNode> resources;
     std::vector<Structure> structures;
     std::vector<Plot> plots;
+    std::vector<WorldDrop> worldDrops;
     int nextWearableId = 3;
     int nextGroupId = 1;
     std::vector<WearableInstance> wearables;
@@ -206,6 +217,7 @@ public:
     int FindNearestResource(Point position, double maxDistance) const;
     int FindNearestPlot(Point position, double maxDistance) const;
     int FindNearestStructure(Point position, Piece kind, double maxDistance) const;
+    int FindNearestDrop(Point position, double maxDistance) const;
 
     Result Harvest(int nodeId, Point player);
     Result Clear(int nodeId, Point player);
@@ -234,6 +246,11 @@ public:
     Result ReorderEntry(int containerId, int index, int targetIndex, Point player, std::uint64_t expectedRevision);
     Result SplitHalf(int containerId, int groupId, Point player, std::uint64_t expectedRevision);
     Result SortPack(std::uint64_t expectedRevision);
+    Result DropGroup(int groupId, int amount, Point position, Point player,
+        std::uint64_t expectedRevision);
+    Result DropWearable(int wearableId, Point position, Point player,
+        std::uint64_t expectedRevision);
+    Result PickUpDrop(int dropId, Point player);
     Result Sleep(double hours, Point player);
     Result SetDayMinutes(double minutes);
     void SetWarmOutfit(bool enabled);

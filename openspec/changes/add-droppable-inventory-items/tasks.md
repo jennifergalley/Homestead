@@ -2,10 +2,10 @@
 
 ## 1. Atomic World-Drop Authority
 
-- [ ] 1.1 Record selected-build inventory action/group/wearable totals, quantity dialogs, pack capacity, focus/ground placement and current save format so the no-Drop baseline is reproducible
-- [ ] 1.2 Add strict bounded world-drop state, World wearable ownership and current-version serialization with stable IDs/payload/position invariants; verify malformed, duplicate, out-of-range, ownership mismatch, count overflow and disposable-old-save rejection cases
-- [ ] 1.3 Implement atomic carried-group quantity and unequipped-wearable Drop transactions with near-player/ground/structure/plot/water/revision/limit validation plus compatible ordinary-stack merge; verify every rejection leaves exact inventory/drop totals unchanged
-- [ ] 1.4 Implement whole-drop pickup with range, capacity, layout and wearable-identity/dye validation; verify success inserts/removes once, capacity failure remains unchanged, repeated pickup cannot duplicate, and merge totals remain exact
+- [x] 1.1 Record selected-build inventory action/group/wearable totals, quantity dialogs, pack capacity, focus/ground placement and current save format so the no-Drop baseline is reproducible
+- [x] 1.2 Add strict bounded world-drop state, World wearable ownership and current-version serialization with stable IDs/payload/position invariants; verify malformed, duplicate, out-of-range, ownership mismatch, count overflow and disposable-old-save rejection cases
+- [x] 1.3 Implement atomic carried-group quantity and unequipped-wearable Drop transactions with near-player/ground/structure/plot/water/revision/limit validation plus compatible ordinary-stack merge; verify every rejection leaves exact inventory/drop totals unchanged
+- [x] 1.4 Implement whole-drop pickup with range, capacity, layout and wearable-identity/dye validation; verify success inserts/removes once, capacity failure remains unchanged, repeated pickup cannot duplicate, and merge totals remain exact
 
 ## 2. Grounded World Pickup
 

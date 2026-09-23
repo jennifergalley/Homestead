@@ -21,6 +21,8 @@ constexpr double MaxHour = 1000000.0;
 constexpr double TimeStep = 1.0 / 120.0;
 constexpr int MaxObjects = 4096;
 constexpr int MaxStock = 120;
+constexpr double DropReach = 220.0;
+constexpr double DropMergeReach = 120.0;
 constexpr double MaxFuel = 48.0;
 constexpr std::size_t MaxSaveBytes = 8 * 1024 * 1024;
 
@@ -539,6 +541,9 @@ Result ValidateInventory(const State& state)
                 equipment[slot] = item.id;
             }
             break;
+        case WearableOwner::World:
+            if (item.chestId != 0) return Bad("A world garment also names a chest.");
+            break;
         default: return Bad("A garment has an unknown owner.");
         }
     }
@@ -585,9 +590,35 @@ Result ValidateInventory(const State& state)
         else if (!piece.layout.empty()) return Bad("Only chests may contain inventory layout.");
     }
     if (groupIds.size() > MaxObjects) return Bad("The homestead has reached its inventory group limit.");
+    std::set<int> dropIds, droppedWearables;
+    if (state.worldDrops.size() > MaxWorldDrops) return Bad("The world drop limit is exceeded.");
+    for (const auto& drop : state.worldDrops)
+    {
+        if (drop.id <= 0 || drop.id >= state.nextId || !dropIds.insert(drop.id).second
+            || !ValidPoint(drop.position) || std::abs(drop.position.x) > MaxWorldCoordinate
+            || std::abs(drop.position.y) > MaxWorldCoordinate)
+            return Bad("A world drop has invalid identity or position.");
+        if (drop.wearableId == 0)
+        {
+            if (!ValidEnum(drop.item, Item::Count) || drop.quantity <= 0
+                || drop.quantity > InventoryCapacity)
+                return Bad("A world item drop has an invalid payload.");
+        }
+        else
+        {
+            const auto* wearable = Find(state.wearables, drop.wearableId);
+            if (drop.item != Item::Count || drop.quantity != 1 || !wearable
+                || wearable->owner != WearableOwner::World
+                || !droppedWearables.insert(drop.wearableId).second)
+                return Bad("A world garment drop has invalid ownership.");
+        }
+    }
     for (const auto& item : state.wearables)
-        if (item.owner != WearableOwner::Equipped && !displayed.count(item.id))
+        if (item.owner != WearableOwner::Equipped && item.owner != WearableOwner::World
+            && !displayed.count(item.id))
             return Bad("A stored garment is missing its layout reference.");
+        else if (item.owner == WearableOwner::World && !droppedWearables.count(item.id))
+            return Bad("A world garment is missing its drop record.");
     return Good("");
 }
 void RefreshEquipment(State& state)
@@ -1064,6 +1095,107 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
         return {true, "Pack is already sorted.", ResultCode::None, revision_};
     return CommitInventory(std::move(candidate), "Pack sorted.");
 }
+Result Simulation::DropGroup(int groupId, int amount, Point position, Point player,
+    std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (!ValidPoint(position) || std::abs(position.x) > MaxWorldCoordinate
+        || std::abs(position.y) > MaxWorldCoordinate || !Near(player, position, DropReach))
+        return Bad("Choose safe ground close to you.");
+    if (IsNearWater(position)) return Bad("Choose dry ground for this item.");
+    for (const auto& structure : state_.structures)
+        if (Near(position, CellCenter(structure.cellX, structure.cellY), 100.0))
+            return Bad("Keep dropped items clear of structures.");
+    for (const auto& plot : state_.plots)
+        if (Near(position, CellCenter(plot.cellX, plot.cellY), 100.0))
+            return Bad("Keep dropped items clear of crop plots.");
+    State candidate = state_;
+    auto entry = std::find_if(candidate.inventoryLayout.begin(), candidate.inventoryLayout.end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == candidate.inventoryLayout.end() || amount <= 0 || amount > entry->quantity)
+        return Bad("Choose an available quantity from the selected carried stack.");
+    WorldDrop* merge = nullptr;
+    double nearest = DropMergeReach * DropMergeReach;
+    for (auto& drop : candidate.worldDrops)
+    {
+        if (drop.wearableId != 0 || drop.item != entry->item
+            || drop.quantity > InventoryCapacity - amount) continue;
+        const double distance = DistanceSquared(position, drop.position);
+        if (distance <= nearest && (!merge || distance < nearest || drop.id < merge->id))
+        { merge = &drop; nearest = distance; }
+    }
+    if (!merge && candidate.worldDrops.size() >= MaxWorldDrops)
+        return Bad("Too many possessions are already resting in the world. Pick one up first.");
+    const Item item = entry->item;
+    entry->quantity -= amount;
+    candidate.inventory[static_cast<int>(item)] -= amount;
+    if (merge) merge->quantity += amount;
+    else
+    {
+        if (candidate.nextId >= TransientResourceIdBase - 1)
+            return Bad("World drop identities are exhausted.");
+        candidate.worldDrops.push_back({candidate.nextId++, position, item, amount, 0});
+    }
+    return CommitInventory(std::move(candidate), "Item dropped.");
+}
+Result Simulation::DropWearable(int wearableId, Point position, Point player,
+    std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (!ValidPoint(position) || std::abs(position.x) > MaxWorldCoordinate
+        || std::abs(position.y) > MaxWorldCoordinate || !Near(player, position, DropReach))
+        return Bad("Choose safe ground close to you.");
+    if (IsNearWater(position)) return Bad("Choose dry ground for this garment.");
+    for (const auto& structure : state_.structures)
+        if (Near(position, CellCenter(structure.cellX, structure.cellY), 100.0))
+            return Bad("Keep dropped garments clear of structures.");
+    for (const auto& plot : state_.plots)
+        if (Near(position, CellCenter(plot.cellX, plot.cellY), 100.0))
+            return Bad("Keep dropped garments clear of crop plots.");
+    const auto* original = GetWearable(wearableId);
+    if (!original || original->owner != WearableOwner::Carried)
+        return Bad("Unequip this garment into your pack before dropping it.");
+    if (state_.worldDrops.size() >= MaxWorldDrops)
+        return Bad("Too many possessions are already resting in the world. Pick one up first.");
+    State candidate = state_;
+    auto* wearable = Find(candidate.wearables, wearableId);
+    wearable->owner = WearableOwner::World;
+    wearable->chestId = 0;
+    if (candidate.nextId >= TransientResourceIdBase - 1)
+        return Bad("World drop identities are exhausted.");
+    candidate.worldDrops.push_back({candidate.nextId++, position, Item::Count, 1, wearableId});
+    return CommitInventory(std::move(candidate), "Garment dropped.");
+}
+Result Simulation::PickUpDrop(int dropId, Point player)
+{
+    if (state_.failed) return Failed();
+    const auto found = std::find_if(state_.worldDrops.begin(), state_.worldDrops.end(),
+        [dropId](const WorldDrop& drop) { return drop.id == dropId; });
+    if (found == state_.worldDrops.end()) return Bad("That dropped possession is no longer available.");
+    if (!Near(player, found->position, Reach)) return Bad("Move closer to pick this up.");
+    State candidate = state_;
+    auto drop = std::find_if(candidate.worldDrops.begin(), candidate.worldDrops.end(),
+        [dropId](const WorldDrop& value) { return value.id == dropId; });
+    if (drop->wearableId == 0)
+    {
+        if (ContainerUsed(candidate, 0) > InventoryCapacity - drop->quantity)
+            return {false, "Not enough pack space to pick up the complete stack.", ResultCode::Capacity, revision_};
+        candidate.inventory[static_cast<int>(drop->item)] += drop->quantity;
+    }
+    else
+    {
+        if (ContainerUsed(candidate, 0) >= InventoryCapacity)
+            return {false, "Not enough pack space to pick up this garment.", ResultCode::Capacity, revision_};
+        auto* wearable = Find(candidate.wearables, drop->wearableId);
+        if (!wearable || wearable->owner != WearableOwner::World)
+            return Bad("This dropped garment has invalid ownership.");
+        wearable->owner = WearableOwner::Carried;
+    }
+    candidate.worldDrops.erase(drop);
+    return CommitInventory(std::move(candidate), "Dropped possession recovered.");
+}
 bool Simulation::IsNight() const
 {
     const double hour = std::fmod(state_.hour, 24.0);
@@ -1141,6 +1273,19 @@ int Simulation::FindNearestResource(Point position, double maxDistance) const
             nearest = node.id;
             distance = current;
         }
+    }
+    return nearest;
+}
+int Simulation::FindNearestDrop(Point position, double maxDistance) const
+{
+    if (!ValidPoint(position) || !FiniteRange(maxDistance, 0, 12000)) return -1;
+    int nearest = -1;
+    double distance = maxDistance * maxDistance;
+    for (const auto& drop : state_.worldDrops)
+    {
+        const double current = DistanceSquared(position, drop.position);
+        if (current < distance || (current == distance && (nearest == -1 || drop.id < nearest)))
+        { nearest = drop.id; distance = current; }
     }
     return nearest;
 }
@@ -1554,6 +1699,10 @@ std::string Simulation::Serialize() const
     for (const auto& plot : state_.plots)
         body << plot.id << ' ' << plot.cellX << ' ' << plot.cellY << ' ' << plot.planted << ' '
              << plot.growth << ' ' << plot.moisture << ' ' << plot.weeds << ' ' << static_cast<int>(plot.kind) << '\n';
+    body << state_.worldDrops.size() << '\n';
+    for (const auto& drop : state_.worldDrops)
+        body << drop.id << ' ' << drop.position.x << ' ' << drop.position.y << ' '
+             << static_cast<int>(drop.item) << ' ' << drop.quantity << ' ' << drop.wearableId << '\n';
     body << state_.nextWearableId << ' ' << state_.nextGroupId << '\n' << state_.wearables.size() << '\n';
     for (const auto& item : state_.wearables)
         body << item.id << ' ' << static_cast<int>(item.definition) << ' ' << item.dye << ' '
@@ -1678,6 +1827,20 @@ Result Simulation::Deserialize(const std::string& data)
         for (const auto& piece : candidate.structures)
             if (piece.cellX == plot.cellX && piece.cellY == plot.cellY) return invalid();
         candidate.plots.push_back(plot);
+    }
+    if (!(input >> count) || count < 0 || count > MaxWorldDrops) return invalid();
+    for (int i = 0; i < count; ++i)
+    {
+        WorldDrop drop;
+        int item = -1;
+        if (!(input >> drop.id >> drop.position.x >> drop.position.y
+            >> item >> drop.quantity >> drop.wearableId)) return invalid();
+        drop.item = static_cast<Item>(item);
+        if (!acceptId(drop.id) || !ValidPoint(drop.position)
+            || std::abs(drop.position.x) > MaxWorldCoordinate
+            || std::abs(drop.position.y) > MaxWorldCoordinate)
+            return invalid();
+        candidate.worldDrops.push_back(drop);
     }
     if (!(input >> candidate.nextWearableId >> candidate.nextGroupId >> count) || count < 0 || count > MaxObjects)
         return invalid();
