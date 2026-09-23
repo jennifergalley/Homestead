@@ -144,6 +144,8 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth)", MENU)
         self.assertIn("FText::AsNumber(FMath::Max(1, Row.Quantity))", MENU)
         self.assertIn('Kind(FName(TEXT("sort")))', MENU)
+        self.assertIn("Scroll->GetScrollOffsetOfEnd()", MENU)
+        self.assertIn("PointerDragRevision != Controller->Simulation().GetRevision()", MENU)
         self.assertNotIn('TEXT("Nearby chest")', MENU)
         self.assertNotIn('TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")', MENU)
         details = function_body(MENU, "TSharedRef<SWidget> SHomesteadMenu::BuildDetails(")

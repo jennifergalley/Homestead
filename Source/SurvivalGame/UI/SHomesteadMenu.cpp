@@ -1827,6 +1827,18 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
                 if (Index != PointerDragSource && Cells[Index]
                     && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
                 { PointerDragTarget = Index; break; }
+            if (Scroll)
+            {
+                const auto Bounds = Scroll->GetCachedGeometry();
+                const float Top = Bounds.GetAbsolutePosition().Y;
+                const float Bottom = Top + Bounds.GetAbsoluteSize().Y;
+                float Delta = 0.0f;
+                if (Position.Y < Top + 36.0f) Delta = -18.0f;
+                else if (Position.Y > Bottom - 36.0f) Delta = 18.0f;
+                if (Delta != 0.0f)
+                    Scroll->SetScrollOffset(FMath::Clamp(Scroll->GetScrollOffset() + Delta,
+                        0.0f, Scroll->GetScrollOffsetOfEnd()));
+            }
         }
     }
 }

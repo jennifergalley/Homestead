@@ -1217,6 +1217,38 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Snapshot]() { return Controller->IsBookOpen()
             && !Controller->NativeMenu->IsVirtualDraggingItem()
             && Controller->Simulation().Serialize() == *Snapshot; });
+    Add(TEXT("Inventory revision change cancels virtual drag before any drop"),
+        [this, Branches]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            Tap(EKeys::Enter);
+            if (!Controller->Sim.ReorderEntry(0, 0, 1,
+                Controller->PlayerPoint(), Controller->Sim.GetRevision()))
+            { Finish(false, TEXT("Could not create the stale virtual-drag revision.")); }
+        },
+        [this]() { return !Controller->NativeMenu->IsVirtualDraggingItem(); }, 0.3f);
+    Add(TEXT("Sort restores order after stale virtual-drag cancellation"),
+        [this]() { Tap(EKeys::S); },
+        [this]() { return !Controller->ToastIsError(); });
+    Add(TEXT("Changing page cancels virtual drag without mutating inventory"),
+        [this, Branches, Snapshot]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            *Snapshot = Controller->Simulation().Serialize();
+            Tap(EKeys::Enter);
+            Controller->NativeMenu->ChangePage(1);
+        },
+        [this, Snapshot]() { return Controller->BookPage() == 1
+            && !Controller->NativeMenu->IsVirtualDraggingItem()
+            && Controller->Simulation().Serialize() == *Snapshot; });
+    Add(TEXT("Return to Pack after virtual-drag page cancellation"),
+        [this, Branches]()
+        {
+            Controller->NativeMenu->ChangePage(0);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+        },
+        [this]() { return Controller->BookPage() == 0
+            && Controller->NativeMenu->HasSynchronizedFocus(); });
     Add(TEXT("Ctrl Enter splits the focused odd stack in half beside its source"),
         [this]()
         {
