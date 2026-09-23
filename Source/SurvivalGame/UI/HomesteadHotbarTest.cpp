@@ -357,4 +357,14 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 { return Value.cellX == *TillX && Value.cellY == *TillY; });
             return Controller->SelectedHotbarIndex() == 3
                 && Plot != Controller->State().plots.end() && Plot->moisture > 0; });
+    Add(TEXT("A new woodland resets world-specific hotbar references safely"),
+        [this]() { Controller->NewGame(); },
+        [this]()
+        {
+            const auto Slots = Controller->HotbarSnapshot();
+            return Controller->IsBookOpen() && Controller->SelectedHotbarIndex() == 0
+                && Slots.Num() == 10 && Slots[0].Tool == Item::Knife
+                && Slots[0].Available && !Slots[1].Available
+                && !Slots[2].Available && !Slots[3].Available;
+        }, 0.8f);
 }
