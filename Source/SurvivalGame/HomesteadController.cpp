@@ -28,10 +28,13 @@
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWave.h"
 #include "UI/SHomesteadMenu.h"
+#include "UI/SHomesteadHotbar.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/IInputProcessor.h"
 #include "UI/HomesteadMenuPortrait.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Widgets/SOverlay.h"
+#include "Widgets/Layout/SBox.h"
 
 namespace
 {
@@ -44,6 +47,24 @@ constexpr const TCHAR* AutosaveSettingsSection = TEXT("Homestead.Autosave");
 constexpr const TCHAR* AutosaveEnabledKey = TEXT("Enabled");
 constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
 constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
+
+bool IsHotbarTool(Homestead::Item Item)
+{
+    return Item == Homestead::Item::Knife || Item == Homestead::Item::Hatchet
+        || Item == Homestead::Item::DiggingStick || Item == Homestead::Item::WateringCan;
+}
+
+FName HotbarIcon(Homestead::Item Item)
+{
+    switch (Item)
+    {
+    case Homestead::Item::Knife: return TEXT("knife");
+    case Homestead::Item::Hatchet: return TEXT("hatchet");
+    case Homestead::Item::DiggingStick: return TEXT("digging-stick");
+    case Homestead::Item::WateringCan: return TEXT("watering-can");
+    default: return NAME_None;
+    }
+}
 
 struct FCameraConfigSnapshot
 {
@@ -227,6 +248,7 @@ void AHomesteadController::BeginPlay()
 #endif
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
+    ResetHotbar();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
     {
@@ -251,6 +273,7 @@ void AHomesteadController::BeginPlay()
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
     bHasPlayableSession = !bTestResetRequired;
     if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
+    ShowHotbar();
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();
     if (HomesteadAutomatedActorsEnabled())
@@ -282,6 +305,11 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         if (NextGamepad != bGamepad) ++PromptDeviceChanges;
         bGamepad = NextGamepad;
     }
+    if (Params.Key == EKeys::LeftControl || Params.Key == EKeys::RightControl)
+    {
+        if (Params.Event == IE_Pressed) bControlDown = true;
+        else if (Params.Event == IE_Released) bControlDown = false;
+    }
     if (NativeMenu.IsValid()) bShowMouseCursor = !bGamepad;
     if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
     {
@@ -292,6 +320,33 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         { if (NativeMenu->PrepareQuickAction()) QuickLoad(); return true; }
         const auto Menu = NativeMenu;
         return Menu->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
+    }
+    if (!bBookOpen && !bPlanning && !IsFailed())
+    {
+        static const FKey NumberKeys[] = {
+            EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five,
+            EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine, EKeys::Zero
+        };
+        if (Params.Event == IE_Pressed)
+            for (int32 Index = 0; Index < UE_ARRAY_COUNT(NumberKeys); ++Index)
+                if (Params.Key == NumberKeys[Index])
+                {
+                    SelectHotbarSlot(Index);
+                    return true;
+                }
+        if (Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
+            && FMath::Abs(Params.AmountDepressed) >= 1.0f)
+        {
+            const bool Control = bControlDown || IsInputKeyDown(EKeys::LeftControl)
+                || IsInputKeyDown(EKeys::RightControl);
+            if (Control)
+            {
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                    Avatar->Zoom(Params.AmountDepressed);
+            }
+            else CycleHotbar(Params.AmountDepressed > 0 ? -1 : 1);
+            return true;
+        }
     }
     return Super::InputKey(Params);
 }
@@ -349,6 +404,203 @@ void AHomesteadController::HideNativeMenu()
     SetInputMode(FInputModeGameOnly());
 }
 
+void AHomesteadController::ShowHotbar()
+{
+    if (HotbarRoot.IsValid() || !GEngine || !GEngine->GameViewport) return;
+    HotbarWidget = SNew(SHomesteadHotbar).Controller(this);
+    HotbarRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return ShouldShowHotbar()
+                ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed;
+        })
+        .HAlign(HAlign_Center)
+        .VAlign(VAlign_Bottom)
+        .Padding(0, 0, 0, 22)
+        [
+            HotbarWidget.ToSharedRef()
+        ];
+    GEngine->GameViewport->AddViewportWidgetContent(HotbarRoot.ToSharedRef(), 50);
+}
+
+void AHomesteadController::HideHotbar()
+{
+    if (HotbarRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(HotbarRoot.ToSharedRef());
+    HotbarWidget.Reset();
+    HotbarRoot.Reset();
+}
+
+bool AHomesteadController::ShouldShowHotbar() const
+{
+    return bWorldReady && !bBookOpen && !bPlanning && !IsFailed();
+}
+
+void AHomesteadController::ResetHotbar()
+{
+    HotbarSlots.Init(-1, 10);
+    HotbarSlots[0] = static_cast<int32>(Homestead::Item::Knife);
+    HotbarSlots[1] = static_cast<int32>(Homestead::Item::Hatchet);
+    HotbarSlots[2] = static_cast<int32>(Homestead::Item::DiggingStick);
+    HotbarSlots[3] = static_cast<int32>(Homestead::Item::WateringCan);
+    SelectedHotbarSlot = 0;
+}
+
+void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected)
+{
+    HotbarSlots.Init(-1, 10);
+    TSet<int32> Seen;
+    for (int32 Index = 0; Index < FMath::Min(10, Slots.Num()); ++Index)
+    {
+        const auto Tool = static_cast<Homestead::Item>(Slots[Index]);
+        if (Slots[Index] >= 0 && IsHotbarTool(Tool) && !Seen.Contains(Slots[Index]))
+        {
+            HotbarSlots[Index] = Slots[Index];
+            Seen.Add(Slots[Index]);
+        }
+    }
+    SelectedHotbarSlot = FMath::Clamp(Selected, 0, 9);
+}
+
+TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
+{
+    TArray<FHomesteadHotbarSlot> Result;
+    Result.Reserve(10);
+    for (int32 Index = 0; Index < 10; ++Index)
+    {
+        FHomesteadHotbarSlot Slot;
+        Slot.Index = Index;
+        Slot.Selected = Index == SelectedHotbarSlot;
+        if (HotbarSlots.IsValidIndex(Index) && HotbarSlots[Index] >= 0)
+        {
+            Slot.Tool = static_cast<Homestead::Item>(HotbarSlots[Index]);
+            Slot.Assigned = IsHotbarTool(Slot.Tool);
+            Slot.Available = Slot.Assigned && Sim.Count(Slot.Tool) > 0;
+            Slot.Icon = HotbarIcon(Slot.Tool);
+        }
+        Result.Add(Slot);
+    }
+    return Result;
+}
+
+void AHomesteadController::SelectHotbarSlot(int32 Index)
+{
+    if (!ShouldShowHotbar() || Index < 0 || Index >= 10) return;
+    SelectedHotbarSlot = Index;
+    const auto Snapshot = HotbarSnapshot();
+    ToastText = Snapshot[Index].Assigned
+        ? Text(Homestead::ItemName(Snapshot[Index].Tool)) : TEXT("Empty slot");
+    bToastError = false;
+    ToastRemaining = 1.0f;
+    PlayEffect(UIClick, 0.05f);
+}
+
+void AHomesteadController::CycleHotbar(int32 Direction)
+{
+    if (!ShouldShowHotbar() || Direction == 0) return;
+    SelectHotbarSlot((SelectedHotbarSlot + (Direction > 0 ? 1 : 9)) % 10);
+}
+
+void AHomesteadController::UseSelectedTool()
+{
+    if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)) return;
+    const int32 ToolValue = HotbarSlots[SelectedHotbarSlot];
+    if (ToolValue < 0 || !IsHotbarTool(static_cast<Homestead::Item>(ToolValue)))
+    {
+        Notify(TEXT("Choose a carried tool first."), true);
+        return;
+    }
+    const auto Tool = static_cast<Homestead::Item>(ToolValue);
+    if (Sim.Count(Tool) <= 0)
+    {
+        Notify(TEXT("That tool is not in your pack."), true);
+        return;
+    }
+    const auto Position = PlayerPoint();
+    if (!bWorldReady || !PrepareWorldAt(Position)) return;
+    UpdateFocus();
+
+    if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Knife)
+    {
+        if (Focus != EFocus::Resource)
+        {
+            Notify(Tool == Homestead::Item::Hatchet
+                ? TEXT("Aim at a sapling or tree.") : TEXT("Aim at low brush or a resource patch."), true);
+            return;
+        }
+        bool NeedsHatchet = false;
+        Homestead::Point Target = Position;
+        for (const auto& Node : State().resources)
+            if (Node.id == FocusId)
+            {
+                NeedsHatchet = Node.kind == Homestead::ResourceKind::Sapling
+                    || Node.kind == Homestead::ResourceKind::ForestTree;
+                Target = Node.position;
+                break;
+            }
+        if (NeedsHatchet != (Tool == Homestead::Item::Hatchet))
+        {
+            Notify(NeedsHatchet ? TEXT("Select the hatchet for trees and saplings.")
+                : TEXT("Select the knife for this low growth."), true);
+            return;
+        }
+        const auto Result = Sim.Clear(FocusId, Position);
+        Notify(Result, WoodTapB);
+        if (Result.ok)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                Avatar->PlayClear(Target);
+        return;
+    }
+
+    if (Tool == Homestead::Item::WateringCan)
+    {
+        if (Focus == EFocus::Water)
+        {
+            Notify(Sim.FillWater(Position));
+            return;
+        }
+        if (Focus != EFocus::Plot)
+        {
+            Notify(TEXT("Aim at a growing crop or stand by the stream."), true);
+            return;
+        }
+        for (const auto& Plot : State().plots)
+            if (Plot.id == FocusId)
+            {
+                const auto Result = Sim.Water(FocusId, Position);
+                Notify(Result, GrassStepB);
+                if (Result.ok)
+                    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                        Avatar->PlayWater(Homestead::CellCenter(Plot.cellX, Plot.cellY));
+                return;
+            }
+    }
+
+    if (Tool == Homestead::Item::DiggingStick)
+    {
+        if (Focus == EFocus::Plot)
+        {
+            const auto Result = Sim.Weed(FocusId, Position);
+            Notify(Result, GrassStepA);
+            if (Result.ok)
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                    Avatar->PlayGather();
+            return;
+        }
+        const FVector Forward = GetPawn()
+            ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
+        const int32 X = FMath::FloorToInt((Position.x + Forward.X * 190)
+            / Homestead::CellSize);
+        const int32 Y = FMath::FloorToInt((Position.y + Forward.Y * 190)
+            / Homestead::CellSize);
+        const auto Result = Sim.Till(X, Y, Position);
+        Notify(Result, GrassStepB);
+        if (Result.ok)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                Avatar->PlayTill(Homestead::CellCenter(X, Y));
+    }
+}
+
 void AHomesteadController::RefreshMenuPortrait()
 {
     if (!bBookOpen || (Page != 0 && Page != 6))
@@ -402,6 +654,7 @@ FString AHomesteadController::MenuPortraitStatus() const
 
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
+    HideHotbar();
     HideNativeMenu();
     Super::EndPlay(Reason);
 }
@@ -484,6 +737,8 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Bottom, IE_Pressed, this, &AHomesteadController::Interact);
     InputComponent->BindKey(EKeys::F, IE_Pressed, this, &AHomesteadController::Secondary);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Left, IE_Pressed, this, &AHomesteadController::Secondary);
+    InputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
+    InputComponent->BindKey(EKeys::Gamepad_RightTrigger, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
     InputComponent->BindKey(EKeys::G, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Top, IE_Pressed, this, &AHomesteadController::Withdraw);
     InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AHomesteadController::Back);
@@ -766,25 +1021,47 @@ FString AHomesteadController::FocusActions() const
 {
     const FString A = bGamepad ? TEXT("[A]") : TEXT("[E]");
     const FString X = bGamepad ? TEXT("[X]") : TEXT("[F]");
+    const FString Use = bGamepad ? TEXT("[RT]") : TEXT("[LMB]");
+    Homestead::Item SelectedTool = Homestead::Item::Count;
+    const bool ToolAvailable = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
+        && HotbarSlots[SelectedHotbarSlot] >= 0
+        && IsHotbarTool(SelectedTool = static_cast<Homestead::Item>(
+            HotbarSlots[SelectedHotbarSlot]))
+        && Sim.Count(SelectedTool) > 0;
     switch (Focus)
     {
     case EFocus::Resource:
         for (const auto& Node : State().resources)
-            if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
-                return A + TEXT(" Chop tree   ") + X + TEXT(" Fell tree (hatchet)");
-        return A + TEXT(" Gather   ") + X + TEXT(" Clear");
+            if (Node.id == FocusId)
+            {
+                const bool Tree = Node.kind == Homestead::ResourceKind::ForestTree
+                    || Node.kind == Homestead::ResourceKind::Sapling;
+                if (Tree) return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
+                    ? Use + TEXT(" Fell with Hatchet") : TEXT("Select Hatchet to fell");
+                return A + TEXT(" Gather") + (ToolAvailable && SelectedTool == Homestead::Item::Knife
+                    ? TEXT("   ") + Use + TEXT(" Clear with Knife") : FString());
+            }
+        return A + TEXT(" Gather");
     case EFocus::Plot:
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
-                return Plot.planted
-                    ? A + (Plot.growth >= 1 ? TEXT(" Harvest") : TEXT(" Water")) + TEXT("   ") + X + TEXT(" Weed")
-                    : A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
+            {
+                if (!Plot.planted) return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
+                if (Plot.growth >= 1) return A + TEXT(" Harvest");
+                if (ToolAvailable && SelectedTool == Homestead::Item::WateringCan)
+                    return Use + TEXT(" Water");
+                if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
+                    return Use + TEXT(" Weed");
+                return TEXT("Select Watering Can or Digging Stick");
+            }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
     case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
-    case EFocus::Water: return A + TEXT(" Fill watering can");
-    default: return X + TEXT(" Till ground   ") + (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
+    case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
+        ? Use + TEXT(" Fill Watering Can") : A + TEXT(" Fill carried Watering Can");
+    default: return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
+        ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
     return FString();
 }
@@ -997,7 +1274,7 @@ void AHomesteadController::Back()
 void AHomesteadController::PreviousPage()
 {
     if (bPlanning) { RotatePlacement(); return; }
-    if (!bBookOpen) { OpenBook(1); return; }
+    if (!bBookOpen) { CycleHotbar(-1); return; }
     Page = ShiftFieldBookPage(Page, -1); Selection = 0; bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(Page == 6);
@@ -1005,7 +1282,7 @@ void AHomesteadController::PreviousPage()
 void AHomesteadController::NextPage()
 {
     if (bPlanning) { RotatePlacement(); return; }
-    if (!bBookOpen) { OpenBook(2); return; }
+    if (!bBookOpen) { CycleHotbar(1); return; }
     Page = ShiftFieldBookPage(Page, 1); Selection = 0; bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(Page == 6);
@@ -1752,6 +2029,8 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     Save->MusicVolume = MusicVolume;
     Save->AmbienceVolume = AmbienceVolume;
     Save->EffectsVolume = EffectsVolume;
+    Save->HotbarSlots = HotbarSlots;
+    Save->SelectedHotbarSlot = SelectedHotbarSlot;
     TArray<uint8> Data;
     const FString Path = SavePath(Slot);
     const FString Temporary = Path + TEXT(".tmp");
@@ -1843,6 +2122,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Appearance.TunicColor = Save.TunicColor;
     Appearance.Outfit = Save.Outfit;
     Appearance.BodyPreset = Save.BodyPreset;
+    SanitizeHotbar(Save.HotbarSlots, Save.SelectedHotbarSlot);
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
     bFreshTerrainSpawn = false;
@@ -1966,6 +2246,7 @@ void AHomesteadController::NewGame()
     LastSuccessfulSave = FDateTime();
     LoadProblem.Reset();
     Appearance = FHomesteadAppearance();
+    ResetHotbar();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);

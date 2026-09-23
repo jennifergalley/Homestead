@@ -184,7 +184,10 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
     }
     if (!FFileHelper::SaveStringToFile(Framing, *FPaths::Combine(Directory, Name + TEXT(".frame.txt"))))
         UE_LOG(LogTemp, Error, TEXT("Could not write screenshot framing evidence."));
-    FScreenshotRequest::RequestScreenshot(FPaths::Combine(Directory, Name + TEXT(".png")), Controller->HasNativeMenu(), false);
+    const bool IncludeSlate = Controller->HasNativeMenu()
+        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotbarTest"));
+    FScreenshotRequest::RequestScreenshot(FPaths::Combine(Directory, Name + TEXT(".png")),
+        IncludeSlate, false);
 }
 
 void AHomesteadSmokeTest::Prepare()
@@ -212,6 +215,11 @@ void AHomesteadSmokeTest::Prepare()
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")))
     {
         PrepareHotkeyChecks();
+        return;
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotbarTest")))
+    {
+        PrepareHotbarChecks();
         return;
     }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest")))

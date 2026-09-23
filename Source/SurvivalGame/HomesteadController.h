@@ -15,8 +15,11 @@ class UAudioComponent;
 class USoundBase;
 namespace HomesteadMenus { class SHomesteadMenu; }
 using SHomesteadMenu = HomesteadMenus::SHomesteadMenu;
+namespace HomesteadMenus { class SHomesteadHotbar; }
+using SHomesteadHotbar = HomesteadMenus::SHomesteadHotbar;
 class IInputProcessor;
 class AHomesteadMenuPortrait;
+class SWidget;
 
 enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe };
 enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye };
@@ -38,6 +41,16 @@ struct FHomesteadRow
     FString Location;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
+};
+
+struct FHomesteadHotbarSlot
+{
+    int32 Index = 0;
+    Homestead::Item Tool = Homestead::Item::Count;
+    bool Assigned = false;
+    bool Available = false;
+    bool Selected = false;
+    FName Icon;
 };
 
 UCLASS()
@@ -119,6 +132,11 @@ public:
     void OrbitMenuPortrait(float Degrees);
     void ZoomMenuPortrait();
     FString MenuPortraitStatus() const;
+    TArray<FHomesteadHotbarSlot> HotbarSnapshot() const;
+    int32 SelectedHotbarIndex() const { return SelectedHotbarSlot; }
+    void SelectHotbarSlot(int32 Index);
+    void CycleHotbar(int32 Direction);
+    bool ShouldShowHotbar() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     float Sensitivity = 1.0f;
@@ -144,6 +162,7 @@ private:
     bool bAudioEnabled = true;
     bool bAutomatedInputOnly = false;
     bool bSimulatedMenuEvent = false;
+    bool bControlDown = false;
     bool bLoggedExternalInput = false;
     uint32 IgnoredExternalInputs = 0;
     uint32 TestQuickSaves = 0, TestQuickLoads = 0;
@@ -195,6 +214,8 @@ private:
     bool bHasPlayableSession = false;
     FString LoadProblem;
     TSharedPtr<SHomesteadMenu> NativeMenu;
+    TSharedPtr<SHomesteadHotbar> HotbarWidget;
+    TSharedPtr<SWidget> HotbarRoot;
     TSharedPtr<IInputProcessor> MenuPointerInput;
     UPROPERTY() TObjectPtr<AHomesteadMenuPortrait> MenuPortrait;
     FSlateBrush PortraitBrush;
@@ -212,6 +233,13 @@ private:
     bool PersistResolutionScale(float Requested);
     void ShowNativeMenu();
     void HideNativeMenu();
+    void ShowHotbar();
+    void HideHotbar();
+    void ResetHotbar();
+    void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected);
+    void UseSelectedTool();
+    TArray<int32> HotbarSlots;
+    int32 SelectedHotbarSlot = 0;
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;
     bool bSaveRoutingTestPending = false;

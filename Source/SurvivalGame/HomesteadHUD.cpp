@@ -147,7 +147,7 @@ void AHomesteadHUD::DrawHUD()
             Write(PC->FocusActions(), ContextX + 22, ViewHeight - 153, 20, HudGold);
         }
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);
-        Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [R3] Camera distance") : TEXT("[I] Field book   [C] Craft   [B] Build   Mouse wheel: zoom"),
+        Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [R3] Camera distance") : TEXT("[I] Field book   [C] Craft   [B] Build   Ctrl+wheel: zoom"),
             FMath::Max(30.0f, ViewWidth - 690), 38, 19, Ink);
     }
     const FString Toast = PC->Toast();

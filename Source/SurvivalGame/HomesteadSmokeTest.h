@@ -79,6 +79,7 @@ private:
     void PrepareVideoSyncChecks();
     void PrepareFeedbackChecks();
     void PrepareHotkeyChecks();
+    void PrepareHotbarChecks();
     void PrepareBookClarityChecks();
     void PrepareBookStorageChecks();
     void QueueBookCapture(const FString& Name);

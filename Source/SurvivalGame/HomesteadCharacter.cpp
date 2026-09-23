@@ -536,8 +536,6 @@ void AHomesteadCharacter::CreateMappings()
     Mapping->MapKey(MouseLookAction, EKeys::Mouse2D);
     auto& LookStick = Mapping->MapKey(StickLookAction, EKeys::Gamepad_Right2D);
     LookStick.Modifiers.Add(NewObject<UInputModifierDeadZone>(Mapping));
-    Mapping->MapKey(ZoomAction, EKeys::MouseScrollUp);
-    Mapping->MapKey(ZoomAction, EKeys::MouseScrollDown).Modifiers.Add(NewObject<UInputModifierNegate>(Mapping));
 }
 
 void AHomesteadCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -2,21 +2,21 @@
 
 ## 1. Reference and Input Baseline
 
-- [ ] 1.1 Archive links/notes for the reviewed Minecraft, Factorio, Coral Island and Dreamlight Valley hotbar screenshots/controls, recording only reusable conventions and explicit non-copy boundaries; verify every claim has a reputable source and no proprietary image enters the repo
-- [ ] 1.2 Record selected-build mouse wheel/camera, number keys, left click, E/F, LB/RB/R3, current tool ownership/capacity/save behavior, and 720p/4K HUD geometry so input conflicts and protected regions are reproducible
+- [x] 1.1 Archive links/notes for the reviewed Minecraft, Factorio, Coral Island and Dreamlight Valley hotbar screenshots/controls, recording only reusable conventions and explicit non-copy boundaries; verify every claim has a reputable source and no proprietary image enters the repo
+- [x] 1.2 Record selected-build mouse wheel/camera, number keys, left click, E/F, LB/RB/R3, current tool ownership/capacity/save behavior, and 720p/4K HUD geometry so input conflicts and protected regions are reproducible
 
 ## 2. First Playable Toolbelt
 
-- [ ] 2.1 Add a gameplay-only ten-slot hotbar snapshot and original Pine/cream/Gold Slate overlay reusing current icons, with stable `1-0` labels, carried/ghost/empty/selected states and no instruction legend; verify pointer hit targets, semantic state and measured 720p/4K bounds
-- [ ] 2.2 Implement `1-0`, unmodified wheel wrap, pointer-click, and gameplay LB/RB selection through the accepted input path; verify direction, number `0`, one-step admission, device changes, menu tab ownership, click consumption and no world mutation
-- [ ] 2.3 Reassign gameplay camera distance to Ctrl+wheel while preserving R3 and Look/menu/planning ownership; verify zoom never changes selection and hotbar scrolling never changes camera distance
+- [x] 2.1 Add a gameplay-only ten-slot hotbar snapshot and original Pine/cream/Gold Slate overlay reusing current icons, with stable `1-0` labels, carried/ghost/empty/selected states and no instruction legend; verify pointer hit targets, semantic state and measured 720p/4K bounds
+- [x] 2.2 Implement `1-0`, unmodified wheel wrap, pointer-click, and gameplay LB/RB selection through the accepted input path; verify direction, number `0`, one-step admission, device changes, menu tab ownership, click consumption and no world mutation
+- [x] 2.3 Reassign gameplay camera distance to Ctrl+wheel while preserving R3 and Look/menu/planning ownership; verify zoom never changes selection and hotbar scrolling never changes camera distance
 
 ## 3. Ownership, Tool Use, and Persistence
 
-- [ ] 3.1 Add validated ten-slot tool-reference and selected-index save state with stable default Knife/Hatchet/Digging Stick/Watering Can assignments; verify no added capacity, duplicate/invalid sanitization, current-version save/reload and safe disposable-save reset disclosure
-- [ ] 3.2 Resolve slot availability live from carried inventory so chest-stored tools ghost and cannot act while returned tools recover; verify transfer, craft, load, new woodland and inventory refresh without stale ownership
-- [ ] 3.3 Route left mouse/controller right trigger selected Knife/Hatchet/Digging Stick/Watering Can use into existing authoritative clear/fell, till/weed and water/fill transactions; verify valid, wrong-tool, empty, stored, range, capacity, water, plot and target cases mutate exactly once or not at all
-- [ ] 3.4 Preserve E/A ordinary interaction plus menu/dialog/planning/failure/load/appearance isolation and existing action presentation/cancellation; verify no click-through, delayed action, duplicate reward, orphaned prop or input leakage
+- [x] 3.1 Add validated ten-slot tool-reference and selected-index save state with stable default Knife/Hatchet/Digging Stick/Watering Can assignments; verify no added capacity, duplicate/invalid sanitization, current-version save/reload and safe disposable-save reset disclosure
+- [x] 3.2 Resolve slot availability live from carried inventory so chest-stored tools ghost and cannot act while returned tools recover; verify transfer, craft, load, new woodland and inventory refresh without stale ownership
+- [x] 3.3 Route left mouse/controller right trigger selected Knife/Hatchet/Digging Stick/Watering Can use into existing authoritative clear/fell, till/weed and water/fill transactions; verify valid, wrong-tool, empty, stored, range, capacity, water, plot and target cases mutate exactly once or not at all
+- [x] 3.4 Preserve E/A ordinary interaction plus menu/dialog/planning/failure/load/appearance isolation and existing action presentation/cancellation; verify no click-through, delayed action, duplicate reward, orphaned prop or input leakage
 
 ## 4. Integrated Acceptance and Promotion
 
@@ -24,4 +24,3 @@
 - [ ] 4.2 Run controller parity, storage/craft/save/reload/new-world, menu/planning/recovery and full-loop routes; verify LB/RB/R3/RT behavior, authoritative state, current settings and unrelated UI remain stable
 - [ ] 4.3 Run focused hotbar/input/save/source contracts, full portable simulation/world/regional suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
 - [ ] 4.4 Build one immutable Shipping candidate under the serialized engine slot, run fresh consumer and comparable cadence routes, update PRODUCT/DESIGN/setup/playtest docs, and promote only if the bar is useful without clutter, input conflict, copied styling or performance regression
-

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering, [switch]$Creek,
-    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [switch]$NativeSaveRetry, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
+    [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$Hotbar, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [switch]$NativeSaveRetry, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
@@ -46,6 +46,9 @@ if ($Prompts -and ($Clearing -or $Weeding -or $Gathering -or $Watering -or $Pres
     throw 'Prompt-intent fixtures run separately from other acceptance modes.'
 }
 if ($CameraLifecycle -and -not $Clearing) { throw 'Camera lifecycle uses the existing controlled clearing fixture.' }
+if ($Hotbar -and ($NativeMenu -or $FullLoop -or $GeneratedWoodland -or $Clearing -or $Watering -or $Weeding -or $Gathering)) {
+    throw 'Hotbar checks require their own isolated gameplay route.'
+}
 if ($Clearing -and ($Weeding -or $Gathering -or $Watering -or $Presentation -or $HairLength -or $FullLoop -or $WithAudio)) {
     throw 'Clearing lifecycle checks run separately from other acceptance modes.'
 }
@@ -146,6 +149,7 @@ if ($DirectionalNavigation) {
 if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
 if ($NativeSaveRetry) { $captures = @() }
+if ($Hotbar) { $captures = @('hotbar-gameplay.png') }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -183,6 +187,7 @@ if ($NativeSaveRetry) { $loopArguments += ' -HomesteadNativeSaveRetryTest' }
 if ($DirectionalNavigation) { $loopArguments += ' -HomesteadDirectionalNavigationTest' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }
 if ($NativeResumeFrom) { $loopArguments += " -HomesteadNativeResumeFrom=`"$([IO.Path]::GetFullPath($NativeResumeFrom))`"" }
+if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadRequireLit' }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage $RenderScale`"" }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
