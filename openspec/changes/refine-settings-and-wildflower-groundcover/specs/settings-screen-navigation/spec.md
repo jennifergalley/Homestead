@@ -47,6 +47,21 @@ The Settings screen SHALL present preferences and session actions as a single ve
 - **WHEN** the player clicks a visible setting control
 - **THEN** that exact control receives focus and activates or edits without a redundant action sidebar
 
+### Requirement: Game speed uses player-facing pace labels
+Settings SHALL present one `Game speed` control with `Leisurely`, `Balanced`, and `Fast` choices instead of showing raw real-minute day lengths. `Leisurely` SHALL map to the existing 120-minute day, `Balanced` to the existing 60-minute default, and `Fast` to the existing 30-minute day. Normal Settings UI MUST NOT label the setting `Day length` or display `30/60/120 minutes`.
+
+#### Scenario: Open the default setting
+- **WHEN** the current day length is 60 real minutes
+- **THEN** `Game speed` shows `Balanced`
+
+#### Scenario: Choose leisurely pace
+- **WHEN** the player clicks `Leisurely` or selects it with left/right input
+- **THEN** the existing 120-minute-day value becomes active without changing unrelated world/settings state
+
+#### Scenario: Reload a saved pace
+- **WHEN** a current save restores one of the supported day-length values
+- **THEN** the corresponding friendly Game speed label is selected exactly
+
 ### Requirement: Credits is removed from the game menu
 The in-game Credits tab, page, focus target, navigation stop, and icon SHALL be absent. Removing the tab MUST NOT remove the packaged attribution file.
 

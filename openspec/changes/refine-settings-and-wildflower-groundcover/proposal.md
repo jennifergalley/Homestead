@@ -12,6 +12,7 @@ The native menu still treats Settings like an inventory grid inside the field bo
 - Separate Settings from the inventory/guidebook tab set. Esc on keyboard opens Settings directly from gameplay; Esc inside Settings resumes gameplay.
 - Use controller Menu/Start for the separate Settings overlay and retain controller View/Back for the guidebook, while keeping `I`, `C`, and `B` purpose-specific field-book entry points and making `G` open Guidebook directly during gameplay.
 - Replace the Settings two-column inventory-like grid with a vertically scrolling labeled list designed for preferences and session actions.
+- Replace raw `Day length: 30/60/120 minutes` copy with a clear `Game speed` three-choice control: `Leisurely` (120-minute day), `Balanced` (60-minute default), and `Fast` (30-minute day), without displaying implementation minutes in the normal Settings UI.
 - Replace Music, Ambience, and Effects volume cycling buttons with focusable continuous sliders, including pointer drag and keyboard/controller left/right adjustment.
 - Persist audio volumes immediately as user-level settings independent from world saves, with exact-property write/readback and rollback behavior matching camera/video preferences.
 - Remove the Credits tab, Credits page, navigation target, and in-game Credits icon entirely. The packaged `asset-credits.md` remains the durable attribution surface.
@@ -26,7 +27,7 @@ Deferred scope includes key rebinding, graphics preset dropdowns, advanced audio
 
 ### New Capabilities
 
-- `settings-screen-navigation`: Separate Settings overlay, vertical preference list, direct Esc/Menu access, direct G-to-Guidebook routing, Settings-only preview metadata, and removal of the Credits tab.
+- `settings-screen-navigation`: Separate Settings overlay, vertical preference list, friendly Game speed choices, direct Esc/Menu access, direct G-to-Guidebook routing, Settings-only preview metadata, and removal of the Credits tab.
 - `audio-volume-controls`: Immediate persistent Music/Ambience/Effects sliders with pointer and controller/keyboard parity.
 - `decorative-wildflower-groundcover`: Sparse deterministic noninteractive wildflower decoration using admitted project assets.
 
