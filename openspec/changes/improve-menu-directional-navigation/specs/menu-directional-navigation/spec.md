@@ -84,10 +84,13 @@ MUST NOT contain an entry whose purpose is to explain ordinary menu controls.
 - **THEN** no topic explains D-pad, stick, arrow, activation, tab, or Back controls
 
 ### Requirement: Existing shortcuts remain reachable without instruction prose
-LB/RB tab shortcuts and the three-press gameplay-to-Settings-exit path SHALL
-remain. Trigger/Tab region cycling MAY remain optional. Removing their on-screen
-instructions MUST NOT remove or remap the actual inputs.
+LB/RB tab shortcuts SHALL remain. Trigger/Tab region cycling MAY remain optional.
+Removing their on-screen instructions MUST NOT remove or remap the actual inputs.
+Settings' Quit game dialog SHALL keep Save & Quit and Quit without Saving
+directionally reachable, default focus SHALL avoid the no-save choice, and Back
+SHALL cancel without a chained confirmation.
 
 #### Scenario: Quit remains discoverable
-- **WHEN** the player opens Settings from gameplay, moves Right and activates
-- **THEN** the cancel-default exit confirmation opens in the existing three presses
+- **WHEN** the player activates Quit game in Settings
+- **THEN** one modal exposes Save & Quit and Quit without Saving, with Save & Quit initially focused
+- **AND** activating either choice performs that choice without another prompt

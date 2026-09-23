@@ -38,7 +38,7 @@ The field-book tab bar becomes Inventory, Craft, Build, Guidebook, and Appearanc
 
 ### 2. Build a dedicated vertical Settings renderer
 
-Settings uses one wide scroll column with semantic row types: action, toggle, cycle, and slider. Session controls (Resume/Save and quit), save/load/new woodland, camera/video preferences, and audio sliders share the list but not inventory cells or item actions. The detail/action sidebar is omitted; descriptions and values live in each row.
+Settings uses one wide scroll column with semantic row types: action, toggle, choice, cycle, and slider. Resume, Save, Quit game, load/new woodland, camera/video preferences, and audio sliders share the list but not inventory cells or item actions. The detail/action sidebar is omitted; descriptions and values live in each row.
 
 Directional navigation is vertical. Left/right edits the focused adjustable row; Enter/A toggles or activates; pointer clicks and slider drags focus the exact row. Existing modals remain over the same overlay and preserve focus traps/defaults.
 
@@ -64,19 +64,32 @@ This is a presentation/input refinement over the existing simulation value. It p
 
 **Alternative considered:** keep one cycling row and rename only its title. Rejected because the available values should be visible and directly selectable rather than hidden behind repeated activation.
 
-### 5. Remove in-game Credits but retain attribution
+### 5. Use one quit-choice dialog
+
+Replace the current top-level `Save and quit` action plus chained Exit -> Unsaved confirmation flow with two Settings actions:
+
+- `Save`: call the normal manual-save path, keep Settings open, and show concise success/error state in the existing Settings feedback area;
+- `Quit game`: open one modal with `Save & Quit` and `Quit without Saving`; Back cancels.
+
+Initial focus is `Save & Quit`, not the destructive no-save option. Save & Quit sets the existing in-progress guard, writes the manual save, and exits only on success. Failure leaves the same modal open with its error while both choices remain available. Quit without Saving exits immediately from that dialog. Remove `Stay in Settings` as a dialog button and remove the chained `Unsaved` confirmation state from this route.
+
+Failed/recovery state cannot save over the checkpoint: direct Save and Save & Quit are disabled or reject in place with the existing reason; Quit without Saving remains available without another prompt.
+
+**Alternative considered:** retain a separate no-save confirmation for safety. Rejected because the two explicit quit choices already communicate the consequence and Jenny wants no additional confirmation.
+
+### 6. Remove in-game Credits but retain attribution
 
 Credits is removed from tab labels/icons, controller row generation, navigation tests, page summaries, and captures. The icon implementation may be deleted if no other surface uses it. `docs/asset-credits.md` remains copied into every package and is included in acceptance receipts.
 
 This is a UI removal, not removal of copyright/license notices from distributed files.
 
-### 6. Show preview identity only in Settings
+### 7. Show preview identity only in Settings
 
 The existing `PreviewLabel()` remains the single source for isolated preview profile/save-routing identity, but the gameplay Canvas footer stops drawing it. Settings conditionally adds a noninteractive build-information row only when `PreviewLabel()` is nonempty. The generic heroine/technical-stand-in gameplay footer is removed with the same permanent chrome; character maturity remains documented in project/release notes rather than occupying the HUD.
 
 **Alternative considered:** retain a shortened version watermark. Rejected because Jenny wants preview/version information only in Settings.
 
-### 7. Reuse Flower Empodium as distinct decorative HISM cover
+### 8. Reuse Flower Empodium as distinct decorative HISM cover
 
 The cover builder loads `SM_FlowerEmpodium_a/b` through their admitted authored material and creates at most two chunk-owned HISM components tagged `DecorativeWildflower`. A bounded deterministic subset (target approximately 12-20 accepted clumps per intersecting 24 m chunk) uses modest 0.55-0.8 uniform scale and small pocket clustering. Interactive flower resources retain larger grouped presentation and separate focus/produce state.
 
@@ -84,7 +97,7 @@ Placement calls the existing low-cover reservation authority and additionally ke
 
 **Alternative considered:** create primitive colored flower dots. Rejected because the verified authored CC0 mesh/material already exists and visually belongs to the world.
 
-### 8. Separate independent lanes and serialize integration
+### 9. Separate independent lanes and serialize integration
 
 The settings lane owns controller overlay routing, Slate list/sliders, audio config, and menu tests. The flower lane owns only world-cover batching/exclusions and environment tests. Shared Editor/cook/package execution and final full-loop/menu acceptance remain serialized. Both reuse selected build caches and `work-actions-v13` rollback.
 
@@ -94,6 +107,8 @@ The settings lane owns controller overlay routing, Slate list/sliders, audio con
 - **[Controller has no obvious field-book button after Menu becomes Settings]** -> Retain View/Back for Guidebook plus purpose-specific face/keyboard paths; update on-screen/onboarding prompts rather than adding permanent HUD chrome.
 - **[Slider disk writes or pointer capture become noisy]** -> Apply runtime during drag, persist on capture end, and verify exactly one property write/readback per completed edit.
 - **[Speed labels imply the opposite mapping]** -> Assert Leisurely=120, Balanced=60 and Fast=30 in source/native/save routes and avoid raw minute copy in the player-facing row.
+- **[No-save exit happens accidentally]** -> Keep one explicit Quit game entry, default modal focus on Save & Quit, visually separate the no-save choice, and let Back cancel; do not add another modal.
+- **[Save & Quit failure strands or exits the player]** -> Exit only after verified save success and retain the same dialog plus error on failure.
 - **[Legacy save load changes audio]** -> Load user preferences first and remove only volume authority from `ApplySave`; retain serialized fields until a future save-version change.
 - **[Decorative flowers look gatherable]** -> Keep them smaller/sparser than interactive grouped patches, never focus them, and inspect ordinary approach behavior.
 - **[Flower overdraw or cover rebuild regresses cadence]** -> Cap accepted instances/components, use existing cull distances/HISM, record triangle/count metrics, and reject on matched performance evidence.
@@ -104,7 +119,7 @@ The settings lane owns controller overlay routing, Slate list/sliders, audio con
 ## Migration Plan
 
 1. Record current Settings grid, Credits navigation, Esc/controller routes, volume cycling/persistence, and representative flower-free ground baselines.
-2. Deliver separate Esc/Menu Settings with vertical action/toggle/choice rows, direct Game speed labels, gameplay G-to-Guidebook routing, Settings-only preview metadata, and remove Credits while preserving every modal and contextual menu route.
+2. Deliver separate Esc/Menu Settings with vertical action/toggle/choice rows, direct Save plus one-dialog Quit flow, Game speed labels, gameplay G-to-Guidebook routing, Settings-only preview metadata, and remove Credits while preserving recovery and contextual menu routes.
 3. Add persistent audio sliders with pointer/controller/keyboard and read-only rollback coverage.
 4. Add decorative flower batches and verify visual distinction, exclusions, lifecycle, and performance.
 5. Run Editor native-menu/directional/input/HUD/environment/full-loop/save tests and inspect 720p/4K Settings plus ordinary flower walks.

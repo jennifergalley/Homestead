@@ -66,7 +66,10 @@ page identity, selected object details, values, Have/Need requirements, labeled
 buttons/steppers, meaningful empty states, errors, confirmations, and concise
 pause state. Contextual hotkey badges MAY remain inside an actual labeled action
 button when they reduce ambiguity; they are not repeated in a global legend.
-Preserve Settings initial Resume focus, Right to Quit, then Activate.
+Preserve direct vertical access to Settings Save and Quit game rows. The Quit
+game modal starts on Save & Quit, reaches Quit without Saving directionally,
+and lets Back return to the Quit game row. No `Stay in Settings` button or
+chained Unsaved confirmation participates in navigation.
 
 **Alternative considered:** shorten the existing footer and tutorial text.
 Rejected because Jenny's direction is that intuitive navigation should make
@@ -84,7 +87,7 @@ from navigation. Direct `CycleRegion` calls are not proof of directional flow.
 Main owns native compilation and gameplay after its current endurance run has
 exited and released resources. Review actual boundary transitions at 720p/4K,
 including scroll, empty/full content, modal edit/cancel, mouse parity and the
-quit path. Source/portable proof is not gameplay acceptance. Adapt old snake
+single-dialog quit/save-failure path. Source/portable proof is not gameplay acceptance. Adapt old snake
 test routes at true edges rather than preserving awkward UX for fixtures.
 
 ## Risks / Trade-offs
@@ -100,3 +103,6 @@ test routes at true edges rather than preserving awkward UX for fixtures.
 - Removing coaching exposes weak affordances -> verify first-look navigation
   through visible focus, grouping, controls and labels; repair the affordance
   rather than restoring instructions when a route is unclear.
+- Quit without saving becomes destructive immediately -> default focus Save & Quit,
+  require deliberate directional/pointer selection of no-save, and keep Back as
+  cancel without adding a second confirmation.

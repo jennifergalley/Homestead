@@ -62,6 +62,29 @@ Settings SHALL present one `Game speed` control with `Leisurely`, `Balanced`, an
 - **WHEN** a current save restores one of the supported day-length values
 - **THEN** the corresponding friendly Game speed label is selected exactly
 
+### Requirement: Save and quit are direct Settings actions
+Settings SHALL contain distinct `Save` and `Quit game` rows. Activating Save SHALL write the normal manual save and remain in Settings without a confirmation dialog. Activating Quit game SHALL open exactly one quit-choice dialog containing `Save & Quit` and `Quit without Saving`; Back SHALL cancel the dialog. Neither choice SHALL open a second confirmation.
+
+#### Scenario: Save and continue
+- **WHEN** the player activates `Save`
+- **THEN** a manual save is attempted, Settings remains open, and success uses concise feedback without another modal
+
+#### Scenario: Save and quit
+- **WHEN** the player opens `Quit game` and chooses `Save & Quit`
+- **THEN** the game saves and exits on success without another confirmation
+
+#### Scenario: Save and quit fails
+- **WHEN** `Save & Quit` cannot write a valid save
+- **THEN** the game remains open in the same quit-choice context with a readable error and no false success
+
+#### Scenario: Quit without saving
+- **WHEN** the player chooses `Quit without Saving`
+- **THEN** the game exits immediately without saving and without a second confirmation
+
+#### Scenario: Cancel quitting
+- **WHEN** the quit-choice dialog is open and the player presses Back
+- **THEN** the dialog closes and focus returns to `Quit game` in Settings
+
 ### Requirement: Credits is removed from the game menu
 The in-game Credits tab, page, focus target, navigation stop, and icon SHALL be absent. Removing the tab MUST NOT remove the packaged attribution file.
 
@@ -87,8 +110,8 @@ Preview profile/version metadata SHALL be absent from the ordinary gameplay HUD 
 - **THEN** no preview/version row is shown
 
 ### Requirement: Session and recovery actions remain safe
-Save, load, new woodland, resume, save-and-quit, quit-without-saving, retry, save failure, graphics failure, restart, and unsaved confirmations SHALL remain available through Settings/recovery with current safety behavior.
+Save, load, new woodland, resume, the single quit-choice dialog, retry, save failure, graphics failure, and restart SHALL remain available through Settings/recovery with current safety behavior. The obsolete chained unsaved-exit confirmation MUST NOT remain in the normal quit path.
 
 #### Scenario: Open Settings from failed state
 - **WHEN** the player is failed and opens Settings
-- **THEN** recovery and quit paths remain visible, focus-safe, and unable to overwrite a usable checkpoint
+- **THEN** recovery and `Quit game` remain visible and focus-safe, Save/Save & Quit cannot overwrite a usable checkpoint, and Quit without Saving remains immediate

@@ -22,7 +22,8 @@ inventory work feel disconnected.
   minus/value/plus stepper whose focused left/right adjustment does not need a
   separate edit mode or instructional paragraph.
 - Preserve visuals, mouse behavior, the sole input-intent classifier, world
-  controls, transactions and the three-press Settings exit path.
+  controls and transactions while adopting Settings' direct Save row and one
+  Save & Quit / Quit without Saving dialog without chained confirmation.
 
 ## Capabilities
 
@@ -57,5 +58,5 @@ First demonstration: open Inventory into quiet, breathable menu chrome; move dow
 into equipment using only D-pad/left stick, reverse up, then move sideways to
 details/actions and portrait controls without reading navigation instructions.
 Full acceptance also covers empty/full/short grids, the quantity stepper,
-dialogs, focus restoration, concise state-only copy, and both input devices in
-the real game.
+the one-dialog quit choices/cancel/failure focus, concise state-only copy, and
+both input devices in the real game.

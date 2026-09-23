@@ -3,9 +3,10 @@
 ## Current state and next visible goal
 
 Final evidence reconciliation adds the Shipping
-`wardrobe-complete-10-input` route to `directional-navigation-06`. Four of8
+`wardrobe-complete-10-input` route to `directional-navigation-06`. Three of8
 tasks complete. Task2.2 now has exact controller/keyboard/mouse intent,
-left-stick repeat/release, pawn/portrait isolation, LB/RB and quit-path evidence.
+left-stick repeat/release, pawn/portrait isolation and LB/RB evidence, but user
+feedback replaces its old chained quit-path requirement.
 Tasks1.2,1.3 and2.1 remain open at their exact uncovered clauses: complete
 top-boundary/upper-control navigation, selected-subject removal/rebuild/tab-return
 focus identity, and a confirmed amount transaction through the revised visible
@@ -22,7 +23,7 @@ or physical-controller comfort claim is part of this reconciliation.
 ## 2. Modal and input consistency
 
 - [ ] 2.1 Trap modal focus and replace hidden quantity edit mode with a visible minus/value/plus stepper; verify focused Left/Right and pointer minus/plus adjust only the draft, Up/Down leaves the stepper, Back cancels, Confirm commits once, and focus return preserves transaction semantics.
-- [x] 2.2 Route D-pad, left stick and keyboard arrows consistently without world movement or implicit portrait rotation; verify the existing intent classifier, mouse behavior, LB/RB and three-press quit path remain intact.
+- [ ] 2.2 Route D-pad, left stick and keyboard arrows consistently without world movement or implicit portrait rotation; verify the existing intent classifier, mouse behavior and LB/RB remain intact, then verify direct Settings Save plus one-dialog Save & Quit/Quit without Saving navigation, safe default focus, Back cancel, save-failure retention and no chained confirmation.
 - [ ] 2.3 Remove persistent generic menu coaching, including default `Choose a tab` filler, global navigation/activation/tab/Back footers, the Guidebook menu-controls lesson, and quantity-edit prose; verify page identity, stateful summaries/details, controls, errors and confirmations remain clear through visible affordances without a replacement instruction legend.
 
 ## 3. Integrated acceptance
@@ -84,7 +85,9 @@ offscreen fixture, not physical-controller comfort.
 
 Together with candidate06's actual LB/RB tab routes,720p/4K navigation,
 separate-process resume, save-and-quit and ordinary mapped endurance, this
-completes2.2.
+completed the former2.2 contract. Jenny's later Save/Quit redesign deliberately
+reopens2.2 only for the replacement one-dialog exit flow; the existing input,
+mouse and LB/RB evidence remains valid.
 
 The evidence does not close1.2: Left/Right, lower equipment and reverse routes
 pass, but no complete item-top-boundary route to upper controls is asserted.
