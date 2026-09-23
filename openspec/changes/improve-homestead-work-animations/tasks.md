@@ -5,7 +5,7 @@
 - [x] 1.1 Record current ordinary mature-tree/sapling chop motion, tool path,
   target distance and cancellation evidence; verify the reproduced contact,
   timing, clipping and camera defects before changing source.
-- [ ] 1.2 Author and verify a planted-foot anticipation/swing/impact/recover
+- [x] 1.2 Author and verify a planted-foot anticipation/swing/impact/recover
   clip on the retained skeleton, preserving bind, scale, nonanimated bones,
   disabled root motion and zero gameplay notifies through source/FBX checks.
 - [ ] 1.3 Integrate target-directed chopping through the existing one-action
@@ -79,3 +79,11 @@ baseline attempts are retained failed because their old setup pinned stale
 focus/one-step crafting. The repaired diagnostic uses stable focusable sapling
 selection and current native recipe activation; task1.1 is complete evidence,
 not a motion fix.
+
+The fresh `AN_Heroine_Chop` source clip is1.8s/109 samples with explicit
+anticipation0-0.34s, swing0.34-0.80s, impact0.80s, follow-through to1.12s and
+recover through1.80s. Blender FBX verification reports53 unchanged bones,
+maximum bind error0, idle endpoint matrix error0.00044305, maximum scale error
+7.15e-7, root travel0cm, foot drift0cm, right-wrist travel66.33cm and zero
+notifies. The target-facing runtime layer and ordinary contact remain separate
+task1.3 evidence.
