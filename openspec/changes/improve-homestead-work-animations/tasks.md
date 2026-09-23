@@ -2,7 +2,7 @@
 
 ## 1. First playable chopping improvement
 
-- [ ] 1.1 Record current ordinary mature-tree/sapling chop motion, tool path,
+- [x] 1.1 Record current ordinary mature-tree/sapling chop motion, tool path,
   target distance and cancellation evidence; verify the reproduced contact,
   timing, clipping and camera defects before changing source.
 - [ ] 1.2 Author and verify a planted-foot anticipation/swing/impact/recover
@@ -60,3 +60,22 @@
   three actions, fix demonstrated contact/clipping/readability defects, update
   animation/design/playtest/provenance docs, and promote only a genuinely
   improved candidate with receipt/proof/`Start-Preview -ValidateOnly`.
+
+## Chopping baseline
+
+`work-animation-baseline-clear-editor-03` is the current ordinary mapped
+sapling baseline: real supply gathering, native hatchet crafting, walking,
+camera orbit and X clear with no injected state/time/teleport. The action lasts
+2.0s; the hatchet is visible from phase0.3424 through1.3984, uses a fixed60°
+tilt, and the right wrist travels55.02cm. Actor travel is0cm, left/right toe
+drift is0.164/0.181cm and view yaw remains17.108°. The tool stays81.30-91.84cm
+from the selected target in XY.
+
+The inspected sheet demonstrates the defect: simulation removes the sapling
+immediately, focus switches to a nearby mature tree, and the clip lifts then
+pushes the hatchet forward/down through empty space without trunk-directed
+anticipation or readable impact. The first selected-Shipping and controlled
+baseline attempts are retained failed because their old setup pinned stale
+focus/one-step crafting. The repaired diagnostic uses stable focusable sapling
+selection and current native recipe activation; task1.1 is complete evidence,
+not a motion fix.

@@ -44,6 +44,7 @@ private:
     int32 PassIndex = 0;
     int32 CaptureIndex = 0;
     int32 ForageId = -1;
+    Homestead::Generation::GeneratedEntityKey ForageKey{};
     FVector2D ForageTarget = FVector2D::ZeroVector;
     int32 FoodBefore = 0;
     int32 HerbBefore = 0;

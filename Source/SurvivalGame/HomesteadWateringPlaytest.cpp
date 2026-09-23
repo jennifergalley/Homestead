@@ -128,6 +128,8 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         const auto Rows = PC->Rows();
         if (!PC->IsBookOpen() || PC->BookPage() != 1 || !Rows.IsValidIndex(PC->SelectedRow())) { Fail(TEXT("Craft book navigation failed.")); return; }
         if (Rows[PC->SelectedRow()].Id != Recipe) { Tap(EKeys::Gamepad_DPad_Down); WaterStageElapsed = 0; break; }
+        // Native recipe selection enters its action region before activation.
+        Tap(EKeys::Gamepad_FaceButton_Bottom);
         Tap(EKeys::Gamepad_FaceButton_Bottom);
         bWaterInputPending = true;
         WaterStageElapsed = 0;
@@ -271,19 +273,60 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
                 if (Node.kind != Homestead::ResourceKind::Sapling || !PC->Simulation().CanHarvest(Node.id)) continue;
                 const FVector2D Target(Node.position.x, Node.position.y);
                 const float Distance = FVector2D::Distance(Target, FVector2D(Position.x, Position.y));
-                if (Distance < Best) { Best = Distance; ForageId = Node.id; ForageTarget = Target; }
+                const Homestead::ResourceNode* Winner = nullptr;
+                double WinnerDistance = 280.0;
+                for (const auto& Other : PC->State().resources)
+                {
+                    if (Other.cleared) continue;
+                    const double CandidateDistance = FVector2D::Distance(
+                        Target, FVector2D(Other.position.x, Other.position.y));
+                    if (CandidateDistance < WinnerDistance)
+                    { WinnerDistance = CandidateDistance; Winner = &Other; }
+                }
+                if (Winner && Winner->id == Node.id && Distance < Best)
+                { Best = Distance; ForageId = Node.id; ForageKey = Node.key; ForageTarget = Target; }
             }
             if (ForageId < 0) { Fail(TEXT("No ready actual sapling to approach.")); return; }
         }
         if (WalkWaterTarget(ForageTarget + FVector2D(0, -420), 15, WallDelta, Move, Look)) ++WaterStage;
         break;
     case 17:
+        {
+        if (Entered)
+        {
+            ForageId = -1;
+            float Best = TNumericLimits<float>::Max();
+            const auto Player = PC->PlayerPoint();
+            for (const auto& Node : PC->State().resources)
+            {
+                if (Node.kind != Homestead::ResourceKind::Sapling || !PC->Simulation().CanHarvest(Node.id)) continue;
+                const FVector2D Target(Node.position.x, Node.position.y);
+                const Homestead::ResourceNode* Winner = nullptr;
+                double WinnerDistance = 280.0;
+                for (const auto& Other : PC->State().resources)
+                {
+                    if (Other.cleared) continue;
+                    const double CandidateDistance = FVector2D::Distance(
+                        Target, FVector2D(Other.position.x, Other.position.y));
+                    if (CandidateDistance < WinnerDistance)
+                    { WinnerDistance = CandidateDistance; Winner = &Other; }
+                }
+                const float Distance = FVector2D::Distance(Target, FVector2D(Player.x, Player.y));
+                if (Winner && Winner->id == Node.id && Distance < Best)
+                { Best = Distance; ForageId = Node.id; ForageKey = Node.key; ForageTarget = Target; }
+            }
+            if (ForageId < 0) { Fail(TEXT("No focusable sapling remained in the loaded approach region.")); return; }
+        }
+        Homestead::ResourceNode Current;
+        const auto Resolved = PC->Simulation().ResolveGeneratedResource(ForageKey, Current);
+        if (Resolved && Current.id > 0) ForageId = Current.id;
         if (WalkWaterTarget(ForageTarget + FVector2D(0, -110), 15, WallDelta, Move, Look))
         {
             if (!PC->IsResourceFocused(ForageId)) { Fail(TEXT("Approached focus is not the selected sapling.")); return; }
             ++WaterStage;
         }
         break;
+        }
     case 18:
         if (Entered) { Tap(EKeys::Gamepad_RightThumbstick); Tap(EKeys::Gamepad_RightThumbstick); }
         if (WaterStageElapsed > 0.65f) ++WaterStage;
