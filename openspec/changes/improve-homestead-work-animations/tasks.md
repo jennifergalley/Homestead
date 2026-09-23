@@ -18,10 +18,10 @@
 
 ## 2. Dedicated tilling motion
 
-- [ ] 2.1 Add an original correctly scaled digging-stick prop using existing
+- [x] 2.1 Add an original correctly scaled digging-stick prop using existing
   admitted project materials; verify hand attachment, no collision/overlap/nav,
   bounds and hide/cancel lifecycle.
-- [ ] 2.2 Author and verify a dedicated downward till/recover clip distinct from
+- [x] 2.2 Author and verify a dedicated downward till/recover clip distinct from
   gathering/chopping, with grounded feet and representative cell-height contact
   through source/interchange checks.
 - [ ] 2.3 Route only successful `Till` transactions to target-directed tilling;
@@ -30,6 +30,19 @@
 - [ ] 2.4 Exercise actual cleared-site tilling through controller input across
   representative appearance/equipment combinations; inspect close/ordinary
   views and verify plots, action costs, persistence and cadence remain exact.
+
+Tasks 2.1 and 2.2 passed in `work-animation-till-water-editor-03`. The original
+procedural digging stick uses the admitted field material, one scale-one
+section, collision/overlap/navigation disabled, hand attachment and bounded
+35-60cm runtime radius; missing-tool rejection and natural recovery leave it
+hidden. `AN_Heroine_Till` is a fresh 1.7s lift/drive/contact/settle/recover clip
+with 53 retained bones, maximum bind error0, idle endpoint error0.0006381,
+maximum scale error6.56e-7, root/foot travel0cm, right-wrist travel59.30cm and
+zero notifies. Fresh import
+`/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Till` reuses the
+heroine skeleton, reports duration1.70000005s, root motion disabled and zero
+notifies. The same native route passed one target-directed authoritative Till
+and recovery; the broader 2.3 rejection/cancellation matrix remains open.
 
 ## 3. Refined watering contact
 

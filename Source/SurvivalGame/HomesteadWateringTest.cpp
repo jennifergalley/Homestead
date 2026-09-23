@@ -4,6 +4,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
+#include "HomesteadDiggingStick.h"
 #include "HomesteadActionTestState.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -17,6 +18,7 @@ struct FWaterProbe
     uint32 Starts = 0;
     uint32 GatherStarts = 0;
     uint32 ClearStarts = 0;
+    uint32 TillStarts = 0;
     bool Ready = false;
     FVector Actor, Hand, Toe;
     FRotator View;
@@ -33,8 +35,10 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     }
     auto Animation = [Avatar]() { return Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()); };
     auto Hidden = [Avatar, Animation]() { return Animation() && Animation()->WaterWeight() < 0.001f
-        && !Avatar->GetWateringTool()->IsPresented() && !Avatar->GetHatchet()->IsPresented(); };
+        && Animation()->TillWeight() < 0.001f && !Avatar->GetWateringTool()->IsPresented()
+        && !Avatar->GetHatchet()->IsPresented() && !Avatar->GetDiggingStick()->IsPresented(); };
     const Homestead::Point Garden = Homestead::CellCenter(-5, 0);
+    const auto TillApproach = MakeShared<Homestead::Point>(Homestead::Point{-1160, 150});
     const Homestead::Point Stream{Homestead::StreamX(2700) - 40, 2700};
     auto Probe = MakeShared<FWaterProbe>();
     auto Matches = [this, Probe]()
@@ -113,22 +117,85 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     QueueGatherTo(Homestead::Item::Fiber, 4);
     QueueGatherTo(Homestead::Item::Seeds, 1);
     QueueCraft(Homestead::Recipe::Hatchet);
-    QueueCraft(Homestead::Recipe::DiggingStick);
     QueueClearCell(-5, 0);
-    Add(TEXT("Stand east of the cleared garden"),
-        [this]()
+    Add(TEXT("Stand east of the cleared garden without a digging stick"),
+        [this, Garden, TillApproach]()
         {
-            Teleport({-1160, 150});
-            Controller->GetPawn()->SetActorRotation(FRotator(0, 180, 0));
-            Controller->SetControlRotation(FRotator(-20, 180, 0));
+            bool Found = false;
+            for (const double Radius : {150.0, 190.0, 230.0})
+                for (int32 Direction = 0; Direction < 16 && !Found; ++Direction)
+                {
+                    const double Angle = 2.0 * PI * Direction / 16.0;
+                    const Homestead::Point Candidate{Garden.x + Radius * FMath::Cos(Angle),
+                        Garden.y + Radius * FMath::Sin(Angle)};
+                    const bool Occupied = std::any_of(Controller->State().resources.begin(),
+                        Controller->State().resources.end(), [&Candidate](const Homestead::ResourceNode& Node)
+                        {
+                            return !Node.cleared && FMath::Square(Node.position.x - Candidate.x)
+                                + FMath::Square(Node.position.y - Candidate.y) < FMath::Square(280.0);
+                        });
+                    if (!Occupied) { *TillApproach = Candidate; Found = true; }
+                }
+            Teleport(*TillApproach);
+            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(
+                Garden.y - TillApproach->y, Garden.x - TillApproach->x));
+            Controller->GetPawn()->SetActorRotation(FRotator(0, Yaw, 0));
+            Controller->SetControlRotation(FRotator(-20, Yaw, 0));
         }, [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.7f);
-    Add(TEXT("Till with the real crafted digging stick"), [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
-        [this]()
+    Add(TEXT("Missing digging stick rejects tilling without presentation"),
+        [this, Probe, Animation]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
+            Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
+        [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
+            && Animation()->TillStarts() == Probe->TillStarts; });
+    QueueCraft(Homestead::Recipe::DiggingStick);
+    Add(TEXT("Stand east of the cleared garden"),
+        [this, Garden, TillApproach]()
         {
+            Teleport(*TillApproach);
+            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(
+                Garden.y - TillApproach->y, Garden.x - TillApproach->x));
+            Controller->GetPawn()->SetActorRotation(FRotator(0, Yaw, 0));
+            Controller->SetControlRotation(FRotator(-20, Yaw, 0));
+        }, [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.7f);
+    Add(TEXT("Till with one target-directed planted-foot digging-stick action"),
+        [this, Avatar, Probe, Animation]()
+        {
+            Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
+            Probe->Ready = Probe->Expected.Till(-5, 0, Controller->PlayerPoint()).ok;
+            Probe->TillStarts = Animation()->TillStarts();
+            Probe->Actor = Avatar->GetActorLocation();
+            Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
+            Probe->View = Controller->GetControlRotation();
+            Tap(EKeys::Gamepad_FaceButton_Left);
+        },
+        [this, Avatar, Probe, Animation, Matches]()
+        {
+            const auto* Tool = Avatar->GetDiggingStick();
             for (const auto& Plot : Controller->State().plots)
-                if (Plot.cellX == -5 && Plot.cellY == 0) { GardenPlotId = Plot.id; return !Controller->ToastIsError(); }
+                if (Plot.cellX == -5 && Plot.cellY == 0)
+                {
+                    GardenPlotId = Plot.id;
+                    const auto Target = Homestead::CellCenter(-5, 0);
+                    const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
+                        Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
+                    return Probe->Ready && !Controller->ToastIsError() && Matches()
+                        && Animation()->TillStarts() == Probe->TillStarts + 1
+                        && Animation()->TillWeight() > 0.99f && Tool->IsPresented()
+                        && Tool->GetAttachParent() == Avatar->GetMesh()
+                        && Tool->GetAttachSocketName() == TEXT("hand_r")
+                        && Tool->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+                        && !Tool->GetGenerateOverlapEvents() && !Tool->CanEverAffectNavigation()
+                        && Tool->GetNumSections() == 1
+                        && Tool->GetComponentScale().Equals(FVector::OneVector, 0.001f)
+                        && Tool->Bounds.SphereRadius > 35 && Tool->Bounds.SphereRadius < 60
+                        && FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
+                        && FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
+                        && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
+                        && FMath::Abs(FMath::FindDeltaAngleDegrees(Avatar->TillTargetYaw(), ExpectedYaw)) < 0.1f;
+                }
             return false;
-        });
+        }, 0.45f);
+    Add(TEXT("Tilling recovers with no orphaned prop"), []() {}, Hidden, 1.9f);
     Add(TEXT("Approach and plant actual wild-root seeds"), [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.7f);
     Add(TEXT("Plant with gamepad A; no watering prop"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
