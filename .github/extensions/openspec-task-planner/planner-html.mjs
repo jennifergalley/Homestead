@@ -89,12 +89,12 @@ export function renderPlannerHtml() {
     }
     .board { display: grid; gap: 14px; }
     .feature { overflow: hidden; }
-    .feature summary {
+    .feature > summary {
       list-style: none;
       cursor: pointer;
       padding: 16px 18px;
     }
-    .feature summary::-webkit-details-marker { display: none; }
+    .feature > summary::-webkit-details-marker { display: none; }
     .feature-head {
       display: grid;
       grid-template-columns: minmax(220px, 1fr) auto;
@@ -130,6 +130,33 @@ export function renderPlannerHtml() {
     .task:last-child { border-bottom: 0; }
     .task-id { color: var(--text-color-muted, #8b949e); font-family: var(--font-mono, Consolas, monospace); font-size: 12px; }
     .task.done .task-text { color: var(--text-color-muted, #8b949e); text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 55%, transparent); }
+    .completed-group {
+      margin-top: 16px;
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--background-color-default, #0d1117) 55%, transparent);
+      overflow: hidden;
+    }
+    .completed-group > summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 11px;
+      color: var(--text-color-muted, #8b949e);
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold, 600);
+    }
+    .completed-group > summary::-webkit-details-marker { display: none; }
+    .completed-group > summary::after { content: "Show"; font-weight: 400; }
+    .completed-group[open] > summary::after { content: "Hide"; }
+    .completed-content {
+      border-top: 1px solid var(--border-color-default, #30363d);
+      padding: 0 11px 11px;
+    }
+    .completed-content .section { margin-top: 12px; }
     .meta { margin-top: 13px; font-size: 12px; color: var(--text-color-muted, #8b949e); }
     .empty { padding: 48px 20px; text-align: center; color: var(--text-color-muted, #8b949e); }
     .error {
@@ -153,7 +180,7 @@ export function renderPlannerHtml() {
     <header class="hero">
       <div>
         <h1>Homestead task planner</h1>
-        <div class="subtitle">Live OpenSpec progress across every planned feature.</div>
+        <div class="subtitle">Open work first. Completed tasks stay tucked away until you need them.</div>
       </div>
       <button id="refresh" class="refresh" type="button">Refresh tasks</button>
     </header>
@@ -231,15 +258,29 @@ export function renderPlannerHtml() {
         details.append(summary);
 
         const body = el("div", "feature-body");
-        for (const section of feature.sections) {
-          const sectionNode = el("section", "section");
-          sectionNode.append(el("h3", "", section.title));
-          for (const task of section.tasks) {
-            const taskNode = el("div", "task" + (task.done ? " done" : ""));
-            taskNode.append(el("div", "task-id", task.id), el("div", "task-text", task.text));
-            sectionNode.append(taskNode);
+        const appendSections = (parent, sections, done) => {
+          for (const section of sections) {
+            const tasks = section.tasks.filter((task) => task.done === done);
+            if (!tasks.length) continue;
+            const sectionNode = el("section", "section");
+            sectionNode.append(el("h3", "", section.title));
+            for (const task of tasks) {
+              const taskNode = el("div", "task" + (task.done ? " done" : ""));
+              taskNode.append(el("div", "task-id", task.id), el("div", "task-text", task.text));
+              sectionNode.append(taskNode);
+            }
+            parent.append(sectionNode);
           }
-          body.append(sectionNode);
+        };
+        appendSections(body, feature.sections, false);
+
+        if (feature.completed > 0) {
+          const completed = el("details", "completed-group");
+          completed.append(el("summary", "", "Completed (" + feature.completed + ")"));
+          const completedContent = el("div", "completed-content");
+          appendSections(completedContent, feature.sections, true);
+          completed.append(completedContent);
+          body.append(completed);
         }
         body.append(el("div", "meta", feature.path + " | Updated " + new Date(feature.modifiedAt).toLocaleString()));
         details.append(body);
