@@ -78,14 +78,14 @@ def main():
     rig.animation_data.action_slot = rig.animation_data.action.slots[0]
     scene.frame_set(1)
     export_fbx(OUT / f"{NAME}.fbx", rig, [mesh], animation=True)
-    contract = {
+    contract = {NAME: {
         "name": NAME, "duration_seconds": DURATION, "fps": FPS,
         "phases": {"anticipation": [0.0, 0.34], "swing": [0.34, 0.80],
                    "impact": 0.80, "follow_through": [0.80, 1.12], "recover": [1.12, 1.80]},
         "authority": "Presentation only after existing successful Clear/Harvest transaction.",
         "root_motion": False, "notifies": 0, "target": "Bounded runtime facing only; no IK/reach mutation.",
         "samples": samples,
-    }
+    }}
     (OUT / "chop-contract.json").write_text(json.dumps(contract, indent=2) + "\n")
     print("CHOP_AUTHORED", OUT / f"{NAME}.fbx")
 
