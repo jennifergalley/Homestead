@@ -56,7 +56,7 @@ void UHomesteadWateringTool::BeginPlay()
 
 float UHomesteadWateringTool::PourAngle(float Phase)
 {
-    return 32.0f * FMath::SmoothStep(0.45f, 0.75f, Phase) * (1 - FMath::SmoothStep(1.25f, 1.5f, Phase));
+    return 44.0f * FMath::SmoothStep(0.55f, 0.80f, Phase) * (1 - FMath::SmoothStep(1.30f, 1.55f, Phase));
 }
 
 void UHomesteadWateringTool::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* TickFunction)
@@ -67,10 +67,9 @@ void UHomesteadWateringTool::TickComponent(float DeltaTime, ELevelTick TickType,
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     const float Phase = Animation ? Animation->WaterPhase() : 0;
     const bool Visible = PC && Animation && Animation->IsWatering() && Animation->WaterWeight() > 0.5f
-        && Phase >= 0.32f && Phase <= 1.65f && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
+        && Phase >= 0.22f && Phase <= 1.60f && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
         && PC->Simulation().Count(Homestead::Item::WateringCan) > 0 && GetNumSections() == 2;
     SetHiddenInGame(!Visible);
     if (!Visible) return;
-    // The authored wrist uses the same tilt; world-up keeps the suspended can upright during the lift.
-    UpdateHandToolGrip(*this, *Avatar->GetMesh(), FRotator(-PourAngle(Phase), Avatar->GetActorRotation().Yaw, 0));
+    UpdateHandToolGrip(*this, *Avatar->GetMesh(), FRotator(-PourAngle(Phase), Avatar->WaterTargetYaw(), 0));
 }
