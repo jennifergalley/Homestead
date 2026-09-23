@@ -446,10 +446,14 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Add(TEXT("Planning cancels clearing"), [this]() { Tap(EKeys::B); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Hidden]() { return Controller->IsPlanning() && Hidden(); });
     Add(TEXT("Cancel planning"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); }, Hidden);
+    const bool bShippingQA = FParse::Param(FCommandLine::Get(), TEXT("HomesteadShippingQA"));
     for (int32 Body = 0; Body < 3; ++Body)
         for (int32 Hair = 0; Hair < 3; ++Hair)
             for (int32 Outfit = 0; Outfit < 2; ++Outfit)
             {
+                if (bShippingQA && !((Body == 0 && Hair == 0 && Outfit == 0)
+                    || (Body == 1 && Hair == 1 && Outfit == 1)
+                    || (Body == 2 && Hair == 2 && Outfit == 0))) continue;
                 Restore();
                 Add(FString::Printf(TEXT("Select hatchet appearance %d/%d/%d"), Body, Hair, Outfit),
                     [this, Avatar, Probe, Body, Hair, Outfit]()
