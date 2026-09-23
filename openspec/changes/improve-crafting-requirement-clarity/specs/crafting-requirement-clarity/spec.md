@@ -6,8 +6,8 @@ Makes recipe readiness and shortages understandable before activation while pres
 
 ## ADDED Requirements
 
-### Requirement: Recipe cards communicate current availability
-Each Craft recipe card SHALL visibly distinguish whether that recipe can be crafted at the player's current position with the carried pack. An unavailable recipe SHALL use a clearly greyed treatment but MUST remain selectable for inspection.
+### Requirement: Recipe tiles are icon-only and communicate current availability
+Each Craft grid tile SHALL show only the recipe icon. Recipe name, output, description, and requirements SHALL appear in the details pane. An unavailable recipe icon SHALL use a clearly greyed treatment but MUST remain selectable for inspection.
 
 #### Scenario: Open Craft without enough ingredients
 - **WHEN** one or more recipes cannot be crafted from the carried pack
@@ -16,10 +16,15 @@ Each Craft recipe card SHALL visibly distinguish whether that recipe can be craf
 
 #### Scenario: A recipe is ready
 - **WHEN** all consumed ingredients, retained requirements, nearby station requirements, and resulting pack capacity permit a recipe
-- **THEN** its card uses the normal available treatment and its Craft action is enabled
+- **THEN** its icon uses the normal available treatment and holding that icon can begin progress
 
-### Requirement: Details show Have and Need for every requirement
-The selected recipe details SHALL show each consumed ingredient as a separate requirement with its carried `Have` amount, required `Need` amount, and met/short state. An unmet ingredient row SHALL also show one concise current acquisition hint backed by authoritative resource/recipe behavior. Retained tools and nearby station requirements SHALL be shown separately and identified as retained or nearby rather than consumed.
+#### Scenario: Scan the recipe grid
+- **WHEN** the Craft page is open
+- **THEN** no recipe name, `Needs:` sentence, or other prose is rendered inside grid tiles
+- **AND** the selected tile's complete identity appears in details
+
+### Requirement: Details use a structured requirement list
+The selected recipe details SHALL present requirements as a vertical semantic list, not a paragraph delimited with colons, semicolons, or inline `+` text. Each consumed ingredient SHALL have its own row with carried `Have`, required `Need`, and met/short state. An unmet ingredient row SHALL also show one concise current acquisition hint backed by authoritative resource/recipe behavior. Retained tools and nearby station requirements SHALL be separate rows identified as retained or nearby rather than consumed.
 
 #### Scenario: Inspect a partially supplied recipe
 - **WHEN** the player selects a recipe with some but not all required ingredients
@@ -42,17 +47,38 @@ The selected recipe details SHALL show each consumed ingredient as a separate re
 - **THEN** Timber appears as a consumed Have/Need row
 - **AND** the hatchet appears as an unmet retained-tool row
 
-### Requirement: Unavailable crafting is not presented as actionable
-The Craft action for an unavailable recipe SHALL be visibly disabled and SHALL NOT mutate simulation state. Recipe inspection and directional/pointer navigation SHALL remain available.
+### Requirement: Holding an icon crafts with visible progress
+Pressing and holding an available recipe icon with pointer, Enter/Space, or controller A SHALL begin a 1.2-second real-time craft cycle. The icon SHALL begin grey and reveal its full color progressively until completion. A quick press/release SHALL still select the recipe but SHALL NOT craft.
 
-#### Scenario: Activate an unavailable recipe
-- **WHEN** the player presses A, Enter, or clicks Craft while the selected recipe is unavailable
-- **THEN** no recipe transaction is requested or committed
-- **AND** the structured shortage details remain visible
+#### Scenario: Complete one held craft
+- **WHEN** the player holds an available recipe for one complete 1.2-second cycle
+- **THEN** the color fill reaches completion and exactly one authoritative recipe transaction is requested
 
-#### Scenario: State changes after selection
-- **WHEN** a selected recipe changes between available and unavailable
-- **THEN** its card, details, and Craft action update together without losing the selected recipe
+#### Scenario: Release before completion
+- **WHEN** the player releases after a partial fill
+- **THEN** incomplete progress clears without consuming ingredients, granting output, or queuing later completion
+
+#### Scenario: Hold an unavailable recipe
+- **WHEN** the player holds a grey unavailable recipe
+- **THEN** no progress cycle or transaction starts and its shortage list remains visible
+
+### Requirement: Continued hold repeats complete crafts
+After a successful cycle, continued hold SHALL immediately begin another 1.2-second cycle while the recipe remains available. Each cycle MUST revalidate current requirements before beginning and commit at most one transaction at completion.
+
+#### Scenario: Hold through multiple cycles
+- **WHEN** supplies and capacity permit three recipe executions and the player holds through three complete fills
+- **THEN** exactly three transactions commit and the fourth cycle does not start if requirements are no longer met
+
+#### Scenario: State changes during a cycle
+- **WHEN** load, recovery, page/focus change, modal opening, input loss, or authoritative state change invalidates the active hold
+- **THEN** the incomplete cycle cancels without mutation or replay
+
+### Requirement: Craft progress has restrained audible feedback
+Each active cycle SHALL play three distinct or varied hammer-on-anvil/metal strike cues synchronized to progress. Cues SHALL respect Effects volume and mute. Sound and fill are presentation-only and MUST NOT grant output or determine transaction completion.
+
+#### Scenario: Craft while effects are muted
+- **WHEN** Effects volume is zero and a cycle completes
+- **THEN** visual progress and the authoritative craft still complete normally with no audible strikes
 
 ### Requirement: Availability remains explanatory rather than authoritative
 Pre-activation availability SHALL be derived from the same current recipe costs, retained requirements, station proximity, inventory capacity, and player state enforced by crafting authority. The authoritative transaction MUST revalidate all rules when an available recipe is activated.
@@ -72,7 +98,7 @@ Pre-activation availability SHALL be derived from the same current recipe costs,
 - **THEN** source-contract validation fails rather than leaving misleading guidance in the Craft page
 
 ### Requirement: Craft clarity works across supported input and layout
-Availability styling, semantic requirement rows, selection, focus, scrolling, and disabled-action behavior SHALL remain readable and synchronized for pointer, keyboard, and controller at supported 720p and 4K layouts.
+Availability styling, semantic requirement rows, selection, focus, scrolling, hold progress, release/cancel, and repeat behavior SHALL remain readable and synchronized for pointer, keyboard, and controller at supported 720p and 4K layouts.
 
 #### Scenario: Navigate mixed recipe states
 - **WHEN** the player moves through available and unavailable recipes using pointer, arrows/D-pad, or tab-region navigation
