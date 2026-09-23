@@ -33,6 +33,17 @@ function Assert-QACompletionRoute([string]$CommandLine,[bool]$Completion,[string
         }
         return
     }
+    if($CommandLine -match '(?i)(?:^|\s)-HomesteadNativeMenuTest(?=\s|$)'){
+        foreach($flag in 'HomesteadNativeMenuTest','HomesteadSmokeTest','HomesteadShippingQA'){
+            if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){
+                throw "Native-menu QA requires one explicit $flag."
+            }
+        }
+        if($CommandLine -match '(?i)(?:^|\s)-Homestead(VisualPlaytest|Endurance|GeneratedWoodland|FullLoop|ClearingTest|PresentationTest|ForageRenewal)(?:\s|$)'){
+            throw 'Native-menu QA cannot mix another acceptance route.'
+        }
+        return
+    }
     if($CommandLine -notmatch '(?i)(?:^|\s)-HomesteadEndurance(?=\s|$)'){
         foreach($flag in 'HomesteadVisualPlaytest','HomesteadShippingQA'){
             if([regex]::Matches($CommandLine,"(?i)(?:^|\s)-$flag(?=\s|$)").Count -ne 1){

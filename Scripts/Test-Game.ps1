@@ -199,7 +199,7 @@ $scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 if ($ShippingQA) { $arguments += ' -HomesteadShippingQA' }
 if ($ShippingQA) {
-    $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:($GeneratedWoodland -or $FullLoop)
+    $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:($GeneratedWoodland -or $FullLoop -or $NativeMenu)
 } else {
     $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
     Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
