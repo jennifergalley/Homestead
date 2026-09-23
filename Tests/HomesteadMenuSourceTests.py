@@ -173,7 +173,8 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertNotIn("SetViewMode", portrait)
 
     def test_context_actions_select_native_subjects(self):
-        self.assertIn("case EFocus::Chest: MenuInventoryView(1); OpenBook(0);", CONTROLLER)
+        self.assertIn("case EFocus::Chest: OpenChestStorage(FocusId);", CONTROLLER)
+        self.assertIn("ActiveChestId = ChestId", CONTROLLER)
         self.assertIn("NativeMenu->FocusLegacySubject(Selection)", CONTROLLER)
         self.assertIn("Homestead::Recipe::RoastedRoots", CONTROLLER)
 

@@ -20,7 +20,7 @@ FString AHomesteadController::MenuInventorySummary() const
     if (MenuInventoryViewIndex == 2) return TEXT("Wearing  |  Equipped clothes do not use pack capacity");
     if (MenuInventoryViewIndex == 1)
     {
-        const int Chest = Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach);
+        const int Chest = ActiveChestId.Get(-1);
         return Chest >= 0 ? FString::Printf(TEXT("Chest %d  |  %d / 120 units"), Chest, Sim.ChestUsedCapacity(Chest))
             : TEXT("No reachable chest  |  Move near storage to open it");
     }
@@ -54,7 +54,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
     }
 
     TArray<FHomesteadRow> Result;
-    const int Chest = Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach);
+    const int Chest = ActiveChestId.Get(Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach));
     const int Container = MenuInventoryViewIndex == 1 ? Chest : 0;
     auto AddWearable = [&](const Homestead::WearableInstance& Instance)
     {

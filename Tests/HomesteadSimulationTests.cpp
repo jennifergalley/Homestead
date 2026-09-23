@@ -1500,6 +1500,8 @@ void DirectSplitAndDeterministicSort()
     Simulation sim;
     Stock(sim, {{Item::Knife, 1}, {Item::Seeds, 2}, {Item::Berries, 4},
         {Item::Fiber, 5}, {Item::Hatchet, 1}, {Item::Stone, 3}});
+    OK(sim.UnequipWearable(1, sim.GetRevision()));
+    const auto tunic = *sim.GetWearable(1);
     const int fiber = Group(sim, Item::Fiber);
     OK(sim.SplitHalf(0, fiber, Home, sim.GetRevision()));
     CHECK(sim.GetLayout(0)->at(2).groupId == fiber);
@@ -1508,6 +1510,7 @@ void DirectSplitAndDeterministicSort()
     const int split = sim.GetLayout(0)->at(3).groupId;
     CHECK(split != fiber);
     UnchangedFailure(sim, [&] { return sim.SplitHalf(0, Group(sim, Item::Knife), Home, sim.GetRevision()); });
+    UnchangedFailure(sim, [&] { return sim.SplitHalf(0, 0, Home, sim.GetRevision()); });
     const auto stale = sim.GetRevision() - 1;
     UnchangedFailure(sim, [&] { return sim.SplitHalf(0, fiber, Home, stale); });
 
@@ -1515,11 +1518,16 @@ void DirectSplitAndDeterministicSort()
     const auto totals = sim.GetState().inventory;
     OK(sim.SortPack(sim.GetRevision()));
     CHECK(sim.UsedCapacity() == used && sim.GetState().inventory == totals);
-    CHECK(sim.GetLayout(0)->size() == 6);
+    CHECK(sim.GetLayout(0)->size() == 7);
     const Item expected[] = {Item::Knife, Item::Hatchet, Item::Stone,
         Item::Fiber, Item::Berries, Item::Seeds};
     for (int index = 0; index < 6; ++index)
         CHECK(sim.GetLayout(0)->at(index).item == expected[index]);
+    CHECK(sim.GetLayout(0)->back().wearableId == tunic.id);
+    CHECK(sim.GetWearable(tunic.id)->definition == tunic.definition
+        && sim.GetWearable(tunic.id)->dye == tunic.dye
+        && sim.GetWearable(tunic.id)->owner == WearableOwner::Carried);
+    CHECK(sim.GetState().equipment[static_cast<int>(EquipmentSlot::Torso)] == 0);
     CHECK(sim.GetLayout(0)->at(3).groupId == fiber);
     CHECK(sim.GetLayout(0)->at(3).quantity == 5);
     CHECK(std::none_of(sim.GetLayout(0)->begin(), sim.GetLayout(0)->end(),
@@ -1529,6 +1537,8 @@ void DirectSplitAndDeterministicSort()
     OK(sim.SortPack(revision));
     CHECK(sim.Serialize() == sorted && sim.GetRevision() == revision);
     InventoryRoundTrip(sim);
+    CHECK(sim.GetWearable(tunic.id)->definition == tunic.definition
+        && sim.GetWearable(tunic.id)->dye == tunic.dye);
 }
 void SelectedFoodGroupTransactions()
 {

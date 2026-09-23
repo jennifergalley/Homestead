@@ -85,6 +85,8 @@ public:
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
     bool MenuSplitHalf(const FHomesteadRow& Row);
     bool MenuSortPack();
+    bool OpenChestStorage(int32 ChestId);
+    TOptional<int32> ActiveStorageChest() const { return ActiveChestId; }
     bool MenuCraftRecipe(Homestead::Recipe Recipe);
     void MenuCraftBeat(int32 Beat);
     FString MenuInventorySummary() const;
@@ -219,6 +221,7 @@ private:
     void CaptureSessionCheckpoint(FVector Location, FRotator Rotation);
     FString WorldId;
     int32 MenuInventoryViewIndex = 0;
+    TOptional<int32> ActiveChestId;
     mutable bool bReadIncompatible = false;
     bool bTestResetRequired = false;
     bool bHasPlayableSession = false;
@@ -265,6 +268,7 @@ private:
     FRotator PendingRotation = FRotator(-15, 15, 0);
 
     void Interact();
+    void OpenFocusedChestWithMouse();
     void Secondary();
     void Withdraw();
     void Back();

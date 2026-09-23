@@ -779,6 +779,7 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Left, IE_Pressed, this, &AHomesteadController::Secondary);
     InputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
     InputComponent->BindKey(EKeys::Gamepad_RightTrigger, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
+    InputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AHomesteadController::OpenFocusedChestWithMouse);
     InputComponent->BindKey(EKeys::G, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Top, IE_Pressed, this, &AHomesteadController::Withdraw);
     InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AHomesteadController::Back);
@@ -1191,10 +1192,38 @@ void AHomesteadController::Interact()
         }
         break;
     }
-    case EFocus::Chest: MenuInventoryView(1); OpenBook(0); break;
+    case EFocus::Chest: OpenChestStorage(FocusId); break;
     case EFocus::Water: Notify(Sim.FillWater(Position)); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
+
+}
+
+void AHomesteadController::OpenFocusedChestWithMouse()
+{
+    if (bBookOpen || bPlanning || IsFailed() || !bWorldReady) return;
+    UpdateFocus();
+    if (Focus == EFocus::Chest) OpenChestStorage(FocusId);
+}
+
+bool AHomesteadController::OpenChestStorage(int32 ChestId)
+{
+    if (bPlanning || IsFailed() || ChestId <= 0) return false;
+    const auto Position = PlayerPoint();
+    const Homestead::Structure* Target = nullptr;
+    for (const auto& Structure : State().structures)
+        if (Structure.id == ChestId && Structure.kind == Homestead::Piece::Chest)
+        { Target = &Structure; break; }
+    if (!Target)
+    { Notify(TEXT("That storage chest is no longer available."), true); return false; }
+    const auto Center = Homestead::CellCenter(Target->cellX, Target->cellY);
+    if (FMath::Square(Center.x - Position.x) + FMath::Square(Center.y - Position.y)
+        > FMath::Square(Homestead::ChestReach))
+    { Notify(TEXT("Move within 280 cm of this chest."), true); return false; }
+    ActiveChestId = ChestId;
+    MenuInventoryViewIndex = 1;
+    OpenBook(0);
+    return true;
 }
 
 void AHomesteadController::Secondary()
@@ -1294,6 +1323,8 @@ void AHomesteadController::CloseBook()
 {
     if (bBookOpen) PlayEffect(UIClick, 0.08f);
     bBookOpen = false;
+    ActiveChestId.Reset();
+    MenuInventoryViewIndex = 0;
     bConfirmRestart = false;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(false);
     if (IsFailed()) ShowNativeMenu();
@@ -2151,6 +2182,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     }
     const Homestead::Simulation Previous = Sim;
     Sim = MoveTemp(Candidate);
+    ActiveChestId.Reset();
     if (Avatar && !Avatar->ApplyPreparedEquipment(Error))
     {
         Sim = Previous;
@@ -2264,6 +2296,7 @@ void AHomesteadController::RetryCheckpoint()
     if (!Region) { Notify(Region); return; }
     if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("Checkpoint terrain could not be prepared."), true); return; }
     Sim = MoveTemp(Candidate);
+    ActiveChestId.Reset();
     bWorldReady = true;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
     Appearance = SessionAppearance;
@@ -2293,6 +2326,7 @@ void AHomesteadController::NewGame()
     if (!Result) { Notify(Result); return; }
     if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("The new woodland could not be prepared. Your current session is retained."), true); return; }
     Sim = MoveTemp(Candidate);
+    ActiveChestId.Reset();
     bWorldReady = true;
     bTestResetRequired = false;
     bHasPlayableSession = true;

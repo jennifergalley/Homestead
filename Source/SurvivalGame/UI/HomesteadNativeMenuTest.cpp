@@ -11,6 +11,7 @@
 #include "Misc/Paths.h"
 #include "InputCoreTypes.h"
 #include "InputKeyEventArgs.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Materials/MaterialInterface.h"
 #include "CoreGlobals.h"
 #include "Misc/CommandLine.h"
@@ -988,8 +989,23 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             *BranchTotal = Controller->Simulation().Count(Homestead::Item::Branch);
             Controller->MenuInventoryView(0); Controller->OpenBook(0);
         },
-        [this, Chest, Branches]() { return *Chest > 0 && *Branches > 0
-            && Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0); });
+        [this, Chest, Branches]() { return *Chest > 0 && *Branches > 0; });
+    Add(TEXT("Focused chest interaction binds one exact storage session ID"),
+        [this]() { Controller->CloseBook(); Tap(EKeys::RightMouseButton); },
+        [this, Chest]() { return Controller->IsBookOpen() && Controller->InventoryView() == 1
+            && Controller->ActiveStorageChest().IsSet()
+            && Controller->ActiveStorageChest().GetValue() == *Chest; });
+    Add(TEXT("Back clears the exact storage session before ordinary Inventory"),
+        [this, Branches]()
+        {
+            Controller->CloseBook();
+            Controller->MenuInventoryView(0);
+            Controller->OpenBook(0);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+        },
+        [this]() { return !Controller->ActiveStorageChest().IsSet()
+            && Controller->InventoryView() == 0
+            && Controller->NativeMenu->HasSynchronizedFocus(); });
     Add(TEXT("Ctrl Enter splits the focused odd stack in half beside its source"),
         [this]()
         {
@@ -1021,6 +1037,39 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                 { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
     Add(TEXT("Sort restores one authoritative branch stack for legacy transaction regression"),
+        [this]() { Tap(EKeys::S); },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                    { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
+    Add(TEXT("Focus the restored branch tile for real Ctrl pointer split"),
+        [this, Branches]() { *Branches = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Branch) { *Branches = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0); },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Ctrl pointer click splits the actual focused tile without an action button"),
+        [this]()
+        {
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            const auto Widget = Slate.GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Focused inventory tile is unavailable for pointer split.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            Slate.SetCursorPos(Position);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Pressed, 1));
+            TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Released, 0));
+        },
+        [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
+    Add(TEXT("Sort restores the pointer-split stack before transfer regression"),
         [this]() { Tap(EKeys::S); },
         [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
