@@ -1074,6 +1074,49 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             [this, Body]() { Screenshot(FString::Printf(TEXT("native-base-only-%d"), Body)); },
             [this]() { return Controller->MenuPortraitBrush() != nullptr; }, 0.8f);
     }
+    const TCHAR* HairLabels[] = {TEXT("wave"), TEXT("bob-blonde")};
+    const TCHAR* ViewLabels[] = {TEXT("back"), TEXT("three-quarter"), TEXT("side")};
+    const float ViewAngles[] = {180.0f, 135.0f, 90.0f};
+    for (int32 Hair = 0; Hair < 2; ++Hair)
+        for (int32 Body = 0; Body < 3; ++Body)
+            for (int32 View = 0; View < 3; ++View)
+            {
+                const FString Name = FString::Printf(TEXT("native-hair-%s-body%d-%s"),
+                    HairLabels[Hair], Body, ViewLabels[View]);
+                Add(TEXT("Apply real close hairstyle review: ") + Name,
+                    [this, Original, OriginalLook, Hair, Body, ViewAngles, View]()
+                    {
+                        Controller->Sim = *Original;
+                        Controller->Appearance = *OriginalLook;
+                        Controller->Appearance.BodyPreset = Body;
+                        Controller->Appearance.HairStyle = Hair;
+                        Controller->Appearance.HairColor = Hair == 1 ? 4 : 0;
+                        auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+                        FString Error;
+                        if (!Avatar || !Avatar->PrepareEquipment(Controller->State(), Controller->Appearance, Error)
+                            || !Avatar->ApplyPreparedEquipment(Error))
+                        { Finish(false, TEXT("Close hairstyle review could not apply production presentation: ") + Error); return; }
+                        Controller->CloseBook(); Controller->MenuInventoryView(2); Controller->OpenBook(0);
+                        Controller->RefreshMenuPortrait();
+                        Controller->OrbitMenuPortrait(ViewAngles[View]);
+                    },
+                    [this, Hair, Body]()
+                    {
+                        const auto* Presentation = Cast<AHomesteadCharacter>(
+                            Controller->GetPawn())->GetEquipmentPresentation();
+                        const TCHAR* Bodies[] = {TEXT("Preferred"), TEXT("Willow"), TEXT("Hazel")};
+                        const TCHAR* Styles[] = {TEXT("LongWave"), TEXT("Bob")};
+                        const FString Expected = FString::Printf(TEXT("SK_Modular_%s_Base_%s"), Bodies[Body], Styles[Hair]);
+                        return Presentation && Presentation->Base.Mesh
+                            && Presentation->Base.Mesh->GetName() == Expected
+                            && Presentation->Garments.Num() == 2
+                            && Controller->MenuPortraitBrush() != nullptr
+                            && VerifyNativeMenuPresentation();
+                    }, 0.8f);
+                Add(TEXT("Capture real close hairstyle review: ") + Name,
+                    [this, Name]() { Screenshot(Name); },
+                    [this]() { return Controller->MenuPortraitBrush() != nullptr; }, 0.8f);
+            }
     Add(TEXT("Apply representative layered equipment to shared gameplay and portrait presentation"),
         [this, Layered, OriginalLook]()
         {

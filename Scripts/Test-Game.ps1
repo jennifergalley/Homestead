@@ -125,6 +125,13 @@ if ($NativeMenu) {
         'native-build.png','native-guidebook.png','native-credits.png','native-appearance.png',
         'native-base-only-0.png','native-base-only-1.png','native-base-only-2.png',
         'native-wardrobe-layered.png','native-wardrobe-dyed.png','native-wardrobe-restored.png')
+    foreach($style in @('wave','bob-blonde')) {
+        foreach($body in 0..2) {
+            foreach($view in @('back','three-quarter','side')) {
+                $captures += "native-hair-$style-body$body-$view.png"
+            }
+        }
+    }
 }
 if ($DirectionalNavigation) {
     $captures = @('native-navigation-equipment.png','native-navigation-scrolled.png','native-navigation-amount.png')
