@@ -182,6 +182,19 @@ std::string MissingMessage(const Inventory& change, const Inventory& stock)
     }
     return first ? "Not enough pack space. Store some items in a chest first." : result + " first.";
 }
+const char* AcquisitionSource(Item item)
+{
+    switch (item)
+    {
+    case Item::Branch: return "Fallen branches";
+    case Item::Stone: return "Loose stones";
+    case Item::Fiber: return "Reeds near water";
+    case Item::Roots: return "Wild roots";
+    case Item::Flowers: return "Meadow herb patches";
+    case Item::Timber: return "Mature trees with Hatchet";
+    default: return "";
+    }
+}
 bool EdgePiece(Piece kind) { return kind == Piece::Wall || kind == Piece::Doorway; }
 bool Furniture(Piece kind) { return kind == Piece::Fire || kind == Piece::Bed || kind == Piece::Chest; }
 using Edge = std::tuple<int, int, int>;
@@ -1147,6 +1160,56 @@ Result Simulation::Craft(Recipe recipe, Point player)
         return Bad("Take your knife from storage to craft tools.");
     if (!TryAdjust(change)) return Bad(MissingMessage(change, state_.inventory));
     return Good(std::string("Made ") + RecipeName(recipe) + ".");
+}
+
+RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
+{
+    RecipeAssessment assessment;
+    assessment.recipe = recipe;
+    if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player))
+    {
+        assessment.blocker = "Choose a valid recipe and location.";
+        return assessment;
+    }
+
+    const Inventory change = CraftChange(recipe);
+    for (int index = 0; index < ItemCount; ++index)
+    {
+        if (change[index] < 0)
+        {
+            RecipeIngredientAssessment ingredient;
+            ingredient.item = static_cast<Item>(index);
+            ingredient.have = state_.inventory[index];
+            ingredient.need = -change[index];
+            ingredient.source = AcquisitionSource(ingredient.item);
+            ingredient.met = ingredient.have >= ingredient.need;
+            assessment.ingredients.push_back(ingredient);
+        }
+        else if (change[index] > 0)
+        {
+            assessment.output = static_cast<Item>(index);
+            assessment.outputCount = change[index];
+        }
+    }
+
+    const bool cooking = recipe == Recipe::RoastedRoots
+        || recipe == Recipe::HerbedRoots;
+    assessment.stationRequired = cooking;
+    assessment.stationMet = !cooking || IsNearFire(player);
+    if (recipe == Recipe::SplitFirewood)
+        assessment.retainedTool = Item::Hatchet;
+    else if (!cooking)
+        assessment.retainedTool = Item::Knife;
+    assessment.retainedToolMet = assessment.retainedTool == Item::Count
+        || Count(assessment.retainedTool) > 0;
+
+    Simulation probe = *this;
+    const Result result = probe.Craft(recipe, player);
+    assessment.craftable = result.ok;
+    assessment.blocker = result.ok ? std::string() : result.message;
+    assessment.capacityMet = result.ok
+        || assessment.blocker != "Not enough pack space. Store some items in a chest first.";
+    return assessment;
 }
 Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point player)
 {

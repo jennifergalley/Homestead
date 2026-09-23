@@ -48,8 +48,8 @@ class MenuSourceContracts(unittest.TestCase):
     def test_recovery_and_pinned_exit_are_independent(self):
         self.assertIn("Retry checkpoint  [A / Enter]", MENU)
         self.assertIn("Settings / Quit  [Y / G]", MENU)
-        self.assertIn("Rows[Index].Id == 9) continue", MENU)
-        self.assertIn("Save and quit to desktop", MENU)
+        self.assertIn('Title = TEXT("Quit game")', MENU)
+        self.assertIn('Labels = {TEXT("Save & Quit"), TEXT("Quit without Saving")}', MENU)
 
     def test_no_label_parsing_for_item_identity(self):
         body = function_body(MENU, "FString SHomesteadMenu::EntryName(")
@@ -180,7 +180,7 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("SHIPPING_QA_REJECTED", CONTROLLER)
         smoke = (SOURCE / "HomesteadSmokeTest.cpp").read_text()
         self.assertIn("PrepareNativeMenuChecks();", smoke)
-        self.assertIn("Controller->HasNativeMenu(), false", smoke)
+        self.assertIn("const bool Native = Controller->HasNativeMenu();", smoke)
         self.assertIn("Shipping QA cancelled", smoke)
 
     def test_native_menu_requires_real_modular_presentation(self):

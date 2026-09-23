@@ -141,6 +141,19 @@ bool Edible(Homestead::Item Item)
 {
     return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
 }
+const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
+{
+    switch (Recipe)
+    {
+    case Homestead::Recipe::Hatchet: return TEXT("A simple stone-headed tool for felling young and mature trees.");
+    case Homestead::Recipe::DiggingStick: return TEXT("A sturdy hand tool for preparing and tending garden soil.");
+    case Homestead::Recipe::WateringCan: return TEXT("A light wooden vessel for carrying stream water to crops.");
+    case Homestead::Recipe::RoastedRoots: return TEXT("Wild roots softened and warmed over a fueled cookfire.");
+    case Homestead::Recipe::HerbedRoots: return TEXT("Roasted roots brightened with meadow herbs.");
+    case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried hatchet.");
+    default: return TEXT("");
+    }
+}
 
 class FHomesteadMenuPointerInput final : public IInputProcessor
 {
@@ -156,6 +169,10 @@ public:
     virtual bool HandleMouseButtonDownEvent(FSlateApplication&, const FPointerEvent& Event) override
     {
         return Controller.IsValid() && !Controller->MenuPhysicalInput(Event.GetEffectingButton(), IE_Pressed);
+    }
+    virtual bool HandleMouseButtonUpEvent(FSlateApplication&, const FPointerEvent& Event) override
+    {
+        return Controller.IsValid() && !Controller->MenuPhysicalInput(Event.GetEffectingButton(), IE_Released);
     }
     virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication&, const FPointerEvent& Event, const FPointerEvent*) override
     {
@@ -678,6 +695,29 @@ void AHomesteadController::MenuActivate()
     if (IsFailed() && Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 0)
     { Notify(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."), true); return; }
     ActivateRow();
+}
+bool AHomesteadController::MenuCraftRecipe(Homestead::Recipe Recipe)
+{
+    if (bMenuSaveInProgress || !bBookOpen || Page != 1 || IsFailed() || bTestResetRequired)
+        return false;
+    const auto Assessment = Sim.AssessRecipe(Recipe, PlayerPoint());
+    if (!Assessment.craftable)
+    {
+        Notify(Text(Assessment.blocker.c_str()), true);
+        return false;
+    }
+    const auto Result = Sim.Craft(Recipe, PlayerPoint());
+    Notify(Result);
+    if (Result.ok) Sim.AdvanceGameHours(0.05, PlayerPoint());
+    return Result.ok;
+}
+void AHomesteadController::MenuCraftBeat(int32 Beat)
+{
+    USoundBase* Strikes[] = {CraftStrikeA.Get(), CraftStrikeB.Get(), CraftStrikeC.Get()};
+    USoundBase* Strike = Strikes[FMath::Abs(Beat) % UE_ARRAY_COUNT(Strikes)];
+    ++TestCraftBeatRequests;
+    if (Strike && bAudioEnabled && EffectsVolume > 0) ++TestAudibleCraftBeats;
+    PlayEffect(Strike, 0.16f);
 }
 void AHomesteadController::MenuStore() { if (!bMenuSaveInProgress) Secondary(); }
 void AHomesteadController::MenuTake() { if (!bMenuSaveInProgress) Withdraw(); }
@@ -1334,8 +1374,21 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         for (int Index = 0; Index < static_cast<int>(Homestead::Recipe::Count); ++Index)
         {
             const auto Recipe = static_cast<Homestead::Recipe>(Index);
-            Result.Add({ Index, Text(Homestead::RecipeName(Recipe)),
-                FString::Printf(TEXT("Needs: %s"), *Text(Homestead::RecipeRequirements(Recipe))), TEXT("craft") });
+            const auto Assessment = Sim.AssessRecipe(Recipe, PlayerPoint());
+            FHomesteadRow Row;
+            Row.Id = Index;
+            Row.SubjectId = Index;
+            Row.Subject = EHomesteadMenuSubject::Recipe;
+            Row.Name = Row.Label = Text(Homestead::RecipeName(Recipe));
+            Row.Location = FString::Printf(TEXT("Makes %d %s"), Assessment.outputCount,
+                *Text(Homestead::ItemName(Assessment.output)));
+            Row.Detail = RecipeDescription(Recipe);
+            Row.IconTint = Assessment.craftable
+                ? FLinearColor(0.92f, 0.74f, 0.43f)
+                : FLinearColor(0.34f, 0.36f, 0.34f);
+            Row.RecipeState = Assessment;
+            Row.HasRecipeState = true;
+            Result.Add(MoveTemp(Row));
         }
     }
     else if (Page == 2)
@@ -1437,7 +1490,7 @@ FString AHomesteadController::BookSummary() const
     switch (Page)
     {
     case 0: return TEXT("Carried counts are in your pack; Chest counts are in nearby storage.");
-    case 1: return TEXT("Recipes show what you can make, not what you carry.");
+    case 1: return FString();
     case 2: return TEXT("Choose a plan to preview placement. Materials are spent when you place it.");
     case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
         static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
@@ -2296,8 +2349,12 @@ void AHomesteadController::InitializeAudio()
     GrassStepB = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/GrassStepB.GrassStepB"));
     WoodTapA = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/WoodTapA.WoodTapA"));
     WoodTapB = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/WoodTapB.WoodTapB"));
+    CraftStrikeA = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeA.CraftStrikeA"));
+    CraftStrikeB = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeB.CraftStrikeB"));
+    CraftStrikeC = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeC.CraftStrikeC"));
     UIClick = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/UIClick.UIClick"));
-    if (!GrassStepA || !GrassStepB || !WoodTapA || !WoodTapB || !UIClick)
+    if (!GrassStepA || !GrassStepB || !WoodTapA || !WoodTapB
+        || !CraftStrikeA || !CraftStrikeB || !CraftStrikeC || !UIClick)
         UE_LOG(LogTemp, Warning, TEXT("Some feedback sounds are missing; rerun the asset/bootstrap pipeline."));
     if (USoundWave* Forest = LoadObject<USoundWave>(nullptr, TEXT("/Game/SurvivalGame/Audio/Ambience/ForestAmbience.ForestAmbience")))
     {

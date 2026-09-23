@@ -267,6 +267,7 @@ void RequirementsMatchTransactions()
         CHECK(std::string(description).substr(0, spent.size() + 1) == spent + ";");
         CHECK(description == RecipeRequirements(recipe));
     }
+
     for (int i = 0; i < static_cast<int>(Piece::Count); ++i)
     {
         const auto piece = static_cast<Piece>(i);
@@ -284,6 +285,94 @@ void RequirementsMatchTransactions()
         CHECK(text.substr(0, text.find(';')) == spent);
         CHECK(description == PieceRequirements(piece));
     }
+}
+
+void StructuredRecipeAssessment()
+{
+    Simulation sim;
+    const auto original = sim.Serialize();
+    const auto originalRevision = sim.GetRevision();
+    const auto missing = sim.AssessRecipe(Recipe::Hatchet, Home);
+    CHECK(!missing.craftable);
+    CHECK(missing.output == Item::Hatchet && missing.outputCount == 1);
+    CHECK(missing.retainedTool == Item::Knife && missing.retainedToolMet);
+    CHECK(!missing.stationRequired && missing.stationMet && missing.capacityMet);
+    CHECK(missing.ingredients.size() == 3);
+    CHECK(missing.ingredients[0].item == Item::Branch);
+    CHECK(std::string(missing.ingredients[0].source) == "Fallen branches");
+    CHECK(missing.ingredients[1].item == Item::Stone);
+    CHECK(std::string(missing.ingredients[1].source) == "Loose stones");
+    CHECK(missing.ingredients[2].item == Item::Fiber);
+    CHECK(std::string(missing.ingredients[2].source) == "Reeds near water");
+    CHECK(sim.Serialize() == original && sim.GetRevision() == originalRevision);
+
+    Stock(sim, {{Item::Knife, 1}, {Item::Branch, 4}, {Item::Stone, 3}, {Item::Fiber, 2}});
+    const auto ready = sim.AssessRecipe(Recipe::Hatchet, Home);
+    CHECK(ready.craftable && ready.blocker.empty());
+    for (const auto& ingredient : ready.ingredients) CHECK(ingredient.met);
+
+    Stock(sim, {{Item::Roots, 2}});
+    auto cooking = sim.AssessRecipe(Recipe::RoastedRoots, Home);
+    CHECK(cooking.stationRequired && !cooking.stationMet && !cooking.craftable);
+    CHECK(cooking.retainedTool == Item::Count && cooking.retainedToolMet);
+
+    Simulation fire;
+    BuildingStock(fire);
+    const Point firePosition = CellCenter(-3, -1);
+    OK(fire.Place(Piece::Fire, -3, -1, 0, firePosition));
+    OK(fire.AddFuel(fire.GetState().structures.back().id, firePosition));
+    Stock(fire, {{Item::Roots, 2}});
+    cooking = fire.AssessRecipe(Recipe::RoastedRoots, firePosition);
+    CHECK(cooking.craftable && cooking.stationMet);
+
+    Stock(sim, {{Item::Timber, 1}});
+    const auto firewood = sim.AssessRecipe(Recipe::SplitFirewood, Home);
+    CHECK(firewood.retainedTool == Item::Hatchet && !firewood.retainedToolMet);
+    CHECK(firewood.output == Item::Firewood && firewood.outputCount == 4);
+    CHECK(std::string(firewood.ingredients[0].source) == "Mature trees with Hatchet");
+
+    const auto invalid = sim.AssessRecipe(static_cast<Recipe>(-1), Home);
+    CHECK(!invalid.craftable && invalid.output == Item::Count);
+
+    Simulation complete;
+    BuildingStock(complete);
+    const Point completeFire = CellCenter(-3, -1);
+    OK(complete.Place(Piece::Fire, -3, -1, 0, completeFire));
+    OK(complete.AddFuel(complete.GetState().structures.back().id, completeFire));
+    Stock(complete, {{Item::Knife, 1}, {Item::Hatchet, 1}, {Item::Branch, 40},
+        {Item::Stone, 20}, {Item::Fiber, 20}, {Item::Roots, 10},
+        {Item::Flowers, 10}, {Item::Timber, 4}});
+    const Item Outputs[] = {Item::Hatchet, Item::DiggingStick, Item::WateringCan,
+        Item::RoastedRoots, Item::HerbedRoots, Item::Firewood};
+    const int OutputCounts[] = {1, 1, 1, 1, 1, 4};
+    for (int index = 0; index < static_cast<int>(Recipe::Count); ++index)
+    {
+        const auto recipe = static_cast<Recipe>(index);
+        const Point position = index == static_cast<int>(Recipe::RoastedRoots)
+            || index == static_cast<int>(Recipe::HerbedRoots) ? completeFire : Home;
+        const auto before = complete.Serialize();
+        const auto revision = complete.GetRevision();
+        const auto assessment = complete.AssessRecipe(recipe, position);
+        CHECK(assessment.craftable && assessment.output == Outputs[index]);
+        CHECK(assessment.outputCount == OutputCounts[index] && assessment.capacityMet);
+        for (const auto& ingredient : assessment.ingredients)
+            CHECK(ingredient.have >= ingredient.need && ingredient.met);
+        CHECK(complete.Serialize() == before && complete.GetRevision() == revision);
+    }
+
+    Simulation full;
+    Stock(full, {{Item::Knife, 1}, {Item::Hatchet, 1}, {Item::Timber, 1}, {Item::Stone, 117}});
+    CHECK(full.UsedCapacity() == InventoryCapacity);
+    const auto capacity = full.AssessRecipe(Recipe::SplitFirewood, Home);
+    CHECK(!capacity.craftable && !capacity.capacityMet);
+    CHECK(capacity.ingredients[0].met && capacity.retainedToolMet);
+    CHECK(capacity.blocker == "Not enough pack space. Store some items in a chest first.");
+
+    Simulation failed;
+    failed.AdvanceGameHours(120, Home);
+    CHECK(failed.GetState().failed);
+    const auto failedAssessment = failed.AssessRecipe(Recipe::Hatchet, Home);
+    CHECK(!failedAssessment.craftable && !failedAssessment.blocker.empty());
 }
 
 void GameplayWalkthrough()
@@ -2087,6 +2176,7 @@ int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
+    Run("pure structured recipe assessment", StructuredRecipeAssessment);
     Run("default gameplay walkthrough", GameplayWalkthrough);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);

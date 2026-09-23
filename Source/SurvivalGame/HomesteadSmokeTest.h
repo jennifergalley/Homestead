@@ -63,6 +63,7 @@ private:
     void PrepareCreekChecks();
     void PrepareDirectionalNavigationChecks();
     void PrepareNativeMenuChecks();
+    void PrepareCraftingChecks();
     void PrepareNativeWardrobeChecks();
     void PrepareNativeInventoryTransactionChecks();
     void PrepareNativeResetChecks();

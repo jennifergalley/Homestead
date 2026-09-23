@@ -285,6 +285,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         if (ProducerOutput.IsEmpty() || ProducerOutput.Contains(TEXT("\"")))
         { Finish(false, TEXT("Resume requires one nonempty, correctly quoted producer directory.")); return; }
     }
+
     if (ResumeRequested)
     {
         if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeQuitTest")))
@@ -420,10 +421,12 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Released, 0));
         },
         [this]() { return Controller->BookPage() == 1 && !Controller->UsesGamepad(); });
-    Add(TEXT("Rejected UI crafting is atomic and describes real requirements"),
+    Add(TEXT("Unavailable quick presses are atomic and expose structured requirements"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Enter); Tap(EKeys::Enter); },
-        [this, Before]() { return Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
-            && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("4 Branch + 3 Stone + 2 Fiber")); });
+        [this, Before]() { const FString Details = Controller->NativeMenu->GetDisplayedDetails();
+            return !Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
+                && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 4"))
+                && Details.Contains(TEXT("Fiber: Have")) && Details.Contains(TEXT("Reeds near water")); });
     Capture(TEXT("native-crafting"));
     Add(TEXT("Mapped tab opens purpose-specific building plans"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
@@ -475,6 +478,241 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Cancel recovery exit returns to recovery without forcing retry"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return Controller->IsFailed() && !Controller->IsBookOpen() && Controller->HasNativeMenu(); });
+}
+
+void AHomesteadSmokeTest::PrepareCraftingChecks()
+{
+    const auto ResetCraftingStock = [this]()
+    {
+        Controller->Sim = Homestead::Simulation();
+        const auto Gather = [this](Homestead::ResourceKind Kind, Homestead::Item Item, int32 Target)
+        {
+            const auto Nodes = Controller->State().resources;
+            for (const auto& Node : Nodes)
+                if (Node.kind == Kind && Controller->Sim.Count(Item) < Target)
+                    Controller->Sim.Harvest(Node.id, Node.position);
+            return Controller->Sim.Count(Item) >= Target;
+        };
+        if (!Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 8)
+            || !Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 6)
+            || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 4))
+        { Finish(false, TEXT("Could not gather isolated crafting stock.")); return; }
+        Controller->OpenBook(1);
+        if (!Controller->NativeMenu.IsValid()
+            || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
+                static_cast<int32>(Homestead::Recipe::Hatchet), 0))
+            Finish(false, TEXT("Hatchet recipe tile was unavailable."));
+    };
+    Add(TEXT("Structured recipe rows expose exact counts and Fiber source"),
+        ResetCraftingStock,
+        [this]()
+        {
+            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            const FString Details = Controller->NativeMenu->GetDisplayedDetails();
+            return Row && Row->Subject == EHomesteadMenuSubject::Recipe
+                && Row->HasRecipeState && Row->RecipeState.craftable
+                && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 4"))
+                && Details.Contains(TEXT("Fiber: Have")) && Details.Contains(TEXT("/ Need 2 (Reeds near water)"))
+                && Controller->NativeMenu->GetActionCount() == 0;
+        });
+    Add(TEXT("Capture ready crafting requirements"),
+        [this]() { Screenshot(TEXT("craft-requirements-ready")); }, []() { return true; }, 0.6f);
+    Add(TEXT("Quick keyboard press selects without crafting"),
+        [this]() { Tap(EKeys::Enter); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 0
+            && FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress()); });
+    Add(TEXT("Space uses the same select-without-crafting press behavior"),
+        [this]() { Tap(EKeys::SpaceBar); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 0
+            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
+    Add(TEXT("Partial keyboard hold shows progress without granting output"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Pressed, 1)); },
+        [this]() { const float Progress = Controller->NativeMenu->GetCraftProgress();
+            return Controller->Simulation().Count(Homestead::Item::Hatchet) == 0
+                && Progress > 0.25f && Progress < 0.75f; }, 0.5f);
+    Add(TEXT("Capture partial crafting progress"),
+        [this]() { Screenshot(TEXT("craft-hold-progress")); }, []() { return true; }, 0.35f);
+    Add(TEXT("Keyboard release cancels incomplete cycle"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Released, 0)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 0
+            && FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress()); }, 0.1f);
+    Add(TEXT("Complete keyboard hold crafts exactly one"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Pressed, 1)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; }, 1.3f);
+    Add(TEXT("Continuing keyboard hold crafts a second complete cycle"),
+        []() {},
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 2; }, 1.2f);
+    Add(TEXT("Release ends repeated keyboard crafting"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Released, 0)); },
+        [this]() { return FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress()); }, 0.1f);
+    Add(TEXT("Unavailable recipe hold cannot queue another craft"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::SpaceBar, IE_Pressed, 1)); },
+        [this]() { const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            return Row && Row->HasRecipeState && !Row->RecipeState.craftable
+                && Controller->Simulation().Count(Homestead::Item::Hatchet) == 2
+                && FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress())
+                && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); }, 0.4f);
+    Add(TEXT("Unavailable recipe release remains inert"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::SpaceBar, IE_Released, 0)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 2; }, 0.1f);
+    Add(TEXT("Capture unavailable crafting requirements"),
+        [this]() { Screenshot(TEXT("craft-requirements-blocked")); }, []() { return true; }, 0.6f);
+
+    Add(TEXT("Controller hold uses the same authoritative cycle"),
+        [this, ResetCraftingStock]() { ResetCraftingStock(); Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_FaceButton_Bottom, IE_Pressed, 1)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; }, 1.3f);
+    Add(TEXT("Controller release cancels continuation"),
+        [this]() { Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1
+            && FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress()); }, 0.2f);
+
+    Add(TEXT("Pointer hold uses the same authoritative cycle"),
+        [this, ResetCraftingStock]() { ResetCraftingStock();
+            Controller->TestCraftBeatRequests = 0;
+            Controller->TestAudibleCraftBeats = 0;
+            Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::LeftMouseButton, IE_Pressed, 1)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1
+            && Controller->TestCraftBeatRequests == 3; }, 1.3f);
+    Add(TEXT("Pointer release ends crafting and refreshes blockers"),
+        [this]() { Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::LeftMouseButton, IE_Released, 0)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1
+            && FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress()); }, 0.2f);
+    Add(TEXT("Muted Effects still times three beats without audible playback"),
+        [this, ResetCraftingStock]() { ResetCraftingStock();
+            Controller->EffectsVolume = 0;
+            Controller->TestCraftBeatRequests = 0;
+            Controller->TestAudibleCraftBeats = 0;
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Pressed, 1)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1
+            && Controller->TestCraftBeatRequests == 3
+            && Controller->TestAudibleCraftBeats == 0; }, 1.3f);
+    Add(TEXT("Release muted hold and restore Effects level"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Released, 0));
+            Controller->EffectsVolume = 0.8f; },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; }, 0.1f);
+    Add(TEXT("Crafting audio proof includes a stable recording tail"),
+        []() {}, []() { return true; }, 2.5f);
+    Add(TEXT("Begin a hold before changing recipe focus"),
+        [this, ResetCraftingStock]() { ResetCraftingStock(); Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Pressed, 1)); },
+        [this]() { return Controller->NativeMenu->GetCraftProgress() > 0.2f
+            && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; }, 0.4f);
+    Add(TEXT("Changing recipe focus cancels incomplete progress"),
+        [this]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
+            static_cast<int32>(Homestead::Recipe::DiggingStick), 0); },
+        [this]() { return FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress())
+            && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; }, 0.2f);
+    Add(TEXT("Begin a hold before changing page"),
+        [this, ResetCraftingStock]() { ResetCraftingStock(); Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Pressed, 1)); },
+        [this]() { return Controller->NativeMenu->GetCraftProgress() > 0.2f; }, 0.4f);
+    Add(TEXT("Changing page cancels incomplete progress"),
+        [this]() { Controller->NativeMenu->ChangePage(2); },
+        [this]() { return Controller->BookPage() == 2
+            && FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress())
+            && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; }, 0.2f);
+    Add(TEXT("Begin a hold before closing the menu"),
+        [this, ResetCraftingStock]() { ResetCraftingStock(); Controller->InputKey(
+            FInputKeyEventArgs::CreateSimulated(EKeys::Enter, IE_Pressed, 1)); },
+        [this]() { return Controller->NativeMenu->GetCraftProgress() > 0.2f; }, 0.4f);
+    Add(TEXT("Closing the menu destroys incomplete progress without queued output"),
+        [this]() { Controller->CloseBook(); },
+        [this]() { return !Controller->IsBookOpen()
+            && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; }, 1.3f);
+
+    const auto PrepareRecipe = [this](Homestead::Recipe Recipe)
+    {
+        Controller->Sim = Homestead::Simulation();
+        const auto Gather = [this](Homestead::ResourceKind Kind, Homestead::Item Item, int32 Target)
+        {
+            const auto Nodes = Controller->State().resources;
+            for (const auto& Node : Nodes)
+                if (Node.kind == Kind && Controller->Sim.Count(Item) < Target)
+                    Controller->Sim.Harvest(Node.id, Node.position);
+            return Controller->Sim.Count(Item) >= Target;
+        };
+        bool Ready = true;
+        if (Recipe == Homestead::Recipe::DiggingStick)
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 3)
+                && Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 1);
+        else if (Recipe == Homestead::Recipe::WateringCan)
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 3)
+                && Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2);
+        else if (Recipe == Homestead::Recipe::RoastedRoots || Recipe == Homestead::Recipe::HerbedRoots)
+        {
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 4)
+                && Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 4)
+                && Gather(Homestead::ResourceKind::Roots, Homestead::Item::Roots, 2);
+            if (Recipe == Homestead::Recipe::HerbedRoots)
+                Ready = Ready && Gather(Homestead::ResourceKind::Flowers, Homestead::Item::Flowers, 1);
+            bool Placed = false;
+            for (int32 X = -4; X <= -2 && !Placed; ++X)
+                for (int32 Y = -1; Y <= 1 && !Placed; ++Y)
+                    Placed = Controller->Sim.Place(Homestead::Piece::Fire, X, Y, 0,
+                        Controller->PlayerPoint()).ok;
+            Ready = Ready && Placed;
+            if (Ready)
+            {
+                const int32 FireId = Controller->State().structures.back().id;
+                Ready = Controller->Sim.AddFuel(FireId, Controller->PlayerPoint()).ok;
+            }
+        }
+        else if (Recipe == Homestead::Recipe::SplitFirewood)
+        {
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 4)
+                && Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 3)
+                && Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2)
+                && Controller->Sim.Craft(Homestead::Recipe::Hatchet, Controller->PlayerPoint()).ok;
+            if (Ready)
+            {
+                const auto Nodes = Controller->State().resources;
+                for (const auto& Node : Nodes)
+                    if (Node.kind == Homestead::ResourceKind::ForestTree)
+                    { Ready = Controller->Sim.Harvest(Node.id, Node.position).ok; break; }
+            }
+        }
+        if (!Ready)
+        {
+            Finish(false, FString::Printf(TEXT("Could not prepare %s crafting inputs."),
+                UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))));
+            return;
+        }
+        Controller->OpenBook(1);
+        if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
+            static_cast<int32>(Recipe), 0))
+            Finish(false, TEXT("Prepared recipe tile was unavailable."));
+    };
+    const Homestead::Recipe Recipes[] = {Homestead::Recipe::DiggingStick,
+        Homestead::Recipe::WateringCan, Homestead::Recipe::RoastedRoots,
+        Homestead::Recipe::HerbedRoots, Homestead::Recipe::SplitFirewood};
+    const Homestead::Item Outputs[] = {Homestead::Item::DiggingStick,
+        Homestead::Item::WateringCan, Homestead::Item::RoastedRoots,
+        Homestead::Item::HerbedRoots, Homestead::Item::Firewood};
+    const int32 Counts[] = {1, 1, 1, 1, 4};
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(Recipes); ++Index)
+    {
+        const auto Recipe = Recipes[Index];
+        const auto Output = Outputs[Index];
+        const int32 Count = Counts[Index];
+        Add(FString::Printf(TEXT("Prepare %s assessment from ordinary gathered inputs"),
+            UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))),
+            [PrepareRecipe, Recipe]() { PrepareRecipe(Recipe); },
+            [this]() { const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+                return Row && Row->HasRecipeState && Row->RecipeState.craftable; });
+        Add(FString::Printf(TEXT("Hold crafts exact %s output"),
+            UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))),
+            [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                EKeys::Enter, IE_Pressed, 1)); },
+            [this, Output, Count]() { return Controller->Simulation().Count(Output) == Count; }, 1.3f);
+        Add(TEXT("Release recipe hold before the next isolated recipe"),
+            [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                EKeys::Enter, IE_Released, 0)); },
+            [this, Output, Count]() { return Controller->Simulation().Count(Output) == Count; }, 0.1f);
+    }
 }
 
 void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()

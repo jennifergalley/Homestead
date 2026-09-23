@@ -12,9 +12,11 @@ public:
     SLATE_BEGIN_ARGS(SHomesteadIcon)
         : _Kind(FName(TEXT("pack")))
         , _Tint(FLinearColor(0.92f, 0.74f, 0.43f, 1.0f))
+        , _Desaturation(0.0f)
     {}
         SLATE_ATTRIBUTE(FName, Kind)
         SLATE_ATTRIBUTE(FLinearColor, Tint)
+        SLATE_ATTRIBUTE(float, Desaturation)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -38,6 +40,7 @@ private:
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{FLinearColor(0.92f, 0.74f, 0.43f, 1.0f)};
+    TAttribute<float> Desaturation{0.0f};
 };
 }
 using SHomesteadIcon = HomesteadIcons::SHomesteadIcon;

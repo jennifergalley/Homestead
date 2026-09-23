@@ -144,6 +144,8 @@ def main():
     for pack, name in (
         ("kenney-impact", "GrassStepA"), ("kenney-impact", "GrassStepB"),
         ("kenney-impact", "WoodTapA"), ("kenney-impact", "WoodTapB"),
+        ("kenney-impact", "CraftStrikeA"), ("kenney-impact", "CraftStrikeB"),
+        ("kenney-impact", "CraftStrikeC"),
         ("kenney-interface", "UIClick"),
     ):
         cue = import_asset(f"{pack}/{name}.ogg", "Audio/Effects", name)

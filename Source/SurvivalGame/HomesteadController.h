@@ -21,7 +21,7 @@ class IInputProcessor;
 class AHomesteadMenuPortrait;
 class SWidget;
 
-enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe };
+enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe };
 enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye };
 
 struct FHomesteadRow
@@ -41,6 +41,8 @@ struct FHomesteadRow
     FString Location;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
+    Homestead::RecipeAssessment RecipeState;
+    bool HasRecipeState = false;
 };
 
 struct FHomesteadHotbarSlot
@@ -81,6 +83,8 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    bool MenuCraftRecipe(Homestead::Recipe Recipe);
+    void MenuCraftBeat(int32 Beat);
     FString MenuInventorySummary() const;
     FString BookTitle() const;
     FString BookSummary() const;
@@ -158,6 +162,9 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> GrassStepB;
     UPROPERTY() TObjectPtr<USoundBase> WoodTapA;
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
+    UPROPERTY() TObjectPtr<USoundBase> CraftStrikeA;
+    UPROPERTY() TObjectPtr<USoundBase> CraftStrikeB;
+    UPROPERTY() TObjectPtr<USoundBase> CraftStrikeC;
     UPROPERTY() TObjectPtr<USoundBase> UIClick;
     bool bAudioEnabled = true;
     bool bAutomatedInputOnly = false;
@@ -166,6 +173,7 @@ private:
     bool bLoggedExternalInput = false;
     uint32 IgnoredExternalInputs = 0;
     uint32 TestQuickSaves = 0, TestQuickLoads = 0;
+    uint32 TestCraftBeatRequests = 0, TestAudibleCraftBeats = 0;
     bool bAlternateStep = false;
     FVector LastStepPosition = FVector::ZeroVector;
     float StepDistance = 0;

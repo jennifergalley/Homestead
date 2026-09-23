@@ -212,6 +212,17 @@ void AHomesteadSmokeTest::Prepare()
         PrepareNativeMenuChecks();
         return;
     }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadCraftingTest")))
+    {
+        bAudioCapture = FParse::Param(FCommandLine::Get(), TEXT("HomesteadAudioProof"));
+        if (bAudioCapture)
+        {
+            FApp::SetUnfocusedVolumeMultiplier(1.0f);
+            UAudioMixerBlueprintLibrary::StartRecordingOutput(this, 180);
+        }
+        PrepareCraftingChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")))
     {
         PrepareHotkeyChecks();
@@ -602,13 +613,14 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Open crafting with the keyboard"),
         [this]() { Tap(EKeys::C); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 1; });
-    Add(TEXT("Enter the selected hatchet recipe's native actions"),
-        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return !Controller->HasNativeMenu()
-            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
-    Add(TEXT("Craft a hatchet using the same gamepad action"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; });
+    Add(TEXT("Hold the selected hatchet recipe with gamepad A"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+            EKeys::Gamepad_FaceButton_Bottom, IE_Pressed, 1)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; }, 1.3f);
+    Add(TEXT("Release the completed hatchet hold"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+            EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0)); },
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Hatchet) == 1; }, 0.1f);
     Add(TEXT("Close crafting before clearing land"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });

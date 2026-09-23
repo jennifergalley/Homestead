@@ -61,6 +61,7 @@ public:
     int32 GetActionCount() const { return Actions.Num(); }
     bool IsEditingQuantity() const { return bEditingAmount; }
     int32 GetDraftQuantity() const { return Amount; }
+    float GetCraftProgress() const { return CraftHoldRecipe >= 0 ? CraftHoldElapsed / CraftCycleSeconds : 0.0f; }
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
@@ -123,6 +124,12 @@ private:
     TArray<int32> MergeTargets;
     int32 AudioEditId = -1;
     float AudioEditStart = 0;
+    enum class ECraftInput { None, Pointer, Keyboard, Controller };
+    static constexpr float CraftCycleSeconds = 1.2f;
+    int32 CraftHoldRecipe = INDEX_NONE;
+    float CraftHoldElapsed = 0;
+    int32 CraftBeat = 0;
+    ECraftInput CraftInput = ECraftInput::None;
 
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();
@@ -141,6 +148,9 @@ private:
     int32 Columns() const;
     int32 DetailIndex() const;
     void Select(int32 Index, bool KeepDesiredColumn = false);
+    bool StartCraftHold(ECraftInput Input);
+    void StopCraftHold();
+    bool IsHoldingRecipe(int32 Recipe) const;
     void Activate();
     void RunAction(EHomesteadItemAction Action);
     FString ActionLabel(EHomesteadItemAction Action) const;

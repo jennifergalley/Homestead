@@ -120,6 +120,30 @@
     "license": "CC0-1.0"
   },
   {
+    "asset": "kenney-impact",
+    "file": "CraftStrikeA.ogg",
+    "bytes": 7651,
+    "sha256": "33B5E6E37C6E9D54E07BF5A89B12C76E879F40C1EA83CDD82714DF1D6F9FEC6D",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/impactMetal_light_000.ogg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "CraftStrikeB.ogg",
+    "bytes": 6967,
+    "sha256": "FBA69C467DDD85DA7B1D82E259F936B876D9BA6A3D6F1B24BDD10468E46BFE08",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/impactMetal_light_001.ogg",
+    "license": "CC0-1.0"
+  },
+  {
+    "asset": "kenney-impact",
+    "file": "CraftStrikeC.ogg",
+    "bytes": 6804,
+    "sha256": "25A96F90A9A1F88A531E824E126F0519504625E5635E65A72E4F31611428DB29",
+    "source": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip#Audio/impactMetal_light_002.ogg",
+    "license": "CC0-1.0"
+  },
+  {
     "asset": "kenney-interface",
     "file": "interface-sounds.zip",
     "bytes": 834536,

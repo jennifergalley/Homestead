@@ -24,10 +24,11 @@ namespace
     public:
         FIconPainter(const FGeometry& InGeometry, FSlateWindowElementList& InElements,
             int32 InLayer, const FLinearColor& InStyleTint, const FLinearColor& InAccent,
-            ESlateDrawEffect InEffects)
-            : Accent(InAccent.R, InAccent.G, InAccent.B, 1.0f), Geometry(InGeometry),
+            float InDesaturation, ESlateDrawEffect InEffects)
+            : Accent(Desaturate(InAccent, InDesaturation)), Geometry(InGeometry),
               Elements(InElements), Layer(InLayer), StyleTint(InStyleTint), Effects(InEffects)
         {
+            Desaturation = FMath::Clamp(InDesaturation, 0.0f, 1.0f);
             const FVector2D Size = Geometry.GetLocalSize();
             Scale = FMath::Max(0.0f, static_cast<float>(FMath::Min(Size.X, Size.Y) / 56.0));
             Origin = (Size - FVector2D(56.0f, 56.0f) * Scale) * 0.5f;
@@ -51,7 +52,7 @@ namespace
                 Geometry.ToPaintGeometry(FVector2D(Width, Height) * Scale,
                     FSlateLayoutTransform(Origin + FVector2D(X, Y) * Scale)),
                 FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")),
-                Effects | ESlateDrawEffect::NoPixelSnapping, Color * StyleTint);
+                Effects | ESlateDrawEffect::NoPixelSnapping, Styled(Color));
         }
 
         void Shape(std::initializer_list<FVector2D> Points, FLinearColor Color)
@@ -101,7 +102,7 @@ namespace
                 Geometry.ToPaintGeometry(FVector2D(24, 40),
                     FSlateLayoutTransform(Scale, Origin + FVector2D(17, 7) * Scale)),
                 FText::FromString(TEXT("?")), FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 28),
-                Effects, Charcoal * StyleTint);
+                Effects, Styled(Charcoal));
         }
 
         int32 GetLayer() const { return Layer; }
@@ -118,7 +119,7 @@ namespace
                 Scaled.Add(Origin + Point * Scale);
             }
             FSlateDrawElement::MakeLines(Elements, ++Layer, Geometry.ToPaintGeometry(),
-                Scaled, Effects, Color * StyleTint, true, Width * Scale);
+                Scaled, Effects, Styled(Color), true, Width * Scale);
         }
 
         void Fill(TArray<FVector2D>& Path, FLinearColor Color)
@@ -153,7 +154,7 @@ namespace
                     FSlateDrawElement::MakeBox(Elements, FillLayer,
                         Geometry.ToPaintGeometry(FVector2D(Crossings[Index + 1] - Crossings[Index], Height) * Scale,
                             FSlateLayoutTransform(Origin + FVector2D(Crossings[Index], Y) * Scale)),
-                        FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")), Effects, Color * StyleTint);
+                        FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")), Effects, Styled(Color));
                 }
             }
             const FVector2D FirstPoint = Path[0];
@@ -168,6 +169,22 @@ namespace
         ESlateDrawEffect Effects;
         float Scale = 1.0f;
         FVector2D Origin;
+        float Desaturation = 0.0f;
+
+        static FLinearColor Desaturate(const FLinearColor& Color, float Amount)
+        {
+            const float Luminance = Color.R * 0.2126f + Color.G * 0.7152f + Color.B * 0.0722f;
+            return FLinearColor(
+                FMath::Lerp(Color.R, Luminance, Amount),
+                FMath::Lerp(Color.G, Luminance, Amount),
+                FMath::Lerp(Color.B, Luminance, Amount),
+                Color.A);
+        }
+
+        FLinearColor Styled(const FLinearColor& Color) const
+        {
+            return Desaturate(Color, Desaturation) * StyleTint;
+        }
     };
 }
 
@@ -175,11 +192,13 @@ void SHomesteadIcon::Construct(const FArguments& InArgs)
 {
     Kind = InArgs._Kind;
     Tint = InArgs._Tint;
+    Desaturation = InArgs._Desaturation;
 }
 
 bool SHomesteadIcon::ComputeVolatility() const
 {
-    return Kind.IsBound() || Tint.IsBound() || SLeafWidget::ComputeVolatility();
+    return Kind.IsBound() || Tint.IsBound() || Desaturation.IsBound()
+        || SLeafWidget::ComputeVolatility();
 }
 
 FVector2D SHomesteadIcon::ComputeDesiredSize(float LayoutScaleMultiplier) const
@@ -244,7 +263,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     const ESlateDrawEffect Effects = ShouldBeEnabled(bParentEnabled)
         ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
     FIconPainter P(AllottedGeometry, OutDrawElements, LayerId,
-        InWidgetStyle.GetColorAndOpacityTint(), Tint.Get(), Effects);
+        InWidgetStyle.GetColorAndOpacityTint(), Tint.Get(), Desaturation.Get(), Effects);
     if (P.GetScale() <= 0.0f)
     {
         return LayerId;

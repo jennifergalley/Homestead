@@ -48,6 +48,7 @@ public:
             [Args._Content.Widget]
         ];
     }
+
     virtual bool SupportsKeyboardFocus() const override { return true; }
     virtual FReply OnFocusReceived(const FGeometry&, const FFocusEvent&) override
     { Focused.ExecuteIfBound(); return FReply::Handled(); }
@@ -383,6 +384,45 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
 {
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
+    if (CraftInput != ECraftInput::None)
+    {
+        if (Dialog != EDialog::None || SeenPage != 1 || Region != ERegion::Content
+            || !Entries.IsValidIndex(ContentSelection)
+            || Entries[ContentSelection].Subject != EHomesteadMenuSubject::Recipe
+            || Entries[ContentSelection].SubjectId != CraftHoldRecipe)
+        {
+            StopCraftHold();
+        }
+        else
+        {
+            const auto Recipe = static_cast<Homestead::Recipe>(CraftHoldRecipe);
+            const auto Assessment = Controller->Simulation().AssessRecipe(Recipe, Controller->PlayerPoint());
+            if (!Assessment.craftable)
+            {
+                StopCraftHold();
+            }
+            else
+            {
+                CraftHoldElapsed += Delta;
+                const float BeatTimes[] = {0.18f, 0.58f, 0.98f};
+                while (CraftBeat < UE_ARRAY_COUNT(BeatTimes) && CraftHoldElapsed >= BeatTimes[CraftBeat])
+                    Controller->MenuCraftBeat(CraftBeat++);
+                if (CraftHoldElapsed >= CraftCycleSeconds)
+                {
+                    if (!Controller->MenuCraftRecipe(Recipe))
+                    {
+                        StopCraftHold();
+                    }
+                    else
+                    {
+                        CraftHoldElapsed = FMath::Fmod(CraftHoldElapsed, CraftCycleSeconds);
+                        CraftBeat = 0;
+                        Refresh();
+                    }
+                }
+            }
+        }
+    }
     FString Next = FString::Printf(TEXT("%d:%d:%d:%d"), Controller->BookPage(), Controller->IsFailed() && !Controller->IsBookOpen(),
         Controller->InventoryView(), Controller->MenuPortraitBrush() != nullptr);
     for (const auto& Row : Controller->MenuRows())
@@ -401,6 +441,36 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     }
     const auto Direction = LeftStick.Poll(FPlatformTime::Seconds());
     if (Direction.Any() && Controller->UsesGamepad() && !bSaving) NavigateDirection(Direction);
+}
+
+bool SHomesteadMenu::StartCraftHold(ECraftInput Input)
+{
+    StopCraftHold();
+    if (!Controller.IsValid() || Dialog != EDialog::None || bSaving || SeenPage != 1
+        || Region != ERegion::Content || !Entries.IsValidIndex(ContentSelection))
+        return false;
+    const auto& Row = Entries[ContentSelection];
+    if (Row.Subject != EHomesteadMenuSubject::Recipe || !Row.HasRecipeState
+        || !Row.RecipeState.craftable)
+        return false;
+    CraftHoldRecipe = Row.SubjectId;
+    CraftHoldElapsed = 0;
+    CraftBeat = 0;
+    CraftInput = Input;
+    return true;
+}
+
+void SHomesteadMenu::StopCraftHold()
+{
+    CraftHoldRecipe = INDEX_NONE;
+    CraftHoldElapsed = 0;
+    CraftBeat = 0;
+    CraftInput = ECraftInput::None;
+}
+
+bool SHomesteadMenu::IsHoldingRecipe(int32 Recipe) const
+{
+    return CraftInput != ECraftInput::None && CraftHoldRecipe == Recipe;
 }
 
 int32 SHomesteadMenu::Columns() const
@@ -667,8 +737,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         ];
     InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
     [ Text(SeenPage <= 2 ? Controller->BookTitle() : Tabs[SeenPage], 26) ];
-    InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)
-    [ Text(SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary(), 17) ];
+    const FString Summary = SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary();
+    if (!Summary.IsEmpty())
+        InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)[ Text(Summary, 17) ];
     if (SeenPage == 0)
     {
         TSharedPtr<SHorizontalBox> Views;
@@ -743,6 +814,21 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             .ToolTipText(FText::FromString(Name + TEXT("\n") + Row.Detail))
             .OnHovered_Lambda([this, Index]() { if (Controller.IsValid() && !Controller->UsesGamepad()) Hover = Index; })
             .OnUnhovered_Lambda([this, Index]() { if (Hover == Index) Hover = INDEX_NONE; })
+            .OnPressed_Lambda([this, Index]()
+            {
+                if (PointerAction() && Entries.IsValidIndex(Index)
+                    && Entries[Index].Subject == EHomesteadMenuSubject::Recipe)
+                {
+                    StopCraftHold();
+                    Region = ERegion::Content;
+                    Select(Index);
+                    StartCraftHold(ECraftInput::Pointer);
+                }
+            })
+            .OnReleased_Lambda([this]()
+            {
+                if (CraftInput == ECraftInput::Pointer) StopCraftHold();
+            })
             .OnClicked_Lambda([this, Index]()
             {
                 if (PointerAction() && Dialog == EDialog::None)
@@ -758,17 +844,53 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
         if (SeenPage <= 2)
         {
-            Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
-            [ SNew(SBox).WidthOverride(48).HeightOverride(48)[ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ];
+            if (Row.Subject == EHomesteadMenuSubject::Recipe)
+            {
+                Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
+                [
+                    SNew(SBox).WidthOverride(58).HeightOverride(58)
+                    [
+                        SNew(SOverlay)
+                        + SOverlay::Slot()
+                        [
+                            SNew(SHomesteadIcon).Kind(EntryIcon(Row))
+                            .Tint(Gold).Desaturation(1.0f)
+                        ]
+                        + SOverlay::Slot().VAlign(VAlign_Bottom)
+                        [
+                            SNew(SBox).WidthOverride(58)
+                            .HeightOverride_Lambda([this, Recipe = Row.SubjectId]()
+                            {
+                                return IsHoldingRecipe(Recipe)
+                                    ? 58.0f * FMath::Clamp(GetCraftProgress(), 0.0f, 1.0f) : 58.0f;
+                            })
+                            .Clipping(EWidgetClipping::ClipToBounds)
+                            [
+                                SNew(SBox).WidthOverride(58).HeightOverride(58).VAlign(VAlign_Bottom)
+                                [
+                                    SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Gold)
+                                    .Desaturation(Row.RecipeState.craftable ? 0.0f : 1.0f)
+                                ]
+                            ]
+                        ]
+                    ]
+                ];
+            }
+            else
+            {
+                Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
+                [ SNew(SBox).WidthOverride(48).HeightOverride(48)[ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ];
+            }
         }
-        Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
+        if (SeenPage != 1)
+            Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
         if (SeenPage == 0)
         {
             Contents->AddSlot().AutoHeight()[ Text(FString::Printf(TEXT("%s %d"), *Row.Location, Row.Quantity), 15) ];
         }
         Cell = SNew(SBox).WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth) : FOptionalSize())
             .MinDesiredWidth(SeenPage <= 2 ? ItemCellWidth : SeenPage == 4 ? 330 : SeenPage == 6 ? 250 : 670)
-            .MinDesiredHeight(SeenPage <= 2 ? 144 : 72)
+            .MinDesiredHeight(SeenPage == 1 ? 96 : SeenPage <= 2 ? 144 : 72)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this, Index]() { return Index == ContentSelection ? Gold : FLinearColor::Transparent; })
@@ -845,6 +967,72 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 ]
             ]
         ];
+    if (Entries.IsValidIndex(ContentSelection)
+        && Entries[ContentSelection].Subject == EHomesteadMenuSubject::Recipe
+        && Entries[ContentSelection].HasRecipeState)
+    {
+        const auto& Assessment = Entries[ContentSelection].RecipeState;
+        DetailsContent->AddSlot().AutoHeight().Padding(0, 0, 0, 10)
+        [
+            SNew(STextBlock).Text(FText::FromString(Entries[ContentSelection].Detail))
+            .WrapTextAt(DetailsWidth - 56).ColorAndOpacity(Muted)
+            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+        ];
+        const auto AddRequirement = [&DetailsContent](const FString& Label, const FString& Status,
+            const FString& Source, bool Met)
+        {
+            TSharedPtr<SVerticalBox> Content;
+            auto Box = SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                .BorderBackgroundColor(Met ? FLinearColor(0.075f, 0.16f, 0.10f, 1)
+                    : FLinearColor(0.24f, 0.075f, 0.055f, 1))
+                .Padding(10)
+                [
+                    SAssignNew(Content, SVerticalBox)
+                    + SVerticalBox::Slot().AutoHeight()
+                    [
+                        SNew(STextBlock).Text(FText::FromString(Label))
+                        .ColorAndOpacity(Ink)
+                        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 17))
+                    ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 0)
+                    [
+                        SNew(STextBlock).Text(FText::FromString(Status))
+                        .ColorAndOpacity(Met ? FSlateColor(Ink)
+                            : FSlateColor(FLinearColor(1.0f, 0.66f, 0.52f)))
+                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                    ]
+                ];
+            if (!Source.IsEmpty())
+                Content->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
+                [
+                    SNew(STextBlock).Text(FText::FromString(Source))
+                    .ColorAndOpacity(Muted)
+                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+                ];
+            DetailsContent->AddSlot().AutoHeight().Padding(0, 0, 0, 7)[Box];
+        };
+        for (const auto& Ingredient : Assessment.ingredients)
+        {
+            AddRequirement(UTF8_TO_TCHAR(Homestead::ItemName(Ingredient.item)),
+                FString::Printf(TEXT("Have %d / Need %d"), Ingredient.have, Ingredient.need),
+                UTF8_TO_TCHAR(Ingredient.source), Ingredient.met);
+        }
+        if (Assessment.retainedTool != Homestead::Item::Count)
+        {
+            const int32 Have = Controller.IsValid()
+                ? Controller->Simulation().Count(Assessment.retainedTool) : 0;
+            AddRequirement(FString::Printf(TEXT("%s (kept)"),
+                UTF8_TO_TCHAR(Homestead::ItemName(Assessment.retainedTool))),
+                FString::Printf(TEXT("Have %d / Need 1"), Have), TEXT("Required tool"),
+                Assessment.retainedToolMet);
+        }
+        if (Assessment.stationRequired)
+            AddRequirement(TEXT("Fueled cookfire nearby"),
+                Assessment.stationMet ? TEXT("Ready") : TEXT("Not nearby"),
+                TEXT("Cooking station"), Assessment.stationMet);
+        AddRequirement(TEXT("Pack space"), Assessment.capacityMet ? TEXT("Available") : TEXT("Pack is full"),
+            TEXT("Crafted output returns to your pack"), Assessment.capacityMet);
+    }
     Actions.Reset();
     ActionButtons.Reset();
     if (Entries.IsValidIndex(ContentSelection))
@@ -865,7 +1053,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
             if (Row.Quantity > 1) Actions.Add(EHomesteadItemAction::Split);
             Actions.Add(EHomesteadItemAction::Merge);
         }
-        else if (!IsDirectCameraSetting(Row)) Actions.Add(EHomesteadItemAction::Primary);
+        else if (Row.Subject != EHomesteadMenuSubject::Recipe && !IsDirectCameraSetting(Row))
+            Actions.Add(EHomesteadItemAction::Primary);
         if (SeenPage == 0 && Row.ContainerId >= 0)
         { Actions.Add(EHomesteadItemAction::MoveEarlier); Actions.Add(EHomesteadItemAction::MoveLater); }
     }
@@ -921,6 +1110,24 @@ FString SHomesteadMenu::DetailsText() const
     const int32 Index = DetailIndex();
     if (!Entries.IsValidIndex(Index)) return DetailsBodyText();
     const auto& Row = Entries[Index];
+    if (Row.Subject == EHomesteadMenuSubject::Recipe && Row.HasRecipeState)
+    {
+        FString Result = Row.Label + TEXT("\n") + Row.Location + TEXT("\n") + Row.Detail;
+        for (const auto& Ingredient : Row.RecipeState.ingredients)
+            Result += FString::Printf(TEXT("\n%s: Have %d / Need %d (%s)"),
+                UTF8_TO_TCHAR(Homestead::ItemName(Ingredient.item)), Ingredient.have,
+                Ingredient.need, UTF8_TO_TCHAR(Ingredient.source));
+        if (Row.RecipeState.retainedTool != Homestead::Item::Count)
+            Result += FString::Printf(TEXT("\n%s (kept): %s"),
+                UTF8_TO_TCHAR(Homestead::ItemName(Row.RecipeState.retainedTool)),
+                Row.RecipeState.retainedToolMet ? TEXT("Ready") : TEXT("Missing"));
+        if (Row.RecipeState.stationRequired)
+            Result += FString::Printf(TEXT("\nFueled cookfire nearby: %s"),
+                Row.RecipeState.stationMet ? TEXT("Ready") : TEXT("Not nearby"));
+        Result += FString::Printf(TEXT("\nPack space: %s"),
+            Row.RecipeState.capacityMet ? TEXT("Available") : TEXT("Full"));
+        return Result;
+    }
     return Row.Label + TEXT("\n") + Row.Location + TEXT("\n\n") + DetailsBodyText();
 }
 FString SHomesteadMenu::DetailsBodyText() const
@@ -928,6 +1135,7 @@ FString SHomesteadMenu::DetailsBodyText() const
     const int32 Index = DetailIndex();
     if (!Entries.IsValidIndex(Index)) return TEXT("Select an item to see its details.\n\nNothing here is a recipe output you already own.");
     const auto& Row = Entries[Index];
+    if (Row.Subject == EHomesteadMenuSubject::Recipe) return FString();
     FString Detail = Row.Detail;
     if (SeenPage == 0)
     {
@@ -1105,6 +1313,7 @@ void SHomesteadMenu::Activate()
 void SHomesteadMenu::ChangePage(int32 Page)
 {
     if (!Controller.IsValid() || Dialog != EDialog::None) return;
+    StopCraftHold();
     Controller->MenuPage(Page);
     Refresh();
 }
@@ -1320,6 +1529,17 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     if (Event == IE_Repeat && (Key == EKeys::Left || Key == EKeys::Right || Key == EKeys::Up || Key == EKeys::Down
         || Key == EKeys::Gamepad_DPad_Left || Key == EKeys::Gamepad_DPad_Right || Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_DPad_Down))
         Event = IE_Pressed;
+    const bool ActivateKey = Key == EKeys::Enter || Key == EKeys::SpaceBar || Key == EKeys::E
+        || Key == EKeys::Gamepad_FaceButton_Bottom || Key == EKeys::LeftMouseButton;
+    if (Event == IE_Released && ActivateKey)
+    {
+        const bool MatchingInput = (CraftInput == ECraftInput::Pointer && Key == EKeys::LeftMouseButton)
+            || (CraftInput == ECraftInput::Controller && Key == EKeys::Gamepad_FaceButton_Bottom)
+            || (CraftInput == ECraftInput::Keyboard
+                && (Key == EKeys::Enter || Key == EKeys::SpaceBar || Key == EKeys::E));
+        if (MatchingInput) StopCraftHold();
+        return true;
+    }
     if (Event != IE_Pressed || bSaving) return true;
     if (!Key.IsMouseButton()) Hover = INDEX_NONE;
     if (Region == ERegion::Portrait && Dialog == EDialog::None
@@ -1333,7 +1553,17 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
             || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right) return true;
     }
     if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::I || Key == EKeys::Gamepad_Special_Right) { Back(); return true; }
-    if (Key == EKeys::Enter || Key == EKeys::E || Key == EKeys::Gamepad_FaceButton_Bottom) { Activate(); return true; }
+    if (ActivateKey)
+    {
+        const ECraftInput Input = Key == EKeys::LeftMouseButton ? ECraftInput::Pointer
+            : Key == EKeys::Gamepad_FaceButton_Bottom ? ECraftInput::Controller : ECraftInput::Keyboard;
+        if (SeenPage == 1 && Region == ERegion::Content && Entries.IsValidIndex(ContentSelection)
+            && Entries[ContentSelection].Subject == EHomesteadMenuSubject::Recipe)
+            StartCraftHold(Input);
+        else
+            Activate();
+        return true;
+    }
     int32 Dx = Key == EKeys::Right || Key == EKeys::Gamepad_DPad_Right ? 1 : Key == EKeys::Left || Key == EKeys::Gamepad_DPad_Left ? -1 : 0;
     int32 Dy = Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down ? 1 : Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up ? -1 : 0;
     if (Dialog != EDialog::None)
@@ -1396,6 +1626,7 @@ FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event
 void SHomesteadMenu::Back()
 {
     if (bSaving) return;
+    StopCraftHold();
     if (Dialog == EDialog::Amount && bEditingAmount) { bEditingAmount = false; BuildDialog(); return; }
     if (Dialog != EDialog::None) { SetDialog(EDialog::None); return; }
     if (Controller.IsValid()) Controller->MenuBack();
@@ -1423,6 +1654,7 @@ void SHomesteadMenu::ShowGraphicsSaveFailure(const FString& Error)
 }
 void SHomesteadMenu::SetDialog(EDialog Value)
 {
+    StopCraftHold();
     Dialog = Value; DialogSelection = 0;
     bEditingAmount = false;
     LeftStick.Reset();

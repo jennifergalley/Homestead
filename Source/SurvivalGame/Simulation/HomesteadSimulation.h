@@ -75,6 +75,30 @@ struct Result
     explicit operator bool() const { return ok; }
 };
 
+struct RecipeIngredientAssessment
+{
+    Item item = Item::Branch;
+    int have = 0;
+    int need = 0;
+    const char* source = "";
+    bool met = false;
+};
+
+struct RecipeAssessment
+{
+    Recipe recipe = Recipe::Hatchet;
+    Item output = Item::Count;
+    int outputCount = 0;
+    std::vector<RecipeIngredientAssessment> ingredients;
+    Item retainedTool = Item::Count;
+    bool retainedToolMet = true;
+    bool stationRequired = false;
+    bool stationMet = true;
+    bool capacityMet = true;
+    bool craftable = false;
+    std::string blocker;
+};
+
 struct ResourceNode
 {
     int id = 0;
@@ -177,6 +201,7 @@ public:
     const char* SeasonName() const;
     bool IsSheltered(Point position) const;
     bool IsNearFire(Point position) const;
+    RecipeAssessment AssessRecipe(Recipe recipe, Point player) const;
     bool CanHarvest(int nodeId) const;
     int FindNearestResource(Point position, double maxDistance) const;
     int FindNearestPlot(Point position, double maxDistance) const;

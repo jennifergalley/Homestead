@@ -64,7 +64,10 @@
             { "member": "Audio/footstep_grass_000.ogg", "name": "GrassStepA.ogg" },
             { "member": "Audio/footstep_grass_001.ogg", "name": "GrassStepB.ogg" },
             { "member": "Audio/impactWood_light_000.ogg", "name": "WoodTapA.ogg" },
-            { "member": "Audio/impactWood_light_001.ogg", "name": "WoodTapB.ogg" }
+            { "member": "Audio/impactWood_light_001.ogg", "name": "WoodTapB.ogg" },
+            { "member": "Audio/impactMetal_light_000.ogg", "name": "CraftStrikeA.ogg" },
+            { "member": "Audio/impactMetal_light_001.ogg", "name": "CraftStrikeB.ogg" },
+            { "member": "Audio/impactMetal_light_002.ogg", "name": "CraftStrikeC.ogg" }
           ]
         }
       ]

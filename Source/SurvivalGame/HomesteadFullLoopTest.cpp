@@ -202,20 +202,24 @@ void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
         [this]() { Tap(EKeys::C); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 1; });
     QueueSelectRow(static_cast<int32>(Recipe));
-    Add(TEXT("Enter the selected recipe's native actions"),
-        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return !Controller->HasNativeMenu()
-            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
-    Add(FString::Printf(TEXT("Craft %s using gamepad A"), UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))),
+    Add(FString::Printf(TEXT("Hold %s using gamepad A"), UTF8_TO_TCHAR(Homestead::RecipeName(Recipe))),
         [this, Before, Item]()
         {
             *Before = Controller->Simulation().Count(Item);
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                EKeys::Gamepad_FaceButton_Bottom, IE_Pressed, 1));
         },
         [this, Before, Item, Quantity]()
         {
             return !Controller->ToastIsError() && Controller->Simulation().Count(Item) == *Before + Quantity;
-        });
+        }, 1.3f);
+    Add(TEXT("Release the completed recipe hold"),
+        [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+            EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0)); },
+        [this, Before, Item, Quantity]()
+        {
+            return Controller->Simulation().Count(Item) == *Before + Quantity;
+        }, 0.1f);
     Add(TEXT("Close the crafting book"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
