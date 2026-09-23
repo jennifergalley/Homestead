@@ -235,7 +235,6 @@ private:
     void UpdateLighting(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
     float CellBase(int CellX, int CellY) const;
-    static float GrassGroundWeight(float X, float Y);
     static bool IsDecorationReserved(const Homestead::State& State, float X, float Y,
         float FootprintRadius, float CanopyRadius = 0, bool bLowCover = false);
 };

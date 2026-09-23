@@ -23,6 +23,8 @@ constexpr std::int64_t MaxWorldCmExclusive =
     (static_cast<std::int64_t>(MaxChunkCoordinate) + 1) * ChunkSizeCm;
 constexpr std::int64_t SamplingHaloCm = 100;
 constexpr double StreamWaterHalfWidthCm = 52.0;
+constexpr double CreekWaterMinimumHalfWidthCm = 38.0;
+constexpr double CreekWaterMaximumHalfWidthCm = 66.0;
 constexpr double StreamBankOuterCm = 175.0;
 constexpr double WaterReachCm = 180.0;
 
@@ -106,4 +108,6 @@ Status FindEntity(WorldDescriptor world, GeneratedEntityKey key, GeneratedEntity
 // Shared legacy adaptation, not regional hydrology. Input is finite global centimeters.
 // Integer noise/hash/keys are exact; libm stream geometry/normals are compared with tolerance.
 double StreamCenterCm(double yCm);
+double CreekWaterHalfWidthCm(WorldDescriptor world, double yCm, bool rightBank);
+double CreekGroundBlendWeight(WorldDescriptor world, double xCm, double yCm);
 }

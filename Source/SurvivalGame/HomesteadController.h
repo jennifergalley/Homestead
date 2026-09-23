@@ -190,6 +190,9 @@ private:
     FDateTime LastSuccessfulSave;
     TOptional<float> PendingResolutionScale;
     FString GraphicsSaveError;
+    void LoadCameraPreferences();
+    bool PersistCameraSensitivity(float Requested);
+    bool PersistCameraInversion(bool Requested);
     bool PersistResolutionScale(float Requested);
     void ShowNativeMenu();
     void HideNativeMenu();

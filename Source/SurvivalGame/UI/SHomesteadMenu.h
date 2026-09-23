@@ -57,6 +57,7 @@ public:
     bool IsFocusedControlVisible() const;
     int32 GetSelectedContentIndex() const { return ContentSelection; }
     int32 GetContentColumnCount() const { return Columns(); }
+    int32 GetActionCount() const { return Actions.Num(); }
     bool IsEditingQuantity() const { return bEditingAmount; }
     int32 GetDraftQuantity() const { return Amount; }
 
@@ -127,6 +128,7 @@ private:
     TSharedRef<SWidget> Text(const FString& Value, int32 Size = 18) const;
     FString EntryName(const FHomesteadRow& Row) const;
     FName EntryIcon(const FHomesteadRow& Row) const;
+    bool IsDirectCameraSetting(const FHomesteadRow& Row) const;
     FString DetailsText() const;
     FString DetailsBodyText() const;
     void ScrollActionIntoView();

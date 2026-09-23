@@ -57,16 +57,19 @@ public:
     UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
     void PlayGather();
     void PlayWater();
+    void PlayWater(Homestead::Point Target);
     void PlayClear();
     void PlayClear(Homestead::Point Target);
     void PlayTill(Homestead::Point Target);
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
+    float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
     void CancelAction();
     FRotator ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred);
     const FString& StartingViewEvidence() const { return InitialViewEvidence; }
 
 private:
+    friend class AHomesteadSmokeTest;
     UPROPERTY(VisibleAnywhere) TObjectPtr<USpringArmComponent> CameraArm;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UCameraComponent> Camera;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> StandIn;
@@ -101,6 +104,7 @@ private:
     FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
     TOptional<float> ClearYaw;
     TOptional<float> TillYaw;
+    TOptional<float> WaterYaw;
 
     bool LoadHeroineAssets();
     float InferMeshYaw(const USkeletalMesh& Asset) const;

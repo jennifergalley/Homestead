@@ -252,8 +252,10 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 return Access && OverlapAllowed && CornerInitiallyOpen && HarvestKeepsCorner
                     && ClearedCornerReserved && CanopyProtectsBuilding && LowCoverNearResource
                     && LowCoverHomeEdge && PathProtected && LowCoverProtectsBuilding && LowCoverProtectsPlot
-                    && AHomesteadWorld::GrassGroundWeight(-2900, -2900) <= 0.1f
-                    && AHomesteadWorld::GrassGroundWeight(-1000, 0) == 0;
+                    && Homestead::Generation::CreekGroundBlendWeight(
+                        Controller->State().world, -2900, -2900) <= 0.1
+                    && Homestead::Generation::CreekGroundBlendWeight(
+                        Controller->State().world, -1000, 0) == 0;
             });
         const auto CameraCanopy = [this, Tree, Probe](bool Ready, bool Cleared)
         {

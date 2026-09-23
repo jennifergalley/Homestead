@@ -15,7 +15,8 @@ if($Packaged) {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $working=$root
     $exe=Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
-    $prefix="`"$(Join-Path $root 'SurvivalGame.uproject')`" /Game/SurvivalGame/Maps/Homestead -game "
+    $offlineArguments=(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1')) -join ' '
+    $prefix="`"$(Join-Path $root 'SurvivalGame.uproject')`" /Game/SurvivalGame/Maps/Homestead -game $offlineArguments "
 }
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $null=New-Item -ItemType Directory -Path (Join-Path $output 'Graphics')

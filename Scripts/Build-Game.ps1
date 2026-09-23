@@ -80,12 +80,13 @@ $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
 & $build SurvivalGameEditor Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
 if ($LASTEXITCODE -ne 0) { throw "Unreal editor-module build failed ($LASTEXITCODE)." }
 $editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
+$offlineArguments = @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 $bootstrap = Join-Path $PSScriptRoot 'bootstrap_unreal.py'
 $logDirectory = Join-Path $root 'Build\Logs'
 $null = New-Item -ItemType Directory -Path $logDirectory -Force
 $bootstrapLog = Join-Path $logDirectory 'bootstrap.log'
 Write-Host "Generating content; full output: $bootstrapLog"
-& $editor $project -run=pythonscript "-script=$bootstrap" -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $bootstrapLog
+& $editor $project -run=pythonscript "-script=$bootstrap" @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $bootstrapLog
 if ($LASTEXITCODE -ne 0) {
     Get-Content -LiteralPath $bootstrapLog -Tail 85 | Write-Output
     throw "Unreal content bootstrap failed ($LASTEXITCODE). See Build\Logs\bootstrap.log."

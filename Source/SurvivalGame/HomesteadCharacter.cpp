@@ -106,7 +106,7 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle"));
     WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
     GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
-    WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Water.AN_Heroine_Water"));
+    WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_WaterRefined.AN_Heroine_WaterRefined"));
     ClearAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Chop.AN_Heroine_Chop"));
     TillAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Till.AN_Heroine_Till"));
     if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation || !ClearAnimation || !TillAnimation)
@@ -403,6 +403,23 @@ void AHomesteadCharacter::PlayGather()
 
 void AHomesteadCharacter::PlayWater()
 {
+    WaterYaw.Reset();
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->RequestWater();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Watering succeeded but its animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::PlayWater(Homestead::Point Target)
+{
+    const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
+    if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Water committed without a valid presentation target; using heroine facing."));
+        PlayWater();
+        return;
+    }
+    WaterYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestWater();
     else
@@ -418,6 +435,7 @@ void AHomesteadCharacter::CancelAction()
     DiggingStick->SetHiddenInGame(true, true);
     ClearYaw.Reset();
     TillYaw.Reset();
+    WaterYaw.Reset();
 }
 
 void AHomesteadCharacter::PlayClear()
@@ -539,7 +557,7 @@ void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
     if (!PC || (PC->IsBookOpen() && PC->BookPage() != 6) || PC->IsFailed()) return;
     AddControllerYawInput(Value.X * Scale * PC->Sensitivity);
-    AddControllerPitchInput(Value.Y * Scale * PC->Sensitivity * (PC->bInvertY ? 1.0f : -1.0f));
+    AddControllerPitchInput(Value.Y * Scale * PC->Sensitivity * (PC->bInvertY ? -1.0f : 1.0f));
 }
 
 void AHomesteadCharacter::MouseLook(const FInputActionValue& Value)

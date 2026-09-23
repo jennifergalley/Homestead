@@ -59,11 +59,19 @@ The final heroine pipeline remains a separate feasibility/visual approval step.
 
 ## Repeatable workflow
 
-**Offline release note:** Development/editor tools can open UE TraceControl
-listeners. The supported Shipping/reused-container path and its deliberately
-limited runtime proof are in `offline-startup.md`. It skips all editor/cook/pak
-runtime launches; the ordinary workflow below does not. Honor the current
-coordinator launch hold before running Development tools.
+**Offline release note:** Development/editor tools compile UE TraceLog and open
+its in-process TraceControl TCP listener on port 1985. In the installed 5.8
+engine this listener is unconditional; `-notraceserver` prevents the sponsored
+`UnrealTraceServer.exe` child but does not remove port 1985. Ordinary project
+Editor/game, import and bounded-authoring scripts reuse
+`Get-UnrealOfflineArguments.ps1`: trace-server autostart, UDP/TCP messaging and
+Android File Server are disabled. A production-path runtime probe confirmed no
+sponsored TraceServer, no UDP and no unexpected TCP; only the disclosed 1985
+listener plus loopback Zen cache traffic remained. No firewall rule or global
+notification setting is changed by the project. The trace-compiled-out
+Shipping/reused-container path and its separate runtime proof remain documented
+in `offline-startup.md`. Honor the coordinator launch hold before running
+Development tools.
 
 1. Run `Scripts\Test-Native.ps1` to exercise game rules and persistence.
 2. Run `Scripts\Build-Game.ps1`. It imports only source assets whose expected

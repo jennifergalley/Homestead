@@ -53,7 +53,8 @@ if($Packaged) {
 } else {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $executable=Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
-    $prefix="`"$project`" /Game/SurvivalGame/Maps/Homestead -game "
+    $offlineArguments=(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1')) -join ' '
+    $prefix="`"$project`" /Game/SurvivalGame/Maps/Homestead -game $offlineArguments "
     $workingDirectory=$root
 }
 if(-not (Test-Path -LiteralPath $executable)) { throw "Missing game executable: $executable" }

@@ -539,13 +539,6 @@ void AHomesteadWorld::AddDecoration(UStaticMesh* Mesh, const FVector& Position, 
     Batch->AddInstance(FTransform(Rotation, Origin, Scale));
 }
 
-float AHomesteadWorld::GrassGroundWeight(float X, float Y)
-{
-    const float Bank = FMath::SmoothStep(195.0, 350.0, FMath::Abs(X - Homestead::StreamX(Y)));
-    const float Patch = 0.5f + 0.5f * FMath::Sin(X * 0.0021f) * FMath::Cos(Y * 0.0017f);
-    return Bank * FMath::Lerp(0.05f, 0.25f, Patch);
-}
-
 bool AHomesteadWorld::IsPreparedFor(const Homestead::State& State) const
 {
     return bTerrainReady && Descriptor.seed == State.world.seed
@@ -764,7 +757,7 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
             Vertices.Add(FVector(PX, PY, Sample.heightCm));
             Normals.Add(FVector(Sample.normalX, Sample.normalY, Sample.normalZ));
             UV.Add(FVector2D(PX / 300.0f, PY / 300.0f));
-            Colors.Add(FLinearColor(GrassGroundWeight(PX, PY), 0, 0, 1));
+            Colors.Add(FLinearColor(Gen::CreekGroundBlendWeight(World, PX, PY), 0, 0, 1));
             Tangents.Add(FProcMeshTangent(FVector(Sample.normalZ, 0, -Sample.normalX).GetSafeNormal(), false));
             if (X < Cells && Y < Cells)
             {
@@ -783,8 +776,8 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
         return nullptr;
     }
 
-    // Separate non-colliding ribbons expose the shallow channel and its muddy banks.
-    auto Ribbon = [&](int Section, float Left, float Right, bool bWater)
+    // The colliding terrain carries the muddy bank blend; only water needs an overlay.
+    auto WaterRibbon = [&](int Section)
     {
         Vertices.Reset();
         Triangles.Reset();
@@ -792,14 +785,16 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
         UV.Reset();
         Colors.Reset();
         Tangents.Reset();
-        const int Columns = bWater ? 1 : 8;
+        constexpr int Columns = 1;
         for (int Y = 0; Y <= Cells; ++Y)
         {
             const float PY = OriginY + Y * Spacing;
             const float Center = Homestead::StreamX(PY);
+            const double Left = Gen::CreekWaterHalfWidthCm(World, PY, false);
+            const double Right = Gen::CreekWaterHalfWidthCm(World, PY, true);
             for (int X = 0; X <= Columns; ++X)
             {
-                const double PX = FMath::Clamp<double>(Center + FMath::Lerp(Left, Right, static_cast<float>(X) / Columns),
+                const double PX = FMath::Clamp<double>(Center + (X == 0 ? -Left : Right),
                     OriginX, OriginX + Gen::ChunkSizeCm);
                 Gen::TerrainSample Sample;
                 const auto Status = Gen::SampleTerrain(World, FMath::RoundToInt64(PX), FMath::RoundToInt64(PY), Sample);
@@ -808,7 +803,7 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
                     UE_LOG(LogHomesteadWorld, Error, TEXT("Generated ribbon sample failed: %s"), UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
                     return false;
                 }
-                const float Z = bWater ? Sample.waterHeightCm : GroundHeight(PX, PY, World) + 2.0f;
+                const float Z = Sample.waterHeightCm;
                 Vertices.Add(FVector(PX, PY, Z));
                 Normals.Add(FVector::UpVector);
                 UV.Add(FVector2D((PX - Center) / 100.0f, PY / 300.0f));
@@ -822,15 +817,13 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
             }
         }
         Mesh->CreateMeshSection_LinearColor(Section, Vertices, Triangles, Normals, UV, Colors, Tangents, false);
-        Mesh->SetMaterial(Section, bWater ? Material(FLinearColor(0.075f, 0.26f, 0.29f), 0.16f)
-            : Material(FLinearColor(0.27f, 0.235f, 0.14f)));
+        Mesh->SetMaterial(Section, Material(FLinearColor(0.075f, 0.26f, 0.29f), 0.16f));
         return true;
     };
-    if (OriginX <= 1680 + Gen::StreamBankOuterCm && OriginX + Gen::ChunkSizeCm >= 1320 - Gen::StreamBankOuterCm)
+    if (OriginX <= 1680 + Gen::CreekWaterMaximumHalfWidthCm
+        && OriginX + Gen::ChunkSizeCm >= 1320 - Gen::CreekWaterMaximumHalfWidthCm)
     {
-        if (!Ribbon(1, -Gen::StreamWaterHalfWidthCm, Gen::StreamWaterHalfWidthCm, true)
-            || !Ribbon(2, -Gen::StreamBankOuterCm, -Gen::StreamWaterHalfWidthCm, false)
-            || !Ribbon(3, Gen::StreamWaterHalfWidthCm, Gen::StreamBankOuterCm, false))
+        if (!WaterRibbon(1))
         {
             Mesh->DestroyComponent();
             return nullptr;
@@ -977,6 +970,8 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
     int32 GrassCount = 0;
     int32 GrassTriangleCount = 0;
     int32 FernCount = 0;
+    int32 BankGrassCount = 0;
+    int32 BankFernCount = 0;
     int32 RebuiltChunks = 0;
     for (auto& Chunk : TerrainChunks)
     {
@@ -1001,7 +996,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         for (const auto& Plot : State.plots)
             if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
                 Signature += FString::Printf(TEXT("P%d;"), Plot.id);
-        Signature += TEXT("ready");
+        Signature += TEXT("natural-creek-v1");
         if (Chunk.Value.CoverSignature == Signature) continue;
         Homestead::State CoverState;
         CoverState.structures = State.structures;
@@ -1080,7 +1075,11 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
             const double X = OriginX + Random.FRandRange(0, 2399.99f);
             const double Y = OriginY + Random.FRandRange(0, 2399.99f);
             const FRotator Rotation(0, Random.FRandRange(0, 360), 0);
-            if (IsDecorationReserved(CoverState, X, Y, 20, 0, true) || FMath::Abs(X - Homestead::StreamX(Y)) < 215)
+            const double StreamDistance = FMath::Abs(X - Homestead::StreamX(Y));
+            const bool bCreekBank = StreamDistance >= 100.0 && StreamDistance < 215.0
+                && Attempt % 5 == 0;
+            if (IsDecorationReserved(CoverState, X, Y, 20, 0, true)
+                || (StreamDistance < 215.0 && !bCreekBank))
                 continue;
             const int32 Variety = Attempt % 16;
             const int32 Index = Variety == 0 ? 0 : Variety < 3 ? 1 : Variety < 12 ? 2 : 3;
@@ -1092,6 +1091,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
                     AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
                 ++GrassCount;
                 GrassTriangleCount += GrassTriangles[Index];
+                if (bCreekBank) ++BankGrassCount;
             }
             if (Attempt % 32 == 0 && FernMeshes.Num() == 4 && !IsDecorationReserved(CoverState, X, Y, 75, 0, true))
             {
@@ -1101,6 +1101,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
                 FernBatches.FindChecked(Mesh->GetPathName())->AddInstance(FTransform(Rotation,
                     AtGround(X, Y) - Rotation.RotateVector(Anchor), FVector::OneVector));
                 ++FernCount;
+                if (bCreekBank) ++BankFernCount;
             }
         }
         for (auto* Batch : GrassBatches) Batch->BuildTreeIfOutdated(false, true);
@@ -1109,8 +1110,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
     }
     DecorationBuildMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
     LastCoverPrepareMilliseconds = DecorationBuildMilliseconds;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_grass_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
-        RebuiltChunks, FernCount, GrassCount, GrassTriangleCount, DecorationBuildMilliseconds);
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
+        RebuiltChunks, FernCount, GrassCount, BankFernCount, BankGrassCount,
+        GrassTriangleCount, DecorationBuildMilliseconds);
     return true;
 }
 

@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering,
+param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering, [switch]$Creek,
     [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [switch]$NativeSaveRetry, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
@@ -61,6 +61,10 @@ if ($Gathering -and ($Presentation -or $FullLoop -or $WithAudio)) {
 if ($Watering -and ($Gathering -or $Presentation -or $FullLoop -or $WithAudio)) {
     throw 'Watering lifecycle checks run separately from other acceptance modes.'
 }
+if ($Creek -and ($Watering -or $Gathering -or $Presentation -or $HairLength -or $FullLoop -or
+    $WithAudio -or $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $NativeMenu)) {
+    throw 'Creek presentation requires its own ordinary traversal route.'
+}
 if ($Presentation -and ($FullLoop -or $WithAudio)) {
     throw 'Presentation fixtures are separate from full-loop and audio acceptance.'
 }
@@ -81,7 +85,8 @@ if ($Packaged) {
     $map = Join-Path $root 'Content\SurvivalGame\Maps\Homestead.umap'
     if (-not (Test-Path -LiteralPath $map)) { throw 'Build and bootstrap the game before running engine integration tests.' }
     $executable = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
-    $prefix = "`"$project`" /Game/SurvivalGame/Maps/Homestead -game "
+    $offlineArguments = (& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1')) -join ' '
+    $prefix = "`"$project`" /Game/SurvivalGame/Maps/Homestead -game $offlineArguments "
 }
 if ($OutputDirectory) { $output = [IO.Path]::GetFullPath($OutputDirectory, $root) }
 if ($ShippingQA -and (-not $Packaged -or -not $OutputDirectory -or $Weeding -or (Test-Path -LiteralPath $output))) {
@@ -104,6 +109,7 @@ if ($HairLength) {
 }
 if ($Gathering) { $captures = @('gather-reach.png','gather-recovered.png') }
 if ($Watering) { $captures = @('watering-pour.png','watering-recovered.png') }
+if ($Creek) { $captures = @('creek-approach.png','creek-bank.png','creek-along.png','creek-crossed.png') }
 if ($Weeding) { $captures = @('weeding-pull.png','weeding-recovered.png') }
 if ($Clearing) { $captures = @('clearing-swing.png','clearing-recovered.png') }
 if ($GeneratedWoodland) { $captures = @('generated-untouched.png','generated-cleared-site.png','generated-boundary.png','generated-reloaded.png') }
@@ -162,6 +168,7 @@ if ($Presentation) { $loopArguments = '-HomesteadPresentationTest' }
 if ($HairLength) { $loopArguments += ' -HomesteadHairLengthTest' }
 if ($Gathering) { $loopArguments = '-HomesteadGatheringTest' }
 if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
+if ($Creek) { $loopArguments = '-HomesteadCreekTest -HomesteadRequireLit' }
 if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($CameraLifecycle) { $loopArguments += ' -HomesteadCameraLifecycle' }

@@ -35,6 +35,29 @@
 
 namespace
 {
+constexpr const TCHAR* CameraSettingsSection = TEXT("Homestead.Camera");
+constexpr const TCHAR* CameraSensitivityKey = TEXT("Sensitivity");
+constexpr const TCHAR* CameraInvertYKey = TEXT("InvertY");
+
+struct FCameraConfigSnapshot
+{
+    bool Existed = false;
+    TArray<uint8> Bytes;
+};
+
+bool CaptureCameraConfig(const FString& Path, FCameraConfigSnapshot& Snapshot)
+{
+    Snapshot.Existed = IFileManager::Get().FileExists(*Path);
+    return !Snapshot.Existed || FFileHelper::LoadFileToArray(Snapshot.Bytes, *Path);
+}
+
+bool RestoreCameraConfig(const FString& Path, const FCameraConfigSnapshot& Snapshot)
+{
+    return Snapshot.Existed
+        ? FFileHelper::SaveArrayToFile(Snapshot.Bytes, *Path)
+        : !IFileManager::Get().FileExists(*Path) || IFileManager::Get().Delete(*Path, false, true, true);
+}
+
 FString Text(const char* Value) { return UTF8_TO_TCHAR(Value); }
 bool Edible(Homestead::Item Item)
 {
@@ -133,6 +156,7 @@ void AHomesteadController::BeginPlay()
     }
 #endif
     if (!PrepareStartupProbe()) return;
+    LoadCameraPreferences();
 #if !UE_BUILD_SHIPPING
     bSaveRoutingTestPending = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveRoutingTest"));
     if (bSaveRoutingTestPending)
@@ -765,7 +789,8 @@ void AHomesteadController::Interact()
                 Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             Notify(Result, GrassStepB);
             if (Result.ok && Planted && !Mature)
-                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayWater();
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                    Avatar->PlayWater(Homestead::CellCenter(Plot.cellX, Plot.cellY));
             break;
         }
         break;
@@ -1164,8 +1189,8 @@ void AHomesteadController::ActivateRow()
         case 0: QuickSave(); break;
         case 1: QuickLoad(); break;
         case 2: Notify(Sim.SetDayMinutes(State().dayMinutes < 60 ? 60 : State().dayMinutes < 120 ? 120 : 30)); break;
-        case 3: Sensitivity = Sensitivity >= 1.8f ? 0.6f : Sensitivity + 0.2f; break;
-        case 4: bInvertY = !bInvertY; break;
+        case 3: PersistCameraSensitivity(Sensitivity >= 1.8f ? 0.6f : Sensitivity + 0.2f); break;
+        case 4: PersistCameraInversion(!bInvertY); break;
         case 5:
             MusicVolume = MusicVolume >= 0.99f ? 0 : FMath::Min(1.0f, MusicVolume + 0.2f);
             Music->SetVolumeMultiplier(MusicVolume);
@@ -1192,6 +1217,111 @@ void AHomesteadController::ActivateRow()
         default: break;
         }
     }
+}
+
+void AHomesteadController::LoadCameraPreferences()
+{
+    Sensitivity = 1.0f;
+    bInvertY = false;
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    FConfigFile Disk;
+    if (!Branch || !Disk.Combine(Branch->IniPath))
+    {
+        UE_LOG(LogTemp, Display, TEXT("CAMERA_SETTINGS defaults active; no readable user-settings file."));
+        return;
+    }
+    float StoredSensitivity = Sensitivity;
+    if (Disk.GetFloat(CameraSettingsSection, CameraSensitivityKey, StoredSensitivity)
+        && FMath::IsFinite(StoredSensitivity) && StoredSensitivity >= 0.2f && StoredSensitivity <= 3.0f)
+    {
+        Sensitivity = StoredSensitivity;
+    }
+    bool StoredInvertY = false;
+    if (Disk.GetBool(CameraSettingsSection, CameraInvertYKey, StoredInvertY))
+    {
+        bInvertY = StoredInvertY;
+    }
+    UE_LOG(LogTemp, Display, TEXT("CAMERA_SETTINGS loaded sensitivity=%.3f invert_y=%d file=%s"),
+        Sensitivity, bInvertY, *Branch->IniPath);
+}
+
+bool AHomesteadController::PersistCameraSensitivity(float Requested)
+{
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    if (!Branch || !FMath::IsFinite(Requested) || Requested < 0.2f || Requested > 3.0f)
+    {
+        Notify(TEXT("Camera sensitivity settings are unavailable. Your previous preference is unchanged."), true);
+        return false;
+    }
+    FCameraConfigSnapshot Snapshot;
+    if (!CaptureCameraConfig(Branch->IniPath, Snapshot))
+    {
+        Notify(TEXT("Could not read camera settings before saving. Your previous preference is unchanged."), true);
+        return false;
+    }
+    FConfigFile Property;
+    Property.SetFloat(CameraSettingsSection, CameraSensitivityKey, Requested);
+    const bool Saved = Property.UpdateSinglePropertyInSection(
+        *Branch->IniPath, CameraSensitivityKey, CameraSettingsSection);
+    FConfigFile Disk;
+    float Persisted = -1.0f;
+    const bool Verified = Saved && Disk.Combine(Branch->IniPath)
+        && Disk.GetFloat(CameraSettingsSection, CameraSensitivityKey, Persisted)
+        && FMath::IsNearlyEqual(Persisted, Requested, 0.001f);
+    if (!Verified)
+    {
+        const bool Restored = !Saved || RestoreCameraConfig(Branch->IniPath, Snapshot);
+        Notify(Restored
+            ? TEXT("Could not save camera sensitivity. Your previous preference was restored.")
+            : TEXT("Could not save or restore camera sensitivity. Check the settings file permissions."), true);
+        UE_LOG(LogTemp, Error, TEXT("CAMERA_SETTINGS sensitivity persistence failed file=%s restored=%d"),
+            *Branch->IniPath, Restored);
+        return false;
+    }
+    GConfig->SetFloat(CameraSettingsSection, CameraSensitivityKey, Requested, GGameUserSettingsIni);
+    Sensitivity = Requested;
+    Notify(FString::Printf(TEXT("Camera sensitivity %.1f. Choice saved in game settings."), Sensitivity));
+    return true;
+}
+
+bool AHomesteadController::PersistCameraInversion(bool Requested)
+{
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    if (!Branch)
+    {
+        Notify(TEXT("Camera inversion settings are unavailable. Your previous preference is unchanged."), true);
+        return false;
+    }
+    FCameraConfigSnapshot Snapshot;
+    if (!CaptureCameraConfig(Branch->IniPath, Snapshot))
+    {
+        Notify(TEXT("Could not read camera settings before saving. Your previous preference is unchanged."), true);
+        return false;
+    }
+    FConfigFile Property;
+    Property.SetBool(CameraSettingsSection, CameraInvertYKey, Requested);
+    const bool Saved = Property.UpdateSinglePropertyInSection(
+        *Branch->IniPath, CameraInvertYKey, CameraSettingsSection);
+    FConfigFile Disk;
+    bool Persisted = false;
+    const bool Verified = Saved && Disk.Combine(Branch->IniPath)
+        && Disk.GetBool(CameraSettingsSection, CameraInvertYKey, Persisted)
+        && Persisted == Requested;
+    if (!Verified)
+    {
+        const bool Restored = !Saved || RestoreCameraConfig(Branch->IniPath, Snapshot);
+        Notify(Restored
+            ? TEXT("Could not save camera inversion. Your previous preference was restored.")
+            : TEXT("Could not save or restore camera inversion. Check the settings file permissions."), true);
+        UE_LOG(LogTemp, Error, TEXT("CAMERA_SETTINGS inversion persistence failed file=%s restored=%d"),
+            *Branch->IniPath, Restored);
+        return false;
+    }
+    GConfig->SetBool(CameraSettingsSection, CameraInvertYKey, Requested, GGameUserSettingsIni);
+    bInvertY = Requested;
+    Notify(Requested ? TEXT("Camera Y inversion On. Choice saved in game settings.")
+        : TEXT("Camera Y inversion Off. Choice saved in game settings."));
+    return true;
 }
 
 bool AHomesteadController::PersistResolutionScale(float Requested)
@@ -1499,8 +1629,6 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     bFreshTerrainSpawn = false;
     bPendingSpawn = true;
     bWasFailed = false;
-    Sensitivity = Save.CameraSensitivity;
-    bInvertY = Save.InvertCameraY;
     MusicVolume = Save.MusicVolume;
     AmbienceVolume = Save.AmbienceVolume;
     EffectsVolume = Save.EffectsVolume;

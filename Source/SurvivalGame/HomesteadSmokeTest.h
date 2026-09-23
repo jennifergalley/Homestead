@@ -60,6 +60,7 @@ private:
 
     void Prepare();
     void PrepareGeneratedWorldChecks();
+    void PrepareCreekChecks();
     void PrepareDirectionalNavigationChecks();
     void PrepareNativeMenuChecks();
     void PrepareNativeWardrobeChecks();
@@ -74,6 +75,7 @@ private:
     void PrepareWeedingChecks();
     void PrepareClearingChecks();
     void PreparePromptChecks();
+    void PrepareCameraPreferenceChecks();
     void PrepareVideoSyncChecks();
     void PrepareFeedbackChecks();
     void PrepareHotkeyChecks();

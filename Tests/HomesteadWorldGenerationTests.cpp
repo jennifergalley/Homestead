@@ -422,6 +422,56 @@ void TerrainReliefAndBuildPockets()
     CHECK(maximum - minimum <= 45.0);
 }
 
+void CreekPresentation()
+{
+    for (const WorldDescriptor world : {
+        WorldDescriptor{0, WorldGenerationVersion},
+        WorldDescriptor{817391, WorldGenerationVersion},
+        WorldDescriptor{UINT64_C(0xffffffffffffffff), WorldGenerationVersion}})
+    {
+        bool asymmetric = false;
+        double minimum = 1e9;
+        double maximum = -1e9;
+        for (std::int64_t y = -4800; y <= 4800; y += 100)
+        {
+            const double left = CreekWaterHalfWidthCm(world, static_cast<double>(y), false);
+            const double right = CreekWaterHalfWidthCm(world, static_cast<double>(y), true);
+            CHECK(std::isfinite(left) && std::isfinite(right));
+            CHECK(left >= CreekWaterMinimumHalfWidthCm && left <= CreekWaterMaximumHalfWidthCm);
+            CHECK(right >= CreekWaterMinimumHalfWidthCm && right <= CreekWaterMaximumHalfWidthCm);
+            CHECK(left == CreekWaterHalfWidthCm(world, static_cast<double>(y), false));
+            CHECK(right == CreekWaterHalfWidthCm(world, static_cast<double>(y), true));
+            asymmetric |= left != right;
+            minimum = std::min(minimum, std::min(left, right));
+            maximum = std::max(maximum, std::max(left, right));
+
+            const double center = StreamCenterCm(static_cast<double>(y));
+            const double mud = CreekGroundBlendWeight(world, center, static_cast<double>(y));
+            const double transition = CreekGroundBlendWeight(world, center + 220.0, static_cast<double>(y));
+            const double forest = CreekGroundBlendWeight(world, center + 400.0, static_cast<double>(y));
+            CHECK(mud == 0.0);
+            CHECK(transition >= 0.0 && transition <= 0.27);
+            CHECK(forest >= 0.07 && forest <= 0.27);
+            CHECK(mud == CreekGroundBlendWeight(world, center, static_cast<double>(y)));
+        }
+        CHECK(asymmetric);
+        CHECK(maximum - minimum >= 8.0);
+        for (const double seamY : {-4800.0, -2400.0, 0.0, 2400.0, 4800.0})
+        {
+            CHECK(CreekWaterHalfWidthCm(world, seamY, false)
+                == CreekWaterHalfWidthCm(world, seamY, false));
+            CHECK(CreekWaterHalfWidthCm(world, seamY, true)
+                == CreekWaterHalfWidthCm(world, seamY, true));
+            const double center = StreamCenterCm(seamY);
+            CHECK(CreekGroundBlendWeight(world, center + 180.0, seamY)
+                == CreekGroundBlendWeight(world, center + 180.0, seamY));
+        }
+    }
+    CHECK(CreekWaterHalfWidthCm({}, std::numeric_limits<double>::quiet_NaN(), false)
+        == StreamWaterHalfWidthCm);
+    CHECK(CreekGroundBlendWeight({}, std::numeric_limits<double>::quiet_NaN(), 0) == 0.0);
+}
+
 void VersionFixture()
 {
     ChunkBaseline chunk;
@@ -621,6 +671,7 @@ int main()
     ClusteredLayout();
     PaletteDistribution();
     TerrainReliefAndBuildPockets();
+    CreekPresentation();
     RegionalInfluence();
     LoadedRegionalDescriptorCaching();
     VersionFixture();

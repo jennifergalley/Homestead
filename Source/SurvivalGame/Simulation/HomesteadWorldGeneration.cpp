@@ -325,6 +325,32 @@ const char* StatusMessage(Status status)
 
 double StreamCenterCm(double yCm) { return 1500.0 + 180.0 * std::sin(yCm / 800.0); }
 
+double CreekWaterHalfWidthCm(WorldDescriptor world, double yCm, bool rightBank)
+{
+    if (!std::isfinite(yCm)) return StreamWaterHalfWidthCm;
+    const auto y = static_cast<std::int64_t>(std::llround(yCm));
+    const std::uint64_t channel = rightBank ? 413 : 411;
+    const double broad = static_cast<double>(Noise(world, 0, y, 700, channel)) / 32768.0;
+    const double detail = static_cast<double>(Noise(world, 0, y, 260, channel + 1)) / 32768.0;
+    const double width = StreamWaterHalfWidthCm + broad * 9.0 + detail * 4.0;
+    return width < CreekWaterMinimumHalfWidthCm ? CreekWaterMinimumHalfWidthCm
+        : width > CreekWaterMaximumHalfWidthCm ? CreekWaterMaximumHalfWidthCm : width;
+}
+
+double CreekGroundBlendWeight(WorldDescriptor world, double xCm, double yCm)
+{
+    if (!std::isfinite(xCm) || !std::isfinite(yCm)) return 0.0;
+    const auto y = static_cast<std::int64_t>(std::llround(yCm));
+    const double broad = static_cast<double>(Noise(world, 0, y, 900, 415)) / 32768.0;
+    const double detail = static_cast<double>(Noise(world, 0, y, 360, 416)) / 32768.0;
+    const double innerEdge = 110.0 + broad * 20.0;
+    const double outerEdge = 285.0 + detail * 35.0;
+    const double distance = std::abs(xCm - StreamCenterCm(yCm));
+    const double bank = Smooth(innerEdge, outerEdge, distance);
+    const double patch = 0.5 + 0.5 * std::sin(xCm * 0.0021) * std::cos(yCm * 0.0017);
+    return bank * (0.07 + 0.20 * patch);
+}
+
 Status ChunkAt(std::int64_t xCm, std::int64_t yCm, ChunkCoord& output)
 {
     if (xCm < MinWorldCm || xCm >= MaxWorldCmExclusive ||

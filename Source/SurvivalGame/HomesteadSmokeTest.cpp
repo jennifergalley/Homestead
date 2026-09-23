@@ -194,6 +194,11 @@ void AHomesteadSmokeTest::Prepare()
         PrepareGeneratedWorldChecks();
         return;
     }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadCreekTest")))
+    {
+        PrepareCreekChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadDirectionalNavigationTest")))
     {
         PrepareDirectionalNavigationChecks();
@@ -212,6 +217,11 @@ void AHomesteadSmokeTest::Prepare()
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest")))
     {
         PrepareFeedbackChecks();
+        return;
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadCameraPreferenceTest")))
+    {
+        PrepareCameraPreferenceChecks();
         return;
     }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest")))
@@ -848,9 +858,11 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadCreekTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadPromptTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadBookClarityTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadVideoSyncTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadCameraPreferenceTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")) ? 0 : 4;

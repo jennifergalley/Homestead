@@ -70,8 +70,9 @@ if (Test-Path -LiteralPath $report) {
     Move-Item -LiteralPath $report -Destination (Join-Path $history 'unreal-import-report.json')
 }
 $editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
+$offlineArguments = @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 Write-Host "Importing the character assets; log: $log"
-& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$importer" -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $log
+& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$importer" @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $log
 if ($LASTEXITCODE -ne 0) {
     Get-Content -LiteralPath $log -Tail 80 | Write-Output
     throw "Unreal character import failed ($LASTEXITCODE)."
@@ -79,20 +80,20 @@ if ($LASTEXITCODE -ne 0) {
 if (-not (Test-Path -LiteralPath $report)) { throw 'Character importer did not produce a fresh validation report.' }
 $variantReport = Join-Path $root 'Build\CharacterPreview\Variants\unreal-import-report.json'
 $variantLog = Join-Path $logs 'variant-import.log'
-& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$variantImporter" -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $variantLog
+& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$variantImporter" @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $variantLog
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $variantReport)) {
     Get-Content -LiteralPath $variantLog -Tail 80 | Write-Output
     throw "Unreal wardrobe import failed ($LASTEXITCODE)."
 }
 $bodyReport = Join-Path $root 'Build\CharacterPreview\BodyPresets\unreal-import-report.json'
 $bodyLog = Join-Path $logs 'body-preset-import.log'
-& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$bodyImporter" -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $bodyLog
+& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$bodyImporter" @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $bodyLog
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $bodyReport)) {
     Get-Content -LiteralPath $bodyLog -Tail 80 | Write-Output
     throw "Unreal body-preset import failed ($LASTEXITCODE)."
 }
 $verificationLog = Join-Path $logs 'character-reference-verification.log'
-& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$verifier" -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $verificationLog
+& $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$verifier" @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $verificationLog
 if ($LASTEXITCODE -ne 0) {
     Get-Content -LiteralPath $verificationLog -Tail 80 | Write-Output
     throw "Persisted character references failed a fresh-process check ($LASTEXITCODE)."

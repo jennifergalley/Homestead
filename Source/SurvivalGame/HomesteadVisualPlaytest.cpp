@@ -384,7 +384,8 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
                 PlotMargin = FMath::Min(PlotMargin,
                     FVector2D::Distance(FVector2D(Position), FVector2D(Center.x, Center.y)) - 195);
             }
-            const float Weight = AHomesteadWorld::GrassGroundWeight(Position.X, Position.Y);
+            const float Weight = Homestead::Generation::CreekGroundBlendWeight(
+                PC->State().world, Position.X, Position.Y);
             Valid &= ScaleError < 0.001 && FMath::Abs(GroundError) < 0.1 && HomeMargin >= -0.1
                 && ResourceMargin >= -0.1 && StructureMargin >= -0.1 && PlotMargin >= -0.1
                 && FMath::Abs(Position.X - Homestead::StreamX(Position.Y)) >= 214.9
@@ -417,7 +418,8 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             MaxPositionError = FMath::Max(MaxPositionError, (FVector(Vertex.Position) - Expected).Size());
             MaxNormalError = FMath::Max(MaxNormalError, (FVector(Vertex.Normal) - FVector(-DX, -DY, 1).GetSafeNormal()).Size());
             MaxUvError = FMath::Max(MaxUvError, (FVector2D(Vertex.UV0) - FVector2D(X / 300.0f, Y / 300.0f)).Size());
-            MaxWeightError = FMath::Max(MaxWeightError, FMath::Abs(Vertex.Color.R / 255.0 - AHomesteadWorld::GrassGroundWeight(X, Y)));
+            MaxWeightError = FMath::Max(MaxWeightError, FMath::Abs(Vertex.Color.R / 255.0
+                - Homestead::Generation::CreekGroundBlendWeight(PC->State().world, X, Y)));
         }
         int32 Offset = 0;
         for (int32 Y = 0; Y < 320; ++Y)

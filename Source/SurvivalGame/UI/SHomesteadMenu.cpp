@@ -601,7 +601,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             .OnUnhovered_Lambda([this, Index]() { if (Hover == Index) Hover = INDEX_NONE; })
             .OnClicked_Lambda([this, Index]()
             {
-                if (PointerAction() && Dialog == EDialog::None) { Region = ERegion::Content; Select(Index); }
+                if (PointerAction() && Dialog == EDialog::None)
+                {
+                    Region = ERegion::Content;
+                    Select(Index);
+                    if (Entries.IsValidIndex(ContentSelection)
+                        && IsDirectCameraSetting(Entries[ContentSelection]))
+                        RunAction(EHomesteadItemAction::Primary);
+                }
                 return FReply::Handled();
             })
             [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
@@ -714,7 +721,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
             if (Row.Quantity > 1) Actions.Add(EHomesteadItemAction::Split);
             Actions.Add(EHomesteadItemAction::Merge);
         }
-        else Actions.Add(EHomesteadItemAction::Primary);
+        else if (!IsDirectCameraSetting(Row)) Actions.Add(EHomesteadItemAction::Primary);
         if (SeenPage == 0 && Row.ContainerId >= 0)
         { Actions.Add(EHomesteadItemAction::MoveEarlier); Actions.Add(EHomesteadItemAction::MoveLater); }
     }
@@ -758,6 +765,11 @@ FName SHomesteadMenu::EntryIcon(const FHomesteadRow& Row) const
     if (SeenPage == 1 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(RecipeIcons)) return FName(RecipeIcons[Row.Id]);
     if (SeenPage == 2 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(PieceIcons)) return FName(PieceIcons[Row.Id]);
     return FName(TabIcons[FMath::Clamp(SeenPage, 0, 6)]);
+}
+bool SHomesteadMenu::IsDirectCameraSetting(const FHomesteadRow& Row) const
+{
+    return SeenPage == 4 && Row.Subject == EHomesteadMenuSubject::Legacy
+        && (Row.Id == 3 || Row.Id == 4);
 }
 int32 SHomesteadMenu::DetailIndex() const { return Hover != INDEX_NONE ? Hover : ContentSelection; }
 FString SHomesteadMenu::DetailsText() const
@@ -937,6 +949,9 @@ void SHomesteadMenu::Activate()
         else Controller->ZoomMenuPortrait();
     }
     else if (Region == ERegion::Actions && Actions.IsValidIndex(ActionSelection)) RunAction(Actions[ActionSelection]);
+    else if (Region == ERegion::Content && Entries.IsValidIndex(ContentSelection)
+        && IsDirectCameraSetting(Entries[ContentSelection]))
+        RunAction(EHomesteadItemAction::Primary);
     else
     {
         Region = Actions.IsEmpty() ? ERegion::Details : ERegion::Actions;

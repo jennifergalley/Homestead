@@ -18,7 +18,8 @@ if($Packaged) {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $executable=Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
     $working=$root
-    $prefix="`"$(Join-Path $root 'SurvivalGame.uproject')`" /Game/SurvivalGame/Maps/Homestead -game "
+    $offlineArguments=(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1')) -join ' '
+    $prefix="`"$(Join-Path $root 'SurvivalGame.uproject')`" /Game/SurvivalGame/Maps/Homestead -game $offlineArguments "
 }
 function Invoke-RoutingProcess([string]$Name,[string]$Flags,[int]$ExpectedExit=0) {
     $log=Join-Path $output "$Name.log"

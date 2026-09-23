@@ -5,6 +5,7 @@ $root = Split-Path $PSScriptRoot -Parent
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
+$offlineArguments = @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 $script = Join-Path $root 'Scripts\Characters\import_locomotion.py'
 foreach ($verify in @($false, $true)) {
     $name = $AnimationSet.ToLower() + $(if ($verify) { '-reload' } else { '-import' })
@@ -17,7 +18,7 @@ foreach ($verify in @($false, $true)) {
     if ($AnimationSet -eq 'Chopping') { $extra += '-ChoppingAnimations' }
     if ($AnimationSet -eq 'Tilling') { $extra += '-TillingAnimations' }
     & $editor (Join-Path $root 'SurvivalGame.uproject') -run=pythonscript "-script=$script" `
-        -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput @extra *> $log
+        @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput @extra *> $log
     $marker = $AnimationSet.ToUpper() + '_VERIFIED'
     if ($LASTEXITCODE -ne 0 -or -not (Select-String -LiteralPath $log -Pattern $marker -Quiet)) {
         Get-Content -LiteralPath $log -Tail 70 | Write-Output
