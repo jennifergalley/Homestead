@@ -12,7 +12,7 @@
   evaluator and hatchet prop; verify successful mature/sapling transactions
   start once, rejected actions do not animate, rapid input coalesces, movement
   cancels cleanly and pawn/camera/feet remain stable.
-- [ ] 1.4 Build one playable chopping candidate and inspect close plus ordinary
+- [x] 1.4 Build one playable chopping candidate and inspect close plus ordinary
   gameplay-camera arcs across representative bodies/hair/garments; verify real
   felling reward, permanent clearing, save/reload and cadence before continuing.
 
@@ -99,3 +99,27 @@ clearing. The route also exposed and fixed prepared wardrobe application not
 cancelling an active hand action. The optional combined camera-lifecycle route
 still has a separately preserved stale woodland-reservation expectation and is
 not counted as chopping acceptance.
+
+Task 1.4 passed with immutable Shipping candidate
+`work-animation-chop-08-shipping` (executable SHA-256
+`F17D1E8A07A3D05BBE6FD5C252C5AB0CC9ECC95CA8BB4368BFE401F4E90501CD`).
+`work-animation-chop-08-shipping-clearing` passed sapling and mature-tree
+transactions, permanent generated keys, reward/state equality, rejection,
+coalescing, movement/menu/planning/appearance/load cancellation, save/reload,
+and three representative production wardrobe combinations at mean32.85fps,
+p95 17.73ms. Editor route `work-animation-chop-clearing-focused-editor-17`
+retains all 18 body/hair/outfit combinations and the capacity/depleted cases.
+Separate Development cooked-process write/reload/normal-preview consumption
+passed in `work-animation-chop-04-hotkey`; the direct Shipping hotkey helper is
+not admitted by Shipping QA and produced no result.
+
+The ordinary mapped Shipping capture
+`work-animation-chop-08-shipping-ordinary-clear` gathered real supplies,
+crafted the hatchet, walked to and cleared a real sapling, then recovered with
+the tool hidden. Its 8Hz action sample records one start, 0cm actor travel, 0cm
+left/right toe drift, fixed view yaw, a 119.63cm right-hand path and nine
+visible hatchet samples. Inspected anticipation/impact/follow-through/recovery
+frames show a materially clearer overhead preparation and descending arc than
+the incumbent generic forward/down lift. Immediate authoritative removal still
+means the target is absent during the gesture, so exact contact and terrain IK
+are not claimed.
