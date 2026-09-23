@@ -1304,7 +1304,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                     { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
     Add(TEXT("Sort restores one authoritative branch stack for legacy transaction regression"),
-        [this]() { Tap(EKeys::S); },
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Top); },
         [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
@@ -1396,6 +1396,18 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest, BranchTotal]() { return Controller->ActiveStorageChest().IsSet()
             && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal - 1
             && Controller->Simulation().ChestUsedCapacity(*Chest) == 1; });
+    Add(TEXT("Controller Right crosses from exact Chest grid to nearest Pack tile"),
+        [this, Chest, Group]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Group(*Chest), *Chest);
+            Tap(EKeys::Gamepad_DPad_Right);
+        },
+        [this]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Subject && Subject->ContainerId == 0; });
+    Add(TEXT("Controller Left reverses from Pack to exact Chest grid"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Left); },
+        [this, Chest]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Subject && Subject->ContainerId == *Chest; });
     Add(TEXT("Record Pack Branch source and focus exact Chest pointer target"),
         [this, Chest, Group, DragSource]()
         {

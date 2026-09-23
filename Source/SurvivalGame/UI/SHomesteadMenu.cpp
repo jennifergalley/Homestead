@@ -1607,6 +1607,41 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             Refresh();
             return;
         }
+        if (SeenPage == 0 && Controller->ActiveStorageChest().IsSet()
+            && Entries.IsValidIndex(ContentSelection))
+        {
+            const int32 CurrentContainer = Entries[ContentSelection].ContainerId;
+            TArray<int32> CurrentGrid;
+            TArray<int32> OtherGrid;
+            for (int32 Index = 0; Index < Entries.Num(); ++Index)
+            {
+                if (Entries[Index].ContainerId == CurrentContainer) CurrentGrid.Add(Index);
+                else OtherGrid.Add(Index);
+            }
+            const int32 Local = CurrentGrid.IndexOfByKey(ContentSelection);
+            if (Direction.x && !OtherGrid.IsEmpty())
+            {
+                const bool MoveToPack = Direction.x > 0 && CurrentContainer > 0;
+                const bool MoveToChest = Direction.x < 0 && CurrentContainer == 0;
+                if (MoveToPack || MoveToChest)
+                {
+                    Select(OtherGrid[FMath::Clamp(Local, 0, OtherGrid.Num() - 1)]);
+                    Moved = true;
+                    break;
+                }
+            }
+            if (Direction.y && Local >= 0)
+            {
+                const auto LocalMove = HomesteadMenuNavigation::Move(
+                    Local, CurrentGrid.Num(), 4, Direction, Local % 4);
+                if (!LocalMove.boundary && LocalMove.index >= 0)
+                {
+                    Select(CurrentGrid[LocalMove.index], true);
+                    Moved = true;
+                    break;
+                }
+            }
+        }
         int32 Next = ContentSelection;
         if (MoveWithin(Next, Entries.Num(), Columns(), Direction, DesiredColumn))
         { Select(Next, Direction.y != 0); Moved = true; }
@@ -1791,7 +1826,14 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
             SplitSelectedHalf();
         return true;
     }
-    if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0 && GetSelectedSubject()) RunAction(EHomesteadItemAction::Split); return true; }
+    if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top)
+    {
+        if (SeenPage == 0 && Key == EKeys::Gamepad_FaceButton_Top)
+        {
+            if (Controller->MenuSortPack()) Refresh();
+        }
+        return true;
+    }
     if (Dx || Dy) { LeftStick.Reset(); NavigateDirection({Dx, Dy}); }
     return true;
 }
