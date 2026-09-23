@@ -848,7 +848,11 @@ void AHomesteadController::Secondary()
         const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
         const int X = FMath::FloorToInt((Position.x + Forward.X * 190) / Homestead::CellSize);
         const int Y = FMath::FloorToInt((Position.y + Forward.Y * 190) / Homestead::CellSize);
-        Notify(Sim.Till(X, Y, Position), GrassStepB);
+        const auto Result = Sim.Till(X, Y, Position);
+        Notify(Result, GrassStepB);
+        if (Result.ok)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                Avatar->PlayTill({(X + 0.5) * Homestead::CellSize, (Y + 0.5) * Homestead::CellSize});
     }
 }
 

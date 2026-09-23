@@ -4,6 +4,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
+#include "HomesteadDiggingStick.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -60,6 +61,8 @@ AHomesteadCharacter::AHomesteadCharacter()
     WateringTool->SetupAttachment(GetMesh(), TEXT("hand_r"));
     Hatchet = CreateDefaultSubobject<UHomesteadHatchet>(TEXT("ContextualHatchet"));
     Hatchet->SetupAttachment(GetMesh(), TEXT("hand_r"));
+    DiggingStick = CreateDefaultSubobject<UHomesteadDiggingStick>(TEXT("ContextualDiggingStick"));
+    DiggingStick->SetupAttachment(GetMesh(), TEXT("hand_r"));
     const FName GarmentNames[] = {TEXT("EquippedTunic"), TEXT("EquippedApron"), TEXT("EquippedFootwear")};
     for (FName Name : GarmentNames)
     {
@@ -105,7 +108,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
     WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Water.AN_Heroine_Water"));
     ClearAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Chop.AN_Heroine_Chop"));
-    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation || !ClearAnimation)
+    TillAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Till.AN_Heroine_Till"));
+    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation || !ClearAnimation || !TillAnimation)
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine mesh or motion assets are missing. Run Scripts/Build-Game.ps1; the labeled stand-in remains visible."));
         return false;
@@ -115,7 +119,8 @@ bool AHomesteadCharacter::LoadHeroineAssets()
         || WalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || GatherAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || WaterAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
-        || ClearAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
+        || ClearAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
+        || TillAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine meshes and clips do not share a skeleton."));
         return false;
@@ -410,7 +415,9 @@ void AHomesteadCharacter::CancelAction()
         Animation->CancelAction();
     WateringTool->SetHiddenInGame(true, true);
     Hatchet->SetHiddenInGame(true, true);
+    DiggingStick->SetHiddenInGame(true, true);
     ClearYaw.Reset();
+    TillYaw.Reset();
 }
 
 void AHomesteadCharacter::PlayClear()
@@ -431,11 +438,28 @@ void AHomesteadCharacter::PlayClear(Homestead::Point Target)
         PlayClear();
         return;
     }
+
     ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestClear();
     else
         UE_LOG(LogTemp, Error, TEXT("Chopping succeeded but its animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::PlayTill(Homestead::Point Target)
+{
+    const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
+    if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Till committed without a valid presentation target; using heroine facing."));
+        TillYaw.Reset();
+    }
+    else
+        TillYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->RequestTill();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Tilling succeeded but its animation instance is unavailable."));
 }
 
 void AHomesteadCharacter::CreateMappings()

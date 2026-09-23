@@ -15,6 +15,7 @@ public:
     void RequestGather();
     void RequestWater();
     void RequestClear();
+    void RequestTill();
     void CancelAction();
     float GatherWeight() const;
     float GatherPhase() const;
@@ -27,6 +28,10 @@ public:
     float ClearPhase() const;
     uint32 ClearStarts() const;
     bool IsClearing() const;
+    float TillWeight() const;
+    float TillPhase() const;
+    uint32 TillStarts() const;
+    bool IsTilling() const;
     float ActionWeight() const;
 
 protected:

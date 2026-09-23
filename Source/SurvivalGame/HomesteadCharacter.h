@@ -17,6 +17,7 @@ class UAnimSequence;
 class UMaterialInstanceDynamic;
 class UHomesteadWateringTool;
 class UHomesteadHatchet;
+class UHomesteadDiggingStick;
 class AHomesteadWorld;
 namespace Homestead { struct Point; }
 
@@ -51,12 +52,16 @@ public:
     UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
     UAnimSequence* GetClearAnimation() const { return ClearAnimation; }
+    UAnimSequence* GetTillAnimation() const { return TillAnimation; }
     UHomesteadHatchet* GetHatchet() const { return Hatchet; }
+    UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
     void PlayGather();
     void PlayWater();
     void PlayClear();
     void PlayClear(Homestead::Point Target);
+    void PlayTill(Homestead::Point Target);
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
+    float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     void CancelAction();
     FRotator ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred);
     const FString& StartingViewEvidence() const { return InitialViewEvidence; }
@@ -79,7 +84,9 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> TillAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadDiggingStick> DiggingStick;
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> GarmentComponents;
     UPROPERTY() FHomesteadEquipmentPresentation PreparedEquipment;
@@ -93,6 +100,7 @@ private:
     FRotator SavedViewRotation = FRotator::ZeroRotator;
     FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
     TOptional<float> ClearYaw;
+    TOptional<float> TillYaw;
 
     bool LoadHeroineAssets();
     float InferMeshYaw(const USkeletalMesh& Asset) const;
