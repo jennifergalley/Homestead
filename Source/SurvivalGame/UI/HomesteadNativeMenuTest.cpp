@@ -751,7 +751,8 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
             *Expected = Controller->Simulation();
             if (!Expected->UnequipWearable(*Tunic, Expected->GetRevision()))
             { Finish(false, TEXT("The independent unequip expectation was invalid.")); return; }
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Unequip))
+            { Finish(false, TEXT("Owned tunic unequip action is unavailable.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, Expected, Tunic]()
@@ -826,8 +827,8 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
             *Expected = Controller->Simulation();
             if (!Expected->RecolorWearable(*Tunic, (Owned->dye + 1) % 4, Controller->PlayerPoint(), Expected->GetRevision()))
             { Finish(false, TEXT("The independent dye expectation was invalid.")); return; }
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_DPad_Right);
+            if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Dye))
+            { Finish(false, TEXT("Owned tunic dye action is unavailable.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, Expected]() { return !Controller->ToastIsError()
@@ -879,7 +880,10 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
                 && Written->IsCurrentVersion() && Written->SimulationData == Saved->Simulation && Written->WorldId == Saved->World;
         });
     Add(TEXT("Mutate owned equipment through UI after saving"),
-        [this, OpenInventory]() { OpenInventory(2); Tap(EKeys::Enter); Tap(EKeys::Enter); },
+        [this, OpenInventory]() { OpenInventory(2);
+            if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Unequip))
+            { Finish(false, TEXT("Saved tunic unequip action is unavailable.")); return; }
+            Tap(EKeys::Enter); },
         [this, Saved, Tunic]()
         {
             const auto* Owned = Controller->Simulation().GetWearable(*Tunic);
@@ -1011,6 +1015,9 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest]() { return Controller->IsBookOpen() && Controller->InventoryView() == 1
             && Controller->ActiveStorageChest().IsSet()
             && Controller->ActiveStorageChest().GetValue() == *Chest; });
+    Add(TEXT("Capture exact Chest and Pack storage surface"),
+        [this]() { Screenshot(TEXT("native-storage-two-grid")); },
+        [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);
     Add(TEXT("Back clears the exact storage session before ordinary Inventory"),
         [this, Branches]()
         {
@@ -1065,6 +1072,53 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
             }
             return BranchIndex >= 0 && BranchIndex < FiberIndex; });
+    Add(TEXT("Enter picks up the focused Branch tile for virtual drag"),
+        [this, Branches]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            Tap(EKeys::Enter);
+        },
+        [this]() { return Controller->NativeMenu->IsVirtualDraggingItem(); });
+    Add(TEXT("Enter drops Branch at focused Fiber using the same reorder authority"),
+        [this]()
+        {
+            int32 Fiber = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Fiber) { Fiber = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Fiber, 0);
+            Tap(EKeys::Enter);
+        },
+        [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            if (!Layout || Controller->NativeMenu->IsVirtualDraggingItem()) return false;
+            int BranchIndex = -1, FiberIndex = -1;
+            for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
+            {
+                if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+            }
+            return BranchIndex > FiberIndex; });
+    Add(TEXT("Sort restores order after virtual drag"),
+        [this]() { Tap(EKeys::S); },
+        [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            if (!Layout) return false;
+            int BranchIndex = -1, FiberIndex = -1;
+            for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
+            {
+                if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+            }
+            return BranchIndex >= 0 && BranchIndex < FiberIndex; });
+    Add(TEXT("Back cancels virtual drag without closing Inventory or mutating state"),
+        [this, Branches, Snapshot]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            *Snapshot = Controller->Simulation().Serialize();
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_FaceButton_Right);
+        },
+        [this, Snapshot]() { return Controller->IsBookOpen()
+            && !Controller->NativeMenu->IsVirtualDraggingItem()
+            && Controller->Simulation().Serialize() == *Snapshot; });
     Add(TEXT("Ctrl Enter splits the focused odd stack in half beside its source"),
         [this]()
         {
@@ -1095,6 +1149,28 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                 { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
+    Add(TEXT("Controller A picks up the split Branch for virtual merge"),
+        [this, Branches]()
+        {
+            int32 Split = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Branch
+                    && Entry.groupId != *Branches) { Split = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Split, 0);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this]() { return Controller->NativeMenu->IsVirtualDraggingItem(); });
+    Add(TEXT("Controller A drops onto the original Branch and merges exact totals"),
+        [this, Branches]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
+            return Layout && !Controller->NativeMenu->IsVirtualDraggingItem()
+                && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+                    { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
     Add(TEXT("Sort restores one authoritative branch stack for legacy transaction regression"),
         [this]() { Tap(EKeys::S); },
         [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
@@ -1218,11 +1294,60 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         },
         [this, Chest]() { return Controller->Simulation().ChestUsedCapacity(*Chest) == 3
             && Controller->NativeMenu->HasActiveDialog(); });
+    Add(TEXT("Cancel amount draft and open the exact two-grid storage session"),
+        [this, Chest]()
+        {
+            Tap(EKeys::Escape);
+            Controller->CloseBook();
+            Controller->OpenChestStorage(*Chest);
+        },
+        [this, Chest]() { return Controller->ActiveStorageChest().IsSet()
+            && Controller->ActiveStorageChest().GetValue() == *Chest
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == 3; });
+    Add(TEXT("Virtual drag transfers the whole Pack Branch stack into exact Chest"),
+        [this, Chest, Group]()
+        {
+            const int32 PackBranch = Group(0);
+            const int32 ChestBranch = Group(*Chest);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PackBranch, 0);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, ChestBranch, *Chest);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Chest]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 0
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == 10
+            && !Controller->NativeMenu->IsVirtualDraggingItem(); });
+    Add(TEXT("Virtual drag returns exact Chest Branch stack to Pack using any Pack tile"),
+        [this, Chest, Group]()
+        {
+            const int32 ChestBranch = Group(*Chest);
+            int32 PackTarget = 0;
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId) { PackTarget = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, ChestBranch, *Chest);
+            Tap(EKeys::Enter);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PackTarget, 0);
+            Tap(EKeys::Enter);
+        },
+        [this, Chest]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 10
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == 0
+            && !Controller->NativeMenu->IsVirtualDraggingItem(); });
+    Add(TEXT("Restore three stored Branch for split and merge regression"),
+        [this, Chest, Group]()
+        {
+            const int32 PackBranch = Group(0);
+            if (!Controller->Sim.TransferGroup(*Chest, PackBranch, 3, true,
+                Controller->PlayerPoint(), Controller->Sim.GetRevision()))
+            { Finish(false, TEXT("Could not restore stored Branch regression state.")); return; }
+            Controller->CloseBook();
+            Controller->OpenChestStorage(*Chest);
+        },
+        [this, Chest]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 7
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == 3; });
     Add(TEXT("Cancel repeated draft then split stored stack through mapped confirmation"),
         [this, Chest, Group]()
         {
-            Tap(EKeys::Escape);
-            Controller->CloseBook(); Controller->MenuInventoryView(1); Controller->OpenBook(0);
+            Controller->CloseBook(); Controller->OpenChestStorage(*Chest);
             const int32 Stored = Group(*Chest, 3);
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Stored, *Chest);
             Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Split);

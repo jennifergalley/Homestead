@@ -1511,7 +1511,7 @@ FString AHomesteadController::BookTitle() const
 {
     switch (Page)
     {
-    case 0: return TEXT("Your pack");
+    case 0: return ActiveChestId.IsSet() ? TEXT("Storage") : TEXT("Your pack");
     case 1: return TEXT("Crafting recipes");
     case 2: return TEXT("Building plans");
     default: return TEXT("Field book");

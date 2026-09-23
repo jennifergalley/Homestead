@@ -386,6 +386,8 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     if (!Controller.IsValid()) return;
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
+    if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())
+        CancelVirtualItemDrag();
     if (CraftInput != ECraftInput::None)
     {
         if (Dialog != EDialog::None || SeenPage != 1 || Region != ERegion::Content
@@ -485,6 +487,7 @@ void SHomesteadMenu::Refresh()
 {
     if (!Controller.IsValid() || !ContentHost) return;
     CancelPointerItemDrag();
+    CancelVirtualItemDrag();
     const int32 OldPage = SeenPage;
     const bool WasRecovery = bRecovery;
     bRecovery = Controller->IsFailed() && !Controller->IsBookOpen();
@@ -533,6 +536,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     }
     TSharedPtr<SVerticalBox> Body;
     TSharedPtr<SUniformGridPanel> Grid;
+    TSharedPtr<SUniformGridPanel> ChestGrid;
+    TSharedPtr<SUniformGridPanel> PackGrid;
     auto Result = SNew(SVerticalBox)
         + SVerticalBox::Slot().FillHeight(1)
         [
@@ -683,9 +688,10 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return Result;
     };
     if (SeenPage == 4) return BuildSettings();
+    const bool Storage = SeenPage == 0 && Controller->ActiveStorageChest().IsSet();
     TSharedPtr<SHorizontalBox> ColumnsBox;
     Body->AddSlot().FillHeight(1)[ SAssignNew(ColumnsBox, SHorizontalBox) ];
-    if ((SeenPage == 0 || SeenPage == 6) && Controller->MenuPortraitBrush())
+    if ((SeenPage == 0 || SeenPage == 6) && !Storage && Controller->MenuPortraitBrush())
     {
         ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, 12, 0)
         [
@@ -738,7 +744,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 SAssignNew(InventoryColumn, SVerticalBox)
             ]
         ];
-    if (SeenPage == 0)
+    if (SeenPage == 0 && !Storage)
     {
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
         [
@@ -768,7 +774,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     const FString Summary = SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary();
     if (!Summary.IsEmpty())
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)[ Text(Summary, 17) ];
-    if (SeenPage == 0)
+    if (SeenPage == 0 && !Storage)
     {
         TSharedPtr<SHorizontalBox> Views;
         InventoryColumn->AddSlot().AutoHeight().Padding(0, 0, 0, 12)[ SAssignNew(Views, SHorizontalBox) ];
@@ -779,13 +785,64 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 TAttribute<FSlateColor>::CreateLambda([this, View]()
                 { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })), ERegion::Inventory, View) ];
     }
-    InventoryColumn->AddSlot().FillHeight(1)
-    [
-        SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
-        + SScrollBox::Slot().HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)
-        [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
-    ];
-    if (SeenPage == 0)
+    if (Storage)
+    {
+        TSharedPtr<SVerticalBox> ChestColumn;
+        TSharedPtr<SVerticalBox> PackColumn;
+        InventoryColumn->AddSlot().FillHeight(1)
+        [
+            SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
+            + SScrollBox::Slot()
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 8, 0)
+                [
+                    SAssignNew(ChestColumn, SVerticalBox)
+                    + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 6)
+                    [ Text(TEXT("Chest"), 20) ]
+                    + SVerticalBox::Slot().AutoHeight()
+                    [ SAssignNew(ChestGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ]
+                ]
+                + SHorizontalBox::Slot().FillWidth(1).Padding(8, 0, 0, 0)
+                [
+                    SAssignNew(PackColumn, SVerticalBox)
+                    + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 6)
+                    [
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                        [ Text(TEXT("Pack"), 20) ]
+                        + SHorizontalBox::Slot().AutoWidth()
+                        [
+                            SNew(SBox).WidthOverride(34).HeightOverride(34)
+                            [
+                                SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+                                .ContentPadding(4).ButtonColorAndOpacity(Selected)
+                                .ToolTipText(FText::FromString(TEXT("Sort pack")))
+                                .OnClicked_Lambda([this]()
+                                {
+                                    if (PointerAction() && Controller->MenuSortPack()) Refresh();
+                                    return FReply::Handled();
+                                })
+                                [ SNew(SHomesteadIcon).Kind(FName(TEXT("sort"))).Tint(Gold) ]
+                            ]
+                        ]
+                    ]
+                    + SVerticalBox::Slot().AutoHeight()
+                    [ SAssignNew(PackGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ]
+                ]
+            ]
+        ];
+    }
+    else
+    {
+        InventoryColumn->AddSlot().FillHeight(1)
+        [
+            SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
+            + SScrollBox::Slot().HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)
+            [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
+        ];
+    }
+    if (SeenPage == 0 && !Storage)
     {
         TSharedPtr<SHorizontalBox> EquipmentBar;
         InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Text(TEXT("Equipped slots"), 16) ];
@@ -823,7 +880,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ]
             ]
         ];
-    if (Entries.IsEmpty())
+    if (Entries.IsEmpty() && Grid)
         Grid->AddSlot(0, 0)[ FocusAnchor(SNew(SBox).WidthOverride_Lambda([this]()
             { return FMath::Max(ItemCellWidth, Scroll->GetCachedGeometry().GetLocalSize().X > 0
                 ? static_cast<float>(Scroll->GetCachedGeometry().GetLocalSize().X) - 24.0f : 480.0f); })
@@ -831,6 +888,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             ? TEXT("No items in reachable storage.\nStand near a chest to manage its contents.")
             : SeenPage == 0 && Controller->InventoryView() == 2 ? TEXT("No removable clothing is equipped.")
             : TEXT("Your pack is empty.\nGather supplies or take an item from a nearby chest."))], ERegion::Content, -1) ];
+    int32 ChestCell = 0;
+    int32 PackCell = 0;
     for (int32 Index = 0; Index < Entries.Num(); ++Index)
     {
         const auto& Row = Entries[Index];
@@ -856,6 +915,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     && (Entries[Index].Subject == EHomesteadMenuSubject::ItemGroup
                         || Entries[Index].Subject == EHomesteadMenuSubject::Wearable))
                 {
+                    CancelVirtualItemDrag();
                     Region = ERegion::Content;
                     Select(Index);
                     BeginPointerItemDrag(Index);
@@ -955,7 +1015,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [ Button ]
             ];
         Cells.Add(Cell);
-        Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
+        if (Storage)
+        {
+            const bool InChest = Row.ContainerId > 0;
+            const int32 CellIndex = InChest ? ChestCell++ : PackCell++;
+            auto TargetGrid = InChest ? ChestGrid : PackGrid;
+            TargetGrid->AddSlot(CellIndex % 4, CellIndex / 4)[ Cell.ToSharedRef() ];
+        }
+        else Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
     }
     return Result;
 }
@@ -1283,6 +1350,10 @@ void SHomesteadMenu::FocusEquipment(int32 Index)
 }
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
 {
+    if (bVirtualDraggingItem && Index == VirtualDragSource)
+        return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+    if (bVirtualDraggingItem && Index == ContentSelection)
+        return Gold;
     if (bPointerDraggingItem && Index == PointerDragSource)
         return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
     if (bPointerDraggingItem && Index == PointerDragTarget)
@@ -1342,6 +1413,36 @@ void SHomesteadMenu::CancelPointerItemDrag()
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
     bSuppressItemClick = false;
+}
+void SHomesteadMenu::BeginOrCommitVirtualItemDrag()
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None || SeenPage != 0
+        || Region != ERegion::Content || !Entries.IsValidIndex(ContentSelection))
+        return;
+    const auto& Row = Entries[ContentSelection];
+    if (Row.Subject != EHomesteadMenuSubject::ItemGroup
+        && Row.Subject != EHomesteadMenuSubject::Wearable)
+        return;
+    if (!bVirtualDraggingItem)
+    {
+        CancelPointerItemDrag();
+        VirtualDragSource = ContentSelection;
+        VirtualDragRevision = Controller->Simulation().GetRevision();
+        bVirtualDraggingItem = true;
+        return;
+    }
+    const int32 Source = VirtualDragSource;
+    const int32 Target = ContentSelection;
+    const uint64 Revision = VirtualDragRevision;
+    CancelVirtualItemDrag();
+    if (Entries.IsValidIndex(Source) && Entries.IsValidIndex(Target) && Source != Target)
+        Controller->MenuDrop(Entries[Source], Entries[Target], Revision);
+}
+void SHomesteadMenu::CancelVirtualItemDrag()
+{
+    VirtualDragSource = INDEX_NONE;
+    VirtualDragRevision = 0;
+    bVirtualDraggingItem = false;
 }
 bool SHomesteadMenu::PointerAction()
 {
@@ -1415,6 +1516,7 @@ void SHomesteadMenu::ChangePage(int32 Page)
 {
     if (!Controller.IsValid() || Dialog != EDialog::None) return;
     CancelPointerItemDrag();
+    CancelVirtualItemDrag();
     StopCraftHold();
     Controller->MenuPage(Page);
     Refresh();
@@ -1669,6 +1771,9 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         if (SeenPage == 1 && Region == ERegion::Content && Entries.IsValidIndex(ContentSelection)
             && Entries[ContentSelection].Subject == EHomesteadMenuSubject::Recipe)
             StartCraftHold(Input);
+        else if (SeenPage == 0 && Region == ERegion::Content
+            && Entries.IsValidIndex(ContentSelection))
+            BeginOrCommitVirtualItemDrag();
         else
             Activate();
         return true;
@@ -1766,6 +1871,7 @@ FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event
 void SHomesteadMenu::Back()
 {
     if (bSaving) return;
+    if (bVirtualDraggingItem) { CancelVirtualItemDrag(); return; }
     CancelPointerItemDrag();
     StopCraftHold();
     if (Dialog == EDialog::Amount && bEditingAmount) { bEditingAmount = false; BuildDialog(); return; }
@@ -1796,6 +1902,7 @@ void SHomesteadMenu::ShowGraphicsSaveFailure(const FString& Error)
 void SHomesteadMenu::SetDialog(EDialog Value)
 {
     CancelPointerItemDrag();
+    CancelVirtualItemDrag();
     StopCraftHold();
     Dialog = Value; DialogSelection = 0;
     bEditingAmount = false;

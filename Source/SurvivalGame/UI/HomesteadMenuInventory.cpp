@@ -17,6 +17,9 @@ void AHomesteadController::MenuInventoryView(int32 View)
 
 FString AHomesteadController::MenuInventorySummary() const
 {
+    if (ActiveChestId.IsSet())
+        return FString::Printf(TEXT("Chest %d: %d / 120  |  Pack: %d / 120"),
+            ActiveChestId.GetValue(), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Sim.UsedCapacity());
     if (MenuInventoryViewIndex == 2) return TEXT("Wearing  |  Equipped clothes do not use pack capacity");
     if (MenuInventoryViewIndex == 1)
     {
@@ -55,6 +58,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
 
     TArray<FHomesteadRow> Result;
     const int Chest = ActiveChestId.Get(Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach));
+    const bool Storage = ActiveChestId.IsSet();
     const int Container = MenuInventoryViewIndex == 1 ? Chest : 0;
     auto AddWearable = [&](const Homestead::WearableInstance& Instance)
     {
@@ -89,35 +93,42 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         Row.CanTake = Row.ContainerId > 0;
         Result.Add(MoveTemp(Row));
     };
-    if (MenuInventoryViewIndex == 2)
+    if (!Storage && MenuInventoryViewIndex == 2)
     {
         for (const auto& Instance : State().wearables)
             if (Instance.owner == Homestead::WearableOwner::Equipped) AddWearable(Instance);
         return Result;
     }
-    if (Container < 0) return Result;
-    const auto* Layout = Sim.GetLayout(Container);
-    if (!Layout) return Result;
-    for (const auto& Entry : *Layout)
+    const auto AddContainer = [&](int32 CurrentContainer)
     {
-        if (Entry.wearableId)
+        if (CurrentContainer < 0) return;
+        const auto* Layout = Sim.GetLayout(CurrentContainer);
+        if (!Layout) return;
+        for (const auto& Entry : *Layout)
         {
-            if (const auto* Instance = Sim.GetWearable(Entry.wearableId)) AddWearable(*Instance);
-            continue;
+            if (Entry.wearableId)
+            {
+                if (const auto* Instance = Sim.GetWearable(Entry.wearableId)) AddWearable(*Instance);
+                continue;
+            }
+            FHomesteadRow Row;
+            Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
+            Row.Subject = EHomesteadMenuSubject::ItemGroup;
+            Row.ContainerId = CurrentContainer;
+            Row.DestinationId = CurrentContainer == 0 ? Chest : 0;
+            Row.Quantity = Entry.quantity;
+            Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
+            Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
+            Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
+                IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
+            Row.CanStore = CurrentContainer == 0 && Chest >= 0;
+            Row.CanTake = CurrentContainer > 0;
+            Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : TEXT("Inspect");
+            Result.Add(MoveTemp(Row));
         }
-        FHomesteadRow Row;
-        Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
-        Row.Subject = EHomesteadMenuSubject::ItemGroup;
-        Row.ContainerId = Container; Row.DestinationId = Container == 0 ? Chest : 0; Row.Quantity = Entry.quantity;
-        Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
-        Row.Location = Container == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), Container);
-        Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
-            IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
-        Row.CanStore = Container == 0 && Chest >= 0;
-        Row.CanTake = Container > 0;
-        Row.Action = Container > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : TEXT("Inspect");
-        Result.Add(MoveTemp(Row));
-    }
+    };
+    if (Storage) { AddContainer(Chest); AddContainer(0); }
+    else AddContainer(Container);
     return Result;
 }
 
@@ -228,7 +239,22 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
 {
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Pick up the item again."), true); return false; }
-    if (Source.ContainerId != Target.ContainerId || Source.ContainerId < 0)
+    if (Source.ContainerId != Target.ContainerId)
+    {
+        if (!ActiveChestId.IsSet()
+            || (Source.ContainerId != 0 && Source.ContainerId != ActiveChestId.GetValue())
+            || (Target.ContainerId != 0 && Target.ContainerId != ActiveChestId.GetValue()))
+        { Notify(TEXT("Choose a valid destination in the opened chest or pack."), true); return false; }
+        Homestead::Result Result{false, "That item cannot move between these containers."};
+        if (Source.Subject == EHomesteadMenuSubject::ItemGroup)
+            Result = Sim.TransferGroup(ActiveChestId.GetValue(), Source.SubjectId, Source.Quantity,
+                Source.ContainerId == 0, PlayerPoint(), ExpectedRevision);
+        else if (Source.Subject == EHomesteadMenuSubject::Wearable)
+            Result = Sim.MoveWearable(Source.SubjectId, Target.ContainerId, PlayerPoint(), ExpectedRevision);
+        Notify(Result);
+        return Result.ok;
+    }
+    if (Source.ContainerId < 0)
     { Notify(TEXT("Choose a valid destination in this container."), true); return false; }
     if (Source.Subject == EHomesteadMenuSubject::ItemGroup
         && Target.Subject == EHomesteadMenuSubject::ItemGroup

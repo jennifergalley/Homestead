@@ -62,6 +62,7 @@ public:
     bool IsEditingQuantity() const { return bEditingAmount; }
     int32 GetDraftQuantity() const { return Amount; }
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
+    bool IsVirtualDraggingItem() const { return bVirtualDraggingItem; }
     void PointerItemDragMove(FVector2D Position);
     float GetCraftProgress() const { return CraftHoldRecipe >= 0 ? CraftHoldElapsed / CraftCycleSeconds : 0.0f; }
 
@@ -133,6 +134,9 @@ private:
     bool bPointerItemDown = false;
     bool bPointerDraggingItem = false;
     bool bSuppressItemClick = false;
+    int32 VirtualDragSource = INDEX_NONE;
+    uint64 VirtualDragRevision = 0;
+    bool bVirtualDraggingItem = false;
     enum class ECraftInput { None, Pointer, Keyboard, Controller };
     static constexpr float CraftCycleSeconds = 1.2f;
     int32 CraftHoldRecipe = INDEX_NONE;
@@ -161,6 +165,8 @@ private:
     void BeginPointerItemDrag(int32 Index);
     void EndPointerItemDrag();
     void CancelPointerItemDrag();
+    void BeginOrCommitVirtualItemDrag();
+    void CancelVirtualItemDrag();
     bool StartCraftHold(ECraftInput Input);
     void StopCraftHold();
     bool IsHoldingRecipe(int32 Recipe) const;
