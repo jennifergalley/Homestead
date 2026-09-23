@@ -66,6 +66,33 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         }
         FocusableMatureTrees.Add(Node);
     }
+    const auto CenterChunk = Controller->State().activeChunk;
+    for (int32 Y = CenterChunk.y - 2; Y <= CenterChunk.y + 2
+        && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty()); ++Y)
+        for (int32 X = CenterChunk.x - 2; X <= CenterChunk.x + 2
+            && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty()); ++X)
+        {
+            Homestead::Generation::ChunkBaseline Baseline;
+            if (Homestead::Generation::GenerateChunk(Controller->State().world, {X, Y}, Baseline)
+                != Homestead::Generation::Status::Ok) continue;
+            for (const auto& Entity : Baseline.entities)
+            {
+                const bool NeedSapling = FocusableSaplings.Num() < 3
+                    && Entity.kind == Homestead::Generation::EntityKind::Sapling;
+                const bool NeedMature = FocusableMatureTrees.IsEmpty()
+                    && Entity.kind == Homestead::Generation::EntityKind::ForestTree;
+                if (!NeedSapling && !NeedMature) continue;
+                const bool Known = Saplings.ContainsByPredicate(
+                    [&Entity](const Homestead::ResourceNode& Node) { return Node.key == Entity.key; });
+                if (Known) continue;
+                Homestead::ResourceNode Node{};
+                Node.key = Entity.key;
+                Node.kind = NeedSapling ? Homestead::ResourceKind::Sapling : Homestead::ResourceKind::ForestTree;
+                Node.position = {static_cast<double>(Entity.xCm), static_cast<double>(Entity.yCm)};
+                if (NeedSapling) { Saplings.Add(Node); FocusableSaplings.Add(Node); }
+                else FocusableMatureTrees.Add(Node);
+            }
+        }
     if (!Avatar || !Avatar->HasHeroine() || Saplings.Num() < 3
         || FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty())
     { Finish(false, TEXT("Clearing needs the real heroine, three saplings and a mature tree.")); return; }
@@ -87,6 +114,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         Add(TEXT("Resolve and approach semantic sapling ") + FString::FromInt(Node->id),
             [this, Avatar, Node]()
             {
+                Teleport(Node->position);
                 Homestead::ResourceNode Current{};
                 if (Controller->Simulation().ResolveGeneratedResource(Node->key, Current)) *Node = Current;
                 Homestead::Point ApproachPoint{Node->position.x, Node->position.y - 110};
