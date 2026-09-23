@@ -1096,6 +1096,19 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     Add(TEXT("Capture exact Chest and Pack storage surface"),
         [this]() { Screenshot(TEXT("native-storage-two-grid")); },
         [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);
+    Add(TEXT("Save the current world while exact storage is open"),
+        [this]() { Tap(EKeys::F5); },
+        [this]() { return !Controller->ToastIsError()
+            && Controller->ActiveStorageChest().IsSet(); });
+    Add(TEXT("Real load closes storage and clears its retained chest ID"),
+        [this]() { Tap(EKeys::F9); },
+        [this]() { return !Controller->ToastIsError() && !Controller->IsBookOpen()
+            && !Controller->ActiveStorageChest().IsSet(); }, 0.8f);
+    Add(TEXT("Storage reopens only through the exact restored chest"),
+        [this, Chest]() { Controller->OpenChestStorage(*Chest); },
+        [this, Chest]() { return Controller->IsBookOpen()
+            && Controller->ActiveStorageChest().IsSet()
+            && Controller->ActiveStorageChest().GetValue() == *Chest; });
     Add(TEXT("Back clears the exact storage session before ordinary Inventory"),
         [this, Branches]()
         {
