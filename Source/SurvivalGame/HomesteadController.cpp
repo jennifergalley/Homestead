@@ -738,11 +738,13 @@ void AHomesteadController::Interact()
     {
         bool Forage = false;
         bool Tree = false;
+        Homestead::Point ActionTarget = Position;
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
                 Tree = Node.kind == Homestead::ResourceKind::ForestTree;
                 Forage = !Tree && Node.kind != Homestead::ResourceKind::Sapling;
+                ActionTarget = Node.position;
                 break;
             }
         const auto Result = Sim.Harvest(FocusId, Position);
@@ -750,7 +752,7 @@ void AHomesteadController::Interact()
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
         if (Result.ok && Tree)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear();
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);
         break;
     }
     case EFocus::Plot:
@@ -812,13 +814,18 @@ void AHomesteadController::Secondary()
     if (Focus == EFocus::Resource)
     {
         bool Sapling = false;
+        Homestead::Point ActionTarget = PlayerPoint();
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
-            { Sapling = Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree; break; }
+            {
+                Sapling = Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree;
+                ActionTarget = Node.position;
+                break;
+            }
         const auto Result = Sim.Clear(FocusId, PlayerPoint());
         Notify(Result, WoodTapB);
         if (Result.ok && Sapling)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear();
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);
     }
     else if (Focus == EFocus::Plot)
     {

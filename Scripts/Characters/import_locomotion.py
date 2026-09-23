@@ -16,11 +16,12 @@ RECEIPT = ROOT / "Build" / "CharacterPreview" / "locomotion-import.json"
 
 def main():
     command = unreal.SystemLibrary.get_command_line()
-    group = "Clearing" if "-ClearingAnimations" in command else "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
+    group = "Chopping" if "-ChoppingAnimations" in command else "Clearing" if "-ClearingAnimations" in command else "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
     source = SOURCE.parent / group
     receipt = RECEIPT.with_name(group.lower() + "-import.json")
     unreal.SystemLibrary.execute_console_command(None, "Interchange.FeatureFlags.Import.FBX 0")
-    contract = json.loads((source / (group.lower() + "-contract.json")).read_text())
+    contract_name = "chop-contract.json" if group == "Chopping" else group.lower() + "-contract.json"
+    contract = json.loads((source / contract_name).read_text())
     mesh = LIB.load_asset(DEST + "/SK_Heroine_LongWave")
     if not mesh:
         raise RuntimeError("Import the existing heroine first")
@@ -28,8 +29,9 @@ def main():
     prior = json.loads(receipt.read_text()) if receipt.exists() else {}
     report = {}
     verify_only = "-LocomotionVerifyOnly" in unreal.SystemLibrary.get_command_line()
+    destination = "/Game/Trials/HomesteadWork_20260923_01/Animations" if group == "Chopping" else DEST + "/Animations"
     for name, expected in contract.items():
-        path = DEST + "/Animations/" + name
+        path = destination + "/" + name
         digest = hashlib.sha256((source / (name + ".fbx")).read_bytes()).hexdigest()
         clip = LIB.load_asset(path) if LIB.does_asset_exist(path) else None
         if not verify_only and (clip is None or prior.get(name, {}).get("sha256") != digest):
@@ -38,7 +40,7 @@ def main():
                 data.set_editor_property("convert_scene", True)
                 data.set_editor_property("convert_scene_unit", True)
                 data.set_editor_property("import_uniform_scale", 1.0)
-            import_task(source / (name + ".fbx"), DEST + "/Animations", name,
+            import_task(source / (name + ".fbx"), destination, name,
                         fbx_options(skeleton, animation=True))
             clip = LIB.load_asset(path)
         if not clip or clip.get_editor_property("skeleton") != skeleton:

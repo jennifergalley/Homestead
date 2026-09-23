@@ -70,9 +70,11 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 Probe->Actor = Avatar->GetActorLocation(); Probe->Hand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
                 Probe->LeftToe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l")); Probe->RightToe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
                 Probe->View = Controller->GetControlRotation(); Tap(Key);
-            }, [this, Avatar, Probe, Animation, Matches]()
+            }, [this, Avatar, Probe, Animation, Matches, Node]()
             {
                 const auto* Tool = Avatar->GetHatchet();
+                const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
+                    Node.position.y - Probe->Actor.Y, Node.position.x - Probe->Actor.X));
                 return Probe->Ready && !Controller->ToastIsError() && Matches()
                     && Animation()->ClearStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
                     && Animation()->WaterStarts() == Probe->WaterStarts && Animation()->ClearWeight() > 0.99f
@@ -88,6 +90,8 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                     && FVector::Dist(Probe->LeftToe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l"))) < 2
                     && FVector::Dist(Probe->RightToe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
                     && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
+                    && FMath::Abs(FMath::FindDeltaAngleDegrees(
+                        Avatar->ClearTargetYaw(), ExpectedYaw)) < 0.1f
                     && Controller->State().hour - Probe->Hour < 0.02;
             }, 0.55f);
     };

@@ -104,7 +104,7 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
     GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
     WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Water.AN_Heroine_Water"));
-    ClearAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Clear.AN_Heroine_Clear"));
+    ClearAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Chop.AN_Heroine_Chop"));
     if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation || !ClearAnimation)
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine mesh or motion assets are missing. Run Scripts/Build-Game.ps1; the labeled stand-in remains visible."));
@@ -409,14 +409,32 @@ void AHomesteadCharacter::CancelAction()
         Animation->CancelAction();
     WateringTool->SetHiddenInGame(true, true);
     Hatchet->SetHiddenInGame(true, true);
+    ClearYaw.Reset();
 }
 
 void AHomesteadCharacter::PlayClear()
 {
+    ClearYaw.Reset();
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestClear();
     else
         UE_LOG(LogTemp, Error, TEXT("Sapling clearing succeeded but its animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::PlayClear(Homestead::Point Target)
+{
+    const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
+    if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Chop committed without a valid presentation target; using heroine facing."));
+        PlayClear();
+        return;
+    }
+    ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->RequestClear();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Chopping succeeded but its animation instance is unavailable."));
 }
 
 void AHomesteadCharacter::CreateMappings()

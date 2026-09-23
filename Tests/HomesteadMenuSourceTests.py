@@ -321,6 +321,16 @@ class MenuSourceContracts(unittest.TestCase):
         native = (SOURCE / "UI" / "HomesteadNativeMenuTest.cpp").read_text()
         self.assertIn("for (int32 Id : {0, 1, 1, 1, 1, 2, 3, 6})", native)
 
+    def test_chop_target_is_presentation_only(self):
+        character = (SOURCE / "HomesteadCharacter.cpp").read_text()
+        controller = CONTROLLER
+        hatchet = (SOURCE / "HomesteadHatchet.cpp").read_text()
+        self.assertIn("HomesteadWork_20260923_01/Animations/AN_Heroine_Chop", character)
+        self.assertIn("ClearYaw = Delta.Rotation().Yaw", character)
+        self.assertIn("Avatar->PlayClear(ActionTarget)", controller)
+        self.assertIn("Avatar->ClearTargetYaw()", hatchet)
+        self.assertNotIn("SetActorRotation", character[character.index("void AHomesteadCharacter::PlayClear(Homestead::Point"):])
+
     def test_full_loop_resolves_generated_keys_after_region_prepare(self):
         fixture = (SOURCE / "HomesteadFullLoopTest.cpp").read_text()
         gather = fixture[fixture.index("void AHomesteadSmokeTest::QueueGatherTo"):

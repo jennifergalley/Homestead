@@ -18,6 +18,7 @@ class UMaterialInstanceDynamic;
 class UHomesteadWateringTool;
 class UHomesteadHatchet;
 class AHomesteadWorld;
+namespace Homestead { struct Point; }
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -54,6 +55,8 @@ public:
     void PlayGather();
     void PlayWater();
     void PlayClear();
+    void PlayClear(Homestead::Point Target);
+    float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     void CancelAction();
     FRotator ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred);
     const FString& StartingViewEvidence() const { return InitialViewEvidence; }
@@ -89,6 +92,7 @@ private:
     float SavedCameraDistance = 470;
     FRotator SavedViewRotation = FRotator::ZeroRotator;
     FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
+    TOptional<float> ClearYaw;
 
     bool LoadHeroineAssets();
     float InferMeshYaw(const USkeletalMesh& Asset) const;

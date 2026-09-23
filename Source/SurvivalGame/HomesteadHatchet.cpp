@@ -66,5 +66,5 @@ void UHomesteadHatchet::TickComponent(float DeltaTime, ELevelTick TickType, FAct
         && PC->Simulation().Count(Homestead::Item::Hatchet) > 0 && GetNumSections() == 3;
     SetHiddenInGame(!Visible);
     if (Visible)
-        UpdateHandToolGrip(*this, *Avatar->GetMesh(), FRotator(-SwingAngle(Phase), Avatar->GetActorRotation().Yaw, 0));
+        UpdateHandToolGrip(*this, *Avatar->GetMesh(), FRotator(-SwingAngle(Phase), Avatar->ClearTargetYaw(), 0));
 }
