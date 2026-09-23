@@ -93,6 +93,7 @@ public:
     void MenuTake();
     void MenuBack();
     void MenuRequestExit();
+    void MenuSave();
     void MenuSaveAndQuit();
     void MenuQuitWithoutSaving();
     void MenuRestart();
@@ -104,6 +105,15 @@ public:
     FString MenuLastError() const { return ToastText; }
     bool MenuNeedsTestReset() const { return bTestResetRequired; }
     FString MenuLoadProblem() const { return LoadProblem; }
+    void MenuSetGameSpeed(double DayMinutes);
+    void MenuAdjustSetting(int32 Id, int32 Direction);
+    float MenuAudioVolume(int32 Id) const;
+    void MenuPreviewAudioVolume(int32 Id, float Value);
+    bool MenuCommitAudioVolume(int32 Id, float Value, float Previous);
+    bool IsAutosaveEnabled() const { return bAutosaveEnabled; }
+    int32 AutosaveIntervalMinutes() const { return AutosaveMinutes; }
+    void MenuSetAutosaveEnabled(bool Enabled);
+    void MenuSetAutosaveInterval(int32 Minutes);
     const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
     void RefreshMenuPortrait();
     void OrbitMenuPortrait(float Degrees);
@@ -165,6 +175,8 @@ private:
     float RefreshRemaining = 0;
     float ToastRemaining = 0;
     float AutosaveRemaining = 240;
+    bool bAutosaveEnabled = true;
+    int32 AutosaveMinutes = 5;
     float MusicGapRemaining = 18;
     float MusicElapsed = 0;
     double LastNudgeTime = -1;
@@ -191,8 +203,12 @@ private:
     TOptional<float> PendingResolutionScale;
     FString GraphicsSaveError;
     void LoadCameraPreferences();
+    void LoadUserPreferences();
     bool PersistCameraSensitivity(float Requested);
     bool PersistCameraInversion(bool Requested);
+    bool PersistAudioVolume(int32 Id, float Requested, float Previous);
+    bool PersistAutosaveEnabled(bool Requested);
+    bool PersistAutosaveInterval(int32 Requested);
     bool PersistResolutionScale(float Requested);
     void ShowNativeMenu();
     void HideNativeMenu();
@@ -215,6 +231,7 @@ private:
     void Withdraw();
     void Back();
     void ToggleBook();
+    void OpenSettings();
     void OpenCraft();
     void OpenBuild();
     void OpenJournal();

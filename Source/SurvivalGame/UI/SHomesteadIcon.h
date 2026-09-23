@@ -29,7 +29,7 @@ protected:
 private:
     enum class EKind : uint8
     {
-        Unknown, Pack, Craft, Build, Guide, Settings, Credits, Appearance,
+        Unknown, Pack, Craft, Build, Guide, Settings, Appearance,
         Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds, Hatchet,
         DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Timber, Firewood,
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,

@@ -12,6 +12,8 @@
 namespace
 {
 constexpr const TCHAR* CameraSection = TEXT("Homestead.Camera");
+constexpr const TCHAR* AudioSection = TEXT("Homestead.Audio");
+constexpr const TCHAR* AutosaveSection = TEXT("Homestead.Autosave");
 
 }
 
@@ -86,7 +88,11 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
             []() {}, [this]()
             {
                 return FMath::IsNearlyEqual(Controller->Sensitivity, 1.0f)
-                    && !Controller->bInvertY;
+                    && !Controller->bInvertY
+                    && FMath::IsNearlyEqual(Controller->MusicVolume, 0.65f)
+                    && FMath::IsNearlyEqual(Controller->AmbienceVolume, 0.70f)
+                    && FMath::IsNearlyEqual(Controller->EffectsVolume, 0.80f)
+                    && Controller->IsAutosaveEnabled() && Controller->AutosaveIntervalMinutes() == 5;
             });
         return;
     }
@@ -96,12 +102,17 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
             []() {}, [this]()
             {
                 return FMath::IsNearlyEqual(Controller->Sensitivity, 1.2f)
-                    && Controller->bInvertY;
+                    && Controller->bInvertY
+                    && FMath::IsNearlyEqual(Controller->MusicVolume, 0.70f)
+                    && FMath::IsNearlyEqual(Controller->AmbienceVolume, 0.65f)
+                    && FMath::IsNearlyEqual(Controller->EffectsVolume, 0.85f)
+                    && !Controller->IsAutosaveEnabled() && Controller->AutosaveIntervalMinutes() == 10;
             });
         Add(TEXT("Open Settings in the second process"),
             [this, World]()
             {
-                Tap(EKeys::Gamepad_RightShoulder);
+                Tap(EKeys::Gamepad_FaceButton_Right);
+                Tap(EKeys::Escape);
                 *World = Controller->Simulation().Serialize();
             },
             [this]() { return Controller->BookPage() == 4; });
@@ -161,11 +172,10 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
         }, 0.15f);
     Steps.Last().Repeat = [InjectLook]() { InjectLook(false, 1.0f); };
 
-    Add(TEXT("Open Settings through the mapped journal and page controls"),
+    Add(TEXT("Open Settings directly through mapped Escape"),
         [this, World]()
         {
-            Tap(EKeys::H);
-            Tap(EKeys::Gamepad_RightShoulder);
+            Tap(EKeys::Escape);
             *World = Controller->Simulation().Serialize();
         },
         [this]() { return Controller->BookPage() == 4 && Controller->HasNativeMenu(); });
@@ -264,7 +274,7 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
         },
         [this]() { return !Controller->ToastIsError(); });
     Add(TEXT("Open Settings after writing the legacy world save"),
-        [this]() { Tap(EKeys::H); Tap(EKeys::Gamepad_RightShoulder); },
+        [this]() { Tap(EKeys::Escape); },
         [this]()
         {
             return Controller->BookPage() == 4 && Controller->NativeMenu.IsValid();
@@ -294,8 +304,7 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
     Add(TEXT("Open Settings after loading the conflicting world save"),
         [this, World]()
         {
-            Tap(EKeys::H);
-            Tap(EKeys::Gamepad_RightShoulder);
+            Tap(EKeys::Escape);
             *World = Controller->Simulation().Serialize();
         },
         [this]()
@@ -333,10 +342,53 @@ void AHomesteadSmokeTest::PrepareCameraPreferenceChecks()
         {
             return Controller->bInvertY && CameraRows(1.2f, true) && Stable();
         });
+    Add(TEXT("Keyboard adjustment persists Music volume in user settings"),
+        [this]() { Controller->NativeMenu->FocusLegacySubject(5); Tap(EKeys::Right); },
+        [this, Stable]()
+        {
+            FConfigFile Disk; float Value = 0;
+            return FMath::IsNearlyEqual(Controller->MusicVolume, 0.70f) && Stable()
+                && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
+                && Disk.GetFloat(AudioSection, TEXT("Music"), Value) && FMath::IsNearlyEqual(Value, 0.70f);
+        });
+    Add(TEXT("Keyboard adjustment persists Ambience and Effects independently"),
+        [this]()
+        {
+            Controller->NativeMenu->FocusLegacySubject(6); Tap(EKeys::Left);
+            Controller->NativeMenu->FocusLegacySubject(7); Tap(EKeys::Right);
+        },
+        [this, Stable]()
+        {
+            FConfigFile Disk; float Ambience = 0, Effects = 0;
+            return FMath::IsNearlyEqual(Controller->AmbienceVolume, 0.65f)
+                && FMath::IsNearlyEqual(Controller->EffectsVolume, 0.85f) && Stable()
+                && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
+                && Disk.GetFloat(AudioSection, TEXT("Ambience"), Ambience)
+                && Disk.GetFloat(AudioSection, TEXT("Effects"), Effects)
+                && FMath::IsNearlyEqual(Ambience, 0.65f) && FMath::IsNearlyEqual(Effects, 0.85f);
+        });
+    Add(TEXT("Autosave controls persist Off and ten-minute interval independently"),
+        [this]()
+        {
+            Controller->NativeMenu->FocusLegacySubject(12); Tap(EKeys::Left);
+            Controller->NativeMenu->FocusLegacySubject(13); Tap(EKeys::Right);
+        },
+        [this, Stable]()
+        {
+            FConfigFile Disk; bool Enabled = true; int32 Minutes = 0;
+            return !Controller->IsAutosaveEnabled() && Controller->AutosaveIntervalMinutes() == 10 && Stable()
+                && Disk.Combine(GConfig->FindBranch(TEXT("GameUserSettings"), {})->IniPath)
+                && Disk.GetBool(AutosaveSection, TEXT("Enabled"), Enabled) && !Enabled
+                && Disk.GetInt(AutosaveSection, TEXT("IntervalMinutes"), Minutes) && Minutes == 10;
+        });
     Add(TEXT("New woodland preserves user-level camera preferences"),
         [this]() { Controller->NewGame(); },
         [this]()
         {
-            return Controller->bInvertY && FMath::IsNearlyEqual(Controller->Sensitivity, 1.2f);
+            return Controller->bInvertY && FMath::IsNearlyEqual(Controller->Sensitivity, 1.2f)
+                && FMath::IsNearlyEqual(Controller->MusicVolume, 0.70f)
+                && FMath::IsNearlyEqual(Controller->AmbienceVolume, 0.65f)
+                && FMath::IsNearlyEqual(Controller->EffectsVolume, 0.85f)
+                && !Controller->IsAutosaveEnabled() && Controller->AutosaveIntervalMinutes() == 10;
         });
 }

@@ -375,8 +375,12 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Capture the settled clearing exposure"),
         [this]() { Screenshot(TEXT("clearing")); },
         []() { return true; }, 1.0f);
-    Add(TEXT("Gamepad opens the pack"),
-        [this]() { Tap(EKeys::Gamepad_Special_Right); },
+    Add(TEXT("Gamepad Guidebook route reaches the pack through field-book tabs"),
+        [this]()
+        {
+            Tap(EKeys::Gamepad_Special_Left);
+            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+        },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Menu pauses simulation"),
         [this]() { PausedHour = Controller->State().hour; },
@@ -391,7 +395,11 @@ void AHomesteadSmokeTest::Prepare()
         [this]() { Tap(EKeys::Escape); },
         [this]() { return !Controller->IsBookOpen(); });
     Add(TEXT("Open the pack before appearance changes"),
-        [this]() { Tap(EKeys::Gamepad_Special_Right); },
+        [this]()
+        {
+            Tap(EKeys::Gamepad_Special_Left);
+            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+        },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Open the appearance page with the controller"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; Tap(EKeys::Gamepad_LeftShoulder); },

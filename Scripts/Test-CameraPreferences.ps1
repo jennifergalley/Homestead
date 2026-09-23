@@ -109,8 +109,20 @@ $savedSensitivity = $sensitivityMatch.Success -and
     [Math]::Abs([double]::Parse($sensitivityMatch.Groups[1].Value,
         [Globalization.CultureInfo]::InvariantCulture) - 1.2) -lt 0.001
 $savedInversion = $saved -match '(?ms)\[Homestead\.Camera\].*?^InvertY=True\s*$'
-if (-not ($savedSensitivity -and $savedInversion)) {
-    throw 'Final camera preferences were not preserved for the second process.'
+$musicMatch = [regex]::Match($saved, '(?ms)\[Homestead\.Audio\].*?^Music=([0-9.]+)\s*$')
+$ambienceMatch = [regex]::Match($saved, '(?ms)\[Homestead\.Audio\].*?^Ambience=([0-9.]+)\s*$')
+$effectsMatch = [regex]::Match($saved, '(?ms)\[Homestead\.Audio\].*?^Effects=([0-9.]+)\s*$')
+$savedMusic = $musicMatch.Success -and [Math]::Abs([double]::Parse($musicMatch.Groups[1].Value,
+    [Globalization.CultureInfo]::InvariantCulture) - 0.70) -lt 0.001
+$savedAmbience = $ambienceMatch.Success -and [Math]::Abs([double]::Parse($ambienceMatch.Groups[1].Value,
+    [Globalization.CultureInfo]::InvariantCulture) - 0.65) -lt 0.001
+$savedEffects = $effectsMatch.Success -and [Math]::Abs([double]::Parse($effectsMatch.Groups[1].Value,
+    [Globalization.CultureInfo]::InvariantCulture) - 0.85) -lt 0.001
+$savedAutosaveOff = $saved -match '(?ms)\[Homestead\.Autosave\].*?^Enabled=False\s*$'
+$savedAutosaveInterval = $saved -match '(?ms)\[Homestead\.Autosave\].*?^IntervalMinutes=10\s*$'
+if (-not ($savedSensitivity -and $savedInversion -and $savedMusic -and $savedAmbience -and
+    $savedEffects -and $savedAutosaveOff -and $savedAutosaveInterval)) {
+    throw 'Final camera/audio/autosave preferences were not preserved for the second process.'
 }
 foreach ($sentinel in @('ResolutionSizeX=1600','ResolutionSizeY=900',
     'FrameRateLimit=57.000000','sg.ResolutionQuality=73','sg.ViewDistanceQuality=2')) {
@@ -123,13 +135,18 @@ $invalidRoot = Join-Path $output 'invalid'
 $null = New-Item -ItemType Directory -Path (Join-Path $invalidRoot 'Graphics') -Force
 $invalidConfig = Join-Path $invalidRoot 'Graphics\GameUserSettings.ini'
 Copy-Item -LiteralPath (Join-Path $output 'initial-fixture.ini') -Destination $invalidConfig
-Add-Content -LiteralPath $invalidConfig -Value "`n[Homestead.Camera]`nSensitivity=NaN`nInvertY=Maybe"
+Add-Content -LiteralPath $invalidConfig -Value "`n[Homestead.Camera]`nSensitivity=NaN`nInvertY=Maybe`n`n[Homestead.Audio]`nMusic=NaN`nAmbience=-1`nEffects=2`n`n[Homestead.Autosave]`nEnabled=Maybe`nIntervalMinutes=7"
 $runs += Invoke-CameraPhase 'invalid' $invalidRoot $invalidConfig
 $invalidAfter = Get-Content -LiteralPath $invalidConfig -Raw
 $invalidSensitivity = $invalidAfter -match '(?ms)\[Homestead\.Camera\].*?^Sensitivity=NaN\s*$'
 $invalidInversion = $invalidAfter -match '(?ms)\[Homestead\.Camera\].*?^InvertY=Maybe\s*$'
-if (-not ($invalidSensitivity -and $invalidInversion)) {
-    throw 'Invalid camera properties were rewritten during startup fallback.'
+$invalidAudio = $invalidAfter -match '(?ms)\[Homestead\.Audio\].*?^Music=NaN\s*$' -and
+    $invalidAfter -match '(?ms)\[Homestead\.Audio\].*?^Ambience=-1\s*$' -and
+    $invalidAfter -match '(?ms)\[Homestead\.Audio\].*?^Effects=2\s*$'
+$invalidAutosave = $invalidAfter -match '(?ms)\[Homestead\.Autosave\].*?^Enabled=Maybe\s*$' -and
+    $invalidAfter -match '(?ms)\[Homestead\.Autosave\].*?^IntervalMinutes=7\s*$'
+if (-not ($invalidSensitivity -and $invalidInversion -and $invalidAudio -and $invalidAutosave)) {
+    throw 'Invalid user preference properties were rewritten during startup fallback.'
 }
 
 [ordered]@{
@@ -138,6 +155,8 @@ if (-not ($invalidSensitivity -and $invalidInversion)) {
     runs = $runs
     finalSensitivity = 1.2
     finalInvertY = $true
+    finalAudio = @{ music = 0.70; ambience = 0.65; effects = 0.85 }
+    finalAutosave = @{ enabled = $false; intervalMinutes = 10 }
     settingsFile = $readConfig
     isolation = 'Explicit synthetic GameUserSettingsINI, UserDir and smoke save routes only.'
     limits = 'Mapped offscreen input and real native Slate controls; physical mouse feel remains ordinary-play acceptance.'

@@ -197,7 +197,6 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("build")), EKind::Build},
         {FName(TEXT("guide")), EKind::Guide},
         {FName(TEXT("settings")), EKind::Settings},
-        {FName(TEXT("credits")), EKind::Credits},
         {FName(TEXT("appearance")), EKind::Appearance},
         {FName(TEXT("knife")), EKind::Knife},
         {FName(TEXT("branch")), EKind::Branch},
@@ -293,17 +292,6 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Rect(7, 17, 10, 7, Gold);
         P.Rect(23, 33, 10, 7, Gold);
         P.Rect(39, 22, 10, 7, Gold);
-        break;
-    case EKind::Credits:
-        P.Line({{19, 43}, {11, 34}, {10, 22}, {17, 11}}, Gold, 2);
-        P.Line({{37, 43}, {45, 34}, {46, 22}, {39, 11}}, Gold, 2);
-        P.Leaf({12, 29}, {6, 20}, 3);
-        P.Leaf({13, 36}, {7, 30}, 3);
-        P.Leaf({44, 29}, {50, 20}, 3);
-        P.Leaf({43, 36}, {49, 30}, 3);
-        P.Disc(28, 22, 6, Cream);
-        P.Shape({{18, 39}, {19, 33}, {24, 29}, {32, 29}, {37, 33}, {38, 39}}, Gold);
-        P.Line({{21, 45}, {28, 49}, {35, 45}}, Cream, 2);
         break;
     case EKind::Appearance:
         P.Line({{28, 38}, {28, 49}}, Wood, 6);

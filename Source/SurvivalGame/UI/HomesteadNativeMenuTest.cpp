@@ -304,7 +304,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             [this]() { Tap(EKeys::F5); },
             [this]() { return Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual"))) != nullptr; });
         Add(TEXT("Open exit confirmation for save-failure retry"),
-            [this]() { Tap(EKeys::Right); Tap(EKeys::Enter); },
+            [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Enter); },
             [this]() { return Controller->NativeMenu->IsExitPrompt(); });
         Add(TEXT("Owned temporary-path failure keeps process open and paused"),
             [this, Before, OriginalRoute, Blocker]()
@@ -313,9 +313,9 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 *OriginalRoute = Controller->SaveRoute.Directory;
                 FFileHelper::SaveStringToFile(TEXT("owned retry blocker"), **Blocker);
                 Controller->SaveRoute.Directory = *Blocker;
-                Tap(EKeys::Down); Tap(EKeys::Enter);
+                Tap(EKeys::Enter);
             },
-            [this, Before]() { return Controller->NativeMenu->IsSaveError()
+            [this, Before]() { return Controller->NativeMenu->IsExitPrompt() && Controller->ToastIsError()
                 && Controller->Simulation().Serialize() == *Before && !IsEngineExitRequested(); });
         Add(TEXT("Explicit Retry succeeds, saves exact current state, then requests exit"),
             [this, Before, OriginalRoute, Blocker]()
@@ -323,7 +323,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 Controller->SaveRoute.Directory = *OriginalRoute;
                 if (!IFileManager::Get().Delete(**Blocker, false, true))
                 { Finish(false, TEXT("Could not remove owned retry blocker.")); return; }
-                Tap(EKeys::Down); Tap(EKeys::Enter);
+                Tap(EKeys::Enter);
                 const auto* Saved = Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual")));
                 const bool Passed = Saved && Saved->SimulationData == UTF8_TO_TCHAR(Before->c_str())
                     && IsEngineExitRequested();
@@ -335,17 +335,12 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeQuitTest")))
     {
         Add(TEXT("Reach the real save-and-quit confirmation"),
-            [this]()
-            {
-                Tap(EKeys::Right);
-                Tap(EKeys::Enter);
-            },
+            [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Enter); },
             [this]() { return Controller->NativeMenu && Controller->NativeMenu->IsExitPrompt(); });
         Add(TEXT("Successful save precedes actual engine exit request"),
             [this, Before]()
             {
                 *Before = Controller->Simulation().Serialize();
-                Tap(EKeys::Down);
                 Tap(EKeys::Enter);
                 const auto* SavedGame = Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual")));
                 const bool Verified = SavedGame && SavedGame->SimulationData == UTF8_TO_TCHAR(Before->c_str())
@@ -362,15 +357,15 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             [this]() { return Controller->NativeMenu.IsValid(); }, 0.8f);
     };
     Capture(TEXT("native-settings"));
-    Add(TEXT("Second and third exit-path presses reach confirmation"),
-        [this]() { Tap(EKeys::Right); Tap(EKeys::Enter); },
+    Add(TEXT("Quit game row opens one two-choice dialog"),
+        [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Enter); },
         [this]() { return Controller->NativeMenu && Controller->NativeMenu->IsExitPrompt(); });
     Capture(TEXT("native-exit-confirm"));
     Add(TEXT("Exit confirmation keeps simulation paused"),
         []() {},
         [this]() { return FMath::IsNearlyEqual(Controller->State().hour, PausedHour, 1e-8); }, 1.0f);
-    Add(TEXT("Exit confirmation defaults to staying"),
-        [this]() { Tap(EKeys::Enter); },
+    Add(TEXT("Back cancels the single quit dialog"),
+        [this]() { Tap(EKeys::Escape); },
         [this]() { return Controller->IsBookOpen() && !Controller->NativeMenu->HasActiveDialog(); });
     Add(TEXT("Current-schema F5 writes a readable sandbox save"),
         [this]() { Tap(EKeys::F5); },
@@ -383,35 +378,31 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             if (!FFileHelper::SaveStringToFile(TEXT("owned synthetic file prevents directory creation"), **Blocker))
             { Finish(false, TEXT("Could not prepare the owned save-failure fixture.")); return; }
             Controller->SaveRoute.Directory = *Blocker;
-            Tap(EKeys::Enter);
-            Tap(EKeys::Down);
-            Tap(EKeys::Enter);
+            Controller->NativeMenu->FocusLegacySubject(9);
+            Tap(EKeys::Enter); Tap(EKeys::Enter);
         },
-        [this, Before]() { return Controller->NativeMenu->IsSaveError()
+        [this, Before]() { return Controller->NativeMenu->IsExitPrompt() && Controller->ToastIsError()
             && Controller->Simulation().Serialize() == *Before; });
     Capture(TEXT("native-save-error"));
     Add(TEXT("Save failure stays actionable beyond toast expiry"),
         []() {},
-        [this]() { return Controller->NativeMenu->IsSaveError() && Controller->Toast().IsEmpty(); }, 8.3f);
+        [this]() { return Controller->NativeMenu->IsExitPrompt() && Controller->Toast().IsEmpty(); }, 8.3f);
     Add(TEXT("Return from failure restores Settings without discarding progress"),
         [this, OriginalRoute, Blocker]()
         {
             Controller->SaveRoute.Directory = *OriginalRoute;
             if (!IFileManager::Get().Delete(**Blocker, false, true))
             { Finish(false, TEXT("Could not remove the owned save-failure fixture.")); return; }
-            Tap(EKeys::Enter);
+            Tap(EKeys::Escape);
         },
         [this, Before]() { return !Controller->NativeMenu->HasActiveDialog()
             && Controller->Simulation().Serialize() == *Before; });
     Add(TEXT("Controller tabs reach real carried inventory"),
-        [this]()
-        {
-            for (int Index = 0; Index < 4; ++Index) Tap(EKeys::Gamepad_LeftShoulder);
-        },
+        [this]() { Tap(EKeys::Escape); Tap(EKeys::I); },
         [this]()
         {
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
-            return Controller->BookPage() == 0 && Controller->UsesGamepad() && Subject
+            return Controller->BookPage() == 0 && !Controller->UsesGamepad() && Subject
                 && Subject->Subject == EHomesteadMenuSubject::ItemGroup
                 && Subject->Id == static_cast<int>(Homestead::Item::Knife) && Subject->Quantity == 1
                 && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("Carried: 1"));
@@ -452,14 +443,10 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { Tap(EKeys::Escape); Tap(EKeys::Escape); },
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     Add(TEXT("Mapped tabs expose purpose-specific Guidebook content"),
-        [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::Escape); Tap(EKeys::G); },
         [this]() { return Controller->BookPage() == 3
             && Controller->BookSummary().Contains(TEXT("Woodland seed")); });
     Capture(TEXT("native-guidebook"));
-    Add(TEXT("Mapped tabs expose purpose-specific Credits content"),
-        [this]() { Tap(EKeys::Gamepad_RightShoulder); Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 5 && Controller->Rows().Num() >= 8; });
-    Capture(TEXT("native-credits"));
     Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
         [this]() { return Controller->BookPage() == 6; });
@@ -468,7 +455,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this, Before]()
         {
             *Before = Controller->Simulation().Serialize();
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Right); Tap(EKeys::Gamepad_Special_Right);
         },
         [this, Before]() { return Controller->BookPage() == 4
             && Controller->Simulation().Serialize() == *Before; });
@@ -481,9 +468,9 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Recovery has independent controller Settings access"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Top); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4; });
-    Add(TEXT("Recovery exit warns about unsaved progress instead of overwriting checkpoint"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Right); Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->NativeMenu->IsUnsavedPrompt(); });
+    Add(TEXT("Recovery Quit game uses the same safe two-choice dialog"),
+        [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return Controller->NativeMenu->IsExitPrompt(); });
     Capture(TEXT("native-recovery-exit"));
     Add(TEXT("Cancel recovery exit returns to recovery without forcing retry"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); Tap(EKeys::Gamepad_FaceButton_Right); },

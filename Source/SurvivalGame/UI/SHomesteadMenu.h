@@ -10,6 +10,7 @@ class SVerticalBox;
 class SHorizontalBox;
 class SBox;
 class SButton;
+class SSlider;
 
 namespace HomesteadMenus
 {
@@ -66,6 +67,7 @@ private:
     enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
+    TSharedPtr<SHorizontalBox> TabBar;
     TSharedPtr<SBox> ContentHost;
     TSharedPtr<SBox> ModalHost;
     TSharedPtr<SBox> DetailsHost;
@@ -119,6 +121,8 @@ private:
     uint64 PendingRevision = 0;
     int32 Amount = 1, MaximumAmount = 1;
     TArray<int32> MergeTargets;
+    int32 AudioEditId = -1;
+    float AudioEditStart = 0;
 
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();

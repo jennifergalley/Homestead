@@ -933,6 +933,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
     const double Started = FPlatformTime::Seconds();
     const FName FernTag(TEXT("AuthoredFern02"));
     const FName GrassTag(TEXT("AuthoredGrassMedium01"));
+    const FName FlowerTag(TEXT("DecorativeWildflower"));
     TArray<UStaticMesh*> FernMeshes;
     for (const TCHAR* Suffix : {TEXT("a"), TEXT("b"), TEXT("c"), TEXT("d")})
     {
@@ -967,11 +968,30 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         }
         GrassMeshes.Add(Mesh);
     }
+    TArray<UStaticMesh*> FlowerMeshes;
+    for (const TCHAR* Suffix : {TEXT("a"), TEXT("b")})
+    {
+        const FString Path = FString::Printf(
+            TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_%s.SM_FlowerEmpodium_%s"),
+            Suffix, Suffix);
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
+        if (!Mesh || Mesh->GetStaticMaterials().Num() != 1 || !Mesh->GetMaterial(0)
+            || Mesh->GetMaterial(0)->GetPathName() != TEXT("/Game/Trials/WoodlandResources_20260921_01/Materials/M_FlowerEmpodium.M_FlowerEmpodium")
+            || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 1
+            || Mesh->GetRenderData()->LODResources[0].GetNumTriangles() != 758)
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted decorative flower is missing or differs: %s"), *Path);
+            return false;
+        }
+        FlowerMeshes.Add(Mesh);
+    }
     int32 GrassCount = 0;
     int32 GrassTriangleCount = 0;
     int32 FernCount = 0;
     int32 BankGrassCount = 0;
     int32 BankFernCount = 0;
+    int32 FlowerCount = 0;
+    int32 FlowerTriangleCount = 0;
     int32 RebuiltChunks = 0;
     for (auto& Chunk : TerrainChunks)
     {
@@ -996,7 +1016,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         for (const auto& Plot : State.plots)
             if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
                 Signature += FString::Printf(TEXT("P%d;"), Plot.id);
-        Signature += TEXT("natural-creek-v1");
+        Signature += TEXT("natural-creek-v1-decorative-wildflower-v1");
         if (Chunk.Value.CoverSignature == Signature) continue;
         Homestead::State CoverState;
         CoverState.structures = State.structures;
@@ -1070,6 +1090,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
         if (FernMeshes.Num() == 4)
             for (auto* Mesh : FernMeshes)
                 FernBatches.Add(Mesh->GetPathName(), CreateCoverBatch(Mesh, FernTag, 0, 5000));
+        TArray<UHierarchicalInstancedStaticMeshComponent*> FlowerBatches;
+        for (auto* Mesh : FlowerMeshes)
+            FlowerBatches.Add(CreateCoverBatch(Mesh, FlowerTag, 3000, 4800));
         for (int32 Attempt = 0; Attempt < 1200; ++Attempt)
         {
             const double X = OriginX + Random.FRandRange(0, 2399.99f);
@@ -1103,16 +1126,30 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation)
                 ++FernCount;
                 if (bCreekBank) ++BankFernCount;
             }
+            if (Attempt % 64 == 17 && FlowerBatches.Num() == 2 && StreamDistance >= 260.0
+                && !IsDecorationReserved(CoverState, X, Y, 55, 0, true))
+            {
+                const int32 FlowerIndex = (Attempt / 64) % 2;
+                auto* Mesh = FlowerMeshes[FlowerIndex];
+                const FBox Bounds = Mesh->GetBoundingBox();
+                const float Scale = Random.FRandRange(0.55f, 0.80f);
+                const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+                FlowerBatches[FlowerIndex]->AddInstance(FTransform(Rotation,
+                    AtGround(X, Y) - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
+                ++FlowerCount;
+                FlowerTriangleCount += 758;
+            }
         }
         for (auto* Batch : GrassBatches) Batch->BuildTreeIfOutdated(false, true);
         for (const auto& Batch : FernBatches) Batch.Value->BuildTreeIfOutdated(false, true);
+        for (auto* Batch : FlowerBatches) Batch->BuildTreeIfOutdated(false, true);
         Chunk.Value.CoverSignature = Signature;
     }
     DecorationBuildMilliseconds = (FPlatformTime::Seconds() - Started) * 1000;
     LastCoverPrepareMilliseconds = DecorationBuildMilliseconds;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
-        RebuiltChunks, FernCount, GrassCount, BankFernCount, BankGrassCount,
-        GrassTriangleCount, DecorationBuildMilliseconds);
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_flowers=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d added_flower_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
+        RebuiltChunks, FernCount, GrassCount, FlowerCount, BankFernCount, BankGrassCount,
+        GrassTriangleCount, FlowerTriangleCount, DecorationBuildMilliseconds);
     return true;
 }
 

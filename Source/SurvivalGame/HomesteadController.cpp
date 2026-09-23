@@ -38,6 +38,12 @@ namespace
 constexpr const TCHAR* CameraSettingsSection = TEXT("Homestead.Camera");
 constexpr const TCHAR* CameraSensitivityKey = TEXT("Sensitivity");
 constexpr const TCHAR* CameraInvertYKey = TEXT("InvertY");
+constexpr const TCHAR* AudioSettingsSection = TEXT("Homestead.Audio");
+constexpr const TCHAR* AudioKeys[] = {TEXT("Music"), TEXT("Ambience"), TEXT("Effects")};
+constexpr const TCHAR* AutosaveSettingsSection = TEXT("Homestead.Autosave");
+constexpr const TCHAR* AutosaveEnabledKey = TEXT("Enabled");
+constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
+constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
 
 struct FCameraConfigSnapshot
 {
@@ -56,6 +62,57 @@ bool RestoreCameraConfig(const FString& Path, const FCameraConfigSnapshot& Snaps
     return Snapshot.Existed
         ? FFileHelper::SaveArrayToFile(Snapshot.Bytes, *Path)
         : !IFileManager::Get().FileExists(*Path) || IFileManager::Get().Delete(*Path, false, true, true);
+}
+
+int32 ShiftFieldBookPage(int32 Page, int32 Direction)
+{
+    int32 Index = 0;
+    for (int32 I = 0; I < UE_ARRAY_COUNT(FieldBookPages); ++I)
+        if (FieldBookPages[I] == Page) { Index = I; break; }
+    return FieldBookPages[(Index + UE_ARRAY_COUNT(FieldBookPages) + Direction) % UE_ARRAY_COUNT(FieldBookPages)];
+}
+
+bool PersistFloatProperty(const FString& Path, const TCHAR* Section, const TCHAR* Key, float Value)
+{
+    FCameraConfigSnapshot Snapshot;
+    if (!CaptureCameraConfig(Path, Snapshot)) return false;
+    FConfigFile Property;
+    Property.SetFloat(Section, Key, Value);
+    const bool Saved = Property.UpdateSinglePropertyInSection(*Path, Key, Section);
+    FConfigFile Disk;
+    float Persisted = -1;
+    const bool Verified = Saved && Disk.Combine(Path) && Disk.GetFloat(Section, Key, Persisted)
+        && FMath::IsNearlyEqual(Persisted, Value, 0.001f);
+    if (!Verified && Saved) RestoreCameraConfig(Path, Snapshot);
+    return Verified;
+}
+
+bool PersistBoolProperty(const FString& Path, const TCHAR* Section, const TCHAR* Key, bool Value)
+{
+    FCameraConfigSnapshot Snapshot;
+    if (!CaptureCameraConfig(Path, Snapshot)) return false;
+    FConfigFile Property;
+    Property.SetBool(Section, Key, Value);
+    const bool Saved = Property.UpdateSinglePropertyInSection(*Path, Key, Section);
+    FConfigFile Disk;
+    bool Persisted = !Value;
+    const bool Verified = Saved && Disk.Combine(Path) && Disk.GetBool(Section, Key, Persisted) && Persisted == Value;
+    if (!Verified && Saved) RestoreCameraConfig(Path, Snapshot);
+    return Verified;
+}
+
+bool PersistIntProperty(const FString& Path, const TCHAR* Section, const TCHAR* Key, int32 Value)
+{
+    FCameraConfigSnapshot Snapshot;
+    if (!CaptureCameraConfig(Path, Snapshot)) return false;
+    FConfigFile Property;
+    Property.SetString(Section, Key, *FString::FromInt(Value));
+    const bool Saved = Property.UpdateSinglePropertyInSection(*Path, Key, Section);
+    FConfigFile Disk;
+    int32 Persisted = -1;
+    const bool Verified = Saved && Disk.Combine(Path) && Disk.GetInt(Section, Key, Persisted) && Persisted == Value;
+    if (!Verified && Saved) RestoreCameraConfig(Path, Snapshot);
+    return Verified;
 }
 
 FString Text(const char* Value) { return UTF8_TO_TCHAR(Value); }
@@ -157,6 +214,7 @@ void AHomesteadController::BeginPlay()
 #endif
     if (!PrepareStartupProbe()) return;
     LoadCameraPreferences();
+    LoadUserPreferences();
 #if !UE_BUILD_SHIPPING
     bSaveRoutingTestPending = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSaveRoutingTest"));
     if (bSaveRoutingTestPending)
@@ -382,6 +440,7 @@ void AHomesteadController::MenuRetry()
     if (!IsFailed()) CloseBook();
 }
 void AHomesteadController::MenuRequestExit() { if (NativeMenu.IsValid()) NativeMenu->RequestExit(); }
+void AHomesteadController::MenuSave() { if (!bMenuSaveInProgress) QuickSave(); }
 FString AHomesteadController::MenuSaveStatus() const
 {
     const FString When = LastSuccessfulSave.GetTicks() > 0
@@ -425,13 +484,13 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Bottom, IE_Pressed, this, &AHomesteadController::Interact);
     InputComponent->BindKey(EKeys::F, IE_Pressed, this, &AHomesteadController::Secondary);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Left, IE_Pressed, this, &AHomesteadController::Secondary);
-    InputComponent->BindKey(EKeys::G, IE_Pressed, this, &AHomesteadController::Withdraw);
+    InputComponent->BindKey(EKeys::G, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Top, IE_Pressed, this, &AHomesteadController::Withdraw);
     InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AHomesteadController::Back);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Right, IE_Pressed, this, &AHomesteadController::Back);
     InputComponent->BindKey(EKeys::I, IE_Pressed, this, &AHomesteadController::ToggleBook);
     InputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AHomesteadController::ToggleBook);
-    InputComponent->BindKey(EKeys::Gamepad_Special_Right, IE_Pressed, this, &AHomesteadController::ToggleBook);
+    InputComponent->BindKey(EKeys::Gamepad_Special_Right, IE_Pressed, this, &AHomesteadController::OpenSettings);
     InputComponent->BindKey(EKeys::C, IE_Pressed, this, &AHomesteadController::OpenCraft);
     InputComponent->BindKey(EKeys::B, IE_Pressed, this, &AHomesteadController::OpenBuild);
     InputComponent->BindKey(EKeys::H, IE_Pressed, this, &AHomesteadController::OpenJournal);
@@ -603,14 +662,17 @@ void AHomesteadController::Tick(float DeltaSeconds)
         UpdateFocus();
         RefreshRemaining = 0.25f;
     }
-    if (!bBookOpen && !bPlanning && !IsFailed())
+    if (bAutosaveEnabled && !bBookOpen && !bPlanning && !IsFailed() && !bMenuSaveInProgress)
     {
         AutosaveRemaining -= DeltaSeconds;
         if (AutosaveRemaining <= 0)
         {
-            SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true);
-            AutoSaveIndex = (AutoSaveIndex + 1) % 3;
-            AutosaveRemaining = 240;
+            if (SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
+            {
+                AutoSaveIndex = (AutoSaveIndex + 1) % 3;
+                AutosaveRemaining = AutosaveMinutes * 60.0f;
+            }
+            else AutosaveRemaining = 60.0f;
         }
     }
     if (bAudioEnabled && Music->Sound)
@@ -805,8 +867,8 @@ void AHomesteadController::Interact()
         Notify(Sim.Sleep(8, Position));
         if (!IsFailed())
         {
-            SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true);
-            AutoSaveIndex = (AutoSaveIndex + 1) % 3;
+            if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
+                AutoSaveIndex = (AutoSaveIndex + 1) % 3;
             if (Sim.IsSheltered(Position) && State().hunger >= 35 && State().warmth >= 45)
                 SaveSlot(TEXT("Homestead_Recovery"), true);
         }
@@ -921,6 +983,7 @@ void AHomesteadController::CloseBook()
     else HideNativeMenu();
 }
 void AHomesteadController::ToggleBook() { if (IsFailed()) return; if (bBookOpen) CloseBook(); else OpenBook(0); }
+void AHomesteadController::OpenSettings() { if (bBookOpen && Page == 4) CloseBook(); else OpenBook(4); }
 void AHomesteadController::OpenCraft() { if (!IsFailed()) OpenBook(1); }
 void AHomesteadController::OpenBuild() { if (!IsFailed()) OpenBook(2); }
 void AHomesteadController::OpenJournal() { if (!IsFailed()) OpenBook(3); }
@@ -935,7 +998,7 @@ void AHomesteadController::PreviousPage()
 {
     if (bPlanning) { RotatePlacement(); return; }
     if (!bBookOpen) { OpenBook(1); return; }
-    Page = (Page + 6) % 7; Selection = 0; bConfirmRestart = false;
+    Page = ShiftFieldBookPage(Page, -1); Selection = 0; bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(Page == 6);
 }
@@ -943,7 +1006,7 @@ void AHomesteadController::NextPage()
 {
     if (bPlanning) { RotatePlacement(); return; }
     if (!bBookOpen) { OpenBook(2); return; }
-    Page = (Page + 1) % 7; Selection = 0; bConfirmRestart = false;
+    Page = ShiftFieldBookPage(Page, 1); Selection = 0; bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(Page == 6);
 }
@@ -1021,16 +1084,17 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     }
     else if (Page == 4)
     {
-        Result.Add({0, TEXT("Save progress"), TEXT("Write a manual save, retaining the previous backup.")});
+        Result.Add({0, TEXT("Save"), TEXT("Write a manual save and remain in Settings.")});
         Result.Add({1, TEXT("Load latest save"), TEXT("Resume the newest valid manual or automatic save.")});
-        Result.Add({2, FString::Printf(TEXT("Day length: %.0f minutes"), State().dayMinutes), TEXT("Cycle 30 / 60 / 120 real minutes per complete game day.")});
+        const FString Speed = State().dayMinutes >= 119 ? TEXT("Leisurely") : State().dayMinutes <= 31 ? TEXT("Fast") : TEXT("Balanced");
+        Result.Add({2, TEXT("Game speed: ") + Speed, TEXT("Leisurely, Balanced, or Fast.")});
         Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), TEXT("Cycle a comfortable turn speed.")});
         Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), TEXT("Change vertical look direction.")});
-        Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Cycle volume; nature continues between pieces.")});
+        Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Music playback level.")});
         Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind and woodland ambience.")});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
         Result.Add({8, TEXT("Start a new woodland"), TEXT("Create a new seed after confirmation. Cancel keeps your current woodland. This build uses a new test-save version.")});
-        Result.Add({9, TEXT("Save and quit"), TEXT("Save this homestead and close the game. Failed saves leave the game open.")});
+        Result.Add({9, TEXT("Quit game"), TEXT("Choose Save & Quit or Quit without Saving.")});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {
             float Normalized = 0, Scale = 100, Minimum = 0, Maximum = 100;
@@ -1047,6 +1111,12 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
                 Label += TEXT(" (engine override)");
             Result.Add({11, Label, TEXT("May reduce tearing, but can add input delay. Does not fix every flicker.")});
         }
+        Result.Add({12, FString::Printf(TEXT("Autosave: %s"), bAutosaveEnabled ? TEXT("On") : TEXT("Off")),
+            TEXT("Periodic rotating saves. Recovery checkpoints remain separate.")});
+        Result.Add({13, FString::Printf(TEXT("Autosave interval: %d minutes"), AutosaveMinutes),
+            bAutosaveEnabled ? TEXT("Counts only unpaused gameplay time.") : TEXT("Stored interval; Autosave is Off.")});
+        if (!PreviewLabel().IsEmpty())
+            Result.Add({14, PreviewLabel(), TEXT("This preview uses isolated saves.")});
     }
     else if (Page == 6)
     {
@@ -1186,20 +1256,18 @@ void AHomesteadController::ActivateRow()
     {
         switch (Id)
         {
-        case 0: QuickSave(); break;
+        case 0: MenuSave(); break;
         case 1: QuickLoad(); break;
         case 2: Notify(Sim.SetDayMinutes(State().dayMinutes < 60 ? 60 : State().dayMinutes < 120 ? 120 : 30)); break;
         case 3: PersistCameraSensitivity(Sensitivity >= 1.8f ? 0.6f : Sensitivity + 0.2f); break;
         case 4: PersistCameraInversion(!bInvertY); break;
         case 5:
-            MusicVolume = MusicVolume >= 0.99f ? 0 : FMath::Min(1.0f, MusicVolume + 0.2f);
-            Music->SetVolumeMultiplier(MusicVolume);
+            PersistAudioVolume(5, MusicVolume >= 0.99f ? 0 : MusicVolume + 0.2f, MusicVolume);
             break;
         case 6:
-            AmbienceVolume = AmbienceVolume >= 0.99f ? 0 : FMath::Min(1.0f, AmbienceVolume + 0.2f);
-            Ambience->SetVolumeMultiplier(AmbienceVolume);
+            PersistAudioVolume(6, AmbienceVolume >= 0.99f ? 0 : AmbienceVolume + 0.2f, AmbienceVolume);
             break;
-        case 7: EffectsVolume = EffectsVolume >= 0.99f ? 0 : FMath::Min(1.0f, EffectsVolume + 0.2f); break;
+        case 7: PersistAudioVolume(7, EffectsVolume >= 0.99f ? 0 : EffectsVolume + 0.2f, EffectsVolume); break;
         case 8: if (bConfirmRestart) NewGame(); else bConfirmRestart = true; break;
         case 9:
             MenuRequestExit();
@@ -1214,6 +1282,8 @@ void AHomesteadController::ActivateRow()
             else Notify(TEXT("Video settings are unavailable in this session."), true);
             break;
         case 11: ToggleVerticalSync(); break;
+        case 12: MenuSetAutosaveEnabled(!bAutosaveEnabled); break;
+        case 13: MenuSetAutosaveInterval(AutosaveMinutes == 5 ? 10 : AutosaveMinutes == 10 ? 20 : AutosaveMinutes == 20 ? 30 : 5); break;
         default: break;
         }
     }
@@ -1243,6 +1313,155 @@ void AHomesteadController::LoadCameraPreferences()
     }
     UE_LOG(LogTemp, Display, TEXT("CAMERA_SETTINGS loaded sensitivity=%.3f invert_y=%d file=%s"),
         Sensitivity, bInvertY, *Branch->IniPath);
+}
+
+void AHomesteadController::LoadUserPreferences()
+{
+    MusicVolume = 0.65f;
+    AmbienceVolume = 0.70f;
+    EffectsVolume = 0.80f;
+    bAutosaveEnabled = true;
+    AutosaveMinutes = 5;
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    FConfigFile Disk;
+    if (!Branch || !Disk.Combine(Branch->IniPath))
+    {
+        AutosaveRemaining = AutosaveMinutes * 60.0f;
+        return;
+    }
+    for (int32 Index = 0; Index < 3; ++Index)
+    {
+        float Stored = MenuAudioVolume(Index + 5);
+        if (Disk.GetFloat(AudioSettingsSection, AudioKeys[Index], Stored) && FMath::IsFinite(Stored)
+            && Stored >= 0 && Stored <= 1)
+            MenuPreviewAudioVolume(Index + 5, Stored);
+    }
+    FString EnabledText;
+    if (Disk.GetString(AutosaveSettingsSection, AutosaveEnabledKey, EnabledText))
+    {
+        if (EnabledText.Equals(TEXT("True"), ESearchCase::IgnoreCase)) bAutosaveEnabled = true;
+        else if (EnabledText.Equals(TEXT("False"), ESearchCase::IgnoreCase)) bAutosaveEnabled = false;
+    }
+    int32 Minutes = 5;
+    if (Disk.GetInt(AutosaveSettingsSection, AutosaveMinutesKey, Minutes)
+        && (Minutes == 5 || Minutes == 10 || Minutes == 20 || Minutes == 30))
+        AutosaveMinutes = Minutes;
+    AutosaveRemaining = AutosaveMinutes * 60.0f;
+}
+
+float AHomesteadController::MenuAudioVolume(int32 Id) const
+{
+    return Id == 5 ? MusicVolume : Id == 6 ? AmbienceVolume : EffectsVolume;
+}
+
+void AHomesteadController::MenuPreviewAudioVolume(int32 Id, float Value)
+{
+    Value = FMath::Clamp(Value, 0.0f, 1.0f);
+    if (Id == 5)
+    {
+        MusicVolume = Value;
+        Music->SetVolumeMultiplier(Value);
+    }
+    else if (Id == 6)
+    {
+        AmbienceVolume = Value;
+        Ambience->SetVolumeMultiplier(Value);
+    }
+    else EffectsVolume = Value;
+}
+
+bool AHomesteadController::PersistAudioVolume(int32 Id, float Requested, float Previous)
+{
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    const int32 Index = Id - 5;
+    Requested = FMath::Clamp(Requested, 0.0f, 1.0f);
+    if (!Branch || Index < 0 || Index >= 3
+        || !PersistFloatProperty(Branch->IniPath, AudioSettingsSection, AudioKeys[Index], Requested))
+    {
+        MenuPreviewAudioVolume(Id, Previous);
+        Notify(TEXT("Could not save that audio preference. The previous level was restored."), true);
+        return false;
+    }
+    GConfig->SetFloat(AudioSettingsSection, AudioKeys[Index], Requested, GGameUserSettingsIni);
+    MenuPreviewAudioVolume(Id, Requested);
+    return true;
+}
+
+bool AHomesteadController::MenuCommitAudioVolume(int32 Id, float Value, float Previous)
+{
+    return PersistAudioVolume(Id, Value, Previous);
+}
+
+bool AHomesteadController::PersistAutosaveEnabled(bool Requested)
+{
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    if (!Branch || !PersistBoolProperty(Branch->IniPath, AutosaveSettingsSection, AutosaveEnabledKey, Requested))
+    {
+        Notify(TEXT("Could not save the Autosave preference. The previous choice was restored."), true);
+        return false;
+    }
+    GConfig->SetBool(AutosaveSettingsSection, AutosaveEnabledKey, Requested, GGameUserSettingsIni);
+    return true;
+}
+
+bool AHomesteadController::PersistAutosaveInterval(int32 Requested)
+{
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    if (!Branch || (Requested != 5 && Requested != 10 && Requested != 20 && Requested != 30)
+        || !PersistIntProperty(Branch->IniPath, AutosaveSettingsSection, AutosaveMinutesKey, Requested))
+    {
+        Notify(TEXT("Could not save the Autosave interval. The previous interval was restored."), true);
+        return false;
+    }
+    GConfig->SetInt(AutosaveSettingsSection, AutosaveMinutesKey, Requested, GGameUserSettingsIni);
+    return true;
+}
+
+void AHomesteadController::MenuSetAutosaveEnabled(bool Enabled)
+{
+    if (!PersistAutosaveEnabled(Enabled)) return;
+    bAutosaveEnabled = Enabled;
+    AutosaveRemaining = AutosaveMinutes * 60.0f;
+    Notify(Enabled ? TEXT("Autosave On.") : TEXT("Autosave Off. Existing autosaves are retained."));
+}
+
+void AHomesteadController::MenuSetAutosaveInterval(int32 Minutes)
+{
+    if (!PersistAutosaveInterval(Minutes)) return;
+    AutosaveMinutes = Minutes;
+    AutosaveRemaining = AutosaveMinutes * 60.0f;
+    Notify(FString::Printf(TEXT("Autosave interval %d minutes."), AutosaveMinutes));
+}
+
+void AHomesteadController::MenuSetGameSpeed(double DayMinutes)
+{
+    Notify(Sim.SetDayMinutes(DayMinutes));
+}
+
+void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
+{
+    if (!Direction) return;
+    if (Id == 2)
+    {
+        const double Values[] = {120, 60, 30};
+        int32 Index = State().dayMinutes >= 119 ? 0 : State().dayMinutes <= 31 ? 2 : 1;
+        MenuSetGameSpeed(Values[FMath::Clamp(Index + Direction, 0, 2)]);
+    }
+    else if (Id == 3) PersistCameraSensitivity(FMath::Clamp(Sensitivity + Direction * 0.2f, 0.2f, 3.0f));
+    else if (Id == 4) PersistCameraInversion(Direction > 0);
+    else if (Id >= 5 && Id <= 7)
+    {
+        const float Previous = MenuAudioVolume(Id);
+        PersistAudioVolume(Id, Previous + Direction * 0.05f, Previous);
+    }
+    else if (Id == 12) MenuSetAutosaveEnabled(Direction > 0);
+    else if (Id == 13)
+    {
+        const int32 Values[] = {5, 10, 20, 30};
+        int32 Index = 0;
+        for (int32 I = 0; I < UE_ARRAY_COUNT(Values); ++I) if (Values[I] == AutosaveMinutes) Index = I;
+        MenuSetAutosaveInterval(Values[FMath::Clamp(Index + Direction, 0, UE_ARRAY_COUNT(Values) - 1)]);
+    }
 }
 
 bool AHomesteadController::PersistCameraSensitivity(float Requested)
@@ -1629,9 +1848,6 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     bFreshTerrainSpawn = false;
     bPendingSpawn = true;
     bWasFailed = false;
-    MusicVolume = Save.MusicVolume;
-    AmbienceVolume = Save.AmbienceVolume;
-    EffectsVolume = Save.EffectsVolume;
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     Music->SetVolumeMultiplier(MusicVolume);
     Ambience->SetVolumeMultiplier(AmbienceVolume);
@@ -1758,7 +1974,7 @@ void AHomesteadController::NewGame()
     bPendingSpawn = true;
     bWasFailed = false;
     RefreshRemaining = 0;
-    AutosaveRemaining = 240;
+    AutosaveRemaining = AutosaveMinutes * 60.0f;
     EndPlacement();
     OpenBook(3);
     Notify(TEXT("A new seeded woodland. Choose where to build; previous save files are still available."));

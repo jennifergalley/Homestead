@@ -149,11 +149,6 @@ void AHomesteadHUD::DrawHUD()
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);
         Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [R3] Camera distance") : TEXT("[I] Field book   [C] Craft   [B] Build   Mouse wheel: zoom"),
             FMath::Max(30.0f, ViewWidth - 690), 38, 19, Ink);
-        Panel(FMath::Max(18.0f, ViewWidth - 632), ViewHeight - 44, FMath::Min(614.0f, ViewWidth - 36), 29, Pine);
-        Write(!PC->PreviewLabel().IsEmpty() ? PC->PreviewLabel()
-            : PC->HasHeroine() ? TEXT("Character prototype - more faces, clothes, and detail to come")
-            : TEXT("Technical stand-in - character assets unavailable"),
-            FMath::Max(30.0f, ViewWidth - 610), ViewHeight - 34, 16, Muted);
     }
     const FString Toast = PC->Toast();
     if (!Toast.IsEmpty())
