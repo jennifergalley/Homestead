@@ -130,6 +130,22 @@ native save consumer, Save & Quit, save-failure retry, directional navigation,
 and three-process valid/invalid preference routes also passed. These offscreen
 checks do not replace human mouse/controller feel, listening, or final art taste.
 
+## Camera-safe foliage delivery, 2026-09-23
+
+`foliage-camera-05-shipping` separates leafy render surfaces from solid camera
+collision and applies a bounded camera-to-hero dither corridor. Ordinary
+Shipping routes at 720p, 1080p, and 4K retain woodland density away from the
+corridor, keep the heroine and focused target readable, and preserve solid
+mature-trunk contact. The focused sapling route verifies no camera sweep block
+through harvest, reload, permanent clear, save, and reload.
+
+The candidate full loop measured 46.31 mean FPS, p95 17.50 ms and p99 17.97 ms
+over 11,779 samples, versus selected `settings-wildflowers-v14` at p95 17.49 ms
+and p99 18.07 ms. Native 4K measured p95/p99 17.48/17.64 ms versus
+17.46/17.63 ms. The difference is below the route's practical noise floor; no
+full-screen foliage, trunk fading, dither trail, or cadence regression was
+observed in reviewed frames.
+
 ## Wardrobe presentation delivery
 
 `wardrobe-presentation-08` retains the ordinary 23-stage mapped route and adds

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\settings-wildflowers-03-shipping",
-  "profile": "settings-wildflowers-v14",
-  "executableSha256": "2AC96E8CE44B2C46804B86F0B99462BBF6DCB496C318DB8D2CA046DA5563B580"
+  "candidateDirectory": "Build\\Releases\\20260921-033354-2d257ba0\\foliage-camera-05-shipping",
+  "profile": "foliage-camera-v15",
+  "executableSha256": "B81E0D80F338655510FF7228F2D7CADAF44FD018A4339507A800218BC9E19E0E"
 }

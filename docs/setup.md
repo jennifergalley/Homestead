@@ -115,12 +115,11 @@ isolation or automatic quit. The active preview profile is shown only in
 Settings. Settings **Save and quit**, F5/F9, autosaves and recovery behave
 normally within that profile.
 
-The current preview selection is `settings-wildflowers-v14`, backed by immutable
-Shipping candidate `settings-wildflowers-03-shipping`. Settings is now a separate
-vertical screen opened by Esc or controller Menu/Start; `G` opens Guidebook.
-Music, ambience, effects and autosave cadence persist as user settings rather
-than world-save state. The previous `work-actions-v13` candidate remains intact
-as rollback.
+The current preview selection is `foliage-camera-v15`, backed by immutable
+Shipping candidate `foliage-camera-05-shipping`. Leafy render surfaces no longer
+compress or obscure the camera; solid trunks and world geometry retain camera
+collision. The previous `settings-wildflowers-v14` candidate remains intact as
+rollback.
 
 Profile IDs are **1-32 ASCII lowercase letters, digits or hyphens, starting with
 a letter**. Empty, duplicate, malformed, uppercase, absolute-path and traversal
@@ -130,8 +129,8 @@ The runtime uses the fixed Windows user-settings root:
 The `profile-` prefix also avoids Windows reserved device-directory names.
 All manual/rotating-auto/recovery files and their `.bak`/atomic `.tmp` siblings
 stay in that directory. The current selected profile is
-`settings-wildflowers-v14`. This is a deliberately fresh test clearing using
-the current world/save schema. The prior `work-actions-v13`,
+`foliage-camera-v15`. This is a deliberately fresh test clearing using the
+current world/save schema. The prior `settings-wildflowers-v14`, `work-actions-v13`,
 `wardrobe-complete-v12`, `inventory-safety-v10`, old `jenny-review` progress and
 original saves remain untouched, not migrated or silently reset. The selected
 rollback's graphics preferences were copied byte-for-byte into the new
