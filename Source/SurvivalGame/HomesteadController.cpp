@@ -1522,7 +1522,9 @@ FString AHomesteadController::BookSummary() const
 {
     switch (Page)
     {
-    case 0: return TEXT("Carried counts are in your pack; Chest counts are in nearby storage.");
+    case 0: return ActiveChestId.IsSet()
+        ? TEXT("Move whole stacks between this chest and your pack.")
+        : TEXT("Carried items and equipped clothing.");
     case 1: return FString();
     case 2: return TEXT("Choose a plan to preview placement. Materials are spent when you place it.");
     case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),

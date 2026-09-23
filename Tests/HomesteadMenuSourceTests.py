@@ -144,6 +144,14 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth)", MENU)
         self.assertIn("FText::AsNumber(FMath::Max(1, Row.Quantity))", MENU)
         self.assertIn('Kind(FName(TEXT("sort")))', MENU)
+        self.assertNotIn('TEXT("Nearby chest")', MENU)
+        self.assertNotIn('TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")', MENU)
+        details = function_body(MENU, "TSharedRef<SWidget> SHomesteadMenu::BuildDetails(")
+        item_actions = details[details.index("if (Entries.IsValidIndex(ContentSelection))"):]
+        self.assertNotIn("Actions.Add(EHomesteadItemAction::Transfer)", item_actions)
+        self.assertNotIn("Actions.Add(EHomesteadItemAction::Split)", item_actions)
+        self.assertNotIn("Actions.Add(EHomesteadItemAction::Merge)", item_actions)
+        self.assertNotIn("Actions.Add(EHomesteadItemAction::MoveEarlier)", item_actions)
 
     def test_detail_actions_are_inside_the_clipped_scroll_region(self):
         details = function_body(MENU, "TSharedRef<SWidget> SHomesteadMenu::BuildDetails(")
@@ -302,7 +310,8 @@ class MenuSourceContracts(unittest.TestCase):
         fixture = (SOURCE / "UI" / "HomesteadDirectionalNavigationTest.cpp").read_text()
         self.assertIn("Tap(EKeys::Gamepad_DPad_Down)", fixture)
         self.assertIn("SlateAxis(EKeys::Gamepad_LeftY, -0.9f)", fixture)
-        self.assertIn("Axis(EKeys::Gamepad_LeftX, 0.9f)", fixture)
+        self.assertIn("IsVirtualDraggingItem()", fixture)
+        self.assertIn("Tap(EKeys::Gamepad_DPad_Right)", fixture)
         self.assertIn("ProcessMouseMoveEvent", fixture)
         self.assertIn("ProcessMouseButtonDownEvent", fixture)
         self.assertIn("PromptDeviceChangeCount()", fixture)

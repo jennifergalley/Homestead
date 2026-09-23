@@ -273,17 +273,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Only the actual final scrolled row exits downward"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
-    Add(TEXT("Empty nearby-storage view has real explanatory focus"),
-        [Open]() { Open(1); },
-        [this, Focused]() { return Controller->MenuRows().IsEmpty() && Focused(TEXT("Content")); });
-    Add(TEXT("Empty content can move down to equipment and back up"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
-        [Focused]() { return Focused(TEXT("Equipment")); });
-    Add(TEXT("Reverse returns to the empty-content focus anchor"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Up); },
-        [this, Focused]() { return Focused(TEXT("Content")) && Controller->NativeMenu->GetSelectedSubject() == nullptr; });
-
-    Add(TEXT("Select a real splittable stack for modal navigation"),
+    Add(TEXT("Select a real stack for controller virtual drag"),
         [this, Open, Before, SelectedId]()
         {
             Open(0); Tap(EKeys::Right);
@@ -293,41 +283,22 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         },
         [this, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Focused(TEXT("Content")) && Subject && Subject->Quantity > 2; });
-    Add(TEXT("Mapped split opens a safe focused modal"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Top); },
-        [this]() { return Controller->NativeMenu->HasActiveDialog() && Controller->NativeMenu->HasSynchronizedFocus()
-            && !Controller->NativeMenu->IsEditingQuantity() && Controller->NativeMenu->GetDraftQuantity() == 1; });
-    Add(TEXT("Focus browsing does not edit or activate quantity"),
-        [this]() { Tap(EKeys::Up); Tap(EKeys::Right); },
-        [this, Before]() { return !Controller->NativeMenu->IsEditingQuantity() && Controller->NativeMenu->GetDraftQuantity() == 1
+    Add(TEXT("Controller A picks up the selected tile without mutation"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Before]() { return Controller->NativeMenu->IsVirtualDraggingItem()
             && Controller->Sim.Serialize() == *Before; });
-    Add(TEXT("Scroll modal choices and return to a visible amount editor"),
-        [this]()
-        {
-            for (int32 Index = 0; Index < 5; ++Index) Tap(EKeys::Down);
-            for (int32 Index = 0; Index < 4; ++Index) Tap(EKeys::Up);
-        },
-        [this]() { return Controller->NativeMenu->HasActiveDialog() && Controller->NativeMenu->HasSynchronizedFocus()
-            && Controller->NativeMenu->IsFocusedControlVisible() && !Controller->NativeMenu->IsEditingQuantity(); });
-    Add(TEXT("Explicit amount activation enters editing"),
-        [this]() { Tap(EKeys::Enter); },
-        [this]() { return Controller->NativeMenu->IsEditingQuantity() && Controller->NativeMenu->HasSynchronizedFocus(); });
-    Add(TEXT("Actual left-stick input edits only the draft in edit mode"),
-        [this]() { Axis(EKeys::Gamepad_LeftX, 0.9f); },
-        [this, Before]() { Axis(EKeys::Gamepad_LeftX, 0); return Controller->NativeMenu->GetDraftQuantity() == 2
-            && Controller->Sim.Serialize() == *Before; }, 0.15f);
-    Capture(TEXT("native-navigation-amount"));
-    Add(TEXT("Back first leaves editing without closing modal"),
+    Add(TEXT("Directional focus moves while virtual drag remains transient"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Right); },
+        [this, Before, SelectedId, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            return Focused(TEXT("Content")) && Controller->NativeMenu->IsVirtualDraggingItem()
+                && Subject && Subject->SubjectId != *SelectedId
+                && Controller->Sim.Serialize() == *Before; });
+    Capture(TEXT("native-navigation-drag"));
+    Add(TEXT("Back cancels virtual drag without closing Inventory"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
-        [this]() { return Controller->NativeMenu->HasActiveDialog() && !Controller->NativeMenu->IsEditingQuantity(); });
-    Add(TEXT("Modal cancel returns real focus to the original stable subject"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
-        [this, Before, SelectedId, Focused]()
-        {
-            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
-            return !Controller->NativeMenu->HasActiveDialog() && Focused(TEXT("Content"))
-                && Subject && Subject->SubjectId == *SelectedId && Controller->Sim.Serialize() == *Before;
-        });
+        [this, Before, Focused]() { return Controller->IsBookOpen()
+            && !Controller->NativeMenu->IsVirtualDraggingItem() && Focused(TEXT("Content"))
+            && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });

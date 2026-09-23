@@ -774,17 +774,6 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     const FString Summary = SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary();
     if (!Summary.IsEmpty())
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)[ Text(Summary, 17) ];
-    if (SeenPage == 0 && !Storage)
-    {
-        TSharedPtr<SHorizontalBox> Views;
-        InventoryColumn->AddSlot().AutoHeight().Padding(0, 0, 0, 12)[ SAssignNew(Views, SHorizontalBox) ];
-        const TCHAR* Names[] = {TEXT("Carried"), TEXT("Nearby chest"), TEXT("Wearing")};
-        for (int32 View = 0; View < 3; ++View)
-            Views->AddSlot().FillWidth(1).Padding(0, 0, View < 2 ? 6 : 0, 0)
-            [ RegisterButton(MakeButton(Names[View], [this, View]() { ChangeInventoryView(View); },
-                TAttribute<FSlateColor>::CreateLambda([this, View]()
-                { return (Region == ERegion::Inventory ? InventorySelection == View : Controller->InventoryView() == View) ? Gold : Pine; })), ERegion::Inventory, View) ];
-    }
     if (Storage)
     {
         TSharedPtr<SVerticalBox> ChestColumn;
@@ -885,9 +874,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             { return FMath::Max(ItemCellWidth, Scroll->GetCachedGeometry().GetLocalSize().X > 0
                 ? static_cast<float>(Scroll->GetCachedGeometry().GetLocalSize().X) - 24.0f : 480.0f); })
             [Text(SeenPage == 0 && Controller->InventoryView() == 1
-            ? TEXT("No items in reachable storage.\nStand near a chest to manage its contents.")
+            ? TEXT("This chest is empty.")
             : SeenPage == 0 && Controller->InventoryView() == 2 ? TEXT("No removable clothing is equipped.")
-            : TEXT("Your pack is empty.\nGather supplies or take an item from a nearby chest."))], ERegion::Content, -1) ];
+            : TEXT("Your pack is empty."))], ERegion::Content, -1) ];
     int32 ChestCell = 0;
     int32 PackCell = 0;
     for (int32 Index = 0; Index < Entries.Num(); ++Index)
@@ -1165,23 +1154,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
         const auto& Row = Entries[ContentSelection];
         if (Row.Subject == EHomesteadMenuSubject::Wearable)
         {
-            Actions.Add(Row.ContainerId < 0 ? EHomesteadItemAction::Unequip : Row.ContainerId == 0
-                ? EHomesteadItemAction::Equip : EHomesteadItemAction::Transfer);
+            if (Row.ContainerId < 0) Actions.Add(EHomesteadItemAction::Unequip);
+            else if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Equip);
             const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
             if (Info && Info->dyeable) Actions.Add(EHomesteadItemAction::Dye);
-            if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Transfer);
         }
         else if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
         {
-            Actions.Add(Row.ContainerId == 0 ? EHomesteadItemAction::Primary : EHomesteadItemAction::Transfer);
-            if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Transfer);
-            if (Row.Quantity > 1) Actions.Add(EHomesteadItemAction::Split);
-            Actions.Add(EHomesteadItemAction::Merge);
+            if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Primary);
         }
         else if (Row.Subject != EHomesteadMenuSubject::Recipe && !IsDirectCameraSetting(Row))
             Actions.Add(EHomesteadItemAction::Primary);
-        if (SeenPage == 0 && Row.ContainerId >= 0)
-        { Actions.Add(EHomesteadItemAction::MoveEarlier); Actions.Add(EHomesteadItemAction::MoveLater); }
     }
     ActionSelection = FMath::Clamp(ActionSelection, 0, FMath::Max(0, Actions.Num() - 1));
     if (Actions.IsEmpty() && Region == ERegion::Actions) Region = ERegion::Details;
@@ -1262,10 +1245,6 @@ FString SHomesteadMenu::DetailsBodyText() const
     const auto& Row = Entries[Index];
     if (Row.Subject == EHomesteadMenuSubject::Recipe) return FString();
     FString Detail = Row.Detail;
-    if (SeenPage == 0)
-    {
-        if (Row.ContainerId == 0 && !Row.CanStore) Detail += TEXT("\n\nStand near a chest to store this item.");
-    }
     if (SeenPage == 4 && Controller.IsValid() && Controller->IsFailed())
         Detail += TEXT("\n\nRecovery: saving a failed state is disabled. Retry a checkpoint or quit explicitly.");
     return Detail;
@@ -1283,13 +1262,6 @@ FString SHomesteadMenu::Footer() const
     const bool Pad = Controller->UsesGamepad();
     FString Hint = Pad ? TEXT("D-pad / Left stick  Move between sections    A  Activate    LB/RB  Tabs")
         : TEXT("Arrows  Move between sections    Enter  Activate    Ctrl+Tab  Tabs");
-    if (SeenPage == 0 && GetSelectedSubject())
-    {
-        const auto& Row = Entries[ContentSelection];
-        if (Row.CanStore || Row.CanTake) Hint += Pad ? TEXT("    X  Transfer") : TEXT("    F  Transfer");
-        if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Quantity > 1)
-            Hint += Pad ? TEXT("    Y  Split") : TEXT("    G  Split");
-    }
     if (Region == ERegion::Portrait) Hint += Pad ? TEXT("    Right stick  Turn    R3  Zoom") : TEXT("    Z  Zoom");
     if (Region == ERegion::Details) Hint += TEXT("    Up/Down  Scroll details");
     return Hint + (Pad ? TEXT("    B  Back") : TEXT("    Esc  Back"));
@@ -1566,7 +1538,6 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
         SynchronizeFocus();
         return;
     }
-    if (SeenPage == 0) Regions.Add(ERegion::Inventory);
     if (Controller->MenuPortraitBrush()) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
@@ -1806,13 +1777,10 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         if (Controller->MenuSortPack()) Refresh();
         return true;
     }
-    if (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Left)
+    if (Key == EKeys::Gamepad_FaceButton_Left)
     {
         if (SeenPage == 0 && GetSelectedSubject())
-        {
-            if (Key == EKeys::Gamepad_FaceButton_Left) SplitSelectedHalf();
-            else RunAction(EHomesteadItemAction::Transfer);
-        }
+            SplitSelectedHalf();
         return true;
     }
     if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top) { if (SeenPage == 0 && GetSelectedSubject()) RunAction(EHomesteadItemAction::Split); return true; }

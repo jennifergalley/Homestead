@@ -20,13 +20,7 @@ FString AHomesteadController::MenuInventorySummary() const
     if (ActiveChestId.IsSet())
         return FString::Printf(TEXT("Chest %d: %d / 120  |  Pack: %d / 120"),
             ActiveChestId.GetValue(), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Sim.UsedCapacity());
-    if (MenuInventoryViewIndex == 2) return TEXT("Wearing  |  Equipped clothes do not use pack capacity");
-    if (MenuInventoryViewIndex == 1)
-    {
-        const int Chest = ActiveChestId.Get(-1);
-        return Chest >= 0 ? FString::Printf(TEXT("Chest %d  |  %d / 120 units"), Chest, Sim.ChestUsedCapacity(Chest))
-            : TEXT("No reachable chest  |  Move near storage to open it");
-    }
+    if (MenuInventoryViewIndex == 2) return TEXT("Equipped clothing");
     return FString::Printf(TEXT("Your pack  |  %d / 120 units"), Sim.UsedCapacity());
 }
 
@@ -57,7 +51,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
     }
 
     TArray<FHomesteadRow> Result;
-    const int Chest = ActiveChestId.Get(Sim.FindNearestStructure(PlayerPoint(), Homestead::Piece::Chest, Homestead::ChestReach));
+    const int Chest = ActiveChestId.Get(-1);
     const bool Storage = ActiveChestId.IsSet();
     const int Container = MenuInventoryViewIndex == 1 ? Chest : 0;
     auto AddWearable = [&](const Homestead::WearableInstance& Instance)
@@ -69,7 +63,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         Row.Subject = EHomesteadMenuSubject::Wearable;
         Row.ContainerId = Instance.owner == Homestead::WearableOwner::Chest ? Instance.chestId
             : Instance.owner == Homestead::WearableOwner::Equipped ? -1 : 0;
-        Row.DestinationId = Row.ContainerId == 0 ? Chest : 0;
+        Row.DestinationId = Storage ? (Row.ContainerId == 0 ? Chest : 0) : -1;
         Row.Quantity = 1;
         Row.Name = Row.Label = FromUtf8(Info->name);
         Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
@@ -89,8 +83,8 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         Row.Action = Row.ContainerId < 0 ? TEXT("Unequip") : Row.ContainerId == 0 ? TEXT("Equip") : TEXT("Take to pack");
         Row.Icon = Instance.definition == Homestead::WearableDefinition::LeatherShoes ? FName(TEXT("leather-shoes"))
             : FName(UTF8_TO_TCHAR(Info->key));
-        Row.CanStore = Row.ContainerId == 0 && Chest >= 0;
-        Row.CanTake = Row.ContainerId > 0;
+        Row.CanStore = false;
+        Row.CanTake = false;
         Result.Add(MoveTemp(Row));
     };
     if (!Storage && MenuInventoryViewIndex == 2)
@@ -115,14 +109,14 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
             Row.Subject = EHomesteadMenuSubject::ItemGroup;
             Row.ContainerId = CurrentContainer;
-            Row.DestinationId = CurrentContainer == 0 ? Chest : 0;
+            Row.DestinationId = Storage ? (CurrentContainer == 0 ? Chest : 0) : -1;
             Row.Quantity = Entry.quantity;
             Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
             Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
             Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
                 IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
-            Row.CanStore = CurrentContainer == 0 && Chest >= 0;
-            Row.CanTake = CurrentContainer > 0;
+            Row.CanStore = false;
+            Row.CanTake = false;
             Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : TEXT("Inspect");
             Result.Add(MoveTemp(Row));
         }

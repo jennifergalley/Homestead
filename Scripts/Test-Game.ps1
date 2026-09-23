@@ -135,7 +135,7 @@ if ($BookClarity) {
 if ($NativeMenu) {
     $captures = @('native-settings.png','native-exit-confirm.png','native-save-error.png',
         'native-inventory.png','native-crafting.png','native-recovery-exit.png',
-        'native-transfer-amount.png','native-storage-transactions.png','native-test-reset.png',
+        'native-storage-two-grid.png','native-storage-transactions.png','native-test-reset.png',
         'native-build.png','native-guidebook.png','native-appearance.png',
         'native-base-only-0.png','native-base-only-1.png','native-base-only-2.png',
         'native-wardrobe-layered.png','native-wardrobe-dyed.png','native-wardrobe-restored.png')
@@ -148,7 +148,7 @@ if ($NativeMenu) {
     }
 }
 if ($DirectionalNavigation) {
-    $captures = @('native-navigation-equipment.png','native-navigation-scrolled.png','native-navigation-amount.png')
+    $captures = @('native-navigation-equipment.png','native-navigation-scrolled.png','native-navigation-drag.png')
 }
 if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
