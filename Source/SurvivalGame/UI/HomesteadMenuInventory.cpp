@@ -175,6 +175,13 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     {
         if (Action == EHomesteadItemAction::Transfer && Row.ContainerId >= 0 && Row.DestinationId >= 0)
             Result = Sim.MoveWearable(Row.SubjectId, Row.DestinationId, PlayerPoint(), ExpectedRevision);
+        else if (Action == EHomesteadItemAction::Drop && Row.ContainerId == 0)
+        {
+            Homestead::Point DropPoint;
+            if (!ResolveDropPoint(DropPoint))
+                Result = {false, "There is no clear dry ground nearby for this garment."};
+            else Result = Sim.DropWearable(Row.SubjectId, DropPoint, PlayerPoint(), ExpectedRevision);
+        }
     }
     else if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
     {
@@ -187,6 +194,13 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
             Result = Sim.SplitGroup(Row.ContainerId, Row.SubjectId, Amount, PlayerPoint(), ExpectedRevision);
         else if (Action == EHomesteadItemAction::Merge)
             Result = Sim.MergeGroups(Row.ContainerId, Row.SubjectId, Amount, PlayerPoint(), ExpectedRevision);
+        else if (Action == EHomesteadItemAction::Drop && Row.ContainerId == 0)
+        {
+            Homestead::Point DropPoint;
+            if (!ResolveDropPoint(DropPoint))
+                Result = {false, "There is no clear dry ground nearby for this item."};
+            else Result = Sim.DropGroup(Row.SubjectId, Amount, DropPoint, PlayerPoint(), ExpectedRevision);
+        }
         else if (Action == EHomesteadItemAction::Primary && Row.ContainerId == 0)
         {
             if (IsFood(static_cast<Homestead::Item>(Row.Id))) Result = Sim.EatGroup(Row.SubjectId, ExpectedRevision);

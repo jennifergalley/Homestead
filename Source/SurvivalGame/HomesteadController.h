@@ -22,7 +22,7 @@ class AHomesteadMenuPortrait;
 class SWidget;
 
 enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe };
-enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye };
+enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye, Drop };
 
 struct FHomesteadRow
 {
@@ -155,9 +155,10 @@ public:
     float EffectsVolume = 0.8f;
 
 private:
+    bool ResolveDropPoint(Homestead::Point& Result) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
-    enum class EFocus { None, Resource, Plot, Fire, Bed, Chest, Water };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water };
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;

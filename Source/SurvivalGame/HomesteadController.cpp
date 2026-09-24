@@ -820,6 +820,44 @@ float AHomesteadController::GroundHeight(float X, float Y) const
     return AHomesteadWorld::GroundHeight(X, Y, State().world);
 }
 
+bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
+{
+    const Homestead::Point PlayerPosition = PlayerPoint();
+    const float Yaw = GetPawn() ? GetPawn()->GetActorRotation().Yaw : GetControlRotation().Yaw;
+    static constexpr float Angles[] = {0, -35, 35, -70, 70, 180};
+    static constexpr float Distances[] = {150, 185, 210};
+    for (const float Distance : Distances)
+        for (const float Angle : Angles)
+        {
+            const FVector Direction = FRotator(0, Yaw + Angle, 0).Vector();
+            const Homestead::Point Candidate{PlayerPosition.x + Direction.X * Distance,
+                PlayerPosition.y + Direction.Y * Distance};
+            if (Homestead::IsNearWater(Candidate)) continue;
+            bool Clear = true;
+            for (const auto& Structure : State().structures)
+                if (FVector2D::Distance(FVector2D(Candidate.x, Candidate.y),
+                    FVector2D(Homestead::CellCenter(Structure.cellX, Structure.cellY).x,
+                    Homestead::CellCenter(Structure.cellX, Structure.cellY).y)) < 240)
+                { Clear = false; break; }
+            if (!Clear) continue;
+            for (const auto& Plot : State().plots)
+                if (FVector2D::Distance(FVector2D(Candidate.x, Candidate.y),
+                    FVector2D(Homestead::CellCenter(Plot.cellX, Plot.cellY).x,
+                    Homestead::CellCenter(Plot.cellX, Plot.cellY).y)) < 140)
+                { Clear = false; break; }
+            if (!Clear) continue;
+            const FVector Center(Candidate.x, Candidate.y,
+                GroundHeight(Candidate.x, Candidate.y) + 45);
+            FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadDropPlacement), false, GetPawn());
+            if (GetWorld()->OverlapAnyTestByChannel(Center, FQuat::Identity,
+                ECC_WorldStatic, FCollisionShape::MakeSphere(22), Params))
+                continue;
+            Result = Candidate;
+            return true;
+        }
+    return false;
+}
+
 bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
 {
     Homestead::Generation::ChunkCoord Chunk;
@@ -1011,6 +1049,8 @@ void AHomesteadController::UpdateFocus()
     };
     for (const auto& Node : State().resources)
         if (!Node.cleared) Consider(EFocus::Resource, Node.id, Node.position);
+    for (const auto& Drop : State().worldDrops)
+        Consider(EFocus::Drop, Drop.id, Drop.position);
     for (const auto& Plot : State().plots)
         Consider(EFocus::Plot, Plot.id, Homestead::CellCenter(Plot.cellX, Plot.cellY));
     for (const auto& Structure : State().structures)
@@ -1050,6 +1090,20 @@ FString AHomesteadController::FocusTitle() const
                 *Text(Homestead::CropName(Plot.kind)), FMath::RoundToInt(Plot.growth * 100),
                 FMath::RoundToInt(Plot.moisture * 100), FMath::RoundToInt(Plot.weeds * 100));
         }
+        break;
+    case EFocus::Drop:
+        for (const auto& Drop : State().worldDrops)
+            if (Drop.id == FocusId)
+            {
+                if (Drop.wearableId)
+                {
+                    const auto* Wearable = Sim.GetWearable(Drop.wearableId);
+                    return Wearable ? Text(Homestead::WearableName(Wearable->definition))
+                        : TEXT("Dropped garment");
+                }
+                return FString::Printf(TEXT("%s x%d"),
+                    *Text(Homestead::ItemName(Drop.item)), Drop.quantity);
+            }
         break;
     case EFocus::Fire: return TEXT("Cookfire");
     case EFocus::Bed: return TEXT("Bedroll");
@@ -1099,6 +1153,7 @@ FString AHomesteadController::FocusActions() const
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
+    case EFocus::Drop: return A + TEXT(" Pick up");
     case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
@@ -1161,6 +1216,9 @@ void AHomesteadController::Interact()
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);
         break;
     }
+    case EFocus::Drop:
+        Notify(Sim.PickUpDrop(FocusId, Position));
+        break;
     case EFocus::Plot:
         for (const auto& Plot : State().plots)
         {

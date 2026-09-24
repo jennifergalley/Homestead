@@ -74,7 +74,7 @@ public:
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
-    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge };
+    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
     TSharedPtr<SHorizontalBox> TabBar;

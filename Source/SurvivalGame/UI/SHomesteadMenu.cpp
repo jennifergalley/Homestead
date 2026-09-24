@@ -1154,13 +1154,21 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
         if (Row.Subject == EHomesteadMenuSubject::Wearable)
         {
             if (Row.ContainerId < 0) Actions.Add(EHomesteadItemAction::Unequip);
-            else if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Equip);
+            else if (Row.ContainerId == 0)
+            {
+                Actions.Add(EHomesteadItemAction::Equip);
+                Actions.Add(EHomesteadItemAction::Drop);
+            }
             const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
             if (Info && Info->dyeable) Actions.Add(EHomesteadItemAction::Dye);
         }
         else if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
         {
-            if (Row.ContainerId == 0) Actions.Add(EHomesteadItemAction::Primary);
+            if (Row.ContainerId == 0)
+            {
+                Actions.Add(EHomesteadItemAction::Primary);
+                Actions.Add(EHomesteadItemAction::Drop);
+            }
         }
         else if (Row.Subject != EHomesteadMenuSubject::Recipe && !IsDirectCameraSetting(Row))
             Actions.Add(EHomesteadItemAction::Primary);
@@ -1285,6 +1293,7 @@ FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
     case EHomesteadItemAction::Equip: return TEXT("Equip");
     case EHomesteadItemAction::Unequip: return TEXT("Unequip to pack");
     case EHomesteadItemAction::Dye: return TEXT("Change dye");
+    case EHomesteadItemAction::Drop: return TEXT("Drop...");
     default: return Row.Action.IsEmpty() ? (SeenPage == 3 || SeenPage == 5 ? TEXT("Read") : TEXT("Change / activate")) : Row.Action;
     }
 }
@@ -1435,7 +1444,8 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
     if (Row.Subject != EHomesteadMenuSubject::Legacy)
     {
         PendingRow = Row; PendingAction = Action; PendingRevision = Controller->Simulation().GetRevision();
-        if ((Action == EHomesteadItemAction::Transfer || Action == EHomesteadItemAction::Split)
+        if ((Action == EHomesteadItemAction::Transfer || Action == EHomesteadItemAction::Split
+            || Action == EHomesteadItemAction::Drop)
             && Row.Subject == EHomesteadMenuSubject::ItemGroup)
         {
             Amount = 1; MaximumAmount = Row.Quantity - (Action == EHomesteadItemAction::Split ? 1 : 0);
@@ -1449,6 +1459,8 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
             { Controller->MenuItemAction(Row, Action, 1, PendingRevision); return; }
             SetDialog(EDialog::Amount); return;
         }
+        if (Action == EHomesteadItemAction::Drop && Row.Subject == EHomesteadMenuSubject::Wearable)
+        { SetDialog(EDialog::DropWearable); return; }
         if (Action == EHomesteadItemAction::Merge)
         {
             MergeTargets.Reset();
@@ -1955,12 +1967,21 @@ void SHomesteadMenu::BuildDialog()
     TArray<FString> Labels;
     if (Dialog == EDialog::Amount)
     {
-        Title = PendingAction == EHomesteadItemAction::Split ? TEXT("Split stack") : TEXT("Transfer items");
+        Title = PendingAction == EHomesteadItemAction::Split ? TEXT("Split stack")
+            : PendingAction == EHomesteadItemAction::Drop ? TEXT("Drop items") : TEXT("Transfer items");
         const FString Destination = PendingAction == EHomesteadItemAction::Split ? TEXT("A new stack in the same container")
+            : PendingAction == EHomesteadItemAction::Drop ? TEXT("Nearby ground")
             : PendingRow.ContainerId > 0 ? TEXT("Your pack") : FString::Printf(TEXT("Chest %d"), PendingRow.DestinationId);
         Description = FString::Printf(TEXT("%s\nFrom: %s\nTo: %s\n\nAmount: %d / %d\nChoose Amount and activate to edit. While editing: Left/Right one, LB/RB ten; Back finishes editing."),
             *PendingRow.Name, *PendingRow.Location, *Destination, Amount, MaximumAmount);
         Labels = {TEXT("Cancel"), TEXT("Confirm"), TEXT("One"), TEXT("All available")};
+    }
+    else if (Dialog == EDialog::DropWearable)
+    {
+        Title = TEXT("Drop garment");
+        Description = FString::Printf(TEXT("%s\n\nPlace this garment on clear ground nearby?"),
+            *PendingRow.Name);
+        Labels = {TEXT("Cancel"), TEXT("Drop")};
     }
     else if (Dialog == EDialog::Merge)
     {
@@ -2077,6 +2098,11 @@ void SHomesteadMenu::DialogAction(int32 Index)
     {
         if (MergeTargets.IsValidIndex(Index - 1))
             Controller->MenuItemAction(PendingRow, PendingAction, MergeTargets[Index - 1], PendingRevision);
+        SetDialog(EDialog::None); Refresh(); return;
+    }
+    if (Dialog == EDialog::DropWearable)
+    {
+        Controller->MenuItemAction(PendingRow, PendingAction, 1, PendingRevision);
         SetDialog(EDialog::None); Refresh(); return;
     }
     if (Dialog == EDialog::SaveFailed && Index == 2) { Controller->MenuQuitWithoutSaving(); return; }

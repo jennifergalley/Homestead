@@ -2,9 +2,11 @@
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
 #include "../HomesteadSave.h"
+#include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
 #include "SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"
@@ -1942,6 +1944,254 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
         [this]() { Controller->OpenBook(0); },
         [this]() { return Controller->IsBookOpen() && Controller->NativeMenu.IsValid()
             && Controller->NativeMenu->HasSynchronizedFocus() && VerifyNativeMenuPresentation(); });
+    const auto DropGroup = MakeShared<int32>(0);
+    const auto DropItem = MakeShared<Homestead::Item>(Homestead::Item::Count);
+    const auto DropCount = MakeShared<int32>(0);
+    const auto DropId = MakeShared<int32>(0);
+    const auto DropPlayerLocation = MakeShared<FVector>(FVector::ZeroVector);
+    const auto DropPlayerRotation = MakeShared<FRotator>(FRotator::ZeroRotator);
+    const auto DropWindowLifecycle = MakeShared<bool>(false);
+    Add(TEXT("Select a carried stack with contextual Drop"),
+        [this, DropGroup, DropItem, DropCount]()
+        {
+            Controller->MenuInventoryView(0);
+            Controller->CloseBook();
+            Controller->OpenBook(0);
+            for (const auto& Entry : *Controller->Simulation().GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Knife && Entry.quantity == 1)
+                {
+                    *DropGroup = Entry.groupId;
+                    *DropItem = Entry.item;
+                    *DropCount = Controller->Simulation().Count(Entry.item);
+                    break;
+                }
+            if (!*DropGroup
+                || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *DropGroup, 0)
+                || !Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop))
+                Finish(false, TEXT("No carried stack exposes the contextual Drop action."));
+        },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Pointer Drop opens shared amount stepper"),
+        [this]()
+        {
+            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Focused Drop action has no pointer target.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            Slate.SetCursorPos(Position);
+            TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        },
+        [this]() { return Controller->NativeMenu->HasActiveDialog()
+            && Controller->NativeMenu->GetDraftQuantity() == 1; });
+    Add(TEXT("Controller cancel leaves exact carried and world totals unchanged"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this, DropItem, DropCount]() { return !Controller->NativeMenu->HasActiveDialog()
+            && Controller->Simulation().Count(*DropItem) == *DropCount
+            && Controller->State().worldDrops.empty(); });
+    Add(TEXT("Keyboard confirms one dropped item through the same action"),
+        [this]()
+        {
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop);
+            Tap(EKeys::Enter);
+            Tap(EKeys::Down);
+            Tap(EKeys::Enter);
+        },
+        [this, DropItem, DropCount, DropId]()
+        {
+            if (Controller->Simulation().Count(*DropItem) != *DropCount - 1
+                || Controller->State().worldDrops.size() != 1) return false;
+            const auto Slots = Controller->HotbarSnapshot();
+            const auto* Knife = Slots.FindByPredicate([](const FHomesteadHotbarSlot& Slot)
+                { return Slot.Tool == Homestead::Item::Knife; });
+            if (!Knife || Knife->Available) return false;
+            *DropId = Controller->State().worldDrops.front().id;
+            return *DropId > 0;
+        });
+    Add(TEXT("Dropped item creates one low nonblocking camera-safe token"),
+        [this, DropPlayerLocation, DropPlayerRotation]()
+        {
+            Controller->CloseBook();
+            if (!Controller->State().worldDrops.empty())
+            {
+                const auto& Drop = Controller->State().worldDrops.front();
+                *DropPlayerLocation = Controller->GetPawn()->GetActorLocation();
+                *DropPlayerRotation = Controller->GetPawn()->GetActorRotation();
+                bool Positioned = false;
+                for (int32 Index = 0; Index < 16 && !Positioned; ++Index)
+                {
+                    const float Angle = Index * 360.0f / 16.0f;
+                    const FVector Away = FRotator(0, Angle, 0).Vector();
+                    const float X = Drop.position.x + Away.X * 80;
+                    const float Y = Drop.position.y + Away.Y * 80;
+                    const float Ground = Controller->GroundHeight(X, Y);
+                    FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadDropProofView), false,
+                        Controller->GetPawn());
+                    const FVector Body(X, Y, Ground + 90);
+                    const FVector Camera = Body + Away * 340 + FVector(0, 0, 90);
+                    const FVector Target(Drop.position.x, Drop.position.y,
+                        Controller->GroundHeight(Drop.position.x, Drop.position.y) + 32);
+                    bool StructureBlocksView = false;
+                    for (const auto& Structure : Controller->State().structures)
+                    {
+                        const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+                        if (FMath::PointDistToSegment(
+                            FVector(Center.x, Center.y, 0),
+                            FVector(Camera.X, Camera.Y, 0),
+                            FVector(Target.X, Target.Y, 0)) < 150)
+                        { StructureBlocksView = true; break; }
+                    }
+                    if (Controller->GetWorld()->OverlapAnyTestByChannel(Body, FQuat::Identity,
+                            ECC_WorldStatic, FCollisionShape::MakeSphere(38), Params)
+                        || Controller->GetWorld()->LineTraceTestByChannel(Camera, Target,
+                            ECC_WorldStatic, Params) || StructureBlocksView)
+                        continue;
+                    Controller->GetPawn()->SetActorLocation(FVector(X, Y, Ground + 100),
+                        false, nullptr, ETeleportType::TeleportPhysics);
+                    Controller->GetPawn()->SetActorRotation(
+                        FRotator(0, FMath::RadiansToDegrees(FMath::Atan2(-Away.Y, -Away.X)), 0));
+                    Positioned = true;
+                }
+                if (!Positioned)
+                { Finish(false, TEXT("No camera-clear view of the dropped item was available.")); return; }
+            }
+        },
+        [this, DropId, DropItem]()
+        {
+            if (!Controller->Landscape) return false;
+            const auto* Visual = Controller->Landscape->DropVisuals.Find(*DropId);
+            if (!Visual || Visual->Components.Num() < 3) return false;
+            for (const TObjectPtr<USceneComponent>& Component : Visual->Components)
+            {
+                const auto* Primitive = Cast<UPrimitiveComponent>(Component.Get());
+                if (!Primitive || Primitive->GetCollisionEnabled() != ECollisionEnabled::NoCollision
+                    || Primitive->CanEverAffectNavigation()) return false;
+            }
+            return Controller->FocusTitle().Contains(UTF8_TO_TCHAR(Homestead::ItemName(*DropItem)))
+                && Controller->FocusActions().Contains(TEXT("Pick up"));
+        }, 0.8f);
+    Add(TEXT("Capture focused nonblocking world drop"),
+        [this]() { Screenshot(TEXT("native-world-drop")); },
+        [this, DropId]() { return Controller->Landscape
+            && Controller->Landscape->DropVisuals.Contains(*DropId)
+            && Controller->FocusActions().Contains(TEXT("Pick up")); }, 0.8f);
+    Add(TEXT("Drop state survives distant active-window churn and exact schema round trip"),
+        [this, DropId, DropWindowLifecycle]()
+        {
+            const std::string Saved = Controller->Simulation().Serialize();
+            Homestead::Simulation Loaded;
+            const bool Persisted = Loaded.Deserialize(Saved).ok
+                && Loaded.GetState().worldDrops.size() == 1
+                && Loaded.GetState().worldDrops.front().id == *DropId;
+            Homestead::Simulation Distant = Controller->Simulation();
+            const auto& Drop = Distant.GetState().worldDrops.front();
+            const Homestead::Point Far{Drop.position.x + Homestead::Generation::ChunkSizeCm * 4,
+                Drop.position.y};
+            const bool Shifted = Distant.SetActiveWorldRegion(Far).ok
+                && Controller->Landscape->Refresh(Distant)
+                && Distant.GetState().worldDrops.size() == 1
+                && !Controller->Landscape->DropVisuals.Contains(*DropId);
+            const bool Returned = Controller->Landscape->Refresh(Controller->Simulation())
+                && Controller->Landscape->DropVisuals.Contains(*DropId);
+            *DropWindowLifecycle = Persisted && Shifted && Returned;
+        },
+        [DropWindowLifecycle]() { return *DropWindowLifecycle; }, 0.8f);
+    Add(TEXT("Focused pickup restores the exact item once and removes its token"),
+        [this, DropPlayerLocation, DropPlayerRotation]()
+        {
+            Controller->Interact();
+            Controller->GetPawn()->SetActorLocation(*DropPlayerLocation,
+                false, nullptr, ETeleportType::TeleportPhysics);
+            Controller->GetPawn()->SetActorRotation(*DropPlayerRotation);
+            Controller->OpenBook(0);
+        },
+        [this, DropItem, DropCount, DropId]() { return Controller->Simulation().Count(*DropItem) == *DropCount
+            && Controller->State().worldDrops.empty() && Controller->Landscape
+            && !Controller->Landscape->DropVisuals.Contains(*DropId)
+            && Controller->HotbarSnapshot().ContainsByPredicate([](const FHomesteadHotbarSlot& Slot)
+                { return Slot.Tool == Homestead::Item::Knife && Slot.Available; }); }, 0.8f);
+    const auto DropWearable = MakeShared<int32>(0);
+    const auto DropWearableDye = MakeShared<int32>(0);
+    const auto WearablePlayerLocation = MakeShared<FVector>(FVector::ZeroVector);
+    Add(TEXT("Equipped garments exclude Drop until unequipped"),
+        [this, DropWearable, DropWearableDye]()
+        {
+            Controller->CloseBook();
+            Controller->OpenBook(0);
+            Controller->MenuInventoryView(2);
+            Controller->NativeMenu->Refresh();
+            for (const auto& Item : Controller->State().wearables)
+                if (Item.owner == Homestead::WearableOwner::Equipped)
+                {
+                    *DropWearable = Item.id;
+                    *DropWearableDye = Item.dye;
+                    break;
+                }
+            if (!*DropWearable
+                || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Wearable, *DropWearable, -1)
+                || Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop)
+                || !Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Unequip))
+            { Finish(false, TEXT("Equipped-garment Drop exclusion or Unequip action is unavailable.")); return; }
+            Tap(EKeys::Enter);
+        },
+        [this, DropWearable]() { const auto* Item = Controller->Simulation().GetWearable(*DropWearable);
+            return Item && Item->owner == Homestead::WearableOwner::Carried; });
+    Add(TEXT("Carried garment Drop uses a one-item controller confirmation"),
+        [this, DropWearable]()
+        {
+            Controller->MenuInventoryView(0);
+            Controller->CloseBook();
+            Controller->OpenBook(0);
+            if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Wearable, *DropWearable, 0)
+                || !Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop))
+            { Finish(false, TEXT("Carried garment does not expose Drop.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this]() { return Controller->NativeMenu->HasActiveDialog()
+            && !Controller->NativeMenu->IsEditingQuantity(); });
+    Add(TEXT("Controller cancel preserves the exact carried garment"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this, DropWearable, DropWearableDye]() { const auto* Item = Controller->Simulation().GetWearable(*DropWearable);
+            return Item && Item->owner == Homestead::WearableOwner::Carried
+                && Item->dye == *DropWearableDye && Controller->State().worldDrops.empty(); });
+    Add(TEXT("Controller confirms the same garment ID and dye into the world"),
+        [this, DropWearable]()
+        {
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_DPad_Down);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, DropWearable, DropWearableDye]() { const auto* Item = Controller->Simulation().GetWearable(*DropWearable);
+            return Item && Item->owner == Homestead::WearableOwner::World && Item->dye == *DropWearableDye
+                && Controller->State().worldDrops.size() == 1
+                && Controller->State().worldDrops.front().wearableId == *DropWearable; });
+    Add(TEXT("Garment pickup preserves identity and dye then restores equip"),
+        [this, DropWearable, WearablePlayerLocation]()
+        {
+            Controller->CloseBook();
+            const auto& Drop = Controller->State().worldDrops.front();
+            *WearablePlayerLocation = Controller->GetPawn()->GetActorLocation();
+            Controller->GetPawn()->SetActorLocation(FVector(Drop.position.x - 70, Drop.position.y,
+                Controller->GroundHeight(Drop.position.x - 70, Drop.position.y) + 100),
+                false, nullptr, ETeleportType::TeleportPhysics);
+            Controller->UpdateFocus();
+            Controller->Interact();
+            Controller->GetPawn()->SetActorLocation(*WearablePlayerLocation,
+                false, nullptr, ETeleportType::TeleportPhysics);
+            Controller->OpenBook(0);
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Wearable, *DropWearable, 0);
+            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Equip);
+            Tap(EKeys::Enter);
+        },
+        [this, DropWearable, DropWearableDye]() { const auto* Item = Controller->Simulation().GetWearable(*DropWearable);
+            return Item && Item->owner == Homestead::WearableOwner::Equipped
+                && Item->dye == *DropWearableDye && Controller->State().worldDrops.empty(); }, 0.8f);
 }
 
 void AHomesteadSmokeTest::PrepareNativeResumeChecks(const FString& ProducerOutput)

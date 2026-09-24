@@ -1029,6 +1029,10 @@ bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float 
         if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 175.0f)
             return true;
     }
+    for (const auto& Drop : State.worldDrops)
+        if (FVector2D(X - Drop.position.x, Y - Drop.position.y).Size()
+            < FootprintRadius + 45.0f)
+            return true;
     return false;
 }
 
@@ -1941,6 +1945,7 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
                             AddPart(Visual, Sphere, AtGround(PX + (Berry - 1) * 10, PY + 5, Height * 0.6f),
                                 FVector(9, 9, 9), FLinearColor(0.42f, 0.035f, 0.09f));
                     }
+
                     else
                         AddPart(Visual, Sphere, AtGround(PX, PY, 7), FVector(24, 24, 15),
                             FLinearColor(0.66f, 0.43f, 0.21f));
@@ -1957,6 +1962,45 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
         AddPart(Visual, Cone, AtGround(X, Y, 19), FVector(22, 22, 38),
             FLinearColor(0.34f, 0.31f, 0.07f), false, FRotator(0, I * 47, 16));
     }
+}
+
+void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
+{
+    FLinearColor Tint(0.56f, 0.43f, 0.22f);
+    if (Drop.wearableId != 0) Tint = FLinearColor(0.64f, 0.42f, 0.52f);
+    else
+    {
+        switch (Drop.item)
+        {
+        case Homestead::Item::Knife:
+        case Homestead::Item::Hatchet:
+        case Homestead::Item::DiggingStick:
+        case Homestead::Item::WateringCan: Tint = FLinearColor(0.22f, 0.28f, 0.26f); break;
+        case Homestead::Item::Berries:
+        case Homestead::Item::Roots:
+        case Homestead::Item::Flowers:
+        case Homestead::Item::RoastedRoots:
+        case Homestead::Item::HerbedRoots: Tint = FLinearColor(0.62f, 0.30f, 0.19f); break;
+        case Homestead::Item::Seeds:
+        case Homestead::Item::Water: Tint = FLinearColor(0.34f, 0.54f, 0.48f); break;
+        default: break;
+        }
+    }
+    const FVector Base = AtGround(Drop.position.x, Drop.position.y, 7);
+    AddPart(Visual, Cylinder, Base, FVector(48, 48, 14), Wood, false);
+    AddPart(Visual, Cube, Base + FVector(0, 0, 16), FVector(44, 34, 14), Tint,
+        false, FRotator(0, Drop.id * 37 % 360, 8), 0.75f);
+    const int32 Marks = FMath::Clamp(Drop.quantity, 1, 5);
+    for (int32 Index = 0; Index < Marks; ++Index)
+        AddPart(Visual, Sphere, Base + FVector(-12 + Index * 6, 0, 29),
+            FVector(5, 5, 5), FLinearColor(0.93f, 0.82f, 0.52f), false);
+    const FLinearColor Tie(0.78f, 0.57f, 0.18f);
+    AddPart(Visual, Cube, Base + FVector(0, 0, 24), FVector(7, 36, 4),
+        Tie, false, FRotator::ZeroRotator, 0.7f);
+    AddPart(Visual, Cube, Base + FVector(0, 0, 24), FVector(44, 7, 4),
+        Tie, false, FRotator::ZeroRotator, 0.7f);
+    AddPart(Visual, Sphere, Base + FVector(0, 0, 30), FVector(9, 9, 9),
+        FLinearColor(0.93f, 0.72f, 0.24f), false, FRotator::ZeroRotator, 0.65f, 0.05f);
 }
 
 void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
@@ -2046,6 +2090,8 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         for (auto& Entry : ResourceProduceVisuals) ClearVisual(Entry.Value);
         for (auto& Entry : StructureVisuals) ClearVisual(Entry.Value);
         for (auto& Entry : PlotVisuals) ClearVisual(Entry.Value);
+        for (auto& Entry : DropVisuals) ClearVisual(Entry.Value);
+        DropVisuals.Reset();
         ClearOuterTreeBatches();
         ClearActiveTreeBatches();
         ClearVisual(Preview);
@@ -2064,6 +2110,8 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     {
         Layout += FString::Printf(TEXT("P:%d:%d;"), Plot.cellX, Plot.cellY);
     }
+    for (const auto& Drop : State.worldDrops)
+        Layout += FString::Printf(TEXT("D:%d:%.3f:%.3f;"), Drop.id, Drop.position.x, Drop.position.y);
     if (ResourceLayoutSignature != Layout)
     {
         if (!BuildDecorations(Simulation)) return false;
@@ -2152,6 +2200,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
 
     std::vector<Homestead::Structure> NearStructures;
     std::vector<Homestead::Plot> NearPlots;
+    std::vector<Homestead::WorldDrop> NearDrops;
     auto Near = [&](int X, int Y)
     {
         const auto Center = Homestead::CellCenter(X, Y);
@@ -2162,6 +2211,12 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         if (Near(Structure.cellX, Structure.cellY)) NearStructures.push_back(Structure);
     for (const auto& Plot : State.plots)
         if (Near(Plot.cellX, Plot.cellY)) NearPlots.push_back(Plot);
+    const double ChunkCenterX = (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm;
+    const double ChunkCenterY = (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm;
+    for (const auto& Drop : State.worldDrops)
+        if (FMath::Abs(Drop.position.x - ChunkCenterX) <= 6000
+            && FMath::Abs(Drop.position.y - ChunkCenterY) <= 6000)
+            NearDrops.push_back(Drop);
     RemoveMissing(StructureVisuals, NearStructures);
     for (const auto& Structure : NearStructures)
     {
@@ -2188,6 +2243,20 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         {
             ClearVisual(Visual);
             BuildPlot(Visual, Plot);
+            Visual.Signature = Signature;
+        }
+    }
+    RemoveMissing(DropVisuals, NearDrops);
+    for (const auto& Drop : NearDrops)
+    {
+        const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d:%d:%d"),
+            Drop.id, Drop.position.x, Drop.position.y, static_cast<int>(Drop.item),
+            Drop.quantity, Drop.wearableId);
+        FHomesteadWorldVisual& Visual = DropVisuals.FindOrAdd(Drop.id);
+        if (Visual.Signature != Signature)
+        {
+            ClearVisual(Visual);
+            BuildDrop(Visual, Drop);
             Visual.Signature = Signature;
         }
     }

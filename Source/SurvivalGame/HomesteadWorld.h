@@ -165,6 +165,8 @@ private:
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> PlotVisuals;
     UPROPERTY()
+    TMap<int32, FHomesteadWorldVisual> DropVisuals;
+    UPROPERTY()
     FHomesteadWorldVisual Preview;
 
     bool bInitialized = false;
@@ -237,6 +239,7 @@ private:
     void ClearActiveTreeBatches();
     void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
+    void BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
     void UpdateLighting(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
     float CellBase(int CellX, int CellY) const;

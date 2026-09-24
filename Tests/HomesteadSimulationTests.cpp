@@ -1550,6 +1550,23 @@ void DirectSplitAndDeterministicSort()
 }
 void PersistentWorldDropTransactions()
 {
+    for (int index = 0; index < ItemCount; ++index)
+    {
+        const Item item = static_cast<Item>(index);
+        Simulation category;
+        Stock(category, {{item, 3}});
+        const int group = Group(category, item);
+        OK(category.DropGroup(group, 1, Home, Home, category.GetRevision()));
+        CHECK(category.Count(item) == 2 && category.GetState().worldDrops.size() == 1);
+        const int firstDrop = category.GetState().worldDrops.front().id;
+        OK(category.PickUpDrop(firstDrop, Home));
+        CHECK(category.Count(item) == 3 && category.GetState().worldDrops.empty());
+        OK(category.DropGroup(Group(category, item), 3, Home, Home, category.GetRevision()));
+        CHECK(category.Count(item) == 0 && category.GetState().worldDrops.front().quantity == 3);
+        OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
+        CHECK(category.Count(item) == 3);
+    }
+
     Simulation sim;
     Stock(sim, {{Item::Knife, 1}, {Item::Branch, 5}});
     const int branches = Group(sim, Item::Branch);
@@ -1617,6 +1634,22 @@ void PersistentWorldDropTransactions()
     Stock(blocked, {{Item::Knife, 1}, {Item::Branch, 1}});
     UnchangedFailure(blocked, [&] { return blocked.DropGroup(Group(blocked, Item::Branch),
         1, CellCenter(-3, 0), CellCenter(-3, 0), blocked.GetRevision()); });
+    Simulation plotBlocked;
+    Stock(plotBlocked, {{Item::DiggingStick, 1}, {Item::Branch, 1}});
+    OK(plotBlocked.Till(-2, -1, CellCenter(-2, -1)));
+    UnchangedFailure(plotBlocked, [&] { return plotBlocked.DropGroup(Group(plotBlocked, Item::Branch),
+        1, CellCenter(-2, -1), CellCenter(-2, -1), plotBlocked.GetRevision()); });
+
+    Simulation multiple;
+    Stock(multiple, {{Item::Branch, 2}, {Item::Stone, 2}, {Item::Berries, 2}, {Item::Seeds, 2}});
+    const Item categories[] = {Item::Branch, Item::Stone, Item::Berries, Item::Seeds};
+    for (int index = 0; index < 4; ++index)
+        OK(multiple.DropGroup(Group(multiple, categories[index]), 1,
+            {Home.x + index * 20.0, Home.y}, Home, multiple.GetRevision()));
+    CHECK(multiple.GetState().worldDrops.size() == 4);
+    for (const auto& value : std::vector<WorldDrop>(multiple.GetState().worldDrops))
+        OK(multiple.PickUpDrop(value.id, Home));
+    CHECK(multiple.GetState().worldDrops.empty());
 
     Simulation capped;
     Stock(capped, {{Item::Knife, 1}, {Item::Branch, 1}});
