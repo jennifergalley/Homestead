@@ -22,4 +22,4 @@
 ## 4. Integrated Acceptance and Promotion
 
 - [x] 4.1 Run focused drop/pickup/save/inventory/focus/world contracts, full portable simulation/world/menu/full-loop suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
-- [ ] 4.2 Run ordinary save/leave/reload/return and active-window routes at 720p/4K, inspect bundle/focus/readability/cadence, build one immutable Shipping candidate, update setup/playtest docs and promote only if possessions can be dropped/recovered without deletion, duplication, obstruction or clutter regression
+- [x] 4.2 Run ordinary save/leave/reload/return and active-window routes at 720p/4K, inspect bundle/focus/readability/cadence, build one immutable Shipping candidate, update setup/playtest docs and promote only if possessions can be dropped/recovered without deletion, duplication, obstruction or clutter regression

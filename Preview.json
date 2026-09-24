@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateDirectory": "Build\\Releases\\20260923-074750-crafting\\crafting-04-shipping",
-  "profile": "crafting-v17",
-  "executableSha256": "CF31AC83410C301B584A8BDBD953AC1A2F2D0179A6C864D022CFFA941F5D5FC8"
+  "candidateDirectory": "Build\\Releases\\20260923-150721-drop\\drop-02-shipping",
+  "profile": "inventory-drop-v18",
+  "executableSha256": "326E4E5C41197468E5EC97AED2717F21F581F622D7134B94EE3A020FBBAD247F"
 }

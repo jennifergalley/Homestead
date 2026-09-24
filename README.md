@@ -14,12 +14,12 @@ skin/hair/iris/tunic colors, and a saved, orbitable Look preview. It includes
 foraging, tool crafting, modular shelter, storage, roots and regrowing berry crops,
 watering/weeding, basic cooking, day/night needs, sleep, and checkpoint recovery.
 
-The current human preview remains `crafting-v17`. A combined compact Inventory,
-exact-world-Chest, and persistent Drop candidate has passed final Shipping 720p,
-4K, full-loop, active-window, and fresh-process resume checks at
-`Build\Releases\20260923-150721-drop\drop-02-shipping`. It is intentionally not
-selected yet because guarded preview promotion requires a commit-backed source
-checkpoint. See `docs\world-drop-baseline.md` for controls and exact evidence.
+The current human preview is `inventory-drop-v18`, backed by the sealed
+`drop-02-shipping` candidate. It combines compact Inventory, exact-world-Chest
+storage, and persistent Drop after final Shipping 720p, 4K, full-loop,
+active-window, fresh-process resume, and QA-off normal-startup checks. The prior
+`crafting-v17` selection remains embedded as rollback. See
+`docs\world-drop-baseline.md` for controls and exact evidence.
 
 Unreal 5.8.2 is installed at `E:\Program Files\UE_5.8`. The native editor module,
 content bootstrap, and initial engine gameplay smoke scenario now run successfully.

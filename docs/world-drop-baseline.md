@@ -60,7 +60,7 @@ Accepted unselected candidate:
 - visual proof:
   `Build\Validation\drop02-shipping-native-720p\native-world-drop.png`
 
-`crafting-v17` remains selected because preview promotion requires an acceptance
-receipt tied to a committed source checkpoint. This candidate was built from
-verified working-tree changes on HEAD `dbb6e37`; it must not be represented as
-checkpointed or promoted until those changes are committed.
+`inventory-drop-v18` is now selected with checkpoint-backed schema-2 acceptance.
+The sealed candidate references source checkpoint `6e1ab1f`, preserves
+`crafting-v17` in `previous-preview.json`, and uses a fresh isolated preview
+profile. Personal saves and every prior preview profile remain untouched.

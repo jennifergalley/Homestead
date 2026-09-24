@@ -115,12 +115,11 @@ isolation or automatic quit. The active preview profile is shown only in
 Settings. Settings **Save and quit**, F5/F9, autosaves and recovery behave
 normally within that profile.
 
-The current preview selection is `crafting-v17`, backed by immutable Shipping
-candidate `crafting-04-shipping`. The verified compact Inventory/exact Chest/
-world-Drop replacement is `drop-02-shipping`, but it remains deliberately
-unselected until its working-tree source is committed and a checkpoint-backed
-acceptance receipt is created. Gameplay still has ten bottom-center carried-tool
-references selected by `1-9/0`, wheel, pointer, or LB/RB.
+The current preview selection is `inventory-drop-v18`, backed by sealed Shipping
+candidate `drop-02-shipping` and source checkpoint `6e1ab1f`. It delivers compact
+Inventory, exact focused-Chest storage, and persistent recoverable world Drop.
+Gameplay still has ten bottom-center carried-tool references selected by
+`1-9/0`, wheel, pointer, or LB/RB. `crafting-v17` remains the embedded rollback.
 
 Profile IDs are **1-32 ASCII lowercase letters, digits or hyphens, starting with
 a letter**. Empty, duplicate, malformed, uppercase, absolute-path and traversal
@@ -130,8 +129,9 @@ The runtime uses the fixed Windows user-settings root:
 The `profile-` prefix also avoids Windows reserved device-directory names.
 All manual/rotating-auto/recovery files and their `.bak`/atomic `.tmp` siblings
 stay in that directory. The current selected profile is
-`crafting-v17`. This is a deliberately fresh test clearing using save schema 7.
-The prior `hotbar-v16`, `foliage-camera-v15`, `settings-wildflowers-v14`, `work-actions-v13`,
+`inventory-drop-v18`. This is a deliberately fresh test clearing using save
+schema 7. The prior `crafting-v17`, `hotbar-v16`, `foliage-camera-v15`,
+`settings-wildflowers-v14`, `work-actions-v13`,
 `wardrobe-complete-v12`, `inventory-safety-v10`, old `jenny-review` progress and
 original saves remain untouched, not migrated or silently reset. The selected
 rollback's graphics preferences were copied byte-for-byte into the new

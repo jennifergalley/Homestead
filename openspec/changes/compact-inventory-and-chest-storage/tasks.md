@@ -22,4 +22,4 @@
 
 - [x] 3.1 Run focused compact-grid/storage/menu/input/transaction contracts, full portable simulation/menu/full-loop/save suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
 - [x] 3.2 Run ordinary mouse/keyboard and controller pack/chest routes with acquisition auto-stack, split-half, reorder, merge, Sort, multiple physical chests, partial/full drag transfers, clothing, food, capacity rejection and save/reload at 720p/4K; inspect density, direct-manipulation feedback, exact storage ownership and cadence
-- [ ] 3.3 Build one immutable Shipping candidate under the serialized engine slot, update UI/setup/playtest docs and promote only if Inventory is materially simpler and smaller while chest storage is accessible exclusively through the correct world chest
+- [x] 3.3 Build one immutable Shipping candidate under the serialized engine slot, update UI/setup/playtest docs and promote only if Inventory is materially simpler and smaller while chest storage is accessible exclusively through the correct world chest

@@ -11,8 +11,12 @@ $graphics=Join-Path $output 'Graphics\GameUserSettings.ini'
 Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $graphics
 $graphicsArguments="-GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`""
 if($Packaged) {
-    $working=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-    $executable=Join-Path $working 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+    $package=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+    if($package.configuration -eq 'Shipping') {
+        throw 'The save-routing test actor is compiled out of Shipping. Use the guarded QA-off Shipping startup proof instead.'
+    }
+    $working=$package.packageDirectory
+    $executable=$package.executable
     $prefix=''
 } else {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
