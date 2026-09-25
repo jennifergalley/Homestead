@@ -10,6 +10,7 @@
 *.mp3 filter=lfs diff=lfs merge=lfs -text
 *.ogg filter=lfs diff=lfs merge=lfs -text
 *.hdr filter=lfs diff=lfs merge=lfs -text
+*.exr filter=lfs diff=lfs merge=lfs -text
 
 # Hash-pinned machine evidence retains its original bytes and formatting.
 docs/research/environment-assets/tree-*/** -text -whitespace

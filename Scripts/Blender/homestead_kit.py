@@ -8,13 +8,64 @@ instances with the same Tint and Roughness).
 import hashlib
 import math
 import os
+import shutil
 from pathlib import Path
 
 import bmesh
 import bpy
-from mathutils import Matrix, Vector, noise
+from mathutils import Euler, Matrix, Vector, noise
 
 HEROINE_HEIGHT_M = 1.63
+ROOT = Path(__file__).resolve().parents[2]
+SOURCE_CACHE = ROOT / "Assets" / "Source" / "Blender" / "polyhaven"
+DEFAULT_HDRI = SOURCE_CACHE / "kloofendal_48d_partly_cloudy_puresky_2k.exr"
+
+
+# ------------------------------------------------------------------- sources
+
+def polyhaven(asset_id, resolution="4k"):
+    """Path to a fetched CC0 Poly Haven .blend (see Get-PolyHavenAsset.ps1)."""
+    path = SOURCE_CACHE / f"{asset_id}_{resolution}" / f"{asset_id}_{resolution}.blend"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Missing {path}. Run: .\\Scripts\\Blender\\Get-PolyHavenAsset.ps1 {asset_id} -Resolution {resolution}")
+    return path
+
+
+def append(blend_path, names):
+    """Append objects (with their materials/images) as hidden templates."""
+    with bpy.data.libraries.load(str(blend_path), link=False) as (source, target):
+        missing = sorted(set(names) - set(source.objects))
+        if missing:
+            raise KeyError(f"{blend_path} has no objects {missing}")
+        target.objects = list(names)
+    templates = {}
+    for obj in target.objects:
+        _link(obj)
+        obj.hide_set(True)
+        obj.hide_render = True
+        templates[obj.name] = obj
+    return templates
+
+
+def instance(template, name, location=(0, 0, 0), rotation=(0, 0, 0), scale=1.0, matrix=None):
+    """Independent copy of ``template`` keeping its own rotation/scale but not its
+    location. ``matrix`` (a 4x4 placement) overrides location/rotation/scale."""
+    obj = template.copy()
+    obj.data = template.data.copy()
+    obj.name = name
+    _link(obj)
+    obj.hide_set(False)
+    obj.hide_render = False
+    loc, rot, size = template.matrix_basis.decompose()
+    own = rot.to_matrix().to_4x4() @ Matrix.Diagonal((*size, 1.0))
+    if matrix is None:
+        factor = scale if isinstance(scale, (tuple, list)) else (scale, scale, scale)
+        matrix = (Matrix.Translation(location)
+                  @ Euler([math.radians(a) for a in rotation]).to_matrix().to_4x4()
+                  @ Matrix.Diagonal((*factor, 1.0)))
+    obj.matrix_world = matrix @ own
+    return obj
 
 
 # --------------------------------------------------------------------------- scene
@@ -91,6 +142,10 @@ def material(name, color, roughness=0.85):
 
 
 def material_spec(mat):
+    textures = texture_maps(mat)
+    if textures:
+        return {"name": mat.name, "textures": {role: Path(p).name for role, p in textures.items()},
+                "blend_method": getattr(mat, "surface_render_method", "")}
     color = mat.get("homestead_color")
     roughness = mat.get("homestead_roughness")
     if color is None:
@@ -104,6 +159,45 @@ def material_spec(mat):
             roughness = mat.roughness
     return {"name": mat.name, "color": [round(float(c), 4) for c in color],
             "roughness": round(float(roughness), 3)}
+
+
+def texture_maps(mat):
+    """Image files used by a material, keyed by a role guessed from the file name."""
+    maps = {}
+    if not mat or not mat.node_tree:
+        return maps
+    roles = (("alpha", "opacity"), ("nor", "normal"), ("rough", "roughness"), ("diff", "basecolor"),
+             ("col", "basecolor"), ("mask", "mask"), ("ao", "ao"), ("arm", "arm"), ("disp", "height"))
+    for node in mat.node_tree.nodes:
+        if node.type != "TEX_IMAGE" or not node.image or node.image.source != "FILE":
+            continue
+        path = bpy.path.abspath(node.image.filepath)
+        stem = Path(path).stem.lower()
+        role = next((r for key, r in roles if f"_{key}" in stem), stem)
+        maps[role] = path
+    return maps
+
+
+def copy_textures(objects, folder):
+    """Copy every texture used by ``objects`` into ``folder`` and repoint the images."""
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    copied = {}
+    for obj in objects:
+        for slot in obj.material_slots:
+            if not slot.material or not slot.material.node_tree:
+                continue
+            for node in slot.material.node_tree.nodes:
+                image = getattr(node, "image", None)
+                if node.type != "TEX_IMAGE" or not image or image.source != "FILE":
+                    continue
+                source = Path(bpy.path.abspath(image.filepath))
+                target = folder / source.name
+                if source.resolve() != target.resolve():
+                    shutil.copy2(source, target)
+                image.filepath = str(target)
+                copied[source.name] = hashlib.sha256(target.read_bytes()).hexdigest()
+    return copied
 
 
 # ----------------------------------------------------------------------- primitives
@@ -219,8 +313,10 @@ def recalc_normals(obj):
 
 # ----------------------------------------------------------------------- finalize
 
-def join(parts, name, pivot="base", smooth_angle=35.0):
-    """Apply modifiers, merge ``parts`` into one ``SM_`` mesh and finalize it."""
+def join(parts, name, pivot="base", smooth_angle=35.0, unwrap=True, reshade=True):
+    """Apply modifiers, merge ``parts`` into one ``SM_`` mesh and finalize it.
+    Use ``unwrap=False, reshade=False`` for scanned sources so their atlas UVs and
+    authored normals survive."""
     parts = [p for p in parts if p is not None]
     _select_only(parts)
     bpy.ops.object.convert(target="MESH")
@@ -230,11 +326,11 @@ def join(parts, name, pivot="base", smooth_angle=35.0):
     obj = bpy.context.view_layer.objects.active
     obj.name = name
     obj.data.name = name
-    return finalize(obj, pivot=pivot, smooth_angle=smooth_angle)
+    return finalize(obj, pivot=pivot, smooth_angle=smooth_angle, unwrap=unwrap, reshade=reshade)
 
 
-def finalize(obj, pivot="base", smooth_angle=35.0):
-    """Apply transforms and modifiers, set the pivot, shading and UVs."""
+def finalize(obj, pivot="base", smooth_angle=35.0, unwrap=True, reshade=True):
+    """Apply transforms and modifiers, set the pivot, and (optionally) UVs/shading."""
     if not obj.name.startswith("SM_"):
         raise ValueError("Exported static meshes must be named SM_*: " + obj.name)
     _select_only([obj])
@@ -249,13 +345,15 @@ def finalize(obj, pivot="base", smooth_angle=35.0):
         lo, hi = bounds(obj)
         obj.data.transform(Matrix.Translation(-(lo + hi) / 2))
     obj.location = (0, 0, 0)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.mesh.remove_doubles(threshold=0.0001)
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.02)
-    bpy.ops.object.mode_set(mode="OBJECT")
-    obj.data.shade_smooth()
-    obj.data.set_sharp_from_angle(angle=math.radians(smooth_angle))
+    if unwrap:
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.mesh.remove_doubles(threshold=0.0001)
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.02)
+        bpy.ops.object.mode_set(mode="OBJECT")
+    if reshade:
+        obj.data.shade_smooth()
+        obj.data.set_sharp_from_angle(angle=math.radians(smooth_angle))
     obj.data.update()
     obj["homestead_finalized"] = True
     return obj
@@ -326,7 +424,8 @@ def render_preview(obj, path, panel=512):
     scene.view_settings.view_transform = "Standard"
     shading = scene.display.shading
     shading.light = "STUDIO"
-    shading.color_type = "MATERIAL"
+    textured = any(texture_maps(s.material) for s in obj.material_slots)
+    shading.color_type = "TEXTURE" if textured else "MATERIAL"
     shading.show_shadows = True
     shading.show_cavity = True
     shading.cavity_type = "BOTH"
@@ -405,3 +504,110 @@ def render_preview(obj, path, panel=512):
     for other in hidden:
         other.hide_render = False
     return str(path)
+
+
+# -------------------------------------------------------------------- beauty
+
+def use_gpu():
+    """Enable Cycles on the best available GPU backend (OptiX, then CUDA/HIP)."""
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    for backend in ("OPTIX", "CUDA", "HIP", "ONEAPI", "METAL"):
+        try:
+            prefs.compute_device_type = backend
+        except TypeError:
+            continue
+        prefs.get_devices()
+        gpus = [d for d in prefs.devices if d.type == backend]
+        if gpus:
+            for device in prefs.devices:
+                device.use = device.type == backend
+            bpy.context.scene.cycles.device = "GPU"
+            return backend, [d.name for d in gpus]
+    bpy.context.scene.cycles.device = "CPU"
+    return "CPU", []
+
+
+def _sky(hdri, strength=1.0, rotation=0.0):
+    world = bpy.data.worlds.new("BeautySky")
+    bpy.context.scene.world = world
+    tree = world.node_tree
+    env = tree.nodes.new("ShaderNodeTexEnvironment")
+    env.image = bpy.data.images.load(str(hdri), check_existing=True)
+    mapping = tree.nodes.new("ShaderNodeMapping")
+    coords = tree.nodes.new("ShaderNodeTexCoord")
+    mapping.inputs["Rotation"].default_value[2] = math.radians(rotation)
+    tree.links.new(coords.outputs["Generated"], mapping.inputs["Vector"])
+    tree.links.new(mapping.outputs["Vector"], env.inputs["Vector"])
+    background = tree.nodes["Background"]
+    background.inputs["Strength"].default_value = strength
+    tree.links.new(env.outputs["Color"], background.inputs["Color"])
+    return world
+
+
+def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160), samples=256,
+                  views=("hero", "detail")):
+    """Photoreal Cycles review renders of ``obj`` on a soil ground under an HDRI sky.
+    ``hero`` frames the whole asset from a third-person-camera height; ``detail``
+    is a close crop around the upper third. Returns {view: path}."""
+    scene = bpy.context.scene
+    scene.render.engine = "CYCLES"
+    backend = use_gpu()
+    scene.cycles.samples = samples
+    scene.cycles.use_denoising = True
+    scene.cycles.use_adaptive_sampling = True
+    scene.render.resolution_x, scene.render.resolution_y = resolution
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = False
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGB"
+    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.look = "AgX - Medium High Contrast"
+    _sky(hdri, rotation=40)
+
+    soil = bpy.data.materials.new("M_BeautySoil")
+    if soil.node_tree is None:
+        soil.use_nodes = True
+    soil_bsdf = soil.node_tree.nodes["Principled BSDF"]
+    noise_tex = soil.node_tree.nodes.new("ShaderNodeTexNoise")
+    noise_tex.inputs["Scale"].default_value = 18.0
+    ramp = soil.node_tree.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (0.035, 0.026, 0.017, 1)
+    ramp.color_ramp.elements[1].color = (0.085, 0.066, 0.042, 1)
+    soil.node_tree.links.new(noise_tex.outputs["Fac"], ramp.inputs["Fac"])
+    soil.node_tree.links.new(ramp.outputs["Color"], soil_bsdf.inputs["Base Color"])
+    soil_bsdf.inputs["Roughness"].default_value = 0.95
+    lo, hi = bounds(obj)
+    size = hi - lo
+    center = (lo + hi) / 2
+    ground = box("BeautyGround", (60, 60, 0.02), (center.x, center.y, lo.z - 0.012), material=soil)
+
+    radius = max(size.length / 2, 0.1)
+    out = {}
+    folder = Path(folder)
+    for view in views:
+        data = bpy.data.cameras.new("BeautyCam")
+        data.lens = 50 if view == "hero" else 85
+        data.dof.use_dof = view == "detail"
+        cam = _link(bpy.data.objects.new("BeautyCam", data))
+        if view == "hero":
+            target = center + Vector((0, 0, -size.z * 0.08))
+            direction = Vector((-0.62, -1.0, 0.42)).normalized()
+            distance = radius / math.tan(math.radians(17)) * 1.02
+        else:
+            target = Vector((center.x - size.x * 0.12, center.y - size.y * 0.25, lo.z + size.z * 0.72))
+            direction = Vector((-0.5, -1.0, 0.25)).normalized()
+            distance = max(radius * 1.35, 0.6)
+            data.dof.focus_distance = distance
+            data.dof.aperture_fstop = 4.0
+        cam.location = target + direction * distance
+        cam.rotation_euler = (target - cam.location).to_track_quat("-Z", "Y").to_euler()
+        scene.camera = cam
+        path = folder / f"{stem}_{view}.png"
+        scene.render.filepath = str(path)
+        bpy.ops.render.render(write_still=True)
+        out[view] = str(path)
+        bpy.data.objects.remove(cam)
+        bpy.data.cameras.remove(data)
+    bpy.data.objects.remove(ground)
+    return {"views": out, "device": backend[0], "gpus": backend[1], "samples": samples,
+            "resolution": list(resolution), "hdri": Path(hdri).name}

@@ -1,52 +1,57 @@
-"""Round shrub: overlapping lumpy leaf clumps on a few woody stems."""
+"""Hero shrub composed from photoscanned CC0 Shrub 02 shoots.
+
+Each Poly Haven Shrub 02 piece is a sparse willow-like shoot; a believable bush is
+many of them rooted in one clump. This recipe keeps the scanned geometry, UVs,
+normals and 4K atlas unchanged and only arranges copies: golden-angle spacing
+around the root, upright in the middle and leaning outward at the rim, which
+gives the vase-shaped dome real shrubs grow into. The same layout is built for
+each publisher LOD so distant versions match exactly.
+"""
 import math
 import random
 
+from mathutils import Matrix, Vector
+
 NAME = "Bush"
-DESCRIPTION = "Homestead woodland/yard shrub, about knee-to-waist height."
-COLLISION = "convex"
-TRIANGLE_BUDGET = 2500
+DESCRIPTION = "Full woodland shrub composed from 22 photoscanned Shrub 02 shoots, with LOD1/LOD2."
+COLLISION = "none"
+TRIANGLE_BUDGET = 150000
+PROVENANCE = ("Arrangement of CC0 Poly Haven 'Shrub 02' by Rico Cilliers "
+              "(https://polyhaven.com/a/shrub_02): scanned geometry, UVs, normals and 4K maps unchanged.")
+
+VARIANTS = ("a", "b", "c", "d")
+COUNT = 22
+SEED = 2207
+
+
+def layout():
+    rng = random.Random(SEED)
+    placements = []
+    for index in range(COUNT):
+        t = (index + 0.5) / COUNT
+        azimuth = math.radians(index * 137.508 + rng.uniform(-14, 14))
+        reach = 0.03 + 0.20 * math.sqrt(t)
+        tilt = math.radians(3 + 22 * t + rng.uniform(-4, 4))
+        yaw = rng.uniform(0, 2 * math.pi)
+        scale = rng.uniform(0.82, 1.1) * (1.08 - 0.25 * t)
+        outward = Vector((-math.sin(azimuth), math.cos(azimuth), 0))
+        matrix = (Matrix.Translation((reach * math.cos(azimuth), reach * math.sin(azimuth), -0.03))
+                  @ Matrix.Rotation(tilt, 4, outward)
+                  @ Matrix.Rotation(yaw, 4, "Z")
+                  @ Matrix.Scale(scale, 4))
+        placements.append((rng.choice(VARIANTS), matrix))
+    return placements
 
 
 def build(kit):
-    rng = random.Random(8812)
-    shade = kit.material("M_BushLeafShade", (0.11, 0.20, 0.07), roughness=0.9)
-    sun = kit.material("M_BushLeafSun", (0.20, 0.33, 0.10), roughness=0.9)
-    bark = kit.material("M_BushStem", (0.17, 0.11, 0.07), roughness=0.95)
-
-    parts = []
-    # Woody stems fanning out from the root, mostly hidden inside the foliage.
-    for index in range(4):
-        yaw = index * 90 + rng.uniform(-25, 25)
-        lean = rng.uniform(28, 40)
-        length = rng.uniform(0.30, 0.40)
-        direction = (math.sin(math.radians(lean)) * math.cos(math.radians(yaw)),
-                     math.sin(math.radians(lean)) * math.sin(math.radians(yaw)),
-                     math.cos(math.radians(lean)))
-        center = tuple(d * length / 2 for d in direction)
-        stem = kit.cylinder(f"Stem{index}", 0.022, length, center, material=bark, sides=6,
-                            radius_top=0.010, rotation=(0, lean, yaw))
-        parts.append(stem)
-
-    # Clumps spread over a dome (uniform in height, golden-angle around) so the
-    # silhouette is broken but foliage still reaches close to the ground. Color
-    # shifts from shaded underside to a sunlit crown.
-    mid = kit.material("M_BushLeafMid", (0.15, 0.26, 0.08), roughness=0.9)
-    clumps = [(0.0, 0.0, 0.42, 0.36, mid)]
-    count = 14
-    for index in range(count):
-        t = (index + 0.5) / count
-        elevation = math.asin(t)
-        azimuth = math.radians(index * 137.5 + rng.uniform(-10, 10))
-        reach = 0.42 * math.cos(elevation) + rng.uniform(-0.03, 0.03)
-        leaf = shade if t < 0.4 else mid if t < 0.75 else sun
-        clumps.append((reach * math.cos(azimuth), reach * math.sin(azimuth),
-                       0.26 + 0.46 * math.sin(elevation),
-                       rng.uniform(0.21, 0.28) * (1 - 0.25 * t), leaf))
-
-    for index, (x, y, z, radius, leaf) in enumerate(clumps):
-        clump = kit.sphere(f"Clump{index}", radius, (x, y, z), material=leaf, segments=10, rings=7,
-                           rotation=(0, 0, rng.uniform(0, 360)), scale=(1, 1, 0.82))
-        kit.roughen(clump, strength=radius * 0.22, scale=3.2 / radius, seed=index + 1)
-        parts.append(clump)
-    return kit.join(parts, "SM_Bush", smooth_angle=80)
+    templates = kit.append(kit.polyhaven("shrub_02"),
+                           [f"shrub_02_{v}_LOD{lod}" for v in VARIANTS for lod in range(3)])
+    placements = layout()
+    meshes = []
+    for lod in range(3):
+        parts = [kit.instance(templates[f"shrub_02_{variant}_LOD{lod}"], f"Shoot{lod}_{index}", matrix=matrix)
+                 for index, (variant, matrix) in enumerate(placements)]
+        name = "SM_Bush" if lod == 0 else f"SM_Bush_LOD{lod}"
+        # Pivot stays at the root clump (ground level) for every LOD.
+        meshes.append(kit.join(parts, name, pivot=None, unwrap=False, reshade=False))
+    return meshes

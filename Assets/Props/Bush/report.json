@@ -1,64 +1,112 @@
 {
   "schema": 1,
   "name": "Bush",
-  "description": "Homestead woodland/yard shrub, about knee-to-waist height.",
-  "collision": "convex",
-  "triangle_budget": 2500,
+  "description": "Full woodland shrub composed from 22 photoscanned Shrub 02 shoots, with LOD1/LOD2.",
+  "collision": "none",
+  "triangle_budget": 150000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/bush.py",
-  "source_sha256": "1c8be375ce1fea803ce7217dec90d484339bc4b1dc783a6b47fdbcce7a849191",
-  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "source_sha256": "74b6224c4811e2febd17f19a28fb6f5870bec5a96a0a23f4e7160a53fc8e152c",
+  "provenance": "Arrangement of CC0 Poly Haven 'Shrub 02' by Rico Cilliers (https://polyhaven.com/a/shrub_02): scanned geometry, UVs, normals and 4K maps unchanged.",
   "meshes": {
     "SM_Bush": {
-      "vertices": 978,
-      "triangles": 1880,
+      "vertices": 93495,
+      "triangles": 139474,
       "size_cm": [
-        127.9,
-        122.3,
-        88.15
+        188.31,
+        204.69,
+        167.12
       ],
       "materials": [
         {
-          "name": "M_BushStem",
-          "color": [
-            0.17,
-            0.11,
-            0.07
-          ],
-          "roughness": 0.95
-        },
-        {
-          "name": "M_BushLeafMid",
-          "color": [
-            0.15,
-            0.26,
-            0.08
-          ],
-          "roughness": 0.9
-        },
-        {
-          "name": "M_BushLeafShade",
-          "color": [
-            0.11,
-            0.2,
-            0.07
-          ],
-          "roughness": 0.9
-        },
-        {
-          "name": "M_BushLeafSun",
-          "color": [
-            0.2,
-            0.33,
-            0.1
-          ],
-          "roughness": 0.9
+          "name": "shrub_02",
+          "textures": {
+            "opacity": "shrub_02_alpha_4k.png",
+            "normal": "shrub_02_nor_gl_4k.exr",
+            "roughness": "shrub_02_rough_4k.exr",
+            "basecolor": "shrub_02_diff_4k.jpg",
+            "mask": "shrub_02_mask_4k.png"
+          },
+          "blend_method": "DITHERED"
         }
       ],
       "fbx": "SM_Bush.fbx",
-      "sha256": "2982c2f99fc43bdcc8ab06a81aea768fa6adac92aab580eacdc84903c23f9ff4",
-      "preview": "preview_SM_Bush.png"
+      "sha256": "e016ae1bc0633554d3a4c7a517a8320077709ed59bdff7b63911745a90e6a98b",
+      "preview": "preview_SM_Bush.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Bush_hero.png",
+          "detail": "beauty_SM_Bush_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr"
+      }
+    },
+    "SM_Bush_LOD1": {
+      "vertices": 58646,
+      "triangles": 85558,
+      "size_cm": [
+        188.31,
+        204.63,
+        167.12
+      ],
+      "materials": [
+        {
+          "name": "shrub_02",
+          "textures": {
+            "opacity": "shrub_02_alpha_4k.png",
+            "normal": "shrub_02_nor_gl_4k.exr",
+            "roughness": "shrub_02_rough_4k.exr",
+            "basecolor": "shrub_02_diff_4k.jpg",
+            "mask": "shrub_02_mask_4k.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "fbx": "SM_Bush_LOD1.fbx",
+      "sha256": "aeca1c09cbee7f02ab77784456065ade1c9406227d0731b1e11231ab3dd9bd2b",
+      "preview": "preview_SM_Bush_LOD1.png"
+    },
+    "SM_Bush_LOD2": {
+      "vertices": 35975,
+      "triangles": 42772,
+      "size_cm": [
+        188.25,
+        204.64,
+        167.07
+      ],
+      "materials": [
+        {
+          "name": "shrub_02",
+          "textures": {
+            "opacity": "shrub_02_alpha_4k.png",
+            "normal": "shrub_02_nor_gl_4k.exr",
+            "roughness": "shrub_02_rough_4k.exr",
+            "basecolor": "shrub_02_diff_4k.jpg",
+            "mask": "shrub_02_mask_4k.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "fbx": "SM_Bush_LOD2.fbx",
+      "sha256": "6428753e5374c907247e430e880744434c2ff8d562208d642b9422c1b185fe29",
+      "preview": "preview_SM_Bush_LOD2.png"
     }
   },
-  "warnings": []
+  "warnings": [],
+  "textures": {
+    "shrub_02_alpha_4k.png": "5588e0a716c34bd390acd2af62b955a963770bd9096e2a64e9cfbb00cb4096f1",
+    "shrub_02_nor_gl_4k.exr": "55d286e91ba43bcf0704c6ba2a4d97f559f2ad3f4ae15e575151621aabf4b87f",
+    "shrub_02_rough_4k.exr": "27b7a4114d63bd60252d0f183fa575c4e56511b4a0241ad457e8eaffcba5ee08",
+    "shrub_02_diff_4k.jpg": "4b2b0ab0f5c760c7e58086c2f79ef09c58b295d4b988e8c685fdc4638d2bf94b",
+    "shrub_02_mask_4k.png": "0decfbda112ce2acfc741c1763adb970cd8dcaf7b9d3164b5d3fb020710828f8"
+  }
 }

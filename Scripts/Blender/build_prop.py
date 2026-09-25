@@ -90,8 +90,10 @@ def main():
               "source": source_path.relative_to(ROOT).as_posix() if source_path.is_relative_to(ROOT)
               else str(source_path),
               "source_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
-              "provenance": "Original project-authored geometry; no third-party asset or texture",
+              "provenance": getattr(recipe, "PROVENANCE", None) if args.recipe else None,
               "meshes": {}, "warnings": []}
+    report["provenance"] = report["provenance"] or \
+        "Original project-authored geometry; no third-party asset or texture"
     for obj in meshes:
         info = kit.stats(obj)
         if info["triangles"] == 0 or min(info["size_cm"]) <= 0:
@@ -105,9 +107,13 @@ def main():
         info["sha256"] = kit.export_fbx(obj, out / info["fbx"])
         report["meshes"][obj.name] = info
 
+    if any("textures" in m for info in report["meshes"].values() for m in info["materials"]):
+        report["textures"] = kit.copy_textures(meshes, out / "Textures")
+
     if args.recipe:
         bpy.context.scene["homestead"] = meta
-        bpy.ops.wm.save_as_mainfile(filepath=str(out / (name + ".blend")), compress=True, copy=True)
+        bpy.ops.wm.save_as_mainfile(filepath=str(out / (name + ".blend")), compress=True, copy=True,
+                                    relative_remap=True)
     if not args.no_preview:
         for obj in meshes:
             preview = out / f"preview_{obj.name}.png"

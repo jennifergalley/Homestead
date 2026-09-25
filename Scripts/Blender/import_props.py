@@ -29,6 +29,10 @@ def save(asset):
 
 
 def material_instance(spec, dest, parent):
+    if "textures" in spec:
+        raise NotImplementedError(
+            f"{spec['name']} is textured; wire a masked two-sided foliage parent before importing "
+            "(see docs\\blender-assets.md, 'Unreal import').")
     name = "MI_" + spec["name"][2:]
     path = f"{dest}/{name}"
     instance = LIB.load_asset(path) if LIB.does_asset_exist(path) else TOOLS.create_asset(

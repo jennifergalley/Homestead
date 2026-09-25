@@ -7,6 +7,8 @@ param(
     [string]$Blender,
     [string]$OutDirectory,
     [switch]$NoPreview,
+    [switch]$NoBeauty,
+    [int]$BeautySamples = 256,
     [switch]$KeepPivot,
     [switch]$Open
 )
@@ -73,6 +75,19 @@ if ($PSCmdlet.ParameterSetName -eq 'FromLive') {
     Copy-Item -LiteralPath $snapshot -Destination (Join-Path (Split-Path $report) "$FromLive.blend") -Force
 }
 Write-Host "Report: $report"
+$reportData = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+if ($reportData.textures -and -not $NoPreview -and -not $NoBeauty) {
+    $blendFile = Get-ChildItem -LiteralPath (Split-Path $report) -Filter '*.blend' | Select-Object -First 1
+    $beautyLog = Join-Path $logDirectory "$label-beauty.log"
+    Write-Host "Rendering Cycles review images ($BeautySamples samples)..."
+    & $exe --background $blendFile.FullName --disable-autoexec --offline-mode --python-exit-code 1 `
+        --python (Join-Path $PSScriptRoot 'render_beauty.py') -- --samples $BeautySamples *> $beautyLog
+    if ($LASTEXITCODE -ne 0 -or -not (Select-String -LiteralPath $beautyLog -Pattern 'HOMESTEAD_BEAUTY_DONE' -Quiet)) {
+        Get-Content -LiteralPath $beautyLog -Tail 30 | Write-Output
+        throw "Beauty render failed. Full log: $beautyLog"
+    }
+    Select-String -LiteralPath $beautyLog -Pattern '^HOMESTEAD_BEAUTY ' | ForEach-Object { $_.Line.Trim() }
+}
 if ($Open) {
     $blendFile = Get-ChildItem -LiteralPath (Split-Path $report) -Filter '*.blend' | Select-Object -First 1
     Start-Process -FilePath $exe -ArgumentList "`"$($blendFile.FullName)`""

@@ -1,7 +1,13 @@
 # Blender prop pipeline
 
-Original static props (furniture, tools, yard clutter, building parts) are authored
-with Blender **5.2.1 LTS** (`C:\Program Files\Blender Foundation\Blender 5.2`)
+**Quality bar: high fidelity only.** Assets must hold up in a 4K render on an RTX 5080,
+meaning photoscanned or equivalently detailed geometry and PBR maps. Flat-tinted
+primitive props (the `kit.box`/`kit.cylinder` path) are for blockout and tooling
+tests, never for final assets. For nature and organic props, start from verified
+CC0 scans (Poly Haven) and use Blender to compose, vary, clean up and LOD them;
+see the Bush recipe.
+
+Props are authored with Blender **5.2.1 LTS** (`C:\Program Files\Blender Foundation\Blender 5.2`)
 from Python *recipes*, in a visible Blender window or headless. The character
 pipeline stays on its pinned portable 4.5.14 toolchain (`docs\character-pipeline.md`).
 
@@ -14,7 +20,9 @@ Everything lives in `Scripts\Blender`:
 | `New-Prop.ps1` | Builds an asset set: FBX + `.blend` + preview sheet + `report.json` |
 | `homestead_kit.py` | Recipe helpers: materials, primitives, `roughen`/`taper`, `join`, export, preview |
 | `build_prop.py` | Blender-side builder used by `New-Prop.ps1` (both live and headless) |
-| `Recipes\*.py` | One recipe per asset set (`chopping_block.py` is the worked example) |
+| `Recipes\*.py` | One recipe per asset set (`bush.py` = scanned composition, `chopping_block.py` = primitive blockout) |
+| `Get-PolyHavenAsset.ps1` | Fetches a CC0 Poly Haven `.blend` + maps (or HDRI) into `Assets\Source\Blender\polyhaven`, MD5-verified, with `receipt.json` |
+| `render_beauty.py` | Headless Cycles review renders (GPU/OptiX, HDRI sky, 4K hero + close detail) |
 | `Import-Props.ps1` / `import_props.py` | Unreal import of built props |
 
 ## Working live (watch it happen)
@@ -78,15 +86,40 @@ recipes deterministic: seeded `random.Random` / `roughen(seed=...)`.
 pivot at bottom-center on the origin, smart-UV-project and set sharp edges from
 a 35° angle.
 
+### Composing scanned sources
+
+```python
+def build(kit):
+    templates = kit.append(kit.polyhaven("shrub_02"), ["shrub_02_a_LOD0", ...])
+    parts = [kit.instance(templates["shrub_02_a_LOD0"], "Shoot0", matrix=placement), ...]
+    return kit.join(parts, "SM_Bush", pivot=None, unwrap=False, reshade=False)
+```
+
+- Fetch first: `.\Scripts\Blender\Get-PolyHavenAsset.ps1 shrub_02` (default 4k). The
+  cache is git-ignored; the recipe's `PROVENANCE` and `docs\asset-credits.md` carry the
+  credit. Check the license on the asset page, not just "free".
+- `append` brings objects in as hidden templates with their materials and 4K images;
+  `instance` copies one, keeping the template's own rotation/scale but not its location.
+- **Always** `unwrap=False, reshade=False` for scans; the default re-unwrap would
+  destroy the atlas UVs.
+- Build every publisher LOD from the same placements (`SM_X`, `SM_X_LOD1`, ...), with
+  `pivot=None` so all LODs share one origin.
+- Textures used by the result are copied to `Assets\Props\<Name>\Textures` and the
+  saved `.blend` is repointed to them.
+
 ## Outputs and review
 
 `Assets\Props\<Name>\` receives `SM_*.fbx`, `<Name>.blend`, `report.json`
 (triangles, size in cm, materials, hashes, source recipe hash) and
-`preview_SM_*.png`: a Workbench contact sheet with a 3/4 view beside a gray
-1.63 m heroine-height marker, plus orthographic front (-Y), right (+X) and top
-views. Always look at the preview (or the live window) before importing; it has
-already caught a floating hatchet head. Previews are Blender diagnostics, not
-in-game evidence.
+`preview_SM_*.png`: a Workbench contact sheet with a gray 1.63 m heroine-height
+marker in a 3/4 view, plus orthographic front (-Y), right (+X) and top views.
+Textured sets also get `beauty_SM_*_hero.png` and `_detail.png`: 3840x2160 Cycles
+renders under the Kloofendal CC0 sky on the GPU (OptiX on the RTX 5080). They run
+headless after the build so the live window stays responsive (`-BeautySamples`,
+`-NoBeauty`). **Judge fidelity from the beauty renders** and the silhouette from
+the contact sheet before calling an asset done. They have already caught a floating
+hatchet head and a bush that splayed like a starburst. They are Blender evidence,
+not in-game evidence.
 
 Conventions match the other exports: meters, Z up, -Y forward, FBX
 `FBX_SCALE_UNITS`, no leaf bones.
@@ -105,5 +138,9 @@ height against Blender. Placing props in the Homestead map is separate, per-feat
 work. The importer has not yet been exercised end to end, because the editor was
 busy in another session when it was written.
 
-Textures are not supported yet: props use flat per-part tints, the same
-look as the reeds and camera-safe foliage.
+Textured props are **not importable yet**: `import_props.py` stops with a clear error
+until a masked, two-sided foliage parent material (base color, alpha mask, normal,
+roughness, translucency) and LOD-chain assembly are added. The Fern 02 and Grass
+Medium 01 import scripts already wire equivalent materials, so reuse their approach.
+Wind (pivot/vertex data) is also not authored yet.
+Flat-tinted blockout props import as `M_Field` instances.

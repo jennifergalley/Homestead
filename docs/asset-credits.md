@@ -33,6 +33,7 @@ includes this credit. Include this document in any distributed build.
 | Grass Medium 01 (four selected clumps) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/grass_medium_01 | CC0 |
 | Grass Ground (ground blend) | Charlotte Baglioni | https://polyhaven.com/a/grass_ground | CC0 |
 | Shrub 04 (two selected shoots) | Rico Cilliers | https://polyhaven.com/a/shrub_04 | CC0 |
+| Shrub 02 (22-shoot Blender bush composition, `Assets\Props\Bush`; not yet in a build) | Rico Cilliers | https://polyhaven.com/a/shrub_02 | CC0 |
 | Dry Branches Medium 01 (three pieces) | Rico Cilliers | https://polyhaven.com/a/dry_branches_medium_01 | CC0 |
 | Fir Sapling (two small conifers) | Rob Tuytel (photography), Rico Cilliers (modeling) | https://polyhaven.com/a/fir_sapling | CC0 |
 | Jacaranda Tree (one spreading canopy) | Rob Tuytel (guidance), Rico Cilliers (modeling) | https://polyhaven.com/a/jacaranda_tree | CC0 |
