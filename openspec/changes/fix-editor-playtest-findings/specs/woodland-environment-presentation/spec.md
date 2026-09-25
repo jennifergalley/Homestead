@@ -20,3 +20,16 @@ as today.
 #### Scenario: Day to night transition
 - **WHEN** game time passes from day into night
 - **THEN** the forward-shading owner switches without a visible lighting pop and without the competing-light warning
+
+### Requirement: Sun shadows move smoothly with the time of day
+As game time advances, sun and moon shadows SHALL move continuously, with no visible jumps in shadow
+position, and the movement MUST NOT cause frame-time spikes. Where hardware ray tracing is
+unavailable, the game MAY fall back to stepped shadow updates that keep frame pacing smooth.
+
+#### Scenario: Watching shadows at a low sun
+- **WHEN** the player stands still in the woodland near dawn or dusk for a minute of real time
+- **THEN** tree and heroine shadows drift smoothly rather than jumping every few seconds
+
+#### Scenario: Frame pacing while the sun moves
+- **WHEN** the 4K presentation route runs capped at 60 FPS with the sun moving
+- **THEN** its p99 frame time is no worse than the stepped-sun baseline and no shadow update produces a stall

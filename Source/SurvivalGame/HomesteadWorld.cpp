@@ -3,6 +3,7 @@
 #include "Async/Async.h"
 #include "Async/ParallelFor.h"
 #include "Components/DirectionalLightComponent.h"
+#include "RenderUtils.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -22,11 +23,16 @@
 #include "ProceduralMeshComponent.h"
 #include "PhysicsEngine/BodySetup.h"
 #include "UObject/ConstructorHelpers.h"
+#include "HAL/IConsoleManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadWorld, Log, All);
 
 namespace
 {
+TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
+    TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
+         "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
+
 // Original provisional shapes, not the final realistic environment asset set.
 const FLinearColor Meadow(0.22f, 0.31f, 0.095f);
 const FLinearColor Leaf(0.12f, 0.26f, 0.065f);
@@ -1054,6 +1060,10 @@ void AHomesteadWorld::BuildLighting()
     Sun->SetMobility(EComponentMobility::Movable);
     Sun->bAtmosphereSunLight = true;
     Sun->SetIntensity(46000.0f);
+    // Ray-traced sun shadows have no cache, so the sun can move every refresh without the Virtual
+    // Shadow Map re-render stalls a rotating sun causes over these non-Nanite trees (4K: 85 vs 78 FPS,
+    // p99 15 vs 24 ms). UpdateLighting applies homestead.RayTracedSun; without hardware ray tracing
+    // the lights use VSM.
     Sun->RegisterComponent();
 
     Moon = NewObject<UDirectionalLightComponent>(this, TEXT("MeadowMoonlight"));
@@ -2363,9 +2373,18 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
-    // 0.5 degrees is a few real seconds of daylight travel at every game speed, and an invisible
-    // shadow step, but it keeps full Virtual Shadow Map re-renders from happening every refresh.
-    constexpr float LightRotationStepDegrees = 0.5f;
+    // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
+    // speed, so no visible shadow step). Virtual Shadow Maps re-render every cached page when a
+    // directional light rotates, so on that fallback step by 0.5 degrees, a few real seconds of
+    // daylight travel, to keep full re-renders rare.
+    const bool bRayTracedSun = IsRayTracingEnabled() && CVarRayTracedSun.GetValueOnGameThread() != 0;
+    const auto ShadowMode = bRayTracedSun ? ECastRayTracedShadow::Enabled : ECastRayTracedShadow::Disabled;
+    if (Sun->GetCastRaytracedShadow() != ShadowMode)
+    {
+        Sun->SetCastRaytracedShadows(ShadowMode);
+        Moon->SetCastRaytracedShadows(ShadowMode);
+    }
+    const float LightRotationStepDegrees = bRayTracedSun ? 0.0f : 0.5f;
     if (!bLightRotationApplied || !SunRotation.Equals(AppliedSunRotation, LightRotationStepDegrees))
     {
         Sun->SetRelativeRotation(SunRotation);

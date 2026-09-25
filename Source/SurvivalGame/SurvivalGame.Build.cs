@@ -11,6 +11,6 @@ public class SurvivalGame : ModuleRules
             "ProceduralMeshComponent", "AudioMixer", "AnimGraphRuntime", "Json",
             "Slate", "SlateCore", "HairStrandsCore"
         });
-        PrivateDependencyModuleNames.AddRange(new[] {"PhysicsCore", "RHI"});
+        PrivateDependencyModuleNames.AddRange(new[] {"PhysicsCore", "RHI", "RenderCore"});
     }
 }

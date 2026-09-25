@@ -254,6 +254,11 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: The sun uses ray-traced shadows (`homestead.RayTracedSun`, default 1) and moves every
+  refresh. `homestead.RayTracedSun 0` restores VSM with 0.5° steps. Don't reintroduce continuous
+  rotation on the VSM path. See `docs/research/rendering-baseline/README.md`. The `-Presentation`
+  smoke route fails at its first case for a pre-existing reason: `ApplyAppearance` rejects
+  "Owned wardrobe appearance requires PrepareEquipment".
 - 2026-09-25: MetaHuman body shape, GASP locomotion and tests:
   - **Body shape via Python works.** `try_add_object_to_edit`, then `get_body_constraints`; build a
     *new list* (changing the Array's structs in place doesn't stick), set `is_active` and
@@ -317,7 +322,8 @@ Dated and short, newest first. Promote anything durable into the sections above.
   disabled.
 - 2026-09-25: Rotating a directional light invalidates every cached Virtual Shadow Map page. The
   world refresh (every 0.25 s) used to rotate the sun continuously, causing paired 30-39 ms stalls
-  at 4K. `UpdateLighting` now steps rotation by 0.5°. Keep light rotation stepped.
+  at 4K. On the VSM path `UpdateLighting` steps rotation by 0.5°; the default ray-traced sun
+  moves continuously.
 - 2026-09-25: Console commands in PIE: `run_python` with
   `unreal.SystemLibrary.execute_console_command(unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world(), '<cmd>')`.
   To A/B lighting live, call `set_actor_tick_enabled(False)` on `HomesteadController` so its

@@ -31,6 +31,11 @@ Settings list steps one row per D-pad press. Reproduce every bug with the editor
 - [ ] 5.1 Diagnose the flat blue creek: capture the creek in a packaged Shipping build and in PIE after shader compilation finishes, and record whether it's a fallback-material artifact or the real water look.
 - [ ] 5.2 If it's real, adjust the existing creek water material/presentation for depth tint and light response within the creek presentation rules; verify with daylight captures along the creek and an unchanged watering-can refill. If 5.1 shows an artifact only, fix readiness gating or record it as not reproducible in Shipping.
 
-## 6. Integrated acceptance
+## 6. Smooth sun shadows
 
-- [ ] 6.1 Run one ordinary packaged playtest covering Settings navigation, eating from the Inventory, felling a tree and viewing the creek; verify each fixed behavior in captures and record the evidence and any remaining limits in this change.
+- [x] 6.1 Stop the visible shadow steps without VSM re-render stalls. Verify frame pacing on the 4K presentation route. (2026-09-25: the sun/moon use hardware ray-traced shadows and rotate every refresh, via `homestead.RayTracedSun`, default 1. The VSM fallback keeps the 0.5° steps. 4K 60-cap p99 is 18.2 ms vs 20.7 ms stepped; uncapped 85 vs 78 FPS. See `docs/research/rendering-baseline/README.md`.)
+- [ ] 6.2 Jenny compares the ray-traced look (softer shadows, less low sun on inner leaves and hair) with `homestead.RayTracedSun 0` at dawn, midday and dusk, and accepts it or asks for tuning. Record her verdict here.
+
+## 7. Integrated acceptance
+
+- [ ] 7.1 Run one ordinary packaged playtest covering Settings navigation, eating from the Inventory, felling a tree, viewing the creek and watching shadows move through dawn; verify each fixed behavior in captures and record the evidence and any remaining limits in this change.

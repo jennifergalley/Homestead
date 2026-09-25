@@ -122,6 +122,40 @@ from `csvprofile` with `r.GPUCsvStatsEnabled 1`, all medians.
   - Groom LOD and simulation settings.
   - DLSS (below).
 
+## Ray-traced sun shadows and continuous sun (2026-09-25)
+
+Jenny noticed the shadows jumping as the light changed. The 0.5° sun steps visibly move long
+low-sun shadows, and each step re-renders every VSM page (a stall). Uncached VSM costs about 16 ms
+per frame here (`r.Shadow.Virtual.Cache 0`: 37 FPS uncapped), so a continuously moving VSM sun
+isn't viable without Nanite trees. The tree assets are hash-pinned by `WoodlandResourcePolicy.ps1`,
+so Nanite would need new derived assets.
+
+The sun and moon now use hardware ray-traced shadows (`homestead.RayTracedSun`, default 1), which
+have no cache. `UpdateLighting` applies the sun rotation on every refresh (about 0.025° at normal
+game speed). Without hardware ray tracing, or with `homestead.RayTracedSun 0`, lights use VSM with
+the 0.5° steps. Local lights still use VSM.
+
+4K presentation route with the MetaHuman heroine, on a quiet machine:
+
+| Run | FPS | Median ms | p95 ms | p99 ms | Frames > 20 ms | Frames > 33 ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| VSM stepped, 60 cap | 59.4 | 16.66 | 17.83 | 20.65 | 13 | 4 |
+| Legacy heroine, VSM stepped, 60 cap | 59.6 | 16.67 | 17.65 | 19.12 | 10 | 2 |
+| RT sun continuous, 60 cap | 59.8 | 16.66 | 17.57 | 18.23 | 6 | 1 |
+| VSM stepped, uncapped | 78.1 | 12.17 | 17.03 | 23.97 | 30 | 8 |
+| RT sun continuous, uncapped | 84.8-86.8 | 11.4-11.7 | 13.1-13.4 | 14.4-14.8 | 2-3 | 1 |
+
+The remaining >33 ms frame is the pre-existing ~100 ms hitch at walk start.
+
+Look changes (compare `homestead.RayTracedSun 0/1` in the console):
+
+- Shadows are softer (physical penumbra).
+- Inner canopy leaves and her hair catch less low sun. Ray tracing shadows leaf-on-leaf and
+  hair-on-hair where VSM leaked light.
+- Shade reads slightly lighter and hazier.
+
+Jenny to judge; the exposure was tuned under VSM.
+
 ## Fallback if ray tracing gets too expensive
 
 Jenny's back-pocket option: rather than dropping hardware ray tracing, integrate NVIDIA DLSS (DLSS 5

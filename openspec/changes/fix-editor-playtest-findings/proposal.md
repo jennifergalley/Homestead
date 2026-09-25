@@ -5,7 +5,8 @@
 On 2026-09-25 an agent played a fresh woodland in Play-In-Editor through the new editor MCP play
 toolset (`.github/skills/unreal-editor-mcp`). Five defects surfaced that Jenny wants recorded and
 fixed later. Some break existing requirements (Settings focus, feedback not covering or moving
-content); the others make ordinary play look wrong (trees vanish, flat creek, lighting warning).
+content); the others make ordinary play look wrong (trees vanish, flat creek, lighting warning). Jenny later
+reported a sixth from her own play: shadows jumping as the sun moves.
 
 ## What Changes
 
@@ -19,6 +20,9 @@ content); the others make ordinary play look wrong (trees vanish, flat creek, li
 - **Competing directional lights.** PIE shows the engine warning "Multiple directional lights are
   competing to be the single one used for forward shading, translucent, water or volumetric fog."
   Sun and moonlight shall have one deterministic forward-shading owner.
+- **Shadows jump as the sun moves** (Jenny, 2026-09-25). The sun stepped by 0.5 degrees to keep
+  Virtual Shadow Map re-renders rare, which visibly jumps long low-sun shadows every few seconds
+  and stalls a frame each step. Shadows shall move smoothly without frame-time spikes.
 - **Menu feedback reflows content.** The field-book feedback banner (for example "Ate Berries.")
   pushed the Inventory page down about 60 px and shrank the portrait. Feedback shall not move rows,
   focus targets or the portrait.
@@ -47,7 +51,7 @@ In-flight capabilities extended with new, distinctly named requirements:
 - `settings-screen-navigation`: directional steps move exactly one visible row.
 - `homestead-work-animations`: felled mature trees leave the world visibly after impact.
 - `woodland-creek-presentation`: creek water surface reads as natural water.
-- `woodland-environment-presentation`: one directional light owns forward shading at a time.
+- `woodland-environment-presentation`: one directional light owns forward shading at a time; sun shadows move smoothly.
 - `homestead-menu-overlay`: menu feedback never reflows page content.
 
 ## Impact
