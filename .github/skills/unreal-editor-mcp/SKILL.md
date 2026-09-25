@@ -247,6 +247,12 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: Rendering presets one at a time opens and closes a Creator window every ~40 s.
+  Warn the human before starting, because it looks like the editor is restarting and it steals
+  any window they're clicking in. Creator's "Missing Project Settings → Enable Missing" writes
+  the three `r.GPUSkin`/`r.SkinCache` lines to `DefaultEngine.ini`. They only take effect after
+  the next editor restart.
+
 - 2026-09-25: There is no general Epic sign-in in the editor. MetaHuman cloud sign-in lives in the
   person icon on the MetaHuman Creator toolbar ("No user signed in, please autorig to trigger
   log-in flow"). Only **Create Full Rig** starts the login flow. **Download Texture Sources**
