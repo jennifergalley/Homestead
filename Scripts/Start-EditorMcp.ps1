@@ -3,6 +3,8 @@ param(
     [string]$EngineRoot,
     [int]$Port = 8765,
     [string]$Map,
+    [string[]]$ExtraPlugins = @(),
+    [switch]$AllowPython,
     [switch]$SkipBuild,
     [int]$TimeoutSeconds = 600
 )
@@ -23,7 +25,7 @@ $plugins = @(
     'PluginToolset'
     'AnimationAssistantToolset'
     'PhysicsToolsets'
-)
+) + $ExtraPlugins
 
 function Test-McpServer {
     $body = '{"jsonrpc":"2.0","id":1,"method":"ping"}'
@@ -59,6 +61,8 @@ $arguments += @(
     '-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
+# Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
+if ($AllowPython) { $arguments += '-HomesteadAgentPython' }
 
 $process = Start-Process -FilePath $editor -ArgumentList $arguments -PassThru
 Write-Host "Started Unreal Editor (PID $($process.Id)); waiting for MCP at $url ..."

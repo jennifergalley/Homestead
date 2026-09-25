@@ -102,5 +102,51 @@ class HomesteadPlayTools(unreal.ToolsetDefinition):
 _registration = Registration([HomesteadPlayTools])
 
 
+def _python_allowed() -> bool:
+    return "-homesteadagentpython" in unreal.SystemLibrary.get_command_line().lower()
+
+
+@unreal.uclass()
+class HomesteadEditorPython(unreal.ToolsetDefinition):
+    """Runs arbitrary Python in the editor for development automation (full `unreal` API).
+    Registered only when the editor was started with Scripts\\Start-EditorMcp.ps1 -AllowPython.
+    """
+
+    @toolset_registry.tool_call
+    @staticmethod
+    def run_python(code: str) -> str:
+        """Executes Python in the editor's interpreter on the game thread and returns captured output.
+
+        The code runs with `unreal` imported. Anything printed is returned; assign a JSON-serializable
+        value to `result` to return it as well. Exceptions are returned as a traceback string.
+        Long-running work blocks the editor; keep calls short.
+
+        Args:
+            code: Python source to execute.
+        """
+        import contextlib
+        import io
+        import json
+        import traceback
+
+        scope = {"unreal": unreal, "__name__": "__homestead_agent__"}
+        output = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+                exec(compile(code, "<run_python>", "exec"), scope)
+        except Exception:
+            output.write(traceback.format_exc())
+        if "result" in scope:
+            try:
+                output.write("\nresult: " + json.dumps(scope["result"], default=str))
+            except Exception as error:
+                output.write(f"\nresult not serializable: {error}")
+        return output.getvalue()
+
+
+if _python_allowed():
+    _registration = Registration([HomesteadPlayTools, HomesteadEditorPython])
+
+
 def register() -> bool:
     return _registration.register()

@@ -31,7 +31,9 @@ Menus and construction planning pause simulation. No online gameplay services.
 - Daily tending and peaceful foraging are pleasures in their own right.
 - The heroine and environment must be appealing, not merely technically present.
 - Use Coral Island, Minecraft, and Disney Dreamlight Valley as primary comparative
-  references for relevant life-sim, character, world, interaction, and UI decisions.
+  references for the gameplay loop, inventory, interaction, and UI decisions.
+- Characters are photorealistic, at MetaHuman quality; Skyrim and Tomb Raider set
+  the bar for character realism and an immersive, survival-driven open world.
 - Preserve progress reliably and provide checkpoint retries.
 - Keep repeated tool work immediate through a visible ten-slot carried-tool
   hotbar with mouse/keyboard and controller parity.

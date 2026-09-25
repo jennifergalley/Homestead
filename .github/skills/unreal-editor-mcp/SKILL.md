@@ -43,7 +43,14 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -SkipBuild # module already 
 - A cold start can take minutes. Quiet is not hung; check `Saved\Logs\SurvivalGame.log`.
 - C++ changes: function-body edits can be hot-patched with Live Coding (section 5). New
   classes/UFUNCTIONs or `.Build.cs` changes need: stop the editor, run `Build.bat` (the script's build
-  step), relaunch. The editor locks its module DLLs, so build with it closed.
+  step), relaunch. The editor locks its module DLLs, so build with it closed. Live Coding patches
+  live only in memory: relaunch without `-SkipBuild` afterwards so the DLL on disk matches source.
+- `-ExtraPlugins A,B` enables more engine plugins for the session (for example
+  `MetaHumanCharacter,MetaHumanSDK,MetaHumanCoreTech,MetaHumanGenerator`).
+- `-AllowPython` registers `homestead_agent.toolset.HomesteadEditorPython.run_python`, which runs
+  arbitrary editor Python (full `unreal` API; print output and an optional `result` value are
+  returned). Opt-in because it is unrestricted code execution on the localhost server; use it for
+  editor automation that Epic's toolsets don't cover (for example the MetaHuman Creator subsystem).
 
 ## 3. Choose how to call tools
 
@@ -99,7 +106,10 @@ do { Start-Sleep 3; $s = st } until ($s.worldReady)   # StartPIE may report a ti
 hk release_all; mcp $E StopPIE
 ```
 
-- Every PIE start generates a **new woodland seed**; positions and node ids differ each run.
+- Every PIE start with no save in this checkout generates a **new woodland seed**. Once an
+  autosave exists, PIE resumes it (same position/time), so positions and node ids persist.
+- **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
+  `I` opens Inventory (page 0), Menu opens Settings (page 4).
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).
 - An editor "Missing Project Settings / Shader Model 6" notification covers the view after launch.
   Dismiss it: `mcp $SL Snapshot '{"ref":"","maxDepth":12,"bIncludeSourceLocations":false}'`, find
@@ -237,6 +247,17 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: MetaHuman Creator (enabled via `-ExtraPlugins`) opens, but logs "MetaHuman Optional
+  Content folder not found ... limited features" until the engine's
+  `Plugins/MetaHuman/MetaHumanCharacter/Content/Optional` (TextureSynthesis, BodyTextures) is
+  installed from the Epic Launcher. Opening a MetaHuman also reports missing project settings:
+  `r.GPUSkin.Support16BitBoneIndex`, `r.GPUSkin.UnlimitedBoneInfluences`,
+  `r.SkinCache.CompileShaders`, and D3D12 SM6 (for Virtual Shadow Maps). The log also warns that
+  Lumen has no ray-tracing data (no distance fields or hardware RT enabled).
+- 2026-09-25: `MetaHumanCharacterEditorSubsystem` (via `run_python`) exposes creation, body/face
+  commits, `request_auto_rigging`, `request_texture_sources`, `build_meta_human` and
+  `spawn_meta_human_actor`. The stock `MetaHumanGenerator` toolset didn't appear in
+  `list_toolsets` even with its plugin enabled.
 - 2026-09-25: Slate `Click`/`PressKey` on game menu widgets only moved hover/focus; the game reads
   input through the PlayerController, not Slate focus. That is why `HomesteadPlayTools` exists.
 - 2026-09-25: PIE shows an on-screen editor warning, "Multiple directional lights are competing to

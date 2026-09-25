@@ -22,6 +22,9 @@ updated as you learn better recipes; this page records setup and verification.
 The server listens only on `127.0.0.1:8765/mcp` (`-Port` overrides it) and rejects browser
 origins other than localhost. It lives as long as that editor window; closing the editor stops it.
 The script also passes the project's usual offline arguments (`Get-UnrealOfflineArguments.ps1`).
+`-ExtraPlugins A,B` enables more engine plugins for that session (for example MetaHuman
+Creator). `-AllowPython` registers an opt-in `run_python` tool that executes arbitrary editor Python;
+leave it off unless a task needs editor automation beyond Epic's toolsets.
 
 Enabled toolset plugins: `EditorToolset`, `AutomationTestToolset`, `ConfigSettingsToolset`,
 `LiveCodingToolset`, `SlateInspectorToolset`, `PluginToolset`, `AnimationAssistantToolset` and

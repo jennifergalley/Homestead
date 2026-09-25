@@ -215,9 +215,18 @@ project context only.
 ## Vision
 
 A beautiful, relatively cozy survival and homesteading game inspired by Minecraft,
-Coral Island, Disney Dreamlight Valley, and the pleasure of wandering Skyrim
-collecting flowers. Dreamlight Valley is specifically a reference for enjoyable
-daily maintenance and tending; Coral Island also informs the foraging loop.
+Coral Island, Disney Dreamlight Valley, Skyrim and Tomb Raider. The references
+split by role:
+
+- **Look and world (Skyrim, Tomb Raider):** photorealistic characters at the
+  quality MetaHuman offers, and an immersive open-world environment with real
+  survival pressure (cold, hunger, crafting).
+- **Loop and mechanics (Coral Island, Dreamlight Valley):** the gameplay loop,
+  inventory management and interaction mechanics. Dreamlight Valley is
+  specifically a reference for enjoyable daily maintenance and tending; Coral
+  Island also informs the foraging loop. Skyrim's flower-picking wander remains
+  an atmosphere reference.
+
 These are experience references, not requests to copy their settings, characters,
 magic, or quest structures.
 
@@ -527,12 +536,13 @@ Recommended sequence, not authorization for purchases or a new pipeline commitme
    between tasks do not establish movement or interaction quality. Use real
    walking, turns, stops, camera orbiting, close inspection and gathering, with
    captured frames and motion telemetry; keep these checks in the ongoing workflow.
-2. Diagnose and improve the current character presentation first. MetaHuman is
-   on hold as an unproven alternative, not the next presumed requirement.
-   Determine whether the problems are materials/lighting, pose, rigging, animation
-   or the underlying mesh before replacing assets. Prove one attractive adult heroine
-   close to the supplied face/hair direction, her petite/curvy proportions, and
-   compatible clothing. Inspect skin, eyes, hair, silhouette, and material/lighting
+2. Replace the prototype heroine with a photorealistic MetaHuman-based heroine
+   (Jenny's direction, 2026-09-25). The earlier diagnose-first/MetaHuman-on-hold
+   step is superseded. Jenny will create/sign in to an Epic account for MetaHuman
+   cloud steps (auto-rigging, texture synthesis) herself; agents guide those steps
+   and never handle credentials. Prove one attractive adult heroine close to the supplied
+   face/hair direction, her petite/curvy proportions, and compatible clothing.
+   Inspect skin, eyes, hair, silhouette, and material/lighting
    response in this game's daylight and firelight, not only in a creator preview.
    Favor one successful heroine before expanding the preset catalog.
 3. Correct the observed locomotion defects. Improve or replace the procedural
