@@ -249,8 +249,9 @@ Dated and short, newest first. Promote anything durable into the sections above.
 
 - 2026-09-25: There is no general Epic sign-in in the editor. MetaHuman cloud sign-in lives in the
   person icon on the MetaHuman Creator toolbar ("No user signed in, please autorig to trigger
-  log-in flow"). The login flow starts on the first **Create Full Rig** or **Download Texture
-  Sources** click and needs the human, so ask Jenny to do it. The launcher's project list only
+  log-in flow"). Only **Create Full Rig** starts the login flow. **Download Texture Sources**
+  just fails with "User not logged in, please autorig before downloading..." toasts. The login
+  needs the human, so ask Jenny to do it. The launcher's project list only
   shows projects it created or opened itself. Open this worktree's `SurvivalGame.uproject` with
   `Start-EditorMcp.ps1` rather than from the launcher.
 - 2026-09-25: Installing engine options from the Epic Launcher while an editor is open can leave
