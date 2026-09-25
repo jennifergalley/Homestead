@@ -1,0 +1,72 @@
+{
+  "status": "diagnostic-tooling-verified; symptom-unresolved",
+  "screenshot_free_timing": {
+    "timing-idle": {
+      "samples": 173,
+      "wall_seconds": 2.000170004,
+      "mean_tick_hz": 86.49264795193879,
+      "median_ms": 11.5165,
+      "p95_ms": 12.479801,
+      "p99_ms": 12.735598,
+      "max_ms": 12.808997,
+      "over_33_33ms": 0,
+      "maximum_actor_speed_cm_s": 0.0,
+      "camera_yaw_travel_degrees": 0.0
+    },
+    "timing-walk": {
+      "samples": 482,
+      "wall_seconds": 6.007140999,
+      "mean_tick_hz": 80.23783694776564,
+      "median_ms": 12.314900999999999,
+      "p95_ms": 13.268303,
+      "p99_ms": 14.089003,
+      "max_ms": 92.438899,
+      "over_33_33ms": 1,
+      "maximum_actor_speed_cm_s": 90.0,
+      "camera_yaw_travel_degrees": 0.0
+    },
+    "timing-turn": {
+      "samples": 810,
+      "wall_seconds": 6.0048063119999995,
+      "mean_tick_hz": 134.89194453804393,
+      "median_ms": 6.346051,
+      "p95_ms": 11.958398,
+      "p99_ms": 13.2351,
+      "max_ms": 18.035401,
+      "over_33_33ms": 0,
+      "maximum_actor_speed_cm_s": 130.731,
+      "camera_yaw_travel_degrees": 106.73899999999998
+    },
+    "timing-sweep": {
+      "samples": 657,
+      "wall_seconds": 6.004381194,
+      "mean_tick_hz": 109.42010155126736,
+      "median_ms": 9.337399,
+      "p95_ms": 12.742002,
+      "p99_ms": 13.455201,
+      "max_ms": 13.882,
+      "over_33_33ms": 0,
+      "maximum_actor_speed_cm_s": 130.731,
+      "camera_yaw_travel_degrees": 320.6170000000001
+    }
+  },
+  "captured_frames": 106,
+  "capture_request_cadence": {
+    "nominal_threshold_hz": 8,
+    "measured_request_hz": 6.485995093474429,
+    "first_to_last_request_wall_seconds": 16.188726400000007,
+    "recorded_tick_wall_seconds": 40.34714160499997,
+    "ticks_exceeding_legacy_one_second_route_clock_cap": 0
+  },
+  "settings": "presentation-settings.txt (start/end runtime queries; no CVar writes)",
+  "admission": "engine.log (native Development sandbox and observer)",
+  "pipeline": "Offscreen rendered game framebuffer; not physical display/scanout.",
+  "limits": [
+    "Instrumented game-thread tick intervals are not GPU or DXGI Present measurements.",
+    "The inherited observer's 8Hz wording is a nominal threshold, not delivered sample rate; use measured_request_hz.",
+    "Legacy telemetry.seconds uses a capped route clock on >1s stalls; this report uses unclamped wall intervals.",
+    "Readback perturbs capture pacing and can miss brief temporal artifacts.",
+    "Timing and capture visit different positions; not a controlled performance A/B.",
+    "No clean-performance, tearing diagnosis, visual approval or fix claim."
+  ]
+}

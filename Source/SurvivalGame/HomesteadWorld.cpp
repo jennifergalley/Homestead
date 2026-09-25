@@ -2350,11 +2350,22 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
     // Matches the simulation's deterministic three-day spring weather cycle.
     const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
-    Sun->SetRelativeRotation(FRotator(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0));
+    const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
+    const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
+    // 0.5 degrees is a few real seconds of daylight travel at every game speed, and an invisible
+    // shadow step, but it keeps full Virtual Shadow Map re-renders from happening every refresh.
+    constexpr float LightRotationStepDegrees = 0.5f;
+    if (!bLightRotationApplied || !SunRotation.Equals(AppliedSunRotation, LightRotationStepDegrees))
+    {
+        Sun->SetRelativeRotation(SunRotation);
+        Moon->SetRelativeRotation(MoonRotation);
+        AppliedSunRotation = SunRotation;
+        AppliedMoonRotation = MoonRotation;
+        bLightRotationApplied = true;
+    }
     Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 17000.0f : 46000.0f, Daylight));
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.76f, 0.56f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
-    Moon->SetRelativeRotation(FRotator(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0));
     Moon->SetIntensity(0.5f * (1.0f - Daylight));
     Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight));
     Fog->SetFogDensity(bRaining ? 0.035f : FMath::Lerp(0.016f, 0.007f, Daylight));

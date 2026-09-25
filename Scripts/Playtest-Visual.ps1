@@ -4,6 +4,7 @@ param([string]$EngineRoot, [ValidateRange(1280,3840)][int]$Width=1280,
     [switch]$Packaged, [switch]$Watering, [switch]$Weeding, [switch]$Clearing, [switch]$Sprint, [switch]$LivingIdle, [switch]$TrialFootLock, [switch]$TrialCMUWalk, [switch]$TrialCMULevelHead, [switch]$CMUGaitReview, [switch]$PresentationDiagnostics,
     [string]$FixtureSave, [string]$PackageDirectory='Build\Windows',
     [string]$OutputDirectory, [switch]$ShippingQA, [switch]$CompletionDriven,
+    [string]$ExecCmds,
     [ValidateRange(-1,2)][int]$BodyPreset=-1, [ValidateRange(-1,2)][int]$HairStyle=-1,
     [ValidateRange(-1,4)][int]$HairColor=-1,
     [ValidateRange(-1,3)][int]$SkinTone=-1, [ValidateRange(-1,3)][int]$EyeColor=-1,
@@ -75,6 +76,8 @@ if($Packaged) {
 if(-not (Test-Path -LiteralPath $executable)) { throw "Missing game executable: $executable" }
 $log=Join-Path $output 'engine.log'
 $arguments=$prefix+"-HomesteadVisualPlaytest -HomesteadTestOutput=`"$output`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$log`""
+# Optional console commands, e.g. "t.MaxFPS 0" to measure uncapped frame time for rendering comparisons.
+if($ExecCmds) { $arguments += " -ExecCmds=`"$ExecCmds`"" }
 if($ShippingQA) {
     $graphics=Join-Path $output 'Graphics\GameUserSettings.ini'
     $null=New-Item -ItemType Directory -Path (Split-Path $graphics -Parent)

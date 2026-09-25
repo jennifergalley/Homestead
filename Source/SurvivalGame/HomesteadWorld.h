@@ -154,6 +154,11 @@ private:
     TObjectPtr<UDirectionalLightComponent> Sun;
     UPROPERTY()
     TObjectPtr<UDirectionalLightComponent> Moon;
+    // Last rotations pushed to the lights. Rotating a directional light invalidates every cached
+    // Virtual Shadow Map page, so small time-of-day changes are applied in coarse steps.
+    FRotator AppliedSunRotation = FRotator::ZeroRotator;
+    FRotator AppliedMoonRotation = FRotator::ZeroRotator;
+    bool bLightRotationApplied = false;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
     UPROPERTY()
