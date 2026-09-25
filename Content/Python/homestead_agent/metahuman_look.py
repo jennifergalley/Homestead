@@ -180,6 +180,8 @@ HEROINE_SCULPT = {
     "cheekbone": (0.3, 0.15, 0.1), "cheek_arch": (0.2, 0.0, 0.05),
     "cheek_hollow": (-0.3, -0.2, 0.0), "cheek_mouth": (0.0, -0.15, 0.0),
 }
+# Jenny chose 2x (2026-09-25). The solver moves landmarks only part of the way.
+HEROINE_SCULPT_SCALE = 2.0
 
 
 def sculpt_face(character_path, edits, scale=1.0, save=True):
