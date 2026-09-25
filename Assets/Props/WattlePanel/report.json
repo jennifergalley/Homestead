@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "WattlePanel",
+  "description": "Primitive homestead wall section: woven hazel wattle with partial clay-straw daub.",
+  "collision": "box",
+  "triangle_budget": 250000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wattle_panel.py",
+  "source_sha256": "ceabd736a45da1a9cf1ff1b725cf7f65712d640725bbaacef3ebd2d04e6aa009",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_WattlePanel": {
+      "vertices": 121827,
+      "triangles": 239182,
+      "size_cm": [
+        223.92,
+        15.96,
+        197.12
+      ],
+      "materials": [
+        {
+          "name": "M_WattlePanel",
+          "textures": {
+            "basecolor": "T_WattlePanel_basecolor.png",
+            "roughness": "T_WattlePanel_roughness.png",
+            "normal": "T_WattlePanel_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_WattlePanel_basecolor.png",
+          "roughness": "T_WattlePanel_roughness.png",
+          "normal": "T_WattlePanel_normal.png",
+          "ao": "T_WattlePanel_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.25,
+          0.03,
+          0.82
+        ]
+      },
+      "fbx": "SM_WattlePanel.fbx",
+      "sha256": "552f56e20cdd2c627923cd6c479de06df2a9d2b15d9b0884188bdb82820860ce",
+      "preview": "preview_SM_WattlePanel.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WattlePanel_hero.png",
+          "detail": "beauty_SM_WattlePanel_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          180
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_WattlePanel_basecolor.png": "470d4ade47925fb470c99b94117ff42fb28d519cad2ece896ec8409f72b13731",
+    "T_WattlePanel_roughness.png": "a039a0f3b3972c380d24fdf66ad508643179a1981a14c1533ba061ea7662dc8a",
+    "T_WattlePanel_normal.png": "91927c9b3003c8742d90e773cf35d71c0763e0ced429757f8c8e8bc4d9c6e786"
+  }
+}

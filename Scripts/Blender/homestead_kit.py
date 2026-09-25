@@ -166,8 +166,9 @@ def texture_maps(mat):
     maps = {}
     if not mat or not mat.node_tree:
         return maps
-    roles = (("alpha", "opacity"), ("nor", "normal"), ("rough", "roughness"), ("diff", "basecolor"),
-             ("col", "basecolor"), ("mask", "mask"), ("ao", "ao"), ("arm", "arm"), ("disp", "height"))
+    roles = (("basecolor", "basecolor"), ("alpha", "opacity"), ("nor", "normal"), ("rough", "roughness"),
+             ("diff", "basecolor"), ("col", "basecolor"), ("mask", "mask"), ("ao", "ao"), ("arm", "arm"),
+             ("disp", "height"))
     for node in mat.node_tree.nodes:
         if node.type != "TEX_IMAGE" or not node.image or node.image.source != "FILE":
             continue
@@ -208,6 +209,7 @@ def _from_bmesh(name, bm, material_, location, rotation, scale):
     bm.free()
     if not mesh.uv_layers:
         mesh.uv_layers.new(name="UVMap")
+    tag_coords(mesh)
     obj = _link(bpy.data.objects.new(name, mesh))
     obj.location = location
     obj.rotation_euler = [math.radians(a) for a in rotation]
@@ -261,6 +263,7 @@ def mesh(name, vertices, faces, material=None, location=(0, 0, 0), rotation=(0, 
     data.from_pydata([tuple(v) for v in vertices], [], [tuple(f) for f in faces])
     data.update()
     data.uv_layers.new(name="UVMap")
+    tag_coords(data)
     obj = _link(bpy.data.objects.new(name, data))
     obj.location = location
     obj.rotation_euler = [math.radians(a) for a in rotation]
@@ -337,13 +340,15 @@ def finalize(obj, pivot="base", smooth_angle=35.0, unwrap=True, reshade=True):
     if obj.modifiers:
         bpy.ops.object.convert(target="MESH")
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    shift = Vector((0, 0, 0))
     if pivot == "base":
         lo, hi = bounds(obj)
         shift = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))
-        obj.data.transform(Matrix.Translation(-shift))
     elif pivot == "center":
         lo, hi = bounds(obj)
-        obj.data.transform(Matrix.Translation(-(lo + hi) / 2))
+        shift = (lo + hi) / 2
+    obj.data.transform(Matrix.Translation(-shift))
+    obj["homestead_shift"] = list(shift)
     obj.location = (0, 0, 0)
     if unwrap:
         bpy.ops.object.mode_set(mode="EDIT")
@@ -544,12 +549,35 @@ def _sky(hdri, strength=1.0, rotation=0.0):
     return world
 
 
+def _fit_distance(corners, target, direction, lens, aspect, margin=1.12, sensor=36.0):
+    """Distance along ``direction`` from ``target`` that keeps every corner in frame."""
+    forward = -direction.normalized()
+    right = forward.cross(Vector((0, 0, 1))).normalized()
+    up = right.cross(forward).normalized()
+    tan_h = (sensor / 2) / lens
+    tan_v = tan_h / aspect
+    need = 0.0
+    for corner in corners:
+        rel = corner - target
+        depth = rel.dot(-forward)
+        need = max(need, depth + abs(rel.dot(right)) / tan_h, depth + abs(rel.dot(up)) / tan_v)
+    return need * margin
+
+
 def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160), samples=256,
-                  views=("hero", "detail")):
+                  views=("hero", "detail"), pose=(0, 0, 0), focus=None):
     """Photoreal Cycles review renders of ``obj`` on a soil ground under an HDRI sky.
-    ``hero`` frames the whole asset from a third-person-camera height; ``detail``
-    is a close crop around the upper third. Returns {view: path}."""
+    ``pose`` (XYZ degrees) temporarily re-orients the asset for review (e.g. lay a
+    tool on the ground); ``focus`` is an object-space point for the close detail
+    view (default: upper third). Returns render metadata."""
     scene = bpy.context.scene
+    rest = obj.matrix_world.copy()
+    obj.matrix_world = Euler([math.radians(a) for a in pose]).to_matrix().to_4x4() @ rest
+    bpy.context.view_layer.update()
+    lo, _ = bounds(obj)
+    obj.matrix_world = Matrix.Translation((0, 0, -lo.z)) @ obj.matrix_world
+    bpy.context.view_layer.update()
+    focus_world = obj.matrix_world @ Vector(focus) if focus is not None else None
     scene.render.engine = "CYCLES"
     backend = use_gpu()
     scene.cycles.samples = samples
@@ -562,6 +590,7 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     scene.render.image_settings.color_mode = "RGB"
     scene.view_settings.view_transform = "AgX"
     scene.view_settings.look = "AgX - Medium High Contrast"
+    scene.view_settings.exposure = -0.35
     _sky(hdri, rotation=40)
 
     soil = bpy.data.materials.new("M_BeautySoil")
@@ -581,6 +610,8 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     center = (lo + hi) / 2
     ground = box("BeautyGround", (60, 60, 0.02), (center.x, center.y, lo.z - 0.012), material=soil)
 
+    corners = [Vector((x, y, z)) for x in (lo.x, hi.x) for y in (lo.y, hi.y) for z in (lo.z, hi.z)]
+    aspect = resolution[0] / resolution[1]
     radius = max(size.length / 2, 0.1)
     out = {}
     folder = Path(folder)
@@ -590,15 +621,17 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
         data.dof.use_dof = view == "detail"
         cam = _link(bpy.data.objects.new("BeautyCam", data))
         if view == "hero":
-            target = center + Vector((0, 0, -size.z * 0.08))
-            direction = Vector((-0.62, -1.0, 0.42)).normalized()
-            distance = radius / math.tan(math.radians(17)) * 1.02
+            target = center
+            elevation = 0.42 if size.z > max(size.x, size.y) * 0.5 else 0.75
+            direction = Vector((-0.62, -1.0, elevation)).normalized()
+            distance = _fit_distance(corners, target, direction, data.lens, aspect)
         else:
-            target = Vector((center.x - size.x * 0.12, center.y - size.y * 0.25, lo.z + size.z * 0.72))
-            direction = Vector((-0.5, -1.0, 0.25)).normalized()
-            distance = max(radius * 1.35, 0.6)
+            target = focus_world or Vector((center.x - size.x * 0.12, center.y - size.y * 0.25,
+                                            lo.z + size.z * 0.72))
+            direction = Vector((-0.5, -1.0, 0.45 if focus_world else 0.25)).normalized()
+            distance = max(radius * (0.9 if focus_world else 1.35), 0.35)
             data.dof.focus_distance = distance
-            data.dof.aperture_fstop = 4.0
+            data.dof.aperture_fstop = 22.0
         cam.location = target + direction * distance
         cam.rotation_euler = (target - cam.location).to_track_quat("-Z", "Y").to_euler()
         scene.camera = cam
@@ -609,5 +642,249 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
         bpy.data.objects.remove(cam)
         bpy.data.cameras.remove(data)
     bpy.data.objects.remove(ground)
+    obj.matrix_world = rest
     return {"views": out, "device": backend[0], "gpus": backend[1], "samples": samples,
-            "resolution": list(resolution), "hdri": Path(hdri).name}
+            "resolution": list(resolution), "hdri": Path(hdri).name, "pose": list(pose)}
+
+
+# ------------------------------------------------------------ modeling tools
+
+def tag_coords(mesh, coords=None):
+    """Store part-local rest coordinates as the ``pcoord`` point attribute that
+    procedural materials read (so shading follows each part after joins)."""
+    if coords is None:
+        coords = [v.co.copy() for v in mesh.vertices]
+    attr = mesh.attributes.get("pcoord") or mesh.attributes.new("pcoord", "FLOAT_VECTOR", "POINT")
+    attr.data.foreach_set("vector", [c for co in coords for c in co])
+    return mesh
+
+
+def tube(name, points, radius=0.01, sides=12, material=None, cap=True, radii=None, roll=0.0):
+    """Sweep a circle along ``points`` (list of 3-tuples) with parallel-transport
+    frames. ``radii`` gives a per-point radius (else constant ``radius``); a
+    callable ``radius(t)`` with t in 0..1 also works. pcoord = (x, y, arclength)
+    in the tube's own frame, so wood/cord/stem materials run along it."""
+    pts = [Vector(p) for p in points]
+    count = len(pts)
+    if count < 2:
+        raise ValueError("tube needs at least two points")
+    lengths = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        lengths.append(lengths[-1] + (b - a).length)
+    total = lengths[-1] or 1.0
+    if radii is None:
+        radii = [radius(l / total) if callable(radius) else radius for l in lengths]
+    tangents = []
+    for i in range(count):
+        prev_pt = pts[max(i - 1, 0)]
+        next_pt = pts[min(i + 1, count - 1)]
+        tangents.append((next_pt - prev_pt).normalized())
+    seed = Vector((0, 0, 1)) if abs(tangents[0].z) < 0.9 else Vector((1, 0, 0))
+    normal = tangents[0].cross(seed).normalized()
+    normals = []
+    for i in range(count):
+        if i:
+            rotation = tangents[i - 1].rotation_difference(tangents[i])
+            normal = (rotation @ normal).normalized()
+        normals.append(normal.copy())
+    verts, coords, faces, uvs = [], [], [], []
+    for i in range(count):
+        binormal = tangents[i].cross(normals[i]).normalized()
+        for j in range(sides):
+            angle = 2 * math.pi * j / sides + roll
+            offset = normals[i] * math.cos(angle) + binormal * math.sin(angle)
+            verts.append(pts[i] + offset * radii[i])
+            coords.append((math.cos(angle) * radii[i], math.sin(angle) * radii[i], lengths[i]))
+    for i in range(count - 1):
+        for j in range(sides):
+            a, b = i * sides + j, i * sides + (j + 1) % sides
+            faces.append((a, b, b + sides, a + sides))
+    if cap:
+        for index, ring in ((0, 0), (count - 1, (count - 1) * sides)):
+            verts.append(pts[index])
+            coords.append((0.0, 0.0, lengths[index]))
+            center = len(verts) - 1
+            for j in range(sides):
+                a, b = ring + j, ring + (j + 1) % sides
+                faces.append((center, b, a) if index == 0 else (center, a, b))
+    data = bpy.data.meshes.new(name)
+    data.from_pydata([tuple(v) for v in verts], [], faces)
+    data.update()
+    data.uv_layers.new(name="UVMap")
+    tag_coords(data, coords)
+    obj = _link(bpy.data.objects.new(name, data))
+    if material is not None:
+        data.materials.append(material)
+    recalc_normals(obj)
+    return obj
+
+
+def assign_tube_uvs(obj, rect, sides, rings):
+    """Map an un-joined ``kit.tube`` (``rings`` points x ``sides``) into a fixed
+    atlas rect (u0, u1, v0, v1): u runs around, v along. Use with
+    ``BAKE = {"repack": False}`` for foliage/cord atlases."""
+    u0, u1, v0, v1 = rect
+    layer = obj.data.uv_layers["UVMap"].data
+    body_faces = (rings - 1) * sides
+    for poly_index, poly in enumerate(obj.data.polygons):
+        seam = poly_index < body_faces and poly_index % sides == sides - 1
+        for loop_index, vertex_index in zip(poly.loop_indices, poly.vertices):
+            ring, side = divmod(min(vertex_index, rings * sides - 1), sides)
+            u = 1.0 if seam and side == 0 else side / sides
+            v = ring / max(1, rings - 1)
+            layer[loop_index].uv = (u0 + (u1 - u0) * u, v0 + (v1 - v0) * v)
+    return obj
+
+
+def warp(obj, fn):
+    """Move every vertex: ``fn(co) -> new co`` in object space. pcoord is kept."""
+    for vert in obj.data.vertices:
+        vert.co = Vector(fn(vert.co.copy()))
+    obj.data.update()
+    return obj
+
+
+def displace(obj, fn):
+    """Offset vertices along their normals by ``fn(co, pcoord) -> meters``."""
+    mesh = obj.data
+    coords = [0.0] * (len(mesh.vertices) * 3)
+    if "pcoord" in mesh.attributes:
+        mesh.attributes["pcoord"].data.foreach_get("vector", coords)
+    else:
+        mesh.vertices.foreach_get("co", coords)
+    for index, vert in enumerate(mesh.vertices):
+        pco = Vector(coords[index * 3:index * 3 + 3])
+        vert.co += vert.normal * fn(vert.co.copy(), pco)
+    mesh.update()
+    return obj
+
+
+def apply_modifiers(obj):
+    """Bake the modifier stack into the mesh data, keeping attributes."""
+    if not obj.modifiers:
+        return obj
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    evaluated = obj.evaluated_get(depsgraph)
+    data = bpy.data.meshes.new_from_object(evaluated)
+    old = obj.data
+    obj.modifiers.clear()
+    obj.data = data
+    if old.users == 0:
+        bpy.data.meshes.remove(old)
+    return obj
+
+
+def subdivide(obj, levels=2, smooth=True):
+    """Apply subdivision now (so later warps/displacements see the density)."""
+    mod = obj.modifiers.new("Subdivision", "SUBSURF")
+    mod.levels = mod.render_levels = levels
+    mod.subdivision_type = "CATMULL_CLARK" if smooth else "SIMPLE"
+    mod.uv_smooth = "PRESERVE_BOUNDARIES"
+    return apply_modifiers(obj)
+
+
+def pack_uvs(obj, margin=0.004):
+    """Fresh non-overlapping UVs for baking: smart project + tight packing."""
+    _select_only([obj])
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=math.radians(60), island_margin=margin, scale_to_bounds=False)
+    bpy.ops.uv.pack_islands(margin=margin, rotate=True)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return obj
+
+
+# -------------------------------------------------------------------- baking
+
+BAKE_MAPS = ("basecolor", "roughness", "normal", "ao")
+
+
+def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
+    """Bake the object's procedural materials into game textures on its UVMap
+    and replace them with one image-based material ``M_<stem>``.
+    Normal maps are tangent-space OpenGL (+Y); flip green for Unreal."""
+    scene = bpy.context.scene
+    scene.render.engine = "CYCLES"
+    device = use_gpu()
+    scene.cycles.samples = samples
+    scene.render.bake.margin = margin
+    scene.render.bake.margin_type = "EXTEND"
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    _select_only([obj])
+    materials = [s.material for s in obj.material_slots if s.material]
+    images, paths = {}, {}
+    for role in maps:
+        image = bpy.data.images.new(f"T_{stem}_{role}", size, size, alpha=False)
+        if role != "basecolor":
+            image.colorspace_settings.name = "Non-Color"
+        for mat in materials:
+            node = mat.node_tree.nodes.new("ShaderNodeTexImage")
+            node.image = image
+            node.name = node.label = "HomesteadBakeTarget"
+            mat.node_tree.nodes.active = node
+        if role == "basecolor":
+            bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"}, use_clear=True, margin=margin)
+        elif role == "roughness":
+            bpy.ops.object.bake(type="ROUGHNESS", use_clear=True, margin=margin)
+        elif role == "normal":
+            bpy.ops.object.bake(type="NORMAL", normal_space="TANGENT", use_clear=True, margin=margin)
+        elif role == "ao":
+            bpy.ops.object.bake(type="AO", use_clear=True, margin=margin)
+        for mat in materials:
+            for node in [n for n in mat.node_tree.nodes if n.name.startswith("HomesteadBakeTarget")]:
+                mat.node_tree.nodes.remove(node)
+        path = folder / f"T_{stem}_{role}.png"
+        image.filepath_raw = str(path)
+        image.file_format = "PNG"
+        image.save()
+        images[role], paths[role] = image, path
+
+    baked = bpy.data.materials.new("M_" + stem)
+    if baked.node_tree is None:
+        baked.use_nodes = True
+    tree = baked.node_tree
+    bsdf = tree.nodes["Principled BSDF"]
+    def texture(role):
+        node = tree.nodes.new("ShaderNodeTexImage")
+        node.image = bpy.data.images.load(str(paths[role]), check_existing=False)
+        if role != "basecolor":
+            node.image.colorspace_settings.name = "Non-Color"
+        return node
+    tree.links.new(texture("basecolor").outputs["Color"], bsdf.inputs["Base Color"])
+    if "roughness" in paths:
+        tree.links.new(texture("roughness").outputs["Color"], bsdf.inputs["Roughness"])
+    if "normal" in paths:
+        normal_map = tree.nodes.new("ShaderNodeNormalMap")
+        tree.links.new(texture("normal").outputs["Color"], normal_map.inputs["Color"])
+        tree.links.new(normal_map.outputs["Normal"], bsdf.inputs["Normal"])
+    subsurface = max((m.node_tree.nodes.get("Principled BSDF") and
+                      m.node_tree.nodes["Principled BSDF"].inputs["Subsurface Weight"].default_value or 0.0)
+                     for m in materials) if materials else 0.0
+    bsdf.inputs["Subsurface Weight"].default_value = subsurface
+    obj.data.materials.clear()
+    obj.data.materials.append(baked)
+    for image in images.values():
+        bpy.data.images.remove(image)
+    return {"size": size, "samples": samples, "device": device[0], "normal": "OpenGL",
+            "maps": {role: path.name for role, path in paths.items()}}
+
+
+# ---------------------------------------------------------------- references
+
+def reference_image(path, view="FRONT", height=1.0, opacity=0.5):
+    """Show a reference photo/drawing as an image empty in the live viewport,
+    standing on the ground behind the model (FRONT faces -Y, SIDE faces +X)."""
+    image = bpy.data.images.load(str(path), check_existing=True)
+    empty = bpy.data.objects.new("Reference_" + Path(path).stem, None)
+    empty.empty_display_type = "IMAGE"
+    empty.data = image
+    empty.empty_display_size = height
+    empty.empty_image_offset = (-0.5, 0.0)
+    empty.color[3] = opacity
+    empty.use_empty_image_alpha = True
+    empty.rotation_euler = (math.radians(90), 0, math.radians(90) if view == "SIDE" else 0)
+    empty.location = (0.6, 0, 0) if view == "SIDE" else (0, 0.6, 0)
+    empty.hide_render = True
+    _link(empty)
+    return empty

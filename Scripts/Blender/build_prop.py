@@ -21,10 +21,13 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import homestead_kit as kit  # noqa: E402
+import homestead_materials as mats  # noqa: E402
 
 if not bpy.app.background:
     # A live session keeps modules loaded between requests; pick up kit edits.
     kit = importlib.reload(kit)
+    mats = importlib.reload(mats)
+kit.mats = mats
 
 
 def load_recipe(path):
@@ -94,8 +97,24 @@ def main():
               "meshes": {}, "warnings": []}
     report["provenance"] = report["provenance"] or \
         "Original project-authored geometry; no third-party asset or texture"
+    bake_spec = getattr(recipe, "BAKE", None) if args.recipe else None
     for obj in meshes:
+        baked = None
+        if bake_spec:
+            if bake_spec.get("repack", True):
+                kit.pack_uvs(obj, margin=bake_spec.get("margin", 0.004))
+            print(f"HOMESTEAD_BAKING {obj.name} {bake_spec.get('size', 2048)}px", flush=True)
+            baked = kit.bake(obj, out / "Textures", obj.name[3:], size=bake_spec.get("size", 2048),
+                             samples=bake_spec.get("samples", 96),
+                             maps=tuple(bake_spec.get("maps", kit.BAKE_MAPS)))
         info = kit.stats(obj)
+        if baked:
+            info["bake"] = baked
+        review = dict(getattr(recipe, "BEAUTY", {})) if args.recipe else {}
+        if review.get("focus") is not None:
+            shift = obj.get("homestead_shift", (0, 0, 0))
+            review["focus"] = [f - s for f, s in zip(review["focus"], shift)]
+        info["review"] = review
         if info["triangles"] == 0 or min(info["size_cm"]) <= 0:
             raise RuntimeError(f"{obj.name} is empty or flat: {info}")
         if not info["materials"] or len(info["materials"]) != len(obj.material_slots):

@@ -18,7 +18,9 @@ Everything lives in `Scripts\Blender`:
 | `Start-BlenderLive.ps1` | Opens a visible Blender with the live bridge (localhost, per-session token) |
 | `Invoke-BlenderLive.ps1` | Runs Python code or a file inside that window and returns its output/traceback |
 | `New-Prop.ps1` | Builds an asset set: FBX + `.blend` + preview sheet + `report.json` |
-| `homestead_kit.py` | Recipe helpers: materials, primitives, `roughen`/`taper`, `join`, export, preview |
+| `homestead_kit.py` | Recipe helpers: primitives, `tube`/`warp`/`displace`/`subdivide`, `join`, `bake`, export, previews, beauty renders, Poly Haven append/instance, `reference_image` |
+| `homestead_materials.py` | Procedural PBR material library (`kit.mats`): wood, bark, flint, rawhide, leaf, stem, daub |
+| `Show-Prop.ps1` | Loads a built asset set into the live window with EEVEE rendered shading and the review sky |
 | `build_prop.py` | Blender-side builder used by `New-Prop.ps1` (both live and headless) |
 | `Recipes\*.py` | One recipe per asset set (`bush.py` = scanned composition, `chopping_block.py` = primitive blockout) |
 | `Get-PolyHavenAsset.ps1` | Fetches a CC0 Poly Haven `.blend` + maps (or HDRI) into `Assets\Source\Blender\polyhaven`, MD5-verified, with `receipt.json` |
@@ -59,7 +61,10 @@ file. Add `-KeepPivot` if you placed the origin deliberately.
 
 `New-Prop.ps1 chopping_block` (no `-Live`) runs the same builder with
 `--background --factory-startup --offline-mode`; use it for batch rebuilds or when
-nobody needs to watch.
+nobody needs to watch. Live and headless builds produce identical outputs, so pick
+whichever Jenny wants at the time. To show a headless result in the window afterwards, run
+`New-Prop.ps1 <recipe> -Show` or `Show-Prop.ps1 <Name>` (EEVEE rendered shading under the
+review sky).
 
 ## Writing a recipe
 
@@ -85,6 +90,87 @@ recipes deterministic: seeded `random.Random` / `roughen(seed=...)`.
 `join`/`finalize` apply modifiers and transforms, weld duplicate vertices, put the
 pivot at bottom-center on the origin, smart-UV-project and set sharp edges from
 a 35° angle.
+
+### Authoring from scratch
+
+```python
+NAME = "FlintAxe"
+COLLISION = "convex"
+TRIANGLE_BUDGET = 120000
+BAKE = {"size": 2048, "samples": 96}                           # procedural -> texture maps
+BEAUTY = {"pose": (90, 0, 28), "focus": (0.02, 0.0, 0.50)}     # lay it down; close-up target
+
+def build(kit):
+    wood = kit.mats.wood("M_AxeHaft", light=(0.25, 0.17, 0.10), dark=(0.11, 0.065, 0.035))
+    haft = kit.tube("Haft", points, radius=lambda t: ..., sides=48, material=wood)
+    kit.displace(haft, lambda co, pco: knots_and_facets(pco))
+    head = kit.tube("Head", points, radius=1.0, sides=64, material=kit.mats.flint("M_AxeHead"))
+    kit.warp(head, loft_to_axe_head)     # reshape the tube's unit circles
+    kit.tag_coords(head.data)            # re-anchor material coordinates after reshaping
+    kit.subdivide(head, levels=1)
+    kit.displace(head, flake_scars)
+    return kit.join([haft, head, ...], "SM_FlintAxe", unwrap=False, reshade=True, smooth_angle=70)
+```
+
+**Modeling tools**
+
+- `tube(name, points, radius|radii, sides, cap, roll)` sweeps a circle along a path with
+  parallel-transport frames. A callable `radius(t)` tapers it.
+- `warp(obj, fn(co) -> co)` reshapes any mesh.
+- `displace(obj, fn(co, pcoord) -> meters)` offsets vertices along their normals.
+- `subdivide(obj, levels, smooth)` and `apply_modifiers` add density.
+- `mesh(name, verts, faces, ...)` builds custom grids (leaf blades, petals).
+- `pack_uvs` creates fresh bake UVs.
+- `assign_tube_uvs(obj, (u0, u1, v0, v1), sides, rings)` maps an un-joined tube into a fixed atlas
+  rect, which is what you want for foliage and cord atlases baked with `"repack": False`.
+
+**Material coordinates.** Every primitive writes a `pcoord` point attribute with part-local rest
+coordinates; tubes use `(x, y, arclength)`. The `kit.mats` materials read it, so wood grain runs
+along each haft, cord strands wind around each lashing, and joins or displacement don't swim the
+texture. Call `kit.tag_coords(mesh)` again after a large `warp` if the material should follow the
+new shape.
+
+**Baking.** With `BAKE` set, `build_prop.py` repacks UVs, unless `"repack": False`, which is for
+hand-laid shared atlases such as foliage. It then runs `kit.bake`, which writes the following
+PNGs to `Assets\Props\<Name>\Textures` and replaces the procedural materials with one image
+material `M_<Name>`:
+
+- `T_<Name>_basecolor`
+- `T_<Name>_roughness`
+- `T_<Name>_normal` (tangent space, OpenGL +Y)
+- `T_<Name>_ao`
+
+The beauty renders use the baked maps, so they show what ships. Subsurface weight carries over
+for leaves.
+
+**Review pose.** `BEAUTY["pose"]` rotates the asset for review only; tools lie on the ground.
+`BEAUTY["focus"]` aims the 85 mm detail camera at an authoring-space point.
+
+**Art-director loop.** After every build, view `beauty_*_hero.png` and `_detail.png` and list
+what reads fake, then fix it and rebuild. The axe took seven passes:
+
+- The cortex was blotched all over the head, then chalk-white.
+- The flake-scar displacement tore spikes through thin rims.
+- The rawhide was too orange.
+- The haft was too pale and too perfect.
+
+Common tells:
+
+- plastic gloss;
+- over-saturation;
+- identical repeated parts;
+- visible facets on silhouettes;
+- floating or intersecting parts;
+- colour that is too clean (no grime where hands and soil touch).
+
+### From a reference image
+
+1. Save the image under `Assets\Source\Blender\references\`.
+2. Note proportions, materials and construction.
+3. Write a recipe. In live mode, pin the image behind the model with
+   `kit.reference_image(path, view="FRONT"|"SIDE", height=<meters>, opacity=0.5)`
+   (viewport only, never rendered).
+4. Compare hero renders with the image side by side each pass.
 
 ### Composing scanned sources
 

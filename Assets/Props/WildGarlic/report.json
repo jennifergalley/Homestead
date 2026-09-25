@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "WildGarlic",
+  "description": "Forageable woodland ramsons clump: glossy broad leaves with loose white flower umbels.",
+  "collision": "none",
+  "triangle_budget": 90000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wild_garlic.py",
+  "source_sha256": "eb44053a79a0f52a431304d69e22f6a83b99a8e1c35e430184a18e11e5e6a3a1",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_WildGarlic": {
+      "vertices": 37902,
+      "triangles": 64256,
+      "size_cm": [
+        59.61,
+        50.21,
+        36.27
+      ],
+      "materials": [
+        {
+          "name": "M_WildGarlic",
+          "textures": {
+            "basecolor": "T_WildGarlic_basecolor.png",
+            "roughness": "T_WildGarlic_roughness.png",
+            "normal": "T_WildGarlic_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_WildGarlic_basecolor.png",
+          "roughness": "T_WildGarlic_roughness.png",
+          "normal": "T_WildGarlic_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04432378053665161,
+          -0.05289251238107681,
+          0.3415685379505157
+        ]
+      },
+      "fbx": "SM_WildGarlic.fbx",
+      "sha256": "2b4b366a5ffda9764dd555d97bf4737edf572f181a8ac0bac33350bd752c96fb",
+      "preview": "preview_SM_WildGarlic.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WildGarlic_hero.png",
+          "detail": "beauty_SM_WildGarlic_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_WildGarlic_basecolor.png": "acfdf773830214d236669c58a973e7e796f23880fdca1a4f4fb41aca2bef688b",
+    "T_WildGarlic_roughness.png": "51b9a86243e34728136b3b62d765de30f297dccb09934c42a2ab787b89037276",
+    "T_WildGarlic_normal.png": "0a504836e31c700603dcdf0d581cc2da2c0e566e7c31466e702e43629d8ccc51"
+  }
+}

@@ -35,8 +35,10 @@ def main():
         obj = bpy.data.objects[name]
         for other in bpy.context.scene.objects:
             other.hide_render = other is not obj
+        review = report["meshes"][name].get("review", {})
         result = kit.render_beauty(obj, folder, f"beauty_{name}", samples=args.samples,
-                                   resolution=(args.width, args.height))
+                                   resolution=(args.width, args.height),
+                                   pose=review.get("pose", (0, 0, 0)), focus=review.get("focus"))
         result["views"] = {view: Path(p).name for view, p in result["views"].items()}
         report["meshes"][name]["beauty"] = result
         print(f"HOMESTEAD_BEAUTY {name} {result['device']} {result['gpus']} {result['views']}")

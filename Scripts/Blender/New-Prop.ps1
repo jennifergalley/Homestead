@@ -10,6 +10,7 @@ param(
     [switch]$NoBeauty,
     [int]$BeautySamples = 256,
     [switch]$KeepPivot,
+    [switch]$Show,
     [switch]$Open
 )
 # Builds a static prop. See docs\blender-assets.md.
@@ -88,6 +89,7 @@ if ($reportData.textures -and -not $NoPreview -and -not $NoBeauty) {
     }
     Select-String -LiteralPath $beautyLog -Pattern '^HOMESTEAD_BEAUTY ' | ForEach-Object { $_.Line.Trim() }
 }
+if ($Show) { & (Join-Path $PSScriptRoot 'Show-Prop.ps1') $reportData.name | Out-Null }
 if ($Open) {
     $blendFile = Get-ChildItem -LiteralPath (Split-Path $report) -Filter '*.blend' | Select-Object -First 1
     Start-Process -FilePath $exe -ArgumentList "`"$($blendFile.FullName)`""

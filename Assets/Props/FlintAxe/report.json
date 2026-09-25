@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "FlintAxe",
+  "description": "Primitive hand tool: hafted knapped-flint axe with rawhide lashing (original).",
+  "collision": "convex",
+  "triangle_budget": 120000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/flint_axe.py",
+  "source_sha256": "6485d002f8d408fb7785dc20f57086e59384e8daeccc7d63d41de392815c40f4",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_FlintAxe": {
+      "vertices": 35152,
+      "triangles": 70272,
+      "size_cm": [
+        19.69,
+        5.63,
+        60.13
+      ],
+      "materials": [
+        {
+          "name": "M_FlintAxe",
+          "textures": {
+            "basecolor": "T_FlintAxe_basecolor.png",
+            "roughness": "T_FlintAxe_roughness.png",
+            "normal": "T_FlintAxe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FlintAxe_basecolor.png",
+          "roughness": "T_FlintAxe_roughness.png",
+          "normal": "T_FlintAxe_normal.png",
+          "ao": "T_FlintAxe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          90,
+          0,
+          28
+        ],
+        "focus": [
+          -0.023396327644586563,
+          0.002100854180753231,
+          0.5009841441642493
+        ]
+      },
+      "fbx": "SM_FlintAxe.fbx",
+      "sha256": "9edccbf2ac2243d703904a7e73ec0514592f298e68dbb6462abb809bc2a599c4",
+      "preview": "preview_SM_FlintAxe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FlintAxe_hero.png",
+          "detail": "beauty_SM_FlintAxe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          90,
+          0,
+          28
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_FlintAxe_basecolor.png": "2083f9b5b79d97e65c3b4fe5c0bb310a4cde7c4dfa14acb912a81bf3d539f46c",
+    "T_FlintAxe_roughness.png": "effc679181070304a4483d99f851f6bd1934be75b8c1add3d83a8452cd50140b",
+    "T_FlintAxe_normal.png": "e845af402295f3942a4a9068905235d05b18a4177013ba2e2b57f8bea52386c0"
+  }
+}
