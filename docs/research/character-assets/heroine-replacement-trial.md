@@ -653,6 +653,9 @@ After playing the face and motion trials, Jenny rejected the Vitruvian
 face/neck seam **outright**. The old `Try-HeroineTrial.cmd`,
 `Try-MotionTrial.cmd`, and `Try-SlowMotionTrial.cmd` remain immutable
 historical A/B paths, not recommendations or appearance candidates.
+(2026-09-25: the MetaHuman heroine replaced these trials, so the four `Try-*Trial.cmd`
+launchers and their `Start-/Stage-/Cook-CharacterTrial.ps1` scripts were removed. Recover them
+from git history if an A/B comparison is ever needed again.)
 The CMU walk's arms and legs feel better to her, but the head tilts
 back when moving. She also preferred the trials' menu scaling. The
 appearance and UI judgments are independent: keep the better menu

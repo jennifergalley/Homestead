@@ -135,7 +135,7 @@ contain the labeled geometric stand-in; see their build status before testing.
 The supplied portrait is local reference only, not a licensed game texture or a
 file to publish. No Skyrim, Hades, Coral Island, or Dreamlight Valley assets are used.
 
-The optional `Try-HeroineTrial.cmd` build fits face/eye geometry from
+The retired heroine face trial (its launcher and build were removed on 2026-09-25) fit face/eye geometry from
 [CharMorph Vitruvian](https://github.com/Upliner/CharMorph-Vitruvian) to the
 existing CC0 MPFB heroine. Its `config.yaml` declares the model data CC0, and
 its README records the original model author's permission to relicense.
@@ -145,9 +145,9 @@ script-stripping procedure are in
 `Assets\Characters\HeroineTrials\Vitruvian01\source-license.json`; the
 separate CharMorph add-on code was not included or executed. Jenny
 subsequently rejected this face and its neck seam; it is retained only
-in historical opt-in candidates.
+in the repository's trial source assets.
 
-The separate experimental `Try-MotionTrial.cmd` candidate also uses
+The retired experimental motion trial also used
 Carnegie Mellon University Graphics Lab Motion Capture Database subject
 07 walk recordings 01 and 04. The original dataset's
 [FAQ](https://mocap.cs.cmu.edu/faqs.php) permits copying, modification
