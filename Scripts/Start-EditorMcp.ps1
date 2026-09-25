@@ -55,6 +55,8 @@ $arguments += @(
     "-EnablePlugins=$($plugins -join ',')"
     '-ModelContextProtocolStartServer'
     "-ModelContextProtocolPort=$Port"
+    # Agents drive the editor while another window has focus; don't throttle PIE in the background.
+    '-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 

@@ -52,6 +52,22 @@ Useful starting points:
 | `AutomationTestToolset.AutomationTestToolset` | discover, run and read automation tests |
 | `LiveCodingToolset.LiveCodingToolset` | compile C++ changes into the running editor |
 | `SlateInspectorToolset.SlateInspectorToolset` | snapshot and click/type in editor UI |
+| `homestead_agent.toolset.HomesteadPlayTools` | play the game in PIE: real controller/keyboard input, `walk_to`, play-state readout (project toolset) |
+
+## Playing the game
+
+The stock tools can see the running game but can't play it: Slate clicks and key presses don't
+reach Homestead, which reads input through its PlayerController. The project adds
+`HomesteadPlayTools`:
+
+- `Source\SurvivalGameEditor\HomesteadAgentPlayLibrary.*`: an editor-only C++ library that injects
+  simulated input through `APlayerController::InputKey`, the same path as the game's playtest
+  harnesses. It also auto-steers `walk_to` and reports player, menu and nearby-resource state.
+- `Content\Python\homestead_agent\toolset.py`: exposes the library as an MCP toolset.
+  `Content\Python\init_unreal.py` registers it only when the Toolset Registry is loaded, so
+  commandlets (including the content bootstrap) are unaffected.
+
+Controls, focus rules, menu quirks and a verified gather/eat/craft/fell loop are in the skill.
 
 ## Use it from a shell
 
@@ -74,6 +90,11 @@ Verified on 2026-09-25 against UE 5.8.2: connect, list toolsets, `get_current_le
 (`/Game/SurvivalGame/Maps/Homestead`), `load_level`, `CaptureViewport`, `StartPIE`, `CaptureEditorImage`
 of the game running in PIE (Guidebook visible), `GetLogEntries`, `StopPIE`. A fresh headless
 Copilot session also loaded `unreal` from `.github\mcp.json` and called its tools natively.
+Also on 2026-09-25, an agent played a fresh world in PIE through `HomesteadPlayTools`: it gathered
+stones, berries, branches and reeds, ate from the Inventory, toggled a setting and restored it,
+crafted a Crude hatchet and felled a tree with it. It also hot-patched the editor module with Live
+Coding. A plain `-run=pythonscript` commandlet confirmed the toolset stays unregistered without the
+MCP plugins.
 
 - `CaptureViewport` requires `captureTransform` and `annotations` keys; pass `null` for defaults.
   During PIE it captures the editor level viewport, not the game view; use `CaptureEditorImage`
