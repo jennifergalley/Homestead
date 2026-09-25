@@ -254,6 +254,17 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: `homestead_agent.metahuman_look` wraps the Creator scripting: `set_hair`,
+  `apply_colours` (groom Melanin/Redness, eye presets) and `sculpt_face` (81 mapped landmarks).
+  Gotchas:
+  - Groom and outfit instance parameters live on `sub.get_preview_collection(c)`, not
+    `c.internal_collection`. They only appear after `assemble_for_preview`, and after the editor
+    has ticked once past a hair change, so change hair in a separate `run_python` call.
+  - Parameter `name`s are `unreal.Name`; key dicts by `str(name)`.
+  - Creator's eye presets aren't Python-visible. Export `EyePresets` to T3D and `import_text` the
+    settings (the module does this).
+  - `translate_face_landmarks` moves points only part of the way (about 40%), so scale the deltas.
+
 - 2026-09-25: Killing the editor leaves `Saved\Autosaves\PackageRestoreData.json`. The next launch
   opens a modal "Restore Packages" dialog that blocks startup and the MCP server, and synthetic
   clicks on Skip Restore don't dismiss it. After a kill, delete that file (and scratch autosaves)
