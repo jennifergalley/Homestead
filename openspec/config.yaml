@@ -25,6 +25,8 @@ context: |
   Essential security, licensing, targeted correctness and truthful errors remain.
   Modest disclosed bugs and later refactoring are preferable to delaying every
   playable increment for exhaustive infrastructure or hypothetical future needs.
+  Record bugs and deferred fixes found in playtests or reviews as OpenSpec
+  changes in this repo (openspec/changes), not GitHub issues or other trackers.
 
 rules:
   proposal:

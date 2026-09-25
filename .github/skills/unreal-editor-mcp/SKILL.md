@@ -230,6 +230,8 @@ Extend it there when play needs a capability; prefer real input over state edits
   finish unless other work is using it; it holds a lot of memory.
 - These plugins are Experimental. If a schema differs from this skill, trust `describe_toolset` and
   fix this file.
+- Record game bugs you find while playing as OpenSpec changes in `openspec/changes` (repo
+  convention; not GitHub issues). The 2026-09-25 findings live in `fix-editor-playtest-findings`.
 
 ## 8. Field notes
 
