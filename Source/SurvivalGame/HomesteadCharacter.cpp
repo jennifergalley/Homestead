@@ -24,6 +24,60 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Components/LODSyncComponent.h"
+#include "GroomComponent.h"
+#include "GroomAsset.h"
+#include "GroomBindingAsset.h"
+#include "HAL/IConsoleManager.h"
+
+namespace
+{
+TAutoConsoleVariable<int32> CVarMetaHumanHeroine(TEXT("homestead.MetaHumanHeroine"), 1,
+    TEXT("1 = MetaHuman heroine (default), 0 = legacy heroine rollback. "
+         "Read when the heroine's appearance is applied."));
+
+// Component-space distance from pelvis to left foot in the reference pose, in centimetres.
+float RefLegLength(const USkeletalMesh* Mesh)
+{
+    if (!Mesh) return 0.0f;
+    const FReferenceSkeleton& Ref = Mesh->GetRefSkeleton();
+    auto ComponentPosition = [&Ref](FName Bone)
+    {
+        FTransform Pose = FTransform::Identity;
+        for (int32 Index = Ref.FindBoneIndex(Bone); Index != INDEX_NONE; Index = Ref.GetParentIndex(Index))
+            Pose = Pose * Ref.GetRefBonePose()[Index];
+        return Pose.GetLocation();
+    };
+    if (Ref.FindBoneIndex(TEXT("pelvis")) == INDEX_NONE || Ref.FindBoneIndex(TEXT("foot_l")) == INDEX_NONE) return 0.0f;
+    return FVector::Dist(ComponentPosition(TEXT("pelvis")), ComponentPosition(TEXT("foot_l")));
+}
+
+const TCHAR* const MetaHumanRoot = TEXT("/Game/Characters/Heroine_MH");
+
+template <typename T>
+T* LoadMetaHumanAsset(const FString& RelativePath)
+{
+    const FString Name = FPaths::GetBaseFilename(RelativePath);
+    const FString Path = FString::Printf(TEXT("%s/%s.%s"), MetaHumanRoot, *RelativePath, *Name);
+    T* Asset = LoadObject<T>(nullptr, *Path);
+    if (!Asset) UE_LOG(LogTemp, Error, TEXT("MetaHuman heroine asset is missing: %s"), *Path);
+    return Asset;
+}
+
+struct FMetaHumanGroomSpec
+{
+    const TCHAR* Component;
+    const TCHAR* Groom;
+    TArray<const TCHAR*> Materials;
+};
+}
+
+bool AHomesteadCharacter::UsesMetaHumanHeroine()
+{
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadMetaHuman"))) return true;
+    return CVarMetaHumanHeroine.GetValueOnGameThread() != 0 && !GIsAutomationTesting
+        && !FParse::Param(FCommandLine::Get(), TEXT("HomesteadLegacyHeroine"));
+}
 
 AHomesteadCharacter::AHomesteadCharacter()
 {
@@ -234,6 +288,164 @@ float AHomesteadCharacter::InferMeshYaw(const USkeletalMesh& Asset) const
     return -Forward.Rotation().Yaw;
 }
 
+bool AHomesteadCharacter::LoadMetaHumanStack()
+{
+    if (bAttemptedMetaHumanLoad) return bMetaHumanAssetsValid;
+    bAttemptedMetaHumanLoad = true;
+    MetaHumanBody = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Body/SKM_MHC_Heroine_BodyMesh"));
+    // Clips retargeted from the legacy heroine with RTG_HeroineLegacy_To_MH (first playable, task 4.2).
+    UAnimSequence* Clips[] = {
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_LivingIdle02")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_GroundedWalk")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Sprint")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Gather")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_WaterRefined")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Chop")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KnifeCut")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Till")),
+    };
+    if (!MetaHumanBody || !MetaHumanBody->GetSkeleton()) return false;
+    for (UAnimSequence* Clip : Clips)
+    {
+        if (!Clip || Clip->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        {
+            UE_LOG(LogTemp, Error, TEXT("A MetaHuman heroine clip is missing or not on the MetaHuman body skeleton."));
+            return false;
+        }
+    }
+    IdleAnimation = Clips[0];
+    WalkAnimation = Clips[1];
+    SlowWalkAnimation = nullptr;
+    SprintAnimation = Clips[2];
+    GatherAnimation = Clips[3];
+    WaterAnimation = Clips[4];
+    ClearAnimation = Clips[5];
+    KnifeCutAnimation = Clips[6];
+    TillAnimation = Clips[7];
+
+    USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
+    UClass* FaceAnimClass = LoadObject<UClass>(nullptr,
+        TEXT("/Game/Characters/Heroine_MH/Common/Face/ABP_Face.ABP_Face_C"));
+    USkeletalMesh* OutfitMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Clothing/MHC_Heroine_Outfits"));
+    if (!FaceMesh || !FaceAnimClass || !OutfitMesh)
+    {
+        UE_LOG(LogTemp, Error, TEXT("MetaHuman heroine face, face animation or outfit is missing."));
+        return false;
+    }
+
+    USkeletalMeshComponent* Body = GetMesh();
+    auto MakeSkinned = [this, Body](const TCHAR* Name, USkeletalMesh* Asset)
+    {
+        auto* Component = NewObject<USkeletalMeshComponent>(this, Name);
+        Component->SetupAttachment(Body);
+        Component->SetSkeletalMesh(Asset);
+        Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Component->SetGenerateOverlapEvents(false);
+        Component->bUseAttachParentBound = true;
+        Component->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+        return Component;
+    };
+    // ABP_Face copies the attached parent's pose, then runs RigLogic for the face rig.
+    MetaHumanFace = MakeSkinned(TEXT("MetaHumanFace"), FaceMesh);
+    MetaHumanFace->SetAnimInstanceClass(FaceAnimClass);
+    MetaHumanFace->AddTickPrerequisiteComponent(Body);
+    MetaHumanFace->RegisterComponent();
+
+    MetaHumanOutfit = MakeSkinned(TEXT("MetaHumanOutfit"), OutfitMesh);
+    const TCHAR* OutfitMaterials[] = {
+        TEXT("Assembled/Heroine/Clothing/MI_WI_DefaultGarment_M_DG_bodyShapeB_Shirt"),
+        TEXT("Assembled/Heroine/Clothing/MI_WI_DefaultGarment_M_DG_bodyShapeB_Short")};
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(OutfitMaterials); ++Index)
+        if (auto* Material = LoadMetaHumanAsset<UMaterialInterface>(OutfitMaterials[Index]))
+            MetaHumanOutfit->SetMaterial(Index, Material);
+    MetaHumanOutfit->RegisterComponent();
+    MetaHumanOutfit->SetLeaderPoseComponent(Body);
+
+    const FMetaHumanGroomSpec Grooms[] = {
+        {TEXT("MetaHumanHair"), TEXT("Hair_L_Straight"),
+            {TEXT("MI_WI_Hair_L_Straight_Hair"), TEXT("MI_WI_Hair_L_Straight_Hair_Cards"), TEXT("MI_WI_Hair_L_Straight_Hair_Helmet")}},
+        {TEXT("MetaHumanEyebrows"), TEXT("Eyebrows_M_SlightArch"),
+            {TEXT("MI_WI_Eyebrows_M_SlightArch_Hair"), TEXT("MI_WI_Eyebrows_M_SlightArch_Facial_Hair")}},
+        {TEXT("MetaHumanEyelashes"), TEXT("Eyelashes_L_ThickCurl"), {TEXT("MI_WI_Eyelashes_L_ThickCurl_Hair")}},
+    };
+    for (const FMetaHumanGroomSpec& Spec : Grooms)
+    {
+        const FString Base = FString::Printf(TEXT("Assembled/Heroine/Grooms/%s"), Spec.Groom);
+        auto* Asset = LoadMetaHumanAsset<UGroomAsset>(Base);
+        auto* Binding = LoadMetaHumanAsset<UGroomBindingAsset>(Base + TEXT("_Binding"));
+        if (!Asset || !Binding) return false;
+        auto* Groom = NewObject<UGroomComponent>(this, Spec.Component);
+        Groom->SetupAttachment(MetaHumanFace);
+        Groom->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Groom->SetGroomAsset(Asset, Binding);
+        for (int32 Index = 0; Index < Spec.Materials.Num(); ++Index)
+            if (auto* Material = LoadMetaHumanAsset<UMaterialInterface>(
+                FString::Printf(TEXT("Assembled/Heroine/Grooms/%s"), Spec.Materials[Index])))
+                Groom->SetMaterial(Index, Material);
+        Groom->RegisterComponent();
+        MetaHumanGrooms.Add(Groom);
+    }
+
+    // Mirrors the assembled BP_Heroine LODSync: body and face drive, garments and grooms follow.
+    MetaHumanLODSync = NewObject<ULODSyncComponent>(this, TEXT("MetaHumanLODSync"));
+    MetaHumanLODSync->NumLODs = 4;
+    MetaHumanLODSync->ComponentsToSync = {
+        FComponentSync(Body->GetFName(), ESyncOption::Drive),
+        FComponentSync(MetaHumanFace->GetFName(), ESyncOption::Drive),
+        FComponentSync(MetaHumanOutfit->GetFName(), ESyncOption::Passive)};
+    for (UGroomComponent* Groom : MetaHumanGrooms)
+    {
+        MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Groom->GetFName(), ESyncOption::Passive));
+        FLODMappingData GroomMapping;
+        GroomMapping.Mapping = {1, 3, 5, 7};
+        MetaHumanLODSync->CustomLODMapping.Add(Groom->GetFName(), GroomMapping);
+    }
+    MetaHumanLODSync->RegisterComponent();
+    bMetaHumanAssetsValid = true;
+    return true;
+}
+
+bool AHomesteadCharacter::ApplyMetaHumanStack()
+{
+    if (!LoadMetaHumanStack())
+    {
+        UE_LOG(LogTemp, Error, TEXT("MetaHuman heroine is unavailable; the labeled stand-in remains visible."));
+        return false;
+    }
+    for (USkeletalMeshComponent* Garment : GarmentComponents)
+    {
+        Garment->SetVisibility(false);
+        Garment->SetLeaderPoseComponent(nullptr);
+        Garment->EmptyOverrideMaterials();
+        Garment->SetSkeletalMesh(nullptr);
+    }
+    USkeletalMeshComponent* Body = GetMesh();
+    if (Body->GetSkeletalMeshAsset() != MetaHumanBody)
+    {
+        Body->EmptyOverrideMaterials();
+        Body->SetSkeletalMesh(MetaHumanBody);
+        Body->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+        Body->SetRelativeRotation(FRotator(0, InferMeshYaw(*MetaHumanBody), 0));
+        Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+        Body->SetAnimInstanceClass(UHomesteadAnimInstance::StaticClass());
+        MetaHumanOutfit->SetLeaderPoseComponent(Body, true);
+    }
+    AppearanceMaterials.Reset();
+    StandIn->SetVisibility(false);
+    Body->SetVisibility(true);
+    bMetaHumanActive = true;
+    const float LegacyLeg = WardrobeMeshes.Num() ? RefLegLength(WardrobeMeshes[0].Get()) : 0.0f;
+    const float MetaHumanLeg = RefLegLength(MetaHumanBody);
+    MetaHumanStrideScale = LegacyLeg > 1.0f && MetaHumanLeg > 1.0f
+        ? FMath::Clamp(MetaHumanLeg / LegacyLeg, 0.8f, 1.4f) : 1.0f;
+    UE_LOG(LogTemp, Log, TEXT("MetaHuman heroine active: leg %.1f cm vs legacy %.1f cm, stride scale %.3f."),
+        MetaHumanLeg, LegacyLeg, MetaHumanStrideScale);
+    if (!bSprintActive) GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
+    bHeroineReady = true;
+    return true;
+}
+
 bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance)
 {
     if (ActiveEquipment.Ready)
@@ -280,6 +492,7 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
         }
     }
     CancelAction(true);
+    if (UsesMetaHumanHeroine()) return ApplyMetaHumanStack();
     USkeletalMeshComponent* VisualMesh = GetMesh();
     if (VisualMesh->GetSkeletalMeshAsset() != Desired)
     {
@@ -349,6 +562,15 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         return false;
     }
     CancelAction(true);
+    if (UsesMetaHumanHeroine())
+    {
+        // The trial keeps the authoritative equipment record but presents the MetaHuman's own outfit.
+        ActiveEquipment = MoveTemp(PreparedEquipment);
+        ClearPreparedEquipment();
+        if (ApplyMetaHumanStack()) return true;
+        Error = TEXT("MetaHuman heroine assets are unavailable.");
+        return false;
+    }
     USkeletalMeshComponent* VisualMesh = GetMesh();
     HomesteadWardrobePresentation::ApplySurface(PreparedEquipment.Base, *VisualMesh);
     VisualMesh->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
@@ -401,7 +623,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
         && GetVelocity().SizeSquared2D() > 144.0f;
     bSprintActive = bSprintHeld && !Blocked && Moving
         && PC->State().energy > 10.0 && SprintAnimation != nullptr;
-    Movement->MaxWalkSpeed = bSprintActive ? 300.0f : 180.0f;
+    Movement->MaxWalkSpeed = bSprintActive ? 300.0f : WalkSpeed();
     if (bSprintActive)
     {
         const auto Result = PC->SpendSprintEnergy(DeltaSeconds);
@@ -676,7 +898,7 @@ void AHomesteadCharacter::CancelSprint()
 {
     bSprintHeld = false;
     bSprintActive = false;
-    GetCharacterMovement()->MaxWalkSpeed = 180.0f;
+    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
 }
 
 void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)

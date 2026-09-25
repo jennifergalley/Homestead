@@ -254,6 +254,29 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: Assembling and playing the MetaHuman heroine:
+  - `build_meta_human` can raise RuntimeError (Control Rig "Cannot break link") even when the log
+    says the assembly succeeded, **and it doesn't save**. Call
+    `EditorAssetLibrary.save_directory(path, False, True)` on the Assembled and Common folders.
+  - Texture resolution: set all eight `skin_settings.desired_texture_sources_resolutions` fields to
+    `RES4K` before `request_texture_sources`. `has_high_resolution_textures` is a property.
+  - Retargeting to `IK_MH_IKRig`: the "Run IK Rig" op blew poses out to about -9000 cm, and "Root
+    Motion" sank the pelvis. Disable both by index (`set_retarget_op_enabled(i, False)`). After
+    fuzzy auto-mapping, clear the bad maps (Root from a foot, metacarpals from fingers).
+  - Python can't spawn actors into the PIE world. Test through the character's own component stack
+    instead.
+  - Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs.
+    Standalone `-game` runs load the DLL from disk, so do a real build first.
+  - Tools like the hatchet are hidden except during their action, so capture a burst about
+    0.5-1.3 s after the action key. Prompts switch to keyboard after `tap_key` of a keyboard key
+    (`[LMB] Fell`); a `Gamepad_RightTriggerAxis` tap then doesn't act. Use `LeftMouseButton`.
+  - For a face close-up in PIE, set the `CameraArm` `target_arm_length` (about 90),
+    `socket_offset` 0 and `target_offset` (0,0,70) via `run_python`. Restore afterwards (330,
+    (0,45,55)).
+  - Frame-cost breakdown: `-ExecCmds "t.MaxFPS 0, r.GPUCsvStatsEnabled 1, csvprofile start"` on
+    `Playtest-Visual.ps1`. The CSV lands in `Saved\Profiling\CSV\`. Before timing, check for other
+    heavy processes (a Blender render from another session skewed runs).
+
 - 2026-09-25: `homestead_agent.metahuman_look` wraps the Creator scripting: `set_hair`,
   `apply_colours` (groom Melanin/Redness, eye presets) and `sculpt_face` (81 mapped landmarks).
   Gotchas:

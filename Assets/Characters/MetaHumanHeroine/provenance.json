@@ -1,0 +1,37 @@
+{
+  "asset": "MetaHuman heroine (replace-heroine-with-metahuman)",
+  "recorded": "2026-09-25",
+  "tool": "MetaHuman Creator in Unreal Engine 5.8 (MetaHumanCharacter plugin), scripted through the editor MCP server",
+  "license": "Unreal Engine EULA (MetaHumans are covered by the Unreal Engine EULA from UE 5.6; no separate MetaHuman licence). See https://www.metahuman.com/license and https://www.unrealengine.com/eula",
+  "licenseNotes": [
+    "Free under the standard Unreal Engine terms; the Unreal Engine royalty applies above USD 1M gross revenue per product.",
+    "The EULA restricts using MetaHuman characters or animation data to train or feed generative AI. Do not do that with these assets."
+  ],
+  "source": {
+    "editableCharacter": "/Game/Characters/Heroine_MH/MHC_Heroine (editor-only source; not cooked)",
+    "startingPreset": "Epic MetaHuman Creator preset, then scripted edits in Content/Python/homestead_agent/metahuman_look.py (HEROINE_LOOK, HEROINE_SCULPT)",
+    "rig": "Epic MetaHuman cloud auto-rigging, JOINTS_AND_BLEND_SHAPES, requested from the editor with Jenny's Epic sign-in",
+    "textures": "Epic MetaHuman cloud texture sources at 4K (RES4K on all eight maps)",
+    "grooms": "Epic stock grooms: Hair_L_Straight, Eyebrows_M_SlightArch, Eyelashes_L_ThickCurl",
+    "outfit": "Epic stock MetaHuman default garment (shirt and shorts), placeholder until the rustic starter outfit (task 4.3/7.3)",
+    "assembly": "build_meta_human, UE Optimized / High, output /Game/Characters/Heroine_MH/Assembled and /Common"
+  },
+  "animation": {
+    "clips": "/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_* (idle, walk, sprint, gather, water, chop, knife cut, till)",
+    "origin": "Retargeted from the project's own legacy heroine clips (see docs/asset-credits.md, Character prototype) with IK_HeroineLegacy -> Epic IK_MH_IKRig via RTG_HeroineLegacy_To_MH",
+    "retargetOps": "Pelvis Motion, FK Chains, Remap Curves. Run IK Rig and Root Motion are disabled because they broke the pose."
+  },
+  "contentInventory": {
+    "totalFiles": 312,
+    "totalMiB": 972.7,
+    "folders": {
+      "MHC_Heroine.uasset": {"files": 1, "MiB": 391.0, "cooked": false},
+      "Assembled/Heroine": {"files": 88, "MiB": 322.9, "cooked": true},
+      "Common": {"files": 213, "MiB": 254.9, "cooked": true},
+      "Animations": {"files": 8, "MiB": 3.8, "cooked": true},
+      "Retarget": {"files": 2, "MiB": 0.1, "cooked": false}
+    }
+  },
+  "cook": "Config/DefaultGame.ini DirectoriesToAlwaysCook: Heroine_MH/Assembled, /Common, /Animations",
+  "runtimePlugins": ["HairStrands", "RigLogic", "MetaHumanCoreTech", "MetaHumanCharacter"]
+}

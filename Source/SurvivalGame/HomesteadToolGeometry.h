@@ -53,13 +53,21 @@ inline bool UpdateHandToolGrip(USceneComponent& Tool, const USkeletalMeshCompone
     const auto& Skeleton = Asset->GetRefSkeleton();
     const int32 Finger = Skeleton.FindBoneIndex(TEXT("middle_01_r"));
     const int32 Hand = Skeleton.FindBoneIndex(TEXT("hand_r"));
-    if (Finger == INDEX_NONE || Hand == INDEX_NONE || Skeleton.GetParentIndex(Finger) != Hand)
+    // The legacy heroine parents the finger to the hand; MetaHuman inserts middle_metacarpal_r between them.
+    FTransform FingerInHand = FTransform::Identity;
+    int32 Bone = Finger;
+    for (int32 Depth = 0; Bone != INDEX_NONE && Bone != Hand && Depth < 2; ++Depth)
+    {
+        FingerInHand = FingerInHand * Skeleton.GetRefBonePose()[Bone];
+        Bone = Skeleton.GetParentIndex(Bone);
+    }
+    if (Finger == INDEX_NONE || Hand == INDEX_NONE || Bone != Hand)
     {
         Tool.SetHiddenInGame(true);
         UE_LOG(LogTemp, Error, TEXT("Contextual tool grip requires the shared hand/middle-finger bind."));
         return false;
     }
-    Tool.SetRelativeLocation(Skeleton.GetRefBonePose()[Finger].GetTranslation() * 0.6f);
+    Tool.SetRelativeLocation(FingerInHand.GetTranslation() * 0.6f);
     Tool.SetWorldRotation(Rotation);
     return true;
 }

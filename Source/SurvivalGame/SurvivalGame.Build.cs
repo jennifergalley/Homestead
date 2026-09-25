@@ -9,7 +9,7 @@ public class SurvivalGame : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
             "ProceduralMeshComponent", "AudioMixer", "AnimGraphRuntime", "Json",
-            "Slate", "SlateCore"
+            "Slate", "SlateCore", "HairStrandsCore"
         });
         PrivateDependencyModuleNames.AddRange(new[] {"PhysicsCore", "RHI"});
     }

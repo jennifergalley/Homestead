@@ -93,6 +93,35 @@ Jenny's bar is a smooth framerate, not just a high one. Per-pass game-thread pac
   Nanite foliage or VSM cache tuning, and confirm in a packaged build with GPU/Present timing
   (these are game-thread intervals). DLSS (below) is the fallback if the GPU cost is the limit.
 
+## MetaHuman heroine cost (2026-09-25)
+
+Same route at 4K, run with `Playtest-Visual.ps1 -PresentationDiagnostics`. The MetaHuman runs used
+`-MetaHuman`; the heroine is now the default, and `-LegacyHeroine` selects the prototype. Breakdown
+from `csvprofile` with `r.GPUCsvStatsEnabled 1`, all medians.
+
+| Run | FPS | Frame ms | Game thread | Render thread | GPU |
+| --- | --- | --- | --- | --- | --- |
+| Legacy heroine, uncapped | 98.5 | 9.7 | 3.5 | 9.7 | 8.3 |
+| MetaHuman, uncapped | 77.5 | 13.4-13.7 | 6.0 | 13.7 | 11.0 |
+| MetaHuman, hair simulation off | - | 12.4 | 5.6 | 12.4 | 10.2 |
+| MetaHuman, `r.SkeletalMeshLODBias 1` | 88.5 | 10.7 (wall) | - | - | - |
+
+- The frame is bound by the render thread.
+- The GPU increase of ~2.7 ms is spread across:
+  - Lumen screen probes on her (+0.37 ms).
+  - Hair simulation in Niagara (+0.36 ms).
+  - Strand interpolation and visibility (+0.45 ms).
+  - Shadows (+0.27 ms) and subsurface (+0.14 ms).
+- The game thread adds RigLogic and animation (~1 ms of parallel animation work) and groom ticks.
+- `r.HairStrands.Enable 0` made pacing worse. Don't use it as a fix.
+- Capped at 60, the MetaHuman runs were inconsistent: one run had 274 frames over 20 ms, a repeat
+  had 22 (legacy has 10). A 256-sample Blender render from another session was running during the
+  later runs, so repeat these on a quiet machine before tuning.
+- Candidate fixes, tracked as OpenSpec task 4.4:
+  - A LODSync minimum LOD at gameplay distance.
+  - Groom LOD and simulation settings.
+  - DLSS (below).
+
 ## Fallback if ray tracing gets too expensive
 
 Jenny's back-pocket option: rather than dropping hardware ray tracing, integrate NVIDIA DLSS (DLSS 5

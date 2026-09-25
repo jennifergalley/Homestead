@@ -189,6 +189,8 @@ samples were sparse and need cautious interpretation.
 
 Review the captures before choosing corrections. Keep the current asset pipeline
 unless observed defects justify replacing it; MetaHuman is not a settled decision.
+(Superseded 2026-09-25: Jenny chose a MetaHuman heroine, and it is now the default.
+Pass `-LegacyHeroine` to `Scripts\Playtest-Visual.ps1` for the prototype rollback.)
 
 ## Reviewed findings from the initial route
 

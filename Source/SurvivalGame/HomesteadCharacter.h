@@ -20,6 +20,8 @@ class UHomesteadWateringTool;
 class UHomesteadHatchet;
 class UHomesteadDiggingStick;
 class UHomesteadKnife;
+class UGroomComponent;
+class ULODSyncComponent;
 class AHomesteadWorld;
 namespace Homestead { struct Point; }
 
@@ -46,6 +48,13 @@ public:
         return ActiveEquipment.Ready ? &ActiveEquipment : nullptr;
     }
     bool HasHeroine() const { return bHeroineReady; }
+    // The MetaHuman heroine is the default. The legacy heroine is the rollback: homestead.MetaHumanHeroine 0,
+    // -HomesteadLegacyHeroine, or any automation test (their wardrobe contracts cover the legacy stack).
+    static bool UsesMetaHumanHeroine();
+    bool IsMetaHumanActive() const { return bMetaHumanActive; }
+    float WalkSpeed() const { return bMetaHumanActive ? 210.0f : 180.0f; }
+    // Walk-clip stride relative to the legacy heroine, so walk play rate matches ground speed.
+    float WalkStrideScale() const { return bMetaHumanActive ? MetaHumanStrideScale : 1.0f; }
     void SetAppearancePreview(bool Enabled);
     FRotator GameplayViewRotation() const;
     float CameraDistance() const;
@@ -110,6 +119,15 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> GarmentComponents;
     UPROPERTY() FHomesteadEquipmentPresentation PreparedEquipment;
     UPROPERTY() FHomesteadEquipmentPresentation ActiveEquipment;
+    UPROPERTY() TObjectPtr<USkeletalMesh> MetaHumanBody;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<USkeletalMeshComponent> MetaHumanFace;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<USkeletalMeshComponent> MetaHumanOutfit;
+    UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UGroomComponent>> MetaHumanGrooms;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<ULODSyncComponent> MetaHumanLODSync;
+    bool bMetaHumanActive = false;
+    bool bAttemptedMetaHumanLoad = false;
+    bool bMetaHumanAssetsValid = false;
+    float MetaHumanStrideScale = 1.0f;
     bool bPlanning = false;
     bool bHeroineReady = false;
     bool bAttemptedAssetLoad = false;
@@ -125,6 +143,8 @@ private:
     TOptional<float> WaterYaw;
 
     bool LoadHeroineAssets();
+    bool LoadMetaHumanStack();
+    bool ApplyMetaHumanStack();
     float InferMeshYaw(const USkeletalMesh& Asset) const;
     void UpdateAppearanceFraming();
     void Move(const FInputActionValue& Value);

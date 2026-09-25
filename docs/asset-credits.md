@@ -97,6 +97,22 @@ the established per-file cap.
 
 ## Character prototype
 
+The default heroine is now a **MetaHuman** made with MetaHuman Creator in
+Unreal Engine 5.8. MetaHumans are covered by the Unreal Engine EULA (from UE 5.6
+there is no separate MetaHuman licence), free below the Unreal royalty threshold.
+The EULA forbids using MetaHuman data to train or feed generative AI.
+
+She uses:
+
+- Epic's cloud rig and 4K texture sources.
+- Epic's stock grooms (long straight hair, brows, lashes).
+- The stock placeholder garment.
+- The project's own clips, retargeted onto the MetaHuman skeleton.
+
+`Assets\Characters\MetaHumanHeroine\provenance.json` records the look scripts,
+retarget setup, content inventory and cooked folders. The prototype heroine below
+remains the rollback (`-HomesteadLegacyHeroine`).
+
 The clothed heroine prototype uses MakeHuman Community / MPFB CC0 graphical
 assets and an original procedural tunic and idle/walk clips. The relaxed idle
 and grounded walk revision is also project-authored on that same rig; no

@@ -231,7 +231,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             SlowWalk.SetExplicitTime(Phase * SlowLength);
         }
         else
-            Rate = Speed / 120.0f;
+            Rate = Speed / (120.0f * (Avatar ? Avatar->WalkStrideScale() : 1.0f));
         Walk.SetPlayRate(Rate);
         Sprint.SetPlayRate(FMath::Clamp(Speed / 300.0f, 0.5f, 1.2f));
         const float SprintTarget = Avatar && Avatar->IsSprinting() && Speed > 12.0f ? 1.0f : 0.0f;
