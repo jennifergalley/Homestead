@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Bush",
+  "description": "Homestead woodland/yard shrub, about knee-to-waist height.",
+  "collision": "convex",
+  "triangle_budget": 2500,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/bush.py",
+  "source_sha256": "1c8be375ce1fea803ce7217dec90d484339bc4b1dc783a6b47fdbcce7a849191",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_Bush": {
+      "vertices": 978,
+      "triangles": 1880,
+      "size_cm": [
+        127.9,
+        122.3,
+        88.15
+      ],
+      "materials": [
+        {
+          "name": "M_BushStem",
+          "color": [
+            0.17,
+            0.11,
+            0.07
+          ],
+          "roughness": 0.95
+        },
+        {
+          "name": "M_BushLeafMid",
+          "color": [
+            0.15,
+            0.26,
+            0.08
+          ],
+          "roughness": 0.9
+        },
+        {
+          "name": "M_BushLeafShade",
+          "color": [
+            0.11,
+            0.2,
+            0.07
+          ],
+          "roughness": 0.9
+        },
+        {
+          "name": "M_BushLeafSun",
+          "color": [
+            0.2,
+            0.33,
+            0.1
+          ],
+          "roughness": 0.9
+        }
+      ],
+      "fbx": "SM_Bush.fbx",
+      "sha256": "2982c2f99fc43bdcc8ab06a81aea768fa6adac92aab580eacdc84903c23f9ff4",
+      "preview": "preview_SM_Bush.png"
+    }
+  },
+  "warnings": []
+}
