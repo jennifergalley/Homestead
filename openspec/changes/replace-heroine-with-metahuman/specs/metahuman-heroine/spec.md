@@ -9,9 +9,10 @@ Defines the playable heroine as a photorealistic MetaHuman whose appearance opti
 ### Requirement: The heroine is a photorealistic MetaHuman
 The playable heroine SHALL be a MetaHuman authored in MetaHuman Creator and assembled for real-time
 use, with a full face rig and high-resolution skin, eye and hair materials. Her default look SHALL
-follow the recorded visual direction: a softly sculpted face, defined brows, full lips, light eyes,
-and long chestnut hair with loose waves ending around the middle of her back, on a petite, curvy
-young-adult body of about 1.60 m.
+follow the recorded visual direction: a softly sculpted face with slightly sharp cheekbones, a
+slim nose and moderately full lips, defined brows, light (green) eyes, and long dark-brown hair, on
+a petite, curvy young-adult body of about 1.60 m. Until a long wavy groom is sourced, stock
+MetaHuman grooms are acceptable.
 
 #### Scenario: Close view in daylight
 - **WHEN** the player views the heroine up close in the Appearance preview and in the woodland at midday
@@ -22,14 +23,20 @@ young-adult body of about 1.60 m.
 - **THEN** skin and hair respond believably to the warm light without blown-out, flat or pale patches
 
 ### Requirement: Appearance options map to the MetaHuman
-The Appearance page SHALL offer hairstyles (long waves, straight bob, ponytail), hair colours and
-eye colours that change the MetaHuman's grooms and materials in play and in the preview. Options
-that cannot yet be offered SHALL be hidden rather than shown as broken or placeholder choices.
-Saved appearance choices SHALL restore on load.
+The Appearance page SHALL offer hairstyles (long, bob, ponytail), hair colours, eye colours and
+skin tones that change the MetaHuman's grooms and materials in play and in the preview. Hair, eye
+and skin colour SHALL be player-configurable in game; the authored look is only the default
+(dark brown hair, green eyes, the heroine's authored skin). Options that cannot yet be offered
+SHALL be hidden rather than shown as broken or placeholder choices. Saved appearance choices SHALL
+restore on load.
 
 #### Scenario: Change hairstyle and colour
 - **WHEN** the player selects Bob and then Blonde on the Appearance page
 - **THEN** the heroine's hair changes to a straight bob in a blonde shade in both the preview and the world, and the choice survives save and reload
+
+#### Scenario: Change eye and skin colour
+- **WHEN** the player selects a different eye colour and skin tone on the Appearance page
+- **THEN** the heroine's irises and skin change in both the preview and the world without seams between face and body, and the choice survives save and reload
 
 #### Scenario: Unsupported option
 - **WHEN** a legacy option has no MetaHuman equivalent yet, such as an additional body preset

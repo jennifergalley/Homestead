@@ -12,9 +12,10 @@ MetaHuman and agreed to create/sign in to an Epic account for its cloud steps.
 ## What Changes
 
 - Replace the playable heroine with a MetaHuman authored in the in-editor MetaHuman Creator:
-  softly sculpted face, defined brows, full lips, light eyes, and long chestnut waves reaching the
-  middle of her back, on a petite/curvy young-adult body of about 1.60 m. Assembled with the
-  **UE Optimized / High** pipeline and a full face rig, with strand hair at close range.
+  softly sculpted face with slightly sharp cheekbones, a slim nose, moderately full lips, defined
+  brows, light eyes, and long dark-brown hair, on a petite/curvy young-adult body of about 1.60 m.
+  Assembled with the **UE Optimized / High** pipeline and a full face rig, with strand hair at
+  close range.
 - Establish a modern rendering baseline the MetaHuman needs, which also benefits the whole world:
   D3D12 **SM6** (Virtual Shadow Maps actually work), **hardware ray-traced Lumen**, the MetaHuman
   skinning settings (16-bit bone indices, unlimited bone influences, skin cache), and a measured
@@ -24,9 +25,10 @@ MetaHuman and agreed to create/sign in to an Epic account for its cloud steps.
 - Move the existing work actions (gather, chop, water, till, knife) onto the new skeleton, then
   improve them with hand/tool contact and target alignment.
 - Add facial life: blinks, eye saccades, breathing and look-at.
-- Map the existing Appearance options (hairstyle, hair colour, eyes, outfit/dye) onto MetaHuman
-  grooms, materials and garments. Rebuild the tunic, apron and footwear as MetaHuman-fitted
-  clothing.
+- Map the existing Appearance options (hairstyle, hair colour, eyes, skin tone, outfit/dye) onto
+  MetaHuman grooms, materials and garments. Hair, eye and skin colour stay player-configurable in
+  game; the authored look is only the default. Rebuild the tunic, apron and footwear as
+  MetaHuman-fitted clothing.
 - **BREAKING (test saves):** the character's skeleton and assets change. Saved appearance IDs are
   preserved where they map; incompatible test saves may reset, which is acceptable for current
   playtesting.
@@ -51,8 +53,7 @@ Smallest useful result and first playable demonstration: the new MetaHuman heroi
 outfit, walking and gathering in the real Homestead woodland with the existing animations retargeted,
 captured in ordinary play. Full-round acceptance adds motion-matched locomotion, improved work
 actions, facial life, full appearance/wardrobe mapping, and Jenny's review of a packaged Shipping
-build at 720p/4K. Additional body presets and skin-tone variety are deferred until one heroine is
-approved.
+build at 720p/4K. Additional body presets are deferred until one heroine is approved.
 
 ## Capabilities
 

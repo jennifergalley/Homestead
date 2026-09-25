@@ -46,8 +46,10 @@ ordinary-play captures. Stills from MetaHuman Creator alone never count as accep
 
 ## 7. Appearance and wardrobe mapping
 
-- [ ] 7.1 Map hairstyles (long waves, straight bob, ponytail) to grooms and hair colours to groom material parameters; verify each style/colour in the Appearance preview and the world survives save and reload.
-- [ ] 7.2 Map eye colours; hide skin-tone and body-preset options without MetaHuman equivalents, and make legacy saves fall back to defaults; verify loading a save that used a hidden option doesn't error.
+- [ ] 7.1 Map hairstyles (long, bob, ponytail) to stock grooms and hair colours to groom Melanin/Redness, with brows and lashes following; default to dark brown (Melanin 0.72, Redness 0.35); verify each style/colour in the Appearance preview and the world survives save and reload.
+- [ ] 7.2 Map eye colours to iris parameters seeded from Creator's eye presets (default preset 8, green); verify each choice in the preview and world survives save and reload.
+- [ ] 7.2a Author a small set of skin-tone texture variants of the heroine's face in Creator and swap them on the face and body materials at runtime; verify each tone shows no face/body seam in the preview and world and survives save and reload.
+- [ ] 7.2b Hide body-preset options without MetaHuman equivalents and make legacy saves fall back to defaults; verify loading a save that used a hidden option doesn't error.
 - [ ] 7.3 Author MetaHuman-fitted tunic, apron and footwear with dye parameters, with cloth on the apron hem if needed; verify all dye/layer combinations through walking, sprinting and chopping show no body poke-through at the gameplay camera.
 - [ ] 7.4 Update the Appearance portrait to frame the MetaHuman with suitable preview lighting; verify 720p and 4K captures.
 

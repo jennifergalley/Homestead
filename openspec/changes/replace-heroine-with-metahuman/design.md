@@ -31,8 +31,8 @@ See proposal.md for motivation. Observed on 2026-09-25 in the live editor throug
 - Keep simulation authority, input mappings, the menu and save behavior intact.
 
 **Non-Goals:**
-- Runtime face or body sliders, additional body presets, and skin-tone variety (deferred until one
-  heroine is approved).
+- Runtime face or body sliders and additional body presets (deferred until one heroine is
+  approved).
 - Netcode, the Mover plugin, traversal (vaulting/climbing), combat.
 - Changing Homestead's material framework to Substrate.
 
@@ -77,6 +77,16 @@ See proposal.md for motivation. Observed on 2026-09-25 in the live editor throug
    the packaged build before and after at 720p and 4K.
 8. **Hair:** strand grooms at LOD0 and near LODs, with the groom's card LOD at distance.
    Hairstyle and colour map to groom assets and their melanin/redness parameters at runtime.
+9. **Player-configurable colour:** hair, eye and skin colour are Appearance options, not baked
+   choices. Hair colour drives the groom materials' Melanin/Redness (brows and lashes follow,
+   slightly darker). Eye colour drives the eye material's iris parameters, seeded from Creator's
+   eye presets. Skin tone can't be a single runtime tint, because MetaHuman skin is synthesized
+   into textures. Author a small set of skin-tone texture variants of the same face in Creator,
+   then swap those texture sets on the face and body materials at runtime. The authored defaults
+   are dark brown hair (Melanin 0.72, Redness 0.35), eye preset 8 (green) and the heroine's own
+   skin. `Content/Python/homestead_agent/metahuman_look.py` records the authoring values.
+   Alternative: separate assembled MetaHumans per skin tone. Rejected: that duplicates the rig
+   and meshes for a texture-only difference.
 
 Independent lanes and owned files:
 - **A. Rendering:** `Config/DefaultEngine.ini`, `SurvivalGame.uproject` (plugins). Needs no other
