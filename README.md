@@ -6,6 +6,9 @@ The design and roadmap are in `docs\game-plan.md`.
 Bounded autonomous development, status updates, pause/stop controls and protected
 candidate builds are described in `docs\autonomous-development.md`.
 
+Original static props are modeled with Blender, live in a visible window or headless;
+see `docs\blender-assets.md`.
+
 ## Current state
 
 This is a **playable homestead prototype**, not the finished game. It has three

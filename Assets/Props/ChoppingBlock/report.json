@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "ChoppingBlock",
+  "description": "Homestead yard prop: stump chopping block with an embedded hatchet.",
+  "collision": "box",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/chopping_block.py",
+  "source_sha256": "77509c8dddbdc7a5012c01591cacaae376014b0aed8acd2b9bb95f95d5c82fb1",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_ChoppingBlock": {
+      "vertices": 348,
+      "triangles": 680,
+      "size_cm": [
+        59.89,
+        60.29,
+        76.88
+      ],
+      "materials": [
+        {
+          "name": "M_ChoppingBlockBark",
+          "color": [
+            0.2,
+            0.13,
+            0.08
+          ],
+          "roughness": 0.95
+        },
+        {
+          "name": "M_ChoppingBlockWood",
+          "color": [
+            0.55,
+            0.4,
+            0.24
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_ChoppingBlockSteel",
+          "color": [
+            0.3,
+            0.31,
+            0.33
+          ],
+          "roughness": 0.45
+        },
+        {
+          "name": "M_ChoppingBlockHandle",
+          "color": [
+            0.42,
+            0.27,
+            0.14
+          ],
+          "roughness": 0.7
+        }
+      ],
+      "fbx": "SM_ChoppingBlock.fbx",
+      "sha256": "4199f5f7b54b9ccfdc03dcdae08b6b8081e575721ddf54452bd48651c48c158f",
+      "preview": "preview_SM_ChoppingBlock.png"
+    }
+  },
+  "warnings": []
+}
