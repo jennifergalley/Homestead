@@ -154,7 +154,8 @@ Look changes (compare `homestead.RayTracedSun 0/1` in the console):
   hair-on-hair where VSM leaked light.
 - Shade reads slightly lighter and hazier.
 
-Jenny to judge; the exposure was tuned under VSM.
+Jenny to judge; the exposure was tuned under VSM. Comparisons (VSM left, ray-traced right):
+`compare-vsm-vs-rt-sun-00003.jpg`, `compare-vsm-vs-rt-sun-00015-crop.jpg`.
 
 ## Fallback if ray tracing gets too expensive
 
