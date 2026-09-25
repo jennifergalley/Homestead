@@ -131,14 +131,28 @@ transaction milestone.
   HISM instance/tree rebuild, collision cooking/enabling and old-chunk teardown
   separately during ordinary boundary travel; retain the existing same-route
   690.414 ms measurement as the comparison baseline.
-- [ ] 8.2 Design and implement bounded incremental publication across frames
+  A Shipping subphase probe and exact cached-height trial are recorded in
+  `docs\research\woodland-transition-profiling.md`: 776.050 ms before versus
+  64.522–67.422 ms after on the mapped route. Keep this unchecked until
+  procedural mesh section publication and its internal collision cook are
+  independently isolated.
+- [x] 8.2 Design and implement bounded incremental publication across frames
   with explicit ownership/cancellation for superseded destinations; preserve
   stable keys, exact terrain seams, active collision readiness and atomic
   failure without exposing partial authoritative state.
-- [ ] 8.3 Verify ordinary controller travel no longer produces a visible
+  Incoming nonblocking cover/resource components are registered hidden and
+  prepared under a bounded per-tick budget, then adopted only on matching
+  world/chunk/revision/signatures. Superseded staging is destroyed; simulation
+  state changes only after a successful world refresh. The ordinary mapped
+  route checks cancellation, exact heights, reused tree capsules and staged
+  adoption. See `docs\research\woodland-transition-profiling.md`.
+- [x] 8.3 Verify ordinary controller travel no longer produces a visible
   multi-frame stall at the tested boundary while retaining felling, building,
   regional water, save/revisit and cadence behavior; report measured
   game-thread and offscreen limits without claiming GPU/Present timing.
+  The final 720p/4K Shipping route explicitly requires no mapped-walk tick
+  over 33.3 ms; measured maxima were 27.819/27.749 ms respectively. This
+  does not establish physical display timing or all-world hitch freedom.
 - [ ] 8.4 Package and promote the streaming candidate only after fresh
   producer/consumer, transition timing and visual checks pass; retain
   woodland-polish-06 as rollback until then.

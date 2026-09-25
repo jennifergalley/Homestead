@@ -1,4 +1,5 @@
 #include "HomesteadVisualPlaytest.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
@@ -121,10 +122,15 @@ void AHomesteadVisualPlaytest::Prepare()
         const bool HasBody = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualBodyPreset="), Body);
         const bool HasHair = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualHairStyle="), Hair);
         const bool HasColor = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualHairColor="), Color);
-        if (HasBody || HasHair || HasColor)
+        int32 Skin = -1, Eyes = -1;
+        const bool HasSkin = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualSkinTone="), Skin);
+        const bool HasEyes = FParse::Value(FCommandLine::Get(), TEXT("HomesteadVisualEyeColor="), Eyes);
+        if (HasBody || HasHair || HasColor || HasSkin || HasEyes)
         {
             if (!(HasBody && HasHair && HasColor) || Body < 0 || Body >= 3
-                || Hair < 0 || Hair >= 3 || Color < 0 || Color >= HomesteadLook::HairColorCount)
+                || Hair < 0 || Hair >= 3 || Color < 0 || Color >= HomesteadLook::HairColorCount
+                || (HasSkin && (Skin < 0 || Skin >= 4))
+                || (HasEyes && (Eyes < 0 || Eyes >= 4)))
             {
                 Observations.Add(TEXT("FAILED invalid complete hair-review appearance."));
                 Finish();
@@ -134,6 +140,8 @@ void AHomesteadVisualPlaytest::Prepare()
             Look.BodyPreset = Body;
             Look.HairStyle = Hair;
             Look.HairColor = Color;
+            if (HasSkin) Look.SkinTone = Skin;
+            if (HasEyes) Look.EyeColor = Eyes;
             FString Error;
             if (!Avatar->PrepareEquipment(PC->State(), Look, Error) || !Avatar->ApplyPreparedEquipment(Error))
             {
@@ -143,8 +151,8 @@ void AHomesteadVisualPlaytest::Prepare()
             }
             PC->Appearance = Look;
             const auto* Presentation = Avatar->GetEquipmentPresentation();
-            Observations.Add(FString::Printf(TEXT("Hair review body=%d style=%d color=%d base=%s garments=%d"),
-                Body, Hair, Color, Presentation && Presentation->Base.Mesh
+            Observations.Add(FString::Printf(TEXT("Hair review body=%d style=%d color=%d skin=%d eyes=%d base=%s garments=%d"),
+                Body, Hair, Color, Look.SkinTone, Look.EyeColor, Presentation && Presentation->Base.Mesh
                     ? *Presentation->Base.Mesh->GetPathName() : TEXT("missing"),
                 Presentation ? Presentation->Garments.Num() : -1));
         }
@@ -154,19 +162,37 @@ void AHomesteadVisualPlaytest::Prepare()
     if (bForageRenewal) { PrepareRenewal(); return; }
     bEndurance = FParse::Param(FCommandLine::Get(), TEXT("HomesteadEndurance"));
     if (bEndurance) { PrepareEndurance(); return; }
-    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius,plot_weeds"));
+    Telemetry.Add(TEXT("frame,seconds,pass,x,y,z,speed,yaw,view_yaw,left_toe_x,left_toe_y,left_toe_z,right_toe_x,right_toe_y,right_toe_z,walk_weight,slow_weight,gait_rate,left_hand_x,left_hand_y,left_hand_z,right_hand_x,right_hand_y,right_hand_z,walk_phase,gather_weight,gather_phase,gather_starts,forage_x,forage_y,water_weight,water_phase,water_starts,tool_visible,tool_x,tool_y,tool_z,can_pitch,water_stock,plot_moisture,tool_scale,tool_radius,plot_weeds"));
     bWaterRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWateringPlaytest"));
     bClearRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadClearingPlaytest"));
     Telemetry[0] += TEXT(",clear_weight,clear_phase,clear_starts,hatchet_visible,hatchet_pitch,hatchet_scale,hatchet_radius,hatchet_x,hatchet_y,hatchet_z,branch_stock,fiber_stock,resource_cleared,energy");
     bWeedRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadWeedingPlaytest"));
     bPresentationDiagnostics = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationDiagnostics"));
-    if (bPresentationDiagnostics && (bWaterRoute || bClearRoute || bWeedRoute))
+    bSprintRoute = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSprintPlaytest"));
+    bGaitReview = FParse::Param(FCommandLine::Get(), TEXT("HomesteadCMUGaitReview"));
+    if (bGaitReview && (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMUWalk01"))
+        || (!FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01"))
+            && !FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMULevelHead")))
+        || bSprintRoute || bPresentationDiagnostics))
     {
-        Observations.Add(TEXT("FAILED Presentation diagnostics cannot be combined with an action route."));
+        Observations.Add(TEXT("FAILED Slow/full gait review needs an isolated licensed CMU walk input."));
         Finish();
         return;
     }
-    Observations.Add(bWeedRoute
+    bSparseSprintCapture = bSprintRoute
+        && FParse::Param(FCommandLine::Get(), TEXT("HomesteadSparseSprintCapture"));
+    bSparseGaitCapture = bGaitReview
+        && FParse::Param(FCommandLine::Get(), TEXT("HomesteadSparseGaitCapture"));
+    if ((bPresentationDiagnostics && (bWaterRoute || bClearRoute || bWeedRoute || bSprintRoute))
+        || (bSprintRoute && (bWaterRoute || bClearRoute || bWeedRoute)))
+    {
+        Observations.Add(TEXT("FAILED Sprint, presentation diagnostics and work routes require separate playtests."));
+        Finish();
+        return;
+    }
+    Observations.Add(bSprintRoute
+        ? TEXT("Sprint movement uses ordinary mapped controls without teleports or state/time edits; after its measured save/reload, the portrait returns to one disclosed fixed woodland position for comparable face framing.")
+        : bWeedRoute
         ? TEXT("Weeding uses an explicitly copied preexisting functional-test save, including saved appearance/location. Prior setup used fixture teleports and ordinary sleep. After F9 loading, this recorded approach/action uses normal mapped controls, no debug teleport/time/state edits. See fixture.json for source and hash.")
         : TEXT("Observational visual playtest: normal mapped controls; no teleports, state edits, or time skips."));
     Observations.Add(TEXT("Frames are sampled at 8 Hz. Screenshot readback can disturb pacing; do not use this run as a frame-rate benchmark."));
@@ -174,6 +200,14 @@ void AHomesteadVisualPlaytest::Prepare()
         Observations.Add(TEXT("Watering starts from the normal new clearing: mapped gathering, crafting, stream refill, tilling and planting. No fixture/save injection. Ordinary crafting still advances its existing game time. Setup is sampled at 1 Hz; final action at requested 8 Hz."));
     if (bClearRoute)
         Observations.Add(TEXT("Sapling clearing starts from the normal new clearing: mapped supply gathering, hatchet crafting, walking and X. No injected save, teleport or debug state/time edit; ordinary crafting retains its existing time cost. Setup sampled at1 Hz, action at requested8 Hz."));
+    if (bSprintRoute)
+    {
+        Observations.Add(TEXT("Sprint comparison: fresh world, ordinary mapped Shift/L3 and left-stick travel; no teleport, injected stock or time edit. Frame captures are visual-only, not cadence proof."));
+        if (bSparseSprintCapture)
+            Observations.Add(TEXT("4K motion checks use uncaptured mapped passes; only later portrait and illustrative movement frames request GPU readback. Their images cannot certify motion-frame cadence."));
+        Observations.Add(TEXT("After mapped sprint and save/reload, the comparison portrait uses production OpenBook/PreviousPage directly as controlled UI setup, not a claimed mapped menu route."));
+        Telemetry[0] += TEXT(",sprint_weight,sprint_phase,sprint_active,max_walk_speed,camera_arm_cm,portrait_open");
+    }
     Passes = {
         {TEXT("close-notes"), 1, {}, {}, EKeys::Gamepad_Special_Right},
         {TEXT("idle"), 3},
@@ -195,6 +229,56 @@ void AHomesteadVisualPlaytest::Prepare()
         {TEXT("gather"), 3},
         {TEXT("after-gather"), 2}
     };
+    if (bSprintRoute)
+        Passes = {
+            {TEXT("close-notes"), 0.7f, {}, {}, EKeys::Gamepad_Special_Right},
+            {TEXT("idle"), 1},
+            {TEXT("walk-level"), 2, FVector2D(0, 1)},
+            {TEXT("stop-from-walk"), 0.7f},
+            {TEXT("held-sprint-standing"), 1},
+            {TEXT("sprint-keyboard"), 2, FVector2D(0, 1)},
+            {TEXT("sprint-diagonal"), 1, FVector2D(0.4f, 0.85f)},
+            {TEXT("release-to-walk"), 1.5f, FVector2D(0, 1)},
+            {TEXT("stop-from-sprint"), 1},
+            {TEXT("sprint-controller"), 2, FVector2D(0, 1)},
+            {TEXT("open-book-while-sprinting"), 0.65f, {}, {}, EKeys::Gamepad_Special_Right},
+            {TEXT("close-book-after-sprint"), 0.65f, {}, {}, EKeys::Gamepad_FaceButton_Right},
+            {TEXT("controller-stop"), 0.8f},
+            {TEXT("save-exertion"), 0.6f, {}, {}, EKeys::F5},
+            {TEXT("reload-exertion"), 0.6f, {}, {}, EKeys::F9},
+            {TEXT("recovered-idle"), 0.8f},
+            {TEXT("open-pack"), 0.5f},
+            {TEXT("open-look"), 2},
+            {TEXT("portrait-idle"), 2, {}, {}, EKeys::Gamepad_RightThumbstick},
+            {TEXT("portrait-orbit"), 2, {}, FVector2D(0.45f, 0)},
+            {TEXT("return-to-world"), 0.8f},
+            {TEXT("walk-visual-sample"), 1.3f, FVector2D(0, 1)},
+            {TEXT("sprint-visual-sample"), 1.6f, FVector2D(0, 1)}
+        };
+    if (bGaitReview)
+        Passes = {
+            {TEXT("close-notes"), .7f, {}, {}, EKeys::Gamepad_Special_Right},
+            {TEXT("idle"), 1.2f},
+            {TEXT("slow-walk"), 4, FVector2D(0, .5f)},
+            {TEXT("stop-from-slow-walk"), 1.2f},
+            {TEXT("full-walk"), 3, FVector2D(0, 1)},
+            {TEXT("turn-while-moving"), 3, FVector2D(.7f, .45f)},
+            {TEXT("stop-from-turn"), 1.2f},
+            {TEXT("orbit-standing-character"), 2, {}, FVector2D(.5f, 0)}
+        };
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadIdleExtended")))
+    {
+        if (!bSprintRoute)
+        {
+            Observations.Add(TEXT("FAILED Extended living-idle footage requires the ordinary Sprint transition route."));
+            Finish();
+            return;
+        }
+        for (auto& Pass : Passes)
+            if (Pass.Label == TEXT("idle") || Pass.Label == TEXT("recovered-idle"))
+                Pass.Duration = 6.2f;
+        Observations.Add(TEXT("Extended idle includes one uninterrupted five-second gameplay loop before and after mapped travel; the menu portrait plays its own idle, but its transparent layout and visual approval remain separate."));
+    }
     if (bWeedRoute)
         Passes = {
             {TEXT("load-disclosed-test-world"), 1, {}, {}, EKeys::F9},
@@ -227,7 +311,8 @@ void AHomesteadVisualPlaytest::Prepare()
         PresentationSettings.Add(TEXT("Timing records instrumented actor-tick wall intervals, NOT GPU duration or present timestamps. Only timing-* precedes all screenshot requests; capture-* is readback-disturbed and visits different positions, not a controlled performance A/B."));
         PresentationSettings.Add(TEXT("Runtime CVars and user settings are recorded separately. output_target is not the internal temporal-upscaler input resolution; auto/default resolution policy may require further evidence."));
     }
-    bTreeRoute = !bWaterRoute && !bClearRoute && !bWeedRoute && !bPresentationDiagnostics;
+    bTreeRoute = !bSprintRoute && !bGaitReview && !bWaterRoute && !bClearRoute
+        && !bWeedRoute && !bPresentationDiagnostics;
     if (bTreeRoute) PrepareTreeEncounter();
     if (bTreeRoute || bPresentationDiagnostics)
     {
@@ -963,11 +1048,12 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
     const FVector Grip = Tool->GripPosition();
     double Moisture = -1, Weeds = -1;
     for (const auto& Plot : PC->State().plots) if (Plot.id == WaterPlotId) { Moisture = Plot.moisture; Weeds = Plot.weeds; }
-    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f,%.4f,%.4f,%u,%d,%.3f,%.3f,%.3f,%.3f,%d,%.6f,%.3f,%.3f,%.6f"),
+    Telemetry.Add(FString::Printf(TEXT("%d,%.4f,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f,%.4f,%.4f,%u,%.3f,%.3f,%.4f,%.4f,%u,%d,%.3f,%.3f,%.3f,%.3f,%d,%.6f,%.3f,%.3f,%.6f"),
         CaptureIndex, Elapsed, *Label, Position.X, Position.Y, Position.Z, Avatar->GetVelocity().Size2D(),
         Avatar->GetActorRotation().Yaw, PC->GetControlRotation().Yaw,
         Left.X, Left.Y, Left.Z, Right.X, Right.Y, Right.Z,
-        Animation ? Animation->WalkWeight() : -1, Animation ? Animation->GaitRate() : -1,
+        Animation ? Animation->WalkWeight() : -1, Animation ? Animation->SlowWalkWeight() : -1,
+        Animation ? Animation->GaitRate() : -1,
         LeftHand.X, LeftHand.Y, LeftHand.Z, RightHand.X, RightHand.Y, RightHand.Z,
         Animation ? Animation->WalkPhase() : -1,
         Animation ? Animation->GatherWeight() : -1, Animation ? Animation->GatherPhase() : -1,
@@ -985,6 +1071,21 @@ void AHomesteadVisualPlaytest::Capture(const FString& Label)
         Hatchet->IsPresented(), Hatchet->GetComponentRotation().Pitch, Hatchet->GetComponentScale().X, Hatchet->Bounds.SphereRadius,
         HatchetGrip.X, HatchetGrip.Y, HatchetGrip.Z, PC->Simulation().Count(Homestead::Item::Branch),
         PC->Simulation().Count(Homestead::Item::Fiber), Cleared, PC->State().energy);
+    if (bSprintRoute)
+    {
+        Telemetry.Last() += FString::Printf(TEXT(",%.4f,%.4f,%d,%.2f"),
+            Animation ? Animation->SprintWeight() : 0,
+            Animation ? Animation->SprintPhase() : 0,
+            Avatar->IsSprinting(), Avatar->GetCharacterMovement()->MaxWalkSpeed);
+        Telemetry.Last() += FString::Printf(TEXT(",%.2f,%d"),
+            Avatar->CameraDistance(), PC->IsBookOpen() && PC->BookPage() == 6);
+        bKeyboardSprintObserved |= Animation && Label.StartsWith(TEXT("sprint-keyboard"))
+            && Animation->SprintWeight() > 0.5f && Avatar->IsSprinting();
+        bControllerSprintObserved |= Animation && Label.StartsWith(TEXT("sprint-controller"))
+            && Animation->SprintWeight() > 0.5f && Avatar->IsSprinting();
+        bSprintRecovered |= Animation && Label == TEXT("stop-from-sprint")
+            && Animation->SprintWeight() < 0.01f && !Avatar->IsSprinting();
+    }
     if (Animation && bClearRoute && (Label == TEXT("clear") || Label == TEXT("after-clear")))
     {
         bObservedClear |= Animation->ClearWeight() > 0.5f;
@@ -1048,6 +1149,57 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
         bEntered = true;
         PassElapsed = 0;
         CaptureElapsed = 0;
+        bCapturedSparsePass = false;
+        if (bSprintRoute)
+        {
+            if (Pass.Label == TEXT("walk-level") || Pass.Label == TEXT("sprint-keyboard"))
+                SprintPassStart = FVector2D(PC->GetPawn()->GetActorLocation());
+            if (Pass.Label == TEXT("held-sprint-standing"))
+            {
+                StationaryEnergy = PC->State().energy;
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            }
+            if (Pass.Label == TEXT("sprint-keyboard"))
+            {
+                bStationarySprintSafe = StationaryEnergy - PC->State().energy < 0.10;
+                SprintStartEnergy = PC->State().energy;
+            }
+            if (Pass.Label == TEXT("release-to-walk"))
+            {
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+                SprintEndEnergy = PC->State().energy;
+            }
+            if (Pass.Label == TEXT("sprint-controller")
+                || Pass.Label == TEXT("sprint-visual-sample"))
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
+            if (Pass.Label == TEXT("open-book-while-sprinting"))
+                MenuEnergy = PC->State().energy;
+            if (Pass.Label == TEXT("controller-stop"))
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
+            if (Pass.Label == TEXT("save-exertion"))
+                SavedSprintEnergy = PC->State().energy;
+            if (Pass.Label == TEXT("open-pack"))
+            {
+                const float Ground = AHomesteadWorld::GroundHeight(-1000, 0, PC->State().world);
+                if (!FMath::IsFinite(Ground))
+                {
+                    Observations.Add(TEXT("FAILED portrait comparison ground is unavailable."));
+                    Finish();
+                    return;
+                }
+                PC->GetPawn()->SetActorLocation(FVector(-1000, 0, Ground + 100),
+                    false, nullptr, ETeleportType::TeleportPhysics);
+                PC->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+                if (auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn()))
+                    Avatar->GetCharacterMovement()->StopMovementImmediately();
+                Observations.Add(TEXT("CONTROLLED portrait-only return to (-1000,0) after mapped sprint/save; no movement or save outcome is inferred from this placement."));
+                PC->OpenBook(0);
+            }
+            if (Pass.Label == TEXT("open-look"))
+                PC->PreviousPage();
+            if (Pass.Label == TEXT("return-to-world"))
+                PC->CloseBook();
+        }
         Tap(Pass.Press);
         if (Pass.WalkToForage)
         {
@@ -1110,10 +1262,34 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     }
     TickTreeEncounter(Pass, WallDelta, Move, Look);
     ApplyAxes(Move, Look);
+    if (bSprintRoute)
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn());
+        const auto* Animation = Avatar
+            ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+        bKeyboardSprintObserved |= Animation && Pass.Label == TEXT("sprint-keyboard")
+            && Animation->SprintWeight() > 0.5f && Avatar->IsSprinting();
+        bControllerSprintObserved |= Animation && Pass.Label == TEXT("sprint-controller")
+            && Animation->SprintWeight() > 0.5f && Avatar->IsSprinting();
+        bSprintRecovered |= Animation && Pass.Label == TEXT("stop-from-sprint")
+            && Animation->SprintWeight() < 0.01f && !Avatar->IsSprinting();
+        bSprintReloaded |= Animation && Pass.Label == TEXT("recovered-idle")
+            && !Avatar->IsSprinting() && Animation->SprintWeight() < 0.01f
+            && FMath::Abs(PC->State().energy - SavedSprintEnergy) < 0.1;
+    }
     PassElapsed += WallDelta;
     CaptureElapsed += WallDelta;
-    const bool RequestCapture = CaptureElapsed >= 0.125f
-        && (!bPresentationDiagnostics || Pass.Label.StartsWith(TEXT("capture-")));
+    const bool SparsePass = bSparseGaitCapture
+        ? Pass.Label == TEXT("slow-walk") || Pass.Label == TEXT("stop-from-slow-walk")
+            || Pass.Label == TEXT("full-walk") || Pass.Label == TEXT("turn-while-moving")
+            || Pass.Label == TEXT("stop-from-turn")
+        : Pass.Label.StartsWith(TEXT("portrait-"))
+            || Pass.Label == TEXT("walk-visual-sample")
+            || Pass.Label == TEXT("sprint-visual-sample");
+    const bool RequestCapture = bSparseSprintCapture || bSparseGaitCapture
+        ? SparsePass && !bCapturedSparsePass && PassElapsed >= (bSparseGaitCapture ? 0.75f : 0.35f)
+        : CaptureElapsed >= 0.125f
+            && (!bPresentationDiagnostics || Pass.Label.StartsWith(TEXT("capture-")));
     if (bPresentationDiagnostics)
     {
         const FVector Position = PC->GetPawn()->GetActorLocation();
@@ -1126,9 +1302,26 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
     {
         Capture(Pass.Label);
         CaptureElapsed = 0;
+        bCapturedSparsePass = true;
     }
     if (PassElapsed >= Pass.Duration)
     {
+        if (bSprintRoute)
+        {
+            const FVector2D End(PC->GetPawn()->GetActorLocation());
+            if (Pass.Label == TEXT("walk-level"))
+                WalkDistance = FVector2D::Distance(End, SprintPassStart);
+            if (Pass.Label == TEXT("sprint-diagonal"))
+                SprintDistance = FVector2D::Distance(End, SprintPassStart);
+            if (Pass.Label == TEXT("open-book-while-sprinting"))
+            {
+                const auto* Avatar = Cast<AHomesteadCharacter>(PC->GetPawn());
+                bSprintMenuCancelled = Avatar && PC->IsBookOpen() && !Avatar->IsSprinting()
+                    && FMath::Abs(PC->State().energy - MenuEnergy) < 0.02;
+            }
+            if (Pass.Label == TEXT("open-look"))
+                bPortraitReady = PC->IsBookOpen() && PC->BookPage() == 6;
+        }
         ApplyAxes({}, {});
         ++PassIndex;
         bEntered = false;
@@ -1142,9 +1335,18 @@ void AHomesteadVisualPlaytest::Finish()
     ApplyAxes({}, {});
     const bool Gathered = PC->Simulation().Count(Homestead::Item::Berries) > FoodBefore
         || PC->Simulation().Count(Homestead::Item::Flowers) > HerbBefore;
-    if (bPresentationDiagnostics)
+    if (bSprintRoute)
+        Observations.Add(FString::Printf(
+            TEXT("Sprint mapped keyboard=%d controller=%d recovered=%d stationary_no_sprint_drain=%d menu_cancel=%d save_reload=%d walk_cm=%.2f sprint_cm=%.2f energy_spent=%.3f; camera visual-only, no physical Present claim"),
+            bKeyboardSprintObserved, bControllerSprintObserved, bSprintRecovered,
+            bStationarySprintSafe, bSprintMenuCancelled, bSprintReloaded,
+            WalkDistance, SprintDistance, SprintStartEnergy - SprintEndEnergy));
+    else if (bPresentationDiagnostics)
         Observations.Add(FString::Printf(TEXT("Presentation diagnostic route completed=%d; captured frames=%d; physical scanout not observed"),
             PassIndex >= Passes.Num() && !Passes.IsEmpty(), CaptureIndex));
+    else if (bGaitReview)
+        Observations.Add(FString::Printf(TEXT("CMU slow/full/turn review completed=%d; captured frames=%d; ordinary mapped travel, no tree or forage assertion"),
+            PassIndex >= Passes.Num() && CaptureIndex > 0, CaptureIndex));
     else if (bClearRoute)
         Observations.Add(FString::Printf(TEXT("Cleared actual sapling=%d; action observed=%d; swung hatchet observed=%d; recovered and hidden=%d"),
             bCleared, bObservedClear, bObservedHatchet, bClearRecovered));
@@ -1183,7 +1385,14 @@ void AHomesteadVisualPlaytest::Finish()
         *FPaths::Combine(OutputDirectory, TEXT("presentation-settings.txt"))) && Saved;
     if (!Saved) UE_LOG(LogTemp, Error, TEXT("Visual playtest could not persist all evidence files."));
     UE_LOG(LogTemp, Display, TEXT("Visual playtest captured %d frames in %s"), CaptureIndex, *OutputDirectory);
-    const bool Complete = bPresentationDiagnostics ? PassIndex >= Passes.Num() && !Passes.IsEmpty() && CaptureIndex > 0
+    const bool Complete = bSprintRoute ? PassIndex >= Passes.Num()
+        && bKeyboardSprintObserved && bControllerSprintObserved && bSprintRecovered
+        && bStationarySprintSafe && bSprintMenuCancelled && bSprintReloaded
+        && bPortraitReady
+        && WalkDistance > 30.0 && SprintDistance / 3.0 > WalkDistance / 2.0 * 1.3
+        && SprintStartEnergy - SprintEndEnergy > 0.5 && SprintStartEnergy - SprintEndEnergy < 2.0
+        : bGaitReview ? PassIndex >= Passes.Num() && CaptureIndex > 0
+        : bPresentationDiagnostics ? PassIndex >= Passes.Num() && !Passes.IsEmpty() && CaptureIndex > 0
         : bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered
         : bWeedRoute ? bWeeded && bObservedGather && bGatherRecovered
         : bWaterRoute ? bWatered && bObservedWater && bObservedTool && bWaterRecovered

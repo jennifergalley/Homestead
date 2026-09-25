@@ -155,8 +155,10 @@ bool AHomesteadVisualPlaytest::RenewalVisuals(int32 Id, bool Ready, bool Focused
             FCollisionShape::MakeSphere(20), Query), TEXT("Cleared sapling location regained a blocking collider."))) return false;
         if (!RenewalCheck(!PC->IsResourceFocused(Id), TEXT("Cleared sapling regained focus."))) return false;
     }
-    else if (Focused && !RenewalCheck(PC->IsResourceFocused(Id) && PC->FocusTitle().Contains(TEXT("(renewing)")) == !Ready
-        && PC->FocusActions().Contains(TEXT("[A] Gather")), TEXT("Actual focused HUD prompt/cooldown did not refresh."))) return false;
+    else if (Focused && !RenewalCheck(PC->IsResourceFocused(Id)
+        && !PC->FocusTitle().Contains(TEXT("(renewing)"))
+        && PC->FocusActions().Contains(TEXT("[A] Gather")) == Ready,
+        TEXT("Actual focused HUD prompt and availability did not refresh."))) return false;
     auto Row = MakeShared<FJsonObject>();
     Row->SetStringField(TEXT("phase"), Label); Row->SetNumberField(TEXT("node"), Id);
     Row->SetNumberField(TEXT("hour"), PC->State().hour); Row->SetNumberField(TEXT("deadline"), Node->readyAtHour);
@@ -327,7 +329,7 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         if (Age < 0.7) break;
         if (Step.Command == Kind::Reject)
         {
-            if (!RenewalCheck(PC->ToastIsError() && PC->Toast().Contains(TEXT("more time to regrow"))
+            if (!RenewalCheck(PC->ToastIsError() && PC->Toast().Contains(TEXT("Nothing to gather"))
                 && PC->ToastRemaining > FMath::Max(0.0, R.BeforeToastSeconds - (R.EngineUnpaused - R.ActionEngine)) + 0.1
                 && PC->State().inventory == R.BeforeInventory && Node->readyAtHour == R.BeforeDeadline
                 && Anim->GatherStarts() == R.BeforeStarts && Anim->ActionWeight() < 0.001f,
@@ -342,7 +344,7 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
             auto Expected = R.BeforeInventory;
             const auto Item = Step.Node == 8 ? Homestead::Item::Branch : Step.Node == 12 ? Homestead::Item::Flowers : Homestead::Item::Berries;
             Expected[static_cast<size_t>(Item)] += Step.Node == 12 ? 3 : 5;
-            if (!RenewalCheck(!PC->ToastIsError() && PC->State().inventory == Expected
+            if (!RenewalCheck(!PC->ToastIsError() && PC->Toast().IsEmpty() && PC->State().inventory == Expected
                 && FMath::Abs(Node->readyAtHour - R.ActionHour - (Step.Node == 10 ? 36 : 24)) < 1.e-6
                 && Anim->GatherStarts() == R.BeforeStarts + 1 && Anim->GatherWeight() > 0.01f,
                 TEXT("Ready gather did not grant exactly one correct reward/cooldown/action."))) return;

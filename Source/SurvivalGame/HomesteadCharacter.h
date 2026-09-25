@@ -19,6 +19,7 @@ class UMaterialParameterCollection;
 class UHomesteadWateringTool;
 class UHomesteadHatchet;
 class UHomesteadDiggingStick;
+class UHomesteadKnife;
 class AHomesteadWorld;
 namespace Homestead { struct Point; }
 
@@ -47,25 +48,33 @@ public:
     bool HasHeroine() const { return bHeroineReady; }
     void SetAppearancePreview(bool Enabled);
     FRotator GameplayViewRotation() const;
+    float CameraDistance() const;
     UAnimSequence* GetIdleAnimation() const { return IdleAnimation; }
     UAnimSequence* GetWalkAnimation() const { return WalkAnimation; }
+    UAnimSequence* GetSlowWalkAnimation() const { return SlowWalkAnimation; }
+    UAnimSequence* GetSprintAnimation() const { return SprintAnimation; }
+    bool IsSprinting() const { return bSprintActive; }
+    void CancelSprint();
     UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
     UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
     UAnimSequence* GetClearAnimation() const { return ClearAnimation; }
+    UAnimSequence* GetKnifeCutAnimation() const { return KnifeCutAnimation; }
     UAnimSequence* GetTillAnimation() const { return TillAnimation; }
     UHomesteadHatchet* GetHatchet() const { return Hatchet; }
     UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
+    UHomesteadKnife* GetKnife() const { return Knife; }
     void PlayGather();
     void PlayWater();
     void PlayWater(Homestead::Point Target);
     void PlayClear();
     void PlayClear(Homestead::Point Target);
+    void PlayKnifeCut(Homestead::Point Target);
     void PlayTill(Homestead::Point Target);
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
-    void CancelAction();
+    void CancelAction(bool Immediate = false);
     FRotator ChooseStartingView(const AHomesteadWorld& Landscape, FRotator Preferred);
     const FString& StartingViewEvidence() const { return InitialViewEvidence; }
 
@@ -76,6 +85,7 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> StandIn;
     UPROPERTY() TObjectPtr<UInputMappingContext> Mapping;
     UPROPERTY() TObjectPtr<UInputAction> MoveAction;
+    UPROPERTY() TObjectPtr<UInputAction> SprintAction;
     UPROPERTY() TObjectPtr<UInputAction> MouseLookAction;
     UPROPERTY() TObjectPtr<UInputAction> StickLookAction;
     UPROPERTY() TObjectPtr<UInputAction> ZoomAction;
@@ -84,13 +94,17 @@ private:
     UPROPERTY() TArray<TObjectPtr<USkeletalMesh>> WardrobeMeshes;
     UPROPERTY() TObjectPtr<UAnimSequence> IdleAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> WalkAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> SlowWalkAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> SprintAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> KnifeCutAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> TillAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadDiggingStick> DiggingStick;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadKnife> Knife;
     UPROPERTY() TArray<TObjectPtr<UMaterialInstanceDynamic>> AppearanceMaterials;
     UPROPERTY() TObjectPtr<UMaterialParameterCollection> CameraFoliageParameters;
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> GarmentComponents;
@@ -101,6 +115,8 @@ private:
     bool bAttemptedAssetLoad = false;
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;
+    bool bSprintHeld = false;
+    bool bSprintActive = false;
     float SavedCameraDistance = 470;
     FRotator SavedViewRotation = FRotator::ZeroRotator;
     FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
@@ -112,6 +128,8 @@ private:
     float InferMeshYaw(const USkeletalMesh& Asset) const;
     void UpdateAppearanceFraming();
     void Move(const FInputActionValue& Value);
+    void BeginSprint(const FInputActionValue& Value);
+    void EndSprint(const FInputActionValue& Value);
     void MouseLook(const FInputActionValue& Value);
     void StickLook(const FInputActionValue& Value);
     void ZoomInput(const FInputActionValue& Value);

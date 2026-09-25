@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering, [switch]$Creek, [switch]$Crafting,
+param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullLoop, [switch]$Presentation, [switch]$HairLength, [switch]$Gathering, [switch]$Watering, [switch]$Creek, [switch]$HeroineSequence, [switch]$UprightGait, [switch]$Crafting, [switch]$LivingIdle,
     [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$Hotbar, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [switch]$NativeSaveRetry, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
@@ -7,6 +7,9 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA,
     [switch]$DisableChunkPreparation)
 $ErrorActionPreference = 'Stop'
+if ($LivingIdle -and -not $NativeMenu) {
+    throw 'The living-idle proof requires the native-menu route.'
+}
 if ($GeneratedWoodland) {
     if (-not $ShippingQA -or $FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or
         $Weeding -or $Clearing -or $CameraLifecycle -or $Prompts -or $BookClarity -or $NativeMenu -or
@@ -72,6 +75,12 @@ if ($Creek -and ($Watering -or $Gathering -or $Presentation -or $HairLength -or 
     $WithAudio -or $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $NativeMenu)) {
     throw 'Creek presentation requires its own ordinary traversal route.'
 }
+if ($HeroineSequence -and (-not $Creek -or ($Packaged -and -not $ShippingQA))) {
+    throw 'The combined heroine sequence requires its own creek route and packaged Shipping QA admission.'
+}
+if ($UprightGait -and -not $HeroineSequence) {
+    throw 'The upright-head movement sequence requires the combined heroine creek route.'
+}
 if ($Presentation -and ($FullLoop -or $WithAudio)) {
     throw 'Presentation fixtures are separate from full-loop and audio acceptance.'
 }
@@ -85,6 +94,23 @@ if ($Packaged) {
     $executable = $package.executable
     if (($package.configuration -eq 'Shipping') -ne [bool]$ShippingQA) { throw 'Shipping automated smoke requires explicit -ShippingQA; it is not a Development override.' }
     if (-not (Test-Path -LiteralPath $executable)) { throw 'Package the Windows game before running packaged integration tests.' }
+    if ($LivingIdle -and -not (Test-Path -LiteralPath (Join-Path $packageRoot 'SurvivalGame\Content\Trials\HeroineIdle_20260924_15\Animations\AN_Heroine_LivingIdle02.uasset'))) {
+        throw 'The requested full living-idle proof requires a package with the admitted five-second clip.'
+    }
+    if ($HeroineSequence) {
+        $trialAssets=if($UprightGait) {@(
+            'SurvivalGame\Content\Trials\HeroineCMUWalk_20260924_04\Animations\AN_Heroine_CMUNormalWalk02.uasset',
+            'SurvivalGame\Content\Trials\HeroineCMUWalk_20260924_04\Animations\AN_Heroine_CMUSlowWalk02.uasset'
+        )}else{@(
+            'SurvivalGame\Content\Trials\HeroineVitruvian_20260924_25\SK_TrialVitruvian01_Preferred_Base_Bob.uasset',
+            'SurvivalGame\Content\Trials\HeroineCMUWalk_20260924_03\Animations\AN_Heroine_CMUNormalWalk01.uasset'
+        )}
+        foreach($relative in $trialAssets) {
+            if(-not (Test-Path -LiteralPath (Join-Path $packageRoot $relative) -PathType Leaf)) {
+                throw "Combined heroine Shipping QA requires the real cooked face and human walk: $relative"
+            }
+        }
+    }
     $output = Join-Path $output 'Packaged'
     $prefix = ''
 } else {
@@ -116,7 +142,9 @@ if ($HairLength) {
 }
 if ($Gathering) { $captures = @('gather-reach.png','gather-recovered.png') }
 if ($Watering) { $captures = @('watering-pour.png','watering-recovered.png') }
-if ($Creek) { $captures = @('creek-approach.png','creek-bank.png','creek-along.png','creek-crossed.png') }
+if ($Creek) { $captures = @('creek-approach.png','creek-bank.png','creek-along.png','creek-crossed.png',
+    'creek-reeds.png','creek-knife-gesture.png','creek-reeds-depleted.png') }
+if ($HeroineSequence) { $captures += 'heroine-sequence-clear.png' }
 if ($Weeding) { $captures = @('weeding-pull.png','weeding-recovered.png') }
 if ($Clearing) { $captures = @('clearing-swing.png','clearing-recovered.png') }
 if ($CameraLifecycle) { $captures += 'camera-safe-sapling.png' }
@@ -180,6 +208,15 @@ if ($HairLength) { $loopArguments += ' -HomesteadHairLengthTest' }
 if ($Gathering) { $loopArguments = '-HomesteadGatheringTest' }
 if ($Watering) { $loopArguments = '-HomesteadWateringTest' }
 if ($Creek) { $loopArguments = '-HomesteadCreekTest -HomesteadRequireLit' }
+if ($HeroineSequence) {
+    $loopArguments += ' -HomesteadHeroineSequence'
+    if($UprightGait) {
+        $loopArguments += ' -HomesteadTrialCMUWalk01 -HomesteadTrialCMULevelHead'
+    }else{
+        $loopArguments += ' -HomesteadHeroineTrialVitruvian01'
+        if($Packaged) { $loopArguments += ' -HomesteadTrialCMUWalk01' }
+    }
+}
 if ($Weeding) { $loopArguments = '-HomesteadWeedingTest' }
 if ($Clearing) { $loopArguments = '-HomesteadClearingTest' }
 if ($CameraLifecycle) { $loopArguments += ' -HomesteadCameraLifecycle' }
@@ -189,6 +226,7 @@ if ($GeneratedResumeFrom) { $loopArguments += " -HomesteadGeneratedResumeFrom=`"
 if ($Prompts) { $loopArguments = '-HomesteadPromptTest' }
 if ($BookClarity) { $loopArguments = '-HomesteadBookClarityTest' }
 if ($NativeMenu) { $loopArguments = '-HomesteadNativeMenuTest -HomesteadRequireLit' }
+if ($LivingIdle) { $loopArguments += ' -HomesteadIdleExtended' }
 if ($NativeSaveRetry) { $loopArguments += ' -HomesteadNativeSaveRetryTest' }
 if ($DirectionalNavigation) { $loopArguments += ' -HomesteadDirectionalNavigationTest' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }

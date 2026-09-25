@@ -43,15 +43,21 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 
 ## Layout
 
-- HUD scale is `clamp(viewport height / 1080, 0.4, 3.0)`; virtual width/height divide actual pixels by that scale. This is height-based scaling, not a fixed 1920-wide canvas.
+- HUD scale is `clamp(viewport height / 1080, 0.4, 1.5)`; virtual width/height divide actual pixels by that scale. This bounds 4K text/controls without changing the 3D render scale.
 - Calendar/weather occupies the upper left `(30,26)`, size `460×73`. Current-device book/camera hints have upper-right Pine backing.
 - Food, Energy, Warmth occupy the lower left in three 200-wide backed meters; numeric values accompany 174×5 bars.
 - A gameplay-only ten-slot Pine/cream/Gold tool hotbar is centered along the
-  bottom. It references carried Knife, Hatchet, Digging Stick, and Watering Can
-  without adding capacity; unavailable references remain ghosted.
+  bottom. It retains the Knife, Hatchet, Digging Stick, and Watering Can slot
+  assignments without adding capacity, but hides uncarried tool icons.
+  At 4K its physical size is bounded independently of 3D resolution.
 - Normal focus/action context sits lower right: width `min(650, 38% of virtual width)`, right inset 32, top at `height−225`.
 - Planning instead uses a lower centered panel up to 880 wide. World/planning toasts remain centered below the top band, up to 900 wide. While the book or Look is open, feedback moves to the free upper-right band at Y26/right inset30, beside the calendar rather than across the book heading. The existing 92-high backing grows if measured lines require it; book rows and footer never move with feedback.
-- Field book is centered, up to `1180×810`, with seven tabs, 74-high rows, a selected-row-following visible window, and a footer. Pack/Craft/Build use purpose-specific titles and a short scope line at panel Y+144; their rows start at Y+180 rather than Y+148. Both supported 16:9 verification sizes still show seven rows. Font sizes and tab/selection behavior are unchanged.
+- The legacy Canvas field-book fallback is centered, up to `1180×810`, with seven tabs, 74-high rows and a selected-row-following visible window; the normal game uses the native Slate menu described below.
+- The actual native Slate field book uses the viewport rather than a miniature
+  centered book: 1280x720 logical at 720p, expanding toward 2560x1440 logical
+  at 4K. Individual font, icon and control sizes remain bounded while
+  portrait/content/details columns and inventory-grid capacity reflow.
+  Guidebook/Credits selection shows its text without an inert Read action.
 - Look uses a left sidebar at `(32,156)`, width `min(500, 35% of virtual width)`, up to 790 high; its scene preview remains visible rather than receiving the normal full-screen book scrim.
 - Most panel contents use 22–40-unit insets. Panels are plain rectangles, separators are thin rules, and a selected tab has a 3-unit underline.
 
@@ -85,7 +91,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 
 ## Components
 
-- **Resources:** branches and loose stones are small ground groups; berries sit on rounded bushes; roots have low leaves; flowers have distinct blossoms; reeds use upright stalks; saplings use small conifer forms.
+- **Resources:** branches and loose stones are small ground groups; berries sit on rounded bushes; roots have low leaves; flowers have distinct blossoms; reeds are original upright green stalks with brown heads and a separate stubble mesh; saplings use small conifer forms.
 - Harvesting removes produce while keeping plant bases where applicable; clearing removes the complete node. Resource visuals are keyed by ID and update on state changes.
 - **Crops:** nine small soil tiles follow the ground. Moisture darkens soil and lowers roughness; staged growth scales plants; mature roots become visible; weeds add separate yellow-green shoots.
 - **Shelter:** foundation, wall, doorway, roof, fire, bedroll, and chest have separate shapes. Fire, bed, and chest use different within-cell offsets to preserve a central route.

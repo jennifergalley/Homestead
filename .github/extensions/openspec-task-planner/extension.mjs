@@ -69,6 +69,9 @@ await joinSession({
                             completedTasks: planner.summary.completedTasks,
                             totalTasks: planner.summary.totalTasks,
                             activeFeatures: planner.summary.activeFeatures,
+                            proposedFeatures: planner.summary.proposedFeatures,
+                            pausedFeatures: planner.summary.pausedFeatures,
+                            completedFeatures: planner.summary.completedFeatures,
                         };
                     },
                 },

@@ -1,5 +1,15 @@
 # Wild forage renewal through normal rest and save/load
 
+**Historical fixture:** this documented manual save contains `HOMESTEAD 3`;
+the current game requires save version 7. Do not pass it to a new Shipping build
+or imply this old 24-hour rest route passed against current code. The
+`HomesteadForageRenewal` source assertions now expect quiet, nontechnical
+player feedback while retaining renewal authority. The current-version
+`-Creek` route exercises ordinary mapped Reed gathering, the exact 24-hour
+deadline, anti-duplicate attempt, stubble, F5/F9 and 720p/4K in-game frames.
+Natural three-rest restoration still needs a newly prepared version-7 fixture
+before it can be rerun.
+
 Targeted diagnostic-only coverage following endurance-01, not another long soak,
 gameplay rebalance, resource grant or preview promotion. The selected human build
 stays accepted video-sync-01 with the persistent jenny-review profile.

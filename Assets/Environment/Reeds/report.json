@@ -1,0 +1,17 @@
+{
+  "SM_ReedClump": {
+    "vertices": 3400,
+    "triangles": 1612,
+    "height_m": 1.0781678352834416,
+    "radius_m": 0.4267256330017287,
+    "sha256": "0248d730bff6f3bd6a48bb154f079b7fcbe0961781bd9e6ad43e8e1e2705f383"
+  },
+  "SM_ReedStubble": {
+    "vertices": 880,
+    "triangles": 440,
+    "height_m": 0.22746259781350983,
+    "radius_m": 0.22742836220288107,
+    "sha256": "8b2b6f3cadf1842288a54080d7a0c01a6de083a3973c292338322686339b082d"
+  },
+  "provenance": "Original project-authored geometry; no third-party asset or reference texture"
+}

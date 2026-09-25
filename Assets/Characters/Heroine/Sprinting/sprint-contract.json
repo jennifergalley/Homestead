@@ -1,0 +1,13 @@
+{
+  "AN_Heroine_Sprint": {
+    "duration_seconds": 0.5,
+    "fps": 60,
+    "stance_speed_cm_s": 300.0,
+    "stance_speed_max_error_cm_s": 0.000286102294921875,
+    "loop_error_m": 0.0,
+    "root_motion": false,
+    "notifies": 0,
+    "rig": "Existing unchanged heroine bind; animation-only import",
+    "rights": "Original authored motion on admitted CC0 MPFB source"
+  }
+}

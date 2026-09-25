@@ -44,7 +44,7 @@ export function renderPlannerHtml() {
     .refresh:hover { border-color: var(--color-focus-outline, #58a6ff); }
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
       gap: 12px;
       margin-bottom: 18px;
     }
@@ -112,11 +112,14 @@ export function renderPlannerHtml() {
       letter-spacing: .04em;
     }
     .badge.active { background: var(--true-color-blue-muted, #1f6feb33); color: var(--true-color-blue, #58a6ff); }
+    .badge.proposed { background: var(--background-color-default, #0d1117); color: var(--text-color-muted, #8b949e); border: 1px solid var(--border-color-default, #30363d); }
+    .badge.paused { background: var(--true-color-yellow-muted, #9e6a032e); color: var(--true-color-yellow, #d29922); }
     .badge.complete { background: var(--true-color-green-muted, #23863633); color: var(--true-color-green, #3fb950); }
     .count { white-space: nowrap; font-variant-numeric: tabular-nums; }
     .bar { height: 6px; margin-top: 12px; border-radius: 999px; overflow: hidden; background: var(--border-color-default, #30363d); }
     .bar span { display: block; height: 100%; background: var(--true-color-blue, #58a6ff); }
     .feature.complete .bar span { background: var(--true-color-green, #3fb950); }
+    .feature.paused .bar span { background: var(--true-color-yellow, #d29922); }
     .feature-body { border-top: 1px solid var(--border-color-default, #30363d); padding: 4px 18px 18px; }
     .section { margin-top: 16px; }
     .section h3 { margin: 0 0 8px; font-size: 13px; color: var(--text-color-muted, #8b949e); }
@@ -180,7 +183,7 @@ export function renderPlannerHtml() {
     <header class="hero">
       <div>
         <h1>Homestead task planner</h1>
-        <div class="subtitle">Open work first. Completed tasks stay tucked away until you need them.</div>
+        <div class="subtitle">Active work, paused work, and plans at a glance. Completed tasks stay tucked away.</div>
       </div>
       <button id="refresh" class="refresh" type="button">Refresh tasks</button>
     </header>
@@ -190,13 +193,18 @@ export function renderPlannerHtml() {
       <div class="filters" role="group" aria-label="Status filter">
         <button class="filter active" data-filter="all" type="button">All</button>
         <button class="filter" data-filter="active" type="button">Active</button>
+        <button class="filter" data-filter="paused" type="button">Paused</button>
+        <button class="filter" data-filter="proposed" type="button">Proposed</button>
         <button class="filter" data-filter="complete" type="button">Complete</button>
       </div>
     </section>
     <section id="board" class="board" aria-live="polite"></section>
   </main>
   <script>
-    const state = { planner: null, filter: "all", query: "" };
+    const state = {
+      planner: null, signature: null, filter: "all", query: "",
+      expanded: new Map(), completedExpanded: new Map(),
+    };
     const stats = document.getElementById("stats");
     const board = document.getElementById("board");
     const search = document.getElementById("search");
@@ -215,6 +223,8 @@ export function renderPlannerHtml() {
         ["Tasks complete", summary.completedTasks + " / " + summary.totalTasks],
         ["Overall progress", summary.totalTasks ? Math.round(summary.completedTasks * 100 / summary.totalTasks) + "%" : "0%"],
         ["Active features", String(summary.activeFeatures)],
+        ["Paused features", String(summary.pausedFeatures)],
+        ["Proposed features", String(summary.proposedFeatures)],
         ["Completed features", String(summary.completedFeatures)],
       ];
       for (const [label, value] of values) {
@@ -244,7 +254,9 @@ export function renderPlannerHtml() {
       }
       for (const feature of features) {
         const details = el("details", "feature " + feature.status);
-        if (feature.status === "active") details.open = true;
+        details.open = state.expanded.get(feature.id)
+          ?? (feature.status === "active" || feature.status === "paused");
+        details.addEventListener("toggle", () => state.expanded.set(feature.id, details.open));
         const summary = el("summary");
         const head = el("div", "feature-head");
         const title = el("div", "feature-title");
@@ -276,6 +288,9 @@ export function renderPlannerHtml() {
 
         if (feature.completed > 0) {
           const completed = el("details", "completed-group");
+          completed.open = state.completedExpanded.get(feature.id) ?? false;
+          completed.addEventListener("toggle", () =>
+            state.completedExpanded.set(feature.id, completed.open));
           completed.append(el("summary", "", "Completed (" + feature.completed + ")"));
           const completedContent = el("div", "completed-content");
           appendSections(completedContent, feature.sections, true);
@@ -293,19 +308,29 @@ export function renderPlannerHtml() {
       renderBoard();
     }
 
-    async function load() {
-      refresh.disabled = true;
-      refresh.textContent = "Refreshing...";
+    async function load(quiet = false) {
+      if (!quiet) {
+        refresh.disabled = true;
+        refresh.textContent = "Refreshing...";
+      }
       try {
         const response = await fetch("/api/tasks", { cache: "no-store" });
         if (!response.ok) throw new Error("Planner request failed: " + response.status);
-        state.planner = await response.json();
-        render();
+        const planner = await response.json();
+        const signature = JSON.stringify({ summary: planner.summary, features: planner.features });
+        if (!quiet || state.signature !== signature) {
+          state.planner = planner;
+          state.signature = signature;
+          render();
+        }
       } catch (error) {
+        state.signature = null;
         board.replaceChildren(el("div", "error", error.message));
       } finally {
-        refresh.disabled = false;
-        refresh.textContent = "Refresh tasks";
+        if (!quiet) {
+          refresh.disabled = false;
+          refresh.textContent = "Refresh tasks";
+        }
       }
     }
 
@@ -320,8 +345,9 @@ export function renderPlannerHtml() {
         if (state.planner) renderBoard();
       });
     }
-    refresh.addEventListener("click", load);
+    refresh.addEventListener("click", () => load());
     load();
+    setInterval(() => load(true), 60_000);
   </script>
 </body>
 </html>`;

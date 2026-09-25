@@ -24,6 +24,7 @@ private:
         TFunction<bool()> Skip;
         TFunction<void()> Repeat;
         float Wait = 0.35f;
+        bool bCompleteWhenReady = false;
         int32 NavigateToId = -1;
     };
     UPROPERTY() TObjectPtr<AHomesteadController> Controller;
@@ -61,6 +62,7 @@ private:
     void Prepare();
     void PrepareGeneratedWorldChecks();
     void PrepareCreekChecks();
+    FString DescribeHeroineAction(const TCHAR* Label) const;
     void PrepareDirectionalNavigationChecks();
     void PrepareNativeMenuChecks();
     void PrepareCraftingChecks();

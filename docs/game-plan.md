@@ -63,6 +63,13 @@ Current progress and the latest usable launch path are recorded in
 `docs\development-status.md` and `Preview.cmd`; the prototype snapshot below
 is historical, not the current build/authorization status.
 
+Jenny's September 23 playtest prioritizes appropriately sized **individual**
+4K text, icons and controls in a viewport-using menu, not a miniature whole
+menu; fixes mouse audio-slider activation and removes inert Read and renewal
+explanations. The first tool recipe must have discoverable bank reeds/Fiber in
+ordinary play. After that playable UI/forage pass, address the measured
+chunk-publication hitch before expanding the far-view/time-card scope.
+
 ### Apply these lessons to every feature round
 
 1. Start with focused reuse research, consulting existing findings before

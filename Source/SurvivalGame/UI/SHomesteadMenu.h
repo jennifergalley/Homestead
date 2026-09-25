@@ -53,12 +53,14 @@ public:
         return Dialog == EDialog::None && SubjectFocused && Entries.IsValidIndex(ContentSelection) ? &Entries[ContentSelection] : nullptr;
     }
     FString GetDisplayedDetails() const { return DetailsText(); }
+    FString GetFocusedRequirementHint() const;
     FString GetFocusedRegionName() const;
     bool HasSynchronizedFocus() const;
     bool IsFocusedControlVisible() const;
     int32 GetSelectedContentIndex() const { return ContentSelection; }
     int32 GetContentColumnCount() const { return Columns(); }
     int32 GetActionCount() const { return Actions.Num(); }
+    TSharedPtr<SWidget> GetAudioSliderWidget(int32 AudioId) const;
     bool IsEditingQuantity() const { return bEditingAmount; }
     int32 GetDraftQuantity() const { return Amount; }
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
@@ -87,6 +89,8 @@ private:
     TArray<TSharedPtr<SWidget>> DialogButtons;
     TArray<TSharedPtr<SWidget>> Cells;
     TArray<TSharedPtr<SWidget>> ActionButtons;
+    TArray<TSharedPtr<SSlider>> AudioSliders;
+    TArray<FString> RequirementHints;
     TArray<FHomesteadRow> Entries;
     TArray<int32> RowIndices;
     TArray<EHomesteadItemAction> Actions;

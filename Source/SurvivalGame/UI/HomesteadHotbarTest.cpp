@@ -1,10 +1,13 @@
 #include "../HomesteadSmokeTest.h"
 
 #include "../HomesteadCharacter.h"
+#include "../HomesteadAnimInstance.h"
 #include "../HomesteadController.h"
+#include "../HomesteadKnife.h"
 #include "../HomesteadSave.h"
 #include "SHomesteadHotbar.h"
 #include "Framework/Application/SlateApplication.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/Events.h"
 
@@ -17,8 +20,17 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     const auto TillX = MakeShared<int32>(0);
     const auto TillY = MakeShared<int32>(0);
     const auto ChestId = MakeShared<int32>(0);
+    const auto KnifeDropId = MakeShared<int32>(0);
     const auto LowId = MakeShared<int32>(0);
     const auto SaplingId = MakeShared<int32>(0);
+    const auto KnifeStarts = MakeShared<uint32>(0);
+    const auto HatchetStarts = MakeShared<uint32>(0);
+    const auto OldHairStyle = MakeShared<int32>(-1);
+    const auto OldBodyPreset = MakeShared<int32>(-1);
+    const auto AirborneEnergy = MakeShared<double>(0);
+    const auto ReserveEnergy = MakeShared<double>(0);
+    const auto WorkEnergy = MakeShared<double>(0);
+    const auto WorkStarts = MakeShared<uint32>(0);
     Homestead::ResourceNode LowResource;
     Homestead::ResourceNode Sapling;
     for (const auto& Node : Controller->State().resources)
@@ -54,6 +66,31 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position,
             TSet<FKey>(), EKeys::LeftMouseButton, 0, FModifierKeysState()));
     };
+    const auto PointerHover = [this](int32 Index)
+    {
+        if (!Controller->HotbarWidget.IsValid()) return;
+        const auto Widget = Controller->HotbarWidget->SlotWidget(Index);
+        if (!Widget) return;
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        const FGeometry Geometry = Widget->GetCachedGeometry();
+        const FVector2D Position = Geometry.GetAbsolutePosition()
+            + Geometry.GetAbsoluteSize() * 0.5f;
+        const FVector2D Previous = Slate.GetCursorPos();
+        Slate.SetCursorPos(Position);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Previous, TSet<FKey>(),
+            EKeys::Invalid, 0, FModifierKeysState()));
+    };
+    const auto PointerLeave = [this]()
+    {
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        const FVector2D Position(20, 20);
+        const FVector2D Previous = Slate.GetCursorPos();
+        Slate.SetCursorPos(Position);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Previous, TSet<FKey>(),
+            EKeys::Invalid, 0, FModifierKeysState()));
+    };
 
     Add(TEXT("Close Guidebook to expose the gameplay hotbar"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
@@ -74,6 +111,24 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Slots[3].Tool == Item::WateringCan && !Slots[3].Available
                 && !Slots[4].Assigned && !Slots[9].Assigned
                 && Controller->Simulation().UsedCapacity() == *Capacity;
+        });
+    Add(TEXT("Carried selected Knife is presented in the heroine hand"),
+        []() {},
+        [this]() { return Controller->GetPawn()
+            && Cast<AHomesteadCharacter>(Controller->GetPawn())->GetKnife()->IsPresented(); }, 0.25f);
+    Add(TEXT("Held Knife is hand-bound, noncolliding and plausibly sized"),
+        []() {},
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Knife = Avatar ? Avatar->GetKnife() : nullptr;
+            const float Height = Knife ? Knife->Bounds.BoxExtent.Z * 2 : 0;
+            return Knife && Knife->GetAttachParent() == Avatar->GetMesh()
+                && Knife->GetAttachSocketName() == TEXT("hand_r")
+                && Knife->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+                && !Knife->GetGenerateOverlapEvents()
+                && Knife->GetNumSections() == 3
+                && Height > 12 && Height < 30;
         });
     Add(TEXT("Capture the original ten-slot gameplay hotbar"),
         [this]() { Screenshot(TEXT("hotbar-gameplay")); },
@@ -108,11 +163,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     Add(TEXT("Wheel down wraps slot ten to slot one exactly once"),
         [this]() { Axis(EKeys::MouseWheelAxis, -1); Axis(EKeys::MouseWheelAxis, 0); },
         [this]() { return Controller->SelectedHotbarIndex() == 0; });
-    Add(TEXT("Number two selects the ghosted Hatchet"),
+    Add(TEXT("Number two selects the assigned but uncarried Hatchet"),
         [this]() { Tap(EKeys::Two); },
         [this]() { return Controller->SelectedHotbarIndex() == 1
             && !Controller->HotbarSnapshot()[1].Available; });
-    Add(TEXT("Ghosted selected tool rejects left click without mutation"),
+    Add(TEXT("Uncarried selected tool rejects left click without mutation"),
         [this, Revision]() { *Revision = Controller->Simulation().GetRevision(); Tap(EKeys::LeftMouseButton); },
         [this, Revision]() { return Controller->ToastIsError()
             && Controller->Simulation().GetRevision() == *Revision; });
@@ -163,6 +218,24 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this, Revision]() { return Controller->SelectedHotbarIndex() == 2
             && Controller->Simulation().GetRevision() == *Revision; });
+    Add(TEXT("Pointer hover previews carried Knife without selecting or using it"),
+        [PointerHover]() { PointerHover(0); },
+        [this, Revision]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Avatar->GetKnife()->IsPresented()
+                && Controller->SelectedHotbarIndex() == 2
+                && Controller->Simulation().GetRevision() == *Revision;
+        }, 0.2f);
+    Add(TEXT("Leaving Knife hover restores selected Digging Stick without a ghost prop"),
+        [PointerHover]() { PointerHover(2); },
+        [this, Revision]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && !Avatar->GetKnife()->IsPresented()
+                && Controller->SelectedHotbarIndex() == 2
+                && Controller->Simulation().GetRevision() == *Revision;
+        }, 0.2f);
     Add(TEXT("CONTROLLED chest fixture uses ordinary transfer authority for live references"),
         [this, ChestId]()
         {
@@ -216,6 +289,47 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this]() { return Controller->Simulation().Count(Item::Hatchet) == 1
             && Controller->HotbarSnapshot()[1].Available; });
+    Add(TEXT("Selected carried Knife is visible before chest storage"),
+        [this, PointerLeave]() { PointerLeave(); Tap(EKeys::One); },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 0
+                && Avatar->GetKnife()->IsPresented();
+        }, 0.2f);
+    Add(TEXT("Storing the only Knife removes its live icon and held prop"),
+        [this, ChestId]()
+        {
+            const auto Result = Controller->Sim.Transfer(*ChestId, Item::Knife, 1,
+                Controller->PlayerPoint());
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Count(Item::Knife) == 0
+                && !Controller->HotbarSnapshot()[0].Available
+                && !Avatar->GetKnife()->IsPresented();
+        });
+    Add(TEXT("Retrieving Knife restores its same numbered icon and held prop"),
+        [this, ChestId]()
+        {
+            const auto Result = Controller->Sim.Transfer(*ChestId, Item::Knife, -1,
+                Controller->PlayerPoint());
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Count(Item::Knife) == 1
+                && Controller->HotbarSnapshot()[0].Available
+                && Avatar->GetKnife()->IsPresented();
+        }, 0.2f);
+    Add(TEXT("Return to the original selected tool after chest proof"),
+        [this]() { Tap(EKeys::Three); },
+        [this]() { return Controller->SelectedHotbarIndex() == 2; });
     Add(TEXT("Ctrl wheel changes camera distance without changing selected slot"),
         [this, CameraDistance]()
         {
@@ -248,6 +362,33 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && !FMath::IsNearlyEqual(
                     Avatar->CameraArm->TargetArmLength, *CameraDistance);
         });
+    Add(TEXT("Controller LB cycles toward Knife without inventory mutation"),
+        [this, Revision]()
+        {
+            *Revision = Controller->Simulation().GetRevision();
+            Tap(EKeys::Gamepad_LeftShoulder);
+        },
+        [this, Revision]() { return Controller->SelectedHotbarIndex() == 1
+            && Controller->Simulation().GetRevision() == *Revision; });
+    Add(TEXT("Controller LB equips the carried Knife in hand"),
+        [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 0
+                && Avatar->GetKnife()->IsPresented();
+        }, 0.2f);
+    Add(TEXT("Controller RB clears held Knife on tool switch"),
+        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 1
+                && !Avatar->GetKnife()->IsPresented();
+        });
+    Add(TEXT("Controller RB returns to the previous selected tool"),
+        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
+        [this]() { return Controller->SelectedHotbarIndex() == 2; });
     Add(TEXT("Gameplay RB cycles the selected tool"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
         [this]() { return Controller->SelectedHotbarIndex() == 3; });
@@ -276,11 +417,136 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             return *LowId > 0 && Controller->SelectedHotbarIndex() == 0;
         }, 0.7f);
     Add(TEXT("Left click with carried Knife clears exactly one authoritative low patch"),
-        [this]() { Tap(EKeys::LeftMouseButton); },
+        [this, KnifeStarts, HatchetStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            if (!Animation) { Finish(false, TEXT("Knife animation instance is missing.")); return; }
+            *KnifeStarts = Animation->KnifeCutStarts();
+            *HatchetStarts = Animation->ClearStarts();
+            Tap(EKeys::LeftMouseButton);
+        },
         [this, LowId]() { const auto Node = std::find_if(
                 Controller->State().resources.begin(), Controller->State().resources.end(),
                 [LowId](const auto& Value) { return Value.id == *LowId; });
             return Node != Controller->State().resources.end() && Node->cleared; });
+    Add(TEXT("Successful Knife clear presents one distinct short cut with the held prop"),
+        []() {},
+        [this, KnifeStarts, HatchetStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            if (!Avatar || !Animation || !Avatar->GetKnife()->IsPresented()
+                || Animation->KnifeCutStarts() != *KnifeStarts + 1
+                || Animation->ClearStarts() != *HatchetStarts
+                || Animation->KnifeCutWeight() <= 0.3f)
+                return false;
+            return true;
+        }, 0.2f);
+    Add(TEXT("Opening the field book cancels a Knife cut and hides the prop"),
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            if (!Animation || Animation->KnifeCutWeight() <= 0.01f)
+            {
+                Finish(false, TEXT("Knife gesture ended before menu cancellation could be exercised."));
+                return;
+            }
+            Tap(EKeys::I);
+        },
+        [this, KnifeStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            const bool Passed = Controller->IsBookOpen() && Avatar && Animation
+                && !Avatar->GetKnife()->IsPresented()
+                && Animation->KnifeCutStarts() == *KnifeStarts + 1;
+            if (!Passed)
+                Results.Add(FString::Printf(
+                    TEXT("KNIFE_CANCEL_DIAG book=%d avatar=%d anim=%d prop_visible=%d cut_starts=%u expected=%u weight=%.3f"),
+                    Controller->IsBookOpen(), Avatar != nullptr, Animation != nullptr,
+                    Avatar && Avatar->GetKnife()->IsPresented(),
+                    Animation ? Animation->KnifeCutStarts() : 0, *KnifeStarts + 1,
+                    Animation ? Animation->KnifeCutWeight() : -1.0f));
+            return Passed;
+        }, 0.3f);
+    Add(TEXT("Closing the book never replays canceled Knife work"),
+        [this]() { Tap(EKeys::Escape); },
+        [this, KnifeStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            return !Controller->IsBookOpen() && Avatar && Animation
+                && Animation->KnifeCutStarts() == *KnifeStarts + 1
+                && Animation->KnifeCutWeight() < 0.01f;
+        }, 0.8f);
+    Add(TEXT("Open Appearance without showing a Knife through the field book"),
+        [this, OldHairStyle, OldBodyPreset]()
+        {
+            *OldHairStyle = Controller->Appearance.HairStyle;
+            *OldBodyPreset = Controller->Appearance.BodyPreset;
+            Controller->MenuPage(6);
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Controller->IsBookOpen() && Controller->BookPage() == 6
+                && Avatar && !Avatar->GetKnife()->IsPresented();
+        }, 0.25f);
+    Add(TEXT("Appearance rebuild keeps the selected Knife hidden in the book"),
+        [this]()
+        {
+            Controller->MenuSelect(0);
+            Controller->MenuActivate();
+        },
+        [this, OldHairStyle]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const bool Passed = Controller->IsBookOpen() && Controller->BookPage() == 6
+                && Controller->Appearance.HairStyle == (*OldHairStyle + 1) % 3
+                && Controller->SelectedHotbarIndex() == 0
+                && Avatar && Avatar->IsEquipmentPresentationReady()
+                && !Avatar->GetKnife()->IsPresented();
+            if (!Passed)
+                Results.Add(FString::Printf(TEXT("APPEARANCE_REBIND_DIAG book=%d page=%d style=%d old=%d hotbar=%d ready=%d knife=%d"),
+                    Controller->IsBookOpen(), Controller->BookPage(), Controller->Appearance.HairStyle,
+                    *OldHairStyle, Controller->SelectedHotbarIndex(),
+                    Avatar && Avatar->IsEquipmentPresentationReady(),
+                    Avatar && Avatar->GetKnife()->IsPresented()));
+            return Passed;
+        }, 0.3f);
+    Add(TEXT("Changing body and fitted garments never ghosts the selected Knife"),
+        [this]()
+        {
+            Controller->MenuSelect(6);
+            Controller->MenuActivate();
+        },
+        [this, OldBodyPreset]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Controller->IsBookOpen() && Controller->BookPage() == 6
+                && Controller->Appearance.BodyPreset == (*OldBodyPreset + 1) % 3
+                && Avatar && Avatar->IsEquipmentPresentationReady()
+                && !Avatar->GetKnife()->IsPresented();
+        }, 0.3f);
+    Add(TEXT("Leaving Appearance rebinds exactly one held Knife without replay"),
+        [this]() { Tap(EKeys::Escape); },
+        [this, KnifeStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            return !Controller->IsBookOpen() && Avatar && Animation
+                && Controller->SelectedHotbarIndex() == 0
+                && Avatar->GetKnife()->IsPresented()
+                && Animation->KnifeCutStarts() == *KnifeStarts + 1;
+        }, 0.3f);
     Add(TEXT("Approach a sapling while Knife remains selected"),
         [this, Sapling]() { Teleport(Sapling.position); },
         [this, SaplingId]()
@@ -297,12 +563,16 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     Add(TEXT("Wrong selected Knife cannot clear the sapling"),
         [this, Revision]() { *Revision = Controller->Simulation().GetRevision();
             Tap(EKeys::LeftMouseButton); },
-        [this, Revision, SaplingId]() { const auto Node = std::find_if(
+        [this, Revision, SaplingId, KnifeStarts]() { const auto Node = std::find_if(
                 Controller->State().resources.begin(), Controller->State().resources.end(),
                 [SaplingId](const auto& Value) { return Value.id == *SaplingId; });
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
             return Controller->ToastIsError()
                 && Controller->Simulation().GetRevision() == *Revision
-                && Node != Controller->State().resources.end() && !Node->cleared; });
+                && Node != Controller->State().resources.end() && !Node->cleared
+                && Animation && Animation->KnifeCutStarts() == *KnifeStarts + 1; });
     Add(TEXT("Number two then left click clears the sapling with the carried Hatchet"),
         [this]() { Tap(EKeys::Two); Tap(EKeys::LeftMouseButton); },
         [this, SaplingId]() { const auto Node = std::find_if(
@@ -371,6 +641,53 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 { return Value.cellX == *TillX && Value.cellY == *TillY; });
             return Controller->SelectedHotbarIndex() == 3
                 && Plot != Controller->State().plots.end() && Plot->moisture > 0; });
+    Add(TEXT("CONTROLLED dropping the only Knife removes its icon and held prop"),
+        [this, KnifeDropId]()
+        {
+            Tap(EKeys::One);
+            int32 GroupId = 0;
+            for (const auto& Entry : Controller->State().inventoryLayout)
+                if (Entry.item == Item::Knife && Entry.wearableId == 0)
+                    GroupId = Entry.groupId;
+            Homestead::Point DropPosition;
+            if (!Controller->ResolveDropPoint(DropPosition))
+            {
+                Finish(false, TEXT("Controlled Knife drop has no safe placement beside the heroine."));
+                return;
+            }
+            const auto Result = Controller->Sim.DropGroup(GroupId, 1, DropPosition,
+                Controller->PlayerPoint(),
+                Controller->Sim.GetRevision());
+            if (!Result || Controller->State().worldDrops.empty())
+            {
+                Finish(false, FString(TEXT("Controlled Knife drop failed: "))
+                    + UTF8_TO_TCHAR(Result.message.c_str()));
+                return;
+            }
+            *KnifeDropId = Controller->State().worldDrops.back().id;
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Count(Item::Knife) == 0
+                && !Controller->HotbarSnapshot()[0].Available
+                && !Avatar->GetKnife()->IsPresented();
+        }, 0.2f);
+    Add(TEXT("CONTROLLED pickup restores the same Knife assignment and held prop"),
+        [this, KnifeDropId]()
+        {
+            const auto Result = Controller->Sim.PickUpDrop(*KnifeDropId,
+                Controller->PlayerPoint());
+            if (!Result) Finish(false, TEXT("Controlled Knife pickup failed."));
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Controller->Simulation().Count(Item::Knife) == 1
+                && Controller->HotbarSnapshot()[0].Available
+                && Avatar->GetKnife()->IsPresented();
+        }, 0.2f);
     Add(TEXT("A new woodland resets world-specific hotbar references safely"),
         [this]() { Controller->NewGame(); },
         [this]()
@@ -381,4 +698,169 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Slots[0].Available && !Slots[1].Available
                 && !Slots[2].Available && !Slots[3].Available;
         }, 0.8f);
+    Add(TEXT("Close fresh notes and settle before sprint eligibility fixtures"),
+        [this]() { Tap(EKeys::Escape); },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return !Controller->IsBookOpen() && Avatar
+                && Avatar->GetCharacterMovement()->IsMovingOnGround()
+                && !Controller->bPendingSpawn;
+        }, 0.8f);
+    Add(TEXT("CONTROLLED Simulation exertion reaches exactly the 10-Energy reserve"),
+        [this, ReserveEnergy]()
+        {
+            for (int32 Index = 0; Index < 26; ++Index)
+            {
+                const auto Result = Controller->Sim.SpendSprintEnergy(10);
+                if (!Result)
+                {
+                    Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+                    return;
+                }
+            }
+            *ReserveEnergy = Controller->State().energy;
+            if (!FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001))
+                Finish(false, FString::Printf(
+                    TEXT("Sprint authority did not clamp to 10 Energy: %.5f"), *ReserveEnergy));
+        },
+        [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001)
+            && Controller->State().energy <= 10.0 && Controller->State().energy > 9.9; });
+    Add(TEXT("Held mapped Shift walks instead of sprinting below Energy reserve"),
+        [this, ReserveEnergy]()
+        {
+            *ReserveEnergy = Controller->State().energy;
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Axis(EKeys::Gamepad_LeftY, 1);
+        },
+        [this, ReserveEnergy]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Avatar->GetVelocity().Size2D() > 60
+                && !Avatar->IsSprinting()
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, 180.0f)
+                && Controller->State().energy <= *ReserveEnergy
+                && Controller->State().energy > *ReserveEnergy - 0.1;
+        }, 0.9f);
+    Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 1); };
+    Add(TEXT("CONTROLLED fresh-world reset restores sprint eligibility safely"),
+        [this]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 0);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+            Controller->NewGame();
+        },
+        [this]() { return Controller->IsBookOpen()
+            && Controller->State().energy > 90; }, 0.8f);
+    Add(TEXT("Close reset notes before new mapped sprint input"),
+        [this]() { Tap(EKeys::Escape); },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && !Controller->IsBookOpen() && !Controller->bPendingSpawn
+                && Avatar->GetCharacterMovement()->IsMovingOnGround();
+        }, 0.6f);
+    Add(TEXT("Held mapped Shift again reaches active grounded sprint"),
+        [this]()
+        {
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Axis(EKeys::Gamepad_LeftY, 1);
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Avatar->IsSprinting()
+                && Avatar->GetVelocity().Size2D() > 200;
+        }, 1.3f);
+    Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 1); };
+    Add(TEXT("CONTROLLED work presentation stops sprint before the Knife gesture"),
+        [this, WorkEnergy, WorkStarts]()
+        {
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            if (!Avatar || !Animation || !Avatar->IsSprinting())
+            {
+                Finish(false, TEXT("The controlled work interruption lacked an active sprint."));
+                return;
+            }
+            *WorkEnergy = Controller->State().energy;
+            *WorkStarts = Animation->KnifeCutStarts();
+            const Homestead::Point Player = Controller->PlayerPoint();
+            Avatar->PlayKnifeCut({Player.x + 100, Player.y});
+            Axis(EKeys::Gamepad_LeftY, 0);
+        },
+        [this, WorkEnergy, WorkStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            return Avatar && Animation && !Avatar->IsSprinting()
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, 180.0f)
+                && Animation->KnifeCutStarts() == *WorkStarts + 1
+                && Animation->KnifeCutWeight() > 0.1f
+                && FMath::Abs(Controller->State().energy - *WorkEnergy) < 0.1;
+        }, 0.4f);
+    Add(TEXT("Cancel the isolated work pose with no queued sprint replay"),
+        [this]()
+        {
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            if (Avatar) Avatar->CancelAction(true);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+        },
+        [this, WorkStarts]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Animation = Avatar
+                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+            return Avatar && Animation && !Avatar->IsSprinting()
+                && Animation->ActionWeight() < 0.01f
+                && Animation->KnifeCutStarts() == *WorkStarts + 1;
+        }, 0.3f);
+    Add(TEXT("Fresh mapped hold re-enters sprint after completed work"),
+        [this]()
+        {
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Axis(EKeys::Gamepad_LeftY, 1);
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && Avatar->IsSprinting()
+                && Avatar->GetVelocity().Size2D() > 200;
+        }, 1.3f);
+    Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 1); };
+    Add(TEXT("CONTROLLED airborne movement cancels sprint and its Energy cost"),
+        [this, AirborneEnergy]()
+        {
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            if (!Avatar || !Avatar->IsSprinting())
+            {
+                Finish(false, TEXT("Airborne sprint fixture lacked a grounded sprint."));
+                return;
+            }
+            *AirborneEnergy = Controller->State().energy;
+            Avatar->SetActorLocation(Avatar->GetActorLocation() + FVector(0, 0, 140),
+                false, nullptr, ETeleportType::TeleportPhysics);
+            Avatar->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+        },
+        [this, AirborneEnergy]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && !Avatar->GetCharacterMovement()->IsMovingOnGround()
+                && !Avatar->IsSprinting()
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, 180.0f)
+                && FMath::Abs(Controller->State().energy - *AirborneEnergy) < 0.1;
+        }, 0.45f);
+    Add(TEXT("Release airborne sprint input without queued restart"),
+        [this]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 0);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+        },
+        [this]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && !Avatar->IsSprinting();
+        });
 }

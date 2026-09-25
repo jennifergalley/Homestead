@@ -1,6 +1,9 @@
 import { readFile, readdir, stat } from "node:fs/promises";
 import { basename, dirname, join, relative } from "node:path";
 
+const activeWindowMs = 15 * 60 * 1000;
+const statusOrder = { active: 0, paused: 1, proposed: 2, complete: 3 };
+
 function titleCase(value) {
     return value
         .replace(/[-_]+/g, " ")
@@ -60,7 +63,26 @@ function parseTasks(markdown) {
     return sections;
 }
 
-async function loadFeature(projectRoot, tasksPath) {
+async function readActiveChange(projectRoot, now) {
+    let run;
+    let status;
+    try {
+        [run, status] = await Promise.all([
+            readFile(join(projectRoot, "Automation", "run.json"), "utf8").then(JSON.parse),
+            readFile(join(projectRoot, "Automation", "status.json"), "utf8").then(JSON.parse),
+        ]);
+    } catch (error) {
+        if (error?.code === "ENOENT") return null;
+        throw error;
+    }
+    const updated = Date.parse(status.updatedUtc);
+    if (run.state !== "running" || run.id !== status.runId || status.phase !== "implementing"
+        || typeof run.openSpecChange !== "string" || !Number.isFinite(updated)
+        || updated > now || now - updated > activeWindowMs) return null;
+    return run.openSpecChange;
+}
+
+async function loadFeature(projectRoot, tasksPath, activeChange) {
     const markdown = await readFile(tasksPath, "utf8");
     const sections = parseTasks(markdown);
     const tasks = sections.flatMap((section) => section.tasks);
@@ -76,16 +98,19 @@ async function loadFeature(projectRoot, tasksPath) {
         modifiedAt: metadata.mtime.toISOString(),
         completed,
         total: tasks.length,
-        status: tasks.length > 0 && completed === tasks.length ? "complete" : "active",
+        status: tasks.length > 0 && completed === tasks.length ? "complete"
+            : changeName === activeChange ? "active"
+            : completed === 0 ? "proposed" : "paused",
         sections,
     };
 }
 
-export async function loadPlanner(projectRoot) {
+export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
-    const features = await Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path)));
+    const activeChange = await readActiveChange(projectRoot, now);
+    const features = await Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange)));
     features.sort((a, b) => {
-        if (a.status !== b.status) return a.status === "active" ? -1 : 1;
+        if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
         return b.modifiedAt.localeCompare(a.modifiedAt);
     });
     const completedTasks = features.reduce((sum, feature) => sum + feature.completed, 0);
@@ -97,6 +122,8 @@ export async function loadPlanner(projectRoot) {
             completedTasks,
             totalTasks,
             activeFeatures: features.filter((feature) => feature.status === "active").length,
+            proposedFeatures: features.filter((feature) => feature.status === "proposed").length,
+            pausedFeatures: features.filter((feature) => feature.status === "paused").length,
             completedFeatures: features.filter((feature) => feature.status === "complete").length,
         },
         features,

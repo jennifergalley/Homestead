@@ -1,0 +1,20 @@
+{
+  "source": "Carnegie Mellon University Graphics Lab Motion Capture Database",
+  "license_evidence": "https://mocap.cs.cmu.edu/faqs.php",
+  "permission": "The motion capture data may be copied, modified, or redistributed without permission.",
+  "subject": 7,
+  "motion_descriptions": {
+    "07_01.amc": "walk",
+    "07_04.amc": "slow walk",
+    "07_12.amc": "brisk walk"
+  },
+  "motion_index": "https://mocap.cs.cmu.edu/search.php?maincat=3&subcat=2",
+  "sources_sha256": {
+    "07.asf": "C29414591D76A34885BFF0B04A2666BF9659F869751A2549591C55277CF95B04",
+    "07_01.amc": "3CA8E8B834481C97C32E9DD555F8C9023E33B6C52D93C9D556C83570204BF3F2",
+    "07_04.amc": "C37994B8EEFA0CF30D1822DB05E698F7CE6098400B462CC0FADD185CAFA3301E",
+    "07_12.amc": "F017A78B4431E73ADE6CD20D0D2323FC6E451DD4E43C247DDB19A19E6A2DF6F2"
+  },
+  "handling": "Downloaded only the three text motion/skeleton files from mocap.cs.cmu.edu/subjects/07, without account, third-party BVH converter, plugin or executable.",
+  "status": "Licensed source for an isolated retargeting trial, not animation acceptance"
+}

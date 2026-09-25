@@ -16,11 +16,11 @@ RECEIPT = ROOT / "Build" / "CharacterPreview" / "locomotion-import.json"
 
 def main():
     command = unreal.SystemLibrary.get_command_line()
-    group = "RefinedWatering" if "-RefinedWateringAnimations" in command else "Tilling" if "-TillingAnimations" in command else "Chopping" if "-ChoppingAnimations" in command else "Clearing" if "-ClearingAnimations" in command else "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
+    group = "IdleRevision" if "-IdleRevisionAnimations" in command else "WalkRevision" if "-WalkRevisionAnimations" in command else "KnifeCut" if "-KnifeCutAnimations" in command else "Sprinting" if "-SprintingAnimations" in command else "RefinedWatering" if "-RefinedWateringAnimations" in command else "Tilling" if "-TillingAnimations" in command else "Chopping" if "-ChoppingAnimations" in command else "Clearing" if "-ClearingAnimations" in command else "Watering" if "-WateringAnimations" in command else "Gathering" if "-GatheringAnimations" in command else "Locomotion"
     source = SOURCE.parent / group
     receipt = RECEIPT.with_name(group.lower() + "-import.json")
     unreal.SystemLibrary.execute_console_command(None, "Interchange.FeatureFlags.Import.FBX 0")
-    contract_name = "refined-watering-contract.json" if group == "RefinedWatering" else "chop-contract.json" if group == "Chopping" else "till-contract.json" if group == "Tilling" else group.lower() + "-contract.json"
+    contract_name = "idle-contract.json" if group == "IdleRevision" else "walk-contract.json" if group == "WalkRevision" else "knife-cut-contract.json" if group == "KnifeCut" else "sprint-contract.json" if group == "Sprinting" else "refined-watering-contract.json" if group == "RefinedWatering" else "chop-contract.json" if group == "Chopping" else "till-contract.json" if group == "Tilling" else group.lower() + "-contract.json"
     contract = json.loads((source / contract_name).read_text())
     mesh = LIB.load_asset(DEST + "/SK_Heroine_LongWave")
     if not mesh:
@@ -29,7 +29,7 @@ def main():
     prior = json.loads(receipt.read_text()) if receipt.exists() else {}
     report = {}
     verify_only = "-LocomotionVerifyOnly" in unreal.SystemLibrary.get_command_line()
-    destination = "/Game/Trials/HomesteadWork_20260923_01/Animations" if group in ("Chopping", "Tilling", "RefinedWatering") else DEST + "/Animations"
+    destination = "/Game/Trials/HeroineIdle_20260924_15/Animations" if group == "IdleRevision" else "/Game/Trials/HeroineWalk_20260924_07/Animations" if group == "WalkRevision" else "/Game/Trials/HeroineKnife_20260924_01/Animations" if group == "KnifeCut" else "/Game/Trials/HeroineSprint_20260924_01/Animations" if group == "Sprinting" else "/Game/Trials/HomesteadWork_20260923_01/Animations" if group in ("Chopping", "Tilling", "RefinedWatering") else DEST + "/Animations"
     for name, expected in contract.items():
         path = destination + "/" + name
         digest = hashlib.sha256((source / (name + ".fbx")).read_bytes()).hexdigest()

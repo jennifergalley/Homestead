@@ -19,6 +19,8 @@
 #include "Input/NavigationReply.h"
 #include "Types/NavigationMetaData.h"
 #include "Layout/WidgetPath.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/Engine.h"
 
 namespace HomesteadMenus
 {
@@ -62,9 +64,29 @@ const FLinearColor Muted(0.71f, 0.77f, 0.69f);
 const FLinearColor MenuGold(0.92f, 0.74f, 0.43f);
 const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.97f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f);
-constexpr float PortraitWidth = 240;
-constexpr float DetailsWidth = 340;
 constexpr float ItemCellWidth = 76;
+float LogicalBookWidth()
+{
+    const FViewport* Viewport = GEngine && GEngine->GameViewport
+        ? GEngine->GameViewport->Viewport : nullptr;
+    return Viewport ? FMath::Max(1280.0f,
+        Viewport->GetSizeXY().X * (1280.0f / 1920.0f)) : 1280.0f;
+}
+float LogicalBookHeight()
+{
+    const FViewport* Viewport = GEngine && GEngine->GameViewport
+        ? GEngine->GameViewport->Viewport : nullptr;
+    return Viewport ? FMath::Max(720.0f,
+        Viewport->GetSizeXY().Y * (720.0f / 1080.0f)) : 720.0f;
+}
+float PortraitColumnWidth()
+{
+    return FMath::Min(420.0f, 240.0f + (LogicalBookWidth() - 1280.0f) * 0.14f);
+}
+float DetailsColumnWidth()
+{
+    return FMath::Min(560.0f, 340.0f + (LogicalBookWidth() - 1280.0f) * 0.18f);
+}
 const FButtonStyle& MenuButtonStyle()
 {
     static const FButtonStyle Style = FButtonStyle()
@@ -83,6 +105,16 @@ const TCHAR* ItemIcons[] = {TEXT("knife"), TEXT("branch"), TEXT("stone"), TEXT("
     TEXT("berries"), TEXT("roots"), TEXT("flowers"), TEXT("seeds"), TEXT("hatchet"),
     TEXT("digging-stick"), TEXT("watering-can"), TEXT("water"), TEXT("roasted-roots"), TEXT("herbed-roots"),
     TEXT("timber"), TEXT("firewood")};
+FName RequirementIcon(Homestead::Item Item)
+{
+    const int32 Index = static_cast<int32>(Item);
+    if (Index < 0 || Index >= UE_ARRAY_COUNT(ItemIcons))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Crafting requirement has no known item icon: %d"), Index);
+        return NAME_None;
+    }
+    return FName(ItemIcons[Index]);
+}
 const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("watering-can"),
     TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
 const TCHAR* PieceIcons[] = {TEXT("foundation"), TEXT("wall"), TEXT("doorway"), TEXT("roof"),
@@ -278,9 +310,15 @@ void SHomesteadMenu::Construct(const FArguments& Args)
         [
             SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
             [
-                SNew(SBox).WidthOverride(1280).HeightOverride(720)
+                SNew(SBox).HAlign(HAlign_Center).VAlign(VAlign_Center)
+                .WidthOverride_Lambda([]() { return FOptionalSize(LogicalBookWidth()); })
+                .HeightOverride_Lambda([]() { return FOptionalSize(LogicalBookHeight()); })
                 [
-                    SNew(SOverlay)
+                    SNew(SBox)
+                    .WidthOverride_Lambda([]() { return FOptionalSize(LogicalBookWidth()); })
+                    .HeightOverride_Lambda([]() { return FOptionalSize(LogicalBookHeight()); })
+                    [
+                        SNew(SOverlay)
                     + SOverlay::Slot().Padding(24, 16)
                     [
                         SAssignNew(Root, SVerticalBox)
@@ -325,7 +363,8 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                             ]
                         ]
                     ]
-                    + SOverlay::Slot()[ SAssignNew(ModalHost, SBox).Visibility(EVisibility::Collapsed) ]
+                        + SOverlay::Slot()[ SAssignNew(ModalHost, SBox).Visibility(EVisibility::Collapsed) ]
+                    ]
                 ]
             ]
         ]
@@ -478,8 +517,9 @@ bool SHomesteadMenu::IsHoldingRecipe(int32 Recipe) const
 
 int32 SHomesteadMenu::Columns() const
 {
-    return SeenPage == 0 ? 7
-        : SeenPage <= 2 ? 6 : SeenPage == 4 || SeenPage == 6 ? 2 : 1;
+    const bool Expanded = LogicalBookWidth() >= 1800;
+    return SeenPage == 0 ? (Expanded ? 12 : 7)
+        : SeenPage <= 2 ? (Expanded ? 10 : 6) : SeenPage == 4 || SeenPage == 6 ? 2 : 1;
 }
 
 void SHomesteadMenu::Refresh()
@@ -544,6 +584,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         ];
     const auto BuildSettings = [this]() -> TSharedRef<SWidget>
     {
+        AudioSliders.Init(nullptr, 3);
         TSharedPtr<SVerticalBox> RowsBox;
         auto Result = SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
@@ -620,22 +661,32 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 const int32 AudioId = Row.Id;
                 RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
                 [
-                    SNew(SSlider).Value_Lambda([this, AudioId]() { return Controller->MenuAudioVolume(AudioId); })
-                    .OnMouseCaptureBegin_Lambda([this, AudioId, Index]()
+                    SNew(SBox).WidthOverride_Lambda([]()
                     {
-                        AudioEditId = AudioId;
-                        AudioEditStart = Controller->MenuAudioVolume(AudioId);
-                        Region = ERegion::Content;
-                        Select(Index);
+                        return FOptionalSize(FMath::Min(LogicalBookWidth() - 80.0f, 1280.0f));
                     })
-                    .OnValueChanged_Lambda([this, AudioId](float Value) { Controller->MenuPreviewAudioVolume(AudioId, Value); })
-                    .OnMouseCaptureEnd_Lambda([this, AudioId]()
-                    {
-                        const float Current = Controller->MenuAudioVolume(AudioId);
-                        Controller->MenuCommitAudioVolume(AudioId, Current, AudioEditStart);
-                        AudioEditId = -1;
-                        Refresh();
-                    })
+                    [
+                        SAssignNew(AudioSliders[AudioId - 5], SSlider)
+                        .Value_Lambda([this, AudioId]() { return Controller->MenuAudioVolume(AudioId); })
+                        .OnMouseCaptureBegin_Lambda([this, AudioId, Index]()
+                        {
+                            AudioEditId = AudioId;
+                            AudioEditStart = Controller->MenuAudioVolume(AudioId);
+                            Region = ERegion::Content;
+                            Select(Index);
+                        })
+                        .OnValueChanged_Lambda([this, AudioId](float Value)
+                        {
+                            Controller->MenuPreviewAudioVolume(AudioId, Value);
+                        })
+                        .OnMouseCaptureEnd_Lambda([this, AudioId]()
+                        {
+                            const float Current = Controller->MenuAudioVolume(AudioId);
+                            Controller->MenuCommitAudioVolume(AudioId, Current, AudioEditStart);
+                            AudioEditId = -1;
+                            Refresh();
+                        })
+                    ]
                 ];
             }
             else if (Row.Id == 12)
@@ -694,7 +745,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     {
         ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, 12, 0)
         [
-            SNew(SBox).WidthOverride(PortraitWidth).Clipping(EWidgetClipping::ClipToBounds)
+            SNew(SBox).WidthOverride(PortraitColumnWidth()).Clipping(EWidgetClipping::ClipToBounds)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Portrait ? MenuGold : MenuPine; })
@@ -858,7 +909,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     }
     ColumnsBox->AddSlot().AutoWidth()
         [
-            SNew(SBox).WidthOverride(DetailsWidth).Clipping(EWidgetClipping::ClipToBounds)
+            SNew(SBox).WidthOverride(DetailsColumnWidth()).Clipping(EWidgetClipping::ClipToBounds)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Details ? MenuGold : MenuPine; })
@@ -1044,7 +1095,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 SNew(SVerticalBox)
                 + SVerticalBox::Slot().AutoHeight()
                 [
-                    SNew(STextBlock).WrapTextAt(DetailsWidth - 100).ColorAndOpacity(Ink)
+                    SNew(STextBlock).WrapTextAt(DetailsColumnWidth() - 100).ColorAndOpacity(Ink)
                     .Font(FCoreStyle::GetDefaultFontStyle("Bold", 22))
                     .Text_Lambda([this]()
                     {
@@ -1054,7 +1105,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
                 [
-                    SNew(STextBlock).WrapTextAt(DetailsWidth - 100).ColorAndOpacity(Muted)
+                    SNew(STextBlock).WrapTextAt(DetailsColumnWidth() - 100).ColorAndOpacity(Muted)
                     .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
                     .Text_Lambda([this]()
                     {
@@ -1074,77 +1125,89 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 SAssignNew(DetailsContent, SVerticalBox)
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)
                 [
-                    FocusAnchor(SNew(STextBlock).WrapTextAt(DetailsWidth - 56).ColorAndOpacity(Ink)
+                    FocusAnchor(SNew(STextBlock).WrapTextAt(DetailsColumnWidth() - 56).ColorAndOpacity(Ink)
                     .Font(FCoreStyle::GetDefaultFontStyle("Regular", 18))
                     .Text_Lambda([this]() { return FText::FromString(DetailsBodyText()); }), ERegion::Details, 1)
                 ]
             ]
         ];
+    RequirementHints.Reset();
     if (Entries.IsValidIndex(ContentSelection)
         && Entries[ContentSelection].Subject == EHomesteadMenuSubject::Recipe
         && Entries[ContentSelection].HasRecipeState)
     {
         const auto& Assessment = Entries[ContentSelection].RecipeState;
-        DetailsContent->AddSlot().AutoHeight().Padding(0, 0, 0, 10)
-        [
-            SNew(STextBlock).Text(FText::FromString(Entries[ContentSelection].Detail))
-            .WrapTextAt(DetailsWidth - 56).ColorAndOpacity(Muted)
-            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
-        ];
-        const auto AddRequirement = [&DetailsContent](const FString& Label, const FString& Status,
-            const FString& Source, bool Met)
+        const auto AddRequirement = [this, &DetailsContent](FName Icon, const FString& Label,
+            const FString& Status, const FString& Source, bool Met)
         {
-            TSharedPtr<SVerticalBox> Content;
+            const int32 FocusIndex = RequirementHints.Num() + 2;
+            RequirementHints.Add(Met ? FString() : Source);
+            const FString FullDetail = FString::Printf(TEXT("%s: %s. %s. %s"),
+                *Label, *Status, Met ? TEXT("Ready") : TEXT("Missing"),
+                Met ? TEXT("Requirement met") : Source.IsEmpty()
+                    ? TEXT("No other requirement") : *Source);
             auto Box = SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
                 .BorderBackgroundColor(Met ? FLinearColor(0.075f, 0.16f, 0.10f, 1)
                     : FLinearColor(0.24f, 0.075f, 0.055f, 1))
-                .Padding(10)
+                .Padding(FMargin(8, 5)).ToolTipText(FText::FromString(FullDetail))
                 [
-                    SAssignNew(Content, SVerticalBox)
+                    SNew(SVerticalBox)
                     + SVerticalBox::Slot().AutoHeight()
                     [
-                        SNew(STextBlock).Text(FText::FromString(Label))
-                        .ColorAndOpacity(Ink)
-                        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 17))
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 9, 0)
+                        [ SNew(SBox).WidthOverride(28).HeightOverride(28)
+                            [ SNew(SHomesteadIcon).Kind(Icon).Tint(Met ? MenuGold : Ink) ] ]
+                        + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                        [ SNew(STextBlock).Text(FText::FromString(Label)).ColorAndOpacity(Ink)
+                            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16)) ]
+                        + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0)
+                        [ SNew(STextBlock).Text(FText::FromString(Status)).ColorAndOpacity(Ink)
+                            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16)) ]
+                        + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+                        [ SNew(STextBlock).Text(FText::FromString(Met ? TEXT("[+]") : TEXT("[-]")))
+                            .ColorAndOpacity(Met ? MenuGold : FLinearColor(1.0f, 0.66f, 0.52f))
+                            .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16)) ]
                     ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 0)
+                    + SVerticalBox::Slot().AutoHeight()
                     [
-                        SNew(STextBlock).Text(FText::FromString(Status))
-                        .ColorAndOpacity(Met ? FSlateColor(Ink)
-                            : FSlateColor(FLinearColor(1.0f, 0.66f, 0.52f)))
-                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                        SNew(STextBlock).Text(FText::FromString(Source)).ColorAndOpacity(Muted)
+                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+                        .Visibility_Lambda([this, FocusIndex, Met, Source]()
+                        {
+                            return !Met && !Source.IsEmpty() && Region == ERegion::Details
+                                && DetailsSelection == FocusIndex
+                                ? EVisibility::Visible : EVisibility::Collapsed;
+                        })
                     ]
                 ];
-            if (!Source.IsEmpty())
-                Content->AddSlot().AutoHeight().Padding(0, 3, 0, 0)
-                [
-                    SNew(STextBlock).Text(FText::FromString(Source))
-                    .ColorAndOpacity(Muted)
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
-                ];
-            DetailsContent->AddSlot().AutoHeight().Padding(0, 0, 0, 7)[Box];
+            DetailsContent->AddSlot().AutoHeight().Padding(0, 0, 0, 5)
+            [FocusAnchor(Box, ERegion::Details, FocusIndex)];
         };
         for (const auto& Ingredient : Assessment.ingredients)
         {
-            AddRequirement(UTF8_TO_TCHAR(Homestead::ItemName(Ingredient.item)),
-                FString::Printf(TEXT("Have %d / Need %d"), Ingredient.have, Ingredient.need),
+            AddRequirement(RequirementIcon(Ingredient.item),
+                UTF8_TO_TCHAR(Homestead::ItemName(Ingredient.item)),
+                FString::Printf(TEXT("%d / %d"), Ingredient.have, Ingredient.need),
                 UTF8_TO_TCHAR(Ingredient.source), Ingredient.met);
         }
         if (Assessment.retainedTool != Homestead::Item::Count)
         {
             const int32 Have = Controller.IsValid()
                 ? Controller->Simulation().Count(Assessment.retainedTool) : 0;
-            AddRequirement(FString::Printf(TEXT("%s (kept)"),
-                UTF8_TO_TCHAR(Homestead::ItemName(Assessment.retainedTool))),
-                FString::Printf(TEXT("Have %d / Need 1"), Have), TEXT("Required tool"),
+            AddRequirement(RequirementIcon(Assessment.retainedTool),
+                FString::Printf(TEXT("%s (kept)"),
+                    UTF8_TO_TCHAR(Homestead::ItemName(Assessment.retainedTool))),
+                FString::Printf(TEXT("%d / 1"), Have), TEXT("Required tool; not consumed"),
                 Assessment.retainedToolMet);
         }
         if (Assessment.stationRequired)
-            AddRequirement(TEXT("Fueled cookfire nearby"),
-                Assessment.stationMet ? TEXT("Ready") : TEXT("Not nearby"),
-                TEXT("Cooking station"), Assessment.stationMet);
-        AddRequirement(TEXT("Pack space"), Assessment.capacityMet ? TEXT("Available") : TEXT("Pack is full"),
-            TEXT("Crafted output returns to your pack"), Assessment.capacityMet);
+            AddRequirement(FName(TEXT("fire")), TEXT("Cookfire"),
+                Assessment.stationMet ? TEXT("Ready") : TEXT("Missing"),
+                TEXT("Fueled cookfire nearby"), Assessment.stationMet);
+        if (!Assessment.capacityMet)
+            AddRequirement(FName(TEXT("pack")), TEXT("Pack space"), TEXT("Full"),
+                TEXT("Make room for the crafted output"), false);
     }
     Actions.Reset();
     ActionButtons.Reset();
@@ -1170,7 +1233,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 Actions.Add(EHomesteadItemAction::Drop);
             }
         }
-        else if (Row.Subject != EHomesteadMenuSubject::Recipe && !IsDirectCameraSetting(Row))
+        else if (Row.Subject != EHomesteadMenuSubject::Recipe && SeenPage != 3
+            && SeenPage != 5 && !IsDirectCameraSetting(Row))
             Actions.Add(EHomesteadItemAction::Primary);
     }
     ActionSelection = FMath::Clamp(ActionSelection, 0, FMath::Max(0, Actions.Num() - 1));
@@ -1220,6 +1284,12 @@ bool SHomesteadMenu::IsDirectCameraSetting(const FHomesteadRow& Row) const
         && (Row.Id == 3 || Row.Id == 4);
 }
 int32 SHomesteadMenu::DetailIndex() const { return Hover != INDEX_NONE ? Hover : ContentSelection; }
+FString SHomesteadMenu::GetFocusedRequirementHint() const
+{
+    const int32 Index = DetailsSelection - 2;
+    return Region == ERegion::Details && RequirementHints.IsValidIndex(Index)
+        ? RequirementHints[Index] : FString();
+}
 FString SHomesteadMenu::DetailsText() const
 {
     const int32 Index = DetailIndex();
@@ -1294,8 +1364,14 @@ FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
     case EHomesteadItemAction::Unequip: return TEXT("Unequip to pack");
     case EHomesteadItemAction::Dye: return TEXT("Change dye");
     case EHomesteadItemAction::Drop: return TEXT("Drop...");
-    default: return Row.Action.IsEmpty() ? (SeenPage == 3 || SeenPage == 5 ? TEXT("Read") : TEXT("Change / activate")) : Row.Action;
+    default: return Row.Action.IsEmpty() ? TEXT("Change / activate") : Row.Action;
     }
+}
+
+TSharedPtr<SWidget> SHomesteadMenu::GetAudioSliderWidget(int32 AudioId) const
+{
+    return SeenPage == 4 && AudioSliders.IsValidIndex(AudioId - 5)
+        ? StaticCastSharedPtr<SWidget>(AudioSliders[AudioId - 5]) : nullptr;
 }
 void SHomesteadMenu::ChangeInventoryView(int32 View)
 {
@@ -1679,6 +1755,21 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
         }
         break;
     case ERegion::Details:
+        if (SeenPage == 1 && Direction.y && !RequirementHints.IsEmpty())
+        {
+            const int32 Next = DetailsSelection + Direction.y;
+            if (Next >= 1 && Next < RequirementHints.Num() + 2)
+            {
+                DetailsSelection = Next;
+                for (const auto& Target : FocusTargets)
+                    if (Target.region == ERegion::Details && Target.index == Next)
+                        if (const auto Widget = Target.widget.Pin())
+                            if (DetailsScroll)
+                                DetailsScroll->ScrollDescendantIntoView(Widget, false);
+                Moved = true;
+                break;
+            }
+        }
         if (Direction.y && DetailsScroll)
         {
             const float Before = DetailsScroll->GetScrollOffset();

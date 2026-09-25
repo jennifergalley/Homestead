@@ -21,6 +21,30 @@ bool AHomesteadSmokeTest::VerifyPresentationMaterials() const
     if (!Avatar) return false;
     const auto* Mesh = Avatar->GetMesh();
     const auto& Look = Controller->GetAppearance();
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01")))
+    {
+        const auto* Face = Mesh->GetMaterial(Mesh->GetMaterialIndex(TEXT("M_Vitruvian_Face")));
+        const auto* Neck = Mesh->GetMaterial(Mesh->GetMaterialIndex(TEXT("M_Vitruvian_Neck")));
+        const auto* Iris = Mesh->GetMaterial(Mesh->GetMaterialIndex(TEXT("M_Vitruvian_Iris")));
+        if (!Face || !Neck || !Iris
+            || !Face->GetShadingModels().HasShadingModel(MSM_DefaultLit)
+            || !Neck->GetShadingModels().HasShadingModel(MSM_DefaultLit)
+            || !Iris->GetShadingModels().HasShadingModel(MSM_DefaultLit)
+            || Face->GetBlendMode() != BLEND_Opaque || Iris->GetBlendMode() != BLEND_Opaque)
+            return false;
+        FLinearColor FaceTint, NeckTint, EyeTint;
+        float Mix = -1;
+        FLinearColor ExpectedEye = HomesteadLook::IrisColor(Look.EyeColor);
+        ExpectedEye.R *= .6f; ExpectedEye.G *= .6f; ExpectedEye.B *= .6f;
+        return Face->GetVectorParameterValue(FMaterialParameterInfo(TEXT("ColorTint")), FaceTint)
+            && Neck->GetVectorParameterValue(FMaterialParameterInfo(TEXT("ColorTint")), NeckTint)
+            && Iris->GetVectorParameterValue(FMaterialParameterInfo(TEXT("IrisColor")), EyeTint)
+            && Iris->GetScalarParameterValue(FMaterialParameterInfo(TEXT("IrisMix")), Mix)
+            && FaceTint.Equals(HomesteadLook::SkinTint(Look.SkinTone), .0001f)
+            && NeckTint.Equals(FaceTint, .0001f)
+            && EyeTint.Equals(ExpectedEye, .0001f)
+            && FMath::IsNearlyEqual(Mix, .8f);
+    }
     const auto* Skin = Mesh->GetMaterial(Mesh->GetMaterialIndex(TEXT("M_Heroine_Skin")));
     const auto* Eyes = Mesh->GetMaterial(Mesh->GetMaterialIndex(TEXT("M_Heroine_LightEyes")));
     if (!Skin || !Eyes || !Skin->GetShadingModels().HasShadingModel(MSM_DefaultLit)

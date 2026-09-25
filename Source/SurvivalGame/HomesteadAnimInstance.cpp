@@ -4,13 +4,20 @@
 #include "Animation/AnimInstanceProxy.h"
 #include "Animation/AnimNode_SequencePlayer.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimNodeSpaceConversions.h"
 #include "AnimNodes/AnimNode_TwoWayBlend.h"
 #include "AnimNodes/AnimNode_SequenceEvaluator.h"
+#include "BoneControllers/AnimNode_ModifyBone.h"
+#include "BoneControllers/AnimNode_TwoBoneIK.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HomesteadWorld.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 namespace
 {
-enum class EHandAction { None, Gather, Water, Clear, Till };
+enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
@@ -26,37 +33,109 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     explicit FHomesteadAnimProxy(UAnimInstance* Instance) : FAnimInstanceProxy(Instance)
     {
         Blend.A.SetLinkNode(&Idle);
-        Blend.B.SetLinkNode(&Walk);
+        Blend.B.SetLinkNode(&SprintBlend);
+        if (bTrialCMUWalk)
+        {
+            GaitBlend.A.SetLinkNode(&Walk);
+            GaitBlend.B.SetLinkNode(&SlowWalk);
+            SlowWalk.SetTeleportToExplicitTime(true);
+            SlowWalk.SetShouldLoop(true);
+        }
+        SprintBlend.A.SetLinkNode(bTrialCMUWalk
+            ? static_cast<FAnimNode_Base*>(&GaitBlend) : static_cast<FAnimNode_Base*>(&Walk));
+        SprintBlend.B.SetLinkNode(&Sprint);
         ActionBlend.A.SetLinkNode(&Blend);
         ActionBlend.B.SetLinkNode(&Gather);
         Gather.SetTeleportToExplicitTime(true);
+        if (bTrialFootLock)
+        {
+            ToComponent.LocalPose.SetLinkNode(&ActionBlend);
+            LeftFoot.ComponentPose.SetLinkNode(&ToComponent);
+            RightFoot.ComponentPose.SetLinkNode(&LeftFoot);
+            LeftRotation.ComponentPose.SetLinkNode(&RightFoot);
+            RightRotation.ComponentPose.SetLinkNode(&LeftRotation);
+            ToLocal.ComponentPose.SetLinkNode(&RightRotation);
+            LeftFoot.IKBone.BoneName = TEXT("foot_l");
+            RightFoot.IKBone.BoneName = TEXT("foot_r");
+            for (FAnimNode_TwoBoneIK* Foot : {&LeftFoot, &RightFoot})
+            {
+                Foot->EffectorLocationSpace = BCS_ComponentSpace;
+                Foot->JointTargetLocationSpace = BCS_ComponentSpace;
+                Foot->bMaintainEffectorRelRot = true;
+                Foot->bAllowStretching = false;
+                Foot->Alpha = 0;
+            }
+            LeftRotation.BoneToModify.BoneName = TEXT("foot_l");
+            RightRotation.BoneToModify.BoneName = TEXT("foot_r");
+            for (FAnimNode_ModifyBone* Foot : {&LeftRotation, &RightRotation})
+            {
+                Foot->RotationMode = BMM_Replace;
+                Foot->RotationSpace = BCS_ComponentSpace;
+                Foot->TranslationMode = BMM_Ignore;
+                Foot->ScaleMode = BMM_Ignore;
+                Foot->Alpha = 0;
+            }
+        }
     }
 
     FAnimNode_SequencePlayer_Standalone Idle;
     FAnimNode_SequencePlayer_Standalone Walk;
+    FAnimNode_SequenceEvaluator_Standalone SlowWalk;
+    FAnimNode_SequencePlayer_Standalone Sprint;
+    FLocomotionBlend GaitBlend;
+    FLocomotionBlend SprintBlend;
     FLocomotionBlend Blend;
     FLocomotionBlend ActionBlend;
     FGatherPose Gather;
+    const bool bTrialFootLock = FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialFootLock"))
+        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01"))
+        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMULevelHead"));
+    const bool bTrialCMUWalk = FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMUWalk01"));
+    FAnimNode_ConvertLocalToComponentSpace ToComponent;
+    FAnimNode_TwoBoneIK LeftFoot;
+    FAnimNode_TwoBoneIK RightFoot;
+    FAnimNode_ModifyBone LeftRotation;
+    FAnimNode_ModifyBone RightRotation;
+    FAnimNode_ConvertComponentToLocalSpace ToLocal;
+    FVector LeftAnchor = FVector::ZeroVector;
+    FVector RightAnchor = FVector::ZeroVector;
+    FQuat LeftAnchorRotation = FQuat::Identity;
+    FQuat RightAnchorRotation = FQuat::Identity;
+    float LeftGroundedZ = 0;
+    float RightGroundedZ = 0;
+    bool bLockLeft = false;
+    bool bLockRight = false;
+    FVector PreviousActorLocation = FVector::ZeroVector;
+    bool bAnchored = false;
+    float PreviousSpeed = 0;
     float Rate = 0;
     float GatherTime = 0;
     uint32 Started = 0;
     uint32 WaterStarted = 0;
     uint32 ClearStarted = 0;
+    uint32 KnifeStarted = 0;
     uint32 TillStarted = 0;
     EHandAction Requested = EHandAction::None;
     EHandAction Active = EHandAction::Gather;
     bool bCancelled = false;
     bool bGathering = false;
 
-    virtual FAnimNode_Base* GetCustomRootNode() override { return &ActionBlend; }
+    virtual FAnimNode_Base* GetCustomRootNode() override
+    {
+        return bTrialFootLock ? static_cast<FAnimNode_Base*>(&ToLocal) : &ActionBlend;
+    }
 
     virtual void Initialize(UAnimInstance* Instance) override
     {
         FAnimInstanceProxy::Initialize(Instance);
+        bAnchored = false;
+        PreviousSpeed = 0;
         if (const auto* Avatar = Cast<AHomesteadCharacter>(Instance->TryGetPawnOwner()))
         {
             Idle.SetSequence(Avatar->GetIdleAnimation());
             Walk.SetSequence(Avatar->GetWalkAnimation());
+            if (bTrialCMUWalk) SlowWalk.SetSequence(Avatar->GetSlowWalkAnimation());
+            Sprint.SetSequence(Avatar->GetSprintAnimation());
             Gather.SetSequence(Avatar->GetGatherAnimation());
         }
     }
@@ -68,9 +147,96 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         const auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
         const float Speed = Avatar && PC && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
             ? Avatar->GetVelocity().Size2D() : 0.0f;
-        // The authored stance travels 60 cm in half a one-second cycle.
-        Rate = Speed / 120.0f;
+        if (bTrialFootLock)
+        {
+            const bool Grounded = Avatar && Avatar->GetCharacterMovement()->IsMovingOnGround();
+            const FVector ActorLocation = Avatar ? Avatar->GetActorLocation() : FVector::ZeroVector;
+            const bool Teleported = bAnchored && FVector::DistSquared(ActorLocation, PreviousActorLocation) > FMath::Square(100.0f);
+            if (!Grounded || Teleported || Speed > 12.0f)
+                bAnchored = false;
+            else if (!bAnchored && PreviousSpeed > 12.0f && PC
+                && Avatar->GetMesh()->GetSkeletalMeshAsset())
+            {
+                const USkeletalMeshComponent* Mesh = Avatar->GetMesh();
+                const FVector LeftToe = Mesh->GetSocketLocation(TEXT("ball_l"));
+                const FVector RightToe = Mesh->GetSocketLocation(TEXT("ball_r"));
+                auto GroundAt = [Avatar, PC](const FVector& Toe, double& Ground)
+                {
+                    Ground = AHomesteadWorld::GroundHeight(Toe.X, Toe.Y, PC->State().world);
+                    if (!FMath::IsFinite(Ground)) return false;
+                    const auto& Floor = Avatar->GetCharacterMovement()->CurrentFloor;
+                    if (Floor.IsWalkableFloor()
+                        && Floor.HitResult.ImpactPoint.Z > Ground + 20.0)
+                        Ground = Floor.HitResult.ImpactPoint.Z;
+                    return true;
+                };
+                double LeftGround = 0, RightGround = 0;
+                if (GroundAt(LeftToe, LeftGround) && GroundAt(RightToe, RightGround))
+                {
+                    LeftAnchor = Mesh->GetSocketLocation(TEXT("foot_l"));
+                    RightAnchor = Mesh->GetSocketLocation(TEXT("foot_r"));
+                    LeftAnchorRotation = Mesh->GetSocketTransform(TEXT("foot_l")).GetRotation();
+                    RightAnchorRotation = Mesh->GetSocketTransform(TEXT("foot_r")).GetRotation();
+                    const float LeftClearance = LeftToe.Z - LeftGround;
+                    const float RightClearance = RightToe.Z - RightGround;
+                    // Keep two planted soles still; a raised swing foot must finish its step.
+                    const bool BothPlanted = FMath::Max(LeftClearance, RightClearance) <= 4.8f
+                        && FMath::Abs(LeftClearance - RightClearance) <= 2.4f;
+                    bLockLeft = BothPlanted || LeftClearance <= RightClearance;
+                    bLockRight = BothPlanted || RightClearance < LeftClearance;
+                    LeftGroundedZ = LeftGround + 1.0f + LeftAnchor.Z - LeftToe.Z;
+                    RightGroundedZ = RightGround + 1.0f + RightAnchor.Z - RightToe.Z;
+                    bAnchored = true;
+                }
+                else
+                    UE_LOG(LogTemp, Warning, TEXT("Planted-stop trial could not resolve finite terrain below both feet."));
+            }
+            const USkeletalMeshComponent* Mesh = Avatar ? Avatar->GetMesh() : nullptr;
+            LeftFoot.Alpha = bAnchored && bLockLeft && Mesh ? 1.0f : 0.0f;
+            RightFoot.Alpha = bAnchored && bLockRight && Mesh ? 1.0f : 0.0f;
+            LeftRotation.Alpha = LeftFoot.Alpha;
+            RightRotation.Alpha = RightFoot.Alpha;
+            if (bAnchored && Mesh)
+            {
+                if (bLockLeft)
+                    LeftAnchor.Z = FMath::FInterpConstantTo(LeftAnchor.Z, LeftGroundedZ, DeltaSeconds, 35.0f);
+                if (bLockRight)
+                    RightAnchor.Z = FMath::FInterpConstantTo(RightAnchor.Z, RightGroundedZ, DeltaSeconds, 35.0f);
+                const FTransform ComponentToWorld = Mesh->GetComponentTransform();
+                LeftFoot.EffectorLocation = ComponentToWorld.InverseTransformPosition(LeftAnchor);
+                RightFoot.EffectorLocation = ComponentToWorld.InverseTransformPosition(RightAnchor);
+                LeftFoot.JointTargetLocation = ComponentToWorld.InverseTransformPosition(
+                    Mesh->GetSocketLocation(TEXT("calf_l")));
+                RightFoot.JointTargetLocation = ComponentToWorld.InverseTransformPosition(
+                    Mesh->GetSocketLocation(TEXT("calf_r")));
+                LeftRotation.Rotation = (ComponentToWorld.GetRotation().Inverse() * LeftAnchorRotation).Rotator();
+                RightRotation.Rotation = (ComponentToWorld.GetRotation().Inverse() * RightAnchorRotation).Rotator();
+            }
+            PreviousActorLocation = ActorLocation;
+            PreviousSpeed = Speed;
+        }
+        if (bTrialCMUWalk && Walk.GetSequence() && SlowWalk.GetSequence())
+        {
+            const float TargetSlow = FMath::Clamp((140.0f - Speed) / 60.0f, 0.0f, 1.0f);
+            GaitBlend.Alpha = FMath::FInterpConstantTo(GaitBlend.Alpha, TargetSlow,
+                DeltaSeconds, 1.0f / 0.18f);
+            const float NormalLength = Walk.GetSequence()->GetPlayLength();
+            const float SlowLength = SlowWalk.GetSequence()->GetPlayLength();
+            const float DistancePerCycle = FMath::Lerp(
+                129.0f * NormalLength, 88.8f * SlowLength, GaitBlend.Alpha);
+            Rate = Speed * NormalLength / DistancePerCycle;
+            const float Phase = FMath::Fmod(
+                (Walk.GetCurrentAssetTime() + DeltaSeconds * Rate) / NormalLength
+                + 12.0f / 172.0f, 1.0f);
+            SlowWalk.SetExplicitTime(Phase * SlowLength);
+        }
+        else
+            Rate = Speed / 120.0f;
         Walk.SetPlayRate(Rate);
+        Sprint.SetPlayRate(FMath::Clamp(Speed / 300.0f, 0.5f, 1.2f));
+        const float SprintTarget = Avatar && Avatar->IsSprinting() && Speed > 12.0f ? 1.0f : 0.0f;
+        SprintBlend.Alpha = FMath::FInterpConstantTo(SprintBlend.Alpha, SprintTarget,
+            DeltaSeconds, 1.0f / 0.16f);
         const float Target = FMath::Clamp(Speed / 35.0f, 0.0f, 1.0f);
         Blend.Alpha = FMath::FInterpConstantTo(Blend.Alpha, Target, DeltaSeconds, 1.0f / 0.20f);
         const bool Blocked = !Avatar || !PC || PC->IsBookOpen() || PC->IsPlanning() || PC->IsFailed()
@@ -82,6 +248,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         {
             Active = Requested;
             Gather.SetSequence(Active == EHandAction::Till ? Avatar->GetTillAnimation()
+                : Active == EHandAction::KnifeCut ? Avatar->GetKnifeCutAnimation()
                 : Active == EHandAction::Clear ? Avatar->GetClearAnimation()
                 : Active == EHandAction::Water ? Avatar->GetWaterAnimation() : Avatar->GetGatherAnimation());
         }
@@ -92,6 +259,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             GatherTime = 0;
             bGathering = true;
             if (Active == EHandAction::Clear) ++ClearStarted;
+            else if (Active == EHandAction::KnifeCut) ++KnifeStarted;
             else if (Active == EHandAction::Till) ++TillStarted;
             else if (Active == EHandAction::Water) ++WaterStarted;
             else ++Started;
@@ -124,7 +292,26 @@ void UHomesteadAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* Proxy)
 
 float UHomesteadAnimInstance::WalkWeight() const
 {
-    return GetProxyOnGameThread<FHomesteadAnimProxy>().Blend.Alpha;
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Blend.Alpha * (1.0f - Proxy.SprintBlend.Alpha);
+}
+
+float UHomesteadAnimInstance::SlowWalkWeight() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.bTrialCMUWalk ? Proxy.Blend.Alpha
+        * (1.0f - Proxy.SprintBlend.Alpha) * Proxy.GaitBlend.Alpha : 0.0f;
+}
+
+float UHomesteadAnimInstance::SprintWeight() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Blend.Alpha * Proxy.SprintBlend.Alpha;
+}
+
+float UHomesteadAnimInstance::SprintPhase() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().Sprint.GetCurrentAssetTime();
 }
 
 float UHomesteadAnimInstance::GaitRate() const
@@ -147,16 +334,26 @@ void UHomesteadAnimInstance::RequestWater()
     GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Water;
 }
 
-void UHomesteadAnimInstance::CancelAction()
+void UHomesteadAnimInstance::CancelAction(bool Immediate)
 {
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     Proxy.Requested = EHandAction::None;
     Proxy.bCancelled = true;
+    if (Immediate)
+    {
+        Proxy.bGathering = false;
+        Proxy.ActionBlend.Alpha = 0;
+    }
 }
 
 void UHomesteadAnimInstance::RequestClear()
 {
     GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Clear;
+}
+
+void UHomesteadAnimInstance::RequestKnifeCut()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::KnifeCut;
 }
 
 void UHomesteadAnimInstance::RequestTill()
@@ -185,6 +382,23 @@ bool UHomesteadAnimInstance::IsClearing() const
 {
     const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     return Proxy.Active == EHandAction::Clear && Proxy.bGathering && !Proxy.bCancelled;
+}
+
+float UHomesteadAnimInstance::KnifeCutWeight() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::KnifeCut ? Proxy.ActionBlend.Alpha : 0;
+}
+
+float UHomesteadAnimInstance::KnifeCutPhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::KnifeCut ? Proxy.GatherTime : 0;
+}
+
+uint32 UHomesteadAnimInstance::KnifeCutStarts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().KnifeStarted;
 }
 
 float UHomesteadAnimInstance::TillWeight() const

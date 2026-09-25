@@ -75,6 +75,7 @@ public:
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
     const Homestead::State& State() const { return Sim.GetState(); }
+    Homestead::Result SpendSprintEnergy(double RealSeconds);
     const Homestead::Simulation& Simulation() const { return Sim; }
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }
@@ -121,6 +122,7 @@ public:
     void MenuRestart();
     void MenuRetry();
     bool MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount = 1);
+    bool MenuPointerButtonIntent(FKey Key);
     bool MenuPointerIntent(float X, float Y);
     bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly || bSimulatedMenuEvent; }
     FString MenuSaveStatus() const;
@@ -145,6 +147,8 @@ public:
     int32 SelectedHotbarIndex() const { return SelectedHotbarSlot; }
     void SelectHotbarSlot(int32 Index);
     void CycleHotbar(int32 Direction);
+    void HoverHotbarSlot(int32 Index) { HoveredHotbarSlot = Index >= 0 && Index < 10 ? Index : INDEX_NONE; }
+    bool KnifePreviewRequested() const;
     bool ShouldShowHotbar() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -156,6 +160,8 @@ public:
 
 private:
     bool ResolveDropPoint(Homestead::Point& Result) const;
+    bool CollectPreparedBaselines(Homestead::Generation::ChunkCoord Chunk,
+        std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
     enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water };
@@ -191,6 +197,8 @@ private:
     bool bPendingSpawn = true;
     bool bFreshTerrainSpawn = true;
     bool bWorldReady = false;
+    double LastRegionSimulationMilliseconds = 0;
+    double LastRegionWorldMilliseconds = 0;
     uint32 WorldRecoveries = 0;
     FVector LastSafeWorldPosition = FVector(-1000, 0, 180);
     bool bConfirmRestart = false;
@@ -253,8 +261,10 @@ private:
     void ResetHotbar();
     void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected);
     void UseSelectedTool();
+    void NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue);
     TArray<int32> HotbarSlots;
     int32 SelectedHotbarSlot = 0;
+    int32 HoveredHotbarSlot = INDEX_NONE;
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;
     bool bSaveRoutingTestPending = false;

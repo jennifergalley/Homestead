@@ -54,11 +54,25 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
                 Avatar->CancelAction();
                 Probe->Id = Node.id;
                 Teleport(Node.position);
+                Homestead::ResourceNode Current;
+                const auto Resolved = Controller->Simulation().ResolveGeneratedResource(Node.key, Current);
+                if (!Resolved || Current.id <= 0 || Current.kind != Homestead::ResourceKind::BerryBush)
+                {
+                    Finish(false, TEXT("Berry patch key did not resolve after active-window or save reload."));
+                    return;
+                }
+                Probe->Id = Current.id;
             },
             [this, Probe, Animation]()
             {
-                return Controller->IsResourceFocused(Probe->Id) && Controller->Simulation().CanHarvest(Probe->Id)
+                const bool Ready = Controller->IsResourceFocused(Probe->Id)
+                    && Controller->Simulation().CanHarvest(Probe->Id)
                     && Animation() && Animation()->GatherWeight() < 0.001f;
+                if (!Ready)
+                    Results.Add(FString::Printf(TEXT("GATHER_APPROACH id=%d focus=%d can_harvest=%d animation=%d weight=%.4f"),
+                        Probe->Id, Controller->FocusId, Controller->Simulation().CanHarvest(Probe->Id),
+                        Animation() != nullptr, Animation() ? Animation()->GatherWeight() : -1.0f));
+                return Ready;
             }, 0.65f);
     };
     auto Gather = [this, Avatar, Probe, Animation](FKey Key)
@@ -81,6 +95,7 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
             [this, Avatar, Probe, Animation]()
             {
                 return Probe->Ready && SameGatherDelta(Controller->State(), Probe->Expected)
+                    && Controller->Toast().IsEmpty()
                     && Animation()->GatherStarts() == Probe->Starts + 1 && Animation()->GatherWeight() > 0.5f
                     && FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) > 8
                     && FVector::Dist(Probe->LeftToe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l"))) < 2
@@ -178,30 +193,40 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         {
             auto Look = Controller->GetAppearance();
             Look.HairColor = (Look.HairColor + 1) % 4;
-            Probe->Ready = Avatar->ApplyAppearance(Look);
+            FString Error;
+            Probe->Ready = Avatar->PrepareEquipment(Controller->State(), Look, Error)
+                && Avatar->ApplyPreparedEquipment(Error);
         },
         [Probe, Animation]() { return Probe->Ready && Animation()->GatherWeight() < 0.001f; }, 0.3f);
     Approach(Berries[5]);
     Gather(EKeys::E);
-    Add(TEXT("Body, hair and outfit replacement cannot keep a bent pose"),
+    Add(TEXT("Body and hair replacement with owned clothing cannot keep a bent pose"),
         [this, Avatar, Probe]()
         {
             auto Look = Controller->GetAppearance();
             Look.BodyPreset = 1;
             Look.HairStyle = 2;
-            Look.Outfit = 1;
-            Probe->Ready = Avatar->ApplyAppearance(Look);
+            FString Error;
+            Probe->Ready = Avatar->PrepareEquipment(Controller->State(), Look, Error)
+                && Avatar->ApplyPreparedEquipment(Error);
         },
         [Avatar, Probe, Animation]()
         {
-            return Probe->Ready && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == TEXT("SK_Heroine_Willow_Ponytail_Apron")
+            const auto* Presentation = Avatar->GetEquipmentPresentation();
+            return Probe->Ready && Presentation && Presentation->Garments.Num() == 2
+                && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == TEXT("SK_Modular_Willow_Base_Ponytail")
                 && Animation() && Animation()->GatherWeight() < 0.001f && Animation()->WalkWeight() < 0.001f;
         });
     Add(TEXT("Restore saved appearance after the mesh-swap fixture"),
-        [this, Avatar, Probe]() { Probe->Ready = Avatar->ApplyAppearance(Controller->GetAppearance()); },
+        [this, Avatar, Probe]()
+        {
+            FString Error;
+            Probe->Ready = Avatar->PrepareEquipment(Controller->State(), Controller->GetAppearance(), Error)
+                && Avatar->ApplyPreparedEquipment(Error);
+        },
         [Probe, Animation]() { return Probe->Ready && Animation() && Animation()->GatherWeight() < 0.001f; });
 
-    Add(TEXT("Walk-range rejection has no gathering presentation or inventory mutation"),
+    Add(TEXT("Invalid distant world use has no gathering presentation or inventory mutation"),
         [this, Probe, Animation]()
         {
             Teleport({3500, -3400});
@@ -212,7 +237,7 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         [this, Probe, Animation]()
         {
             return SameGatherDelta(Controller->State(), Probe->Expected)
-                && Controller->Toast().Contains(TEXT("Walk closer"))
+                && Controller->ToastIsError()
                 && Animation()->GatherStarts() == Probe->Starts && Animation()->GatherWeight() < 0.001f;
         });
 
@@ -234,6 +259,19 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         Steps.Last().Skip = Skip;
     }
     Approach(Reserved);
+    Add(TEXT("CONTROLLED top-up after mapped gathers prepares an exact full-pack rejection"),
+        [this]()
+        {
+            const int32 Remaining = Homestead::InventoryCapacity - Controller->Simulation().UsedCapacity();
+            if (Remaining <= 0) return;
+            Homestead::Simulation Candidate = Controller->Simulation();
+            auto& State = const_cast<Homestead::State&>(Candidate.GetState());
+            State.inventory[static_cast<int32>(Homestead::Item::Branch)] += Remaining;
+            State.inventoryLayout.push_back({State.nextGroupId++, Homestead::Item::Branch, Remaining, 0});
+            const auto Result = Controller->Sim.Deserialize(Candidate.Serialize());
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+        },
+        [this]() { return Controller->Simulation().UsedCapacity() == Homestead::InventoryCapacity; });
     Add(TEXT("A full-pack rejection has no action, inventory delta or regrowth mutation"),
         [this, Probe, Animation]()
         {

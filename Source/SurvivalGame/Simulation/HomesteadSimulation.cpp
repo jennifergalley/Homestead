@@ -270,17 +270,28 @@ bool GeneratedNode(const State& state, const Generation::GeneratedEntity& entity
     out = node;
     return true;
 }
-Result Materialize(State& candidate, const State* previous, int& nextHandle)
+Result Materialize(State& candidate, const State* previous, int& nextHandle,
+    const PreparedWorldRegion* prepared = nullptr)
 {
+    if (prepared && (candidate.world.seed != prepared->world.seed
+        || candidate.world.generationVersion != prepared->world.generationVersion))
+        return Bad("Prepared woodland belongs to a different world.");
     std::vector<ResourceNode> resources;
     for (int dy = -1; dy <= 1; ++dy)
         for (int dx = -1; dx <= 1; ++dx)
         {
-            Generation::ChunkBaseline baseline;
             const Generation::ChunkCoord coord{candidate.activeChunk.x + dx, candidate.activeChunk.y + dy};
-            const auto status = Generation::GenerateChunk(candidate.world, coord, baseline);
-            if (status != Generation::Status::Ok) return GenerationFailure(status);
-            for (const auto& entity : baseline.entities)
+            Generation::ChunkBaseline generated;
+            const auto* baseline = prepared ? prepared->chunks[(dy + 1) * 3 + dx + 1] : nullptr;
+            if (baseline && baseline->chunk != coord)
+                return Bad("Prepared woodland chunk does not match the active region.");
+            if (!baseline)
+            {
+                const auto status = Generation::GenerateChunk(candidate.world, coord, generated);
+                if (status != Generation::Status::Ok) return GenerationFailure(status);
+                baseline = &generated;
+            }
+            for (const auto& entity : baseline->entities)
             {
                 ResourceNode node;
                 if (!GeneratedNode(candidate, entity, node)) continue;
@@ -787,18 +798,22 @@ Result Simulation::NewGame(std::uint64_t seed)
     nextResourceHandle_ = nextHandle;
     return {true, "A new seeded woodland is ready.", ResultCode::None, ++revision_};
 }
-Result Simulation::SetActiveWorldRegion(Point player)
+Result Simulation::SetActiveWorldRegion(Point player,
+    const PreparedWorldRegion* prepared)
 {
     if (!ValidPoint(player)) return Bad("Exploration supports coordinates within 1000000 cm of the origin.");
     Generation::ChunkCoord coord;
     const auto status = Generation::ChunkAt(static_cast<std::int64_t>(std::floor(player.x)),
         static_cast<std::int64_t>(std::floor(player.y)), coord);
     if (status != Generation::Status::Ok) return GenerationFailure(status);
+    if (prepared && (state_.world.seed != prepared->world.seed
+        || state_.world.generationVersion != prepared->world.generationVersion))
+        return Bad("Prepared woodland belongs to a different world.");
     if (coord == state_.activeChunk) return {true, "The active region is unchanged.", ResultCode::None, revision_};
     State candidate = state_;
     candidate.activeChunk = coord;
     int nextHandle = nextResourceHandle_;
-    const auto populated = Materialize(candidate, &state_, nextHandle);
+    const auto populated = Materialize(candidate, &state_, nextHandle, prepared);
     if (!populated) return populated;
     state_ = std::move(candidate);
     nextResourceHandle_ = nextHandle;
@@ -1323,7 +1338,7 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (!node || node->cleared) return Bad("That resource is no longer available.");
     if (node->kind == ResourceKind::ForestTree) return Clear(nodeId, player);
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
-    if (node->readyAtHour > state_.hour) return Bad("This patch needs more time to regrow.");
+    if (node->readyAtHour > state_.hour) return Bad("Nothing to gather here.");
     if (node->kind == ResourceKind::Sapling && Count(Item::Hatchet) == 0)
         return Bad("Craft a crude hatchet before cutting a sapling.");
     if (node->kind != ResourceKind::Sapling && Count(Item::Knife) == 0)
@@ -1334,7 +1349,7 @@ Result Simulation::Harvest(int nodeId, Point player)
     updated->readyAtHour = state_.hour + Regrowth(node->kind);
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
-    const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ". This patch will regrow.";
+    const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ".";
     return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Clear(int nodeId, Point player)
@@ -1354,7 +1369,7 @@ Result Simulation::Clear(int nodeId, Point player)
     updated->readyAtHour = 0.0;
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
-    return CommitInventory(std::move(candidate), "Land cleared permanently. This patch will no longer regrow.");
+    return CommitInventory(std::move(candidate), "Land cleared.");
 }
 Result Simulation::Eat(Item item)
 {
@@ -1505,8 +1520,8 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
     plot->kind = kind;
     plot->planted = true;
     plot->growth = 0.0;
-    return Good(berries ? "Planted the seeds from one berry. Water and weed; this bush will regrow after harvest."
-        : "Roots planted. Water and weed to encourage growth.");
+    return Good(berries ? "Planted berry seeds."
+        : "Roots planted.");
 }
 Result Simulation::Water(int plotId, Point player)
 {
@@ -1636,6 +1651,16 @@ void Simulation::Advance(double realSeconds, Point player, bool paused)
 {
     if (paused || !FiniteRange(realSeconds, 0.0, 31536000.0)) return;
     AdvanceGameHours(realSeconds * 24.0 / (state_.dayMinutes * 60.0), player);
+}
+Result Simulation::SpendSprintEnergy(double realSeconds)
+{
+    if (state_.failed) return Failed();
+    if (!FiniteRange(realSeconds, 0.0, 10.0) || realSeconds <= 0)
+        return Bad("Sprint requires a positive finite time step.");
+    if (state_.energy <= 10.0)
+        return Bad("Rest to regain enough energy to sprint.");
+    state_.energy = std::max(10.0, state_.energy - 0.35 * realSeconds);
+    return {true, "", ResultCode::None, revision_};
 }
 void Simulation::AdvanceGameHours(double hours, Point player)
 {

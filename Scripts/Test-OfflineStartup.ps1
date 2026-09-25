@@ -2,13 +2,19 @@
 param(
     [Parameter(Mandatory)][string]$PackageDirectory,
     [Parameter(Mandatory)][string]$OutputDirectory,
-    [Parameter(Mandatory)][string]$RunId
+    [Parameter(Mandatory)][string]$RunId,
+    [Parameter(Mandatory)][string]$FixtureSave,
+    [Parameter(Mandatory)][ValidatePattern('^[A-Fa-f0-9]{64}$')][string]$FixtureSha256,
+    [switch]$VitruvianTrial,
+    [switch]$CMUWalk
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $root = Split-Path $PSScriptRoot -Parent
 $run = & (Join-Path $PSScriptRoot 'Development-Run.ps1') -Action Status
-if (-not $run.allowWork -or $run.id -ne $RunId -or [DateTimeOffset]::UtcNow.AddMinutes(3) -gt [DateTimeOffset]$run.deadlineUtc) {
+if (-not $run.allowWork -or $run.id -ne $RunId -or
+    ($run.completionPolicy -ne 'until-complete' -and
+        [DateTimeOffset]::UtcNow.AddMinutes(3) -gt [DateTimeOffset]$run.deadlineUtc)) {
     throw 'Run permission/deadline does not allow the bounded startup probe.'
 }
 $output = [IO.Path]::GetFullPath($OutputDirectory, $root)
@@ -16,12 +22,33 @@ if (Test-Path -LiteralPath $output) { throw 'Use a fresh startup probe output.' 
 $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
 $exe = Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe'
 if (-not (Test-Path -LiteralPath $exe)) { throw 'The offline probe requires the actual Shipping executable.' }
+$trialMesh = Join-Path $package 'SurvivalGame\Content\Trials\HeroineVitruvian_20260924_25\SK_TrialVitruvian01_Preferred_Base_Bob.uasset'
+if ($VitruvianTrial -and -not (Test-Path -LiteralPath $trialMesh -PathType Leaf)) {
+    throw 'The normal-startup face trial requires its cooked and staged skeletal mesh.'
+}
+if ($CMUWalk) {
+    $motionMesh = Join-Path $package 'SurvivalGame\Content\Trials\HeroineCMUWalk_20260924_03\Animations\AN_Heroine_CMUNormalWalk01.uasset'
+    if (-not $VitruvianTrial -or -not (Test-Path -LiteralPath $motionMesh -PathType Leaf)) {
+        throw 'The normal-startup walk trial requires its packaged licensed face and motion.'
+    }
+}
 $profileHash = [Convert]::ToHexString([Security.Cryptography.MD5]::HashData([Text.Encoding]::UTF8.GetBytes($output.Replace('\','/'))))
 $profile = 'offline-' + $profileHash.Substring(0,12).ToLowerInvariant()
 $saveDirectory = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) "SurvivalGame\PreviewProfiles\profile-$profile\SaveGames"
 if (Test-Path -LiteralPath (Split-Path $saveDirectory -Parent)) { throw 'Synthetic profile already exists; refusing to overwrite it.' }
-$fixture = Join-Path $root 'Saved\Automation\20260920-050723-5cc6c8a5\video-sync-01-full-loop\SmokeSave\Homestead_Manual.sav'
-$fixtureHash = 'D07D8406AC875A9212E9C7F37E502DFC6E86EE501397A18C54BB3D3EAA5214C3'
+$fixture = [IO.Path]::GetFullPath($FixtureSave, $root)
+$testRoot = [IO.Path]::GetFullPath((Join-Path $root 'Saved\Automation')) + '\'
+if (-not $fixture.StartsWith($testRoot, [StringComparison]::OrdinalIgnoreCase) -or
+    -not (Test-Path -LiteralPath $fixture -PathType Leaf)) {
+    throw 'Startup fixture must be an existing isolated automation save.'
+}
+for ($item = Get-Item -LiteralPath $fixture; $item -and $item.FullName.Length -ge $root.Length;
+    $item = if ($item -is [IO.DirectoryInfo]) { $item.Parent } else { $item.Directory }) {
+    if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        throw 'Startup fixture/ancestor must be an ordinary local file.'
+    }
+}
+$fixtureHash = $FixtureSha256.ToUpperInvariant()
 if ((Get-FileHash -LiteralPath $fixture).Hash -ne $fixtureHash) { throw 'Prepared test-world provenance differs.' }
 $null = New-Item -ItemType Directory -Path (Join-Path $output 'Graphics'), $saveDirectory
 $config = Join-Path $output 'Graphics\GameUserSettings.ini'
@@ -33,6 +60,8 @@ $configHash = (Get-FileHash -LiteralPath $config).Hash
 $null = Get-CimInstance -Namespace 'root\StandardCimv2' -ClassName MSFT_NetTCPConnection -Filter "OwningProcess=$PID"
 $null = Get-CimInstance -Namespace 'root\StandardCimv2' -ClassName MSFT_NetUDPEndpoint -Filter "OwningProcess=$PID"
 $arguments = "-HomesteadPreviewProfile=$profile -HomesteadStartupProbe=`"$output`" -GameUserSettingsINI=`"$config`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -nosplash -unattended"
+if ($VitruvianTrial) { $arguments += ' -HomesteadHeroineTrialVitruvian01' }
+if ($CMUWalk) { $arguments += ' -HomesteadTrialCMUWalk01' }
 $samples = [Collections.Generic.List[object]]::new()
 $started = [DateTimeOffset]::UtcNow
 $process = Start-Process -FilePath $exe -WorkingDirectory $package -ArgumentList $arguments -PassThru
@@ -51,7 +80,9 @@ try {
         $samples.Add([ordered]@{utc=[DateTimeOffset]::UtcNow.ToString('o'); tcp=$tcp; udp=$udp})
         if ($tcp.Count -or $udp.Count) { throw 'Unexpected owned network endpoint. Stop and report before any further launch.' }
         $state = Get-Content -LiteralPath (Join-Path $root 'Automation\run.json') -Raw | ConvertFrom-Json
-        if ($state.state -ne 'running' -or [DateTimeOffset]::UtcNow -ge [DateTimeOffset]$state.deadlineUtc) {
+        if ($state.state -ne 'running' -or
+            ($state.completionPolicy -ne 'until-complete' -and
+                [DateTimeOffset]::UtcNow -ge [DateTimeOffset]$state.deadlineUtc)) {
             Set-Content -LiteralPath (Join-Path $output 'stop-probe.txt') -Value 'Run control stopped the owned probe.'
         }
         if ([DateTimeOffset]::UtcNow -gt $limit) { throw 'Owned startup probe exceeded its bounded timeout.' }

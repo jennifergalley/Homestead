@@ -1,0 +1,19 @@
+{
+  "asset": "Vitruvian for CharMorph, isolated face-and-rig candidate",
+  "repository": "https://github.com/Upliner/CharMorph-Vitruvian",
+  "revision": "c252d1fc7f00ba59d87b66b3d32fa3471fc6ee44",
+  "license": "CC0 1.0",
+  "license_evidence": "config.yaml declares 'Vitruvian (CC0)' and 'license: CC0'; README records original Antonia author's permission to relicense. No AGPL MB-Lab character data is used.",
+  "download_access": "Public official GitHub clone and LFS, without account or purchase",
+  "handling": "Blender 4.5/5.2 reads char.blend with --disable-autoexec and use_scripts=False. Its two embedded Python rig UI texts were not run; no CharMorph add-on code was installed or executed.",
+  "sources_sha256": {
+    "char.blend": "7E9581C30B48F1409DFEEC4A5EC0736014318FC8825CA6D4728F2B543BB02126",
+    "config.yaml": "A034C723ABF98FD9CD64A5080293DB3AAF0F5508126FF9C4ECB7D7FF6B86931B",
+    "textures/4K/Light_Skin_Color.1001.exr": "FC24DC691865D28F142BD6D01C50AE7A4C1B084AA62199FD0A313FB553147BC5",
+    "textures/4K/Light_Skin_Color.1002.exr": "1C4F8AFDA9F11DCD24371236BF9D8BEA05DF5CFCC497CF11EE3C5F6CFB55F5A3",
+    "textures/4K/Iris_Color.1007.exr": "9241F2E16310B2D96BE83C8F39359CA9168A28D04BC57F21E8FE95CFBD1000FF",
+    "textures/4K/Sclera_Color.1005.exr": "1134F1D4C3D7173228E3830DB885A8C2602A25BF316FFE842BB92E05B14BA768",
+    "textures/4K/Mouth_Color.1008.exr": "90CD829D0EFE0A248DAA0126DCC0632DB659BD105AC14A97A7589929C1D12BA4"
+  },
+  "status": "Isolated CC0 source candidate; game-camera and customization acceptance pending"
+}

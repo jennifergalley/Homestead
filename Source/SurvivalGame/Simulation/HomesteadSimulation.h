@@ -191,6 +191,12 @@ double StreamX(double y);
 bool IsNearWater(Point position);
 Point CellCenter(int cellX, int cellY);
 
+struct PreparedWorldRegion
+{
+    Generation::WorldDescriptor world;
+    std::array<const Generation::ChunkBaseline*, 9> chunks{};
+};
+
 class Simulation
 {
 public:
@@ -198,7 +204,8 @@ public:
     const State& GetState() const { return state_; }
     Result NewGame();
     Result NewGame(std::uint64_t seed);
-    Result SetActiveWorldRegion(Point player);
+    Result SetActiveWorldRegion(Point player,
+        const PreparedWorldRegion* prepared = nullptr);
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
     int Count(Item item) const;
     int UsedCapacity() const;
@@ -256,6 +263,7 @@ public:
     void SetWarmOutfit(bool enabled);
     void Advance(double realSeconds, Point player, bool paused = false);
     void AdvanceGameHours(double hours, Point player);
+    Result SpendSprintEnergy(double realSeconds);
 
     std::string Serialize() const;
     Result Deserialize(const std::string& data);

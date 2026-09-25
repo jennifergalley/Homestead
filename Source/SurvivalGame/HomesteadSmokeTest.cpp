@@ -811,8 +811,10 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
             LastNavigationAt = StepElapsed;
         }
     }
-    if (StepElapsed < Step.Wait && !(NavigationComplete && StepElapsed >= 0.25f)) return;
-    if (!Step.Check())
+    const bool CompletedEarly = Step.bCompleteWhenReady && Step.Check();
+    if (StepElapsed < Step.Wait && !CompletedEarly
+        && !(NavigationComplete && StepElapsed >= 0.25f)) return;
+    if (!CompletedEarly && !Step.Check())
     {
         TraceState(TEXT("FAIL ") + Step.Name);
         Finish(false, Step.Name + TEXT(" | ") + Controller->Toast());

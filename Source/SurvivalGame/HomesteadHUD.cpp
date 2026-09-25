@@ -85,7 +85,7 @@ void AHomesteadHUD::DrawHUD()
     const AHomesteadController* PC = Cast<AHomesteadController>(PlayerOwner);
     if (!PC) return;
     if (PC->HasNativeMenu()) return;
-    UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 3.0f);
+    UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 1.5f);
     ViewWidth = Canvas->ClipX / UiScale;
     ViewHeight = Canvas->ClipY / UiScale;
     static const bool MeasureFeedback = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))

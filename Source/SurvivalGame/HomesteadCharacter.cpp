@@ -5,6 +5,7 @@
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
 #include "HomesteadDiggingStick.h"
+#include "HomesteadKnife.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -69,6 +70,8 @@ AHomesteadCharacter::AHomesteadCharacter()
     Hatchet->SetupAttachment(GetMesh(), TEXT("hand_r"));
     DiggingStick = CreateDefaultSubobject<UHomesteadDiggingStick>(TEXT("ContextualDiggingStick"));
     DiggingStick->SetupAttachment(GetMesh(), TEXT("hand_r"));
+    Knife = CreateDefaultSubobject<UHomesteadKnife>(TEXT("HeldKnife"));
+    Knife->SetupAttachment(GetMesh(), TEXT("hand_r"));
     const FName GarmentNames[] = {TEXT("EquippedTunic"), TEXT("EquippedApron"), TEXT("EquippedFootwear")};
     for (FName Name : GarmentNames)
     {
@@ -109,13 +112,34 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     bAttemptedAssetLoad = true;
     LongHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Trials/HeroineWave_20260921_01/Meshes/SK_Heroine_LongWave.SK_Heroine_LongWave"));
     BobHairMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/SurvivalGame/Characters/ModularClothing/JoinedBob/SK_Heroine_Bob.SK_Heroine_Bob"));
-    IdleAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle"));
-    WalkAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
+    IdleAnimation = LoadObject<UAnimSequence>(nullptr,
+        TEXT("/Game/Trials/HeroineIdle_20260924_15/Animations/AN_Heroine_LivingIdle02.AN_Heroine_LivingIdle02"));
+    const bool CMUWalk = FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMUWalk01"));
+    const bool LevelHead = FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMULevelHead"));
+    if (LevelHead && !CMUWalk)
+    {
+        UE_LOG(LogTemp, Error, TEXT("The upright-head motion variant requires the licensed CMU walk trial."));
+        return false;
+    }
+    WalkAnimation = LoadObject<UAnimSequence>(nullptr, CMUWalk
+        ? (LevelHead
+            ? TEXT("/Game/Trials/HeroineCMUWalk_20260924_04/Animations/AN_Heroine_CMUNormalWalk02.AN_Heroine_CMUNormalWalk02")
+            : TEXT("/Game/Trials/HeroineCMUWalk_20260924_03/Animations/AN_Heroine_CMUNormalWalk01.AN_Heroine_CMUNormalWalk01"))
+        : TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_GroundedWalk.AN_Heroine_GroundedWalk"));
+    if (CMUWalk)
+        SlowWalkAnimation = LoadObject<UAnimSequence>(nullptr,
+            LevelHead
+                ? TEXT("/Game/Trials/HeroineCMUWalk_20260924_04/Animations/AN_Heroine_CMUSlowWalk02.AN_Heroine_CMUSlowWalk02")
+                : TEXT("/Game/Trials/HeroineCMUWalk_20260924_03/Animations/AN_Heroine_CMUSlowWalk01.AN_Heroine_CMUSlowWalk01"));
+    SprintAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HeroineSprint_20260924_01/Animations/AN_Heroine_Sprint.AN_Heroine_Sprint"));
     GatherAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_Gather.AN_Heroine_Gather"));
     WaterAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_WaterRefined.AN_Heroine_WaterRefined"));
     ClearAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Chop.AN_Heroine_Chop"));
+    KnifeCutAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HeroineKnife_20260924_01/Animations/AN_Heroine_KnifeCut.AN_Heroine_KnifeCut"));
     TillAnimation = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Trials/HomesteadWork_20260923_01/Animations/AN_Heroine_Till.AN_Heroine_Till"));
-    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation || !GatherAnimation || !WaterAnimation || !ClearAnimation || !TillAnimation)
+    if (!LongHairMesh || !BobHairMesh || !IdleAnimation || !WalkAnimation
+        || (CMUWalk && !SlowWalkAnimation) || !SprintAnimation
+        || !GatherAnimation || !WaterAnimation || !ClearAnimation || !KnifeCutAnimation || !TillAnimation)
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine mesh or motion assets are missing. Run Scripts/Build-Game.ps1; the labeled stand-in remains visible."));
         return false;
@@ -123,9 +147,12 @@ bool AHomesteadCharacter::LoadHeroineAssets()
     if (!LongHairMesh->GetSkeleton() || LongHairMesh->GetSkeleton() != BobHairMesh->GetSkeleton()
         || IdleAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || WalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
+        || (CMUWalk && SlowWalkAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
+        || SprintAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || GatherAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || WaterAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || ClearAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
+        || KnifeCutAnimation->GetSkeleton() != LongHairMesh->GetSkeleton()
         || TillAnimation->GetSkeleton() != LongHairMesh->GetSkeleton())
     {
         UE_LOG(LogTemp, Error, TEXT("Heroine meshes and clips do not share a skeleton."));
@@ -252,7 +279,7 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
             }
         }
     }
-    CancelAction();
+    CancelAction(true);
     USkeletalMeshComponent* VisualMesh = GetMesh();
     if (VisualMesh->GetSkeletalMeshAsset() != Desired)
     {
@@ -321,7 +348,7 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         UE_LOG(LogTemp, Error, TEXT("Wardrobe apply rejected: %s"), *Error);
         return false;
     }
-    CancelAction();
+    CancelAction(true);
     USkeletalMeshComponent* VisualMesh = GetMesh();
     HomesteadWardrobePresentation::ApplySurface(PreparedEquipment.Base, *VisualMesh);
     VisualMesh->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
@@ -362,6 +389,30 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
 void AHomesteadCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    auto* PC = Cast<AHomesteadController>(Controller);
+    auto* Movement = GetCharacterMovement();
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    const bool Blocked = !PC || !PC->IsWorldReady() || PC->IsBookOpen()
+        || PC->IsPlanning() || PC->IsFailed() || bPlanning || bAppearancePreview
+        || !Movement->IsMovingOnGround() || !bHeroineReady
+        || (Animation && Animation->ActionWeight() > 0.01f);
+    if (Blocked) CancelSprint();
+    const bool Moving = Movement->GetCurrentAcceleration().SizeSquared2D() > 1.0f
+        && GetVelocity().SizeSquared2D() > 144.0f;
+    bSprintActive = bSprintHeld && !Blocked && Moving
+        && PC->State().energy > 10.0 && SprintAnimation != nullptr;
+    Movement->MaxWalkSpeed = bSprintActive ? 300.0f : 180.0f;
+    if (bSprintActive)
+    {
+        const auto Result = PC->SpendSprintEnergy(DeltaSeconds);
+        if (!Result.ok || PC->State().energy <= 10.0)
+        {
+            if (!Result.ok && PC->State().energy > 10.0)
+                UE_LOG(LogTemp, Error, TEXT("Sprint Energy update failed: %s"),
+                    UTF8_TO_TCHAR(Result.message.c_str()));
+            CancelSprint();
+        }
+    }
     if (bAppearancePreview) UpdateAppearanceFraming();
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
@@ -416,6 +467,8 @@ FRotator AHomesteadCharacter::ChooseStartingView(const AHomesteadWorld& Landscap
 
 void AHomesteadCharacter::PlayGather()
 {
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestGather();
     else
@@ -424,6 +477,8 @@ void AHomesteadCharacter::PlayGather()
 
 void AHomesteadCharacter::PlayWater()
 {
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
     WaterYaw.Reset();
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestWater();
@@ -433,6 +488,8 @@ void AHomesteadCharacter::PlayWater()
 
 void AHomesteadCharacter::PlayWater(Homestead::Point Target)
 {
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
     const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
     if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
     {
@@ -447,13 +504,14 @@ void AHomesteadCharacter::PlayWater(Homestead::Point Target)
         UE_LOG(LogTemp, Error, TEXT("Watering succeeded but its animation instance is unavailable."));
 }
 
-void AHomesteadCharacter::CancelAction()
+void AHomesteadCharacter::CancelAction(bool Immediate)
 {
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
-        Animation->CancelAction();
+        Animation->CancelAction(Immediate);
     WateringTool->SetHiddenInGame(true, true);
     Hatchet->SetHiddenInGame(true, true);
     DiggingStick->SetHiddenInGame(true, true);
+    Knife->SetHiddenInGame(true, true);
     ClearYaw.Reset();
     TillYaw.Reset();
     WaterYaw.Reset();
@@ -461,6 +519,8 @@ void AHomesteadCharacter::CancelAction()
 
 void AHomesteadCharacter::PlayClear()
 {
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
     ClearYaw.Reset();
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestClear();
@@ -470,6 +530,8 @@ void AHomesteadCharacter::PlayClear()
 
 void AHomesteadCharacter::PlayClear(Homestead::Point Target)
 {
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
     const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
     if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
     {
@@ -485,8 +547,28 @@ void AHomesteadCharacter::PlayClear(Homestead::Point Target)
         UE_LOG(LogTemp, Error, TEXT("Chopping succeeded but its animation instance is unavailable."));
 }
 
+void AHomesteadCharacter::PlayKnifeCut(Homestead::Point Target)
+{
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
+    if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
+        ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Knife work committed without a valid presentation target; using heroine facing."));
+        ClearYaw.Reset();
+    }
+    if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Animation->RequestKnifeCut();
+    else
+        UE_LOG(LogTemp, Error, TEXT("Knife work succeeded but its distinct animation instance is unavailable."));
+}
+
 void AHomesteadCharacter::PlayTill(Homestead::Point Target)
 {
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
     const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
     if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
     {
@@ -512,6 +594,7 @@ void AHomesteadCharacter::CreateMappings()
         return Action;
     };
     MoveAction = MakeAction(EInputActionValueType::Axis2D);
+    SprintAction = MakeAction(EInputActionValueType::Boolean);
     MouseLookAction = MakeAction(EInputActionValueType::Axis2D);
     StickLookAction = MakeAction(EInputActionValueType::Axis2D);
     ZoomAction = MakeAction(EInputActionValueType::Axis1D);
@@ -534,6 +617,9 @@ void AHomesteadCharacter::CreateMappings()
     auto& MoveStick = Mapping->MapKey(MoveAction, EKeys::Gamepad_Left2D);
     MoveStick.Modifiers.Add(NewObject<UInputModifierDeadZone>(Mapping));
     Mapping->MapKey(MouseLookAction, EKeys::Mouse2D);
+    Mapping->MapKey(SprintAction, EKeys::LeftShift);
+    Mapping->MapKey(SprintAction, EKeys::RightShift);
+    Mapping->MapKey(SprintAction, EKeys::Gamepad_LeftThumbstick);
     auto& LookStick = Mapping->MapKey(StickLookAction, EKeys::Gamepad_Right2D);
     LookStick.Modifiers.Add(NewObject<UInputModifierDeadZone>(Mapping));
 }
@@ -545,6 +631,9 @@ void AHomesteadCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     if (auto* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::Move);
+        Input->BindAction(SprintAction, ETriggerEvent::Started, this, &AHomesteadCharacter::BeginSprint);
+        Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &AHomesteadCharacter::EndSprint);
+        Input->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AHomesteadCharacter::EndSprint);
         Input->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::MouseLook);
         Input->BindAction(StickLookAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::StickLook);
         Input->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::ZoomInput);
@@ -571,6 +660,25 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(FRotationMatrix(Facing).GetUnitAxis(EAxis::Y), Axis.X);
 }
 
+void AHomesteadCharacter::BeginSprint(const FInputActionValue&)
+{
+    const auto* PC = Cast<AHomesteadController>(Controller);
+    bSprintHeld = PC && PC->IsWorldReady() && !PC->IsBookOpen()
+        && !PC->IsPlanning() && !PC->IsFailed();
+}
+
+void AHomesteadCharacter::EndSprint(const FInputActionValue&)
+{
+    CancelSprint();
+}
+
+void AHomesteadCharacter::CancelSprint()
+{
+    bSprintHeld = false;
+    bSprintActive = false;
+    GetCharacterMovement()->MaxWalkSpeed = 180.0f;
+}
+
 void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)
 {
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
@@ -594,7 +702,8 @@ void AHomesteadCharacter::SetPlanning(bool Enabled)
     bPlanning = Enabled;
     if (Enabled)
     {
-        CancelAction();
+        CancelSprint();
+        CancelAction(true);
         GetCharacterMovement()->StopMovementImmediately();
     }
 }
@@ -659,4 +768,9 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
 FRotator AHomesteadCharacter::GameplayViewRotation() const
 {
     return bAppearancePreview ? SavedViewRotation : (Controller ? Controller->GetControlRotation() : FRotator::ZeroRotator);
+}
+
+float AHomesteadCharacter::CameraDistance() const
+{
+    return CameraArm->TargetArmLength;
 }

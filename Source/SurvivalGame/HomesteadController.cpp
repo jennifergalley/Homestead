@@ -35,6 +35,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SScaleBox.h"
 
 namespace
 {
@@ -168,11 +169,11 @@ public:
     }
     virtual bool HandleMouseButtonDownEvent(FSlateApplication&, const FPointerEvent& Event) override
     {
-        return Controller.IsValid() && !Controller->MenuPhysicalInput(Event.GetEffectingButton(), IE_Pressed);
+        return Controller.IsValid() && !Controller->MenuPointerButtonIntent(Event.GetEffectingButton());
     }
     virtual bool HandleMouseButtonUpEvent(FSlateApplication&, const FPointerEvent& Event) override
     {
-        return Controller.IsValid() && !Controller->MenuPhysicalInput(Event.GetEffectingButton(), IE_Released);
+        return Controller.IsValid() && !Controller->MenuPointerButtonIntent(Event.GetEffectingButton());
     }
     virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication&, const FPointerEvent& Event, const FPointerEvent*) override
     {
@@ -266,6 +267,9 @@ void AHomesteadController::BeginPlay()
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
     ResetHotbar();
+    if (!SmokeTest && !VisualPlaytest
+        && FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01")))
+        Appearance.HairStyle = 1;
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
     {
@@ -377,6 +381,18 @@ bool AHomesteadController::MenuPhysicalInput(FKey Key, EInputEvent Event, float 
     return MenuAcceptsPhysicalInput();
 }
 
+bool AHomesteadController::MenuPointerButtonIntent(FKey Key)
+{
+    if (!MenuAcceptsPhysicalInput()) return false;
+    if (Key.IsMouseButton())
+    {
+        if (bGamepad) ++PromptDeviceChanges;
+        bGamepad = false;
+        bShowMouseCursor = true;
+    }
+    return true;
+}
+
 bool AHomesteadController::MenuPointerIntent(float X, float Y)
 {
     MenuPhysicalInput(EKeys::MouseX, IE_Axis, X);
@@ -389,6 +405,7 @@ bool AHomesteadController::MenuPointerIntent(float X, float Y)
 void AHomesteadController::ShowNativeMenu()
 {
     if (!GEngine || !GEngine->GameViewport) return;
+    HoveredHotbarSlot = INDEX_NONE;
     RefreshMenuPortrait();
     if (!NativeMenu.IsValid())
     {
@@ -437,13 +454,24 @@ void AHomesteadController::ShowHotbar()
         .VAlign(VAlign_Bottom)
         .Padding(0, 0, 0, 22)
         [
-            HotbarWidget.ToSharedRef()
+            SNew(SScaleBox).Stretch(EStretch::UserSpecified)
+            .UserSpecifiedScale_Lambda([]()
+            {
+                const FViewport* Viewport = GEngine && GEngine->GameViewport
+                    ? GEngine->GameViewport->Viewport : nullptr;
+                return Viewport ? FMath::Min(1.0f,
+                    1080.0f / FMath::Max(720, Viewport->GetSizeXY().Y)) : 1.0f;
+            })
+            [
+                HotbarWidget.ToSharedRef()
+            ]
         ];
     GEngine->GameViewport->AddViewportWidgetContent(HotbarRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
 {
+    HoveredHotbarSlot = INDEX_NONE;
     if (HotbarRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(HotbarRoot.ToSharedRef());
     HotbarWidget.Reset();
@@ -463,6 +491,7 @@ void AHomesteadController::ResetHotbar()
     HotbarSlots[2] = static_cast<int32>(Homestead::Item::DiggingStick);
     HotbarSlots[3] = static_cast<int32>(Homestead::Item::WateringCan);
     SelectedHotbarSlot = 0;
+    HoveredHotbarSlot = INDEX_NONE;
 }
 
 void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected)
@@ -497,14 +526,26 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Available = Slot.Assigned && Sim.Count(Slot.Tool) > 0;
             Slot.Icon = HotbarIcon(Slot.Tool);
         }
+
         Result.Add(Slot);
     }
     return Result;
 }
 
+bool AHomesteadController::KnifePreviewRequested() const
+{
+    if (!ShouldShowHotbar() || Sim.Count(Homestead::Item::Knife) <= 0) return false;
+    const int32 Slot = HoveredHotbarSlot != INDEX_NONE ? HoveredHotbarSlot : SelectedHotbarSlot;
+    return HotbarSlots.IsValidIndex(Slot)
+        && HotbarSlots[Slot] == static_cast<int32>(Homestead::Item::Knife);
+}
+
 void AHomesteadController::SelectHotbarSlot(int32 Index)
 {
     if (!ShouldShowHotbar() || Index < 0 || Index >= 10) return;
+    if (Index != SelectedHotbarSlot)
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+            Avatar->CancelAction(true);
     SelectedHotbarSlot = Index;
     const auto Snapshot = HotbarSnapshot();
     ToastText = Snapshot[Index].Assigned
@@ -564,10 +605,11 @@ void AHomesteadController::UseSelectedTool()
             return;
         }
         const auto Result = Sim.Clear(FocusId, Position);
-        Notify(Result, WoodTapB);
+        NotifyResourceAction(Result, WoodTapB);
         if (Result.ok)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                Avatar->PlayClear(Target);
+                if (Tool == Homestead::Item::Knife) Avatar->PlayKnifeCut(Target);
+                else Avatar->PlayClear(Target);
         return;
     }
 
@@ -858,6 +900,21 @@ bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
     return false;
 }
 
+bool AHomesteadController::CollectPreparedBaselines(Homestead::Generation::ChunkCoord Chunk,
+    std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const
+{
+    bool bComplete = true;
+    for (int32 Y = -1; Y <= 1; ++Y)
+        for (int32 X = -1; X <= 1; ++X)
+        {
+            const int32 Index = (Y + 1) * 3 + X + 1;
+            Prepared[Index] = Landscape ? Landscape->CachedBaselineFor(
+                State().world, {Chunk.x + X, Chunk.y + Y}) : nullptr;
+            bComplete &= Prepared[Index] != nullptr;
+        }
+    return bComplete;
+}
+
 bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
 {
     Homestead::Generation::ChunkCoord Chunk;
@@ -871,21 +928,34 @@ bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
         return false;
     }
     if (bWorldReady && State().activeChunk == Chunk && Landscape && Landscape->IsPreparedFor(State())) return true;
+    const double PreparationStarted = FPlatformTime::Seconds();
     Homestead::Simulation Candidate = Sim;
-    const auto Result = Candidate.SetActiveWorldRegion(Position);
+    Homestead::PreparedWorldRegion Prepared;
+    Prepared.world = State().world;
+    CollectPreparedBaselines(Chunk, Prepared.chunks);
+    const auto Result = Candidate.SetActiveWorldRegion(Position, &Prepared);
     if (!Result) { Notify(Result); return false; }
+    LastRegionSimulationMilliseconds = (FPlatformTime::Seconds() - PreparationStarted) * 1000;
+    const double PublicationStarted = FPlatformTime::Seconds();
     if (!Landscape || !Landscape->Refresh(Candidate))
     {
+        if (Landscape) Landscape->CancelStagedResources();
         bWorldReady = false;
         Notify(TEXT("The next woodland region could not be prepared. Movement stopped; existing saves are untouched."), true);
         return false;
     }
+    LastRegionWorldMilliseconds = (FPlatformTime::Seconds() - PublicationStarted) * 1000;
     Sim = MoveTemp(Candidate);
     bWorldReady = true;
     Focus = EFocus::None;
     FocusId = -1;
     RefreshRemaining = 0;
     return true;
+}
+
+Homestead::Result AHomesteadController::SpendSprintEnergy(double RealSeconds)
+{
+    return Sim.SpendSprintEnergy(RealSeconds);
 }
 
 bool AHomesteadController::HasHeroine() const
@@ -998,6 +1068,52 @@ void AHomesteadController::Tick(float DeltaSeconds)
         UpdateFocus();
         RefreshRemaining = 0.25f;
     }
+    if (bWorldReady && !bPendingSpawn && !IsFailed())
+        if (APawn* ControlledPawn = GetPawn())
+        {
+            const FVector Position = ControlledPawn->GetActorLocation();
+            const FVector Velocity = ControlledPawn->GetVelocity();
+            const auto Chunk = State().activeChunk;
+            const double LocalX = Position.X - static_cast<double>(Chunk.x)
+                * Homestead::Generation::ChunkSizeCm;
+            const double LocalY = Position.Y - static_cast<double>(Chunk.y)
+                * Homestead::Generation::ChunkSizeCm;
+            const double DistanceX = Velocity.X < -12 ? LocalX
+                : Velocity.X > 12 ? Homestead::Generation::ChunkSizeCm - LocalX
+                : Homestead::Generation::ChunkSizeCm;
+            const double DistanceY = Velocity.Y < -12 ? LocalY
+                : Velocity.Y > 12 ? Homestead::Generation::ChunkSizeCm - LocalY
+                : Homestead::Generation::ChunkSizeCm;
+            if (FMath::Min(DistanceX, DistanceY) <= 900.0)
+            {
+                const bool bAlongX = DistanceX <= DistanceY;
+                const Homestead::Generation::ChunkCoord Next{
+                    Chunk.x + (bAlongX ? (Velocity.X < 0 ? -1 : 1) : 0),
+                    Chunk.y + (bAlongX ? 0 : (Velocity.Y < 0 ? -1 : 1))};
+                const Homestead::Point Target{
+                    (static_cast<double>(Next.x) + 0.5) * Homestead::Generation::ChunkSizeCm,
+                    (static_cast<double>(Next.y) + 0.5) * Homestead::Generation::ChunkSizeCm};
+                Homestead::PreparedWorldRegion Prepared;
+                Prepared.world = State().world;
+                if (FMath::Abs(Target.x) <= Homestead::MaxWorldCoordinate
+                    && FMath::Abs(Target.y) <= Homestead::MaxWorldCoordinate
+                    && CollectPreparedBaselines(Next, Prepared.chunks))
+                {
+                    Homestead::Simulation Destination = Sim;
+                    const auto Result = Destination.SetActiveWorldRegion(Target, &Prepared);
+                    if (!Result || !Landscape->StageAdjacentResources(Destination, Sim.GetRevision()))
+                    {
+                        bWorldReady = false;
+                        Notify(TEXT("Adjacent woodland resources could not be prepared. Movement stopped; saves are untouched."), true);
+                        return;
+                    }
+                }
+            }
+            else if (FMath::Min(LocalX, LocalY) > 1000.0
+                && FMath::Min(Homestead::Generation::ChunkSizeCm - LocalX,
+                    Homestead::Generation::ChunkSizeCm - LocalY) > 1000.0)
+                Landscape->CancelStagedResources();
+        }
     if (bAutosaveEnabled && !bBookOpen && !bPlanning && !IsFailed() && !bMenuSaveInProgress)
     {
         AutosaveRemaining -= DeltaSeconds;
@@ -1073,8 +1189,7 @@ FString AHomesteadController::FocusTitle() const
             if (Node.id == FocusId)
             {
                 FString Status;
-                if (Node.readyAtHour > State().hour) Status = TEXT("  (renewing)");
-                else if ((Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree)
+                if ((Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree)
                     && Sim.Count(Homestead::Item::Hatchet) == 0) Status = TEXT("  (hatchet required)");
                 else if (Node.kind != Homestead::ResourceKind::Sapling && Node.kind != Homestead::ResourceKind::ForestTree
                     && Sim.Count(Homestead::Item::Knife) == 0) Status = TEXT("  (knife required)");
@@ -1131,6 +1246,7 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
+                if (Node.readyAtHour > State().hour) return FString();
                 const bool Tree = Node.kind == Homestead::ResourceKind::ForestTree
                     || Node.kind == Homestead::ResourceKind::Sapling;
                 if (Tree) return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
@@ -1171,6 +1287,20 @@ void AHomesteadController::Notify(const Homestead::Result& Result, USoundBase* S
     RefreshRemaining = 0;
 }
 
+void AHomesteadController::NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue)
+{
+    if (!Result.ok)
+    {
+        Notify(Result);
+        return;
+    }
+    ToastText.Reset();
+    ToastRemaining = 0;
+    bToastError = false;
+    if (SuccessCue) PlayEffect(SuccessCue);
+    RefreshRemaining = 0;
+}
+
 void AHomesteadController::Notify(const FString& Message, bool Error)
 {
     ToastText = Message;
@@ -1199,19 +1329,23 @@ void AHomesteadController::Interact()
     {
         bool Forage = false;
         bool Tree = false;
+        bool Reeds = false;
         Homestead::Point ActionTarget = Position;
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
                 Tree = Node.kind == Homestead::ResourceKind::ForestTree;
+                Reeds = Node.kind == Homestead::ResourceKind::Reeds;
                 Forage = !Tree && Node.kind != Homestead::ResourceKind::Sapling;
                 ActionTarget = Node.position;
                 break;
             }
         const auto Result = Sim.Harvest(FocusId, Position);
-        Notify(Result, Tree ? WoodTapB.Get() : GrassStepA.Get());
+        NotifyResourceAction(Result, Tree ? WoodTapB.Get() : GrassStepA.Get());
         if (Result.ok && Forage)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                if (Reeds) Avatar->PlayKnifeCut(ActionTarget);
+                else Avatar->PlayGather();
         if (Result.ok && Tree)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);
         break;
@@ -1316,9 +1450,11 @@ void AHomesteadController::Secondary()
                 break;
             }
         const auto Result = Sim.Clear(FocusId, PlayerPoint());
-        Notify(Result, WoodTapB);
-        if (Result.ok && Sapling)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);
+        NotifyResourceAction(Result, WoodTapB);
+        if (Result.ok)
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                if (Sapling) Avatar->PlayClear(ActionTarget);
+                else Avatar->PlayKnifeCut(ActionTarget);
     }
     else if (Focus == EFocus::Plot)
     {
@@ -1352,6 +1488,7 @@ void AHomesteadController::Secondary()
 void AHomesteadController::OpenBook(int32 TargetPage)
 {
     EndPlacement();
+    HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
     Page = FMath::Clamp(TargetPage, 0, 6);
     Selection = 0;
@@ -1359,7 +1496,8 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     PlayEffect(UIClick, 0.08f);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
-        Avatar->CancelAction();
+        Avatar->CancelAction(true);
+        Avatar->CancelSprint();
         Avatar->GetCharacterMovement()->StopMovementImmediately();
         Avatar->SetAppearancePreview(false);
     }
@@ -2053,6 +2191,7 @@ void AHomesteadController::ToggleVerticalSync()
 void AHomesteadController::BeginPlacement(Homestead::Piece Kind)
 {
     CloseBook();
+    HoveredHotbarSlot = INDEX_NONE;
     bPlanning = true;
     BuildKind = Kind;
     BuildRotation = 0;
@@ -2259,7 +2398,11 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     bWorldReady = true;
     bHasPlayableSession = true;
     LoadProblem.Reset();
-    if (Avatar) Avatar->CancelAction();
+    if (Avatar)
+    {
+        Avatar->CancelAction(true);
+        Avatar->CancelSprint();
+    }
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
     Appearance.HairStyle = Save.HairStyle;
@@ -2360,7 +2503,11 @@ void AHomesteadController::RetryCheckpoint()
     Sim = MoveTemp(Candidate);
     ActiveChestId.Reset();
     bWorldReady = true;
-    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction();
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+    {
+        Avatar->CancelAction(true);
+        Avatar->CancelSprint();
+    }
     Appearance = SessionAppearance;
     PendingLocation = SessionLocation;
     PendingRotation = SessionRotation;
@@ -2395,6 +2542,8 @@ void AHomesteadController::NewGame()
     LastSuccessfulSave = FDateTime();
     LoadProblem.Reset();
     Appearance = FHomesteadAppearance();
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01")))
+        Appearance.HairStyle = 1;
     ResetHotbar();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);

@@ -1,0 +1,84 @@
+{
+  "AN_Heroine_CMUSlowWalk02": {
+    "duration_seconds": 1.4333333333333333,
+    "source_frames": [
+      100,
+      272
+    ],
+    "source_fps": 120,
+    "leg_scale": 0.9030918284012938,
+    "maximum_floor_correction_cm": 5.333873629570007,
+    "toe_loop_error_m": 0.0,
+    "head_pitch_degrees": {
+      "minimum": 27.3422356434815,
+      "median": 29.036193349917347,
+      "maximum": 31.32643190966538
+    },
+    "leveled_head_pitch_degrees": {
+      "minimum": -2.000029887853491,
+      "median": -2.000002407399239,
+      "maximum": -1.9999878229536665
+    },
+    "stance": {
+      "l": {
+        "contact_samples": 13,
+        "median_stance_speed_cm_s": 97.68041968345642,
+        "toe_ground_m": 0.020311646163463593,
+        "maximum_toe_lift_cm": 8.484116941690445
+      },
+      "r": {
+        "contact_samples": 16,
+        "median_stance_speed_cm_s": 79.95235919952393,
+        "toe_ground_m": 0.022095616906881332,
+        "maximum_toe_lift_cm": 12.065589800477028
+      }
+    },
+    "median_stance_speed_cm_s": 88.81638944149017,
+    "root_motion": false,
+    "notifies": 0,
+    "fbx_sha256": "eb67931a5d35152c09676a3ef5b45ef348a4db9d29f6f851009dd85cb217d397",
+    "license": "CMU Graphics Lab mocap: copying, modification and redistribution allowed",
+    "status": "Offline licensed in-place retarget; in-game motion quality unverified"
+  },
+  "AN_Heroine_CMUNormalWalk02": {
+    "duration_seconds": 1.0666666666666667,
+    "source_frames": [
+      100,
+      229
+    ],
+    "source_fps": 120,
+    "leg_scale": 0.9030918820763028,
+    "maximum_floor_correction_cm": 5.297659989446402,
+    "toe_loop_error_m": 0.0,
+    "head_pitch_degrees": {
+      "minimum": 27.68996972056308,
+      "median": 29.818307650285465,
+      "maximum": 31.172316712722775
+    },
+    "leveled_head_pitch_degrees": {
+      "minimum": -2.000028176525338,
+      "median": -2.000004791283151,
+      "maximum": -1.9999835268721973
+    },
+    "stance": {
+      "l": {
+        "contact_samples": 9,
+        "median_stance_speed_cm_s": 140.0182843208313,
+        "toe_ground_m": 0.01882017031311989,
+        "maximum_toe_lift_cm": 9.574441984295845
+      },
+      "r": {
+        "contact_samples": 11,
+        "median_stance_speed_cm_s": 118.37035417556763,
+        "toe_ground_m": 0.010875709354877472,
+        "maximum_toe_lift_cm": 11.163363605737686
+      }
+    },
+    "median_stance_speed_cm_s": 129.19431924819946,
+    "root_motion": false,
+    "notifies": 0,
+    "fbx_sha256": "e6eeb57c845b69281d0de43862f0a388bcd4cd2cb3a8dc2b1a53e54784c52bf1",
+    "license": "CMU Graphics Lab mocap: copying, modification and redistribution allowed",
+    "status": "Offline licensed in-place retarget; in-game motion quality unverified"
+  }
+}

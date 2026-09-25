@@ -81,6 +81,46 @@ construction and a bounded preparation split cannot materially improve it,
 record the measured architectural limit and leave promotion contingent on the
 visual polish still being a genuine overall improvement.
 
+### Measured incremental publication for ordinary woodland crossings
+
+The newer Shipping subphase trace found a second choke point outside the world
+refresh: `Simulation::SetActiveWorldRegion` regenerated nine immutable chunks
+for about 71.5 ms before the world spent 56 ms publishing. The simulation now
+uses the already-prepared world-owned `ChunkBaseline` values only when world
+descriptor and chunk key agree. A missing entry uses the original generator;
+a supplied entry with the wrong key fails without changing simulation state.
+Cached `terrain` samples likewise replace repeated analytic placement-height
+sampling for cover and tree roots, retaining the exact colliding-grid triangle
+interpolation. Existing capsules are retained for stable keys only when their
+resource handles, geometry and transforms all agree.
+
+The remaining incoming resource meshes and five outer cover chunks are
+nonblocking. As the character walks within 900 cm of a boundary, predict one
+adjacent destination from movement direction. Prepare at most a 4 ms window
+of incoming components on the game thread each tick. Components are owned in
+UPROPERTY maps by the existing world actor, registered hidden with collision
+disabled and not added to authoritative visual maps. Stage cover only after
+all of its neighbor baselines are already cached; never synchronously fill
+missing baselines as a side effect of speculative publication. If the desired
+chunk, seed/version or source simulation revision changes, destroy the old
+stage before preparing the new one. Exact resource and cover signatures are
+rechecked when the actual destination arrives, including ready/depleted
+produce; mismatches are not adopted. Only then reveal matching visuals while
+the controller commits its candidate simulation after world refresh succeeds.
+Trees retain active collision before that commit. Cold teleports and uncached
+neighbors intentionally take the existing synchronous fallback rather than
+exposing an incomplete or collidable staged world.
+
+The Shipping mapped walk now asserts zero frame ticks above 33.3 ms and a
+staging call below 16.67 ms, in addition to collision, tree identity, exact
+negative-coordinate seams and save/revisit assertions. Its final 720p/4K
+observed maxima were 27.819/27.749 ms; physical GPU/Present behavior remains
+unmeasured. The engine's procedural-mesh API combines section publication and
+internal collision cooking; their independent costs are not yet isolated, so
+task 8.1 remains open even though the combined section is not dominant.
+Promotion remains subject to the existing commit-backed receipt and explicit
+rollback procedure.
+
 ### Governing supersession: September21 16:19-16:26
 
 Jenny now requires no initial house clearing and real seeded exploration with

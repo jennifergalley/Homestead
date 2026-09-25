@@ -21,6 +21,7 @@ public:
     void Orbit(float Degrees);
     void ToggleCloseup();
     UTextureRenderTarget2D* Texture() const { return Target; }
+    TOptional<float> IdlePhase() const;
 
 private:
     UPROPERTY() TObjectPtr<USkeletalMeshComponent> Body;
@@ -29,6 +30,7 @@ private:
     UPROPERTY() TObjectPtr<UPointLightComponent> Light;
     UPROPERTY() TObjectPtr<UPointLightComponent> FillLight;
     UPROPERTY() TObjectPtr<UTextureRenderTarget2D> Target;
+    TWeakObjectPtr<AHomesteadCharacter> Subject;
     bool bCapturePending = false;
     float Yaw = 0;
     bool bCloseup = false;

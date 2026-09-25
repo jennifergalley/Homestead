@@ -1,6 +1,9 @@
 #include "HomesteadMenuPortrait.h"
 #include "../HomesteadCharacter.h"
+#include "../HomesteadController.h"
 #include "../HomesteadWardrobePresentation.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Components/SceneComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -12,13 +15,14 @@
 AHomesteadMenuPortrait::AHomesteadMenuPortrait()
 {
     PrimaryActorTick.bCanEverTick = true;
-    PrimaryActorTick.TickInterval = 1.0f / 15.0f;
+    PrimaryActorTick.TickInterval = 1.0f / 24.0f;
     SetActorEnableCollision(false);
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("PortraitRoot"));
     Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PortraitBody"));
     Body->SetupAttachment(RootComponent);
     Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     Body->SetGenerateOverlapEvents(false);
+    Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
     Body->SetCastShadow(false);
     Body->SetLightingChannels(false, false, true);
     const FName Names[] = {TEXT("PortraitTunic"), TEXT("PortraitApron"), TEXT("PortraitFeet")};
@@ -89,6 +93,16 @@ bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)
 {
     const auto* Source = Character.GetMesh();
     if (!Source || !Source->GetSkeletalMeshAsset()) return false;
+    UAnimSequence* Idle = Character.GetIdleAnimation();
+    if (!Idle)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Menu portrait needs the heroine's admitted idle animation."));
+        return false;
+    }
+    Subject = &Character;
+    const auto* Previous = Body->GetSingleNodeInstance();
+    const float PreviousPhase = Previous && Previous->GetAnimationAsset() == Idle
+        ? Previous->GetCurrentTime() : 0.0f;
     if (!Target)
     {
         Target = NewObject<UTextureRenderTarget2D>(this);
@@ -125,7 +139,15 @@ bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)
         for (int32 Index = 0; Index < Source->GetNumMaterials(); ++Index) Body->SetMaterial(Index, Source->GetMaterial(Index));
         for (const auto& Part : Garments) Part->SetVisibility(false);
     }
-    Body->SetLeaderPoseComponent(Character.GetMesh(), true, false);
+    Body->SetLeaderPoseComponent(nullptr);
+    Body->PlayAnimation(Idle, true);
+    if (auto* Current = Body->GetSingleNodeInstance())
+        Current->SetPosition(FMath::Fmod(PreviousPhase, Idle->GetPlayLength()), false);
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Menu portrait could not play its independent idle."));
+        return false;
+    }
     MeshRotation = Source->GetRelativeRotation();
     Body->SetRelativeRotation(MeshRotation + FRotator(0, Yaw, 0));
     Body->SetRelativeScale3D(Source->GetRelativeScale3D());
@@ -164,6 +186,12 @@ void AHomesteadMenuPortrait::ToggleCloseup()
     bCapturePending = true;
 }
 
+TOptional<float> AHomesteadMenuPortrait::IdlePhase() const
+{
+    const auto* Animation = Body->GetSingleNodeInstance();
+    return Animation ? TOptional<float>(Animation->GetCurrentTime()) : TOptional<float>();
+}
+
 void AHomesteadMenuPortrait::UpdateCaptureFraming()
 {
     if (!Target || SubjectExtent.Z <= 0) return;
@@ -191,7 +219,11 @@ void AHomesteadMenuPortrait::UpdateCaptureFraming()
 void AHomesteadMenuPortrait::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if (bCapturePending && Target)
+    const auto* PC = Subject.IsValid()
+        ? Cast<AHomesteadController>(Subject->GetController()) : nullptr;
+    const bool bVisible = PC && PC->IsBookOpen()
+        && (PC->BookPage() == 0 || PC->BookPage() == 6);
+    if ((bCapturePending || bVisible) && Target)
     {
         Capture->CaptureScene();
         bCapturePending = false;

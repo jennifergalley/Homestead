@@ -9,6 +9,11 @@ digging stick and watering can are project-authored original prototype content.
 They reuse the admitted heroine skeleton and existing project materials; they
 introduce no external asset or license dependency.
 
+The creek-bank reed clump and remaining stubble are project-authored Blender
+meshes (`Scripts\Environment\build_reed_clumps.py`); their shafts, blades and
+seed heads reuse `M_Field` color instances. The small held Knife is likewise
+project-authored procedural geometry. Neither adds a third-party asset.
+
 ## Music
 
 **Evening Fall (Harp)** by **Kevin MacLeod** (incompetech.com).
@@ -104,3 +109,28 @@ approval or the complete character creator. Older technical packages may still
 contain the labeled geometric stand-in; see their build status before testing.
 The supplied portrait is local reference only, not a licensed game texture or a
 file to publish. No Skyrim, Hades, Coral Island, or Dreamlight Valley assets are used.
+
+The optional `Try-HeroineTrial.cmd` build fits face/eye geometry from
+[CharMorph Vitruvian](https://github.com/Upliner/CharMorph-Vitruvian) to the
+existing CC0 MPFB heroine. Its `config.yaml` declares the model data CC0, and
+its README records the original model author's permission to relicense.
+The fitted neck reuses the admitted MPFB skin texture and the original
+modular rig and garments. Exact pinned source revision, file hashes and
+script-stripping procedure are in
+`Assets\Characters\HeroineTrials\Vitruvian01\source-license.json`; the
+separate CharMorph add-on code was not included or executed. Jenny
+subsequently rejected this face and its neck seam; it is retained only
+in historical opt-in candidates.
+
+The separate experimental `Try-MotionTrial.cmd` candidate also uses
+Carnegie Mellon University Graphics Lab Motion Capture Database subject
+07 walk recordings 01 and 04. The original dataset's
+[FAQ](https://mocap.cs.cmu.edu/faqs.php) permits copying, modification
+and redistribution without permission. Only the publisher's original
+text ASF/AMC files were downloaded and retargeted by first-party
+scripts; exact official URLs, data digests and motion descriptions are
+in `Assets\Characters\HeroineTrials\CMUWalk01\source-license.json`.
+The separate `CMUWalk02` upright-head retarget uses those same
+digest-pinned source files, the existing heroine skeleton and original
+face; it does not reuse the rejected Vitruvian geometry. This is not
+visual approval of the resulting walk or Sprint.

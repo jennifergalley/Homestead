@@ -7,6 +7,7 @@
 #include "Dom/JsonObject.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/FileManager.h"
@@ -41,12 +42,18 @@ struct FWoodlandFixture
     FVector WalkBefore = FVector::ZeroVector, WalkAfter = FVector::ZeroVector;
     FVector Previous = FVector::ZeroVector;
     bool CrossedOldBoundary = false, CrossedChunkSeam = false, ContinuousGround = true;
+    bool StaleStagingCancelled = false;
+    double WorstWalkFrameMilliseconds = 0;
+    int32 WalkFramesOver33Milliseconds = 0;
+    int32 WalkFramesOver50Milliseconds = 0;
     size_t EditCount = 0;
     FString WorldId, SimulationText, Fingerprint, RegionalReachKey;
     std::string PreWaterCaptureSimulation;
     double PreWaterCaptureHour = 0.0;
     FString ActiveBatchSnapshot;
     int32 ActiveBatchComponents = 0, ActiveBatchInstances = 0, ActiveCollisionCapsules = 0;
+    TMap<FString, TWeakObjectPtr<UCapsuleComponent>> WalkTreeCollisions;
+    TMap<FString, int32> WalkTreeResourceIds;
     FString OuterBatchSnapshot;
     int32 OuterBatchComponents = 0, OuterBatchInstances = 0;
     uint32 ProducerProcess = 0;
@@ -915,10 +922,85 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             Teleport(Fixture->WalkStart);
             Controller->GetPawn()->SetActorRotation(FRotator(0, 180, 0));
             Controller->SetControlRotation(FRotator(-15, 180, 0));
+            Fixture->WalkTreeCollisions.Reset();
+            Fixture->WalkTreeResourceIds.Reset();
+            for (const auto& Entry : Controller->Landscape->ActiveTreeCollisions)
+            {
+                const auto* Instance = Controller->Landscape->ActiveTreeInstances.Find(Entry.Key);
+                if (Instance)
+                {
+                    Fixture->WalkTreeCollisions.Add(Entry.Key, Entry.Value.Get());
+                    Fixture->WalkTreeResourceIds.Add(Entry.Key, Instance->ResourceId);
+                }
+            }
         },
         [this, Fixture]() { return FMath::Abs(Controller->PlayerPoint().x + 3750) < 20
             && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
             && Controller->State().resourceEdits.size() == Fixture->EditCount; }, 1.0f);
+    Add(TEXT("CONTROLLED superseded resource staging stays invisible, nonblocking and cancellable"),
+        [this, Fixture]()
+        {
+            auto* Landscape = Controller->Landscape.Get();
+            const auto& Current = Controller->Simulation();
+            const auto Center = Current.GetState().activeChunk;
+            const auto Before = Current.Serialize();
+            const int32 Collisions = Landscape->ActiveTreeCollisions.Num();
+            bool bComponentsHidden = true;
+            bool bStaged = true;
+            for (int32 Direction : {-1, 1})
+            {
+                Homestead::Simulation Destination = Current;
+                const Homestead::Point Target{
+                    (Center.x + Direction + 0.5) * Homestead::Generation::ChunkSizeCm,
+                    (Center.y + 0.5) * Homestead::Generation::ChunkSizeCm};
+                if (!Destination.SetActiveWorldRegion(Target))
+                {
+                    bStaged = false;
+                    break;
+                }
+                if (!Landscape->StageAdjacentResources(Destination, Current.GetRevision()))
+                {
+                    bStaged = false;
+                    break;
+                }
+                for (int32 Attempt = 0; Attempt < 64 && Landscape->StagedCoverChunks.Num() < 5; ++Attempt)
+                    if (!Landscape->StageAdjacentResources(Destination, Current.GetRevision()))
+                    {
+                        bStaged = false;
+                        break;
+                    }
+                if (!bStaged || Landscape->StagedResourceVisuals.IsEmpty()
+                    || Landscape->StagedCoverChunks.Num() != 5)
+                {
+                    bStaged = false;
+                    break;
+                }
+                for (const auto& Entry : Landscape->StagedResourceVisuals)
+                    for (USceneComponent* Component : Entry.Value.Components)
+                    {
+                        auto* Primitive = Cast<UPrimitiveComponent>(Component);
+                        bComponentsHidden &= Primitive && Primitive->IsRegistered()
+                            && !Primitive->IsVisible()
+                            && Primitive->GetCollisionEnabled() == ECollisionEnabled::NoCollision;
+                    }
+                for (const auto& Entry : Landscape->StagedCoverChunks)
+                    for (USceneComponent* Component : Entry.Value.Cover.Components)
+                    {
+                        auto* Primitive = Cast<UPrimitiveComponent>(Component);
+                        bComponentsHidden &= Primitive && Primitive->IsRegistered()
+                            && !Primitive->IsVisible()
+                            && Primitive->GetCollisionEnabled() == ECollisionEnabled::NoCollision;
+                    }
+            }
+            Landscape->CancelStagedResources();
+            Fixture->StaleStagingCancelled = bComponentsHidden && bStaged
+                && Landscape->StagedResourceVisuals.IsEmpty()
+                && Landscape->StagedResourceProduceVisuals.IsEmpty()
+                && Landscape->StagedCoverChunks.IsEmpty()
+                && Landscape->ActiveTreeCollisions.Num() == Collisions
+                && Current.Serialize() == Before;
+        },
+        [Fixture]() { return Fixture->StaleStagingCancelled; }, 0.1f);
     Add(TEXT("Naturally walk across old -4000 edge and -4800 generated seam using held mapped left-stick input"),
         [this, Fixture]()
         {
@@ -942,16 +1024,38 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                 static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineCacheMisses),
                 static_cast<unsigned long long>(Controller->Landscape->ChunkBaselineBuildCount),
                 FParse::Param(FCommandLine::Get(), TEXT("HomesteadDisableChunkPreparation"))));
+            Results.Add(Controller->Landscape->LastTransitionPublishingProfile);
+            Results.Add(FString::Printf(
+                TEXT("CHUNK_STAGE simulation_ms=%.3f world_publication_ms=%.3f staged_resource_visuals=%d staged_cover_chunks=%d max_stage_frame_ms=%.3f"),
+                Controller->LastRegionSimulationMilliseconds,
+                Controller->LastRegionWorldMilliseconds,
+                Controller->Landscape->LastTransitionStagedResourceVisuals,
+                Controller->Landscape->LastTransitionStagedCoverChunks,
+                Controller->Landscape->LastTransitionStagingFrameMilliseconds));
+            Results.Add(FString::Printf(
+                TEXT("CHUNK_WALL max_tick_ms=%.3f frames_over_33ms=%d frames_over_50ms=%d"),
+                Fixture->WorstWalkFrameMilliseconds,
+                Fixture->WalkFramesOver33Milliseconds, Fixture->WalkFramesOver50Milliseconds));
             return Fixture->WalkBefore.X > -4000 && Fixture->WalkAfter.X < -4900
                 && Controller->IsWorldReady() && Controller->WorldRecoveryCount() == 0
                 && Fixture->WalkAfter.X > -5550 && FMath::Abs(Fixture->WalkAfter.Y - Fixture->WalkStart.y) < 70
                 && Fixture->CrossedOldBoundary && Fixture->CrossedChunkSeam && Fixture->ContinuousGround
+                && Controller->Landscape->LastTransitionStagedResourceVisuals > 0
+                && Controller->Landscape->LastTransitionStagedCoverChunks == 5
+                && Controller->Landscape->LastTransitionStagingFrameMilliseconds < 16.67
+                && Fixture->WalkFramesOver33Milliseconds == 0
+                && Fixture->WorstWalkFrameMilliseconds < 33.3
                 && Controller->State().activeChunk.x == -3
                 && Controller->State().resourceEdits.size() == Fixture->EditCount
                 && ClearedKey(Controller->Simulation(), Fixture->SiteTree, false);
         }, 8.5f);
     Steps.Last().Repeat = [this, Fixture]()
     {
+        const double FrameMilliseconds = GetWorld()->GetDeltaSeconds() * 1000.0;
+        Fixture->WorstWalkFrameMilliseconds = FMath::Max(
+            Fixture->WorstWalkFrameMilliseconds, FrameMilliseconds);
+        Fixture->WalkFramesOver33Milliseconds += FrameMilliseconds > 33.3;
+        Fixture->WalkFramesOver50Milliseconds += FrameMilliseconds > 50.0;
         const auto Position = Controller->GetPawn()->GetActorLocation();
         const auto* Character = Cast<ACharacter>(Controller->GetPawn());
         const double AboveGround = Position.Z - Controller->GroundHeight(Position.X, Position.Y);
@@ -966,6 +1070,47 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     Add(TEXT("Release movement after the actual boundary traversal"),
         [this]() { Axis(EKeys::Gamepad_LeftY, 0); },
         [this]() { return Controller->GetPawn()->GetVelocity().Size2D() < 5; }, 0.8f);
+    Add(TEXT("Unchanged generated tree capsules retain identity across the mapped boundary"),
+        []() {},
+        [this, Fixture]()
+        {
+            int32 Retained = 0;
+            for (const auto& Entry : Fixture->WalkTreeCollisions)
+            {
+                const auto* Current = Controller->Landscape->ActiveTreeCollisions.Find(Entry.Key);
+                const auto* Instance = Controller->Landscape->ActiveTreeInstances.Find(Entry.Key);
+                const int32* PreviousId = Fixture->WalkTreeResourceIds.Find(Entry.Key);
+                if (!Current || !Instance || !PreviousId || Instance->ResourceId != *PreviousId)
+                    continue;
+                if (!Entry.Value.IsValid() || Entry.Value.Get() != Current->Get()
+                    || !Current->Get()->IsRegistered())
+                    return false;
+                ++Retained;
+            }
+            return Retained > 0;
+        }, 0.1f);
+    Add(TEXT("Cached cover and tree heights match canonical colliding terrain across negative seams"),
+        []() {},
+        [this]()
+        {
+            namespace Gen = Homestead::Generation;
+            for (float X : {-5200.25f, -4800.0f, -4799.5f})
+                for (float Y : {-0.5f, 0.0f, 2340.0f})
+                {
+                    Gen::ChunkCoord Chunk;
+                    const int64 X0 = FMath::FloorToInt64(X / Gen::TerrainSpacingCm)
+                        * Gen::TerrainSpacingCm;
+                    const int64 Y0 = FMath::FloorToInt64(Y / Gen::TerrainSpacingCm)
+                        * Gen::TerrainSpacingCm;
+                    if (Gen::ChunkAt(X0, Y0, Chunk) != Gen::Status::Ok
+                        || Controller->Landscape->ChunkBaselineCache.find(Chunk)
+                            == Controller->Landscape->ChunkBaselineCache.end()
+                        || FMath::Abs(Controller->Landscape->CachedGroundHeight(X, Y)
+                            - Controller->Landscape->GroundHeight(X, Y)) > 0.0001f)
+                        return false;
+                }
+            return true;
+        }, 0.1f);
     Capture(TEXT("generated-boundary"));
     Add(TEXT("CONTROLLED return teleport prepares collision, then resolves saved tree KEYS instead of old handles"),
         [this, Garden]()

@@ -103,6 +103,10 @@ public:
     float GroundHeight(float X, float Y) const;
     bool IsPreparedFor(const Homestead::State& State) const;
     int32 StartingViewObstructions(FVector Focus, FVector Camera) const;
+    const Homestead::Generation::ChunkBaseline* CachedBaselineFor(
+        Homestead::Generation::WorldDescriptor World, Homestead::Generation::ChunkCoord Chunk) const;
+    bool StageAdjacentResources(const Homestead::Simulation& Destination, uint64 SourceRevision);
+    void CancelStagedResources();
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -161,6 +165,21 @@ private:
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> ResourceProduceVisuals;
     UPROPERTY()
+    TMap<int32, FHomesteadWorldVisual> StagedResourceVisuals;
+    UPROPERTY()
+    TMap<int32, FHomesteadWorldVisual> StagedResourceProduceVisuals;
+    UPROPERTY()
+    TMap<FIntPoint, FHomesteadTerrainChunk> StagedCoverChunks;
+    std::vector<Homestead::ResourceNode> StagedResourceNodes;
+    TArray<FIntPoint> StagedCoverKeys;
+    Homestead::Generation::WorldDescriptor StagedWorld;
+    Homestead::Generation::ChunkCoord StagedChunk;
+    uint64 StagedSourceRevision = 0;
+    int32 StagedResourceCursor = 0;
+    int32 StagedCoverCursor = 0;
+    bool bStagingResourceWindow = false;
+    bool bStagingResourceBuild = false;
+    UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> StructureVisuals;
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> PlotVisuals;
@@ -201,6 +220,16 @@ private:
     double LastTransitionCoverMilliseconds = 0;
     double LastTransitionOuterTreeMilliseconds = 0;
     double LastTransitionActiveTreeMilliseconds = 0;
+    int32 LastTransitionStagedResourceVisuals = 0;
+    int32 LastTransitionStagedCoverChunks = 0;
+    double LastTransitionStagingFrameMilliseconds = 0;
+    double StagingFrameMaximumMilliseconds = 0;
+    FString TerrainChunkProfile;
+    FString TerrainProfile;
+    FString CoverProfile;
+    FString OuterTreeProfile;
+    FString ActiveTreeProfile;
+    FString LastTransitionPublishingProfile;
     Homestead::Generation::ChunkCoord PreparedChunk;
     bool bTerrainReady = false;
     bool bVisualBuildFailed = false;
@@ -226,10 +255,12 @@ private:
     UProceduralMeshComponent* BuildTerrainChunk(const Homestead::Generation::ChunkBaseline& Baseline,
         Homestead::Generation::WorldDescriptor World, bool bCollision);
     FVector AtGround(float X, float Y, float Offset = 0) const;
+    float CachedGroundHeight(float X, float Y) const;
     void BuildLighting();
     bool LoadCameraSafeFoliageMaterials();
     bool ApplyCameraSafeFoliageMaterials(UMeshComponent& Component);
-    bool BuildDecorations(const Homestead::Simulation& Simulation);
+    bool BuildDecorations(const Homestead::Simulation& Simulation,
+        const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
     bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,
         FHomesteadOuterTreeInstance& Instance);

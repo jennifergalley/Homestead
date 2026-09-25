@@ -1,0 +1,14 @@
+{
+  "AN_Heroine_LivingIdle02": {
+    "duration_seconds": 5,
+    "fps": 60,
+    "toe_drift_m": 0.0,
+    "head_travel_m": 0.013237919113312372,
+    "hand_travel_m": 0.027648495453418322,
+    "root_lateral_m": 0.0,
+    "loop_error_m": 0.0,
+    "root_motion": false,
+    "notifies": 0,
+    "rights": "Original authored motion on the admitted CC0 MakeHuman bind"
+  }
+}

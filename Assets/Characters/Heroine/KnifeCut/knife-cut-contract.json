@@ -1,0 +1,13 @@
+{
+  "AN_Heroine_KnifeCut": {
+    "duration_seconds": 0.9,
+    "fps": 60,
+    "wrist_travel_m": 0.3697383782597774,
+    "toe_drift_m": 4.5472963212928556e-08,
+    "root_motion": false,
+    "notifies": 0,
+    "rig": "Existing unchanged heroine bind; animation-only import",
+    "authority": "Presentation only after existing successful Knife Clear or reed Harvest",
+    "rights": "Original authored motion on admitted CC0 MPFB source"
+  }
+}

@@ -1,11 +1,13 @@
 #include "../HomesteadSmokeTest.h"
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "HomesteadMenuPortrait.h"
 #include "../HomesteadSave.h"
 #include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
 #include "SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimSequence.h"
 #include "Components/PrimitiveComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "HAL/FileManager.h"
@@ -265,6 +267,8 @@ bool AHomesteadSmokeTest::VerifyNativeMenuPresentation() const
 void AHomesteadSmokeTest::PrepareNativeMenuChecks()
 {
     const auto Before = MakeShared<std::string>();
+    const auto PortraitWorld = MakeShared<std::string>();
+    const auto PortraitPhase = MakeShared<float>(-1);
     const auto OriginalRoute = MakeShared<FString>();
     const auto Blocker = MakeShared<FString>(FPaths::Combine(HomesteadTestOutputDirectory(), TEXT("native-menu-write-blocker")));
     Add(TEXT("Required modular content is actually prepared and rendered; no prototype fallback"),
@@ -361,6 +365,74 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             [this]() { return Controller->NativeMenu.IsValid(); }, 0.8f);
     };
     Capture(TEXT("native-settings"));
+    const auto DragAudioSlider = [this](int32 AudioId, float FromFraction, float ToFraction,
+        bool ReleaseOutside, bool& StayedOpen)
+    {
+        const auto Widget = Controller->NativeMenu->GetAudioSliderWidget(AudioId);
+        if (!Widget)
+        {
+            Finish(false, TEXT("Native Settings audio slider is missing."));
+            return;
+        }
+        const FGeometry Geometry = Widget->GetCachedGeometry();
+        if (Geometry.GetAbsoluteSize().X < 40 || Geometry.GetAbsoluteSize().Y < 1)
+        {
+            Finish(false, TEXT("Native Settings audio slider has no hit geometry."));
+            return;
+        }
+        const FVector2D From = Geometry.GetAbsolutePosition()
+            + FVector2D(Geometry.GetAbsoluteSize().X * FromFraction, Geometry.GetAbsoluteSize().Y * 0.5f);
+        FVector2D To = Geometry.GetAbsolutePosition()
+            + FVector2D(Geometry.GetAbsoluteSize().X * ToFraction, Geometry.GetAbsoluteSize().Y * 0.5f);
+        if (ReleaseOutside) To.Y -= 80;
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        Slate.SetCursorPos(From);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, From, From, TSet<FKey>(),
+            EKeys::Invalid, 0, FModifierKeysState()));
+        TSet<FKey> Pressed;
+        Pressed.Add(EKeys::LeftMouseButton);
+        Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, From, From, Pressed,
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        StayedOpen = Controller->HasNativeMenu() && Controller->BookPage() == 4
+            && Controller->IsBookOpen();
+        Slate.SetCursorPos(To);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, To, From, Pressed,
+            EKeys::Invalid, 0, FModifierKeysState()));
+        Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, To, To, TSet<FKey>(),
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+    };
+    for (const int32 AudioId : {5, 6, 7})
+    {
+        const auto Stayed = MakeShared<bool>(false);
+        const auto Prior = MakeShared<float>(0);
+        const float Target = AudioId == 5 ? 0.26f : AudioId == 6 ? 0.42f : 0.58f;
+        if (AudioId != 5)
+            Add(FString::Printf(TEXT("Scroll Settings to audio slider %d"), AudioId),
+                [this, AudioId]() { Controller->NativeMenu->FocusLegacySubject(AudioId); },
+                [this, AudioId]()
+                {
+                    const auto Widget = Controller->NativeMenu->GetAudioSliderWidget(AudioId);
+                    return Widget && Widget->GetCachedGeometry().GetAbsoluteSize().X > 40
+                        && Controller->NativeMenu->IsFocusedControlVisible();
+                }, 0.2f);
+        Add(FString::Printf(TEXT("Pointer click/drag audio slider %d stays in Settings"), AudioId),
+            [this, AudioId, Stayed, Prior, Target, DragAudioSlider]()
+            {
+                *Prior = Controller->MenuAudioVolume(AudioId);
+                DragAudioSlider(AudioId, AudioId == 5 ? Target : 0.8f,
+                    Target, AudioId != 5, *Stayed);
+            },
+            [this, AudioId, Stayed, Prior, Target]()
+            {
+                const bool Valid = *Stayed && Controller->HasNativeMenu()
+                    && Controller->IsBookOpen() && Controller->BookPage() == 4
+                    && !Controller->NativeMenu->HasActiveDialog()
+                    && FMath::Abs(Controller->MenuAudioVolume(AudioId) - Target) < 0.09f
+                    && FMath::Abs(Controller->MenuAudioVolume(AudioId) - *Prior) > 0.09f;
+                return Valid;
+            }, 0.2f);
+    }
     Add(TEXT("Quit game row opens one two-choice dialog"),
         [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Enter); },
         [this]() { return Controller->NativeMenu && Controller->NativeMenu->IsExitPrompt(); });
@@ -411,6 +483,38 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 && Subject->Id == static_cast<int>(Homestead::Item::Knife) && Subject->Quantity == 1
                 && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("Carried: 1"));
         });
+    Add(TEXT("Inventory portrait animates on its own while the simulation is paused"),
+        [this, PortraitWorld, PortraitPhase]()
+        {
+            *PortraitWorld = Controller->Simulation().Serialize();
+            const auto Phase = Controller->MenuPortrait
+                ? Controller->MenuPortrait->IdlePhase() : TOptional<float>();
+            if (!Phase.IsSet())
+            {
+                Finish(false, TEXT("Inventory portrait has no independent idle instance."));
+                return;
+            }
+            *PortraitPhase = Phase.GetValue();
+        },
+        [this, PortraitWorld, PortraitPhase]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto Phase = Controller->MenuPortrait
+                ? Controller->MenuPortrait->IdlePhase() : TOptional<float>();
+            const UAnimSequence* Idle = Avatar ? Avatar->GetIdleAnimation() : nullptr;
+            if (!Phase.IsSet() || !Idle || *PortraitPhase < 0) return false;
+            const float Duration = Idle->GetPlayLength();
+            const float Advance = FMath::Fmod(Phase.GetValue() - *PortraitPhase + Duration, Duration);
+            const bool Passed = Controller->IsBookOpen() && Controller->BookPage() == 0
+                && Controller->Simulation().Serialize() == *PortraitWorld
+                && Advance > 0.65f && Advance < 1.65f;
+            if (!Passed)
+                Results.Add(FString::Printf(TEXT("PORTRAIT_IDLE_DIAG book=%d page=%d start=%.3f now=%.3f duration=%.3f advance=%.3f same_world=%d"),
+                    Controller->IsBookOpen(), Controller->BookPage(), *PortraitPhase,
+                    Phase.GetValue(), Duration, Advance,
+                    Controller->Simulation().Serialize() == *PortraitWorld));
+            return Passed;
+        }, FParse::Param(FCommandLine::Get(), TEXT("HomesteadIdleExtended")) ? 6.1f : 1.1f);
     Capture(TEXT("native-inventory"));
     PrepareNativeInventoryTransactionChecks();
     Add(TEXT("Mouse noise does not steal controller hints"),
@@ -453,6 +557,19 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return Controller->BookPage() == 3
             && Controller->BookSummary().Contains(TEXT("Woodland seed")); });
     Capture(TEXT("native-guidebook"));
+    Add(TEXT("Guidebook text is readable without an inert Read action"),
+        [this]() { Controller->NativeMenu->FocusLegacySubject(2); },
+        [this]() { return Controller->BookPage() == 3
+            && Controller->NativeMenu->GetActionCount() == 0
+            && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("reeds")); });
+    Add(TEXT("Credits has no fabricated Read action"),
+        [this]() { Controller->OpenBook(5); },
+        [this]() { return Controller->BookPage() == 5
+            && Controller->NativeMenu->GetActionCount() == 0; });
+    Add(TEXT("Return to Guidebook without losing informational focus"),
+        [this]() { Controller->OpenBook(3); },
+        [this]() { return Controller->BookPage() == 3
+            && Controller->NativeMenu->GetActionCount() == 0; });
     Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
         [this]() { return Controller->BookPage() == 6; });
@@ -485,6 +602,28 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
 
 void AHomesteadSmokeTest::PrepareCraftingChecks()
 {
+    Add(TEXT("CONTROLLED unmet Fiber reveals Reeds on directional focus without crafting"),
+        [this]()
+        {
+            Controller->Sim = Homestead::Simulation();
+            Controller->OpenBook(1);
+            if (!Controller->NativeMenu
+                || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
+                    static_cast<int32>(Homestead::Recipe::Hatchet), 0))
+            {
+                Finish(false, TEXT("Hatchet details are unavailable for the unmet Fiber focus test."));
+                return;
+            }
+            Tap(EKeys::Tab);
+            for (int32 Step = 0; Step < 4; ++Step) Tap(EKeys::Down);
+        },
+        [this]()
+        {
+            return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Details")
+                && Controller->NativeMenu->GetFocusedRequirementHint() == TEXT("Reeds near water")
+                && Controller->Simulation().Count(Homestead::Item::Fiber) == 0
+                && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0;
+        });
     const auto ResetCraftingStock = [this]()
     {
         Controller->Sim = Homestead::Simulation();
@@ -716,6 +855,47 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
                 EKeys::Enter, IE_Released, 0)); },
             [this, Output, Count]() { return Controller->Simulation().Count(Output) == Count; }, 0.1f);
     }
+    Add(TEXT("CONTROLLED full pack shows capacity only when it blocks Split firewood"),
+        [this]()
+        {
+            Homestead::Simulation Full;
+            auto& State = const_cast<Homestead::State&>(Full.GetState());
+            State.inventory.fill(0);
+            State.inventoryLayout.clear();
+            for (const auto Pair : {TPair<Homestead::Item, int32>(Homestead::Item::Knife, 1),
+                TPair<Homestead::Item, int32>(Homestead::Item::Hatchet, 1),
+                TPair<Homestead::Item, int32>(Homestead::Item::Timber, 1),
+                TPair<Homestead::Item, int32>(Homestead::Item::Stone, 117)})
+            {
+                State.inventory[static_cast<int32>(Pair.Key)] = Pair.Value;
+                State.inventoryLayout.push_back(
+                    {State.nextGroupId++, Pair.Key, Pair.Value, 0});
+            }
+            const auto Loaded = Controller->Sim.Deserialize(Full.Serialize());
+            if (!Loaded || Controller->Sim.UsedCapacity() != Homestead::InventoryCapacity)
+            {
+                Finish(false, TEXT("Controlled full-pack recipe authority is invalid."));
+                return;
+            }
+            Controller->OpenBook(1);
+            if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
+                static_cast<int32>(Homestead::Recipe::SplitFirewood), 0))
+                Finish(false, TEXT("Split firewood details are unavailable."));
+        },
+        [this]()
+        {
+            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            const FString Details = Controller->NativeMenu->GetDisplayedDetails();
+            return Row && Row->HasRecipeState && !Row->RecipeState.capacityMet
+                && Row->RecipeState.ingredients.size() == 1
+                && Row->RecipeState.ingredients[0].met
+                && Row->RecipeState.retainedToolMet
+                && Controller->NativeMenu->GetActionCount() == 0
+                && Details.Contains(TEXT("Pack space: Full"));
+        });
+    Add(TEXT("Capture the only blocking pack-capacity icon row"),
+        [this]() { Screenshot(TEXT("craft-requirements-capacity")); },
+        []() { return true; }, 0.6f);
 }
 
 void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
@@ -1980,7 +2160,10 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
             TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
             auto& Slate = FSlateApplication::Get();
+            const FVector2D Previous = Slate.GetCursorPos();
             Slate.SetCursorPos(Position);
+            Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Previous, TSet<FKey>(),
+                EKeys::Invalid, 0, FModifierKeysState()));
             TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
             Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
                 EKeys::LeftMouseButton, 0, FModifierKeysState()));

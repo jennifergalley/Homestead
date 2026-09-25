@@ -58,6 +58,14 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                     if (Weak.IsValid()) Weak->SelectHotbarSlot(Index);
                     return FReply::Handled();
                 })
+                .OnHovered_Lambda([Weak = Controller, Index]()
+                {
+                    if (Weak.IsValid()) Weak->HoverHotbarSlot(Index);
+                })
+                .OnUnhovered_Lambda([Weak = Controller]()
+                {
+                    if (Weak.IsValid()) Weak->HoverHotbarSlot(INDEX_NONE);
+                })
                 [
                     SNew(SBox).WidthOverride(46).HeightOverride(46)
                     [
@@ -69,20 +77,21 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FName();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) ? Snapshot[Index].Icon : FName();
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
+                                    ? Snapshot[Index].Icon : FName();
                             })
                             .Tint_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FLinearColor(1, 1, 1, 0);
                                 const auto Snapshot = Weak->HotbarSnapshot();
                                 return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
-                                    ? Gold : FLinearColor(Gold.R, Gold.G, Gold.B, 0.25f);
+                                    ? Gold : FLinearColor(1, 1, 1, 0);
                             })
                             .Visibility_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return EVisibility::Collapsed;
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Assigned
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
                                     ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
                             })
                         ]

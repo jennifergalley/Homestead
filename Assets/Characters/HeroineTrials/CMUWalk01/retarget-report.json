@@ -1,0 +1,64 @@
+{
+  "AN_Heroine_CMUSlowWalk01": {
+    "duration_seconds": 1.4333333333333333,
+    "source_frames": [
+      100,
+      272
+    ],
+    "source_fps": 120,
+    "leg_scale": 0.9030918284012938,
+    "maximum_floor_correction_cm": 5.333873629570007,
+    "toe_loop_error_m": 0.0,
+    "stance": {
+      "l": {
+        "contact_samples": 13,
+        "median_stance_speed_cm_s": 97.68041968345642,
+        "toe_ground_m": 0.020311646163463593,
+        "maximum_toe_lift_cm": 8.484116941690445
+      },
+      "r": {
+        "contact_samples": 16,
+        "median_stance_speed_cm_s": 79.95235919952393,
+        "toe_ground_m": 0.022095616906881332,
+        "maximum_toe_lift_cm": 12.065589800477028
+      }
+    },
+    "median_stance_speed_cm_s": 88.81638944149017,
+    "root_motion": false,
+    "notifies": 0,
+    "fbx_sha256": "d6a3dbe45024706a13462e6718db7576b769ca02b2e1d9fc0f7a856bfe8a567a",
+    "license": "CMU Graphics Lab mocap: copying, modification and redistribution allowed",
+    "status": "Offline licensed in-place retarget; in-game motion quality unverified"
+  },
+  "AN_Heroine_CMUNormalWalk01": {
+    "duration_seconds": 1.0666666666666667,
+    "source_frames": [
+      100,
+      229
+    ],
+    "source_fps": 120,
+    "leg_scale": 0.9030918820763028,
+    "maximum_floor_correction_cm": 5.297659989446402,
+    "toe_loop_error_m": 0.0,
+    "stance": {
+      "l": {
+        "contact_samples": 9,
+        "median_stance_speed_cm_s": 140.0182843208313,
+        "toe_ground_m": 0.01882017031311989,
+        "maximum_toe_lift_cm": 9.574441984295845
+      },
+      "r": {
+        "contact_samples": 11,
+        "median_stance_speed_cm_s": 118.37035417556763,
+        "toe_ground_m": 0.010875709354877472,
+        "maximum_toe_lift_cm": 11.163363605737686
+      }
+    },
+    "median_stance_speed_cm_s": 129.19431924819946,
+    "root_motion": false,
+    "notifies": 0,
+    "fbx_sha256": "0930d158d692e46463580aa6a4361c4f52d1450ff9ffa4105ad2aa0a4c697dc3",
+    "license": "CMU Graphics Lab mocap: copying, modification and redistribution allowed",
+    "status": "Offline licensed in-place retarget; in-game motion quality unverified"
+  }
+}

@@ -1856,6 +1856,33 @@ void GeneratedWorldIdentityAndActivation()
     const auto original = sim.Serialize();
     const auto originalNodes = sim.GetState().resources;
     const auto revision = sim.GetRevision();
+    std::vector<Generation::ChunkBaseline> preparedChunks(9);
+    PreparedWorldRegion prepared;
+    prepared.world = sim.GetState().world;
+    for (int dy = -1; dy <= 1; ++dy)
+        for (int dx = -1; dx <= 1; ++dx)
+        {
+            const int index = (dy + 1) * 3 + dx + 1;
+            CHECK(Generation::GenerateChunk(sim.GetState().world, {dx, dy},
+                preparedChunks[index]) == Generation::Status::Ok);
+            prepared.chunks[index] = &preparedChunks[index];
+        }
+    Simulation fromPrepared = sim;
+    Simulation regenerated = sim;
+    auto mismatched = prepared;
+    mismatched.chunks[0] = prepared.chunks[1];
+    UnchangedFailure(fromPrepared, [&] {
+        return fromPrepared.SetActiveWorldRegion({1, 1}, &mismatched);
+    });
+    mismatched = prepared;
+    ++mismatched.world.seed;
+    UnchangedFailure(fromPrepared, [&] {
+        return fromPrepared.SetActiveWorldRegion({1, 1}, &mismatched);
+    });
+    OK(fromPrepared.SetActiveWorldRegion({1, 1}, &prepared));
+    OK(regenerated.SetActiveWorldRegion({1, 1}));
+    CHECK(fromPrepared.Serialize() == regenerated.Serialize());
+    CHECK(fromPrepared.GetRevision() == regenerated.GetRevision());
     OK(sim.SetActiveWorldRegion({-1, 1}));
     CHECK(sim.GetRevision() == revision);
     OK(sim.SetActiveWorldRegion({1, 1}));
@@ -2331,6 +2358,28 @@ void SparseEditScaleAndPayloadBounds()
         << MaxResourceEdits << ", fullSaveBytes=" << fullSave.size() << ".\n";
 }
 
+void SprintEnergyContract()
+{
+    Simulation sim;
+    const auto revision = sim.GetRevision();
+    const double before = sim.GetState().energy;
+    UnchangedFailure(sim, [&] { return sim.SpendSprintEnergy(-1); });
+    UnchangedFailure(sim, [&] { return sim.SpendSprintEnergy(0); });
+    UnchangedFailure(sim, [&] {
+        return sim.SpendSprintEnergy(std::numeric_limits<double>::quiet_NaN());
+    });
+    OK(sim.SpendSprintEnergy(1));
+    CHECK(std::abs(sim.GetState().energy - (before - 0.35)) < 0.00001);
+    CHECK(sim.GetRevision() == revision);
+    for (int i = 0; i < 30 && sim.GetState().energy > 10; ++i)
+        OK(sim.SpendSprintEnergy(10));
+    CHECK(sim.GetState().energy == 10.0);
+    UnchangedFailure(sim, [&] { return sim.SpendSprintEnergy(1); });
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.GetState().energy == 10.0);
+}
+
 void Run(const char* name, void (*test)())
 {
     test();
@@ -2356,6 +2405,7 @@ int main()
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
+    Run("sprint consumes existing Energy with a reserve", SprintEnergyContract);
     Run("warmth, sleep and failure recovery", WarmthSleepAndFailure);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
     Run("strict atomic persistence", PersistenceRejection);
