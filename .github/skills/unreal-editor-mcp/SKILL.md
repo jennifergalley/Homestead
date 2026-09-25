@@ -254,6 +254,11 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: Original props are authored in Blender by the `blender-assets` skill
+  (`docs\blender-assets.md`, `Assets\Props\*`). Its `Import-Props.ps1` opens the project in its own
+  editor, so quit an MCP editor session first; never run both at once. The heroine's MetaHuman
+  pipeline doesn't use Blender.
+
 - 2026-09-25: The sun uses ray-traced shadows (`homestead.RayTracedSun`, default 1) and moves every
   refresh. `homestead.RayTracedSun 0` restores VSM with 0.5° steps. Don't reintroduce continuous
   rotation on the VSM path. See `docs/research/rendering-baseline/README.md`. The `-Presentation`
