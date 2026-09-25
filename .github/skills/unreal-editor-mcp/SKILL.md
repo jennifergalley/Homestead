@@ -247,6 +247,20 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: Creator scripting recipes (via `run_python`). Duplicate a preset from
+  `/MetaHumanCharacter/Optional/Presets/<Name>` to start a character. Swap hair with
+  `c.internal_collection.try_add_item_from_wardrobe_item('Hair', wi)` plus
+  `default_instance.set_single_slot_selection('Hair', key)`, using wardrobe items under
+  `/MetaHumanCharacter/Optional/Grooms/Bindings/Hair/`. **Scripted edits don't appear in an open
+  Creator window, even after Refresh Preview.** Close the editor (`close_all_editors_for_asset`),
+  release edit mode, save, then reopen. For review shots, set `viewport_settings.camera_frame`
+  (FACE/BODY) and `show_viewport_overlays = False` before opening, then use Slate `Screenshot` on
+  the `MHC_<name>` window. `set_body_constraints` + `commit_body_state` rebuilt the body mesh but
+  `get_body_constraints` read back unchanged values, even on a blank MetaHuman. Body shaping
+  through Python is unverified; use Creator's Body sliders until proven. `CaptureAssetImage`
+  doesn't support MetaHuman characters.
+- 2026-09-25: The Epic Launcher queues engine-option installs indefinitely while an editor is open.
+  Exit the launcher from the tray and reopen it.
 - 2026-09-25: Rendering presets one at a time opens and closes a Creator window every ~40 s.
   Warn the human before starting, because it looks like the editor is restarting and it steals
   any window they're clicking in. Creator's "Missing Project Settings → Enable Missing" writes
