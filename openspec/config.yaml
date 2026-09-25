@@ -27,6 +27,8 @@ context: |
   playable increment for exhaustive infrastructure or hypothetical future needs.
   Record bugs and deferred fixes found in playtests or reviews as OpenSpec
   changes in this repo (openspec/changes), not GitHub issues or other trackers.
+  All project docs, plans and working preferences live in this repo, never in
+  Notion or other external notebooks.
 
 rules:
   proposal:
