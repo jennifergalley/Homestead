@@ -10,13 +10,13 @@ ordinary-play captures. Stills from MetaHuman Creator alone never count as accep
 
 ## 1. Jenny's setup steps (manual)
 
-- [ ] 1.1 Jenny installs the MetaHuman Creator optional content for UE 5.8 from the Epic Launcher (engine Options); verify the editor no longer logs "MetaHuman Optional Content folder not found" and Creator shows its preset and wardrobe libraries.
+- [x] 1.1 Jenny installs the MetaHuman Creator optional content for UE 5.8 from the Epic Launcher (engine Options); verify the editor no longer logs "MetaHuman Optional Content folder not found" and Creator shows its preset and wardrobe libraries.
 - [ ] 1.2 Jenny signs in to Epic in the editor and accepts the MetaHuman consent at the first Download Texture Sources / Create Full Rig prompt; verify both cloud steps complete for the trial asset.
-- [ ] 1.3 Jenny adds the Game Animation Sample to her Fab library and creates the sample project from the Launcher; verify its project path is recorded for migration.
+- [x] 1.3 Jenny adds the Game Animation Sample to her Fab library and creates the sample project from the Launcher; verify its project path is recorded for migration. (`E:\Unreal Projects\GameAnimationSample\GameAnimationSample.uproject`)
 
 ## 2. Rendering baseline
 
-- [ ] 2.1 Record a before baseline: packaged 720p and 4K woodland walk captures, p95/p99 frame times, and the Lumen/VSM/SM6 warnings from the log; verify evidence files exist.
+- [x] 2.1 Record a before baseline: packaged 720p and 4K woodland walk captures, p95/p99 frame times, and the Lumen/VSM/SM6 warnings from the log; verify evidence files exist. (Development `-game` route, not packaged; see `docs/research/rendering-baseline/`.)
 - [ ] 2.2 Enable SM6, hardware ray tracing, Lumen hardware RT, mesh distance fields and the MetaHuman skinning settings in `DefaultEngine.ini`, then run the one-time shader rebuild; verify the editor and packaged logs show no missing-settings, VSM or Lumen ray-tracing warnings.
 - [ ] 2.3 Compare after captures and frame times against 2.1 in the same routes; verify at least 60 FPS at 4K output with the chosen upscaling, and record lighting/exposure changes needed for dawn, midday, dusk and firelight.
 

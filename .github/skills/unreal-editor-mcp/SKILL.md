@@ -242,11 +242,33 @@ Extend it there when play needs a capability; prefer real input over state edits
   fix this file.
 - Record game bugs you find while playing as OpenSpec changes in `openspec/changes` (repo
   convention; not GitHub issues). The 2026-09-25 findings live in `fix-editor-playtest-findings`.
+- Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
+  performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
+  -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over
+  33.3 ms), look for periodic spikes (for example, the paired 30-39 ms Virtual Shadow Map stalls
+  that continuous sun rotation caused), and watch real walk/turn/camera sweeps in play for visible
+  hitches. Test both capped (60 FPS) and uncapped. PIE timing is indicative only; smoothness
+  sign-off needs the packaged build.
 
 ## 8. Field notes
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: Killing the editor leaves `Saved\Autosaves\PackageRestoreData.json`. The next launch
+  opens a modal "Restore Packages" dialog that blocks startup and the MCP server, and synthetic
+  clicks on Skip Restore don't dismiss it. After a kill, delete that file (and scratch autosaves)
+  before relaunching. Quitting via `run_python` `unreal.SystemLibrary.quit_editor()` (after
+  `LevelEditorSubsystem.editor_request_end_play()`) exits cleanly in seconds and leaves restore
+  disabled.
+- 2026-09-25: Rotating a directional light invalidates every cached Virtual Shadow Map page. The
+  world refresh (every 0.25 s) used to rotate the sun continuously, causing paired 30-39 ms stalls
+  at 4K. `UpdateLighting` now steps rotation by 0.5°. Keep light rotation stepped.
+- 2026-09-25: Console commands in PIE: `run_python` with
+  `unreal.SystemLibrary.execute_console_command(unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world(), '<cmd>')`.
+  To A/B lighting live, call `set_actor_tick_enabled(False)` on `HomesteadController` so its
+  Refresh stops overwriting the sun. Then set the sun's rotation, intensity and colour, and the
+  `MeadowExposure` post-process settings (set `override_<name>` too), and capture. Turn the tick
+  back on afterwards. A new game starts at hour 6 (dawn), and one game hour is 2.5 real minutes.
 - 2026-09-25: Creator scripting recipes (via `run_python`). Duplicate a preset from
   `/MetaHumanCharacter/Optional/Presets/<Name>` to start a character. Swap hair with
   `c.internal_collection.try_add_item_from_wardrobe_item('Hair', wi)` plus

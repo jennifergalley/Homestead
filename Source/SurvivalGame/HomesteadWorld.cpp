@@ -1032,6 +1032,17 @@ void AHomesteadWorld::BuildLighting()
     Settings.AutoExposureMaxBrightness = 16.0f;
     Settings.bOverride_AutoExposureBias = true;
     Settings.AutoExposureBias = -0.15f;
+    // Virtual Shadow Maps give real canopy shadows, and a low sun lights upright trunks and the
+    // heroine head-on while the ground only gets grazing light. Compress local highlights and lift
+    // local shade so dawn doesn't clip sunlit bark or crush nearby shade to black.
+    Settings.bOverride_LocalExposureHighlightContrastScale = true;
+    Settings.LocalExposureHighlightContrastScale = 0.5f;
+    Settings.bOverride_LocalExposureShadowContrastScale = true;
+    Settings.LocalExposureShadowContrastScale = 0.8f;
+    // Near-horizon sunlight is deep orange after atmospheric transmittance; slightly desaturating
+    // highlights stops saturated albedo (the green dress) from hue-clipping to flat yellow.
+    Settings.bOverride_ColorSaturationHighlights = true;
+    Settings.ColorSaturationHighlights = FVector4(0.85f, 0.85f, 0.85f, 1.0f);
     Settings.bOverride_AutoExposureSpeedUp = true;
     Settings.AutoExposureSpeedUp = 3.0f;
     Settings.bOverride_AutoExposureSpeedDown = true;
@@ -2364,7 +2375,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
         bLightRotationApplied = true;
     }
     Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 17000.0f : 46000.0f, Daylight));
-    Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.76f, 0.56f),
+    // The sky atmosphere already reddens a low sun through its transmittance; keep only a mild
+    // extra tint so dawn stays golden instead of saturating to orange.
+    Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
     Moon->SetIntensity(0.5f * (1.0f - Daylight));
     Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight));
