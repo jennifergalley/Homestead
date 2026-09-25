@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "unreal": {
+      "type": "http",
+      "url": "http://127.0.0.1:8765/mcp",
+      "tools": ["*"],
+      "timeout": 600000
+    }
+  }
+}

@@ -1,0 +1,73 @@
+[CmdletBinding()]
+param(
+    [string]$EngineRoot,
+    [int]$Port = 8765,
+    [string]$Map,
+    [switch]$SkipBuild,
+    [int]$TimeoutSeconds = 600
+)
+$ErrorActionPreference = 'Stop'
+$root = Split-Path $PSScriptRoot -Parent
+$project = Join-Path $root 'SurvivalGame.uproject'
+$url = "http://127.0.0.1:$Port/mcp"
+
+# Editor-only plugins shipped with UE 5.8 (Experimental). They are enabled for this editor
+# process only, so the .uproject, commandlets, cooking and packaged builds are unaffected.
+$plugins = @(
+    'ModelContextProtocol'
+    'EditorToolset'
+    'AutomationTestToolset'
+    'ConfigSettingsToolset'
+    'LiveCodingToolset'
+    'SlateInspectorToolset'
+    'PluginToolset'
+    'AnimationAssistantToolset'
+    'PhysicsToolsets'
+)
+
+function Test-McpServer {
+    $body = '{"jsonrpc":"2.0","id":1,"method":"ping"}'
+    try {
+        $null = Invoke-WebRequest -Uri $url -Method Post -Body $body -ContentType 'application/json' `
+            -Headers @{ Accept = 'application/json, text/event-stream' } -TimeoutSec 3 -SkipHttpErrorCheck
+        return $true
+    } catch { return $false }
+}
+
+if (Test-McpServer) {
+    Write-Host "Unreal MCP server is already answering at $url"
+    return
+}
+
+$engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
+& (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
+
+if (-not $SkipBuild) {
+    $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
+    & $build SurvivalGameEditor Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
+    if ($LASTEXITCODE -ne 0) { throw "Unreal editor-module build failed ($LASTEXITCODE)." }
+}
+
+$editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
+$arguments = @("`"$project`"")
+if ($Map) { $arguments += $Map }
+$arguments += @(
+    "-EnablePlugins=$($plugins -join ',')"
+    '-ModelContextProtocolStartServer'
+    "-ModelContextProtocolPort=$Port"
+    '-nosplash'
+) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
+
+$process = Start-Process -FilePath $editor -ArgumentList $arguments -PassThru
+Write-Host "Started Unreal Editor (PID $($process.Id)); waiting for MCP at $url ..."
+
+$deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+while ((Get-Date) -lt $deadline) {
+    if ($process.HasExited) { throw "Unreal Editor exited early with code $($process.ExitCode). See Saved\Logs\SurvivalGame.log." }
+    if (Test-McpServer) {
+        Write-Host "Unreal MCP server ready at $url (editor PID $($process.Id))."
+        return
+    }
+    Start-Sleep -Seconds 3
+}
+throw "Unreal Editor is running (PID $($process.Id)) but MCP did not answer at $url within $TimeoutSeconds s."

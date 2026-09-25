@@ -174,6 +174,11 @@ the game build/start scripts. To create a standalone Windows build:
 analysis, never the microphone or other applications. This is not a substitute
 for listening. `-FullLoop` adds the extended homestead scenario.
 
+To let AI agents drive the live editor (load the map, play in editor, capture
+screens, read logs, edit actors/assets), run `.\Scripts\Start-EditorMcp.ps1`.
+It enables Epic's built-in Unreal MCP server for that editor session only; see
+`docs\editor-mcp.md` and the `unreal-editor-mcp` skill in `.github\skills`.
+
 `Build-Game.ps1` fetches the licensed source assets, compiles the native editor
 module, generates the materials/map/audio assets in the editor, and optionally
 cooks/packages the game. Failed steps stop with an explicit error.
