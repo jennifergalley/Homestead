@@ -10,6 +10,7 @@
   "source": {
     "editableCharacter": "/Game/Characters/Heroine_MH/MHC_Heroine (editor-only source; not cooked)",
     "startingPreset": "Epic MetaHuman Creator preset, then scripted edits in Content/Python/homestead_agent/metahuman_look.py (HEROINE_LOOK, HEROINE_SCULPT)",
+    "body": "2026-09-25 body pass after Jenny's in-game review: active constraints Hip 92 cm (was 99.4), High Hip 78 cm (was 81.4), Waist pinned at 68 cm; face rig removed, body changed, then re-rigged and reassembled. Height 178.7 cm (not yet changed)",
     "rig": "Epic MetaHuman cloud auto-rigging, JOINTS_AND_BLEND_SHAPES, requested from the editor with Jenny's Epic sign-in",
     "textures": "Epic MetaHuman cloud texture sources at 4K (RES4K on all eight maps)",
     "grooms": "Epic stock grooms: Hair_L_Straight, Eyebrows_M_SlightArch, Eyelashes_L_ThickCurl",
@@ -17,9 +18,14 @@
     "assembly": "build_meta_human, UE Optimized / High, output /Game/Characters/Heroine_MH/Assembled and /Common"
   },
   "animation": {
-    "clips": "/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_* (idle, walk, sprint, gather, water, chop, knife cut, till)",
+    "clips": "/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_* (idle, gather, water, chop, knife cut, till; legacy walk/sprint kept for comparison)",
     "origin": "Retargeted from the project's own legacy heroine clips (see docs/asset-credits.md, Character prototype) with IK_HeroineLegacy -> Epic IK_MH_IKRig via RTG_HeroineLegacy_To_MH",
-    "retargetOps": "Pelvis Motion, FK Chains, Remap Curves. Run IK Rig and Root Motion are disabled because they broke the pose."
+    "retargetOps": "Pelvis Motion, FK Chains, Remap Curves. Run IK Rig and Root Motion are disabled because they broke the pose.",
+    "locomotion": {
+      "clips": "/Game/Characters/Heroine_MH/Animations/GASP/AN_HeroineMH_GASP_{Walk,Run,Sprint,SprintRelaxed,WalkRelaxed}; the game uses Walk (208.7 cm/s natural speed) and Run as sprint (521.7 cm/s)",
+      "source": "Epic Games Game Animation Sample (Fab, UE-only, Unreal Engine EULA): M_Neutral_Walk_Loop_F, M_Neutral_Run_Loop_F, M_Neutral_Sprint_Loop_F, M_Relaxed_Sprint_Loop_F, M_Relaxed_Walk_Loop_F, migrated with AssetTools.migrate_packages to /Game/Characters/UEFN_Mannequin (with SKM_UEFN_Mannequin and IK_UEFN_Mannequin); foley notifies, audio and extra clips removed",
+      "retarget": "Content/Python/homestead_agent/gasp_locomotion.py: RTG_UEFN_To_HeroineMH (default ops; Root Motion op targets the root bone, copies from source root, snaps height to ground); clips locked in place"
+    }
   },
   "contentInventory": {
     "totalFiles": 312,

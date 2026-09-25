@@ -36,21 +36,6 @@ TAutoConsoleVariable<int32> CVarMetaHumanHeroine(TEXT("homestead.MetaHumanHeroin
     TEXT("1 = MetaHuman heroine (default), 0 = legacy heroine rollback. "
          "Read when the heroine's appearance is applied."));
 
-// Component-space distance from pelvis to left foot in the reference pose, in centimetres.
-float RefLegLength(const USkeletalMesh* Mesh)
-{
-    if (!Mesh) return 0.0f;
-    const FReferenceSkeleton& Ref = Mesh->GetRefSkeleton();
-    auto ComponentPosition = [&Ref](FName Bone)
-    {
-        FTransform Pose = FTransform::Identity;
-        for (int32 Index = Ref.FindBoneIndex(Bone); Index != INDEX_NONE; Index = Ref.GetParentIndex(Index))
-            Pose = Pose * Ref.GetRefBonePose()[Index];
-        return Pose.GetLocation();
-    };
-    if (Ref.FindBoneIndex(TEXT("pelvis")) == INDEX_NONE || Ref.FindBoneIndex(TEXT("foot_l")) == INDEX_NONE) return 0.0f;
-    return FVector::Dist(ComponentPosition(TEXT("pelvis")), ComponentPosition(TEXT("foot_l")));
-}
 
 const TCHAR* const MetaHumanRoot = TEXT("/Game/Characters/Heroine_MH");
 
@@ -75,7 +60,9 @@ struct FMetaHumanGroomSpec
 bool AHomesteadCharacter::UsesMetaHumanHeroine()
 {
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadMetaHuman"))) return true;
+    // Smoke/automation routes assert the legacy wardrobe and material contracts.
     return CVarMetaHumanHeroine.GetValueOnGameThread() != 0 && !GIsAutomationTesting
+        && !FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
         && !FParse::Param(FCommandLine::Get(), TEXT("HomesteadLegacyHeroine"));
 }
 
@@ -293,11 +280,12 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     if (bAttemptedMetaHumanLoad) return bMetaHumanAssetsValid;
     bAttemptedMetaHumanLoad = true;
     MetaHumanBody = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Body/SKM_MHC_Heroine_BodyMesh"));
-    // Clips retargeted from the legacy heroine with RTG_HeroineLegacy_To_MH (first playable, task 4.2).
+    // Walk and sprint are Game Animation Sample loops (retargeted by homestead_agent.gasp_locomotion);
+    // the work actions are retargeted from the legacy heroine with RTG_HeroineLegacy_To_MH.
     UAnimSequence* Clips[] = {
         LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_LivingIdle02")),
-        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_GroundedWalk")),
-        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Sprint")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/GASP/AN_HeroineMH_GASP_Walk")),
+        LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/GASP/AN_HeroineMH_GASP_Run")),
         LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Gather")),
         LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_WaterRefined")),
         LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Chop")),
@@ -435,12 +423,6 @@ bool AHomesteadCharacter::ApplyMetaHumanStack()
     StandIn->SetVisibility(false);
     Body->SetVisibility(true);
     bMetaHumanActive = true;
-    const float LegacyLeg = WardrobeMeshes.Num() ? RefLegLength(WardrobeMeshes[0].Get()) : 0.0f;
-    const float MetaHumanLeg = RefLegLength(MetaHumanBody);
-    MetaHumanStrideScale = LegacyLeg > 1.0f && MetaHumanLeg > 1.0f
-        ? FMath::Clamp(MetaHumanLeg / LegacyLeg, 0.8f, 1.4f) : 1.0f;
-    UE_LOG(LogTemp, Log, TEXT("MetaHuman heroine active: leg %.1f cm vs legacy %.1f cm, stride scale %.3f."),
-        MetaHumanLeg, LegacyLeg, MetaHumanStrideScale);
     if (!bSprintActive) GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
     bHeroineReady = true;
     return true;
@@ -623,7 +605,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
         && GetVelocity().SizeSquared2D() > 144.0f;
     bSprintActive = bSprintHeld && !Blocked && Moving
         && PC->State().energy > 10.0 && SprintAnimation != nullptr;
-    Movement->MaxWalkSpeed = bSprintActive ? 300.0f : WalkSpeed();
+    Movement->MaxWalkSpeed = bSprintActive ? SprintSpeed() : WalkSpeed();
     if (bSprintActive)
     {
         const auto Result = PC->SpendSprintEnergy(DeltaSeconds);

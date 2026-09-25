@@ -254,6 +254,27 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-25: MetaHuman body shape, GASP locomotion and tests:
+  - **Body shape via Python works.** `try_add_object_to_edit`, then `get_body_constraints`; build a
+    *new list* (changing the Array's structs in place doesn't stick), set `is_active` and
+    `target_measurement`, then `set_body_constraints` and `commit_body_state`. The model shifts
+    other measurements (Hip down pushed Waist up), so pin those too.
+  - A rigged character must have its face rig removed first (`remove_face_rig`), then be re-rigged
+    (`request_auto_rigging`, ~25 s), reassembled, and re-retargeted.
+  - `metahuman_look.set_body` wraps this. Always `remove_object_to_edit` afterwards, or Creator
+    later fails to open the asset ("already added for editing... may be corrupted").
+  - **Migrating from another project headless:** run `UnrealEditor-Cmd <other>.uproject
+    -run=pythonscript` with `AssetTools.migrate_packages(pkgs, <our Content dir>, MigrationOptions(prompt=False))`.
+    It follows every dependency. The GASP clips dragged in 272 foley sounds and about 40 extra
+    clips via notifies, which had to be pruned.
+  - **Retargeting UEFN → `IK_MH_IKRig`:** the Root Motion op's roots default to the pelvis. Set the
+    target root bone to `root`, source `COPY_FROM_SOURCE_ROOT`, height `SNAP_TO_GROUND`, then lock
+    the clips in place (`set_root_motion_enabled`). See `homestead_agent.gasp_locomotion`.
+  - `Test-Game.ps1` smoke routes run a plain `-game` process (not UE automation) with
+    `-HomesteadSmokeTest`, which selects the legacy heroine.
+  - The Hotbar route's "Held mapped Shift again reaches active grounded sprint" step is flaky
+    after `NewGame`; it passed on rerun.
+
 - 2026-09-25: Assembling and playing the MetaHuman heroine:
   - `build_meta_human` can raise RuntimeError (Control Rig "Cannot break link") even when the log
     says the assembly succeeded, **and it doesn't save**. Call

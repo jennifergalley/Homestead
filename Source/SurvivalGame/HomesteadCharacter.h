@@ -49,12 +49,16 @@ public:
     }
     bool HasHeroine() const { return bHeroineReady; }
     // The MetaHuman heroine is the default. The legacy heroine is the rollback: homestead.MetaHumanHeroine 0,
-    // -HomesteadLegacyHeroine, or any automation test (their wardrobe contracts cover the legacy stack).
+    // -HomesteadLegacyHeroine, or smoke/automation tests (their wardrobe contracts cover the legacy stack).
     static bool UsesMetaHumanHeroine();
     bool IsMetaHumanActive() const { return bMetaHumanActive; }
     float WalkSpeed() const { return bMetaHumanActive ? 210.0f : 180.0f; }
-    // Walk-clip stride relative to the legacy heroine, so walk play rate matches ground speed.
-    float WalkStrideScale() const { return bMetaHumanActive ? MetaHumanStrideScale : 1.0f; }
+    float SprintSpeed() const { return bMetaHumanActive ? 480.0f : 300.0f; }
+    // Ground speed (cm/s) each locomotion clip covers at play rate 1, so play rate follows speed.
+    // Legacy clips were authored for 120/300 cm/s. The MetaHuman uses the Game Animation Sample
+    // walk/run loops, measured with homestead_agent.gasp_locomotion after retargeting.
+    float WalkClipSpeed() const { return bMetaHumanActive ? 208.7f : 120.0f; }
+    float SprintClipSpeed() const { return bMetaHumanActive ? 521.7f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
     FRotator GameplayViewRotation() const;
     float CameraDistance() const;
@@ -127,7 +131,6 @@ private:
     bool bMetaHumanActive = false;
     bool bAttemptedMetaHumanLoad = false;
     bool bMetaHumanAssetsValid = false;
-    float MetaHumanStrideScale = 1.0f;
     bool bPlanning = false;
     bool bHeroineReady = false;
     bool bAttemptedAssetLoad = false;

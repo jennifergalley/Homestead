@@ -113,6 +113,14 @@ She uses:
 retarget setup, content inventory and cooked folders. The prototype heroine below
 remains the rollback (`-HomesteadLegacyHeroine`).
 
+Her walk and sprint (run) loops come from Epic Games' **Game Animation Sample**
+project (free on Fab). It is Epic-published, UE-only content under the Unreal Engine
+EULA, so it may be used and modified in Unreal Engine products only. Five UEFN
+mannequin loops, the mannequin mesh/skeleton and `IK_UEFN_Mannequin` were migrated to
+their original `/Game/Characters/UEFN_Mannequin` paths. They are then retargeted onto
+the heroine by `Content\Python\homestead_agent\gasp_locomotion.py`. The sample's foley
+notifies and audio were not kept.
+
 The clothed heroine prototype uses MakeHuman Community / MPFB CC0 graphical
 assets and an original procedural tunic and idle/walk clips. The relaxed idle
 and grounded walk revision is also project-authored on that same rig; no

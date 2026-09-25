@@ -204,3 +204,50 @@ def sculpt_face(character_path, edits, scale=1.0, save=True):
     if save:
         unreal.EditorAssetLibrary.save_loaded_asset(character, False)
     return character
+
+
+# Jenny's body pass (2026-09-25): narrower hips and a smaller bottom, waist held where it was.
+HEROINE_BODY = {"Hip": 92.0, "High Hip": 78.0, "Waist": 68.0}
+
+
+def body_measurements(character_path, names=None):
+    """Current body constraint targets (cm): {name: (active, target)}."""
+    character = unreal.load_asset(character_path)
+    added = not _subsystem().is_object_added_for_editing(character)
+    sub = _edit(character) if added else _subsystem()
+    try:
+        return {str(k.name): (k.is_active, round(k.target_measurement, 1))
+                for k in sub.get_body_constraints(character) if not names or str(k.name) in names}
+    finally:
+        if added:
+            _end_edit(character)
+
+
+def set_body(character_path, measurements, save=True):
+    """Activate body constraints at the given targets and commit the parametric body.
+
+    A rigged character must have its face rig removed first, because body edits don't carry into
+    the old rig. After this, call request_auto_rigging again, then build_meta_human, then re-run
+    the retargets in gasp_locomotion (the skeleton proportions change). Build a fresh list:
+    changing structs while iterating get_body_constraints' Array doesn't stick.
+    """
+    character = unreal.load_asset(character_path)
+    close_editors(character)
+    sub = _edit(character)
+    try:
+        sub.remove_face_rig(character)
+        constraints = []
+        for k in list(sub.get_body_constraints(character)):
+            if str(k.name) in measurements:
+                k.set_editor_property("is_active", True)
+                k.set_editor_property("target_measurement", float(measurements[str(k.name)]))
+            constraints.append(k)
+        sub.set_body_constraints(character, constraints)
+        sub.commit_body_state(character)
+        result = {str(k.name): round(k.target_measurement, 1) for k in sub.get_body_constraints(character)
+                  if str(k.name) in measurements or str(k.name) == "Height"}
+    finally:
+        _end_edit(character)
+    if save:
+        unreal.EditorAssetLibrary.save_asset(character_path, False)
+    return result
