@@ -147,9 +147,12 @@ class Graph:
 # ------------------------------------------------------------------ materials
 
 def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, roughness=0.62,
-         weathering=0.0, grime=0.0, seed=0.0):
+         weathering=0.0, grime=0.0, seed=0.0, polish=0.0, polish_center=0.0, polish_length=0.06,
+         relief=1.0):
     """Stripped/seasoned wood: fine long grain along Z, growth-ring banding,
-    long tonal streaks, pores, optional grey weathering and dark handling grime."""
+    long tonal streaks, pores, optional grey weathering and dark handling grime.
+    ``polish`` burnishes a band of part-local Z (``polish_center`` +- ``polish_length``)
+    darker and glossier, as where a hand has gripped a tool handle for years."""
     g = Graph(name)
     p = g.coord((1.0, 1.0, 1.0))
     x, y, z = g.separate(p)
@@ -173,10 +176,20 @@ def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, rou
         dirt = g.noise(p, scale=30.0, detail=6.0, roughness=0.7).outputs["Fac"]
         color = g.mix(color, (0.07, 0.05, 0.035), g.remap(dirt, 0.4, 0.75, 0.0, grime))
     pores = g.noise(stretched, scale=38.0, detail=2.0).outputs["Fac"]
+    rough = g.remap(fibres, 0.3, 0.7, roughness - 0.08, roughness + 0.1)
+    if polish:
+        worn = g.math("ABSOLUTE", g.math("SUBTRACT", z, polish_center))
+        wobble = g.noise(p, scale=14.0, detail=3.0).outputs["Fac"]
+        worn = g.math("ADD", worn, g.math("MULTIPLY", g.math("SUBTRACT", wobble, 0.5), polish_length * 0.6))
+        mask = g.remap(worn, polish_length, polish_length * 0.25, 0.0, polish)
+        # Hand oil darkens and closes the grain; the pores stay dark.
+        color = g.mix(color, (0.62, 0.52, 0.44), mask, blend="MULTIPLY")
+        rough = g.math("MULTIPLY", rough, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", mask, 0.5)))
+        pores = g.math("MULTIPLY", pores, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", mask, 0.6)))
     g.set("Base Color", color)
-    g.set("Roughness", g.remap(fibres, 0.3, 0.7, roughness - 0.08, roughness + 0.1))
+    g.set("Roughness", rough)
     height = g.math("ADD", g.math("MULTIPLY", fibres, 1.0), g.math("MULTIPLY", pores, 0.4))
-    g.set("Normal", g.bump(height, strength=0.35, distance=0.0015))
+    g.set("Normal", g.bump(height, strength=0.35 * relief, distance=0.0015))
     return g.mat
 
 
@@ -321,4 +334,166 @@ def daub(name, clay=(0.30, 0.22, 0.14), dry=(0.46, 0.38, 0.27), straw=(0.52, 0.4
     g.set("Roughness", 0.92)
     height = g.math("SUBTRACT", lumps, g.math("MULTIPLY", crack_mask, 0.5))
     g.set("Normal", g.bump(height, strength=0.7, distance=0.006))
+    return g.mat
+
+
+def steel(name, bevel=0.0035, scale_from=0.022, patina=0.6, rust=0.35, seed=0.0):
+    """Hand-forged carbon-steel blade. pcoord is (thickness, distance from the cutting
+    edge, length) in meters (see the machete recipe). Three zones: a bright honed
+    bevel within ``bevel`` of the edge, a ground flat carrying a mottled grey-brown
+    plant-sap patina, and black forge scale with hammer marks beyond ``scale_from``
+    (towards the spine). Rust sits in pits and scale flakes; the honed bevel is clean.
+    Albedo stays in measured iron ranges (bare steel ~0.56 linear), metallic 1 on
+    bare steel, lower on scale and 0 on rust."""
+    g = Graph(name)
+    p = g.coord()
+    x, d, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.37, seed * 0.11, seed * 0.53))
+    wob = g.noise(seeded, scale=45.0, detail=3.0).outputs["Fac"]
+    shoulder = g.math("ADD", d, g.math("MULTIPLY", g.math("SUBTRACT", wob, 0.5), 0.0014))
+    bevel_mask = g.remap(shoulder, bevel, bevel - 0.0005)
+    big = g.noise(seeded, scale=9.0, detail=4.0).outputs["Fac"]
+    ragged = g.noise(seeded, scale=48.0, detail=6.0, roughness=0.7).outputs["Fac"]
+    reach = g.math("ADD", d, g.math("MULTIPLY", g.math("SUBTRACT", big, 0.5), 0.016))
+    reach = g.math("ADD", reach, g.math("MULTIPLY", g.math("SUBTRACT", ragged, 0.5), 0.009))
+    zone = g.remap(reach, scale_from - 0.0015, scale_from + 0.003)
+    flakes = g.noise(seeded, scale=55.0, detail=5.0, roughness=0.65).outputs["Fac"]
+    cover = g.remap(flakes, 0.31, 0.36)
+    scale_mask = g.math("MULTIPLY", zone, cover)
+    # Where scale has flaked off, the steel underneath is dull grey and pitted, not bright.
+    hole = g.math("MULTIPLY", zone, g.math("SUBTRACT", 1.0, cover))
+    # Scratches: honing strokes run diagonally across the bevel, grinding marks across the flats.
+    diag = g.combine(g.math("ADD", g.math("MULTIPLY", d, 0.8), g.math("MULTIPLY", z, 0.6)),
+                     g.math("SUBTRACT", g.math("MULTIPLY", z, 0.8), g.math("MULTIPLY", d, 0.6)), x)
+    hone = g.noise(g.vmath("MULTIPLY", diag, (40.0, 2600.0, 40.0)), scale=1.0, detail=2.0).outputs["Fac"]
+    grind = g.noise(g.vmath("MULTIPLY", p, (60.0, 25.0, 1800.0)), scale=1.0, detail=3.0,
+                    distortion=0.8).outputs["Fac"]
+    # Pits: fine pitting everywhere off the bevel, a few larger rust blooms.
+    pit_noise = g.noise(seeded, scale=520.0, detail=2.0).outputs["Fac"]
+    # Pitting clusters where moisture sat, and under flaked scale.
+    cluster = g.noise(g.vmath("ADD", seeded, (1.3, 4.1, 2.2)), scale=14.0, detail=3.0).outputs["Fac"]
+    cluster = g.math("MAXIMUM", g.remap(cluster, 0.48, 0.62), g.math("MULTIPLY", hole, 0.8))
+    pits = g.math("MULTIPLY", g.remap(pit_noise, 0.66, 0.75), g.math("SUBTRACT", 1.0, bevel_mask))
+    pits = g.math("MULTIPLY", pits, cluster)
+    bloom = g.noise(g.vmath("ADD", seeded, (3.1, 1.7, 0.4)), scale=16.0, detail=5.0, roughness=0.7).outputs["Fac"]
+    bloom = g.remap(bloom, 0.68 - 0.1 * rust, 0.76 - 0.1 * rust, 0.0, rust)
+    rust_mask = g.math("MINIMUM", g.math("ADD", g.math("MULTIPLY", pits, 0.9),
+                                        g.math("MULTIPLY", bloom, g.math("SUBTRACT", 1.0, bevel_mask))), 1.0)
+    rust_mask = g.math("MAXIMUM", rust_mask, g.math("MULTIPLY", hole, g.remap(pit_noise, 0.45, 0.6, 0.15, 0.7)))
+    # Colors (linear).
+    tint = g.noise(g.vmath("ADD", seeded, (7.0, 0.0, 0.0)), scale=22.0, detail=4.0).outputs["Fac"]
+    # Noise Fac clusters tightly around 0.5, so masks remap a narrow band for real contrast.
+    tan_patina = g.remap(tint, 0.44, 0.60, 0.0, patina)
+    blue_patina = g.remap(big, 0.47, 0.60, 0.0, patina * 0.85)
+    ground = g.mix((0.50, 0.49, 0.475), (0.21, 0.19, 0.16), tan_patina)
+    ground = g.mix(ground, (0.12, 0.125, 0.14), blue_patina)
+    # Sap patina wiped along the blade by cutting strokes, and fine oxide freckling.
+    streak = g.noise(g.vmath("MULTIPLY", seeded, (40.0, 70.0, 5.0)), scale=1.0, detail=4.0).outputs["Fac"]
+    streaks = g.remap(streak, 0.50, 0.60, 0.0, patina * 0.6)
+    ground = g.mix(ground, (0.19, 0.16, 0.12), streaks)
+    freckle = g.noise(g.vmath("ADD", seeded, (2.0, 5.0, 1.0)), scale=110.0, detail=3.0).outputs["Fac"]
+    ground = g.mix(ground, (0.24, 0.225, 0.20), g.remap(freckle, 0.52, 0.64, 0.0, patina * 0.5))
+    patina_mask = g.math("MINIMUM", g.math("ADD", g.math("ADD", tan_patina, blue_patina), streaks), 1.0)
+    ground = g.mix(ground, (0.86, 0.86, 0.86), g.remap(grind, 0.3, 0.75, 0.0, 0.15), blend="MULTIPLY")
+    honed = g.mix((0.60, 0.595, 0.585), (0.50, 0.495, 0.49), g.remap(hone, 0.35, 0.7))
+    forge = g.mix((0.035, 0.036, 0.04), (0.075, 0.072, 0.07), g.remap(flakes, 0.4, 0.8))
+    rust_color = g.mix((0.075, 0.034, 0.017), (0.17, 0.068, 0.026), g.remap(pit_noise, 0.68, 0.82))
+    color = g.mix(ground, forge, scale_mask)
+    color = g.mix(color, (0.085, 0.08, 0.075), hole)
+    color = g.mix(color, honed, bevel_mask)
+    color = g.mix(color, rust_color, rust_mask)
+    g.set("Base Color", color)
+    # Thin oxide films read slightly less metallic; scale much less; rust not at all.
+    metal = g.math("SUBTRACT", 1.0, g.math("MULTIPLY", patina_mask, 0.15))
+    metal = g.math("SUBTRACT", metal, g.math("MULTIPLY", scale_mask, 0.55))
+    metal = g.math("SUBTRACT", metal, g.math("MULTIPLY", hole, 0.4))
+    metal = g.math("MAXIMUM", metal, bevel_mask)
+    g.set("Metallic", g.math("MULTIPLY", metal, g.math("SUBTRACT", 1.0, rust_mask)))
+    rough = g.remap(grind, 0.3, 0.7, 0.48, 0.58)
+    rough = g.math("ADD", rough, g.math("MULTIPLY", patina_mask, 0.12))
+    rough = g.math("ADD", g.math("MULTIPLY", rough, g.math("SUBTRACT", 1.0, zone)),
+                   g.math("MULTIPLY", zone, 0.64))
+    honed_rough = g.remap(hone, 0.3, 0.7, 0.16, 0.28)
+    rough = g.math("ADD", g.math("MULTIPLY", rough, g.math("SUBTRACT", 1.0, bevel_mask)),
+                   g.math("MULTIPLY", honed_rough, bevel_mask))
+    rough = g.math("ADD", g.math("MULTIPLY", rough, g.math("SUBTRACT", 1.0, rust_mask)),
+                   g.math("MULTIPLY", rust_mask, 0.9))
+    g.set("Roughness", rough)
+    # Relief: shallow hammer dishes under the scale, grinding lines, pits and rust crust.
+    cells = g.voronoi(seeded, scale=115.0, feature="SMOOTH_F1").outputs["Distance"]
+    hammer = g.math("MULTIPLY", g.math("MULTIPLY", cells, cells),
+                    g.math("ADD", 0.25, g.math("MULTIPLY", scale_mask, 0.75)))
+    hammer = g.math("MULTIPLY", hammer, g.math("SUBTRACT", 1.0, bevel_mask))
+    height = g.math("ADD", g.math("MULTIPLY", hammer, 0.9), g.math("MULTIPLY", grind, 0.02))
+    height = g.math("ADD", height, g.math("MULTIPLY", hone, g.math("MULTIPLY", bevel_mask, 0.006)))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", pits, 0.35))
+    height = g.math("ADD", height, g.math("MULTIPLY", bloom, g.math("MULTIPLY", flakes, 0.3)))
+    g.set("Normal", g.bump(height, strength=0.7, distance=0.0025))
+    return g.mat
+
+
+def brass(name, polished=(0.78, 0.58, 0.30), tarnish=(0.20, 0.15, 0.075), wear=0.5):
+    """Old brass hardware (rivets, liners): peened faces rubbed bright, dark
+    brown-green tarnish in the texture and around the rims."""
+    g = Graph(name)
+    p = g.coord()
+    blot = g.noise(p, scale=900.0, detail=4.0, roughness=0.6).outputs["Fac"]
+    rub = g.remap(blot, 0.55 - 0.2 * wear, 0.62 - 0.2 * wear)
+    g.set("Base Color", g.mix(tarnish, polished, rub))
+    g.set("Metallic", g.remap(rub, 0.0, 1.0, 0.55, 1.0))
+    g.set("Roughness", g.remap(rub, 0.0, 1.0, 0.62, 0.3))
+    dents = g.noise(p, scale=2400.0, detail=2.0).outputs["Fac"]
+    g.set("Normal", g.bump(g.math("ADD", dents, g.math("MULTIPLY", blot, 0.4)), strength=0.25,
+                           distance=0.0002))
+    return g.mat
+
+
+def leather(name, color=(0.30, 0.19, 0.10), dark=(0.12, 0.07, 0.035), roughness=0.74,
+            creases=1.0, soil_below=None, soil=0.5, handled=None, stains=0.0, seed=0.0):
+    """Soft smoke-tanned hide (buckskin): mottled smoke colour, a fine suede nap,
+    crease lines that collect dirt, optional soil grime below part-local Z
+    ``soil_below`` and a burnished, grubbier band ``handled=(z_center, span)``
+    where fingers work the drawstring. ``stains`` adds faint berry-juice spots."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.41, seed * 0.23, seed * 0.19))
+    smoke = g.noise(seeded, scale=7.0, detail=5.0, roughness=0.6).outputs["Fac"]
+    mottle = g.noise(seeded, scale=38.0, detail=4.0).outputs["Fac"]
+    nap = g.noise(seeded, scale=1400.0, detail=3.0, roughness=0.7).outputs["Fac"]
+    # Noise Fac clusters around 0.5: narrow remaps give the smoke mottling real contrast.
+    tone = g.math("ADD", g.math("MULTIPLY", smoke, 0.65), g.math("MULTIPLY", mottle, 0.35))
+    base = g.ramp(tone, [(0.40, dark), (0.52, color), (0.62, tuple(min(1.0, c * 1.15) for c in color))])
+    base = g.mix(base, (0.88, 0.87, 0.85), g.remap(nap, 0.4, 0.62), blend="MULTIPLY")
+    # Soft suede has no grain pattern: broad soft wrinkles running with the gathers, plus
+    # fine horizontal compression crinkles. Smooth fields, never ridged (ridges read as marble).
+    wrinkle = g.noise(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.35)), scale=55.0, detail=3.0).outputs["Fac"]
+    crinkle = g.noise(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 3.5)), scale=140.0, detail=2.0,
+                      distortion=0.4).outputs["Fac"]
+    crease = g.math("ADD", g.math("MULTIPLY", g.remap(wrinkle, 0.42, 0.58, 1.0, 0.0), 0.7 * creases),
+                    g.math("MULTIPLY", g.remap(crinkle, 0.44, 0.56, 1.0, 0.0), 0.3 * creases))
+    base = g.mix(base, tuple(c * 0.6 for c in dark), g.math("MULTIPLY", crease, 0.22))
+    grime = g.math("MULTIPLY", crease, 0.0)
+    if soil_below is not None:
+        dirt = g.noise(seeded, scale=24.0, detail=5.0).outputs["Fac"]
+        low = g.math("ADD", z, g.math("MULTIPLY", g.math("SUBTRACT", dirt, 0.5), 0.05))
+        grime = g.math("MAXIMUM", grime, g.remap(low, soil_below, soil_below - 0.05, 0.0, soil))
+    if handled is not None:
+        center, span = handled
+        near = g.math("ABSOLUTE", g.math("SUBTRACT", z, center))
+        grime = g.math("MAXIMUM", grime, g.remap(near, span, span * 0.3, 0.0, 0.45))
+    base = g.mix(base, (0.07, 0.05, 0.035), grime)
+    if stains:
+        spot = g.noise(g.vmath("ADD", seeded, (5.0, 2.0, 9.0)), scale=30.0, detail=3.0).outputs["Fac"]
+        base = g.mix(base, (0.09, 0.03, 0.045), g.remap(spot, 0.62, 0.67, 0.0, stains))
+    g.set("Base Color", base)
+    rough = g.remap(nap, 0.3, 0.7, roughness - 0.05, roughness + 0.06)
+    if handled is not None:
+        rough = g.math("SUBTRACT", rough, g.math("MULTIPLY", g.remap(near, span, span * 0.3), 0.18))
+    g.set("Roughness", rough)
+    g.set("Sheen Weight", 0.25)
+    g.set("Sheen Roughness", 0.6)
+    height = g.math("SUBTRACT", g.math("MULTIPLY", nap, 0.2), g.math("MULTIPLY", crease, 0.5))
+    height = g.math("ADD", height, g.math("MULTIPLY", mottle, 0.15))
+    g.set("Normal", g.bump(height, strength=0.4, distance=0.0012))
     return g.mat
