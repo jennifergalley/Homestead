@@ -177,7 +177,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   generated woodland around 13:00) and use `slomo 0.25`.
 - Felling a tree (MetaHuman, hatchet selected): she walks up to the trunk if the felling stance
   is more than 35 cm away, eases into it, swings three strokes (a sapling takes one), and the tree
-  topples away from her, bounces once, lies 4 s and sinks. `LogTemp` Verbose lines starting with
+  topples away from her, bounces once, lies 4 s and sinks. Each stroke plays one of
+  `Audio/Effects/ChopA..C` and the landing plays `TreeFall` (all cut from CC0 recordings by
+  `Scripts\generate_chop_sounds.py`). `LogTemp` Verbose lines starting with
   `Fell:` give the trunk centre, radius, stance and where the walk-up ended
   (`log LogTemp Verbose` to see them). To check contact, sample the hatchet prop's edge,
   `Held_SM_FlintHatchet` transformed at local (-0.21, -13.89, 43), a few times a second during the
@@ -225,9 +227,22 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 - Feedback messages ("Ate Berries.", "Made Crude hatchet.") appear as a banner on the book and in
   `toast` briefly. World-side hints (for example "Craft a crude hatchet before felling trees") may be
   visible in captures without appearing in `toast`, so capture after actions.
+- **Right-click and Ctrl+click popups**: `HomesteadPackMenu <tile> [mode]` (console, pass the
+  player controller, book on the pack page) opens the right-click context menu (mode 0) or the
+  Ctrl+click amount slider (mode 1) on pack tile `<tile>` (0-based), anchored at the tile. Clicks
+  and keys go to the popup until it closes; Escape or B cancels without changing anything.
+- **Portrait**: the pack page's left column is a live cut-out capture of the real heroine (two
+  SceneCapture2Ds on her own components, lit only by lighting channel 2 while the book is open),
+  so it shows her current clothes and held tool. It is not a copy of her mesh; if it shows
+  scenery, check `M_PortraitCutout` and the coverage render target.
+- **Action hints retire**: each keyed cue ("[A] Gather", "[LMB] Fell with Hatchet") hides after
+  three successful uses. Counts live in `Saved\Config\WindowsEditor\GameUserSettings.ini` under
+  `[Homestead.ActionHints]` (id = verb + `_` + resource kind, alphanumerics only, e.g.
+  `Gather_Berrybush=3`). Delete the section or use Settings > "Show action hints again" before
+  a playtest that needs to see the cues.
 
-Settings changes persist ("Choice saved in game settings"). Where PIE writes them hasn't been
-checked, so restore anything you change.
+Settings changes persist ("Choice saved in game settings") in
+`Saved\Config\WindowsEditor\GameUserSettings.ini`, so restore anything you change.
 
 ## 5. Other recipes (verified)
 
@@ -377,6 +392,13 @@ and ground traces into a list; unregister it and dump the list to JSON afterward
 the root-motion wobble (head sway 35.6 cm peak to peak) and heel dips were found and verified.
 Console variables can be flipped live for A/B captures with
 `unreal.SystemLibrary.execute_console_command(world, 'homestead.FootPlacement 0')`.
+
+A PIE screenshot that is always the right window: run the console command `shot showui`
+(through `execute_console_command` with the player controller). It writes
+`Saved\Screenshots\WindowsEditor\ScreenShotNNNNN.png` with the HUD, independent of which monitor
+or window is in front. To judge foliage wind while she stands still, record about 6 s with
+ddagrab, decode to grayscale at half size and look at the per-pixel standard deviation over
+time (`v.std(0)`, scaled ×8); moving leaves light up, still ground stays black.
 
 ## 6. Toolset map
 

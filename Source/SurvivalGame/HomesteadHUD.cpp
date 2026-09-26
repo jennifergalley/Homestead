@@ -200,6 +200,8 @@ void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
             Cue.Verb = Part.Mid(Close + 1).TrimStart();
         }
         else Cue.Verb = Part;
+        // A keyed hint retires once she's done that action a few times; guidance text stays.
+        if (!Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb)) continue;
         if (!Cue.Verb.IsEmpty() || !Cue.Key.IsEmpty()) Cues.Add(Cue);
     }
     if (Cues.IsEmpty()) return;

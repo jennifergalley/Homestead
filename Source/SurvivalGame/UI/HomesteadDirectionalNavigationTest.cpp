@@ -50,11 +50,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     };
     const auto PortraitPose = [this]()
     {
-        TArray<USkeletalMeshComponent*> Parts;
-        if (Controller->MenuPortrait) Controller->MenuPortrait->GetComponents(Parts);
-        for (const auto* Part : Parts)
-            if (Part->GetFName() == TEXT("PortraitBody")) return Part->GetRelativeRotation();
-        return FRotator::ZeroRotator;
+        return Controller->MenuPortrait ? FRotator(0, Controller->MenuPortrait->OrbitYaw(), 0) : FRotator::ZeroRotator;
     };
     const auto Focused = [this](const TCHAR* Region)
     {

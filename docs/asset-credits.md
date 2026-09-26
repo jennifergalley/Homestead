@@ -82,6 +82,12 @@ distributed build.
 | Forest Ambience | TinyWorlds | https://opengameart.org/content/forest-ambience | CC0 |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
+| Tree chop fall thud (hatchet chops ChopA/ChopB and the TreeFall landing) | kheetor | https://opengameart.org/content/tree-chop-fall-thud | CC0 |
+| 100 CC0 metal and wood SFX (`wood_hammer_02`, chop ChopC) | rubberduck | https://opengameart.org/content/100-cc0-metal-and-wood-sfx | CC0 |
+
+The felling sounds are cut, band-limited and normalised from those two recordings by
+`Scripts\generate_chop_sounds.py`. The generated WAVs are tracked in `Assets\Audio\Effects`; to
+regenerate, download the two Ogg sources into `Assets\Source\oga-wood-chop` (gitignored).
 
 The MetaHuman heroine's bare-foot footsteps (`Assets\Audio\Footsteps`) are original to this
 project. `Scripts\generate_bare_footsteps.py` synthesizes them from noise and decaying tones, with

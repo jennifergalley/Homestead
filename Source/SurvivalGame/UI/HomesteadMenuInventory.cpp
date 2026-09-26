@@ -117,7 +117,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
                 IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
             Row.CanStore = false;
             Row.CanTake = false;
-            Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : TEXT("Inspect");
+            Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
             Result.Add(MoveTemp(Row));
         }
     };
@@ -236,6 +236,24 @@ bool AHomesteadController::MenuSplitHalf(const FHomesteadRow& Row)
     const auto Result = Sim.SplitHalf(Row.ContainerId, Row.SubjectId, PlayerPoint(), Sim.GetRevision());
     Notify(Result);
     return Result.ok;
+}
+
+bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
+{
+    if (!ActiveChestId.IsSet())
+    { Notify(TEXT("Open a storage chest to move things into it."), true); return false; }
+    if (Row.ContainerId < 0)
+    { Notify(TEXT("Unequip that garment before storing it."), true); return false; }
+    FHomesteadRow Target = Row;
+    Target.DestinationId = Row.ContainerId == 0 ? ActiveChestId.GetValue() : 0;
+    if (Row.Subject == EHomesteadMenuSubject::Wearable)
+        return MenuItemAction(Target, EHomesteadItemAction::Transfer, 1, Sim.GetRevision());
+    if (Row.Subject != EHomesteadMenuSubject::ItemGroup) return false;
+    const int32 Used = Row.ContainerId > 0 ? Sim.UsedCapacity() : Sim.ChestUsedCapacity(ActiveChestId.GetValue());
+    const int32 Room = Used < 0 ? 0 : Homestead::InventoryCapacity - Used;
+    // Move what fits; with no room at all the transfer reports why.
+    const int32 Count = Room > 0 ? FMath::Min(Row.Quantity, Room) : Row.Quantity;
+    return MenuItemAction(Target, EHomesteadItemAction::Transfer, Count, Sim.GetRevision());
 }
 
 bool AHomesteadController::MenuSortPack()

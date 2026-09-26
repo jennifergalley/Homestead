@@ -161,6 +161,12 @@ def main():
         cue.set_editor_property("looping", False)
         if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):
             raise RuntimeError(f"Could not save one-shot sound {name}.")
+    # Hatchet-on-trunk chops and the trunk landing, cut from CC0 recordings by Scripts/generate_chop_sounds.py.
+    for name in ("ChopA", "ChopB", "ChopC", "TreeFall"):
+        cue = import_asset(f"{name}.wav", "Audio/Effects", name, source_root=ROOT / "Assets" / "Audio" / "Effects")
+        cue.set_editor_property("looping", False)
+        if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):
+            raise RuntimeError(f"Could not save one-shot sound {name}.")
 
     map_path = f"{CONTENT}/Maps/Homestead"
     if not LIB.does_asset_exist(map_path):

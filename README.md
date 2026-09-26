@@ -215,7 +215,15 @@ wardrobe delivery deliberately uses the separate `jenny-review-v5` profile.
 
 The field book and construction preview pause simulation. Near a storage chest,
 the Pack page supports storing with X/F and taking stored materials with Y/G.
+Right-click any pack or chest tile for its actions: eat, pin/unpin, move to or
+take from the open chest, drop 1, drop all, or pick an amount. Ctrl+click a
+stack opens an amount slider (drag, mouse wheel, or Left/Right; LB/RB step by 10)
+to split off, drop, or move exactly that many; Shift+click moves the whole stack
+between pack and chest. The portrait beside the pack shows her live, as she
+stands in the world, with whatever she's wearing or holding.
 Food selections consume one item; core actions explain unmet requirements.
+Action cues ("[A] Gather", "[LMB] Fell") retire once you've done each action
+three times; Settings > "Show action hints again" brings them back.
 Settings also offers 100/85/70-percent 3D resolution scaling; the UI remains sharp
 while TSR upscales the world.
 

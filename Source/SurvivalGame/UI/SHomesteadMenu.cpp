@@ -31,6 +31,18 @@ class SMenuButton : public SButton
 public:
     virtual FReply OnAnalogValueChanged(const FGeometry&, const FAnalogInputEvent&) override
     { return FReply::Unhandled(); }
+    // Item tiles open their context menu on a right click.
+    TFunction<void()> RightClick;
+    virtual FReply OnMouseButtonDown(const FGeometry& Geometry, const FPointerEvent& Event) override
+    {
+        if (RightClick && Event.GetEffectingButton() == EKeys::RightMouseButton) return FReply::Handled();
+        return SButton::OnMouseButtonDown(Geometry, Event);
+    }
+    virtual FReply OnMouseButtonUp(const FGeometry& Geometry, const FPointerEvent& Event) override
+    {
+        if (RightClick && Event.GetEffectingButton() == EKeys::RightMouseButton) { RightClick(); return FReply::Handled(); }
+        return SButton::OnMouseButtonUp(Geometry, Event);
+    }
 };
 class SMenuFocusAnchor : public SCompoundWidget
 {
@@ -989,7 +1001,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     if (bSuppressItemClick) { bSuppressItemClick = false; return FReply::Handled(); }
                     Region = ERegion::Content;
                     Select(Index);
-                    if (SeenPage == 0 && bControl) SplitSelectedHalf();
+                    const FModifierKeysState Modifiers = FSlateApplication::Get().GetModifierKeys();
+                    const bool Item = SeenPage == 0 && Entries.IsValidIndex(Index)
+                        && (Entries[Index].Subject == EHomesteadMenuSubject::ItemGroup
+                            || Entries[Index].Subject == EHomesteadMenuSubject::Wearable);
+                    if (Item && (bShift || Modifiers.IsShiftDown())) MoveWhole(Index);
+                    else if (Item && (bControl || Modifiers.IsControlDown())
+                        && Entries[Index].Subject == EHomesteadMenuSubject::ItemGroup)
+                        OpenQuantityPrompt(Entries[Index]);
                     if (Entries.IsValidIndex(ContentSelection)
                         && IsDirectCameraSetting(Entries[ContentSelection]))
                         RunAction(EHomesteadItemAction::Primary);
@@ -997,6 +1016,11 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 return FReply::Handled();
             })
             [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
+        if (SeenPage == 0 && (Row.Subject == EHomesteadMenuSubject::ItemGroup || Row.Subject == EHomesteadMenuSubject::Wearable))
+            StaticCastSharedRef<SMenuButton>(Button)->RightClick = [this, Index]()
+            {
+                if (PointerAction() && Dialog == EDialog::None) OpenItemContextMenu(Index);
+            };
         if (SeenPage == 0)
         {
             Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
@@ -1260,7 +1284,11 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
         {
             if (Row.ContainerId == 0)
             {
-                Actions.Add(EHomesteadItemAction::Primary);
+                // Food is eaten from here; other items have nothing to "use" in the pack.
+                const auto Item = static_cast<Homestead::Item>(Row.Id);
+                if (Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots
+                    || Item == Homestead::Item::HerbedRoots)
+                    Actions.Add(EHomesteadItemAction::Primary);
                 if (Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
                     && AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(Row.Id)))
                     Actions.Add(EHomesteadItemAction::Pin);
@@ -1475,6 +1503,202 @@ void SHomesteadMenu::SplitSelectedHalf()
         return;
     const auto Row = Entries[ContentSelection];
     if (Controller->MenuSplitHalf(Row)) Refresh();
+}
+void SHomesteadMenu::MoveWhole(int32 Index)
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None || !Entries.IsValidIndex(Index)) return;
+    const FHomesteadRow Row = Entries[Index];
+    if (Controller->MenuMoveWhole(Row)) Refresh();
+}
+void SHomesteadMenu::OpenItemContextMenu(int32 Index)
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None || SeenPage != 0 || !Entries.IsValidIndex(Index)) return;
+    CancelPointerItemDrag();
+    Region = ERegion::Content;
+    Select(Index);
+    const FHomesteadRow Row = Entries[Index];
+    if (Row.Subject != EHomesteadMenuSubject::ItemGroup && Row.Subject != EHomesteadMenuSubject::Wearable) return;
+    PopupOptions.Reset();
+    const auto Add = [this](const FString& Label, TFunction<void()> Run)
+    {
+        PopupOptions.Add({[Label]() { return Label; }, MoveTemp(Run), nullptr});
+    };
+    const auto Act = [this, Row](EHomesteadItemAction Action, int32 Count) -> TFunction<void()>
+    {
+        return [this, Row, Action, Count]()
+            { Controller->MenuItemAction(Row, Action, Count, Controller->Simulation().GetRevision()); };
+    };
+    const TFunction<void()> Move = [this, Row]() { Controller->MenuMoveWhole(Row); };
+    const bool Storage = Controller->ActiveStorageChest().IsSet();
+    PopupTitle = Row.Name + (Row.Quantity > 1 ? FString::Printf(TEXT("  x%d"), Row.Quantity) : FString());
+    if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
+    {
+        const bool Known = Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count);
+        const auto Item = static_cast<Homestead::Item>(Row.Id);
+        if (Row.ContainerId == 0)
+        {
+            if (Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots
+                || Item == Homestead::Item::HerbedRoots)
+                Add(TEXT("Eat 1"), Act(EHomesteadItemAction::Primary, 1));
+            if (Known && AHomesteadController::CanPinToHotbar(Item))
+                Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),
+                    Act(EHomesteadItemAction::Pin, 1));
+            if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move);
+            Add(Row.Quantity > 1 ? TEXT("Drop 1") : TEXT("Drop"), Act(EHomesteadItemAction::Drop, 1));
+            if (Row.Quantity > 1)
+            {
+                Add(FString::Printf(TEXT("Drop all %d"), Row.Quantity), Act(EHomesteadItemAction::Drop, Row.Quantity));
+                Add(TEXT("Drop or split some..."), [this, Row]() { OpenQuantityPrompt(Row); });
+            }
+        }
+        else if (Row.ContainerId > 0)
+        {
+            Add(TEXT("Take to pack"), Move);
+            if (Row.Quantity > 1) Add(TEXT("Take or split some..."), [this, Row]() { OpenQuantityPrompt(Row); });
+        }
+    }
+    else
+    {
+        if (Row.ContainerId < 0) Add(TEXT("Unequip to pack"), Act(EHomesteadItemAction::Unequip, 1));
+        else if (Row.ContainerId == 0)
+        {
+            Add(TEXT("Equip"), Act(EHomesteadItemAction::Equip, 1));
+            if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move);
+            Add(TEXT("Drop"), Act(EHomesteadItemAction::Drop, 1));
+        }
+        else Add(TEXT("Take to pack"), Move);
+        const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
+        if (Info && Info->dyeable) Add(TEXT("Change dye"), Act(EHomesteadItemAction::Dye, 1));
+    }
+    Add(TEXT("Cancel"), nullptr);
+    PopupAnchor = FSlateApplication::Get().GetCursorPos();
+    SetDialog(EDialog::Context);
+}
+void SHomesteadMenu::OpenQuantityPrompt(const FHomesteadRow& Row)
+{
+    if (!Controller.IsValid() || Row.Subject != EHomesteadMenuSubject::ItemGroup || Row.ContainerId < 0) return;
+    if (Row.Quantity < 2)
+    {
+        OpenItemContextMenu(Entries.IndexOfByPredicate([&Row](const FHomesteadRow& Entry)
+            { return Entry.Subject == Row.Subject && Entry.SubjectId == Row.SubjectId; }));
+        return;
+    }
+    CancelPointerItemDrag();
+    PendingRow = Row;
+    PendingRevision = Controller->Simulation().GetRevision();
+    MaximumAmount = Row.Quantity;
+    Amount = FMath::Max(1, Row.Quantity / 2);
+    PopupTitle = Row.Name + FString::Printf(TEXT("  x%d"), Row.Quantity);
+    PopupOptions.Reset();
+    const auto Run = [this](EHomesteadItemAction Action)
+    {
+        return [this, Action]()
+            { Controller->MenuItemAction(PendingRow, Action, Amount, Controller->Simulation().GetRevision()); };
+    };
+    const TFunction<bool()> CanSplit = [this]() { return Amount < MaximumAmount; };
+    if (Row.ContainerId == 0)
+    {
+        PopupOptions.Add({[this]() { return FString::Printf(TEXT("Split off %d"), Amount); }, Run(EHomesteadItemAction::Split), CanSplit});
+        PopupOptions.Add({[this]() { return FString::Printf(TEXT("Drop %d"), Amount); }, Run(EHomesteadItemAction::Drop), nullptr});
+        if (Controller->ActiveStorageChest().IsSet())
+            PopupOptions.Add({[this]() { return FString::Printf(TEXT("Move %d to chest"), Amount); }, Run(EHomesteadItemAction::Transfer), nullptr});
+    }
+    else
+    {
+        PopupOptions.Add({[this]() { return FString::Printf(TEXT("Take %d to pack"), Amount); }, Run(EHomesteadItemAction::Transfer), nullptr});
+        PopupOptions.Add({[this]() { return FString::Printf(TEXT("Split off %d"), Amount); }, Run(EHomesteadItemAction::Split), CanSplit});
+    }
+    PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr});
+    if (Dialog == EDialog::None) PopupAnchor = FSlateApplication::Get().GetCursorPos();
+    SetDialog(EDialog::Quantity);
+}
+void SHomesteadMenu::AdjustQuantity(int32 Delta)
+{
+    if (Dialog != EDialog::Quantity) return;
+    Amount = FMath::Clamp(Amount + Delta, 1, MaximumAmount);
+}
+void SHomesteadMenu::BuildPopup()
+{
+    DialogButtons.Reset();
+    AmountControl.Reset();
+    DialogScroll.Reset();
+    ModalHost->SetVisibility(EVisibility::Visible);
+    const bool Quantity = Dialog == EDialog::Quantity;
+    const float Width = Quantity ? 340.0f : 280.0f;
+    const float Height = 60.0f + PopupOptions.Num() * 48.0f + (Quantity ? 110.0f : 0.0f);
+    // Open beside the pointer, kept inside the book.
+    const FGeometry Frame = Root->GetCachedGeometry();
+    const FVector2D Size = Frame.GetLocalSize();
+    FVector2D Local = Frame.AbsoluteToLocal(PopupAnchor) + FVector2D(8, 8);
+    if (Size.X <= 0 || Size.Y <= 0 || !FSlateApplication::Get().IsInitialized()) Local = FVector2D(200, 150);
+    Local.X = FMath::Clamp(Local.X, 8.0f, FMath::Max(8.0f, static_cast<float>(Size.X) - Width - 8.0f));
+    Local.Y = FMath::Clamp(Local.Y, 8.0f, FMath::Max(8.0f, static_cast<float>(Size.Y) - Height - 8.0f));
+    TSharedPtr<SVerticalBox> List;
+    ModalHost->SetContent(
+        SNew(SOverlay)
+        + SOverlay::Slot()
+        [
+            SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+            .ButtonColorAndOpacity(FLinearColor(0, 0, 0, 0.2f))
+            .OnClicked_Lambda([this]() { if (PointerAction()) SetDialog(EDialog::None); return FReply::Handled(); })
+        ]
+        + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(FMargin(Local.X, Local.Y, 0, 0))
+        [
+            SNew(SBox).WidthOverride(Width)
+            [
+                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuGold).Padding(2)
+                [
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine).Padding(10)
+                    [ SAssignNew(List, SVerticalBox) ]
+                ]
+            ]
+        ]);
+    List->AddSlot().AutoHeight().Padding(4, 0, 4, 8)
+    [
+        SNew(STextBlock).Text(FText::FromString(PopupTitle)).ColorAndOpacity(MenuGold)
+        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
+    ];
+    if (Quantity)
+    {
+        List->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 2)
+        [
+            SNew(STextBlock).ColorAndOpacity(Ink).Font(FCoreStyle::GetDefaultFontStyle("Bold", 28))
+            .Text_Lambda([this]() { return FText::FromString(FString::Printf(TEXT("%d  of  %d"), Amount, MaximumAmount)); })
+        ];
+        List->AddSlot().AutoHeight().Padding(4, 6)
+        [
+            SNew(SSlider).MinValue(1.0f).MaxValue(static_cast<float>(MaximumAmount)).StepSize(1.0f).MouseUsesStep(true)
+            .IsFocusable(false)
+            .Value_Lambda([this]() { return static_cast<float>(Amount); })
+            .OnValueChanged_Lambda([this](float Value)
+                { Amount = FMath::Clamp(FMath::RoundToInt(Value), 1, MaximumAmount); })
+        ];
+        List->AddSlot().AutoHeight().Padding(4, 0, 4, 8)
+        [
+            SNew(STextBlock).Text(FText::FromString(TEXT("Drag, scroll the wheel, or press Left / Right.")))
+            .ColorAndOpacity(Muted).Font(FCoreStyle::GetDefaultFontStyle("Regular", 13)).AutoWrapText(true)
+        ];
+    }
+    for (int32 Index = 0; Index < PopupOptions.Num(); ++Index)
+    {
+        const TFunction<FString()> Label = PopupOptions[Index].Label;
+        const TFunction<bool()> Enabled = PopupOptions[Index].Enabled;
+        TSharedRef<SButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(12, 8))
+            .ButtonColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; })
+            .IsEnabled_Lambda([Enabled]() { return !Enabled || Enabled(); })
+            .OnHovered_Lambda([this, Index]() { DialogSelection = Index; })
+            .OnClicked_Lambda([this, Index]() { if (PointerAction()) DialogAction(Index); return FReply::Handled(); })
+            [
+                SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(MenuPine) : FSlateColor(Ink); })
+                .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
+            ];
+        Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, Index]()
+            { if (!bSynchronizingFocus) DialogSelection = Index; }));
+        DialogButtons.Add(Button);
+        List->AddSlot().AutoHeight().Padding(0, 3)[ Button ];
+    }
+    bFocusPending = true;
 }
 void SHomesteadMenu::BeginPointerItemDrag(int32 Index)
 {
@@ -1912,7 +2136,7 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::I || Key == EKeys::Gamepad_Special_Right) { Back(); return true; }
     if (ActivateKey)
     {
-        if (SeenPage == 0 && bControl && Region == ERegion::Content
+        if (SeenPage == 0 && bControl && !Key.IsMouseButton() && Region == ERegion::Content
             && Entries.IsValidIndex(ContentSelection)
             && Entries[ContentSelection].Subject == EHomesteadMenuSubject::ItemGroup)
         {
@@ -1935,6 +2159,11 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     int32 Dy = Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down ? 1 : Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up ? -1 : 0;
     if (Dialog != EDialog::None)
     {
+        if (Dialog == EDialog::Quantity && (Dx || Key == EKeys::Gamepad_RightShoulder || Key == EKeys::Gamepad_LeftShoulder))
+        {
+            AdjustQuantity(Dx ? Dx : Key == EKeys::Gamepad_RightShoulder ? 10 : -10);
+            return true;
+        }
         if (Dialog == EDialog::Amount)
         {
             const int32 Delta = Key == EKeys::Gamepad_RightShoulder ? 10 : Key == EKeys::Gamepad_LeftShoulder ? -10 : 0;
@@ -2033,6 +2262,12 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
 }
 FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event)
 {
+    if (Dialog == EDialog::Quantity)
+    {
+        if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput())
+            AdjustQuantity((Event.GetWheelDelta() > 0 ? 1 : -1) * (Event.IsShiftDown() ? 10 : 1));
+        return FReply::Handled();
+    }
     if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput() && Scroll)
         Scroll->SetScrollOffset(FMath::Max(0.0f, Scroll->GetScrollOffset() - Event.GetWheelDelta() * 80));
     return FReply::Handled();
@@ -2050,7 +2285,8 @@ void SHomesteadMenu::Back()
 bool SHomesteadMenu::PrepareQuickAction()
 {
     if (bSaving) return false;
-    if (Dialog == EDialog::Amount || Dialog == EDialog::Merge) SetDialog(EDialog::None);
+    if (Dialog == EDialog::Amount || Dialog == EDialog::Merge || Dialog == EDialog::Context || Dialog == EDialog::Quantity)
+        SetDialog(EDialog::None);
     return Dialog == EDialog::None;
 }
 void SHomesteadMenu::RequestExit()
@@ -2084,6 +2320,7 @@ void SHomesteadMenu::SetDialog(EDialog Value)
 int32 SHomesteadMenu::DialogCount() const
 {
     if (Dialog == EDialog::Amount) return 4;
+    if (Dialog == EDialog::Context || Dialog == EDialog::Quantity) return PopupOptions.Num();
     if (Dialog == EDialog::Merge) return MergeTargets.Num() + 1;
     if (Dialog == EDialog::Exit) return 2;
     return Dialog == EDialog::SaveFailed || Dialog == EDialog::GraphicsFailed ? 3 : 2;
@@ -2091,6 +2328,7 @@ int32 SHomesteadMenu::DialogCount() const
 void SHomesteadMenu::BuildDialog()
 {
     if (Dialog == EDialog::None) { ModalHost->SetVisibility(EVisibility::Collapsed); AmountControl.Reset(); return; }
+    if (Dialog == EDialog::Context || Dialog == EDialog::Quantity) { BuildPopup(); return; }
     FString Title, Description;
     TArray<FString> Labels;
     if (Dialog == EDialog::Amount)
@@ -2208,6 +2446,15 @@ void SHomesteadMenu::DialogAction(int32 Index)
     {
         if (Index == 0) { bSaving = true; Controller->MenuSaveAndQuit(); }
         else if (Index == 1) Controller->MenuQuitWithoutSaving();
+        return;
+    }
+    if (Dialog == EDialog::Context || Dialog == EDialog::Quantity)
+    {
+        if (!PopupOptions.IsValidIndex(Index) || (PopupOptions[Index].Enabled && !PopupOptions[Index].Enabled())) return;
+        const TFunction<void()> Run = PopupOptions[Index].Run;
+        SetDialog(EDialog::None);
+        if (Run) Run();
+        if (Dialog == EDialog::None) Refresh();
         return;
     }
     if (Index == 0)

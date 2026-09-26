@@ -1497,7 +1497,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 if (!Entry.wearableId && Entry.item == Homestead::Item::Branch) { *Branches = Entry.groupId; break; }
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0); },
         [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
-    Add(TEXT("Ctrl pointer click splits the actual focused tile without an action button"),
+    Add(TEXT("Ctrl pointer click opens the how-many popover on the actual focused tile"),
         [this]()
         {
             TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
@@ -1515,8 +1515,29 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 EKeys::LeftMouseButton, 0, FModifierKeysState()));
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Released, 0));
         },
+        [this]() { return Controller->NativeMenu->IsQuantityPrompt()
+            && Controller->NativeMenu->GetPopupOptionLabel(0).StartsWith(TEXT("Split off")); });
+    Add(TEXT("Pointer Split off in the popover splits without typing an amount"),
+        [this]()
+        {
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            const auto Widget = Controller->NativeMenu->GetDialogButton(0);
+            if (!Widget) { Finish(false, TEXT("The popover has no Split off button.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            Slate.SetCursorPos(Position);
+            Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                EKeys::Invalid, 0, FModifierKeysState()));
+            TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        },
         [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
-            return Layout && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
+            return Layout && !Controller->NativeMenu->HasActiveDialog()
+                && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                 { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 2; });
     Add(TEXT("Record the original Branch merge target and focus its split source"),
         [this, Branches, DragTarget]()
@@ -1565,6 +1586,39 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         },
         [this, Snapshot]() { return Controller->Simulation().Serialize() == *Snapshot
             && !Controller->NativeMenu->IsPointerDraggingItem(); });
+    Add(TEXT("Right click on a stack opens its context menu with drop and hotbar choices"),
+        [this, Branches]()
+        {
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            const auto Widget = Slate.GetKeyboardFocusedWidget();
+            if (!Widget) { Finish(false, TEXT("Branch tile is unavailable for the context menu.")); return; }
+            const auto Geometry = Widget->GetCachedGeometry();
+            const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+            Slate.SetCursorPos(Position);
+            TSet<FKey> Pressed; Pressed.Add(EKeys::RightMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+                EKeys::RightMouseButton, 0, FModifierKeysState()));
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                EKeys::RightMouseButton, 0, FModifierKeysState()));
+        },
+        [this]()
+        {
+            if (!Controller->NativeMenu->IsItemContextMenu()) return false;
+            bool DropOne = false, DropAll = false;
+            for (int32 Index = 0; Index < Controller->NativeMenu->DialogCountForTest(); ++Index)
+            {
+                const FString Label = Controller->NativeMenu->GetPopupOptionLabel(Index);
+                DropOne |= Label == TEXT("Drop 1");
+                DropAll |= Label.StartsWith(TEXT("Drop all"));
+            }
+            return DropOne && DropAll;
+        });
+    Add(TEXT("Escape closes the context menu without mutation"),
+        [this]() { Tap(EKeys::Escape); },
+        [this, Snapshot]() { return !Controller->NativeMenu->HasActiveDialog() && Controller->IsBookOpen()
+            && Controller->Simulation().Serialize() == *Snapshot; });
     Add(TEXT("Seed one exact-chest target through authority for direct transfer testing"),
         [this, Chest, Group]()
         {

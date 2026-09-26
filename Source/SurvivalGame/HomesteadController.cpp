@@ -37,6 +37,7 @@
 #include "Widgets/SOverlay.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScaleBox.h"
+#include "Misc/ScopeExit.h"
 
 // "log LogHomesteadFootsteps Verbose" lists every footstep with its game time.
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadFootsteps, Log, All);
@@ -52,6 +53,7 @@ constexpr const TCHAR* LastMusicTrackKey = TEXT("LastMusicTrack");
 constexpr const TCHAR* AutosaveSettingsSection = TEXT("Homestead.Autosave");
 constexpr const TCHAR* AutosaveEnabledKey = TEXT("Enabled");
 constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
+constexpr const TCHAR* ActionHintSection = TEXT("Homestead.ActionHints");
 constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
 
 bool IsHotbarTool(Homestead::Item Item)
@@ -645,6 +647,13 @@ Homestead::Item AHomesteadController::PresentedTool() const
     return IsHotbarTool(Tool) && Sim.Count(Tool) > 0 ? Tool : Homestead::Item::Count;
 }
 
+Homestead::Item AHomesteadController::SelectedCarriedTool() const
+{
+    if (!HotbarSlots.IsValidIndex(SelectedHotbarSlot) || HotbarSlots[SelectedHotbarSlot] < 0) return Homestead::Item::Count;
+    const auto Tool = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
+    return IsHotbarTool(Tool) && Sim.Count(Tool) > 0 ? Tool : Homestead::Item::Count;
+}
+
 void AHomesteadController::SelectHotbarSlot(int32 Index)
 {
     if (!ShouldShowHotbar() || Index < 0 || Index >= 10) return;
@@ -714,6 +723,8 @@ void AHomesteadController::UseSelectedTool()
     const auto Position = PlayerPoint();
     if (!bWorldReady || !PrepareWorldAt(Position)) return;
     UpdateFocus();
+    const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("RT") : TEXT("LMB"));
+    ON_SCOPE_EXIT { EndHintUse(Hint); };
 
     if (Tool == Homestead::Item::Machete)
     {
@@ -806,7 +817,7 @@ void AHomesteadController::RefreshMenuPortrait()
     }
     if (MenuPortrait && MenuPortrait->Refresh(*Avatar))
     {
-        PortraitBrush.SetResourceObject(MenuPortrait->Texture());
+        PortraitBrush.SetResourceObject(MenuPortrait->BrushResource());
         PortraitBrush.ImageSize = FVector2D(384, 768);
         PortraitBrush.DrawAs = ESlateBrushDrawType::Image;
     }
@@ -831,10 +842,16 @@ void AHomesteadController::ZoomMenuPortrait()
 
 FString AHomesteadController::MenuPortraitStatus() const
 {
-    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    return Avatar && Avatar->IsEquipmentPresentationReady()
-        ? TEXT("Your worn clothing\nNeutral preview lighting")
-        : TEXT("Character prototype\nOwned clothing is not yet renderable");
+    return TEXT("As you look now");
+}
+
+void AHomesteadController::HomesteadPackMenu(int32 Tile, int32 Mode)
+{
+    if (!NativeMenu.IsValid() || !bBookOpen || Page != 0) { Notify(TEXT("Open the pack first."), true); return; }
+    const auto Rows = MenuRows();
+    if (!Rows.IsValidIndex(Tile)) { Notify(TEXT("There is no item in that tile."), true); return; }
+    if (Mode == 1) NativeMenu->OpenQuantityPrompt(Rows[Tile]);
+    else NativeMenu->OpenItemContextMenu(Tile);
 }
 
 void AHomesteadController::HomesteadMorning(float Hour)
@@ -1478,6 +1495,88 @@ FString AHomesteadController::FocusActions() const
     return FString();
 }
 
+FString AHomesteadController::HintId(const FString& Verb) const
+{
+    FString Noun;
+    if (Focus == EFocus::Resource)
+        for (const auto& Node : State().resources)
+            if (Node.id == FocusId)
+            {
+                Noun = Node.kind == Homestead::ResourceKind::ForestTree || Node.kind == Homestead::ResourceKind::Sapling
+                    ? FString(TEXT("Tree")) : Text(Homestead::ResourceName(Node.kind));
+                break;
+            }
+    FString Id;
+    for (const TCHAR Letter : Verb + TEXT("_") + Noun)
+        if (FChar::IsAlnum(Letter) || Letter == TEXT('_')) Id.AppendChar(Letter);
+    return Id;
+}
+
+int32 AHomesteadController::HintUseCount(const FString& Verb) const
+{
+    const int32* Uses = HintUses.Find(HintId(Verb));
+    return Uses ? *Uses : 0;
+}
+
+bool AHomesteadController::IsHintRetired(const FString& Verb) const
+{
+    return HintUseCount(Verb) >= HintRetireUses;
+}
+
+AHomesteadController::FHintUse AHomesteadController::BeginHintUse(const FString& Button) const
+{
+    FHintUse Use;
+    Use.Serial = NoticeSerial;
+    Use.bHackPending = bHackPending;
+    TArray<FString> Parts;
+    FocusActions().ParseIntoArray(Parts, TEXT("   "));
+    const FString Prefix = TEXT("[") + Button + TEXT("] ");
+    for (const FString& Part : Parts)
+        if (Part.TrimStartAndEnd().StartsWith(Prefix))
+        {
+            Use.Id = HintId(Part.TrimStartAndEnd().Mid(Prefix.Len()));
+            break;
+        }
+    return Use;
+}
+
+void AHomesteadController::EndHintUse(const FHintUse& Use)
+{
+    if (Use.Id.IsEmpty()) return;
+    const bool Succeeded = (NoticeSerial != Use.Serial && !bToastError) || (!Use.bHackPending && bHackPending);
+    if (!Succeeded) return;
+    int32& Uses = HintUses.FindOrAdd(Use.Id);
+    if (Uses >= HintRetireUses) return;
+    ++Uses;
+    if (const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr)
+        if (PersistIntProperty(Branch->IniPath, ActionHintSection, *Use.Id, Uses))
+            GConfig->SetInt(ActionHintSection, *Use.Id, Uses, GGameUserSettingsIni);
+}
+
+void AHomesteadController::LoadActionHints()
+{
+    HintUses.Reset();
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    FConfigFile Disk;
+    if (!Branch || !Disk.Combine(Branch->IniPath)) return;
+    if (const FConfigSection* Section = Disk.FindSection(ActionHintSection))
+        for (const auto& Pair : *Section)
+        {
+            const int32 Uses = FCString::Atoi(*Pair.Value.GetValue());
+            if (Uses > 0) HintUses.Add(Pair.Key.ToString(), FMath::Min(Uses, HintRetireUses));
+        }
+}
+
+void AHomesteadController::ResetActionHints()
+{
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    for (const auto& Pair : HintUses)
+        if (Branch && PersistIntProperty(Branch->IniPath, ActionHintSection, *Pair.Key, 0))
+            GConfig->SetInt(ActionHintSection, *Pair.Key, 0, GGameUserSettingsIni);
+    HintUses.Reset();
+    Notify(TEXT("Action hints will show again for your next few tries."));
+}
+
 void AHomesteadController::Notify(const Homestead::Result& Result, USoundBase* SuccessCue)
 {
     Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result.ok);
@@ -1495,6 +1594,7 @@ void AHomesteadController::NotifyResourceAction(const Homestead::Result& Result,
     ToastText.Reset();
     ToastRemaining = 0;
     bToastError = false;
+    ++NoticeSerial;
     if (SuccessCue) PlayEffect(SuccessCue);
     RefreshRemaining = 0;
 }
@@ -1562,7 +1662,10 @@ void AHomesteadController::UpdatePendingFell()
 {
     FVector Landing;
     if (Landscape && Landscape->TakeFelledTreeLanding(Landing))
-        PlayEffect(WoodTapA, 1.6f);
+    {
+        if (TreeFallThud) PlayEffect(TreeFallThud, 0.7f);
+        else PlayEffect(WoodTapA, 0.6f);
+    }
     if (FellResource == INDEX_NONE) return;
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
@@ -1578,7 +1681,13 @@ void AHomesteadController::UpdatePendingFell()
     while (Felling && FellStrokesHeard < FellStrokes
         && Phase >= AHomesteadCharacter::FellStrikeSeconds(FellStrokesHeard))
     {
-        PlayEffect(FellStrokesHeard % 2 ? WoodTapA.Get() : WoodTapB.Get(), 1.25f);
+        // About 7 dB under the old wood taps; the hammer-cut variant is a touch hotter.
+        if (!ChopStrokes.IsEmpty())
+        {
+            const int32 Pick = FellStrokesHeard % ChopStrokes.Num();
+            PlayEffect(ChopStrokes[Pick].Get(), Pick == 2 ? 0.65f : 0.8f);
+        }
+        else PlayEffect(FellStrokesHeard % 2 ? WoodTapA.Get() : WoodTapB.Get(), 0.55f);
         ++FellStrokesHeard;
     }
     // The last stroke through the notch, or she stopped: the tree goes over.
@@ -1613,6 +1722,7 @@ void AHomesteadController::UpdatePendingHack()
 
 void AHomesteadController::Notify(const FString& Message, bool Error)
 {
+    ++NoticeSerial;
     ToastText = Message;
     bToastError = Error;
     ToastRemaining = Error ? 8 : 5;
@@ -1633,6 +1743,8 @@ void AHomesteadController::Interact()
         return;
     }
     UpdateFocus();
+    const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("A") : TEXT("E"));
+    ON_SCOPE_EXIT { EndHintUse(Hint); };
     switch (Focus)
     {
     case EFocus::Resource:
@@ -1795,6 +1907,8 @@ void AHomesteadController::Secondary()
     if (bPlanning) { RotatePlacement(); return; }
     if (!bWorldReady || !PrepareWorldAt(PlayerPoint())) return;
     UpdateFocus();
+    const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("X") : TEXT("F"));
+    ON_SCOPE_EXIT { EndHintUse(Hint); };
     if (Focus == EFocus::Resource)
     {
         bool Sapling = false;
@@ -2083,6 +2197,8 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             TEXT("Periodic rotating saves. Recovery checkpoints remain separate.")});
         Result.Add({13, FString::Printf(TEXT("Autosave interval: %d minutes"), AutosaveMinutes),
             bAutosaveEnabled ? TEXT("Counts only unpaused gameplay time.") : TEXT("Stored interval; Autosave is Off.")});
+        Result.Add({15, TEXT("Show action hints again"),
+            FString::Printf(TEXT("Each floating action hint retires after you've done that action %d times. This brings them all back."), HintRetireUses)});
         if (!PreviewLabel().IsEmpty())
             Result.Add({14, PreviewLabel(), TEXT("This preview uses isolated saves.")});
     }
@@ -2254,6 +2370,7 @@ void AHomesteadController::ActivateRow()
         case 11: ToggleVerticalSync(); break;
         case 12: MenuSetAutosaveEnabled(!bAutosaveEnabled); break;
         case 13: MenuSetAutosaveInterval(AutosaveMinutes == 5 ? 10 : AutosaveMinutes == 10 ? 20 : AutosaveMinutes == 20 ? 30 : 5); break;
+        case 15: ResetActionHints(); break;
         default: break;
         }
     }
@@ -2292,6 +2409,7 @@ void AHomesteadController::LoadUserPreferences()
     EffectsVolume = 0.80f;
     bAutosaveEnabled = true;
     AutosaveMinutes = 5;
+    LoadActionHints();
     const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
     FConfigFile Disk;
     if (!Branch || !Disk.Combine(Branch->IniPath))
@@ -3037,6 +3155,12 @@ void AHomesteadController::InitializeAudio()
     CraftStrikeB = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeB.CraftStrikeB"));
     CraftStrikeC = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeC.CraftStrikeC"));
     UIClick = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/UIClick.UIClick"));
+    for (const TCHAR* Chop : {TEXT("ChopA"), TEXT("ChopB"), TEXT("ChopC")})
+        if (USoundBase* Cue = LoadObject<USoundBase>(nullptr,
+            *FString::Printf(TEXT("/Game/SurvivalGame/Audio/Effects/%s.%s"), Chop, Chop), nullptr, LOAD_NoWarn | LOAD_Quiet))
+            ChopStrokes.Add(Cue);
+    TreeFallThud = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/TreeFall.TreeFall"),
+        nullptr, LOAD_NoWarn | LOAD_Quiet);
     auto LoadPool = [](TArray<TObjectPtr<USoundBase>>& Pool, const TCHAR* Prefix, int32 Count)
     {
         Pool.Reset();

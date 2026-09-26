@@ -125,14 +125,38 @@ def textured_parent():
 FOLIAGE_WIND_CODE = """
 float h = VertexColor.r;
 float phase = VertexColor.g * 6.2832;
-float gust = sin(Time * 0.37 + dot(WorldPos.xy, float2(0.0011, 0.0007))) * 0.5 + 0.75;
-float sway = sin(Time * 1.3 + phase + dot(WorldPos.xy, float2(0.004, 0.003))) * 0.65
-           + sin(Time * 2.3 + phase * 1.7) * 0.35;
+float gust = sin(Time * 0.23 + dot(WorldPos.xy, float2(0.0011, 0.0007))) * 0.35 + 0.65;
+float sway = sin(Time * 0.8 + phase + dot(WorldPos.xy, float2(0.004, 0.003))) * 0.7
+           + sin(Time * 1.45 + phase * 1.7) * 0.3;
 float3 offset = normalize(float3(1.0, 0.45, 0.0)) * (sway * gust * Strength * h * h);
-offset += float3(sin(Time * 7.1 + phase * 5.0), cos(Time * 6.3 + phase * 3.0),
-                 sin(Time * 8.3 + phase)) * (Flutter * VertexColor.b * gust);
+offset += float3(sin(Time * 4.1 + phase * 5.0), cos(Time * 3.7 + phase * 3.0),
+                 0.3 * sin(Time * 4.9 + phase)) * (Flutter * VertexColor.b * gust);
 return offset;
 """
+# A slow, small sway: the first pass (3.5 cm, faster flutter) read as bushes bouncing in place.
+FOLIAGE_WIND_STRENGTH = 1.6
+FOLIAGE_LEAF_FLUTTER = 0.2
+
+
+def sync_foliage_wind(material):
+    """Bring an existing foliage parent's wind node and defaults up to FOLIAGE_WIND_CODE."""
+    wind = EDIT.get_material_property_input_node(material, unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
+    if not isinstance(wind, unreal.MaterialExpressionCustom):
+        return material
+    changed = wind.get_editor_property("code").strip() != FOLIAGE_WIND_CODE.strip()
+    if changed:
+        wind.set_editor_property("code", FOLIAGE_WIND_CODE)
+    for source in EDIT.get_inputs_for_material_expression(material, wind):
+        if isinstance(source, unreal.MaterialExpressionScalarParameter):
+            target = {"WindStrength": FOLIAGE_WIND_STRENGTH, "LeafFlutter": FOLIAGE_LEAF_FLUTTER}.get(
+                str(source.get_editor_property("parameter_name")))
+            if target is not None and abs(source.get_editor_property("default_value") - target) > 1e-4:
+                source.set_editor_property("default_value", target)
+                changed = True
+    if changed:
+        EDIT.recompile_material(material)
+        save(material)
+    return material
 
 
 def foliage_parent():
@@ -141,7 +165,7 @@ def foliage_parent():
     colour alpha, and bake wind weights into vertex colour (R height, G phase, B flutter).
     The camera-safe dither keeps shrubs between the camera and heroine from hiding her."""
     if LIB.does_asset_exist(FOLIAGE_PROP_PARENT):
-        return LIB.load_asset(FOLIAGE_PROP_PARENT)
+        return sync_foliage_wind(LIB.load_asset(FOLIAGE_PROP_PARENT))
     folder, name = FOLIAGE_PROP_PARENT.rsplit("/", 1)
     material = TOOLS.create_asset(name, folder, unreal.Material, unreal.MaterialFactoryNew())
     if not material:
@@ -222,8 +246,8 @@ def foliage_parent():
     link(node(unreal.MaterialExpressionVertexColor, -700, 650), "", wind, "VertexColor")
     link(node(unreal.MaterialExpressionWorldPosition, -700, 750), "", wind, "WorldPos")
     link(node(unreal.MaterialExpressionTime, -700, 850), "", wind, "Time")
-    link(scalar("WindStrength", 3.5, -700, 950), "", wind, "Strength")
-    link(scalar("LeafFlutter", 0.6, -700, 1050), "", wind, "Flutter")
+    link(scalar("WindStrength", FOLIAGE_WIND_STRENGTH, -700, 950), "", wind, "Strength")
+    link(scalar("LeafFlutter", FOLIAGE_LEAF_FLUTTER, -700, 1050), "", wind, "Flutter")
     out(wind, "", unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
     EDIT.recompile_material(material)
     save(material)

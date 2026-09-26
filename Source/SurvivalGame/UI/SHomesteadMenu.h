@@ -47,6 +47,16 @@ public:
     bool IsSaveError() const { return Dialog == EDialog::SaveFailed; }
     bool IsUnsavedPrompt() const { return Dialog == EDialog::Unsaved; }
     bool IsTestResetPrompt() const { return Dialog == EDialog::TestReset; }
+    // Right-click item menu and the Ctrl+click how-many popover (pointer-first inventory handling).
+    bool IsItemContextMenu() const { return Dialog == EDialog::Context; }
+    bool IsQuantityPrompt() const { return Dialog == EDialog::Quantity; }
+    int32 DialogCountForTest() const { return DialogCount(); }
+    FString GetPopupOptionLabel(int32 Index) const
+    { return PopupOptions.IsValidIndex(Index) && PopupOptions[Index].Label ? PopupOptions[Index].Label() : FString(); }
+    TSharedPtr<SWidget> GetDialogButton(int32 Index) const
+    { return DialogButtons.IsValidIndex(Index) ? DialogButtons[Index] : nullptr; }
+    void OpenItemContextMenu(int32 Index);
+    void OpenQuantityPrompt(const FHomesteadRow& Row);
     const FHomesteadRow* GetSelectedSubject() const
     {
         const bool SubjectFocused = Region == ERegion::Content || Region == ERegion::Details || Region == ERegion::Actions;
@@ -76,7 +86,7 @@ public:
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
-    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable };
+    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable, Context, Quantity };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
     TSharedPtr<SHorizontalBox> TabBar;
@@ -135,6 +145,14 @@ private:
     uint64 PendingRevision = 0;
     int32 Amount = 1, MaximumAmount = 1;
     TArray<int32> MergeTargets;
+    struct FPopupOption { TFunction<FString()> Label; TFunction<void()> Run; TFunction<bool()> Enabled; };
+    TArray<FPopupOption> PopupOptions;
+    FString PopupTitle;
+    FVector2D PopupAnchor = FVector2D::ZeroVector;
+    void BuildPopup();
+    void AdjustQuantity(int32 Delta);
+    // Shift+click: the whole stack or garment to the other side of an open chest.
+    void MoveWhole(int32 Index);
     int32 AudioEditId = -1;
     float AudioEditStart = 0;
     int32 PointerDragSource = INDEX_NONE;

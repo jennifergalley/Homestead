@@ -92,6 +92,8 @@ public:
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
     bool MenuSplitHalf(const FHomesteadRow& Row);
+    // Moves a whole stack or garment between the pack and the open chest (as much as fits).
+    bool MenuMoveWhole(const FHomesteadRow& Row);
     bool MenuSortPack();
     bool MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target, uint64 ExpectedRevision);
     bool OpenChestStorage(int32 ChestId);
@@ -104,6 +106,14 @@ public:
     FString BookFooter() const;
     FString FocusTitle() const;
     FString FocusActions() const;
+    // The floating action hints retire once each action has been done this many times; the counts
+    // live in the user settings file, so they outlast saves and new woodlands.
+    static constexpr int32 HintRetireUses = 3;
+    // Stable id for a focus-cue verb ("Gather", "Fell with Hatchet") on the current focus.
+    FString HintId(const FString& Verb) const;
+    bool IsHintRetired(const FString& Verb) const;
+    int32 HintUseCount(const FString& Verb) const;
+    void ResetActionHints();
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
     FString PlacementLabel() const;
@@ -162,12 +172,18 @@ public:
     bool KnifePreviewRequested() const;
     // The carried tool in the selected (or hovered) hotbar slot, or Item::Count.
     Homestead::Item PresentedTool() const;
+    // The carried tool in the selected slot regardless of menus (she keeps holding it while the
+    // field book is open, so its preview shows it), or Item::Count.
+    Homestead::Item SelectedCarriedTool() const;
     bool ShouldShowHotbar() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
     // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
     UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
+    // Console playtest aid: open the pack's right-click menu (Mode 0) or Ctrl+click popover (Mode 1)
+    // on the Nth pack tile, as a pointer would.
+    UFUNCTION(Exec) void HomesteadPackMenu(int32 Tile = 0, int32 Mode = 0);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -176,6 +192,14 @@ public:
     float EffectsVolume = 0.8f;
 
 private:
+    struct FHintUse { FString Id; uint32 Serial = 0; bool bHackPending = false; };
+    // Before an action button is handled: which hint (if any) that button's cue shows now.
+    FHintUse BeginHintUse(const FString& Button) const;
+    // After: count it when the action succeeded (a non-error notice, or a machete swing began).
+    void EndHintUse(const FHintUse& Use);
+    void LoadActionHints();
+    TMap<FString, int32> HintUses;
+    uint32 NoticeSerial = 0;
     bool ResolveDropPoint(Homestead::Point& Result) const;
     bool CollectPreparedBaselines(Homestead::Generation::ChunkCoord Chunk,
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
@@ -201,6 +225,9 @@ private:
     void StartNextMusicTrack();
     UPROPERTY() TObjectPtr<USoundBase> WoodTapA;
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
+    // Hatchet biting a standing trunk, one per stroke in turn.
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> ChopStrokes;
+    UPROPERTY() TObjectPtr<USoundBase> TreeFallThud;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeA;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeB;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeC;

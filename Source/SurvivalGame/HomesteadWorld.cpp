@@ -1865,6 +1865,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                         Batch->SetCanEverAffectNavigation(false);
                     }
                     Batch->SetGenerateOverlapEvents(false);
+                    // The gentle wind sway needn't redraw cached virtual shadow pages every frame;
+                    // that made the bush shadows shimmer while she stood still.
+                    Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
                     Batch->SetCullDistances(bLow ? 2200 : 0, bLow ? 3800 : 9000);
                     Batch->SetVisibility(!StageChunk);
                     Batch->SetHiddenInGame(StageChunk != nullptr);

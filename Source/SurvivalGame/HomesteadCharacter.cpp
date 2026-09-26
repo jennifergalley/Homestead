@@ -1334,8 +1334,8 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     Homestead::Item Presented = Homestead::Item::Count;
     if (PC)
     {
-        if (!bAppearancePreview && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed())
-            Presented = PC->PresentedTool();
+        if (!bAppearancePreview && !PC->IsPlanning() && !PC->IsFailed())
+            Presented = PC->IsBookOpen() ? PC->SelectedCarriedTool() : PC->PresentedTool();
     }
     else if (InCharacterLab() && LabHeldTool) Presented = *LabHeldTool;
     const bool HandsFree = Animation->ActionWeight() < 0.01f && Animation->EatWeight() < 0.01f;

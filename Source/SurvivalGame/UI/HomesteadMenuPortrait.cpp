@@ -1,62 +1,44 @@
 #include "HomesteadMenuPortrait.h"
 #include "../HomesteadCharacter.h"
 #include "../HomesteadController.h"
-#include "../HomesteadWardrobePresentation.h"
-#include "Animation/AnimSequence.h"
-#include "Animation/AnimSingleNodeInstance.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
-#include "Engine/SkeletalMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
+#include "Animation/AnimSequence.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Animation/AnimSequence.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 
-AHomesteadMenuPortrait::AHomesteadMenuPortrait()
+namespace
 {
-    PrimaryActorTick.bCanEverTick = true;
-    PrimaryActorTick.TickInterval = 1.0f / 24.0f;
-    SetActorEnableCollision(false);
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("PortraitRoot"));
-    Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PortraitBody"));
-    Body->SetupAttachment(RootComponent);
-    Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    Body->SetGenerateOverlapEvents(false);
-    Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-    Body->SetCastShadow(false);
-    Body->SetLightingChannels(false, false, true);
-    const FName Names[] = {TEXT("PortraitTunic"), TEXT("PortraitApron"), TEXT("PortraitFeet")};
-    for (FName Name : Names)
-    {
-        auto* Part = CreateDefaultSubobject<USkeletalMeshComponent>(Name);
-        Part->SetupAttachment(Body);
-        Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        Part->SetGenerateOverlapEvents(false);
-        Part->SetCastShadow(false);
-        Part->SetLightingChannels(false, false, true);
-        Garments.Add(Part);
-    }
-    Capture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitCapture"));
-    Capture->SetupAttachment(RootComponent);
-    Capture->SetRelativeLocation(FVector(270, 0, 85));
-    Capture->SetRelativeRotation(FRotator(0, 180, 0));
-    Capture->FOVAngle = 20;
-    Capture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
-    Capture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
-    Capture->bCaptureEveryFrame = false;
-    Capture->bCaptureOnMovement = false;
-    Capture->bAlwaysPersistRenderingState = true;
-    Capture->ShowFlags.SetAtmosphere(false);
-    Capture->ShowFlags.SetFog(false);
-    Capture->ShowFlags.SetMotionBlur(false);
-    Capture->ShowFlags.SetDepthOfField(false);
-    Capture->ShowFlags.SetSkyLighting(false);
-    Capture->ShowFlags.SetGlobalIllumination(false);
-    Capture->ShowFlags.SetReflectionEnvironment(false);
-    Capture->ShowFlags.SetLocalExposure(false);
-    Capture->ShowFlags.SetEyeAdaptation(true);
-    Capture->PostProcessBlendWeight = 1;
-    auto& Exposure = Capture->PostProcessSettings;
+constexpr int32 PortraitWidth = 512;
+constexpr int32 PortraitHeight = 1024;
+
+void PortraitShowFlags(USceneCaptureComponent2D& Capture)
+{
+    Capture.PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+    Capture.bCaptureEveryFrame = false;
+    Capture.bCaptureOnMovement = false;
+    Capture.bAlwaysPersistRenderingState = true;
+    Capture.FOVAngle = 20;
+    Capture.ShowFlags.SetAtmosphere(false);
+    Capture.ShowFlags.SetFog(false);
+    Capture.ShowFlags.SetMotionBlur(false);
+    Capture.ShowFlags.SetDepthOfField(false);
+    Capture.ShowFlags.SetSkyLighting(false);
+    Capture.ShowFlags.SetGlobalIllumination(false);
+    Capture.ShowFlags.SetReflectionEnvironment(false);
+    Capture.ShowFlags.SetLocalExposure(false);
+    Capture.ShowFlags.SetEyeAdaptation(true);
+    Capture.PostProcessBlendWeight = 1;
+    auto& Exposure = Capture.PostProcessSettings;
     Exposure.bOverride_AutoExposureMethod = true;
     Exposure.AutoExposureMethod = AEM_Manual;
     Exposure.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
@@ -67,23 +49,40 @@ AHomesteadMenuPortrait::AHomesteadMenuPortrait()
     Exposure.CameraISO = 400;
     Exposure.bOverride_CameraShutterSpeed = true;
     Exposure.CameraShutterSpeed = 15;
-    Exposure.bOverride_DepthOfFieldFstop = true;
-    Exposure.DepthOfFieldFstop = 2.8f;
     Exposure.bOverride_BloomIntensity = true;
     Exposure.BloomIntensity = 0;
+}
+}
+
+AHomesteadMenuPortrait::AHomesteadMenuPortrait()
+{
+    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.TickInterval = 1.0f / 24.0f;
+    SetActorEnableCollision(false);
+    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("PortraitRoot"));
+    Capture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitCapture"));
+    Capture->SetupAttachment(RootComponent);
+    PortraitShowFlags(*Capture);
+    Capture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+    // The same view again for her silhouette: scene colour's alpha is the inverse of coverage.
+    CoverageCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitCoverage"));
+    CoverageCapture->SetupAttachment(Capture);
+    PortraitShowFlags(*CoverageCapture);
+    CoverageCapture->CaptureSource = ESceneCaptureSource::SCS_SceneColorHDR;
+    // Soft studio key and fill on lighting channel 2, which only she joins while the book is open.
     Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PortraitLight"));
     Light->SetupAttachment(RootComponent);
-    Light->SetRelativeLocation(FVector(180, -120, 200));
+    Light->SetRelativeLocation(FVector(180, -120, 110));
     Light->SetIntensityUnits(ELightUnits::Lumens);
-    Light->SetIntensity(3000);
+    Light->SetIntensity(14000);
     Light->SetAttenuationRadius(700);
     Light->SetCastShadows(false);
     Light->SetLightingChannels(false, false, true);
     FillLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("PortraitFillLight"));
     FillLight->SetupAttachment(RootComponent);
-    FillLight->SetRelativeLocation(FVector(110, 155, 65));
+    FillLight->SetRelativeLocation(FVector(110, 155, -25));
     FillLight->SetIntensityUnits(ELightUnits::Lumens);
-    FillLight->SetIntensity(1800);
+    FillLight->SetIntensity(8000);
     FillLight->SetAttenuationRadius(650);
     FillLight->SetCastShadows(false);
     FillLight->SetLightingChannels(false, false, true);
@@ -91,91 +90,85 @@ AHomesteadMenuPortrait::AHomesteadMenuPortrait()
 
 bool AHomesteadMenuPortrait::Refresh(AHomesteadCharacter& Character)
 {
-    const auto* Source = Character.GetMesh();
-    if (!Source || !Source->GetSkeletalMeshAsset()) return false;
-    UAnimSequence* Idle = Character.GetIdleAnimation();
-    if (!Idle)
+    if (!Character.GetMesh() || !Character.GetMesh()->GetSkeletalMeshAsset()) return false;
+    if (!ColorTarget)
     {
-        UE_LOG(LogTemp, Error, TEXT("Menu portrait needs the heroine's admitted idle animation."));
-        return false;
+        ColorTarget = NewObject<UTextureRenderTarget2D>(this);
+        ColorTarget->ClearColor = FLinearColor::Transparent;
+        ColorTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
+        ColorTarget->InitAutoFormat(PortraitWidth, PortraitHeight);
+        Capture->TextureTarget = ColorTarget;
+        CoverageTarget = NewObject<UTextureRenderTarget2D>(this);
+        CoverageTarget->ClearColor = FLinearColor(0, 0, 0, 1);
+        CoverageTarget->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA16f;
+        CoverageTarget->InitAutoFormat(PortraitWidth, PortraitHeight);
+        CoverageCapture->TextureTarget = CoverageTarget;
     }
-    Subject = &Character;
-    const auto* Previous = Body->GetSingleNodeInstance();
-    const float PreviousPhase = Previous && Previous->GetAnimationAsset() == Idle
-        ? Previous->GetCurrentTime() : 0.0f;
-    if (!Target)
+    if (!CompositeMaterial)
+        CompositeMaterial = LoadObject<UMaterialInterface>(nullptr,
+            TEXT("/Game/SurvivalGame/UI/M_PortraitCutout.M_PortraitCutout"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (CompositeMaterial && !Composite)
     {
-        Target = NewObject<UTextureRenderTarget2D>(this);
-        Target->ClearColor = FLinearColor(0.025f, 0.05f, 0.038f, 1);
-        Target->RenderTargetFormat = ETextureRenderTargetFormat::RTF_RGBA8;
-        Target->InitAutoFormat(768, 1536);
-        Capture->TextureTarget = Target;
+        Composite = UMaterialInstanceDynamic::Create(CompositeMaterial, this);
+        Composite->SetTextureParameterValue(TEXT("Color"), ColorTarget);
+        Composite->SetTextureParameterValue(TEXT("Coverage"), CoverageTarget);
     }
+    if (Subject.Get() != &Character)
+    {
+        RestoreLighting();
+        Subject = &Character;
+        AnimatedSeconds = 0;
+        if (const auto* Idle = Character.GetIdleAnimation())
+            StartPhase = FMath::Fmod(static_cast<float>(GetWorld()->GetTimeSeconds()), Idle->GetPlayLength());
+    }
+    // Everything she is showing right now: body, face, outfit, hair, pouch, belt and held tool.
     Capture->ClearShowOnlyComponents();
-    if (const auto* Presentation = Character.GetEquipmentPresentation())
+    CoverageCapture->ClearShowOnlyComponents();
+    TArray<UPrimitiveComponent*> Parts;
+    Character.GetComponents(Parts);
+    const FTransform Frame(FRotator(0, Character.GetActorRotation().Yaw, 0), Character.GetActorLocation());
+    FBox Bounds(ForceInit);
+    for (UPrimitiveComponent* Part : Parts)
     {
-        HomesteadWardrobePresentation::ApplySurface(Presentation->Base, *Body);
-        for (int32 Index = 0; Index < Garments.Num(); ++Index)
+        if (!Part || Part->IsA<UCapsuleComponent>()) continue;
+        // Hidden parts stay listed: a tool she takes up or a garment she puts on while the book
+        // is open shows up without rebuilding the list.
+        Capture->ShowOnlyComponent(Part);
+        CoverageCapture->ShowOnlyComponent(Part);
+        if (!LitParts.ContainsByPredicate([Part](const auto& Lit) { return Lit.Key.Get() == Part; }))
         {
-            if (Presentation->Garments.IsValidIndex(Index))
-            {
-                HomesteadWardrobePresentation::ApplySurface(Presentation->Garments[Index], *Garments[Index]);
-                Garments[Index]->SetLeaderPoseComponent(Body, true, false);
-                Garments[Index]->SetVisibility(true);
-                Capture->ShowOnlyComponent(Garments[Index]);
-            }
-            else
-            {
-                Garments[Index]->SetVisibility(false);
-                Garments[Index]->SetSkeletalMesh(nullptr);
-                Garments[Index]->EmptyOverrideMaterials();
-            }
+            LitParts.Add({Part, Part->LightingChannels});
+            Part->SetLightingChannels(false, false, true);
         }
+        if (Part->IsVisible() && !Part->bHiddenInGame
+            && (Part->IsA<USkeletalMeshComponent>() || Part->IsA<UStaticMeshComponent>()))
+            Bounds += Part->Bounds.GetBox().TransformBy(Frame.Inverse());
     }
-    else
-    {
-        Body->SetSkeletalMesh(Source->GetSkeletalMeshAsset());
-        Body->EmptyOverrideMaterials();
-        for (int32 Index = 0; Index < Source->GetNumMaterials(); ++Index) Body->SetMaterial(Index, Source->GetMaterial(Index));
-        for (const auto& Part : Garments) Part->SetVisibility(false);
-    }
-    Body->SetLeaderPoseComponent(nullptr);
-    Body->PlayAnimation(Idle, true);
-    if (auto* Current = Body->GetSingleNodeInstance())
-        Current->SetPosition(FMath::Fmod(PreviousPhase, Idle->GetPlayLength()), false);
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Menu portrait could not play its independent idle."));
-        return false;
-    }
-    MeshRotation = Source->GetRelativeRotation();
-    Body->SetRelativeRotation(MeshRotation + FRotator(0, Yaw, 0));
-    Body->SetRelativeScale3D(Source->GetRelativeScale3D());
-    FTransform ReferenceTransform = Body->GetRelativeTransform();
-    ReferenceTransform.SetRotation(MeshRotation.Quaternion());
-    FBox SubjectBounds = Body->GetSkeletalMeshAsset()->GetBounds().GetBox().TransformBy(ReferenceTransform);
-    for (const auto& Part : Garments)
-        if (Part->IsVisible() && Part->GetSkeletalMeshAsset())
-            SubjectBounds += Part->GetSkeletalMeshAsset()->GetBounds().GetBox().TransformBy(
-                Part->GetRelativeTransform() * ReferenceTransform);
-    if (!SubjectBounds.IsValid || SubjectBounds.GetExtent().ContainsNaN() || SubjectBounds.GetExtent().Z <= 0)
-    {
-        UE_LOG(LogTemp, Error, TEXT("Menu portrait rejected invalid rendered subject bounds."));
-        return false;
-    }
-    SubjectCenter = SubjectBounds.GetCenter();
-    SubjectExtent = SubjectBounds.GetExtent();
+    const float HalfHeight = Character.GetCapsuleComponent() ? Character.GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 90.0f;
+    if (!Bounds.IsValid || Bounds.GetExtent().ContainsNaN())
+        Bounds = FBox(FVector(-40, -40, -HalfHeight), FVector(40, 40, HalfHeight));
+    // Skeletal bounds are generous; keep the frame on her rather than on padding.
+    Bounds.Min.Z = FMath::Max(Bounds.Min.Z, -HalfHeight - 4.0);
+    Bounds.Max.Z = FMath::Min(Bounds.Max.Z, HalfHeight + 20.0);
+    SubjectCenter = Bounds.GetCenter();
+    SubjectExtent = Bounds.GetExtent();
+    SubjectExtent.X = FMath::Min(SubjectExtent.X, 60.0);
+    SubjectExtent.Y = FMath::Min(SubjectExtent.Y, 70.0);
+    FollowSubject();
     UpdateCaptureFraming();
-    Capture->ShowOnlyComponent(Body);
     bCapturePending = true;
     return true;
+}
+
+UObject* AHomesteadMenuPortrait::BrushResource() const
+{
+    return Composite ? static_cast<UObject*>(Composite) : static_cast<UObject*>(ColorTarget);
 }
 
 void AHomesteadMenuPortrait::Orbit(float Degrees)
 {
     Yaw = FMath::Fmod(Yaw + Degrees, 360.0f);
-    Body->SetRelativeRotation(MeshRotation + FRotator(0, Yaw, 0));
-    UpdateCaptureFraming();
+    FollowSubject();
     bCapturePending = true;
 }
 
@@ -188,15 +181,24 @@ void AHomesteadMenuPortrait::ToggleCloseup()
 
 TOptional<float> AHomesteadMenuPortrait::IdlePhase() const
 {
-    const auto* Animation = Body->GetSingleNodeInstance();
-    return Animation ? TOptional<float>(Animation->GetCurrentTime()) : TOptional<float>();
+    const auto* Character = Subject.Get();
+    const auto* Idle = Character ? Character->GetIdleAnimation() : nullptr;
+    if (!Idle || Idle->GetPlayLength() <= 0) return {};
+    return FMath::Fmod(StartPhase + AnimatedSeconds, Idle->GetPlayLength());
+}
+
+void AHomesteadMenuPortrait::FollowSubject()
+{
+    if (const auto* Character = Subject.Get())
+        SetActorLocationAndRotation(Character->GetActorLocation(),
+            FRotator(0, Character->GetActorRotation().Yaw + Yaw, 0));
 }
 
 void AHomesteadMenuPortrait::UpdateCaptureFraming()
 {
-    if (!Target || SubjectExtent.Z <= 0) return;
+    if (!ColorTarget || SubjectExtent.Z <= 0) return;
     const float HalfFov = FMath::DegreesToRadians(Capture->FOVAngle * 0.5f);
-    const double Aspect = static_cast<double>(Target->SizeX) / Target->SizeY;
+    const double Aspect = static_cast<double>(ColorTarget->SizeX) / ColorTarget->SizeY;
     const double VerticalTangent = FMath::Tan(HalfFov) / Aspect;
     FVector Center = SubjectCenter;
     double Distance = 0;
@@ -207,13 +209,27 @@ void AHomesteadMenuPortrait::UpdateCaptureFraming()
     }
     else
     {
-        const double Radius = FVector2D(SubjectExtent.X, SubjectExtent.Y).Size();
-        Distance = FMath::Max(Radius / FMath::Sin(HalfFov),
-            SubjectExtent.Z / VerticalTangent + SubjectExtent.X) * 1.08;
+        // Fit her height; a tool held out to the side may run past the frame edge.
+        Distance = FMath::Max(FMath::Min(SubjectExtent.Y, 45.0) / FMath::Tan(HalfFov),
+            SubjectExtent.Z / VerticalTangent) * 1.05 + FMath::Min(SubjectExtent.X, 45.0);
     }
-    Center = FRotator(0, Yaw, 0).RotateVector(Center);
+    Center.Y = 0;
     Capture->SetRelativeLocation(Center + FVector(Distance, 0, 0));
     Capture->SetRelativeRotation(FRotator(0, 180, 0));
+}
+
+void AHomesteadMenuPortrait::RestoreLighting()
+{
+    for (const auto& Lit : LitParts)
+        if (UPrimitiveComponent* Part = Lit.Key.Get())
+            Part->SetLightingChannels(Lit.Value.bChannel0, Lit.Value.bChannel1, Lit.Value.bChannel2);
+    LitParts.Reset();
+}
+
+void AHomesteadMenuPortrait::EndPlay(const EEndPlayReason::Type Reason)
+{
+    RestoreLighting();
+    Super::EndPlay(Reason);
 }
 
 void AHomesteadMenuPortrait::Tick(float DeltaSeconds)
@@ -223,9 +239,12 @@ void AHomesteadMenuPortrait::Tick(float DeltaSeconds)
         ? Cast<AHomesteadController>(Subject->GetController()) : nullptr;
     const bool bVisible = PC && PC->IsBookOpen()
         && (PC->BookPage() == 0 || PC->BookPage() == 6);
-    if ((bCapturePending || bVisible) && Target)
+    if (bVisible) AnimatedSeconds += DeltaSeconds;
+    if ((bCapturePending || bVisible) && ColorTarget)
     {
+        FollowSubject();
         Capture->CaptureScene();
+        CoverageCapture->CaptureScene();
         bCapturePending = false;
     }
 }
