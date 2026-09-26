@@ -14,6 +14,15 @@ meshes (`Scripts\Environment\build_reed_clumps.py`); their shafts, blades and
 seed heads reuse `M_Field` color instances. The small held Knife is likewise
 project-authored procedural geometry. Neither adds a third-party asset.
 
+The MetaHuman heroine's primitive outfit (`Assets\Characters\PrimitiveOutfit`: homespun tank top
+and low-rise shorts) is project-authored. `Scripts\Blender\Recipes\primitive_outfit.py` models it
+around her MetaHuman body and skins it to `metahuman_base_skel`. The same seeded recipe synthesizes
+every garment texture (weave, slubs, stitching, stains) in numpy, so it uses no scanned or
+downloaded texture. The body and face meshes in `PrimitiveOutfit.blend` are the heroine's
+MetaHuman assets (Unreal Engine EULA) and are included only for fitting and review. Only the
+review renders use Poly Haven's CC0 `kloofendal_48d_partly_cloudy_puresky` HDRI (Greg Zaal, sky edits by
+Jarod Guest, https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky). It isn't part of the game asset.
+
 ## Music
 
 All music is by **Kevin MacLeod** (incompetech.com), licensed under

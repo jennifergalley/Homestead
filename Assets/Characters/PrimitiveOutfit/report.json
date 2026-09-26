@@ -1,0 +1,399 @@
+{
+ "recipe": "Scripts/Blender/Recipes/primitive_outfit.py",
+ "seed": 20260926,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf"
+ },
+ "landmarks": {
+  "jugular_z": 1.4477414407730103,
+  "shoulder_x": 0.1509849727153778,
+  "navel": [
+   0.0,
+   -0.1257217824459076,
+   1.11
+  ],
+  "navel_dip_mm": 7.048740863800049,
+  "apex": [
+   0.07201766967773438,
+   -0.13629230856895447,
+   1.3172551393508911
+  ],
+  "underbust_z": 1.2592551393508875,
+  "armpit_z": 1.3210744857788086,
+  "neck_x": 0.06,
+  "perineum": [
+   0.0,
+   -0.012500000186264515,
+   0.8593802452087402
+  ],
+  "hip_joint_z": 0.9609218239784241,
+  "height_body_top": 1.7889848947525024
+ },
+ "params": {
+  "SKM_PrimitiveTankTop": {
+   "hem_z": 1.2072551393508875,
+   "ua_z": 1.2990744857788086,
+   "fs_z": 1.392255139350891,
+   "bs_z": 1.3872551393508912,
+   "scoop_z": 1.3572551393508911,
+   "bscoop_z": 1.3422551393508912,
+   "strap_x": 0.10276293717622756,
+   "strap_w": 0.017,
+   "offset": 0.0032
+  },
+  "SKM_PrimitiveShorts": {
+   "waist_front_z": 1.032,
+   "waist_back_rise": 0.036,
+   "junction_z": 0.9043802452087403,
+   "inseam_z": 0.8143802452087402,
+   "outseam_lift": 0.022,
+   "offset": 0.0032
+  }
+ },
+ "garments": {
+  "SKM_PrimitiveTankTop": {
+   "vertices": 7200,
+   "triangles": 14394,
+   "bones_weighted": 24,
+   "accessories": 2
+  },
+  "SKM_PrimitiveShorts": {
+   "vertices": 8820,
+   "triangles": 17593,
+   "bones_weighted": 20,
+   "accessories": 6
+  }
+ },
+ "textures": {
+  "SKM_PrimitiveTankTop": {
+   "texel_uv_per_m": 1.3435797770309883,
+   "textures": {
+    "basecolor": "T_PrimitiveTankTop_basecolor.png",
+    "normal": "T_PrimitiveTankTop_normal.png",
+    "roughness": "T_PrimitiveTankTop_roughness.png",
+    "ao": "T_PrimitiveTankTop_ao.png"
+   },
+   "albedo_max": 0.7400000095367432,
+   "albedo_mean": [
+    0.5931544303894043,
+    0.5593551993370056,
+    0.48651251196861267
+   ],
+   "rough_mean": 0.8880141377449036,
+   "px_per_cm": 55.03302766718928,
+   "resolution": 4096
+  },
+  "SKM_PrimitiveShorts": {
+   "texel_uv_per_m": 1.3982381690749088,
+   "textures": {
+    "basecolor": "T_PrimitiveShorts_basecolor.png",
+    "normal": "T_PrimitiveShorts_normal.png",
+    "roughness": "T_PrimitiveShorts_roughness.png",
+    "ao": "T_PrimitiveShorts_ao.png"
+   },
+   "albedo_max": 0.5892110466957092,
+   "albedo_mean": [
+    0.47455519437789917,
+    0.3997562527656555,
+    0.29450663924217224
+   ],
+   "rough_mean": 0.8884769082069397,
+   "px_per_cm": 57.271835405308266,
+   "resolution": 4096
+  },
+  "detail": {
+   "normal": "T_HomespunWeave_Detail_normal.png",
+   "roughness": "T_HomespunWeave_Detail_roughness.png",
+   "tone": "T_HomespunWeave_Detail_tone.png"
+  }
+ },
+ "bind_pose": {
+  "SKM_PrimitiveTankTop": {
+   "verts": 7200,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_PrimitiveShorts": {
+   "verts": 8820,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  }
+ },
+ "test_poses": {
+  "bend_forward_60": {
+   "SKM_PrimitiveTankTop": {
+    "verts": 7200,
+    "inside": 1,
+    "inside_pct": 0.013888888888888888,
+    "inside_near_edge": 1,
+    "max_depth_mm": 0.5714681912634296,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_PrimitiveShorts": {
+    "verts": 8820,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   }
+  },
+  "twist_45": {
+   "SKM_PrimitiveTankTop": {
+    "verts": 7200,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_PrimitiveShorts": {
+    "verts": 8820,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   }
+  },
+  "arms_overhead": {
+   "SKM_PrimitiveTankTop": {
+    "verts": 7200,
+    "inside": 53,
+    "inside_pct": 0.736111111111111,
+    "inside_near_edge": 53,
+    "max_depth_mm": 3.3405374365011307,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_PrimitiveShorts": {
+    "verts": 8820,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   }
+  },
+  "kneel_left_forward": {
+   "SKM_PrimitiveTankTop": {
+    "verts": 7200,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_PrimitiveShorts": {
+    "verts": 8820,
+    "inside": 32,
+    "inside_pct": 0.36281179138321995,
+    "inside_near_edge": 7,
+    "max_depth_mm": 5.781516530909124,
+    "p99_depth_mm": 0.0
+   }
+  },
+  "squat": {
+   "SKM_PrimitiveTankTop": {
+    "verts": 7200,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_PrimitiveShorts": {
+    "verts": 8820,
+    "inside": 723,
+    "inside_pct": 8.197278911564625,
+    "inside_near_edge": 383,
+    "max_depth_mm": 7.856077603616677,
+    "p99_depth_mm": 5.125205511276353
+   }
+  }
+ },
+ "exports": {
+  "SKM_PrimitiveTankTop": {
+   "file": "SKM_PrimitiveTankTop.fbx",
+   "bones": 32,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r"
+   ]
+  },
+  "SKM_PrimitiveShorts": {
+   "file": "SKM_PrimitiveShorts.fbx",
+   "bones": 28,
+   "bone_names": [
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twistCor_02_l",
+    "thigh_twistCor_02_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thigh_twist_02_l",
+    "thigh_twist_02_r"
+   ]
+  },
+  "SKM_PrimitiveOutfit": {
+   "file": "SKM_PrimitiveOutfit.fbx",
+   "bones": 56,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twistCor_02_l",
+    "thigh_twistCor_02_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thigh_twist_02_l",
+    "thigh_twist_02_r",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r"
+   ]
+  }
+ },
+ "coverage": {
+  "resolution": 2048,
+  "uv_channel": 0,
+  "uv_name": "DiffuseUV",
+  "udim_u_offset": 1.0,
+  "covered_triangles": 4701,
+  "total_triangles": 60816,
+  "covered_vertices": 2703,
+  "per_garment_triangles": {
+   "SKM_PrimitiveTankTop": 1982,
+   "SKM_PrimitiveShorts": 2719
+  },
+  "margin_m": 0.012
+ },
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0, raw cm values like the UE export)",
+  "axes": "Z up, -Y forward (FBX UpAxis Z, FrontAxis -Y), same as input",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "smoothing": "FACE",
+  "tangents": true
+ },
+ "files": {
+  "SKM_PrimitiveOutfit.fbx": "ed20483e0712b0eb67fa48351acdec1d34e9754d2f9942eea8045cf1ff8ddbd6",
+  "SKM_PrimitiveShorts.fbx": "2e9b5357e74e7c5fa819e8a4d8b1a3358ff1550f1fd0c68f02b6f5a186dc11e0",
+  "SKM_PrimitiveTankTop.fbx": "328705e2a42b334c8f6bfa02cabe159f809e7ebd5970d6a0dc90583042a05997",
+  "Textures/T_HomespunWeave_Detail_normal.png": "dd8232b4adb7014c0419ca9defdd11f877dbc2ade60564ddc045f25d0359771a",
+  "Textures/T_HomespunWeave_Detail_roughness.png": "ae0440440a9c10319885ef49c32b862fca87edbdd7135aef3a21c8e47fb25960",
+  "Textures/T_HomespunWeave_Detail_tone.png": "4c9b36ca35f9835ab2567cc7d6fef1ce8f6ddfc3db3709ecfa2a7d0d8044e010",
+  "Textures/T_PrimitiveShorts_ao.png": "cb8dc74115dfc2ca08fb76c95e6370293f17f685d8aaff631669b0d659e775a6",
+  "Textures/T_PrimitiveShorts_basecolor.png": "35ebf676e58609dea95e9195445b2ac9c44e6f1ccec474f082e2890efec3da71",
+  "Textures/T_PrimitiveShorts_normal.png": "2c3e3b3f918cb327dc6276f4eb570b168d2e92136b6805ab052eba20493429ce",
+  "Textures/T_PrimitiveShorts_roughness.png": "c063ec7d205fecd2f350283fec9b9f536e6f3009dd0f766c0eaf0177bae01dcc",
+  "Textures/T_PrimitiveTankTop_ao.png": "c55ee080671b47f3365ea3d8abb8ca9c5127cc5b2a2c1b3b703056467781f088",
+  "Textures/T_PrimitiveTankTop_basecolor.png": "6cb40004cf113c4cc9303b7e8931fdfca9a9d92c2852e77a0caa29806bb4d35b",
+  "Textures/T_PrimitiveTankTop_normal.png": "30445c016c21c943127b884dbb96d952b567fedbff3bebbafde0601df6c2c0ad",
+  "Textures/T_PrimitiveTankTop_roughness.png": "f6b9a0e30eed11821f36063284f0c832cc8199f127c100aadcbcdfaa2a39acce",
+  "BodyCoverageMask.png": "fd16d32eabd73a242387dec88fb2b7434af59f0fff042aab94e50fe84edfa738"
+ }
+}
