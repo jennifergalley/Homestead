@@ -15,6 +15,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/IConsoleManager.h"
 #include "HomesteadWorld.h"
+#include "HomesteadLab.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
@@ -320,7 +321,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         FAnimInstanceProxy::PreUpdate(Instance, DeltaSeconds);
         const auto* Avatar = Cast<AHomesteadCharacter>(Instance->TryGetPawnOwner());
         const auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
-        const float Speed = Avatar && PC && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
+        const bool Lab = Avatar && !PC && Avatar->InCharacterLab();
+        const float Speed = Avatar && (Lab || (PC && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()))
             ? Avatar->GetVelocity().Size2D() : 0.0f;
         if (bTrialFootLock)
         {
@@ -415,7 +417,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             DeltaSeconds, 1.0f / 0.16f);
         const float Target = FMath::Clamp(Speed / 35.0f, 0.0f, 1.0f);
         Blend.Alpha = FMath::FInterpConstantTo(Blend.Alpha, Target, DeltaSeconds, 1.0f / 0.20f);
-        const bool Blocked = !Avatar || !PC || PC->IsBookOpen() || PC->IsPlanning() || PC->IsFailed()
+        const bool Blocked = !Avatar || (!Lab && (!PC || PC->IsBookOpen() || PC->IsPlanning() || PC->IsFailed()))
             || Avatar->GetVelocity().Size2D() > 5
             || !Avatar->GetCharacterMovement()->IsMovingOnGround()
             || !Avatar->GetPendingMovementInputVector().IsNearlyZero()
@@ -468,8 +470,10 @@ void UHomesteadFootstepNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeq
     const auto* Avatar = MeshComp ? Cast<AHomesteadCharacter>(MeshComp->GetOwner()) : nullptr;
     const auto* Anim = MeshComp ? Cast<UHomesteadAnimInstance>(MeshComp->GetAnimInstance()) : nullptr;
     auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
-    if (!PC || !Anim || (bRun ? Anim->SprintWeight() : Anim->WalkWeight()) < 0.5f) return;
-    PC->PlayFootstep(bLeftFoot, bRun);
+    auto* Lab = Avatar ? Cast<AHomesteadLabController>(Avatar->GetController()) : nullptr;
+    if ((!PC && !Lab) || !Anim || (bRun ? Anim->SprintWeight() : Anim->WalkWeight()) < 0.5f) return;
+    if (PC) PC->PlayFootstep(bLeftFoot, bRun);
+    else Lab->PlayFootstep(bLeftFoot, bRun);
 }
 
 void UHomesteadAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* Proxy)

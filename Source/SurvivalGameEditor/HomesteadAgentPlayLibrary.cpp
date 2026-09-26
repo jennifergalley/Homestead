@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "HomesteadController.h"
+#include "HomesteadLab.h"
 #include "InputCoreTypes.h"
 #include "InputKeyEventArgs.h"
 #include "Serialization/JsonSerializer.h"
@@ -244,6 +245,7 @@ FString UHomesteadAgentPlayLibrary::GetPlayState(int32 NearbyCount, float Radius
     const TSharedRef<FJsonObject> Root = MakeShared<FJsonObject>();
     APlayerController* PC = PlayController();
     Root->SetBoolField(TEXT("pie"), PC != nullptr);
+    Root->SetBoolField(TEXT("characterLab"), PC && PC->IsA<AHomesteadLabController>());
     AHomesteadController* HC = Cast<AHomesteadController>(PC);
     if (HC)
     {

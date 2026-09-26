@@ -52,6 +52,8 @@ public:
     // -HomesteadLegacyHeroine, or smoke/automation tests (their wardrobe contracts cover the legacy stack).
     static bool UsesMetaHumanHeroine();
     bool IsMetaHumanActive() const { return bMetaHumanActive; }
+    // Possessed by the character lab controller: no simulation, so movement is never gated by it.
+    bool InCharacterLab() const;
     float WalkSpeed() const { return bMetaHumanActive ? 210.0f : 180.0f; }
     float SprintSpeed() const { return bMetaHumanActive ? 480.0f : 300.0f; }
     // Ground speed (cm/s) each locomotion clip covers at play rate 1, so play rate follows speed.

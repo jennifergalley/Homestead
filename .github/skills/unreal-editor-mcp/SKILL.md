@@ -196,6 +196,36 @@ mcp $E CaptureViewport '{"captureTransform":null,"annotations":null,"bShowUI":fa
 mcp 'LiveCodingToolset.LiveCodingToolset' CompileLiveCoding    # hot-patch C++ function bodies into the running editor/PIE
 ```
 
+### Character lab (model and animation iteration)
+
+An endless flat grid floor with the real heroine: the same character, camera, input, anim graph and
+foot placement, but no simulation, woodland, menus or saves. It doesn't touch Jenny's saves.
+
+- PIE: `py "unreal.SystemLibrary.execute_console_command(None, 'homestead.CharacterLab 1')"`,
+  then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
+  `-HomesteadCharacterLab`.
+- `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
+- Console (use `execute_console_command(world, ...)`): `LabAction Gather|Water|Chop|Knife|Till`,
+  `LabSun <hour>`, `LabCourse` (10/20/30° ramps and 10/20 cm steps at x = 2500),
+  `LabTeleport <x> <y>`, `slomo 0.25`, `homestead.FootPlacement 0|1`.
+- The HUD shows speed, gait/action weights, foot placement state, frame time and sun hour.
+
+### Author an animation with the MetaHuman Control Rig
+
+`homestead_agent.rig_authoring.Session` builds a level sequence with the heroine body and her
+`MetaHuman_ControlRig`, keys controls, and bakes an AnimSequence. Details that cost time to find:
+
+- `ControlRigSequencerLibrary.set_local_control_rig_*` doesn't key from Python here. Write the
+  section channels directly (`control.Location.X`, `control.Rotation.X` = roll/Y = pitch/Z = yaw);
+  the Session helpers do this.
+- Evaluate the sequence once before reading offsets
+  (`LevelSequenceEditorBlueprintLibrary.set_current_time`). Until then the hierarchy reports the
+  rig's default skeleton, and `get_control_rig_world_transform` can return zeros.
+- Arms need `arm_*_fk_ik_switch` = True for IK; legs are IK with the switch False.
+- Spine controls: `roll` bends forward, `pitch` bends sideways, `yaw` twists.
+- Bake with `SequencerTools.export_anim_sequence`; the AnimSequence factory needs
+  `target_skeleton` set, or creation fails.
+
 ### Record a playtest video and measure motion
 
 `CaptureEditorImage` is one still. To see motion (gait, wobble, shadow crawl), record the PIE

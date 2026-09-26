@@ -29,6 +29,7 @@
 #include "GroomAsset.h"
 #include "GroomBindingAsset.h"
 #include "HAL/IConsoleManager.h"
+#include "HomesteadLab.h"
 
 namespace
 {
@@ -133,6 +134,8 @@ void AHomesteadCharacter::BeginPlay()
     {
         if (auto* PC = Cast<AHomesteadController>(Controller))
             ApplyAppearance(PC->GetAppearance());
+        else if (InCharacterLab())
+            ApplyAppearance(FHomesteadAppearance());
     }
     CreateMappings();
     if (APlayerController* PC = Cast<APlayerController>(Controller))
@@ -603,19 +606,20 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     auto* PC = Cast<AHomesteadController>(Controller);
+    const bool Lab = !PC && InCharacterLab();
     auto* Movement = GetCharacterMovement();
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
-    const bool Blocked = !PC || !PC->IsWorldReady() || PC->IsBookOpen()
-        || PC->IsPlanning() || PC->IsFailed() || bPlanning || bAppearancePreview
+    const bool Blocked = (Lab ? false : !PC || !PC->IsWorldReady() || PC->IsBookOpen()
+        || PC->IsPlanning() || PC->IsFailed()) || bPlanning || bAppearancePreview
         || !Movement->IsMovingOnGround() || !bHeroineReady
         || (Animation && Animation->ActionWeight() > 0.01f);
     if (Blocked) CancelSprint();
     const bool Moving = Movement->GetCurrentAcceleration().SizeSquared2D() > 1.0f
         && GetVelocity().SizeSquared2D() > 144.0f;
     bSprintActive = bSprintHeld && !Blocked && Moving
-        && PC->State().energy > 10.0 && SprintAnimation != nullptr;
+        && (Lab || PC->State().energy > 10.0) && SprintAnimation != nullptr;
     Movement->MaxWalkSpeed = bSprintActive ? SprintSpeed() : WalkSpeed();
-    if (bSprintActive)
+    if (bSprintActive && !Lab)
     {
         const auto Result = PC->SpendSprintEnergy(DeltaSeconds);
         if (!Result.ok || PC->State().energy <= 10.0)
@@ -860,10 +864,11 @@ void AHomesteadCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void AHomesteadCharacter::Move(const FInputActionValue& Value)
 {
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
-    if (!PC || !PC->IsWorldReady() || PC->IsBookOpen() || PC->IsFailed()) return;
+    if (!PC && !InCharacterLab()) return;
+    if (PC && (!PC->IsWorldReady() || PC->IsBookOpen() || PC->IsFailed())) return;
     const FVector2D Axis = Value.Get<FVector2D>();
     if (!Axis.IsNearlyZero()) CancelAction();
-    if (bPlanning)
+    if (bPlanning && PC)
     {
         PC->NudgePlacement(Axis);
         return;
@@ -876,8 +881,8 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
 void AHomesteadCharacter::BeginSprint(const FInputActionValue&)
 {
     const auto* PC = Cast<AHomesteadController>(Controller);
-    bSprintHeld = PC && PC->IsWorldReady() && !PC->IsBookOpen()
-        && !PC->IsPlanning() && !PC->IsFailed();
+    bSprintHeld = PC ? PC->IsWorldReady() && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
+        : InCharacterLab();
 }
 
 void AHomesteadCharacter::EndSprint(const FInputActionValue&)
@@ -895,6 +900,12 @@ void AHomesteadCharacter::CancelSprint()
 void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)
 {
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
+    if (!PC && InCharacterLab())
+    {
+        AddControllerYawInput(Value.X * Scale);
+        AddControllerPitchInput(Value.Y * Scale);
+        return;
+    }
     if (!PC || (PC->IsBookOpen() && PC->BookPage() != 6) || PC->IsFailed()) return;
     AddControllerYawInput(Value.X * Scale * PC->Sensitivity);
     AddControllerPitchInput(Value.Y * Scale * PC->Sensitivity * (PC->bInvertY ? -1.0f : 1.0f));
@@ -976,6 +987,11 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
     Camera->PostProcessSettings.bOverride_AutoExposureBias = true;
     Camera->PostProcessSettings.AutoExposureBias =
         GameController && GameController->Simulation().IsNight() ? 0.5f : 0.0f;
+}
+
+bool AHomesteadCharacter::InCharacterLab() const
+{
+    return Controller && Controller->IsA<AHomesteadLabController>();
 }
 
 FRotator AHomesteadCharacter::GameplayViewRotation() const

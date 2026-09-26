@@ -105,6 +105,13 @@ if ($Package) {
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive
     $credits = Join-Path $packageRoot 'asset-credits.md'
     Copy-Item -LiteralPath (Join-Path $root 'docs\asset-credits.md') -Destination $credits -Force
+    # Discord recognises "SurvivalGame" executables as the Steam game Outpost Zero. Players launch a
+    # hard link with Homestead's own name instead (same file, no extra disk); scripts and tests keep
+    # using SurvivalGame.exe.
+    $binary = Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+    $playerExe = Join-Path $packageRoot 'SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe'
+    if (Test-Path -LiteralPath $playerExe) { Remove-Item -LiteralPath $playerExe -Force }
+    $null = New-Item -ItemType HardLink -Path $playerExe -Target $binary
     [ordered]@{
         packagedUtc = [DateTimeOffset]::UtcNow.ToString('o')
         engineRoot = $engine
@@ -116,7 +123,7 @@ if ($Package) {
     if ($packageRoot -ne $archive) {
         Copy-Item -LiteralPath (Join-Path $archive 'build-receipt.json') -Destination (Join-Path $packageRoot 'build-receipt.json') -Force
     }
-    Write-Host "Packaged game: $packageRoot. Credits are included."
+    Write-Host "Packaged game: $packageRoot. Credits are included. Players launch $playerExe."
 }
 else {
     Write-Host 'Editor target and content are built. Run Scripts\Start-Game.ps1.'
