@@ -166,7 +166,8 @@ def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, rou
     """Stripped/seasoned wood: fine long grain along Z, growth-ring banding,
     long tonal streaks, pores, optional grey weathering and dark handling grime.
     ``polish`` burnishes a band of part-local Z (``polish_center`` +- ``polish_length``)
-    darker and glossier, as where a hand has gripped a tool handle for years."""
+    darker and glossier, as where a hand has gripped a tool handle for years.
+    ``polish_center`` may be a list for tools held with two hands (one band per grip)."""
     g = Graph(name)
     p = g.coord((1.0, 1.0, 1.0))
     x, y, z = g.separate(p)
@@ -192,7 +193,11 @@ def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, rou
     pores = g.noise(stretched, scale=38.0, detail=2.0).outputs["Fac"]
     rough = g.remap(fibres, 0.3, 0.7, roughness - 0.08, roughness + 0.1)
     if polish:
-        worn = g.math("ABSOLUTE", g.math("SUBTRACT", z, polish_center))
+        centres = polish_center if isinstance(polish_center, (list, tuple)) else (polish_center,)
+        worn = None
+        for centre in centres:
+            distance = g.math("ABSOLUTE", g.math("SUBTRACT", z, centre))
+            worn = distance if worn is None else g.math("MINIMUM", worn, distance)
         wobble = g.noise(p, scale=14.0, detail=3.0).outputs["Fac"]
         worn = g.math("ADD", worn, g.math("MULTIPLY", g.math("SUBTRACT", wobble, 0.5), polish_length * 0.6))
         mask = g.remap(worn, polish_length, polish_length * 0.25, 0.0, polish)

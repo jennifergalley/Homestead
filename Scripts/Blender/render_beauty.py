@@ -43,7 +43,9 @@ def main():
                                    pose=review.get("pose", (0, 0, 0)), focus=review.get("focus"),
                                    views=tuple(args.view or review.get("views", ("hero", "detail"))),
                                    ground=review.get("ground", "lowest"),
-                                   eye_distance=review.get("eye_distance"))
+                                   eye_distance=review.get("eye_distance"),
+                                   detail_distance=review.get("detail_distance"),
+                                   detail_fstop=review.get("detail_fstop", 22.0))
         result["views"] = {view: Path(p).name for view, p in result["views"].items()}
         if args.prefix == "beauty":
             report["meshes"][name]["beauty"] = result

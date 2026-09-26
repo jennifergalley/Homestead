@@ -163,12 +163,21 @@ for leaves.
 - `brass`: polished high points and tarnished recesses.
 - `leather`: grain, creases, grime and stains.
 
-`wood` also takes `polish` / `polish_center` / `polish_length` (a worn band where the hand grips) and `relief`. Recipes built from scratch with these include
+`wood` also takes `polish` / `polish_center` / `polish_length` (a worn band where the hand grips;
+`polish_center` may be a list for two-handed tools) and `relief`. Recipes built from scratch with these include
 `flint_axe.py`, `machete.py`, `forage_pouch.py` (pivot at the top of the hanging loop),
 `cord_belt.py`, and the forage props `berry_cluster.py`, `wild_root.py` and `berry_bush_produce.py`.
 The forage props use `blackberry` (packed glossy drupelets), `leaf_pcoord` (the leaf material
 driven by pcoord, so it survives the bake repack), `root` and `soil`. `berry_bush_produce.py`
-reuses the berry builders by loading `berry_cluster.py` beside it.
+reuses the berry builders by loading `berry_cluster.py` beside it. `seeds.py` builds the planting
+props: `SM_Seeds`, a pinch of four tepary beans (pivot at the cluster centre), and
+`SM_SoilMound` (+ `_LOD1`), a covered-seed loose-loam mound with a fingertip press (pivot at the
+bottom centre, rim sunk 3 mm).
+
+**The baked material inherits the largest Subsurface Weight** of the recipe's source materials,
+with Principled's default ~5 cm red-biased radius, across the whole mesh. `flint` (0.08) and
+`rawhide` (0.15) set one. For opaque sets, zero it on every material before baking, as
+`stone_hoe.py` does; otherwise thin edges glow and dark stone turns maroon.
 
 **Hand-held hotbar tools.** `flint_knife.py`, `digging_stick.py`, `water_pail.py` and
 `flint_hatchet.py` are authored in their attach frame, not bottom-centre: the origin is the
@@ -181,6 +190,14 @@ below its bail grip, with its spout toward +X.
   70k). It loads the axe's shape functions with `importlib`, lowers the tessellation, and moves
   the flake-scar ridges into the bake with `add_scar_bump`. Its `REPORT["attach"]` gives cm
   offsets from the pivot to the upper-hand choke, the edge centre, the butt and the haft top.
+- `stone_hoe.py` is the two-handed tilling tool (replaces the digging stick): a knapped chert
+  blade rawhide-lashed at 75 degrees into the natural crook of an elbow haft (a sapling that
+  grew from a thicker limb, the limb cut into a foot and heel). Its pivot is the right-hand grip
+  a third of the way down the 125 cm haft; the blade is at the -Z end pointing -Y.
+  `REPORT["attach"]` gives cm offsets to the left-hand grip (upper choke), the edge centre, the
+  bit corners, the haft top, the crook and the blade end (the head's lowest point). It lays its
+  own UVs (`BAKE["repack"] = False`): the haft is cut into four cylindrical islands so the long
+  tube doesn't pack as one diagonal sliver, and the blade and lashing get 1.6x texel density.
 - `flint_knife.py` reuses `add_scar_bump` by loading `flint_hatchet.py`.
 - `digging_stick.py` layers fire-hardening onto `wood` by arclength (`char_overlay`).
 - `water_pail.py` adds wet-wood (`wet_overlay`) and adze-facet (`adze_marks`) overlays.
@@ -188,7 +205,10 @@ below its bail grip, with its spout toward +X.
   There is no separate water material slot.
 
 **Review pose.** `BEAUTY["pose"]` rotates the asset for review only; tools lie on the ground.
-`BEAUTY["focus"]` aims the 85 mm detail camera at an authoring-space point.
+`BEAUTY["focus"]` aims the 85 mm detail camera at an authoring-space point. For tiny props
+(`seeds.py`), `BEAUTY["detail_distance"]` (m) moves the detail camera in closer than its 0.35 m
+floor, and `BEAUTY["detail_fstop"]` stops the aperture down so a macro close-up keeps its depth
+in focus. The near clip scales with the camera distance.
 
 **Art-director loop.** After every build, view `beauty_*_hero.png` and `_detail.png` and list
 what reads fake, then fix it and rebuild. The axe took seven passes:

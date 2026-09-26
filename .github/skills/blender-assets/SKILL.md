@@ -86,6 +86,16 @@ before each pass.
   spikes in concave creases. Cluster stones remesh separately (`union=False`) or they fuse into puddles.
   Measure baked albedo instead of trusting a sunlit render: granite at 0.3 linear already looks white in sun;
   add metre-scale variation (lichen film, streaks), not darkness.
+- **Diagnose with the baked maps.** When something reads wrong (a pale glow, a colour cast), open the
+  `T_<Name>_*` PNGs and ray-cast the render pixel to its UV before tweaking colours. The StoneHoe's "maroon,
+  glowing" blade was the bake giving the whole mesh flint's Subsurface Weight with a 5 cm radius. Zero
+  subsurface on opaque sets.
+- **UV packing of long parts.** A 1.2 m haft packs as a diagonal sliver and starves every other part of texels.
+  Lay tube UVs yourself in segments and use `BAKE["repack"] = False` (`stone_hoe.py`), and inspect the basecolor
+  atlas once per new asset.
+- **Knapped stone.** Uniform Voronoi scars read as crumpled paper or turtle shell. Scars are struck from the
+  edges, so elongate the cells across the blade and keep them few and broad. Soil-worn chert is waxy
+  (roughness ~0.45); only the use-polished bit is glossy.
 
 ## Rules
 
