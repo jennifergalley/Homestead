@@ -38,6 +38,8 @@ public:
     // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip). At rest the
     // wrist deviates CarryDegrees toward the pinky so the tool's head hangs down and forward.
     void SetRightHandGrip(float Alpha, float CarryDegrees = 46.0f);
+    // Closes the left hand (0-1) outside felling, e.g. on a bunch of reed stems.
+    void SetLeftHandGrip(float Alpha);
     void CancelAction(bool Immediate = false);
     float GatherWeight() const;
     float GatherPhase() const;

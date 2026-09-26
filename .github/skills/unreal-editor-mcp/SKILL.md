@@ -295,6 +295,18 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   two-pass bake keyed in the pelvis frame): each pickup is pinched in the right hand and slipped
   into the hip pouch at `POUCH_OPENING`. Pick/stow frames live in `POUCH_EVENTS` and must match
   `GatherPouchTiming` in `HomesteadCharacter.cpp`.
+- `LabAction Reeds` (and `LabProp Reeds`) plays `AN_HeroineMH_KneelCutReeds` (`kneel_reeds.py`,
+  `kr.report()` prints the left fist and blade middle against the stems): she kneels, closes her
+  left fist on the stems 40 cm up, saws through them just below it with the flint knife (blade out
+  of the thumb side, edge toward the stems), then rises holding the cut bundle (`CarriedReeds`, the
+  clump mesh narrowed) in her left fist. The knife shows in her right hand throughout with the
+  wrist carry off; the left hand closes through `SetLeftHandGrip`. `EVENTS` must match
+  `GatherReedsTiming`. The stems stand at `kneel_reeds.STEMS` (34 cm ahead, 10 cm to her right,
+  clear of the forward knee); the C++ settle uses the same offsets. The arms can't reach lower
+  than about 30 cm while kneeling, so keep grasp and cut heights around there.
+- Never bake a clip while PIE is running: the bake opens a hidden "Overwrite Existing Object"
+  modal behind the PIE window that doesn't take input and blocks MCP. Stop PIE first; if it
+  happens anyway, `Stop-Process` the editor by PID and restart it.
 - `LabAction Machete` plays `AN_HeroineMH_MacheteHack` (`machete_hack.py`): a wide overhead
   forehand, then a backhand, with the Blender `SM_Machete` in her right hand. The rig's finger
   controls don't key usefully, so the fist is built at runtime in `FHandGrip`

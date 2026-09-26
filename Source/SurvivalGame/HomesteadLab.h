@@ -38,7 +38,7 @@ public:
     static constexpr float CourseX = 2500.0f;
 
     // Test props on the floor, built from the same meshes and layout as the woodland's resources.
-    enum class EProp { None, Sticks, Stones, Berries, Roots };
+    enum class EProp { None, Sticks, Stones, Berries, Roots, Reeds };
     void PlaceProp(EProp Kind, FVector2D At);
     EProp PropKind() const { return Prop; }
     FVector2D PropLocation() const { return PropAt; }

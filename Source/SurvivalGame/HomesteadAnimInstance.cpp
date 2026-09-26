@@ -310,6 +310,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FHandGrip Grip;
     // Closes the left hand on the axe haft while felling.
     FHandGrip LeftGrip{true};
+    float LeftGripAlpha = 0;
+    float LeftGripTarget = 0;
     // Closes her right fingers on a bite of food while she eats.
     FHandGrip Pinch;
     float GripAlpha = 0;
@@ -593,7 +595,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         GripCarry = GripAlpha < 0.01f ? GripCarryTarget : FMath::FInterpConstantTo(GripCarry, GripCarryTarget, DeltaSeconds, 180.0f);
         Grip.CarryDeviation = GripCarry;
         Grip.Carry = Active == EHandAction::Machete || Active == EHandAction::Fell ? 1.0f - ActionBlend.Alpha : 1.0f;
-        LeftGrip.Alpha = Active == EHandAction::Fell ? ActionBlend.Alpha : 0.0f;
+        LeftGripAlpha = FMath::FInterpConstantTo(LeftGripAlpha, LeftGripTarget, DeltaSeconds, 1.0f / 0.15f);
+        LeftGrip.Alpha = FMath::Max(Active == EHandAction::Fell ? ActionBlend.Alpha : 0.0f, LeftGripAlpha);
         UpdateEating(DeltaSeconds);
     }
 
@@ -824,6 +827,11 @@ void UHomesteadAnimInstance::SetRightHandGrip(float Alpha, float CarryDegrees)
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     Proxy.GripTarget = FMath::Clamp(Alpha, 0.0f, 1.0f);
     Proxy.GripCarryTarget = FMath::Clamp(CarryDegrees, -30.0f, 75.0f);
+}
+
+void UHomesteadAnimInstance::SetLeftHandGrip(float Alpha)
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().LeftGripTarget = FMath::Clamp(Alpha, 0.0f, 1.0f);
 }
 
 float UHomesteadAnimInstance::ClearWeight() const

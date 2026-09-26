@@ -1630,7 +1630,19 @@ void AHomesteadController::Interact()
         NotifyResourceAction(Result, bFell ? nullptr : Tree ? WoodTapB.Get() : GrassStepA.Get());
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                if (Reeds) Avatar->PlayKnifeCut(ActionTarget);
+                if (Reeds)
+                {
+                    // Kneel, gather the stems in her left fist and saw them free with the knife.
+                    if (Avatar->PlayKneelGather(EHomesteadKneelGather::Reeds, FVector2D(ActionTarget.x, ActionTarget.y)) && Landscape)
+                    {
+                        Landscape->HoldProduce(FocusId);
+                        HeldStickPile = FocusId;
+                        HeldStickPileSince = GetWorld()->GetTimeSeconds();
+                        HeldPartsFirst = 0;
+                        HeldPartsCount = 1;
+                    }
+                    else if (!Avatar->IsCuttingReeds()) Avatar->PlayKnifeCut(ActionTarget);
+                }
                 else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
                     || Kind == Homestead::ResourceKind::BerryBush)
                 {

@@ -421,6 +421,15 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     UStaticMesh* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
     CarriedForage = MakeProp(TEXT("CarriedForage"), ForageBerryMesh ? ForageBerryMesh.Get() : Sphere);
     EatenFood = MakeProp(TEXT("EatenFood"), ForageBerryMesh ? ForageBerryMesh.Get() : Sphere);
+    // Optional: authored with homestead_agent.kneel_reeds; without it reeds use the standing knife cut.
+    GatherReedsAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelCutReeds"));
+    if (GatherReedsAnimation && GatherReedsAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        GatherReedsAnimation = nullptr;
+    if (UStaticMesh* Reeds = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Reeds/SM_ReedClump.SM_ReedClump")))
+    {
+        CarriedReeds = MakeProp(TEXT("CarriedReeds"), Reeds);
+        CarriedReeds->SetCastShadow(true);
+    }
     // Optional: authored with homestead_agent.eat_berry.
     EatAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Eat"));
     if (EatAnimation && EatAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
@@ -916,11 +925,14 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
     KneelKind = Kind;
     bForageBerries = bBerries;
     const bool bPropsReady = Kind == EHomesteadKneelGather::Sticks ? CarriedSticks.Num() >= 2
-        : Kind == EHomesteadKneelGather::Stones ? CarriedStones.Num() >= 2 : CarriedForage != nullptr;
+        : Kind == EHomesteadKneelGather::Stones ? CarriedStones.Num() >= 2
+        : Kind == EHomesteadKneelGather::Reeds ? CarriedReeds && GetHeldProp(Homestead::Item::Knife)
+        : CarriedForage != nullptr;
     if (!GetGatherSticksAnimation() || !bPropsReady || !Animation)
     {
+        const bool bReeds = Kind == EHomesteadKneelGather::Reeds;
         KneelKind = EHomesteadKneelGather::Sticks;
-        PlayGather();
+        if (!bReeds) PlayGather();
         return false;
     }
     if (Kind == EHomesteadKneelGather::Pouch)
@@ -945,9 +957,11 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
     StickAlignRemaining = 0;
     if (Pile)
     {
-        // Her right hand picks both sticks up about 32 cm ahead and 26 cm to her right. Turn and
-        // settle her during the first step so that spot lands on the pile.
-        constexpr float GrabForward = 32.0f, GrabRight = 26.0f;
+        // Her right hand picks both sticks up about 32 cm ahead and 26 cm to her right; reed stems
+        // are gathered 34 cm ahead and 10 cm to her right, beside the forward knee (kneel_reeds.STEMS). Turn and settle her during the
+        // first step so that spot lands on the pile.
+        const bool bReeds = Kind == EHomesteadKneelGather::Reeds;
+        const float GrabForward = bReeds ? 34.0f : 32.0f, GrabRight = bReeds ? 10.0f : 26.0f;
         const FVector Here = GetActorLocation();
         const FVector2D ToPile = *Pile - FVector2D(Here);
         if (ToPile.Size() > 1.0f && ToPile.Size() < 150.0f)
@@ -1003,20 +1017,37 @@ namespace GatherPouchTiming
 {
 constexpr float Pick1 = 36.0f / 30.0f, Stow1 = 56.0f / 30.0f, Pick2 = 74.0f / 30.0f, Stow2 = 94.0f / 30.0f;
 }
+// Moments in AN_HeroineMH_KneelCutReeds (seconds; homestead_agent.kneel_reeds EVENTS): her left
+// fist closes on the stems, the knife cuts them free.
+namespace GatherReedsTiming
+{
+constexpr float Grab = 38.0f / 30.0f, Cut = 72.0f / 30.0f;
+}
+
+bool AHomesteadCharacter::IsCuttingReeds() const
+{
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    return KneelKind == EHomesteadKneelGather::Reeds && Animation && Animation->IsGatheringSticks();
+}
 
 void AHomesteadCharacter::UpdateCarriedSticks()
 {
     const bool bPouch = KneelKind == EHomesteadKneelGather::Pouch;
     const bool bStones = KneelKind == EHomesteadKneelGather::Stones;
+    const bool bReeds = KneelKind == EHomesteadKneelGather::Reeds;
     const auto& Props = bStones ? CarriedStones : CarriedSticks;
-    if (bPouch ? !CarriedForage : Props.Num() < 2) return;
-    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (bReeds ? !CarriedReeds : bPouch ? !CarriedForage : Props.Num() < 2) return;
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     const bool Active = Animation && Animation->IsGatheringSticks();
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
-    const float Pick1 = bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
-    const float Pick2 = bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
+    // Reeds come off the clump all at once, with the cut.
+    const float Pick1 = bReeds ? GatherReedsTiming::Cut : bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
+    const float Pick2 = bReeds ? GatherReedsTiming::Cut : bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
+    if (bReeds && Animation)
+        Animation->SetLeftHandGrip(Active && Time >= GatherReedsTiming::Grab - 0.1f ? 1.0f : 0.0f);
     int32 Stage = 0;
-    if (bPouch)
+    if (bReeds) Stage = Active && Time >= GatherReedsTiming::Cut ? 1 : 0;
+    else if (bPouch)
     {
         using namespace GatherPouchTiming;
         Stage = !Active ? 0 : Time >= Stow2 ? 4 : Time >= Pick2 ? 3 : Time >= Stow1 ? 2 : Time >= Pick1 ? 1 : 0;
@@ -1052,6 +1083,24 @@ void AHomesteadCharacter::UpdateCarriedSticks()
         Prop->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, Bone);
         Prop->SetVisibility(true);
     };
+    if (bReeds)
+    {
+        if (Stage != 1)
+        {
+            CarriedReeds->SetVisibility(false);
+            return;
+        }
+        // Upright through her left fist: the stems run out of the thumb side, cut ends a hand's
+        // width below it, the clump narrowed to a gathered bunch.
+        const FVector HandL = Body->GetSocketLocation(TEXT("hand_l"));
+        const FVector FingersL = (Body->GetSocketLocation(TEXT("middle_01_l")) - HandL).GetSafeNormal();
+        const FVector UpL = (Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"))).GetSafeNormal();
+        const FVector PalmL = -FVector::CrossProduct(FingersL, UpL).GetSafeNormal();
+        const FVector Fist = HandL + FingersL * 7.0f + PalmL * 3.0f;
+        Put(CarriedReeds, Fist - UpL * 14.0f, FRotationMatrix::MakeFromZX(UpL, FingersL).Rotator(),
+            FVector(0.28f, 0.28f, 0.85f), TEXT("hand_l"), false);
+        return;
+    }
     if (bPouch)
     {
         if (Stage != 1 && Stage != 3)
@@ -1238,6 +1287,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     const bool HandsFree = Animation->ActionWeight() < 0.01f && Animation->EatWeight() < 0.01f;
     const bool Hacking = Animation->MacheteWeight() > 0.01f;
     const bool Felling = Animation->FellWeight() > 0.01f;
+    const bool CuttingReeds = IsCuttingReeds();
     float Grip = 0, Carry = 46;
     if (HeldMachete)
     {
@@ -1250,11 +1300,13 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         UStaticMeshComponent* Prop = HeldProps[Index];
         const FHeldToolSpec& Spec = HeldToolSpecs[Index];
         const bool Held = Spec.Tool == Homestead::Item::Hatchet && Felling
+            || Spec.Tool == Homestead::Item::Knife && CuttingReeds
             || (HandsFree && !Hacking && Presented == Spec.Tool);
         Prop->SetVisibility(Held);
         if (!Held) continue;
         Grip = 1;
-        Carry = Spec.CarryDegrees;
+        // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
+        Carry = CuttingReeds ? 0.0f : Spec.CarryDegrees;
         if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
     }
     if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;

@@ -229,6 +229,11 @@ void AHomesteadLabWorld::PlaceProp(EProp Kind, FVector2D At)
                     AHomesteadCharacter::StonePileSize(I, HandStone != nullptr) / Size, true, HandStone ? nullptr : RockMaterial);
         }
     }
+    else if (Kind == EProp::Reeds)
+    {
+        Add(TEXT("/Game/SurvivalGame/Environment/Reeds/SM_ReedStubble.SM_ReedStubble"), FVector2D::ZeroVector, 0, 1.0f, false);
+        Add(TEXT("/Game/SurvivalGame/Environment/Reeds/SM_ReedClump.SM_ReedClump"), FVector2D::ZeroVector, 0, 1.0f, true);
+    }
     else if (Kind == EProp::Roots)
     {
         const TCHAR* Name = TEXT("SM_Shrub04_a");
@@ -356,13 +361,20 @@ void AHomesteadLabController::LabAction(const FString& Name)
         HeldPartsFirst = Stones ? 1 : 0;
         HeldPartsCount = Berries ? 4 : 1;
     }
+    else if (Name.Equals(TEXT("Reeds"), ESearchCase::IgnoreCase))
+    {
+        if (World && (World->PropKind() != EProp::Reeds || !World->PropIntact())) LabProp(Name);
+        bHoldingStickPile = World && Avatar->PlayKneelGather(EHomesteadKneelGather::Reeds, World->PropLocation());
+        HeldPartsFirst = 0;
+        HeldPartsCount = 1;
+    }
     else if (Name.Equals(TEXT("Water"), ESearchCase::IgnoreCase)) Avatar->PlayWater(Target);
     else if (Name.Equals(TEXT("Chop"), ESearchCase::IgnoreCase)) Avatar->PlayClear(Target);
     else if (Name.Equals(TEXT("Knife"), ESearchCase::IgnoreCase)) Avatar->PlayKnifeCut(Target);
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
     else if (Name.Equals(TEXT("Machete"), ESearchCase::IgnoreCase)) Avatar->PlayMacheteHack(Target);
     else if (Name.Equals(TEXT("Fell"), ESearchCase::IgnoreCase)) Avatar->PlayFell(Target, 2);
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Water, Chop, Knife, Till, Machete or Fell."));
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Water, Chop, Knife, Till, Machete or Fell."));
 }
 
 void AHomesteadLabController::LabProp(const FString& Name)
@@ -373,9 +385,10 @@ void AHomesteadLabController::LabProp(const FString& Name)
     const EProp Kind = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) ? EProp::Sticks
         : Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase) ? EProp::Stones
         : Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase) ? EProp::Berries
-        : Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) ? EProp::Roots : EProp::None;
+        : Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) ? EProp::Roots
+        : Name.Equals(TEXT("Reeds"), ESearchCase::IgnoreCase) ? EProp::Reeds : EProp::None;
     if (Kind == EProp::None && !Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
-        UE_LOG(LogTemp, Warning, TEXT("LabProp takes Sticks, Stones, Berries, Roots or None."));
+        UE_LOG(LogTemp, Warning, TEXT("LabProp takes Sticks, Stones, Berries, Roots, Reeds or None."));
     const FVector At = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
     World->PlaceProp(Kind, FVector2D(At));
     bHoldingStickPile = false;
@@ -407,7 +420,8 @@ void AHomesteadLabController::LabLoop(const FString& Name)
     LoopStart = Avatar->GetActorTransform();
     // One clip plus a second's pause between repeats.
     const bool Kneel = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase)
-        || Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase);
+        || Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase)
+        || Name.Equals(TEXT("Reeds"), ESearchCase::IgnoreCase);
     const UAnimSequence* Clip = Kneel ? Avatar->GetGatherSticksAnimation() : nullptr;
     LoopPeriod = (Clip ? Clip->GetPlayLength() : 3.5f) + 1.0f;
     LoopNextStart = GetWorld()->GetTimeSeconds();
@@ -506,7 +520,7 @@ void AHomesteadLabHUD::DrawHUD()
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
     Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
-    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
+    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Water|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|Reeds|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)
     {

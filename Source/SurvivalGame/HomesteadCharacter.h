@@ -26,7 +26,7 @@ class ULODSyncComponent;
 class AHomesteadWorld;
 namespace Homestead { struct Point; enum class Item : int; }
 
-enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch };
+enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds };
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -75,11 +75,17 @@ public:
     void CancelSprint();
     UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
     // MetaHuman only: the kneeling gather clip for the current kind (sticks and stones share the
-    // arm-cradle clip; roots and berries use the hip-pouch clip), or null.
+    // arm-cradle clip; roots and berries use the hip-pouch clip; reeds are sawn free with the
+    // knife), or null.
     UAnimSequence* GetGatherSticksAnimation() const
     {
         if (!bMetaHumanActive) return nullptr;
-        return KneelKind == EHomesteadKneelGather::Pouch ? GatherPouchAnimation.Get() : GatherSticksAnimation.Get();
+        switch (KneelKind)
+        {
+        case EHomesteadKneelGather::Pouch: return GatherPouchAnimation.Get();
+        case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
+        default: return GatherSticksAnimation.Get();
+        }
     }
     UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
@@ -95,9 +101,13 @@ public:
     // turns and settles so her hand lands on it.
     bool PlayGatherSticks(TOptional<FVector2D> Pile = {});
     // Kneeling gathers for other forage: stones are cradled in the left arm like sticks, roots and
-    // berries are slipped into the hip pouch. Returns true when the kneeling clip plays.
+    // berries are slipped into the hip pouch, reeds are gathered in the left fist and sawn through
+    // with the knife. Returns true when the kneeling clip plays; false (with no animation for
+    // reeds, PlayGather for the rest) when its clip or props are unavailable.
     bool PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile = {}, bool bBerries = false);
     EHomesteadKneelGather GetKneelKind() const { return KneelKind; }
+    // Kneeling over reeds with the knife (the reed gather is playing).
+    bool IsCuttingReeds() const;
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return bStickPileOnGround; }
@@ -193,6 +203,9 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> GatherAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherSticksAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPouchAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> GatherReedsAnimation;
+    // The cut bundle of reed stems in her left fist after the reed gather's cut.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedReeds;
     // Two branch props that appear in her hand and stack on her left forearm during the stick gather.
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> CarriedSticks;
     // Two stones for the stone gather (same meshes and sizes as the woodland's stone pile).
