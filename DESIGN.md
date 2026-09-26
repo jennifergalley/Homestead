@@ -47,7 +47,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - Calendar/weather occupies the upper left `(30,26)`, size `460×73`. Current-device book/camera hints have upper-right Pine backing.
 - Food, Energy, Warmth occupy the lower left in three 200-wide backed meters; numeric values accompany 174×5 bars.
 - A gameplay-only ten-slot Pine/cream/Gold tool hotbar is centered along the
-  bottom. It retains the Knife, Hatchet, Digging Stick, and Watering Can slot
+  bottom. It retains the Knife, Hatchet, Stone Hoe, and Watering Can slot
   assignments without adding capacity, but hides uncarried tool icons.
   At 4K its physical size is bounded independently of 3D resolution.
 - Normal focus/action context sits lower right: width `min(650, 38% of virtual width)`, right inset 32, top at `height−225`.

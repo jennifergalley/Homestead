@@ -79,7 +79,7 @@ bool Blocks(const ResourceNode& Node, int32 X, int32 Y)
 const Plot* FixturePlot(const State& State, const FWoodlandFixture& Fixture)
 {
     for (const auto& Plot : State.plots)
-        if (Plot.cellX == Fixture.PlotX && Plot.cellY == Fixture.PlotY) return &Plot;
+        if (Plot.cellX == CellToGarden(Fixture.PlotX) && Plot.cellY == CellToGarden(Fixture.PlotY)) return &Plot;
     return nullptr;
 }
 
@@ -851,7 +851,7 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     Add(TEXT("CONTROLLED teleport to the cleared tree plot approach; no ordinary-travel claim"),
         [this, Garden]()
         {
-            Teleport({Garden.x - 190, Garden.y});
+            Teleport({Garden.x - GardenCellSize, Garden.y});
             Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
             Controller->SetControlRotation(FRotator(-20, 0, 0));
         },

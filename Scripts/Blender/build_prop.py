@@ -116,9 +116,18 @@ def main():
             if bake_spec.get("repack", True):
                 kit.pack_uvs(obj, margin=bake_spec.get("margin", 0.004))
             print(f"HOMESTEAD_BAKING {obj.name} {bake_spec.get('size', 2048)}px", flush=True)
-            baked = kit.bake(obj, out / "Textures", obj.name[3:], size=bake_spec.get("size", 2048),
-                             samples=bake_spec.get("samples", 96),
-                             maps=tuple(bake_spec.get("maps", kit.BAKE_MAPS)))
+            # Hide the other meshes (notably LODs sitting exactly on top of LOD0) so they don't
+            # occlude the AO bake or catch its rays.
+            hidden = [o for o in meshes if o is not obj and not o.hide_render]
+            for other in hidden:
+                other.hide_render = True
+            try:
+                baked = kit.bake(obj, out / "Textures", obj.name[3:], size=bake_spec.get("size", 2048),
+                                 samples=bake_spec.get("samples", 96),
+                                 maps=tuple(bake_spec.get("maps", kit.BAKE_MAPS)))
+            finally:
+                for other in hidden:
+                    other.hide_render = False
             if hasattr(recipe, "after_bake"):
                 recipe.after_bake(kit, obj)
             baked_materials[obj.name] = (obj.material_slots[0].material, baked)

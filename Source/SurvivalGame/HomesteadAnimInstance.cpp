@@ -313,6 +313,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     // Closes the left hand on the axe haft while felling.
     FHandGrip LeftGrip{true};
     float LeftGripAlpha = 0;
+    // The MetaHuman's till clip is the two-handed stone hoe (homestead_agent.hoe_till).
+    bool bHoeTill = false;
     float LeftGripTarget = 0;
     // Closes her right fingers on a bite of food while she eats.
     FHandGrip Pinch;
@@ -376,6 +378,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Sprint.SetSequence(Avatar->GetSprintAnimation());
             Gather.SetSequence(Avatar->GetGatherAnimation());
             Eat.SetSequence(Avatar->GetEatAnimation());
+            bHoeTill = Avatar->UsesHoeTill();
         }
     }
 
@@ -596,9 +599,10 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         // Switching tools eases the wrist to the new carry instead of snapping.
         GripCarry = GripAlpha < 0.01f ? GripCarryTarget : FMath::FInterpConstantTo(GripCarry, GripCarryTarget, DeltaSeconds, 180.0f);
         Grip.CarryDeviation = GripCarry;
-        Grip.Carry = Active == EHandAction::Machete || Active == EHandAction::Fell ? 1.0f - ActionBlend.Alpha : 1.0f;
+        const bool bTwoHanded = Active == EHandAction::Fell || (Active == EHandAction::Till && bHoeTill);
+        Grip.Carry = Active == EHandAction::Machete || bTwoHanded ? 1.0f - ActionBlend.Alpha : 1.0f;
         LeftGripAlpha = FMath::FInterpConstantTo(LeftGripAlpha, LeftGripTarget, DeltaSeconds, 1.0f / 0.15f);
-        LeftGrip.Alpha = FMath::Max(Active == EHandAction::Fell ? ActionBlend.Alpha : 0.0f, LeftGripAlpha);
+        LeftGrip.Alpha = FMath::Max(bTwoHanded ? ActionBlend.Alpha : 0.0f, LeftGripAlpha);
         UpdateEating(DeltaSeconds);
     }
 

@@ -53,7 +53,8 @@ void UHomesteadDiggingStick::TickComponent(float DeltaTime, ELevelTick TickType,
     const auto* Animation = Avatar
         ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     const float Phase = Animation ? Animation->TillPhase() : 0;
-    const bool Visible = PC && Animation && Animation->IsTilling()
+    // The MetaHuman tills with the held stone hoe prop instead.
+    const bool Visible = PC && Animation && Animation->IsTilling() && !Avatar->UsesHoeTill()
         && Animation->TillWeight() > 0.5f && Phase >= 0.22f && Phase <= 1.48f
         && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
         && PC->Simulation().Count(Homestead::Item::DiggingStick) > 0

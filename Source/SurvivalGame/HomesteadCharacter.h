@@ -26,7 +26,7 @@ class ULODSyncComponent;
 class AHomesteadWorld;
 namespace Homestead { struct Point; enum class Item : int; }
 
-enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds };
+enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant };
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -84,6 +84,7 @@ public:
         {
         case EHomesteadKneelGather::Pouch: return GatherPouchAnimation.Get();
         case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
+        case EHomesteadKneelGather::Plant: return GatherPlantAnimation.Get();
         default: return GatherSticksAnimation.Get();
         }
     }
@@ -92,6 +93,10 @@ public:
     UAnimSequence* GetClearAnimation() const { return ClearAnimation; }
     UAnimSequence* GetKnifeCutAnimation() const { return KnifeCutAnimation; }
     UAnimSequence* GetTillAnimation() const { return TillAnimation; }
+    // Tilling is the two-handed stone hoe clip (MetaHuman with AN_HeroineMH_HoeTill).
+    bool UsesHoeTill() const { return bHoeTill; }
+    // homestead_agent.hoe_till EVENTS: the first chop turns the soil.
+    static constexpr float HoeFirstChop = 30.0f / 30.0f;
     UHomesteadHatchet* GetHatchet() const { return Hatchet; }
     UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
     UHomesteadKnife* GetKnife() const { return Knife; }
@@ -108,6 +113,9 @@ public:
     EHomesteadKneelGather GetKneelKind() const { return KneelKind; }
     // Kneeling over reeds with the knife (the reed gather is playing).
     bool IsCuttingReeds() const;
+    // Kneel and press one seed into the tilled square at Target, then cover it (MetaHuman only;
+    // false when the clip is unavailable). IsStickPileOnGround stays true until it is covered.
+    bool PlayPlant(Homestead::Point Target);
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return bStickPileOnGround; }
@@ -204,6 +212,9 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> GatherSticksAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPouchAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherReedsAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> GatherPlantAnimation;
+    // The pinch of seed in her fingers while she plants.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedSeed;
     // The cut bundle of reed stems in her left fist after the reed gather's cut.
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedReeds;
     // Two branch props that appear in her hand and stack on her left forearm during the stick gather.
@@ -241,6 +252,7 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> KnifeCutAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> TillAnimation;
+    bool bHoeTill = false;
     UPROPERTY() TObjectPtr<UAnimSequence> MacheteAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> FellAnimation;
     // Eases her into a work stance (felling, hacking) instead of snapping: a snapped turn flings

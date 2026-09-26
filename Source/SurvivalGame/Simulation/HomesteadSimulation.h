@@ -22,8 +22,13 @@ enum class CropKind : int { Roots, Berries, Count };
 
 constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
+// Garden squares: each building cell holds 3 x 3 of them, and the middle one shares its centre.
+constexpr int GardenCellsPerCell = 3;
+constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 8;
+constexpr int SimulationSaveVersion = 9;
+// Saves before this stored crop plots on whole building cells.
+constexpr int GardenSquareSaveVersion = 9;
 // Version 7 saves predate the machete (one fewer item per stock) and cleared underbrush.
 constexpr int LegacySimulationSaveVersion = 7;
 constexpr double ChestReach = 280.0;
@@ -145,6 +150,7 @@ struct Structure
 struct Plot
 {
     int id = 0;
+    // Garden-square coordinates (GardenCellSize), not building cells.
     int cellX = 0;
     int cellY = 0;
     bool planted = false;
@@ -204,6 +210,14 @@ const char* PieceRequirements(Piece piece);
 double StreamX(double y);
 bool IsNearWater(Point position);
 Point CellCenter(int cellX, int cellY);
+int GardenCell(double value);
+Point GardenCellCenter(int gardenX, int gardenY);
+// Building cell that contains a garden square.
+int GardenToCell(int garden);
+// The garden square at the middle of a building cell.
+inline int CellToGarden(int cell) { return cell * GardenCellsPerCell + GardenCellsPerCell / 2; }
+Point PlotCenter(const Plot& plot);
+bool PlotInCell(const Plot& plot, int cellX, int cellY);
 
 // Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
 // below Reserve, so exertion alone never collapses her.
@@ -281,6 +295,7 @@ public:
     Result GrantStarterKit(Point anchor, Point facing, bool includeSeeds);
     // Playtest aid: put `count` of an item in her pack if there is room.
     Result GrantItems(Item item, int count);
+    // Till one garden square (garden coordinates, see GardenCell) with the stone hoe.
     Result Till(int cellX, int cellY, Point player);
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);

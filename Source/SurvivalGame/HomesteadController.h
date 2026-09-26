@@ -276,6 +276,9 @@ private:
     int32 AutosaveMinutes = 5;
     // Gathered Branches pile kept visible until the kneeling pickup lifts the last stick.
     int32 HeldStickPile = INDEX_NONE;
+    int32 HeldPlot = INDEX_NONE;
+    double HeldPlotSince = 0;
+    bool bHeldPlotTilling = false;
     double HeldStickPileSince = 0;
     // Ground parts of the held produce to hide at the first pickup (the rest go with the second).
     int32 HeldPartsFirst = 0, HeldPartsCount = 0;
@@ -323,6 +326,12 @@ private:
     // Layout is the save's HotbarLayout: older hotbars gain the machete and berries once.
     void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout);
     void EatFromHotbar(Homestead::Item Food);
+    // The garden square the hoe lands on, just ahead of her.
+    void TillSquareAhead(int32& X, int32& Y) const;
+    // Till the square ahead with the hoe, or hoe out its weeds if it is already tilled.
+    void HoeSquareAhead();
+    // Plant the focused bare plot with Crop; she kneels to press in the seed.
+    void PlantFocusedPlot(Homestead::CropKind Crop);
     // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
     void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();

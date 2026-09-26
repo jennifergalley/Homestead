@@ -55,30 +55,8 @@
         "detail_fstop": 128.0
       },
       "fbx": "SM_Seeds.fbx",
-      "sha256": "2a55407fc6e9ba08f35e2b19b8dc398ea975e455ded01ae7671da7f42895f423",
-      "preview": "preview_SM_Seeds.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_Seeds_hero.png",
-          "detail": "beauty_SM_Seeds_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 256,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          30
-        ],
-        "ground": "lowest"
-      }
+      "sha256": "9b70578d481fd8b4c03a2c8b1a1be98225dc996aebd10733a7b963e7b5c71564",
+      "preview": "preview_SM_Seeds.png"
     },
     "SM_SoilMound": {
       "vertices": 2467,
@@ -125,30 +103,8 @@
         "ground": "origin"
       },
       "fbx": "SM_SoilMound.fbx",
-      "sha256": "66d21c214090e1c1bd429156d2323954db2cd582bfeffcc4c36703b6f1ebb217",
-      "preview": "preview_SM_SoilMound.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_SoilMound_hero.png",
-          "detail": "beauty_SM_SoilMound_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 256,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          0
-        ],
-        "ground": "origin"
-      }
+      "sha256": "65aad0fb7ce7fc417c8d448330621e372bae38bceaf2517cfa6df784860627f7",
+      "preview": "preview_SM_SoilMound.png"
     },
     "SM_SoilMound_LOD1": {
       "vertices": 778,
@@ -184,7 +140,7 @@
       },
       "review": {},
       "fbx": "SM_SoilMound_LOD1.fbx",
-      "sha256": "282a0447faa5634e2063b6ae85cbccf38f1b2c711ed22dcdfa774a0dab304d3a",
+      "sha256": "a5728c828b311e9bbbfa317f43cd14ece84a7900438b13743b37ca01390c8005",
       "preview": "preview_SM_SoilMound_LOD1.png"
     }
   },
@@ -194,11 +150,11 @@
     "SM_SoilMound": "Pivot = bottom centre on the ground line (z = 0); the rim sinks 3 mm below it. ~14 cm across (the feathered rim included), 3.5 cm tall, 4.8k triangles. SM_SoilMound_LOD1 (1.4k) is a 30% decimation sharing its UVs and textures."
   },
   "textures": {
-    "T_Seeds_basecolor.png": "ef7ac61c0e517cfaeb3b35b2de3a07ecd71ac45a77e7037f5a31d10358733e67",
-    "T_Seeds_roughness.png": "a07d2982b7e3ced2f12e128a9601d24a197e4c2c0b17a223545634951e9d67da",
-    "T_Seeds_normal.png": "50a4081851d59adc89d803ed3075764d24890f102b6f8291b8e01d71e1a6938a",
-    "T_SoilMound_basecolor.png": "9fc293dde51b47bc97f51bcc1a5148e5a2f9830e9f4d87f48d4dab2d6646a092",
-    "T_SoilMound_roughness.png": "687d29ee4663e8bb000aa66cc2c923c2d39b21750720c73c8af36d5fdae115d6",
-    "T_SoilMound_normal.png": "f02168d1941675b0da06c282d3a3779daf10f6f049e3b27a68e134f72d64f07d"
+    "T_Seeds_basecolor.png": "55f462412e3d84adba7ce627721dd83bd59e530ecc7ae841098a31c225d691bc",
+    "T_Seeds_roughness.png": "e9a1598262c9076a0e7d3c1687792bf0ecd4cbea15c55325053d656c56437dc8",
+    "T_Seeds_normal.png": "737b556f99b2be28e0a912a84fa8b0c63598c2d3dde83d9c185a7a0ddfc82516",
+    "T_SoilMound_basecolor.png": "05c3b510a09ccbfe8dbe0ccc19f032ceaf13c955b001abc4bb1aea008fa21839",
+    "T_SoilMound_roughness.png": "da539c9a6003ad9eb4a32ee86e1494763e41c153c552825247b91bbc3e77f8d2",
+    "T_SoilMound_normal.png": "15dada9ef1ede50b9b15914c7dacebf96ff5b4a115c7233ff8550bcf9a6d9ba8"
   }
 }

@@ -223,9 +223,9 @@ while TSR upscales the world.
 
 Gather berries and eat them from the Pack page, or pin food to the hotbar (Pack page:
 Pin to hotbar) and eat it with the left mouse button / RT while it's selected. Gather branches, stones, and
-fiber from reeds. Make a hatchet, a digging stick, and a watering can. Clear a
+fiber from reeds. Make a hatchet, a stone hoe, and a watering can. Clear a
 small patch, build a floor/walls/doorway/roof, and add a bedroll, chest, and fire.
-Collect planting stock from wild roots, till a plot, and plant it. Refill the can
+Collect planting stock from wild roots, hoe a garden square (one 1 m square per stroke, just ahead of her), and kneel to plant it with the seed you choose (E roots, F berry seeds). Refill the can
 at the stream; water and weed as needed. Fuel the fire with branches and prepare
 the simple root recipes. Food and warmth matter while time passes. Work spends
 Energy (felling and tilling most, gathering little) while time alone tires her

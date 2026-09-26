@@ -35,7 +35,7 @@ void AHomesteadVisualPlaytest::TickWeeding(float WallDelta)
             if (Plot.planted && Plot.weeds >= 0.125 && Plot.growth < 1)
             {
                 WaterPlotId = Plot.id;
-                const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                const auto Center = Homestead::PlotCenter(Plot);
                 GardenCenter = FVector2D(Center.x, Center.y);
                 Observations.Add(FString::Printf(TEXT("Loaded existing planted plot %d with %.6f weeds at game hour %.6f; no setup mutation."),
                     Plot.id, Plot.weeds, PC->State().hour));

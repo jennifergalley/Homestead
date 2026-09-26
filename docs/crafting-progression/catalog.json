@@ -32,7 +32,7 @@
     {"key":"item:Flowers","status":"current","runtimeEnum":"Item","runtimeId":6,"capacity":1,"role":"Display name Meadow herb; not arbitrary edible flowers."},
     {"key":"item:Seeds","status":"current","runtimeEnum":"Item","runtimeId":7,"capacity":1,"role":"Root planting stock; obtained with roots, not a rare drop."},
     {"key":"item:Hatchet","status":"current","runtimeEnum":"Item","runtimeId":8,"capacity":1,"role":"Crude hatchet; enables Sapling harvest/clear. Mature-tree integration is separate."},
-    {"key":"item:DiggingStick","status":"current","runtimeEnum":"Item","runtimeId":9,"capacity":1,"role":"Tilling tool, not currently required for wild root harvest."},
+    {"key":"item:DiggingStick","status":"current","runtimeEnum":"Item","runtimeId":9,"capacity":1,"role":"Stone hoe (runtime name DiggingStick): tills or weeds one 1 m garden square at a time; not currently required for wild root harvest."},
     {"key":"item:WateringCan","status":"current","runtimeEnum":"Item","runtimeId":10,"capacity":1,"role":"Existing wood/fiber vessel abstraction; fills six Water portions."},
     {"key":"item:Water","status":"current","runtimeEnum":"Item","runtimeId":11,"capacity":1,"role":"Garden input, not drinking/thirst."},
     {"key":"item:RoastedRoots","status":"current","runtimeEnum":"Item","runtimeId":12,"capacity":1,"nutrition":28,"role":"Pot-free cooked food; currently never spoils."},

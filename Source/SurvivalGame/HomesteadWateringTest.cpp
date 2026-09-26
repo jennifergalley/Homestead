@@ -37,7 +37,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     auto Hidden = [Avatar, Animation]() { return Animation() && Animation()->WaterWeight() < 0.001f
         && Animation()->TillWeight() < 0.001f && !Avatar->GetWateringTool()->IsPresented()
         && !Avatar->GetHatchet()->IsPresented() && !Avatar->GetDiggingStick()->IsPresented(); };
-    const Homestead::Point Garden = Homestead::CellCenter(-5, 0);
+    const Homestead::Point Garden = Homestead::GardenCellCenter(-13, 1);
     const auto TillApproach = MakeShared<Homestead::Point>(Homestead::Point{-1160, 150});
     const auto Stream = MakeShared<Homestead::Point>(
         Homestead::Point{Homestead::StreamX(2700) - 120, 2700});
@@ -103,7 +103,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             [this, Avatar, Probe, Animation, Matches, DoubleTap]()
             {
                 const auto* Tool = Avatar->GetWateringTool();
-                const auto Target = Homestead::CellCenter(-5, 0);
+                const auto Target = Homestead::GardenCellCenter(-13, 1);
                 const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
                     Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
                 return Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap
@@ -189,7 +189,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         [this, Avatar, Probe, Animation]()
         {
             Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
-            Probe->Ready = Probe->Expected.Till(-5, 0, Controller->PlayerPoint()).ok;
+            Probe->Ready = Probe->Expected.Till(-13, 1, Controller->PlayerPoint()).ok;
             Probe->TillStarts = Animation()->TillStarts();
             Probe->GatherStarts = Animation()->GatherStarts();
             Probe->ClearStarts = Animation()->ClearStarts();
@@ -203,10 +203,10 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         {
             const auto* Tool = Avatar->GetDiggingStick();
             for (const auto& Plot : Controller->State().plots)
-                if (Plot.cellX == -5 && Plot.cellY == 0)
+                if (Plot.cellX == -13 && Plot.cellY == 1)
                 {
                     GardenPlotId = Plot.id;
-                    const auto Target = Homestead::CellCenter(-5, 0);
+                    const auto Target = Homestead::GardenCellCenter(-13, 1);
                     const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
                         Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
                     return Probe->Ready && !Controller->ToastIsError() && Matches()
@@ -367,7 +367,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                         { Occupied = true; break; }
                     for (const auto& Plot : Controller->State().plots)
                     {
-                        const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                        const auto Center = Homestead::PlotCenter(Plot);
                         if (FMath::Square(Center.x - Candidate.x) + FMath::Square(Center.y - Candidate.y)
                             < FMath::Square(300.0)) Occupied = true;
                     }

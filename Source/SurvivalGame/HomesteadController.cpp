@@ -61,6 +61,21 @@ bool IsHotbarTool(Homestead::Item Item)
         || Item == Homestead::Item::Machete;
 }
 
+template <typename FPredicate>
+const Homestead::Plot* FindPlotWhere(const std::vector<Homestead::Plot>& Plots, FPredicate Predicate)
+{
+    for (const auto& Plot : Plots) if (Predicate(Plot)) return &Plot;
+    return nullptr;
+}
+
+// Chosen on the hotbar to plant bare tilled soil: seeds grow roots, a berry's seeds grow a bush.
+TOptional<Homestead::CropKind> PlantingCrop(Homestead::Item Item)
+{
+    if (Item == Homestead::Item::Seeds) return Homestead::CropKind::Roots;
+    if (Item == Homestead::Item::Berries) return Homestead::CropKind::Berries;
+    return {};
+}
+
 bool IsFoodItem(Homestead::Item Item)
 {
     return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots
@@ -72,6 +87,7 @@ FName HotbarIcon(Homestead::Item Item)
     switch (Item)
     {
     case Homestead::Item::Berries: return TEXT("berries");
+    case Homestead::Item::Seeds: return TEXT("seeds");
     case Homestead::Item::RoastedRoots: return TEXT("roasted-roots");
     case Homestead::Item::HerbedRoots: return TEXT("herbed-roots");
     case Homestead::Item::Knife: return TEXT("knife");
@@ -539,7 +555,7 @@ void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Sele
 
 bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
 {
-    return IsHotbarTool(Item) || IsFoodItem(Item);
+    return IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
 }
 
 bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
@@ -552,7 +568,7 @@ bool AHomesteadController::TogglePinnedToHotbar(Homestead::Item Item)
     const FString Name = UTF8_TO_TCHAR(Homestead::ItemName(Item));
     if (!CanPinToHotbar(Item))
     {
-        Notify(TEXT("Only tools and food can go on the hotbar."), true);
+        Notify(TEXT("Only tools, food and seeds can go on the hotbar."), true);
         return false;
     }
     const int32 Value = static_cast<int32>(Item);
@@ -654,6 +670,28 @@ void AHomesteadController::UseSelectedTool()
 {
     if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)) return;
     const int32 ToolValue = HotbarSlots[SelectedHotbarSlot];
+    // Seeds or a berry on bare tilled soil: plant it there (a berry is eaten anywhere else).
+    if (ToolValue >= 0)
+        if (const auto Crop = PlantingCrop(static_cast<Homestead::Item>(ToolValue)))
+        {
+            if (bWorldReady && PrepareWorldAt(PlayerPoint()))
+            {
+                UpdateFocus();
+                const auto* Bare = Focus == EFocus::Plot
+                    ? FindPlotWhere(State().plots, [this](const Homestead::Plot& Plot) { return Plot.id == FocusId; })
+                    : nullptr;
+                if (Bare && !Bare->planted)
+                {
+                    PlantFocusedPlot(*Crop);
+                    return;
+                }
+            }
+            if (static_cast<Homestead::Item>(ToolValue) == Homestead::Item::Seeds)
+            {
+                Notify(TEXT("Aim at bare tilled soil to plant seeds."), true);
+                return;
+            }
+        }
     if (ToolValue >= 0 && IsFoodItem(static_cast<Homestead::Item>(ToolValue)))
     {
         const auto Food = static_cast<Homestead::Item>(ToolValue);
@@ -740,34 +778,12 @@ void AHomesteadController::UseSelectedTool()
                 Notify(Result, GrassStepB);
                 if (Result.ok)
                     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                        Avatar->PlayWater(Homestead::CellCenter(Plot.cellX, Plot.cellY));
+                        Avatar->PlayWater(Homestead::PlotCenter(Plot));
                 return;
             }
     }
 
-    if (Tool == Homestead::Item::DiggingStick)
-    {
-        if (Focus == EFocus::Plot)
-        {
-            const auto Result = Sim.Weed(FocusId, Position);
-            Notify(Result, GrassStepA);
-            if (Result.ok)
-                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                    Avatar->PlayGather();
-            return;
-        }
-        const FVector Forward = GetPawn()
-            ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
-        const int32 X = FMath::FloorToInt((Position.x + Forward.X * 190)
-            / Homestead::CellSize);
-        const int32 Y = FMath::FloorToInt((Position.y + Forward.Y * 190)
-            / Homestead::CellSize);
-        const auto Result = Sim.Till(X, Y, Position);
-        Notify(Result, GrassStepB);
-        if (Result.ok)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                Avatar->PlayTill(Homestead::CellCenter(X, Y));
-    }
+    if (Tool == Homestead::Item::DiggingStick) HoeSquareAhead();
 }
 
 void AHomesteadController::RefreshMenuPortrait()
@@ -1013,8 +1029,7 @@ bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
             if (!Clear) continue;
             for (const auto& Plot : State().plots)
                 if (FVector2D::Distance(FVector2D(Candidate.x, Candidate.y),
-                    FVector2D(Homestead::CellCenter(Plot.cellX, Plot.cellY).x,
-                    Homestead::CellCenter(Plot.cellX, Plot.cellY).y)) < 140)
+                    FVector2D(Homestead::PlotCenter(Plot).x, Homestead::PlotCenter(Plot).y)) < 90)
                 { Clear = false; break; }
             if (!Clear) continue;
             const FVector Center(Candidate.x, Candidate.y,
@@ -1194,6 +1209,22 @@ void AHomesteadController::Tick(float DeltaSeconds)
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
     UpdatePendingHack();
     UpdatePendingFell();
+    if (HeldPlot != INDEX_NONE)
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+        // Until the hoe bites (tilling) or she has covered the seed (planting), or it was interrupted.
+        const bool bDone = bHeldPlotTilling
+            ? !Animation || !Animation->IsTilling() || Animation->TillPhase() >= AHomesteadCharacter::HoeFirstChop
+            : !Avatar || !Avatar->IsStickPileOnGround();
+        if (bDone || GetWorld()->GetTimeSeconds() - HeldPlotSince > 7.0)
+        {
+            if (Landscape) Landscape->ReleasePlot();
+            HeldPlot = INDEX_NONE;
+            bHeldPlotTilling = false;
+            RefreshRemaining = 0;
+        }
+    }
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -1318,7 +1349,7 @@ void AHomesteadController::UpdateFocus()
     for (const auto& Drop : State().worldDrops)
         Consider(EFocus::Drop, Drop.id, Drop.position);
     for (const auto& Plot : State().plots)
-        Consider(EFocus::Plot, Plot.id, Homestead::CellCenter(Plot.cellX, Plot.cellY));
+        Consider(EFocus::Plot, Plot.id, Homestead::PlotCenter(Plot));
     for (const auto& Structure : State().structures)
     {
         EFocus Kind = EFocus::None;
@@ -1431,7 +1462,7 @@ FString AHomesteadController::FocusActions() const
                     return Use + TEXT(" Water");
                 if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
                     return Use + TEXT(" Weed");
-                return TEXT("Select Watering Can or Digging Stick");
+                return TEXT("Select Watering Can or Stone Hoe");
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -1680,12 +1711,16 @@ void AHomesteadController::Interact()
             if (Plot.id != FocusId) continue;
             const bool Planted = Plot.planted;
             const bool Mature = Plot.growth >= 1;
-            const auto Result = !Planted ? Sim.Plant(FocusId, Position) :
-                Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
+            if (!Planted)
+            {
+                PlantFocusedPlot(Homestead::CropKind::Roots);
+                break;
+            }
+            const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             Notify(Result, GrassStepB);
-            if (Result.ok && Planted && !Mature)
+            if (Result.ok && !Mature)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                    Avatar->PlayWater(Homestead::CellCenter(Plot.cellX, Plot.cellY));
+                    Avatar->PlayWater(Homestead::PlotCenter(Plot));
             break;
         }
         break;
@@ -1787,27 +1822,75 @@ void AHomesteadController::Secondary()
         for (const auto& Plot : State().plots)
         {
             if (Plot.id != FocusId) continue;
-            const bool Planted = Plot.planted;
-            const auto Result = Planted ? Sim.Weed(FocusId, PlayerPoint())
-                : Sim.Plant(FocusId, PlayerPoint(), Homestead::CropKind::Berries);
+            if (!Plot.planted)
+            {
+                PlantFocusedPlot(Homestead::CropKind::Berries);
+                break;
+            }
+            const auto Result = Sim.Weed(FocusId, PlayerPoint());
             Notify(Result, GrassStepA);
-            if (Result.ok && Planted)
+            if (Result.ok)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
             break;
         }
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
-    else
+    else HoeSquareAhead();
+}
+
+void AHomesteadController::TillSquareAhead(int32& X, int32& Y) const
+{
+    // The hoe's blade bites about 85 cm out; probing there keeps the bite inside the chosen square.
+    const auto Position = PlayerPoint();
+    const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
+    X = Homestead::GardenCell(Position.x + Forward.X * 85);
+    Y = Homestead::GardenCell(Position.y + Forward.Y * 85);
+}
+
+void AHomesteadController::HoeSquareAhead()
+{
+    int32 X = 0, Y = 0;
+    TillSquareAhead(X, Y);
+    const auto Position = PlayerPoint();
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    // Already tilled: hoe out its weeds instead.
+    if (const auto* Tilled = FindPlotWhere(State().plots, [X, Y](const Homestead::Plot& Plot)
+        { return Plot.cellX == X && Plot.cellY == Y; }))
     {
-        const auto Position = PlayerPoint();
-        const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
-        const int X = FMath::FloorToInt((Position.x + Forward.X * 190) / Homestead::CellSize);
-        const int Y = FMath::FloorToInt((Position.y + Forward.Y * 190) / Homestead::CellSize);
-        const auto Result = Sim.Till(X, Y, Position);
-        Notify(Result, GrassStepB);
-        if (Result.ok)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                Avatar->PlayTill({(X + 0.5) * Homestead::CellSize, (Y + 0.5) * Homestead::CellSize});
+        const auto Result = Sim.Weed(Tilled->id, Position);
+        Notify(Result, GrassStepA);
+        if (Result.ok && Avatar) Avatar->PlayTill(Homestead::PlotCenter(*Tilled));
+        return;
+    }
+    const auto Result = Sim.Till(X, Y, Position);
+    Notify(Result, GrassStepB);
+    if (!Result.ok || !Avatar) return;
+    Avatar->PlayTill(Homestead::GardenCellCenter(X, Y));
+    // The turned soil appears when the hoe first bites.
+    if (Avatar->UsesHoeTill() && Landscape && !State().plots.empty())
+    {
+        Landscape->HoldPlot(State().plots.back().id, true);
+        HeldPlot = State().plots.back().id;
+        HeldPlotSince = GetWorld()->GetTimeSeconds();
+        bHeldPlotTilling = true;
+    }
+}
+
+void AHomesteadController::PlantFocusedPlot(Homestead::CropKind Crop)
+{
+    const auto* Plot = FindPlotWhere(State().plots, [this](const Homestead::Plot& Candidate) { return Candidate.id == FocusId; });
+    if (!Plot) return;
+    const auto Target = Homestead::PlotCenter(*Plot);
+    const auto Result = Sim.Plant(FocusId, PlayerPoint(), Crop);
+    Notify(Result, GrassStepB);
+    if (!Result.ok) return;
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (Avatar && Avatar->PlayPlant(Target) && Landscape)
+    {
+        Landscape->HoldPlot(FocusId);
+        HeldPlot = FocusId;
+        bHeldPlotTilling = false;
+        HeldPlotSince = GetWorld()->GetTimeSeconds();
     }
 }
 
@@ -1961,7 +2044,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
         Result.Add({2, TEXT("2. Make your first tools"), TEXT("Branches, loose stones and reeds supply wood, stone and fiber.")});
         Result.Add({3, TEXT("3. Make a home"), TEXT("Craft a hatchet and fell the trees at your chosen site. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
-        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a digging stick. Till with F/X; bare plots offer roots with A/E or berry seeds with X/F.")});
+        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a stone hoe. Each swing tills one small square; plant each square with A/E (root seeds) or X/F (berry seeds), or pick seeds or a berry on the hotbar and click.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill a watering can at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried hatchet. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is owned and crafted.")});
@@ -2771,7 +2854,7 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
         return;
     }
     for (const auto Tool : {Homestead::Item::Knife, Homestead::Item::Hatchet, Homestead::Item::DiggingStick,
-        Homestead::Item::WateringCan, Homestead::Item::Machete})
+        Homestead::Item::WateringCan, Homestead::Item::Machete, Homestead::Item::Seeds})
     {
         const int32 Value = static_cast<int32>(Tool);
         if (HotbarSlots.Contains(Value)) continue;

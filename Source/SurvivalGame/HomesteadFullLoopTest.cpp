@@ -377,8 +377,9 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     const Homestead::Point Home = Homestead::CellCenter(-4, -2);
     const Homestead::Point Fire = Homestead::CellCenter(-3, -2);
     const Homestead::Point Chest = Homestead::CellCenter(-4, -3);
-    const Homestead::Point Garden = Homestead::CellCenter(-5, 0);
-    const Homestead::Point BerryGarden = Homestead::CellCenter(-3, 0);
+    // The garden squares the hoe turns from the west- and east-facing stances below.
+    const Homestead::Point Garden = Homestead::GardenCellCenter(-13, 1);
+    const Homestead::Point BerryGarden = Homestead::GardenCellCenter(-9, 1);
     const auto BerryPlotId = MakeShared<int32>(-1);
     const auto Stream = MakeShared<Homestead::Point>(Homestead::Point{Homestead::StreamX(2700) - 40, 2700});
     const auto RevalidateStreamBank = [this, Stream]()
@@ -570,7 +571,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             for (const auto& Plot : Controller->State().plots)
-                if (Plot.cellX == -5 && Plot.cellY == 0 && !Plot.planted)
+                if (Plot.cellX == -13 && Plot.cellY == 1 && !Plot.planted)
                 {
                     GardenPlotId = Plot.id;
                     return !Controller->ToastIsError();
@@ -607,7 +608,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, BerryPlotId, SecondaryStarts, PickingStarts]()
         {
             for (const auto& Plot : Controller->State().plots)
-                if (Plot.cellX == -3 && Plot.cellY == 0 && !Plot.planted)
+                if (Plot.cellX == -9 && Plot.cellY == 1 && !Plot.planted)
                 {
                     *BerryPlotId = Plot.id;
                     return Plot.id != GardenPlotId && !Controller->ToastIsError() && PickingStarts() == *SecondaryStarts;

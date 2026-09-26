@@ -151,7 +151,7 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   `[RT] Fell with Hatchet`. Use the named button. With keyboard/mouse input last used it reads
   `[LMB] Fell with Hatchet`; `tap_key LeftMouseButton` works then. The same text floats above her
   head as the interact cue.
-- Hotbar keys are `One`..`Zero`. The starter kit puts knife, hatchet, digging stick, pail and
+- Hotbar keys are `One`..`Zero`. The starter kit puts knife, hatchet, stone hoe, pail and
   machete in slots 1-5. Check `hotbarSlot` (0-based) and `focusActions` after selecting.
 - An action that silently does nothing usually left a reason in `toast` (`toastIsError: true`),
   for example "Not enough pack space." when a felled tree's wood won't fit. Read it before
@@ -182,6 +182,16 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   (`log LogTemp Verbose` to see them). To check contact, sample the hatchet prop's edge,
   `Held_SM_FlintHatchet` transformed at local (-0.21, -13.89, 43), a few times a second during the
   swing; it should come within the trunk radius of the centre at about 95 cm above the ground.
+- Gardening (MetaHuman): the garden grid is 1 m squares (`Homestead::GardenCellSize`, 3 x 3 per
+  3 m building cell; `Plot.cellX/Y` are garden coordinates, so use `PlotCenter(Plot)` or
+  `GardenCellCenter`, never `CellCenter`). With the stone hoe (slot `Three`), LMB/RT turns the one
+  square whose cell holds the point 85 cm ahead of her, or weeds it if already tilled. She lifts
+  the hoe overhead and chops twice, and `SM_TilledBed` appears on the first bite. On a bare
+  tilled square the focus offers `[E] Plant roots` / `[F] Plant berry seeds` (gamepad A / X):
+  she kneels, presses the seed in with a pinch and scoops loam over it, and `SM_SoilMound` shows
+  on the bed. A square with moisture of 0.4 or more uses `MI_TilledBed_Wet`. To find beds from
+  Python, look for static mesh components whose mesh name contains `TilledBed` on
+  `HomesteadWorld_0`.
 
 Verified loop (one fresh world): stones and berries with A, eat, branches ×3,
 stream reeds, craft Crude hatchet, select hotbar `Two`, fell a tree with RT.
@@ -438,6 +448,23 @@ Extend it there when play needs a capability; prefer real input over state edits
 ## 8. Field notes
 
 Dated and short, newest first. Promote anything durable into the sections above.
+
+- 2026-09-26: Adding a prop to the game mid-session:
+  - **Never cache a loaded asset in a function-local `static UStaticMesh*`.** `static M =
+    LoadObject(...)` caches nullptr forever if the asset didn't exist (or wasn't saved) when the
+    line first ran. Worse, a raw static is not a GC root: once no component uses the asset, GC
+    frees it and the next use crashes. The packaged FullLoop crashed in `SetStaticMesh` from
+    `BuildPlot` after the sown-seed mound mesh went unused. Hold it in a `UPROPERTY()
+    TObjectPtr<>` member loaded on first use (`if (!Member) Member = LoadObject(...)`). Save new
+    assets with `EditorAssetLibrary.save_asset(path, only_if_is_dirty=False)` before testing.
+  - **Reloading `import_props` after editing it:** a plain `import` returns the cached module.
+    Load it fresh with `importlib.util.spec_from_file_location('import_props',
+    r'<repo>\Scripts\Blender\import_props.py')` + `module_from_spec` + `exec_module`, then
+    `m.main(['TilledBed', 'Seeds'])`. Extra textures (for example a `_wet` variant) go through an
+    `AssetImportTask` with `replace_existing=True`.
+  - **An invisible ground prop is usually back-face culled.** Check the FBX's average face
+    normal z in Blender; an open sheet from `kit.recalc_normals` can face down (see
+    docs/blender-assets.md).
 
 - 2026-09-26: Inspecting the generated woodland scatter:
   - **Count decorations by tag.** In the PIE world, loop over actors, then

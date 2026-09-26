@@ -250,7 +250,8 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 const bool LowCoverProtectsBuilding = AHomesteadWorld::IsDecorationReserved(State, -1750, -1950, 20, 0, true);
                 State.structures.clear();
                 Homestead::Plot Plot{};
-                Plot.cellX = -7; Plot.cellY = -7;
+                // The garden square just west of the (-1800, -1950) low-cover probe.
+                Plot.cellX = -19; Plot.cellY = -20;
                 State.plots.push_back(Plot);
                 const bool LowCoverProtectsPlot = AHomesteadWorld::IsDecorationReserved(State, -1800, -1950, 20, 0, true);
                 Results.Add(FString::Printf(TEXT("RESERVATION access=%d overlap=%d corner=%d harvest=%d cleared=%d canopy_build=%d low_resource=%d low_home=%d path=%d low_build=%d low_plot=%d creek_far=%.6f creek_home=%.6f"),

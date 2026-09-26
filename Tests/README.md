@@ -355,7 +355,7 @@ or continuous smoothness.
   to six, requiring enough inventory room for the full refill.
 - One branch fuels one selected fire for four game hours, up to 48 hours.
   Fires burn independently, including during sleep and while far away.
-- Tool costs: hatchet 4 branches/3 stones/2 fiber; digging stick 3 branches/
+- Tool costs: hatchet 4 branches/3 stones/2 fiber; stone hoe 3 branches/
   1 stone; watering can 3 branches/2 fiber. Tools are not consumed.
 - Pot-free recipes: roasted roots use 2 roots; herbed roots use 2 roots and
   1 meadow herb. Both require a nearby fueled fire. Berries are raw-edible.

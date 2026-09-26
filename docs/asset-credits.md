@@ -40,7 +40,7 @@ Thimbleberry, BrackenFern, WildStrawberry and GrassYarrowTuft, built with
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
 
-The StoneHoe (`Scripts\Blender\Recipes\stone_hoe.py`) and the Seeds set (tepary beans and the
+The StoneHoe (`Scripts\Blender\Recipes\stone_hoe.py`), the TilledBed garden square (`Scripts\Blender\Recipes\tilled_bed.py`) and the Seeds set (tepary beans and the
 covered-seed SoilMound, `Scripts\Blender\Recipes\seeds.py`) are project-authored procedural geometry
 with procedural materials baked to textures; they use no scanned or downloaded geometry or
 textures. Their review renders use the same CC0 Kloofendal HDRI, which ships with no asset.

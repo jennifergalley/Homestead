@@ -195,11 +195,12 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         {
             float Best = TNumericLimits<float>::Max();
             const auto Position = PC->PlayerPoint();
-            for (int32 X = -7; X <= 3; ++X)
-                for (int32 Y = -7; Y <= 7; ++Y)
+            for (int32 CellX = -7; CellX <= 3; ++CellX)
+                for (int32 CellY = -7; CellY <= 7; ++CellY)
                 {
-                    const auto Center = Homestead::CellCenter(X, Y);
-                    const FVector2D Approach(Center.x, Center.y - 220);
+                    const int32 X = Homestead::CellToGarden(CellX), Y = Homestead::CellToGarden(CellY);
+                    const auto Center = Homestead::GardenCellCenter(X, Y);
+                    const FVector2D Approach(Center.x, Center.y - Homestead::GardenCellSize);
                     const FVector2D Staging(Center.x, Center.y - 340);
                     auto Trial = PC->Simulation();
                     const float Distance = FVector2D::Distance(Staging, FVector2D(Position.x, Position.y));
@@ -216,7 +217,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         if (WalkWaterTarget(WaterTarget, 12, WallDelta, Move, Look)) ++WaterStage;
         break;
     case 7:
-        if (WalkWaterTarget(GardenCenter + FVector2D(0, -220), 10, WallDelta, Move, Look)) ++WaterStage;
+        if (WalkWaterTarget(GardenCenter + FVector2D(0, -Homestead::GardenCellSize), 10, WallDelta, Move, Look)) ++WaterStage;
         break;
     case 8:
         if (WaterPlotId < 0 && !bWaterInputPending)
@@ -232,7 +233,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
             if (PC->ToastIsError() || PC->State().plots.empty()) { Fail(PC->Toast()); return; }
             for (const auto& Plot : PC->State().plots)
             {
-                const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                const auto Center = Homestead::PlotCenter(Plot);
                 if (FVector2D::Distance(GardenCenter, FVector2D(Center.x, Center.y)) < 1) WaterPlotId = Plot.id;
             }
             if (WaterPlotId < 0) { Fail(TEXT("Mapped tilling did not create the chosen plot.")); return; }

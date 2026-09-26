@@ -413,10 +413,11 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{26, 15}, {35, 19}, {25, 19}, {33, 23}}, Gold, 2);
         break;
     case EKind::DiggingStick:
-        P.Line({{13, 13}, {20, 7}, {28, 12}, {23, 19}, {13, 13}}, Gold, 3);
-        P.Line({{22, 17}, {37, 39}}, Wood, 6);
-        P.Shape({{32, 37}, {38, 35}, {45, 48}, {36, 46}}, Gold);
-        P.Line({{37, 39}, {41, 45}}, Pine, 1.5f);
+        // Stone hoe: a long diagonal haft with a flat stone blade lashed across its head.
+        P.Line({{9, 50}, {35, 10}}, Wood, 5);
+        P.Shape({{31, 9}, {40, 6}, {49, 27}, {46, 34}, {38, 32}, {37, 20}}, StoneGray);
+        P.Shape({{46, 24}, {49, 27}, {46, 34}, {41, 33}}, Cream);
+        P.Line({{30, 12}, {39, 14}, {29, 17}, {38, 19}}, Gold, 2);
         break;
     case EKind::Machete:
         // Long leaf-tapered blade over a riveted wooden grip.

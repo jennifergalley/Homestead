@@ -1424,8 +1424,8 @@ bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float 
     }
     for (const auto& Plot : State.plots)
     {
-        const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
-        if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 175.0f)
+        const auto Center = Homestead::PlotCenter(Plot);
+        if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 70.0f)
             return true;
     }
     for (const auto& Drop : State.worldDrops)
@@ -1571,7 +1571,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
             if (Nearby((Structure.cellX + 0.5) * Homestead::CellSize, (Structure.cellY + 0.5) * Homestead::CellSize))
                 Signature += FString::Printf(TEXT("S%d;"), Structure.id);
         for (const auto& Plot : State.plots)
-            if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
+            if (Nearby(Homestead::PlotCenter(Plot).x, Homestead::PlotCenter(Plot).y))
                 Signature += FString::Printf(TEXT("P%d;"), Plot.id);
         for (const auto& Cut : State.clearedUnderbrush)
             if (Cut.chunk.x == Chunk.Key.X && Cut.chunk.y == Chunk.Key.Y)
@@ -2967,19 +2967,52 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
 
 void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot)
 {
-    const Homestead::Point Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+    const Homestead::Point Center = Homestead::PlotCenter(Plot);
     const float Moisture = Stage(Plot.moisture, 5) / 5.0f;
     const FLinearColor WetSoil = FMath::Lerp(Soil, FLinearColor(0.075f, 0.044f, 0.025f), Moisture);
-    // Small separate soil tiles follow the terrain rather than floating above a slope.
-    for (int X = -1; X <= 1; ++X)
+    // One hoed square of turned soil, a little inside the garden square so neighbours read apart,
+    // with one plant at its middle.
     {
-        for (int Y = -1; Y <= 1; ++Y)
         {
-            const float PX = Center.x + X * 76;
-            const float PY = Center.y + Y * 76;
-            AddPart(Visual, Cube, AtGround(PX, PY, 1.5f), FVector(74, 74, 3), WetSoil,
-                false, FRotator::ZeroRotator, 0.9f - Moisture * 0.35f);
-            if (Plot.planted)
+            const float PX = Center.x;
+            const float PY = Center.y;
+            // One hoed square of loose loam raked into three ridges (the Blender tilled bed; its
+            // ragged rim sinks below the ground line), laid on the local slope of the terrain.
+            // Watering swaps in the darker wet-soil texture.
+            if (!TilledBedMesh)
+                TilledBedMesh = LoadObject<UStaticMesh>(nullptr,
+                    TEXT("/Game/SurvivalGame/Environment/Props/TilledBed/SM_TilledBed.SM_TilledBed"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+            if (!TilledBedWetMaterial)
+                TilledBedWetMaterial = LoadObject<UMaterialInterface>(nullptr,
+                    TEXT("/Game/SurvivalGame/Environment/Props/TilledBed/MI_TilledBed_Wet.MI_TilledBed_Wet"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+            UStaticMesh* Bed = TilledBedMesh;
+            UMaterialInterface* WetBed = TilledBedWetMaterial;
+            if (Bed)
+            {
+                constexpr float Probe = 40.0f;
+                const FVector Normal = FVector(GroundHeight(PX - Probe, PY) - GroundHeight(PX + Probe, PY),
+                    GroundHeight(PX, PY - Probe) - GroundHeight(PX, PY + Probe), 2 * Probe).GetSafeNormal();
+                const float Yaw = (Plot.id % 2) ? 180.0f : 0.0f;
+                const FRotator Lie = FRotationMatrix::MakeFromZX(Normal, FRotator(0, Yaw, 0).Vector()).Rotator();
+                if (auto* Part = AddPart(Visual, Bed, AtGround(PX, PY, -1.2f), FVector(100, 100, 100), WetSoil, false, Lie))
+                    Part->SetMaterial(0, Moisture >= 0.4f && WetBed ? WetBed : Bed->GetMaterial(0));
+            }
+            else
+                AddPart(Visual, Cube, AtGround(PX, PY, 0.4f), FVector(Homestead::GardenCellSize - 8.0f, Homestead::GardenCellSize - 8.0f, 1.2f),
+                    WetSoil * 0.85f, false, FRotator::ZeroRotator, 0.95f - Moisture * 0.35f);
+            constexpr int X = 0, Y = 0;
+            if (Plot.planted && Stage(Plot.growth, 12) == 0)
+            {
+                // Just sown: a small mound of soil over the seed, with her fingertip's press.
+                if (!SoilMoundMesh)
+                    SoilMoundMesh = LoadObject<UStaticMesh>(nullptr,
+                        TEXT("/Game/SurvivalGame/Environment/Props/Seeds/SM_SoilMound.SM_SoilMound"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+                UStaticMesh* Mound = SoilMoundMesh;
+                if (auto* Part = AddPart(Visual, Mound ? Mound : Sphere.Get(), AtGround(PX, PY + 12, Mound ? (Bed ? 0.6f : 0.0f) : 0.5f),
+                    Mound ? FVector(120, 120, 130) : FVector(15, 15, 4), WetSoil * 0.8f))
+                    if (Mound) Part->SetMaterial(0, Mound->GetMaterial(0));
+            }
+            else if (Plot.planted)
             {
                 const float Growth = Stage(Plot.growth, 12) / 12.0f;
                 const bool BerryCrop = Plot.kind == Homestead::CropKind::Berries;
@@ -3009,9 +3042,9 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
     const int WeedCount = Stage(Plot.weeds, 8);
     for (int I = 0; I < WeedCount; ++I)
     {
-        const float X = Center.x + Random.FRandRange(-100, 100);
-        const float Y = Center.y + Random.FRandRange(-100, 100);
-        AddPart(Visual, Cone, AtGround(X, Y, 19), FVector(22, 22, 38),
+        const float X = Center.x + Random.FRandRange(-38, 38);
+        const float Y = Center.y + Random.FRandRange(-38, 38);
+        AddPart(Visual, Cone, AtGround(X, Y, 12), FVector(14, 14, 24),
             FLinearColor(0.34f, 0.31f, 0.07f), false, FRotator(0, I * 47, 16));
     }
 }
@@ -3326,7 +3359,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     for (const auto& Structure : State.structures)
         if (Near(Structure.cellX, Structure.cellY)) NearStructures.push_back(Structure);
     for (const auto& Plot : State.plots)
-        if (Near(Plot.cellX, Plot.cellY)) NearPlots.push_back(Plot);
+        if (Near(Homestead::GardenToCell(Plot.cellX), Homestead::GardenToCell(Plot.cellY))) NearPlots.push_back(Plot);
     const double ChunkCenterX = (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm;
     const double ChunkCenterY = (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm;
     for (const auto& Drop : State.worldDrops)
@@ -3354,14 +3387,18 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     RemoveMissing(PlotVisuals, NearPlots);
     for (const auto& Plot : NearPlots)
     {
-        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d"),
-            Plot.cellX, Plot.cellY, Plot.planted, Stage(Plot.growth, 12),
+        const bool bShownPlanted = Plot.planted && Plot.id != HeldPlotId;
+        const bool bSquareHidden = bHeldPlotHidden && Plot.id == HeldPlotId;
+        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d"),
+            Plot.cellX, Plot.cellY, bShownPlanted, bSquareHidden, Stage(Plot.growth, 12),
             Stage(Plot.moisture, 5), Stage(Plot.weeds, 8), static_cast<int>(Plot.kind));
         FHomesteadWorldVisual& Visual = PlotVisuals.FindOrAdd(Plot.id);
         if (Visual.Signature != Signature)
         {
             ClearVisual(Visual);
-            BuildPlot(Visual, Plot);
+            Homestead::Plot Shown = Plot;
+            Shown.planted = bShownPlanted;
+            if (!bSquareHidden) BuildPlot(Visual, Shown);
             Visual.Signature = Signature;
         }
     }

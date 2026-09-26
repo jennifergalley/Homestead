@@ -55,8 +55,8 @@ or sufficient in the new world.
 3. Build a small **two-cell enclosed shelter**, bed and chest in different
    furniture cells, and an outdoor cookfire. Fuel it and cook roots without a
    pot. The first meal need not wait for farming: berries are edible raw.
-4. Make the digging stick and watering can; till two root plots and one berry
-   plot from gathered planting stock. Water/weed for pleasure and faster growth.
+4. Make the stone hoe and watering can; hoe two root squares and one berry
+   square (1 m garden squares) from gathered planting stock. Water/weed for pleasure and faster growth.
    Harvests and storage, not compulsory village errands, lead into winter prep.
 
 ```mermaid

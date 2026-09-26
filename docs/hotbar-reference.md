@@ -28,7 +28,7 @@ directly changes spring-arm distance; number keys and left mouse have no tool
 binding. E/controller A performs context interaction, F/controller X performs
 secondary clearing/weeding/tilling, gameplay LB/RB opens or changes field-book
 pages, and R3 toggles camera distance. The starter Knife and crafted Hatchet,
-Digging Stick, and Watering Can occupy ordinary pack capacity and persist only
+Stone Hoe, and Watering Can occupy ordinary pack capacity and persist only
 through Simulation inventory. Save schema 6 has no shortcut references.
 
 At 1280x720 and 3840x2160, the lower-left needs panel and lower-right context

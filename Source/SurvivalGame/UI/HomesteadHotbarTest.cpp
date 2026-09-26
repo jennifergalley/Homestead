@@ -591,11 +591,12 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 for (int32 X = -7; X <= 1 && !Found; ++X)
                 {
                     Homestead::Simulation Candidate = Controller->Simulation();
-                    const auto Center = Homestead::CellCenter(X, Y);
-                    const Homestead::Point Position{Center.x - 190, Center.y};
-                    if (Candidate.Till(X, Y, Position))
+                    const int32 GardenX = Homestead::CellToGarden(X), GardenY = Homestead::CellToGarden(Y);
+                    const auto Center = Homestead::GardenCellCenter(GardenX, GardenY);
+                    const Homestead::Point Position{Center.x - Homestead::GardenCellSize, Center.y};
+                    if (Candidate.Till(GardenX, GardenY, Position))
                     {
-                        *TillX = X; *TillY = Y; Found = true;
+                        *TillX = GardenX; *TillY = GardenY; Found = true;
                         Teleport(Position);
                         Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
                     }
@@ -626,7 +627,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             }
             const auto Result = Controller->Sim.Deserialize(Supplied.Serialize());
             if (!Result) { Finish(false, UTF8_TO_TCHAR(Result.message.c_str())); return; }
-            Teleport(Homestead::CellCenter(*TillX, *TillY));
+            Teleport(Homestead::GardenCellCenter(*TillX, *TillY));
         },
         [this]() { return Controller->Simulation().Count(Item::Seeds) >= 1
             && Controller->Simulation().Count(Item::Water) >= 6; }, 0.7f);

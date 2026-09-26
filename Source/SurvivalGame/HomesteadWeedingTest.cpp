@@ -26,7 +26,7 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
         if (Plot.planted && Plot.weeds >= 0.125 && Plot.growth < 1)
         {
             GardenPlotId = Plot.id;
-            Garden = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+            Garden = Homestead::PlotCenter(Plot);
             break;
         }
     if (!Avatar || !Avatar->HasHeroine() || GardenPlotId < 0)

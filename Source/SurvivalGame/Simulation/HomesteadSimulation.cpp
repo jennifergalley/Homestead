@@ -345,15 +345,24 @@ bool SaveResourceEdit(State& candidate, const ResourceNode& node)
     }
     return true;
 }
+Result CheckAreaResources(const State& state, double left, double bottom, double size, const char* blocked);
 Result CheckBuildingResources(const State& state, int x, int y)
 {
-    const double left = static_cast<double>(x) * CellSize;
-    const double bottom = static_cast<double>(y) * CellSize;
+    return CheckAreaResources(state, x * CellSize, y * CellSize, CellSize,
+        "Fell the standing tree or clear the sapling before using this building cell.");
+}
+Result CheckGardenResources(const State& state, int gardenX, int gardenY)
+{
+    return CheckAreaResources(state, gardenX * GardenCellSize, gardenY * GardenCellSize, GardenCellSize,
+        "Fell the standing tree or clear the sapling before tilling here.");
+}
+Result CheckAreaResources(const State& state, double left, double bottom, double size, const char* blockedMessage)
+{
     Generation::ChunkCoord low, high;
     const auto lowStatus = Generation::ChunkAt(static_cast<std::int64_t>(left - 50),
         static_cast<std::int64_t>(bottom - 50), low);
-    const auto highStatus = Generation::ChunkAt(static_cast<std::int64_t>(left + CellSize + 50),
-        static_cast<std::int64_t>(bottom + CellSize + 50), high);
+    const auto highStatus = Generation::ChunkAt(static_cast<std::int64_t>(left + size + 50),
+        static_cast<std::int64_t>(bottom + size + 50), high);
     if (lowStatus != Generation::Status::Ok) return GenerationFailure(lowStatus);
     if (highStatus != Generation::Status::Ok) return GenerationFailure(highStatus);
     for (int cy = low.y; cy <= high.y; ++cy)
@@ -368,10 +377,11 @@ Result CheckBuildingResources(const State& state, int x, int y)
                 ResourceNode node;
                 if (!GeneratedNode(state, entity, node) || node.cleared) continue;
                 const bool blocked = node.kind == ResourceKind::Sapling ?
-                    Cell(node.position.x) == x && Cell(node.position.y) == y :
-                    DistanceSquared(node.position, {Clamp(node.position.x, left, left + CellSize),
-                        Clamp(node.position.y, bottom, bottom + CellSize)}) <= 50.0 * 50.0;
-                if (blocked) return Bad("Fell the standing tree or clear the sapling before using this building cell.");
+                    node.position.x >= left && node.position.x < left + size
+                        && node.position.y >= bottom && node.position.y < bottom + size :
+                    DistanceSquared(node.position, {Clamp(node.position.x, left, left + size),
+                        Clamp(node.position.y, bottom, bottom + size)}) <= 50.0 * 50.0;
+                if (blocked) return Bad(blockedMessage);
             }
         }
     return Good("");
@@ -729,7 +739,7 @@ const char* GarmentRequirements(WearableDefinition definition)
 const char* ItemName(Item item)
 {
     static const char* names[] = {"Knife", "Branch", "Stone", "Fiber", "Berries", "Roots",
-        "Meadow herb", "Seeds", "Crude hatchet", "Digging stick", "Watering can", "Water",
+        "Meadow herb", "Seeds", "Crude hatchet", "Stone hoe", "Watering can", "Water",
         "Roasted roots", "Herbed roots", "Timber", "Firewood", "Machete"};
     static_assert(sizeof(names) / sizeof(names[0]) == ItemCount, "Every item needs a name.");
     return ValidEnum(item, Item::Count) ? names[static_cast<int>(item)] : "Unknown item";
@@ -742,7 +752,7 @@ const char* ResourceName(ResourceKind kind)
 }
 const char* RecipeName(Recipe recipe)
 {
-    static const char* names[] = {"Crude hatchet", "Digging stick", "Watering can",
+    static const char* names[] = {"Crude hatchet", "Stone hoe", "Watering can",
         "Roasted roots", "Herbed roots", "Split firewood"};
     return ValidEnum(recipe, Recipe::Count) ? names[static_cast<int>(recipe)] : "Unknown recipe";
 }
@@ -795,6 +805,20 @@ double StreamX(double y) { return Generation::StreamCenterCm(y); }
 bool IsNearWater(Point position)
 {
     return ValidPoint(position) && std::abs(position.x - StreamX(position.y)) <= 180.0;
+}
+int GardenCell(double value) { return static_cast<int>(std::floor(value / GardenCellSize)); }
+int GardenToCell(int garden)
+{
+    return garden >= 0 ? garden / GardenCellsPerCell : -((-garden + GardenCellsPerCell - 1) / GardenCellsPerCell);
+}
+Point GardenCellCenter(int gardenX, int gardenY)
+{
+    return {(static_cast<double>(gardenX) + 0.5) * GardenCellSize, (static_cast<double>(gardenY) + 0.5) * GardenCellSize};
+}
+Point PlotCenter(const Plot& plot) { return GardenCellCenter(plot.cellX, plot.cellY); }
+bool PlotInCell(const Plot& plot, int cellX, int cellY)
+{
+    return GardenToCell(plot.cellX) == cellX && GardenToCell(plot.cellY) == cellY;
 }
 Point CellCenter(int cellX, int cellY)
 {
@@ -1149,7 +1173,7 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
         if (Near(position, CellCenter(structure.cellX, structure.cellY), 100.0))
             return Bad("Keep dropped items clear of structures.");
     for (const auto& plot : state_.plots)
-        if (Near(position, CellCenter(plot.cellX, plot.cellY), 100.0))
+        if (Near(position, PlotCenter(plot), 100.0))
             return Bad("Keep dropped items clear of crop plots.");
     State candidate = state_;
     auto entry = std::find_if(candidate.inventoryLayout.begin(), candidate.inventoryLayout.end(),
@@ -1193,7 +1217,7 @@ Result Simulation::DropWearable(int wearableId, Point position, Point player,
         if (Near(position, CellCenter(structure.cellX, structure.cellY), 100.0))
             return Bad("Keep dropped garments clear of structures.");
     for (const auto& plot : state_.plots)
-        if (Near(position, CellCenter(plot.cellX, plot.cellY), 100.0))
+        if (Near(position, PlotCenter(plot), 100.0))
             return Bad("Keep dropped garments clear of crop plots.");
     const auto* original = GetWearable(wearableId);
     if (!original || original->owner != WearableOwner::Carried)
@@ -1337,7 +1361,7 @@ int Simulation::FindNearestPlot(Point position, double maxDistance) const
     double distance = maxDistance * maxDistance;
     for (const auto& plot : state_.plots)
     {
-        const double current = DistanceSquared(position, CellCenter(plot.cellX, plot.cellY));
+        const double current = DistanceSquared(position, PlotCenter(plot));
         if (current <= distance && !(current == distance && nearest != -1))
         { nearest = plot.id; distance = current; }
     }
@@ -1533,7 +1557,7 @@ Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point p
     const auto space = CheckBuildingResources(state_, cellX, cellY);
     if (!space) return space;
     for (const auto& plot : state_.plots)
-        if (plot.cellX == cellX && plot.cellY == cellY) return Bad("Keep this crop plot clear of buildings.");
+        if (PlotInCell(plot, cellX, cellY)) return Bad("Keep this crop plot clear of buildings.");
     for (const auto& piece : state_.structures)
     {
         if (EdgePiece(kind) && EdgePiece(piece.kind) &&
@@ -1599,7 +1623,7 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
     const auto used = [this](int x, int y)
     {
         for (const auto& piece : state_.structures) if (piece.cellX == x && piece.cellY == y) return true;
-        for (const auto& plot : state_.plots) if (plot.cellX == x && plot.cellY == y) return true;
+        for (const auto& plot : state_.plots) if (PlotInCell(plot, x, y)) return true;
         return false;
     };
     int placed = 0;
@@ -1628,26 +1652,28 @@ Result Simulation::GrantItems(Item item, int count)
 Result Simulation::Till(int cellX, int cellY, Point player)
 {
     if (state_.failed) return Failed();
-    if (!ValidCell(cellX, cellY) || !Near(player, CellCenter(cellX, cellY))) return Bad("Move closer to a valid garden cell.");
-    if (Count(Item::DiggingStick) == 0) return Bad("Craft a digging stick before tilling soil.");
+    const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
+    if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
+        return Bad("Move closer to a valid garden square.");
+    if (Count(Item::DiggingStick) == 0) return Bad("Craft a stone hoe before tilling soil.");
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
-    const auto space = CheckBuildingResources(state_, cellX, cellY);
+    const auto space = CheckGardenResources(state_, cellX, cellY);
     if (!space) return space;
     for (const auto& structure : state_.structures)
-        if (structure.cellX == cellX && structure.cellY == cellY) return Bad("Choose soil away from buildings.");
+        if (structure.cellX == buildingX && structure.cellY == buildingY) return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("This cell is already tilled.");
     if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
     state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
-    return Exert(Exertion::TillEnergy, Good("Soil tilled. Plant wild-root seeds or seeds from a foraged berry here."));
+    return Exert(Exertion::TillEnergy, Good("Soil tilled. Choose seeds or a berry on your hotbar to plant here."));
 }
 Result Simulation::Plant(int plotId, Point player, CropKind kind)
 {
     if (state_.failed) return Failed();
     if (!ValidEnum(kind, CropKind::Count)) return Bad("Choose roots or berries to plant.");
     auto* plot = Find(state_.plots, plotId);
-    if (!plot || !Near(player, CellCenter(plot->cellX, plot->cellY))) return Bad("Move beside a tilled plot to plant.");
+    if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a tilled plot to plant.");
     if (plot->planted) return Bad("A crop is already growing here.");
     const bool berries = kind == CropKind::Berries;
     const Item plantingItem = berries ? Item::Berries : Item::Seeds;
@@ -1663,7 +1689,7 @@ Result Simulation::Water(int plotId, Point player)
 {
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
-    if (!plot || !Near(player, CellCenter(plot->cellX, plot->cellY))) return Bad("Move beside a garden plot to water it.");
+    if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
     if (Count(Item::WateringCan) == 0) return Bad("Craft a watering can first.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
     if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
@@ -1675,7 +1701,7 @@ Result Simulation::Weed(int plotId, Point player)
 {
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
-    if (!plot || !Near(player, CellCenter(plot->cellX, plot->cellY))) return Bad("Move beside a garden plot to weed it.");
+    if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to weed it.");
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
     if (auto ready = CheckExertion(Exertion::WeedEnergy); !ready) return ready;
     plot->weeds = 0.0;
@@ -1685,7 +1711,7 @@ Result Simulation::HarvestCrop(int plotId, Point player)
 {
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
-    if (!plot || !Near(player, CellCenter(plot->cellX, plot->cellY))) return Bad("Move beside your crop to harvest.");
+    if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside your crop to harvest.");
     if (!plot->planted || plot->growth < 1.0) return Bad("This crop is not ready to harvest.");
     const bool berries = plot->kind == CropKind::Berries;
     const Inventory yield = berries ? Items({{Item::Berries, 6}}) : Items({{Item::Roots, 4}, {Item::Seeds, 2}});
@@ -1934,7 +1960,8 @@ Result Simulation::Deserialize(const std::string& data)
     if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD") return invalid();
     header >> std::ws;
     if (!header.eof()) return invalid();
-    if (version != SimulationSaveVersion && version != LegacySimulationSaveVersion) return {false,
+    if (version != SimulationSaveVersion && version != LegacySimulationSaveVersion
+        && version != GardenSquareSaveVersion - 1) return {false,
         "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
     const int storedItems = version == LegacySimulationSaveVersion ? static_cast<int>(Item::Machete) : ItemCount;
@@ -2025,14 +2052,22 @@ Result Simulation::Deserialize(const std::string& data)
         int kind = -1;
         if (!(input >> kind)) return invalid();
         plot.kind = static_cast<CropKind>(kind);
-        if (!acceptId(plot.id) || !ValidCell(plot.cellX, plot.cellY) || !ValidEnum(plot.kind, CropKind::Count) ||
+        // Older saves planted a whole building cell; it becomes that cell's middle garden square.
+        if (version < GardenSquareSaveVersion)
+        {
+            if (!ValidCell(plot.cellX, plot.cellY)) return invalid();
+            plot.cellX = CellToGarden(plot.cellX);
+            plot.cellY = CellToGarden(plot.cellY);
+        }
+        if (!acceptId(plot.id) || !ValidCell(GardenToCell(plot.cellX), GardenToCell(plot.cellY))
+            || !ValidEnum(plot.kind, CropKind::Count) ||
             (!plot.planted && plot.kind != CropKind::Roots) ||
             !FiniteRange(plot.growth, 0.0, 1.0) || !FiniteRange(plot.moisture, 0.0, 1.0) ||
             !FiniteRange(plot.weeds, 0.0, 1.0) || (!plot.planted && plot.growth != 0.0) ||
             !plots.insert({plot.cellX, plot.cellY}).second ||
-            !CheckBuildingResources(candidate, plot.cellX, plot.cellY)) return invalid();
+            !CheckGardenResources(candidate, plot.cellX, plot.cellY)) return invalid();
         for (const auto& piece : candidate.structures)
-            if (piece.cellX == plot.cellX && piece.cellY == plot.cellY) return invalid();
+            if (PlotInCell(plot, piece.cellX, piece.cellY)) return invalid();
         candidate.plots.push_back(plot);
     }
     if (!(input >> count) || count < 0 || count > MaxWorldDrops) return invalid();

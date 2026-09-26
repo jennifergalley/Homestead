@@ -367,6 +367,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     ClearAnimation = Clips[5];
     KnifeCutAnimation = Clips[6];
     TillAnimation = Clips[7];
+    // Optional: the two-handed stone hoe authored with homestead_agent.hoe_till.
+    if (auto* Hoe = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_HoeTill")))
+        if (Hoe->GetSkeleton() == MetaHumanBody->GetSkeleton()) { TillAnimation = Hoe; bHoeTill = true; }
     // Optional: authored with homestead_agent.kneel_gather; without it sticks use the plain gather.
     GatherSticksAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelGatherSticks"));
     if (GatherSticksAnimation && GatherSticksAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
@@ -434,6 +437,12 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         CarriedReeds = MakeProp(TEXT("CarriedReeds"), Reeds);
         CarriedReeds->SetCastShadow(true);
     }
+    // Optional: authored with homestead_agent.kneel_plant.
+    GatherPlantAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelPlant"));
+    if (GatherPlantAnimation && GatherPlantAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        GatherPlantAnimation = nullptr;
+    if (UStaticMesh* Seeds = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/Seeds/SM_Seeds.SM_Seeds")))
+        CarriedSeed = MakeProp(TEXT("CarriedSeed"), Seeds);
     // Optional: authored with homestead_agent.eat_berry.
     EatAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Eat"));
     if (EatAnimation && EatAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
@@ -476,6 +485,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     const FHeldToolAsset Assets[] = {
         {Homestead::Item::Knife, TEXT("FlintKnife/SM_FlintKnife"), 30, false, FTransform::Identity},
         {Homestead::Item::Hatchet, TEXT("FlintHatchet/SM_FlintHatchet"), 58, false, FTransform::Identity},
+        // The stone hoe (pivot at the right hand's grip, blade at the far end) is carried tipped
+        // well forward so its head clears the ground; the digging stick is the fallback.
+        {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 64, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
         {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
     };
@@ -485,6 +497,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         auto* PropMesh = LoadObject<UStaticMesh>(nullptr,
             *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s.%s"), Asset.Path, *Name));
         if (!PropMesh) continue;
+        // One prop per tool: the first authored mesh found wins.
+        if (HeldToolSpecs.ContainsByPredicate([&Asset](const FHeldToolSpec& Spec) { return Spec.Tool == Asset.Tool; })) continue;
         auto* Prop = MakeProp(*FString::Printf(TEXT("Held_%s"), *Name), PropMesh);
         Prop->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
         Prop->SetRelativeTransform(Asset.Offset * Grip);
@@ -935,12 +949,13 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
     const bool bPropsReady = Kind == EHomesteadKneelGather::Sticks ? CarriedSticks.Num() >= 2
         : Kind == EHomesteadKneelGather::Stones ? CarriedStones.Num() >= 2
         : Kind == EHomesteadKneelGather::Reeds ? CarriedReeds && GetHeldProp(Homestead::Item::Knife)
+        : Kind == EHomesteadKneelGather::Plant ? CarriedSeed != nullptr
         : CarriedForage != nullptr;
     if (!GetGatherSticksAnimation() || !bPropsReady || !Animation)
     {
-        const bool bReeds = Kind == EHomesteadKneelGather::Reeds;
+        const bool bQuiet = Kind == EHomesteadKneelGather::Reeds || Kind == EHomesteadKneelGather::Plant;
         KneelKind = EHomesteadKneelGather::Sticks;
-        if (!bReeds) PlayGather();
+        if (!bQuiet) PlayGather();
         return false;
     }
     if (Kind == EHomesteadKneelGather::Pouch)
@@ -968,8 +983,10 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
         // Her right hand picks both sticks up about 32 cm ahead and 26 cm to her right; reed stems
         // are gathered 34 cm ahead and 10 cm to her right, beside the forward knee (kneel_reeds.STEMS). Turn and settle her during the
         // first step so that spot lands on the pile.
-        const bool bReeds = Kind == EHomesteadKneelGather::Reeds;
-        const float GrabForward = bReeds ? 34.0f : 32.0f, GrabRight = bReeds ? 10.0f : 26.0f;
+        // Her forefinger presses the seed in 32 cm ahead and 9 cm to her right (kneel_plant.SPOT, as baked).
+        const bool bReeds = Kind == EHomesteadKneelGather::Reeds, bPlant = Kind == EHomesteadKneelGather::Plant;
+        const float GrabForward = bReeds ? 34.0f : bPlant ? 32.0f : 32.0f;
+        const float GrabRight = bReeds ? 10.0f : bPlant ? 9.0f : 26.0f;
         const FVector Here = GetActorLocation();
         const FVector2D ToPile = *Pile - FVector2D(Here);
         if (ToPile.Size() > 1.0f && ToPile.Size() < 150.0f)
@@ -1032,6 +1049,17 @@ namespace GatherReedsTiming
 constexpr float Grab = 38.0f / 30.0f, Cut = 72.0f / 30.0f;
 }
 
+// Moments in AN_HeroineMH_KneelPlant (seconds; homestead_agent.kneel_plant EVENTS).
+namespace GatherPlantTiming
+{
+constexpr float Pick = 36.0f / 30.0f, Press = 58.0f / 30.0f, Covered = 102.0f / 30.0f;
+}
+
+bool AHomesteadCharacter::PlayPlant(Homestead::Point Target)
+{
+    return PlayKneelGather(EHomesteadKneelGather::Plant, FVector2D(Target.x, Target.y));
+}
+
 bool AHomesteadCharacter::IsCuttingReeds() const
 {
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
@@ -1043,18 +1071,23 @@ void AHomesteadCharacter::UpdateCarriedSticks()
     const bool bPouch = KneelKind == EHomesteadKneelGather::Pouch;
     const bool bStones = KneelKind == EHomesteadKneelGather::Stones;
     const bool bReeds = KneelKind == EHomesteadKneelGather::Reeds;
+    const bool bPlant = KneelKind == EHomesteadKneelGather::Plant;
     const auto& Props = bStones ? CarriedStones : CarriedSticks;
-    if (bReeds ? !CarriedReeds : bPouch ? !CarriedForage : Props.Num() < 2) return;
+    if (bPlant ? !CarriedSeed : bReeds ? !CarriedReeds : bPouch ? !CarriedForage : Props.Num() < 2) return;
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     const bool Active = Animation && Animation->IsGatheringSticks();
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
     // Reeds come off the clump all at once, with the cut.
-    const float Pick1 = bReeds ? GatherReedsTiming::Cut : bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
-    const float Pick2 = bReeds ? GatherReedsTiming::Cut : bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
+    // Reeds come off the clump all at once, with the cut; a planted square stays bare until covered.
+    const float Pick1 = bPlant ? GatherPlantTiming::Covered : bReeds ? GatherReedsTiming::Cut
+        : bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
+    const float Pick2 = bPlant ? GatherPlantTiming::Covered : bReeds ? GatherReedsTiming::Cut
+        : bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
     if (bReeds && Animation)
         Animation->SetLeftHandGrip(Active && Time >= GatherReedsTiming::Grab - 0.1f ? 1.0f : 0.0f);
     int32 Stage = 0;
-    if (bReeds) Stage = Active && Time >= GatherReedsTiming::Cut ? 1 : 0;
+    if (bPlant) Stage = Active && Time >= GatherPlantTiming::Pick && Time < GatherPlantTiming::Press ? 1 : 0;
+    else if (bReeds) Stage = Active && Time >= GatherReedsTiming::Cut ? 1 : 0;
     else if (bPouch)
     {
         using namespace GatherPouchTiming;
@@ -1091,6 +1124,19 @@ void AHomesteadCharacter::UpdateCarriedSticks()
         Prop->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, Bone);
         Prop->SetVisibility(true);
     };
+    if (bPlant)
+    {
+        if (Stage != 1)
+        {
+            CarriedSeed->SetVisibility(false);
+            return;
+        }
+        // Between the pinched thumb and forefinger tips.
+        const FVector Index = Body->GetSocketLocation(TEXT("index_03_r"));
+        const FVector Thumb = Body->GetSocketLocation(TEXT("thumb_03_r"));
+        Put(CarriedSeed, (Index + Thumb) * 0.5f, Body->GetSocketRotation(TEXT("hand_r")), FVector(1.0f), TEXT("hand_r"), false);
+        return;
+    }
     if (bReeds)
     {
         if (Stage != 1)
@@ -1296,11 +1342,12 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     const bool Hacking = Animation->MacheteWeight() > 0.01f;
     const bool Felling = Animation->FellWeight() > 0.01f;
     const bool CuttingReeds = IsCuttingReeds();
+    const bool Hoeing = bHoeTill && Animation->TillWeight() > 0.01f;
     float Grip = 0, Carry = RestWristDegrees;
     // At rest a tool's handle crosses the palm diagonally (heel of the hand to the index knuckle),
     // which tips its head forward and down with the wrist nearly straight. Authored actions set
     // the tool's angle themselves, so the tilt eases out while one plays.
-    const float TiltTarget = HandsFree && !Hacking && !Felling && !CuttingReeds ? 1.0f : 0.0f;
+    const float TiltTarget = HandsFree && !Hacking && !Felling && !CuttingReeds && !Hoeing ? 1.0f : 0.0f;
     HeldToolTilt = FMath::FInterpConstantTo(HeldToolTilt, TiltTarget, DeltaSeconds, 1.0f / 0.15f);
     const auto Tilt = [this](const FTransform& Rest, float Degrees)
     {
@@ -1323,12 +1370,13 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const FHeldToolSpec& Spec = HeldToolSpecs[Index];
         const bool Held = Spec.Tool == Homestead::Item::Hatchet && Felling
             || Spec.Tool == Homestead::Item::Knife && CuttingReeds
+            || Spec.Tool == Homestead::Item::DiggingStick && Hoeing
             || (HandsFree && !Hacking && Presented == Spec.Tool);
         Prop->SetVisibility(Held);
         if (!Held) continue;
         Grip = 1;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
-        Carry = CuttingReeds ? 0.0f : FMath::Min(Spec.CarryDegrees, RestWristDegrees);
+        Carry = CuttingReeds || Hoeing ? 0.0f : FMath::Min(Spec.CarryDegrees, RestWristDegrees);
         if (!Spec.bHangs) Prop->SetRelativeTransform(Tilt(Spec.Rest, Spec.CarryDegrees - Carry));
         if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
     }

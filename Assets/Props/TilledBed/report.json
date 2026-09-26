@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "TilledBed",
+  "description": "A freshly hoed 1 m garden square of loose loam raked into three ridges, with a ragged feathered rim (pivot = bottom centre, with LOD1) (original).",
+  "collision": "none",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/tilled_bed.py",
+  "source_sha256": "6018fc9b3c9852824352303f54050765b63ba3843a1ce72699a03dcfcd57cf28",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_TilledBed": {
+      "vertices": 7056,
+      "triangles": 13778,
+      "size_cm": [
+        112.0,
+        112.0,
+        6.97
+      ],
+      "materials": [
+        {
+          "name": "M_TilledBed",
+          "textures": {
+            "basecolor": "T_TilledBed_basecolor.png",
+            "roughness": "T_TilledBed_roughness.png",
+            "normal": "T_TilledBed_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TilledBed_basecolor.png",
+          "roughness": "T_TilledBed_roughness.png",
+          "normal": "T_TilledBed_normal.png",
+          "ao": "T_TilledBed_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.02
+        ],
+        "ground": "origin"
+      },
+      "fbx": "SM_TilledBed.fbx",
+      "sha256": "aee735776ce85d90e7590a52cc21f8aabdcf8f1b9168f10d2e1639003cbb320f",
+      "preview": "preview_SM_TilledBed.png"
+    },
+    "SM_TilledBed_LOD1": {
+      "vertices": 1823,
+      "triangles": 3443,
+      "size_cm": [
+        112.23,
+        112.16,
+        7.18
+      ],
+      "materials": [
+        {
+          "name": "M_TilledBed",
+          "textures": {
+            "basecolor": "T_TilledBed_basecolor.png",
+            "roughness": "T_TilledBed_roughness.png",
+            "normal": "T_TilledBed_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TilledBed_basecolor.png",
+          "roughness": "T_TilledBed_roughness.png",
+          "normal": "T_TilledBed_normal.png",
+          "ao": "T_TilledBed_ao.png"
+        },
+        "shared_with": "SM_TilledBed"
+      },
+      "review": {},
+      "fbx": "SM_TilledBed_LOD1.fbx",
+      "sha256": "bdd8a828ec246caa6eb339a631f59d19ddb3ecc87e1c20499e8056e307f79308",
+      "preview": "preview_SM_TilledBed_LOD1.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_TilledBed": "Pivot = bottom centre on the ground line (z = 0); the rim sinks 15 mm below it. Worked area 1 m square (about 1.1 m with the thrown rim), ridges along X at y = -0.3, 0, +0.3 m, up to ~5.5 cm tall."
+  },
+  "textures": {
+    "T_TilledBed_basecolor.png": "c793851723f51ab531c8926c01942192024051c45cf48f96d6e3b8b25583a0f0",
+    "T_TilledBed_roughness.png": "b2452e4b20b8c90411b989e3de164fc86307d42254628386f46b52010e7db4be",
+    "T_TilledBed_normal.png": "23efd333f82dd7d51db5597dc9f1c312da1b435dd4090675286e06ebca962d09"
+  }
+}

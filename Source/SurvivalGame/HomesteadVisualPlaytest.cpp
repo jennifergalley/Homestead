@@ -361,7 +361,7 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
         }
         for (const auto& Plot : PC->State().plots)
         {
-            const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+            const auto Center = Homestead::PlotCenter(Plot);
             PlotMargin = FMath::Min(PlotMargin,
                 FVector2D::Distance(Position, FVector2D(Center.x, Center.y)) - Radius - 175);
         }
@@ -468,7 +468,7 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
             }
             for (const auto& Plot : PC->State().plots)
             {
-                const auto Center = Homestead::CellCenter(Plot.cellX, Plot.cellY);
+                const auto Center = Homestead::PlotCenter(Plot);
                 PlotMargin = FMath::Min(PlotMargin,
                     FVector2D::Distance(FVector2D(Position), FVector2D(Center.x, Center.y)) - 195);
             }

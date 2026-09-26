@@ -173,6 +173,21 @@ reuses the berry builders by loading `berry_cluster.py` beside it. `seeds.py` bu
 props: `SM_Seeds`, a pinch of four tepary beans (pivot at the cluster centre), and
 `SM_SoilMound` (+ `_LOD1`), a covered-seed loose-loam mound with a fingertip press (pivot at the
 bottom centre, rim sunk 3 mm).
+`tilled_bed.py` builds `SM_TilledBed` (+ `_LOD1`), one 1 m garden square of hoe-turned loam: a
+heightfield sheet with ridges, clods and a feathered edge that sinks into the grass, pivot at
+the bottom centre, planar UVs. The game swaps in `MI_TilledBed_Wet` (basecolor darkened to
+0.6/0.57/0.54 with ffmpeg `colorchannelmixer`) once the square is watered.
+
+**Open sheets need explicit face winding.** `kit.recalc_normals` guesses the outward side
+from the volume, and an open sheet has none, so it can come out facing down and be back-face
+culled in Unreal (the bed was invisible from above). `tilled_bed.py` flips any face whose
+normal points down after building; check the average normal z in the report if a
+ground-hugging prop disappears.
+
+**LODs are hidden while each object bakes.** `build_prop.py` hides every other mesh from
+render while it bakes one object's AO and normals. Before that fix, a `_LOD1` coincident with
+LOD0 self-shadowed the AO bake black and blotchy (`seeds.py` and `tilled_bed.py` hit this). If an
+older prop with an LOD shows unexplained dark blotches, rebuild it.
 
 **The baked material inherits the largest Subsurface Weight** of the recipe's source materials,
 with Principled's default ~5 cm red-biased radius, across the whole mesh. `flint` (0.08) and

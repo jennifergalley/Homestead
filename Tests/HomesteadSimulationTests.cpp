@@ -428,7 +428,7 @@ void GameplayWalkthrough()
     GatherUntil(sim, Item::Berries, ResourceKind::BerryBush, 10);
     OK(sim.Eat(Item::Berries));
     const Point garden = CellCenter(-2, -1);
-    OK(sim.Till(-2, -1, garden));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
     int plotId = sim.FindNearestPlot(garden, 1);
     CHECK(plotId != -1);
     OK(sim.Plant(plotId, garden));
@@ -604,9 +604,9 @@ void PlacementAndShelter()
     OK(sim.Place(Piece::Bed, -3, 0, 0, Home));
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Fire, -3, 0, 0, Home); });
     Stock(sim, {{Item::DiggingStick, 1}, {Item::Branch, 20}, {Item::Stone, 20}});
-    UnchangedFailure(sim, [&] { return sim.Till(-3, 0, Home); });
-    OK(sim.Till(-2, -1, CellCenter(-2, -1)));
-    UnchangedFailure(sim, [&] { return sim.Till(-2, -1, CellCenter(-2, -1)); });
+    UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-3), CellToGarden(0), Home); });
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
+    UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)); });
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Fire, -2, -1, 0, CellCenter(-2, -1)); });
 }
 
@@ -784,6 +784,42 @@ void TimberAndFirewoodTransactions()
     Simulation legacy;
     OK(legacy.Deserialize(Encode(current.GetState(), LegacySimulationSaveVersion)));
     CHECK(legacy.Count(Item::Machete) == 0 && legacy.GetState().clearedUnderbrush.empty());
+    // Version 8 stored crop plots on whole building cells; each becomes that cell's middle square.
+    Simulation farm;
+    Stock(farm, {{Item::DiggingStick, 1}});
+    OK(farm.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
+    State old = farm.GetState();
+    old.plots[0].cellX = -2;
+    old.plots[0].cellY = -1;
+    Simulation moved;
+    OK(moved.Deserialize(Encode(old, GardenSquareSaveVersion - 1)));
+    CHECK(moved.GetState().plots[0].cellX == CellToGarden(-2) && moved.GetState().plots[0].cellY == CellToGarden(-1));
+}
+
+void GardenSquares()
+{
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::Seeds, 2}, {Item::Berries, 1}});
+    const Point garden = CellCenter(-2, -1);
+    const int x = CellToGarden(-2), y = CellToGarden(-1);
+    // Each till turns over one small square; its neighbours in the same building cell stay untilled.
+    OK(sim.Till(x, y, garden));
+    CHECK(sim.GetState().plots.size() == 1);
+    OK(sim.Till(x + 1, y, garden));
+    OK(sim.Till(x, y - 1, garden));
+    CHECK(sim.GetState().plots.size() == 3);
+    UnchangedFailure(sim, [&] { return sim.Till(x + 1, y, garden); });
+    CHECK(Close(GardenCellCenter(x, y).x, garden.x) && Close(GardenCellCenter(x, y).y, garden.y));
+    CHECK(GardenToCell(x - 1) == -2 && GardenToCell(x + 1) == -2 && GardenToCell(x + 2) == -1);
+    CHECK(GardenToCell(-1) == -1 && GardenToCell(-3) == -1 && GardenToCell(-4) == -2);
+    // And each square is planted with its own choice.
+    OK(sim.Plant(sim.GetState().plots[0].id, garden, CropKind::Roots));
+    OK(sim.Plant(sim.GetState().plots[1].id, garden, CropKind::Berries));
+    CHECK(sim.GetState().plots[0].kind == CropKind::Roots && sim.GetState().plots[1].kind == CropKind::Berries);
+    CHECK(!sim.GetState().plots[2].planted);
+    // No building on a building cell with a garden square in it.
+    BuildingStock(sim);
+    UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -2, -1, 0, garden); });
 }
 
 void FarmingAndRain()
@@ -791,7 +827,7 @@ void FarmingAndRain()
     Simulation sim;
     const Point garden = CellCenter(-2, -1);
     Stock(sim, {{Item::Seeds, 3}, {Item::DiggingStick, 1}, {Item::WateringCan, 1}});
-    OK(sim.Till(-2, -1, garden));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
     int id = sim.FindNearestPlot(garden, 1);
     UnchangedFailure(sim, [&] { return sim.HarvestCrop(id, garden); });
     OK(sim.Plant(id, garden));
@@ -872,8 +908,8 @@ void BerryCropCycle()
     Stock(sim, {{Item::Knife, 1}, {Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::Seeds, 2}});
     const Point berries = CellCenter(-3, -1);
     const Point roots = CellCenter(-2, -1);
-    OK(sim.Till(-3, -1, berries));
-    OK(sim.Till(-2, -1, roots));
+    OK(sim.Till(CellToGarden(-3), CellToGarden(-1), berries));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), roots));
     const int berryId = sim.FindNearestPlot(berries, 1);
     const int rootId = sim.FindNearestPlot(roots, 1);
     CHECK(sim.GetState().plots[0].kind == CropKind::Roots);
@@ -969,8 +1005,8 @@ void CropKindPersistenceAndVersionRejection()
     Stock(sim, {{Item::Knife, 1}, {Item::DiggingStick, 1}, {Item::WateringCan, 1},
         {Item::Seeds, 3}, {Item::Roots, 2}, {Item::Berries, 2}, {Item::Branch, 3}});
     const Point garden = CellCenter(-2, -1);
-    OK(sim.Till(-2, -1, garden));
-    OK(sim.Till(-1, -1, CellCenter(-1, -1)));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(sim.Till(CellToGarden(-1), CellToGarden(-1), CellCenter(-1, -1)));
     const int id = sim.FindNearestPlot(garden, 1);
     OK(sim.Plant(id, garden));
     OK(sim.FillWater(WaterSource));
@@ -1067,7 +1103,7 @@ void ClockPauseAndBatching()
     OK(large.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
     OK(large.AddFuel(large.GetState().structures.back().id, CellCenter(-3, -1)));
     Stock(large, {{Item::DiggingStick, 1}, {Item::Seeds, 2}});
-    OK(large.Till(-2, -1, CellCenter(-2, -1)));
+    OK(large.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     OK(large.Plant(large.GetState().plots[0].id, CellCenter(-2, -1)));
     Edit(large, [](State& state) { state.hour = 31.25; });
     OK(small.Deserialize(large.Serialize()));
@@ -1165,7 +1201,7 @@ void SleepAndFiniteBoundaries()
     OK(once.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
     OK(once.AddFuel(once.GetState().structures.back().id, CellCenter(-3, -1)));
     Stock(once, {{Item::DiggingStick, 1}, {Item::Seeds, 1}});
-    OK(once.Till(-2, -1, CellCenter(-2, -1)));
+    OK(once.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     OK(once.Plant(once.GetState().plots[0].id, CellCenter(-2, -1)));
     CHECK(once.Count(Item::Seeds) == 0);
     Edit(once, [](State& state) { state.hour = 31; state.energy = 15; state.warmth = 50; });
@@ -1188,7 +1224,7 @@ void SleepAndFiniteBoundaries()
     CHECK(once.Serialize() == before);
     UnchangedFailure(once, [&] { return once.Sleep(1, Home); });
     Edit(once, [](State& state) { state.nextId = TransientResourceIdBase - 1; });
-    UnchangedFailure(once, [&] { return once.Till(-1, -1, CellCenter(-1, -1)); });
+    UnchangedFailure(once, [&] { return once.Till(CellToGarden(-1), CellToGarden(-1), CellCenter(-1, -1)); });
     UnchangedFailure(once, [&] { return once.Place(Piece::Foundation, -1, -1, 0, CellCenter(-1, -1)); });
     Simulation restored;
     OK(restored.Deserialize(once.Serialize()));
@@ -1201,7 +1237,7 @@ void PersistenceRejection()
     BuildRoom(sim);
     OK(sim.Place(Piece::Chest, -4, 0, 0, CellCenter(-4, 0)));
     Stock(sim, {{Item::DiggingStick, 1}, {Item::Seeds, 2}});
-    OK(sim.Till(-2, -1, CellCenter(-2, -1)));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     OK(sim.Plant(sim.GetState().plots[0].id, CellCenter(-2, -1)));
     const std::string original = sim.Serialize();
     const std::string payload = original.substr(original.find('\n') + 1);
@@ -1257,8 +1293,8 @@ void PersistenceRejection()
         [](State& s) { auto p = s.structures[0]; p.id = s.nextId++; s.structures.push_back(p); },
         [](State& s) { auto p = s.structures[2]; p.id = s.nextId++; s.structures.push_back(p); },
         [](State& s) { s.plots[0].id = TransientResourceIdBase; },
-        [](State& s) { s.plots[0].cellX = 3334; },
-        [](State& s) { s.plots[0].cellX = -3; s.plots[0].cellY = 0; },
+        [](State& s) { s.plots[0].cellX = 3334 * GardenCellsPerCell; },
+        [](State& s) { s.plots[0].cellX = CellToGarden(-3); s.plots[0].cellY = CellToGarden(0); },
         [](State& s) { s.plots[0].growth = -0.01; },
         [](State& s) { s.plots[0].growth = 1.01; },
         [](State& s) { s.plots[0].moisture = -0.01; },
@@ -1517,7 +1553,7 @@ void QuantityMutationReconciliation()
     OK(sim.Craft(Recipe::WateringCan, Home));
     OK(sim.FillWater(WaterSource));
     const Point garden = CellCenter(-2, -1);
-    OK(sim.Till(-2, -1, garden));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
     const int plot = sim.GetState().plots.back().id;
     OK(sim.Plant(plot, garden, CropKind::Berries));
     OK(sim.Water(plot, garden));
@@ -1671,7 +1707,7 @@ void PersistentWorldDropTransactions()
         1, CellCenter(-3, 0), CellCenter(-3, 0), blocked.GetRevision()); });
     Simulation plotBlocked;
     Stock(plotBlocked, {{Item::DiggingStick, 1}, {Item::Branch, 1}});
-    OK(plotBlocked.Till(-2, -1, CellCenter(-2, -1)));
+    OK(plotBlocked.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     UnchangedFailure(plotBlocked, [&] { return plotBlocked.DropGroup(Group(plotBlocked, Item::Branch),
         1, CellCenter(-2, -1), CellCenter(-2, -1), plotBlocked.GetRevision()); });
 
@@ -2057,7 +2093,8 @@ void GeneratedBuildingFootprintAndReload()
     CHECK(static_cast<int>(std::floor(tree.position.x / CellSize)) != cellX);
     const auto site = CellCenter(cellX, cellY);
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, cellX, cellY, 0, site); });
-    UnchangedFailure(sim, [&] { return sim.Till(cellX, cellY, site); });
+    // The garden square beside the trunk, on this side of the cell edge, is blocked by it too.
+    UnchangedFailure(sim, [&] { return sim.Till(cellX * GardenCellsPerCell + GardenCellsPerCell - 1, GardenCell(tree.position.y), site); });
     OK(sim.SetActiveWorldRegion({12000, -12000}));
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, cellX, cellY, 0, site); });
     OK(sim.SetActiveWorldRegion(tree.position));
@@ -2067,7 +2104,7 @@ void GeneratedBuildingFootprintAndReload()
     CHECK(foundation > 0 && foundation < TransientResourceIdBase);
     const int plotX = cellX + 2;
     FellFixtureCell(sim, plotX, cellY);
-    OK(sim.Till(plotX, cellY, CellCenter(plotX, cellY)));
+    OK(sim.Till(CellToGarden(plotX), CellToGarden(cellY), CellCenter(plotX, cellY)));
     CHECK(sim.GetState().plots.back().id < TransientResourceIdBase);
     OK(sim.SetActiveWorldRegion({12000, -12000}));
     const auto save = sim.Serialize();
@@ -2270,7 +2307,7 @@ void MixedPersistentWorldChurn()
     const int structureId = sim.GetState().structures.back().id;
     int plotX = cellX + 2;
     FellFixtureCell(sim, plotX, cellY);
-    OK(sim.Till(plotX, cellY, CellCenter(plotX, cellY)));
+    OK(sim.Till(CellToGarden(plotX), CellToGarden(cellY), CellCenter(plotX, cellY)));
     const int plotId = sim.GetState().plots.back().id;
     const auto beforeTravel = sim.Serialize();
     for (int i = -20; i <= 20; ++i)
@@ -2431,16 +2468,16 @@ void ActionEnergyContract()
     CHECK(Close(sim.GetState().energy, start - Exertion::GatherEnergy, 1e-9));
     OK(sim.Craft(Recipe::DiggingStick, Home));
     CHECK(Close(sim.GetState().energy, start - Exertion::GatherEnergy - Exertion::CraftEnergy, 1e-9));
-    OK(sim.Till(-2, -1, CellCenter(-2, -1)));
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     CHECK(Close(sim.GetState().energy, start - Exertion::GatherEnergy - Exertion::CraftEnergy - Exertion::TillEnergy, 1e-9));
     // Rejected work costs nothing.
-    UnchangedFailure(sim, [&] { return sim.Till(-2, -1, CellCenter(-2, -1)); });
+    UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)); });
     // Too tired: work is refused before it would leave her under the reserve, and nothing changes.
     Edit(sim, [](State& state) { state.energy = Exertion::Reserve + Exertion::TillEnergy - 0.01; state.hunger = 50; });
-    UnchangedFailure(sim, [&] { return sim.Till(-3, -1, CellCenter(-3, -1)); });
+    UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)); });
     Simulation probe;
     OK(probe.Deserialize(sim.Serialize()));
-    CHECK(probe.Till(-3, -1, CellCenter(-3, -1)).message.find("exhausted") != std::string::npos);
+    CHECK(probe.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)).message.find("exhausted") != std::string::npos);
     // Light work is still possible at the same Energy, and exertion never drops her below the reserve.
     const int plot = sim.GetState().plots[0].id;
     OK(sim.Plant(plot, CellCenter(-2, -1)));
@@ -2449,7 +2486,7 @@ void ActionEnergyContract()
     // A meal restores enough to carry on.
     Stock(sim, {{Item::DiggingStick, 1}, {Item::Berries, 1}});
     OK(sim.Eat(Item::Berries));
-    OK(sim.Till(-3, -1, CellCenter(-3, -1)));
+    OK(sim.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)));
     // An awake game hour drains only a little.
     Simulation idle;
     const double rested = idle.GetState().energy;
@@ -2480,6 +2517,7 @@ int main()
     Run("independent fires and chest storage", FireAndStorage);
     Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
+    Run("small garden squares, per-square planting and plot migration", GardenSquares);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);

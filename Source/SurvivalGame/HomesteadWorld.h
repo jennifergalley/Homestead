@@ -127,6 +127,10 @@ public:
     // pile stays on the ground until the heroine's animation lifts it. One at a time.
     void HoldProduce(int32 Id) { HeldProduceId = Id; }
     void ReleaseProduce() { HeldProduceId = INDEX_NONE; }
+    // Keeps a just-planted square looking bare (no seed mound yet) while she plants it.
+    // bHidden hides the square entirely (just tilled, before the hoe bites).
+    void HoldPlot(int32 Id, bool bHideSquare = false) { HeldPlotId = Id; bHeldPlotHidden = bHideSquare; }
+    void ReleasePlot() { HeldPlotId = INDEX_NONE; bHeldPlotHidden = false; }
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
@@ -201,6 +205,13 @@ private:
     TObjectPtr<UStaticMesh> Cone;
     UPROPERTY()
     TObjectPtr<UStaticMesh> ImportedRock;
+    // Garden props, loaded on first use (they can be imported while the editor runs).
+    UPROPERTY()
+    TObjectPtr<UStaticMesh> TilledBedMesh;
+    UPROPERTY()
+    TObjectPtr<UMaterialInterface> TilledBedWetMaterial;
+    UPROPERTY()
+    TObjectPtr<UStaticMesh> SoilMoundMesh;
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()
@@ -277,6 +288,8 @@ private:
     bool bInitialized = false;
     FString ResourceLayoutSignature;
     int32 HeldProduceId = INDEX_NONE;
+    int32 HeldPlotId = INDEX_NONE;
+    bool bHeldPlotHidden = false;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
     FString RegionalWaterSignature;
