@@ -33,6 +33,10 @@ public:
     bool HandleKey(FKey Key, EInputEvent Event, float InputAmount);
     void ChangePage(int32 Page);
     bool FocusLegacySubject(int32 Id);
+    // Settings is split into Game (0), Sound (1) and Video (2) tabs below the always-visible session rows.
+    int32 GetSettingsTab() const { return SettingsTab; }
+    void SetSettingsTab(int32 Tab);
+    static int32 SettingsTabOf(int32 SettingId);
     bool FocusSubject(EHomesteadMenuSubject Subject, int32 SubjectId, int32 ContainerId);
     bool FocusItemAction(EHomesteadItemAction Action);
     void RequestExit();
@@ -118,6 +122,7 @@ private:
     int32 DesiredColumn = 0;
     int32 ActionSelection = 0;
     int32 SessionSelection = 0;
+    int32 SettingsTab = 0;
     int32 DialogSelection = 0;
     int32 FocusedTab = 0;
     FString RememberedKeys[7];
@@ -166,6 +171,7 @@ private:
     void QuickMove(int32 Index);
     void ComputeActions();
     int32 StorageColumns() const;
+    int32 SettingsTopCount() const;
     FString PackHint() const;
     int32 AudioEditId = -1;
     float AudioEditStart = 0;

@@ -228,7 +228,12 @@ holding.
 Food selections consume one item; core actions explain unmet requirements.
 Action cues ("[A] Gather", "[LMB] Fell") retire once you've done each action
 three times; Settings > "Show action hints again" brings them back.
-Settings also offers 100/85/70-percent 3D resolution scaling; the UI remains sharp
+Settings is a centred column about a third of the screen wide: Resume, then
+Save, Load latest save and Quit game side by side, then Game, Sound and Video
+tabs (Game holds speed, camera, autosave, new woodland and hint reset; Sound the
+three volume sliders; Video resolution scale and vertical sync). D-pad Down
+walks Resume, the top row, the tabs, then the list; Left/Right on the tabs
+switches tab. Video also offers 100/85/70-percent 3D resolution scaling; the UI remains sharp
 while TSR upscales the world.
 
 ## First session

@@ -407,15 +407,14 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         const auto Stayed = MakeShared<bool>(false);
         const auto Prior = MakeShared<float>(0);
         const auto Target = MakeShared<float>(0);
-        if (AudioId != 5)
-            Add(FString::Printf(TEXT("Scroll Settings to audio slider %d"), AudioId),
-                [this, AudioId]() { Controller->NativeMenu->FocusLegacySubject(AudioId); },
-                [this, AudioId]()
-                {
-                    const auto Widget = Controller->NativeMenu->GetAudioSliderWidget(AudioId);
-                    return Widget && Widget->GetCachedGeometry().GetAbsoluteSize().X > 40
-                        && Controller->NativeMenu->IsFocusedControlVisible();
-                }, 0.2f);
+        Add(FString::Printf(TEXT("Open the Sound tab at audio slider %d"), AudioId),
+            [this, AudioId]() { Controller->NativeMenu->FocusLegacySubject(AudioId); },
+            [this, AudioId]()
+            {
+                const auto Widget = Controller->NativeMenu->GetAudioSliderWidget(AudioId);
+                return Widget && Widget->GetCachedGeometry().GetAbsoluteSize().X > 40
+                    && Controller->NativeMenu->IsFocusedControlVisible();
+            }, 0.2f);
         Add(FString::Printf(TEXT("Pointer click/drag audio slider %d stays in Settings"), AudioId),
             [this, AudioId, Stayed, Prior, Target, DragAudioSlider]()
             {

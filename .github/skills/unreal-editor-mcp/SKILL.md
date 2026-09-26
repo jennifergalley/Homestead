@@ -214,11 +214,13 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 - Menu opens the book on **Settings** (page 4). LB/RB change pages in the order 0 Inventory,
   1 Craft, 2 Build, 3 Guidebook, 6 (not inspected; likely Appearance), 4 Settings, wrapping.
   Loop LB until `st().bookPage` is the page you want. B closes/backs out.
-- **Settings Up/Down moves two rows per press** in the ~1000 px PIE viewport, so only even rows
-  (0 Save, 2 Game speed, 4 Invert camera Y, 6 Ambience, 8 Start a new woodland) are reachable by
-  D-pad. `SHomesteadMenu::Columns()` returns 2 for page 4 although the rows were drawn stacked;
-  not checked at full-screen sizes. Left/Right on a setting changes its value; A toggles.
-  Verify the selected row visually before activating.
+- **Settings** is a centred single column: Resume (focused on open), a top row Save | Load latest
+  save | Quit game, Game/Sound/Video tabs, then the current tab's list. D-pad Down from Resume
+  enters the top row (Left/Right moves across it); Down again lands on the active tab, where
+  Left/Right switches tabs; Down again enters the list, where Left/Right changes a value and A
+  toggles. Up from the first list row returns to the tabs. Sound holds the volume sliders; Video
+  holds resolution scale and vertical sync; everything else is on Game. Verify the selected row
+  visually before activating.
 - "Start a new woodland" opens a Cancel-default confirmation; B backs out safely.
 - **Inventory**: there is no details pane or action-button column on the pack/chest page. A on an
   item starts a *move*; Y (or F) opens the item's context menu, where D-pad + A picks an action

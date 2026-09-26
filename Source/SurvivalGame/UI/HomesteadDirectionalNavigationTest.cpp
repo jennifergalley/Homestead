@@ -309,11 +309,12 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Directional input reaches the direct Quit game row"),
         [this]()
         {
-            for (int32 Index = 0; Index < 32; ++Index)
+            // Save, Load latest save and Quit game share the top row of Settings.
+            for (int32 Index = 0; Index < 4; ++Index)
             {
                 const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
                 if (Subject && Subject->Id == 9) break;
-                Tap(EKeys::Gamepad_DPad_Down);
+                Tap(EKeys::Gamepad_DPad_Right);
             }
         },
         [this, Focused]()

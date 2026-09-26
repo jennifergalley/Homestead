@@ -21,6 +21,7 @@
 #include "Layout/WidgetPath.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Engine.h"
+#include "Algo/Find.h"
 
 namespace HomesteadMenus
 {
@@ -536,7 +537,7 @@ int32 SHomesteadMenu::Columns() const
 {
     const bool Expanded = LogicalBookWidth() >= 1800;
     return SeenPage == 0 ? (Expanded ? 12 : 9)
-        : SeenPage <= 2 ? (Expanded ? 10 : 6) : SeenPage == 4 || SeenPage == 6 ? 2 : 1;
+        : SeenPage <= 2 ? (Expanded ? 10 : 6) : SeenPage == 6 ? 2 : 1;
 }
 
 void SHomesteadMenu::Refresh()
@@ -560,6 +561,33 @@ void SHomesteadMenu::Refresh()
         Entries.Add(Rows[Index]);
         RowIndices.Add(Rows[Index].Subject == EHomesteadMenuSubject::Legacy
             ? LegacyRows.IndexOfByPredicate([&](const FHomesteadRow& Row) { return Row.Id == Rows[Index].Id; }) : INDEX_NONE);
+    }
+    if (SeenPage == 4)
+    {
+        // Session rows first, then only the rows of the chosen Game / Sound / Video tab.
+        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 12, 13, 15, 8, 14, 5, 6, 7, 10, 11};
+        TArray<FHomesteadRow> Sorted;
+        TArray<int32> SortedIndices;
+        const auto Take = [&](int32 Found)
+        {
+            Sorted.Add(Entries[Found]);
+            SortedIndices.Add(RowIndices[Found]);
+        };
+        for (const int32 Id : Order)
+        {
+            const int32 Tab = SettingsTabOf(Id);
+            if (Tab >= 0 && Tab != SettingsTab) continue;
+            const int32 Found = Entries.IndexOfByPredicate([Id](const FHomesteadRow& Row) { return Row.Id == Id; });
+            if (Found >= 0) Take(Found);
+        }
+        for (int32 Index = 0; Index < Entries.Num(); ++Index)
+        {
+            const int32 Id = Entries[Index].Id;
+            const bool Listed = Algo::Find(Order, Id) != nullptr;
+            if (!Listed && SettingsTabOf(Id) == SettingsTab) Take(Index);
+        }
+        Entries = MoveTemp(Sorted);
+        RowIndices = MoveTemp(SortedIndices);
     }
     const FString DesiredKey = OldPage == SeenPage ? OldKey : RememberedKeys[SeenPage];
     int32 Match = Entries.IndexOfByPredicate([&](const FHomesteadRow& Row) { return RowKey(Row) == DesiredKey; });
@@ -603,21 +631,62 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     {
         AudioSliders.Init(nullptr, 3);
         TSharedPtr<SVerticalBox> RowsBox;
-        auto Result = SNew(SVerticalBox)
-            + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
+        TSharedPtr<SHorizontalBox> TopRow;
+        TSharedPtr<SHorizontalBox> TabStrip;
+        const int32 TopCount = SettingsTopCount();
+        // Settings sits in a centred column about a third of the screen wide.
+        auto Result = SNew(SBox).HAlign(HAlign_Center)
+        [
+            SNew(SBox).WidthOverride_Lambda([]()
+                { return FOptionalSize(FMath::Clamp(LogicalBookWidth() * 0.33f, 460.0f, 820.0f)); })
             [
-                RegisterButton(MakeButton(Controller->IsFailed() ? TEXT("Return to recovery") : TEXT("Resume"),
-                    [this]() { Back(); }, TAttribute<FSlateColor>::CreateLambda([this]()
-                        { return Region == ERegion::Session ? MenuGold : MenuPine; })), ERegion::Session, 0)
-            ]
-            + SVerticalBox::Slot().FillHeight(1)
-            [
-                SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
-                + SScrollBox::Slot()
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
                 [
-                    SAssignNew(RowsBox, SVerticalBox)
+                    RegisterButton(MakeButton(Controller->IsFailed() ? TEXT("Return to recovery") : TEXT("Resume"),
+                        [this]() { Back(); }, TAttribute<FSlateColor>::CreateLambda([this]()
+                            { return Region == ERegion::Session && SessionSelection == 0 ? MenuGold : MenuPine; })),
+                        ERegion::Session, 0)
                 ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SAssignNew(TopRow, SHorizontalBox) ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)[ SAssignNew(TabStrip, SHorizontalBox) ]
+                + SVerticalBox::Slot().FillHeight(1)
+                [
+                    SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
+                    + SScrollBox::Slot()
+                    [
+                        SAssignNew(RowsBox, SVerticalBox)
+                    ]
+                ]
+            ]
+        ];
+        static const TCHAR* TabNames[] = {TEXT("Game"), TEXT("Sound"), TEXT("Video")};
+        for (int32 Tab = 0; Tab < 3; ++Tab)
+        {
+            const int32 Session = Tab + 1;
+            TabStrip->AddSlot().FillWidth(1).Padding(Tab ? 4 : 0, 0, 0, 0)
+            [
+                FocusAnchor(
+                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 9))
+                    .HAlign(HAlign_Center)
+                    .ButtonColorAndOpacity_Lambda([this, Tab, Session]()
+                    {
+                        return SettingsTab == Tab ? MenuGold
+                            : Region == ERegion::Session && SessionSelection == Session ? Selected : MenuPine;
+                    })
+                    .OnClicked_Lambda([this, Tab, Session]()
+                    {
+                        if (PointerAction()) { Region = ERegion::Session; SessionSelection = Session; SetSettingsTab(Tab); }
+                        return FReply::Handled();
+                    })
+                    [
+                        SNew(STextBlock).Text(FText::FromString(TabNames[Tab]))
+                        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 19))
+                        .ColorAndOpacity_Lambda([this, Tab]() { return SettingsTab == Tab ? FSlateColor(PineInk) : FSlateColor(Ink); })
+                    ],
+                    ERegion::Session, Session)
             ];
+        }
 
         const auto OptionButton = [this](const FString& Label, bool SelectedOption, TFunction<void()> Action)
         {
@@ -631,7 +700,29 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ];
         };
 
-        for (int32 Index = 0; Index < Entries.Num(); ++Index)
+        for (int32 Index = 0; Index < TopCount; ++Index)
+        {
+            const FHomesteadRow& Row = Entries[Index];
+            const TSharedRef<SWidget> Cell = FocusAnchor(
+                SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(4, 12))
+                .HAlign(HAlign_Center)
+                .ToolTipText(FText::FromString(Row.Detail))
+                .ButtonColorAndOpacity_Lambda([this, Index]() { return ContentSelection == Index && Region == ERegion::Content ? Selected : MenuPine; })
+                .OnClicked_Lambda([this, Index]()
+                {
+                    if (PointerAction()) { Region = ERegion::Content; Select(Index); RunAction(EHomesteadItemAction::Primary); }
+                    return FReply::Handled();
+                })
+                [
+                    SNew(STextBlock).Text(FText::FromString(Row.Label)).Justification(ETextJustify::Center)
+                    .ColorAndOpacity(Ink).Font(FCoreStyle::GetDefaultFontStyle("Bold", 15))
+                ],
+                ERegion::Content, Index);
+            Cells.Add(Cell);
+            TopRow->AddSlot().FillWidth(Row.Label.Len() > 10 ? 1.4f : 1.0f).Padding(Index ? 4 : 0, 0, 0, 0)[Cell];
+        }
+
+        for (int32 Index = TopCount; Index < Entries.Num(); ++Index)
         {
             const FHomesteadRow& Row = Entries[Index];
             TAttribute<FText> RowLabel = FText::FromString(Row.Label);
@@ -678,10 +769,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 const int32 AudioId = Row.Id;
                 RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
                 [
-                    SNew(SBox).WidthOverride_Lambda([]()
-                    {
-                        return FOptionalSize(FMath::Min(LogicalBookWidth() - 80.0f, 1280.0f));
-                    })
+                    SNew(SBox)
                     [
                         SAssignNew(AudioSliders[AudioId - 5], SSlider)
                         .Value_Lambda([this, AudioId]() { return Controller->MenuAudioVolume(AudioId); })
@@ -1901,7 +1989,7 @@ void SHomesteadMenu::Activate()
     if (Region == ERegion::Tabs) ChangePage(FocusedTab);
     else if (Region == ERegion::Inventory) ChangeInventoryView(InventorySelection);
     else if (Region == ERegion::Equipment) FocusEquipment(EquipmentSelection);
-    else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else RequestExit(); }
+    else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else SetSettingsTab(SessionSelection - 1); }
     else if (Region == ERegion::Recovery) { if (RecoverySelection == 0) Controller->MenuRetry(); else ChangePage(4); }
     else if (Region == ERegion::Portrait)
     {
@@ -1932,8 +2020,37 @@ void SHomesteadMenu::ChangePage(int32 Page)
     Controller->MenuPage(Page);
     Refresh();
 }
+int32 SHomesteadMenu::SettingsTabOf(int32 SettingId)
+{
+    switch (SettingId)
+    {
+    case 0: case 1: case 9: return -1;
+    case 5: case 6: case 7: return 1;
+    case 10: case 11: return 2;
+    default: return 0;
+    }
+}
+void SHomesteadMenu::SetSettingsTab(int32 Tab)
+{
+    Tab = FMath::Clamp(Tab, 0, 2);
+    if (Tab == SettingsTab || Dialog != EDialog::None) return;
+    SettingsTab = Tab;
+    if (Scroll) Scroll->ScrollToStart();
+    Refresh();
+}
+int32 SHomesteadMenu::SettingsTopCount() const
+{
+    int32 Count = 0;
+    while (SeenPage == 4 && Entries.IsValidIndex(Count) && SettingsTabOf(Entries[Count].Id) < 0) ++Count;
+    return Count;
+}
 bool SHomesteadMenu::FocusLegacySubject(int32 Id)
 {
+    if (SeenPage == 4 && SettingsTabOf(Id) >= 0 && SettingsTabOf(Id) != SettingsTab)
+    {
+        SettingsTab = SettingsTabOf(Id);
+        Refresh();
+    }
     const int32 Index = Entries.IndexOfByPredicate([Id](const FHomesteadRow& Row)
         { return Row.Subject == EHomesteadMenuSubject::Legacy && Row.Id == Id; });
     if (Index < 0) return false;
@@ -2049,11 +2166,45 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     {
     case ERegion::Content:
     {
-        if (SeenPage == 4 && Direction.x && Entries.IsValidIndex(ContentSelection))
+        if (SeenPage == 4 && Entries.IsValidIndex(ContentSelection))
         {
-            Controller->MenuAdjustSetting(Entries[ContentSelection].Id, Direction.x);
-            Refresh();
-            return;
+            // Save / Load / Quit form one row above the Game / Sound / Video tabs; the tab's
+            // settings follow as a single column.
+            const int32 Top = SettingsTopCount();
+            if (ContentSelection < Top)
+            {
+                if (Direction.x)
+                {
+                    const int32 Next = FMath::Clamp(ContentSelection + Direction.x, 0, Top - 1);
+                    if (Next != ContentSelection) { Select(Next); Moved = true; }
+                }
+                else
+                {
+                    Region = ERegion::Session;
+                    SessionSelection = Direction.y < 0 ? 0 : SettingsTab + 1;
+                    Moved = true;
+                }
+                break;
+            }
+            if (Direction.x)
+            {
+                Controller->MenuAdjustSetting(Entries[ContentSelection].Id, Direction.x);
+                Refresh();
+                return;
+            }
+            if (Direction.y < 0 && ContentSelection == Top)
+            {
+                Region = ERegion::Session;
+                SessionSelection = SettingsTab + 1;
+                Moved = true;
+                break;
+            }
+            if (Entries.IsValidIndex(ContentSelection + Direction.y))
+            {
+                Select(ContentSelection + Direction.y);
+                Moved = true;
+            }
+            break;
         }
         if (SeenPage == 0 && Controller->ActiveStorageChest().IsSet()
             && Entries.IsValidIndex(ContentSelection))
@@ -2098,7 +2249,29 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     case ERegion::Tabs:
         if (Direction.x) { FocusedTab = ShiftFieldBookPage(FocusedTab, Direction.x); Moved = true; }
         break;
-    case ERegion::Session: Moved = MoveWithin(SessionSelection, 2, 2, Direction); break;
+    case ERegion::Session:
+    {
+        const int32 Top = SettingsTopCount();
+        if (SeenPage != 4) { Moved = MoveWithin(SessionSelection, 2, 2, Direction); break; }
+        if (SessionSelection == 0)
+        {
+            if (Direction.y > 0 && Top > 0) { Region = ERegion::Content; Select(0); Moved = true; }
+            break;
+        }
+        if (Direction.x)
+        {
+            const int32 Tab = FMath::Clamp(SessionSelection - 1 + Direction.x, 0, 2);
+            if (Tab != SessionSelection - 1) { SessionSelection = Tab + 1; SetSettingsTab(Tab); Moved = true; }
+        }
+        else if (Direction.y < 0)
+        {
+            Region = Top > 0 ? ERegion::Content : ERegion::Session;
+            if (Top > 0) Select(FMath::Min(SettingsTab, Top - 1)); else SessionSelection = 0;
+            Moved = true;
+        }
+        else if (Direction.y > 0 && Entries.Num() > Top) { Region = ERegion::Content; Select(Top); Moved = true; }
+        break;
+    }
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
     case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, 3, 3, Direction); break;
     case ERegion::Portrait:
