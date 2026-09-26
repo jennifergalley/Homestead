@@ -117,6 +117,13 @@ public:
     void PlayClear(Homestead::Point Target);
     void PlayKnifeCut(Homestead::Point Target);
     void PlayTill(Homestead::Point Target);
+    // Machete hack through underbrush at Target: two diagonal forehand cuts. False when the
+    // clip is unavailable (legacy heroine), so the caller clears at once instead.
+    bool PlayMacheteHack(Homestead::Point Target);
+    // Seconds into the hack when the second cut lands and the plant is cleared.
+    static constexpr float MacheteClearSeconds = 1.25f;
+    UAnimSequence* GetMacheteAnimation() const { return MacheteAnimation; }
+    UStaticMeshComponent* GetHeldMachete() const { return HeldMachete; }
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
@@ -175,6 +182,10 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> KnifeCutAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> TillAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> MacheteAnimation;
+    // The Blender machete, held in the right hand's closed grip (pivot at the grip centre).
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HeldMachete;
+    void UpdateHeldTools();
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadDiggingStick> DiggingStick;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadKnife> Knife;

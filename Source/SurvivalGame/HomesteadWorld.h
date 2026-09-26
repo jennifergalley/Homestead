@@ -151,6 +151,19 @@ public:
     static void GenerateRocks(uint64 WorldSeed, FIntPoint Chunk, const FVector2D* KnobSite,
         TFunctionRef<bool(float, float, float, uint8)> IsFree, TArray<FHomesteadRock>& Out);
     static float RockRadius(uint8 Kind);
+    // Placed underbrush (after reservations, rocks and machete clearing) nearest a point, for the
+    // machete. Low groundcover (strawberry, yarrow) isn't offered.
+    struct FUnderbrushTarget
+    {
+        FIntPoint Chunk = FIntPoint::ZeroValue;
+        int32 Index = INDEX_NONE;
+        uint8 Species = 0;
+        FVector2D Position = FVector2D::ZeroVector;
+        float Radius = 0;
+        bool bWoody = false;
+    };
+    bool FindUnderbrushNear(const Homestead::Simulation& Simulation, FVector2D Point, float Reach, FUnderbrushTarget& Out) const;
+    static FString UnderbrushName(uint8 Species);
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -219,6 +232,8 @@ private:
     TMap<int32, FHomesteadWorldVisual> StagedResourceProduceVisuals;
     UPROPERTY()
     TMap<FIntPoint, FHomesteadTerrainChunk> StagedCoverChunks;
+    // Underbrush actually placed per chunk at its last cover build (for FindUnderbrushNear).
+    TMap<FIntPoint, TArray<FHomesteadUnderbrush>> PlacedUnderbrush;
     std::vector<Homestead::ResourceNode> StagedResourceNodes;
     TArray<FIntPoint> StagedCoverKeys;
     Homestead::Generation::WorldDescriptor StagedWorld;

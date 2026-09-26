@@ -234,6 +234,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("herbed-roots")), EKind::HerbedRoots},
         {FName(TEXT("timber")), EKind::Timber},
         {FName(TEXT("firewood")), EKind::Firewood},
+        {FName(TEXT("machete")), EKind::Machete},
         {FName(TEXT("foundation")), EKind::Foundation},
         {FName(TEXT("wall")), EKind::Wall},
         {FName(TEXT("doorway")), EKind::Doorway},
@@ -416,6 +417,16 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{22, 17}, {37, 39}}, Wood, 6);
         P.Shape({{32, 37}, {38, 35}, {45, 48}, {36, 46}}, Gold);
         P.Line({{37, 39}, {41, 45}}, Pine, 1.5f);
+        break;
+    case EKind::Machete:
+        // Long leaf-tapered blade over a riveted wooden grip.
+        P.Shape({{21, 34}, {42, 9}, {49, 5}, {47, 13}, {27, 38}}, StoneGray);
+        P.Shape({{42, 9}, {49, 5}, {47, 13}, {44, 14}}, Cream);
+        P.Line({{24, 33}, {43, 11}}, Cream, 1.5f);
+        P.Line({{9, 49}, {22, 35}}, Wood, 7);
+        P.Line({{18, 31}, {27, 40}}, Gold, 3);
+        P.Disc(13, 45, 1.5f, Gold);
+        P.Disc(17, 41, 1.5f, Gold);
         break;
     case EKind::WateringCan:
         P.Line({{18, 23}, {9, 21}, {6, 28}, {9, 36}, {18, 36}}, Gold, 3);

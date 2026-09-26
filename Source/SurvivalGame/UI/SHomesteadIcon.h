@@ -33,7 +33,7 @@ private:
     {
         Unknown, Pack, Sort, Craft, Build, Guide, Settings, Appearance,
         Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds, Hatchet,
-        DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Timber, Firewood,
+        DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Timber, Firewood, Machete,
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,
         LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
         SlotTorso, SlotApron, SlotFeet

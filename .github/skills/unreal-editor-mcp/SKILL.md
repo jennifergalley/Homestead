@@ -205,7 +205,7 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till`,
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete`,
   `LabProp Sticks|Stones|Roots|Berries|None` (puts that pile on the ground in front of her, the way the
   woodland does), `LabLoop <action>|Off` (replays the action every few seconds from the same
   spot with a fresh pile, so Jenny can watch it repeat), `LabSun <hour>`, `LabCourse`
@@ -260,6 +260,16 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   two-pass bake keyed in the pelvis frame): each pickup is pinched in the right hand and slipped
   into the hip pouch at `POUCH_OPENING`. Pick/stow frames live in `POUCH_EVENTS` and must match
   `GatherPouchTiming` in `HomesteadCharacter.cpp`.
+- `LabAction Machete` plays `AN_HeroineMH_MacheteHack` (`machete_hack.py`): a wide overhead
+  forehand, then a backhand, with the Blender `SM_Machete` in her right hand. The rig's finger
+  controls don't key usefully, so the fist is built at runtime in `FHandGrip`
+  (`HomesteadAnimInstance.cpp`): it curls the right-hand fingers and applies a wrist "carry"
+  (46° ulnar deviation about the palm normal) that tips the blade down and forward at idle.
+  `Carry` fades to 0 as the hack clip blends in. The prop attaches with `HandGripTransform`
+  (0.78 of the way from hand to middle knuckle, plus 2.6 cm along the palm; the blade runs
+  along +Z with the edge toward −Y).
+- `FindUnderbrushNear` takes the `Simulation` and skips cleared plants. Without that, a cleared
+  bramble can shadow a live one, or keep showing as focus until the cover rebuilds.
 - Loose stones use the Blender `HandStones` set (`SM_HandStone_A-C`) when imported; until then
   they fall back to the `MossRocks` cluster, which is an 8 m group of rocks, so scaling it down
   reads as a scatter of pebbles, not one stone.

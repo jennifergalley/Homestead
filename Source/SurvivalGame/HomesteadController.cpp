@@ -1,5 +1,6 @@
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "HomesteadSave.h"
 #include "Engine/GameViewportClient.h"
@@ -56,7 +57,8 @@ constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
 bool IsHotbarTool(Homestead::Item Item)
 {
     return Item == Homestead::Item::Knife || Item == Homestead::Item::Hatchet
-        || Item == Homestead::Item::DiggingStick || Item == Homestead::Item::WateringCan;
+        || Item == Homestead::Item::DiggingStick || Item == Homestead::Item::WateringCan
+        || Item == Homestead::Item::Machete;
 }
 
 FName HotbarIcon(Homestead::Item Item)
@@ -67,6 +69,7 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Hatchet: return TEXT("hatchet");
     case Homestead::Item::DiggingStick: return TEXT("digging-stick");
     case Homestead::Item::WateringCan: return TEXT("watering-can");
+    case Homestead::Item::Machete: return TEXT("machete");
     default: return NAME_None;
     }
 }
@@ -495,6 +498,7 @@ void AHomesteadController::ResetHotbar()
     HotbarSlots[1] = static_cast<int32>(Homestead::Item::Hatchet);
     HotbarSlots[2] = static_cast<int32>(Homestead::Item::DiggingStick);
     HotbarSlots[3] = static_cast<int32>(Homestead::Item::WateringCan);
+    HotbarSlots[4] = static_cast<int32>(Homestead::Item::Machete);
     SelectedHotbarSlot = 0;
     HoveredHotbarSlot = INDEX_NONE;
 }
@@ -511,6 +515,13 @@ void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Sele
             HotbarSlots[Index] = Slots[Index];
             Seen.Add(Slots[Index]);
         }
+    }
+    // Hotbars saved before the machete existed get it in their first free slot.
+    const int32 Machete = static_cast<int32>(Homestead::Item::Machete);
+    if (!Seen.Contains(Machete))
+    {
+        const int32 Free = HotbarSlots.IndexOfByKey(-1);
+        if (Free != INDEX_NONE) HotbarSlots[Free] = Machete;
     }
     SelectedHotbarSlot = FMath::Clamp(Selected, 0, 9);
 }
@@ -539,10 +550,16 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
 
 bool AHomesteadController::KnifePreviewRequested() const
 {
-    if (!ShouldShowHotbar() || Sim.Count(Homestead::Item::Knife) <= 0) return false;
+    return PresentedTool() == Homestead::Item::Knife;
+}
+
+Homestead::Item AHomesteadController::PresentedTool() const
+{
+    if (!ShouldShowHotbar()) return Homestead::Item::Count;
     const int32 Slot = HoveredHotbarSlot != INDEX_NONE ? HoveredHotbarSlot : SelectedHotbarSlot;
-    return HotbarSlots.IsValidIndex(Slot)
-        && HotbarSlots[Slot] == static_cast<int32>(Homestead::Item::Knife);
+    if (!HotbarSlots.IsValidIndex(Slot) || HotbarSlots[Slot] < 0) return Homestead::Item::Count;
+    const auto Tool = static_cast<Homestead::Item>(HotbarSlots[Slot]);
+    return IsHotbarTool(Tool) && Sim.Count(Tool) > 0 ? Tool : Homestead::Item::Count;
 }
 
 void AHomesteadController::SelectHotbarSlot(int32 Index)
@@ -584,6 +601,13 @@ void AHomesteadController::UseSelectedTool()
     const auto Position = PlayerPoint();
     if (!bWorldReady || !PrepareWorldAt(Position)) return;
     UpdateFocus();
+
+    if (Tool == Homestead::Item::Machete)
+    {
+        if (Focus != EFocus::Underbrush) Notify(TEXT("Aim at a bush, bramble or fern."), true);
+        else StartMacheteHack();
+        return;
+    }
 
     if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Knife)
     {
@@ -1074,6 +1098,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         else StepDistance = 0;
     }
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
+    UpdatePendingHack();
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -1208,6 +1233,21 @@ void AHomesteadController::UpdateFocus()
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::CellCenter(Structure.cellX, Structure.cellY));
     }
     if (Focus == EFocus::None && Homestead::IsNearWater(Position)) Focus = EFocus::Water;
+    // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
+    const bool bMachete = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
+        && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::Machete)
+        && Sim.Count(Homestead::Item::Machete) > 0;
+    AHomesteadWorld::FUnderbrushTarget Brush;
+    if (bMachete && Landscape && Landscape->FindUnderbrushNear(Sim, FVector2D(Position.x, Position.y), 110.0f, Brush))
+    {
+        Focus = EFocus::Underbrush;
+        FocusId = Brush.Index;
+        FocusBrushChunk = Brush.Chunk;
+        FocusBrushIndex = Brush.Index;
+        FocusBrushSpecies = Brush.Species;
+        FocusBrushPosition = Brush.Position;
+        bFocusBrushWoody = Brush.bWoody;
+    }
 }
 
 FString AHomesteadController::FocusTitle() const
@@ -1254,6 +1294,7 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Bed: return TEXT("Bedroll");
     case EFocus::Chest: return TEXT("Storage chest");
     case EFocus::Water: return TEXT("Fresh stream water");
+    case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     default: break;
     }
     return TEXT("Woodland");
@@ -1304,6 +1345,7 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
         ? Use + TEXT(" Fill Watering Can") : A + TEXT(" Fill carried Watering Can");
+    case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     default: return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -1329,6 +1371,50 @@ void AHomesteadController::NotifyResourceAction(const Homestead::Result& Result,
     bToastError = false;
     if (SuccessCue) PlayEffect(SuccessCue);
     RefreshRemaining = 0;
+}
+
+void AHomesteadController::StartMacheteHack()
+{
+    if (bHackPending || Focus != EFocus::Underbrush) return;
+    if (Sim.Count(Homestead::Item::Machete) == 0)
+    {
+        Notify(TEXT("Take your machete from storage to hack through undergrowth."), true);
+        return;
+    }
+    const Homestead::Point Target{FocusBrushPosition.X, FocusBrushPosition.Y};
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    HackChunk = FocusBrushChunk;
+    HackIndex = FocusBrushIndex;
+    HackPosition = FocusBrushPosition;
+    bHackWoody = bFocusBrushWoody;
+    if (Avatar && Avatar->PlayMacheteHack(Target))
+    {
+        bHackPending = true;
+        HackSince = GetWorld()->GetTimeSeconds();
+        return;
+    }
+    // No hacking clip (legacy heroine): clear at once with the generic swing.
+    const auto Result = Sim.ClearUnderbrush({HackChunk.X, HackChunk.Y}, HackIndex, bHackWoody, Target, PlayerPoint());
+    NotifyResourceAction(Result, WoodTapB);
+    if (Result.ok && Avatar) Avatar->PlayClear(Target);
+}
+
+void AHomesteadController::UpdatePendingHack()
+{
+    if (!bHackPending) return;
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    if (Animation && Animation->IsHacking() && Animation->MachetePhase() >= AHomesteadCharacter::MacheteClearSeconds)
+    {
+        bHackPending = false;
+        const auto Result = Sim.ClearUnderbrush({HackChunk.X, HackChunk.Y}, HackIndex, bHackWoody,
+            {HackPosition.X, HackPosition.Y}, PlayerPoint());
+        NotifyResourceAction(Result, WoodTapB);
+        return;
+    }
+    // Interrupted (she moved, opened the book) before the cut landed: nothing is cleared.
+    if (!Animation || (!Animation->IsHacking() && GetWorld()->GetTimeSeconds() - HackSince > 0.4))
+        bHackPending = false;
 }
 
 void AHomesteadController::Notify(const FString& Message, bool Error)
@@ -1446,6 +1532,7 @@ void AHomesteadController::Interact()
     }
     case EFocus::Chest: OpenChestStorage(FocusId); break;
     case EFocus::Water: Notify(Sim.FillWater(Position)); break;
+    case EFocus::Underbrush: StartMacheteHack(); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 
@@ -2502,7 +2589,7 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
         return;
     }
     for (const auto Tool : {Homestead::Item::Knife, Homestead::Item::Hatchet, Homestead::Item::DiggingStick,
-        Homestead::Item::WateringCan})
+        Homestead::Item::WateringCan, Homestead::Item::Machete})
     {
         const int32 Value = static_cast<int32>(Tool);
         if (HotbarSlots.Contains(Value)) continue;

@@ -76,7 +76,7 @@ struct FGroundedFootIK : FAnimNode_TwoBoneIK
     }
 };
 
-enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks };
+enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks, Machete };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
@@ -85,6 +85,87 @@ struct FLocomotionBlend : FAnimNode_TwoWayBlend
 struct FGatherPose : FAnimNode_SequenceEvaluator_Standalone
 {
     virtual bool IsLooping() const override { return false; }
+};
+
+// Closes the right hand around a held tool handle on top of whatever the clip does: each finger
+// joint flexes toward the palm about the across-the-knuckles axis, and the thumb wraps over.
+struct FHandGrip : FAnimNode_SkeletalControlBase
+{
+    static constexpr int32 Chains = 5;
+    FBoneReference Joints[Chains][3];
+    float Angles[Chains][3] = {{72, 84, 52}, {76, 86, 54}, {80, 86, 54}, {84, 86, 54}, {18, 38, 32}};
+    FBoneReference Hand{TEXT("hand_r")}, IndexBase{TEXT("index_01_r")}, MiddleBase{TEXT("middle_01_r")}, PinkyBase{TEXT("pinky_01_r")};
+    // Resting carry: ulnar deviation lets a hanging tool's head tip down and forward instead of
+    // jutting straight out from the fist. 0 while an authored swing drives the wrist.
+    float Carry = 0;
+    static constexpr float CarryDeviation = 46;
+
+    FHandGrip()
+    {
+        const TCHAR* Names[Chains] = {TEXT("index"), TEXT("middle"), TEXT("ring"), TEXT("pinky"), TEXT("thumb")};
+        for (int32 Chain = 0; Chain < Chains; ++Chain)
+            for (int32 Joint = 0; Joint < 3; ++Joint)
+                Joints[Chain][Joint].BoneName = *FString::Printf(TEXT("%s_%02d_r"), Names[Chain], Joint + 1);
+        Alpha = 0;
+    }
+    virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override
+    {
+        for (auto& Chain : Joints) for (auto& Joint : Chain) Joint.Initialize(RequiredBones);
+        for (FBoneReference* Bone : {&Hand, &IndexBase, &MiddleBase, &PinkyBase}) Bone->Initialize(RequiredBones);
+    }
+    virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override
+    {
+        for (auto& Chain : Joints) for (auto& Joint : Chain) if (!Joint.IsValidToEvaluate(RequiredBones)) return false;
+        return Hand.IsValidToEvaluate(RequiredBones) && IndexBase.IsValidToEvaluate(RequiredBones)
+            && MiddleBase.IsValidToEvaluate(RequiredBones) && PinkyBase.IsValidToEvaluate(RequiredBones);
+    }
+    virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output,
+        TArray<FBoneTransform>& OutBoneTransforms) override
+    {
+        const FBoneContainer& Bones = Output.Pose.GetPose().GetBoneContainer();
+        auto CS = [&](const FBoneReference& Bone) { return Output.Pose.GetComponentSpaceTransform(Bone.GetCompactPoseIndex(Bones)); };
+        const FVector HandAt = CS(Hand).GetLocation();
+        const FVector Along = (CS(MiddleBase).GetLocation() - HandAt).GetSafeNormal();
+        const FVector Across = (CS(IndexBase).GetLocation() - CS(PinkyBase).GetLocation()).GetSafeNormal();
+        const FVector Palm = FVector::CrossProduct(Across, Along).GetSafeNormal();
+        if (Palm.IsNearlyZero()) return;
+        // Palm x Along = -Across, so a positive turn about Palm swings the fingers to the pinky side.
+        FTransform Wrist = FTransform::Identity;
+        if (Carry > 0.001f)
+        {
+            const FQuat Turn(Palm, FMath::DegreesToRadians(CarryDeviation * Carry));
+            Wrist = FTransform(-HandAt) * FTransform(Turn) * FTransform(HandAt);
+            const FCompactPoseBoneIndex HandIndex = Hand.GetCompactPoseIndex(Bones);
+            OutBoneTransforms.Add(FBoneTransform(HandIndex, CS(Hand) * Wrist));
+        }
+        for (int32 Chain = 0; Chain < Chains; ++Chain)
+        {
+            const bool bThumb = Chain == Chains - 1;
+            const FCompactPoseBoneIndex First = Joints[Chain][0].GetCompactPoseIndex(Bones);
+            FTransform ParentOld = Output.Pose.GetComponentSpaceTransform(Bones.GetParentBoneIndex(First));
+            FTransform ParentNew = ParentOld;
+            FVector Direction = Along;
+            for (int32 Joint = 0; Joint < 3; ++Joint)
+            {
+                const FCompactPoseBoneIndex Index = Joints[Chain][Joint].GetCompactPoseIndex(Bones);
+                const FTransform Old = Output.Pose.GetComponentSpaceTransform(Index);
+                FTransform New = Old.GetRelativeTransform(ParentOld) * ParentNew;
+                if (Joint < 2)
+                    Direction = (Output.Pose.GetComponentSpaceTransform(Joints[Chain][Joint + 1].GetCompactPoseIndex(Bones)).GetLocation()
+                        - Old.GetLocation()).GetSafeNormal();
+                // Rotating about Axis moves the segment toward Axis x Direction; pick the sign that
+                // curls toward the palm. The thumb bends straight toward the palm.
+                FVector Axis = bThumb ? FVector::CrossProduct(Direction, Palm).GetSafeNormal() : Across;
+                if (FVector::DotProduct(FVector::CrossProduct(Axis, Direction), Palm) < 0) Axis = -Axis;
+                if (!Axis.IsNearlyZero())
+                    New.SetRotation(FQuat(Axis, FMath::DegreesToRadians(Angles[Chain][Joint])) * New.GetRotation());
+                OutBoneTransforms.Add(FBoneTransform(Index, New * Wrist));
+                ParentOld = Old;
+                ParentNew = New;
+            }
+        }
+        OutBoneTransforms.Sort(FCompareBoneTransformIndex());
+    }
 };
 
 struct FHomesteadAnimProxy : FAnimInstanceProxy
@@ -112,7 +193,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         RightSlope.ComponentPose.SetLinkNode(&LeftSlope);
         LeftPlant.ComponentPose.SetLinkNode(&RightSlope);
         RightPlant.ComponentPose.SetLinkNode(&LeftPlant);
-        PlaceToLocal.ComponentPose.SetLinkNode(&RightPlant);
+        Grip.ComponentPose.SetLinkNode(&RightPlant);
+        PlaceToLocal.ComponentPose.SetLinkNode(&Grip);
         PelvisPlacement.BoneToModify.BoneName = TEXT("pelvis");
         PelvisPlacement.TranslationMode = BMM_Additive;
         PelvisPlacement.TranslationSpace = BCS_ComponentSpace;
@@ -197,6 +279,9 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FGroundedFootIK RightPlant;
     FAnimNode_ModifyBone LeftSlope;
     FAnimNode_ModifyBone RightSlope;
+    FHandGrip Grip;
+    float GripAlpha = 0;
+    float GripTarget = 0;
     FAnimNode_ConvertComponentToLocalSpace PlaceToLocal;
     float LeftGroundHeight = 0;
     float RightGroundHeight = 0;
@@ -223,6 +308,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     uint32 WaterStarted = 0;
     uint32 ClearStarted = 0;
     uint32 KnifeStarted = 0;
+    uint32 MacheteStarted = 0;
     uint32 TillStarted = 0;
     EHandAction Requested = EHandAction::None;
     EHandAction Active = EHandAction::Gather;
@@ -426,6 +512,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         {
             Active = Requested;
             Gather.SetSequence(Active == EHandAction::Till ? Avatar->GetTillAnimation()
+                : Active == EHandAction::Machete ? Avatar->GetMacheteAnimation()
                 : Active == EHandAction::KnifeCut ? Avatar->GetKnifeCutAnimation()
                 : Active == EHandAction::Clear ? Avatar->GetClearAnimation()
                 : Active == EHandAction::Water ? Avatar->GetWaterAnimation()
@@ -439,6 +526,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             bGathering = true;
             if (Active == EHandAction::Clear) ++ClearStarted;
             else if (Active == EHandAction::KnifeCut) ++KnifeStarted;
+            else if (Active == EHandAction::Machete) ++MacheteStarted;
             else if (Active == EHandAction::Till) ++TillStarted;
             else if (Active == EHandAction::Water) ++WaterStarted;
             else ++Started;
@@ -455,6 +543,9 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             ActionTarget > ActionBlend.Alpha ? 1.0f / 0.12f : 1.0f / 0.16f);
         // A cancelled pose stays at its current phase while blending out; no restart snap.
         Gather.SetExplicitTime(GatherTime);
+        GripAlpha = FMath::FInterpConstantTo(GripAlpha, GripTarget, DeltaSeconds, 1.0f / 0.15f);
+        Grip.Alpha = GripAlpha;
+        Grip.Carry = Active == EHandAction::Machete ? 1.0f - ActionBlend.Alpha : 1.0f;
     }
 };
 }
@@ -568,6 +659,39 @@ void UHomesteadAnimInstance::RequestKnifeCut()
 void UHomesteadAnimInstance::RequestTill()
 {
     GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Till;
+}
+
+void UHomesteadAnimInstance::RequestMacheteHack()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Machete;
+}
+
+float UHomesteadAnimInstance::MacheteWeight() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Machete ? Proxy.ActionBlend.Alpha : 0;
+}
+
+float UHomesteadAnimInstance::MachetePhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Machete ? Proxy.GatherTime : 0;
+}
+
+uint32 UHomesteadAnimInstance::MacheteStarts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().MacheteStarted;
+}
+
+bool UHomesteadAnimInstance::IsHacking() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Machete && Proxy.bGathering && !Proxy.bCancelled;
+}
+
+void UHomesteadAnimInstance::SetRightHandGrip(float Alpha)
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().GripTarget = FMath::Clamp(Alpha, 0.0f, 1.0f);
 }
 
 float UHomesteadAnimInstance::ClearWeight() const

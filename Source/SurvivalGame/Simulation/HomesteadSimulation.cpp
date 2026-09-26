@@ -382,9 +382,10 @@ bool ReadUnsigned(std::istream& stream, std::uint64_t& value)
     value = parsed;
     return true;
 }
-bool ReadStock(std::istream& stream, Inventory& stock)
+bool ReadStock(std::istream& stream, Inventory& stock, int stored = ItemCount)
 {
-    for (int& value : stock) if (!(stream >> value)) return false;
+    stock.fill(0);
+    for (int i = 0; i < stored; ++i) if (!(stream >> stock[i])) return false;
     return StockValid(stock);
 }
 void WriteStock(std::ostream& stream, const Inventory& stock)
@@ -456,6 +457,7 @@ int InventoryCategory(Item item)
     case Item::Hatchet:
     case Item::DiggingStick:
     case Item::WateringCan:
+    case Item::Machete:
         return 0;
     case Item::Branch:
     case Item::Stone:
@@ -706,7 +708,8 @@ const char* ItemName(Item item)
 {
     static const char* names[] = {"Knife", "Branch", "Stone", "Fiber", "Berries", "Roots",
         "Meadow herb", "Seeds", "Crude hatchet", "Digging stick", "Watering can", "Water",
-        "Roasted roots", "Herbed roots", "Timber", "Firewood"};
+        "Roasted roots", "Herbed roots", "Timber", "Firewood", "Machete"};
+    static_assert(sizeof(names) / sizeof(names[0]) == ItemCount, "Every item needs a name.");
     return ValidEnum(item, Item::Count) ? names[static_cast<int>(item)] : "Unknown item";
 }
 const char* ResourceName(ResourceKind kind)
@@ -1371,6 +1374,33 @@ Result Simulation::Clear(int nodeId, Point player)
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
     return CommitInventory(std::move(candidate), "Land cleared.");
 }
+bool operator<(const UnderbrushEdit& a, const UnderbrushEdit& b)
+{
+    return a.chunk < b.chunk || (a.chunk == b.chunk && a.index < b.index);
+}
+bool Simulation::IsUnderbrushCleared(Generation::ChunkCoord chunk, int index) const
+{
+    const UnderbrushEdit key{chunk, index};
+    return std::binary_search(state_.clearedUnderbrush.begin(), state_.clearedUnderbrush.end(), key);
+}
+Result Simulation::ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool woody, Point plant, Point player)
+{
+    if (state_.failed) return Failed();
+    if (index < 0 || index >= MaxUnderbrushIndex || !ValidPoint(plant)) return Bad("Choose a bush or bramble to clear.");
+    if (Count(Item::Machete) == 0) return Bad("Take your machete from storage to hack through undergrowth.");
+    if (!Near(player, plant, 450.0)) return Bad("Move closer to clear this undergrowth.");
+    if (IsUnderbrushCleared(chunk, index)) return Bad("This undergrowth has already been cleared.");
+    if (static_cast<int>(state_.clearedUnderbrush.size()) >= MaxUnderbrushEdits)
+        return Bad("The world has reached its 16384 cleared-undergrowth limit.");
+    State candidate = state_;
+    const UnderbrushEdit key{chunk, index};
+    candidate.clearedUnderbrush.insert(
+        std::lower_bound(candidate.clearedUnderbrush.begin(), candidate.clearedUnderbrush.end(), key), key);
+    // A full pack still clears; the cuttings are just left on the ground.
+    ++candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
+    if (ContainerUsed(candidate, 0) > InventoryCapacity) --candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
+    return CommitInventory(std::move(candidate), "Undergrowth cleared.");
+}
 Result Simulation::Eat(Item item)
 {
     const auto allowed = CanEat(state_, item);
@@ -1502,7 +1532,7 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
         return false;
     };
     Inventory change{};
-    for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan})
+    for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Machete})
         if (!owned(tool)) change[static_cast<int>(tool)] = 1;
     if (includeSeeds)
     {
@@ -1808,6 +1838,9 @@ std::string Simulation::Serialize() const
     for (int id : state_.equipment) body << id << ' ';
     body << '\n';
     WriteLayout(body, state_.inventoryLayout);
+    body << state_.clearedUnderbrush.size() << '\n';
+    for (const auto& plant : state_.clearedUnderbrush)
+        body << plant.chunk.x << ' ' << plant.chunk.y << ' ' << plant.index << '\n';
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -1829,9 +1862,10 @@ Result Simulation::Deserialize(const std::string& data)
     if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD") return invalid();
     header >> std::ws;
     if (!header.eof()) return invalid();
-    if (version != SimulationSaveVersion) return {false,
+    if (version != SimulationSaveVersion && version != LegacySimulationSaveVersion) return {false,
         "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
+    const int storedItems = version == LegacySimulationSaveVersion ? static_cast<int>(Item::Machete) : ItemCount;
     const std::string payload = data.substr(newline + 1);
     if (size != payload.size() || Checksum(payload) != checksum) return invalid();
     for (unsigned char c : payload) if (c > 127 || (c < 32 && c != '\n' && c != '\r' && c != '\t')) return invalid();
@@ -1845,7 +1879,7 @@ Result Simulation::Deserialize(const std::string& data)
         !FiniteRange(candidate.warmth, 0.0, 100.0) || candidate.nextId < 1 ||
         candidate.nextId >= TransientResourceIdBase) return invalid();
     const bool critical = candidate.hunger == 0 || candidate.energy == 0 || candidate.warmth == 0;
-    if (critical != candidate.failed || !ReadStock(input, candidate.inventory)) return invalid();
+    if (critical != candidate.failed || !ReadStock(input, candidate.inventory, storedItems)) return invalid();
     std::set<int> ids;
     const auto acceptId = [&](int id) { return id > 0 && id < candidate.nextId && ids.insert(id).second; };
     int count = 0;
@@ -1890,7 +1924,7 @@ Result Simulation::Deserialize(const std::string& data)
         Structure piece;
         int kind = 0;
         if (!(input >> piece.id >> kind >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours) ||
-            !ReadStock(input, piece.storage) || !ReadLayout(input, piece.layout)) return invalid();
+            !ReadStock(input, piece.storage, storedItems) || !ReadLayout(input, piece.layout)) return invalid();
         piece.kind = static_cast<Piece>(kind);
         if (!acceptId(piece.id) || !ValidEnum(piece.kind, Piece::Count) || !ValidCell(piece.cellX, piece.cellY) ||
             piece.rotation < 0 || piece.rotation >= 4 ||
@@ -1956,6 +1990,19 @@ Result Simulation::Deserialize(const std::string& data)
     }
     for (int& id : candidate.equipment) if (!(input >> id)) return invalid();
     if (!ReadLayout(input, candidate.inventoryLayout)) return invalid();
+    if (version != LegacySimulationSaveVersion)
+    {
+        if (!(input >> count) || count < 0 || count > MaxUnderbrushEdits) return invalid();
+        for (int i = 0; i < count; ++i)
+        {
+            UnderbrushEdit plant;
+            if (!(input >> plant.chunk.x >> plant.chunk.y >> plant.index) ||
+                plant.index < 0 || plant.index >= MaxUnderbrushIndex ||
+                (!candidate.clearedUnderbrush.empty() && !(candidate.clearedUnderbrush.back() < plant)))
+                return invalid();
+            candidate.clearedUnderbrush.push_back(plant);
+        }
+    }
     input >> std::ws;
     if (!input.eof()) return invalid();
     const auto inventory = ValidateInventory(candidate);

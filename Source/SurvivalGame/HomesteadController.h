@@ -153,6 +153,8 @@ public:
     void CycleHotbar(int32 Direction);
     void HoverHotbarSlot(int32 Index) { HoveredHotbarSlot = Index >= 0 && Index < 10 ? Index : INDEX_NONE; }
     bool KnifePreviewRequested() const;
+    // The carried tool in the selected (or hovered) hotbar slot, or Item::Count.
+    Homestead::Item PresentedTool() const;
     bool ShouldShowHotbar() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
@@ -170,7 +172,7 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush };
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;
@@ -232,6 +234,22 @@ private:
     Homestead::Piece BuildKind = Homestead::Piece::Foundation;
     EFocus Focus = EFocus::None;
     int32 FocusId = -1;
+    // The underbrush plant in focus while the machete is selected (EFocus::Underbrush).
+    FIntPoint FocusBrushChunk = FIntPoint::ZeroValue;
+    int32 FocusBrushIndex = INDEX_NONE;
+    uint8 FocusBrushSpecies = 0;
+    FVector2D FocusBrushPosition = FVector2D::ZeroVector;
+    bool bFocusBrushWoody = false;
+    // A machete hack in progress: the plant is cleared when her second stroke lands, so it
+    // stands until then and an interrupted hack changes nothing.
+    bool bHackPending = false;
+    FIntPoint HackChunk = FIntPoint::ZeroValue;
+    int32 HackIndex = INDEX_NONE;
+    FVector2D HackPosition = FVector2D::ZeroVector;
+    bool bHackWoody = false;
+    double HackSince = 0;
+    void UpdatePendingHack();
+    void StartMacheteHack();
     float RefreshRemaining = 0;
     float ToastRemaining = 0;
     float AutosaveRemaining = 240;

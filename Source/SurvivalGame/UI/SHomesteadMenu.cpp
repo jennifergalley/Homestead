@@ -104,7 +104,8 @@ const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("gui
 const TCHAR* ItemIcons[] = {TEXT("knife"), TEXT("branch"), TEXT("stone"), TEXT("fiber"),
     TEXT("berries"), TEXT("roots"), TEXT("flowers"), TEXT("seeds"), TEXT("hatchet"),
     TEXT("digging-stick"), TEXT("watering-can"), TEXT("water"), TEXT("roasted-roots"), TEXT("herbed-roots"),
-    TEXT("timber"), TEXT("firewood")};
+    TEXT("timber"), TEXT("firewood"), TEXT("machete")};
+static_assert(UE_ARRAY_COUNT(ItemIcons) == Homestead::ItemCount, "Every item needs an icon.");
 FName RequirementIcon(Homestead::Item Item)
 {
     const int32 Index = static_cast<int32>(Item);

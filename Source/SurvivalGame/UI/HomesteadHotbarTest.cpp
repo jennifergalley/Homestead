@@ -109,7 +109,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Slots[1].Tool == Item::Hatchet && !Slots[1].Available
                 && Slots[2].Tool == Item::DiggingStick && !Slots[2].Available
                 && Slots[3].Tool == Item::WateringCan && !Slots[3].Available
-                && !Slots[4].Assigned && !Slots[9].Assigned
+                && Slots[4].Tool == Item::Machete && !Slots[4].Available
+                && !Slots[5].Assigned && !Slots[9].Assigned
                 && Controller->Simulation().UsedCapacity() == *Capacity;
         });
     Add(TEXT("Carried selected Knife is presented in the heroine hand"),
@@ -171,7 +172,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, Revision]() { *Revision = Controller->Simulation().GetRevision(); Tap(EKeys::LeftMouseButton); },
         [this, Revision]() { return Controller->ToastIsError()
             && Controller->Simulation().GetRevision() == *Revision; });
-    Add(TEXT("Duplicate invalid save references sanitize to Empty and clamp selection"),
+    Add(TEXT("Duplicate invalid save references sanitize to Empty, gain the missing Machete and clamp selection"),
         [this]()
         {
             Controller->SanitizeHotbar({
@@ -184,7 +185,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             const auto Slots = Controller->HotbarSnapshot();
             const bool Passed = Slots[0].Tool == Item::Knife && Slots[0].Assigned
-                && !Slots[1].Assigned && !Slots[2].Assigned
+                && Slots[1].Tool == Item::Machete && Slots[1].Assigned && !Slots[2].Assigned
                 && Slots[3].Tool == Item::WateringCan && Slots[3].Assigned
                 && Controller->SelectedHotbarIndex() == 9;
             Controller->ResetHotbar();

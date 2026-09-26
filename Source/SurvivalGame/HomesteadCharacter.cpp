@@ -66,6 +66,37 @@ struct FMetaHumanGroomSpec
     const TCHAR* Groom;
     TArray<const TCHAR*> Materials;
 };
+
+FTransform RefComponentTransform(const FReferenceSkeleton& Skeleton, int32 Bone)
+{
+    FTransform Result = FTransform::Identity;
+    for (; Bone != INDEX_NONE; Bone = Skeleton.GetParentIndex(Bone))
+        Result = Result * Skeleton.GetRefBonePose()[Bone];
+    return Result;
+}
+
+// A handle held in the right hand's closed grip (FHandGrip), relative to hand_r: across the palm
+// at the finger crease, the tool's +Z toward the thumb side and its -Y (a blade's edge) along the
+// knuckles, the way a machete or hatchet is held. Tools author their pivot at the grip centre.
+FTransform HandGripTransform(const USkeletalMesh& Mesh)
+{
+    const FReferenceSkeleton& Skeleton = Mesh.GetRefSkeleton();
+    const int32 Hand = Skeleton.FindBoneIndex(TEXT("hand_r"));
+    const int32 Middle = Skeleton.FindBoneIndex(TEXT("middle_01_r"));
+    const int32 Index = Skeleton.FindBoneIndex(TEXT("index_01_r"));
+    const int32 Pinky = Skeleton.FindBoneIndex(TEXT("pinky_01_r"));
+    if (Hand == INDEX_NONE || Middle == INDEX_NONE || Index == INDEX_NONE || Pinky == INDEX_NONE)
+        return FTransform::Identity;
+    const FTransform HandT = RefComponentTransform(Skeleton, Hand);
+    const FVector Knuckle = RefComponentTransform(Skeleton, Middle).GetLocation();
+    const FVector Along = (Knuckle - HandT.GetLocation()).GetSafeNormal();
+    FVector Across = RefComponentTransform(Skeleton, Index).GetLocation() - RefComponentTransform(Skeleton, Pinky).GetLocation();
+    Across = (Across - Along * FVector::DotProduct(Across, Along)).GetSafeNormal();
+    const FVector Palm = FVector::CrossProduct(Across, Along).GetSafeNormal();
+    const FVector Centre = HandT.GetLocation() + (Knuckle - HandT.GetLocation()) * 0.78f + Palm * 2.6f;
+    const FTransform Grip(FRotationMatrix::MakeFromZY(Across, -Along).ToQuat(), Centre);
+    return Grip.GetRelativeTransform(HandT);
+}
 }
 
 bool AHomesteadCharacter::UsesMetaHumanHeroine()
@@ -354,6 +385,10 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     GatherPouchAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelGatherPouch"));
     if (GatherPouchAnimation && GatherPouchAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         GatherPouchAnimation = nullptr;
+    // Optional: authored with homestead_agent.machete_hack.
+    MacheteAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_MacheteHack"));
+    if (MacheteAnimation && MacheteAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        MacheteAnimation = nullptr;
     auto MakeProp = [this](const TCHAR* Name, UStaticMesh* PropMesh)
     {
         auto* Prop = NewObject<UStaticMeshComponent>(this, Name);
@@ -398,6 +433,13 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         CordBelt->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("pelvis"));
         CordBelt->SetRelativeTransform(FTransform(FRotator(-90.0f, -2.05f, 0.0f), FVector(4.25f, 1.07f, -0.02f), FVector(1.24f, 1.12f, 1.0f)));
         CordBelt->SetVisibility(true);
+    }
+    if (UStaticMesh* Machete = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/Machete/SM_Machete.SM_Machete")))
+    {
+        HeldMachete = MakeProp(TEXT("HeldMachete"), Machete);
+        HeldMachete->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
+        HeldMachete->SetRelativeTransform(HandGripTransform(*MetaHumanBody));
+        HeldMachete->SetCastShadow(true);
     }
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
@@ -741,6 +783,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdateCarriedSticks();
+    UpdateHeldTools();
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
@@ -1123,6 +1166,39 @@ void AHomesteadCharacter::PlayKnifeCut(Homestead::Point Target)
         Animation->RequestKnifeCut();
     else
         UE_LOG(LogTemp, Error, TEXT("Knife work succeeded but its distinct animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::UpdateHeldTools()
+{
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!Animation || !HeldMachete) return;
+    const auto* PC = Cast<AHomesteadController>(Controller);
+    const bool Hacking = Animation->MacheteWeight() > 0.01f;
+    // In hand while hacking, or when selected on the hotbar and her hands are otherwise free.
+    const bool Selected = PC && bMetaHumanActive && !bAppearancePreview
+        && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
+        && PC->PresentedTool() == Homestead::Item::Machete && Animation->ActionWeight() < 0.01f;
+    const bool Held = bMetaHumanActive && (Hacking || Selected);
+    HeldMachete->SetVisibility(Held);
+    Animation->SetRightHandGrip(Held ? 1.0f : 0.0f);
+}
+
+bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target)
+{
+    if (!bMetaHumanActive || !MacheteAnimation || !HeldMachete) return false;
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!Animation) return false;
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
+    if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
+    {
+        ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+        SetActorRotation(FRotator(0, *ClearYaw, 0));
+    }
+    else ClearYaw.Reset();
+    Animation->RequestMacheteHack();
+    return true;
 }
 
 void AHomesteadCharacter::PlayTill(Homestead::Point Target)

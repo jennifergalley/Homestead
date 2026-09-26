@@ -246,6 +246,51 @@ float AHomesteadWorld::UnderbrushRadius(uint8 Species)
     return Species < UnderbrushSpeciesCount ? UnderbrushSpecies[Species].Radius : 0.0f;
 }
 
+FString AHomesteadWorld::UnderbrushName(uint8 Species)
+{
+    static const TCHAR* Names[] = {TEXT("Blackberry bramble"), TEXT("Blackberry thicket"), TEXT("Toyon hedge"),
+        TEXT("Hazel"), TEXT("Deer brush"), TEXT("Thimbleberry"), TEXT("Bracken fern"), TEXT("Wild strawberry"),
+        TEXT("Grass and yarrow")};
+    static_assert(UE_ARRAY_COUNT(Names) == UnderbrushSpeciesCount);
+    return Species < UnderbrushSpeciesCount ? Names[Species] : TEXT("Undergrowth");
+}
+
+bool AHomesteadWorld::FindUnderbrushNear(const Homestead::Simulation& Simulation, FVector2D Point, float Reach,
+    FUnderbrushTarget& Out) const
+{
+    enum : uint8 { Hedge = 2, Hazel = 3, DeerBrush = 4, Strawberry = 7 };
+    float Best = TNumericLimits<float>::Max();
+    const int64 ChunkX = FMath::FloorToInt64(Point.X / Homestead::Generation::ChunkSizeCm);
+    const int64 ChunkY = FMath::FloorToInt64(Point.Y / Homestead::Generation::ChunkSizeCm);
+    for (int64 DY = -1; DY <= 1; ++DY)
+        for (int64 DX = -1; DX <= 1; ++DX)
+        {
+            const FIntPoint Key(static_cast<int32>(ChunkX + DX), static_cast<int32>(ChunkY + DY));
+            // Only chunks whose cover is live; a staged neighbour isn't visible yet.
+            if (!TerrainChunks.Contains(Key)) continue;
+            const auto* Plants = PlacedUnderbrush.Find(Key);
+            if (!Plants) continue;
+            for (const FHomesteadUnderbrush& Plant : *Plants)
+            {
+                if (Plant.Species >= Strawberry) continue;
+                // Just cleared; the chunk's cover hasn't rebuilt without it yet.
+                if (Simulation.IsUnderbrushCleared({Key.X, Key.Y}, Plant.Index)) continue;
+                const float Radius = UnderbrushSpecies[Plant.Species].Radius * Plant.Scale;
+                // Distance to the plant's near edge, not its stem.
+                const float Edge = FVector2D::Distance(Point, FVector2D(Plant.X, Plant.Y)) - Radius * 0.8f;
+                if (Edge > Reach || Edge >= Best) continue;
+                Best = Edge;
+                Out.Chunk = Key;
+                Out.Index = Plant.Index;
+                Out.Species = Plant.Species;
+                Out.Position = FVector2D(Plant.X, Plant.Y);
+                Out.Radius = Radius;
+                Out.bWoody = Plant.Species == Hedge || Plant.Species == Hazel || Plant.Species == DeerBrush;
+            }
+        }
+    return Best < TNumericLimits<float>::Max();
+}
+
 void AHomesteadWorld::GenerateUnderbrush(uint64 WorldSeed, FIntPoint Chunk, TArray<FHomesteadUnderbrush>& Out)
 {
     enum : uint8 { Bramble, BrambleLarge, Hedge, Hazel, DeerBrush, Thimbleberry, Fern, Strawberry, Yarrow };
@@ -1527,6 +1572,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
         for (const auto& Plot : State.plots)
             if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
                 Signature += FString::Printf(TEXT("P%d;"), Plot.id);
+        for (const auto& Cut : State.clearedUnderbrush)
+            if (Cut.chunk.x == Chunk.Key.X && Cut.chunk.y == Chunk.Key.Y)
+                Signature += FString::Printf(TEXT("U%d;"), Cut.index);
         Signature += TEXT("natural-creek-v1-decorative-wildflower-v1-underbrush-v2-granite-v2");
         if (!StageChunk && bStagingResourceWindow
             && StagedChunk == State.activeChunk && StagedWorld.seed == State.world.seed
@@ -1762,12 +1810,15 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
 
             TArray<FHomesteadUnderbrush> Plants;
             GenerateUnderbrush(State.world.seed, Chunk.Key, Plants);
+            TArray<FHomesteadUnderbrush>& Placed = PlacedUnderbrush.FindOrAdd(Chunk.Key);
+            Placed.Reset();
             UHierarchicalInstancedStaticMeshComponent* UnderbrushBatches[UnderbrushSpeciesCount] = {};
             for (const FHomesteadUnderbrush& Plant : Plants)
             {
                 const FUnderbrushSpecies& Species = UnderbrushSpecies[Plant.Species];
                 UStaticMesh* Mesh = UnderbrushMeshes[Plant.Species];
                 if (!Mesh) continue;
+                if (Simulation.IsUnderbrushCleared({Chunk.Key.X, Chunk.Key.Y}, Plant.Index)) continue;
                 const float Radius = Species.Radius * Plant.Scale;
                 bool bOnRock = false;
                 for (const FHomesteadRock& Rock : Rocks)
@@ -1828,6 +1879,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                 Batch->AddInstance(FTransform(Rotation,
                     FVector(Plant.X, Plant.Y, CachedGroundHeight(Plant.X, Plant.Y) - 4.0f * Plant.Scale),
                     FVector(Plant.Scale)));
+                Placed.Add(Plant);
                 ++UnderbrushCount;
                 BlockingUnderbrushCount += Species.bBlocking ? 1 : 0;
             }
@@ -2812,7 +2864,8 @@ void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::
         case Homestead::Item::Knife:
         case Homestead::Item::Hatchet:
         case Homestead::Item::DiggingStick:
-        case Homestead::Item::WateringCan: Tint = FLinearColor(0.22f, 0.28f, 0.26f); break;
+        case Homestead::Item::WateringCan:
+        case Homestead::Item::Machete: Tint = FLinearColor(0.22f, 0.28f, 0.26f); break;
         case Homestead::Item::Berries:
         case Homestead::Item::Roots:
         case Homestead::Item::Flowers:

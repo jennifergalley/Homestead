@@ -13,7 +13,7 @@ enum class Item : int
 {
     Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
     Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
-    Timber, Firewood, Count
+    Timber, Firewood, Machete, Count
 };
 enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, Count };
 enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, SplitFirewood, Count };
@@ -23,10 +23,14 @@ enum class CropKind : int { Roots, Berries, Count };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 7;
+constexpr int SimulationSaveVersion = 8;
+// Version 7 saves predate the machete (one fewer item per stock) and cleared underbrush.
+constexpr int LegacySimulationSaveVersion = 7;
 constexpr double ChestReach = 280.0;
 constexpr double MaxWorldCoordinate = 1000000.0;
 constexpr int MaxResourceEdits = 16384;
+constexpr int MaxUnderbrushEdits = 16384;
+constexpr int MaxUnderbrushIndex = 4096;
 constexpr int MaxWorldDrops = 512;
 constexpr int TransientResourceIdBase = 1000000;
 
@@ -117,6 +121,15 @@ struct ResourceEdit
     double readyAtHour = 0.0;
 };
 
+// A decorative underbrush plant hacked away with the machete: the Unreal world's per-chunk
+// generator index, which depends only on the world seed and chunk.
+struct UnderbrushEdit
+{
+    Generation::ChunkCoord chunk{};
+    int index = 0;
+};
+bool operator<(const UnderbrushEdit& a, const UnderbrushEdit& b);
+
 struct Structure
 {
     int id = 0;
@@ -173,6 +186,7 @@ struct State
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
+    std::vector<UnderbrushEdit> clearedUnderbrush; // Sorted, unique.
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -228,6 +242,10 @@ public:
 
     Result Harvest(int nodeId, Point player);
     Result Clear(int nodeId, Point player);
+    // Hack away one underbrush plant at `plant` (validated by the caller's world). Woody shrubs
+    // yield a branch, soft growth yields fiber.
+    Result ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool woody, Point plant, Point player);
+    bool IsUnderbrushCleared(Generation::ChunkCoord chunk, int index) const;
     Result Eat(Item item);
     Result EatGroup(int groupId, std::uint64_t expectedRevision);
     Result Craft(Recipe recipe, Point player);

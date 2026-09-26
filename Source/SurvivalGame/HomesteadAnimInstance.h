@@ -25,6 +25,9 @@ public:
     void RequestClear();
     void RequestKnifeCut();
     void RequestTill();
+    void RequestMacheteHack();
+    // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip).
+    void SetRightHandGrip(float Alpha);
     void CancelAction(bool Immediate = false);
     float GatherWeight() const;
     float GatherPhase() const;
@@ -44,6 +47,10 @@ public:
     float TillPhase() const;
     uint32 TillStarts() const;
     bool IsTilling() const;
+    float MacheteWeight() const;
+    float MachetePhase() const;
+    uint32 MacheteStarts() const;
+    bool IsHacking() const;
     float ActionWeight() const;
 
 protected:
