@@ -71,6 +71,8 @@ public:
     bool IsSprinting() const { return bSprintActive; }
     void CancelSprint();
     UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
+    // MetaHuman only: kneel, pick up two sticks and stack them in the left arm (null otherwise).
+    UAnimSequence* GetGatherSticksAnimation() const { return bMetaHumanActive ? GatherSticksAnimation.Get() : nullptr; }
     UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
     UAnimSequence* GetClearAnimation() const { return ClearAnimation; }
@@ -80,6 +82,8 @@ public:
     UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
     UHomesteadKnife* GetKnife() const { return Knife; }
     void PlayGather();
+    // Gathering sticks: the kneeling pickup with carried stick props when available, else PlayGather.
+    void PlayGatherSticks();
     void PlayWater();
     void PlayWater(Homestead::Point Target);
     void PlayClear();
@@ -112,6 +116,11 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> SlowWalkAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> SprintAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> GatherSticksAnimation;
+    // Two branch props that appear in her hand and stack on her left forearm during the stick gather.
+    UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> CarriedSticks;
+    int32 StickStage = 0;
+    void UpdateCarriedSticks();
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;

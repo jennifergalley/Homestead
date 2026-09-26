@@ -322,6 +322,25 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     ClearAnimation = Clips[5];
     KnifeCutAnimation = Clips[6];
     TillAnimation = Clips[7];
+    // Optional: authored with homestead_agent.kneel_gather; without it sticks use the plain gather.
+    GatherSticksAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelGatherSticks"));
+    if (GatherSticksAnimation && GatherSticksAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        GatherSticksAnimation = nullptr;
+    const TCHAR* StickMeshes[] = {
+        TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b"),
+        TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_c.SM_DryBranchesMedium01_c")};
+    CarriedSticks.Reset();
+    for (int32 Index = 0; Index < 2; ++Index)
+        if (UStaticMesh* Branch = LoadObject<UStaticMesh>(nullptr, StickMeshes[Index]))
+        {
+            auto* Stick = NewObject<UStaticMeshComponent>(this, *FString::Printf(TEXT("CarriedStick%d"), Index));
+            Stick->SetupAttachment(GetMesh());
+            Stick->SetStaticMesh(Branch);
+            Stick->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Stick->SetVisibility(false);
+            Stick->RegisterComponent();
+            CarriedSticks.Add(Stick);
+        }
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
     UClass* FaceAnimClass = LoadObject<UClass>(nullptr,
@@ -631,6 +650,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
         }
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
+    UpdateCarriedSticks();
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
         const FVector CameraPosition = Camera->GetComponentLocation();
@@ -692,6 +712,80 @@ void AHomesteadCharacter::PlayGather()
         UE_LOG(LogTemp, Error, TEXT("Gather succeeded but the heroine gathering animation instance is unavailable."));
 }
 
+void AHomesteadCharacter::PlayGatherSticks()
+{
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!GetGatherSticksAnimation() || CarriedSticks.Num() < 2 || !Animation)
+    {
+        PlayGather();
+        return;
+    }
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    StickStage = 0;
+    Animation->RequestGatherSticks();
+}
+
+// Stick moments in AN_HeroineMH_KneelGatherSticks (seconds; homestead_agent.kneel_gather STICK_EVENTS).
+namespace GatherSticksTiming
+{
+constexpr float Pick1 = 38.0f / 30.0f, Stack1 = 54.0f / 30.0f, Pick2 = 70.0f / 30.0f, Stack2 = 86.0f / 30.0f,
+    Stow = 112.0f / 30.0f;
+}
+
+void AHomesteadCharacter::UpdateCarriedSticks()
+{
+    if (CarriedSticks.Num() < 2) return;
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    const bool Active = Animation && Animation->IsGatheringSticks();
+    const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
+    using namespace GatherSticksTiming;
+    const int32 Stage = !Active || Time >= Stow ? 0 : Time >= Stack2 ? 4 : Time >= Pick2 ? 3 : Time >= Stack1 ? 2 : Time >= Pick1 ? 1 : 0;
+    if (Stage == StickStage) return;
+    StickStage = Stage;
+    USkeletalMeshComponent* Body = GetMesh();
+    // Grip: in the right palm, running across the fingers.
+    auto Grip = [Body](UStaticMeshComponent* Stick, float Scale)
+    {
+        const FVector Hand = Body->GetSocketLocation(TEXT("hand_r"));
+        const FVector Fingers = (Body->GetSocketLocation(TEXT("middle_01_r")) - Hand).GetSafeNormal();
+        const FVector Across = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
+        const FVector Palm = FVector::CrossProduct(Fingers, Across).GetSafeNormal();
+        const FVector Centre = Hand + Fingers * 6.0f + Palm * 3.0f;
+        Stick->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        // Branch meshes run along their local Y.
+        const FRotator Rotation = FRotationMatrix::MakeFromYZ(Across, Palm).Rotator();
+        const FVector Offset = Rotation.RotateVector(Stick->GetStaticMesh()->GetBounds().Origin * Scale);
+        Stick->SetWorldLocationAndRotation(Centre - Offset, Rotation);
+        Stick->SetWorldScale3D(FVector(Scale));
+        Stick->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_r"));
+        Stick->SetVisibility(true);
+    };
+    // Stack: lying level on the left forearm and running across her body (parallel to her chest), like
+    // carried firewood hugged against the belly.
+    auto Stack = [Body, this](UStaticMeshComponent* Stick, float Scale, float Height, float Twist)
+    {
+        const FVector Elbow = Body->GetSocketLocation(TEXT("lowerarm_l"));
+        const FVector Wrist = Body->GetSocketLocation(TEXT("hand_l"));
+        const FVector Along = GetActorRightVector().GetSafeNormal2D().RotateAngleAxis(Twist, FVector::UpVector);
+        const FVector Centre = FMath::Lerp(Elbow, Wrist, 0.55f) + FVector(0, 0, Height) + GetActorForwardVector() * 3.0f;
+        Stick->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        const FRotator Rotation = FRotationMatrix::MakeFromYZ(Along, FVector::UpVector).Rotator();
+        const FVector Offset = Rotation.RotateVector(Stick->GetStaticMesh()->GetBounds().Origin * Scale);
+        Stick->SetWorldLocationAndRotation(Centre - Offset, Rotation);
+        Stick->SetWorldScale3D(FVector(Scale));
+        Stick->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("lowerarm_l"));
+        Stick->SetVisibility(true);
+    };
+    constexpr float ScaleA = 0.55f, ScaleB = 0.65f;
+    if (Stage == 0)
+        for (UStaticMeshComponent* Stick : CarriedSticks) Stick->SetVisibility(false);
+    else if (Stage == 1) Grip(CarriedSticks[0], ScaleA);
+    else if (Stage == 2) Stack(CarriedSticks[0], ScaleA, 5.0f, -8.0f);
+    else if (Stage == 3) Grip(CarriedSticks[1], ScaleB);
+    else Stack(CarriedSticks[1], ScaleB, 9.0f, 10.0f);
+}
+
 void AHomesteadCharacter::PlayWater()
 {
     CancelSprint();
@@ -725,6 +819,8 @@ void AHomesteadCharacter::CancelAction(bool Immediate)
 {
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->CancelAction(Immediate);
+    for (UStaticMeshComponent* Stick : CarriedSticks) Stick->SetVisibility(false);
+    StickStage = 0;
     WateringTool->SetHiddenInGame(true, true);
     Hatchet->SetHiddenInGame(true, true);
     DiggingStick->SetHiddenInGame(true, true);

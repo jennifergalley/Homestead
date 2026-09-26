@@ -1678,6 +1678,15 @@ void Simulation::AdvanceGameHours(double hours, Point player)
         hours -= step;
     }
 }
+void Simulation::SkipToHourOfDay(double hourOfDay)
+{
+    if (state_.failed || !FiniteRange(hourOfDay, 0.0, 24.0)) return;
+    double target = std::floor(state_.hour / 24.0) * 24.0 + hourOfDay;
+    if (target <= state_.hour) target += 24.0;
+    if (target > MaxHour) return;
+    state_.hour = target;
+    ++revision_;
+}
 Result Simulation::Sleep(double hours, Point player)
 {
     if (state_.failed) return Failed();

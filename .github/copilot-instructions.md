@@ -17,6 +17,12 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   hours on long-running improvements or full feature build-outs, selecting the next thing to
   iterate on as each one completes.
 
+## Judgment calls
+
+- When you're unsure whether to make a change, make it if it would enhance realism and
+  verisimilitude (for example, carried sticks lying across her body instead of jutting forward,
+  keeping limbs out of her torso, or a more natural pose). Say what you changed when you report.
+
 ## Builds
 
 - If the packaged game is running from `Build\Windows` when you need to repackage, close it and

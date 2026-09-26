@@ -263,6 +263,9 @@ public:
     void SetWarmOutfit(bool enabled);
     void Advance(double realSeconds, Point player, bool paused = false);
     void AdvanceGameHours(double hours, Point player);
+    // Playtest aid: jump the clock forward to the next occurrence of hourOfDay (0-24) without
+    // simulating the skipped interval, so needs, crops and fires are left as they were.
+    void SkipToHourOfDay(double hourOfDay);
     Result SpendSprintEnergy(double realSeconds);
 
     std::string Serialize() const;

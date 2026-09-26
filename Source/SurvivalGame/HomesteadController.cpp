@@ -717,6 +717,12 @@ FString AHomesteadController::MenuPortraitStatus() const
         : TEXT("Character prototype\nOwned clothing is not yet renderable");
 }
 
+void AHomesteadController::HomesteadMorning(float Hour)
+{
+    Sim.SkipToHourOfDay(Hour);
+    RefreshRemaining = 0;
+}
+
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
     HideHotbar();
@@ -1340,12 +1346,14 @@ void AHomesteadController::Interact()
         bool Forage = false;
         bool Tree = false;
         bool Reeds = false;
+        bool Sticks = false;
         Homestead::Point ActionTarget = Position;
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
                 Tree = Node.kind == Homestead::ResourceKind::ForestTree;
                 Reeds = Node.kind == Homestead::ResourceKind::Reeds;
+                Sticks = Node.kind == Homestead::ResourceKind::Branches;
                 Forage = !Tree && Node.kind != Homestead::ResourceKind::Sapling;
                 ActionTarget = Node.position;
                 break;
@@ -1355,6 +1363,7 @@ void AHomesteadController::Interact()
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                 if (Reeds) Avatar->PlayKnifeCut(ActionTarget);
+                else if (Sticks) Avatar->PlayGatherSticks();
                 else Avatar->PlayGather();
         if (Result.ok && Tree)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);

@@ -76,7 +76,7 @@ struct FGroundedFootIK : FAnimNode_TwoBoneIK
     }
 };
 
-enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till };
+enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
@@ -428,7 +428,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Gather.SetSequence(Active == EHandAction::Till ? Avatar->GetTillAnimation()
                 : Active == EHandAction::KnifeCut ? Avatar->GetKnifeCutAnimation()
                 : Active == EHandAction::Clear ? Avatar->GetClearAnimation()
-                : Active == EHandAction::Water ? Avatar->GetWaterAnimation() : Avatar->GetGatherAnimation());
+                : Active == EHandAction::Water ? Avatar->GetWaterAnimation()
+                : Active == EHandAction::GatherSticks ? Avatar->GetGatherSticksAnimation() : Avatar->GetGatherAnimation());
         }
         const auto* Clip = Gather.GetSequence();
         if (Blocked || bCancelled) bGathering = false;
@@ -518,6 +519,23 @@ float UHomesteadAnimInstance::WalkPhase() const
 void UHomesteadAnimInstance::RequestGather()
 {
     GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Gather;
+}
+
+void UHomesteadAnimInstance::RequestGatherSticks()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::GatherSticks;
+}
+
+bool UHomesteadAnimInstance::IsGatheringSticks() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::GatherSticks && Proxy.bGathering && !Proxy.bCancelled;
+}
+
+float UHomesteadAnimInstance::GatherSticksPhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::GatherSticks ? Proxy.GatherTime : 0;
 }
 
 void UHomesteadAnimInstance::RequestWater()

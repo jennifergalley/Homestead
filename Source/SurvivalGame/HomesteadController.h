@@ -155,6 +155,8 @@ public:
     bool KnifePreviewRequested() const;
     bool ShouldShowHotbar() const;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
+    UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;

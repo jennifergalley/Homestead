@@ -17,6 +17,10 @@ public:
     float GaitRate() const;
     float WalkPhase() const;
     void RequestGather();
+    void RequestGatherSticks();
+    bool IsGatheringSticks() const;
+    // Seconds into the stick-gather clip while it plays.
+    float GatherSticksPhase() const;
     void RequestWater();
     void RequestClear();
     void RequestKnifeCut();

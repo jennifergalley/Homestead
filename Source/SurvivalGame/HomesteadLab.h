@@ -57,7 +57,7 @@ public:
     virtual void BeginPlay() override;
 
     // Console commands (also reachable through the editor MCP console helpers).
-    // Play a work animation in place: Gather, Water, Chop, Knife or Till.
+    // Play a work animation in place: Gather, Sticks, Water, Chop, Knife or Till.
     UFUNCTION(Exec) void LabAction(const FString& Name);
     // Move the sun to a time of day (0-24); shadows and sky follow.
     UFUNCTION(Exec) void LabSun(float Hour);

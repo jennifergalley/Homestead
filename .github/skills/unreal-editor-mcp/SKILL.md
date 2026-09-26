@@ -205,7 +205,7 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console (use `execute_console_command(world, ...)`): `LabAction Gather|Water|Chop|Knife|Till`,
+- Console (use `execute_console_command(world, ...)`): `LabAction Gather|Sticks|Water|Chop|Knife|Till`,
   `LabSun <hour>`, `LabCourse` (10/20/30° ramps and 10/20 cm steps at x = 2500),
   `LabTeleport <x> <y>`, `slomo 0.25`, `homestead.FootPlacement 0|1`.
 - The HUD shows speed, gait/action weights, foot placement state, frame time and sun hour.
@@ -225,6 +225,14 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
 - Spine controls: `roll` bends forward, `pitch` bends sideways, `yaw` twists.
 - Bake with `SequencerTools.export_anim_sequence`; the AnimSequence factory needs
   `target_skeleton` set, or creation fails.
+- Reading bones from the rig hierarchy after `set_current_time` does **not** give the keyed pose;
+  it keeps returning the rest pose. To key something in a moving bone's frame (for example, the
+  stick bundle cradled against `spine_05` in `kneel_gather.py`), bake once, read the bone from the
+  baked clip with `bone_positions`, then key and bake again.
+- `kneel_gather.clearance(anim)` reports per-frame forearm-to-spine and forearm-to-thigh
+  distances. Use it to catch an arm passing through her body before you look at captures:
+  under about 16 cm to the spine, or about 11 cm to the thigh, means intersection.
+- Lab `LabAction Sticks` plays the kneeling stick gather with the stick props.
 
 ### Record a playtest video and measure motion
 
@@ -275,6 +283,16 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 ## 7. Rules
 
+- Jenny's rule: if you're unsure whether to make a change, make it when it would enhance realism
+  and verisimilitude (also in `.github/copilot-instructions.md`).
+- Jenny's rule: **whenever you spawn into the woodland to test something, make it morning** so the
+  captures show something. After `worldReady`, run
+  `py "w=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()\nunreal.SystemLibrary.execute_console_command(w,'HomesteadMorning')"`
+  (optional hour argument, default 8). It jumps the clock to the next morning without simulating
+  the skipped hours; the same console command works in the packaged Development build. The
+  character lab has its own sun (`LabSun <hour>`, default 10).
+- Jenny likes to watch you work. Prefer `PlayMode_InEditorFloating` with the PIE window brought to
+  the front (section 5) over hidden in-viewport PIE.
 - If Jenny has the packaged game open from `Build\Windows` when you need to repackage, close it
   (`Stop-Process -Id <pid>` on the `SurvivalGame` processes) and build in place. She's only messing
   around in it for now and would rather get the newest build. Don't build to a side folder.

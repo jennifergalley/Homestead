@@ -195,6 +195,24 @@ void UnchangedFailure(Simulation& sim, const std::function<Result()>& action)
     CHECK(sim.GetRevision() == revision);
 }
 
+void SkipToMorning()
+{
+    Simulation sim;
+    const double energy = sim.GetState().energy;
+    const auto revision = sim.GetRevision();
+    sim.SkipToHourOfDay(8);
+    CHECK(Close(sim.GetState().hour, 8));
+    CHECK(sim.GetState().energy == energy);
+    CHECK(sim.GetRevision() == revision + 1);
+    sim.SkipToHourOfDay(8);
+    CHECK(Close(sim.GetState().hour, 32));
+    sim.SkipToHourOfDay(7);
+    CHECK(Close(sim.GetState().hour, 55));
+    sim.SkipToHourOfDay(25);
+    sim.SkipToHourOfDay(std::numeric_limits<double>::quiet_NaN());
+    CHECK(Close(sim.GetState().hour, 55));
+}
+
 void DefaultsAndValidation()
 {
     Simulation sim;
@@ -2391,6 +2409,7 @@ void Run(const char* name, void (*test)())
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
+    Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
     Run("pure structured recipe assessment", StructuredRecipeAssessment);
     Run("default gameplay walkthrough", GameplayWalkthrough);

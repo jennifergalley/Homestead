@@ -45,12 +45,13 @@ AHomesteadLabWorld::AHomesteadLabWorld()
     PrimaryActorTick.bCanEverTick = true;
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("LabRoot"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
-    // World-aligned engine grid: its lines stay fixed in the world, so foot sliding and stride
-    // length can be read directly against it.
-    static ConstructorHelpers::FObjectFinder<UMaterialInterface> GridAsset(
+    // World-aligned grid (homestead_agent.lab_assets): 10 cm / 1 m / 10 m lines fixed in the world,
+    // so foot sliding and stride length read directly against it at any floor size.
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> GridAsset(TEXT("/Game/Lab/Materials/M_LabGrid.M_LabGrid"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> FallbackGrid(
         TEXT("/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial"));
     Cube = CubeAsset.Object;
-    Grid = GridAsset.Object;
+    Grid = GridAsset.Succeeded() ? GridAsset.Object : FallbackGrid.Object;
 
     Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LabFloor"));
     Floor->SetupAttachment(RootComponent);
@@ -82,6 +83,12 @@ AHomesteadLabWorld::AHomesteadLabWorld()
     auto* Exposure = CreateDefaultSubobject<UPostProcessComponent>(TEXT("LabExposure"));
     Exposure->SetupAttachment(RootComponent);
     Exposure->bUnbound = true;
+    Exposure->Settings.bOverride_AutoExposureMethod = true;
+    Exposure->Settings.AutoExposureMethod = AEM_Histogram;
+    Exposure->Settings.bOverride_AutoExposureMinBrightness = true;
+    Exposure->Settings.AutoExposureMinBrightness = 0.0f;
+    Exposure->Settings.bOverride_AutoExposureMaxBrightness = true;
+    Exposure->Settings.AutoExposureMaxBrightness = 16.0f;
     Exposure->Settings.bOverride_AutoExposureBias = true;
     Exposure->Settings.AutoExposureBias = -0.15f;
     Exposure->Settings.bOverride_LocalExposureHighlightContrastScale = true;
@@ -199,11 +206,12 @@ void AHomesteadLabController::LabAction(const FString& Name)
     const FVector Ahead = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 100.0f;
     const Homestead::Point Target{Ahead.X, Ahead.Y};
     if (Name.Equals(TEXT("Gather"), ESearchCase::IgnoreCase)) Avatar->PlayGather();
+    else if (Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase)) Avatar->PlayGatherSticks();
     else if (Name.Equals(TEXT("Water"), ESearchCase::IgnoreCase)) Avatar->PlayWater(Target);
     else if (Name.Equals(TEXT("Chop"), ESearchCase::IgnoreCase)) Avatar->PlayClear(Target);
     else if (Name.Equals(TEXT("Knife"), ESearchCase::IgnoreCase)) Avatar->PlayKnifeCut(Target);
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Water, Chop, Knife or Till."));
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Water, Chop, Knife or Till."));
 }
 
 void AHomesteadLabController::LabSun(float Hour)
@@ -267,7 +275,7 @@ void AHomesteadLabHUD::DrawHUD()
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
     Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
-    Lines.Add(TEXT("Console: LabAction Gather|Water|Chop|Knife|Till   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
+    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Water|Chop|Knife|Till   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)
     {

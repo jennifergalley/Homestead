@@ -140,7 +140,7 @@ If CMake is unavailable, use the installed MSVC compiler in its initialized
 developer environment:
 
 ```powershell
-cl /nologo /std:c++17 /O2 /W4 /EHs-c- /D_HAS_EXCEPTIONS=0 /I Source\SurvivalGame\Simulation Source\SurvivalGame\Simulation\HomesteadSimulation.cpp Tests\HomesteadSimulationTests.cpp /Fe:build-native\HomesteadSimulationTests.exe /Fo:build-native\
+cl /nologo /std:c++17 /O2 /W4 /EHs-c- /D_HAS_EXCEPTIONS=0 /I Source\SurvivalGame\Simulation Source\SurvivalGame\Simulation\*.cpp Tests\HomesteadSimulationTests.cpp /Fe:build-native\HomesteadSimulationTests.exe /Fo:build-native\
 build-native\HomesteadSimulationTests.exe
 ```
 
