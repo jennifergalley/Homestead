@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "FlintHatchet",
+  "description": "Game-ready hafted flint hatchet with rawhide lashing (original, reworked FlintAxe). Pivot = lower-hand grip 7 cm above the butt; head +Z, edge -Y.",
+  "collision": "none",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/flint_hatchet.py",
+  "source_sha256": "f36465a144b36076dee09b3d776376b9e866a8bfd71b27e0a3e6c01584047f82",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_FlintHatchet": {
+      "vertices": 4582,
+      "triangles": 9132,
+      "size_cm": [
+        5.64,
+        19.69,
+        60.14
+      ],
+      "materials": [
+        {
+          "name": "M_FlintHatchet",
+          "textures": {
+            "basecolor": "T_FlintHatchet_basecolor.png",
+            "roughness": "T_FlintHatchet_roughness.png",
+            "normal": "T_FlintHatchet_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FlintHatchet_basecolor.png",
+          "roughness": "T_FlintHatchet_roughness.png",
+          "normal": "T_FlintHatchet_normal.png",
+          "ao": "T_FlintHatchet_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          28
+        ],
+        "focus": [
+          0.0,
+          -0.075,
+          0.43
+        ]
+      },
+      "fbx": "SM_FlintHatchet.fbx",
+      "sha256": "17671767f21f027cb85368a42e5069aa75e9c69cce22c28e3a589ef91a63d3be",
+      "preview": "preview_SM_FlintHatchet.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FlintHatchet_hero.png",
+          "detail": "beauty_SM_FlintHatchet_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "attach": {
+    "units": "cm, from the mesh pivot (lower-hand grip centre), mesh space",
+    "pivot": "lower (dominant) hand grip centre, 7 cm above the butt",
+    "handle_axis": "+Z (head end)",
+    "edge_direction": "-Y",
+    "upper_hand_choke": [
+      -0.09,
+      -0.49,
+      18.0
+    ],
+    "edge_centre": [
+      -0.21,
+      -13.89,
+      43.0
+    ],
+    "butt_end": [
+      -0.21,
+      0.31,
+      -7.0
+    ],
+    "haft_top": [
+      -0.12,
+      0.71,
+      53.0
+    ]
+  },
+  "textures": {
+    "T_FlintHatchet_basecolor.png": "26ec7ae2b8f956f922bbd5ecd8813ca28300bb93c224d601dd686777022cfe8c",
+    "T_FlintHatchet_roughness.png": "61776a98c5688ebc78e030a6ce4e9e4f7c6305be297b9a98fabb37f267ef93bf",
+    "T_FlintHatchet_normal.png": "26c751097d717d576bcb3179ff7a7018dae54efe3841a784738d3550e7ce409f"
+  }
+}
