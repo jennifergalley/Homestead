@@ -325,6 +325,11 @@ def grow(spec, rng):
                     size *= 0.85
                 pet = leaf.get("petiole", 0.0) * size
                 base = node + d * pet
+                if leaf.get("flat"):
+                    # Blade held level on its petiole (large shade leaves).
+                    flat = Vector((d.x, d.y, d.z * (1 - leaf["flat"]))) + UP * rng.uniform(-0.12, 0.08)
+                    d = flat.normalized() if flat.length > 1e-3 else d
+                    up = (UP * 1.5 + jitter * 0.6).normalized()
                 tw_leaves.append(dict(base=base, node=node, dir=d, up=up, length=size, outer=outer,
                                       from_tip=from_tip, k=k, fold=rng.uniform(*leaf.get("fold", (0.1, 0.3))),
                                       droop=rng.uniform(*leaf.get("droop", (0.05, 0.3))),
@@ -367,7 +372,8 @@ def emit(desc, atlas, lod, spec, leaf_key, spray_key):
         t0 = b.triangles
         pts, radii = br["pts"], br["radii"]
         tw = br.get("twig")
-        if tw is not None and (lod == 2 or not tw["full"]):
+        lod2_leaves = spec.get("lod2_leaves", 0.0)
+        if tw is not None and ((lod == 2 and not (lod2_leaves and tw["full"])) or not tw["full"]):
             # The spray card paints this twig's leafy end; only model the bare part below it.
             cut = next((i for i, s in enumerate(br["acc"]) if s >= br["length"] - tw["zone"] + 0.02), len(pts))
             pts, radii = pts[:cut], radii[:cut]
@@ -388,12 +394,26 @@ def emit(desc, atlas, lod, spec, leaf_key, spray_key):
     spray_grid = spec.get("spray_grid", ((2, 2), (1, 1), (1, 1)))
     for tw in desc["twigs"]:
         t0 = b.triangles
-        if tw["full"] and lod < 2 and not (lod == 1 and spec.get("lod1_sprays_only")):
+        keep = spec.get("lod2_leaves", 0.0)
+        if tw["full"] and (lod < 2 or keep) and not (lod == 1 and spec.get("lod1_sprays_only")):
             rows, cols = leaf_grid[lod]
-            for lf in tw["leaves"]:
+            pet_key = spec["leaf"].get("petiole_tube") if lod < 2 else None
+            for li, lf in enumerate(tw["leaves"]):
+                gscale = 1.0
+                if lod == 2:
+                    # Far LOD with few large leaves: keep a share of real leaves, enlarged to hold coverage.
+                    if ((li * 0.618 + tw["phase"]) % 1.0) >= keep:
+                        continue
+                    gscale = min(1.3, keep ** -0.5)
                 key = leaf_key(lf, tw)
-                width = lf["length"] * tile_aspect(atlas, key)
-                b.card(lf["base"], lf["dir"], lf["up"], lf["length"], width, atlas.uv(key), rows=rows, cols=cols,
+                width = lf["length"] * gscale * tile_aspect(atlas, key)
+                if pet_key and (lf["base"] - lf["node"]).length > 0.01:
+                    r = spec["leaf"].get("petiole_radius", 0.0018)
+                    mid = lf["node"].lerp(lf["base"], 0.5) + UP * 0.25 * (lf["base"] - lf["node"]).length
+                    b.tube([lf["node"], mid, lf["base"]] if lod == 0 else [lf["node"], lf["base"]],
+                           [r, r * 0.85, r * 0.7] if lod == 0 else [r, r * 0.7], 3, atlas.uv(pet_key),
+                           v_length=spec.get("v_bark", 0.6), phase=tw["phase"], flutter=0.3)
+                b.card(lf["base"], lf["dir"], lf["up"], lf["length"] * gscale, width, atlas.uv(key), rows=rows, cols=cols,
                        fold=lf["fold"], curl=lf["curl"] if lod == 0 else 0.0, droop=lf["droop"],
                        twist=lf["twist"] if lod == 0 else 0.0, phase=tw["phase"], flutter=1.0,
                        flutter_base=0.25)
@@ -418,6 +438,26 @@ def emit(desc, atlas, lod, spec, leaf_key, spray_key):
 
 
 # ------------------------------------------------------------------ painting helpers
+
+def over_window(layer, X, Y, center, radius, paint):
+    """Composite ``paint(Xs, Ys, window_slices)`` (a Layer for the sub-grid) onto ``layer`` only
+    inside the square window of ``radius`` tile units around ``center``; much faster than
+    painting every small leaf over the whole tile."""
+    xs, ys = X[0], Y[:, 0]
+    i0 = int(np.searchsorted(ys, center[1] - radius))
+    i1 = int(np.searchsorted(ys, center[1] + radius))
+    j0 = int(np.searchsorted(xs, center[0] - radius))
+    j1 = int(np.searchsorted(xs, center[0] + radius))
+    if i1 - i0 < 4 or j1 - j0 < 4:
+        return
+    sl = (slice(i0, i1), slice(j0, j1))
+    sub = F.Layer((i1 - i0, j1 - j0))
+    sub.color, sub.alpha, sub.height = layer.color[sl], layer.alpha[sl], layer.height[sl]
+    sub.rough, sub.trans, sub.ao = layer.rough[sl], layer.trans[sl], layer.ao[sl]
+    sub.over(paint(X[sl], Y[sl]))
+    layer.color[sl], layer.alpha[sl], layer.height[sl] = sub.color, sub.alpha, sub.height
+    layer.rough[sl], layer.trans[sl], layer.ao[sl] = sub.rough, sub.trans, sub.ao
+
 
 def paint_spray(atlas, key, nrng, rng, blade, count, *, leaf_len=0.30, angle=(40, 60), arrangement="alternate",
                 twig_color=(0.07, 0.05, 0.03), twig_width=0.010, twig_top=0.80, tip_leaf=True,
@@ -452,9 +492,11 @@ def paint_spray(atlas, key, nrng, rng, blade, count, *, leaf_len=0.30, angle=(40
             th = sd * math.radians(rng.uniform(*angle)) * (1.0 - 0.35 * t)
             ln = leaf_len * (1.0 - taper * t ** 1.5) * rng.uniform(0.9, 1.08)
             sq = rng.uniform(*squash)
-            Xl, Yl = rotated(X, Y, (x, y), th, ln, sq)
             k = keys[i % len(keys)] if keys else None
-            layer.over(blade(Xl, Yl, px / ln, i, k))
+            ctr = (x + 0.5 * ln * math.sin(th), y + 0.5 * ln * math.cos(th))
+            over_window(layer, X, Y, ctr, ln * 0.72,
+                        lambda Xs, Ys, o=(x, y), th=th, ln=ln, sq=sq, i=i, k=k:
+                        blade(*rotated(Xs, Ys, o, th, ln, sq), px / ln, i, k))
     if tip_leaf:
         ln = leaf_len * (1.0 - taper * 0.9) * rng.uniform(0.95, 1.1)
         Xl, Yl = rotated(X, Y, twig[-1], rng.uniform(-0.1, 0.1), ln, 0.95)
