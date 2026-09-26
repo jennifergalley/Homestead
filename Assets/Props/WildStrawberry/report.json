@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "WildStrawberry",
+  "description": "Woodland strawberry groundcover patch, 15 cm tall and 70 cm across: trifoliate toothed leaves on hairy petioles, runners with daughter plantlets, white flowers and a few red berries. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wild_strawberry.py",
+  "source_sha256": "bb418523bde062fbd798d87e9eb0a3ee9d3b7a058725402c99fc83789427dd6b",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_WildStrawberry": {
+      "vertices": 2388,
+      "triangles": 2750,
+      "size_cm": [
+        63.46,
+        59.01,
+        13.1
+      ],
+      "materials": [
+        {
+          "name": "M_WildStrawberry",
+          "textures": {
+            "basecolor": "T_WildStrawberry_basecolor.png",
+            "normal": "T_WildStrawberry_normal.png",
+            "roughness": "T_WildStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05924747884273529,
+          -0.10280091613531113,
+          0.06
+        ]
+      },
+      "fbx": "SM_WildStrawberry.fbx",
+      "sha256": "575e0a05a28c728389c071572ada0d467f0316412d34fa51af0a5412b744c550",
+      "preview": "preview_SM_WildStrawberry.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WildStrawberry_hero.png",
+          "detail": "beauty_SM_WildStrawberry_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_WildStrawberry_LOD1": {
+      "vertices": 1123,
+      "triangles": 870,
+      "size_cm": [
+        63.45,
+        59.11,
+        13.66
+      ],
+      "materials": [
+        {
+          "name": "M_WildStrawberry",
+          "textures": {
+            "basecolor": "T_WildStrawberry_basecolor.png",
+            "normal": "T_WildStrawberry_normal.png",
+            "roughness": "T_WildStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05924747884273529,
+          -0.10280091613531113,
+          0.06
+        ]
+      },
+      "fbx": "SM_WildStrawberry_LOD1.fbx",
+      "sha256": "2d2454b9ec31ae2840e096b15a90028f39abda13571f4b009142dc2895aaf83f",
+      "preview": "preview_SM_WildStrawberry_LOD1.png"
+    },
+    "SM_WildStrawberry_LOD2": {
+      "vertices": 538,
+      "triangles": 428,
+      "size_cm": [
+        71.69,
+        65.6,
+        12.8
+      ],
+      "materials": [
+        {
+          "name": "M_WildStrawberry",
+          "textures": {
+            "basecolor": "T_WildStrawberry_basecolor.png",
+            "normal": "T_WildStrawberry_normal.png",
+            "roughness": "T_WildStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05924747884273529,
+          -0.10280091613531113,
+          0.06
+        ]
+      },
+      "fbx": "SM_WildStrawberry_LOD2.fbx",
+      "sha256": "cbb9f2f6937984a9208dbe0f307dfc249174e2d67c31e2de2b26d2e1b6c2906f",
+      "preview": "preview_SM_WildStrawberry_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-plantlet random phase",
+    "B": "leaf flutter 0 at the petiole top -> 1 at leaflet tips",
+    "A": "1"
+  },
+  "material_notes": "One material M_WildStrawberry: T_WildStrawberry_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_WildStrawberry_basecolor.png": "10bfaf71e687fbc9af2ee3d2b4c326165ae2d7e657051bf5f3f14db4b923eaa2",
+    "T_WildStrawberry_normal.png": "fcc453000bb318da1304850e0fefb0e980eee8b769efa0e34bee930173880958",
+    "T_WildStrawberry_roughness.png": "534fef9e0ad2a5a323d59f44ffbb67116d1a094e64f70e0cb76de6e6576a64e2"
+  }
+}
