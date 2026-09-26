@@ -137,6 +137,9 @@ private:
     FTransform StickAlignFrom, StickAlignTo;
     float StickAlignRemaining = 0;
     void UpdateStickAlignment(float DeltaSeconds);
+    UPROPERTY() TObjectPtr<UGroomComponent> MetaHumanHair;
+    float HairSprintBlend = 0;
+    void UpdateHairMotion(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;

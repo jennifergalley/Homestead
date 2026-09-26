@@ -94,7 +94,7 @@ try {
         throw 'Shipping native acceptance/compiled trace guard failed.'
     }
     if ($native.actualWindowMode -ne 2 -or $native.viewportWidth -ne 1280 -or $native.viewportHeight -ne 720 -or
-        $native.savedWindowMode -ne 2 -or $native.vsyncPreference -or $native.frameLimit -ne 60 -or $native.'r.VSync' -ne '0' -or
+        $native.savedWindowMode -ne 1 -or $native.vsyncPreference -or $native.frameLimit -ne 60 -or $native.'r.VSync' -ne '0' -or
         $native.viewMode -ne 3 -or $native.litGuardTicks -lt 1 -or -not $native.heroinePresent -or
         $native.saveDispatches -ne 1 -or $native.loadDispatches -ne 1 -or
         $native.savedSimulationMd5 -ne $native.loadedSimulationMd5 -or $native.profile -cne $profile) {

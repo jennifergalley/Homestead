@@ -92,9 +92,10 @@ prototype below retains its older field-book controls.
 
 To play the preserved original prototype, double-click **`Play.cmd`** in this folder
 or `Build\Windows\SurvivalGame.exe`. The packaged game does not need the editor
-open. `Play.cmd` (and Jenny's desktop shortcut) open borderless windowed fullscreen
-at the monitor's native resolution (`-Res=0x0wf`); pass any arguments, such as
-`-windowed`, to override that. In-game Settings includes **Save and quit**.
+open. The game opens borderless fullscreen at the monitor's native resolution by
+default (`FullscreenMode=1` in `Config\DefaultGameUserSettings.ini`), however it is
+launched; `Play.cmd` and Jenny's desktop and taskbar shortcuts also pass `-Res=0x0wf`.
+Pass `-windowed` to get a window instead. In-game Settings includes **Save and quit**.
 
 To review the separately verified movement and action improvements, double-click
 **`Preview.cmd`** (requires PowerShell 7). It selects only the explicit candidate

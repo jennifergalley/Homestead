@@ -37,6 +37,16 @@ TAutoConsoleVariable<int32> CVarMetaHumanHeroine(TEXT("homestead.MetaHumanHeroin
     TEXT("1 = MetaHuman heroine (default), 0 = legacy heroine rollback. "
          "Read when the heroine's appearance is applied."));
 
+// Hair inherits more of her motion as she speeds up from a walk to a full sprint.
+TAutoConsoleVariable<float> CVarHairLinearWalk(TEXT("homestead.HairLinearWalk"), 0.5f,
+    TEXT("MetaHuman hair linear velocity scale at walking speed and below."));
+TAutoConsoleVariable<float> CVarHairLinearSprint(TEXT("homestead.HairLinearSprint"), 0.65f,
+    TEXT("MetaHuman hair linear velocity scale at full sprint."));
+TAutoConsoleVariable<float> CVarHairAngularWalk(TEXT("homestead.HairAngularWalk"), 0.4f,
+    TEXT("MetaHuman hair angular velocity scale at walking speed and below."));
+TAutoConsoleVariable<float> CVarHairAngularSprint(TEXT("homestead.HairAngularSprint"), 0.45f,
+    TEXT("MetaHuman hair angular velocity scale at full sprint."));
+
 
 const TCHAR* const MetaHumanRoot = TEXT("/Game/Characters/Heroine_MH");
 
@@ -404,9 +414,12 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         if (FCString::Strcmp(Spec.Component, TEXT("MetaHumanHair")) == 0)
         {
             // Calmer than the stock groom: less inherited body motion and more damping, so turns don't fling it.
+            // UpdateHairMotion raises the inherited motion a little at a sprint.
             FHairSimulationSettings& Sim = Groom->SimulationSettings;
-            Sim.SimulationSetup.LinearVelocityScale = 0.5f;
-            Sim.SimulationSetup.AngularVelocityScale = 0.4f;
+            Sim.SimulationSetup.LinearVelocityScale = CVarHairLinearWalk.GetValueOnGameThread();
+            Sim.SimulationSetup.AngularVelocityScale = CVarHairAngularWalk.GetValueOnGameThread();
+            HairSprintBlend = 0;
+            MetaHumanHair = Groom;
             Sim.bOverrideSettings = true;
             Sim.SolverSettings.bEnableSimulation = true;
             Sim.ExternalForces.GravityVector = FVector(0, 0, -981);
@@ -671,6 +684,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdateCarriedSticks();
     UpdateStickAlignment(DeltaSeconds);
+    UpdateHairMotion(DeltaSeconds);
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
         const FVector CameraPosition = Camera->GetComponentLocation();
@@ -767,6 +781,19 @@ bool AHomesteadCharacter::PlayGatherSticks(TOptional<FVector2D> Pile)
     }
     Animation->RequestGatherSticks();
     return true;
+}
+
+void AHomesteadCharacter::UpdateHairMotion(float DeltaSeconds)
+{
+    if (!MetaHumanHair) return;
+    const float Walk = WalkSpeed(), Sprint = SprintSpeed();
+    const float Target = FMath::Clamp((GetVelocity().Size2D() - Walk) / FMath::Max(Sprint - Walk, 1.0f), 0.0f, 1.0f);
+    HairSprintBlend = FMath::FInterpTo(HairSprintBlend, Target, DeltaSeconds, 3.0f);
+    auto& Setup = MetaHumanHair->SimulationSettings.SimulationSetup;
+    Setup.LinearVelocityScale = FMath::Lerp(CVarHairLinearWalk.GetValueOnGameThread(),
+        CVarHairLinearSprint.GetValueOnGameThread(), HairSprintBlend);
+    Setup.AngularVelocityScale = FMath::Lerp(CVarHairAngularWalk.GetValueOnGameThread(),
+        CVarHairAngularSprint.GetValueOnGameThread(), HairSprintBlend);
 }
 
 void AHomesteadCharacter::UpdateStickAlignment(float DeltaSeconds)

@@ -264,8 +264,12 @@ setup = s.simulation_setup; setup.linear_velocity_scale = 0.5; s.simulation_setu
 - `override_settings` = True replaces the asset's drag, bend, stretch, friction and collision
   values with the component's (`external_forces.air_drag`, `material_constraints.bend_damping`
   and so on). It also needs `solver_settings.enable_simulation` = True, or the hair stops simulating.
-- The shipped values are in `AHomesteadCharacter`'s groom setup (velocity 0.5/0.4, air drag 1.0,
-  bend damping 0.05, bend stiffness 0.15). Change them there after tuning live.
+- The shipped values are in `AHomesteadCharacter`'s groom setup (air drag 1.0, bend damping
+  0.05, bend stiffness 0.15). Change them there after tuning live.
+- The velocity scales follow her speed every tick (`UpdateHairMotion`), from walk values to
+  sprint values, so edit them with the CVars rather than Python: `homestead.HairLinearWalk`
+  0.5, `homestead.HairLinearSprint` 0.65, `homestead.HairAngularWalk` 0.4,
+  `homestead.HairAngularSprint` 0.45.
 
 ### Record a playtest video and measure motion
 

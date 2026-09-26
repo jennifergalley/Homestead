@@ -14,7 +14,7 @@ try {
     Set-Content -LiteralPath $file -Value ";METADATA=(Diff=true, UseCommands=true)`n[/Script/Engine.GameUserSettings]`nPreferredFullscreenMode=1"
     $result = & $compare -DefaultsFile $defaults -UserFile $file -InitialDefaultsSha256 $hash
     if ($result.bytesIdentical -or @($result.comparisons | Where-Object { -not $_.inherited }).Count) { throw 'Inherited defaults failed.' }; $checks++
-    foreach ($entry in @('bUseVSync=True','FullscreenMode=1','FrameRateLimit=45.000000','ResolutionSizeX=1600','+bUseVSync=False')) {
+    foreach ($entry in @('bUseVSync=True','FullscreenMode=2','FrameRateLimit=45.000000','ResolutionSizeX=1600','+bUseVSync=False')) {
         Set-Content -LiteralPath $file -Value "[/Script/Engine.GameUserSettings]`n$entry"
         $failed=$false; try { & $compare -DefaultsFile $defaults -UserFile $file -InitialDefaultsSha256 $hash | Out-Null } catch { $failed=$true }
         if (-not $failed) { throw "Invalid preferences accepted: $entry" }; $checks++
