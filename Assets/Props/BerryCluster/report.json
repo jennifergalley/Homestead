@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "BerryCluster",
+  "description": "Hand-picked sprig of five ripe wild blackberries with one trifoliate leaf (original). Pivot = pinch point on the stem; stem +Z, berries hang -Z.",
+  "collision": "none",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/berry_cluster.py",
+  "source_sha256": "07eacad67c0db9bf4231437767e61954225cbdb4544fcb5f3cfeedd23614c980",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BerryCluster": {
+      "vertices": 1392,
+      "triangles": 2608,
+      "size_cm": [
+        5.69,
+        3.9,
+        5.09
+      ],
+      "materials": [
+        {
+          "name": "M_BerryCluster",
+          "textures": {
+            "basecolor": "T_BerryCluster_basecolor.png",
+            "roughness": "T_BerryCluster_roughness.png",
+            "normal": "T_BerryCluster_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BerryCluster_basecolor.png",
+          "roughness": "T_BerryCluster_roughness.png",
+          "normal": "T_BerryCluster_normal.png",
+          "ao": "T_BerryCluster_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          90,
+          0,
+          25
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          -0.022
+        ]
+      },
+      "fbx": "SM_BerryCluster.fbx",
+      "sha256": "47867b1f6e28a86d16dd71e02f228b7d7070f7c5633986531d9d1e585a516b7f",
+      "preview": "preview_SM_BerryCluster.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BerryCluster_hero.png",
+          "detail": "beauty_SM_BerryCluster_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          90,
+          0,
+          25
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_BerryCluster_basecolor.png": "99bec88adf7be8122da4fc29f3f566d36d7cab5aefda600651a8c0f64080330a",
+    "T_BerryCluster_roughness.png": "0b2f3a878f1e5230bfa247b4a4acab56393e724d4df1379e3890bf6ed6f1b056",
+    "T_BerryCluster_normal.png": "27c1eb1f870eab54d227e6af92af59ad36694cc9ab4a161a9713bba7443b64ef"
+  }
+}

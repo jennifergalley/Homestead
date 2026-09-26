@@ -159,8 +159,11 @@ for leaves.
 - `leather`: grain, creases, grime and stains.
 
 `wood` also takes `polish` / `polish_center` / `polish_length` (a worn band where the hand grips) and `relief`. Recipes built from scratch with these include
-`flint_axe.py`, `machete.py`, `forage_pouch.py` (pivot at the top of the hanging loop) and
-`cord_belt.py`.
+`flint_axe.py`, `machete.py`, `forage_pouch.py` (pivot at the top of the hanging loop),
+`cord_belt.py`, and the forage props `berry_cluster.py`, `wild_root.py` and `berry_bush_produce.py`.
+The forage props use `blackberry` (packed glossy drupelets), `leaf_pcoord` (the leaf material
+driven by pcoord, so it survives the bake repack), `root` and `soil`. `berry_bush_produce.py`
+reuses the berry builders by loading `berry_cluster.py` beside it.
 
 **Review pose.** `BEAUTY["pose"]` rotates the asset for review only; tools lie on the ground.
 `BEAUTY["focus"]` aims the 85 mm detail camera at an authoring-space point.

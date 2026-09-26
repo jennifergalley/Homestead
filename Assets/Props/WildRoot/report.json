@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "WildRoot",
+  "description": "Freshly pulled wild taproot with clinging soil, fine rootlets and cut green stalks (original). Pivot = crown centre; root hangs -Z, stalks point +Z.",
+  "collision": "none",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wild_root.py",
+  "source_sha256": "7936124d7c0bd7105b116c5245ffd861a74b675dbe9cb6753c87e1c44224bfd4",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_WildRoot": {
+      "vertices": 1446,
+      "triangles": 2764,
+      "size_cm": [
+        4.22,
+        2.71,
+        15.62
+      ],
+      "materials": [
+        {
+          "name": "M_WildRoot",
+          "textures": {
+            "basecolor": "T_WildRoot_basecolor.png",
+            "roughness": "T_WildRoot_roughness.png",
+            "normal": "T_WildRoot_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_WildRoot_basecolor.png",
+          "roughness": "T_WildRoot_roughness.png",
+          "normal": "T_WildRoot_normal.png",
+          "ao": "T_WildRoot_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          90,
+          0,
+          30
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          -0.022
+        ]
+      },
+      "fbx": "SM_WildRoot.fbx",
+      "sha256": "9d39c7299d3878ad37d492cca80a56f5864b3241f4a4c47accef2995259d8dc9",
+      "preview": "preview_SM_WildRoot.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WildRoot_hero.png",
+          "detail": "beauty_SM_WildRoot_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          90,
+          0,
+          30
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_WildRoot_basecolor.png": "f211148bbf943b944297d05b72f181608a3b427693fd9d87e2da8b97a5377f6e",
+    "T_WildRoot_roughness.png": "ed008a3a9f707e4e0f30f1ff14bf42a505e4b60ebb7bd83820d1a998730e0a48",
+    "T_WildRoot_normal.png": "ca3765b747dc7466b1c3335456574abe81cb9774cdfa0cee9d4eecbef7dbc2bb"
+  }
+}

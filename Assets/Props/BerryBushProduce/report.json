@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "BerryBushProduce",
+  "description": "Eight ripe blackberry clusters laid out to sit on a 60-80 cm shrub (original). Pivot = shrub base; clusters at 15-45 cm height within 35 cm radius.",
+  "collision": "none",
+  "triangle_budget": 8000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/berry_bush_produce.py",
+  "source_sha256": "244ef4e62f7930e5bc8d76516d4d9827270bebab69dd6e496ac199770d1ea6dc",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BerryBushProduce": {
+      "vertices": 3232,
+      "triangles": 6176,
+      "size_cm": [
+        57.06,
+        52.87,
+        27.86
+      ],
+      "materials": [
+        {
+          "name": "M_BerryBushProduce",
+          "textures": {
+            "basecolor": "T_BerryBushProduce_basecolor.png",
+            "roughness": "T_BerryBushProduce_roughness.png",
+            "normal": "T_BerryBushProduce_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BerryBushProduce_basecolor.png",
+          "roughness": "T_BerryBushProduce_roughness.png",
+          "normal": "T_BerryBushProduce_normal.png",
+          "ao": "T_BerryBushProduce_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.2744317054748535,
+          -0.02974541485309601,
+          0.1670449185371399
+        ]
+      },
+      "fbx": "SM_BerryBushProduce.fbx",
+      "sha256": "93d1a15c0769708c1227e8632c6b2f3905b6b366b36e49529220947d842d7f0c",
+      "preview": "preview_SM_BerryBushProduce.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BerryBushProduce_hero.png",
+          "detail": "beauty_SM_BerryBushProduce_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_BerryBushProduce_basecolor.png": "d40cc40078e260a7d4bd88f7cde442b8a821853b1f174b39409d014dfad8058d",
+    "T_BerryBushProduce_roughness.png": "f4e451e3343038851a49449c45843fadb0a10eb2baa79993a9806d8f4198eeaf",
+    "T_BerryBushProduce_normal.png": "fb57351aebe6d05931cac8aa87043ac52b2ea8527813486820f0bff929075d80"
+  }
+}
