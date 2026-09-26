@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "WaterPail",
+  "description": "Carved wooden water pail with pouring lip, withy bail and cord-bound grip, holding water (original). Pivot = bail grip centre; pail hangs -Z, spout +X, grip along Y.",
+  "collision": "none",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/water_pail.py",
+  "source_sha256": "dc051d984d2e48c05d244e96219724adcd8533e79ea1318cf7320e6293a7782f",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_WaterPail": {
+      "vertices": 3639,
+      "triangles": 7200,
+      "size_cm": [
+        22.17,
+        23.43,
+        39.44
+      ],
+      "materials": [
+        {
+          "name": "M_WaterPail",
+          "textures": {
+            "basecolor": "T_WaterPail_basecolor.png",
+            "roughness": "T_WaterPail_roughness.png",
+            "normal": "T_WaterPail_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_WaterPail_basecolor.png",
+          "roughness": "T_WaterPail_roughness.png",
+          "normal": "T_WaterPail_normal.png",
+          "ao": "T_WaterPail_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.10000000000000006,
+          -0.1300000114440918
+        ]
+      },
+      "fbx": "SM_WaterPail.fbx",
+      "sha256": "16d37b86ca2dff5e0b07a0f70675ada01300bf586feae923093e4f726be8304a",
+      "preview": "preview_SM_WaterPail.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WaterPail_hero.png",
+          "detail": "beauty_SM_WaterPail_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_WaterPail_basecolor.png": "20366702e17b10e43446c95fb3bc48fb0da9a2a1f401191e532191ed936c07a4",
+    "T_WaterPail_roughness.png": "717982ded0b96a219e08b6d90ea3bedac93d53e2c261537aa5758ebe8eddaa68",
+    "T_WaterPail_normal.png": "ef5aface30a6414f4f95e2a020e67fe4634b7dd67c563a95f70422f95cad2034"
+  }
+}

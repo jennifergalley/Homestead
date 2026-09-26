@@ -170,6 +170,23 @@ The forage props use `blackberry` (packed glossy drupelets), `leaf_pcoord` (the 
 driven by pcoord, so it survives the bake repack), `root` and `soil`. `berry_bush_produce.py`
 reuses the berry builders by loading `berry_cluster.py` beside it.
 
+**Hand-held hotbar tools.** `flint_knife.py`, `digging_stick.py`, `water_pail.py` and
+`flint_hatchet.py` are authored in their attach frame, not bottom-centre: the origin is the
+main hand's grip centre, the handle runs along Z, and the working edge faces -Y. They join
+with `pivot=None` so the authored origin survives export. Each docstring states its pivot,
+axes and where the working end points; `report.json` records `size_cm`. The pail hangs -Z
+below its bail grip, with its spout toward +X.
+
+- `flint_hatchet.py` is a game-ready rework of `flint_axe.py` (under 10k triangles instead of
+  70k). It loads the axe's shape functions with `importlib`, lowers the tessellation, and moves
+  the flake-scar ridges into the bake with `add_scar_bump`. Its `REPORT["attach"]` gives cm
+  offsets from the pivot to the upper-hand choke, the edge centre, the butt and the haft top.
+- `flint_knife.py` reuses `add_scar_bump` by loading `flint_hatchet.py`.
+- `digging_stick.py` layers fire-hardening onto `wood` by arclength (`char_overlay`).
+- `water_pail.py` adds wet-wood (`wet_overlay`) and adze-facet (`adze_marks`) overlays.
+  Its water disc is baked into the single texture set as a dark, low-roughness region.
+  There is no separate water material slot.
+
 **Review pose.** `BEAUTY["pose"]` rotates the asset for review only; tools lie on the ground.
 `BEAUTY["focus"]` aims the 85 mm detail camera at an authoring-space point.
 
