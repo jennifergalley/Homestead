@@ -260,6 +260,43 @@ terrain height sinks it by its recorded `sink_depth_m`; `BEAUTY["ground"] = "ori
 reviews them half-buried the same way. `HandStones` are the exception: bounds-centre
 pivots for hand attachment.
 
+### Procedural foliage (bushes, brambles, ferns, groundcover)
+
+The woodland underbrush set (`blackberry_bramble`, `toyon_hedge`, `hazel`, `deer_brush`,
+`thimbleberry`, `bracken_fern`, `wild_strawberry`, `grass_yarrow_tuft`) is built from
+scratch with two shared modules in `Scripts\Blender`:
+
+- `homestead_foliage.py` (`F`) paints a texture atlas in numpy and builds the geometry.
+  `F.Atlas(NAME, size, seed)` allocates `column` strips (tiling bark and stems, v along
+  the stem) and `tile` boxes (leaves, flowers, sprays). `F.paint_blade` draws one leaf
+  from a silhouette (`F.ovate` or a custom shape) and a vein list. The result is saved as
+  three PNGs under `Assets\Props\<Name>\Textures`:
+  - `_basecolor`: sRGB, alpha is the opacity mask, clip at 0.5.
+  - `_normal`: OpenGL; flip green in Unreal.
+  - `_roughness`: packed as R roughness, G translucency mask, B AO.
+
+  `atlas.material()` makes the two-sided, masked Principled material.
+
+  `F.Batch` collects cards, flats, tubes and spheres. `F.finish_lods` writes `SM_<Name>`,
+  `_LOD1` and `_LOD2`, which share one origin.
+- `homestead_shrub.py` (`S`) grows a multi-stem shrub from a `SPEC` dict: an envelope,
+  branch levels, crown clumps, spurs, shell fill and leaf placement. `S.emit` then turns
+  it into one LOD. Outer twigs get real leaf cards and inner ones get painted spray
+  cards. `lod_levels` drops branch levels per LOD. `lod2_leaves` keeps a share of the
+  real leaves at LOD2, for plants with few big leaves.
+- **Wind vertex colour** `Wind` on every vertex:
+  - R: height above ground / plant height.
+  - G: per-branch (or per-frond / per-stem) random phase.
+  - B: leaf flutter, 0 at the leaf base to 1 at the tip, 0 on wood.
+  - A: 1.
+- Each recipe also sets `COLLISION` (`"convex"` for blocking masses such as brambles
+  and hedges, `"none"` for walk-through plants) and a `REPORT` dict (blocking, wind,
+  material notes) that is merged into `report.json`. `BEAUTY` may hold per-mesh
+  poses/focus under `"meshes"`.
+- `$env:HOMESTEAD_REUSE_TEXTURES = '1'` reuses the existing PNGs. That gives quick,
+  geometry-only iterations (seconds instead of minutes for a 4K atlas). Set it back to
+  `'0'` after any painting change.
+
 ## Outputs and review
 
 `Assets\Props\<Name>\` receives `SM_*.fbx`, `<Name>.blend`, `report.json`

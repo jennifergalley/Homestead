@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "GrassYarrowTuft",
+  "description": "Bunchgrass and yarrow tuft, 35 cm tall and 60 cm across: arching ribbed grass blades, part cured to straw, awned seed spikes, feathery yarrow rosettes and flat white flower heads. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/grass_yarrow_tuft.py",
+  "source_sha256": "9a67d6d4d30edc159ad9add57020575541c93731bcfb0abb326dd6dd34ba82bb",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_GrassYarrowTuft": {
+      "vertices": 3265,
+      "triangles": 2952,
+      "size_cm": [
+        74.88,
+        63.65,
+        47.83
+      ],
+      "materials": [
+        {
+          "name": "M_GrassYarrowTuft",
+          "textures": {
+            "basecolor": "T_GrassYarrowTuft_basecolor.png",
+            "normal": "T_GrassYarrowTuft_normal.png",
+            "roughness": "T_GrassYarrowTuft_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.13971719205379485,
+          -0.10185750544071198,
+          0.13
+        ]
+      },
+      "fbx": "SM_GrassYarrowTuft.fbx",
+      "sha256": "46148cb74da8cf2c2e2121dec8bbc279e5479578b890e8adcadf22bb5feb23a5",
+      "preview": "preview_SM_GrassYarrowTuft.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GrassYarrowTuft_hero.png",
+          "detail": "beauty_SM_GrassYarrowTuft_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_GrassYarrowTuft_LOD1": {
+      "vertices": 1268,
+      "triangles": 996,
+      "size_cm": [
+        75.11,
+        63.9,
+        50.93
+      ],
+      "materials": [
+        {
+          "name": "M_GrassYarrowTuft",
+          "textures": {
+            "basecolor": "T_GrassYarrowTuft_basecolor.png",
+            "normal": "T_GrassYarrowTuft_normal.png",
+            "roughness": "T_GrassYarrowTuft_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.13971719205379485,
+          -0.10185750544071198,
+          0.13
+        ]
+      },
+      "fbx": "SM_GrassYarrowTuft_LOD1.fbx",
+      "sha256": "96ef5605bf1da57bbb0cf01951cfc3f1f3bd06772735cb6c5cb7a8c4a682eaeb",
+      "preview": "preview_SM_GrassYarrowTuft_LOD1.png"
+    },
+    "SM_GrassYarrowTuft_LOD2": {
+      "vertices": 592,
+      "triangles": 402,
+      "size_cm": [
+        71.62,
+        60.35,
+        50.78
+      ],
+      "materials": [
+        {
+          "name": "M_GrassYarrowTuft",
+          "textures": {
+            "basecolor": "T_GrassYarrowTuft_basecolor.png",
+            "normal": "T_GrassYarrowTuft_normal.png",
+            "roughness": "T_GrassYarrowTuft_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.13971719205379485,
+          -0.10185750544071198,
+          0.13
+        ]
+      },
+      "fbx": "SM_GrassYarrowTuft_LOD2.fbx",
+      "sha256": "9e0c894cbb007b951d38812288f0adda8316c3c9735d24478756fc067d91a937",
+      "preview": "preview_SM_GrassYarrowTuft_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-blade / per-stem random phase",
+    "B": "flutter 0 at blade base -> 1 at blade tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_GrassYarrowTuft: T_GrassYarrowTuft_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_GrassYarrowTuft_basecolor.png": "a83316331234ed5f89939ce5da810a33ab48c8a6560da3707b05229b5360294e",
+    "T_GrassYarrowTuft_normal.png": "28be6b25fcc8988b6bf693508148434ba85165d256be98c6a2b4059f7f909588",
+    "T_GrassYarrowTuft_roughness.png": "775423349cbea30d288681ac191bb0b54ead09d0ed7edcc10eb39c0b9cc44df0"
+  }
+}
