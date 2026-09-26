@@ -1,13 +1,12 @@
-"""Paint the MetaHuman's baked grey underwear out of the heroine's body textures where the
-primitive outfit leaves skin showing.
+"""Paint the MetaHuman's baked grey underwear out of the heroine's body textures.
 
 MetaHuman Creator bakes a grey sports top and briefs into the body basecolor, normal and
 SRMF maps. The primitive tank top is cropped shorter than that top and the low-rise shorts
 sit below the briefs' waistband, so the grey showed at her ribs, neckline and hips.
 
-Every underwear pixel in the upper body (the top, plus the briefs above the shorts' coverage)
-is inpainted from the surrounding skin. The briefs below that line stay, so a pose that
-pushes skin through the shorts shows grey cloth, not bare skin.
+Every underwear pixel is inpainted from the surrounding skin, including those under the
+outfit: grey showed through the tank top's back scoop and beside its straps, and wherever a
+pose pushes skin through a garment.
 
 Usage (outside Unreal, Python 3 with numpy, Pillow and opencv-python):
     python Scripts/Characters/remove_body_underwear.py <export dir>
@@ -24,9 +23,6 @@ from PIL import Image
 
 Image.MAX_IMAGE_PIXELS = None
 ROOT = Path(__file__).resolve().parents[2]
-COVERAGE = ROOT / "Assets" / "Characters" / "PrimitiveOutfit" / "BodyCoverageMask.png"
-# Rows (as a fraction of V) below which the briefs are left alone: the crotch and seat.
-KEEP_BELOW_V = 0.60
 WORK = 1024
 
 
@@ -40,10 +36,11 @@ def underwear_mask(basecolor):
 
 
 def removal_mask(size, grey):
-    covered = np.asarray(Image.open(COVERAGE).convert("L").resize((size, size), Image.BILINEAR)) > 127
-    remove = grey & ~covered
-    remove[int(size * KEEP_BELOW_V):, :] = False
-    return remove
+    """Every underwear pixel goes, covered or not. The tank top's back scoop and narrow straps
+    leave skin showing where the baked top was wider, and the coverage mask (fitted to the
+    garment surface) can't see those gaps; skin also reads better than grey cloth wherever a
+    pose pushes the body through a garment."""
+    return grey.copy()
 
 
 def fill(image, grey, remove, feather=6):

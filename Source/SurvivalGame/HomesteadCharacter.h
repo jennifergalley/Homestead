@@ -143,9 +143,9 @@ public:
     bool IsApproachingFell() const { return bFellApproach; }
     // At impact in AN_HeroineMH_AxeFell (axe_fell.bit_at_strike): the bit's centre relative to her
     // root (cm to her left, cm forward) and its horizontal travel into the trunk (left, forward).
-    static constexpr float FellBitLeft = 26.9f;
+    static constexpr float FellBitLeft = -26.9f;
     static constexpr float FellBitForward = 67.4f;
-    static constexpr float FellCutLeft = -0.835f;
+    static constexpr float FellCutLeft = 0.835f;
     static constexpr float FellCutForward = 0.550f;
     UAnimSequence* GetFellAnimation() const { return FellAnimation; }
     // A berry (or piece of root) from the hip pouch to her mouth (MetaHuman only; false otherwise).
@@ -267,7 +267,16 @@ private:
         float CarryDegrees;
         // Hangs plumb from the hand by a bail (the water pail) rather than turning with the wrist.
         bool bHangs;
+        // Attachment to hand_r with the handle square across the fingers (as the actions use it).
+        FTransform Rest;
     };
+    FTransform MacheteGrip;
+    // Resting carry: the wrist deviates only this far; the rest of CarryDegrees tips the tool in
+    // the fist instead, so the hand stays in line with the forearm.
+    static constexpr float RestWristDegrees = 12.0f;
+    static constexpr float MacheteCarryDegrees = 46.0f;
+    float HeldToolTilt = 0;
+    void UpdateFellingHatchet();
     TArray<FHeldToolSpec> HeldToolSpecs;
     TOptional<Homestead::Item> LabHeldTool;
     // The pail's pendulum: tilt (pitch, roll in degrees) and its rate, driven by the hand's motion.

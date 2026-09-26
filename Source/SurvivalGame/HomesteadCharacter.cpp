@@ -92,7 +92,8 @@ FTransform HandGripTransform(const USkeletalMesh& Mesh)
     const FVector Along = (Knuckle - HandT.GetLocation()).GetSafeNormal();
     FVector Across = RefComponentTransform(Skeleton, Index).GetLocation() - RefComponentTransform(Skeleton, Pinky).GetLocation();
     Across = (Across - Along * FVector::DotProduct(Across, Along)).GetSafeNormal();
-    const FVector Palm = FVector::CrossProduct(Across, Along).GetSafeNormal();
+    // Into the palm (Across x Along points out of the back of the hand).
+    const FVector Palm = FVector::CrossProduct(Along, Across).GetSafeNormal();
     const FVector Centre = HandT.GetLocation() + (Knuckle - HandT.GetLocation()) * 0.78f + Palm * 2.6f;
     const FTransform Grip(FRotationMatrix::MakeFromZY(Across, -Along).ToQuat(), Centre);
     return Grip.GetRelativeTransform(HandT);
@@ -355,6 +356,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         }
     }
     IdleAnimation = Clips[0];
+    // Optional: the grounded resting stance authored with homestead_agent.active_idle.
+    if (auto* ActiveIdle = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_ActiveIdle")))
+        if (ActiveIdle->GetSkeleton() == MetaHumanBody->GetSkeleton()) IdleAnimation = ActiveIdle;
     WalkAnimation = Clips[1];
     SlowWalkAnimation = nullptr;
     SprintAnimation = Clips[2];
@@ -456,7 +460,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     {
         HeldMachete = MakeProp(TEXT("HeldMachete"), Machete);
         HeldMachete->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
-        HeldMachete->SetRelativeTransform(HandGripTransform(*MetaHumanBody));
+        MacheteGrip = HandGripTransform(*MetaHumanBody);
+        HeldMachete->SetRelativeTransform(MacheteGrip);
         HeldMachete->SetCastShadow(true);
     }
     // Blender hand tools, each authored with its pivot at the main hand's grip, the handle along
@@ -486,8 +491,11 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         Prop->SetUsingAbsoluteRotation(Asset.bHangs);
         Prop->SetCastShadow(true);
         HeldProps.Add(Prop);
-        HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs});
+        HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs, Asset.Offset * Grip});
     }
+    // After the pose is final each frame, lay the felling hatchet through both fists.
+    GetMesh()->RegisterOnBoneTransformsFinalizedDelegate(
+        FOnBoneTransformsFinalizedMultiCast::FDelegate::CreateUObject(this, &AHomesteadCharacter::UpdateFellingHatchet));
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
     UClass* FaceAnimClass = LoadObject<UClass>(nullptr,
@@ -1288,12 +1296,26 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     const bool Hacking = Animation->MacheteWeight() > 0.01f;
     const bool Felling = Animation->FellWeight() > 0.01f;
     const bool CuttingReeds = IsCuttingReeds();
-    float Grip = 0, Carry = 46;
+    float Grip = 0, Carry = RestWristDegrees;
+    // At rest a tool's handle crosses the palm diagonally (heel of the hand to the index knuckle),
+    // which tips its head forward and down with the wrist nearly straight. Authored actions set
+    // the tool's angle themselves, so the tilt eases out while one plays.
+    const float TiltTarget = HandsFree && !Hacking && !Felling && !CuttingReeds ? 1.0f : 0.0f;
+    HeldToolTilt = FMath::FInterpConstantTo(HeldToolTilt, TiltTarget, DeltaSeconds, 1.0f / 0.15f);
+    const auto Tilt = [this](const FTransform& Rest, float Degrees)
+    {
+        // Grip-local X is the palm normal; a positive turn about it tips the head toward the fingertips.
+        return FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Degrees * HeldToolTilt))) * Rest;
+    };
     if (HeldMachete)
     {
         const bool Held = Hacking || (HandsFree && Presented == Homestead::Item::Machete);
         HeldMachete->SetVisibility(Held);
-        if (Held) Grip = 1;
+        if (Held)
+        {
+            Grip = 1;
+            HeldMachete->SetRelativeTransform(Tilt(MacheteGrip, MacheteCarryDegrees - RestWristDegrees));
+        }
     }
     for (int32 Index = 0; Index < HeldProps.Num(); ++Index)
     {
@@ -1306,11 +1328,50 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         if (!Held) continue;
         Grip = 1;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
-        Carry = CuttingReeds ? 0.0f : Spec.CarryDegrees;
+        Carry = CuttingReeds ? 0.0f : FMath::Min(Spec.CarryDegrees, RestWristDegrees);
+        if (!Spec.bHangs) Prop->SetRelativeTransform(Tilt(Spec.Rest, Spec.CarryDegrees - Carry));
         if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
     }
     if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
     Animation->SetRightHandGrip(Grip, Carry);
+}
+
+void AHomesteadCharacter::UpdateFellingHatchet()
+{
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    UStaticMeshComponent* Prop = GetHeldProp(Homestead::Item::Hatchet);
+    if (!Animation || !Prop || !Prop->IsVisible()) return;
+    const float Weight = Animation->FellWeight();
+    if (Weight <= 0.01f) return;
+    // The left fist holds the knob and the right slides along the haft (axe_fell.py): the haft
+    // runs from the left grip centre toward the right, the edge along the left knuckles.
+    USkeletalMeshComponent* Body = GetMesh();
+    const auto GripCentre = [Body](const TCHAR* Side, FVector& Along)
+    {
+        const FVector Hand = Body->GetSocketLocation(*FString::Printf(TEXT("hand_%s"), Side));
+        const FVector Knuckle = Body->GetSocketLocation(*FString::Printf(TEXT("middle_01_%s"), Side));
+        const FVector Across = Body->GetSocketLocation(*FString::Printf(TEXT("index_01_%s"), Side))
+            - Body->GetSocketLocation(*FString::Printf(TEXT("pinky_01_%s"), Side));
+        Along = (Knuckle - Hand).GetSafeNormal();
+        const bool bLeft = Side[0] == TEXT('l');
+        const FVector Palm = (bLeft ? FVector::CrossProduct(Across, Along) : FVector::CrossProduct(Along, Across)).GetSafeNormal();
+        return Hand + (Knuckle - Hand) * 0.78f + Palm * 2.6f;
+    };
+    FVector AlongL, AlongR;
+    const FVector Knob = GripCentre(TEXT("l"), AlongL);
+    const FVector Upper = GripCentre(TEXT("r"), AlongR);
+    FVector Haft = Upper - Knob;
+    // With the hands together (address, impact) their spacing can't set the line; use the left fist's across axis.
+    const FVector AcrossL = (Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"))).GetSafeNormal();
+    Haft = Haft.Size() > 6.0f ? Haft.GetSafeNormal() : AcrossL;
+    const FVector Edge = (AlongL - Haft * FVector::DotProduct(AlongL, Haft)).GetSafeNormal();
+    if (Edge.IsNearlyZero()) return;
+    // Hatchet convention: head along +Z, edge toward -Y.
+    const FTransform TwoHanded(FRotationMatrix::MakeFromZY(Haft, -Edge).ToQuat(), Knob, Prop->GetComponentScale());
+    const FTransform OneHanded = Prop->GetComponentTransform();
+    FTransform Blended;
+    Blended.Blend(OneHanded, TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
+    Prop->SetWorldTransform(Blended);
 }
 
 bool AHomesteadCharacter::PlayEat(bool bBerry)
@@ -1456,7 +1517,8 @@ bool AHomesteadCharacter::PlayFell(Homestead::Point Target, int32 Strokes, float
             const float Bite = FMath::Max(0.0f, TrunkRadius - 2.0f);
             const float Left = FellBitLeft + FellCutLeft * Bite, Forward = FellBitForward + FellCutForward * Bite;
             const float Standoff = FMath::Sqrt(Left * Left + Forward * Forward);
-            // The tree stands to her left of straight ahead, so she faces a little to its right.
+            // The bit lands to one side of straight ahead (her right for the right-shoulder chop),
+            // so she faces a little past the tree to the other side.
             ClearYaw = TreeYaw + FMath::RadiansToDegrees(FMath::Atan2(Left, Forward));
             const FVector2D To = FVector2D(Target.x, Target.y) - Delta.GetSafeNormal() * Standoff;
             UE_LOG(LogTemp, Verbose, TEXT("Fell: trunk (%.0f, %.0f) r%.1f from (%.0f, %.0f) stance (%.0f, %.0f) yaw %.1f"), Target.x, Target.y, TrunkRadius, GetActorLocation().X, GetActorLocation().Y, To.X, To.Y, *ClearYaw);

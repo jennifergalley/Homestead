@@ -920,7 +920,23 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ]
             ]
         ];
-    if (Entries.IsEmpty() && Grid)
+    // Empty slots draw as pale outlines on the page, so the pack and chests read as grids of room.
+    auto EmptyCell = []() -> TSharedRef<SWidget>
+    {
+        return SNew(SBox).WidthOverride(ItemCellWidth + 4).HeightOverride(80).Padding(2)
+            [
+                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(1.5f)
+                .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.2f))
+                [
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                    .BorderBackgroundColor(FLinearColor(0.2f, 0.3f, 0.24f, 0.55f))
+                ]
+            ];
+    };
+    const bool bPackGrid = SeenPage == 0 && !(Controller->InventoryView() == 2);
+    if (Entries.IsEmpty() && Grid && bPackGrid)
+        Grid->AddSlot(0, 0)[ FocusAnchor(EmptyCell(), ERegion::Content, -1) ];
+    else if (Entries.IsEmpty() && Grid)
         Grid->AddSlot(0, 0)[ FocusAnchor(SNew(SBox).WidthOverride_Lambda([this]()
             { return FMath::Max(ItemCellWidth, Scroll->GetCachedGeometry().GetLocalSize().X > 0
                 ? static_cast<float>(Scroll->GetCachedGeometry().GetLocalSize().X) - 24.0f : 480.0f); })
@@ -1064,6 +1080,20 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         }
         else Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
     }
+    // Pad the grids with empty slots to at least four full rows, and always complete the last row.
+    const auto Pad = [&EmptyCell](const TSharedPtr<SUniformGridPanel>& Target, int32 Used, int32 Width)
+    {
+        if (!Target || Width <= 0) return;
+        const int32 Total = FMath::Max(Width * 4, (Used + Width - 1) / Width * Width);
+        for (int32 Cell = FMath::Max(Used, 0); Cell < Total; ++Cell)
+            Target->AddSlot(Cell % Width, Cell / Width)[ EmptyCell() ];
+    };
+    if (Storage)
+    {
+        Pad(ChestGrid, ChestCell, 4);
+        Pad(PackGrid, PackCell, 4);
+    }
+    else if (bPackGrid) Pad(Grid, FMath::Max(Entries.Num(), 1), Columns());
     return Result;
 }
 

@@ -135,13 +135,15 @@ struct FHandGrip : FAnimNode_SkeletalControlBase
         const FVector HandAt = CS(Hand).GetLocation();
         const FVector Along = (CS(MiddleBase).GetLocation() - HandAt).GetSafeNormal();
         const FVector Across = (CS(IndexBase).GetLocation() - CS(PinkyBase).GetLocation()).GetSafeNormal();
-        const FVector Palm = FVector::CrossProduct(Across, Along).GetSafeNormal() * (bLeft ? -1.0f : 1.0f);
+        // Out of the back of the hand: the relaxed fingers curl the other way, toward the palm.
+        const FVector Back = FVector::CrossProduct(Across, Along).GetSafeNormal() * (bLeft ? -1.0f : 1.0f);
+        const FVector Palm = -Back;
         if (Palm.IsNearlyZero()) return;
-        // Palm x Along = -Across, so a positive turn about Palm swings the fingers to the pinky side.
+        // Back x Along = -Across, so a positive turn about Back swings the fingers to the pinky side.
         FTransform Wrist = FTransform::Identity;
         if (Carry > 0.001f)
         {
-            const FQuat Turn(Palm, FMath::DegreesToRadians(CarryDeviation * Carry));
+            const FQuat Turn(Back, FMath::DegreesToRadians(CarryDeviation * Carry));
             Wrist = FTransform(-HandAt) * FTransform(Turn) * FTransform(HandAt);
             const FCompactPoseBoneIndex HandIndex = Hand.GetCompactPoseIndex(Bones);
             OutBoneTransforms.Add(FBoneTransform(HandIndex, CS(Hand) * Wrist));

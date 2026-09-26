@@ -468,9 +468,21 @@ Dated and short, newest first. Promote anything durable into the sections above.
     user32 `EnumWindows` on the editor PID and click its button. Call `SetProcessDPIAware` first,
     because the desktop is scaled. Stop PIE before reimports.
   - **Baked underwear on the body.** The MetaHuman body textures (`T_Body_{BC,N,SRMF}_VT`) have the
-    grey top and briefs painted in. `Scripts\Characters\remove_body_underwear.py` inpaints them
-    outside the outfit's coverage mask. Reimport the `_Clean.tga` files over the originals and keep
-    their settings.
+    grey top and briefs painted in. `Scripts\Characters\remove_body_underwear.py` inpaints every
+    underwear pixel, covered or not (the tank top's back scoop and straps showed grey otherwise).
+    Export the three textures with `AssetExportTask` + `TextureExporterTGA`, run the script, and
+    reimport the `_Clean.tga` files over the originals with `replace_existing_settings=False`,
+    then re-check `srgb`, compression and VT streaming.
+  - **Hand palm direction.** For these MetaHuman hands, `across x along` (index-minus-pinky
+    crossed with wrist-to-knuckle) points out of the *back* of the right hand, and the relaxed
+    fingers curl the opposite way. `FHandGrip` and `HandGripTransform` curl and seat props toward
+    `along x across`. Getting it backwards bends the fingers backwards (the "cursed" grip).
+  - **Resting idle.** `AN_HeroineMH_ActiveIdle` (`active_idle.py`) replaces LivingIdle02 when
+    present: shoulder-width stance, knees apart, weight on the right leg, hands clear of the
+    pouch. Held tools tip forward in the fist (`HeldToolTilt`) instead of bending the wrist.
+  - **Felling is a right-shoulder chop.** In `axe_fell.py` the left hand holds the knob and the
+    right hand slides; `UpdateFellingHatchet` lays the hatchet through both fists after the pose is
+    final. The bit lands to her right (`FellBitLeft` is negative).
   - **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
     (`-HomesteadSmokeTest`). To see the MetaHuman, launch
     `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the
