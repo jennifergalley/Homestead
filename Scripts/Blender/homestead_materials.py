@@ -115,9 +115,10 @@ class Graph:
             "From Min": from_min, "From Max": from_max, "To Min": to_min, "To Max": to_max},
             clamp=clamp).outputs["Result"]
 
-    def ramp(self, fac, stops):
+    def ramp(self, fac, stops, interpolation="LINEAR"):
         """stops: [(position, (r, g, b)), ...] in linear color."""
         node = self.node("ShaderNodeValToRGB", Fac=fac)
+        node.color_ramp.interpolation = interpolation
         elements = node.color_ramp.elements
         while len(elements) < len(stops):
             elements.new(0.5)
@@ -142,6 +143,19 @@ class Graph:
         if normal is not None:
             self.link(normal, node.inputs["Normal"])
         return node.outputs["Normal"]
+
+    def ao(self, distance=0.2, samples=16, local=True):
+        """Cycles ambient occlusion (1 = open, 0 = enclosed) for cavity masks."""
+        node = self.node("ShaderNodeAmbientOcclusion", Distance=distance, samples=samples,
+                         only_local=local)
+        return node.outputs["AO"]
+
+    def channel(self, color, index=0):
+        node = self.node("ShaderNodeSeparateColor", Color=color)
+        return node.outputs[index]
+
+    def scale(self, vector, factor):
+        return self.vmath("MULTIPLY", vector, factor if isinstance(factor, (tuple, list)) else (factor,) * 3)
 
 
 # ------------------------------------------------------------------ materials
@@ -630,4 +644,297 @@ def soil(name, damp=(0.12, 0.085, 0.055), dry=(0.26, 0.20, 0.135), seed=0.0):
     g.set("Roughness", 0.95)
     height = g.math("ADD", g.math("MULTIPLY", g.remap(crumb, 0.6, 0.0), 0.6), g.math("MULTIPLY", lumps, 0.4))
     g.set("Normal", g.bump(height, strength=0.8, distance=0.0008))
+# ------------------------------------------------------------------ granite
+
+# Sierra Nevada granodiorite/granite, linear albedo. Plagioclase is chalky white, quartz a
+# smoky translucent grey, K-feldspar cream to faint pink, biotite and hornblende black.
+GRANITE_MINERALS = [
+    (0.00, (0.02, 0.019, 0.018)),    # biotite
+    (0.11, (0.036, 0.040, 0.034)),   # hornblende
+    (0.17, (0.30, 0.305, 0.31)),     # quartz
+    (0.33, (0.52, 0.515, 0.50)),     # plagioclase
+    (0.80, (0.52, 0.48, 0.43)),      # K-feldspar
+]
+GRANITE_MEAN = (0.37, 0.36, 0.345)
+
+
+def _granite_grains(g, vector, grain, w=None):
+    """Interlocking mineral grains: returns (color, roughness, relief) sockets.
+
+    Coarse, blocky feldspar grains (plagioclase, K-feldspar) with the spaces between
+    them filled by finer quartz, biotite and hornblende, as in a real hypidiomorphic
+    granodiorite; grain edges are warped so no cell polygon survives. ``w`` switches
+    the textures to 4D (seamless torus-mapped tiles)."""
+    dims = "4D" if w is not None else "3D"
+    extra = {"W": w} if w is not None else {}
+    warp = g.node("ShaderNodeTexNoise", Vector=vector, Scale=1.0 / (grain * 2.2), Detail=3.0,
+                  noise_dimensions=dims, **extra).outputs["Color"]
+    warped = g.vmath("ADD", vector, g.scale(g.vmath("SUBTRACT", warp, (0.5, 0.5, 0.5)), grain * 1.1))
+    coarse = g.node("ShaderNodeTexVoronoi", Vector=warped, Scale=1.0 / (grain * 1.5), Randomness=1.0,
+                    voronoi_dimensions=dims, feature="F1", **extra)
+    fine = g.node("ShaderNodeTexVoronoi", Vector=warped, Scale=1.0 / (grain * 0.62), Randomness=1.0,
+                  voronoi_dimensions=dims, feature="F1", **extra)
+    pick_c = g.channel(coarse.outputs["Color"], 0)
+    pick_f = g.channel(fine.outputs["Color"], 0)
+    felsic = g.remap(pick_c, 0.349, 0.351)
+    plag, kspar = GRANITE_MINERALS[3][1], GRANITE_MINERALS[4][1]
+    big = g.ramp(pick_c, [(0.0, plag), (0.82, kspar)], interpolation="CONSTANT")
+    small = g.ramp(pick_f, [(0.0, GRANITE_MINERALS[0][1]), (0.2, GRANITE_MINERALS[1][1]),
+                            (0.3, GRANITE_MINERALS[2][1]), (0.75, plag)], interpolation="CONSTANT")
+    color = g.mix(small, big, felsic)
+    shade = g.math("ADD", g.math("MULTIPLY", felsic, g.channel(coarse.outputs["Color"], 1)),
+                   g.math("MULTIPLY", g.math("SUBTRACT", 1.0, felsic), g.channel(fine.outputs["Color"], 1)))
+    color = g.mix(color, (0.86, 0.86, 0.85), g.remap(shade, 0.0, 1.0, 0.0, 0.7), blend="MULTIPLY")
+    cloud = g.node("ShaderNodeTexNoise", Vector=vector, Scale=1.0 / (grain * 0.6), Detail=2.0,
+                   noise_dimensions=dims, **extra).outputs["Fac"]
+    color = g.mix(color, (0.9, 0.9, 0.9), g.remap(cloud, 0.4, 0.65), blend="MULTIPLY")
+    # Tiny biotite books scattered through the felsic grains.
+    specks = g.node("ShaderNodeTexVoronoi", Vector=warped, Scale=1.0 / (grain * 0.4), Randomness=1.0,
+                    voronoi_dimensions=dims, feature="F1", **extra)
+    speck = g.math("MULTIPLY", g.remap(g.channel(specks.outputs["Color"], 2), 0.935, 0.94),
+                   g.remap(specks.outputs["Distance"], 0.4, 0.28))
+    color = g.mix(color, (0.018, 0.017, 0.016), speck)
+    # Per mineral: quartz and mica glossier; feldspar stands proud of the weathered surface.
+    mineral = g.math("ADD", g.math("MULTIPLY", felsic, 1.0),
+                     g.math("MULTIPLY", g.math("SUBTRACT", 1.0, felsic), g.math("MULTIPLY", pick_f, 1.0)))
+    rough = g.channel(g.ramp(mineral, [(0.0, (0.46,) * 3), (0.3, (0.64,) * 3), (0.75, (0.84,) * 3)],
+                             interpolation="CONSTANT"), 0)
+    rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=speck, A=rough, B=0.45).outputs[0]
+    relief = g.channel(g.ramp(mineral, [(0.0, (0.35,) * 3), (0.3, (0.75,) * 3), (0.75, (1.0,) * 3)],
+                              interpolation="CONSTANT"), 0)
+    relief = g.math("ADD", relief, g.math("MULTIPLY", g.math("SUBTRACT", shade, 0.5), 0.25))
+    relief = g.math("ADD", relief, g.math("MULTIPLY", cloud, 0.4))
+    relief = g.math("SUBTRACT", relief, g.math("MULTIPLY", speck, 0.4))
+    return color, rough, relief
+
+def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45, moss=0.12,
+            iron=0.25, streaks=0.3, soil=0.2, soil_height=0.12, enclaves=0.4, megacrysts=0.0,
+            relief=1.0, north=(0.0, 1.0, 0.0), seed=0.0, fresh="fresh", spots=1.0, film=0.5):
+    """Weathered Sierra Nevada granite for rocks meshed in meters with pcoord = object
+    coordinates and the ground line at z = 0.
+
+    - ``grain``: mean crystal size (m). ``grains=False`` replaces the crystals by their
+      average colour, for big rocks whose bake texels are coarser than the crystals
+      (pair them with the shared tiling GraniteDetail maps).
+    - ``scale``: rock size (m) that sizes the macro weathering features.
+    - ``patina``: grey-buff weathering rind; ``lichen``/``moss`` coverage (moss prefers
+      cavities and faces toward ``north`` near the ground); ``iron`` rust stains;
+      ``streaks`` dark water streaks down steep faces; ``soil`` dirt up to
+      ``soil_height`` m above the ground line (and everything buried below it);
+      ``enclaves`` dark mafic inclusions; ``megacrysts`` Cathedral Peak style K-feldspar
+      phenocrysts; ``relief`` multiplies the bump strength.
+    - ``fresh``: name of a 0..1 point attribute marking newly spalled surfaces (written by
+      ``homestead_rocks.sheets`` recipes); they keep a cleaner, paler face with less rind
+      and lichen. Missing attributes read as 0 (all weathered).
+    """
+    g = Graph(name)
+    p = g.coord()
+    ps = g.vmath("ADD", p, (seed * 7.13, seed * 3.37, seed * 5.71))
+    px, py, pz = g.separate(p)
+    normal = g.node("ShaderNodeTexCoord").outputs["Normal"]
+    nx, ny, nz = g.separate(normal)
+    north_facing = g.vmath("DOT_PRODUCT", normal, north)
+    steep = g.remap(g.math("ABSOLUTE", nz), 0.85, 0.35)
+    upward = g.remap(nz, 0.1, 0.8)
+    spalled = g.node("ShaderNodeAttribute", attribute_name=fresh, attribute_type="GEOMETRY").outputs["Fac"]
+    weathered = g.math("SUBTRACT", 1.0, g.math("MULTIPLY", spalled, 0.85))
+    joint_face = g.node("ShaderNodeAttribute", attribute_name="joint", attribute_type="GEOMETRY").outputs["Fac"]
+
+    if grains:
+        color, rough, height = _granite_grains(g, ps, grain)
+    else:
+        speck = g.noise(ps, scale=1.0 / (grain * 3.0), detail=3.0).outputs["Fac"]
+        color = g.mix(GRANITE_MEAN, tuple(c * 0.82 for c in GRANITE_MEAN), g.remap(speck, 0.4, 0.62))
+        rough = g.remap(speck, 0.3, 0.7, 0.72, 0.84)
+        height = speck
+
+    # Megacrysts and mafic enclaves.
+    if megacrysts:
+        mega = g.node("ShaderNodeTexVoronoi", Vector=g.scale(ps, (1.0, 1.0, 1.6)), Scale=1.0 / 0.055,
+                      Randomness=1.0, feature="F1", distance="CHEBYCHEV")
+        mega_mask = g.math("MULTIPLY", g.remap(g.channel(mega.outputs["Color"], 0), 1.0 - 0.14 * megacrysts,
+                                               1.0 - 0.14 * megacrysts + 0.01),
+                           g.remap(mega.outputs["Distance"], 0.3, 0.24))
+        color = g.mix(color, (0.50, 0.455, 0.40), mega_mask)
+        height = g.math("ADD", height, g.math("MULTIPLY", mega_mask, 0.3))
+    if enclaves:
+        warp = g.noise(ps, scale=4.0, detail=3.0).outputs["Color"]
+        evec = g.vmath("ADD", g.scale(ps, (1.0, 0.7, 2.6)), g.scale(warp, 0.1))
+        encl = g.node("ShaderNodeTexVoronoi", Vector=evec, Scale=1.0 / 0.5, Randomness=1.0, feature="F1")
+        encl_mask = g.math("MULTIPLY", g.remap(g.channel(encl.outputs["Color"], 1), 1.0 - 0.06 * enclaves,
+                                               1.0 - 0.06 * enclaves + 0.004),
+                           g.remap(encl.outputs["Distance"], 0.3, 0.25))
+        fine = g.noise(ps, scale=1.0 / (grain * 0.5), detail=2.0).outputs["Fac"]
+        color = g.mix(color, g.mix((0.10, 0.10, 0.095), (0.2, 0.2, 0.19), g.remap(fine, 0.35, 0.65)),
+                      g.math("MULTIPLY", encl_mask, 0.85))
+
+    # Weathering rind: crystals lose contrast and the surface warms to grey-buff.
+    zone = g.noise(ps, scale=1.1 / scale, detail=4.0, roughness=0.55).outputs["Fac"]
+    rind = g.math("MULTIPLY", g.remap(zone, 0.3, 0.7, patina * 0.5, patina), weathered)
+    color = g.mix(color, (0.27, 0.265, 0.25), g.math("MULTIPLY", rind, 0.65))
+    color = g.mix(color, (0.93, 0.9, 0.84), g.math("MULTIPLY", rind, 0.6), blend="MULTIPLY")
+    mottle = g.noise(ps, scale=4.5 / scale, detail=5.0, roughness=0.6).outputs["Fac"]
+    color = g.mix(color, (0.72, 0.72, 0.7), g.remap(mottle, 0.4, 0.72, 0.0, 0.9), blend="MULTIPLY")
+    aged = g.noise(ps, scale=0.8 / scale, detail=3.0).outputs["Fac"]
+    color = g.mix(color, (0.68, 0.68, 0.66), g.math("MULTIPLY", g.remap(aged, 0.45, 0.68), weathered),
+                  blend="MULTIPLY")
+    light = g.noise(ps, scale=2.3 / scale, detail=3.0).outputs["Fac"]
+    color = g.mix(color, (1.12, 1.1, 1.06), g.math("MULTIPLY", g.remap(light, 0.55, 0.75), weathered),
+                  blend="MULTIPLY")
+
+    # Iron-oxide stains: blotches round weathering biotite, and rusty runs down steep faces.
+    if iron:
+        blotch = g.noise(ps, scale=2.2 / scale, detail=5.0, roughness=0.62).outputs["Fac"]
+        runs = g.noise(g.combine(g.math("MULTIPLY", px, 9.0 / scale), g.math("MULTIPLY", py, 9.0 / scale),
+                                 g.math("MULTIPLY", pz, 0.7 / scale)), scale=1.4, detail=4.0).outputs["Fac"]
+        rust = g.math("MAXIMUM", g.remap(blotch, 0.6, 0.78),
+                      g.math("MULTIPLY", g.remap(runs, 0.55, 0.78), steep))
+        color = g.mix(color, (0.78, 0.5, 0.3), g.math("MULTIPLY", g.math("MULTIPLY", rust, iron), weathered),
+                      blend="MULTIPLY")
+
+    # Dark water streaks (cyanobacteria/lichen) running down from rims on steep faces.
+    # Old joint faces (``joint`` attribute) carry a rusty iron-oxide film.
+    oxide = g.noise(ps, scale=3.0 / scale, detail=5.0, roughness=0.6).outputs["Fac"]
+    rust_film = g.math("MULTIPLY", joint_face, g.remap(oxide, 0.3, 0.6, 0.45, 0.95))
+    color = g.mix(color, (0.82, 0.66, 0.5), rust_film, blend="MULTIPLY")
+    streak_mask = None
+    if streaks:
+        lines = g.noise(g.combine(g.math("MULTIPLY", px, 16.0 / scale), g.math("MULTIPLY", py, 16.0 / scale),
+                                  g.math("MULTIPLY", pz, 0.45 / scale)), scale=1.3, detail=5.0).outputs["Fac"]
+        wet = g.noise(ps, scale=0.9 / scale, detail=2.0).outputs["Fac"]
+        streak_mask = g.math("MULTIPLY", g.math("MULTIPLY", g.remap(lines, 0.5, 0.68), steep),
+                             g.remap(wet, 0.42, 0.6))
+        streak_mask = g.math("MULTIPLY", streak_mask, g.math("MULTIPLY", weathered, streaks))
+        color = g.mix(color, (0.05, 0.05, 0.045), g.math("MULTIPLY", streak_mask, 0.8))
+
+    # Cavities hold dirt and moss.
+    hollow = g.remap(g.ao(distance=0.06 * scale + 0.01, samples=16), 0.45, 0.95, 1.0, 0.0)
+    color = g.mix(color, (0.6, 0.55, 0.48), g.math("MULTIPLY", hollow, 0.6), blend="MULTIPLY")
+    cavity = g.remap(g.ao(distance=0.035, samples=12), 0.35, 0.9, 1.0, 0.0)
+    color = g.mix(color, (0.55, 0.5, 0.44), g.math("MULTIPLY", cavity, 0.6), blend="MULTIPLY")
+
+    # Old surfaces carry a patchy dark film of lichen and cyanobacteria: grey-olive mottling
+    # that makes weathered Sierra boulders read mid-grey rather than white from a distance.
+    if film:
+        blot = g.noise(g.vmath("ADD", ps, g.scale(g.noise(ps, scale=1.5 / scale, detail=2.0).outputs["Color"],
+                                                   0.25 * scale)), scale=2.2 / scale, detail=6.0,
+                       roughness=0.62).outputs["Fac"]
+        film_mask = g.math("MULTIPLY", g.remap(blot, 0.43, 0.57),
+                           g.math("MULTIPLY", g.math("SUBTRACT", 1.0, g.math("MULTIPLY", spalled, 0.5)), film))
+        film_mask = g.math("MULTIPLY", film_mask, g.math("ADD", 0.45, g.math("MULTIPLY", upward, 0.55)))
+        color = g.mix(color, (0.42, 0.43, 0.39), film_mask, blend="MULTIPLY")
+
+    # Crustose lichens. Colonies are irregular, coalescing crusts (a thresholded fBm, not
+    # discs) in species zones: grey-green and pale grey crusts, chartreuse map lichen, and
+    # small black crust/rock-tripe spots. Most grow on tops and cooler (north) faces.
+    lichen_mask = None
+    if lichen:
+        lwarp = g.noise(ps, scale=9.0, detail=3.0).outputs["Color"]
+        ls = max(1.0, scale / 1.5) ** 0.5   # colonies grow bigger on big, old rocks
+        lvec = g.vmath("ADD", ps, g.scale(g.vmath("SUBTRACT", lwarp, (0.5, 0.5, 0.5)), 0.08 * ls))
+        crustfield = g.noise(lvec, scale=1.0 / (0.11 * ls), detail=7.0, roughness=0.62).outputs["Fac"]
+        colony = g.noise(ps, scale=1.3 / scale, detail=3.0).outputs["Fac"]
+        exposure = g.math("ADD", g.math("MULTIPLY", upward, 0.55),
+                          g.math("ADD", g.math("MULTIPLY", g.remap(north_facing, -0.3, 0.9), 0.3), 0.15))
+        density = g.math("MULTIPLY", g.math("MULTIPLY", g.remap(colony, 0.3, 0.7, 0.2, 1.0), exposure),
+                         g.math("MULTIPLY", weathered, lichen))
+        threshold = g.math("SUBTRACT", 0.7, g.math("MULTIPLY", density, 0.45))
+        edge = g.math("SUBTRACT", crustfield, threshold)
+        lichen_mask = g.remap(edge, 0.0, 0.012)
+        lichen_mask = g.math("MULTIPLY", lichen_mask, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", cavity, 0.8)))
+        species = g.noise(ps, scale=1.0 / 0.3, detail=2.0).outputs["Color"]
+        pick = g.channel(species, 0)
+        crust = g.ramp(pick, [(0.0, (0.2, 0.215, 0.18)), (0.36, (0.34, 0.355, 0.31)),
+                              (0.58, (0.25, 0.275, 0.12)), (0.64, (0.14, 0.14, 0.125))], interpolation="CONSTANT")
+        age = g.remap(edge, 0.0, 0.08, 0.75, 1.0)
+        crust = g.mix(crust, (0.8, 0.8, 0.78), g.math("SUBTRACT", 1.0, age), blend="MULTIPLY")
+        areoles = g.node("ShaderNodeTexVoronoi", Vector=lvec, Scale=1.0 / 0.004,
+                         feature="DISTANCE_TO_EDGE").outputs["Distance"]
+        crust = g.mix(crust, (0.55, 0.55, 0.52), g.remap(areoles, 0.0, 0.06, 0.45, 0.0), blend="MULTIPLY")
+        # Map lichen colonies have a black prothallus rim.
+        rim = g.math("MULTIPLY", g.remap(edge, 0.0, 0.004), g.remap(edge, 0.016, 0.006))
+        is_map = g.math("MULTIPLY", g.remap(pick, 0.575, 0.585), g.remap(pick, 0.64, 0.63))
+        crust = g.mix(crust, (0.03, 0.03, 0.028), g.math("MULTIPLY", rim, is_map))
+        # Map lichen is areolate: yellow-green islands separated by the black prothallus.
+        crust = g.mix(crust, (0.035, 0.035, 0.03),
+                      g.math("MULTIPLY", g.remap(areoles, 0.0, 0.07, 1.0, 0.0), g.math("MULTIPLY", is_map, 0.9)))
+        color = g.mix(color, crust, g.math("MULTIPLY", lichen_mask, 0.92))
+        dots = g.node("ShaderNodeTexVoronoi", Vector=lvec, Scale=1.0 / (0.045 * ls), Randomness=1.0, feature="F1")
+        spot_size = g.remap(g.channel(dots.outputs["Color"], 1), 0.0, 1.0, 0.08, 0.32)
+        spot_on = g.remap(g.math("ADD", g.channel(dots.outputs["Color"], 2),
+                                 g.math("MULTIPLY", density, 0.12 * spots)), 1.0 - 0.05 * spots,
+                          1.0 - 0.05 * spots + 0.005)
+        ragged = g.noise(lvec, scale=1.0 / 0.006, detail=4.0, roughness=0.7).outputs["Fac"]
+        spot_edge = g.math("SUBTRACT", g.math("ADD", spot_size, g.math("MULTIPLY",
+                           g.math("SUBTRACT", ragged, 0.5), 0.9)), dots.outputs["Distance"])
+        spot_mask = g.math("MULTIPLY", g.remap(spot_edge, 0.0, 0.03), spot_on)
+        color = g.mix(color, (0.045, 0.042, 0.036), g.math("MULTIPLY", spot_mask, g.remap(ragged, 0.3, 0.6, 0.75, 1.0)))
+        lichen_mask = g.math("MAXIMUM", lichen_mask, spot_mask)
+
+    # Moss cushions in crevices and on shaded faces near the ground.
+    moss_mask = None
+    if moss:
+        clump = g.noise(ps, scale=9.0 / scale, detail=5.0, roughness=0.65).outputs["Fac"]
+        shade = g.math("MULTIPLY", g.remap(north_facing, 0.05, 0.75),
+                       g.remap(pz, min(0.9 * scale, 1.2), 0.05 * min(scale, 1.5)))
+        where = g.math("MAXIMUM", g.math("MULTIPLY", g.math("MULTIPLY", hollow, shade), 1.4),
+                       g.math("MULTIPLY", shade, g.remap(nz, -0.3, 0.4)))
+        where = g.math("MINIMUM", where, 1.0)
+        value = g.math("ADD", g.math("MULTIPLY", where, 0.5 + moss * 2.5),
+                       g.math("MULTIPLY", g.math("SUBTRACT", clump, 0.5), 0.6))
+        moss_mask = g.math("MULTIPLY", g.remap(value, 0.55, 0.64), g.remap(pz, -0.02, 0.02))
+        tuft = g.noise(ps, scale=260.0, detail=4.0).outputs["Fac"]
+        green = g.mix((0.035, 0.05, 0.016), (0.075, 0.09, 0.03), g.remap(tuft, 0.35, 0.7))
+        green = g.mix(green, (0.10, 0.085, 0.04), g.remap(clump, 0.55, 0.75, 0.0, 0.6))
+        color = g.mix(color, green, moss_mask)
+    # Soil splash and the buried base.
+    if soil:
+        jitter = g.noise(ps, scale=12.0, detail=4.0).outputs["Fac"]
+        line = g.math("ADD", pz, g.math("MULTIPLY", g.math("SUBTRACT", jitter, 0.5), soil_height * 0.8))
+        dirt = g.math("MAXIMUM", g.remap(line, soil_height, 0.0, 0.0, soil),
+                      g.remap(pz, 0.01, -0.03))
+        color = g.mix(color, (0.085, 0.064, 0.045), dirt)
+    else:
+        dirt = None
+
+    g.set("Base Color", color)
+    roughness = rough
+    for mask, value in ((streak_mask, 0.66), (lichen_mask, 0.9), (moss_mask, 0.95), (dirt, 0.95)):
+        if mask is not None:
+            roughness = g.node("ShaderNodeMix", data_type="FLOAT", Factor=mask, A=roughness, B=value).outputs[0]
+    g.set("Roughness", roughness)
+
+    grit = g.noise(ps, scale=1.0 / 0.0012, detail=2.0).outputs["Fac"]
+    pitting = g.noise(ps, scale=1.0 / 0.012, detail=4.0, roughness=0.6).outputs["Fac"]
+    fine = g.math("ADD", height, g.math("MULTIPLY", grit, 0.35))
+    if lichen_mask is not None:
+        fine = g.math("ADD", fine, g.math("MULTIPLY", lichen_mask, 0.6))
+    if moss_mask is not None:
+        fine = g.math("ADD", fine, g.math("MULTIPLY", moss_mask, g.math("MULTIPLY", tuft, 3.0)))
+    coarse = g.math("ADD", g.math("MULTIPLY", pitting, 1.0),
+                    g.math("MULTIPLY", g.noise(ps, scale=1.0 / 0.05, detail=4.0).outputs["Fac"], 1.5))
+    g.math("ADD", fine, 0.0).node.label = "HOMESTEAD_HEIGHT"
+    bumped = g.bump(coarse, strength=0.6 * relief, distance=0.006)
+    g.set("Normal", g.bump(fine, strength=0.55 * relief, distance=0.0007, normal=bumped))
+    return g.mat
+
+
+def granite_detail(name, tile=1.0, grain=0.0045):
+    """Seamless tiling crystal detail for the shared GraniteDetail maps. UV 0..1 on a
+    ``tile`` x ``tile`` m plane is mapped onto a flat (Clifford) torus in 4D, so the
+    grain texture repeats with no seam and no stretching. Base colour is normalised
+    so its mean is linear 0.5 (multiply by 2 over a macro colour)."""
+    g = Graph(name)
+    u, v, _ = g.separate(g.uv())
+    radius = tile / (2 * 3.14159265)
+    au, av = g.math("MULTIPLY", u, 6.2831853), g.math("MULTIPLY", v, 6.2831853)
+    vector = g.combine(g.math("MULTIPLY", g.math("COSINE", au), radius),
+                       g.math("MULTIPLY", g.math("SINE", au), radius),
+                       g.math("MULTIPLY", g.math("COSINE", av), radius))
+    w = g.math("MULTIPLY", g.math("SINE", av), radius)
+    color, rough, height = _granite_grains(g, vector, grain, w=w)
+    g.set("Base Color", g.mix(color, tuple(0.5 / c for c in GRANITE_MEAN), 1.0, blend="MULTIPLY"))
+    g.set("Roughness", rough)
+    g.math("ADD", height, 0.0).node.label = "HOMESTEAD_HEIGHT"
+    g.set("Normal", g.bump(height, strength=0.6, distance=0.0007))
     return g.mat

@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "GraniteBlockTalus",
+  "description": "Medium (0.9 m) angular granite talus block with fresh fracture faces and chipped edges; LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 100000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_block_talus.py",
+  "source_sha256": "dbe3c439dff12b5d80f112a1aafe0ec29a99f677589d0ccc5ea6d0ed1e92a125",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteBlockTalus": {
+      "vertices": 48970,
+      "triangles": 97936,
+      "size_cm": [
+        107.01,
+        87.43,
+        67.54
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBlockTalus",
+          "textures": {
+            "basecolor": "T_GraniteBlockTalus_basecolor.png",
+            "roughness": "T_GraniteBlockTalus_roughness.png",
+            "normal": "T_GraniteBlockTalus_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBlockTalus_basecolor.png",
+          "roughness": "T_GraniteBlockTalus_roughness.png",
+          "normal": "T_GraniteBlockTalus_normal.png",
+          "ao": "T_GraniteBlockTalus_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.15,
+          -0.25,
+          0.4
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBlockTalus.fbx",
+      "sha256": "95fba973eceabde49749126f1de042515e5fb26dd13a4e70965ebc282de47908",
+      "preview": "preview_SM_GraniteBlockTalus.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteBlockTalus_hero.png",
+          "detail": "beauty_SM_GraniteBlockTalus_detail.png",
+          "eye": "beauty_SM_GraniteBlockTalus_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteBlockTalus_LOD1": {
+      "vertices": 10002,
+      "triangles": 20000,
+      "size_cm": [
+        106.96,
+        87.35,
+        67.56
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBlockTalus",
+          "textures": {
+            "basecolor": "T_GraniteBlockTalus_basecolor.png",
+            "roughness": "T_GraniteBlockTalus_roughness.png",
+            "normal": "T_GraniteBlockTalus_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBlockTalus_basecolor.png",
+          "roughness": "T_GraniteBlockTalus_roughness.png",
+          "normal": "T_GraniteBlockTalus_normal.png",
+          "ao": "T_GraniteBlockTalus_ao.png"
+        },
+        "shared_with": "SM_GraniteBlockTalus"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.15,
+          -0.25,
+          0.4
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBlockTalus_LOD1.fbx",
+      "sha256": "a9b78d08a9631c9fca1d78e470c83ba8158b69de7045ff8d10785ef22f8ae108",
+      "preview": "preview_SM_GraniteBlockTalus_LOD1.png"
+    },
+    "SM_GraniteBlockTalus_LOD2": {
+      "vertices": 2502,
+      "triangles": 5000,
+      "size_cm": [
+        106.98,
+        87.38,
+        67.63
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBlockTalus",
+          "textures": {
+            "basecolor": "T_GraniteBlockTalus_basecolor.png",
+            "roughness": "T_GraniteBlockTalus_roughness.png",
+            "normal": "T_GraniteBlockTalus_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBlockTalus_basecolor.png",
+          "roughness": "T_GraniteBlockTalus_roughness.png",
+          "normal": "T_GraniteBlockTalus_normal.png",
+          "ao": "T_GraniteBlockTalus_ao.png"
+        },
+        "shared_with": "SM_GraniteBlockTalus"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.15,
+          -0.25,
+          0.4
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBlockTalus_LOD2.fbx",
+      "sha256": "e4f4bf8e1395aa1ab215af29064c70af7265cebb6b3e43034d47e4771acbb227",
+      "preview": "preview_SM_GraniteBlockTalus_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.088,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 9 cm).",
+    "collision": "Convex hull (the block is convex).",
+    "north": "+Y"
+  },
+  "textures": {
+    "T_GraniteBlockTalus_basecolor.png": "b5fe361d34d48b9173682ba360f2e3afec444735f8544b78dc77a7b1aab35cb4",
+    "T_GraniteBlockTalus_roughness.png": "cdc567dc9b11aff7cfcf00f3eda8c7359c5c3ff8cf3b68da5b774945b14b0e54",
+    "T_GraniteBlockTalus_normal.png": "15b30a21fb7689cc6558605b210fb7cf84b647a489824860b9f9eb3c4c10ea24"
+  }
+}

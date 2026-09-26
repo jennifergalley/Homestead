@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "name": "GraniteSpalls",
+  "description": "Small ground cluster of 7 curved exfoliation spall plates and chips (5-40 cm), ~1.1 m footprint; LOD1/LOD2.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_spalls.py",
+  "source_sha256": "bdb6f85cb255bb3e5b765c070c4ff265809cd1467ee7f664d9d18574fe0cfc82",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteSpalls": {
+      "vertices": 30104,
+      "triangles": 60160,
+      "size_cm": [
+        68.92,
+        79.49,
+        10.23
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteSpalls",
+          "textures": {
+            "basecolor": "T_GraniteSpalls_basecolor.png",
+            "roughness": "T_GraniteSpalls_roughness.png",
+            "normal": "T_GraniteSpalls_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteSpalls_basecolor.png",
+          "roughness": "T_GraniteSpalls_roughness.png",
+          "normal": "T_GraniteSpalls_normal.png",
+          "ao": "T_GraniteSpalls_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.05,
+          -0.05,
+          0.05
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteSpalls.fbx",
+      "sha256": "c2b56d50ebb9a888ab1f1a9fc38c5333c1b414857575e2997d16e0296a82001d",
+      "preview": "preview_SM_GraniteSpalls.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteSpalls_hero.png",
+          "detail": "beauty_SM_GraniteSpalls_detail.png",
+          "eye": "beauty_SM_GraniteSpalls_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteSpalls_LOD1": {
+      "vertices": 7524,
+      "triangles": 15000,
+      "size_cm": [
+        68.93,
+        79.5,
+        10.24
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteSpalls",
+          "textures": {
+            "basecolor": "T_GraniteSpalls_basecolor.png",
+            "roughness": "T_GraniteSpalls_roughness.png",
+            "normal": "T_GraniteSpalls_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteSpalls_basecolor.png",
+          "roughness": "T_GraniteSpalls_roughness.png",
+          "normal": "T_GraniteSpalls_normal.png",
+          "ao": "T_GraniteSpalls_ao.png"
+        },
+        "shared_with": "SM_GraniteSpalls"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.05,
+          -0.05,
+          0.05
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteSpalls_LOD1.fbx",
+      "sha256": "108b4cbc28c71923ee2e39b2a35755f6bc8d57c91c4f814ee0ba28241bf089c7",
+      "preview": "preview_SM_GraniteSpalls_LOD1.png"
+    },
+    "SM_GraniteSpalls_LOD2": {
+      "vertices": 1774,
+      "triangles": 3500,
+      "size_cm": [
+        68.93,
+        79.51,
+        10.26
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteSpalls",
+          "textures": {
+            "basecolor": "T_GraniteSpalls_basecolor.png",
+            "roughness": "T_GraniteSpalls_roughness.png",
+            "normal": "T_GraniteSpalls_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteSpalls_basecolor.png",
+          "roughness": "T_GraniteSpalls_roughness.png",
+          "normal": "T_GraniteSpalls_normal.png",
+          "ao": "T_GraniteSpalls_ao.png"
+        },
+        "shared_with": "SM_GraniteSpalls"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.05,
+          -0.05,
+          0.05
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteSpalls_LOD2.fbx",
+      "sha256": "e957128b500b0b7a13b8efd24b6e6652714309a746a5f7000b934df6d8217822",
+      "preview": "preview_SM_GraniteSpalls_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.037,
+    "placement": "Origin is the ground line; place at terrain height (pieces extend 4 cm below it). Walkable decoration: no collision. Pairs with the foot of the big exfoliating rocks.",
+    "north": "+Y"
+  },
+  "textures": {
+    "T_GraniteSpalls_basecolor.png": "ae7a0b765afe24c9bfa13eb73683380a41b81de4accdbd435813b9001499121b",
+    "T_GraniteSpalls_roughness.png": "bd4436ac8904503163d1083ad0b2603fd6739db9f98f8fc31ead28267858fe5e",
+    "T_GraniteSpalls_normal.png": "faadc8da5f9f01cb1a75ae7afb927c6668b70392a13353a202c12a178af34f7b"
+  }
+}

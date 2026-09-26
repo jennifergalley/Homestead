@@ -181,9 +181,13 @@ def texture_maps(mat):
 
 
 def copy_textures(objects, folder):
-    """Copy every texture used by ``objects`` into ``folder`` and repoint the images."""
+    """Copy every texture used by ``objects`` into ``folder`` and repoint the images.
+    Textures that already live in another asset set under ``Assets/Props`` (shared
+    tiling maps such as GraniteDetail) stay where they are and are reported by their
+    path relative to ``Assets/Props``."""
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
+    props = (ROOT / "Assets" / "Props").resolve()
     copied = {}
     for obj in objects:
         for slot in obj.material_slots:
@@ -194,6 +198,11 @@ def copy_textures(objects, folder):
                 if node.type != "TEX_IMAGE" or not image or image.source != "FILE":
                     continue
                 source = Path(bpy.path.abspath(image.filepath))
+                resolved = source.resolve()
+                if resolved.is_relative_to(props) and not resolved.is_relative_to(folder.parent.resolve()):
+                    copied[resolved.relative_to(props).as_posix()] = \
+                        hashlib.sha256(resolved.read_bytes()).hexdigest()
+                    continue
                 target = folder / source.name
                 if source.resolve() != target.resolve():
                     shutil.copy2(source, target)
@@ -566,17 +575,25 @@ def _fit_distance(corners, target, direction, lens, aspect, margin=1.12, sensor=
 
 
 def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160), samples=256,
-                  views=("hero", "detail"), pose=(0, 0, 0), focus=None):
+                  views=("hero", "detail"), pose=(0, 0, 0), focus=None, ground="lowest",
+                  eye_distance=None):
     """Photoreal Cycles review renders of ``obj`` on a soil ground under an HDRI sky.
     ``pose`` (XYZ degrees) temporarily re-orients the asset for review (e.g. lay a
     tool on the ground); ``focus`` is an object-space point for the close detail
-    view (default: upper third). Returns render metadata."""
+    view (default: upper third). ``ground="origin"`` puts the soil at the object's
+    origin instead of under its lowest point, so props authored to sink into the
+    terrain (rocks) are reviewed half-buried as placed. The optional ``"eye"`` view
+    looks at the asset from a standing player's eye height (1.6 m) at
+    ``eye_distance`` meters. Returns render metadata."""
     scene = bpy.context.scene
     rest = obj.matrix_world.copy()
     obj.matrix_world = Euler([math.radians(a) for a in pose]).to_matrix().to_4x4() @ rest
     bpy.context.view_layer.update()
     lo, _ = bounds(obj)
-    obj.matrix_world = Matrix.Translation((0, 0, -lo.z)) @ obj.matrix_world
+    ground_z = 0.0
+    ground_mode = ground
+    if ground_mode != "origin":
+        obj.matrix_world = Matrix.Translation((0, 0, -lo.z)) @ obj.matrix_world
     bpy.context.view_layer.update()
     focus_world = obj.matrix_world @ Vector(focus) if focus is not None else None
     scene.render.engine = "CYCLES"
@@ -607,6 +624,8 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     soil.node_tree.links.new(ramp.outputs["Color"], soil_bsdf.inputs["Base Color"])
     soil_bsdf.inputs["Roughness"].default_value = 0.95
     lo, hi = bounds(obj)
+    if ground_mode == "origin":
+        lo = Vector((lo.x, lo.y, max(lo.z, ground_z)))
     size = hi - lo
     center = (lo + hi) / 2
     ground = box("BeautyGround", (60, 60, 0.02), (center.x, center.y, lo.z - 0.012), material=soil)
@@ -618,14 +637,22 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     folder = Path(folder)
     for view in views:
         data = bpy.data.cameras.new("BeautyCam")
-        data.lens = 50 if view == "hero" else 85
+        data.lens = {"hero": 50, "eye": 28}.get(view, 85)
         data.dof.use_dof = view == "detail"
+        data.clip_start, data.clip_end = 0.05, 2000
         cam = _link(bpy.data.objects.new("BeautyCam", data))
         if view == "hero":
             target = center
             elevation = 0.42 if size.z > max(size.x, size.y) * 0.5 else 0.75
             direction = Vector((-0.62, -1.0, elevation)).normalized()
             distance = _fit_distance(corners, target, direction, data.lens, aspect)
+        elif view == "eye":
+            flat = Vector((-0.62, -1.0, 0.0)).normalized()
+            reach = eye_distance or max(size.x, size.y) * 1.3 + 2.0
+            cam.location = Vector((center.x, center.y, lo.z + 1.6)) + flat * reach
+            target = Vector((center.x, center.y, lo.z + min(size.z * 0.4, 1.6)))
+            direction = (cam.location - target).normalized()
+            distance = (cam.location - target).length
         else:
             target = focus_world or Vector((center.x - size.x * 0.12, center.y - size.y * 0.25,
                                             lo.z + size.z * 0.72))
@@ -645,7 +672,8 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     bpy.data.objects.remove(ground)
     obj.matrix_world = rest
     return {"views": out, "device": backend[0], "gpus": backend[1], "samples": samples,
-            "resolution": list(resolution), "hdri": Path(hdri).name, "pose": list(pose)}
+            "resolution": list(resolution), "hdri": Path(hdri).name, "pose": list(pose),
+            "ground": ground_mode}
 
 
 # ------------------------------------------------------------ modeling tools
@@ -875,6 +903,28 @@ def _bake_input_as_emission(materials, socket_name):
             for socket in previous:
                 tree.links.new(socket, out.inputs["Surface"])
     return undo
+def _bake_labelled(materials, role, margin):
+    """Bake a custom scalar/color map: each material exposes it on a node labelled
+    ``HOMESTEAD_<ROLE>`` (e.g. HOMESTEAD_HEIGHT), which is routed through an emission
+    shader for the bake and then disconnected again."""
+    label = "HOMESTEAD_" + role.upper()
+    restore = []
+    for mat in materials:
+        tree = mat.node_tree
+        source = next((n for n in tree.nodes if n.label == label), None)
+        output = next((n for n in tree.nodes if n.type == "OUTPUT_MATERIAL" and n.is_active_output), None)
+        if source is None or output is None:
+            raise RuntimeError(f"{mat.name} has no node labelled {label} for the '{role}' bake")
+        previous = [link.from_socket for link in output.inputs["Surface"].links]
+        emission = tree.nodes.new("ShaderNodeEmission")
+        tree.links.new(source.outputs[0], emission.inputs["Color"])
+        tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
+        restore.append((tree, output, emission, previous))
+    bpy.ops.object.bake(type="EMIT", use_clear=True, margin=margin)
+    for tree, output, emission, previous in restore:
+        tree.nodes.remove(emission)
+        for socket in previous:
+            tree.links.new(socket, output.inputs["Surface"])
 
 
 def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
@@ -917,6 +967,8 @@ def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
             bpy.ops.object.bake(type="NORMAL", normal_space="TANGENT", use_clear=True, margin=margin)
         elif role == "ao":
             bpy.ops.object.bake(type="AO", use_clear=True, margin=margin)
+        else:
+            _bake_labelled(materials, role, margin)
         for mat in materials:
             for node in [n for n in mat.node_tree.nodes if n.name.startswith("HomesteadBakeTarget")]:
                 mat.node_tree.nodes.remove(node)
@@ -926,6 +978,9 @@ def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
         image.save()
         images[role], paths[role] = image, path
 
+    clash = bpy.data.materials.get("M_" + stem)
+    if clash is not None:
+        clash.name = "M_" + stem + "_Procedural"
     baked = bpy.data.materials.new("M_" + stem)
     if baked.node_tree is None:
         baked.use_nodes = True
@@ -959,6 +1014,68 @@ def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
 
 
 # ---------------------------------------------------------------- references
+
+def layer_detail(obj, folder, stem, tile=1.0, strength=0.8, bump=0.6, box_blend=0.25):
+    """Layer shared tiling detail maps (``<folder>/T_<stem>_{basecolor,roughness,height}.png``)
+    over an object's baked material, box-projected in object space at ``tile`` m per
+    repeat: base colour x (2 x detail) at ``strength``, roughness nudged per mineral,
+    and grain height as bump on top of the baked normal map. This is what the Unreal
+    material should reproduce with world-aligned textures (see the recipe NOTES)."""
+    folder = Path(folder)
+    mat = obj.material_slots[0].material
+    tree = mat.node_tree
+    bsdf = next(n for n in tree.nodes if n.type == "BSDF_PRINCIPLED")
+    coords = tree.nodes.new("ShaderNodeTexCoord")
+    mapping = tree.nodes.new("ShaderNodeMapping")
+    mapping.inputs["Scale"].default_value = (1.0 / tile,) * 3
+    tree.links.new(coords.outputs["Object"], mapping.inputs["Vector"])
+
+    def image(role, color):
+        node = tree.nodes.new("ShaderNodeTexImage")
+        node.image = bpy.data.images.load(str(folder / f"T_{stem}_{role}.png"), check_existing=True)
+        if not color:
+            node.image.colorspace_settings.name = "Non-Color"
+        node.projection = "BOX"
+        node.projection_blend = box_blend
+        tree.links.new(mapping.outputs["Vector"], node.inputs["Vector"])
+        return node.outputs["Color"]
+
+    base_link = bsdf.inputs["Base Color"].links[0]
+    doubled = tree.nodes.new("ShaderNodeVectorMath")
+    doubled.operation = "SCALE"
+    doubled.inputs["Scale"].default_value = 2.0
+    tree.links.new(image("basecolor", True), doubled.inputs[0])
+    mix = tree.nodes.new("ShaderNodeMix")
+    mix.data_type = "RGBA"
+    mix.blend_type = "MULTIPLY"
+    mix.inputs["Factor"].default_value = strength
+    colors = [s for s in mix.inputs if s.type == "RGBA"]
+    tree.links.new(base_link.from_socket, colors[0])
+    tree.links.new(doubled.outputs["Vector"], colors[1])
+    tree.links.new(next(s for s in mix.outputs if s.type == "RGBA"), bsdf.inputs["Base Color"])
+
+    rough_link = bsdf.inputs["Roughness"].links[0]
+    rough_mix = tree.nodes.new("ShaderNodeMix")
+    rough_mix.data_type = "FLOAT"
+    rough_mix.inputs["Factor"].default_value = strength * 0.5
+    values = [s for s in rough_mix.inputs if s.type == "VALUE"]
+    tree.links.new(rough_link.from_socket, values[1])
+    rough_detail = tree.nodes.new("ShaderNodeSeparateColor")
+    tree.links.new(image("roughness", False), rough_detail.inputs["Color"])
+    tree.links.new(rough_detail.outputs[0], values[2])
+    tree.links.new(next(s for s in rough_mix.outputs if s.type == "VALUE"), bsdf.inputs["Roughness"])
+
+    normal_link = bsdf.inputs["Normal"].links[0]
+    height = tree.nodes.new("ShaderNodeSeparateColor")
+    tree.links.new(image("height", False), height.inputs["Color"])
+    bump_node = tree.nodes.new("ShaderNodeBump")
+    bump_node.inputs["Strength"].default_value = bump
+    bump_node.inputs["Distance"].default_value = 0.0007
+    tree.links.new(height.outputs[0], bump_node.inputs["Height"])
+    tree.links.new(normal_link.from_socket, bump_node.inputs["Normal"])
+    tree.links.new(bump_node.outputs["Normal"], bsdf.inputs["Normal"])
+    return mat
+
 
 def reference_image(path, view="FRONT", height=1.0, opacity=0.5):
     """Show a reference photo/drawing as an image empty in the live viewport,

@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "name": "GraniteRubble",
+  "description": "Small ground cluster: 3 sub-angular granite stones, 5 small stones and grus chips (1-35 cm); LOD1/LOD2.",
+  "collision": "none",
+  "triangle_budget": 90000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_rubble.py",
+  "source_sha256": "3e77060b4f9bca20404dafd4e5e32ad4db4cb512fef004a609e3caa7eb5ce615",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteRubble": {
+      "vertices": 38612,
+      "triangles": 77104,
+      "size_cm": [
+        69.05,
+        78.58,
+        22.73
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteRubble",
+          "textures": {
+            "basecolor": "T_GraniteRubble_basecolor.png",
+            "roughness": "T_GraniteRubble_roughness.png",
+            "normal": "T_GraniteRubble_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteRubble_basecolor.png",
+          "roughness": "T_GraniteRubble_roughness.png",
+          "normal": "T_GraniteRubble_normal.png",
+          "ao": "T_GraniteRubble_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.1,
+          -0.1,
+          0.1
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteRubble.fbx",
+      "sha256": "9fae8d4dcc3de391da0d73cf641a919b3a0475e65184901f311215e4d0dc23cc",
+      "preview": "preview_SM_GraniteRubble.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteRubble_hero.png",
+          "detail": "beauty_SM_GraniteRubble_detail.png",
+          "eye": "beauty_SM_GraniteRubble_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteRubble_LOD1": {
+      "vertices": 8560,
+      "triangles": 17000,
+      "size_cm": [
+        69.05,
+        78.57,
+        22.72
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteRubble",
+          "textures": {
+            "basecolor": "T_GraniteRubble_basecolor.png",
+            "roughness": "T_GraniteRubble_roughness.png",
+            "normal": "T_GraniteRubble_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteRubble_basecolor.png",
+          "roughness": "T_GraniteRubble_roughness.png",
+          "normal": "T_GraniteRubble_normal.png",
+          "ao": "T_GraniteRubble_ao.png"
+        },
+        "shared_with": "SM_GraniteRubble"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.1,
+          -0.1,
+          0.1
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteRubble_LOD1.fbx",
+      "sha256": "ef00ad772d7b135c502dc096cbb11f536311a63911c82ef236a67cfd245ad943",
+      "preview": "preview_SM_GraniteRubble_LOD1.png"
+    },
+    "SM_GraniteRubble_LOD2": {
+      "vertices": 2060,
+      "triangles": 4000,
+      "size_cm": [
+        69.05,
+        78.54,
+        22.73
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteRubble",
+          "textures": {
+            "basecolor": "T_GraniteRubble_basecolor.png",
+            "roughness": "T_GraniteRubble_roughness.png",
+            "normal": "T_GraniteRubble_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteRubble_basecolor.png",
+          "roughness": "T_GraniteRubble_roughness.png",
+          "normal": "T_GraniteRubble_normal.png",
+          "ao": "T_GraniteRubble_ao.png"
+        },
+        "shared_with": "SM_GraniteRubble"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.1,
+          -0.1,
+          0.1
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteRubble_LOD2.fbx",
+      "sha256": "5e288a2536c0745dae50a7d9acbc2cf7bd55c6dd11fa77f00422712a70152009",
+      "preview": "preview_SM_GraniteRubble_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.083,
+    "placement": "Origin is the ground line; place at terrain height (stones extend 8 cm below it). Walkable decoration: no collision.",
+    "north": "+Y (moss side)"
+  },
+  "textures": {
+    "T_GraniteRubble_basecolor.png": "f05781c8b3c2c2b066cfa7e663ec9667678421e9ddd9c68b11af3f52a6b1e440",
+    "T_GraniteRubble_roughness.png": "e29a229b226224c38d8a80b299264dfc874832a02b15f95214070d41f57a60ab",
+    "T_GraniteRubble_normal.png": "2cccdfedbfcdef17ecf14b92d7c0e49430349cef3b7e2bc36a580efece3ef147"
+  }
+}

@@ -24,6 +24,8 @@ def main():
     parser.add_argument("--width", type=int, default=3840)
     parser.add_argument("--height", type=int, default=2160)
     parser.add_argument("--mesh", action="append")
+    parser.add_argument("--view", action="append", help="hero, detail and/or eye (default: recipe BEAUTY views)")
+    parser.add_argument("--prefix", default="beauty", help="Output file prefix (e.g. draft for quick passes)")
     args = parser.parse_args(argv)
     folder = Path(bpy.data.filepath).parent
     report_path = folder / "report.json"
@@ -36,11 +38,15 @@ def main():
         for other in bpy.context.scene.objects:
             other.hide_render = other is not obj
         review = report["meshes"][name].get("review", {})
-        result = kit.render_beauty(obj, folder, f"beauty_{name}", samples=args.samples,
+        result = kit.render_beauty(obj, folder, f"{args.prefix}_{name}", samples=args.samples,
                                    resolution=(args.width, args.height),
-                                   pose=review.get("pose", (0, 0, 0)), focus=review.get("focus"))
+                                   pose=review.get("pose", (0, 0, 0)), focus=review.get("focus"),
+                                   views=tuple(args.view or review.get("views", ("hero", "detail"))),
+                                   ground=review.get("ground", "lowest"),
+                                   eye_distance=review.get("eye_distance"))
         result["views"] = {view: Path(p).name for view, p in result["views"].items()}
-        report["meshes"][name]["beauty"] = result
+        if args.prefix == "beauty":
+            report["meshes"][name]["beauty"] = result
         print(f"HOMESTEAD_BEAUTY {name} {result['device']} {result['gpus']} {result['views']}")
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print("HOMESTEAD_BEAUTY_DONE")

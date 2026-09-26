@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "name": "GraniteCobbles",
+  "description": "Small ground cluster of 8 half-buried rounded granite stones (10-38 cm) in a ~1.1 m footprint; LOD1/LOD2.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_cobbles.py",
+  "source_sha256": "09d2a7bb04e4e8d08174310696a40cd09adf221525a7a18367e43f86de5011bd",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteCobbles": {
+      "vertices": 33488,
+      "triangles": 66944,
+      "size_cm": [
+        95.14,
+        71.95,
+        22.99
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteCobbles",
+          "textures": {
+            "basecolor": "T_GraniteCobbles_basecolor.png",
+            "roughness": "T_GraniteCobbles_roughness.png",
+            "normal": "T_GraniteCobbles_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteCobbles_basecolor.png",
+          "roughness": "T_GraniteCobbles_roughness.png",
+          "normal": "T_GraniteCobbles_normal.png",
+          "ao": "T_GraniteCobbles_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.05,
+          0.08
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteCobbles.fbx",
+      "sha256": "f68d585f8bc168c0a90d1c3268b355ce51674de134bfdde2f16a6adf130561a3",
+      "preview": "preview_SM_GraniteCobbles.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteCobbles_hero.png",
+          "detail": "beauty_SM_GraniteCobbles_detail.png",
+          "eye": "beauty_SM_GraniteCobbles_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteCobbles_LOD1": {
+      "vertices": 7516,
+      "triangles": 15000,
+      "size_cm": [
+        95.14,
+        71.95,
+        22.98
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteCobbles",
+          "textures": {
+            "basecolor": "T_GraniteCobbles_basecolor.png",
+            "roughness": "T_GraniteCobbles_roughness.png",
+            "normal": "T_GraniteCobbles_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteCobbles_basecolor.png",
+          "roughness": "T_GraniteCobbles_roughness.png",
+          "normal": "T_GraniteCobbles_normal.png",
+          "ao": "T_GraniteCobbles_ao.png"
+        },
+        "shared_with": "SM_GraniteCobbles"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.05,
+          0.08
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteCobbles_LOD1.fbx",
+      "sha256": "58ef7e4f319765cc050efd974032c447e8f576e688f265428aee1c0685a427d6",
+      "preview": "preview_SM_GraniteCobbles_LOD1.png"
+    },
+    "SM_GraniteCobbles_LOD2": {
+      "vertices": 1766,
+      "triangles": 3500,
+      "size_cm": [
+        95.16,
+        71.87,
+        22.99
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteCobbles",
+          "textures": {
+            "basecolor": "T_GraniteCobbles_basecolor.png",
+            "roughness": "T_GraniteCobbles_roughness.png",
+            "normal": "T_GraniteCobbles_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteCobbles_basecolor.png",
+          "roughness": "T_GraniteCobbles_roughness.png",
+          "normal": "T_GraniteCobbles_normal.png",
+          "ao": "T_GraniteCobbles_ao.png"
+        },
+        "shared_with": "SM_GraniteCobbles"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.05,
+          0.08
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_GraniteCobbles_LOD2.fbx",
+      "sha256": "05e66a91d85592c98bb68a54b8087f09c72612a3e83e4f41df09f97d1c081bb3",
+      "preview": "preview_SM_GraniteCobbles_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.13,
+    "placement": "Origin is the ground line; place at terrain height (stones extend 13 cm below it). Walkable decoration: no collision.",
+    "north": "+Y (moss side)"
+  },
+  "textures": {
+    "T_GraniteCobbles_basecolor.png": "3fdaf11cd4f0e374df5adf1603924bc8701b53ba62630a4cee387825449007af",
+    "T_GraniteCobbles_roughness.png": "6aa03b0c6d81acd0bbc0cdfdcfce7f4f028eb83deec0c55620c4e9e62f6eeb3c",
+    "T_GraniteCobbles_normal.png": "b9c9163696e286d277c79486bcc99c2962799ed55a176965b9ba2c1f2fa26cd6"
+  }
+}

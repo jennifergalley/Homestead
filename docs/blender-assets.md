@@ -143,6 +143,11 @@ material `M_<Name>`:
 - `T_<Name>_roughness`
 - `T_<Name>_normal` (tangent space, OpenGL +Y)
 - `T_<Name>_ao`
+- extra roles (e.g. `height`) bake whatever node each material labels `HOMESTEAD_<ROLE>`
+
+Recipes may define `after_bake(kit, obj)` (e.g. to layer shared detail maps) and `NOTES`
+(a dict copied into `report.json`). Textures that live in another asset set under
+`Assets\Props` stay shared and are reported by relative path instead of copied.
 
 For metals, add `"metallic"` to `BAKE["maps"]` (as in `machete.py`). Basecolor and metallic are
 then baked through an emission pass, so metal albedo isn't lost to the diffuse bake. This writes
@@ -214,6 +219,46 @@ def build(kit):
   `pivot=None` so all LODs share one origin.
 - Textures used by the result are copied to `Assets\Props\<Name>\Textures` and the
   saved `.blend` is repointed to them.
+
+## Rocks (Sierra Nevada granite)
+
+`Scripts\Blender\homestead_rocks.py` builds rocks from implicit fields (numpy, seeded):
+
+- `boulder(radii, power, lumps, joints, rotate, bend)` is a superellipsoid corestone cut by
+  rounded joint planes; `cut` splits one along a (rough) fracture plane; `scatter` makes one
+  solid per stone for clusters.
+- `solid(name, field, center, post)` meshes the surface by bisection along icosphere rays
+  (star-shaped pieces), with an optional `post(P, N)` pass: `plates` (exfoliation shells
+  spalled in polygonal Voronoi plates), `pits` (weathering pans), `crack` (joint traces).
+- `finish(kit, pieces, name, lod0_tris, lod_tris, ground_z, detail, union)` voxel-remeshes
+  (union or per piece), unwraps a smoothed copy into few large islands (buried islands at
+  30 % texel density), subdivides, applies `detail(P, N) -> offset | (offset, attributes)`,
+  puts the ground line at the origin and decimates LODs that keep LOD0's UVs. The builder
+  bakes LOD0 once and gives `_LODn` meshes the same material.
+- `detail` can write point attributes the material reads: `fresh` (newly spalled or
+  broken rock: paler, less rind and lichen) and `joint` (old joint faces: rusty film).
+
+`kit.mats.granite` is weathered granodiorite: interlocking crystals (coarse plagioclase
+and K-feldspar, interstitial quartz, biotite and hornblende), weathering rind, mafic
+enclaves, optional K-feldspar megacrysts, iron stains, black water streaks on steep faces,
+a metre-scale lichen/cyanobacteria film, crustose lichens (grey-green, chartreuse
+areolate map lichen with black prothallus, black spots), crevice and north-side moss,
+and a soil line. Linear albedo of bare weathered rock is ~0.28-0.35, roughness 0.8-0.95
+(quartz and mica glossier).
+
+Texel density: crystals are 2-5 mm, so rocks up to ~1.5 m bake them in (2K). The large
+and house-sized rocks bake macro maps without crystals (4K) and layer the shared,
+seamless `Assets\Props\GraniteDetail` maps (1 m tiles, generated on a flat 4D torus so
+they tile without seams) in object/world space: `BaseColor = Macro * lerp(1, 2 * Detail,
+0.8)`, detail normal blended over the macro normal, roughness `lerp(Macro, Detail, 0.4)`.
+`kit.layer_detail` wires the same thing into the Blender material for the review renders.
+Each recipe's `NOTES` (copied to `report.json`) gives the sink depth, collision advice and
+material notes.
+
+Rocks are authored with the ground line at z = 0 and pivot there, so placing one at
+terrain height sinks it by its recorded `sink_depth_m`; `BEAUTY["ground"] = "origin"`
+reviews them half-buried the same way. `HandStones` are the exception: bounds-centre
+pivots for hand attachment.
 
 ## Outputs and review
 
