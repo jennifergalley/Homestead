@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Machete",
+  "description": "Old hand-forged carbon-steel machete: leaf-tapered blade, riveted hardwood scales, brass rivets and lanyard liner (original). Pivot = grip centre; blade +Z, edge -Y.",
+  "collision": "none",
+  "triangle_budget": 8000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/machete.py",
+  "source_sha256": "f95bbc27b4fb3a65c15792fc574b9844d6d346d0cca201e6dfa707ec97a7fbc6",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_Machete": {
+      "vertices": 3371,
+      "triangles": 6726,
+      "size_cm": [
+        2.39,
+        6.08,
+        61.5
+      ],
+      "materials": [
+        {
+          "name": "M_Machete",
+          "textures": {
+            "basecolor": "T_Machete_basecolor.png",
+            "roughness": "T_Machete_roughness.png",
+            "metallic": "T_Machete_metallic.png",
+            "normal": "T_Machete_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Machete_basecolor.png",
+          "roughness": "T_Machete_roughness.png",
+          "normal": "T_Machete_normal.png",
+          "metallic": "T_Machete_metallic.png",
+          "ao": "T_Machete_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          24
+        ],
+        "focus": [
+          0.0,
+          -0.006,
+          0.085
+        ]
+      },
+      "fbx": "SM_Machete.fbx",
+      "sha256": "dd1c864d706003898d286135458cc176ce0da094227e4bb2ee8aef58245209e9",
+      "preview": "preview_SM_Machete.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Machete_hero.png",
+          "detail": "beauty_SM_Machete_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          24
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_Machete_basecolor.png": "4891a523263a76026e975cc4325c7d9c08ad981667fc41baf287424476c9cbe3",
+    "T_Machete_roughness.png": "8e860796aaf6ae23ee164f6f9c123fa0ac043c853dc33f7ed4d8129f4ff0cfb8",
+    "T_Machete_metallic.png": "9dfe31ac5347b05c6672b2725416396e4d7015f7f30ab0a7602a7b2f3b8bb08f",
+    "T_Machete_normal.png": "9e3cfa4ed464663822af65d3db09d80143397fc5a2e163c845d9f68c45829f4f"
+  }
+}

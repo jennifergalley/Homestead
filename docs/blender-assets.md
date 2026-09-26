@@ -119,6 +119,9 @@ def build(kit):
 - `warp(obj, fn(co) -> co)` reshapes any mesh.
 - `displace(obj, fn(co, pcoord) -> meters)` offsets vertices along their normals.
 - `subdivide(obj, levels, smooth)` and `apply_modifiers` add density.
+- `loft(name, rows, cap_start, cap_end, cyclic)` skins a stack of closed cross-section rings into
+  quads. Use it for shapes a round tube can't make: the lenticular, bevelled machete blade, or a
+  pleated pouch body. Caps fan to the centroid or to a given point.
 - `mesh(name, verts, faces, ...)` builds custom grids (leaf blades, petals).
 - `pack_uvs` creates fresh bake UVs.
 - `assign_tube_uvs(obj, (u0, u1, v0, v1), sides, rings)` maps an un-joined tube into a fixed atlas
@@ -140,8 +143,23 @@ material `M_<Name>`:
 - `T_<Name>_normal` (tangent space, OpenGL +Y)
 - `T_<Name>_ao`
 
+For metals, add `"metallic"` to `BAKE["maps"]` (as in `machete.py`). Basecolor and metallic are
+then baked through an emission pass, so metal albedo isn't lost to the diffuse bake. This writes
+`T_<Name>_metallic` and wires it into the image material.
+
 The beauty renders use the baked maps, so they show what ships. Subsurface weight carries over
 for leaves.
+
+**Materials.** `kit.mats` includes the following, besides wood, flint and rawhide:
+
+- `steel`: forge scale, patina, pitted rust, and a bright honed bevel. Bare steel has albedo
+  ~0.56 and metallic 1; metallic is lower where the steel is scaled or rusted.
+- `brass`: polished high points and tarnished recesses.
+- `leather`: grain, creases, grime and stains.
+
+`wood` also takes `polish` / `polish_center` / `polish_length` (a worn band where the hand grips) and `relief`. Recipes built from scratch with these include
+`flint_axe.py`, `machete.py`, `forage_pouch.py` (pivot at the top of the hanging loop) and
+`cord_belt.py`.
 
 **Review pose.** `BEAUTY["pose"]` rotates the asset for review only; tools lie on the ground.
 `BEAUTY["focus"]` aims the 85 mm detail camera at an authoring-space point.

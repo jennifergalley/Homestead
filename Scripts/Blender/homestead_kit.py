@@ -167,6 +167,7 @@ def texture_maps(mat):
     if not mat or not mat.node_tree:
         return maps
     roles = (("basecolor", "basecolor"), ("alpha", "opacity"), ("nor", "normal"), ("rough", "roughness"),
+             ("metal", "metallic"),
              ("diff", "basecolor"), ("col", "basecolor"), ("mask", "mask"), ("ao", "ao"), ("arm", "arm"),
              ("disp", "height"))
     for node in mat.node_tree.nodes:
@@ -736,6 +737,50 @@ def assign_tube_uvs(obj, rect, sides, rings):
     return obj
 
 
+def loft(name, rows, material=None, coords=None, cap_start=True, cap_end=True, cyclic=False):
+    """Skin a sequence of closed cross-section rings (``rows``: lists of 3-tuples,
+    all the same length, wound consistently) into quads. ``cap_start``/``cap_end``
+    close an end with a fan to its centroid (True) or to a given 3-tuple point;
+    ``cyclic`` also joins the last ring back to the first (a torus). ``coords``
+    (same nesting as ``rows``) becomes the pcoord attribute; default is rest position.
+    ``material`` may be a list of materials; set ``polygon.material_index`` after."""
+    count, sides = len(rows), len(rows[0])
+    if any(len(r) != sides for r in rows):
+        raise ValueError("loft rows must all have the same number of points")
+    verts = [Vector(p) for row in rows for p in row]
+    pco = [Vector(p) for row in (coords or rows) for p in row]
+    faces = []
+    for i in range(count if cyclic else count - 1):
+        i2 = (i + 1) % count
+        for j in range(sides):
+            a, b = i * sides + j, i * sides + (j + 1) % sides
+            faces.append((a, b, i2 * sides + (j + 1) % sides, i2 * sides + j))
+    if not cyclic:
+        for cap, ring_index, flip in ((cap_start, 0, True), (cap_end, count - 1, False)):
+            if not cap:
+                continue
+            ring = [ring_index * sides + j for j in range(sides)]
+            point = sum((verts[k] for k in ring), Vector()) / sides if cap is True else Vector(cap)
+            source = coords[ring_index] if coords else None
+            verts.append(point)
+            pco.append(sum((Vector(p) for p in source), Vector()) / sides if source else point.copy())
+            center = len(verts) - 1
+            for j in range(sides):
+                a, b = ring[j], ring[(j + 1) % sides]
+                faces.append((center, b, a) if flip else (center, a, b))
+    data = bpy.data.meshes.new(name)
+    data.from_pydata([tuple(v) for v in verts], [], faces)
+    data.update()
+    data.uv_layers.new(name="UVMap")
+    tag_coords(data, pco)
+    obj = _link(bpy.data.objects.new(name, data))
+    for mat in (material if isinstance(material, (list, tuple)) else [material]):
+        if mat is not None:
+            data.materials.append(mat)
+    recalc_normals(obj)
+    return obj
+
+
 def warp(obj, fn):
     """Move every vertex: ``fn(co) -> new co`` in object space. pcoord is kept."""
     for vert in obj.data.vertices:
@@ -799,10 +844,45 @@ def pack_uvs(obj, margin=0.004):
 BAKE_MAPS = ("basecolor", "roughness", "normal", "ao")
 
 
+def _bake_input_as_emission(materials, socket_name):
+    """Route each material's Principled ``socket_name`` input into an Emission
+    shader so an EMIT bake captures it verbatim. Returns a restore callback."""
+    restore = []
+    for mat in materials:
+        tree = mat.node_tree
+        out = next((n for n in tree.nodes if n.type == "OUTPUT_MATERIAL" and n.is_active_output),
+                   None) or next((n for n in tree.nodes if n.type == "OUTPUT_MATERIAL"), None)
+        bsdf = next((n for n in tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
+        if out is None or bsdf is None:
+            continue
+        previous = [l.from_socket for l in out.inputs["Surface"].links]
+        emit = tree.nodes.new("ShaderNodeEmission")
+        emit.name = "HomesteadBakeEmit"
+        emit.inputs["Strength"].default_value = 1.0
+        source = bsdf.inputs[socket_name]
+        if source.is_linked:
+            tree.links.new(source.links[0].from_socket, emit.inputs["Color"])
+        else:
+            value = source.default_value
+            emit.inputs["Color"].default_value = (*value[:3], 1.0) if hasattr(value, "__len__") \
+                else (value, value, value, 1.0)
+        tree.links.new(emit.outputs["Emission"], out.inputs["Surface"])
+        restore.append((tree, out, emit, previous))
+
+    def undo():
+        for tree, out, emit, previous in restore:
+            tree.nodes.remove(emit)
+            for socket in previous:
+                tree.links.new(socket, out.inputs["Surface"])
+    return undo
+
+
 def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
     """Bake the object's procedural materials into game textures on its UVMap
     and replace them with one image-based material ``M_<stem>``.
-    Normal maps are tangent-space OpenGL (+Y); flip green for Unreal."""
+    Normal maps are tangent-space OpenGL (+Y); flip green for Unreal.
+    Include ``"metallic"`` in ``maps`` for metals: base color and metallic are then
+    baked through emission, because Cycles' diffuse-color pass is black on metal."""
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     device = use_gpu()
@@ -823,7 +903,13 @@ def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
             node.image = image
             node.name = node.label = "HomesteadBakeTarget"
             mat.node_tree.nodes.active = node
-        if role == "basecolor":
+        if role in ("basecolor", "metallic") and "metallic" in maps:
+            undo = _bake_input_as_emission(materials, "Base Color" if role == "basecolor" else "Metallic")
+            try:
+                bpy.ops.object.bake(type="EMIT", use_clear=True, margin=margin)
+            finally:
+                undo()
+        elif role == "basecolor":
             bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"}, use_clear=True, margin=margin)
         elif role == "roughness":
             bpy.ops.object.bake(type="ROUGHNESS", use_clear=True, margin=margin)
@@ -854,6 +940,8 @@ def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
     tree.links.new(texture("basecolor").outputs["Color"], bsdf.inputs["Base Color"])
     if "roughness" in paths:
         tree.links.new(texture("roughness").outputs["Color"], bsdf.inputs["Roughness"])
+    if "metallic" in paths:
+        tree.links.new(texture("metallic").outputs["Color"], bsdf.inputs["Metallic"])
     if "normal" in paths:
         normal_map = tree.nodes.new("ShaderNodeNormalMap")
         tree.links.new(texture("normal").outputs["Color"], normal_map.inputs["Color"])

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "ForagePouch",
+  "description": "Forager's drawstring waist pouch in smoke-tanned buckskin with plant-fibre cord (original). Pivot = top of the hanging loop; hangs along -Z, front faces -Y.",
+  "collision": "none",
+  "triangle_budget": 6000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/forage_pouch.py",
+  "source_sha256": "e011de6ba1b8915ef3ad0a000245ae58ae216778bf37d2346ea6a552b3ee0c67",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_ForagePouch": {
+      "vertices": 2953,
+      "triangles": 5882,
+      "size_cm": [
+        14.01,
+        7.76,
+        21.9
+      ],
+      "materials": [
+        {
+          "name": "M_ForagePouch",
+          "textures": {
+            "basecolor": "T_ForagePouch_basecolor.png",
+            "roughness": "T_ForagePouch_roughness.png",
+            "normal": "T_ForagePouch_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ForagePouch_basecolor.png",
+          "roughness": "T_ForagePouch_roughness.png",
+          "normal": "T_ForagePouch_normal.png",
+          "ao": "T_ForagePouch_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          18
+        ],
+        "focus": [
+          0.0,
+          -0.03,
+          -0.075
+        ]
+      },
+      "fbx": "SM_ForagePouch.fbx",
+      "sha256": "2a35530380013ee2f43dfe8b95f39ba0222500d14deb45cb5a1718271d1eb362",
+      "preview": "preview_SM_ForagePouch.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_ForagePouch_hero.png",
+          "detail": "beauty_SM_ForagePouch_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          18
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_ForagePouch_basecolor.png": "42af771a943c9a9943eb859d55efe8ac236317ba5de76057702e7f022c43a7f5",
+    "T_ForagePouch_roughness.png": "6e88a9daeac98282f7f84b9b798d3f57784f01816edb456bb18b3f65db177644",
+    "T_ForagePouch_normal.png": "c8123afa266af05ccc1af958aaf4f4b17e4560bb3c5740edaae2db077a08c973"
+  }
+}
