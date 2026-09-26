@@ -490,7 +490,7 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
     # Old joint faces (``joint`` attribute) carry a rusty iron-oxide film.
     oxide = g.noise(ps, scale=3.0 / scale, detail=5.0, roughness=0.6).outputs["Fac"]
     rust_film = g.math("MULTIPLY", joint_face, g.remap(oxide, 0.3, 0.6, 0.45, 0.95))
-    color = g.mix(color, (0.82, 0.66, 0.5), rust_film, blend="MULTIPLY")
+    color = g.mix(color, (0.86, 0.74, 0.6), rust_film, blend="MULTIPLY")
     streak_mask = None
     if streaks:
         lines = g.noise(g.combine(g.math("MULTIPLY", px, 16.0 / scale), g.math("MULTIPLY", py, 16.0 / scale),
@@ -538,7 +538,7 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
         lichen_mask = g.math("MULTIPLY", lichen_mask, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", cavity, 0.8)))
         species = g.noise(ps, scale=1.0 / 0.3, detail=2.0).outputs["Color"]
         pick = g.channel(species, 0)
-        crust = g.ramp(pick, [(0.0, (0.2, 0.215, 0.18)), (0.36, (0.34, 0.355, 0.31)),
+        crust = g.ramp(pick, [(0.0, (0.2, 0.215, 0.18)), (0.36, (0.37, 0.385, 0.34)),
                               (0.58, (0.25, 0.275, 0.12)), (0.64, (0.14, 0.14, 0.125))], interpolation="CONSTANT")
         age = g.remap(edge, 0.0, 0.08, 0.75, 1.0)
         crust = g.mix(crust, (0.8, 0.8, 0.78), g.math("SUBTRACT", 1.0, age), blend="MULTIPLY")
@@ -608,6 +608,13 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
     coarse = g.math("ADD", g.math("MULTIPLY", pitting, 1.0),
                     g.math("MULTIPLY", g.noise(ps, scale=1.0 / 0.05, detail=4.0).outputs["Fac"], 1.5))
     g.math("ADD", fine, 0.0).node.label = "HOMESTEAD_HEIGHT"
+    # Where crystals show through: 1 on bare rock, 0 under lichen, moss and soil. Big rocks
+    # bake it (map role "mask") to gate the shared tiling crystal detail.
+    cover = g.math("MAXIMUM", 0.0, 0.0)
+    for mask in (lichen_mask, moss_mask, dirt):
+        if mask is not None:
+            cover = g.math("MAXIMUM", cover, mask)
+    g.math("SUBTRACT", 1.0, g.math("MINIMUM", g.math("MULTIPLY", cover, 0.7), 1.0)).node.label = "HOMESTEAD_MASK"
     bumped = g.bump(coarse, strength=0.6 * relief, distance=0.006)
     g.set("Normal", g.bump(fine, strength=0.55 * relief, distance=0.0007, normal=bumped))
     return g.mat

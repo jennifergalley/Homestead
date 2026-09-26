@@ -929,12 +929,14 @@ def bake(obj, folder, stem, size=2048, samples=96, maps=BAKE_MAPS, margin=16):
 
 # ---------------------------------------------------------------- references
 
-def layer_detail(obj, folder, stem, tile=1.0, strength=0.8, bump=0.6, box_blend=0.25):
+def layer_detail(obj, folder, stem, tile=1.0, strength=0.8, bump=0.6, box_blend=0.25, mask=None):
     """Layer shared tiling detail maps (``<folder>/T_<stem>_{basecolor,roughness,height}.png``)
     over an object's baked material, box-projected in object space at ``tile`` m per
     repeat: base colour x (2 x detail) at ``strength``, roughness nudged per mineral,
     and grain height as bump on top of the baked normal map. This is what the Unreal
-    material should reproduce with world-aligned textures (see the recipe NOTES)."""
+    material should reproduce with world-aligned textures (see the recipe NOTES).
+    ``mask`` is the asset's own baked cover mask (UV-mapped, 1 = bare rock): the detail
+    fades out under lichen, moss and soil."""
     folder = Path(folder)
     mat = obj.material_slots[0].material
     tree = mat.node_tree
@@ -962,7 +964,18 @@ def layer_detail(obj, folder, stem, tile=1.0, strength=0.8, bump=0.6, box_blend=
     mix = tree.nodes.new("ShaderNodeMix")
     mix.data_type = "RGBA"
     mix.blend_type = "MULTIPLY"
+    gate = None
+    if mask is not None:
+        gate_image = tree.nodes.new("ShaderNodeTexImage")
+        gate_image.image = bpy.data.images.load(str(mask), check_existing=True)
+        gate_image.image.colorspace_settings.name = "Non-Color"
+        gate = tree.nodes.new("ShaderNodeMath")
+        gate.operation = "MULTIPLY"
+        tree.links.new(gate_image.outputs["Color"], gate.inputs[0])
+        gate.inputs[1].default_value = strength
     mix.inputs["Factor"].default_value = strength
+    if gate is not None:
+        tree.links.new(gate.outputs[0], mix.inputs["Factor"])
     colors = [s for s in mix.inputs if s.type == "RGBA"]
     tree.links.new(base_link.from_socket, colors[0])
     tree.links.new(doubled.outputs["Vector"], colors[1])
@@ -972,6 +985,12 @@ def layer_detail(obj, folder, stem, tile=1.0, strength=0.8, bump=0.6, box_blend=
     rough_mix = tree.nodes.new("ShaderNodeMix")
     rough_mix.data_type = "FLOAT"
     rough_mix.inputs["Factor"].default_value = strength * 0.5
+    if gate is not None:
+        half = tree.nodes.new("ShaderNodeMath")
+        half.operation = "MULTIPLY"
+        half.inputs[1].default_value = 0.5
+        tree.links.new(gate.outputs[0], half.inputs[0])
+        tree.links.new(half.outputs[0], rough_mix.inputs["Factor"])
     values = [s for s in rough_mix.inputs if s.type == "VALUE"]
     tree.links.new(rough_link.from_socket, values[1])
     rough_detail = tree.nodes.new("ShaderNodeSeparateColor")
@@ -984,6 +1003,12 @@ def layer_detail(obj, folder, stem, tile=1.0, strength=0.8, bump=0.6, box_blend=
     tree.links.new(image("height", False), height.inputs["Color"])
     bump_node = tree.nodes.new("ShaderNodeBump")
     bump_node.inputs["Strength"].default_value = bump
+    if gate is not None:
+        scaled = tree.nodes.new("ShaderNodeMath")
+        scaled.operation = "MULTIPLY"
+        scaled.inputs[1].default_value = bump / strength
+        tree.links.new(gate.outputs[0], scaled.inputs[0])
+        tree.links.new(scaled.outputs[0], bump_node.inputs["Strength"])
     bump_node.inputs["Distance"].default_value = 0.0007
     tree.links.new(height.outputs[0], bump_node.inputs["Height"])
     tree.links.new(normal_link.from_socket, bump_node.inputs["Normal"])

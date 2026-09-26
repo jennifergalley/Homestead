@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "GraniteBoulderJointed",
+  "description": "Large (3.6 m) blocky jointed granite corestone with a joint crack, spalled plates and streaks; LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 400000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_boulder_jointed.py",
+  "source_sha256": "9834bf3942fc84d3750fd14a6c8dad97b3a22be2a2d30ecea3a21613d99f1bfa",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteBoulderJointed": {
+      "vertices": 146762,
+      "triangles": 293520,
+      "size_cm": [
+        352.62,
+        235.66,
+        190.56
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderJointed",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteBoulderJointed_normal.png",
+            "mask": "T_GraniteBoulderJointed_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderJointed_basecolor.png",
+          "roughness": "T_GraniteBoulderJointed_roughness.png",
+          "normal": "T_GraniteBoulderJointed_normal.png",
+          "ao": "T_GraniteBoulderJointed_ao.png",
+          "mask": "T_GraniteBoulderJointed_mask.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.55,
+          0.2,
+          1.7
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 8.0
+      },
+      "fbx": "SM_GraniteBoulderJointed.fbx",
+      "sha256": "7ad15962ca815f6cfae702f4d37e987d26e1ff0df982da1d2e26f1675dd3d6c5",
+      "preview": "preview_SM_GraniteBoulderJointed.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteBoulderJointed_hero.png",
+          "detail": "beauty_SM_GraniteBoulderJointed_detail.png",
+          "eye": "beauty_SM_GraniteBoulderJointed_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteBoulderJointed_LOD1": {
+      "vertices": 30002,
+      "triangles": 60000,
+      "size_cm": [
+        352.64,
+        235.64,
+        190.56
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderJointed",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteBoulderJointed_normal.png",
+            "mask": "T_GraniteBoulderJointed_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderJointed_basecolor.png",
+          "roughness": "T_GraniteBoulderJointed_roughness.png",
+          "normal": "T_GraniteBoulderJointed_normal.png",
+          "ao": "T_GraniteBoulderJointed_ao.png",
+          "mask": "T_GraniteBoulderJointed_mask.png"
+        },
+        "shared_with": "SM_GraniteBoulderJointed"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.55,
+          0.2,
+          1.7
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 8.0
+      },
+      "fbx": "SM_GraniteBoulderJointed_LOD1.fbx",
+      "sha256": "dd833dc08e7db032c1749d29e1cd408a320f0e1a1356776e1ef81a406e3a19d3",
+      "preview": "preview_SM_GraniteBoulderJointed_LOD1.png"
+    },
+    "SM_GraniteBoulderJointed_LOD2": {
+      "vertices": 6002,
+      "triangles": 12000,
+      "size_cm": [
+        352.58,
+        235.63,
+        190.57
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderJointed",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteBoulderJointed_normal.png",
+            "mask": "T_GraniteBoulderJointed_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderJointed_basecolor.png",
+          "roughness": "T_GraniteBoulderJointed_roughness.png",
+          "normal": "T_GraniteBoulderJointed_normal.png",
+          "ao": "T_GraniteBoulderJointed_ao.png",
+          "mask": "T_GraniteBoulderJointed_mask.png"
+        },
+        "shared_with": "SM_GraniteBoulderJointed"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.55,
+          0.2,
+          1.7
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 8.0
+      },
+      "fbx": "SM_GraniteBoulderJointed_LOD2.fbx",
+      "sha256": "fdf85701d53efa3613f383ca01936f2d14013728549d05a6e0047b1053d3c8a1",
+      "preview": "preview_SM_GraniteBoulderJointed_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.259,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 0.26 m).",
+    "north": "+Y (steep streaked face and moss)",
+    "collision": "Convex is acceptable: the joint crack is too narrow to walk into.",
+    "material": "Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; roughness = lerp(Macro, DetailRoughness, 0.5 * k).",
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "textures": {
+    "T_GraniteBoulderJointed_basecolor.png": "8916d8b378fbfba977eaf28e689ad07fcbb8e87a2c70d72dd7edbb747e3fcaa3",
+    "T_GraniteBoulderJointed_roughness.png": "39f564385e7ba7676585cad34c5b63fa1e540c06d101b16f27c06cc8e254e664",
+    "T_GraniteBoulderJointed_normal.png": "d744a43fa84dce3afc20a704f8f82f934436d076529203b9b8479cd658eddf9c",
+    "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_GraniteBoulderJointed_mask.png": "daf5892138a7a719358ced8080a45b3ed6c0fe24bbca7509080f44f98850e0cf",
+    "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
+  }
+}

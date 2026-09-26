@@ -24,7 +24,7 @@ DESCRIPTION = ("House-sized (9 x 8 x 5 m) exfoliating granite dome boulder with 
                "weathering pans, a leaning sheet slab, streaks and lichen; Nanite-grade LOD0 plus LOD1/LOD2.")
 COLLISION = "convex"
 TRIANGLE_BUDGET = 1600000
-BAKE = {"size": 4096, "samples": 48, "repack": False}
+BAKE = {"size": 4096, "samples": 48, "repack": False, "maps": ["basecolor", "roughness", "normal", "ao", "mask"]}
 BEAUTY = {"pose": (0, 0, 0), "focus": (-2.6, -2.9, 1.6), "ground": "origin",
           "views": ["hero", "detail", "eye"], "eye_distance": 15.0}
 NOTES = {}
@@ -33,7 +33,7 @@ DETAIL = {"folder": "Assets/Props/GraniteDetail/Textures", "stem": "GraniteDetai
 
 SHELLS = dict(cell=4.2, thickness=0.4, coverage=0.42, width=0.3, wobble=0.14)
 INNER = dict(cell=2.9, thickness=0.28, coverage=0.38, width=0.22, wobble=0.14)
-FLAKES = dict(cell=0.7, thickness=0.025, coverage=0.18, width=0.02, wobble=0.2)
+FLAKES = dict(cell=0.7, thickness=0.007, coverage=0.18, width=0.02, wobble=0.2)
 
 
 def _flank_bias(c):
@@ -49,7 +49,7 @@ def _shells(points, normal):
 
 
 def build(kit):
-    mat = kit.mats.granite("M_GraniteDome", grains=False, grain=0.004, scale=8.0, lichen=0.8, moss=0.12,
+    mat = kit.mats.granite("M_GraniteDome", grains=False, grain=0.004, scale=8.0, lichen=1.15, moss=0.12,
                            iron=0.3, streaks=0.6, soil=0.5, soil_height=0.35, enclaves=0.5, film=1.0, patina=0.9, seed=4.0)
     field = rocks.boulder(
         radii=(4.7, 3.9, 3.4), power=2.6, lumps=0.04, lump_scale=0.9, seed=41, center=(0, 0, 0),
@@ -73,8 +73,9 @@ def build(kit):
     slab_field = rocks.boulder(radii=(2.3, 1.8, 0.13), power=2.3, lumps=0.04, lump_scale=0.9, seed=43,
                                center=(-4.3, -3.8, -1.0), rotate=slab_rot, bend=0.08,
                                joints=[((0.0, 0.0, 1.0), 0.1, 0.04), ((0.0, 0.0, -1.0), 0.1, 0.05),
-                                       ((1.0, 0.35, 0.0), 1.8, 0.28), ((-0.6, 1.0, 0.0), 1.5, 0.3),
-                                       ((-0.8, -0.9, 0.0), 1.9, 0.3)])
+                                       ((1.0, 0.35, 0.0), 1.75, 0.1), ((0.2, 1.0, 0.0), 1.45, 0.1),
+                                       ((-0.7, 0.8, 0.0), 1.6, 0.1), ((-1.0, -0.2, 0.0), 1.95, 0.12),
+                                       ((-0.4, -1.0, 0.0), 1.55, 0.1), ((0.75, -0.7, 0.0), 1.7, 0.1)])
     slab = rocks.solid("Slab", slab_field, subdivisions=7, material=mat, r_max=4.0)
 
     def detail(points, normal):
@@ -82,7 +83,7 @@ def build(kit):
         _, fresh = _shells(points, normal)
         flake, flaked = rocks.plates(points, normal, seed=33, **FLAKES)
         grain = rocks.relief(points, normal, 44, [(2.5, 0.02), (0.4, 0.005), (0.08, 0.002)])
-        return grain - flake, {"fresh": np.clip(np.maximum(fresh, flaked * 0.6), 0, 1)}
+        return grain - flake, {"fresh": np.clip(np.maximum(fresh * 0.4, flaked * 0.6), 0, 1)}
 
     meshes, sink = rocks.finish(kit, [dome, slab], "SM_GraniteDome", 1200000, (160000, 32000),
                                 ground_z=-1.35, detail=detail)
@@ -95,9 +96,10 @@ def build(kit):
                      "in, which blocks nothing a player could stand in). Use complex-as-simple with "
                      "LOD2 if players should climb the stepped shells or stand in the slab gap.",
         "nanite": "LOD0 is Nanite-grade; enable Nanite and keep LOD1/LOD2 as the non-Nanite fallback.",
-        "material": ("Macro bake (no crystals) + shared GraniteDetail tiling maps: world-aligned 1 m "
-                     "tiles, BaseColor = Macro * lerp(1, 2 * Detail, 0.8); normal = blend of macro and "
-                     "detail normals; roughness = lerp(Macro, DetailRoughness, 0.4)."),
+        "material": ("Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), "
+                     "gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; "
+                     "BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; "
+                     "roughness = lerp(Macro, DetailRoughness, 0.5 * k)."),
         "detail_textures": [f"{DETAIL['folder']}/T_GraniteDetail_{role}.png"
                             for role in ("basecolor", "normal", "roughness", "height")],
     })
@@ -106,4 +108,5 @@ def build(kit):
 
 def after_bake(kit, obj):
     kit.layer_detail(obj, kit.ROOT / DETAIL["folder"], DETAIL["stem"], tile=DETAIL["tile_m"],
-                     strength=DETAIL["strength"])
+                     strength=DETAIL["strength"],
+                     mask=kit.ROOT / "Assets" / "Props" / NAME / "Textures" / f"T_{NAME}_mask.png")
