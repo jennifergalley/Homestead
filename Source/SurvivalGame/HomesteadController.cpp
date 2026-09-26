@@ -296,6 +296,7 @@ void AHomesteadController::BeginPlay()
     UE_LOG(LogTemp, Display, TEXT("SAVE_ROUTING version=1 mode=%s profile=%s directory=\"%s\" automation_input=%d smoke_actor=%d visual_actor=%d"),
         *SaveRoute.Mode, *SaveRoute.Profile, *SaveRoute.Directory, bAutomatedInputOnly, SmokeTest, VisualPlaytest);
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
+    if (!Loaded) GrantPlaytestKit(true);
     bHasPlayableSession = !bTestResetRequired;
     if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     ShowHotbar();
@@ -2463,7 +2464,35 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     EndPlacement();
     CloseBook();
     RefreshRemaining = 0;
+    GrantPlaytestKit(false);
     return true;
+}
+
+void AHomesteadController::GrantPlaytestKit(bool bNewGame)
+{
+    const TCHAR* Command = FCommandLine::Get();
+    for (const TCHAR* Automation : {TEXT("unattended"), TEXT("HomesteadSmokeTest"), TEXT("HomesteadVisualPlaytest"),
+        TEXT("HomesteadShippingQA"), TEXT("HomesteadSaveAudit"), TEXT("HomesteadPreviewProfile")})
+        if (FParse::Param(Command, Automation) || FString(Command).Contains(FString(TEXT("-")) + Automation + TEXT("=")))
+            return;
+    if (bSaveRoutingTestPending || !StartupProbeDirectory.IsEmpty()) return;
+    const FVector Facing = PendingRotation.Vector();
+    const auto Result = Sim.GrantStarterKit({PendingLocation.X, PendingLocation.Y}, {Facing.X, Facing.Y}, bNewGame);
+    if (!Result)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Playtest kit was not granted: %s"), UTF8_TO_TCHAR(Result.message.c_str()));
+        return;
+    }
+    for (const auto Tool : {Homestead::Item::Knife, Homestead::Item::Hatchet, Homestead::Item::DiggingStick,
+        Homestead::Item::WateringCan})
+    {
+        const int32 Value = static_cast<int32>(Tool);
+        if (HotbarSlots.Contains(Value)) continue;
+        const int32 Empty = HotbarSlots.IndexOfByKey(-1);
+        if (Empty != INDEX_NONE) HotbarSlots[Empty] = Value;
+    }
+    if (Landscape) Landscape->Refresh(Sim);
+    UE_LOG(LogTemp, Display, TEXT("Playtest kit granted (new game %d): %s"), bNewGame, UTF8_TO_TCHAR(Result.message.c_str()));
 }
 
 bool AHomesteadController::LoadLatest(bool RecoveryOnly)
@@ -2594,6 +2623,7 @@ void AHomesteadController::NewGame()
     RefreshRemaining = 0;
     AutosaveRemaining = AutosaveMinutes * 60.0f;
     EndPlacement();
+    GrantPlaytestKit(true);
     OpenBook(3);
     Notify(TEXT("A new seeded woodland. Choose where to build; previous save files are still available."));
 }

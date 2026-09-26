@@ -232,6 +232,9 @@ public:
     Result EatGroup(int groupId, std::uint64_t expectedRevision);
     Result Craft(Recipe recipe, Point player);
     Result Place(Piece kind, int cellX, int cellY, int rotation, Point player);
+    // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
+    // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.
+    Result GrantStarterKit(Point anchor, Point facing, bool includeSeeds);
     Result Till(int cellX, int cellY, Point player);
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);

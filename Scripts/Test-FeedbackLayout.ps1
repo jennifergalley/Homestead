@@ -18,6 +18,8 @@ $exe = Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
 $null = New-Item -ItemType Directory -Path (Join-Path $output 'Graphics')
 $config = Join-Path $output 'Graphics\GameUserSettings.ini'
 Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $config
+# The feedback steps toggle V-Sync on and back off, so start from Off.
+(Get-Content -LiteralPath $config -Raw) -replace 'bUseVSync=True','bUseVSync=False' | Set-Content -LiteralPath $config -NoNewline
 $baselineFlag = if ($Baseline) { '-HomesteadFeedbackBaseline' } else { '' }
 $litFlag = if ($RequireLit) { '-HomesteadRequireLit' } else { '' }
 $arguments = "-HomesteadSmokeTest -HomesteadFeedbackTest $baselineFlag $litFlag -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$config`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$(Join-Path $output 'engine.log')`""

@@ -282,6 +282,8 @@ private:
     void HideHotbar();
     void ResetHotbar();
     void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected);
+    // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
+    void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();
     void NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue);
     TArray<int32> HotbarSlots;

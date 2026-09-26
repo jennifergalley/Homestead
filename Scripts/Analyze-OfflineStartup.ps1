@@ -12,7 +12,7 @@ if ((Get-FileHash -LiteralPath $launch.executable).Hash -ne $launch.executableSh
 if ($native.status -ne 'passed' -or -not $native.shipping -or $native.traceCompiled -or
     $native.actualWindowMode -ne 2 -or $native.viewportWidth -ne 1280 -or $native.viewportHeight -ne 720 -or
     $native.savedWidth -ne 1920 -or $native.savedHeight -ne 1080 -or $native.savedWindowMode -ne 1 -or
-    $native.vsyncPreference -or $native.frameLimit -ne 60 -or $native.'r.VSync' -ne '0' -or
+    -not $native.vsyncPreference -or $native.frameLimit -ne 60 -or $native.'r.VSync' -ne '1' -or
     $native.'r.ScreenPercentage' -ne '0' -or $native.'r.AntiAliasingMethod' -ne '4' -or $native.'t.MaxFPS' -ne '60' -or
     $native.viewMode -ne 3 -or $native.litGuardTicks -lt 1 -or -not $native.heroinePresent -or
     $native.saveDispatches -ne 1 -or $native.loadDispatches -ne 1 -or $native.shotRequested -or

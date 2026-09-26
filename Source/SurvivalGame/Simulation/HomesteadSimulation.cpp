@@ -1490,6 +1490,70 @@ Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point p
     state_.structures.push_back({state_.nextId++, kind, cellX, cellY, rotation, 0.0, {}});
     return Good(std::string("Placed ") + PieceName(kind) + ".");
 }
+Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds)
+{
+    if (state_.failed) return Failed();
+    if (!ValidPoint(anchor)) return Bad("Choose a valid starter-kit location.");
+    const auto owned = [this](Item item)
+    {
+        if (Count(item) > 0) return true;
+        for (const auto& piece : state_.structures)
+            if (piece.kind == Piece::Chest && piece.storage[static_cast<int>(item)] > 0) return true;
+        return false;
+    };
+    Inventory change{};
+    for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan})
+        if (!owned(tool)) change[static_cast<int>(tool)] = 1;
+    if (includeSeeds)
+    {
+        change[static_cast<int>(Item::Seeds)] = 8;
+        change[static_cast<int>(Item::Berries)] = 4;
+    }
+    if (!TryAdjust(change)) return Bad("The pack has no room for the starter tools.");
+
+    int beds = 0, chests = 0;
+    for (const auto& piece : state_.structures)
+    {
+        beds += piece.kind == Piece::Bed;
+        chests += piece.kind == Piece::Chest;
+    }
+    std::vector<Piece> wanted;
+    if (beds == 0) wanted.push_back(Piece::Bed);
+    for (int i = chests; i < 2; ++i) wanted.push_back(Piece::Chest);
+    // Clear cells nearest a spot ahead and to the side of her, never the cell she stands in.
+    const int homeX = Cell(anchor.x), homeY = Cell(anchor.y);
+    const double length = std::sqrt(facing.x * facing.x + facing.y * facing.y);
+    const Point forward = length > 1e-6 ? Point{facing.x / length, facing.y / length} : Point{1.0, 0.0};
+    // Unreal is left-handed: facing +X, +Y is to her right.
+    const Point target{anchor.x + forward.x * 350.0 - forward.y * 350.0, anchor.y + forward.y * 350.0 + forward.x * 350.0};
+    std::vector<std::pair<double, std::pair<int, int>>> cells;
+    for (int dy = -3; dy <= 3; ++dy)
+        for (int dx = -3; dx <= 3; ++dx)
+        {
+            const int x = homeX + dx, y = homeY + dy;
+            if ((dx == 0 && dy == 0) || !ValidCell(x, y)) continue;
+            cells.push_back({DistanceSquared(CellCenter(x, y), target), {x, y}});
+        }
+    std::sort(cells.begin(), cells.end());
+    const auto used = [this](int x, int y)
+    {
+        for (const auto& piece : state_.structures) if (piece.cellX == x && piece.cellY == y) return true;
+        for (const auto& plot : state_.plots) if (plot.cellX == x && plot.cellY == y) return true;
+        return false;
+    };
+    int placed = 0;
+    for (const auto& cell : cells)
+    {
+        if (placed == static_cast<int>(wanted.size())) break;
+        const int x = cell.second.first, y = cell.second.second;
+        if (used(x, y) || !CheckBuildingResources(state_, x, y)) continue;
+        if (state_.structures.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1) break;
+        state_.structures.push_back({state_.nextId++, wanted[placed], x, y, 2, 0.0, {}});
+        ++placed;
+    }
+    ++revision_;
+    return Good("Your starter tools, bed and storage chests are ready.");
+}
 Result Simulation::Till(int cellX, int cellY, Point player)
 {
     if (state_.failed) return Failed();
