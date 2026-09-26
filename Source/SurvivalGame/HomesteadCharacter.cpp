@@ -351,11 +351,69 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
             Stick->RegisterComponent();
             CarriedSticks.Add(Stick);
         }
+    GatherPouchAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelGatherPouch"));
+    if (GatherPouchAnimation && GatherPouchAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        GatherPouchAnimation = nullptr;
+    auto MakeProp = [this](const TCHAR* Name, UStaticMesh* PropMesh)
+    {
+        auto* Prop = NewObject<UStaticMeshComponent>(this, Name);
+        Prop->SetupAttachment(GetMesh());
+        Prop->SetStaticMesh(PropMesh);
+        Prop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Prop->SetVisibility(false);
+        Prop->RegisterComponent();
+        return Prop;
+    };
+    CarriedStones.Reset();
+    UStaticMesh* ClusterRock = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks"));
+    UMaterialInterface* RockMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/SurvivalGame/Materials/M_Rock.M_Rock"));
+    for (int32 Index = 0; Index < 2; ++Index)
+    {
+        // She carries pile parts 1 and 2.
+        UStaticMesh* HandStone = LoadHandStone(Index + 1);
+        if (!HandStone && !ClusterRock) break;
+        auto* Stone = MakeProp(*FString::Printf(TEXT("CarriedStone%d"), Index), HandStone ? HandStone : ClusterRock);
+        if (!HandStone && RockMaterial) Stone->SetMaterial(0, RockMaterial);
+        CarriedStones.Add(Stone);
+    }
+    // Authored forage props when imported (Blender recipes); simple tinted shapes otherwise.
+    ForageBerryMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/BerryCluster/SM_BerryCluster.SM_BerryCluster"));
+    ForageRootMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/WildRoot/SM_WildRoot.SM_WildRoot"));
+    UStaticMesh* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    CarriedForage = MakeProp(TEXT("CarriedForage"), ForageBerryMesh ? ForageBerryMesh.Get() : Sphere);
+    if (UStaticMesh* Pouch = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/ForagePouch/SM_ForagePouch.SM_ForagePouch")))
+    {
+        ForagePouch = MakeProp(TEXT("ForagePouch"), Pouch);
+        // Hangs from her right hip, back against the body, neck just below POUCH_OPENING in
+        // kneel_pouch.py (pelvis frame of the clip's standing pose).
+        ForagePouch->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("pelvis"));
+        ForagePouch->SetRelativeTransform(FTransform(FRotator(0.0f, -92.05f, 90.0f), FVector(4.79f, 4.61f, 21.0f)));
+        ForagePouch->SetVisibility(true);
+    }
+    // The rawhide cord belt the pouch hangs from, on the shorts' waistband with the knot in front.
+    // The loop is stretched to her hip width and depth so it wraps rather than floating.
+    if (UStaticMesh* Belt = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/CordBelt/SM_CordBelt.SM_CordBelt")))
+    {
+        CordBelt = MakeProp(TEXT("CordBelt"), Belt);
+        CordBelt->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("pelvis"));
+        CordBelt->SetRelativeTransform(FTransform(FRotator(-90.0f, -2.05f, 0.0f), FVector(4.25f, 1.07f, -0.02f), FVector(1.24f, 1.12f, 1.0f)));
+        CordBelt->SetVisibility(true);
+    }
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
     UClass* FaceAnimClass = LoadObject<UClass>(nullptr,
         TEXT("/Game/Characters/Heroine_MH/Common/Face/ABP_Face.ABP_Face_C"));
-    USkeletalMesh* OutfitMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Clothing/MHC_Heroine_Outfits"));
+    USkeletalMesh* OutfitMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/PrimitiveOutfit/SKM_PrimitiveOutfit"));
+    // The homespun tank top and shorts are fitted to the un-culled body (BodyFull); the stock
+    // MetaHuman outfit stays as the fallback on the body culled beneath it.
+    const bool bPrimitiveOutfit = OutfitMesh && OutfitMesh->GetSkeleton() == MetaHumanBody->GetSkeleton();
+    if (bPrimitiveOutfit)
+    {
+        if (USkeletalMesh* FullBody = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/BodyFull/SKM_MHC_Heroine_BodyFull"));
+            FullBody && FullBody->GetSkeleton() == MetaHumanBody->GetSkeleton())
+            MetaHumanBody = FullBody;
+    }
+    else OutfitMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Clothing/MHC_Heroine_Outfits"));
     if (!FaceMesh || !FaceAnimClass || !OutfitMesh)
     {
         UE_LOG(LogTemp, Error, TEXT("MetaHuman heroine face, face animation or outfit is missing."));
@@ -384,7 +442,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     const TCHAR* OutfitMaterials[] = {
         TEXT("Assembled/Heroine/Clothing/MI_WI_DefaultGarment_M_DG_bodyShapeB_Shirt"),
         TEXT("Assembled/Heroine/Clothing/MI_WI_DefaultGarment_M_DG_bodyShapeB_Short")};
-    for (int32 Index = 0; Index < UE_ARRAY_COUNT(OutfitMaterials); ++Index)
+    for (int32 Index = 0; !bPrimitiveOutfit && Index < UE_ARRAY_COUNT(OutfitMaterials); ++Index)
         if (auto* Material = LoadMetaHumanAsset<UMaterialInterface>(OutfitMaterials[Index]))
             MetaHumanOutfit->SetMaterial(Index, Material);
     MetaHumanOutfit->RegisterComponent();
@@ -746,13 +804,44 @@ void AHomesteadCharacter::PlayGather()
         UE_LOG(LogTemp, Error, TEXT("Gather succeeded but the heroine gathering animation instance is unavailable."));
 }
 
+UStaticMesh* AHomesteadCharacter::LoadHandStone(int32 Index)
+{
+    static const TCHAR* Names[] = {TEXT("SM_HandStone_A"), TEXT("SM_HandStone_B"), TEXT("SM_HandStone_C")};
+    if (Index < 0 || Index >= UE_ARRAY_COUNT(Names)) return nullptr;
+    const FString Path = FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/HandStones/%s.%s"), Names[Index], Names[Index]);
+    return LoadObject<UStaticMesh>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+}
+
 bool AHomesteadCharacter::PlayGatherSticks(TOptional<FVector2D> Pile)
 {
+    return PlayKneelGather(EHomesteadKneelGather::Sticks, Pile);
+}
+
+bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile, bool bBerries)
+{
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
-    if (!GetGatherSticksAnimation() || CarriedSticks.Num() < 2 || !Animation)
+    KneelKind = Kind;
+    bForageBerries = bBerries;
+    const bool bPropsReady = Kind == EHomesteadKneelGather::Sticks ? CarriedSticks.Num() >= 2
+        : Kind == EHomesteadKneelGather::Stones ? CarriedStones.Num() >= 2 : CarriedForage != nullptr;
+    if (!GetGatherSticksAnimation() || !bPropsReady || !Animation)
     {
+        KneelKind = EHomesteadKneelGather::Sticks;
         PlayGather();
         return false;
+    }
+    if (Kind == EHomesteadKneelGather::Pouch)
+    {
+        UStaticMesh* ForageMesh = bBerries ? ForageBerryMesh.Get() : ForageRootMesh.Get();
+        if (ForageMesh) CarriedForage->SetStaticMesh(ForageMesh);
+        else
+        {
+            // Placeholder until the authored props are imported: a berry-red or root-brown ball.
+            CarriedForage->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere")));
+            if (auto* Tint = CarriedForage->CreateDynamicMaterialInstance(0,
+                LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"))))
+                Tint->SetVectorParameterValue(TEXT("Color"), bBerries ? FLinearColor(0.42f, 0.025f, 0.055f) : FLinearColor(0.65f, 0.43f, 0.19f));
+        }
     }
     CancelSprint();
     GetCharacterMovement()->StopMovementImmediately();
@@ -807,70 +896,141 @@ void AHomesteadCharacter::UpdateStickAlignment(float DeltaSeconds)
 }
 
 // Stick moments in AN_HeroineMH_KneelGatherSticks (seconds; homestead_agent.kneel_gather STICK_EVENTS).
+// Stones share this clip.
 namespace GatherSticksTiming
 {
 constexpr float Pick1 = 38.0f / 30.0f, Stack1 = 54.0f / 30.0f, Pick2 = 70.0f / 30.0f, Stack2 = 86.0f / 30.0f,
     Stow = 112.0f / 30.0f;
 }
+// Moments in AN_HeroineMH_KneelGatherPouch (seconds; homestead_agent.kneel_pouch POUCH_EVENTS).
+namespace GatherPouchTiming
+{
+constexpr float Pick1 = 36.0f / 30.0f, Stow1 = 56.0f / 30.0f, Pick2 = 74.0f / 30.0f, Stow2 = 94.0f / 30.0f;
+}
 
 void AHomesteadCharacter::UpdateCarriedSticks()
 {
-    if (CarriedSticks.Num() < 2) return;
+    const bool bPouch = KneelKind == EHomesteadKneelGather::Pouch;
+    const bool bStones = KneelKind == EHomesteadKneelGather::Stones;
+    const auto& Props = bStones ? CarriedStones : CarriedSticks;
+    if (bPouch ? !CarriedForage : Props.Num() < 2) return;
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     const bool Active = Animation && Animation->IsGatheringSticks();
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
-    using namespace GatherSticksTiming;
-    const int32 Stage = !Active || Time >= Stow ? 0 : Time >= Stack2 ? 4 : Time >= Pick2 ? 3 : Time >= Stack1 ? 2 : Time >= Pick1 ? 1 : 0;
+    const float Pick1 = bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
+    const float Pick2 = bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
+    int32 Stage = 0;
+    if (bPouch)
+    {
+        using namespace GatherPouchTiming;
+        Stage = !Active ? 0 : Time >= Stow2 ? 4 : Time >= Pick2 ? 3 : Time >= Stow1 ? 2 : Time >= Pick1 ? 1 : 0;
+    }
+    else
+    {
+        using namespace GatherSticksTiming;
+        Stage = !Active || Time >= Stow ? 0 : Time >= Stack2 ? 4 : Time >= Pick2 ? 3 : Time >= Stack1 ? 2 : Time >= Pick1 ? 1 : 0;
+    }
     bStickGatherStarted |= Active;
     if (Active) SticksLifted = Time >= Pick2 ? 2 : Time >= Pick1 ? 1 : 0;
-    // The pile leaves the ground with the second stick (or if the gather ends early).
+    // The ground produce leaves with the second pickup (or if the gather ends early).
     if (bStickPileOnGround && ((Active && Time >= Pick2) || (bStickGatherStarted && !Active)))
         bStickPileOnGround = false;
     if (Stage == StickStage) return;
     StickStage = Stage;
     USkeletalMeshComponent* Body = GetMesh();
-    // Grip: in the right palm, running across the fingers.
-    auto Grip = [Body](UStaticMeshComponent* Stick, float Scale)
+    // Hand frame: fingers, across the knuckles (index -> pinky reversed) and out of the palm.
+    const auto HandFrame = [Body](FVector& Hand, FVector& Fingers, FVector& Across, FVector& Palm)
     {
-        const FVector Hand = Body->GetSocketLocation(TEXT("hand_r"));
-        const FVector Fingers = (Body->GetSocketLocation(TEXT("middle_01_r")) - Hand).GetSafeNormal();
-        const FVector Across = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
-        const FVector Palm = FVector::CrossProduct(Fingers, Across).GetSafeNormal();
-        const FVector Centre = Hand + Fingers * 6.0f + Palm * 3.0f;
-        Stick->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-        // Branch meshes run along their local Y.
-        const FRotator Rotation = FRotationMatrix::MakeFromYZ(Across, Palm).Rotator();
-        const FVector Offset = Rotation.RotateVector(Stick->GetStaticMesh()->GetBounds().Origin * Scale);
-        Stick->SetWorldLocationAndRotation(Centre - Offset, Rotation);
-        Stick->SetWorldScale3D(FVector(Scale));
-        Stick->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_r"));
-        Stick->SetVisibility(true);
+        Hand = Body->GetSocketLocation(TEXT("hand_r"));
+        Fingers = (Body->GetSocketLocation(TEXT("middle_01_r")) - Hand).GetSafeNormal();
+        Across = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
+        Palm = FVector::CrossProduct(Fingers, Across).GetSafeNormal();
     };
-    // Stack: lying level on the left forearm and running across her body (parallel to her chest), like
-    // carried firewood hugged against the belly.
-    auto Stack = [Body, this](UStaticMeshComponent* Stick, float Scale, float Height, float Twist)
+    // Places a prop so its bounds centre (or authored pivot) lands on Centre, attached to Bone.
+    const auto Put = [Body](UStaticMeshComponent* Prop, FVector Centre, FRotator Rotation, FVector Scale, FName Bone, bool bCentreBounds)
+    {
+        Prop->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+        const FVector Offset = bCentreBounds ? Rotation.RotateVector(Prop->GetStaticMesh()->GetBounds().Origin * Scale) : FVector::ZeroVector;
+        Prop->SetWorldLocationAndRotation(Centre - Offset, Rotation);
+        Prop->SetWorldScale3D(Scale);
+        Prop->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, Bone);
+        Prop->SetVisibility(true);
+    };
+    if (bPouch)
+    {
+        if (Stage != 1 && Stage != 3)
+        {
+            CarriedForage->SetVisibility(false);
+            return;
+        }
+        FVector Hand, Fingers, Across, Palm;
+        HandFrame(Hand, Fingers, Across, Palm);
+        const bool bAuthored = CarriedForage->GetStaticMesh() == (bForageBerries ? ForageBerryMesh.Get() : ForageRootMesh.Get())
+            && CarriedForage->GetStaticMesh() != nullptr;
+        // Pinched between thumb and fingers: authored props hang from their pinch pivot, a root
+        // points along the fingers.
+        const FVector Pinch = Hand + Fingers * 8.0f + Palm * 2.5f;
+        const FRotator Rotation = bForageBerries ? FRotationMatrix::MakeFromZX(-Fingers, Across).Rotator()
+            : FRotationMatrix::MakeFromZX(Fingers, Across).Rotator();
+        const FVector Scale = bAuthored ? FVector(1.0f) : bForageBerries ? FVector(0.045f) : FVector(0.06f, 0.06f, 0.12f);
+        Put(CarriedForage, bAuthored ? Pinch : Pinch + (bForageBerries ? FVector::ZeroVector : Fingers * 3.0f), Rotation, Scale,
+            TEXT("hand_r"), !bAuthored);
+        return;
+    }
+    // Stones match the woodland pile's components 1 and 2 (StonePileSize).
+    const auto StoneScale = [](UStaticMeshComponent* Stone, int32 Index)
+    {
+        const float Size = Stone->GetStaticMesh()->GetBoundingBox().GetSize().GetMax();
+        const bool bHandStone = Stone->GetStaticMesh() == LoadHandStone(Index + 1);
+        return FVector(StonePileSize(Index + 1, bHandStone) / FMath::Max(Size, 1.0f));
+    };
+    // Grip: sticks run across the fingers; a stone sits in the palm.
+    auto Grip = [&, this](int32 Index)
+    {
+        FVector Hand, Fingers, Across, Palm;
+        HandFrame(Hand, Fingers, Across, Palm);
+        UStaticMeshComponent* Prop = Props[Index];
+        if (bStones)
+        {
+            const FVector Scale = StoneScale(Prop, Index);
+            const float Radius = Prop->GetStaticMesh()->GetBoundingBox().GetSize().GetMax() * Scale.X * 0.4f;
+            Put(Prop, Hand + Fingers * 6.0f + Palm * (Radius + 1.5f), FRotationMatrix::MakeFromYZ(Across, Palm).Rotator(),
+                Scale, TEXT("hand_r"), true);
+            return;
+        }
+        // Branch meshes run along their local Y.
+        Put(Prop, Hand + Fingers * 6.0f + Palm * 3.0f, FRotationMatrix::MakeFromYZ(Across, Palm).Rotator(),
+            FVector(CarriedStickScale), TEXT("hand_r"), true);
+    };
+    // Stack: sticks lie level on the left forearm across her body, like carried firewood hugged
+    // against the belly; stones nest in the crook of the arm, side by side along the forearm.
+    auto Stack = [&, this](int32 Index)
     {
         const FVector Elbow = Body->GetSocketLocation(TEXT("lowerarm_l"));
         const FVector Wrist = Body->GetSocketLocation(TEXT("hand_l"));
+        UStaticMeshComponent* Prop = Props[Index];
+        if (bStones)
+        {
+            const FVector Scale = StoneScale(Prop, Index);
+            const float Radius = Prop->GetStaticMesh()->GetBoundingBox().GetSize().GetMax() * Scale.X * 0.4f;
+            const FVector Centre = FMath::Lerp(Elbow, Wrist, Index == 0 ? 0.3f : 0.62f)
+                + FVector(0, 0, Radius + 3.0f) + GetActorForwardVector() * (Index == 0 ? 2.0f : 4.0f);
+            Put(Prop, Centre, FRotator(0, GetActorRotation().Yaw + Index * 70.0f, 0), Scale, TEXT("lowerarm_l"), true);
+            return;
+        }
+        const float Height = Index == 0 ? 5.0f : 9.0f, Twist = Index == 0 ? -8.0f : 10.0f;
         const FVector Along = GetActorRightVector().GetSafeNormal2D().RotateAngleAxis(Twist, FVector::UpVector);
         const FVector Centre = FMath::Lerp(Elbow, Wrist, 0.55f) + FVector(0, 0, Height) + GetActorForwardVector() * 3.0f;
-        Stick->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-        const FRotator Rotation = FRotationMatrix::MakeFromYZ(Along, FVector::UpVector).Rotator();
-        const FVector Offset = Rotation.RotateVector(Stick->GetStaticMesh()->GetBounds().Origin * Scale);
-        Stick->SetWorldLocationAndRotation(Centre - Offset, Rotation);
-        Stick->SetWorldScale3D(FVector(Scale));
-        Stick->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("lowerarm_l"));
-        Stick->SetVisibility(true);
+        Put(Prop, Centre, FRotationMatrix::MakeFromYZ(Along, FVector::UpVector).Rotator(), FVector(CarriedStickScale),
+            TEXT("lowerarm_l"), true);
     };
-    constexpr float ScaleA = CarriedStickScale, ScaleB = CarriedStickScale;
     if (Stage == 0)
-        for (UStaticMeshComponent* Stick : CarriedSticks) Stick->SetVisibility(false);
-    else if (Stage == 1) Grip(CarriedSticks[0], ScaleA);
-    else if (Stage == 2) Stack(CarriedSticks[0], ScaleA, 5.0f, -8.0f);
-    else if (Stage == 3) Grip(CarriedSticks[1], ScaleB);
-    else Stack(CarriedSticks[1], ScaleB, 9.0f, 10.0f);
+        for (UStaticMeshComponent* Prop : Props) Prop->SetVisibility(false);
+    else if (Stage == 1) Grip(0);
+    else if (Stage == 2) Stack(0);
+    else if (Stage == 3) Grip(1);
+    else Stack(1);
 }
-
 void AHomesteadCharacter::PlayWater()
 {
     CancelSprint();

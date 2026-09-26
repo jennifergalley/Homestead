@@ -240,6 +240,8 @@ private:
     // Gathered Branches pile kept visible until the kneeling pickup lifts the last stick.
     int32 HeldStickPile = INDEX_NONE;
     double HeldStickPileSince = 0;
+    // Ground parts of the held produce to hide at the first pickup (the rest go with the second).
+    int32 HeldPartsFirst = 0, HeldPartsCount = 0;
     float MusicGapRemaining = 18;
     float MusicElapsed = 0;
     double LastNudgeTime = -1;

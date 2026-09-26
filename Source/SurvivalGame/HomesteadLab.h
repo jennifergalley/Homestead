@@ -38,7 +38,7 @@ public:
     static constexpr float CourseX = 2500.0f;
 
     // Test props on the floor, built from the same meshes and layout as the woodland's resources.
-    enum class EProp { None, Sticks, Stones, Berries };
+    enum class EProp { None, Sticks, Stones, Berries, Roots };
     void PlaceProp(EProp Kind, FVector2D At);
     EProp PropKind() const { return Prop; }
     FVector2D PropLocation() const { return PropAt; }
@@ -97,6 +97,7 @@ private:
     double LastFootstepTime = -1;
     int32 LastStep = INDEX_NONE;
     bool bHoldingStickPile = false;
+    int32 HeldPartsFirst = 1, HeldPartsCount = 1;
     FString LoopAction;
     FTransform LoopStart;
     double LoopNextStart = 0;

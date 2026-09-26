@@ -216,12 +216,40 @@ void AHomesteadLabWorld::PlaceProp(EProp Kind, FVector2D At)
     }
     else if (Kind == EProp::Stones)
     {
-        auto* Rock = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks"));
         auto* RockMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/SurvivalGame/Materials/M_Rock.M_Rock"));
-        const float Size = Rock ? Rock->GetBoundingBox().GetSize().GetMax() : 0.0f;
-        for (int32 I = 0; I < 3 && Size > 0; ++I)
-            Add(TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks"), FVector2D(I * 17 - 17, I % 2 * 14), I * 79,
-                (24.0f + I * 4.0f) / Size, true, RockMaterial);
+        for (int32 I = 0; I < 3; ++I)
+        {
+            UStaticMesh* HandStone = AHomesteadCharacter::LoadHandStone(I);
+            const TCHAR* Path = TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks");
+            const FString StonePath = HandStone ? HandStone->GetPathName() : FString(Path);
+            auto* Rock = HandStone ? HandStone : LoadObject<UStaticMesh>(nullptr, Path);
+            const float Size = Rock ? Rock->GetBoundingBox().GetSize().GetMax() : 0.0f;
+            if (Size > 0)
+                Add(*StonePath, FVector2D(I * 17 - 17, I % 2 * 14), I * 79,
+                    AHomesteadCharacter::StonePileSize(I, HandStone != nullptr) / Size, true, HandStone ? nullptr : RockMaterial);
+        }
+    }
+    else if (Kind == EProp::Roots)
+    {
+        const TCHAR* Name = TEXT("SM_Shrub04_a");
+        for (int32 I = 0; I < 3; ++I)
+            Add(*FString::Printf(TEXT("%s%s.%s"), Meshes, Name, Name), FVector2D(I * 8 - 8, I % 2 * 9), I * 120, 1.0f, false);
+        auto* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+        auto* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+        auto* Brown = Base ? UMaterialInstanceDynamic::Create(Base, this) : nullptr;
+        if (Brown) Brown->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.65f, 0.43f, 0.19f));
+        for (int32 I = 0; I < 2 && Sphere; ++I)
+        {
+            auto* Root = NewObject<UStaticMeshComponent>(this);
+            Root->SetupAttachment(RootComponent);
+            Root->SetStaticMesh(Sphere);
+            if (Brown) Root->SetMaterial(0, Brown);
+            Root->SetWorldLocation(FVector(At.X + I * 11 - 5, At.Y + I * 4, SurfaceHeight(At.X, At.Y) + 4));
+            Root->SetWorldScale3D(FVector(0.11f, 0.11f, 0.08f));
+            Root->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Root->RegisterComponent();
+            PropProduce.Add(Root);
+        }
     }
     else if (Kind == EProp::Berries)
     {
@@ -307,12 +335,32 @@ void AHomesteadLabController::LabAction(const FString& Name)
     {
         if (World && (World->PropKind() != EProp::Sticks || !World->PropIntact())) LabProp(TEXT("Sticks"));
         bHoldingStickPile = World && Avatar->PlayGatherSticks(World->PropLocation());
+        HeldPartsFirst = 1;
+        HeldPartsCount = 1;
+    }
+    else if (Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase)
+        || Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase))
+    {
+        const bool Stones = Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase);
+        const bool Berries = Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase);
+        const EProp Kind = Stones ? EProp::Stones : Berries ? EProp::Berries : EProp::Roots;
+        if (World && (World->PropKind() != Kind || !World->PropIntact())) LabProp(Name);
+        FVector2D Pile = World ? World->PropLocation() : FVector2D(Target.x, Target.y);
+        if (Berries)
+        {
+            const FVector2D Toward = FVector2D(Avatar->GetActorLocation()) - Pile;
+            if (Toward.Size() > 1.0f) Pile += Toward.GetSafeNormal() * 22.0f;
+        }
+        bHoldingStickPile = World && Avatar->PlayKneelGather(
+            Stones ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch, Pile, Berries);
+        HeldPartsFirst = Stones ? 1 : 0;
+        HeldPartsCount = Berries ? 4 : 1;
     }
     else if (Name.Equals(TEXT("Water"), ESearchCase::IgnoreCase)) Avatar->PlayWater(Target);
     else if (Name.Equals(TEXT("Chop"), ESearchCase::IgnoreCase)) Avatar->PlayClear(Target);
     else if (Name.Equals(TEXT("Knife"), ESearchCase::IgnoreCase)) Avatar->PlayKnifeCut(Target);
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Water, Chop, Knife or Till."));
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Water, Chop, Knife or Till."));
 }
 
 void AHomesteadLabController::LabProp(const FString& Name)
@@ -322,9 +370,10 @@ void AHomesteadLabController::LabProp(const FString& Name)
     using EProp = AHomesteadLabWorld::EProp;
     const EProp Kind = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) ? EProp::Sticks
         : Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase) ? EProp::Stones
-        : Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase) ? EProp::Berries : EProp::None;
+        : Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase) ? EProp::Berries
+        : Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) ? EProp::Roots : EProp::None;
     if (Kind == EProp::None && !Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
-        UE_LOG(LogTemp, Warning, TEXT("LabProp takes Sticks, Stones, Berries or None."));
+        UE_LOG(LogTemp, Warning, TEXT("LabProp takes Sticks, Stones, Berries, Roots or None."));
     const FVector At = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
     World->PlaceProp(Kind, FVector2D(At));
     bHoldingStickPile = false;
@@ -341,7 +390,9 @@ void AHomesteadLabController::LabLoop(const FString& Name)
     LoopAction = Name;
     LoopStart = Avatar->GetActorTransform();
     // One clip plus a second's pause between repeats.
-    const UAnimSequence* Clip = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) ? Avatar->GetGatherSticksAnimation() : nullptr;
+    const bool Kneel = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase)
+        || Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase);
+    const UAnimSequence* Clip = Kneel ? Avatar->GetGatherSticksAnimation() : nullptr;
     LoopPeriod = (Clip ? Clip->GetPlayLength() : 3.5f) + 1.0f;
     LoopNextStart = GetWorld()->GetTimeSeconds();
 }
@@ -369,7 +420,8 @@ void AHomesteadLabController::PlayerTick(float DeltaTime)
     if (!bHoldingStickPile || !World) return;
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     // Same pile timing as the woodland (AHomesteadController::Tick).
-    if (Avatar && Avatar->SticksLiftedFromPile() >= 1) World->TakePropPart(1);
+    if (Avatar && Avatar->SticksLiftedFromPile() >= 1)
+        for (int32 Part = HeldPartsFirst; Part < HeldPartsFirst + HeldPartsCount; ++Part) World->TakePropPart(Part);
     if (!Avatar || !Avatar->IsStickPileOnGround())
     {
         World->TakeAllProp();
@@ -438,7 +490,7 @@ void AHomesteadLabHUD::DrawHUD()
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
     Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
-    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Water|Chop|Knife|Till   LabLoop <action>|Off   LabProp Sticks|Stones|Berries|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
+    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)
     {

@@ -1,5 +1,6 @@
 #include "HomesteadWorld.h"
 
+#include "HomesteadCharacter.h"
 #include "Async/Async.h"
 #include "Async/ParallelFor.h"
 #include "Components/DirectionalLightComponent.h"
@@ -2074,9 +2075,19 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         {
             for (int I = 0; I < 3; ++I)
             {
-                if (ImportedRock && ImportedRock->GetBoundingBox().GetSize().GetMax() > 0)
-                    Authored(ImportedRock, FVector2D(I * 17 - 17, I % 2 * 14), I * 79, true,
-                        (24.0f + I * 4.0f) / ImportedRock->GetBoundingBox().GetSize().GetMax());
+                UStaticMesh* HandStone = AHomesteadCharacter::LoadHandStone(I);
+                UStaticMesh* Rock = HandStone ? HandStone : ImportedRock.Get();
+                if (Rock && Rock->GetBoundingBox().GetSize().GetMax() > 0)
+                {
+                    const int32 First = Visual.Components.Num();
+                    Authored(Rock, FVector2D(I * 17 - 17, I % 2 * 14), I * 79, true,
+                        AHomesteadCharacter::StonePileSize(I, HandStone != nullptr) / Rock->GetBoundingBox().GetSize().GetMax());
+                    // Authored hand stones keep their baked granite material.
+                    if (HandStone && Visual.Components.Num() > First)
+                        if (auto* Placed = Cast<UStaticMeshComponent>(Visual.Components.Last()))
+                            for (int32 Slot = 0; Slot < HandStone->GetStaticMaterials().Num(); ++Slot)
+                                Placed->SetMaterial(Slot, HandStone->GetMaterial(Slot));
+                }
                 else
                 {
                     bVisualBuildFailed = true;
@@ -2108,8 +2119,10 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         if (bProduceOnly)
         {
-            Part(Sphere, FVector(0, 0, 5), FVector(18, 18, 12), FLinearColor(0.65f, 0.43f, 0.19f),
-                FRotator::ZeroRotator, true);
+            // Two root crowns: the heroine's pouch gather lifts one per pickup.
+            for (int I = 0; I < 2; ++I)
+                Part(Sphere, FVector(I * 11 - 5, I * 4, 4), FVector(11, 11, 8), FLinearColor(0.65f, 0.43f, 0.19f),
+                    FRotator::ZeroRotator, true);
         }
         break;
     case Homestead::ResourceKind::Flowers:

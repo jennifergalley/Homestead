@@ -1077,7 +1077,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-        if (Avatar && Landscape && Avatar->SticksLiftedFromPile() >= 1) Landscape->HideHeldProducePart(1);
+        if (Avatar && Landscape && Avatar->SticksLiftedFromPile() >= 1)
+            for (int32 Part = HeldPartsFirst; Part < HeldPartsFirst + HeldPartsCount; ++Part) Landscape->HideHeldProducePart(Part);
         // Safety limit in paused-aware game time, in case the kneeling clip never starts.
         if (!Avatar || !Avatar->IsStickPileOnGround() || GetWorld()->GetTimeSeconds() - HeldStickPileSince > 6.0)
         {
@@ -1360,6 +1361,7 @@ void AHomesteadController::Interact()
         bool Tree = false;
         bool Reeds = false;
         bool Sticks = false;
+        auto Kind = Homestead::ResourceKind::Count;
         Homestead::Point ActionTarget = Position;
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
@@ -1367,6 +1369,7 @@ void AHomesteadController::Interact()
                 Tree = Node.kind == Homestead::ResourceKind::ForestTree;
                 Reeds = Node.kind == Homestead::ResourceKind::Reeds;
                 Sticks = Node.kind == Homestead::ResourceKind::Branches;
+                Kind = Node.kind;
                 Forage = !Tree && Node.kind != Homestead::ResourceKind::Sapling;
                 ActionTarget = Node.position;
                 break;
@@ -1376,13 +1379,28 @@ void AHomesteadController::Interact()
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                 if (Reeds) Avatar->PlayKnifeCut(ActionTarget);
-                else if (Sticks)
+                else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
+                    || Kind == Homestead::ResourceKind::BerryBush)
                 {
-                    if (Avatar->PlayGatherSticks(FVector2D(ActionTarget.x, ActionTarget.y)) && Landscape)
+                    const bool Berries = Kind == Homestead::ResourceKind::BerryBush;
+                    const auto Gather = Sticks ? EHomesteadKneelGather::Sticks
+                        : Kind == Homestead::ResourceKind::Stones ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
+                    FVector2D Target(ActionTarget.x, ActionTarget.y);
+                    // Berries are picked from the near side of the bush, not its centre.
+                    if (Berries)
+                    {
+                        const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * 22.0f;
+                    }
+                    if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
                     {
                         Landscape->HoldProduce(FocusId);
                         HeldStickPile = FocusId;
                         HeldStickPileSince = GetWorld()->GetTimeSeconds();
+                        // Sticks and stones: component 1 is the first one lifted. Berries: the
+                        // first half of the bush's clusters. Roots: the one root crown.
+                        HeldPartsFirst = Berries ? 0 : Gather == EHomesteadKneelGather::Pouch ? 0 : 1;
+                        HeldPartsCount = Berries ? 4 : 1;
                     }
                 }
                 else Avatar->PlayGather();
