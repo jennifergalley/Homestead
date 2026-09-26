@@ -205,8 +205,8 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Water|Chop|Knife|Till`,
-  `LabProp Sticks|Stones|Berries|None` (puts that pile on the ground in front of her, the way the
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till`,
+  `LabProp Sticks|Stones|Roots|Berries|None` (puts that pile on the ground in front of her, the way the
   woodland does), `LabLoop <action>|Off` (replays the action every few seconds from the same
   spot with a fresh pile, so Jenny can watch it repeat), `LabSun <hour>`, `LabCourse`
   (10/20/30° ramps and 10/20 cm steps at x = 2500), `LabTeleport <x> <y>`, `slomo 0.25`,
@@ -255,6 +255,14 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   distances. Use it to catch an arm passing through her body before you look at captures:
   under about 16 cm to the spine, or about 11 cm to the thigh, means intersection.
 - Lab `LabAction Sticks` plays the kneeling stick gather with the stick props.
+- `LabAction Stones` reuses the stick clip with two stones (palm grip, then nested along the left
+  forearm). `LabAction Roots|Berries` plays `AN_HeroineMH_KneelGatherPouch` (`kneel_pouch.py`,
+  two-pass bake keyed in the pelvis frame): each pickup is pinched in the right hand and slipped
+  into the hip pouch at `POUCH_OPENING`. Pick/stow frames live in `POUCH_EVENTS` and must match
+  `GatherPouchTiming` in `HomesteadCharacter.cpp`.
+- Loose stones use the Blender `HandStones` set (`SM_HandStone_A-C`) when imported; until then
+  they fall back to the `MossRocks` cluster, which is an 8 m group of rocks, so scaling it down
+  reads as a scatter of pebbles, not one stone.
 
 ### Tune hair motion live
 
@@ -373,6 +381,33 @@ Extend it there when play needs a capability; prefer real input over state edits
 ## 8. Field notes
 
 Dated and short, newest first. Promote anything durable into the sections above.
+
+- 2026-09-26: Props, materials and checking the packaged heroine:
+  - **Masks samplers need non-sRGB textures.** Engine `WhiteSquareTexture` and `Black` are sRGB. On
+    a Masks sampler the whole material fails to compile and silently renders as the default grid,
+    so search the log for `Failed to compile`. `import_props.py` uses its own
+    `T_PropDefault{White,Black}` textures and `/Engine/EngineMaterials/DefaultNormal`.
+  - **Import props in the running editor.** Under `-run=pythonscript` the
+    `StaticMeshEditorSubsystem` is missing, so collision and LOD import fail. Instead, `run_python`
+    `sys.path.insert(0, r'<repo>\Scripts\Blender'); import import_props; import_props.main([...])`
+    (or `import_prop(name, M_Field)` per prop), with a long `editor_mcp.py --timeout`. `_LODn` FBXs
+    become LODs of their base mesh. Reports with a `wind` block get `M_PropFoliage`: masked,
+    two-sided foliage, packed R roughness / G translucency / B AO, vertex-colour wind WPO and a
+    camera-safe dither.
+  - **Modal dialogs block MCP.** One modal (for example "Overwrite Existing Object" during a
+    reimport while PIE runs) blocks every later `run_python` call indefinitely. Find it with
+    user32 `EnumWindows` on the editor PID and click its button. Call `SetProcessDPIAware` first,
+    because the desktop is scaled. Stop PIE before reimports.
+  - **Baked underwear on the body.** The MetaHuman body textures (`T_Body_{BC,N,SRMF}_VT`) have the
+    grey top and briefs painted in. `Scripts\Characters\remove_body_underwear.py` inpaints them
+    outside the outfit's coverage mask. Reimport the `_Clean.tga` files over the originals and keep
+    their settings.
+  - **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
+    (`-HomesteadSmokeTest`). To see the MetaHuman, launch
+    `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the
+    Alt `keybd_event` trick before `SetForegroundWindow`, or the Copilot app stays on top. Then
+    capture a short ddagrab burst (`-t 1.2 out_%02d.png`); a single `-frames:v 1` grab sometimes
+    writes nothing.
 
 - 2026-09-25: Original props are authored in Blender by the `blender-assets` skill
   (`docs\blender-assets.md`, `Assets\Props\*`). Its `Import-Props.ps1` opens the project in its own
