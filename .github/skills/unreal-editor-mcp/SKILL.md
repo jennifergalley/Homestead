@@ -218,6 +218,11 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
 - The anim instance drops an action requested in the same frame as `CancelAction`, while the
   cancel is still blending out. Wait a moment before replaying; `LabLoop` waits 0.25 s.
 - The HUD shows speed, gait/action weights, foot placement state, frame time and sun hour.
+- Framing for animation reviews: keep her whole body in view, head to feet, so Jenny can judge
+  the full pose. Set the `SpringArmComponent` `target_arm_length` to about 300 and `target_offset`
+  to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
+  her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
+  when she kneels; use them only for a specific close-up, and share the full-body view too.
 - `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
   worst clearance per carried stick and body part in PIE (negative cm = inside her).
 
@@ -239,7 +244,13 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
 - Reading bones from the rig hierarchy after `set_current_time` does **not** give the keyed pose;
   it keeps returning the rest pose. To key something in a moving bone's frame (for example, the
   stick bundle cradled against `spine_05` in `kneel_gather.py`), bake once, read the bone from the
-  baked clip with `bone_positions`, then key and bake again.
+  baked clip with `bone_positions`, then key and bake again. `kneel_gather.build()` bakes four
+  passes, so the right hand can rest on the bundle the baked left arm carries, lined up with the
+  forearm from the pass before. Each pass takes about 5 s.
+- Check wrists as well as positions. The angle between `lowerarm_r→hand_r` and
+  `hand_r→middle_01_r` in the baked clip should be under about 25° for a relaxed hand. A fixed
+  finger direction can leave it at 70-80°, which Jenny sees as sharp. Aim the fingers along the
+  forearm instead.
 - `kneel_gather.clearance(anim)` reports per-frame forearm-to-spine and forearm-to-thigh
   distances. Use it to catch an arm passing through her body before you look at captures:
   under about 16 cm to the spine, or about 11 cm to the thigh, means intersection.

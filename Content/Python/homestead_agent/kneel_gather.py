@@ -6,7 +6,8 @@
 
 She steps her left foot forward and drops onto her right knee, leans in, picks up a stick with her
 right hand and lays it across her left forearm (cradled against her belly), picks up a second, then
-rises holding the bundle and lowers her arms. Timings (30 fps) are in FRAMES; the game shows and
+rests her right hand on top of the bundle (in line with the forearm, so the wrist stays relaxed)
+while she rises, and lowers her arms. Timings (30 fps) are in FRAMES; the game shows and
 hides the stick props at those moments (see STICK_EVENTS).
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
@@ -51,6 +52,15 @@ LAY_FROM_CRADLE_R = (-6.0, 8.0, 6.0)
 HUG_FROM_CRADLE_L = (0.0, 0.0, 12.0)
 # While kneeling the cradling wrist stays at least this high: the forward thigh's top is ~58 cm.
 THIGH_CLEAR_Z = 66.0
+# Once both sticks are on the bundle her right palm rests on top of it, a little to her right of
+# the cradling forearm, fingers draped over its front edge.
+PILE_TOP_ABOVE_CENTRE = 3.0
+REST_FROM_PILE_R = (-13.0, 4.0, 1.5)
+REST_FINGERS_R = (0.35, 1.0, -0.35)
+# How far the resting fingers tip down from the forearm's line (tan of the angle, ~8°).
+REST_DRAPE_R = 0.14
+# Right elbow out to her side and forward while the hand rests, so the forearm stays in front of her.
+REST_ELBOW_POLE_R = (-70.0, 50.0, 100.0)
 
 
 def _add(a, b):
@@ -58,9 +68,24 @@ def _add(a, b):
 
 
 def build():
-    """Bake twice: the first pass gives the torso's motion (hand keys don't move the spine), the
-    second keys the cradle in the chest's frame from it."""
-    return _author(_author(None))
+    """Bake four times: the first pass gives the torso's motion (hand keys don't move the spine),
+    the second keys the cradle in the chest's frame from it, and the last two rest the right hand
+    on top of the bundle wherever that cradle carries it, lined up with the forearm the previous
+    pass produced (two passes let the forearm and hand settle together)."""
+    anim = None
+    for _ in range(4):
+        anim = _author(anim)
+    return anim
+
+
+def pile_top(anim, frame):
+    """Top of the carried stick bundle at ``frame`` of a baked clip (component space). Mirrors
+    AHomesteadCharacter::UpdateCarriedSticks: the top stick's centre sits 9 cm above 55% of the way
+    from the left elbow to the wrist, 3 cm forward."""
+    bones = ra.bone_positions(anim, ('lowerarm_l', 'hand_l'), frame / 30)
+    elbow, wrist = bones['lowerarm_l'].translation, bones['hand_l'].translation
+    centre = elbow + (wrist - elbow) * 0.55 + unreal.Vector(0, 3, 9)
+    return centre + unreal.Vector(0, 0, PILE_TOP_ABOVE_CENTRE)
 
 
 def _author(chest_anim):
@@ -182,9 +207,30 @@ def _author(chest_anim):
         s.key_world(F[f'lift{n}'], 'hand_r_ik_ctrl', _add(stick, (6, -8, 30)), grab_r)
         p = F[f'place{n}']
         s.key_world(p, 'hand_r_ik_ctrl', on_chest(p, lay_point), chest_turn(p, lay_r))
-    # Dense keys while she rises: the chest follows a curve that sparse component-space keys cut through.
-    for f in list(range(F['place2'] + 3, F['settle'], 3)) + [F['settle']]:
-        s.key_world(f, 'hand_r_ik_ctrl', on_chest(f, lay_point - unreal.Vector(0, 0, 6)), chest_turn(f, lay_r))
+    # Resting on the bundle: palm down on the top stick, the hand carrying on from the forearm with
+    # only a slight drape over the stick, so the wrist stays nearly straight. The palm's centre is
+    # about 5 cm along the fingers from the wrist and 2 cm out of the palm, so the wrist sits back
+    # and up from the contact.
+    def rest_at(frame):
+        if chest_anim is None:
+            return on_chest(frame, lay_point), s.hand_turn('r', REST_FINGERS_R, (0, 0, -1))
+        palm = pile_top(chest_anim, frame) + unreal.Vector(*REST_FROM_PILE_R)
+        # Forearm direction from the previous pass (its elbow is keyed the same way).
+        arm = ra.bone_positions(chest_anim, ('lowerarm_r', 'hand_r'), frame / 30)
+        along = arm['hand_r'].translation - arm['lowerarm_r'].translation
+        along = along.normal()
+        fingers = (along + unreal.Vector(0, 0, -REST_DRAPE_R)).normal()
+        wrist = palm - fingers * 5.0 + unreal.Vector(0, 0, 2.0)
+        return (wrist.x, wrist.y, wrist.z), s.hand_turn('r', (fingers.x, fingers.y, fingers.z), (0, 0, -1))
+
+    rest_pole = local(REST_ELBOW_POLE_R)
+    # Hold the pickups' elbow path (the kneel->end blend) up to the last lay, then move to the rest pole.
+    t = (F['place2'] - F['kneel']) / (F['end'] - F['kneel'])
+    s.key_world(F['place2'], 'arm_r_pv_ik_ctrl', tuple(a + (b - a) * t for a, b in zip((-60.0, 0.0, 70.0), (-45.0, -30.0, 100.0))))
+    for f in list(range(F['place2'] + 4, F['settle'], 3)) + [F['settle']]:
+        location, turn = rest_at(f)
+        s.key_world(f, 'hand_r_ik_ctrl', location, turn)
+        s.key_world(f, 'arm_r_pv_ik_ctrl', on_chest(f, rest_pole))
     s.key_world(F['end'], 'hand_r_ik_ctrl', side_r, hang_r)
 
     # Left hand: side -> brace on the forward knee while kneeling -> cradle the bundle -> side.
