@@ -1073,6 +1073,18 @@ void AHomesteadController::Tick(float DeltaSeconds)
         else StepDistance = 0;
     }
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
+    if (HeldStickPile != INDEX_NONE)
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        if (Avatar && Landscape && Avatar->SticksLiftedFromPile() >= 1) Landscape->HideHeldProducePart(1);
+        // Safety limit in paused-aware game time, in case the kneeling clip never starts.
+        if (!Avatar || !Avatar->IsStickPileOnGround() || GetWorld()->GetTimeSeconds() - HeldStickPileSince > 6.0)
+        {
+            if (Landscape) Landscape->ReleaseProduce();
+            HeldStickPile = INDEX_NONE;
+            RefreshRemaining = 0;
+        }
+    }
     RefreshRemaining -= DeltaSeconds;
     if (RefreshRemaining <= 0)
     {
@@ -1363,7 +1375,15 @@ void AHomesteadController::Interact()
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                 if (Reeds) Avatar->PlayKnifeCut(ActionTarget);
-                else if (Sticks) Avatar->PlayGatherSticks();
+                else if (Sticks)
+                {
+                    if (Avatar->PlayGatherSticks(FVector2D(ActionTarget.x, ActionTarget.y)) && Landscape)
+                    {
+                        Landscape->HoldProduce(FocusId);
+                        HeldStickPile = FocusId;
+                        HeldStickPileSince = GetWorld()->GetTimeSeconds();
+                    }
+                }
                 else Avatar->PlayGather();
         if (Result.ok && Tree)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);

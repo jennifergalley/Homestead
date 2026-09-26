@@ -205,10 +205,21 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console (use `execute_console_command(world, ...)`): `LabAction Gather|Sticks|Water|Chop|Knife|Till`,
-  `LabSun <hour>`, `LabCourse` (10/20/30° ramps and 10/20 cm steps at x = 2500),
-  `LabTeleport <x> <y>`, `slomo 0.25`, `homestead.FootPlacement 0|1`.
+- Console: `LabAction Gather|Sticks|Water|Chop|Knife|Till`,
+  `LabProp Sticks|Stones|Berries|None` (puts that pile on the ground in front of her, the way the
+  woodland does), `LabLoop <action>|Off` (replays the action every few seconds from the same
+  spot with a fresh pile, so Jenny can watch it repeat), `LabSun <hour>`, `LabCourse`
+  (10/20/30° ramps and 10/20 cm steps at x = 2500), `LabTeleport <x> <y>`, `slomo 0.25`,
+  `homestead.FootPlacement 0|1`.
+- **Pass the player controller** for the lab exec commands, or they silently don't run:
+  `w=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world();
+  unreal.SystemLibrary.execute_console_command(w, 'LabLoop Sticks', unreal.GameplayStatics.get_player_controller(w, 0))`.
+  CVars such as `homestead.FootPlacement` work without it.
+- The anim instance drops an action requested in the same frame as `CancelAction`, while the
+  cancel is still blending out. Wait a moment before replaying; `LabLoop` waits 0.25 s.
 - The HUD shows speed, gait/action weights, foot placement state, frame time and sun hour.
+- `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
+  worst clearance per carried stick and body part in PIE (negative cm = inside her).
 
 ### Author an animation with the MetaHuman Control Rig
 
@@ -233,6 +244,28 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   distances. Use it to catch an arm passing through her body before you look at captures:
   under about 16 cm to the spine, or about 11 cm to the thigh, means intersection.
 - Lab `LabAction Sticks` plays the kneeling stick gather with the stick props.
+
+### Tune hair motion live
+
+Her hair groom (`MetaHumanHair`) uses the Niagara strands solver, which reads the groom
+component's `simulation_settings` every tick, so edits in PIE show up immediately:
+
+```python
+w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()
+ch = unreal.GameplayStatics.get_player_character(w, 0)
+hair = [g for g in ch.get_components_by_class(unreal.GroomComponent) if g.get_name() == 'MetaHumanHair'][0]
+s = hair.get_editor_property('simulation_settings')
+setup = s.simulation_setup; setup.linear_velocity_scale = 0.5; s.simulation_setup = setup
+```
+
+- Nested structs are copies: modify, then assign them back, then `set_editor_property`.
+- `simulation_setup` velocity scales (0-1) cut the motion she passes to the hair and apply on
+  their own.
+- `override_settings` = True replaces the asset's drag, bend, stretch, friction and collision
+  values with the component's (`external_forces.air_drag`, `material_constraints.bend_damping`
+  and so on). It also needs `solver_settings.enable_simulation` = True, or the hair stops simulating.
+- The shipped values are in `AHomesteadCharacter`'s groom setup (velocity 0.5/0.4, air drag 1.0,
+  bend damping 0.05, bend stiffness 0.15). Change them there after tuning live.
 
 ### Record a playtest video and measure motion
 

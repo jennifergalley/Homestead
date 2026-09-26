@@ -98,6 +98,12 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     bool Initialize(const Homestead::Simulation& Simulation);
     bool Refresh(const Homestead::Simulation& Simulation);
+    // Keep one gathered resource's produce visible (as if still ready) until released, so the
+    // pile stays on the ground until the heroine's animation lifts it. One at a time.
+    void HoldProduce(int32 Id) { HeldProduceId = Id; }
+    void ReleaseProduce() { HeldProduceId = INDEX_NONE; }
+    // Hide one component of the held produce (a stick she has already lifted from the pile).
+    void HideHeldProducePart(int32 Index);
     void SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation);
     static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
     float GroundHeight(float X, float Y) const;
@@ -195,6 +201,7 @@ private:
 
     bool bInitialized = false;
     FString ResourceLayoutSignature;
+    int32 HeldProduceId = INDEX_NONE;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
     FString RegionalWaterSignature;

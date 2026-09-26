@@ -401,6 +401,25 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
             if (auto* Material = LoadMetaHumanAsset<UMaterialInterface>(
                 FString::Printf(TEXT("Assembled/Heroine/Grooms/%s"), Spec.Materials[Index])))
                 Groom->SetMaterial(Index, Material);
+        if (FCString::Strcmp(Spec.Component, TEXT("MetaHumanHair")) == 0)
+        {
+            // Calmer than the stock groom: less inherited body motion and more damping, so turns don't fling it.
+            FHairSimulationSettings& Sim = Groom->SimulationSettings;
+            Sim.SimulationSetup.LinearVelocityScale = 0.5f;
+            Sim.SimulationSetup.AngularVelocityScale = 0.4f;
+            Sim.bOverrideSettings = true;
+            Sim.SolverSettings.bEnableSimulation = true;
+            Sim.ExternalForces.GravityVector = FVector(0, 0, -981);
+            Sim.ExternalForces.AirDrag = 1.0f;
+            Sim.MaterialConstraints.BendDamping = 0.05f;
+            Sim.MaterialConstraints.BendStiffness = 0.15f;
+            Sim.MaterialConstraints.StretchDamping = 0.0f;
+            Sim.MaterialConstraints.StretchStiffness = 1.0f;
+            Sim.MaterialConstraints.StaticFriction = 0.5f;
+            Sim.MaterialConstraints.KineticFriction = 0.5f;
+            Sim.MaterialConstraints.StrandsViscosity = 1.0f;
+            Sim.MaterialConstraints.CollisionRadius = 5.0f;
+        }
         Groom->RegisterComponent();
         MetaHumanGrooms.Add(Groom);
     }
@@ -651,6 +670,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdateCarriedSticks();
+    UpdateStickAlignment(DeltaSeconds);
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
         const FVector CameraPosition = Camera->GetComponentLocation();
@@ -712,18 +732,51 @@ void AHomesteadCharacter::PlayGather()
         UE_LOG(LogTemp, Error, TEXT("Gather succeeded but the heroine gathering animation instance is unavailable."));
 }
 
-void AHomesteadCharacter::PlayGatherSticks()
+bool AHomesteadCharacter::PlayGatherSticks(TOptional<FVector2D> Pile)
 {
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     if (!GetGatherSticksAnimation() || CarriedSticks.Num() < 2 || !Animation)
     {
         PlayGather();
-        return;
+        return false;
     }
     CancelSprint();
     GetCharacterMovement()->StopMovementImmediately();
     StickStage = 0;
+    bStickPileOnGround = true;
+    bStickGatherStarted = false;
+    SticksLifted = 0;
+    StickAlignRemaining = 0;
+    if (Pile)
+    {
+        // Her right hand picks both sticks up about 32 cm ahead and 26 cm to her right. Turn and
+        // settle her during the first step so that spot lands on the pile.
+        constexpr float GrabForward = 32.0f, GrabRight = 26.0f;
+        const FVector Here = GetActorLocation();
+        const FVector2D ToPile = *Pile - FVector2D(Here);
+        if (ToPile.Size() > 1.0f && ToPile.Size() < 150.0f)
+        {
+            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(ToPile.Y, ToPile.X))
+                - FMath::RadiansToDegrees(FMath::Atan2(GrabRight, GrabForward));
+            const FVector Desired = FVector(Pile->X, Pile->Y, Here.Z)
+                - FRotator(0, Yaw, 0).RotateVector(FVector(GrabForward, GrabRight, 0));
+            StickAlignFrom = GetActorTransform();
+            StickAlignTo = FTransform(FRotator(0, Yaw, 0), Desired);
+            StickAlignRemaining = StickAlignSeconds;
+        }
+    }
     Animation->RequestGatherSticks();
+    return true;
+}
+
+void AHomesteadCharacter::UpdateStickAlignment(float DeltaSeconds)
+{
+    if (StickAlignRemaining <= 0) return;
+    StickAlignRemaining = FMath::Max(0.0f, StickAlignRemaining - DeltaSeconds);
+    const float Alpha = FMath::SmoothStep(0.0f, 1.0f, 1.0f - StickAlignRemaining / StickAlignSeconds);
+    const FVector Location = FMath::Lerp(StickAlignFrom.GetLocation(), StickAlignTo.GetLocation(), Alpha);
+    const FQuat Rotation = FQuat::Slerp(StickAlignFrom.GetRotation(), StickAlignTo.GetRotation(), Alpha);
+    SetActorLocationAndRotation(FVector(Location.X, Location.Y, GetActorLocation().Z), Rotation, true);
 }
 
 // Stick moments in AN_HeroineMH_KneelGatherSticks (seconds; homestead_agent.kneel_gather STICK_EVENTS).
@@ -741,6 +794,11 @@ void AHomesteadCharacter::UpdateCarriedSticks()
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
     using namespace GatherSticksTiming;
     const int32 Stage = !Active || Time >= Stow ? 0 : Time >= Stack2 ? 4 : Time >= Pick2 ? 3 : Time >= Stack1 ? 2 : Time >= Pick1 ? 1 : 0;
+    bStickGatherStarted |= Active;
+    if (Active) SticksLifted = Time >= Pick2 ? 2 : Time >= Pick1 ? 1 : 0;
+    // The pile leaves the ground with the second stick (or if the gather ends early).
+    if (bStickPileOnGround && ((Active && Time >= Pick2) || (bStickGatherStarted && !Active)))
+        bStickPileOnGround = false;
     if (Stage == StickStage) return;
     StickStage = Stage;
     USkeletalMeshComponent* Body = GetMesh();
@@ -777,7 +835,7 @@ void AHomesteadCharacter::UpdateCarriedSticks()
         Stick->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("lowerarm_l"));
         Stick->SetVisibility(true);
     };
-    constexpr float ScaleA = 0.55f, ScaleB = 0.65f;
+    constexpr float ScaleA = CarriedStickScale, ScaleB = CarriedStickScale;
     if (Stage == 0)
         for (UStaticMeshComponent* Stick : CarriedSticks) Stick->SetVisibility(false);
     else if (Stage == 1) Grip(CarriedSticks[0], ScaleA);
@@ -821,6 +879,8 @@ void AHomesteadCharacter::CancelAction(bool Immediate)
         Animation->CancelAction(Immediate);
     for (UStaticMeshComponent* Stick : CarriedSticks) Stick->SetVisibility(false);
     StickStage = 0;
+    bStickPileOnGround = false;
+    StickAlignRemaining = 0;
     WateringTool->SetHiddenInGame(true, true);
     Hatchet->SetHiddenInGame(true, true);
     DiggingStick->SetHiddenInGame(true, true);

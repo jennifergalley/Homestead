@@ -83,7 +83,16 @@ public:
     UHomesteadKnife* GetKnife() const { return Knife; }
     void PlayGather();
     // Gathering sticks: the kneeling pickup with carried stick props when available, else PlayGather.
-    void PlayGatherSticks();
+    // Returns true when the kneeling pickup plays. With Pile (world X/Y of the gathered pile) she
+    // turns and settles so her hand lands on it.
+    bool PlayGatherSticks(TOptional<FVector2D> Pile = {});
+    // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
+    // world keeps the gathered pile visible until then.
+    bool IsStickPileOnGround() const { return bStickPileOnGround; }
+    // Sticks lifted off the pile so far in the current kneeling gather (0-2).
+    int32 SticksLiftedFromPile() const { return bStickPileOnGround ? SticksLifted : 2; }
+    // World scale of the carried stick props; the woodland's Branches pile uses the same meshes at this scale.
+    static constexpr float CarriedStickScale = 0.6f;
     void PlayWater();
     void PlayWater(Homestead::Point Target);
     void PlayClear();
@@ -120,7 +129,14 @@ private:
     // Two branch props that appear in her hand and stack on her left forearm during the stick gather.
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> CarriedSticks;
     int32 StickStage = 0;
+    bool bStickPileOnGround = false;
+    bool bStickGatherStarted = false;
+    int32 SticksLifted = 0;
     void UpdateCarriedSticks();
+    static constexpr float StickAlignSeconds = 0.5f;
+    FTransform StickAlignFrom, StickAlignTo;
+    float StickAlignRemaining = 0;
+    void UpdateStickAlignment(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;

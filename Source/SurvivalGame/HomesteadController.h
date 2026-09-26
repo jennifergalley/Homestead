@@ -237,6 +237,9 @@ private:
     float AutosaveRemaining = 240;
     bool bAutosaveEnabled = true;
     int32 AutosaveMinutes = 5;
+    // Gathered Branches pile kept visible until the kneeling pickup lifts the last stick.
+    int32 HeldStickPile = INDEX_NONE;
+    double HeldStickPileSince = 0;
     float MusicGapRemaining = 18;
     float MusicElapsed = 0;
     double LastNudgeTime = -1;

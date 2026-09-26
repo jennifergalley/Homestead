@@ -1974,6 +1974,14 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
     return true;
 }
 
+void AHomesteadWorld::HideHeldProducePart(int32 Index)
+{
+    if (HeldProduceId == INDEX_NONE) return;
+    if (auto* Produce = ResourceProduceVisuals.Find(HeldProduceId))
+        if (Produce->Components.IsValidIndex(Index) && IsValid(Produce->Components[Index]))
+            Produce->Components[Index]->SetVisibility(false);
+}
+
 void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly)
 {
     if (Node.cleared)
@@ -2051,10 +2059,13 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     case Homestead::ResourceKind::Branches:
         if (bProduceOnly)
         {
+            // Scale matches the heroine's carried stick props (AHomesteadCharacter::CarriedStickScale),
+            // so a stick keeps its size when she picks it up; component 1 (_b) and 2 (_c) are the
+            // two she lifts.
             for (int I = 0; I < 3; ++I)
             {
                 const TCHAR* Names[] = {TEXT("SM_DryBranchesMedium01_a"), TEXT("SM_DryBranchesMedium01_b"), TEXT("SM_DryBranchesMedium01_c")};
-                Authored(LoadResource(Names[I]), FVector2D(I * 9 - 9, I * 7 - 7), I * 35 + 20, true);
+                Authored(LoadResource(Names[I]), FVector2D(I * 9 - 9, I * 7 - 7), I * 35 + 20, true, 0.6f);
             }
         }
         break;
@@ -2590,7 +2601,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             ResourceProduceVisuals.Remove(Node.id);
             continue;
         }
-        const bool bReady = Node.readyAtHour <= State.hour;
+        const bool bReady = Node.readyAtHour <= State.hour || Node.id == HeldProduceId;
         const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
             static_cast<int>(Node.kind), Node.position.x, Node.position.y, Node.cleared);
         AdoptStaged(ResourceVisuals, StagedResourceVisuals, Node.id, Signature);

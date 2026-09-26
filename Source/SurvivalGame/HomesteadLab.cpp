@@ -1,5 +1,6 @@
 #include "HomesteadLab.h"
 
+#include "Animation/AnimSequence.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/PostProcessComponent.h"
@@ -15,6 +16,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/App.h"
 #include "Misc/CommandLine.h"
@@ -176,6 +178,95 @@ float AHomesteadLabWorld::SurfaceHeight(float X, float Y) const
         ? static_cast<float>(Hit.ImpactPoint.Z) : 0.0f;
 }
 
+void AHomesteadLabWorld::PlaceProp(EProp Kind, FVector2D At)
+{
+    for (UStaticMeshComponent* Part : PropBase) if (IsValid(Part)) Part->DestroyComponent();
+    for (UStaticMeshComponent* Part : PropProduce) if (IsValid(Part)) Part->DestroyComponent();
+    PropBase.Reset();
+    PropProduce.Reset();
+    Prop = Kind;
+    PropAt = At;
+    // Same meshes, offsets, yaws and scales as AHomesteadWorld::BuildResource.
+    auto Add = [this, At](const TCHAR* Path, FVector2D Offset, float Yaw, float Scale, bool bProduce,
+        UMaterialInterface* Material = nullptr)
+    {
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, Path);
+        if (!Mesh) { UE_LOG(LogTemp, Warning, TEXT("LabProp: missing %s"), Path); return; }
+        const FBox Bounds = Mesh->GetBoundingBox();
+        const FRotator Rotation(0, Yaw, 0);
+        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+        const FVector Ground(At.X + Offset.X, At.Y + Offset.Y, SurfaceHeight(At.X + Offset.X, At.Y + Offset.Y));
+        auto* Part = NewObject<UStaticMeshComponent>(this);
+        Part->SetupAttachment(RootComponent);
+        Part->SetMobility(EComponentMobility::Movable);
+        Part->SetStaticMesh(Mesh);
+        if (Material) Part->SetMaterial(0, Material);
+        Part->SetWorldTransform(FTransform(Rotation, Ground - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
+        Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Part->RegisterComponent();
+        (bProduce ? PropProduce : PropBase).Add(Part);
+    };
+    const TCHAR* Meshes = TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/");
+    if (Kind == EProp::Sticks)
+    {
+        const TCHAR* Names[] = {TEXT("SM_DryBranchesMedium01_a"), TEXT("SM_DryBranchesMedium01_b"), TEXT("SM_DryBranchesMedium01_c")};
+        for (int32 I = 0; I < 3; ++I)
+            Add(*FString::Printf(TEXT("%s%s.%s"), Meshes, Names[I], Names[I]), FVector2D(I * 9 - 9, I * 7 - 7), I * 35 + 20,
+                AHomesteadCharacter::CarriedStickScale, true);
+    }
+    else if (Kind == EProp::Stones)
+    {
+        auto* Rock = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks"));
+        auto* RockMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/SurvivalGame/Materials/M_Rock.M_Rock"));
+        const float Size = Rock ? Rock->GetBoundingBox().GetSize().GetMax() : 0.0f;
+        for (int32 I = 0; I < 3 && Size > 0; ++I)
+            Add(TEXT("/Game/SurvivalGame/Environment/MossRocks.MossRocks"), FVector2D(I * 17 - 17, I % 2 * 14), I * 79,
+                (24.0f + I * 4.0f) / Size, true, RockMaterial);
+    }
+    else if (Kind == EProp::Berries)
+    {
+        for (int32 I = 0; I < 3; ++I)
+        {
+            const TCHAR* Name = I == 1 ? TEXT("SM_Shrub04_a") : TEXT("SM_Shrub04_c");
+            Add(*FString::Printf(TEXT("%s%s.%s"), Meshes, Name, Name), FVector2D((I - 1) * 10, I % 2 * 10 - 5), I * 113, 1.0f, false);
+        }
+        auto* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+        auto* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+        auto* Red = Base ? UMaterialInstanceDynamic::Create(Base, this) : nullptr;
+        if (Red) Red->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.42f, 0.025f, 0.055f));
+        for (int32 I = 0; I < 8 && Sphere; ++I)
+        {
+            const float Angle = I * 2.399f;
+            auto* Berry = NewObject<UStaticMeshComponent>(this);
+            Berry->SetupAttachment(RootComponent);
+            Berry->SetStaticMesh(Sphere);
+            if (Red) Berry->SetMaterial(0, Red);
+            Berry->SetWorldLocation(FVector(At.X + FMath::Cos(Angle) * 15, At.Y + FMath::Sin(Angle) * 11,
+                SurfaceHeight(At.X, At.Y) + 16 + I % 3 * 4));
+            Berry->SetWorldScale3D(FVector(3.8f / 100.0f));
+            Berry->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Berry->RegisterComponent();
+            PropProduce.Add(Berry);
+        }
+    }
+}
+
+void AHomesteadLabWorld::TakePropPart(int32 Index)
+{
+    if (PropProduce.IsValidIndex(Index) && IsValid(PropProduce[Index])) PropProduce[Index]->SetVisibility(false);
+}
+
+void AHomesteadLabWorld::TakeAllProp()
+{
+    for (int32 Index = 0; Index < PropProduce.Num(); ++Index) TakePropPart(Index);
+}
+
+bool AHomesteadLabWorld::PropIntact() const
+{
+    for (UStaticMeshComponent* Part : PropProduce) if (!IsValid(Part) || !Part->IsVisible()) return false;
+    return !PropProduce.IsEmpty();
+}
+
 void AHomesteadLabController::BeginPlay()
 {
     Super::BeginPlay();
@@ -195,7 +286,7 @@ void AHomesteadLabController::BeginPlay()
     LoadPool(WalkSteps, TEXT("BareStepWalk"), 6);
     LoadPool(RunSteps, TEXT("BareStepRun"), 4);
     LabTeleport(0, 0);
-    UE_LOG(LogTemp, Display, TEXT("CHARACTER_LAB ready: flat grid floor, course at x=%.0f; console: LabAction, LabSun, LabTeleport, LabCourse, slomo."),
+    UE_LOG(LogTemp, Display, TEXT("CHARACTER_LAB ready: flat grid floor, course at x=%.0f; console: LabAction, LabProp, LabSun, LabTeleport, LabCourse, slomo."),
         AHomesteadLabWorld::CourseX);
 }
 
@@ -205,13 +296,85 @@ void AHomesteadLabController::LabAction(const FString& Name)
     if (!Avatar) return;
     const FVector Ahead = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 100.0f;
     const Homestead::Point Target{Ahead.X, Ahead.Y};
-    if (Name.Equals(TEXT("Gather"), ESearchCase::IgnoreCase)) Avatar->PlayGather();
-    else if (Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase)) Avatar->PlayGatherSticks();
+    using EProp = AHomesteadLabWorld::EProp;
+    if (Name.Equals(TEXT("Gather"), ESearchCase::IgnoreCase))
+    {
+        // Like the game, forage produce leaves the ground as soon as the harvest commits.
+        Avatar->PlayGather();
+        if (World && World->PropKind() != EProp::Sticks) World->TakeAllProp();
+    }
+    else if (Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase))
+    {
+        if (World && (World->PropKind() != EProp::Sticks || !World->PropIntact())) LabProp(TEXT("Sticks"));
+        bHoldingStickPile = World && Avatar->PlayGatherSticks(World->PropLocation());
+    }
     else if (Name.Equals(TEXT("Water"), ESearchCase::IgnoreCase)) Avatar->PlayWater(Target);
     else if (Name.Equals(TEXT("Chop"), ESearchCase::IgnoreCase)) Avatar->PlayClear(Target);
     else if (Name.Equals(TEXT("Knife"), ESearchCase::IgnoreCase)) Avatar->PlayKnifeCut(Target);
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
     else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Water, Chop, Knife or Till."));
+}
+
+void AHomesteadLabController::LabProp(const FString& Name)
+{
+    const APawn* Avatar = GetPawn();
+    if (!Avatar || !World) return;
+    using EProp = AHomesteadLabWorld::EProp;
+    const EProp Kind = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) ? EProp::Sticks
+        : Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase) ? EProp::Stones
+        : Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase) ? EProp::Berries : EProp::None;
+    if (Kind == EProp::None && !Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
+        UE_LOG(LogTemp, Warning, TEXT("LabProp takes Sticks, Stones, Berries or None."));
+    const FVector At = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
+    World->PlaceProp(Kind, FVector2D(At));
+    bHoldingStickPile = false;
+}
+
+void AHomesteadLabController::LabLoop(const FString& Name)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar || Name.IsEmpty() || Name.Equals(TEXT("Off"), ESearchCase::IgnoreCase))
+    {
+        LoopAction.Reset();
+        return;
+    }
+    LoopAction = Name;
+    LoopStart = Avatar->GetActorTransform();
+    // One clip plus a second's pause between repeats.
+    const UAnimSequence* Clip = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) ? Avatar->GetGatherSticksAnimation() : nullptr;
+    LoopPeriod = (Clip ? Clip->GetPlayLength() : 3.5f) + 1.0f;
+    LoopNextStart = GetWorld()->GetTimeSeconds();
+}
+
+void AHomesteadLabController::PlayerTick(float DeltaTime)
+{
+    Super::PlayerTick(DeltaTime);
+    if (!LoopAction.IsEmpty() && GetWorld()->GetTimeSeconds() >= LoopNextStart)
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+        {
+            Avatar->CancelAction(true);
+            // Back to where the loop began (the stick gather steps her onto the pile), camera untouched.
+            Avatar->SetActorLocationAndRotation(LoopStart.GetLocation(), LoopStart.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
+            if (World && World->PropKind() != AHomesteadLabWorld::EProp::None) World->PlaceProp(World->PropKind(),
+                FVector2D(LoopStart.GetLocation() + LoopStart.GetRotation().GetForwardVector() * 45.0f));
+            // The animation ignores new requests until the cancel has blended out.
+            LoopPlayAt = GetWorld()->GetTimeSeconds() + 0.25;
+            LoopNextStart = LoopPlayAt + LoopPeriod;
+        }
+    if (!LoopAction.IsEmpty() && LoopPlayAt > 0 && GetWorld()->GetTimeSeconds() >= LoopPlayAt)
+    {
+        LoopPlayAt = 0;
+        LabAction(LoopAction);
+    }
+    if (!bHoldingStickPile || !World) return;
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    // Same pile timing as the woodland (AHomesteadController::Tick).
+    if (Avatar && Avatar->SticksLiftedFromPile() >= 1) World->TakePropPart(1);
+    if (!Avatar || !Avatar->IsStickPileOnGround())
+    {
+        World->TakeAllProp();
+        bHoldingStickPile = false;
+    }
 }
 
 void AHomesteadLabController::LabSun(float Hour)
@@ -275,7 +438,7 @@ void AHomesteadLabHUD::DrawHUD()
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
     Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
-    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Water|Chop|Knife|Till   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
+    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Water|Chop|Knife|Till   LabLoop <action>|Off   LabProp Sticks|Stones|Berries|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)
     {
