@@ -94,6 +94,8 @@ public:
     bool MenuSplitHalf(const FHomesteadRow& Row);
     // Moves a whole stack or garment between the pack and the open chest (as much as fits).
     bool MenuMoveWhole(const FHomesteadRow& Row);
+    // The menu row for one owned garment wherever it is (worn, carried or stored).
+    bool MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const;
     bool MenuSortPack();
     bool MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target, uint64 ExpectedRevision);
     bool OpenChestStorage(int32 ChestId);
@@ -182,7 +184,8 @@ public:
     // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
     UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
     // Console playtest aid: open the pack's right-click menu (Mode 0) or Ctrl+click popover (Mode 1)
-    // on the Nth pack tile, as a pointer would.
+    // on the Nth pack tile, as a pointer would. Mode 2 opens the nearest storage chest (logging where
+    // it is) when she stands within reach of it.
     UFUNCTION(Exec) void HomesteadPackMenu(int32 Tile = 0, int32 Mode = 0);
 
     float Sensitivity = 1.0f;

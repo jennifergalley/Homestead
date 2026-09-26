@@ -55,7 +55,7 @@ public:
     { return PopupOptions.IsValidIndex(Index) && PopupOptions[Index].Label ? PopupOptions[Index].Label() : FString(); }
     TSharedPtr<SWidget> GetDialogButton(int32 Index) const
     { return DialogButtons.IsValidIndex(Index) ? DialogButtons[Index] : nullptr; }
-    void OpenItemContextMenu(int32 Index);
+    void OpenItemContextMenu(int32 Index, bool bPointer = true);
     void OpenQuantityPrompt(const FHomesteadRow& Row);
     const FHomesteadRow* GetSelectedSubject() const
     {
@@ -145,14 +145,28 @@ private:
     uint64 PendingRevision = 0;
     int32 Amount = 1, MaximumAmount = 1;
     TArray<int32> MergeTargets;
-    struct FPopupOption { TFunction<FString()> Label; TFunction<void()> Run; TFunction<bool()> Enabled; };
+    struct FPopupOption
+    {
+        TFunction<FString()> Label; TFunction<void()> Run; TFunction<bool()> Enabled;
+        // The item action this option performs, so keyboard/controller routes can land on it.
+        TOptional<EHomesteadItemAction> Action;
+    };
     TArray<FPopupOption> PopupOptions;
     FString PopupTitle;
     FVector2D PopupAnchor = FVector2D::ZeroVector;
+    bool bKeepPopupAnchor = false;
     void BuildPopup();
     void AdjustQuantity(int32 Delta);
-    // Shift+click: the whole stack or garment to the other side of an open chest.
-    void MoveWhole(int32 Index);
+    bool BuildItemOptions(const FHomesteadRow& Row);
+    void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);
+    // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
+    FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;
+    // Shift+click: the whole stack or garment to the other side of an open chest; with no chest
+    // open, pins tools and food to the hotbar and puts on carried garments.
+    void QuickMove(int32 Index);
+    void ComputeActions();
+    int32 StorageColumns() const;
+    FString PackHint() const;
     int32 AudioEditId = -1;
     float AudioEditStart = 0;
     int32 PointerDragSource = INDEX_NONE;
@@ -175,7 +189,7 @@ private:
     TSharedRef<SWidget> BuildBody();
     TSharedRef<SWidget> BuildDetails();
     TSharedRef<SButton> MakeButton(const FString& Label, TFunction<void()> Action,
-        TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.97f)),
+        TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.6f)),
         const FString& AccessibleLabel = FString(), FMargin Padding = FMargin(14, 10));
     TSharedRef<SWidget> Text(const FString& Value, int32 Size = 18) const;
     FString EntryName(const FHomesteadRow& Row) const;
@@ -203,7 +217,7 @@ private:
     FString ActionLabel(EHomesteadItemAction Action) const;
     FString RowKey(const FHomesteadRow& Row) const;
     void ChangeInventoryView(int32 View);
-    void FocusEquipment(int32 Index);
+    void FocusEquipment(int32 Index, bool bPointer = false);
     FString EquipmentLabel(int32 Index) const;
     void CycleRegion(int32 Direction);
     void SetDialog(EDialog Value);

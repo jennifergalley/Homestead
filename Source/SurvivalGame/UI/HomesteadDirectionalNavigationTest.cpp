@@ -219,9 +219,9 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             Tap(EKeys::Gamepad_DPad_Right);
         },
         [Focused]() { return Focused(TEXT("Content")); });
-    Add(TEXT("Right boundary reaches actual details or action controls"),
+    Add(TEXT("Right boundary stays in the pack now that item actions live in the item menu"),
         [this]() { Tap(EKeys::Right); },
-        [Focused]() { return Focused(TEXT("Details")) || Focused(TEXT("Actions")); });
+        [Focused]() { return Focused(TEXT("Content")); });
 
     Add(TEXT("Prepare disclosed short-row fixture from real stock and splits"),
         [Fixture, ColumnCount]() { Fixture(*ColumnCount + 2); },

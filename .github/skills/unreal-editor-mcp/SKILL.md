@@ -220,8 +220,10 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   not checked at full-screen sizes. Left/Right on a setting changes its value; A toggles.
   Verify the selected row visually before activating.
 - "Start a new woodland" opens a Cancel-default confirmation; B backs out safely.
-- **Inventory**: A on an item starts a *move*, not use. RT cycles regions (content, equipped slots,
-  details). In details, D-pad Down reaches the action buttons (`Eat 1`, `Drop...`), then A.
+- **Inventory**: there is no details pane or action-button column on the pack/chest page. A on an
+  item starts a *move*; Y (or F) opens the item's context menu, where D-pad + A picks an action
+  (`Eat 1`, `Drop 1`, `Move to chest N`, ...). X splits in half, S sorts. RT cycles content and
+  equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
 - **Craft**: D-pad selects a recipe; details list requirements. Crafting is **hold A**
   (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
 - Feedback messages ("Ate Berries.", "Made Crude hatchet.") appear as a banner on the book and in
@@ -231,6 +233,10 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   player controller, book on the pack page) opens the right-click context menu (mode 0) or the
   Ctrl+click amount slider (mode 1) on pack tile `<tile>` (0-based), anchored at the tile. Clicks
   and keys go to the popup until it closes; Escape or B cancels without changing anything.
+  `HomesteadPackMenu 0 2` opens the nearest storage chest (and logs its position) when she is
+  within 280 cm of it, which is the quickest way into the Storage page in PIE. A synthetic
+  Shift+click in automation needs a `ProcessMouseMoveEvent` onto the tile first, or Slate never
+  delivers the click.
 - **Portrait**: the pack page's left column is a live cut-out capture of the real heroine (two
   SceneCapture2Ds on her own components, lit only by lighting channel 2 while the book is open),
   so it shows her current clothes and held tool. It is not a copy of her mesh; if it shows

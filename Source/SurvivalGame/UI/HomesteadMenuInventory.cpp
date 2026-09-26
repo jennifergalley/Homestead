@@ -8,6 +8,39 @@ bool IsFood(Homestead::Item Item)
     return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
 }
 FString FromUtf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
+bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int Chest, FHomesteadRow& Row)
+{
+    const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
+    if (!Info) return false;
+    Row = FHomesteadRow();
+    Row.Id = static_cast<int>(Instance.definition); Row.SubjectId = Instance.id;
+    Row.Subject = EHomesteadMenuSubject::Wearable;
+    Row.ContainerId = Instance.owner == Homestead::WearableOwner::Chest ? Instance.chestId
+        : Instance.owner == Homestead::WearableOwner::Equipped ? -1 : 0;
+    Row.DestinationId = Storage ? (Row.ContainerId == 0 ? Chest : 0) : -1;
+    Row.Quantity = 1;
+    Row.Name = Row.Label = FromUtf8(Info->name);
+    Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
+        : FString::Printf(TEXT("Chest %d"), Row.ContainerId);
+    Row.Detail = FromUtf8(Homestead::WearableDescription(Instance.definition));
+    if (Info->dyeable)
+    {
+        Row.Detail += TEXT("\nDye: ") + FromUtf8(Homestead::DyeName(Instance.dye));
+        Row.Name += TEXT(" - ") + FromUtf8(Homestead::DyeName(Instance.dye));
+        Row.Label = Row.Name;
+        Row.IconTint = FLinearColor(0.20f, 0.27f, 0.115f) * HomesteadLook::TunicTint(Instance.dye);
+    }
+    Row.Detail += FString::Printf(TEXT("\nOwned item #%d\n"), Instance.id);
+    if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Torso))) Row.Detail += TEXT("Torso + legs");
+    else if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Apron))) Row.Detail += TEXT("Apron layer (requires tunic)");
+    else Row.Detail += TEXT("Feet");
+    Row.Action = Row.ContainerId < 0 ? TEXT("Unequip") : Row.ContainerId == 0 ? TEXT("Equip") : TEXT("Take to pack");
+    Row.Icon = Instance.definition == Homestead::WearableDefinition::LeatherShoes ? FName(TEXT("leather-shoes"))
+        : FName(UTF8_TO_TCHAR(Info->key));
+    Row.CanStore = false;
+    Row.CanTake = false;
+    return true;
+}
 }
 
 void AHomesteadController::MenuInventoryView(int32 View)
@@ -56,36 +89,8 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
     const int Container = MenuInventoryViewIndex == 1 ? Chest : 0;
     auto AddWearable = [&](const Homestead::WearableInstance& Instance)
     {
-        const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
-        if (!Info) return;
         FHomesteadRow Row;
-        Row.Id = static_cast<int>(Instance.definition); Row.SubjectId = Instance.id;
-        Row.Subject = EHomesteadMenuSubject::Wearable;
-        Row.ContainerId = Instance.owner == Homestead::WearableOwner::Chest ? Instance.chestId
-            : Instance.owner == Homestead::WearableOwner::Equipped ? -1 : 0;
-        Row.DestinationId = Storage ? (Row.ContainerId == 0 ? Chest : 0) : -1;
-        Row.Quantity = 1;
-        Row.Name = Row.Label = FromUtf8(Info->name);
-        Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
-            : FString::Printf(TEXT("Chest %d"), Row.ContainerId);
-        Row.Detail = FromUtf8(Homestead::WearableDescription(Instance.definition));
-        if (Info->dyeable)
-        {
-            Row.Detail += TEXT("\nDye: ") + FromUtf8(Homestead::DyeName(Instance.dye));
-            Row.Name += TEXT(" - ") + FromUtf8(Homestead::DyeName(Instance.dye));
-            Row.Label = Row.Name;
-            Row.IconTint = FLinearColor(0.20f, 0.27f, 0.115f) * HomesteadLook::TunicTint(Instance.dye);
-        }
-        Row.Detail += FString::Printf(TEXT("\nOwned item #%d\n"), Instance.id);
-        if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Torso))) Row.Detail += TEXT("Torso + legs");
-        else if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Apron))) Row.Detail += TEXT("Apron layer (requires tunic)");
-        else Row.Detail += TEXT("Feet");
-        Row.Action = Row.ContainerId < 0 ? TEXT("Unequip") : Row.ContainerId == 0 ? TEXT("Equip") : TEXT("Take to pack");
-        Row.Icon = Instance.definition == Homestead::WearableDefinition::LeatherShoes ? FName(TEXT("leather-shoes"))
-            : FName(UTF8_TO_TCHAR(Info->key));
-        Row.CanStore = false;
-        Row.CanTake = false;
-        Result.Add(MoveTemp(Row));
+        if (WearableRow(Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
     };
     if (!Storage && MenuInventoryViewIndex == 2)
     {
@@ -254,6 +259,12 @@ bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
     // Move what fits; with no room at all the transfer reports why.
     const int32 Count = Room > 0 ? FMath::Min(Row.Quantity, Room) : Row.Quantity;
     return MenuItemAction(Target, EHomesteadItemAction::Transfer, Count, Sim.GetRevision());
+}
+
+bool AHomesteadController::MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const
+{
+    const auto* Instance = Sim.GetWearable(WearableId);
+    return Instance && WearableRow(*Instance, ActiveChestId.IsSet(), ActiveChestId.Get(-1), Out);
 }
 
 bool AHomesteadController::MenuSortPack()

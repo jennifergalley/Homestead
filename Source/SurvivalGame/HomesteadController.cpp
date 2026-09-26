@@ -847,11 +847,30 @@ FString AHomesteadController::MenuPortraitStatus() const
 
 void AHomesteadController::HomesteadPackMenu(int32 Tile, int32 Mode)
 {
+    if (Mode == 2)
+    {
+        const auto Position = PlayerPoint();
+        const Homestead::Structure* Nearest = nullptr;
+        float Best = TNumericLimits<float>::Max();
+        for (const auto& Structure : State().structures)
+        {
+            if (Structure.kind != Homestead::Piece::Chest) continue;
+            const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+            const float Distance = FMath::Square(Center.x - Position.x) + FMath::Square(Center.y - Position.y);
+            if (Distance < Best) { Best = Distance; Nearest = &Structure; }
+        }
+        if (!Nearest) { Notify(TEXT("There is no storage chest nearby."), true); return; }
+        const auto ChestCenter = Homestead::CellCenter(Nearest->cellX, Nearest->cellY);
+        UE_LOG(LogTemp, Display, TEXT("HomesteadPackMenu: nearest chest %d at (%.0f, %.0f)"), Nearest->id, ChestCenter.x, ChestCenter.y);
+        if (bBookOpen) CloseBook();
+        OpenChestStorage(Nearest->id);
+        return;
+    }
     if (!NativeMenu.IsValid() || !bBookOpen || Page != 0) { Notify(TEXT("Open the pack first."), true); return; }
     const auto Rows = MenuRows();
     if (!Rows.IsValidIndex(Tile)) { Notify(TEXT("There is no item in that tile."), true); return; }
     if (Mode == 1) NativeMenu->OpenQuantityPrompt(Rows[Tile]);
-    else NativeMenu->OpenItemContextMenu(Tile);
+    else NativeMenu->OpenItemContextMenu(Tile, false);
 }
 
 void AHomesteadController::HomesteadMorning(float Hour)

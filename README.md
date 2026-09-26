@@ -213,14 +213,18 @@ force a graphics mode after saving. See `docs\hotkey-safety-playtesting.md`;
 historical selection checkpoint `af0c907` used `jenny-review`; the current
 wardrobe delivery deliberately uses the separate `jenny-review-v5` profile.
 
-The field book and construction preview pause simulation. Near a storage chest,
-the Pack page supports storing with X/F and taking stored materials with Y/G.
-Right-click any pack or chest tile for its actions: eat, pin/unpin, move to or
-take from the open chest, drop 1, drop all, or pick an amount. Ctrl+click a
-stack opens an amount slider (drag, mouse wheel, or Left/Right; LB/RB step by 10)
-to split off, drop, or move exactly that many; Shift+click moves the whole stack
-between pack and chest. The portrait beside the pack shows her live, as she
-stands in the world, with whatever she's wearing or holding.
+The field book and construction preview pause simulation. The book is
+translucent so the woodland shows through, and the pack and chest pages have no
+details pane: every item action is on a click. Right-click any pack or chest tile
+(F or controller Y) for its actions: eat, pin/unpin, wear, move to or take from
+the open chest, drop 1, drop all, pick an amount, or sort. Shift+click moves the
+whole stack between pack and chest; with no chest open it pins a tool to the
+hotbar or wears a garment. Ctrl+click a stack opens an amount slider (drag,
+mouse wheel, or Left/Right; LB/RB step by 10) to split off, drop, or move exactly
+that many. Drag a tile to rearrange or move it; X splits a stack in half. Click
+an equipped slot to take off or swap what she's wearing. The portrait beside the
+pack shows her live, as she stands in the world, with whatever she's wearing or
+holding.
 Food selections consume one item; core actions explain unmet requirements.
 Action cues ("[A] Gather", "[LMB] Fell") retire once you've done each action
 three times; Settings > "Show action hints again" brings them back.

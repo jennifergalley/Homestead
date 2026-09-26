@@ -406,7 +406,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     {
         const auto Stayed = MakeShared<bool>(false);
         const auto Prior = MakeShared<float>(0);
-        const float Target = AudioId == 5 ? 0.26f : AudioId == 6 ? 0.42f : 0.58f;
+        const auto Target = MakeShared<float>(0);
         if (AudioId != 5)
             Add(FString::Printf(TEXT("Scroll Settings to audio slider %d"), AudioId),
                 [this, AudioId]() { Controller->NativeMenu->FocusLegacySubject(AudioId); },
@@ -420,15 +420,18 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             [this, AudioId, Stayed, Prior, Target, DragAudioSlider]()
             {
                 *Prior = Controller->MenuAudioVolume(AudioId);
-                DragAudioSlider(AudioId, AudioId == 5 ? Target : 0.8f,
-                    Target, AudioId != 5, *Stayed);
+                // Volumes persist in GameUserSettings between runs, so aim away from the saved level.
+                const float Preferred = AudioId == 5 ? 0.26f : AudioId == 6 ? 0.42f : 0.58f;
+                *Target = FMath::Abs(Preferred - *Prior) > 0.15f ? Preferred : Preferred + 0.3f;
+                DragAudioSlider(AudioId, AudioId == 5 ? *Target : (*Target > 0.7f ? 0.1f : 0.8f),
+                    *Target, AudioId != 5, *Stayed);
             },
             [this, AudioId, Stayed, Prior, Target]()
             {
                 const bool Valid = *Stayed && Controller->HasNativeMenu()
                     && Controller->IsBookOpen() && Controller->BookPage() == 4
                     && !Controller->NativeMenu->HasActiveDialog()
-                    && FMath::Abs(Controller->MenuAudioVolume(AudioId) - Target) < 0.09f
+                    && FMath::Abs(Controller->MenuAudioVolume(AudioId) - *Target) < 0.09f
                     && FMath::Abs(Controller->MenuAudioVolume(AudioId) - *Prior) > 0.09f;
                 return Valid;
             }, 0.2f);
@@ -1486,7 +1489,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
                     { return !Entry.wearableId && Entry.item == Homestead::Item::Branch; }) == 1; });
     Add(TEXT("Sort restores one authoritative branch stack for legacy transaction regression"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Top); },
+        [this]() { Tap(EKeys::S); },
         [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             return Layout && Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
                 && std::count_if(Layout->begin(), Layout->end(), [](const Homestead::LayoutEntry& Entry)
@@ -1696,6 +1699,41 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
             && Controller->Simulation().ChestUsedCapacity(*Chest) == 0
             && !Controller->NativeMenu->IsPointerDraggingItem(); });
+    const auto ShiftClickFocused = [this]()
+    {
+        TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+        auto& Slate = FSlateApplication::Get();
+        const auto Widget = Slate.GetKeyboardFocusedWidget();
+        if (!Widget) { Finish(false, TEXT("Focused tile is unavailable for Shift+click.")); return; }
+        const auto Geometry = Widget->GetCachedGeometry();
+        const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
+        Slate.SetCursorPos(Position);
+        Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+            EKeys::Invalid, 0, FModifierKeysState()));
+        Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+        TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+        Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+            EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+    };
+    Add(TEXT("Focus the Pack Branch stack for Shift+click"),
+        [this, Group]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Group(0), 0); },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Shift+click moves the whole Pack Branch stack into the open Chest"),
+        [ShiftClickFocused]() { ShiftClickFocused(); },
+        [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == 0
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == *BranchTotal
+            && !Controller->NativeMenu->HasActiveDialog(); });
+    Add(TEXT("Focus the Chest Branch stack for Shift+click"),
+        [this, Chest, Group]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Group(*Chest), *Chest); },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+    Add(TEXT("Shift+click on the Chest Branch stack returns it to the Pack"),
+        [ShiftClickFocused]() { ShiftClickFocused(); },
+        [this, Chest, BranchTotal]() { return Controller->Simulation().Count(Homestead::Item::Branch) == *BranchTotal
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == 0
+            && !Controller->NativeMenu->HasActiveDialog(); });
     Add(TEXT("Seed one exact-chest target then split Pack for partial direct transfer"),
         [this, Chest, Group]()
         {
@@ -2204,12 +2242,22 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                 || !Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop))
                 Finish(false, TEXT("No carried stack exposes the contextual Drop action."));
         },
-        [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
-    Add(TEXT("Pointer Drop opens shared amount stepper"),
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus()
+            && Controller->NativeMenu->IsItemContextMenu(); });
+    Add(TEXT("Controller cancel leaves exact carried and world totals unchanged"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this, DropItem, DropCount]() { return !Controller->NativeMenu->HasActiveDialog()
+            && Controller->Simulation().Count(*DropItem) == *DropCount
+            && Controller->State().worldDrops.empty(); });
+    Add(TEXT("Reopen the item menu on Drop for a real pointer choice"),
+        [this]() { Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop); },
+        [this]() { return Controller->NativeMenu->HasSynchronizedFocus()
+            && Controller->NativeMenu->IsItemContextMenu(); });
+    Add(TEXT("Pointer Drop in the item menu drops exactly one item"),
         [this]()
         {
             const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
-            if (!Widget) { Finish(false, TEXT("Focused Drop action has no pointer target.")); return; }
+            if (!Widget) { Finish(false, TEXT("Focused Drop option has no pointer target.")); return; }
             const auto Geometry = Widget->GetCachedGeometry();
             const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
             TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
@@ -2223,21 +2271,6 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                 EKeys::LeftMouseButton, 0, FModifierKeysState()));
             Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
                 EKeys::LeftMouseButton, 0, FModifierKeysState()));
-        },
-        [this]() { return Controller->NativeMenu->HasActiveDialog()
-            && Controller->NativeMenu->GetDraftQuantity() == 1; });
-    Add(TEXT("Controller cancel leaves exact carried and world totals unchanged"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
-        [this, DropItem, DropCount]() { return !Controller->NativeMenu->HasActiveDialog()
-            && Controller->Simulation().Count(*DropItem) == *DropCount
-            && Controller->State().worldDrops.empty(); });
-    Add(TEXT("Keyboard confirms one dropped item through the same action"),
-        [this]()
-        {
-            Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Drop);
-            Tap(EKeys::Enter);
-            Tap(EKeys::Down);
-            Tap(EKeys::Enter);
         },
         [this, DropItem, DropCount, DropId]()
         {
