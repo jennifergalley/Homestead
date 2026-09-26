@@ -280,7 +280,7 @@ def emit(desc, atlas, lod, height):
         up = Matrix.Rotation(bl["roll"], 3, d) @ up      # arch partly sideways so blades curve in plan
         widen = (1.0, 1.1, 1.35)[lod]
         b.card(bl["base"], d, up, bl["length"], bl["length"] * S.tile_aspect(atlas, bl["key"]) * widen,
-               atlas.uv(bl["key"]), rows=(7, 3, 1)[lod], cols=1, fold=0.0, droop=bl["droop"],
+               atlas.uv(bl["key"]), rows=(7, 3, 2)[lod], cols=1, fold=0.0, droop=bl["droop"] * (1.0, 0.85, 0.7)[lod],
                twist=bl["twist"] if lod < 2 else 0.0, phase=bl["phase"], flutter=1.0, flutter_base=0.0)
     stats["blades"] = b.triangles - t0
     t0 = b.triangles
@@ -306,7 +306,7 @@ def emit(desc, atlas, lod, height):
             d = (lf["heading"] * math.cos(lf["elev"]) + Vector((0, 0, math.sin(lf["elev"])))).normalized()
             up = (Vector((0, 0, 1)) - lf["heading"] * 0.6).normalized()
             b.card(ro["base"], d, up, lf["length"], lf["length"] * S.tile_aspect(atlas, lf["key"]) * (1, 1, 1.3)[lod],
-                   atlas.uv(lf["key"]), rows=(3, 1, 1)[lod], cols=1, fold=0.0, droop=lf["droop"],
+                   atlas.uv(lf["key"]), rows=(3, 1, 1)[lod], cols=1, fold=0.0, droop=lf["droop"] * (1.0, 0.5, 0.5)[lod],
                    phase=lf["phase"], flutter=1.0, flutter_base=0.1)
     for st in desc["stems"]:
         rng = random.Random(st["seed"])

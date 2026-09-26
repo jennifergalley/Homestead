@@ -6,7 +6,7 @@
   "triangle_budget": 3000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/grass_yarrow_tuft.py",
-  "source_sha256": "83c87fbbfe6d2d671d3b14c17aaef9d1ec6f9f29baac925f067047ee058cb1da",
+  "source_sha256": "9a67d6d4d30edc159ad9add57020575541c93731bcfb0abb326dd6dd34ba82bb",
   "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
   "meshes": {
     "SM_GrassYarrowTuft": {
@@ -41,7 +41,7 @@
         ]
       },
       "fbx": "SM_GrassYarrowTuft.fbx",
-      "sha256": "5fad731d543fb8edb221fc21bdbe419cc1bb6313cbfc23d7817e779b7dc4298f",
+      "sha256": "46148cb74da8cf2c2e2121dec8bbc279e5479578b890e8adcadf22bb5feb23a5",
       "preview": "preview_SM_GrassYarrowTuft.png",
       "beauty": {
         "views": {
@@ -69,9 +69,9 @@
       "vertices": 1268,
       "triangles": 996,
       "size_cm": [
-        74.84,
-        63.15,
-        51.52
+        75.11,
+        63.9,
+        50.93
       ],
       "materials": [
         {
@@ -97,16 +97,16 @@
         ]
       },
       "fbx": "SM_GrassYarrowTuft_LOD1.fbx",
-      "sha256": "e309184f52ac04aff034c2b034d3ccfc8d2e635cf58740fe40239da408df3577",
+      "sha256": "96ef5605bf1da57bbb0cf01951cfc3f1f3bd06772735cb6c5cb7a8c4a682eaeb",
       "preview": "preview_SM_GrassYarrowTuft_LOD1.png"
     },
     "SM_GrassYarrowTuft_LOD2": {
-      "vertices": 440,
-      "triangles": 250,
+      "vertices": 592,
+      "triangles": 402,
       "size_cm": [
-        68.49,
-        61.91,
-        68.36
+        71.62,
+        60.35,
+        50.78
       ],
       "materials": [
         {
@@ -132,7 +132,7 @@
         ]
       },
       "fbx": "SM_GrassYarrowTuft_LOD2.fbx",
-      "sha256": "42111d10b9595a51157282b853528d56d16a675109b7a98a3b18b23ee66e35e2",
+      "sha256": "9e0c894cbb007b951d38812288f0adda8316c3c9735d24478756fc067d91a937",
       "preview": "preview_SM_GrassYarrowTuft_LOD2.png"
     }
   },
