@@ -33,10 +33,13 @@ def _controller():
     return unreal.IKRetargeterController.get_controller(unreal.load_asset(RETARGETER))
 
 
-def build_retargeter(disabled_ops=()):
+def build_retargeter(disabled_ops=('Root Motion',)):
     """Create (or reset) the retargeter with default ops and fuzzy chain mapping.
 
-    ``disabled_ops`` holds op names to switch off (for example 'Run IK Rig').
+    ``disabled_ops`` holds op names to switch off. The Root Motion op stays off by default: with
+    IK_MH_IKRig it writes a root that snakes sideways and yaws by up to 15 degrees per step, and
+    because the game locks the root, that turned into a head-and-shoulder wobble in play.
+    ``retarget`` rebuilds a straight root track instead (see ``straighten_root``).
     """
     tools = unreal.AssetToolsHelpers.get_asset_tools()
     if unreal.EditorAssetLibrary.does_asset_exist(RETARGETER):
@@ -103,6 +106,7 @@ def retarget(clips=None):
         anim = unreal.load_asset(target)
         # GASP foley notifies reference sample-only audio and blueprints; the game plays its own steps.
         unreal.AnimationLibrary.remove_all_animation_notify_tracks(anim)
+        straighten_root(anim)
         # In place: the capsule drives movement, so lock the root and discard sequence root motion.
         unreal.AnimationLibrary.set_root_motion_enabled(anim, True)
         # GASP clips use a sample-only curve compression asset; use the engine default.
@@ -111,6 +115,49 @@ def retarget(clips=None):
         unreal.EditorAssetLibrary.save_asset(target, False)
         made.append(target)
     return made
+
+
+def straighten_root(anim):
+    """Move a loop's forward travel from the pelvis onto a straight, unrotated root track.
+
+    Without the Root Motion op the retargeted root stays at the origin and the pelvis carries the
+    travel. The root becomes a constant-velocity line through the pelvis path, so locking the
+    root in game keeps only the natural pelvis sway. Only the pelvis is keyed under the root.
+    """
+    lib = unreal.AnimationLibrary
+    frames = lib.get_num_keys(anim)
+    children = [str(n) for n in lib.get_animation_track_names(anim)
+                if list(lib.find_bone_path_to_root(anim, n))[1:2] == ['root']]
+    if children != ['pelvis']:
+        raise RuntimeError(f'Expected only the pelvis under the root, found {children}')
+    root = [lib.get_bone_pose_for_frame(anim, 'root', i, False) for i in range(frames)]
+    if any(abs(r.translation.x) + abs(r.translation.y) > 0.01
+           or abs(r.rotation.rotator().yaw) > 0.01 for r in root):
+        raise RuntimeError('straighten_root expects the root at the origin (Root Motion op off)')
+    pelvis = [lib.get_bone_pose_for_frame(anim, 'pelvis', i, False) for i in range(frames)]
+    first, last = pelvis[0].translation, pelvis[-1].translation
+    step_x = (last.x - first.x) / max(frames - 1, 1)
+    step_y = (last.y - first.y) / max(frames - 1, 1)
+    offset_x = sum(p.translation.x - step_x * i for i, p in enumerate(pelvis)) / frames
+    offset_y = sum(p.translation.y - step_y * i for i, p in enumerate(pelvis)) / frames
+    root_keys, pelvis_keys = [], []
+    for i, p in enumerate(pelvis):
+        x, y = offset_x + step_x * i, offset_y + step_y * i
+        root_keys.append(unreal.Vector(x, y, 0.0))
+        pelvis_keys.append(unreal.Vector(p.translation.x - x, p.translation.y - y, p.translation.z))
+    ctl = anim.get_editor_property('controller')
+    ctl.open_bracket(unreal.Text('Straighten root'))
+    ctl.set_bone_track_keys('root', root_keys, [unreal.Quat()] * frames, [unreal.Vector(1, 1, 1)] * frames)
+    rotations, scales = [p.rotation for p in pelvis], [p.scale3d for p in pelvis]
+    ctl.set_bone_track_keys('pelvis', pelvis_keys, rotations, scales)
+    # Evaluation adds the skeleton-vs-retarget-source pelvis offset to raw keys (about -10.7 cm in
+    # z for this heroine), so measure it and write keys that evaluate to the intended pose.
+    shift = lib.get_bone_pose_for_frame(anim, 'pelvis', 0, False).translation - pelvis_keys[0]
+    pelvis_keys = [k - shift for k in pelvis_keys]
+    ctl.set_bone_track_keys('pelvis', pelvis_keys, rotations, scales)
+    ctl.close_bracket()
+    return {'frames': frames, 'speed_cm_s': round(
+        (step_x ** 2 + step_y ** 2) ** 0.5 * (frames - 1) / max(anim.get_play_length(), 1e-3), 1)}
 
 
 LEGACY_MESH = '/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave'

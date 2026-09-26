@@ -29,6 +29,19 @@ strikes the trunk, the watering can tips over the plot, and gathering reaches th
 - **WHEN** the heroine stands still on a sloped bank near the creek
 - **THEN** both feet rest on the ground with hips adjusted, not floating or sinking
 
+#### Scenario: Walk over uneven ground
+- **WHEN** the heroine walks or sprints across the generated woodland
+- **THEN** heel strikes and toe-offs stay on the terrain surface instead of dipping into it
+
+### Requirement: The upper body stays steady while moving
+Walking and sprinting SHALL keep the heroine's torso, shoulders and head carried the way the source
+motion capture carries them. Retargeting or playback MUST NOT add side-to-side sway or a rocking
+yaw of the body line, and the body SHALL face the direction of travel.
+
+#### Scenario: Walk straight ahead
+- **WHEN** the heroine walks in a straight line in ordinary play
+- **THEN** her head moves no more from side to side than in the source walk clip, and the recorded footage shows no wobble at the head and shoulders
+
 #### Scenario: Chop a tree
 - **WHEN** the player fells a focused tree
 - **THEN** the swing aligns to the trunk and the hatchet visibly contacts it at impact

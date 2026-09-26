@@ -35,6 +35,7 @@ Settings list steps one row per D-pad press. Reproduce every bug with the editor
 
 - [x] 6.1 Stop the visible shadow steps without VSM re-render stalls. Verify frame pacing on the 4K presentation route. (2026-09-25: the sun/moon use hardware ray-traced shadows and rotate every refresh, via `homestead.RayTracedSun`, default 1. The VSM fallback keeps the 0.5° steps. 4K 60-cap p99 is 18.2 ms vs 20.7 ms stepped; uncapped 85 vs 78 FPS. See `docs/research/rendering-baseline/README.md`.)
 - [ ] 6.2 Jenny compares the ray-traced look (softer shadows, less low sun on inner leaves and hair) with `homestead.RayTracedSun 0` at dawn, midday and dusk, and accepts it or asks for tuning. Record her verdict here.
+- [x] 6.3 Jenny (2026-09-25): ray-traced shadows show pixelated movement on the terrain and her clothes. Cut the ray-traced shadow noise to the VSM level without losing 60 FPS smoothness at 4K. (2026-09-25: reproduced in PIE with 60 FPS desktop-duplication captures; static-camera temporal noise p99 was 8.9 (ground shade) and 7.8 (heroine) for ray tracing at 1 sample, vs 3.6-4.6 and 3.5-5.0 for VSM. `DefaultEngine.ini` now sets `r.RayTracing.Shadows.SamplesPerPixel=2` and `r.Shadow.Denoiser.HistoryConvolutionSamples=16`: 4.8 and 4.1. The cost is about 0.7 ms at 1080p. Packaged 4K MetaHuman route: 60-cap 59.7 FPS, p99 18.7 ms; uncapped 76.8 FPS, p99 16.8 ms. Jenny to confirm in play.)
 
 ## 7. Integrated acceptance
 

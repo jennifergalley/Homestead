@@ -33,3 +33,7 @@ unavailable, the game MAY fall back to stepped shadow updates that keep frame pa
 #### Scenario: Frame pacing while the sun moves
 - **WHEN** the 4K presentation route runs capped at 60 FPS with the sun moving
 - **THEN** its p99 frame time is no worse than the stepped-sun baseline and no shadow update produces a stall
+
+#### Scenario: Shade stays clean while moving
+- **WHEN** the heroine walks through dappled canopy shade with the camera following
+- **THEN** shadows on the ground and on her clothes don't crawl, sparkle or break into visible pixel noise, and static shade is no noisier than the Virtual Shadow Map look

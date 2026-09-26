@@ -57,8 +57,8 @@ public:
     // Ground speed (cm/s) each locomotion clip covers at play rate 1, so play rate follows speed.
     // Legacy clips were authored for 120/300 cm/s. The MetaHuman uses the Game Animation Sample
     // walk/run loops, measured with homestead_agent.gasp_locomotion after retargeting.
-    float WalkClipSpeed() const { return bMetaHumanActive ? 208.7f : 120.0f; }
-    float SprintClipSpeed() const { return bMetaHumanActive ? 521.7f : 300.0f; }
+    float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
+    float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
     FRotator GameplayViewRotation() const;
     float CameraDistance() const;

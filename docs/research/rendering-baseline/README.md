@@ -157,6 +157,34 @@ Look changes (compare `homestead.RayTracedSun 0/1` in the console):
 Jenny to judge; the exposure was tuned under VSM. Comparisons (VSM left, ray-traced right):
 `compare-vsm-vs-rt-sun-00003.jpg`, `compare-vsm-vs-rt-sun-00015-crop.jpg`.
 
+### Shadow noise follow-up (2026-09-25)
+
+Jenny saw "pixelated movement" in the ray-traced shadows on the terrain and her clothes. At
+1 sample per pixel the shadow denoiser leaves crawling speckle in dappled shade, and it gets worse
+while moving because the denoiser's history is rejected. Measured in PIE with 60 FPS
+desktop-duplication captures (ffmpeg `ddagrab`) of a still camera over canopy shade. The metric
+is the p99 of each pixel's deviation from its neighbouring frames' mean, in 8-bit luma:
+
+| Setting | Ground shade | Heroine | Lights pass (1080p internal) |
+| --- | --- | --- | --- |
+| RT, 1 spp (before) | 7.3-8.9 | 6.0-7.8 | 1.00 ms |
+| RT, 2 spp | 5.5 | 6.0 | 1.67 ms |
+| RT, 2 spp + `HistoryConvolutionSamples 16` (now) | 4.8 | 4.1 | ~1.7 ms |
+| RT, 4 spp + `HistoryConvolutionSamples 16` | 3.0 | 4.0 | 2.69 ms |
+| VSM (stepped sun) | 3.6-4.6 | 3.5-5.0 | - |
+
+`Config/DefaultEngine.ini` `[SystemSettings]` now sets `r.RayTracing.Shadows.SamplesPerPixel=2`
+and `r.Shadow.Denoiser.HistoryConvolutionSamples=16`. A smaller sun source angle (0.25°) and
+denoiser pre-convolution didn't help. The packaged 4K presentation route with the MetaHuman:
+
+| Run | FPS | Median ms | p95 ms | p99 ms | Frames > 20 ms | Frames > 33 ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| RT 2 spp, 60 cap | 59.7 | 16.65 | 17.64 | 18.69 | 7 | 1 |
+| RT 2 spp, uncapped | 76.8 | 12.90 | 14.93 | 16.80 | 4 | 1 |
+
+Uncapped costs about 1.4 ms at 4K compared with 1 spp, and pacing stays smooth. If more GPU time
+is needed, the DLSS fallback below (ray reconstruction) is the next step.
+
 ## Fallback if ray tracing gets too expensive
 
 Jenny's back-pocket option: rather than dropping hardware ray tracing, integrate NVIDIA DLSS (DLSS 5

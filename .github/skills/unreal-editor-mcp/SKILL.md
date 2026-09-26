@@ -196,6 +196,27 @@ mcp $E CaptureViewport '{"captureTransform":null,"annotations":null,"bShowUI":fa
 mcp 'LiveCodingToolset.LiveCodingToolset' CompileLiveCoding    # hot-patch C++ function bodies into the running editor/PIE
 ```
 
+### Record a playtest video and measure motion
+
+`CaptureEditorImage` is one still. To see motion (gait, wobble, shadow crawl), record the PIE
+window with ffmpeg's Desktop Duplication grabber, which gives true 60 FPS where `gdigrab` gives
+only about 30. `pip install imageio-ffmpeg` provides the ffmpeg binary.
+
+1. Start PIE with `"playMode":"PlayMode_InEditorFloating"`.
+2. Make the window topmost at a known rectangle, or the capture records whatever window is in
+   front. Call `SetProcessDPIAware`, then call `SetWindowPos(hwnd, HWND_TOPMOST=-1, 0, 0, 1936,
+   1119, 0x40)` on the editor process's `MainWindowHandle`.
+3. Run `ffmpeg -filter_complex "ddagrab=output_idx=0:framerate=60:offset_x=0:offset_y=0:video_size=1920x1110:draw_mouse=0,hwdownload,format=bgra" -t 15 -c:v libx264 -preset ultrafast -crf 14 -pix_fmt yuv420p out.mp4`
+   in a background process, and drive the heroine with `set_sticks`/`hold_key` meanwhile.
+4. Review with `-vf "fps=2,scale=480:-1,tile=6x5"` contact sheets and crops of full-rate frames.
+
+For numbers rather than pictures, register a per-frame Python callback in PIE with
+`unreal.register_slate_post_tick_callback`. It records `get_socket_transform(bone, RTS_COMPONENT)`
+and ground traces into a list; unregister it and dump the list to JSON afterwards. This is how
+the root-motion wobble (head sway 35.6 cm peak to peak) and heel dips were found and verified.
+Console variables can be flipped live for A/B captures with
+`unreal.SystemLibrary.execute_console_command(world, 'homestead.FootPlacement 0')`.
+
 ## 6. Toolset map
 
 | Need | Toolset |
@@ -277,9 +298,13 @@ Dated and short, newest first. Promote anything durable into the sections above.
     -run=pythonscript` with `AssetTools.migrate_packages(pkgs, <our Content dir>, MigrationOptions(prompt=False))`.
     It follows every dependency. The GASP clips dragged in 272 foley sounds and about 40 extra
     clips via notifies, which had to be pruned.
-  - **Retargeting UEFN → `IK_MH_IKRig`:** the Root Motion op's roots default to the pelvis. Set the
-    target root bone to `root`, source `COPY_FROM_SOURCE_ROOT`, height `SNAP_TO_GROUND`, then lock
-    the clips in place (`set_root_motion_enabled`). See `homestead_agent.gasp_locomotion`.
+  - **Retargeting UEFN → `IK_MH_IKRig`:** keep the Root Motion op **off**. Even with target root
+    `root` and `COPY_FROM_SOURCE_ROOT`, it wrote a root that snaked and yawed up to 16° per step.
+    Locking that root in game made the heroine's head and shoulders wobble. `gasp_locomotion`
+    retargets with the op off, then `straighten_root` puts the travel on a straight root before
+    locking the clips in place (`set_root_motion_enabled`). Check a new clip with
+    `get_bone_pose_for_time(anim, 'root', t, False)`: the root should have no yaw and no sideways
+    drift.
   - `Test-Game.ps1` smoke routes run a plain `-game` process (not UE automation) with
     `-HomesteadSmokeTest`, which selects the legacy heroine.
   - The Hotbar route's "Held mapped Shift again reaches active grounded sprint" step is flaky
@@ -395,3 +420,13 @@ Dated and short, newest first. Promote anything durable into the sections above.
 - 2026-09-25: `CaptureViewport` rejects calls that omit `captureTransform`/`annotations`; pass `null`.
   It returns the PNG inside JSON text (`returnValue.image`), which `editor_mcp.py` extracts.
 - 2026-09-25: `find_actors` with `{}` fails; it needs explicit keys (check `describe_toolset`).
+- 2026-09-25: `IKRetargetBatchOperation.run_batch_retarget` returns nothing while PIE runs; stop
+  PIE first.
+- 2026-09-25: After `AnimationDataController.set_bone_track_keys`,
+  `AnimationLibrary.get_bone_pose_for_frame` reports the pelvis about 10.7 cm lower than the
+  written keys (a skeleton-vs-retarget-source offset). The game doesn't apply that offset. Write,
+  read back, and compensate (see `gasp_locomotion.straighten_root`).
+- 2026-09-25: Trees are components of the `HomesteadWorld` actor. When searching for terrain with
+  traces, require the `ProceduralMeshComponent` hit and a single hit per column; otherwise a
+  teleport lands the heroine on a tree canopy.
+- 2026-09-25: The view tool sometimes reports a freshly written PNG as missing; view it again.

@@ -9,14 +9,72 @@
 #include "AnimNodes/AnimNode_SequenceEvaluator.h"
 #include "BoneControllers/AnimNode_ModifyBone.h"
 #include "BoneControllers/AnimNode_TwoBoneIK.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "HomesteadWorld.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
 namespace
 {
+TAutoConsoleVariable<int32> CVarFootPlacement(TEXT("homestead.FootPlacement"), 1,
+    TEXT("Ground-adaptive foot IK for the MetaHuman heroine: feet follow the terrain, the pelvis drops ")
+    TEXT("to reach the lower foot and soles stay above ground (0 = off)."));
+
+// Two-bone leg IK whose effector is the animated foot raised onto the ground under it. The ground
+// height and pelvis drop come from the game thread (component space); the node adds only as much
+// extra lift as keeps the ankle and ball above their standing clearance, so heel strikes and
+// toe-offs never dip into the terrain.
+struct FGroundedFootIK : FAnimNode_TwoBoneIK
+{
+    FBoneReference Ball;
+    float GroundZ = 0;
+    float BallGroundZ = 0;
+    float PelvisDrop = 0;
+    // MetaHuman standing reference: ankle 8.6 cm, ball 1.1 cm above the floor.
+    static constexpr float AnkleClearance = 7.5f;
+    static constexpr float BallClearance = 1.0f;
+
+    virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override
+    {
+        FAnimNode_TwoBoneIK::CacheBones_AnyThread(Context);
+        Ball.Initialize(Context.AnimInstanceProxy->GetRequiredBones());
+    }
+
+    virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override
+    {
+        return Ball.IsValidToEvaluate(RequiredBones) && FAnimNode_TwoBoneIK::IsValidToEvaluate(Skeleton, RequiredBones);
+    }
+
+    virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output,
+        TArray<FBoneTransform>& OutBoneTransforms) override
+    {
+        const FBoneContainer& Bones = Output.Pose.GetPose().GetBoneContainer();
+        const FCompactPoseBoneIndex FootIndex = IKBone.GetCompactPoseIndex(Bones);
+        const FCompactPoseBoneIndex CalfIndex = Bones.GetParentBoneIndex(FootIndex);
+        const FCompactPoseBoneIndex ThighIndex = Bones.GetParentBoneIndex(CalfIndex);
+        const FVector Foot = Output.Pose.GetComponentSpaceTransform(FootIndex).GetLocation();
+        const FVector Calf = Output.Pose.GetComponentSpaceTransform(CalfIndex).GetLocation();
+        const FVector Thigh = Output.Pose.GetComponentSpaceTransform(ThighIndex).GetLocation();
+        const double BallZ = Output.Pose.GetComponentSpaceTransform(Ball.GetCompactPoseIndex(Bones)).GetLocation().Z;
+        // Heights are relative to the ground under the ankle and under the ball respectively.
+        const float Clearance = FMath::Max3(0.0f, AnkleClearance - static_cast<float>(Foot.Z - PelvisDrop),
+            BallGroundZ - GroundZ + BallClearance - static_cast<float>(BallZ - PelvisDrop));
+        EffectorLocation = Foot + FVector(0, 0, GroundZ - PelvisDrop + Clearance);
+        // Keep the knee bending in its animated plane; a near-straight leg falls back to the mesh
+        // forward axis (+Y for the MetaHuman) so the solver never flips the knee.
+        const FVector Axis = (Foot - Thigh).GetSafeNormal();
+        FVector Knee = (Calf - Thigh) - Axis * FVector::DotProduct(Calf - Thigh, Axis);
+        if (Knee.SizeSquared() < 1.0f)
+            Knee = FVector::YAxisVector - Axis * Axis.Y;
+        JointTargetLocation = Calf + Knee.GetSafeNormal() * 50.0f;
+        FAnimNode_TwoBoneIK::EvaluateSkeletalControl_AnyThread(Output, OutBoneTransforms);
+    }
+};
+
 enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
@@ -47,6 +105,41 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         ActionBlend.A.SetLinkNode(&Blend);
         ActionBlend.B.SetLinkNode(&Gather);
         Gather.SetTeleportToExplicitTime(true);
+        PlaceToComponent.LocalPose.SetLinkNode(&ActionBlend);
+        PelvisPlacement.ComponentPose.SetLinkNode(&PlaceToComponent);
+        LeftSlope.ComponentPose.SetLinkNode(&PelvisPlacement);
+        RightSlope.ComponentPose.SetLinkNode(&LeftSlope);
+        LeftPlant.ComponentPose.SetLinkNode(&RightSlope);
+        RightPlant.ComponentPose.SetLinkNode(&LeftPlant);
+        PlaceToLocal.ComponentPose.SetLinkNode(&RightPlant);
+        PelvisPlacement.BoneToModify.BoneName = TEXT("pelvis");
+        PelvisPlacement.TranslationMode = BMM_Additive;
+        PelvisPlacement.TranslationSpace = BCS_ComponentSpace;
+        PelvisPlacement.RotationMode = BMM_Ignore;
+        PelvisPlacement.ScaleMode = BMM_Ignore;
+        LeftPlant.IKBone.BoneName = TEXT("foot_l");
+        RightPlant.IKBone.BoneName = TEXT("foot_r");
+        LeftPlant.Ball.BoneName = TEXT("ball_l");
+        RightPlant.Ball.BoneName = TEXT("ball_r");
+        for (FGroundedFootIK* Foot : {&LeftPlant, &RightPlant})
+        {
+            Foot->EffectorLocationSpace = BCS_ComponentSpace;
+            Foot->JointTargetLocationSpace = BCS_ComponentSpace;
+            Foot->bMaintainEffectorRelRot = true;
+            Foot->bAllowStretching = false;
+        }
+        LeftSlope.BoneToModify.BoneName = TEXT("foot_l");
+        RightSlope.BoneToModify.BoneName = TEXT("foot_r");
+        for (FAnimNode_ModifyBone* Foot : {&LeftSlope, &RightSlope})
+        {
+            Foot->RotationMode = BMM_Additive;
+            Foot->RotationSpace = BCS_ComponentSpace;
+            Foot->TranslationMode = BMM_Ignore;
+            Foot->ScaleMode = BMM_Ignore;
+        }
+        for (FAnimNode_SkeletalControlBase* Node : std::initializer_list<FAnimNode_SkeletalControlBase*>{
+            &PelvisPlacement, &LeftPlant, &RightPlant, &LeftSlope, &RightSlope})
+            Node->Alpha = 0;
         if (bTrialFootLock)
         {
             ToComponent.LocalPose.SetLinkNode(&ActionBlend);
@@ -97,6 +190,21 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FAnimNode_ModifyBone LeftRotation;
     FAnimNode_ModifyBone RightRotation;
     FAnimNode_ConvertComponentToLocalSpace ToLocal;
+    FAnimNode_ConvertLocalToComponentSpace PlaceToComponent;
+    FAnimNode_ModifyBone PelvisPlacement;
+    FGroundedFootIK LeftPlant;
+    FGroundedFootIK RightPlant;
+    FAnimNode_ModifyBone LeftSlope;
+    FAnimNode_ModifyBone RightSlope;
+    FAnimNode_ConvertComponentToLocalSpace PlaceToLocal;
+    float LeftGroundHeight = 0;
+    float RightGroundHeight = 0;
+    float LeftBallHeight = 0;
+    float RightBallHeight = 0;
+    float PelvisDrop = 0;
+    FQuat LeftTilt = FQuat::Identity;
+    FQuat RightTilt = FQuat::Identity;
+    float PlacementAlpha = 0;
     FVector LeftAnchor = FVector::ZeroVector;
     FVector RightAnchor = FVector::ZeroVector;
     FQuat LeftAnchorRotation = FQuat::Identity;
@@ -122,7 +230,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
 
     virtual FAnimNode_Base* GetCustomRootNode() override
     {
-        return bTrialFootLock ? static_cast<FAnimNode_Base*>(&ToLocal) : &ActionBlend;
+        return bTrialFootLock ? static_cast<FAnimNode_Base*>(&ToLocal) : &PlaceToLocal;
     }
 
     virtual void Initialize(UAnimInstance* Instance) override
@@ -130,6 +238,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         FAnimInstanceProxy::Initialize(Instance);
         bAnchored = false;
         PreviousSpeed = 0;
+        LeftGroundHeight = RightGroundHeight = LeftBallHeight = RightBallHeight = PelvisDrop = PlacementAlpha = 0;
+        LeftTilt = RightTilt = FQuat::Identity;
         if (const auto* Avatar = Cast<AHomesteadCharacter>(Instance->TryGetPawnOwner()))
         {
             Idle.SetSequence(Avatar->GetIdleAnimation());
@@ -138,6 +248,71 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Sprint.SetSequence(Avatar->GetSprintAnimation());
             Gather.SetSequence(Avatar->GetGatherAnimation());
         }
+    }
+
+    // Game thread: trace the ground under each foot and hand the proxy nodes component-space
+    // heights, the pelvis drop and a slope tilt. Values ease in so steps and slope changes never pop.
+    void UpdateFootPlacement(const AHomesteadCharacter* Avatar, float DeltaSeconds)
+    {
+        const USkeletalMeshComponent* Mesh = Avatar ? Avatar->GetMesh() : nullptr;
+        const bool Enabled = Mesh && !bTrialFootLock && Avatar->IsMetaHumanActive()
+            && CVarFootPlacement.GetValueOnGameThread() != 0;
+        const bool Grounded = Enabled && Avatar->GetCharacterMovement()->IsMovingOnGround();
+        float LeftTarget = 0, RightTarget = 0, LeftBallTarget = 0, RightBallTarget = 0;
+        FQuat LeftTiltTarget = FQuat::Identity, RightTiltTarget = FQuat::Identity;
+        if (Grounded)
+        {
+            const UCapsuleComponent* Capsule = Avatar->GetCapsuleComponent();
+            const FTransform& ToWorld = Mesh->GetComponentTransform();
+            const float Base = ToWorld.GetLocation().Z;
+            FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadFootPlacement), false, Avatar);
+            const FCollisionResponseParams Response(Capsule->GetCollisionResponseToChannels());
+            auto Ground = [&](const FVector& At, float& Height, FVector* Normal)
+            {
+                FHitResult Hit;
+                if (!Avatar->GetWorld()->LineTraceSingleByChannel(Hit, FVector(At.X, At.Y, Base + 50.0f),
+                        FVector(At.X, At.Y, Base - 60.0f), Capsule->GetCollisionObjectType(), Params, Response)
+                    || Hit.ImpactNormal.Z < 0.7f)
+                    return false;
+                Height = FMath::Clamp(static_cast<float>(Hit.ImpactPoint.Z - Base), -40.0f, 45.0f);
+                if (Normal) *Normal = Hit.ImpactNormal;
+                return true;
+            };
+            auto Trace = [&](FName Ankle, FName Ball, float& Height, float& BallHeight, FQuat& Tilt)
+            {
+                FVector Normal;
+                if (!Ground(Mesh->GetSocketLocation(Ankle), Height, &Normal)) return;
+                if (!Ground(Mesh->GetSocketLocation(Ball), BallHeight, nullptr)) BallHeight = Height;
+                const FQuat Full = FQuat::FindBetweenNormals(FVector::UpVector,
+                    ToWorld.InverseTransformVectorNoScale(Normal).GetSafeNormal());
+                const float Angle = Full.GetAngle();
+                const float Limit = FMath::DegreesToRadians(25.0f);
+                Tilt = Angle > Limit ? FQuat::Slerp(FQuat::Identity, Full, Limit / Angle) : Full;
+            };
+            Trace(TEXT("foot_l"), TEXT("ball_l"), LeftTarget, LeftBallTarget, LeftTiltTarget);
+            Trace(TEXT("foot_r"), TEXT("ball_r"), RightTarget, RightBallTarget, RightTiltTarget);
+        }
+        const float Ease = FMath::Clamp(DeltaSeconds * 14.0f, 0.0f, 1.0f);
+        LeftGroundHeight = FMath::Lerp(LeftGroundHeight, LeftTarget, Ease);
+        RightGroundHeight = FMath::Lerp(RightGroundHeight, RightTarget, Ease);
+        LeftBallHeight = FMath::Lerp(LeftBallHeight, LeftBallTarget, Ease);
+        RightBallHeight = FMath::Lerp(RightBallHeight, RightBallTarget, Ease);
+        LeftTilt = FQuat::Slerp(LeftTilt, LeftTiltTarget, Ease);
+        RightTilt = FQuat::Slerp(RightTilt, RightTiltTarget, Ease);
+        PelvisDrop = FMath::Lerp(PelvisDrop, FMath::Min3(LeftTarget, RightTarget, 0.0f),
+            FMath::Clamp(DeltaSeconds * 10.0f, 0.0f, 1.0f));
+        PlacementAlpha = FMath::FInterpConstantTo(PlacementAlpha, Enabled ? 1.0f : 0.0f, DeltaSeconds, 4.0f);
+        PelvisPlacement.Translation = FVector(0, 0, PelvisDrop);
+        LeftPlant.GroundZ = LeftGroundHeight;
+        RightPlant.GroundZ = RightGroundHeight;
+        LeftPlant.BallGroundZ = LeftBallHeight;
+        RightPlant.BallGroundZ = RightBallHeight;
+        LeftPlant.PelvisDrop = RightPlant.PelvisDrop = PelvisDrop;
+        LeftSlope.Rotation = LeftTilt.Rotator();
+        RightSlope.Rotation = RightTilt.Rotator();
+        for (FAnimNode_SkeletalControlBase* Node : std::initializer_list<FAnimNode_SkeletalControlBase*>{
+            &PelvisPlacement, &LeftPlant, &RightPlant, &LeftSlope, &RightSlope})
+            Node->Alpha = PlacementAlpha;
     }
 
     virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
@@ -215,6 +390,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             PreviousActorLocation = ActorLocation;
             PreviousSpeed = Speed;
         }
+        UpdateFootPlacement(Avatar, DeltaSeconds);
         if (bTrialCMUWalk && Walk.GetSequence() && SlowWalk.GetSequence())
         {
             const float TargetSlow = FMath::Clamp((140.0f - Speed) / 60.0f, 0.0f, 1.0f);

@@ -248,12 +248,17 @@ bool AHomesteadCharacter::LoadHeroineAssets()
 float AHomesteadCharacter::InferMeshYaw(const USkeletalMesh& Asset) const
 {
     const FReferenceSkeleton& Skeleton = Asset.GetRefSkeleton();
-    const FName FootNames[] = {TEXT("foot_l"), TEXT("foot.L"), TEXT("LeftFoot")};
-    const FName ToeNames[] = {TEXT("ball_l"), TEXT("toe_l"), TEXT("toe.L"), TEXT("LeftToeBase")};
-    int32 Foot = INDEX_NONE, Toe = INDEX_NONE;
-    for (const FName Name : FootNames) if ((Foot = Skeleton.FindBoneIndex(Name)) != INDEX_NONE) break;
-    for (const FName Name : ToeNames) if ((Toe = Skeleton.FindBoneIndex(Name)) != INDEX_NONE) break;
-    if (Foot == INDEX_NONE || Toe == INDEX_NONE)
+    auto FindBone = [&Skeleton](std::initializer_list<const TCHAR*> Names)
+    {
+        for (const TCHAR* Name : Names)
+            if (const int32 Index = Skeleton.FindBoneIndex(Name); Index != INDEX_NONE) return Index;
+        return static_cast<int32>(INDEX_NONE);
+    };
+    const int32 LeftFoot = FindBone({TEXT("foot_l"), TEXT("foot.L"), TEXT("LeftFoot")});
+    const int32 LeftToe = FindBone({TEXT("ball_l"), TEXT("toe_l"), TEXT("toe.L"), TEXT("LeftToeBase")});
+    const int32 RightFoot = FindBone({TEXT("foot_r"), TEXT("foot.R"), TEXT("RightFoot")});
+    const int32 RightToe = FindBone({TEXT("ball_r"), TEXT("toe_r"), TEXT("toe.R"), TEXT("RightToeBase")});
+    if (LeftFoot == INDEX_NONE || LeftToe == INDEX_NONE)
     {
         UE_LOG(LogTemp, Warning, TEXT("Cannot infer heroine facing from foot/toe bones; verify the imported mesh orientation."));
         return 0;
@@ -265,7 +270,11 @@ float AHomesteadCharacter::InferMeshYaw(const USkeletalMesh& Asset) const
             Transform = Transform * Skeleton.GetRefBonePose()[Parent];
         return Transform.GetLocation();
     };
-    FVector Forward = Position(Toe) - Position(Foot);
+    // Feet toe out (about 10 degrees on the MetaHuman), so average both feet to cancel the splay;
+    // a single foot turned the whole body off the direction of travel.
+    FVector Forward = Position(LeftToe) - Position(LeftFoot);
+    if (RightFoot != INDEX_NONE && RightToe != INDEX_NONE)
+        Forward += Position(RightToe) - Position(RightFoot);
     Forward.Z = 0;
     if (Forward.SizeSquared() < 1)
     {
