@@ -980,10 +980,11 @@ Result Simulation::CraftGarment(WearableDefinition definition, Point player, std
         return Bad("Gather " + std::to_string(info->fiberCost - Count(Item::Fiber)) + " more Fiber first.");
     if (!CanAllocate(state_.nextWearableId) || state_.wearables.size() >= MaxObjects)
         return Bad("The homestead has reached its garment identity limit.");
+    if (auto rested = CheckExertion(Exertion::GarmentEnergy); !rested) return rested;
     State candidate = state_;
     candidate.inventory[static_cast<int>(Item::Fiber)] -= info->fiberCost;
     candidate.wearables.push_back({candidate.nextWearableId++, definition, 0, WearableOwner::Carried, 0});
-    return CommitInventory(std::move(candidate), "Made one garment from fiber.");
+    return Exert(Exertion::GarmentEnergy, CommitInventory(std::move(candidate), "Made one garment from fiber."));
 }
 Result Simulation::RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision)
 {
@@ -1368,6 +1369,8 @@ Result Simulation::Harvest(int nodeId, Point player)
         return Bad("Craft a crude hatchet before cutting a sapling.");
     if (node->kind != ResourceKind::Sapling && Count(Item::Knife) == 0)
         return Bad("Take your knife from storage before gathering.");
+    const double cost = HarvestCost(nodeId);
+    if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = Yield(node->kind);
     State candidate = state_;
     auto* updated = Find(candidate.resources, nodeId);
@@ -1375,7 +1378,7 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
     const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ".";
-    return CommitInventory(std::move(candidate), message.c_str());
+    return Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
 }
 Result Simulation::Clear(int nodeId, Point player)
 {
@@ -1387,6 +1390,8 @@ Result Simulation::Clear(int nodeId, Point player)
         return Bad("Craft a crude hatchet before felling trees or clearing saplings.");
     if (!RequiresHatchet(node->kind) && Count(Item::Knife) == 0)
         return Bad("Take your knife from storage before clearing.");
+    const double cost = ClearCost(nodeId);
+    if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = node->readyAtHour <= state_.hour ? Yield(node->kind) : Inventory{};
     State candidate = state_;
     auto* updated = Find(candidate.resources, nodeId);
@@ -1394,7 +1399,7 @@ Result Simulation::Clear(int nodeId, Point player)
     updated->readyAtHour = 0.0;
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
-    return CommitInventory(std::move(candidate), "Land cleared.");
+    return Exert(cost, CommitInventory(std::move(candidate), "Land cleared."));
 }
 bool operator<(const UnderbrushEdit& a, const UnderbrushEdit& b)
 {
@@ -1414,6 +1419,8 @@ Result Simulation::ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool
     if (IsUnderbrushCleared(chunk, index)) return Bad("This undergrowth has already been cleared.");
     if (static_cast<int>(state_.clearedUnderbrush.size()) >= MaxUnderbrushEdits)
         return Bad("The world has reached its 16384 cleared-undergrowth limit.");
+    const double cost = woody ? Exertion::WoodyUnderbrushEnergy : Exertion::SoftUnderbrushEnergy;
+    if (auto ready = CheckExertion(cost); !ready) return ready;
     State candidate = state_;
     const UnderbrushEdit key{chunk, index};
     candidate.clearedUnderbrush.insert(
@@ -1421,7 +1428,7 @@ Result Simulation::ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool
     // A full pack still clears; the cuttings are just left on the ground.
     ++candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
     if (ContainerUsed(candidate, 0) > InventoryCapacity) --candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
-    return CommitInventory(std::move(candidate), "Undergrowth cleared.");
+    return Exert(cost, CommitInventory(std::move(candidate), "Undergrowth cleared."));
 }
 Result Simulation::Eat(Item item)
 {
@@ -1458,8 +1465,11 @@ Result Simulation::Craft(Recipe recipe, Point player)
         return Bad("Take your crude hatchet from storage to split firewood.");
     if (!cooking && recipe != Recipe::SplitFirewood && Count(Item::Knife) == 0)
         return Bad("Take your knife from storage to craft tools.");
+    const double cost = cooking ? Exertion::CookEnergy
+        : recipe == Recipe::SplitFirewood ? Exertion::SplitFirewoodEnergy : Exertion::CraftEnergy;
+    if (auto ready = CheckExertion(cost); !ready) return ready;
     if (!TryAdjust(change)) return Bad(MissingMessage(change, state_.inventory));
-    return Good(std::string("Made ") + RecipeName(recipe) + ".");
+    return Exert(cost, Good(std::string("Made ") + RecipeName(recipe) + "."));
 }
 
 RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
@@ -1536,9 +1546,10 @@ Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point p
     if ((kind == Piece::Roof || EdgePiece(kind)) && !HasPiece(state_, Piece::Foundation, cellX, cellY))
         return Bad("Build a foundation in this cell first.");
     const Inventory cost = BuildCost(kind);
+    if (auto ready = CheckExertion(Exertion::BuildEnergy); !ready) return ready;
     if (!TryAdjust(cost)) return Bad(MissingMessage(cost, state_.inventory));
     state_.structures.push_back({state_.nextId++, kind, cellX, cellY, rotation, 0.0, {}});
-    return Good(std::string("Placed ") + PieceName(kind) + ".");
+    return Exert(Exertion::BuildEnergy, Good(std::string("Placed ") + PieceName(kind) + "."));
 }
 Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds)
 {
@@ -1604,6 +1615,16 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
     ++revision_;
     return Good("Your starter tools, bed and storage chests are ready.");
 }
+Result Simulation::GrantItems(Item item, int count)
+{
+    if (state_.failed) return Failed();
+    if (item == Item::Count || count <= 0) return Bad("Choose an item and a positive amount.");
+    Inventory change{};
+    change[static_cast<int>(item)] = count;
+    if (!TryAdjust(change)) return Bad("Not enough pack space.");
+    ++revision_;
+    return Good(std::string("Added ") + std::to_string(count) + " " + ItemName(item) + ".");
+}
 Result Simulation::Till(int cellX, int cellY, Point player)
 {
     if (state_.failed) return Failed();
@@ -1617,8 +1638,9 @@ Result Simulation::Till(int cellX, int cellY, Point player)
         if (structure.cellX == cellX && structure.cellY == cellY) return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("This cell is already tilled.");
+    if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
     state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
-    return Good("Soil tilled. Plant wild-root seeds or seeds from a foraged berry here.");
+    return Exert(Exertion::TillEnergy, Good("Soil tilled. Plant wild-root seeds or seeds from a foraged berry here."));
 }
 Result Simulation::Plant(int plotId, Point player, CropKind kind)
 {
@@ -1629,13 +1651,13 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
     if (plot->planted) return Bad("A crop is already growing here.");
     const bool berries = kind == CropKind::Berries;
     const Item plantingItem = berries ? Item::Berries : Item::Seeds;
+    if (auto ready = CheckExertion(Exertion::PlantEnergy); !ready) return ready;
     if (!TryAdjust(Items({{plantingItem, -1}})))
         return Bad(berries ? "Gather a berry to plant the seeds from its fruit." : "Gather seeds from wild roots before planting.");
     plot->kind = kind;
     plot->planted = true;
     plot->growth = 0.0;
-    return Good(berries ? "Planted berry seeds."
-        : "Roots planted.");
+    return Exert(Exertion::PlantEnergy, Good(berries ? "Planted berry seeds." : "Roots planted."));
 }
 Result Simulation::Water(int plotId, Point player)
 {
@@ -1644,9 +1666,10 @@ Result Simulation::Water(int plotId, Point player)
     if (!plot || !Near(player, CellCenter(plot->cellX, plot->cellY))) return Bad("Move beside a garden plot to water it.");
     if (Count(Item::WateringCan) == 0) return Bad("Craft a watering can first.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
+    if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
     if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad("Refill your watering can at the stream.");
     plot->moisture = 1.0;
-    return Good("Soil watered.");
+    return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
 Result Simulation::Weed(int plotId, Point player)
 {
@@ -1654,8 +1677,9 @@ Result Simulation::Weed(int plotId, Point player)
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, CellCenter(plot->cellX, plot->cellY))) return Bad("Move beside a garden plot to weed it.");
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
+    if (auto ready = CheckExertion(Exertion::WeedEnergy); !ready) return ready;
     plot->weeds = 0.0;
-    return Good("Weeds removed. The crop has more room to grow.");
+    return Exert(Exertion::WeedEnergy, Good("Weeds removed. The crop has more room to grow."));
 }
 Result Simulation::HarvestCrop(int plotId, Point player)
 {
@@ -1665,11 +1689,12 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (!plot->planted || plot->growth < 1.0) return Bad("This crop is not ready to harvest.");
     const bool berries = plot->kind == CropKind::Berries;
     const Inventory yield = berries ? Items({{Item::Berries, 6}}) : Items({{Item::Roots, 4}, {Item::Seeds, 2}});
+    if (auto ready = CheckExertion(Exertion::HarvestCropEnergy); !ready) return ready;
     if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
     plot->planted = berries;
     plot->growth = 0.0;
-    return Good(berries ? "Harvested six berries. The bush remains planted and will grow more fruit."
-        : "Harvested four roots and two seeds. This plot is ready to replant.");
+    return Exert(Exertion::HarvestCropEnergy, Good(berries ? "Harvested six berries. The bush remains planted and will grow more fruit."
+        : "Harvested four roots and two seeds. This plot is ready to replant."));
 }
 Result Simulation::FillWater(Point player)
 {
@@ -1678,8 +1703,9 @@ Result Simulation::FillWater(Point player)
     if (!IsNearWater(player)) return Bad("Walk to the stream to refill your watering can.");
     if (Count(Item::Water) >= 6) return Bad("Your watering can is already full.");
     const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
+    if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
     if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
-    return Good("Watering can filled with six water portions.");
+    return Exert(Exertion::FillWaterEnergy, Good("Watering can filled with six water portions."));
 }
 Result Simulation::AddFuel(int structureId, Point player)
 {
@@ -1689,10 +1715,11 @@ Result Simulation::AddFuel(int structureId, Point player)
     if (!Near(player, CellCenter(fire->cellX, fire->cellY))) return Bad("Move closer to fuel this cookfire.");
     if (fire->fuelHours > MaxFuel - 4.0) return Bad("This fire has enough fuel. Add more after it burns down.");
     const Item fuel = Count(Item::Firewood) > 0 ? Item::Firewood : Item::Branch;
+    if (auto ready = CheckExertion(Exertion::FuelEnergy); !ready) return ready;
     if (!TryAdjust(Items({{fuel, -1}}))) return Bad("Carry firewood or a branch to fuel the fire.");
     fire->fuelHours += 4.0;
-    return Good(fuel == Item::Firewood ? "Added firewood: four more hours of fire."
-        : "Added a branch: four more hours of fire.");
+    return Exert(Exertion::FuelEnergy, Good(fuel == Item::Firewood ? "Added firewood: four more hours of fire."
+        : "Added a branch: four more hours of fire."));
 }
 Result Simulation::Transfer(int chestId, Item item, int amount, Point player)
 {
@@ -1729,7 +1756,7 @@ void Simulation::Step(double hours, Point player, bool sleeping)
     if (sheltered) warmthRate = std::max(1.0, warmthRate + 7.0);
     if (fire) warmthRate = std::max(6.0, warmthRate + 12.0);
     const double hungerRate = sleeping ? -1.3 : -2.0;
-    const double energyRate = sleeping ? 10.0 : -2.4;
+    const double energyRate = sleeping ? 10.0 : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
     elapsed = std::min(elapsed, state_.hunger / -hungerRate);
@@ -1775,6 +1802,31 @@ Result Simulation::SpendSprintEnergy(double realSeconds)
         return Bad("Rest to regain enough energy to sprint.");
     state_.energy = std::max(10.0, state_.energy - 0.35 * realSeconds);
     return {true, "", ResultCode::None, revision_};
+}
+Result Simulation::CheckExertion(double cost) const
+{
+    if (state_.failed) return Failed();
+    if (state_.energy - cost < Exertion::Reserve) return Bad("You're too exhausted to keep working. Eat something or rest.");
+    return {true, "", ResultCode::None, revision_};
+}
+Result Simulation::Exert(double cost, Result done)
+{
+    if (done.ok) state_.energy = Clamp(state_.energy - cost, 0.0, 100.0);
+    return done;
+}
+double Simulation::HarvestCost(int nodeId) const
+{
+    const auto* node = Find(state_.resources, nodeId);
+    if (!node) return 0.0;
+    if (node->kind == ResourceKind::ForestTree) return Exertion::FellEnergy;
+    return node->kind == ResourceKind::Sapling ? Exertion::SaplingEnergy : Exertion::GatherEnergy;
+}
+double Simulation::ClearCost(int nodeId) const
+{
+    const auto* node = Find(state_.resources, nodeId);
+    if (!node) return 0.0;
+    if (node->kind == ResourceKind::ForestTree) return Exertion::FellEnergy;
+    return node->kind == ResourceKind::Sapling ? Exertion::SaplingEnergy : Exertion::ClearEnergy;
 }
 void Simulation::AdvanceGameHours(double hours, Point player)
 {

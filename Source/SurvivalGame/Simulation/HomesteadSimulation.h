@@ -205,6 +205,32 @@ double StreamX(double y);
 bool IsNearWater(Point position);
 Point CellCenter(int cellX, int cellY);
 
+// Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
+// below Reserve, so exertion alone never collapses her.
+namespace Exertion
+{
+constexpr double AwakePerHour = 0.6;
+constexpr double Reserve = 5.0;
+constexpr double GatherEnergy = 0.5;
+constexpr double ClearEnergy = 1.0;
+constexpr double SaplingEnergy = 1.5;
+constexpr double FellEnergy = 4.0;
+constexpr double WoodyUnderbrushEnergy = 1.5;
+constexpr double SoftUnderbrushEnergy = 0.8;
+constexpr double CraftEnergy = 0.8;
+constexpr double CookEnergy = 0.3;
+constexpr double SplitFirewoodEnergy = 1.5;
+constexpr double BuildEnergy = 1.5;
+constexpr double GarmentEnergy = 0.8;
+constexpr double TillEnergy = 2.0;
+constexpr double PlantEnergy = 0.4;
+constexpr double WaterEnergy = 0.4;
+constexpr double WeedEnergy = 0.8;
+constexpr double HarvestCropEnergy = 0.6;
+constexpr double FillWaterEnergy = 0.3;
+constexpr double FuelEnergy = 0.2;
+}
+
 struct PreparedWorldRegion
 {
     Generation::WorldDescriptor world;
@@ -253,6 +279,8 @@ public:
     // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
     // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.
     Result GrantStarterKit(Point anchor, Point facing, bool includeSeeds);
+    // Playtest aid: put `count` of an item in her pack if there is room.
+    Result GrantItems(Item item, int count);
     Result Till(int cellX, int cellY, Point player);
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);
@@ -288,6 +316,11 @@ public:
     // simulating the skipped interval, so needs, crops and fires are left as they were.
     void SkipToHourOfDay(double hourOfDay);
     Result SpendSprintEnergy(double realSeconds);
+    // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.
+    Result CheckExertion(double cost) const;
+    // What harvesting or clearing a node would cost her.
+    double HarvestCost(int nodeId) const;
+    double ClearCost(int nodeId) const;
 
     std::string Serialize() const;
     Result Deserialize(const std::string& data);
@@ -300,6 +333,8 @@ private:
     bool TryAdjust(const Inventory& change);
     Result CheckRevision(std::uint64_t expectedRevision) const;
     Result CommitInventory(State&& candidate, const char* message);
+    // Charges `cost` Energy when `done` succeeded.
+    Result Exert(double cost, Result done);
     void Step(double hours, Point player, bool sleeping);
 };
 }

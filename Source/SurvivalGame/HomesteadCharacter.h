@@ -138,6 +138,12 @@ public:
     static constexpr float FellCutLeft = -0.835f;
     static constexpr float FellCutForward = 0.550f;
     UAnimSequence* GetFellAnimation() const { return FellAnimation; }
+    // A berry (or piece of root) from the hip pouch to her mouth (MetaHuman only; false otherwise).
+    bool PlayEat(bool bBerry);
+    UAnimSequence* GetEatAnimation() const { return EatAnimation; }
+    // AN_HeroineMH_Eat (homestead_agent.eat_berry EVENTS): food in her fingers, then in her mouth.
+    static constexpr float EatPick = 19.0f / 30.0f;
+    static constexpr float EatBite = 40.0f / 30.0f;
     // AN_HeroineMH_AxeFell timing (axe_fell.py FRAMES): the clip holds two identical strokes and
     // the cycle from the first rock-free to the second repeats for longer fells.
     static constexpr float FellLoopStart = 44.0f / 30.0f;
@@ -193,6 +199,11 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> CarriedStones;
     // The root or berry cluster in her right hand during a pouch gather.
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedForage;
+    UPROPERTY() TObjectPtr<UAnimSequence> EatAnimation;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> EatenFood;
+    bool bEatBerry = true;
+    bool bEatFoodInHand = false;
+    void UpdateEating();
     UPROPERTY() TObjectPtr<UStaticMesh> ForageBerryMesh;
     UPROPERTY() TObjectPtr<UStaticMesh> ForageRootMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).

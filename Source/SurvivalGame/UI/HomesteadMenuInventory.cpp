@@ -134,6 +134,9 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Select the item again before confirming."), true); return false; }
     Homestead::Result Result{false, "That action is not available for this item."};
+    if (Action == EHomesteadItemAction::Pin && Row.Subject == EHomesteadMenuSubject::ItemGroup)
+        return Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
+            && TogglePinnedToHotbar(static_cast<Homestead::Item>(Row.Id));
     if (Row.Subject == EHomesteadMenuSubject::GarmentRecipe || Action == EHomesteadItemAction::Equip
         || Action == EHomesteadItemAction::Unequip || Action == EHomesteadItemAction::Dye)
     {

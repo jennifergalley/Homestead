@@ -23,7 +23,7 @@ class AHomesteadMenuPortrait;
 class SWidget;
 
 enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe };
-enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye, Drop };
+enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye, Drop, Pin };
 
 struct FHomesteadRow
 {
@@ -53,6 +53,9 @@ struct FHomesteadHotbarSlot
     bool Assigned = false;
     bool Available = false;
     bool Selected = false;
+    // Food pinned to the hotbar: left-click eats one. Count is how many are in the pack.
+    bool Food = false;
+    int32 Count = 0;
     FName Icon;
 };
 
@@ -151,6 +154,10 @@ public:
     int32 SelectedHotbarIndex() const { return SelectedHotbarSlot; }
     void SelectHotbarSlot(int32 Index);
     void CycleHotbar(int32 Direction);
+    // Tools and food can be pinned to the hotbar from the pack.
+    static bool CanPinToHotbar(Homestead::Item Item);
+    bool IsPinnedToHotbar(Homestead::Item Item) const;
+    bool TogglePinnedToHotbar(Homestead::Item Item);
     void HoverHotbarSlot(int32 Index) { HoveredHotbarSlot = Index >= 0 && Index < 10 ? Index : INDEX_NONE; }
     bool KnifePreviewRequested() const;
     // The carried tool in the selected (or hovered) hotbar slot, or Item::Count.
@@ -159,6 +166,8 @@ public:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
+    // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
+    UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -311,7 +320,9 @@ private:
     void ShowHotbar();
     void HideHotbar();
     void ResetHotbar();
-    void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected);
+    // Layout is the save's HotbarLayout: older hotbars gain the machete and berries once.
+    void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout);
+    void EatFromHotbar(Homestead::Item Food);
     // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
     void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();

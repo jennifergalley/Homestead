@@ -1152,7 +1152,8 @@ void WarmthSleepAndFailure()
     tired.AdvanceGameHours(10, Home);
     CHECK(tired.GetState().failed);
     CHECK(tired.GetState().energy == 0);
-    CHECK(Close(tired.GetState().hour, 6.5));
+    // Time awake drains Energy slowly: 1.2 points last two hours.
+    CHECK(Close(tired.GetState().hour, 8.0));
 }
 
 void SleepAndFiniteBoundaries()
@@ -2319,7 +2320,11 @@ void SparseEditScaleAndPayloadBounds()
             ++actions;
             CHECK(static_cast<int>(sim.GetState().resourceEdits.size()) == actions);
             if (actions % 20 == 0)
+            {
                 WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}});
+                // 256 harvests is far more work than one day's Energy; rest between batches.
+                Edit(sim, [](State& state) { state.energy = 100; }, false);
+            }
             const auto size = sim.Serialize().size();
             CHECK(size >= lastSize - 4);
             lastSize = size;
@@ -2416,6 +2421,42 @@ void SprintEnergyContract()
     CHECK(loaded.GetState().energy == 10.0);
 }
 
+void ActionEnergyContract()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Knife, 1}, {Item::DiggingStick, 1}, {Item::Seeds, 2}, {Item::Branch, 12}, {Item::Stone, 8}, {Item::Fiber, 6}});
+    const double start = sim.GetState().energy;
+    const auto branch = Node(sim, ResourceKind::Branches);
+    OK(sim.Harvest(branch.id, branch.position));
+    CHECK(Close(sim.GetState().energy, start - Exertion::GatherEnergy, 1e-9));
+    OK(sim.Craft(Recipe::DiggingStick, Home));
+    CHECK(Close(sim.GetState().energy, start - Exertion::GatherEnergy - Exertion::CraftEnergy, 1e-9));
+    OK(sim.Till(-2, -1, CellCenter(-2, -1)));
+    CHECK(Close(sim.GetState().energy, start - Exertion::GatherEnergy - Exertion::CraftEnergy - Exertion::TillEnergy, 1e-9));
+    // Rejected work costs nothing.
+    UnchangedFailure(sim, [&] { return sim.Till(-2, -1, CellCenter(-2, -1)); });
+    // Too tired: work is refused before it would leave her under the reserve, and nothing changes.
+    Edit(sim, [](State& state) { state.energy = Exertion::Reserve + Exertion::TillEnergy - 0.01; state.hunger = 50; });
+    UnchangedFailure(sim, [&] { return sim.Till(-3, -1, CellCenter(-3, -1)); });
+    Simulation probe;
+    OK(probe.Deserialize(sim.Serialize()));
+    CHECK(probe.Till(-3, -1, CellCenter(-3, -1)).message.find("exhausted") != std::string::npos);
+    // Light work is still possible at the same Energy, and exertion never drops her below the reserve.
+    const int plot = sim.GetState().plots[0].id;
+    OK(sim.Plant(plot, CellCenter(-2, -1)));
+    CHECK(sim.GetState().energy >= Exertion::Reserve);
+    CHECK(!sim.GetState().failed);
+    // A meal restores enough to carry on.
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::Berries, 1}});
+    OK(sim.Eat(Item::Berries));
+    OK(sim.Till(-3, -1, CellCenter(-3, -1)));
+    // An awake game hour drains only a little.
+    Simulation idle;
+    const double rested = idle.GetState().energy;
+    idle.AdvanceGameHours(1, Home);
+    CHECK(Close(idle.GetState().energy, rested - Exertion::AwakePerHour, 1e-9));
+}
+
 void Run(const char* name, void (*test)())
 {
     test();
@@ -2443,6 +2484,7 @@ int main()
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
     Run("sprint consumes existing Energy with a reserve", SprintEnergyContract);
+    Run("work spends Energy and time drains it slowly", ActionEnergyContract);
     Run("warmth, sleep and failure recovery", WarmthSleepAndFailure);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
     Run("strict atomic persistence", PersistenceRejection);

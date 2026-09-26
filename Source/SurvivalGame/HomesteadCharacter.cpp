@@ -420,6 +420,11 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     ForageRootMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/WildRoot/SM_WildRoot.SM_WildRoot"));
     UStaticMesh* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
     CarriedForage = MakeProp(TEXT("CarriedForage"), ForageBerryMesh ? ForageBerryMesh.Get() : Sphere);
+    EatenFood = MakeProp(TEXT("EatenFood"), ForageBerryMesh ? ForageBerryMesh.Get() : Sphere);
+    // Optional: authored with homestead_agent.eat_berry.
+    EatAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Eat"));
+    if (EatAnimation && EatAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        EatAnimation = nullptr;
     if (UStaticMesh* Pouch = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/ForagePouch/SM_ForagePouch.SM_ForagePouch")))
     {
         ForagePouch = MakeProp(TEXT("ForagePouch"), Pouch);
@@ -816,6 +821,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdateCarriedSticks();
+    UpdateEating();
     UpdateHeldTools(DeltaSeconds);
     UpdateFellApproach(DeltaSeconds);
     if (FellStepRemaining > 0)
@@ -1229,7 +1235,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
             Presented = PC->PresentedTool();
     }
     else if (InCharacterLab() && LabHeldTool) Presented = *LabHeldTool;
-    const bool HandsFree = Animation->ActionWeight() < 0.01f;
+    const bool HandsFree = Animation->ActionWeight() < 0.01f && Animation->EatWeight() < 0.01f;
     const bool Hacking = Animation->MacheteWeight() > 0.01f;
     const bool Felling = Animation->FellWeight() > 0.01f;
     float Grip = 0, Carry = 46;
@@ -1253,6 +1259,51 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     }
     if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
     Animation->SetRightHandGrip(Grip, Carry);
+}
+
+bool AHomesteadCharacter::PlayEat(bool bBerry)
+{
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!bMetaHumanActive || !EatAnimation || !EatenFood || !Animation || Animation->IsEating()) return false;
+    bEatBerry = bBerry;
+    Animation->RequestEat();
+    return true;
+}
+
+void AHomesteadCharacter::UpdateEating()
+{
+    if (!EatenFood) return;
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    const float Time = Animation && Animation->IsEating() ? Animation->EatPhase() : -1.0f;
+    const bool bInHand = Time >= EatPick && Time < EatBite;
+    if (bInHand == bEatFoodInHand) return;
+    bEatFoodInHand = bInHand;
+    if (!bInHand)
+    {
+        EatenFood->SetVisibility(false);
+        return;
+    }
+    // Pinched between thumb and fingertips, like the forage she stows (UpdateCarriedSticks).
+    USkeletalMeshComponent* Body = GetMesh();
+    const FVector Hand = Body->GetSocketLocation(TEXT("hand_r"));
+    const FVector Fingers = (Body->GetSocketLocation(TEXT("middle_01_r")) - Hand).GetSafeNormal();
+    const FVector Across = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
+    UStaticMesh* FoodMesh = bEatBerry ? ForageBerryMesh.Get() : ForageRootMesh.Get();
+    const bool bAuthored = FoodMesh != nullptr;
+    if (bAuthored) EatenFood->SetStaticMesh(FoodMesh);
+    // A small bite: a few berries off the cluster, or a short piece of root.
+    const FVector Scale = bAuthored ? FVector(bEatBerry ? 0.65f : 0.45f) : FVector(0.035f);
+    const FRotator Rotation = bEatBerry ? FRotationMatrix::MakeFromZX(-Fingers, Across).Rotator()
+        : FRotationMatrix::MakeFromZX(Fingers, Across).Rotator();
+    // Between the pinched thumb and fingertips (the last knuckles plus a little toward the tips).
+    const FVector Index = Body->GetSocketLocation(TEXT("index_03_r"));
+    const FVector Thumb = Body->GetSocketLocation(TEXT("thumb_03_r"));
+    const FVector Pinch = (Index + Thumb) * 0.5f + ((Index - Hand).GetSafeNormal() + (Thumb - Hand).GetSafeNormal()).GetSafeNormal() * 1.2f;
+    EatenFood->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+    EatenFood->SetWorldLocationAndRotation(Pinch, Rotation);
+    EatenFood->SetWorldScale3D(Scale);
+    EatenFood->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_r"));
+    EatenFood->SetVisibility(true);
 }
 
 void AHomesteadCharacter::SetLabHeldTool(Homestead::Item Tool)

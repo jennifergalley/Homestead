@@ -61,10 +61,19 @@ bool IsHotbarTool(Homestead::Item Item)
         || Item == Homestead::Item::Machete;
 }
 
+bool IsFoodItem(Homestead::Item Item)
+{
+    return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots
+        || Item == Homestead::Item::HerbedRoots;
+}
+
 FName HotbarIcon(Homestead::Item Item)
 {
     switch (Item)
     {
+    case Homestead::Item::Berries: return TEXT("berries");
+    case Homestead::Item::RoastedRoots: return TEXT("roasted-roots");
+    case Homestead::Item::HerbedRoots: return TEXT("herbed-roots");
     case Homestead::Item::Knife: return TEXT("knife");
     case Homestead::Item::Hatchet: return TEXT("hatchet");
     case Homestead::Item::DiggingStick: return TEXT("digging-stick");
@@ -499,31 +508,87 @@ void AHomesteadController::ResetHotbar()
     HotbarSlots[2] = static_cast<int32>(Homestead::Item::DiggingStick);
     HotbarSlots[3] = static_cast<int32>(Homestead::Item::WateringCan);
     HotbarSlots[4] = static_cast<int32>(Homestead::Item::Machete);
+    HotbarSlots[5] = static_cast<int32>(Homestead::Item::Berries);
     SelectedHotbarSlot = 0;
     HoveredHotbarSlot = INDEX_NONE;
 }
 
-void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected)
+void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout)
 {
     HotbarSlots.Init(-1, 10);
     TSet<int32> Seen;
     for (int32 Index = 0; Index < FMath::Min(10, Slots.Num()); ++Index)
     {
-        const auto Tool = static_cast<Homestead::Item>(Slots[Index]);
-        if (Slots[Index] >= 0 && IsHotbarTool(Tool) && !Seen.Contains(Slots[Index]))
+        if (Slots[Index] >= 0 && Slots[Index] < static_cast<int32>(Homestead::Item::Count)
+            && CanPinToHotbar(static_cast<Homestead::Item>(Slots[Index])) && !Seen.Contains(Slots[Index]))
         {
             HotbarSlots[Index] = Slots[Index];
             Seen.Add(Slots[Index]);
         }
     }
-    // Hotbars saved before the machete existed get it in their first free slot.
-    const int32 Machete = static_cast<int32>(Homestead::Item::Machete);
-    if (!Seen.Contains(Machete))
-    {
-        const int32 Free = HotbarSlots.IndexOfByKey(-1);
-        if (Free != INDEX_NONE) HotbarSlots[Free] = Machete;
-    }
+    // Hotbars saved before the machete and pinned food existed get them once, in free slots.
+    if (Layout < UHomesteadSave::CurrentHotbarLayout)
+        for (const auto Item : {Homestead::Item::Machete, Homestead::Item::Berries})
+        {
+            const int32 Value = static_cast<int32>(Item);
+            const int32 Free = HotbarSlots.IndexOfByKey(-1);
+            if (!Seen.Contains(Value) && Free != INDEX_NONE) HotbarSlots[Free] = Value;
+        }
     SelectedHotbarSlot = FMath::Clamp(Selected, 0, 9);
+}
+
+bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
+{
+    return IsHotbarTool(Item) || IsFoodItem(Item);
+}
+
+bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
+{
+    return HotbarSlots.Contains(static_cast<int32>(Item));
+}
+
+bool AHomesteadController::TogglePinnedToHotbar(Homestead::Item Item)
+{
+    const FString Name = UTF8_TO_TCHAR(Homestead::ItemName(Item));
+    if (!CanPinToHotbar(Item))
+    {
+        Notify(TEXT("Only tools and food can go on the hotbar."), true);
+        return false;
+    }
+    const int32 Value = static_cast<int32>(Item);
+    const int32 Pinned = HotbarSlots.IndexOfByKey(Value);
+    if (Pinned != INDEX_NONE)
+    {
+        HotbarSlots[Pinned] = -1;
+        Notify(Name + TEXT(" unpinned from the hotbar."));
+        return true;
+    }
+    // Food goes to the right-hand slots first, leaving 1-5 for tools.
+    int32 Free = INDEX_NONE;
+    for (int32 Step = 0; Step < 10 && Free == INDEX_NONE; ++Step)
+    {
+        const int32 Index = (Step + 5) % 10;
+        if (HotbarSlots.IsValidIndex(Index) && HotbarSlots[Index] < 0) Free = Index;
+    }
+    if (Free == INDEX_NONE)
+    {
+        Notify(TEXT("The hotbar is full. Unpin something first."), true);
+        return false;
+    }
+    HotbarSlots[Free] = Value;
+    Notify(FString::Printf(TEXT("%s pinned to hotbar slot %d."), *Name, Free == 9 ? 0 : Free + 1));
+    return true;
+}
+
+void AHomesteadController::EatFromHotbar(Homestead::Item Food)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    // One mouthful at a time: clicks while she is still eating are ignored.
+    if (Animation && Animation->IsEating()) return;
+    const auto Result = Sim.Eat(Food);
+    Notify(Result);
+    if (Result.ok && Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
 }
 
 TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
@@ -538,8 +603,10 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
         if (HotbarSlots.IsValidIndex(Index) && HotbarSlots[Index] >= 0)
         {
             Slot.Tool = static_cast<Homestead::Item>(HotbarSlots[Index]);
-            Slot.Assigned = IsHotbarTool(Slot.Tool);
-            Slot.Available = Slot.Assigned && Sim.Count(Slot.Tool) > 0;
+            Slot.Assigned = CanPinToHotbar(Slot.Tool);
+            Slot.Food = IsFoodItem(Slot.Tool);
+            Slot.Count = Slot.Assigned ? Sim.Count(Slot.Tool) : 0;
+            Slot.Available = Slot.Assigned && Slot.Count > 0;
             Slot.Icon = HotbarIcon(Slot.Tool);
         }
 
@@ -587,6 +654,14 @@ void AHomesteadController::UseSelectedTool()
 {
     if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)) return;
     const int32 ToolValue = HotbarSlots[SelectedHotbarSlot];
+    if (ToolValue >= 0 && IsFoodItem(static_cast<Homestead::Item>(ToolValue)))
+    {
+        const auto Food = static_cast<Homestead::Item>(ToolValue);
+        if (Sim.Count(Food) <= 0)
+            Notify(FString::Printf(TEXT("No %s left in your pack."), UTF8_TO_TCHAR(Homestead::ItemName(Food))), true);
+        else EatFromHotbar(Food);
+        return;
+    }
     if (ToolValue < 0 || !IsHotbarTool(static_cast<Homestead::Item>(ToolValue)))
     {
         Notify(TEXT("Choose a carried tool first."), true);
@@ -750,6 +825,21 @@ void AHomesteadController::HomesteadMorning(float Hour)
 {
     Sim.SkipToHourOfDay(Hour);
     RefreshRemaining = 0;
+}
+
+void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
+{
+    const FString Wanted = ItemName.Replace(TEXT(" "), TEXT(""));
+    for (int32 Index = 0; Index < static_cast<int32>(Homestead::Item::Count); ++Index)
+    {
+        const auto Item = static_cast<Homestead::Item>(Index);
+        if (!FString(UTF8_TO_TCHAR(Homestead::ItemName(Item))).Replace(TEXT(" "), TEXT("")).Equals(Wanted, ESearchCase::IgnoreCase))
+            continue;
+        const auto Result = Sim.GrantItems(Item, Amount);
+        Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result);
+        return;
+    }
+    Notify(FString::Printf(TEXT("No item called %s."), *ItemName), true);
 }
 
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
@@ -1384,6 +1474,14 @@ void AHomesteadController::StartMacheteHack()
     if (Sim.Count(Homestead::Item::Machete) == 0)
     {
         Notify(TEXT("Take your machete from storage to hack through undergrowth."), true);
+        return;
+    }
+    // Refuse before the swing rather than after it when she's too tired to clear this plant.
+    const auto Rested = Sim.CheckExertion(bFocusBrushWoody
+        ? Homestead::Exertion::WoodyUnderbrushEnergy : Homestead::Exertion::SoftUnderbrushEnergy);
+    if (!Rested)
+    {
+        Notify(Rested);
         return;
     }
     const Homestead::Point Target{FocusBrushPosition.X, FocusBrushPosition.Y};
@@ -2532,6 +2630,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     Save->EffectsVolume = EffectsVolume;
     Save->HotbarSlots = HotbarSlots;
     Save->SelectedHotbarSlot = SelectedHotbarSlot;
+    Save->HotbarLayout = UHomesteadSave::CurrentHotbarLayout;
     TArray<uint8> Data;
     const FString Path = SavePath(Slot);
     const FString Temporary = Path + TEXT(".tmp");
@@ -2628,7 +2727,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Appearance.TunicColor = Save.TunicColor;
     Appearance.Outfit = Save.Outfit;
     Appearance.BodyPreset = Save.BodyPreset;
-    SanitizeHotbar(Save.HotbarSlots, Save.SelectedHotbarSlot);
+    SanitizeHotbar(Save.HotbarSlots, Save.SelectedHotbarSlot, Save.HotbarLayout);
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
     bFreshTerrainSpawn = false;

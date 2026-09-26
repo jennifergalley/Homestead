@@ -322,7 +322,14 @@ function Test-SourceParity($Data) {
         Assert-That ($action.nativeAdvanceGameHours -eq $hours) "source: catalog timing $($action.key)."
     }
     Assert-StockEqual $actions['clear:Sapling'].outputs $actions['gather:Sapling'].outputs 'source ready-clear yield'
-    Assert-That ($Data.actionDefaults.authorityGameHours -eq 0 -and $Data.actionDefaults.directEnergyPoints -eq 0) 'source: no current per-action time/energy charge.'
+    Assert-That ($Data.actionDefaults.authorityGameHours -eq 0 -and $Data.actionDefaults.directEnergyPoints -eq 0) 'source: no default per-action time/energy charge.'
+    $exertion = [regex]::Matches($header, 'constexpr double (\w+) = ([0-9.]+);')
+    $sourceEnergy = @{}
+    foreach ($match in $exertion) { $sourceEnergy[$match.Groups[1].Value] = [double]$match.Groups[2].Value }
+    Assert-That ($sourceEnergy['AwakePerHour'] -eq $Data.units.awakeEnergyPerGameHour) 'source: awake Energy drain changed.'
+    foreach ($name in $Data.units.actionEnergy.Keys) {
+        Assert-That ($sourceEnergy[$name] -eq $Data.units.actionEnergy[$name]) "source: action Energy $name."
+    }
     Assert-That ($controller.Contains('if (Result.ok) Sim.AdvanceGameHours(0.05, PlayerPoint());')) 'source: recipe wrapper timing changed.'
     Assert-That ($controller.Contains('if (Result.ok) Sim.AdvanceGameHours(0.1, Position);')) 'source: placement wrapper timing changed.'
     Assert-That ($header.Contains('InventoryCapacity = 120')) 'source: capacity changed.'

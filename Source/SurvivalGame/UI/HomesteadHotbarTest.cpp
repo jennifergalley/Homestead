@@ -96,7 +96,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return Controller->ShouldShowHotbar()
             && Controller->HotbarWidget.IsValid(); });
-    Add(TEXT("Default ten-slot references add no capacity and resolve only the carried Knife"),
+    Add(TEXT("Default ten-slot references add no capacity, resolve only the carried Knife and pin Berries"),
         [this, Capacity]()
         {
             *Capacity = Controller->Simulation().UsedCapacity();
@@ -110,7 +110,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Slots[2].Tool == Item::DiggingStick && !Slots[2].Available
                 && Slots[3].Tool == Item::WateringCan && !Slots[3].Available
                 && Slots[4].Tool == Item::Machete && !Slots[4].Available
-                && !Slots[5].Assigned && !Slots[9].Assigned
+                && Slots[5].Tool == Item::Berries && Slots[5].Assigned && Slots[5].Food
+                && !Slots[6].Assigned && !Slots[9].Assigned
                 && Controller->Simulation().UsedCapacity() == *Capacity;
         });
     Add(TEXT("Carried selected Knife is presented in the heroine hand"),
@@ -172,20 +173,21 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, Revision]() { *Revision = Controller->Simulation().GetRevision(); Tap(EKeys::LeftMouseButton); },
         [this, Revision]() { return Controller->ToastIsError()
             && Controller->Simulation().GetRevision() == *Revision; });
-    Add(TEXT("Duplicate invalid save references sanitize to Empty, gain the missing Machete and clamp selection"),
+    Add(TEXT("Duplicate invalid save references sanitize to Empty, gain the missing Machete and Berries and clamp selection"),
         [this]()
         {
             Controller->SanitizeHotbar({
                 static_cast<int32>(Item::Knife),
                 static_cast<int32>(Item::Knife),
                 999,
-                static_cast<int32>(Item::WateringCan)}, 99);
+                static_cast<int32>(Item::WateringCan)}, 99, 0);
         },
         [this]()
         {
             const auto Slots = Controller->HotbarSnapshot();
             const bool Passed = Slots[0].Tool == Item::Knife && Slots[0].Assigned
-                && Slots[1].Tool == Item::Machete && Slots[1].Assigned && !Slots[2].Assigned
+                && Slots[1].Tool == Item::Machete && Slots[1].Assigned
+                && Slots[2].Tool == Item::Berries && Slots[2].Food && !Slots[4].Assigned
                 && Slots[3].Tool == Item::WateringCan && Slots[3].Assigned
                 && Controller->SelectedHotbarIndex() == 9;
             Controller->ResetHotbar();

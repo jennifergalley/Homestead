@@ -79,23 +79,43 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FName();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
+                                // Pinned food keeps its (faded) icon when the pack runs out.
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
                                     ? Snapshot[Index].Icon : FName();
                             })
                             .Tint_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FLinearColor(1, 1, 1, 0);
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
-                                    ? Gold : FLinearColor(1, 1, 1, 0);
+                                if (!Snapshot.IsValidIndex(Index)) return FLinearColor(1, 1, 1, 0);
+                                return Snapshot[Index].Available ? Gold
+                                    : Snapshot[Index].Food ? FLinearColor(Gold.R, Gold.G, Gold.B, 0.3f) : FLinearColor(1, 1, 1, 0);
                             })
                             .Visibility_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return EVisibility::Collapsed;
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
                                     ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
                             })
+                        ]
+                        + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
+                        .Padding(0, 0, 5, 2)
+                        [
+                            // How many of a pinned food are left in the pack.
+                            SNew(STextBlock)
+                            .Text_Lambda([Weak = Controller, Index]()
+                            {
+                                if (!Weak.IsValid()) return FText::GetEmpty();
+                                const auto Snapshot = Weak->HotbarSnapshot();
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Food
+                                    ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
+                            })
+                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
+                            .ColorAndOpacity(Cream)
+                            .ShadowOffset(FVector2D(1, 1))
+                            .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
+                            .Visibility(EVisibility::HitTestInvisible)
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)
                         .Padding(5, 2, 0, 0)

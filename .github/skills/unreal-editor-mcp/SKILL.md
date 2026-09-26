@@ -160,6 +160,21 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   start PIE again (new game at 06:00 with the starter kit; the field book opens, close it with
   `Gamepad_FaceButton_Right`). `HomesteadMorning <hour>` (pass the player controller) only moves
   the clock, so it costs no energy; night playtests are too dark to judge.
+- `HomesteadGive <Item> [count]` (console, pass the player controller) adds to the pack by item
+  name, spaces optional: `HomesteadGive Berries 10`, `HomesteadGive RoastedRoots 3`. The toast
+  says what was added or why not (full pack, unknown name).
+- Energy: work costs it (gather 0.5, fell 4, till 2, machete 0.8-1.5, build 1.5; the full table
+  is `Homestead::Exertion` in `HomesteadSimulation.h`), time awake drains only 0.6/game hour.
+  Below a 5-Energy reserve work is refused with "You're too exhausted to keep working." Eat or
+  sleep before a long test loop.
+- Eating (MetaHuman): food in the hotbar (Berries start in slot 6; the field book's pack page
+  has Pin to hotbar / Unpin from hotbar on any food or tool) is eaten with LMB/RT. She reaches
+  into the hip pouch, pinches a bite (the berry shows in her fingers from 0.63 s to the bite at
+  1.33 s), eats and chews; it layers over walking. Clicks while she's eating are ignored.
+  The clip is authored by `homestead_agent.eat_berry` (`eb.build()` in the editor, not PIE;
+  `eb.report()` prints the pinch-to-mouth distance). For a close look, raise the spring arm's
+  `target_offset` z to 50-55 with arm length 130-150, face her away from the sun (yaw 180 in the
+  generated woodland around 13:00) and use `slomo 0.25`.
 - Felling a tree (MetaHuman, hatchet selected): she walks up to the trunk if the felling stance
   is more than 35 cm away, eases into it, swings three strokes (a sapling takes one), and the tree
   topples away from her, bounces once, lies 4 s and sinks. `LogTemp` Verbose lines starting with

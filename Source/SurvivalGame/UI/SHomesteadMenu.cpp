@@ -1231,6 +1231,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
             if (Row.ContainerId == 0)
             {
                 Actions.Add(EHomesteadItemAction::Primary);
+                if (Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
+                    && AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(Row.Id)))
+                    Actions.Add(EHomesteadItemAction::Pin);
                 Actions.Add(EHomesteadItemAction::Drop);
             }
         }
@@ -1365,6 +1368,9 @@ FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
     case EHomesteadItemAction::Unequip: return TEXT("Unequip to pack");
     case EHomesteadItemAction::Dye: return TEXT("Change dye");
     case EHomesteadItemAction::Drop: return TEXT("Drop...");
+    case EHomesteadItemAction::Pin:
+        return Controller.IsValid() && Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
+            && Controller->IsPinnedToHotbar(static_cast<Homestead::Item>(Row.Id)) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar");
     default: return Row.Action.IsEmpty() ? TEXT("Change / activate") : Row.Action;
     }
 }

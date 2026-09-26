@@ -92,15 +92,22 @@ expiry rules.
 ## Current units, recipes and needs
 
 One game hour = **150 real seconds** at the current 60-minute day.
-Simulation craft/gather/build/garment calls themselves advance **0 hours** and
-charge **0 direct energy points**. Native recipe activation adds **0.05 game
+Simulation craft/gather/build/garment calls themselves advance **0 hours**.
+Work spends Energy directly (`Homestead::Exertion` in `HomesteadSimulation.h`,
+mirrored as `units.actionEnergy` in `catalog.json`): gathering 0.5, clearing low
+growth 1, a sapling 1.5, felling a tree 4, hacking undergrowth 1.5 woody / 0.8
+soft, crafting 0.8 (cooking 0.3, splitting firewood 1.5), building 1.5, a garment
+0.8, tilling 2, planting 0.4, watering 0.4, weeding 0.8, harvesting a crop 0.6,
+filling the can 0.3 and fueling a fire 0.2. Work that would leave her below a
+5-Energy reserve is refused ("too exhausted") and changes nothing, so exertion
+alone never collapses her; eating or sleeping restores it. Native recipe activation adds **0.05 game
 hour** (7.5 real-second equivalent, not a seven-second progress bar), and
 placement adds **0.1 hour** (15-second equivalent).
-At the unchanged awake drain of 2 hunger and 2.4 energy/hour, these advances
-cost 0.10/0.12 points per recipe and 0.20/0.24 per placed piece.
+At the awake drain of 2 hunger and 0.6 energy/hour, these advances cost
+0.10/0.03 points per recipe and 0.20/0.06 per placed piece.
 Walking and unpaused animations additionally consume normal world-clock time.
 Menus/planning pause that clock. Garments have no equivalent extra time charge.
-No durability, repair, crafting levels or per-action stamina costs exist.
+No durability, repair or crafting levels exist.
 
 | Current action (exact identifier) | Consumed input | Output | Retained prerequisite / reach | Native added hours |
 |---|---|---|---|---:|
@@ -128,7 +135,8 @@ single free-weight pocket object.
 
 Current berries restore 12 hunger, roasted roots 28, herbed roots 38, capped at
 100. Raw roots are not edible. Food has no spoilage. Awake drain is 2 hunger
-and 2.4 energy/hour; sleep drains 1.3 hunger and restores 10 energy/hour.
+and 0.6 energy/hour (time alone tires her very slowly; work is what spends
+Energy); sleep drains 1.3 hunger and restores 10 energy/hour.
 Eight hours' sleep needs a bed within 300 cm and advances the garden/fuel clock.
 Night warmth is -6/hour before modifiers; shelter raises the rate to at least
 +1/hour and a nearby fire to at least +6/hour. These are existing rules,

@@ -31,4 +31,7 @@ public:
     UPROPERTY() int32 BodyPreset = 0;
     UPROPERTY() TArray<int32> HotbarSlots;
     UPROPERTY() int32 SelectedHotbarSlot = 0;
+    // 0: saved before food could be pinned; 1: pinned food and the machete migration applied.
+    static constexpr int32 CurrentHotbarLayout = 1;
+    UPROPERTY() int32 HotbarLayout = 0;
 };

@@ -8,8 +8,9 @@
     "seasonDays": 14,
     "awakeHungerPerGameHour": 2,
     "sleepHungerPerGameHour": 1.3,
-    "awakeEnergyPerGameHour": 2.4,
+    "awakeEnergyPerGameHour": 0.6,
     "sleepEnergyPerGameHour": 10,
+    "actionEnergy": {"Reserve":5,"GatherEnergy":0.5,"ClearEnergy":1,"SaplingEnergy":1.5,"FellEnergy":4,"WoodyUnderbrushEnergy":1.5,"SoftUnderbrushEnergy":0.8,"CraftEnergy":0.8,"CookEnergy":0.3,"SplitFirewoodEnergy":1.5,"BuildEnergy":1.5,"GarmentEnergy":0.8,"TillEnergy":2,"PlantEnergy":0.4,"WaterEnergy":0.4,"WeedEnergy":0.8,"HarvestCropEnergy":0.6,"FillWaterEnergy":0.3,"FuelEnergy":0.2},
     "branchFuelGameHours": 4,
     "maxFireFuelGameHours": 48,
     "durability": "unsupported; no tool wear or breakage in current runtime"

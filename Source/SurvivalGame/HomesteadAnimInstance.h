@@ -26,6 +26,13 @@ public:
     void RequestKnifeCut();
     void RequestTill();
     void RequestMacheteHack();
+    // Hand-to-mouth eating layered over the right arm and head, so she can eat while walking. It
+    // ignores CancelAction and plays to the end.
+    void RequestEat();
+    bool IsEating() const;
+    float EatPhase() const;
+    float EatWeight() const;
+    uint32 EatStarts() const;
     // Two-handed axe felling: Strokes cuts into the trunk (the clip's stroke cycle repeats).
     void RequestFell(int32 Strokes);
     // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip). At rest the

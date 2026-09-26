@@ -7,6 +7,7 @@
 #include "Animation/AnimNodeSpaceConversions.h"
 #include "AnimNodes/AnimNode_TwoWayBlend.h"
 #include "AnimNodes/AnimNode_SequenceEvaluator.h"
+#include "AnimNodes/AnimNode_LayeredBoneBlend.h"
 #include "BoneControllers/AnimNode_ModifyBone.h"
 #include "BoneControllers/AnimNode_TwoBoneIK.h"
 #include "Components/CapsuleComponent.h"
@@ -194,7 +195,15 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         ActionBlend.A.SetLinkNode(&Blend);
         ActionBlend.B.SetLinkNode(&Gather);
         Gather.SetTeleportToExplicitTime(true);
-        PlaceToComponent.LocalPose.SetLinkNode(&ActionBlend);
+        // Eating rides on top of whatever she is doing: the right arm and the head only.
+        EatLayer.BasePose.SetLinkNode(&ActionBlend);
+        EatLayer.AddPose();
+        EatLayer.BlendPoses[0].SetLinkNode(&Eat);
+        for (const TCHAR* Branch : {TEXT("clavicle_r"), TEXT("neck_01")})
+            EatLayer.LayerSetup[0].BranchFilters.AddDefaulted_GetRef().BoneName = Branch;
+        EatLayer.BlendWeights[0] = 0;
+        Eat.SetTeleportToExplicitTime(true);
+        PlaceToComponent.LocalPose.SetLinkNode(&EatLayer);
         PelvisPlacement.ComponentPose.SetLinkNode(&PlaceToComponent);
         LeftSlope.ComponentPose.SetLinkNode(&PelvisPlacement);
         RightSlope.ComponentPose.SetLinkNode(&LeftSlope);
@@ -202,7 +211,11 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         RightPlant.ComponentPose.SetLinkNode(&LeftPlant);
         Grip.ComponentPose.SetLinkNode(&RightPlant);
         LeftGrip.ComponentPose.SetLinkNode(&Grip);
-        PlaceToLocal.ComponentPose.SetLinkNode(&LeftGrip);
+        Pinch.ComponentPose.SetLinkNode(&LeftGrip);
+        PlaceToLocal.ComponentPose.SetLinkNode(&Pinch);
+        // A pinch for food: index fingertip meets the thumb, the other fingers tuck into the palm.
+        const float PinchAngles[FHandGrip::Chains][3] = {{34, 58, 40}, {62, 78, 48}, {82, 88, 52}, {86, 88, 52}, {44, 32, 26}};
+        FMemory::Memcpy(Pinch.Angles, PinchAngles, sizeof(PinchAngles));
         PelvisPlacement.BoneToModify.BoneName = TEXT("pelvis");
         PelvisPlacement.TranslationMode = BMM_Additive;
         PelvisPlacement.TranslationSpace = BCS_ComponentSpace;
@@ -233,7 +246,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Node->Alpha = 0;
         if (bTrialFootLock)
         {
-            ToComponent.LocalPose.SetLinkNode(&ActionBlend);
+            ToComponent.LocalPose.SetLinkNode(&EatLayer);
             LeftFoot.ComponentPose.SetLinkNode(&ToComponent);
             RightFoot.ComponentPose.SetLinkNode(&LeftFoot);
             LeftRotation.ComponentPose.SetLinkNode(&RightFoot);
@@ -271,6 +284,13 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FLocomotionBlend Blend;
     FLocomotionBlend ActionBlend;
     FGatherPose Gather;
+    FAnimNode_SequenceEvaluator_Standalone Eat;
+    FAnimNode_LayeredBoneBlend EatLayer;
+    float EatTime = 0;
+    float EatAlpha = 0;
+    bool bEating = false;
+    bool bEatRequested = false;
+    uint32 EatStarted = 0;
     const bool bTrialFootLock = FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialFootLock"))
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01"))
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadTrialCMULevelHead"));
@@ -290,6 +310,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FHandGrip Grip;
     // Closes the left hand on the axe haft while felling.
     FHandGrip LeftGrip{true};
+    // Closes her right fingers on a bite of food while she eats.
+    FHandGrip Pinch;
     float GripAlpha = 0;
     float GripTarget = 0;
     float GripCarry = 46;
@@ -349,6 +371,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             if (bTrialCMUWalk) SlowWalk.SetSequence(Avatar->GetSlowWalkAnimation());
             Sprint.SetSequence(Avatar->GetSprintAnimation());
             Gather.SetSequence(Avatar->GetGatherAnimation());
+            Eat.SetSequence(Avatar->GetEatAnimation());
         }
     }
 
@@ -571,6 +594,32 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         Grip.CarryDeviation = GripCarry;
         Grip.Carry = Active == EHandAction::Machete || Active == EHandAction::Fell ? 1.0f - ActionBlend.Alpha : 1.0f;
         LeftGrip.Alpha = Active == EHandAction::Fell ? ActionBlend.Alpha : 0.0f;
+        UpdateEating(DeltaSeconds);
+    }
+
+    void UpdateEating(float DeltaSeconds)
+    {
+        const auto* Clip = Eat.GetSequence();
+        const float Length = Clip ? Clip->GetPlayLength() : 0.0f;
+        if (bEatRequested && Clip && !bEating)
+        {
+            bEating = true;
+            EatTime = 0;
+            ++EatStarted;
+        }
+        bEatRequested = false;
+        if (bEating)
+        {
+            EatTime = FMath::Min(EatTime + DeltaSeconds, Length);
+            if (EatTime >= Length) bEating = false;
+        }
+        const float Target = bEating && EatTime < Length - 0.25f ? 1.0f : 0.0f;
+        EatAlpha = FMath::FInterpConstantTo(EatAlpha, Target, DeltaSeconds, Target > EatAlpha ? 1.0f / 0.15f : 1.0f / 0.25f);
+        EatLayer.BlendWeights[0] = EatAlpha;
+        Eat.SetExplicitTime(EatTime);
+        // Fingers close as they find the food in the pouch and open once it is in her mouth.
+        const float Close = FMath::SmoothStep(0.45f, 0.63f, EatTime) * (1.0f - FMath::SmoothStep(1.36f, 1.6f, EatTime));
+        Pinch.Alpha = (bEating ? Close : 0.0f) * EatAlpha * (1.0f - GripAlpha);
     }
 };
 }
@@ -684,6 +733,32 @@ void UHomesteadAnimInstance::RequestKnifeCut()
 void UHomesteadAnimInstance::RequestTill()
 {
     GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Till;
+}
+
+void UHomesteadAnimInstance::RequestEat()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().bEatRequested = true;
+}
+
+bool UHomesteadAnimInstance::IsEating() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().bEating;
+}
+
+float UHomesteadAnimInstance::EatPhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.bEating ? Proxy.EatTime : 0.0f;
+}
+
+float UHomesteadAnimInstance::EatWeight() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().EatAlpha;
+}
+
+uint32 UHomesteadAnimInstance::EatStarts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().EatStarted;
 }
 
 void UHomesteadAnimInstance::RequestMacheteHack()
