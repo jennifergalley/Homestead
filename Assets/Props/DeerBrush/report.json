@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "DeerBrush",
+  "description": "Young deer brush (Ceanothus integerrimus): loose arching mound 1.1 m tall and 1.5 m across with three-veined leaves and fading white-blue flower plumes. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 25000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/deer_brush.py",
+  "source_sha256": "7a8431d96382c9099f115f1e35ab73798bc6a62c6b55192e9f64d9513b8b8d51",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_DeerBrush": {
+      "vertices": 14659,
+      "triangles": 15405,
+      "size_cm": [
+        165.25,
+        146.62,
+        120.29
+      ],
+      "materials": [
+        {
+          "name": "M_DeerBrush",
+          "textures": {
+            "basecolor": "T_DeerBrush_basecolor.png",
+            "normal": "T_DeerBrush_normal.png",
+            "roughness": "T_DeerBrush_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.03319358825683594,
+          -0.2765237271785736,
+          0.65
+        ]
+      },
+      "fbx": "SM_DeerBrush.fbx",
+      "sha256": "c199e5380333f7fe960383144746e779c7521dafdca5600daf479bec5f9d3957",
+      "preview": "preview_SM_DeerBrush.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DeerBrush_hero.png",
+          "detail": "beauty_SM_DeerBrush_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_DeerBrush_LOD1": {
+      "vertices": 6745,
+      "triangles": 5622,
+      "size_cm": [
+        164.64,
+        146.56,
+        120.39
+      ],
+      "materials": [
+        {
+          "name": "M_DeerBrush",
+          "textures": {
+            "basecolor": "T_DeerBrush_basecolor.png",
+            "normal": "T_DeerBrush_normal.png",
+            "roughness": "T_DeerBrush_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.03319358825683594,
+          -0.2765237271785736,
+          0.65
+        ]
+      },
+      "fbx": "SM_DeerBrush_LOD1.fbx",
+      "sha256": "9b24feee478d3735c5f74e27f1d7555dafd212d422b2429c139c1f4ead219c08",
+      "preview": "preview_SM_DeerBrush_LOD1.png"
+    },
+    "SM_DeerBrush_LOD2": {
+      "vertices": 2399,
+      "triangles": 1732,
+      "size_cm": [
+        166.63,
+        158.66,
+        120.28
+      ],
+      "materials": [
+        {
+          "name": "M_DeerBrush",
+          "textures": {
+            "basecolor": "T_DeerBrush_basecolor.png",
+            "normal": "T_DeerBrush_normal.png",
+            "roughness": "T_DeerBrush_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.03319358825683594,
+          -0.2765237271785736,
+          0.65
+        ]
+      },
+      "fbx": "SM_DeerBrush_LOD2.fbx",
+      "sha256": "a6406bc8a8fa8cd1f7b9544a5be040fe476d2fc8f7fb8d8a72427f1eb7c3cd15",
+      "preview": "preview_SM_DeerBrush_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "leaf flutter 0 at leaf base -> 1 at tip, 0 on stems",
+    "A": "1"
+  },
+  "material_notes": "One material M_DeerBrush: T_DeerBrush_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_DeerBrush_basecolor.png": "a88929675cb89d6802666bd22f32ddf9cd7733dbad16c56d029f537dd83e2212",
+    "T_DeerBrush_normal.png": "521df7105ac193aaef591776fbc4f39bec2163135ac66a76a70bb0cf2ed6fc9f",
+    "T_DeerBrush_roughness.png": "f3ce6ac19805cd080dcf814e6f33854bf24bf7b0b0162570ef823ccfc4d47bb9"
+  }
+}

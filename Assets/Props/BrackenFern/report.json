@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "BrackenFern",
+  "description": "Bracken fern colony clump, 0.9 m tall and 1.5 m across: erect dark-based stipes carrying horizontal triangular bipinnate blades, a few yellowing and dead fronds. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 25000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/bracken_fern.py",
+  "source_sha256": "80820bf9fae28cee83ef77641742561c6305651791624a5826c9621c47bd8944",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_BrackenFern": {
+      "vertices": 9178,
+      "triangles": 11024,
+      "size_cm": [
+        164.32,
+        171.67,
+        61.24
+      ],
+      "materials": [
+        {
+          "name": "M_BrackenFern",
+          "textures": {
+            "basecolor": "T_BrackenFern_basecolor.png",
+            "normal": "T_BrackenFern_normal.png",
+            "roughness": "T_BrackenFern_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.2579503357410431,
+          0.13504072427749636,
+          0.6
+        ]
+      },
+      "fbx": "SM_BrackenFern.fbx",
+      "sha256": "a540a36fea19a99a9a5558b54850abfe063581f6a66aec1cf4cc79cde1feeda2",
+      "preview": "preview_SM_BrackenFern.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BrackenFern_hero.png",
+          "detail": "beauty_SM_BrackenFern_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_BrackenFern_LOD1": {
+      "vertices": 2418,
+      "triangles": 2340,
+      "size_cm": [
+        162.9,
+        170.25,
+        70.97
+      ],
+      "materials": [
+        {
+          "name": "M_BrackenFern",
+          "textures": {
+            "basecolor": "T_BrackenFern_basecolor.png",
+            "normal": "T_BrackenFern_normal.png",
+            "roughness": "T_BrackenFern_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.2579503357410431,
+          0.13504072427749636,
+          0.6
+        ]
+      },
+      "fbx": "SM_BrackenFern_LOD1.fbx",
+      "sha256": "b2501acfd8ca144d98a8dbcb62a82558c30d0dd74d91ee2f5750284f65a8f48d",
+      "preview": "preview_SM_BrackenFern_LOD1.png"
+    },
+    "SM_BrackenFern_LOD2": {
+      "vertices": 780,
+      "triangles": 1196,
+      "size_cm": [
+        183.36,
+        200.28,
+        63.5
+      ],
+      "materials": [
+        {
+          "name": "M_BrackenFern",
+          "textures": {
+            "basecolor": "T_BrackenFern_basecolor.png",
+            "normal": "T_BrackenFern_normal.png",
+            "roughness": "T_BrackenFern_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.2579503357410431,
+          0.13504072427749636,
+          0.6
+        ]
+      },
+      "fbx": "SM_BrackenFern_LOD2.fbx",
+      "sha256": "ff6f9c14d88bb548ee77bb85d90ea798687042871ea9a14db1a290c6ce16305d",
+      "preview": "preview_SM_BrackenFern_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-frond random phase",
+    "B": "flutter 0 at the stipe -> 1 at pinna tips",
+    "A": "1"
+  },
+  "material_notes": "One material M_BrackenFern: T_BrackenFern_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_BrackenFern_basecolor.png": "c9d6211bab661afd9710cf69d76669dd2e39c74a30968d61b877511e0fd0dea1",
+    "T_BrackenFern_normal.png": "41f4be49eeb4d2f69b065ebc036e23f03b1f147b072f5afeb8676327c4d57c2f",
+    "T_BrackenFern_roughness.png": "c3abdae2856995113ceb2a89da47862f1a2034aca8d85f906a2f47cf4d64dea5"
+  }
+}

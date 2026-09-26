@@ -599,6 +599,8 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     scene.render.engine = "CYCLES"
     backend = use_gpu()
     scene.cycles.samples = samples
+    # Dense alpha-clipped foliage stacks many transparent card layers.
+    scene.cycles.transparent_max_bounces = max(scene.cycles.transparent_max_bounces, 64)
     scene.cycles.use_denoising = True
     scene.cycles.use_adaptive_sampling = True
     scene.render.resolution_x, scene.render.resolution_y = resolution

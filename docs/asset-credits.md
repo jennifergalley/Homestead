@@ -33,6 +33,10 @@ geometry or textures. Reference photographs were viewed only for comparison and 
 not stored in the repository. The review renders use the CC0 Kloofendal 48d
 Partly Cloudy (Pure Sky) HDRI by Greg Zaal (https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky),
 which ships with no asset.
+The woodland underbrush set (`Assets\Props\BlackberryBramble` and the other foliage props built
+with `Scripts\Blender\homestead_foliage.py`) is project-authored: every mesh is generated from
+code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
+library. No scan, photo or third-party texture is used.
 
 ## Music
 
