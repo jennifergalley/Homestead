@@ -8,4 +8,9 @@ if not exist "%Game%" (
     pause
     exit /b 1
 )
-start "" "%Game%" %*
+rem With no arguments, open borderless windowed fullscreen at the monitor's native size.
+if "%~1"=="" (
+    start "" "%Game%" -Res=0x0wf
+) else (
+    start "" "%Game%" %*
+)
