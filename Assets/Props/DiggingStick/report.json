@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "DiggingStick",
+  "description": "Fire-hardened hardwood digging stick with charred chisel point and leather grip wrap (original). Pivot = upper-hand grip 25 cm below the top; point -Z, blunt top +Z.",
+  "collision": "none",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/digging_stick.py",
+  "source_sha256": "c64adbf8f1c50832810a2109c9f72092e59494a13c6db9f580f73247bf72271c",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_DiggingStick": {
+      "vertices": 3288,
+      "triangles": 6564,
+      "size_cm": [
+        4.2,
+        4.18,
+        100.02
+      ],
+      "materials": [
+        {
+          "name": "M_DiggingStick",
+          "textures": {
+            "basecolor": "T_DiggingStick_basecolor.png",
+            "roughness": "T_DiggingStick_roughness.png",
+            "normal": "T_DiggingStick_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DiggingStick_basecolor.png",
+          "roughness": "T_DiggingStick_roughness.png",
+          "normal": "T_DiggingStick_normal.png",
+          "ao": "T_DiggingStick_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          30
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          -0.69
+        ]
+      },
+      "fbx": "SM_DiggingStick.fbx",
+      "sha256": "468c6512461f63a829e972a9c85f64a3701ab05c0ec183eb54556195494ad05f",
+      "preview": "preview_SM_DiggingStick.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DiggingStick_hero.png",
+          "detail": "beauty_SM_DiggingStick_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          30
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_DiggingStick_basecolor.png": "d70ab2a5c1128112c7bf07d15a85e0653cb0ef05c94371af3bd02ff9d88d9171",
+    "T_DiggingStick_roughness.png": "1786eeb37fb1dc5c97bd6701a9f2106f961e5eeef3c22dee06869111746c1662",
+    "T_DiggingStick_normal.png": "046db73fb39273ff33105a5dd8e680245b034554ee6f35951b11c4236162859a"
+  }
+}
