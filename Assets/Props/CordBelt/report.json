@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "CordBelt",
+  "description": "Two-ply plant-fibre cord belt, ~80 cm loop of 8 mm cord tied with a reef knot in front (original). Pivot = loop centre at cord height; knot faces -Y, tails hang -Z.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/cord_belt.py",
+  "source_sha256": "3107233f147eac87f48f04dd7c396abb1da17c43680400a644c641ccb7c755b6",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_CordBelt": {
+      "vertices": 1746,
+      "triangles": 3480,
+      "size_cm": [
+        29.24,
+        24.12,
+        12.7
+      ],
+      "materials": [
+        {
+          "name": "M_CordBelt",
+          "textures": {
+            "basecolor": "T_CordBelt_basecolor.png",
+            "roughness": "T_CordBelt_roughness.png",
+            "normal": "T_CordBelt_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CordBelt_basecolor.png",
+          "roughness": "T_CordBelt_roughness.png",
+          "normal": "T_CordBelt_normal.png",
+          "ao": "T_CordBelt_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          20
+        ],
+        "focus": [
+          0.0,
+          -0.11,
+          -0.02
+        ]
+      },
+      "fbx": "SM_CordBelt.fbx",
+      "sha256": "654ed2144e8868617191a994314941b8202f10c4fe01516479d6335cbb5212be",
+      "preview": "preview_SM_CordBelt.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CordBelt_hero.png",
+          "detail": "beauty_SM_CordBelt_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          20
+        ]
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_CordBelt_basecolor.png": "b93b29aeb2e1ae79756e194db65923e44fcca336d7315ebfe7b4ed46c0083cfc",
+    "T_CordBelt_roughness.png": "6083388625f0e399c8b114ccd3c600e0c8c6262835fa39a99a5b0d4bf8584c12",
+    "T_CordBelt_normal.png": "ca89754d8881a759210eec0613763eab6e58ef685efc41ffa5d43216076b4581"
+  }
+}
