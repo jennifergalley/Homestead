@@ -22,6 +22,7 @@ Reference recipes:
 | `wattle_panel.py` | From scratch: woven rod sweeps around stakes, bark + daub materials, 4K bake |
 | `wild_garlic.py` | From scratch foliage: real-geometry leaves/flowers on a shared UV atlas (`BAKE repack: False`) |
 | `bush.py` | Scan composition: instanced, varied Poly Haven shoots with LODs |
+| `granite_*.py`, `hand_stones.py` | From scratch rocks: `homestead_rocks` implicit fields, exfoliation plates, `kit.mats.granite`, shared LOD UVs; big ones layer the tiling `granite_detail.py` maps |
 
 ## Choose the mode Jenny asks for
 
@@ -80,6 +81,11 @@ before each pass.
   translucency and imperfections.
 - **Review renders.** `render_beauty` uses AgX with -0.35 exposure and an f/22 detail camera. Judge colour there,
   not in the Workbench previews.
+- **Rocks (see `docs\blender-assets.md`, "Rocks").** Cut big exfoliation steps *before* the voxel remesh
+  (it heals folds); only small flakes and relief after it. Displacing 0.3 m+ on the final mesh folds into
+  spikes in concave creases. Cluster stones remesh separately (`union=False`) or they fuse into puddles.
+  Measure baked albedo instead of trusting a sunlit render: granite at 0.3 linear already looks white in sun;
+  add metre-scale variation (lichen film, streaks), not darkness.
 
 ## Rules
 

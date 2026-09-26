@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "GraniteDetail",
+  "description": "Seamless 1 m tiling granite crystal detail maps (shared by the large boulders); swatch plane.",
+  "collision": "none",
+  "triangle_budget": 200,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_detail.py",
+  "source_sha256": "67057c5a19c04f8f3e6ab84e2ccbc87ac7a1052e8f5f080cc5b1a42e20d67c1b",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteDetail": {
+      "vertices": 81,
+      "triangles": 128,
+      "size_cm": [
+        100.0,
+        100.0,
+        0.08
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteDetail",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteDetail_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 32,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteDetail_basecolor.png",
+          "roughness": "T_GraniteDetail_roughness.png",
+          "normal": "T_GraniteDetail_normal.png",
+          "height": "T_GraniteDetail_height.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_GraniteDetail.fbx",
+      "sha256": "d225a87dd977e67bbb971d35d7f2df5092d8339ecd1ee80daeea7abf69027cc1",
+      "preview": "preview_SM_GraniteDetail.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteDetail_hero.png",
+          "detail": "beauty_SM_GraniteDetail_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "tile_m": 1.0,
+    "grain_m": 0.0032,
+    "usage": "World/object-aligned projection at 1 tile per meter; basecolor x2 multiply over macro."
+  },
+  "textures": {
+    "T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "T_GraniteDetail_normal.png": "2ac3fdaae274194876e0cf14b19dd9db80876bbe8621cb0991e6032bf9ebfa6d"
+  }
+}

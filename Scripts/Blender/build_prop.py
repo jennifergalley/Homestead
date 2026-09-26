@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -97,16 +98,28 @@ def main():
               "meshes": {}, "warnings": []}
     report["provenance"] = report["provenance"] or \
         "Original project-authored geometry; no third-party asset or texture"
+    if args.recipe and getattr(recipe, "NOTES", None):
+        report["notes"] = recipe.NOTES
     bake_spec = getattr(recipe, "BAKE", None) if args.recipe else None
+    baked_materials = {}
     for obj in meshes:
         baked = None
-        if bake_spec:
+        lod = re.match(r"^(SM_.+)_LOD\d+$", obj.name)
+        if bake_spec and lod and lod.group(1) in baked_materials:
+            # LODs decimated from an unwrapped LOD0 share its UVs and texture set.
+            obj.data.materials.clear()
+            obj.data.materials.append(baked_materials[lod.group(1)][0])
+            baked = dict(baked_materials[lod.group(1)][1], shared_with=lod.group(1))
+        elif bake_spec:
             if bake_spec.get("repack", True):
                 kit.pack_uvs(obj, margin=bake_spec.get("margin", 0.004))
             print(f"HOMESTEAD_BAKING {obj.name} {bake_spec.get('size', 2048)}px", flush=True)
             baked = kit.bake(obj, out / "Textures", obj.name[3:], size=bake_spec.get("size", 2048),
                              samples=bake_spec.get("samples", 96),
                              maps=tuple(bake_spec.get("maps", kit.BAKE_MAPS)))
+            if hasattr(recipe, "after_bake"):
+                recipe.after_bake(kit, obj)
+            baked_materials[obj.name] = (obj.material_slots[0].material, baked)
         info = kit.stats(obj)
         if baked:
             info["bake"] = baked

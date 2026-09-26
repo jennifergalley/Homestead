@@ -14,6 +14,17 @@ meshes (`Scripts\Environment\build_reed_clumps.py`); their shafts, blades and
 seed heads reuse `M_Field` color instances. The small held Knife is likewise
 project-authored procedural geometry. Neither adds a third-party asset.
 
+The granite rocks and boulders in `Assets\Props` (GraniteCobbles, GraniteSpalls,
+GraniteRubble, GraniteBoulderLoaf, GraniteBlockTalus, GraniteBoulderLow,
+GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones)
+and the shared tiling GraniteDetail maps are project-authored: procedural geometry
+(`Scripts\Blender\homestead_rocks.py`) and procedural materials
+(`homestead_materials.granite`) baked to textures, with no scanned or downloaded
+geometry or textures. Reference photographs were viewed only for comparison and are
+not stored in the repository. The review renders use the CC0 Kloofendal 48d
+Partly Cloudy (Pure Sky) HDRI by Greg Zaal (https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky),
+which ships with no asset.
+
 ## Music
 
 All music is by **Kevin MacLeod** (incompetech.com), licensed under

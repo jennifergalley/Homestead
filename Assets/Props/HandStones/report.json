@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "name": "HandStones",
+  "description": "Three single hand-sized granite stones (12, 16, 19 cm) for gathering and carrying.",
+  "collision": "convex",
+  "triangle_budget": 3200,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/hand_stones.py",
+  "source_sha256": "52d6166a5a980282f8dd0865c97d41b0aa9affd9d7d348cf3fc7b0dde1a59023",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_HandStone_A": {
+      "vertices": 1102,
+      "triangles": 2200,
+      "size_cm": [
+        12.19,
+        9.23,
+        6.87
+      ],
+      "materials": [
+        {
+          "name": "M_HandStone_A",
+          "textures": {
+            "basecolor": "T_HandStone_A_basecolor.png",
+            "roughness": "T_HandStone_A_roughness.png",
+            "normal": "T_HandStone_A_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_HandStone_A_basecolor.png",
+          "roughness": "T_HandStone_A_roughness.png",
+          "normal": "T_HandStone_A_normal.png",
+          "ao": "T_HandStone_A_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_HandStone_A.fbx",
+      "sha256": "42d881510adf0cb3e1fb14a8915d277e44ca3effdf376d0b7fab7260e98934c3",
+      "preview": "preview_SM_HandStone_A.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_HandStone_A_hero.png",
+          "detail": "beauty_SM_HandStone_A_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_HandStone_B": {
+      "vertices": 1302,
+      "triangles": 2600,
+      "size_cm": [
+        15.47,
+        12.16,
+        8.61
+      ],
+      "materials": [
+        {
+          "name": "M_HandStone_B",
+          "textures": {
+            "basecolor": "T_HandStone_B_basecolor.png",
+            "roughness": "T_HandStone_B_roughness.png",
+            "normal": "T_HandStone_B_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_HandStone_B_basecolor.png",
+          "roughness": "T_HandStone_B_roughness.png",
+          "normal": "T_HandStone_B_normal.png",
+          "ao": "T_HandStone_B_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_HandStone_B.fbx",
+      "sha256": "a12c75849aaa5978126e73499f94b75435cb6bb9ce4d913940bebfdf527b1107",
+      "preview": "preview_SM_HandStone_B.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_HandStone_B_hero.png",
+          "detail": "beauty_SM_HandStone_B_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_HandStone_C": {
+      "vertices": 1452,
+      "triangles": 2900,
+      "size_cm": [
+        18.69,
+        14.14,
+        8.43
+      ],
+      "materials": [
+        {
+          "name": "M_HandStone_C",
+          "textures": {
+            "basecolor": "T_HandStone_C_basecolor.png",
+            "roughness": "T_HandStone_C_roughness.png",
+            "normal": "T_HandStone_C_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_HandStone_C_basecolor.png",
+          "roughness": "T_HandStone_C_roughness.png",
+          "normal": "T_HandStone_C_normal.png",
+          "ao": "T_HandStone_C_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_HandStone_C.fbx",
+      "sha256": "fcaf1fb668fdb3c9c1eb0661faf95934f4c06e8b5758b9f706c9c2da83b47e04",
+      "preview": "preview_SM_HandStone_C.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_HandStone_C_hero.png",
+          "detail": "beauty_SM_HandStone_C_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "pivot": "Bounds centre of each stone (for socket attachment); the stones are authored lying on their natural resting face, which is their local -Z (dirt side).",
+    "collision": "Simple convex hull per stone."
+  },
+  "textures": {
+    "T_HandStone_A_basecolor.png": "158b3ae2e5c1665fef65d8ac91ebe40dae3fe21e003dc361ec06429ffc4585f9",
+    "T_HandStone_A_roughness.png": "b145e7e3cf423f2645b7d76efeb470dc2ee29dac6b0deae1625950c45720956c",
+    "T_HandStone_A_normal.png": "5f890e23345fc5df478b8e6ff62dc858d9e0cadbdd439efd63da96341513a6c1",
+    "T_HandStone_B_basecolor.png": "172a3c8873766c8e32de73397fbcfdd81fdb855ba64bc1f430ab5ff92f5d22f3",
+    "T_HandStone_B_roughness.png": "de7ed176aa12de7e4fc5dd9955256232dc7c00daf0edb10ded573d1f15897175",
+    "T_HandStone_B_normal.png": "e78639372ecdb487bd8d601a01f376f1c7f204629710c1e85b0fe875972dbc09",
+    "T_HandStone_C_basecolor.png": "2184f0c87704e7d10f5d89777650590b53ba69b46ea82d012999028394d00097",
+    "T_HandStone_C_roughness.png": "cb0378ad557b7093c43475908db8cf8985198e96859c868a97d96993cd7abbba",
+    "T_HandStone_C_normal.png": "4674031ab455f0320c78d5d056e8fc51a68bcdec2483eaf83c066dfe074706c4"
+  }
+}
