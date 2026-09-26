@@ -21,21 +21,21 @@ NAME = "GraniteErratic"
 DESCRIPTION = "Large (3.3 m) rounded, faceted granite glacial erratic with spalled shells and lichen; LOD1/LOD2."
 COLLISION = "convex"
 TRIANGLE_BUDGET = 400000
-BAKE = {"size": 4096, "samples": 64, "repack": False}
+BAKE = {"size": 4096, "samples": 64, "repack": False, "maps": ["basecolor", "roughness", "normal", "ao", "mask"]}
 BEAUTY = {"pose": (0, 0, 0), "focus": (-0.6, -1.0, 1.6), "ground": "origin",
           "views": ["hero", "detail", "eye"], "eye_distance": 7.5}
 NOTES = {}
 DETAIL = {"folder": "Assets/Props/GraniteDetail/Textures", "stem": "GraniteDetail", "tile_m": 1.0,
           "strength": 0.8}
 
-SHELLS = dict(cell=1.5, thickness=0.055, coverage=0.4, width=0.04, wobble=0.16)
-FLAKES = dict(cell=0.35, thickness=0.012, coverage=0.2, width=0.012, wobble=0.22)
+SHELLS = dict(cell=0.95, thickness=0.05, coverage=0.3, width=0.04, wobble=0.16)
+FLAKES = dict(cell=0.35, thickness=0.007, coverage=0.2, width=0.012, wobble=0.22)
 
 
 def build(kit):
-    mat = kit.mats.granite("M_GraniteErratic", grains=False, grain=0.0035, scale=3.0, patina=0.75, lichen=0.75,
+    mat = kit.mats.granite("M_GraniteErratic", grains=False, grain=0.0035, scale=3.0, patina=0.85, lichen=1.35,
                            moss=0.15, iron=0.3, streaks=0.3, soil=0.5, soil_height=0.18, enclaves=0.6,
-                           spots=2.2, seed=9.0)
+                           spots=2.2, film=0.9, seed=9.0)
     field = rocks.boulder(
         radii=(1.75, 1.4, 1.25), power=2.35, lumps=0.035, lump_scale=1.0, seed=91,
         joints=[((0.0, 0.0, -1.0), 0.95, 0.45),     # settled base
@@ -58,7 +58,7 @@ def build(kit):
                                     **SHELLS)
         flake, flaked = rocks.plates(points, normal, seed=94, **FLAKES)
         grain = rocks.relief(points, normal, 95, [(0.9, 0.01), (0.2, 0.003), (0.05, 0.0012)])
-        return grain - depth - flake * (0.5 + 0.5 * up), {"fresh": np.clip(np.maximum(fresh, flaked * 0.5), 0, 1)}
+        return grain - depth - flake * (0.5 + 0.5 * up), {"fresh": np.clip(np.maximum(fresh * 0.4, flaked * 0.6), 0, 1)}
 
     meshes, sink = rocks.finish(kit, [rock], "SM_GraniteErratic", 300000, (60000, 12000), ground_z=-0.7,
                                 detail=detail)
@@ -67,9 +67,10 @@ def build(kit):
         "placement": f"Origin is the ground line; place at terrain height (already sunk {sink:.2f} m).",
         "north": "+Y (moss side)",
         "collision": "Convex is fine: the boulder is convex apart from shallow shell steps.",
-        "material": ("Macro bake (no crystals) + shared GraniteDetail tiling maps: world-aligned 1 m "
-                     "tiles, BaseColor = Macro * lerp(1, 2 * Detail, 0.8); normal = blend of macro and "
-                     "detail normals; roughness = lerp(Macro, DetailRoughness, 0.4)."),
+        "material": ("Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), "
+                     "gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; "
+                     "BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; "
+                     "roughness = lerp(Macro, DetailRoughness, 0.5 * k)."),
         "detail_textures": [f"{DETAIL['folder']}/T_GraniteDetail_{role}.png"
                             for role in ("basecolor", "normal", "roughness", "height")],
     })
@@ -78,4 +79,5 @@ def build(kit):
 
 def after_bake(kit, obj):
     kit.layer_detail(obj, kit.ROOT / DETAIL["folder"], DETAIL["stem"], tile=DETAIL["tile_m"],
-                     strength=DETAIL["strength"])
+                     strength=DETAIL["strength"],
+                     mask=kit.ROOT / "Assets" / "Props" / NAME / "Textures" / f"T_{NAME}_mask.png")

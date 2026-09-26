@@ -247,10 +247,12 @@ and a soil line. Linear albedo of bare weathered rock is ~0.28-0.35, roughness 0
 (quartz and mica glossier).
 
 Texel density: crystals are 2-5 mm, so rocks up to ~1.5 m bake them in (2K). The large
-and house-sized rocks bake macro maps without crystals (4K) and layer the shared,
+and house-sized rocks bake macro maps without crystals (4K) plus a cover mask
+(`T_<Name>_mask`, 1 = bare rock, lower under lichen, moss and soil) and layer the shared,
 seamless `Assets\Props\GraniteDetail` maps (1 m tiles, generated on a flat 4D torus so
-they tile without seams) in object/world space: `BaseColor = Macro * lerp(1, 2 * Detail,
-0.8)`, detail normal blended over the macro normal, roughness `lerp(Macro, Detail, 0.4)`.
+they tile without seams) in object/world space: `k = 0.8 * Mask`,
+`BaseColor = Macro * lerp(1, 2 * Detail, k)`, detail normal blended over the macro normal
+by `k`, roughness `lerp(Macro, Detail, 0.5 * k)`.
 `kit.layer_detail` wires the same thing into the Blender material for the review renders.
 Each recipe's `NOTES` (copied to `report.json`) gives the sink depth, collision advice and
 material notes.

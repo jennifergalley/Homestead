@@ -25,7 +25,7 @@ DESCRIPTION = ("House-sized (8 x 6.5 x 4 m) jointed granite boulder split in two
                "slab, rusty joint faces, streaks and lichen; Nanite-grade LOD0 plus LOD1/LOD2.")
 COLLISION = "convex"
 TRIANGLE_BUDGET = 1600000
-BAKE = {"size": 4096, "samples": 48, "repack": False}
+BAKE = {"size": 4096, "samples": 48, "repack": False, "maps": ["basecolor", "roughness", "normal", "ao", "mask"]}
 BEAUTY = {"pose": (0, 0, -90), "focus": (0.0, -2.6, 3.0), "ground": "origin",
           "views": ["hero", "detail", "eye"], "eye_distance": 13.0}
 NOTES = {}
@@ -38,7 +38,7 @@ N_A = rocks.unit((1.0, 0.18, 0.12))
 N_B = rocks.unit((1.0, 0.18, -0.12))
 D_A, D_B = -0.1, 0.12
 SHELLS = dict(cell=3.6, thickness=0.3, coverage=0.4, width=0.25, wobble=0.14)
-FLAKES = dict(cell=0.6, thickness=0.022, coverage=0.18, width=0.02, wobble=0.2)
+FLAKES = dict(cell=0.6, thickness=0.007, coverage=0.18, width=0.02, wobble=0.2)
 
 
 def _joint_mask(points, normal):
@@ -49,7 +49,7 @@ def _joint_mask(points, normal):
 
 
 def build(kit):
-    mat = kit.mats.granite("M_GraniteSplitBoulder", grains=False, grain=0.004, scale=7.0, lichen=0.75,
+    mat = kit.mats.granite("M_GraniteSplitBoulder", grains=False, grain=0.004, scale=7.0, lichen=1.15,
                            moss=0.14, iron=0.35, streaks=0.75, soil=0.5, soil_height=0.3, enclaves=0.5,
                            seed=7.0)
     block = rocks.boulder(
@@ -81,13 +81,12 @@ def build(kit):
 
     # Exfoliation sheet leaning on the east face, curved like the face it came off.
     slab_rot = rocks.rotation(yaw=96.0, roll=74.0)
-    slab_field = rocks.boulder(radii=(1.8, 1.5, 0.14), power=3.2, lumps=0.05, lump_scale=1.1, seed=73,
-                               center=(4.25, 0.35, 0.15), rotate=slab_rot, bend=0.07,
-                               joints=[((0.0, 0.0, 1.0), 0.1, 0.03), ((0.0, 0.0, -1.0), 0.11, 0.04),
-                                       ((1.0, 0.4, 0.0), 1.35, 0.04), ((-0.5, -1.0, 0.0), 1.3, 0.05),
-                                       ((-1.0, 0.3, 0.0), 1.55, 0.04), ((0.6, -0.9, 0.0), 1.4, 0.04)])
-    slab = rocks.cut(slab_field, rocks.unit((0.3, 0.9, 0.3)), 1.4, rounding=0.03, wobble=0.08,
-                     wobble_scale=1.5, seed=77)
+    slab = rocks.boulder(radii=(1.8, 1.5, 0.14), power=3.0, lumps=0.05, lump_scale=1.1, seed=73,
+                         center=(4.25, 0.35, 0.15), rotate=slab_rot, bend=0.07,
+                         joints=[((0.0, 0.0, 1.0), 0.1, 0.03), ((0.0, 0.0, -1.0), 0.11, 0.04),
+                                 ((1.0, 0.4, 0.0), 1.35, 0.06), ((-0.5, -1.0, 0.0), 1.3, 0.07),
+                                 ((-1.0, 0.3, 0.0), 1.55, 0.06), ((0.6, -0.9, 0.0), 1.45, 0.06),
+                                 ((-0.3, 1.0, 0.0), 1.3, 0.07)])
     slab = rocks.solid("Slab", slab, center=(4.25, 0.35, 0.15), subdivisions=7, material=mat, r_max=4.0)
     rocks.transform(slab, np.eye(3), (0.25, 0.0, 0.0))
 
@@ -96,7 +95,7 @@ def build(kit):
         _, fresh = rocks.plates(points, normal, seed=74, **SHELLS)
         flake, flaked = rocks.plates(points, normal, seed=75, **FLAKES)
         grain = rocks.relief(points, normal, 76, [(2.2, 0.02), (0.4, 0.005), (0.08, 0.002)])
-        fresh = np.clip(np.maximum(fresh * (1 - joint), flaked * 0.6), 0, 1)
+        fresh = np.clip(np.maximum(fresh * 0.4 * (1 - joint), flaked * 0.6), 0, 1)
         return grain - flake, {"fresh": fresh, "joint": joint}
 
     meshes, sink = rocks.finish(kit, [west, east, slab], "SM_GraniteSplitBoulder", 1200000, (160000, 32000),
@@ -111,9 +110,10 @@ def build(kit):
                       "hulls (west half, east half, slab). The recipe exports 'convex' only because the "
                       "importer supports none/box/convex."),
         "nanite": "LOD0 is Nanite-grade; enable Nanite and keep LOD1/LOD2 as the non-Nanite fallback.",
-        "material": ("Macro bake (no crystals) + shared GraniteDetail tiling maps: world-aligned 1 m "
-                     "tiles, BaseColor = Macro * lerp(1, 2 * Detail, 0.8); normal = blend of macro and "
-                     "detail normals; roughness = lerp(Macro, DetailRoughness, 0.4)."),
+        "material": ("Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), "
+                     "gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; "
+                     "BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; "
+                     "roughness = lerp(Macro, DetailRoughness, 0.5 * k)."),
         "detail_textures": [f"{DETAIL['folder']}/T_GraniteDetail_{role}.png"
                             for role in ("basecolor", "normal", "roughness", "height")],
     })
@@ -122,4 +122,5 @@ def build(kit):
 
 def after_bake(kit, obj):
     kit.layer_detail(obj, kit.ROOT / DETAIL["folder"], DETAIL["stem"], tile=DETAIL["tile_m"],
-                     strength=DETAIL["strength"])
+                     strength=DETAIL["strength"],
+                     mask=kit.ROOT / "Assets" / "Props" / NAME / "Textures" / f"T_{NAME}_mask.png")

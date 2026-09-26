@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "name": "GraniteDome",
+  "description": "House-sized (9 x 8 x 5 m) exfoliating granite dome boulder with spalled sheet steps, weathering pans, a leaning sheet slab, streaks and lichen; Nanite-grade LOD0 plus LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 1600000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_dome.py",
+  "source_sha256": "18e5fd033629b59531ed9ba28a20229f405a331dfdfad420d546e54e9670ea0a",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteDome": {
+      "vertices": 617300,
+      "triangles": 1234592,
+      "size_cm": [
+        1031.53,
+        926.01,
+        476.95
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteDome",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteDome_normal.png",
+            "mask": "T_GraniteDome_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteDome_basecolor.png",
+          "roughness": "T_GraniteDome_roughness.png",
+          "normal": "T_GraniteDome_normal.png",
+          "ao": "T_GraniteDome_ao.png",
+          "mask": "T_GraniteDome_mask.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -2.6,
+          -2.9,
+          1.6
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 15.0
+      },
+      "fbx": "SM_GraniteDome.fbx",
+      "sha256": "d166012c990d8c90bf378e2334d723d6fac8cc936f6ca711ea15c1f7c18e9ae9",
+      "preview": "preview_SM_GraniteDome.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteDome_hero.png",
+          "detail": "beauty_SM_GraniteDome_detail.png",
+          "eye": "beauty_SM_GraniteDome_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteDome_LOD1": {
+      "vertices": 80004,
+      "triangles": 160000,
+      "size_cm": [
+        1031.63,
+        926.05,
+        476.92
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteDome",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteDome_normal.png",
+            "mask": "T_GraniteDome_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteDome_basecolor.png",
+          "roughness": "T_GraniteDome_roughness.png",
+          "normal": "T_GraniteDome_normal.png",
+          "ao": "T_GraniteDome_ao.png",
+          "mask": "T_GraniteDome_mask.png"
+        },
+        "shared_with": "SM_GraniteDome"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -2.6,
+          -2.9,
+          1.6
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 15.0
+      },
+      "fbx": "SM_GraniteDome_LOD1.fbx",
+      "sha256": "294b39c441cfe7e1c43eecd6f76c7d2871e3bd22f77178ba7f8b53e066166cc4",
+      "preview": "preview_SM_GraniteDome_LOD1.png"
+    },
+    "SM_GraniteDome_LOD2": {
+      "vertices": 16004,
+      "triangles": 32000,
+      "size_cm": [
+        1031.47,
+        925.96,
+        477.14
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteDome",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteDome_normal.png",
+            "mask": "T_GraniteDome_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteDome_basecolor.png",
+          "roughness": "T_GraniteDome_roughness.png",
+          "normal": "T_GraniteDome_normal.png",
+          "ao": "T_GraniteDome_ao.png",
+          "mask": "T_GraniteDome_mask.png"
+        },
+        "shared_with": "SM_GraniteDome"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -2.6,
+          -2.9,
+          1.6
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 15.0
+      },
+      "fbx": "SM_GraniteDome_LOD2.fbx",
+      "sha256": "6310fff7bb478b6e1f1770960245df39d832ee1793ccb6372ca4ce4fcf1d11c9",
+      "preview": "preview_SM_GraniteDome_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.741,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 0.74 m). On slopes sink the downhill side further or embed it in a terrain bump.",
+    "north": "+Y (moss side)",
+    "collision": "Convex hull is acceptable for walking around it (the leaning slab and base fill in, which blocks nothing a player could stand in). Use complex-as-simple with LOD2 if players should climb the stepped shells or stand in the slab gap.",
+    "nanite": "LOD0 is Nanite-grade; enable Nanite and keep LOD1/LOD2 as the non-Nanite fallback.",
+    "material": "Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; roughness = lerp(Macro, DetailRoughness, 0.5 * k).",
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "textures": {
+    "T_GraniteDome_basecolor.png": "376a3449276f37509241d2b1a64d0326ad2075e1a3ae3ab24ab705ba162dcf77",
+    "T_GraniteDome_roughness.png": "87940d9f37ee37a6d80ca482ffd975f4464585dfb0542830832846be0dfba9bd",
+    "T_GraniteDome_normal.png": "0fe3952ae8a433c8e98da2a15fc5c3e7c1ddbffea1dba066b4c5beba21d77d19",
+    "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_GraniteDome_mask.png": "c23bf88c9c1dafad9b443566bcf993ddaf68fefce88ec2728708714e046087e1",
+    "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
+  }
+}

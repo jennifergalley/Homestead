@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "GraniteErratic",
+  "description": "Large (3.3 m) rounded, faceted granite glacial erratic with spalled shells and lichen; LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 400000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_erratic.py",
+  "source_sha256": "f860aad6d111a021d85172b950a7874f5e99c4939d9dc6965acb16d79ebf6332",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteErratic": {
+      "vertices": 158346,
+      "triangles": 316688,
+      "size_cm": [
+        315.6,
+        251.55,
+        204.04
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteErratic",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteErratic_normal.png",
+            "mask": "T_GraniteErratic_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteErratic_basecolor.png",
+          "roughness": "T_GraniteErratic_roughness.png",
+          "normal": "T_GraniteErratic_normal.png",
+          "ao": "T_GraniteErratic_ao.png",
+          "mask": "T_GraniteErratic_mask.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.6,
+          -1.0,
+          1.6
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 7.5
+      },
+      "fbx": "SM_GraniteErratic.fbx",
+      "sha256": "9bab47cd200f90a82af97dff761ddf719d6be8eca26cc7f4a6c309c19a99142a",
+      "preview": "preview_SM_GraniteErratic.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteErratic_hero.png",
+          "detail": "beauty_SM_GraniteErratic_detail.png",
+          "eye": "beauty_SM_GraniteErratic_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteErratic_LOD1": {
+      "vertices": 30002,
+      "triangles": 60000,
+      "size_cm": [
+        315.6,
+        251.55,
+        204.04
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteErratic",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteErratic_normal.png",
+            "mask": "T_GraniteErratic_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteErratic_basecolor.png",
+          "roughness": "T_GraniteErratic_roughness.png",
+          "normal": "T_GraniteErratic_normal.png",
+          "ao": "T_GraniteErratic_ao.png",
+          "mask": "T_GraniteErratic_mask.png"
+        },
+        "shared_with": "SM_GraniteErratic"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.6,
+          -1.0,
+          1.6
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 7.5
+      },
+      "fbx": "SM_GraniteErratic_LOD1.fbx",
+      "sha256": "dda3ffc46186f9240e1b7e3d16a56ddc726eb5798fb97e44067de269882a15fb",
+      "preview": "preview_SM_GraniteErratic_LOD1.png"
+    },
+    "SM_GraniteErratic_LOD2": {
+      "vertices": 6002,
+      "triangles": 12000,
+      "size_cm": [
+        315.52,
+        251.57,
+        204.06
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteErratic",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteErratic_normal.png",
+            "mask": "T_GraniteErratic_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteErratic_basecolor.png",
+          "roughness": "T_GraniteErratic_roughness.png",
+          "normal": "T_GraniteErratic_normal.png",
+          "ao": "T_GraniteErratic_ao.png",
+          "mask": "T_GraniteErratic_mask.png"
+        },
+        "shared_with": "SM_GraniteErratic"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.6,
+          -1.0,
+          1.6
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 7.5
+      },
+      "fbx": "SM_GraniteErratic_LOD2.fbx",
+      "sha256": "ab9eb4217b48bc88e98184e34804cf2d4268e80cf2ae0197b0c00e80426bb95e",
+      "preview": "preview_SM_GraniteErratic_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.242,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 0.24 m).",
+    "north": "+Y (moss side)",
+    "collision": "Convex is fine: the boulder is convex apart from shallow shell steps.",
+    "material": "Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; roughness = lerp(Macro, DetailRoughness, 0.5 * k).",
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "textures": {
+    "T_GraniteErratic_basecolor.png": "740863e61259d77be7c19517b7e50a17d45be0ef07520b1fa012eb408703e537",
+    "T_GraniteErratic_roughness.png": "5b9939629b93ea31a5baa7c8490ec7cfb4e116240bf3ba07c44dc736ef0d6489",
+    "T_GraniteErratic_normal.png": "2e62a8b28e2ad21f26051881d6fb022072af00cf19e4987ac5ca5d98f01ad155",
+    "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_GraniteErratic_mask.png": "b4aef7f24f806e00249de5b4bd2240d568760dbc34aa972bd1220e859ad47ea0",
+    "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
+  }
+}

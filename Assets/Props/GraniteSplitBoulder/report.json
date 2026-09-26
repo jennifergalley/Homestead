@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "name": "GraniteSplitBoulder",
+  "description": "House-sized (8 x 6.5 x 4 m) jointed granite boulder split in two, with a leaning exfoliation slab, rusty joint faces, streaks and lichen; Nanite-grade LOD0 plus LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 1600000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_split_boulder.py",
+  "source_sha256": "c8984406095bd22bbfce74e8e8d7db27746397019b2c6443788838c5acbff3d9",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteSplitBoulder": {
+      "vertices": 557644,
+      "triangles": 1115280,
+      "size_cm": [
+        874.29,
+        581.57,
+        417.64
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteSplitBoulder",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteSplitBoulder_normal.png",
+            "mask": "T_GraniteSplitBoulder_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteSplitBoulder_basecolor.png",
+          "roughness": "T_GraniteSplitBoulder_roughness.png",
+          "normal": "T_GraniteSplitBoulder_normal.png",
+          "ao": "T_GraniteSplitBoulder_ao.png",
+          "mask": "T_GraniteSplitBoulder_mask.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "focus": [
+          0.0,
+          -2.6,
+          3.0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 13.0
+      },
+      "fbx": "SM_GraniteSplitBoulder.fbx",
+      "sha256": "f2f47640d416efca953068dc61ad8ca0a7fa39bc604a6342c29da254f9ffa2d2",
+      "preview": "preview_SM_GraniteSplitBoulder.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteSplitBoulder_hero.png",
+          "detail": "beauty_SM_GraniteSplitBoulder_detail.png",
+          "eye": "beauty_SM_GraniteSplitBoulder_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteSplitBoulder_LOD1": {
+      "vertices": 80004,
+      "triangles": 160000,
+      "size_cm": [
+        874.25,
+        581.55,
+        417.64
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteSplitBoulder",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteSplitBoulder_normal.png",
+            "mask": "T_GraniteSplitBoulder_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteSplitBoulder_basecolor.png",
+          "roughness": "T_GraniteSplitBoulder_roughness.png",
+          "normal": "T_GraniteSplitBoulder_normal.png",
+          "ao": "T_GraniteSplitBoulder_ao.png",
+          "mask": "T_GraniteSplitBoulder_mask.png"
+        },
+        "shared_with": "SM_GraniteSplitBoulder"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "focus": [
+          0.0,
+          -2.6,
+          3.0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 13.0
+      },
+      "fbx": "SM_GraniteSplitBoulder_LOD1.fbx",
+      "sha256": "e4e52f647e78bd90a965e271f1cc7a74c7eb5241aed46534a14baf7ee84697b6",
+      "preview": "preview_SM_GraniteSplitBoulder_LOD1.png"
+    },
+    "SM_GraniteSplitBoulder_LOD2": {
+      "vertices": 16004,
+      "triangles": 32000,
+      "size_cm": [
+        874.28,
+        581.58,
+        417.7
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteSplitBoulder",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_GraniteSplitBoulder_normal.png",
+            "mask": "T_GraniteSplitBoulder_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteSplitBoulder_basecolor.png",
+          "roughness": "T_GraniteSplitBoulder_roughness.png",
+          "normal": "T_GraniteSplitBoulder_normal.png",
+          "ao": "T_GraniteSplitBoulder_ao.png",
+          "mask": "T_GraniteSplitBoulder_mask.png"
+        },
+        "shared_with": "SM_GraniteSplitBoulder"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -90
+        ],
+        "focus": [
+          0.0,
+          -2.6,
+          3.0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 13.0
+      },
+      "fbx": "SM_GraniteSplitBoulder_LOD2.fbx",
+      "sha256": "3b47071d6f848a8575f65a34bf69427e128ef75028edf627115f954350b53bb9",
+      "preview": "preview_SM_GraniteSplitBoulder_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.673,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 0.67 m).",
+    "north": "+Y (moss side)",
+    "collision": "Needs complex collision: a convex hull would fill the walk-in split and the gap behind the slab and put invisible walls around the overhangs. Use complex-as-simple with SM_GraniteSplitBoulder_LOD2 (32k tris), or author 3 convex hulls (west half, east half, slab). The recipe exports 'convex' only because the importer supports none/box/convex.",
+    "nanite": "LOD0 is Nanite-grade; enable Nanite and keep LOD1/LOD2 as the non-Nanite fallback.",
+    "material": "Macro bake (no crystals) + shared GraniteDetail tiling maps (world-aligned 1 m tiles), gated by T_<Name>_mask (UV0; 1 = bare rock, 0 under lichen/moss/soil): k = 0.8 * Mask; BaseColor = Macro * lerp(1, 2 * Detail, k); normal = macro blended with detail normal by k; roughness = lerp(Macro, DetailRoughness, 0.5 * k).",
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "textures": {
+    "T_GraniteSplitBoulder_basecolor.png": "27a6e587ab5a11cb922def1e8046505803758744a3675968d16bd2ea259d8902",
+    "T_GraniteSplitBoulder_roughness.png": "fc537216ddf9df56e3bb1187bcb44aca461e0c2ba860907be4ad06bcfe9e6f9c",
+    "T_GraniteSplitBoulder_normal.png": "ddef52256b04da05b1c47c9c5f7428083a52a991febaf478d4a832964cdb8f5f",
+    "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_GraniteSplitBoulder_mask.png": "9a6cc6b9b8f97cc32e753b7616078957e461bd094c493e22f6352596cee5fcb6",
+    "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
+  }
+}
