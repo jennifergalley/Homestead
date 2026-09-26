@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Thimbleberry",
+  "description": "Thimbleberry clump, 0.9 m tall and 1.2 m across: thornless canes with big velvety maple-like leaves, white flowers and red berries. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 25000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/thimbleberry.py",
+  "source_sha256": "82ec126627baf24ce9c75670e00a92e426044b3ab25c04e43bb71475a3966d91",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Thimbleberry": {
+      "vertices": 8128,
+      "triangles": 11168,
+      "size_cm": [
+        163.98,
+        138.75,
+        107.64
+      ],
+      "materials": [
+        {
+          "name": "M_Thimbleberry",
+          "textures": {
+            "basecolor": "T_Thimbleberry_basecolor.png",
+            "normal": "T_Thimbleberry_normal.png",
+            "roughness": "T_Thimbleberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.1105722188949585,
+          -0.18647854328155516,
+          0.55
+        ]
+      },
+      "fbx": "SM_Thimbleberry.fbx",
+      "sha256": "479496e7abf009c2d3f598d118f1cad070da3fc7ff7e07cb9563ae048a13823c",
+      "preview": "preview_SM_Thimbleberry.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Thimbleberry_hero.png",
+          "detail": "beauty_SM_Thimbleberry_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_Thimbleberry_LOD1": {
+      "vertices": 3640,
+      "triangles": 3726,
+      "size_cm": [
+        162.84,
+        138.34,
+        110.45
+      ],
+      "materials": [
+        {
+          "name": "M_Thimbleberry",
+          "textures": {
+            "basecolor": "T_Thimbleberry_basecolor.png",
+            "normal": "T_Thimbleberry_normal.png",
+            "roughness": "T_Thimbleberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.1105722188949585,
+          -0.18647854328155516,
+          0.55
+        ]
+      },
+      "fbx": "SM_Thimbleberry_LOD1.fbx",
+      "sha256": "bf2e45ccab294f4e55ba1f0e6b685f88ca1c8717ca87027b443d94002a056b06",
+      "preview": "preview_SM_Thimbleberry_LOD1.png"
+    },
+    "SM_Thimbleberry_LOD2": {
+      "vertices": 900,
+      "triangles": 756,
+      "size_cm": [
+        175.89,
+        156.45,
+        109.87
+      ],
+      "materials": [
+        {
+          "name": "M_Thimbleberry",
+          "textures": {
+            "basecolor": "T_Thimbleberry_basecolor.png",
+            "normal": "T_Thimbleberry_normal.png",
+            "roughness": "T_Thimbleberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.1105722188949585,
+          -0.18647854328155516,
+          0.55
+        ]
+      },
+      "fbx": "SM_Thimbleberry_LOD2.fbx",
+      "sha256": "b814d1d5462f28d0bbf1c810a6a8e59e9e36be12127f8db83c423657998cfa93",
+      "preview": "preview_SM_Thimbleberry_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-cane random phase",
+    "B": "leaf flutter 0 at leaf base -> 1 at tip, 0 on canes",
+    "A": "1"
+  },
+  "material_notes": "One material M_Thimbleberry: T_Thimbleberry_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_Thimbleberry_basecolor.png": "79b18884062a4af385d03efa59ff85f86ef0622f87e4e7d34a9d723f30b14fd3",
+    "T_Thimbleberry_normal.png": "8b473d1028f1b205fc456941ff2f9ae0212ba53d311d7147c4b29083349daac4",
+    "T_Thimbleberry_roughness.png": "15b81b1f7b549d9835b1fa0a2bf062d7da03671e6fb85138c8333f7a928c2a73"
+  }
+}
