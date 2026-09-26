@@ -485,7 +485,7 @@ def leather(name, color=(0.30, 0.19, 0.10), dark=(0.12, 0.07, 0.035), roughness=
     base = g.mix(base, (0.07, 0.05, 0.035), grime)
     if stains:
         spot = g.noise(g.vmath("ADD", seeded, (5.0, 2.0, 9.0)), scale=30.0, detail=3.0).outputs["Fac"]
-        base = g.mix(base, (0.09, 0.03, 0.045), g.remap(spot, 0.62, 0.67, 0.0, stains))
+        base = g.mix(base, (0.075, 0.045, 0.045), g.remap(spot, 0.62, 0.67, 0.0, stains))
     g.set("Base Color", base)
     rough = g.remap(nap, 0.3, 0.7, roughness - 0.05, roughness + 0.06)
     if handled is not None:
