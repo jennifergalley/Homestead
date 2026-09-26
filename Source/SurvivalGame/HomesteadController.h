@@ -65,6 +65,9 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupInputComponent() override;
     virtual bool InputKey(const FInputKeyEventArgs& Params) override;
+    // Bare-foot step on soil, called by UHomesteadFootstepNotify at each touchdown.
+    void PlayFootstep(bool bLeftFoot, bool bRun);
+    uint32 FootstepCount() const { return Footsteps; }
 
     bool IsBookOpen() const { return bBookOpen; }
     bool IsFailed() const { return Sim.GetState().failed; }
@@ -172,6 +175,8 @@ private:
     UPROPERTY() TObjectPtr<UAudioComponent> Ambience;
     UPROPERTY() TObjectPtr<USoundBase> GrassStepA;
     UPROPERTY() TObjectPtr<USoundBase> GrassStepB;
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> BareWalkSteps;
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> BareRunSteps;
     UPROPERTY() TObjectPtr<USoundBase> WoodTapA;
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeA;
@@ -189,6 +194,9 @@ private:
     bool bAlternateStep = false;
     FVector LastStepPosition = FVector::ZeroVector;
     float StepDistance = 0;
+    double LastFootstepTime = -1;
+    int32 LastBareStep = INDEX_NONE;
+    uint32 Footsteps = 0;
     bool bBookOpen = false;
     bool bPlanning = false;
     bool bGamepad = true;

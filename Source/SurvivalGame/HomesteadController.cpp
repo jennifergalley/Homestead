@@ -37,6 +37,9 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScaleBox.h"
 
+// "log LogHomesteadFootsteps Verbose" lists every footstep with its game time.
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadFootsteps, Log, All);
+
 namespace
 {
 constexpr const TCHAR* CameraSettingsSection = TEXT("Homestead.Camera");
@@ -1046,7 +1049,10 @@ void AHomesteadController::Tick(float DeltaSeconds)
         const FVector Position = Avatar->GetActorLocation();
         const float Distance = FVector::Dist2D(Position, LastStepPosition);
         LastStepPosition = Position;
-        if (!bBookOpen && !bPlanning && !IsFailed() && Avatar->GetCharacterMovement()->IsMovingOnGround()
+        // The MetaHuman's steps come from footstep notifies on her locomotion clips (PlayFootstep).
+        // The legacy heroine's clips have none, so she keeps a step every 70 cm.
+        if (!Avatar->IsMetaHumanActive() && !bBookOpen && !bPlanning && !IsFailed()
+            && Avatar->GetCharacterMovement()->IsMovingOnGround()
             && Distance < 120 && Avatar->GetVelocity().Size2D() > 12)
         {
             StepDistance += Distance;
@@ -2598,8 +2604,21 @@ void AHomesteadController::InitializeAudio()
     CraftStrikeB = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeB.CraftStrikeB"));
     CraftStrikeC = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/CraftStrikeC.CraftStrikeC"));
     UIClick = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/UIClick.UIClick"));
+    auto LoadPool = [](TArray<TObjectPtr<USoundBase>>& Pool, const TCHAR* Prefix, int32 Count)
+    {
+        Pool.Reset();
+        for (int32 Index = 0; Index < Count; ++Index)
+        {
+            const FString Name = FString::Printf(TEXT("%s_%02d"), Prefix, Index);
+            if (USoundBase* Step = LoadObject<USoundBase>(nullptr,
+                    *FString::Printf(TEXT("/Game/SurvivalGame/Audio/Effects/%s.%s"), *Name, *Name)))
+                Pool.Add(Step);
+        }
+    };
+    LoadPool(BareWalkSteps, TEXT("BareStepWalk"), 6);
+    LoadPool(BareRunSteps, TEXT("BareStepRun"), 4);
     if (!GrassStepA || !GrassStepB || !WoodTapA || !WoodTapB
-        || !CraftStrikeA || !CraftStrikeB || !CraftStrikeC || !UIClick)
+        || !CraftStrikeA || !CraftStrikeB || !CraftStrikeC || !UIClick || BareWalkSteps.Num() != 6 || BareRunSteps.Num() != 4)
         UE_LOG(LogTemp, Warning, TEXT("Some feedback sounds are missing; rerun the asset/bootstrap pipeline."));
     if (USoundWave* Forest = LoadObject<USoundWave>(nullptr, TEXT("/Game/SurvivalGame/Audio/Ambience/ForestAmbience.ForestAmbience")))
     {
@@ -2621,6 +2640,27 @@ void AHomesteadController::PlayEffect(USoundBase* Cue, float Gain)
 {
     if (Cue && bAudioEnabled && EffectsVolume > 0)
         UGameplayStatics::PlaySound2D(this, Cue, EffectsVolume * Gain, FMath::FRandRange(0.96f, 1.04f));
+}
+
+void AHomesteadController::PlayFootstep(bool bLeftFoot, bool bRun)
+{
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const double Now = GetWorld()->GetTimeSeconds();
+    if (!Avatar || bBookOpen || bPlanning || IsFailed() || !Avatar->GetCharacterMovement()->IsMovingOnGround()
+        || Avatar->GetVelocity().Size2D() < 12 || Now - LastFootstepTime < 0.18)
+        return;
+    const auto& Pool = bRun ? BareRunSteps : BareWalkSteps;
+    if (Pool.IsEmpty()) return;
+    LastFootstepTime = Now;
+    ++Footsteps;
+    int32 Pick = FMath::RandRange(0, Pool.Num() - 1);
+    if (Pool.Num() > 1 && Pick == LastBareStep) Pick = (Pick + 1) % Pool.Num();
+    LastBareStep = Pick;
+    UE_LOG(LogHomesteadFootsteps, Verbose, TEXT("Footstep %s %s t=%.3f"), bLeftFoot ? TEXT("L") : TEXT("R"),
+        bRun ? TEXT("run") : TEXT("walk"), Now);
+    // Bare feet on soft soil are quiet: about 10 dB under the old shod grass step while walking,
+    // a little firmer when running, with a small level variation so repeats don't stand out.
+    PlayEffect(Pool[Pick].Get(), (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f));
 }
 
 void AHomesteadController::MusicFinished()

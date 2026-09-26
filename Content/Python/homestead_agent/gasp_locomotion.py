@@ -107,6 +107,7 @@ def retarget(clips=None):
         # GASP foley notifies reference sample-only audio and blueprints; the game plays its own steps.
         unreal.AnimationLibrary.remove_all_animation_notify_tracks(anim)
         straighten_root(anim)
+        add_footstep_notifies(anim)
         # In place: the capsule drives movement, so lock the root and discard sequence root motion.
         unreal.AnimationLibrary.set_root_motion_enabled(anim, True)
         # GASP clips use a sample-only curve compression asset; use the engine default.
@@ -160,7 +161,58 @@ def straighten_root(anim):
         (step_x ** 2 + step_y ** 2) ** 0.5 * (frames - 1) / max(anim.get_play_length(), 1e-3), 1)}
 
 
-LEGACY_MESH = '/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave'
+# MetaHuman standing reference heights (cm): ankle joint and ball of the foot above the floor.
+ANKLE_HEIGHT = 8.6
+BALL_HEIGHT = 1.1
+FOOTSTEP_TRACK = 'Footsteps'
+
+
+def footstep_contacts(anim, touch_cm=1.5, lift_cm=6.0):
+    """Touchdown times of each foot in a locomotion loop: [(seconds, 'l' | 'r'), ...].
+
+    A foot touches down when the lower of its heel (ankle minus standing height) and ball comes
+    within ``touch_cm`` of the floor after having lifted more than ``lift_cm``.
+    """
+    lib = unreal.AnimationLibrary
+    frames = lib.get_num_keys(anim)
+    length = anim.get_play_length()
+    heights = {'l': [], 'r': []}
+    for i in range(frames - 1):  # the last key repeats the first in a loop
+        t = length * i / (frames - 1)
+        p = _component_positions(anim, ('foot_l', 'ball_l', 'foot_r', 'ball_r'), t)
+        for side in 'lr':
+            heights[side].append(min(p[f'foot_{side}'].z - ANKLE_HEIGHT, p[f'ball_{side}'].z - BALL_HEIGHT))
+    contacts = []
+    for side, h in heights.items():
+        n = len(h)
+        lifted = False
+        for k in range(2 * n):  # two passes so a touchdown across the loop seam is found
+            z = h[k % n]
+            if z > lift_cm:
+                lifted = True
+            elif lifted and z <= touch_cm:
+                lifted = False
+                if k >= n:
+                    contacts.append((round(length * (k - n) / (frames - 1), 4), side))
+    return sorted(contacts)
+
+
+def add_footstep_notifies(anim):
+    """Replace the clip's footstep track with UHomesteadFootstepNotify events at each touchdown."""
+    lib = unreal.AnimationLibrary
+    if FOOTSTEP_TRACK in [str(n) for n in lib.get_animation_notify_track_names(anim)]:
+        lib.remove_animation_notify_track(anim, FOOTSTEP_TRACK)
+    lib.add_animation_notify_track(anim, FOOTSTEP_TRACK)
+    run = any(word in anim.get_name() for word in ('Run', 'Sprint'))
+    contacts = footstep_contacts(anim)
+    for t, side in contacts:
+        notify = lib.add_animation_notify_event(anim, FOOTSTEP_TRACK, t, unreal.HomesteadFootstepNotify)
+        notify.set_editor_property('left_foot', side == 'l')
+        notify.set_editor_property('run', run)
+    return contacts
+
+
+LEGACY_MESH =  '/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave'
 LEGACY_RETARGETER = '/Game/Characters/Heroine_MH/Retarget/RTG_HeroineLegacy_To_MH'
 LEGACY_ANIMS = '/Game/SurvivalGame/Characters/Heroine/Animations/'
 # Work actions and idle still come from the legacy heroine (task 6.1/6.2 replaces them).

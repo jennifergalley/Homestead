@@ -33,6 +33,15 @@ strikes the trunk, the watering can tips over the plot, and gathering reaches th
 - **WHEN** the heroine walks or sprints across the generated woodland
 - **THEN** heel strikes and toe-offs stay on the terrain surface instead of dipping into it
 
+### Requirement: Footsteps match her feet and the ground
+Each footstep sound SHALL play when one of the heroine's feet visibly touches down, one sound per
+touchdown at any walking or sprinting speed. The sound SHALL suit bare feet on soft woodland soil:
+soft and dull, with no hard heel click, and quiet under the ambience.
+
+#### Scenario: Walk then sprint
+- **WHEN** the heroine walks and then sprints in a straight line
+- **THEN** the footstep log shows alternating left and right steps at her stride cadence (about two per second walking and three sprinting), not a fixed distance interval
+
 ### Requirement: The upper body stays steady while moving
 Walking and sprinting SHALL keep the heroine's torso, shoulders and head carried the way the source
 motion capture carries them. Retargeting or playback MUST NOT add side-to-side sway or a rocking

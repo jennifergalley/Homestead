@@ -43,6 +43,10 @@ includes this credit. Include this document in any distributed build.
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 |
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
 
+The MetaHuman heroine's bare-foot footsteps (`Assets\Audio\Footsteps`) are original to this
+project. `Scripts\generate_bare_footsteps.py` synthesizes them from noise and decaying tones, with
+no third-party audio. The legacy heroine keeps the Kenney grass steps.
+
 The Fern 02 clearing candidate uses four separately imported meshes and the
 publisher's 1K diffuse, DirectX normal, roughness, ambient-occlusion and alpha
 maps. Source-axis/unit conversion was baked once; the project-authored masked,

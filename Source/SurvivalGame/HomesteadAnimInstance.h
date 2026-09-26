@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimNotifies/AnimNotify.h"
 #include "HomesteadAnimInstance.generated.h"
 
 UCLASS(Transient)
@@ -44,4 +45,21 @@ public:
 protected:
     virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
     virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* Proxy) override;
+};
+
+// Placed on locomotion clips at each foot's touchdown (homestead_agent.gasp_locomotion), so the
+// footstep sound lands with the visible contact at any play rate. It only sounds while its clip
+// dominates the blend, so walk and run contacts never double up during gait transitions.
+UCLASS(meta = (DisplayName = "Homestead Footstep"))
+class SURVIVALGAME_API UHomesteadFootstepNotify : public UAnimNotify
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere, Category = "Footstep")
+    bool bLeftFoot = true;
+    UPROPERTY(EditAnywhere, Category = "Footstep")
+    bool bRun = false;
+
+    virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+        const FAnimNotifyEventReference& EventReference) override;
 };

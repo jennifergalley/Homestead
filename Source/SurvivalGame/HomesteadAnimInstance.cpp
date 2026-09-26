@@ -461,6 +461,17 @@ FAnimInstanceProxy* UHomesteadAnimInstance::CreateAnimInstanceProxy()
     return new FHomesteadAnimProxy(this);
 }
 
+void UHomesteadFootstepNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
+    const FAnimNotifyEventReference& EventReference)
+{
+    Super::Notify(MeshComp, Animation, EventReference);
+    const auto* Avatar = MeshComp ? Cast<AHomesteadCharacter>(MeshComp->GetOwner()) : nullptr;
+    const auto* Anim = MeshComp ? Cast<UHomesteadAnimInstance>(MeshComp->GetAnimInstance()) : nullptr;
+    auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
+    if (!PC || !Anim || (bRun ? Anim->SprintWeight() : Anim->WalkWeight()) < 0.5f) return;
+    PC->PlayFootstep(bLeftFoot, bRun);
+}
+
 void UHomesteadAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* Proxy)
 {
     delete static_cast<FHomesteadAnimProxy*>(Proxy);
