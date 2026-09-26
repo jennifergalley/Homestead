@@ -361,7 +361,8 @@ void AHomesteadLabController::LabAction(const FString& Name)
     else if (Name.Equals(TEXT("Knife"), ESearchCase::IgnoreCase)) Avatar->PlayKnifeCut(Target);
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
     else if (Name.Equals(TEXT("Machete"), ESearchCase::IgnoreCase)) Avatar->PlayMacheteHack(Target);
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Water, Chop, Knife, Till or Machete."));
+    else if (Name.Equals(TEXT("Fell"), ESearchCase::IgnoreCase)) Avatar->PlayFell(Target, 2);
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Water, Chop, Knife, Till, Machete or Fell."));
 }
 
 void AHomesteadLabController::LabProp(const FString& Name)
@@ -378,6 +379,20 @@ void AHomesteadLabController::LabProp(const FString& Name)
     const FVector At = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
     World->PlaceProp(Kind, FVector2D(At));
     bHoldingStickPile = false;
+}
+
+void AHomesteadLabController::LabHold(const FString& Name)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    using Homestead::Item;
+    const TPair<const TCHAR*, Item> Tools[] = {{TEXT("Knife"), Item::Knife}, {TEXT("Hatchet"), Item::Hatchet},
+        {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("Machete"), Item::Machete}};
+    for (const auto& Tool : Tools)
+        if (Name.Equals(Tool.Key, ESearchCase::IgnoreCase)) { Avatar->SetLabHeldTool(Tool.Value); return; }
+    Avatar->SetLabHeldTool(Item::Count);
+    if (!Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
+        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete or None."));
 }
 
 void AHomesteadLabController::LabLoop(const FString& Name)
@@ -491,7 +506,7 @@ void AHomesteadLabHUD::DrawHUD()
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
     Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
-    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
+    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)
     {

@@ -80,6 +80,8 @@ public:
     UFUNCTION(Exec) void LabProp(const FString& Name);
     // Repeat a LabAction (with a fresh prop and from the same spot) until LabLoop Off.
     UFUNCTION(Exec) void LabLoop(const FString& Name);
+    // Carry a hotbar tool at rest in her hand: Knife, Hatchet, DiggingStick, Pail, Machete or None.
+    UFUNCTION(Exec) void LabHold(const FString& Name);
     // Move the sun to a time of day (0-24); shadows and sky follow.
     UFUNCTION(Exec) void LabSun(float Hour);
     // Put the heroine at X/Y (cm) on the floor or course, facing +X.

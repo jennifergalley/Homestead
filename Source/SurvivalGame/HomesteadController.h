@@ -250,6 +250,16 @@ private:
     double HackSince = 0;
     void UpdatePendingHack();
     void StartMacheteHack();
+    // Felling in progress: the tree is already cleared; its standing copy topples after the last
+    // stroke (or at once if she stops), with a chop sound per stroke.
+    int32 FellResource = INDEX_NONE;
+    int32 FellStrokes = 0, FellStrokesHeard = 0;
+    uint32 FellStartsBefore = 0;
+    bool bFellSeen = false;
+    double FellSince = 0;
+    // Present a committed tree or sapling clear: the felling clip when she has it, else PlayClear.
+    void PresentFelling(int32 ResourceId, Homestead::Point Target, bool bTree);
+    void UpdatePendingFell();
     float RefreshRemaining = 0;
     float ToastRemaining = 0;
     float AutosaveRemaining = 240;

@@ -26,8 +26,11 @@ public:
     void RequestKnifeCut();
     void RequestTill();
     void RequestMacheteHack();
-    // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip).
-    void SetRightHandGrip(float Alpha);
+    // Two-handed axe felling: Strokes cuts into the trunk (the clip's stroke cycle repeats).
+    void RequestFell(int32 Strokes);
+    // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip). At rest the
+    // wrist deviates CarryDegrees toward the pinky so the tool's head hangs down and forward.
+    void SetRightHandGrip(float Alpha, float CarryDegrees = 46.0f);
     void CancelAction(bool Immediate = false);
     float GatherWeight() const;
     float GatherPhase() const;
@@ -50,6 +53,11 @@ public:
     float MacheteWeight() const;
     float MachetePhase() const;
     uint32 MacheteStarts() const;
+    float FellWeight() const;
+    // Seconds since the felling started (play time, including repeated strokes).
+    float FellPhase() const;
+    uint32 FellStarts() const;
+    bool IsFelling() const;
     bool IsHacking() const;
     float ActionWeight() const;
 

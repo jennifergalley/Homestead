@@ -24,7 +24,7 @@ class UHomesteadKnife;
 class UGroomComponent;
 class ULODSyncComponent;
 class AHomesteadWorld;
-namespace Homestead { struct Point; }
+namespace Homestead { struct Point; enum class Item : int; }
 
 enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch };
 
@@ -123,7 +123,42 @@ public:
     // Seconds into the hack when the second cut lands and the plant is cleared.
     static constexpr float MacheteClearSeconds = 1.25f;
     UAnimSequence* GetMacheteAnimation() const { return MacheteAnimation; }
+    // Two-handed felling with the hatchet (MetaHuman only): Strokes cuts, then she recovers to the
+    // carry. False when the clip or the held hatchet is unavailable, so the caller uses PlayClear.
+    // TrunkRadius (cm) places her so the bit lands on the trunk's surface: she steps and turns
+    // into the felling stance during the address. 0 keeps her where she stands, facing Target.
+    bool PlayFell(Homestead::Point Target, int32 Strokes, float TrunkRadius = 0);
+    bool CanFell() const;
+    // She is still walking up to the felling stance; the swing has not been requested yet.
+    bool IsApproachingFell() const { return bFellApproach; }
+    // At impact in AN_HeroineMH_AxeFell (axe_fell.bit_at_strike): the bit's centre relative to her
+    // root (cm to her left, cm forward) and its horizontal travel into the trunk (left, forward).
+    static constexpr float FellBitLeft = 26.9f;
+    static constexpr float FellBitForward = 67.4f;
+    static constexpr float FellCutLeft = -0.835f;
+    static constexpr float FellCutForward = 0.550f;
+    UAnimSequence* GetFellAnimation() const { return FellAnimation; }
+    // AN_HeroineMH_AxeFell timing (axe_fell.py FRAMES): the clip holds two identical strokes and
+    // the cycle from the first rock-free to the second repeats for longer fells.
+    static constexpr float FellLoopStart = 44.0f / 30.0f;
+    static constexpr float FellLoop = 36.0f / 30.0f;
+    static constexpr float FellFirstStrike = 34.0f / 30.0f;
+    static float FellPlayLength(float ClipLength, int32 Strokes) { return ClipLength + (Strokes - 2) * FellLoop; }
+    static float FellClipTime(float PlayTime, int32 Strokes)
+    {
+        if (PlayTime < FellLoopStart) return PlayTime;
+        if (PlayTime < FellLoopStart + (Strokes - 1) * FellLoop)
+            return FellLoopStart + FMath::Fmod(PlayTime - FellLoopStart, FellLoop);
+        return PlayTime - (Strokes - 2) * FellLoop;
+    }
+    // Play time at which stroke Index (0-based) bites into the trunk.
+    static float FellStrikeSeconds(int32 Index) { return FellFirstStrike + Index * FellLoop; }
     UStaticMeshComponent* GetHeldMachete() const { return HeldMachete; }
+    // The Blender prop shown in her hand while Tool is selected on the hotbar (MetaHuman only), or
+    // null when that tool has no authored held prop.
+    UStaticMeshComponent* GetHeldProp(Homestead::Item Tool) const;
+    // Character lab only (no hotbar there): the tool she carries at rest. Item::Count = none.
+    void SetLabHeldTool(Homestead::Item Tool);
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
@@ -183,9 +218,40 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> KnifeCutAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> TillAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> MacheteAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> FellAnimation;
+    // Eases her into a work stance (felling, hacking) instead of snapping: a snapped turn flings
+    // the simulated hair.
+    FVector FellStepFrom = FVector::ZeroVector, FellStepTo = FVector::ZeroVector;
+    float FellStepFromYaw = 0, FellStepToYaw = 0;
+    float FellStepRemaining = 0;
+    void BeginStanceStep(const FVector& To, float Yaw);
+    static constexpr float FellStepSeconds = 0.4f;
+    // Walking up to a trunk beyond a stance step before the swing starts.
+    bool bFellApproach = false;
+    FVector2D FellApproachTo = FVector2D::ZeroVector;
+    float FellApproachYaw = 0, FellApproachTime = 0;
+    int32 FellApproachStrokes = 0;
+    void UpdateFellApproach(float DeltaSeconds);
     // The Blender machete, held in the right hand's closed grip (pivot at the grip centre).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HeldMachete;
-    void UpdateHeldTools();
+    // Selected-tool carry props, parallel to HeldToolSpecs.
+    UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> HeldProps;
+    struct FHeldToolSpec
+    {
+        Homestead::Item Tool;
+        // Wrist ulnar deviation at rest (FHandGrip carry).
+        float CarryDegrees;
+        // Hangs plumb from the hand by a bail (the water pail) rather than turning with the wrist.
+        bool bHangs;
+    };
+    TArray<FHeldToolSpec> HeldToolSpecs;
+    TOptional<Homestead::Item> LabHeldTool;
+    // The pail's pendulum: tilt (pitch, roll in degrees) and its rate, driven by the hand's motion.
+    FVector2D PailSwing = FVector2D::ZeroVector, PailSwingRate = FVector2D::ZeroVector;
+    FVector PailHandLast = FVector::ZeroVector, PailHandVelocity = FVector::ZeroVector;
+    bool bPailHandValid = false;
+    void UpdateHeldTools(float DeltaSeconds);
+    void UpdateHangingPail(UStaticMeshComponent& Pail, float DeltaSeconds);
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadDiggingStick> DiggingStick;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadKnife> Knife;

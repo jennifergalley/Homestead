@@ -129,6 +129,17 @@ public:
     void ReleaseProduce() { HeldProduceId = INDEX_NONE; }
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
+    // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
+    // (the rebuilt woodland no longer draws it) until DropFelledTree topples it away from AwayFrom;
+    // it lies a few seconds, then sinks away. One at a time; a new felling finishes the last.
+    bool BeginFelling(int32 ResourceId);
+    void DropFelledTree(FVector2D AwayFrom);
+    bool IsFelledTreeStanding() const { return FallingParts.Num() > 0 && !bTreeFalling; }
+    // True once per felled tree, when it hits the ground (for the thud).
+    bool TakeFelledTreeLanding(FVector& Where);
+    // Where an axe meets active tree ResourceId at waist height: the trunk's centre and radius
+    // (cm). False when it isn't a standing mature tree.
+    bool TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const;
     void SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation);
     static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
     float GroundHeight(float X, float Y) const;
@@ -169,6 +180,15 @@ private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
     static constexpr int32 ActiveMatureTreeMinLOD = 1;
+    // The tree being felled or falling, as world-space parts pivoting about its base.
+    UPROPERTY() TArray<TObjectPtr<USceneComponent>> FallingParts;
+    TArray<FTransform> FallingRest;
+    FVector FallPivot = FVector::ZeroVector, FallAxis = FVector::ZeroVector;
+    float FallHeight = 1000, FallAngle = 0, FallRate = 0, FallLying = 0;
+    int32 FallBounces = 0;
+    bool bTreeFalling = false, bTreeLanded = false, bLandingPending = false;
+    void UpdateFallingTree(float DeltaSeconds);
+    void FinishFallingTree();
     static constexpr int32 OuterMatureTreeMinLOD = 2;
 
     UPROPERTY()

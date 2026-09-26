@@ -559,6 +559,7 @@ AHomesteadWorld::AHomesteadWorld()
 void AHomesteadWorld::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    UpdateFallingTree(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
         FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();
@@ -2452,6 +2453,168 @@ bool AHomesteadWorld::RebuildActiveTreeBatches(const Homestead::Simulation& Simu
         TEXT("Generated active mature trees rebuilt: batches=%d instances=%d collisions=%d."),
         ActiveTreeBatches.Num(), ActiveTreeInstances.Num(), ActiveTreeCollisions.Num());
     return true;
+}
+
+bool AHomesteadWorld::TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const
+{
+    // Trunk centroid and radius 80-100 cm up each mesh's trunk section (measured from LOD0): the
+    // collision capsules wrap the whole trunk and crown, and the jacaranda's forked trunk stands
+    // well off its origin.
+    struct FChop { const TCHAR* Mesh; FVector2D Offset; float Radius; };
+    static const FChop Chops[] = {
+        {TEXT("SM_TreeSmall02_Woodland"), FVector2D(9.1, 4.0), 9.0f},
+        {TEXT("SM_MatureFir"), FVector2D(3.6, -0.2), 13.0f},
+        {TEXT("SM_Jacaranda"), FVector2D(8.5, -37.3), 55.0f},
+    };
+    for (const auto& Entry : ActiveTreeInstances)
+    {
+        if (Entry.Value.ResourceId != ResourceId) continue;
+        const FTransform& Transform = Entry.Value.Visual.Transform;
+        for (const FChop& Chop : Chops)
+            if (Entry.Value.Visual.MeshPath.Contains(Chop.Mesh))
+            {
+                const FVector At = GetActorTransform().TransformPosition(Transform.TransformPosition(FVector(Chop.Offset, 90.0)));
+                Centre = FVector2D(At.X, At.Y);
+                Radius = Chop.Radius * Transform.GetScale3D().X;
+                return true;
+            }
+        const FVector At = GetActorTransform().TransformPosition(Entry.Value.CollisionTransform.GetLocation());
+        Centre = FVector2D(At.X, At.Y);
+        Radius = Entry.Value.CapsuleRadius;
+        return true;
+    }
+    return false;
+}
+
+void AHomesteadWorld::FinishFallingTree()
+{
+    for (USceneComponent* Part : FallingParts)
+        if (IsValid(Part)) Part->DestroyComponent();
+    FallingParts.Reset();
+    FallingRest.Reset();
+    bTreeFalling = bTreeLanded = bLandingPending = false;
+}
+
+bool AHomesteadWorld::BeginFelling(int32 ResourceId)
+{
+    FinishFallingTree();
+    for (const auto& Entry : ActiveTreeInstances)
+    {
+        if (Entry.Value.ResourceId != ResourceId) continue;
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Entry.Value.Visual.MeshPath);
+        if (!Mesh) return false;
+        auto* Part = NewObject<UStaticMeshComponent>(this);
+        Part->SetupAttachment(GetRootComponent());
+        Part->SetMobility(EComponentMobility::Movable);
+        Part->SetStaticMesh(Mesh);
+        Part->bOverrideMinLOD = true;
+        Part->MinLOD = ActiveMatureTreeMinLOD;
+        Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Part->SetGenerateOverlapEvents(false);
+        Part->SetCanEverAffectNavigation(false);
+        if (!ApplyCameraSafeFoliageMaterials(*Part))
+        {
+            Part->DestroyComponent();
+            return false;
+        }
+        Part->SetRelativeTransform(Entry.Value.Visual.Transform);
+        Part->RegisterComponent();
+        FallingParts.Add(Part);
+        break;
+    }
+    // Saplings are ordinary resource visuals: take them over so the rebuild leaves them be.
+    if (FallingParts.IsEmpty())
+        if (FHomesteadWorldVisual* Visual = ResourceVisuals.Find(ResourceId))
+        {
+            for (USceneComponent* Part : Visual->Components)
+                if (IsValid(Part))
+                {
+                    Part->SetMobility(EComponentMobility::Movable);
+                    FallingParts.Add(Part);
+                }
+            Visual->Components.Reset();
+            ResourceVisuals.Remove(ResourceId);
+        }
+    if (FallingParts.IsEmpty()) return false;
+    FBox Bounds(ForceInit);
+    for (USceneComponent* Part : FallingParts)
+    {
+        FallingRest.Add(Part->GetComponentTransform());
+        Bounds += Part->Bounds.GetBox();
+    }
+    FallPivot = FallingParts[0]->GetComponentLocation();
+    FallHeight = FMath::Max(100.0f, static_cast<float>(Bounds.Max.Z - FallPivot.Z));
+    FallAngle = FallRate = FallLying = 0;
+    FallBounces = 0;
+    return true;
+}
+
+void AHomesteadWorld::DropFelledTree(FVector2D AwayFrom)
+{
+    if (FallingParts.IsEmpty() || bTreeFalling) return;
+    FVector2D Away = FVector2D(FallPivot.X, FallPivot.Y) - AwayFrom;
+    if (!Away.Normalize()) Away = FVector2D(1, 0);
+    FallAxis = FVector::CrossProduct(FVector::UpVector, FVector(Away, 0)).GetSafeNormal();
+    // A notched trunk starts to lean slowly, then gravity takes it.
+    FallAngle = 0.03f;
+    FallRate = 0.05f;
+    bTreeFalling = true;
+}
+
+bool AHomesteadWorld::TakeFelledTreeLanding(FVector& Where)
+{
+    if (!bLandingPending) return false;
+    bLandingPending = false;
+    Where = FallPivot;
+    return true;
+}
+
+void AHomesteadWorld::UpdateFallingTree(float DeltaSeconds)
+{
+    if (FallingParts.IsEmpty() || !bTreeFalling) return;
+    const float Dt = FMath::Min(DeltaSeconds, 1.0f / 20.0f);
+    // A rod pivoting on its base: angular acceleration 3g sin(angle) / 2L.
+    constexpr float Landed = 1.47f;
+    float Sink = 0;
+    if (!bTreeLanded)
+    {
+        FallRate += 1.5f * 980.0f / FallHeight * FMath::Sin(FallAngle) * Dt;
+        FallAngle += FallRate * Dt;
+        if (FallAngle >= Landed)
+        {
+            FallAngle = Landed;
+            if (FallBounces == 0 && FallRate > 0.4f)
+            {
+                bLandingPending = true;
+                FallRate = -FallRate * 0.12f;
+                ++FallBounces;
+            }
+            else
+            {
+                FallRate = 0;
+                bTreeLanded = true;
+            }
+        }
+    }
+    else
+    {
+        // Lies a few seconds, then sinks into the forest floor.
+        FallLying += Dt;
+        Sink = 160.0f * FMath::Square(FMath::Clamp((FallLying - 4.0f) / 1.8f, 0.0f, 1.0f));
+        if (FallLying > 6.0f)
+        {
+            FinishFallingTree();
+            return;
+        }
+    }
+    const FQuat Turn(FallAxis, FallAngle);
+    for (int32 Index = 0; Index < FallingParts.Num(); ++Index)
+    {
+        if (!IsValid(FallingParts[Index])) continue;
+        const FTransform& Rest = FallingRest[Index];
+        const FVector Location = FallPivot + Turn.RotateVector(Rest.GetLocation() - FallPivot) - FVector(0, 0, Sink);
+        FallingParts[Index]->SetWorldLocationAndRotation(Location, Turn * Rest.GetRotation());
+    }
 }
 
 void AHomesteadWorld::HideHeldProducePart(int32 Index)

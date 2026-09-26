@@ -77,7 +77,8 @@ void UHomesteadKnife::TickComponent(float DeltaTime, ELevelTick TickType,
         && PC->Simulation().Count(Homestead::Item::Knife) > 0
         && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
         && (Animation->KnifeCutWeight() > 0.01f
-            || (PC->KnifePreviewRequested() && Animation->ActionWeight() < 0.01f))
+            || (PC->KnifePreviewRequested() && Animation->ActionWeight() < 0.01f
+                && !Avatar->GetHeldProp(Homestead::Item::Knife)))
         && GetNumSections() == 3;
     SetHiddenInGame(!Visible);
     if (Visible)

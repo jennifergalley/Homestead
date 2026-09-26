@@ -76,7 +76,7 @@ struct FGroundedFootIK : FAnimNode_TwoBoneIK
     }
 };
 
-enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks, Machete };
+enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks, Machete, Fell };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
@@ -94,18 +94,25 @@ struct FHandGrip : FAnimNode_SkeletalControlBase
     static constexpr int32 Chains = 5;
     FBoneReference Joints[Chains][3];
     float Angles[Chains][3] = {{72, 84, 52}, {76, 86, 54}, {80, 86, 54}, {84, 86, 54}, {18, 38, 32}};
-    FBoneReference Hand{TEXT("hand_r")}, IndexBase{TEXT("index_01_r")}, MiddleBase{TEXT("middle_01_r")}, PinkyBase{TEXT("pinky_01_r")};
+    FBoneReference Hand, IndexBase, MiddleBase, PinkyBase;
+    // The left hand's bones mirror the right's, so its palm faces the other way.
+    bool bLeft = false;
     // Resting carry: ulnar deviation lets a hanging tool's head tip down and forward instead of
     // jutting straight out from the fist. 0 while an authored swing drives the wrist.
     float Carry = 0;
-    static constexpr float CarryDeviation = 46;
+    float CarryDeviation = 46;
 
-    FHandGrip()
+    explicit FHandGrip(bool bLeftHand = false) : bLeft(bLeftHand)
     {
+        const TCHAR* Side = bLeft ? TEXT("l") : TEXT("r");
         const TCHAR* Names[Chains] = {TEXT("index"), TEXT("middle"), TEXT("ring"), TEXT("pinky"), TEXT("thumb")};
         for (int32 Chain = 0; Chain < Chains; ++Chain)
             for (int32 Joint = 0; Joint < 3; ++Joint)
-                Joints[Chain][Joint].BoneName = *FString::Printf(TEXT("%s_%02d_r"), Names[Chain], Joint + 1);
+                Joints[Chain][Joint].BoneName = *FString::Printf(TEXT("%s_%02d_%s"), Names[Chain], Joint + 1, Side);
+        Hand.BoneName = *FString::Printf(TEXT("hand_%s"), Side);
+        IndexBase.BoneName = *FString::Printf(TEXT("index_01_%s"), Side);
+        MiddleBase.BoneName = *FString::Printf(TEXT("middle_01_%s"), Side);
+        PinkyBase.BoneName = *FString::Printf(TEXT("pinky_01_%s"), Side);
         Alpha = 0;
     }
     virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override
@@ -127,7 +134,7 @@ struct FHandGrip : FAnimNode_SkeletalControlBase
         const FVector HandAt = CS(Hand).GetLocation();
         const FVector Along = (CS(MiddleBase).GetLocation() - HandAt).GetSafeNormal();
         const FVector Across = (CS(IndexBase).GetLocation() - CS(PinkyBase).GetLocation()).GetSafeNormal();
-        const FVector Palm = FVector::CrossProduct(Across, Along).GetSafeNormal();
+        const FVector Palm = FVector::CrossProduct(Across, Along).GetSafeNormal() * (bLeft ? -1.0f : 1.0f);
         if (Palm.IsNearlyZero()) return;
         // Palm x Along = -Across, so a positive turn about Palm swings the fingers to the pinky side.
         FTransform Wrist = FTransform::Identity;
@@ -194,7 +201,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         LeftPlant.ComponentPose.SetLinkNode(&RightSlope);
         RightPlant.ComponentPose.SetLinkNode(&LeftPlant);
         Grip.ComponentPose.SetLinkNode(&RightPlant);
-        PlaceToLocal.ComponentPose.SetLinkNode(&Grip);
+        LeftGrip.ComponentPose.SetLinkNode(&Grip);
+        PlaceToLocal.ComponentPose.SetLinkNode(&LeftGrip);
         PelvisPlacement.BoneToModify.BoneName = TEXT("pelvis");
         PelvisPlacement.TranslationMode = BMM_Additive;
         PelvisPlacement.TranslationSpace = BCS_ComponentSpace;
@@ -280,8 +288,12 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FAnimNode_ModifyBone LeftSlope;
     FAnimNode_ModifyBone RightSlope;
     FHandGrip Grip;
+    // Closes the left hand on the axe haft while felling.
+    FHandGrip LeftGrip{true};
     float GripAlpha = 0;
     float GripTarget = 0;
+    float GripCarry = 46;
+    float GripCarryTarget = 46;
     FAnimNode_ConvertComponentToLocalSpace PlaceToLocal;
     float LeftGroundHeight = 0;
     float RightGroundHeight = 0;
@@ -309,6 +321,9 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     uint32 ClearStarted = 0;
     uint32 KnifeStarted = 0;
     uint32 MacheteStarted = 0;
+    uint32 FellStarted = 0;
+    int32 FellStrokes = 1;
+    int32 RequestedStrokes = 1;
     uint32 TillStarted = 0;
     EHandAction Requested = EHandAction::None;
     EHandAction Active = EHandAction::Gather;
@@ -513,6 +528,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Active = Requested;
             Gather.SetSequence(Active == EHandAction::Till ? Avatar->GetTillAnimation()
                 : Active == EHandAction::Machete ? Avatar->GetMacheteAnimation()
+                : Active == EHandAction::Fell ? Avatar->GetFellAnimation()
                 : Active == EHandAction::KnifeCut ? Avatar->GetKnifeCutAnimation()
                 : Active == EHandAction::Clear ? Avatar->GetClearAnimation()
                 : Active == EHandAction::Water ? Avatar->GetWaterAnimation()
@@ -527,25 +543,34 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             if (Active == EHandAction::Clear) ++ClearStarted;
             else if (Active == EHandAction::KnifeCut) ++KnifeStarted;
             else if (Active == EHandAction::Machete) ++MacheteStarted;
+            else if (Active == EHandAction::Fell) { ++FellStarted; FellStrokes = RequestedStrokes; }
             else if (Active == EHandAction::Till) ++TillStarted;
             else if (Active == EHandAction::Water) ++WaterStarted;
             else ++Started;
         }
         Requested = EHandAction::None;
         bCancelled = false;
+        // Felling repeats the clip's stroke cycle once per stroke the tree needs.
+        const bool bFell = Active == EHandAction::Fell && Clip;
+        const float PlayLength = !Clip ? 0.0f : bFell
+            ? AHomesteadCharacter::FellPlayLength(Clip->GetPlayLength(), FellStrokes) : Clip->GetPlayLength();
         if (bGathering)
         {
-            GatherTime = FMath::Min(GatherTime + DeltaSeconds, Clip->GetPlayLength());
-            if (GatherTime >= Clip->GetPlayLength()) bGathering = false;
+            GatherTime = FMath::Min(GatherTime + DeltaSeconds, PlayLength);
+            if (GatherTime >= PlayLength) bGathering = false;
         }
-        const float ActionTarget = bGathering && GatherTime < Clip->GetPlayLength() - 0.16f ? 1.0f : 0.0f;
+        const float ActionTarget = bGathering && GatherTime < PlayLength - 0.16f ? 1.0f : 0.0f;
         ActionBlend.Alpha = FMath::FInterpConstantTo(ActionBlend.Alpha, ActionTarget, DeltaSeconds,
             ActionTarget > ActionBlend.Alpha ? 1.0f / 0.12f : 1.0f / 0.16f);
         // A cancelled pose stays at its current phase while blending out; no restart snap.
-        Gather.SetExplicitTime(GatherTime);
+        Gather.SetExplicitTime(bFell ? AHomesteadCharacter::FellClipTime(GatherTime, FellStrokes) : GatherTime);
         GripAlpha = FMath::FInterpConstantTo(GripAlpha, GripTarget, DeltaSeconds, 1.0f / 0.15f);
         Grip.Alpha = GripAlpha;
-        Grip.Carry = Active == EHandAction::Machete ? 1.0f - ActionBlend.Alpha : 1.0f;
+        // Switching tools eases the wrist to the new carry instead of snapping.
+        GripCarry = GripAlpha < 0.01f ? GripCarryTarget : FMath::FInterpConstantTo(GripCarry, GripCarryTarget, DeltaSeconds, 180.0f);
+        Grip.CarryDeviation = GripCarry;
+        Grip.Carry = Active == EHandAction::Machete || Active == EHandAction::Fell ? 1.0f - ActionBlend.Alpha : 1.0f;
+        LeftGrip.Alpha = Active == EHandAction::Fell ? ActionBlend.Alpha : 0.0f;
     }
 };
 }
@@ -689,9 +714,41 @@ bool UHomesteadAnimInstance::IsHacking() const
     return Proxy.Active == EHandAction::Machete && Proxy.bGathering && !Proxy.bCancelled;
 }
 
-void UHomesteadAnimInstance::SetRightHandGrip(float Alpha)
+void UHomesteadAnimInstance::RequestFell(int32 Strokes)
 {
-    GetProxyOnGameThread<FHomesteadAnimProxy>().GripTarget = FMath::Clamp(Alpha, 0.0f, 1.0f);
+    auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    Proxy.Requested = EHandAction::Fell;
+    Proxy.RequestedStrokes = FMath::Clamp(Strokes, 1, 8);
+}
+
+float UHomesteadAnimInstance::FellWeight() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Fell ? Proxy.ActionBlend.Alpha : 0;
+}
+
+float UHomesteadAnimInstance::FellPhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Fell ? Proxy.GatherTime : 0;
+}
+
+uint32 UHomesteadAnimInstance::FellStarts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FellStarted;
+}
+
+bool UHomesteadAnimInstance::IsFelling() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Fell && Proxy.bGathering && !Proxy.bCancelled;
+}
+
+void UHomesteadAnimInstance::SetRightHandGrip(float Alpha, float CarryDegrees)
+{
+    auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    Proxy.GripTarget = FMath::Clamp(Alpha, 0.0f, 1.0f);
+    Proxy.GripCarryTarget = FMath::Clamp(CarryDegrees, -30.0f, 75.0f);
 }
 
 float UHomesteadAnimInstance::ClearWeight() const

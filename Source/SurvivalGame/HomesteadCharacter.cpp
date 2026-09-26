@@ -389,6 +389,10 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     MacheteAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_MacheteHack"));
     if (MacheteAnimation && MacheteAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         MacheteAnimation = nullptr;
+    // Optional: authored with homestead_agent.axe_fell.
+    FellAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_AxeFell"));
+    if (FellAnimation && FellAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        FellAnimation = nullptr;
     auto MakeProp = [this](const TCHAR* Name, UStaticMesh* PropMesh)
     {
         auto* Prop = NewObject<UStaticMeshComponent>(this, Name);
@@ -440,6 +444,35 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         HeldMachete->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
         HeldMachete->SetRelativeTransform(HandGripTransform(*MetaHumanBody));
         HeldMachete->SetCastShadow(true);
+    }
+    // Blender hand tools, each authored with its pivot at the main hand's grip, the handle along
+    // +Z and the working edge toward -Y (docs/blender-assets.md). Offsets adapt tools held elsewhere.
+    HeldProps.Reset();
+    HeldToolSpecs.Reset();
+    const FTransform Grip = HandGripTransform(*MetaHumanBody);
+    struct FHeldToolAsset { Homestead::Item Tool; const TCHAR* Path; float CarryDegrees; bool bHangs; FTransform Offset; };
+    // The digging stick's pivot is its upper grip with the point toward -Z; she trail-carries it at
+    // the balance point instead, point forward and down, the way a spear or staff is carried.
+    const FTransform StickTrail(FQuat(FVector::XAxisVector, PI), FVector(0, 0, -25));
+    const FHeldToolAsset Assets[] = {
+        {Homestead::Item::Knife, TEXT("FlintKnife/SM_FlintKnife"), 30, false, FTransform::Identity},
+        {Homestead::Item::Hatchet, TEXT("FlintHatchet/SM_FlintHatchet"), 58, false, FTransform::Identity},
+        {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
+        {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
+    };
+    for (const FHeldToolAsset& Asset : Assets)
+    {
+        const FString Name = FPaths::GetBaseFilename(Asset.Path);
+        auto* PropMesh = LoadObject<UStaticMesh>(nullptr,
+            *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s.%s"), Asset.Path, *Name));
+        if (!PropMesh) continue;
+        auto* Prop = MakeProp(*FString::Printf(TEXT("Held_%s"), *Name), PropMesh);
+        Prop->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
+        Prop->SetRelativeTransform(Asset.Offset * Grip);
+        Prop->SetUsingAbsoluteRotation(Asset.bHangs);
+        Prop->SetCastShadow(true);
+        HeldProps.Add(Prop);
+        HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs});
     }
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
@@ -783,7 +816,18 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdateCarriedSticks();
-    UpdateHeldTools();
+    UpdateHeldTools(DeltaSeconds);
+    UpdateFellApproach(DeltaSeconds);
+    if (FellStepRemaining > 0)
+    {
+        // Settle into the work stance while she addresses the trunk or bush.
+        FellStepRemaining = FMath::Max(0.0f, FellStepRemaining - DeltaSeconds);
+        const float Alpha = FMath::SmoothStep(0.0f, 1.0f, 1.0f - FellStepRemaining / FellStepSeconds);
+        FVector Step = FMath::Lerp(FellStepFrom, FellStepTo, Alpha);
+        Step.Z = GetActorLocation().Z;
+        const float Yaw = FellStepFromYaw + FMath::FindDeltaAngleDegrees(FellStepFromYaw, FellStepToYaw) * Alpha;
+        SetActorLocationAndRotation(Step, FRotator(0, Yaw, 0), true);
+    }
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
@@ -919,7 +963,10 @@ void AHomesteadCharacter::UpdateHairMotion(float DeltaSeconds)
 {
     if (!MetaHumanHair) return;
     const float Walk = WalkSpeed(), Sprint = SprintSpeed();
-    const float Target = FMath::Clamp((GetVelocity().Size2D() - Walk) / FMath::Max(Sprint - Walk, 1.0f), 0.0f, 1.0f);
+    float Target = FMath::Clamp((GetVelocity().Size2D() - Walk) / FMath::Max(Sprint - Walk, 1.0f), 0.0f, 1.0f);
+    // Swinging an axe or machete throws her head and shoulders about as much as a sprint does.
+    if (const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
+        Target = FMath::Max(Target, 0.5f * FMath::Max(Animation->FellWeight(), Animation->MacheteWeight()));
     HairSprintBlend = FMath::FInterpTo(HairSprintBlend, Target, DeltaSeconds, 3.0f);
     auto& Setup = MetaHumanHair->SimulationSettings.SimulationSetup;
     Setup.LinearVelocityScale = FMath::Lerp(CVarHairLinearWalk.GetValueOnGameThread(),
@@ -1117,6 +1164,7 @@ void AHomesteadCharacter::CancelAction(bool Immediate)
     Knife->SetHiddenInGame(true, true);
     ClearYaw.Reset();
     TillYaw.Reset();
+    bFellApproach = false;
     WaterYaw.Reset();
 }
 
@@ -1168,19 +1216,90 @@ void AHomesteadCharacter::PlayKnifeCut(Homestead::Point Target)
         UE_LOG(LogTemp, Error, TEXT("Knife work succeeded but its distinct animation instance is unavailable."));
 }
 
-void AHomesteadCharacter::UpdateHeldTools()
+void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
 {
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
-    if (!Animation || !HeldMachete) return;
+    if (!Animation || !bMetaHumanActive) return;
     const auto* PC = Cast<AHomesteadController>(Controller);
+    // At rest a selected tool rides in her hand; it gives way to authored actions and menus.
+    Homestead::Item Presented = Homestead::Item::Count;
+    if (PC)
+    {
+        if (!bAppearancePreview && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed())
+            Presented = PC->PresentedTool();
+    }
+    else if (InCharacterLab() && LabHeldTool) Presented = *LabHeldTool;
+    const bool HandsFree = Animation->ActionWeight() < 0.01f;
     const bool Hacking = Animation->MacheteWeight() > 0.01f;
-    // In hand while hacking, or when selected on the hotbar and her hands are otherwise free.
-    const bool Selected = PC && bMetaHumanActive && !bAppearancePreview
-        && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
-        && PC->PresentedTool() == Homestead::Item::Machete && Animation->ActionWeight() < 0.01f;
-    const bool Held = bMetaHumanActive && (Hacking || Selected);
-    HeldMachete->SetVisibility(Held);
-    Animation->SetRightHandGrip(Held ? 1.0f : 0.0f);
+    const bool Felling = Animation->FellWeight() > 0.01f;
+    float Grip = 0, Carry = 46;
+    if (HeldMachete)
+    {
+        const bool Held = Hacking || (HandsFree && Presented == Homestead::Item::Machete);
+        HeldMachete->SetVisibility(Held);
+        if (Held) Grip = 1;
+    }
+    for (int32 Index = 0; Index < HeldProps.Num(); ++Index)
+    {
+        UStaticMeshComponent* Prop = HeldProps[Index];
+        const FHeldToolSpec& Spec = HeldToolSpecs[Index];
+        const bool Held = Spec.Tool == Homestead::Item::Hatchet && Felling
+            || (HandsFree && !Hacking && Presented == Spec.Tool);
+        Prop->SetVisibility(Held);
+        if (!Held) continue;
+        Grip = 1;
+        Carry = Spec.CarryDegrees;
+        if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
+    }
+    if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
+    Animation->SetRightHandGrip(Grip, Carry);
+}
+
+void AHomesteadCharacter::SetLabHeldTool(Homestead::Item Tool)
+{
+    if (Tool == Homestead::Item::Count) LabHeldTool.Reset();
+    else LabHeldTool = Tool;
+}
+
+UStaticMeshComponent* AHomesteadCharacter::GetHeldProp(Homestead::Item Tool) const
+{
+    if (!bMetaHumanActive) return nullptr;
+    if (Tool == Homestead::Item::Machete) return HeldMachete;
+    for (int32 Index = 0; Index < HeldToolSpecs.Num(); ++Index)
+        if (HeldToolSpecs[Index].Tool == Tool) return HeldProps[Index];
+    return nullptr;
+}
+
+void AHomesteadCharacter::UpdateHangingPail(UStaticMeshComponent& Pail, float DeltaSeconds)
+{
+    // A pendulum hanging from the bail: the hand's horizontal acceleration swings the pail the
+    // other way, then gravity (a ~25 cm pendulum) and a little damping settle it plumb.
+    const FVector Hand = Pail.GetComponentLocation();
+    const float Dt = FMath::Clamp(DeltaSeconds, 1.0f / 240.0f, 1.0f / 20.0f);
+    FVector2D Push = FVector2D::ZeroVector;
+    if (bPailHandValid)
+    {
+        const FVector Velocity = (Hand - PailHandLast) / Dt;
+        const FVector Smoothed = FMath::Lerp(PailHandVelocity, Velocity, FMath::Min(1.0f, Dt * 20.0f));
+        const FVector Acceleration = (Smoothed - PailHandVelocity) / Dt;
+        PailHandVelocity = Smoothed;
+        Push = FVector2D(-Acceleration.X, -Acceleration.Y) / 980.0f;
+        Push = Push.ClampAxes(-0.5f, 0.5f);
+    }
+    else
+    {
+        PailSwing = PailSwingRate = FVector2D::ZeroVector;
+        PailHandVelocity = FVector::ZeroVector;
+    }
+    PailHandLast = Hand;
+    bPailHandValid = true;
+    constexpr float Stiffness = 980.0f / 25.0f, Damping = 3.5f;
+    PailSwingRate += (-(PailSwing - Push) * Stiffness - PailSwingRate * Damping) * Dt;
+    PailSwing = (PailSwing + PailSwingRate * Dt).ClampAxes(-0.7f, 0.7f);
+    // The bail runs fore and aft in her fist; the spout faces out to her right.
+    const FQuat Yaw(FVector::UpVector, FMath::DegreesToRadians(GetActorRotation().Yaw + 90.0f));
+    const FQuat Swing = FQuat::FindBetweenNormals(-FVector::UpVector, FVector(PailSwing.X, PailSwing.Y, -1.0f).GetSafeNormal());
+    Pail.SetWorldRotation(Swing * Yaw);
 }
 
 bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target)
@@ -1194,11 +1313,90 @@ bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target)
     if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
     {
         ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
-        SetActorRotation(FRotator(0, *ClearYaw, 0));
+        BeginStanceStep(GetActorLocation(), *ClearYaw);
     }
     else ClearYaw.Reset();
     Animation->RequestMacheteHack();
     return true;
+}
+
+void AHomesteadCharacter::BeginStanceStep(const FVector& To, float Yaw)
+{
+    FellStepFrom = GetActorLocation();
+    FellStepTo = To;
+    FellStepFromYaw = GetActorRotation().Yaw;
+    FellStepToYaw = Yaw;
+    FellStepRemaining = FellStepSeconds;
+}
+
+bool AHomesteadCharacter::CanFell() const
+{
+    return bMetaHumanActive && FellAnimation && GetHeldProp(Homestead::Item::Hatchet);
+}
+
+bool AHomesteadCharacter::PlayFell(Homestead::Point Target, int32 Strokes, float TrunkRadius)
+{
+    if (!CanFell()) return false;
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!Animation) return false;
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
+    if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
+    {
+        const float TreeYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+        ClearYaw = TreeYaw;
+        FellStepRemaining = 0;
+        if (TrunkRadius > 0)
+        {
+            // The trunk's centre sits past the bit along its travel, 2 cm of bite in.
+            const float Bite = FMath::Max(0.0f, TrunkRadius - 2.0f);
+            const float Left = FellBitLeft + FellCutLeft * Bite, Forward = FellBitForward + FellCutForward * Bite;
+            const float Standoff = FMath::Sqrt(Left * Left + Forward * Forward);
+            // The tree stands to her left of straight ahead, so she faces a little to its right.
+            ClearYaw = TreeYaw + FMath::RadiansToDegrees(FMath::Atan2(Left, Forward));
+            const FVector2D To = FVector2D(Target.x, Target.y) - Delta.GetSafeNormal() * Standoff;
+            UE_LOG(LogTemp, Verbose, TEXT("Fell: trunk (%.0f, %.0f) r%.1f from (%.0f, %.0f) stance (%.0f, %.0f) yaw %.1f"), Target.x, Target.y, TrunkRadius, GetActorLocation().X, GetActorLocation().Y, To.X, To.Y, *ClearYaw);
+            if (FVector2D::Distance(To, FVector2D(GetActorLocation())) > 35.0f && Delta.Size() > Standoff)
+            {
+                // Too far for a stance step: walk up to the trunk, then settle and swing.
+                bFellApproach = true;
+                FellApproachTo = To;
+                FellApproachYaw = *ClearYaw;
+                FellApproachTime = 0;
+                FellApproachStrokes = Strokes;
+                return true;
+            }
+            BeginStanceStep(FVector(To.X, To.Y, GetActorLocation().Z), *ClearYaw);
+        }
+        else BeginStanceStep(GetActorLocation(), *ClearYaw);
+    }
+    else ClearYaw.Reset();
+    Animation->RequestFell(Strokes);
+    return true;
+}
+
+void AHomesteadCharacter::UpdateFellApproach(float DeltaSeconds)
+{
+    if (!bFellApproach) return;
+    FellApproachTime += DeltaSeconds;
+    const FVector2D Remaining = FellApproachTo - FVector2D(GetActorLocation());
+    const float Distance = Remaining.Size();
+    // Close enough for the stance step to finish the placement (or blocked): address the trunk.
+    if (Distance > 12.0f && FellApproachTime < 2.5f)
+    {
+        const float Scale = FMath::Clamp(Distance / 70.0f, 0.4f, 1.0f);
+        AddMovementInput(FVector(Remaining.GetSafeNormal(), 0.0), Scale);
+        return;
+    }
+    bFellApproach = false;
+    UE_LOG(LogTemp, Verbose, TEXT("Fell: approach ended at (%.0f, %.0f) after %.2fs, %.0f cm short"), GetActorLocation().X, GetActorLocation().Y, FellApproachTime, Distance);
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!Animation || !CanFell()) return;
+    GetCharacterMovement()->StopMovementImmediately();
+    ClearYaw = FellApproachYaw;
+    BeginStanceStep(FVector(FellApproachTo.X, FellApproachTo.Y, GetActorLocation().Z), FellApproachYaw);
+    Animation->RequestFell(FellApproachStrokes);
 }
 
 void AHomesteadCharacter::PlayTill(Homestead::Point Target)

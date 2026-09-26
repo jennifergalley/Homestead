@@ -633,12 +633,16 @@ void AHomesteadController::UseSelectedTool()
                 : TEXT("Select the knife for this low growth."), true);
             return;
         }
+        const int32 Cleared = FocusId;
+        auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        const bool bFell = NeedsHatchet && Avatar && Avatar->CanFell();
         const auto Result = Sim.Clear(FocusId, Position);
-        NotifyResourceAction(Result, WoodTapB);
-        if (Result.ok)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                if (Tool == Homestead::Item::Knife) Avatar->PlayKnifeCut(Target);
-                else Avatar->PlayClear(Target);
+        NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
+        if (Result.ok && Avatar)
+        {
+            if (Tool == Homestead::Item::Knife) Avatar->PlayKnifeCut(Target);
+            else PresentFelling(Cleared, Target, false);
+        }
         return;
     }
 
@@ -1099,6 +1103,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
     UpdatePendingHack();
+    UpdatePendingFell();
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -1399,6 +1404,66 @@ void AHomesteadController::StartMacheteHack()
     if (Result.ok && Avatar) Avatar->PlayClear(Target);
 }
 
+void AHomesteadController::PresentFelling(int32 ResourceId, Homestead::Point Target, bool bTree)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    // Called just after the clear committed, before the woodland rebuilds, so the tree is still
+    // in the world's batches. A mature tree takes three strokes; a sapling one.
+    FVector2D Trunk(Target.x, Target.y);
+    float Radius = 5.0f;
+    const bool bTreeTrunk = (Landscape && Landscape->TreeChopTarget(ResourceId, Trunk, Radius)) || bTree;
+    const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance());
+    const int32 Strokes = bTreeTrunk ? 3 : 1;
+    if (Animation && Avatar->PlayFell({Trunk.X, Trunk.Y}, Strokes, FMath::Max(Radius, 5.0f)))
+    {
+        if (Landscape) Landscape->BeginFelling(ResourceId);
+        FellResource = ResourceId;
+        FellStrokes = Strokes;
+        FellStrokesHeard = 0;
+        FellStartsBefore = Animation->FellStarts();
+        bFellSeen = false;
+        FellSince = GetWorld()->GetTimeSeconds();
+        return;
+    }
+    Avatar->PlayClear(Target);
+}
+
+void AHomesteadController::UpdatePendingFell()
+{
+    FVector Landing;
+    if (Landscape && Landscape->TakeFelledTreeLanding(Landing))
+        PlayEffect(WoodTapA, 1.6f);
+    if (FellResource == INDEX_NONE) return;
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    const bool Felling = Animation && Animation->IsFelling() && Animation->FellStarts() != FellStartsBefore;
+    bFellSeen |= Felling;
+    // Waiting for the clip to start (the request lands on the next animation update).
+    if (!bFellSeen && Animation && (Avatar->IsApproachingFell() || GetWorld()->GetTimeSeconds() - FellSince < 0.5))
+    {
+        if (Avatar->IsApproachingFell()) FellSince = GetWorld()->GetTimeSeconds();
+        return;
+    }
+    const float Phase = Felling ? Animation->FellPhase() : 1e6f;
+    while (Felling && FellStrokesHeard < FellStrokes
+        && Phase >= AHomesteadCharacter::FellStrikeSeconds(FellStrokesHeard))
+    {
+        PlayEffect(FellStrokesHeard % 2 ? WoodTapA.Get() : WoodTapB.Get(), 1.25f);
+        ++FellStrokesHeard;
+    }
+    // The last stroke through the notch, or she stopped: the tree goes over.
+    if (!Felling || Phase >= AHomesteadCharacter::FellStrikeSeconds(FellStrokes - 1) + 0.2f)
+    {
+        if (Landscape)
+        {
+            const FVector From = Avatar ? Avatar->GetActorLocation() : FVector::ZeroVector;
+            Landscape->DropFelledTree(FVector2D(From.X, From.Y));
+        }
+        FellResource = INDEX_NONE;
+    }
+}
+
 void AHomesteadController::UpdatePendingHack()
 {
     if (!bHackPending) return;
@@ -1460,8 +1525,11 @@ void AHomesteadController::Interact()
                 ActionTarget = Node.position;
                 break;
             }
+        const int32 Harvested = FocusId;
+        const auto* Feller = Cast<AHomesteadCharacter>(GetPawn());
+        const bool bFell = Tree && Feller && Feller->CanFell();
         const auto Result = Sim.Harvest(FocusId, Position);
-        NotifyResourceAction(Result, Tree ? WoodTapB.Get() : GrassStepA.Get());
+        NotifyResourceAction(Result, bFell ? nullptr : Tree ? WoodTapB.Get() : GrassStepA.Get());
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                 if (Reeds) Avatar->PlayKnifeCut(ActionTarget);
@@ -1490,8 +1558,7 @@ void AHomesteadController::Interact()
                     }
                 }
                 else Avatar->PlayGather();
-        if (Result.ok && Tree)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayClear(ActionTarget);
+        if (Result.ok && Tree) PresentFelling(Harvested, ActionTarget, true);
         break;
     }
     case EFocus::Drop:
@@ -1594,12 +1661,16 @@ void AHomesteadController::Secondary()
                 ActionTarget = Node.position;
                 break;
             }
+        const int32 Cleared = FocusId;
+        auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        const bool bFell = Sapling && Avatar && Avatar->CanFell();
         const auto Result = Sim.Clear(FocusId, PlayerPoint());
-        NotifyResourceAction(Result, WoodTapB);
-        if (Result.ok)
-            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                if (Sapling) Avatar->PlayClear(ActionTarget);
-                else Avatar->PlayKnifeCut(ActionTarget);
+        NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
+        if (Result.ok && Avatar)
+        {
+            if (Sapling) PresentFelling(Cleared, ActionTarget, false);
+            else Avatar->PlayKnifeCut(ActionTarget);
+        }
     }
     else if (Focus == EFocus::Plot)
     {

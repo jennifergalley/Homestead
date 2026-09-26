@@ -148,7 +148,25 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - `nearbyResources` covers only the currently streamed chunks. After walking far, nodes elsewhere
   (for example creek reeds) drop out of the list; walk back toward them to reload.
 - `focusActions` shows the prompt, for example `[A] Gather   [RT] Clear with Knife`,
-  `[RT] Fell with Hatchet`. Use the named button.
+  `[RT] Fell with Hatchet`. Use the named button. With keyboard/mouse input last used it reads
+  `[LMB] Fell with Hatchet`; `tap_key LeftMouseButton` works then. The same text floats above her
+  head as the interact cue.
+- Hotbar keys are `One`..`Zero`. The starter kit puts knife, hatchet, digging stick, pail and
+  machete in slots 1-5. Check `hotbarSlot` (0-based) and `focusActions` after selecting.
+- An action that silently does nothing usually left a reason in `toast` (`toastIsError: true`),
+  for example "Not enough pack space." when a felled tree's wood won't fit. Read it before
+  debugging the animation.
+- A clean world for a playtest: stop PIE, move `Saved\SaveGames\*` into a dated backup folder,
+  start PIE again (new game at 06:00 with the starter kit; the field book opens, close it with
+  `Gamepad_FaceButton_Right`). `HomesteadMorning <hour>` (pass the player controller) only moves
+  the clock, so it costs no energy; night playtests are too dark to judge.
+- Felling a tree (MetaHuman, hatchet selected): she walks up to the trunk if the felling stance
+  is more than 35 cm away, eases into it, swings three strokes (a sapling takes one), and the tree
+  topples away from her, bounces once, lies 4 s and sinks. `LogTemp` Verbose lines starting with
+  `Fell:` give the trunk centre, radius, stance and where the walk-up ended
+  (`log LogTemp Verbose` to see them). To check contact, sample the hatchet prop's edge,
+  `Held_SM_FlintHatchet` transformed at local (-0.21, -13.89, 43), a few times a second during the
+  swing; it should come within the trunk radius of the centre at about 95 cm above the ground.
 
 Verified loop (one fresh world): stones and berries with A, eat, branches ×3,
 stream reeds, craft Crude hatchet, select hotbar `Two`, fell a tree with RT.
@@ -205,7 +223,9 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete`,
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete|Fell`,
+  `LabHold Knife|Hatchet|DiggingStick|Pail|Machete|None` (the hand-carry prop for that tool, as
+  when it's selected on the hotbar),
   `LabProp Sticks|Stones|Roots|Berries|None` (puts that pile on the ground in front of her, the way the
   woodland does), `LabLoop <action>|Off` (replays the action every few seconds from the same
   spot with a fresh pile, so Jenny can watch it repeat), `LabSun <hour>`, `LabCourse`
