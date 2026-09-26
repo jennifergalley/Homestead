@@ -19,6 +19,7 @@ const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
 const FLinearColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
 const FLinearColor Cream(0.93f, 0.93f, 0.84f, 1.0f);
 const FLinearColor Gold(0.92f, 0.74f, 0.43f, 1.0f);
+constexpr float HotbarSlotSize = 64.0f;
 }
 
 void SHomesteadHotbar::Construct(const FArguments& Args)
@@ -33,7 +34,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
     for (int32 Index = 0; Index < 10; ++Index)
     {
         TSharedPtr<SButton> Button;
-        Slots->AddSlot().AutoWidth().Padding(2, 0)
+        Slots->AddSlot().AutoWidth().Padding(3, 0)
         [
             SNew(SBorder)
             .BorderImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
@@ -41,7 +42,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
             {
                 return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? Gold : Pine;
             })
-            .Padding(2)
+            .Padding(3)
             [
                 SAssignNew(Button, SButton)
                 .ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>(TEXT("NoBorder")))
@@ -67,7 +68,8 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                     if (Weak.IsValid()) Weak->HoverHotbarSlot(INDEX_NONE);
                 })
                 [
-                    SNew(SBox).WidthOverride(46).HeightOverride(46)
+                    // Genre-typical 1080p slot size (Stardew and Valheim use roughly 64-70 px).
+                    SNew(SBox).WidthOverride(HotbarSlotSize).HeightOverride(HotbarSlotSize)
                     [
                         SNew(SOverlay)
                         + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
@@ -96,13 +98,15 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             })
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)
-                        .Padding(3, 0, 0, 0)
+                        .Padding(5, 2, 0, 0)
                         [
                             SNew(STextBlock)
                             .Text(FText::FromString(Index == 9
                                 ? TEXT("0") : FString::FromInt(Index + 1)))
-                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 11))
+                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
                             .ColorAndOpacity(Cream)
+                            .ShadowOffset(FVector2D(1, 1))
+                            .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
                         ]
                     ]
                 ]

@@ -66,6 +66,28 @@ double FoodNutrition(Item item)
     default: return 0.0;
     }
 }
+// Stamina from a meal: a handful of berries is a quick pick-me-up, cooked roots a real rest.
+double FoodEnergy(Item item)
+{
+    switch (item)
+    {
+    case Item::Berries: return 6.0;
+    case Item::RoastedRoots: return 12.0;
+    case Item::HerbedRoots: return 18.0;
+    default: return 0.0;
+    }
+}
+// Applies a meal to hunger and energy and describes what it did, e.g. "Ate Berries: Food +12, Energy +6."
+std::string ApplyMeal(State& state, Item item)
+{
+    const double food = std::min(100.0, state.hunger + FoodNutrition(item)) - state.hunger;
+    const double energy = std::min(100.0, state.energy + FoodEnergy(item)) - state.energy;
+    state.hunger += food;
+    state.energy += energy;
+    std::string message = std::string("Ate ") + ItemName(item) + ": Food +" + std::to_string(static_cast<int>(std::lround(food)));
+    if (energy >= 0.5) message += ", Energy +" + std::to_string(static_cast<int>(std::lround(energy)));
+    return message + ".";
+}
 Result CanEat(const State& state, Item item)
 {
     if (state.failed) return Failed();
@@ -1406,8 +1428,7 @@ Result Simulation::Eat(Item item)
     const auto allowed = CanEat(state_, item);
     if (!allowed) return allowed;
     if (!TryAdjust(Items({{item, -1}}))) return Bad(std::string("Gather or cook some ") + ItemName(item) + " first.");
-    state_.hunger = std::min(100.0, state_.hunger + FoodNutrition(item));
-    return Good(std::string("Ate ") + ItemName(item) + ".");
+    return Good(ApplyMeal(state_, item));
 }
 Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
 {
@@ -1423,8 +1444,7 @@ Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
     const Item item = entry->item;
     --entry->quantity;
     --candidate.inventory[static_cast<int>(item)];
-    candidate.hunger = std::min(100.0, candidate.hunger + FoodNutrition(item));
-    const std::string message = std::string("Ate ") + ItemName(item) + ".";
+    const std::string message = ApplyMeal(candidate, item);
     return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Craft(Recipe recipe, Point player)

@@ -300,7 +300,9 @@ void ClusteredLayout()
                     roles.insert(entity.paletteRole);
                     variants.insert(entity.variantIndex);
                 }
-            CHECK(trees >= 30);
+            // A house-sized granite knob clears its own footprint of trees.
+            std::int64_t knobX = 0, knobY = 0;
+            CHECK(trees >= (GraniteKnob(world, {cx, cy}, knobX, knobY) ? 22 : 30));
             totalTrees += trees;
             if (trees <= 34) ++chunksWithMicroOpenings;
         }
@@ -501,7 +503,8 @@ void VersionFixture()
         append(entity.scalePermille);
     }
     std::cout << "Generation v5 fixture fingerprint: " << fingerprint << '\n';
-    CHECK(fingerprint == UINT64_C(12467904686569182803));
+    // This chunk holds a granite knob: its footprint is clear of trees and its branch pile sits at its foot.
+    CHECK(fingerprint == UINT64_C(13472204741086288178));
 }
 
 void RegionalInfluence()

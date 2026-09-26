@@ -53,11 +53,13 @@ std::string Envelope(const std::string& body, int version = SimulationSaveVersio
 // Independent fixture writer intentionally permits invalid states so parser validation is exercised.
 std::string Encode(const State& s, int version = SimulationSaveVersion)
 {
+    // Version 7 stocks predate the machete (the last item).
+    const int stockItems = version >= 8 ? ItemCount : ItemCount - 1;
     std::ostringstream out;
     out.imbue(std::locale::classic());
     out << std::setprecision(17) << s.hour << ' ' << s.dayMinutes << ' ' << s.hunger << ' '
         << s.energy << ' ' << s.warmth << ' ' << s.failed << ' ' << s.warmOutfit << ' ' << s.nextId << '\n';
-    for (int value : s.inventory) out << value << ' ';
+    for (int i = 0; i < stockItems; ++i) out << s.inventory[i] << ' ';
     out << '\n' << s.world.seed << ' ' << s.world.generationVersion << ' ' << s.activeChunk.x << ' ' << s.activeChunk.y << '\n';
     out << s.resourceEdits.size() << '\n';
     for (const auto& edit : s.resourceEdits)
@@ -68,7 +70,7 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
     {
         out << p.id << ' ' << static_cast<int>(p.kind) << ' ' << p.cellX << ' ' << p.cellY << ' '
             << p.rotation << ' ' << p.fuelHours << ' ';
-        for (int value : p.storage) out << value << ' ';
+        for (int i = 0; i < stockItems; ++i) out << p.storage[i] << ' ';
         out << '\n';
         if (version >= 4)
         {
@@ -102,6 +104,12 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
         out << '\n' << s.inventoryLayout.size() << '\n';
         for (const auto& e : s.inventoryLayout)
             out << e.groupId << ' ' << static_cast<int>(e.item) << ' ' << e.quantity << ' ' << e.wearableId << '\n';
+    }
+    if (version >= 8)
+    {
+        out << s.clearedUnderbrush.size() << '\n';
+        for (const auto& plant : s.clearedUnderbrush)
+            out << plant.chunk.x << ' ' << plant.chunk.y << ' ' << plant.index << '\n';
     }
     return Envelope(out.str(), version);
 }
@@ -450,8 +458,11 @@ void GameplayWalkthrough()
     sim.AdvanceGameHours(4, Home);
     CHECK(sim.GetState().plots[0].growth > 0.0);
     OK(sim.Weed(plotId, garden));
+    const double energyBeforeMeal = sim.GetState().energy;
+    CHECK(energyBeforeMeal < 100);
     OK(sim.Eat(Item::HerbedRoots));
-    CHECK(sim.GetState().energy < 100);
+    // A cooked meal restores some energy as well as food.
+    CHECK(sim.GetState().energy > energyBeforeMeal || sim.GetState().energy == 100);
     const double beforeSleep = sim.GetState().hour;
     OK(sim.Sleep(8, Home));
     CHECK(Close(sim.GetState().hour, beforeSleep + 8));
@@ -706,7 +717,8 @@ void TimberAndFirewoodTransactions()
     static_assert(static_cast<int>(Item::HerbedRoots) == 13, "Existing item IDs are unchanged");
     static_assert(static_cast<int>(Item::Timber) == 14, "Timber appends after existing items");
     static_assert(static_cast<int>(Item::Firewood) == 15, "Firewood appends after Timber");
-    static_assert(ItemCount == 16, "Two processing materials are present");
+    static_assert(static_cast<int>(Item::Machete) == 16, "The machete appends after Firewood");
+    static_assert(ItemCount == 17, "Two processing materials and the machete are present");
     static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
     static_assert(static_cast<int>(Recipe::SplitFirewood) == 5, "Split Firewood appends after existing recipes");
     static_assert(static_cast<int>(Recipe::Count) == 6, "One processing recipe is present");
@@ -765,9 +777,13 @@ void TimberAndFirewoodTransactions()
 
     Simulation current;
     const auto before = current.Serialize();
-    CHECK(current.Deserialize(Encode(current.GetState(), SimulationSaveVersion - 1)).code ==
+    CHECK(current.Deserialize(Encode(current.GetState(), LegacySimulationSaveVersion - 1)).code ==
         ResultCode::UnsupportedVersion);
     CHECK(current.Serialize() == before);
+    // Version 7 (before the machete and underbrush clearing) still loads, with neither.
+    Simulation legacy;
+    OK(legacy.Deserialize(Encode(current.GetState(), LegacySimulationSaveVersion)));
+    CHECK(legacy.Count(Item::Machete) == 0 && legacy.GetState().clearedUnderbrush.empty());
 }
 
 void FarmingAndRain()
@@ -967,7 +983,7 @@ void CropKindPersistenceAndVersionRejection()
     OK(sim.Clear(berry.id, berry.position));
     sim.AdvanceGameHours(2, Home);
     const std::string expected = sim.Serialize();
-    CHECK(expected.rfind("HOMESTEAD 7 ", 0) == 0);
+    CHECK(expected.rfind("HOMESTEAD " + std::to_string(SimulationSaveVersion) + " ", 0) == 0);
     const std::string legacy = Encode(sim.GetState(), 2);
     Simulation migrated;
     const auto initial = migrated.Serialize();
@@ -1017,7 +1033,7 @@ void CropKindPersistenceAndVersionRejection()
     const std::string payload = mixed.substr(mixed.find('\n') + 1);
     reject(Envelope(payload, 2));
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 8));
+    reject(Envelope(payload, SimulationSaveVersion + 1));
     State malformedLegacy = sim.GetState();
     malformedLegacy.plots[0].growth = 1.1;
     reject(Encode(malformedLegacy, 2));
@@ -1197,7 +1213,7 @@ void PersistenceRejection()
     reject(original.substr(0, original.size() - 1));
     reject(original + "garbage");
     reject(Envelope(payload, 1));
-    reject(Envelope(payload, 8));
+    reject(Envelope(payload, SimulationSaveVersion + 1));
     reject(Envelope(payload + "garbage"));
     reject(Envelope(payload.substr(0, payload.size() - 8)));
     reject(std::string(8 * 1024 * 1024 + 1, 'x'));
@@ -1697,6 +1713,8 @@ void SelectedFoodGroupTransactions()
             expectedState.inventoryLayout.back().quantity = 1;
             --expectedState.inventory[static_cast<int>(food.first)];
             expectedState.hunger = hunger + food.second > 100.0 ? 100.0 : hunger + food.second;
+            const double mealEnergy = food.first == Item::Berries ? 6.0 : food.first == Item::RoastedRoots ? 12.0 : 18.0;
+            expectedState.energy = std::min(100.0, expectedState.energy + mealEnergy);
             Simulation expected;
             OK(expected.Deserialize(Encode(expectedState)));
             Simulation aggregate = sim;
@@ -1810,7 +1828,7 @@ void WardrobeSaveRejection()
     FixtureLayouts(dependent);
     CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
-    for (int version : {1, 2, 3, 4, 5, 6, 8, 999})
+    for (int version : {1, 2, 3, 4, 5, 6, SimulationSaveVersion + 1, 999})
     {
         CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);

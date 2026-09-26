@@ -45,5 +45,9 @@ private:
     void Panel(float X, float Y, float Width, float Height, FLinearColor Color);
     void Meter(const FString& Label, double Value, float X, float Y, FLinearColor Color);
     void DrawBook(const AHomesteadController& PC);
+    // The focus prompt, floating just above the heroine's head: key badges and verbs ("E  Gather")
+    // with the target's name small above, on a soft dark backing for contrast.
+    void DrawInteractCue(const AHomesteadController& PC);
+    float TextWidth(const FString& Text, float Size) const;
     void DrawAppearanceBook(const AHomesteadController& PC);
 };

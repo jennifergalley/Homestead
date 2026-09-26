@@ -13,6 +13,7 @@ const FLinearColor Muted(0.71f, 0.77f, 0.69f, 1);
 const FLinearColor HudGold(0.92f, 0.74f, 0.43f, 1);
 const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
 const FLinearColor HudWarning(1.0f, 0.67f, 0.48f, 1);
+constexpr float MeterWidth = 168;
 }
 
 void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLinearColor Color)
@@ -70,12 +71,13 @@ void AHomesteadHUD::Wrap(const FString& Text, float X, float Y, float Width, flo
 
 void AHomesteadHUD::Meter(const FString& Label, double Value, float X, float Y, FLinearColor Color)
 {
-    Panel(X - 12, Y - 8, 200, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
-    ProtectFeedback(TEXT("need-meter"), X - 12, Y - 8, 200, 55);
+    // Compact enough that all three sit left of the centred hotbar at 1080p.
+    Panel(X - 12, Y - 8, MeterWidth, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
+    ProtectFeedback(TEXT("need-meter"), X - 12, Y - 8, MeterWidth, 55);
     Write(Label, X, Y, 19, Ink);
-    Write(FString::Printf(TEXT("%.0f"), Value), X + 143, Y, 19, Value < 25 ? HudWarning : Muted);
-    Panel(X, Y + 29, 174, 5, FLinearColor(0.2f, 0.25f, 0.2f, 1));
-    Panel(X, Y + 29, 174 * FMath::Clamp(static_cast<float>(Value / 100), 0.0f, 1.0f), 5, Color);
+    Write(FString::Printf(TEXT("%.0f"), Value), X + MeterWidth - 50, Y, 19, Value < 25 ? HudWarning : Muted);
+    Panel(X, Y + 29, MeterWidth - 24, 5, FLinearColor(0.2f, 0.25f, 0.2f, 1));
+    Panel(X, Y + 29, (MeterWidth - 24) * FMath::Clamp(static_cast<float>(Value / 100), 0.0f, 1.0f), 5, Color);
 }
 
 void AHomesteadHUD::DrawHUD()
@@ -125,8 +127,8 @@ void AHomesteadHUD::DrawHUD()
     {
         const float Bottom = ViewHeight - 90;
         Meter(TEXT("Food"), State.hunger, 46, Bottom, FLinearColor(0.77f, 0.66f, 0.37f, 1));
-        Meter(TEXT("Energy"), State.energy, 257, Bottom, FLinearColor(0.66f, 0.76f, 0.52f, 1));
-        Meter(TEXT("Warmth"), State.warmth, 468, Bottom, FLinearColor(0.83f, 0.56f, 0.37f, 1));
+        Meter(TEXT("Energy"), State.energy, 46 + MeterWidth + 11, Bottom, FLinearColor(0.66f, 0.76f, 0.52f, 1));
+        Meter(TEXT("Warmth"), State.warmth, 46 + (MeterWidth + 11) * 2, Bottom, FLinearColor(0.83f, 0.56f, 0.37f, 1));
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
         if (PC->IsPlanning())
@@ -137,15 +139,7 @@ void AHomesteadHUD::DrawHUD()
             Write(PC->UsesGamepad() ? TEXT("Left stick: position   RB: rotate   A: place   B: done")
                 : TEXT("WASD: position   R: rotate   E: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
-        else
-        {
-            const float ContextWidth = FMath::Min(650.0f, ViewWidth * 0.38f);
-            const float ContextX = ViewWidth - ContextWidth - 32;
-            Panel(ContextX, ViewHeight - 225, ContextWidth, 105, Pine);
-            ProtectFeedback(TEXT("context-panel"), ContextX, ViewHeight - 225, ContextWidth, 105);
-            Wrap(PC->FocusTitle(), ContextX + 22, ViewHeight - 213, ContextWidth - 44, 21, Ink, 2);
-            Write(PC->FocusActions(), ContextX + 22, ViewHeight - 153, 20, HudGold);
-        }
+        else DrawInteractCue(*PC);
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);
         Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [L3] Sprint   [R3] Camera distance")
                 : TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] Sprint   Ctrl+wheel: zoom"),
@@ -170,6 +164,83 @@ void AHomesteadHUD::DrawHUD()
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
             Write(Lines[Index], X + 22, Y + 15 + Index * 30, 23, PC->ToastIsError() ? HudWarning : Ink);
         bDrawingToast = false;
+    }
+}
+
+float AHomesteadHUD::TextWidth(const FString& Text, float Size) const
+{
+    UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
+    if (!Font || !Canvas) return 0;
+    float W = 0, H = 0;
+    Canvas->StrLen(Font, Text, W, H);
+    return W * Size / FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
+}
+
+void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
+{
+    const APawn* Pawn = PC.GetPawn();
+    const FString Actions = PC.FocusActions();
+    // Nothing to do here: the open woodland's "[I] Field book" hint already sits in the top bar.
+    if (!Pawn || Actions.IsEmpty() || Actions.Contains(TEXT("Field book"))) return;
+    const FVector Screen = Project(Pawn->GetActorLocation() + FVector(0, 0, 112), false);
+    if (Screen.Z <= 0) return;
+    // "[E] Gather   [LMB] Clear with Knife" -> (key, verb) pairs; unkeyed hints stay plain text.
+    TArray<FString> Parts;
+    Actions.ParseIntoArray(Parts, TEXT("   "));
+    struct FCue { FString Key, Verb; };
+    TArray<FCue> Cues;
+    for (FString Part : Parts)
+    {
+        Part.TrimStartAndEndInline();
+        FCue Cue;
+        if (Part.StartsWith(TEXT("[")) && Part.Contains(TEXT("]")))
+        {
+            const int32 Close = Part.Find(TEXT("]"));
+            Cue.Key = Part.Mid(1, Close - 1);
+            Cue.Verb = Part.Mid(Close + 1).TrimStart();
+        }
+        else Cue.Verb = Part;
+        if (!Cue.Verb.IsEmpty() || !Cue.Key.IsEmpty()) Cues.Add(Cue);
+    }
+    if (Cues.IsEmpty()) return;
+    constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 8, Space = 9;
+    float Width = 0;
+    for (int32 Index = 0; Index < Cues.Num(); ++Index)
+    {
+        if (Index) Width += Gap;
+        if (!Cues[Index].Key.IsEmpty()) Width += FMath::Max(BadgeH, TextWidth(Cues[Index].Key, KeySize) + KeyPad * 2) + Space;
+        Width += TextWidth(Cues[Index].Verb, Size);
+    }
+    FString Title = PC.FocusTitle();
+    const float TitleSize = 16;
+    const float TitleWidth = FMath::Min(TextWidth(Title, TitleSize), 520.0f);
+    const float BoxWidth = FMath::Max(Width, TitleWidth) + 30;
+    const float BoxHeight = Title.IsEmpty() ? BadgeH + 16 : BadgeH + 40;
+    const float CenterX = FMath::Clamp(static_cast<float>(Screen.X) / UiScale, BoxWidth * 0.5f + 12, ViewWidth - BoxWidth * 0.5f - 12);
+    const float Top = FMath::Clamp(static_cast<float>(Screen.Y) / UiScale - BoxHeight, 110.0f, ViewHeight - 260.0f);
+    Panel(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, FLinearColor(0.02f, 0.035f, 0.028f, 0.58f));
+    ProtectFeedback(TEXT("interact-cue"), CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight);
+    float Y = Top + 8;
+    if (!Title.IsEmpty())
+    {
+        Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, Muted);
+        Y += 24;
+    }
+    float X = CenterX - Width * 0.5f;
+    for (int32 Index = 0; Index < Cues.Num(); ++Index)
+    {
+        if (Index) X += Gap;
+        const FCue& Cue = Cues[Index];
+        if (!Cue.Key.IsEmpty())
+        {
+            const float BadgeW = FMath::Max(BadgeH, TextWidth(Cue.Key, KeySize) + KeyPad * 2);
+            Panel(X, Y, BadgeW, BadgeH, HudGold);
+            Write(Cue.Key, X + (BadgeW - TextWidth(Cue.Key, KeySize)) * 0.5f, Y + (BadgeH - KeySize) * 0.5f - 1, KeySize, Pine);
+            X += BadgeW + Space;
+        }
+        Write(Cue.Verb, X + 1, Y + (BadgeH - Size) * 0.5f, Size, FLinearColor(0, 0, 0, 0.7f));
+        Write(Cue.Verb, X, Y + (BadgeH - Size) * 0.5f - 1, Size, Ink);
+        X += TextWidth(Cue.Verb, Size);
     }
 }
 

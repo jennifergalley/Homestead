@@ -305,7 +305,20 @@ Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int s
         if (std::abs(static_cast<double>(entity.xCm) - center) < 230.0)
             entity.xCm = static_cast<std::int64_t>(std::llround(center)) +
                 (static_cast<double>(entity.xCm) < center ? -250 : 250);
-        if (InGraniteKnob(world, chunk, entity.xCm, entity.yCm)) return Status::NotFound;
+        if (InGraniteKnob(world, chunk, entity.xCm, entity.yCm))
+        {
+            // Every chunk keeps its anchor patch (one branch pile per chunk): it sits at the knob's
+            // foot instead. Optional members under the rock simply don't grow.
+            std::int64_t knobX = 0, knobY = 0;
+            if (slot > 0 || !KnobSite(world, chunk, knobX, knobY)) return Status::NotFound;
+            double dx = static_cast<double>(entity.xCm - knobX), dy = static_cast<double>(entity.yCm - knobY);
+            const double length = std::sqrt(dx * dx + dy * dy);
+            if (length < 1.0) { dx = 1.0; dy = 0.0; }
+            else { dx /= length; dy /= length; }
+            constexpr double Foot = static_cast<double>(GraniteKnobRadiusCm) + 60.0;
+            entity.xCm = knobX + static_cast<std::int64_t>(std::llround(dx * Foot));
+            entity.yCm = knobY + static_cast<std::int64_t>(std::llround(dy * Foot));
+        }
     }
     const auto heightStatus = Height(world, entity.xCm, entity.yCm, entity.heightCm);
     if (heightStatus != Status::Ok) return heightStatus;
