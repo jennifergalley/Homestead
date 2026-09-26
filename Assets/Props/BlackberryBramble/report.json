@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "name": "BlackberryBramble",
+  "description": "Himalayan blackberry bramble mounds (medium 1.2 m and large 2 m) with arching prickly canes, five-leaflet leaves, dead canes, flowers and green/red/black berries. Blocking.",
+  "collision": "convex",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/blackberry_bramble.py",
+  "source_sha256": "fe832c7c944f2fc34d85904dbdaaabcfa283b3be76c58a2b9829bee7a735ed6c",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_BlackberryBramble": {
+      "vertices": 32367,
+      "triangles": 36887,
+      "size_cm": [
+        232.28,
+        225.84,
+        123.32
+      ],
+      "materials": [
+        {
+          "name": "M_BlackberryBramble",
+          "textures": {
+            "basecolor": "T_BlackberryBramble_basecolor.png",
+            "normal": "T_BlackberryBramble_normal.png",
+            "roughness": "T_BlackberryBramble_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.20375720262527466,
+          -0.474098551273346,
+          0.8
+        ]
+      },
+      "fbx": "SM_BlackberryBramble.fbx",
+      "sha256": "c83736a51916780bd27706137709ccb8137ede682a9663c871688fd77cd0cb20",
+      "preview": "preview_SM_BlackberryBramble.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BlackberryBramble_hero.png",
+          "detail": "beauty_SM_BlackberryBramble_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_BlackberryBramble_LOD1": {
+      "vertices": 12992,
+      "triangles": 11930,
+      "size_cm": [
+        231.43,
+        225.12,
+        124.64
+      ],
+      "materials": [
+        {
+          "name": "M_BlackberryBramble",
+          "textures": {
+            "basecolor": "T_BlackberryBramble_basecolor.png",
+            "normal": "T_BlackberryBramble_normal.png",
+            "roughness": "T_BlackberryBramble_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.20375720262527466,
+          -0.474098551273346,
+          0.8
+        ]
+      },
+      "fbx": "SM_BlackberryBramble_LOD1.fbx",
+      "sha256": "f331e3e5c1e3c963d536513f2c267d3422a807db9a2d6ebfb7d99ec977febbe3",
+      "preview": "preview_SM_BlackberryBramble_LOD1.png"
+    },
+    "SM_BlackberryBramble_LOD2": {
+      "vertices": 4887,
+      "triangles": 4150,
+      "size_cm": [
+        240.93,
+        236.85,
+        124.55
+      ],
+      "materials": [
+        {
+          "name": "M_BlackberryBramble",
+          "textures": {
+            "basecolor": "T_BlackberryBramble_basecolor.png",
+            "normal": "T_BlackberryBramble_normal.png",
+            "roughness": "T_BlackberryBramble_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.20375720262527466,
+          -0.474098551273346,
+          0.8
+        ]
+      },
+      "fbx": "SM_BlackberryBramble_LOD2.fbx",
+      "sha256": "8796975b620088f2052b1d9865e40b4dd27b41dbfe0607821702c9380e181c1c",
+      "preview": "preview_SM_BlackberryBramble_LOD2.png"
+    },
+    "SM_BlackberryBrambleLarge": {
+      "vertices": 50670,
+      "triangles": 57929,
+      "size_cm": [
+        349.3,
+        317.28,
+        177.16
+      ],
+      "materials": [
+        {
+          "name": "M_BlackberryBramble",
+          "textures": {
+            "basecolor": "T_BlackberryBramble_basecolor.png",
+            "normal": "T_BlackberryBramble_normal.png",
+            "roughness": "T_BlackberryBramble_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.1799160957336426,
+          -0.7943029522895813,
+          1.3
+        ]
+      },
+      "fbx": "SM_BlackberryBrambleLarge.fbx",
+      "sha256": "8f1c098170c953dad18c17cf7b5a781102ebb099de315a09b7add8b1332fc7bb",
+      "preview": "preview_SM_BlackberryBrambleLarge.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BlackberryBrambleLarge_hero.png",
+          "detail": "beauty_SM_BlackberryBrambleLarge_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_BlackberryBrambleLarge_LOD1": {
+      "vertices": 20326,
+      "triangles": 19580,
+      "size_cm": [
+        347.72,
+        316.92,
+        179.09
+      ],
+      "materials": [
+        {
+          "name": "M_BlackberryBramble",
+          "textures": {
+            "basecolor": "T_BlackberryBramble_basecolor.png",
+            "normal": "T_BlackberryBramble_normal.png",
+            "roughness": "T_BlackberryBramble_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.07991609573364258,
+          -0.39430295228958134,
+          0.8
+        ]
+      },
+      "fbx": "SM_BlackberryBrambleLarge_LOD1.fbx",
+      "sha256": "dbfec415b4bbdea38e90cb1739b9afecfd6ff1355545ace23d0167cbc861b16e",
+      "preview": "preview_SM_BlackberryBrambleLarge_LOD1.png"
+    },
+    "SM_BlackberryBrambleLarge_LOD2": {
+      "vertices": 8348,
+      "triangles": 7346,
+      "size_cm": [
+        363.34,
+        331.72,
+        183.04
+      ],
+      "materials": [
+        {
+          "name": "M_BlackberryBramble",
+          "textures": {
+            "basecolor": "T_BlackberryBramble_basecolor.png",
+            "normal": "T_BlackberryBramble_normal.png",
+            "roughness": "T_BlackberryBramble_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.07991609573364258,
+          -0.39430295228958134,
+          0.8
+        ]
+      },
+      "fbx": "SM_BlackberryBrambleLarge_LOD2.fbx",
+      "sha256": "405059e85c8ebc7e00f77786a153944646e93be0384d1c2dc84c2c28f4096e5e",
+      "preview": "preview_SM_BlackberryBrambleLarge_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": true,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-cane random phase",
+    "B": "leaf flutter 0 at leaf base -> 1 at tip, 0 on canes",
+    "A": "1"
+  },
+  "material_notes": "One material M_BlackberryBramble: T_BlackberryBramble_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_BlackberryBramble_basecolor.png": "8802a29e71591d45d2325aa679a95a280022f7606cfa55744f976781b0e8c83b",
+    "T_BlackberryBramble_normal.png": "b6cb380cc33d02d1963452856cd006b5ae3e1597fdad9a5d8f57c8996a8ccd9b",
+    "T_BlackberryBramble_roughness.png": "d01e553ac3f5c18a1997a248c075e23d82682052e98f4fc0c7929d9b641dab5f"
+  }
+}

@@ -97,6 +97,8 @@ def main():
               "meshes": {}, "warnings": []}
     report["provenance"] = report["provenance"] or \
         "Original project-authored geometry; no third-party asset or texture"
+    if args.recipe:
+        report.update(getattr(recipe, "REPORT", {}))
     bake_spec = getattr(recipe, "BAKE", None) if args.recipe else None
     for obj in meshes:
         baked = None
@@ -111,6 +113,7 @@ def main():
         if baked:
             info["bake"] = baked
         review = dict(getattr(recipe, "BEAUTY", {})) if args.recipe else {}
+        review.update(review.pop("meshes", {}).get(obj.name, {}))
         if review.get("focus") is not None:
             shift = obj.get("homestead_shift", (0, 0, 0))
             review["focus"] = [f - s for f, s in zip(review["focus"], shift)]

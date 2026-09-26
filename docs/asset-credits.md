@@ -14,6 +14,11 @@ meshes (`Scripts\Environment\build_reed_clumps.py`); their shafts, blades and
 seed heads reuse `M_Field` color instances. The small held Knife is likewise
 project-authored procedural geometry. Neither adds a third-party asset.
 
+The woodland underbrush set (`Assets\Props\BlackberryBramble` and the other foliage props built
+with `Scripts\Blender\homestead_foliage.py`) is project-authored: every mesh is generated from
+code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
+library. No scan, photo or third-party texture is used.
+
 ## Music
 
 All music is by **Kevin MacLeod** (incompetech.com), licensed under
