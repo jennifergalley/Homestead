@@ -1869,7 +1869,10 @@ Result Simulation::Deserialize(const std::string& data)
         edit.key.localId = static_cast<std::uint32_t>(localId);
         if (!candidate.resourceEdits.empty() && !(candidate.resourceEdits.back().key < edit.key)) return invalid();
         Generation::GeneratedEntity entity;
-        if (Generation::FindEntity(candidate.world, edit.key, entity) != Generation::Status::Ok) return invalid();
+        const auto found = Generation::FindEntity(candidate.world, edit.key, entity);
+        // A candidate the generator has since retired (e.g. a tree now under a granite knob) drops quietly.
+        if (found == Generation::Status::NotFound) continue;
+        if (found != Generation::Status::Ok) return invalid();
         ResourceNode node;
         if (!GeneratedNode(candidate, entity, node) ||
             !FiniteRange(edit.readyAtHour, 0.0, candidate.hour + Regrowth(node.kind)) ||

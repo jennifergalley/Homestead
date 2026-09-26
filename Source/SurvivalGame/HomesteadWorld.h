@@ -100,6 +100,19 @@ struct FHomesteadUnderbrush
     float Scale = 1;
 };
 
+// One Sierra granite rock: small ground clusters, knee-high boulders, erratics, and rare
+// house-sized domes and split boulders grouped into outcrops.
+struct FHomesteadRock
+{
+    uint8 Kind = 0;
+    float X = 0;
+    float Y = 0;
+    float Yaw = 0;
+    float Scale = 1;
+    float Pitch = 0;
+    float Roll = 0;
+};
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadWorld : public AActor
 {
@@ -132,6 +145,12 @@ public:
     static float UnderbrushDensity(float X, float Y);
     static bool IsUnderbrushBlocking(uint8 Species);
     static float UnderbrushRadius(uint8 Species);
+    // Granite layout for one chunk. IsFree(X, Y, Radius, Kind) applies reservations so outcrop
+    // anchors can retry elsewhere; the result is deterministic for a seed and reservation set.
+    // KnobSite, when set, is the generator's house-sized granite site (Homestead::Generation::GraniteKnob).
+    static void GenerateRocks(uint64 WorldSeed, FIntPoint Chunk, const FVector2D* KnobSite,
+        TFunctionRef<bool(float, float, float, uint8)> IsFree, TArray<FHomesteadRock>& Out);
+    static float RockRadius(uint8 Kind);
 
 private:
     friend class AHomesteadVisualPlaytest;

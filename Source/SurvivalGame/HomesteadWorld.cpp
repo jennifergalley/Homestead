@@ -98,6 +98,135 @@ uint8 PickUnderbrush(FRandomStream& Random, std::initializer_list<std::pair<uint
     }
     return Weights.begin()->first;
 }
+
+// Blender-built Sierra granite (docs\blender-assets.md "Rocks"). Pivots are on the ground line
+// and already sunk; Radius is the footprint half-width at scale 1. Size: 0 ground cluster,
+// 1 knee-high boulder, 2 erratic, 3 house-sized.
+struct FRockKind
+{
+    const TCHAR* Asset;
+    float Radius;
+    float MinScale;
+    float MaxScale;
+    uint8 Size;
+};
+const FRockKind RockKinds[] = {
+    {TEXT("GraniteCobbles/SM_GraniteCobbles"), 45, 0.8f, 1.3f, 0},
+    {TEXT("GraniteSpalls/SM_GraniteSpalls"), 40, 0.8f, 1.3f, 0},
+    {TEXT("GraniteRubble/SM_GraniteRubble"), 40, 0.8f, 1.4f, 0},
+    {TEXT("GraniteBoulderLoaf/SM_GraniteBoulderLoaf"), 62, 0.8f, 1.35f, 1},
+    {TEXT("GraniteBlockTalus/SM_GraniteBlockTalus"), 52, 0.8f, 1.4f, 1},
+    {TEXT("GraniteBoulderLow/SM_GraniteBoulderLow"), 72, 0.8f, 1.3f, 1},
+    {TEXT("GraniteErratic/SM_GraniteErratic"), 150, 0.85f, 1.2f, 2},
+    {TEXT("GraniteBoulderJointed/SM_GraniteBoulderJointed"), 160, 0.85f, 1.15f, 2},
+    {TEXT("GraniteDome/SM_GraniteDome"), 470, 0.85f, 1.05f, 3},
+    {TEXT("GraniteSplitBoulder/SM_GraniteSplitBoulder"), 400, 0.9f, 1.1f, 3},
+};
+constexpr int32 RockKindCount = UE_ARRAY_COUNT(RockKinds);
+}
+
+float AHomesteadWorld::RockRadius(uint8 Kind)
+{
+    return Kind < RockKindCount ? RockKinds[Kind].Radius : 0.0f;
+}
+
+void AHomesteadWorld::GenerateRocks(uint64 WorldSeed, FIntPoint Chunk, const FVector2D* KnobSite,
+    TFunctionRef<bool(float, float, float, uint8)> IsFree, TArray<FHomesteadRock>& Out)
+{
+    enum : uint8 { Cobbles, Spalls, Rubble, Loaf, Talus, Low, Erratic, Jointed, Dome, Split };
+    Out.Reset();
+    const float OriginX = static_cast<float>(static_cast<int64>(Chunk.X) * Homestead::Generation::ChunkSizeCm);
+    const float OriginY = static_cast<float>(static_cast<int64>(Chunk.Y) * Homestead::Generation::ChunkSizeCm);
+    const float Size = static_cast<float>(Homestead::Generation::ChunkSizeCm);
+    FRandomStream Random(static_cast<int32>(GetTypeHash(WorldSeed) ^ GetTypeHash(Chunk) ^ 0x6A7A17E5u));
+    auto TryAdd = [&](uint8 Kind, float X, float Y) -> bool
+    {
+        const FRockKind& Rock = RockKinds[Kind];
+        const float Scale = Random.FRandRange(Rock.MinScale, Rock.MaxScale);
+        // +Y (the mossy face) stays roughly north, like the authored boulders.
+        const float Yaw = Random.FRandRange(-40.0f, 40.0f) + (Rock.Size == 0 ? Random.FRandRange(0, 360) : 0);
+        const float Tilt = Rock.Size == 1 ? 5.0f : Rock.Size == 0 ? 3.0f : 0.0f;
+        const float Pitch = Random.FRandRange(-Tilt, Tilt);
+        const float Roll = Random.FRandRange(-Tilt, Tilt);
+        if (X < OriginX || Y < OriginY || X >= OriginX + Size || Y >= OriginY + Size) return false;
+        const float Radius = Rock.Radius * Scale;
+        for (const auto& Other : Out)
+        {
+            const float Spacing = 0.85f * (Radius + RockKinds[Other.Kind].Radius * Other.Scale);
+            if (FVector2D::DistSquared(FVector2D(X, Y), FVector2D(Other.X, Other.Y)) < Spacing * Spacing)
+                return false;
+        }
+        if (!IsFree(X, Y, Radius, Rock.Size)) return false;
+        FHomesteadRock Placed;
+        Placed.Kind = Kind;
+        Placed.X = X;
+        Placed.Y = Y;
+        Placed.Yaw = Yaw;
+        Placed.Scale = Scale;
+        Placed.Pitch = Pitch;
+        Placed.Roll = Roll;
+        Out.Add(Placed);
+        return true;
+    };
+    auto Around = [&](uint8 Kind, const FHomesteadRock& Anchor, float MinGap, float MaxGap)
+    {
+        const float Base = RockKinds[Anchor.Kind].Radius * Anchor.Scale + RockKinds[Kind].Radius;
+        for (int32 Attempt = 0; Attempt < 4; ++Attempt)
+        {
+            const float Angle = Random.FRandRange(0.0f, UE_TWO_PI);
+            const float Distance = Base + Random.FRandRange(MinGap, MaxGap);
+            if (TryAdd(Kind, Anchor.X + FMath::Cos(Angle) * Distance, Anchor.Y + FMath::Sin(Angle) * Distance)) return;
+        }
+    };
+    auto Outcrop = [&](FHomesteadRock Anchor, bool bHouse)
+    {
+        if (Random.FRand() < (bHouse ? 0.45f : 0.3f)) Around(Random.FRand() < 0.5f ? Erratic : Jointed, Anchor, 20, 260);
+        const int32 Boulders = Random.RandRange(2, bHouse ? 5 : 3);
+        for (int32 Index = 0; Index < Boulders; ++Index)
+            Around(PickUnderbrush(Random, {{Loaf, 2}, {Talus, 3}, {Low, 2}}), Anchor, -20, 320);
+        const int32 Clusters = Random.RandRange(3, bHouse ? 8 : 5);
+        for (int32 Index = 0; Index < Clusters; ++Index)
+            Around(PickUnderbrush(Random, {{Cobbles, 2}, {Spalls, 2}, {Rubble, 3}}), Anchor, -30, 420);
+    };
+    // Outcrops cluster in broad bands, like the granite knobs strewn through Sierra woodland.
+    const float Band = FMath::PerlinNoise2D(FVector2D(OriginX / 7200.0f + 4.3f, OriginY / 7200.0f - 9.1f));
+    const float OutcropChance = 0.12f + 0.4f * FMath::Max(0.0f, Band);
+    if (KnobSite)
+    {
+        // The generator keeps trees and forage off the knob, so a dome or split boulder fits there.
+        if (TryAdd(Random.FRand() < 0.55f ? Dome : Split, KnobSite->X, KnobSite->Y))
+            Outcrop(Out.Last(), true);
+        else if (TryAdd(Random.FRand() < 0.5f ? Erratic : Jointed, KnobSite->X, KnobSite->Y))
+            Outcrop(Out.Last(), false);
+    }
+    else if (Random.FRand() < OutcropChance)
+    {
+        const uint8 AnchorKind = Random.FRand() < 0.5f ? Erratic : Jointed;
+        const float Margin = RockKinds[AnchorKind].Radius;
+        for (int32 Attempt = 0; Attempt < 14; ++Attempt)
+        {
+            const float X = OriginX + Random.FRandRange(Margin * 0.6f, Size - Margin * 0.6f);
+            const float Y = OriginY + Random.FRandRange(Margin * 0.6f, Size - Margin * 0.6f);
+            if (!TryAdd(AnchorKind, X, Y)) continue;
+            Outcrop(Out.Last(), false);
+            break;
+        }
+    }
+    else if (Random.FRand() < 0.1f + 0.2f * FMath::Max(0.0f, Band))
+    {
+        // A lone erratic dropped among the trees.
+        for (int32 Attempt = 0; Attempt < 5; ++Attempt)
+            if (TryAdd(Random.FRand() < 0.5f ? Erratic : Jointed,
+                OriginX + Random.FRandRange(200, Size - 200), OriginY + Random.FRandRange(200, Size - 200)))
+                break;
+    }
+    if (Random.FRand() < 0.45f)
+        TryAdd(PickUnderbrush(Random, {{Loaf, 2}, {Talus, 1}, {Low, 2}}),
+            OriginX + Random.FRandRange(0, Size), OriginY + Random.FRandRange(0, Size));
+    const int32 Scattered = Random.RandRange(1, 4);
+    for (int32 Index = 0; Index < Scattered; ++Index)
+        TryAdd(PickUnderbrush(Random, {{Cobbles, 3}, {Spalls, 2}, {Rubble, 3}}),
+            OriginX + Random.FRandRange(0, Size), OriginY + Random.FRandRange(0, Size));
 }
 
 float AHomesteadWorld::UnderbrushDensity(float X, float Y)
@@ -1343,6 +1472,18 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
         if (!UnderbrushMeshes[Species])
             UE_LOG(LogHomesteadWorld, Warning, TEXT("Underbrush %s is not imported; it is skipped."), *Asset);
     }
+    int32 RockCount = 0;
+    int32 BigRockCount = 0;
+    UStaticMesh* RockMeshes[RockKindCount] = {};
+    for (int32 Kind = 0; Kind < RockKindCount; ++Kind)
+    {
+        const FString Asset(RockKinds[Kind].Asset);
+        const FString Name = FPaths::GetCleanFilename(Asset);
+        RockMeshes[Kind] = LoadObject<UStaticMesh>(nullptr,
+            *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s.%s"), *Asset, *Name));
+        if (!RockMeshes[Kind])
+            UE_LOG(LogHomesteadWorld, Warning, TEXT("Granite %s is not imported; it is skipped."), *Asset);
+    }
     int32 RebuiltChunks = 0;
     struct FChunkCoverWork
     {
@@ -1386,7 +1527,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
         for (const auto& Plot : State.plots)
             if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
                 Signature += FString::Printf(TEXT("P%d;"), Plot.id);
-        Signature += TEXT("natural-creek-v1-decorative-wildflower-v1-underbrush-v2");
+        Signature += TEXT("natural-creek-v1-decorative-wildflower-v1-underbrush-v2-granite-v2");
         if (!StageChunk && bStagingResourceWindow
             && StagedChunk == State.activeChunk && StagedWorld.seed == State.world.seed
             && StagedWorld.generationVersion == State.world.generationVersion
@@ -1403,7 +1544,8 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                     Component->SetVisibility(true);
                     Component->SetHiddenInGame(false);
                     auto* Primitive = Cast<UPrimitiveComponent>(Component);
-                    if (Primitive && Primitive->GetCollisionProfileName() == UCollisionProfile::BlockAll_ProfileName)
+                    if (Primitive && (Primitive->GetCollisionProfileName() == UCollisionProfile::BlockAll_ProfileName
+                        || Primitive->ComponentHasTag(TEXT("HomesteadBlocking"))))
                         Primitive->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
                 }
                 ++RebuiltChunks;
@@ -1548,6 +1690,76 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
             }
         }
         {
+            TArray<FHomesteadRock> Rocks;
+            std::int64_t KnobX = 0, KnobY = 0;
+            const bool bKnob = Homestead::Generation::GraniteKnob(State.world, {Chunk.Key.X, Chunk.Key.Y}, KnobX, KnobY);
+            const FVector2D Knob(static_cast<double>(KnobX), static_cast<double>(KnobY));
+            GenerateRocks(State.world.seed, Chunk.Key, bKnob ? &Knob : nullptr, [&](float X, float Y, float Radius, uint8 RockSize)
+            {
+                if (!RockMeshes[0]) return false;
+                const float ClearingDistance = FVector2D::Distance(FVector2D(X, Y), StartingClearing);
+                const double StreamDistance = FMath::Abs(X - Homestead::StreamX(Y));
+                return ClearingDistance >= (RockSize == 0 ? 450.0f : StartingClearingBlockingRadius) + Radius
+                    && StreamDistance >= (RockSize == 0 ? 140.0 : 240.0) + Radius
+                    && !IsDecorationReserved(CoverState, X, Y, Radius * (RockSize == 0 ? 0.6f : 0.85f), 0, true);
+            }, Rocks);
+            UHierarchicalInstancedStaticMeshComponent* RockBatches[RockKindCount] = {};
+            for (const FHomesteadRock& Rock : Rocks)
+            {
+                const FRockKind& Kind = RockKinds[Rock.Kind];
+                UStaticMesh* Mesh = RockMeshes[Rock.Kind];
+                if (!Mesh) continue;
+                UHierarchicalInstancedStaticMeshComponent*& Batch = RockBatches[Rock.Kind];
+                if (!Batch)
+                {
+                    const double SetupStarted = FPlatformTime::Seconds();
+                    Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+                    Batch->SetupAttachment(GetRootComponent());
+                    Batch->SetMobility(EComponentMobility::Static);
+                    Batch->ComponentTags.Add(TEXT("WoodlandGranite"));
+                    Batch->SetStaticMesh(Mesh);
+                    if (Kind.Size > 0)
+                    {
+                        Batch->ComponentTags.Add(TEXT("HomesteadBlocking"));
+                        Batch->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+                        Batch->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+                        // Knee-high boulders let the camera boom pass; erratics and domes push it in.
+                        if (Kind.Size == 1) Batch->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+                        Batch->SetCanEverAffectNavigation(true);
+                    }
+                    else
+                    {
+                        Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+                        Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+                        Batch->SetCanEverAffectNavigation(false);
+                    }
+                    Batch->SetGenerateOverlapEvents(false);
+                    Batch->SetCullDistances(0, Kind.Size == 0 ? 4500 : Kind.Size == 1 ? 9000 : 0);
+                    Batch->SetVisibility(!StageChunk);
+                    Batch->SetHiddenInGame(StageChunk != nullptr);
+                    Batch->SetCastShadow(true);
+                    Batch->bAutoRebuildTreeOnInstanceChanges = false;
+                    Batch->RegisterComponent();
+                    if (StageChunk) Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+                    Chunk.Value->Cover.Components.Add(Batch);
+                    BatchSetupMilliseconds += (FPlatformTime::Seconds() - SetupStarted) * 1000;
+                }
+                // Settle on the lowest ground under the footprint so the downhill side never floats.
+                const float Reach = Kind.Radius * Rock.Scale * 0.55f;
+                float Z = CachedGroundHeight(Rock.X, Rock.Y);
+                for (int32 Sample = 0; Sample < 6; ++Sample)
+                {
+                    const float Angle = Sample * UE_TWO_PI / 6;
+                    Z = FMath::Min(Z, CachedGroundHeight(Rock.X + FMath::Cos(Angle) * Reach, Rock.Y + FMath::Sin(Angle) * Reach));
+                }
+                Batch->AddInstance(FTransform(FRotator(Rock.Pitch, Rock.Yaw, Rock.Roll),
+                    FVector(Rock.X, Rock.Y, Z), FVector(Rock.Scale)));
+                ++RockCount;
+                BigRockCount += Kind.Size >= 2 ? 1 : 0;
+            }
+            for (auto* Batch : RockBatches)
+                if (Batch) Batch->BuildTreeIfOutdated(false, true);
+
             TArray<FHomesteadUnderbrush> Plants;
             GenerateUnderbrush(State.world.seed, Chunk.Key, Plants);
             UHierarchicalInstancedStaticMeshComponent* UnderbrushBatches[UnderbrushSpeciesCount] = {};
@@ -1557,6 +1769,18 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                 UStaticMesh* Mesh = UnderbrushMeshes[Plant.Species];
                 if (!Mesh) continue;
                 const float Radius = Species.Radius * Plant.Scale;
+                bool bOnRock = false;
+                for (const FHomesteadRock& Rock : Rocks)
+                {
+                    const float Clear = RockKinds[Rock.Kind].Radius * Rock.Scale * (RockKinds[Rock.Kind].Size == 0 ? 0.5f : 0.9f)
+                        + Radius * 0.35f;
+                    if (FVector2D::DistSquared(FVector2D(Plant.X, Plant.Y), FVector2D(Rock.X, Rock.Y)) < Clear * Clear)
+                    {
+                        bOnRock = true;
+                        break;
+                    }
+                }
+                if (bOnRock) continue;
                 const float ClearingDistance = FVector2D::Distance(FVector2D(Plant.X, Plant.Y), StartingClearing);
                 const double StreamDistance = FMath::Abs(Plant.X - Homestead::StreamX(Plant.Y));
                 const bool bLow = Plant.Species >= 6;
@@ -1575,6 +1799,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                     Batch->SetStaticMesh(Mesh);
                     if (Species.bBlocking)
                     {
+                        Batch->ComponentTags.Add(TEXT("HomesteadBlocking"));
                         Batch->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
                         // The camera boom and interaction traces pass through; only her body is stopped.
                         Batch->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -1625,9 +1850,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
             RebuiltChunks, CoverScanMilliseconds, CoverTeardownMilliseconds,
             BatchSetupMilliseconds, InstanceMilliseconds, TreeBuildMilliseconds,
             DecorationBuildMilliseconds);
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_flowers=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d added_flower_triangles=%d underbrush=%d blocking_underbrush=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_flowers=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d added_flower_triangles=%d underbrush=%d blocking_underbrush=%d granite=%d big_granite=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
         RebuiltChunks, FernCount, GrassCount, FlowerCount, BankFernCount, BankGrassCount,
-        GrassTriangleCount, FlowerTriangleCount, UnderbrushCount, BlockingUnderbrushCount, DecorationBuildMilliseconds);
+        GrassTriangleCount, FlowerTriangleCount, UnderbrushCount, BlockingUnderbrushCount, RockCount, BigRockCount, DecorationBuildMilliseconds);
     return true;
 }
 

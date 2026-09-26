@@ -250,9 +250,11 @@ Texel density: crystals are 2-5 mm, so rocks up to ~1.5 m bake them in (2K). The
 and house-sized rocks bake macro maps without crystals (4K) plus a cover mask
 (`T_<Name>_mask`, 1 = bare rock, lower under lichen, moss and soil) and layer the shared,
 seamless `Assets\Props\GraniteDetail` maps (1 m tiles, generated on a flat 4D torus so
-they tile without seams) in object/world space: `k = 0.8 * Mask`,
-`BaseColor = Macro * lerp(1, 2 * Detail, k)`, detail normal blended over the macro normal
-by `k`, roughness `lerp(Macro, Detail, 0.5 * k)`.
+they tile without seams) in object/world space: `k = DetailStrength * Mask`,
+`BaseColor = Macro * MacroBrightness * lerp(1, 2 * Detail, k)`, detail normal blended over
+the macro normal by `k`, roughness `lerp(Macro, Detail, 0.5 * k)`. In Unreal these live in
+`M_PropGranite` (`import_props.granite_parent`); DetailStrength 0.5 and MacroBrightness
+0.74 keep sunlit domes from reading as white plaster under the forest exposure.
 `kit.layer_detail` wires the same thing into the Blender material for the review renders.
 Each recipe's `NOTES` (copied to `report.json`) gives the sink depth, collision advice and
 material notes.
@@ -322,17 +324,30 @@ Conventions match the other exports: meters, Z up, -Y forward, FBX
 .\Scripts\Blender\Import-Props.ps1 -Name ChoppingBlock
 ```
 
-Requires the built editor module and `M_Field` (from `Scripts\Build-Game.ps1`), and
-**no other editor using the project**. It verifies the FBX hashes against the
-report, imports to `/Game/SurvivalGame/Environment/Props/<Name>`, assigns the
-tinted instances, adds the requested simple collision and checks the imported
-height against Blender. Placing props in the Homestead map is separate, per-feature
-work. The importer has not yet been exercised end to end, because the editor was
-busy in another session when it was written.
+Requires the built editor module and `M_Field` (from `Scripts\Build-Game.ps1`). It
+verifies the FBX hashes against the report, imports to
+`/Game/SurvivalGame/Environment/Props/<Name>`, merges `_LODn` meshes into one LOD chain,
+assigns material instances, adds the requested simple collision and checks the imported
+height against Blender. The headless commandlet lacks `StaticMeshEditorSubsystem`, so LOD
+and collision work needs a running editor: `sys.path.insert(0, r"<repo>\Scripts\Blender")`,
+`import import_props`, then `import_props.import_prop(name, unreal.load_asset(M_Field))`
+through the MCP `run_python` tool.
 
-Textured props are **not importable yet**: `import_props.py` stops with a clear error
-until a masked, two-sided foliage parent material (base color, alpha mask, normal,
-roughness, translucency) and LOD-chain assembly are added. The Fern 02 and Grass
-Medium 01 import scripts already wire equivalent materials, so reuse their approach.
-Wind (pivot/vertex data) is also not authored yet.
-Flat-tinted blockout props import as `M_Field` instances.
+Material parents by report type:
+
+- Flat-tinted blockout props: `M_Field` instances.
+- Textured props: `M_PropTextured` (base colour, normal, packed roughness).
+- Foliage atlases: `M_PropFoliage` (masked, two-sided, translucency).
+- Rocks whose report lists `notes.detail_textures` and a cover mask: `M_PropGranite`.
+
+`COLLISION_OVERRIDES` forces complex-as-simple collision where a convex hull would fill a
+gap (the SplitBoulder's crack), and `NANITE_PROPS` enables Nanite on the house-sized rocks.
+
+In-game placement lives in `AHomesteadWorld::BuildDecorations`:
+
+- `GenerateUnderbrush` scatters the foliage set.
+- `GenerateRocks` scatters the granite: erratic outcrops in Perlin bands, lone erratics, and
+  scattered clusters. House-sized rocks go only on `Homestead::Generation::GraniteKnob`
+  sites (about one chunk in seven). World generation keeps trees and forage off those
+  sites, because the 4 m tree grid leaves no gap large enough for them otherwise. Save
+  loading drops resource edits for candidates that no longer generate.

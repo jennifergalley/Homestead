@@ -176,6 +176,25 @@ std::int64_t Clamp(std::int64_t value, std::int64_t low, std::int64_t high)
     return value < low ? low : (value > high ? high : value);
 }
 
+bool KnobSite(WorldDescriptor world, ChunkCoord chunk, std::int64_t& xCm, std::int64_t& yCm)
+{
+    const auto knob = Hash(world, chunk.x, chunk.y, 305);
+    if (knob % 7 != 0) return false;
+    // Kept 700 cm inside the chunk so neighbouring chunks never need to test it.
+    xCm = static_cast<std::int64_t>(chunk.x) * ChunkSizeCm + 700 + static_cast<std::int64_t>((knob >> 8) % 1001);
+    yCm = static_cast<std::int64_t>(chunk.y) * ChunkSizeCm + 700 + static_cast<std::int64_t>((knob >> 32) % 1001);
+    return std::abs(static_cast<double>(xCm) - StreamCenterCm(static_cast<double>(yCm))) >= 900.0;
+}
+
+bool InGraniteKnob(WorldDescriptor world, ChunkCoord chunk, std::int64_t xCm, std::int64_t yCm)
+{
+    std::int64_t knobX = 0, knobY = 0;
+    if (!KnobSite(world, chunk, knobX, knobY)) return false;
+    const auto dx = xCm - knobX;
+    const auto dy = yCm - knobY;
+    return dx * dx + dy * dy < GraniteKnobRadiusCm * GraniteKnobRadiusCm;
+}
+
 bool TreeCandidate(WorldDescriptor world, ChunkCoord chunk, int slot,
     std::int64_t& xCm, std::int64_t& yCm)
 {
@@ -211,7 +230,7 @@ bool TreeCandidate(WorldDescriptor world, ChunkCoord chunk, int slot,
         const auto dy = yCm - openingY;
         if (dx * dx + dy * dy < 280 * 280) return false;
     }
-    return true;
+    return !InGraniteKnob(world, chunk, xCm, yCm);
 }
 
 void AssignTreePalette(GeneratedEntity& entity, std::uint64_t hash)
@@ -286,6 +305,7 @@ Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int s
         if (std::abs(static_cast<double>(entity.xCm) - center) < 230.0)
             entity.xCm = static_cast<std::int64_t>(std::llround(center)) +
                 (static_cast<double>(entity.xCm) < center ? -250 : 250);
+        if (InGraniteKnob(world, chunk, entity.xCm, entity.yCm)) return Status::NotFound;
     }
     const auto heightStatus = Height(world, entity.xCm, entity.yCm, entity.heightCm);
     if (heightStatus != Status::Ok) return heightStatus;
@@ -434,5 +454,15 @@ Status GenerateChunk(WorldDescriptor world, ChunkCoord chunk, ChunkBaseline& out
     }
     output = std::move(baseline);
     return Status::Ok;
+}
+
+bool GraniteKnob(WorldDescriptor world, ChunkCoord chunk, std::int64_t& xCm, std::int64_t& yCm)
+{
+    if (world.generationVersion != WorldGenerationVersion) return false;
+    std::int64_t x = 0, y = 0;
+    if (!KnobSite(world, chunk, x, y)) return false;
+    xCm = x;
+    yCm = y;
+    return true;
 }
 }

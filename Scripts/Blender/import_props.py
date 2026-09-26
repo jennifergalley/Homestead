@@ -230,6 +230,177 @@ def foliage_parent():
     return material
 
 
+GRANITE_PARENT = "/Game/SurvivalGame/Materials/M_PropGranite"
+# Per-prop overrides of report.json: a convex hull would fill the split boulder's gap.
+COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex"}
+# Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.
+NANITE_PROPS = {"GraniteDome", "GraniteSplitBoulder"}
+DETAIL_DEST = f"{DEST_ROOT}/GraniteDetail/Textures"
+TRIPLANAR_CODE = """
+float3 w = pow(abs(normalize(N)), 4.0);
+w /= (w.x + w.y + w.z);
+float3 p = WorldPos * (Tile / 100.0);
+return Texture2DSample(Tex, TexSampler, p.yz).rgb * w.x
+     + Texture2DSample(Tex, TexSampler, p.xz).rgb * w.y
+     + Texture2DSample(Tex, TexSampler, p.xy).rgb * w.z;
+"""
+DETAIL_NORMAL_CODE = """
+float2 d = DetailRaw.xy * 2.0 - 1.0;
+return normalize(float3(Macro.xy + d * K, Macro.z));
+"""
+
+
+def granite_parent():
+    """Big Blender granite: a macro bake (no crystals) layered with the shared GraniteDetail
+    crystal tiling (triplanar, world-aligned 1 m tiles) where T_<Name>_mask is bare rock:
+    k = DetailStrength * mask; base = macro * lerp(1, 2 * detail, k); roughness =
+    lerp(macro, detail, 0.5 * k); the detail normal is added over the macro by k."""
+    if LIB.does_asset_exist(GRANITE_PARENT):
+        return LIB.load_asset(GRANITE_PARENT)
+    folder, name = GRANITE_PARENT.rsplit("/", 1)
+    material = TOOLS.create_asset(name, folder, unreal.Material, unreal.MaterialFactoryNew())
+    if not material:
+        raise RuntimeError("Could not create " + GRANITE_PARENT)
+    material.set_editor_property("used_with_instanced_static_meshes", True)
+    material.set_editor_property("used_with_nanite", True)
+    color = unreal.MaterialSamplerType.SAMPLERTYPE_COLOR
+    masks = unreal.MaterialSamplerType.SAMPLERTYPE_MASKS
+    normals = unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL
+
+    def node(kind, x, y):
+        created = EDIT.create_material_expression(material, kind, x, y)
+        if not created:
+            raise RuntimeError(f"Could not create {kind} in {GRANITE_PARENT}")
+        return created
+
+    def link(source, output, target, input_name):
+        if not EDIT.connect_material_expressions(source, output, target, input_name):
+            raise RuntimeError(f"Could not connect {output} -> {input_name} in {GRANITE_PARENT}")
+
+    def out(source, output, prop):
+        if not EDIT.connect_material_property(source, output, prop):
+            raise RuntimeError(f"Could not connect {output} to {prop} in {GRANITE_PARENT}")
+
+    def sampler(parameter, default, kind, y, x=-1200, cls=unreal.MaterialExpressionTextureSampleParameter2D):
+        created = node(cls, x, y)
+        created.set_editor_property("parameter_name", parameter)
+        created.set_editor_property("texture", unreal.load_object(None, default) if isinstance(default, str) else default)
+        created.set_editor_property("sampler_type", kind)
+        return created
+
+    def scalar(parameter, value, x, y):
+        created = node(unreal.MaterialExpressionScalarParameter, x, y)
+        created.set_editor_property("parameter_name", parameter)
+        created.set_editor_property("default_value", value)
+        return created
+
+    def custom(description, code, names, x, y):
+        created = node(unreal.MaterialExpressionCustom, x, y)
+        created.set_editor_property("description", description)
+        created.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+        inputs = []
+        for input_name in names:
+            value = unreal.CustomInput()
+            value.set_editor_property("input_name", input_name)
+            inputs.append(value)
+        created.set_editor_property("inputs", inputs)
+        created.set_editor_property("code", code)
+        return created
+
+    base = sampler("BaseColorTexture", WHITE, color, -700)
+    normal = sampler("NormalTexture", FLAT_NORMAL, normals, -400)
+    rough = sampler("RoughnessTexture", mask_default(True), masks, -100)
+    ao = sampler("AOTexture", mask_default(True), masks, 200)
+    mask = sampler("MaskTexture", mask_default(True), masks, 500)
+    world = node(unreal.MaterialExpressionWorldPosition, -1500, 900)
+    vertex_normal = node(unreal.MaterialExpressionVertexNormalWS, -1500, 1000)
+    tile = scalar("DetailTilesPerMetre", 1.0, -1500, 1100)
+
+    def triplanar(parameter, default, kind, y):
+        texture = sampler(parameter, default, kind, y, -1500, unreal.MaterialExpressionTextureObjectParameter)
+        sample = custom("Triplanar " + parameter, TRIPLANAR_CODE, ("Tex", "WorldPos", "N", "Tile"), -1100, y)
+        link(texture, "", sample, "Tex")
+        link(world, "", sample, "WorldPos")
+        link(vertex_normal, "", sample, "N")
+        link(tile, "", sample, "Tile")
+        return sample
+
+    detail_base = triplanar("DetailBaseColor", WHITE, color, 800)
+    detail_normal = triplanar("DetailNormal", FLAT_NORMAL, normals, 1300)
+    detail_rough = triplanar("DetailRoughness", mask_default(True), masks, 1800)
+
+    k = node(unreal.MaterialExpressionMultiply, -900, 500)
+    link(mask, "R", k, "A")
+    link(scalar("DetailStrength", 0.5, -1100, 600), "", k, "B")
+
+    doubled = node(unreal.MaterialExpressionMultiply, -800, 800)
+    link(detail_base, "", doubled, "A")
+    doubled.set_editor_property("const_b", 2.0)
+    layer = node(unreal.MaterialExpressionLinearInterpolate, -600, 700)
+    layer.set_editor_property("const_a", 1.0)
+    link(doubled, "", layer, "B")
+    link(k, "", layer, "Alpha")
+    tinted = node(unreal.MaterialExpressionMultiply, -600, -700)
+    link(base, "RGB", tinted, "A")
+    link(scalar("MacroBrightness", 0.74, -800, -600), "", tinted, "B")
+    color_out = node(unreal.MaterialExpressionMultiply, -400, -600)
+    link(tinted, "", color_out, "A")
+    link(layer, "", color_out, "B")
+    out(color_out, "", unreal.MaterialProperty.MP_BASE_COLOR)
+
+    half_k = node(unreal.MaterialExpressionMultiply, -800, 1900)
+    link(k, "", half_k, "A")
+    half_k.set_editor_property("const_b", 0.5)
+    rough_out = node(unreal.MaterialExpressionLinearInterpolate, -400, -100)
+    link(rough, "R", rough_out, "A")
+    link(detail_rough, "", rough_out, "B")
+    link(half_k, "", rough_out, "Alpha")
+    out(rough_out, "", unreal.MaterialProperty.MP_ROUGHNESS)
+
+    normal_out = custom("Detail normal over macro", DETAIL_NORMAL_CODE, ("Macro", "DetailRaw", "K"), -400, -400)
+    link(normal, "RGB", normal_out, "Macro")
+    link(detail_normal, "", normal_out, "DetailRaw")
+    link(k, "", normal_out, "K")
+    out(normal_out, "", unreal.MaterialProperty.MP_NORMAL)
+    out(ao, "R", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION)
+    EDIT.recompile_material(material)
+    save(material)
+    return material
+
+
+def granite_instance(spec, info, folder, dest, report):
+    maps = info.get("bake", {}).get("maps", {})
+    parameters = {"basecolor": "BaseColorTexture", "normal": "NormalTexture", "roughness": "RoughnessTexture",
+                  "ao": "AOTexture", "mask": "MaskTexture"}
+    name = "MI_" + spec["name"][2:]
+    path = f"{dest}/{name}"
+    instance = LIB.load_asset(path) if LIB.does_asset_exist(path) else TOOLS.create_asset(
+        name, dest, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    if not instance:
+        raise RuntimeError("Could not create " + path)
+    EDIT.set_material_instance_parent(instance, granite_parent())
+    for role, parameter in parameters.items():
+        source = folder / "Textures" / maps[role]
+        if not source.exists():
+            source = folder / maps[role]
+        texture = import_texture(source, f"{dest}/Textures", "roughness" if role == "mask" else role)
+        EDIT.set_material_instance_texture_parameter_value(instance, parameter, texture)
+    details = {"basecolor": ("DetailBaseColor", "basecolor"), "normal": ("DetailNormal", "normal"),
+               "roughness": ("DetailRoughness", "roughness")}
+    for relative in report["notes"]["detail_textures"]:
+        source = ROOT / relative
+        role = source.stem.rsplit("_", 1)[-1]
+        if role not in details:
+            continue
+        parameter, texture_role = details[role]
+        texture = LIB.load_asset(f"{DETAIL_DEST}/{source.stem}") if LIB.does_asset_exist(
+            f"{DETAIL_DEST}/{source.stem}") else import_texture(source, DETAIL_DEST, texture_role)
+        EDIT.set_material_instance_texture_parameter_value(instance, parameter, texture)
+    EDIT.update_material_instance(instance)
+    save(instance)
+    return instance
+
+
 def import_texture(source, dest, role):
     task = unreal.AssetImportTask()
     task.set_editor_property("filename", str(source))
@@ -288,6 +459,8 @@ def textured_instance(spec, info, folder, dest, report=None):
 
 
 def material_instance(spec, dest, parent, info=None, folder=None, report=None):
+    if report and report.get("notes", {}).get("detail_textures") and "mask" in (info or {}).get("bake", {}).get("maps", {}):
+        return granite_instance(spec, info, folder, dest, report)
     if "textures" in spec:
         return textured_instance(spec, info or {}, folder, dest, report)
     name = "MI_" + spec["name"][2:]
@@ -340,6 +513,11 @@ def add_collision(mesh, kind):
         raise RuntimeError("Collision needs the StaticMeshEditorSubsystem, which -run=pythonscript lacks; "
                            "run import_props.main([...]) inside the editor (Start-EditorMcp.ps1 -AllowPython)")
     subsystem.remove_collisions(mesh)
+    if kind == "complex":
+        # Walk into splits and slab gaps a convex hull would fill; the collision LOD is set after LODs import.
+        body = mesh.get_editor_property("body_setup")
+        body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+        return
     if kind == "convex" and subsystem.set_convex_decomposition_collisions(mesh, 1, 24, 100000):
         return
     shape = unreal.ScriptCollisionShapeType.BOX if kind == "box" \
@@ -372,7 +550,11 @@ def import_prop(name, parent):
             raise RuntimeError(f"{mesh_name} material slots {slots} != report {sorted(instances)}")
         for index, slot in enumerate(slots):
             mesh.set_material(index, instances[slot])
-        add_collision(mesh, report.get("collision", "box"))
+        add_collision(mesh, COLLISION_OVERRIDES.get(name, report.get("collision", "box")))
+        if name in NANITE_PROPS:
+            settings = mesh.get_editor_property("nanite_settings")
+            settings.set_editor_property("enabled", True)
+            mesh.set_editor_property("nanite_settings", settings)
         save(mesh)
         extent = mesh.get_bounds().box_extent
         size = [extent.x * 2, extent.y * 2, extent.z * 2]
@@ -391,6 +573,8 @@ def import_prop(name, parent):
             stale = f"{dest}/{base}_LOD{index}"
             if LIB.does_asset_exist(stale):
                 LIB.delete_asset(stale)
+        if COLLISION_OVERRIDES.get(name) == "complex":
+            mesh.set_editor_property("lod_for_collision", max(index for index, _ in entries))
         save(mesh)
         result[base]["lods"] = mesh.get_num_lods()
     return result

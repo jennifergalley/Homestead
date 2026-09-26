@@ -27,6 +27,7 @@ constexpr double CreekWaterMinimumHalfWidthCm = 38.0;
 constexpr double CreekWaterMaximumHalfWidthCm = 66.0;
 constexpr double StreamBankOuterCm = 175.0;
 constexpr double WaterReachCm = 180.0;
+constexpr std::int64_t GraniteKnobRadiusCm = 540;
 
 struct WorldDescriptor
 {
@@ -104,6 +105,8 @@ Status SampleTerrain(WorldDescriptor world, std::int64_t xCm, std::int64_t yCm,
     TerrainSample& output);
 Status GenerateChunk(WorldDescriptor world, ChunkCoord chunk, ChunkBaseline& output);
 Status FindEntity(WorldDescriptor world, GeneratedEntityKey key, GeneratedEntity& output);
+// Some chunks hold a house-sized granite knob; trees and forage keep GraniteKnobRadiusCm clear of it.
+bool GraniteKnob(WorldDescriptor world, ChunkCoord chunk, std::int64_t& xCm, std::int64_t& yCm);
 
 // Shared legacy adaptation, not regional hydrology. Input is finite global centimeters.
 // Integer noise/hash/keys are exact; libm stream geometry/normals are compared with tolerance.

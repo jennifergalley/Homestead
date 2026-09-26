@@ -382,6 +382,18 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-26: Inspecting the generated woodland scatter:
+  - **Count decorations by tag.** In the PIE world, loop over actors, then
+    `get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent)`, keep
+    `component_has_tag('WoodlandGranite')` (or `'WoodlandUnderbrush'`), and read
+    `get_instance_transform(i, True)` per mesh. The log line `Generated cover refresh: ...
+    underbrush= granite= big_granite=` gives the totals.
+  - **Go and look.** Put her next to the target with `get_player_pawn(w, 0).set_actor_location(v,
+    False, True)` at z ≈ 200 (she drops to the ground) and `set_actor_rotation`. Then use `walk_to`
+    into a boulder to prove collision: `stuck` at about the footprint radius.
+  - `EditorAssetLibrary.save_asset(path, False)` returned False on material instances during PIE.
+    After stopping PIE, `save_loaded_asset(obj, False)` saved them.
+
 - 2026-09-26: Props, materials and checking the packaged heroine:
   - **Masks samplers need non-sRGB textures.** Engine `WhiteSquareTexture` and `Black` are sRGB. On
     a Masks sampler the whole material fails to compile and silently renders as the default grid,
