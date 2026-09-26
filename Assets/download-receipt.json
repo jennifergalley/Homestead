@@ -64,6 +64,38 @@
     "license": "CC-BY-4.0"
   },
   {
+    "asset": "ascending-the-vale",
+    "file": "AscendingTheVale.mp3",
+    "bytes": 7926743,
+    "sha256": "A0AB3AAE9A942D797C381DF8D914DFEF453E7E455C1C6333D1916D59BA005353",
+    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Ascending%20the%20Vale.mp3",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "asset": "teller-of-the-tales",
+    "file": "TellerOfTheTales.mp3",
+    "bytes": 6798250,
+    "sha256": "320B37A09FC37EC5962C975563541BEE9BCBF1208B0181789248780286F4C1D4",
+    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Teller%20of%20the%20Tales.mp3",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "asset": "meditation-impromptu-02",
+    "file": "MeditationImpromptu02.mp3",
+    "bytes": 8261798,
+    "sha256": "4E7EAD76CFDDA0979FF7D771FBBC3DBB312CA80CE25B78F3CDCAEF07FCC7C2DA",
+    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3",
+    "license": "CC-BY-4.0"
+  },
+  {
+    "asset": "at-rest",
+    "file": "AtRest.mp3",
+    "bytes": 8264831,
+    "sha256": "EC30F84D2ACD6DDAEFBB16246B050BA89E26E7396A2D48D7E0D0ECCAFF51F141",
+    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/At%20Rest.mp3",
+    "license": "CC-BY-4.0"
+  },
+  {
     "asset": "forest-ambience",
     "file": "ForestAmbience.mp3",
     "bytes": 716670,

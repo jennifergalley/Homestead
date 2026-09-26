@@ -6,6 +6,7 @@
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
+#include "HomesteadMusicPlaylist.h"
 #include "Styling/SlateBrush.h"
 #include "HomesteadController.generated.h"
 
@@ -177,6 +178,14 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> GrassStepB;
     UPROPERTY() TArray<TObjectPtr<USoundBase>> BareWalkSteps;
     UPROPERTY() TArray<TObjectPtr<USoundBase>> BareRunSteps;
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> MusicTracks;
+    TArray<float> MusicTrackGains;
+    TArray<FString> MusicTrackNames;
+    Homestead::MusicShuffleBag MusicBag;
+    int32 MusicTrack = INDEX_NONE;
+    // Music component level: the Settings music volume times the current track's level match.
+    float MusicLevel() const;
+    void StartNextMusicTrack();
     UPROPERTY() TObjectPtr<USoundBase> WoodTapA;
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeA;

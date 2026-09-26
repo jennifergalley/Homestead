@@ -19,7 +19,7 @@ Focused reuse research found the existing track and all candidate additions in K
 
 The smallest useful in-game result imports at least three verified tracks and starts two fresh no-save launches on different tracks when the catalog allows. The first playable demonstration records a complete session shuffle with no repeat before every track has played, then relaunches and proves the persisted last-track guard works independently of homestead saves. Full acceptance covers missing assets, one/zero-track fallback, volume/mute, fades/gaps, credits/package identity, separate-process restart, Settings integration, and immutable Shipping replay.
 
-Deferred scope includes adaptive season/weather/daypart scoring, combat/event stingers, crossfading overlapping tracks, user playlists, streaming audio, per-track volume normalization beyond import checks, a now-playing HUD, and music preference categories.
+Deferred scope includes adaptive season/weather/daypart scoring, combat/event stingers, crossfading overlapping tracks, user playlists, streaming audio, a now-playing HUD, and music preference categories. Per-track level matching is in scope: Jenny reported on 2026-09-25 that the music was too loud by default. The harp measured about 27 dB above the forest ambience at default settings.
 
 ## Capabilities
 

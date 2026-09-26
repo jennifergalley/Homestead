@@ -245,6 +245,9 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 ## 7. Rules
 
+- If Jenny has the packaged game open from `Build\Windows` when you need to repackage, close it
+  (`Stop-Process -Id <pid>` on the `SurvivalGame` processes) and build in place. She's only messing
+  around in it for now and would rather get the newest build. Don't build to a side folder.
 - Homestead's world is generated at play time. The unplayed map shows little or nothing in the
   editor viewport; judge the game from PIE captures.
 - Don't save level or asset edits made while exploring unless the task calls for it. Generated

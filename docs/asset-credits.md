@@ -16,11 +16,20 @@ project-authored procedural geometry. Neither adds a third-party asset.
 
 ## Music
 
-**Evening Fall (Harp)** by **Kevin MacLeod** (incompetech.com).
-Licensed under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/).
-[Official track page](https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100236).
-Converted for game playback; playback fades applied. The in-game field book
-includes this credit. Include this document in any distributed build.
+All music is by **Kevin MacLeod** (incompetech.com), licensed under
+[Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/):
+
+| Track | Official track page |
+| --- | --- |
+| Evening Fall (Harp) | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100236 |
+| Ascending the Vale | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064 |
+| Teller of the Tales | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1400020 |
+| Meditation Impromptu 02 | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100162 |
+| At Rest | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100748 |
+
+Converted for game playback; playback fades and level matching applied. The tracks play shuffled
+with gaps between them. The in-game field book includes this credit. Include this document in any
+distributed build.
 
 ## Public-domain assets
 

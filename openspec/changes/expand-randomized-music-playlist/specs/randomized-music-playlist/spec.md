@@ -45,6 +45,15 @@ Missing or invalid assets SHALL be skipped with diagnostics. One valid track SHA
 - **WHEN** all but one catalog asset fail validation or load
 - **THEN** the valid track can play with normal gaps/fades and no false shuffle assertion
 
+### Requirement: Music sits under the woodland at default settings
+Every catalog track SHALL play at the same perceived level, and at the default Music volume that
+level SHALL leave the woodland ambience and footsteps clearly audible instead of dominating them.
+The Settings percentages keep their meaning; level matching applies underneath them.
+
+#### Scenario: First launch with default settings
+- **WHEN** a fresh install starts and music begins
+- **THEN** each track's measured loudness at the default setting is within 1 dB of the others and at least 10 dB below the previous single-track mix
+
 ### Requirement: Production order is fresh but tests are reproducible
 Production shuffle entropy SHALL not derive from world seed, save slot, or a fixed startup constant. Tests SHALL be able to inject deterministic entropy to verify order properties without making packaged playback deterministic.
 

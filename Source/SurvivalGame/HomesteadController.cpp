@@ -47,6 +47,7 @@ constexpr const TCHAR* CameraSensitivityKey = TEXT("Sensitivity");
 constexpr const TCHAR* CameraInvertYKey = TEXT("InvertY");
 constexpr const TCHAR* AudioSettingsSection = TEXT("Homestead.Audio");
 constexpr const TCHAR* AudioKeys[] = {TEXT("Music"), TEXT("Ambience"), TEXT("Effects")};
+constexpr const TCHAR* LastMusicTrackKey = TEXT("LastMusicTrack");
 constexpr const TCHAR* AutosaveSettingsSection = TEXT("Homestead.Autosave");
 constexpr const TCHAR* AutosaveEnabledKey = TEXT("Enabled");
 constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
@@ -1133,9 +1134,9 @@ void AHomesteadController::Tick(float DeltaSeconds)
             else AutosaveRemaining = 60.0f;
         }
     }
-    if (bAudioEnabled && Music->Sound)
+    if (bAudioEnabled && !MusicTracks.IsEmpty())
     {
-        if (Music->IsPlaying())
+        if (Music->IsPlaying() && Music->Sound)
         {
             MusicElapsed += DeltaSeconds;
             const float Duration = Music->Sound->GetDuration();
@@ -1151,8 +1152,11 @@ void AHomesteadController::Tick(float DeltaSeconds)
             if (MusicGapRemaining <= 0 && MusicVolume > 0)
             {
                 MusicElapsed = 0;
-                Music->SetVolumeMultiplier(MusicVolume);
+                StartNextMusicTrack();
                 Music->FadeIn(4, 1);
+                // Playback can report "not playing" for a frame after FadeIn; don't advance the bag
+                // again. MusicFinished sets the real gap when the track ends.
+                MusicGapRemaining = 10;
             }
         }
     }
@@ -1696,9 +1700,9 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     }
     else
     {
-        Result.Add({0, TEXT("Music: Evening Fall (Harp)"), TEXT("Kevin MacLeod - incompetech.com")});
+        Result.Add({0, TEXT("Music by Kevin MacLeod (incompetech.com)"), TEXT("Evening Fall (Harp), Ascending the Vale, Teller of the Tales, Meditation Impromptu 02, At Rest")});
         Result.Add({1, TEXT("Creative Commons Attribution 4.0"), TEXT("https://creativecommons.org/licenses/by/4.0/")});
-        Result.Add({2, TEXT("Music playback"), TEXT("Converted for game playback; playback fades applied.")});
+        Result.Add({2, TEXT("Music playback"), TEXT("Converted for game playback; playback fades and level matching applied.")});
         Result.Add({3, TEXT("Forest ambience"), TEXT("TinyWorlds - OpenGameArt - CC0")});
         Result.Add({4, TEXT("Brown Mud Leaves 01"), TEXT("Rob Tuytel - Poly Haven - CC0")});
         Result.Add({5, TEXT("Rock Moss Set 02"), TEXT("Kless Gyzen - Poly Haven - CC0")});
@@ -1927,7 +1931,7 @@ void AHomesteadController::MenuPreviewAudioVolume(int32 Id, float Value)
     if (Id == 5)
     {
         MusicVolume = Value;
-        Music->SetVolumeMultiplier(Value);
+        Music->SetVolumeMultiplier(MusicLevel());
     }
     else if (Id == 6)
     {
@@ -2425,7 +2429,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     bPendingSpawn = true;
     bWasFailed = false;
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
-    Music->SetVolumeMultiplier(MusicVolume);
+    Music->SetVolumeMultiplier(MusicLevel());
     Ambience->SetVolumeMultiplier(AmbienceVolume);
     EndPlacement();
     CloseBook();
@@ -2628,12 +2632,66 @@ void AHomesteadController::InitializeAudio()
         if (bAudioEnabled) Ambience->FadeIn(3, 1);
     }
     else UE_LOG(LogTemp, Warning, TEXT("Forest ambience is not imported. Run Scripts/bootstrap_unreal.py."));
-    if (USoundBase* Score = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Music/EveningHarp.EveningHarp")))
+    // Kevin MacLeod tracks (CC BY 4.0), shuffled with no immediate repeat. Loudness is the gated,
+    // K-weighted level measured from each source file (dBFS); every track is matched to the same
+    // level, which sits about 14 dB under the old harp-only mix at the default 65% setting, so music
+    // stays under the woodland ambience and footsteps instead of dominating them.
+    struct FTrack { const TCHAR* Name; float Loudness; };
+    static constexpr FTrack Tracks[] = {
+        {TEXT("EveningHarp"), -21.0f}, {TEXT("AscendingTheVale"), -21.3f}, {TEXT("TellerOfTheTales"), -23.4f},
+        {TEXT("MeditationImpromptu02"), -23.6f}, {TEXT("AtRest"), -28.6f}};
+    constexpr float TargetLoudnessAtFullVolume = -35.0f;
+    MusicTracks.Reset();
+    MusicTrackGains.Reset();
+    MusicTrackNames.Reset();
+    for (const FTrack& Track : Tracks)
     {
-        Music->SetSound(Score);
+        if (USoundBase* Score = LoadObject<USoundBase>(nullptr,
+                *FString::Printf(TEXT("/Game/SurvivalGame/Audio/Music/%s.%s"), Track.Name, Track.Name)))
+        {
+            MusicTracks.Add(Score);
+            MusicTrackNames.Add(Track.Name);
+            MusicTrackGains.Add(FMath::Pow(10.0f, (TargetLoudnessAtFullVolume - Track.Loudness) / 20.0f));
+        }
+        else UE_LOG(LogTemp, Warning, TEXT("Music track %s is not imported and is skipped. Run Scripts/bootstrap_unreal.py."), Track.Name);
+    }
+    // A fresh launch avoids opening with the track the previous launch last started (a user
+    // preference, independent of homestead saves). Order comes from process entropy.
+    FString LastTrack;
+    const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
+    FConfigFile Disk;
+    if (Branch && Disk.Combine(Branch->IniPath)) Disk.GetString(AudioSettingsSection, LastMusicTrackKey, LastTrack);
+    MusicBag.Reset(MusicTracks.Num(), MusicTrackNames.IndexOfByKey(LastTrack),
+        FPlatformTime::Cycles64() ^ static_cast<uint64>(FDateTime::UtcNow().GetTicks()) ^ FPlatformProcess::GetCurrentProcessId());
+    if (MusicTracks.IsEmpty())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No music tracks are available; ambience and effects continue."));
+    }
+    else
+    {
         Music->OnAudioFinished.AddDynamic(this, &AHomesteadController::MusicFinished);
     }
-    else UE_LOG(LogTemp, Warning, TEXT("Music is not imported. Run Scripts/bootstrap_unreal.py."));
+}
+
+float AHomesteadController::MusicLevel() const
+{
+    return MusicVolume * (MusicTrackGains.IsValidIndex(MusicTrack) ? MusicTrackGains[MusicTrack] : 1.0f);
+}
+
+void AHomesteadController::StartNextMusicTrack()
+{
+    MusicTrack = MusicBag.Next();
+    if (!MusicTracks.IsValidIndex(MusicTrack)) return;
+    Music->SetSound(MusicTracks[MusicTrack].Get());
+    Music->SetVolumeMultiplier(MusicLevel());
+    UE_LOG(LogTemp, Display, TEXT("MUSIC_TRACK started=%s catalog=%d"), *MusicTrackNames[MusicTrack], MusicTracks.Num());
+    if (const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr)
+    {
+        FConfigFile Property;
+        Property.SetString(AudioSettingsSection, LastMusicTrackKey, *MusicTrackNames[MusicTrack]);
+        if (!Property.UpdateSinglePropertyInSection(*Branch->IniPath, LastMusicTrackKey, AudioSettingsSection))
+            UE_LOG(LogTemp, Warning, TEXT("Could not record the last music track; the next launch may repeat it."));
+    }
 }
 
 void AHomesteadController::PlayEffect(USoundBase* Cue, float Gain)

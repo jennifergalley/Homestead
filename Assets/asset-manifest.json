@@ -39,6 +39,54 @@
       ]
     },
     {
+      "id": "ascending-the-vale",
+      "author": "Kevin MacLeod (incompetech.com)",
+      "title": "Ascending the Vale",
+      "license": "CC-BY-4.0",
+      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": "Ascending the Vale by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "files": [
+        { "name": "AscendingTheVale.mp3", "bytes": 7926743, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Ascending%20the%20Vale.mp3" }
+      ]
+    },
+    {
+      "id": "teller-of-the-tales",
+      "author": "Kevin MacLeod (incompetech.com)",
+      "title": "Teller of the Tales",
+      "license": "CC-BY-4.0",
+      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1400020",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": "Teller of the Tales by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "files": [
+        { "name": "TellerOfTheTales.mp3", "bytes": 6798250, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Teller%20of%20the%20Tales.mp3" }
+      ]
+    },
+    {
+      "id": "meditation-impromptu-02",
+      "author": "Kevin MacLeod (incompetech.com)",
+      "title": "Meditation Impromptu 02",
+      "license": "CC-BY-4.0",
+      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100162",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": "Meditation Impromptu 02 by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "files": [
+        { "name": "MeditationImpromptu02.mp3", "bytes": 8261798, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3" }
+      ]
+    },
+    {
+      "id": "at-rest",
+      "author": "Kevin MacLeod (incompetech.com)",
+      "title": "At Rest",
+      "license": "CC-BY-4.0",
+      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100748",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "credit": "At Rest by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "files": [
+        { "name": "AtRest.mp3", "bytes": 8264831, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/At%20Rest.mp3" }
+      ]
+    },
+    {
       "id": "forest-ambience",
       "author": "TinyWorlds",
       "license": "CC0-1.0",
