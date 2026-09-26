@@ -576,7 +576,7 @@ def _fit_distance(corners, target, direction, lens, aspect, margin=1.12, sensor=
 
 def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160), samples=256,
                   views=("hero", "detail"), pose=(0, 0, 0), focus=None, ground="lowest",
-                  eye_distance=None):
+                  eye_distance=None, detail_distance=None, detail_fstop=22.0):
     """Photoreal Cycles review renders of ``obj`` on a soil ground under an HDRI sky.
     ``pose`` (XYZ degrees) temporarily re-orients the asset for review (e.g. lay a
     tool on the ground); ``focus`` is an object-space point for the close detail
@@ -584,7 +584,9 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
     origin instead of under its lowest point, so props authored to sink into the
     terrain (rocks) are reviewed half-buried as placed. The optional ``"eye"`` view
     looks at the asset from a standing player's eye height (1.6 m) at
-    ``eye_distance`` meters. Returns render metadata."""
+    ``eye_distance`` meters. ``detail_distance`` / ``detail_fstop`` override the
+    detail camera's distance (default >= 0.35 m) and aperture for tiny props such as
+    seeds. Returns render metadata."""
     scene = bpy.context.scene
     rest = obj.matrix_world.copy()
     obj.matrix_world = Euler([math.radians(a) for a in pose]).to_matrix().to_4x4() @ rest
@@ -659,9 +661,11 @@ def render_beauty(obj, folder, stem, hdri=DEFAULT_HDRI, resolution=(3840, 2160),
             target = focus_world or Vector((center.x - size.x * 0.12, center.y - size.y * 0.25,
                                             lo.z + size.z * 0.72))
             direction = Vector((-0.5, -1.0, 0.45 if focus_world else 0.25)).normalized()
-            distance = max(radius * (0.9 if focus_world else 1.35), 0.35)
+            distance = detail_distance or max(radius * (0.9 if focus_world else 1.35), 0.35)
             data.dof.focus_distance = distance
-            data.dof.aperture_fstop = 22.0
+            data.dof.aperture_fstop = detail_fstop
+        # Tiny props put the camera only centimetres away; keep them inside the clip range.
+        data.clip_start = min(0.05, distance * 0.1)
         cam.location = target + direction * distance
         cam.rotation_euler = (target - cam.location).to_track_quat("-Z", "Y").to_euler()
         scene.camera = cam

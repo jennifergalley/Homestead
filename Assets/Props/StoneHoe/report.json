@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "StoneHoe",
+  "description": "Two-handed stone hoe: knapped chert blade rawhide-lashed into the crook of a bark-stripped elbow haft (original). Pivot = right-hand grip 1/3 down from the top; handle +Z, blade -Z end pointing -Y.",
+  "collision": "none",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/stone_hoe.py",
+  "source_sha256": "8e04ed67814a7279c0dabd18df5a1f48ddc0e0ed4327035b1b3343ced7e54eb0",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StoneHoe": {
+      "vertices": 7852,
+      "triangles": 15684,
+      "size_cm": [
+        9.52,
+        23.31,
+        128.32
+      ],
+      "materials": [
+        {
+          "name": "M_StoneHoe",
+          "textures": {
+            "basecolor": "T_StoneHoe_basecolor.png",
+            "roughness": "T_StoneHoe_roughness.png",
+            "normal": "T_StoneHoe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneHoe_basecolor.png",
+          "roughness": "T_StoneHoe_roughness.png",
+          "normal": "T_StoneHoe_normal.png",
+          "ao": "T_StoneHoe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          -90,
+          70,
+          80
+        ],
+        "focus": [
+          0.0028719231486320496,
+          -0.07165545225143433,
+          -0.7790178656578064
+        ]
+      },
+      "fbx": "SM_StoneHoe.fbx",
+      "sha256": "8738b2a642148c2fe029890fb24078746c4220c5521ffcbf49d392621403436a",
+      "preview": "preview_SM_StoneHoe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StoneHoe_hero.png",
+          "detail": "beauty_SM_StoneHoe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          -90,
+          70,
+          80
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "attach": {
+    "units": "cm, from the mesh pivot (right-hand grip centre), mesh space",
+    "pivot": "main (right) hand grip centre on the haft, 42 cm below the haft top (one third down)",
+    "handle_axis": "+Z (haft top); the crook and blade are at the -Z end",
+    "edge_direction": "-Y (blade 75 degrees from the haft, cutting edge along X)",
+    "hoe_angle_deg": 75.0,
+    "left_hand_grip": [
+      0.12,
+      0.59,
+      32.0
+    ],
+    "edge_centre": [
+      -0.91,
+      -19.31,
+      -75.45
+    ],
+    "haft_top": [
+      -0.06,
+      0.52,
+      42.0
+    ],
+    "bit_corners": [
+      [
+        -4.74,
+        -18.35,
+        -75.71
+      ],
+      [
+        2.86,
+        -18.35,
+        -75.71
+      ]
+    ],
+    "crook": [
+      -0.91,
+      -0.12,
+      -83.0
+    ],
+    "blade_end": [
+      -0.85,
+      2.68,
+      -86.35
+    ]
+  },
+  "textures": {
+    "T_StoneHoe_basecolor.png": "ad7b2d0c5aeda49bf5984e107a5aee987d4eb5ff3a73ea2d5376887a121926df",
+    "T_StoneHoe_roughness.png": "f7e135a80ff6c76482f893f5ab3b255453ef5e1dd58c3076ae94bb88c0e3d056",
+    "T_StoneHoe_normal.png": "a07f0b61fc286a017fb50417b6145f7ea2bf6ab13b21f67e7219129e757be8c0"
+  }
+}

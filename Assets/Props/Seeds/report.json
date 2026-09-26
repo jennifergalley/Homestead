@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "name": "Seeds",
+  "description": "A pinch of four dry tepary beans (pivot = cluster centre) and a covered-seed loose-soil mound (pivot = bottom centre, with LOD1) (original).",
+  "collision": "none",
+  "triangle_budget": 5000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/seeds.py",
+  "source_sha256": "d92482c42562f93452e137d4d5abb4b0d968dc40f7c6dddcb006a0f40e2308f1",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Seeds": {
+      "vertices": 1160,
+      "triangles": 2304,
+      "size_cm": [
+        1.17,
+        1.08,
+        0.66
+      ],
+      "materials": [
+        {
+          "name": "M_Seeds",
+          "textures": {
+            "basecolor": "T_Seeds_basecolor.png",
+            "roughness": "T_Seeds_roughness.png",
+            "normal": "T_Seeds_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Seeds_basecolor.png",
+          "roughness": "T_Seeds_roughness.png",
+          "normal": "T_Seeds_normal.png",
+          "ao": "T_Seeds_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "focus": [
+          0.0017726621590554714,
+          -0.00018089520744979382,
+          -0.0017229507211595774
+        ],
+        "detail_distance": 0.075,
+        "detail_fstop": 128.0
+      },
+      "fbx": "SM_Seeds.fbx",
+      "sha256": "2a55407fc6e9ba08f35e2b19b8dc398ea975e455ded01ae7671da7f42895f423",
+      "preview": "preview_SM_Seeds.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Seeds_hero.png",
+          "detail": "beauty_SM_Seeds_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_SoilMound": {
+      "vertices": 2467,
+      "triangles": 4824,
+      "size_cm": [
+        13.92,
+        14.22,
+        3.55
+      ],
+      "materials": [
+        {
+          "name": "M_SoilMound",
+          "textures": {
+            "basecolor": "T_SoilMound_basecolor.png",
+            "roughness": "T_SoilMound_roughness.png",
+            "normal": "T_SoilMound_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SoilMound_basecolor.png",
+          "roughness": "T_SoilMound_roughness.png",
+          "normal": "T_SoilMound_normal.png",
+          "ao": "T_SoilMound_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.012,
+          -0.008,
+          0.026
+        ],
+        "ground": "origin"
+      },
+      "fbx": "SM_SoilMound.fbx",
+      "sha256": "66d21c214090e1c1bd429156d2323954db2cd582bfeffcc4c36703b6f1ebb217",
+      "preview": "preview_SM_SoilMound.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SoilMound_hero.png",
+          "detail": "beauty_SM_SoilMound_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_SoilMound_LOD1": {
+      "vertices": 778,
+      "triangles": 1447,
+      "size_cm": [
+        13.92,
+        14.21,
+        3.55
+      ],
+      "materials": [
+        {
+          "name": "M_SoilMound",
+          "textures": {
+            "basecolor": "T_SoilMound_basecolor.png",
+            "roughness": "T_SoilMound_roughness.png",
+            "normal": "T_SoilMound_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SoilMound_basecolor.png",
+          "roughness": "T_SoilMound_roughness.png",
+          "normal": "T_SoilMound_normal.png",
+          "ao": "T_SoilMound_ao.png"
+        },
+        "shared_with": "SM_SoilMound"
+      },
+      "review": {},
+      "fbx": "SM_SoilMound_LOD1.fbx",
+      "sha256": "282a0447faa5634e2063b6ae85cbccf38f1b2c711ed22dcdfa774a0dab304d3a",
+      "preview": "preview_SM_SoilMound_LOD1.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_Seeds": "Pivot = bounds centre of the 4-bean cluster, for the thumb-forefinger pinch socket.",
+    "SM_SoilMound": "Pivot = bottom centre on the ground line (z = 0); the rim sinks 3 mm below it. ~14 cm across (the feathered rim included), 3.5 cm tall, 4.8k triangles. SM_SoilMound_LOD1 (1.4k) is a 30% decimation sharing its UVs and textures."
+  },
+  "textures": {
+    "T_Seeds_basecolor.png": "ef7ac61c0e517cfaeb3b35b2de3a07ecd71ac45a77e7037f5a31d10358733e67",
+    "T_Seeds_roughness.png": "a07d2982b7e3ced2f12e128a9601d24a197e4c2c0b17a223545634951e9d67da",
+    "T_Seeds_normal.png": "50a4081851d59adc89d803ed3075764d24890f102b6f8291b8e01d71e1a6938a",
+    "T_SoilMound_basecolor.png": "9fc293dde51b47bc97f51bcc1a5148e5a2f9830e9f4d87f48d4dab2d6646a092",
+    "T_SoilMound_roughness.png": "687d29ee4663e8bb000aa66cc2c923c2d39b21750720c73c8af36d5fdae115d6",
+    "T_SoilMound_normal.png": "f02168d1941675b0da06c282d3a3779daf10f6f049e3b27a68e134f72d64f07d"
+  }
+}
