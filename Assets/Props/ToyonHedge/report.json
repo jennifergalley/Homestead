@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "ToyonHedge",
+  "description": "Dense evergreen toyon hedge mass, 3.1 x 1.7 m and 1.9 m tall, with leathery toothed leaves, grey stems, reddening old leaves and berry clusters. Blocking.",
+  "collision": "convex",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/toyon_hedge.py",
+  "source_sha256": "f04d3fc7b997d8578c7bb490748e48bc84317929c251afab531395dd9a03d98a",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_ToyonHedge": {
+      "vertices": 50781,
+      "triangles": 53520,
+      "size_cm": [
+        330.35,
+        176.26,
+        208.41
+      ],
+      "materials": [
+        {
+          "name": "M_ToyonHedge",
+          "textures": {
+            "basecolor": "T_ToyonHedge_basecolor.png",
+            "normal": "T_ToyonHedge_normal.png",
+            "roughness": "T_ToyonHedge_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0224265456199646,
+          -0.5372848510742188,
+          1.0
+        ]
+      },
+      "fbx": "SM_ToyonHedge.fbx",
+      "sha256": "1d89af6f594b195dea24efef9ef1f23bb55aad5fb203eb04bb1b83339ae4dddd",
+      "preview": "preview_SM_ToyonHedge.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_ToyonHedge_hero.png",
+          "detail": "beauty_SM_ToyonHedge_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "SM_ToyonHedge_LOD1": {
+      "vertices": 21186,
+      "triangles": 17866,
+      "size_cm": [
+        331.37,
+        178.61,
+        209.69
+      ],
+      "materials": [
+        {
+          "name": "M_ToyonHedge",
+          "textures": {
+            "basecolor": "T_ToyonHedge_basecolor.png",
+            "normal": "T_ToyonHedge_normal.png",
+            "roughness": "T_ToyonHedge_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0224265456199646,
+          -0.5372848510742188,
+          1.0
+        ]
+      },
+      "fbx": "SM_ToyonHedge_LOD1.fbx",
+      "sha256": "dcbb6b668c097f16e2925b1a5a2ad9f121c3ddbde27bc38cf86d870be81f27b7",
+      "preview": "preview_SM_ToyonHedge_LOD1.png"
+    },
+    "SM_ToyonHedge_LOD2": {
+      "vertices": 8736,
+      "triangles": 6220,
+      "size_cm": [
+        338.3,
+        188.7,
+        207.21
+      ],
+      "materials": [
+        {
+          "name": "M_ToyonHedge",
+          "textures": {
+            "basecolor": "T_ToyonHedge_basecolor.png",
+            "normal": "T_ToyonHedge_normal.png",
+            "roughness": "T_ToyonHedge_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0224265456199646,
+          -0.5372848510742188,
+          1.0
+        ]
+      },
+      "fbx": "SM_ToyonHedge_LOD2.fbx",
+      "sha256": "f82d5f461291bc821832295315f437c93a20ecf606931d506555930dcb019d0c",
+      "preview": "preview_SM_ToyonHedge_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": true,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "leaf flutter 0 at leaf base -> 1 at tip, 0 on stems",
+    "A": "1"
+  },
+  "material_notes": "One material M_ToyonHedge: T_ToyonHedge_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_ToyonHedge_basecolor.png": "63b741d76554a18796077fd29e3f73da353e13ac2eeba4aff5bf08733f465f67",
+    "T_ToyonHedge_normal.png": "1986b0a12a8cf049b6e362f01b8eb40908dcf4f55ed0459302d7c500bca47ef2",
+    "T_ToyonHedge_roughness.png": "93fb08a2deda13ee9dd876cb5fa067adf11fc9a25a70c23a0393493e475c32e1"
+  }
+}
