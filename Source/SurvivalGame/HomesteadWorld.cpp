@@ -56,6 +56,131 @@ bool ProfileChunkPublishing()
 {
     return FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland"));
 }
+
+// Blender-built woodland underbrush (Assets\Props, docs\blender-assets.md). Radius is the
+// footprint half-width at scale 1; blocking species are brambles and hedges the heroine can't
+// walk through until she clears them.
+struct FUnderbrushSpecies
+{
+    const TCHAR* Asset;
+    float Radius;
+    float MinScale;
+    float MaxScale;
+    bool bBlocking;
+    bool bShadow;
+};
+const FUnderbrushSpecies UnderbrushSpecies[] = {
+    {TEXT("BlackberryBramble/SM_BlackberryBramble"), 105, 0.85f, 1.2f, true, true},
+    {TEXT("BlackberryBramble/SM_BlackberryBrambleLarge"), 155, 0.9f, 1.15f, true, true},
+    {TEXT("ToyonHedge/SM_ToyonHedge"), 135, 0.85f, 1.1f, true, true},
+    {TEXT("Hazel/SM_Hazel"), 90, 0.8f, 1.15f, false, true},
+    {TEXT("DeerBrush/SM_DeerBrush"), 72, 0.8f, 1.2f, false, true},
+    {TEXT("Thimbleberry/SM_Thimbleberry"), 70, 0.8f, 1.2f, false, true},
+    {TEXT("BrackenFern/SM_BrackenFern"), 75, 0.75f, 1.25f, false, false},
+    {TEXT("WildStrawberry/SM_WildStrawberry"), 28, 0.8f, 1.3f, false, false},
+    {TEXT("GrassYarrowTuft/SM_GrassYarrowTuft"), 30, 0.8f, 1.3f, false, false},
+};
+constexpr int32 UnderbrushSpeciesCount = UE_ARRAY_COUNT(UnderbrushSpecies);
+// Keep the starting clearing (new games spawn at -1000,0) walkable and open.
+const FVector2D StartingClearing(-1000, 0);
+constexpr float StartingClearingBlockingRadius = 1600;
+constexpr float StartingClearingShrubRadius = 550;
+
+uint8 PickUnderbrush(FRandomStream& Random, std::initializer_list<std::pair<uint8, int32>> Weights)
+{
+    int32 Total = 0;
+    for (const auto& Entry : Weights) Total += Entry.second;
+    int32 Roll = Random.RandRange(0, Total - 1);
+    for (const auto& Entry : Weights)
+    {
+        if (Roll < Entry.second) return Entry.first;
+        Roll -= Entry.second;
+    }
+    return Weights.begin()->first;
+}
+}
+
+float AHomesteadWorld::UnderbrushDensity(float X, float Y)
+{
+    const float Broad = FMath::PerlinNoise2D(FVector2D(X / 3400.0f + 11.3f, Y / 3400.0f - 7.1f));
+    const float Fine = FMath::PerlinNoise2D(FVector2D(X / 1100.0f - 3.7f, Y / 1100.0f + 19.9f));
+    return FMath::Clamp(0.45f + Broad * 0.95f + Fine * 0.3f, 0.0f, 1.0f);
+}
+
+bool AHomesteadWorld::IsUnderbrushBlocking(uint8 Species)
+{
+    return Species < UnderbrushSpeciesCount && UnderbrushSpecies[Species].bBlocking;
+}
+
+float AHomesteadWorld::UnderbrushRadius(uint8 Species)
+{
+    return Species < UnderbrushSpeciesCount ? UnderbrushSpecies[Species].Radius : 0.0f;
+}
+
+void AHomesteadWorld::GenerateUnderbrush(uint64 WorldSeed, FIntPoint Chunk, TArray<FHomesteadUnderbrush>& Out)
+{
+    enum : uint8 { Bramble, BrambleLarge, Hedge, Hazel, DeerBrush, Thimbleberry, Fern, Strawberry, Yarrow };
+    Out.Reset();
+    const float OriginX = static_cast<float>(static_cast<int64>(Chunk.X) * Homestead::Generation::ChunkSizeCm);
+    const float OriginY = static_cast<float>(static_cast<int64>(Chunk.Y) * Homestead::Generation::ChunkSizeCm);
+    const float Size = static_cast<float>(Homestead::Generation::ChunkSizeCm);
+    FRandomStream Random(static_cast<int32>(GetTypeHash(WorldSeed) ^ GetTypeHash(Chunk) ^ 0x51F15EEDu));
+    auto TryAdd = [&](uint8 Species, float X, float Y)
+    {
+        const float Scale = Random.FRandRange(UnderbrushSpecies[Species].MinScale, UnderbrushSpecies[Species].MaxScale);
+        const float Yaw = Random.FRandRange(0.0f, 360.0f);
+        if (X < OriginX || Y < OriginY || X >= OriginX + Size || Y >= OriginY + Size) return;
+        const float Radius = UnderbrushSpecies[Species].Radius * Scale;
+        for (const auto& Other : Out)
+        {
+            const float Spacing = 0.6f * (Radius + UnderbrushSpecies[Other.Species].Radius * Other.Scale);
+            if (FVector2D::DistSquared(FVector2D(X, Y), FVector2D(Other.X, Other.Y)) < Spacing * Spacing) return;
+        }
+        FHomesteadUnderbrush Plant;
+        Plant.Species = Species;
+        Plant.Index = Out.Num();
+        Plant.X = X;
+        Plant.Y = Y;
+        Plant.Yaw = Yaw;
+        Plant.Scale = Scale;
+        Out.Add(Plant);
+    };
+    // Clusters: meadow groundcover, loose shrub groups, or bramble and hedge thickets.
+    for (int32 Cluster = 0; Cluster < 11; ++Cluster)
+    {
+        const float CX = OriginX + Random.FRandRange(0, Size);
+        const float CY = OriginY + Random.FRandRange(0, Size);
+        const float Density = UnderbrushDensity(CX, CY);
+        const bool bThicket = Density >= 0.64f;
+        const bool bShrubs = Density >= 0.32f;
+        const int32 Count = bThicket ? 7 + FMath::FloorToInt((Density - 0.64f) * 40.0f)
+            : bShrubs ? 3 + FMath::FloorToInt(Density * 9.0f) : Random.RandRange(4, 9);
+        const float Spread = bThicket ? 420.0f : bShrubs ? 340.0f : 240.0f;
+        for (int32 Plant = 0; Plant < Count; ++Plant)
+        {
+            const uint8 Species = bThicket
+                ? PickUnderbrush(Random, {{Bramble, 5}, {BrambleLarge, 3}, {Hedge, 2}, {Thimbleberry, 1}, {Fern, 1}, {Hazel, 1}})
+                : bShrubs
+                ? PickUnderbrush(Random, {{Hazel, 2}, {DeerBrush, 3}, {Thimbleberry, 3}, {Fern, 4}, {Strawberry, 1}, {Yarrow, 1}})
+                : PickUnderbrush(Random, {{Strawberry, 3}, {Yarrow, 3}, {Fern, 1}});
+            const float Angle = Random.FRandRange(0.0f, UE_TWO_PI);
+            const float Distance = Spread * FMath::Sqrt(Random.FRand());
+            TryAdd(Species, CX + FMath::Cos(Angle) * Distance, CY + FMath::Sin(Angle) * Distance);
+        }
+    }
+    // Scattered individuals so shrubs aren't only in clumps.
+    for (int32 Attempt = 0; Attempt < 30; ++Attempt)
+    {
+        const float X = OriginX + Random.FRandRange(0, Size);
+        const float Y = OriginY + Random.FRandRange(0, Size);
+        const float Roll = Random.FRand();
+        const float Density = UnderbrushDensity(X, Y);
+        if (Roll > 0.12f + 0.6f * Density) continue;
+        const uint8 Species = Density >= 0.35f
+            ? PickUnderbrush(Random, {{Hazel, 2}, {DeerBrush, 2}, {Thimbleberry, 2}, {Fern, 3}, {Bramble, Density >= 0.6f ? 2 : 0}})
+            : PickUnderbrush(Random, {{Strawberry, 2}, {Yarrow, 3}, {Fern, 1}});
+        TryAdd(Species, X, Y);
+    }
 }
 
 bool AHomesteadWorld::LoadCameraSafeFoliageMaterials()
@@ -1206,6 +1331,18 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
     int32 BankFernCount = 0;
     int32 FlowerCount = 0;
     int32 FlowerTriangleCount = 0;
+    int32 UnderbrushCount = 0;
+    int32 BlockingUnderbrushCount = 0;
+    UStaticMesh* UnderbrushMeshes[UnderbrushSpeciesCount] = {};
+    for (int32 Species = 0; Species < UnderbrushSpeciesCount; ++Species)
+    {
+        const FString Asset(UnderbrushSpecies[Species].Asset);
+        const FString Name = FPaths::GetCleanFilename(Asset);
+        UnderbrushMeshes[Species] = LoadObject<UStaticMesh>(nullptr,
+            *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s.%s"), *Asset, *Name));
+        if (!UnderbrushMeshes[Species])
+            UE_LOG(LogHomesteadWorld, Warning, TEXT("Underbrush %s is not imported; it is skipped."), *Asset);
+    }
     int32 RebuiltChunks = 0;
     struct FChunkCoverWork
     {
@@ -1249,7 +1386,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
         for (const auto& Plot : State.plots)
             if (Nearby((Plot.cellX + 0.5) * Homestead::CellSize, (Plot.cellY + 0.5) * Homestead::CellSize))
                 Signature += FString::Printf(TEXT("P%d;"), Plot.id);
-        Signature += TEXT("natural-creek-v1-decorative-wildflower-v1");
+        Signature += TEXT("natural-creek-v1-decorative-wildflower-v1-underbrush-v2");
         if (!StageChunk && bStagingResourceWindow
             && StagedChunk == State.activeChunk && StagedWorld.seed == State.world.seed
             && StagedWorld.generationVersion == State.world.generationVersion
@@ -1265,6 +1402,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                 {
                     Component->SetVisibility(true);
                     Component->SetHiddenInGame(false);
+                    auto* Primitive = Cast<UPrimitiveComponent>(Component);
+                    if (Primitive && Primitive->GetCollisionProfileName() == UCollisionProfile::BlockAll_ProfileName)
+                        Primitive->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
                 }
                 ++RebuiltChunks;
                 ++LastTransitionStagedCoverChunks;
@@ -1407,6 +1547,68 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                 FlowerTriangleCount += 758;
             }
         }
+        {
+            TArray<FHomesteadUnderbrush> Plants;
+            GenerateUnderbrush(State.world.seed, Chunk.Key, Plants);
+            UHierarchicalInstancedStaticMeshComponent* UnderbrushBatches[UnderbrushSpeciesCount] = {};
+            for (const FHomesteadUnderbrush& Plant : Plants)
+            {
+                const FUnderbrushSpecies& Species = UnderbrushSpecies[Plant.Species];
+                UStaticMesh* Mesh = UnderbrushMeshes[Plant.Species];
+                if (!Mesh) continue;
+                const float Radius = Species.Radius * Plant.Scale;
+                const float ClearingDistance = FVector2D::Distance(FVector2D(Plant.X, Plant.Y), StartingClearing);
+                const double StreamDistance = FMath::Abs(Plant.X - Homestead::StreamX(Plant.Y));
+                const bool bLow = Plant.Species >= 6;
+                if (ClearingDistance < (Species.bBlocking ? StartingClearingBlockingRadius : StartingClearingShrubRadius) + Radius
+                    || StreamDistance < (bLow ? 150.0 : 230.0) + Radius * 0.5
+                    || IsDecorationReserved(CoverState, Plant.X, Plant.Y, Radius * (bLow ? 0.5f : 0.7f), 0, bLow))
+                    continue;
+                UHierarchicalInstancedStaticMeshComponent*& Batch = UnderbrushBatches[Plant.Species];
+                if (!Batch)
+                {
+                    const double SetupStarted = FPlatformTime::Seconds();
+                    Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+                    Batch->SetupAttachment(GetRootComponent());
+                    Batch->SetMobility(EComponentMobility::Static);
+                    Batch->ComponentTags.Add(TEXT("WoodlandUnderbrush"));
+                    Batch->SetStaticMesh(Mesh);
+                    if (Species.bBlocking)
+                    {
+                        Batch->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+                        // The camera boom and interaction traces pass through; only her body is stopped.
+                        Batch->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+                        Batch->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+                        Batch->SetCanEverAffectNavigation(true);
+                    }
+                    else
+                    {
+                        Batch->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+                        Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+                        Batch->SetCanEverAffectNavigation(false);
+                    }
+                    Batch->SetGenerateOverlapEvents(false);
+                    Batch->SetCullDistances(bLow ? 2200 : 0, bLow ? 3800 : 9000);
+                    Batch->SetVisibility(!StageChunk);
+                    Batch->SetHiddenInGame(StageChunk != nullptr);
+                    Batch->SetCastShadow(Species.bShadow);
+                    Batch->bAutoRebuildTreeOnInstanceChanges = false;
+                    Batch->RegisterComponent();
+                    if (StageChunk) Batch->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+                    Chunk.Value->Cover.Components.Add(Batch);
+                    BatchSetupMilliseconds += (FPlatformTime::Seconds() - SetupStarted) * 1000;
+                }
+                const FRotator Rotation(0, Plant.Yaw, 0);
+                // Pivots are at the base; sink a little so stems root into uneven ground.
+                Batch->AddInstance(FTransform(Rotation,
+                    FVector(Plant.X, Plant.Y, CachedGroundHeight(Plant.X, Plant.Y) - 4.0f * Plant.Scale),
+                    FVector(Plant.Scale)));
+                ++UnderbrushCount;
+                BlockingUnderbrushCount += Species.bBlocking ? 1 : 0;
+            }
+            for (auto* Batch : UnderbrushBatches)
+                if (Batch) Batch->BuildTreeIfOutdated(false, true);
+        }
         InstanceMilliseconds += (FPlatformTime::Seconds() - InstanceStarted) * 1000;
         const double TreeStarted = FPlatformTime::Seconds();
         for (auto* Batch : GrassBatches) Batch->BuildTreeIfOutdated(false, true);
@@ -1423,9 +1625,9 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
             RebuiltChunks, CoverScanMilliseconds, CoverTeardownMilliseconds,
             BatchSetupMilliseconds, InstanceMilliseconds, TreeBuildMilliseconds,
             DecorationBuildMilliseconds);
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_flowers=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d added_flower_triangles=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Generated cover refresh: rebuilt_chunks=%d added_ferns=%d added_grass=%d added_flowers=%d bank_ferns=%d bank_grass=%d added_grass_triangles=%d added_flower_triangles=%d underbrush=%d blocking_underbrush=%d elapsed_ms=%.3f; CPU wall time, not GPU frame cost."),
         RebuiltChunks, FernCount, GrassCount, FlowerCount, BankFernCount, BankGrassCount,
-        GrassTriangleCount, FlowerTriangleCount, DecorationBuildMilliseconds);
+        GrassTriangleCount, FlowerTriangleCount, UnderbrushCount, BlockingUnderbrushCount, DecorationBuildMilliseconds);
     return true;
 }
 
@@ -2198,9 +2400,35 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
 void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview)
 {
     const Homestead::Point Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
-    const FVector Base(Center.x, Center.y, CellBase(Structure.cellX, Structure.cellY));
+    FVector Base(Center.x, Center.y, CellBase(Structure.cellX, Structure.cellY));
     // UE positive yaw rotates +X toward +Y; negative yaw maps the north edge to east.
-    const FRotator Rotation(0, -90.0f * (Structure.rotation % 4), 0);
+    FRotator Rotation(0, -90.0f * (Structure.rotation % 4), 0);
+    const bool bFurniture = Structure.kind == Homestead::Piece::Bed || Structure.kind == Homestead::Piece::Chest
+        || Structure.kind == Homestead::Piece::Fire;
+    if (bFurniture && !FoundationCells.Contains(FIntPoint(Structure.cellX, Structure.cellY)))
+    {
+        // Off a foundation, set the piece on the ground under its own footprint and lean it with the
+        // slope so a bedroll or chest doesn't hover over the downhill side of the cell.
+        const FVector2D Local = Structure.kind == Homestead::Piece::Bed ? FVector2D(95, -10)
+            : Structure.kind == Homestead::Piece::Chest ? FVector2D(-100, -100) : FVector2D(-100, 95);
+        const FVector2D Half = Structure.kind == Homestead::Piece::Bed ? FVector2D(35, 78)
+            : Structure.kind == Homestead::Piece::Chest ? FVector2D(35, 28) : FVector2D(34, 34);
+        const FVector Pivot = FVector(Center.x, Center.y, 0) + Rotation.RotateVector(FVector(Local, 0));
+        const FVector AxisX = Rotation.RotateVector(FVector::ForwardVector);
+        const FVector AxisY = Rotation.RotateVector(FVector::RightVector);
+        auto GroundAt = [&](float DX, float DY)
+        {
+            const FVector P = Pivot + AxisX * DX + AxisY * DY;
+            return GroundHeight(P.X, P.Y);
+        };
+        const float SlopeX = (GroundAt(Half.X, 0) - GroundAt(-Half.X, 0)) / (2 * Half.X);
+        const float SlopeY = (GroundAt(0, Half.Y) - GroundAt(0, -Half.Y)) / (2 * Half.Y);
+        const float PivotZ = GroundHeight(Pivot.X, Pivot.Y) - 1.5f;
+        Rotation = FRotationMatrix::MakeFromXY(AxisX + FVector::UpVector * SlopeX,
+            AxisY + FVector::UpVector * SlopeY).Rotator();
+        // Keep the footprint centre on the ground once the tilt swings the cell-centre origin.
+        Base = FVector(Pivot.X, Pivot.Y, PivotZ) - Rotation.RotateVector(FVector(Local, 0));
+    }
     auto Part = [&](UStaticMesh* Mesh, FVector Offset, FVector Size, FLinearColor Color,
         bool bSolid = false, FRotator LocalRotation = FRotator::ZeroRotator, float Glow = 0.0f)
     {
@@ -2665,11 +2893,14 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             && FMath::Abs(Drop.position.y - ChunkCenterY) <= 6000)
             NearDrops.push_back(Drop);
     RemoveMissing(StructureVisuals, NearStructures);
+    FoundationCells.Reset();
+    for (const auto& Structure : State.structures)
+        if (Structure.kind == Homestead::Piece::Foundation) FoundationCells.Add(FIntPoint(Structure.cellX, Structure.cellY));
     for (const auto& Structure : NearStructures)
     {
-        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d"),
+        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d"),
             static_cast<int>(Structure.kind), Structure.cellX, Structure.cellY, Structure.rotation,
-            Structure.fuelHours > 0);
+            Structure.fuelHours > 0, FoundationCells.Contains(FIntPoint(Structure.cellX, Structure.cellY)));
         FHomesteadWorldVisual& Visual = StructureVisuals.FindOrAdd(Structure.id);
         if (Visual.Signature != Signature)
         {

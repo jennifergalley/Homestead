@@ -88,6 +88,18 @@ struct FHomesteadChunkBaselineBuild
     std::vector<Homestead::Generation::ChunkBaseline> Chunks;
 };
 
+// One deterministic woodland underbrush plant. Index is stable per chunk for a given world
+// seed, so a cleared plant can be recorded by (chunk, index).
+struct FHomesteadUnderbrush
+{
+    uint8 Species = 0;
+    int32 Index = 0;
+    float X = 0;
+    float Y = 0;
+    float Yaw = 0;
+    float Scale = 1;
+};
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadWorld : public AActor
 {
@@ -113,6 +125,13 @@ public:
         Homestead::Generation::WorldDescriptor World, Homestead::Generation::ChunkCoord Chunk) const;
     bool StageAdjacentResources(const Homestead::Simulation& Destination, uint64 SourceRevision);
     void CancelStagedResources();
+    // Underbrush layout for one 24 m chunk, before reservations (resources, structures, the
+    // starting clearing) are applied. Density follows low-frequency noise: open meadows,
+    // scattered shrubs, and thickets of blocking brambles and hedges.
+    static void GenerateUnderbrush(uint64 WorldSeed, FIntPoint Chunk, TArray<FHomesteadUnderbrush>& Out);
+    static float UnderbrushDensity(float X, float Y);
+    static bool IsUnderbrushBlocking(uint8 Species);
+    static float UnderbrushRadius(uint8 Species);
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -192,6 +211,8 @@ private:
     bool bStagingResourceBuild = false;
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> StructureVisuals;
+    // Cells holding a foundation; furniture elsewhere rests on the bare ground instead of floor height.
+    TSet<FIntPoint> FoundationCells;
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> PlotVisuals;
     UPROPERTY()
