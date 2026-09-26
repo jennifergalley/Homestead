@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "FlintKnife",
+  "description": "Hafted knapped-flint knife: backed biface in a split-wood handle with pitch and sinew wrap (original). Pivot = mid-handle; blade +Z, edge -Y.",
+  "collision": "none",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/flint_knife.py",
+  "source_sha256": "9be5fda31d6453b89fa04938346a75f0a2fc7ac5dbff41686381cc98bb2dabe9",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_FlintKnife": {
+      "vertices": 3216,
+      "triangles": 6416,
+      "size_cm": [
+        2.35,
+        3.03,
+        21.0
+      ],
+      "materials": [
+        {
+          "name": "M_FlintKnife",
+          "textures": {
+            "basecolor": "T_FlintKnife_basecolor.png",
+            "roughness": "T_FlintKnife_roughness.png",
+            "normal": "T_FlintKnife_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FlintKnife_basecolor.png",
+          "roughness": "T_FlintKnife_roughness.png",
+          "normal": "T_FlintKnife_normal.png",
+          "ao": "T_FlintKnife_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          20
+        ],
+        "focus": [
+          0.0,
+          -0.004,
+          0.07
+        ]
+      },
+      "fbx": "SM_FlintKnife.fbx",
+      "sha256": "0e71e79e90319024e9ac7ce0f476ce89f4267d1ac2b849fc8bfa5ef45906b785",
+      "preview": "preview_SM_FlintKnife.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FlintKnife_hero.png",
+          "detail": "beauty_SM_FlintKnife_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          20
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_FlintKnife_basecolor.png": "cf1e59c1fedfb93ece931ac8f8ca99fdd0b5f5409f245bee5050e100843c2de0",
+    "T_FlintKnife_roughness.png": "bed18627d98e7e16591407055c1b9c1657852fcef7c9f1e0104b80cb3e3e13e4",
+    "T_FlintKnife_normal.png": "8840492cc618110b7f4b5eaffbdb01b43931b5100875917efc066b6e18f8c54f"
+  }
+}
