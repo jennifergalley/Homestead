@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "GraniteBoulderLoaf",
+  "description": "Medium (1.3 m) rounded granite corestone boulder with exfoliation shells, lichen and moss; LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 100000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_boulder_loaf.py",
+  "source_sha256": "e65d5ec1ac167269affa8908a3f1c2e07f3832fa75c7c9536f2fa470b5d1376f",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteBoulderLoaf": {
+      "vertices": 46058,
+      "triangles": 92112,
+      "size_cm": [
+        129.91,
+        95.68,
+        67.04
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderLoaf",
+          "textures": {
+            "basecolor": "T_GraniteBoulderLoaf_basecolor.png",
+            "roughness": "T_GraniteBoulderLoaf_roughness.png",
+            "normal": "T_GraniteBoulderLoaf_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderLoaf_basecolor.png",
+          "roughness": "T_GraniteBoulderLoaf_roughness.png",
+          "normal": "T_GraniteBoulderLoaf_normal.png",
+          "ao": "T_GraniteBoulderLoaf_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.15,
+          -0.3,
+          0.35
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBoulderLoaf.fbx",
+      "sha256": "c13fa9b4ca8d3377aadb96d35632ebd9f838bb4caeace141da4a22696fbef3cd",
+      "preview": "preview_SM_GraniteBoulderLoaf.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteBoulderLoaf_hero.png",
+          "detail": "beauty_SM_GraniteBoulderLoaf_detail.png",
+          "eye": "beauty_SM_GraniteBoulderLoaf_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteBoulderLoaf_LOD1": {
+      "vertices": 10002,
+      "triangles": 20000,
+      "size_cm": [
+        129.89,
+        95.69,
+        67.04
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderLoaf",
+          "textures": {
+            "basecolor": "T_GraniteBoulderLoaf_basecolor.png",
+            "roughness": "T_GraniteBoulderLoaf_roughness.png",
+            "normal": "T_GraniteBoulderLoaf_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderLoaf_basecolor.png",
+          "roughness": "T_GraniteBoulderLoaf_roughness.png",
+          "normal": "T_GraniteBoulderLoaf_normal.png",
+          "ao": "T_GraniteBoulderLoaf_ao.png"
+        },
+        "shared_with": "SM_GraniteBoulderLoaf"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.15,
+          -0.3,
+          0.35
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBoulderLoaf_LOD1.fbx",
+      "sha256": "8d07f5787d37e7786fdd65e78e92efb1fb4a0a11341799893ef5457f0b4836c0",
+      "preview": "preview_SM_GraniteBoulderLoaf_LOD1.png"
+    },
+    "SM_GraniteBoulderLoaf_LOD2": {
+      "vertices": 2502,
+      "triangles": 5000,
+      "size_cm": [
+        129.92,
+        95.73,
+        67.08
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderLoaf",
+          "textures": {
+            "basecolor": "T_GraniteBoulderLoaf_basecolor.png",
+            "roughness": "T_GraniteBoulderLoaf_roughness.png",
+            "normal": "T_GraniteBoulderLoaf_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderLoaf_basecolor.png",
+          "roughness": "T_GraniteBoulderLoaf_roughness.png",
+          "normal": "T_GraniteBoulderLoaf_normal.png",
+          "ao": "T_GraniteBoulderLoaf_ao.png"
+        },
+        "shared_with": "SM_GraniteBoulderLoaf"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.15,
+          -0.3,
+          0.35
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBoulderLoaf_LOD2.fbx",
+      "sha256": "700bb5889d2aeac4cee9a2a898a2617920dd651ec3f23a976943f373c3bb6eec",
+      "preview": "preview_SM_GraniteBoulderLoaf_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.103,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 10 cm). Add ~0.5 x slope x radius on slopes.",
+    "north": "+Y (moss and denser lichen side)"
+  },
+  "textures": {
+    "T_GraniteBoulderLoaf_basecolor.png": "c1ed5bbce6e9cd5027c62745964c5404c90aad57156355bee4713018fb5b45a8",
+    "T_GraniteBoulderLoaf_roughness.png": "0a9eae5d66faed86964477fa624e95f660e4b759c3ebe73b8b7a798ce43961c9",
+    "T_GraniteBoulderLoaf_normal.png": "3f972e2f121d9287dec56712a7453bf1fcf6495cc8d894de04bc971946ce18a5"
+  }
+}

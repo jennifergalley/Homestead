@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "name": "GraniteBoulderLow",
+  "description": "Medium (1.5 m) low, flat-topped granite boulder half-sunk in the forest floor, lichen and moss; LOD1/LOD2.",
+  "collision": "convex",
+  "triangle_budget": 100000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_boulder_low.py",
+  "source_sha256": "dc8d7e6338210fe6db8da2d85714c99c7a721f7c0b62f166826c416fdc0d2981",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteBoulderLow": {
+      "vertices": 44906,
+      "triangles": 89808,
+      "size_cm": [
+        150.69,
+        121.75,
+        62.44
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderLow",
+          "textures": {
+            "basecolor": "T_GraniteBoulderLow_basecolor.png",
+            "roughness": "T_GraniteBoulderLow_roughness.png",
+            "normal": "T_GraniteBoulderLow_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderLow_basecolor.png",
+          "roughness": "T_GraniteBoulderLow_roughness.png",
+          "normal": "T_GraniteBoulderLow_normal.png",
+          "ao": "T_GraniteBoulderLow_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.2,
+          -0.2,
+          0.42
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBoulderLow.fbx",
+      "sha256": "fa6744e751afe43e22373003f408ec4e78283fc4f2322b4ccf3c55acbc826515",
+      "preview": "preview_SM_GraniteBoulderLow.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteBoulderLow_hero.png",
+          "detail": "beauty_SM_GraniteBoulderLow_detail.png",
+          "eye": "beauty_SM_GraniteBoulderLow_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteBoulderLow_LOD1": {
+      "vertices": 10002,
+      "triangles": 20000,
+      "size_cm": [
+        150.7,
+        121.75,
+        62.43
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderLow",
+          "textures": {
+            "basecolor": "T_GraniteBoulderLow_basecolor.png",
+            "roughness": "T_GraniteBoulderLow_roughness.png",
+            "normal": "T_GraniteBoulderLow_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderLow_basecolor.png",
+          "roughness": "T_GraniteBoulderLow_roughness.png",
+          "normal": "T_GraniteBoulderLow_normal.png",
+          "ao": "T_GraniteBoulderLow_ao.png"
+        },
+        "shared_with": "SM_GraniteBoulderLow"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.2,
+          -0.2,
+          0.42
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBoulderLow_LOD1.fbx",
+      "sha256": "8aa4f082ce3548e2ba4664f40f38c4b5c47d3cc733059833da7dd1cddc7088a3",
+      "preview": "preview_SM_GraniteBoulderLow_LOD1.png"
+    },
+    "SM_GraniteBoulderLow_LOD2": {
+      "vertices": 2502,
+      "triangles": 5000,
+      "size_cm": [
+        150.79,
+        121.74,
+        62.43
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteBoulderLow",
+          "textures": {
+            "basecolor": "T_GraniteBoulderLow_basecolor.png",
+            "roughness": "T_GraniteBoulderLow_roughness.png",
+            "normal": "T_GraniteBoulderLow_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteBoulderLow_basecolor.png",
+          "roughness": "T_GraniteBoulderLow_roughness.png",
+          "normal": "T_GraniteBoulderLow_normal.png",
+          "ao": "T_GraniteBoulderLow_ao.png"
+        },
+        "shared_with": "SM_GraniteBoulderLow"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.2,
+          -0.2,
+          0.42
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GraniteBoulderLow_LOD2.fbx",
+      "sha256": "e6bad67701811e258a1a4ca1c069a36cee913eeec689086fe853dd936d058e66",
+      "preview": "preview_SM_GraniteBoulderLow_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.202,
+    "placement": "Origin is the ground line; place at terrain height (already sunk 20 cm). Players can step onto its low top.",
+    "collision": "Convex hull.",
+    "north": "+Y (moss side)"
+  },
+  "textures": {
+    "T_GraniteBoulderLow_basecolor.png": "4994b825e7dfad9ae5587dfdde9a3e35ca84970a16a40493f125b1e6246fda9b",
+    "T_GraniteBoulderLow_roughness.png": "a9cc695ef5337796c49aa6cbad221627898ef7a2cd2bc149acbc73e0928cbb00",
+    "T_GraniteBoulderLow_normal.png": "4341402a0411b0b5e334c4011545bb6bae689c4ff10486c51bb9d5b412ff6d5f"
+  }
+}
