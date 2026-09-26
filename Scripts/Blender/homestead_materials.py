@@ -497,3 +497,137 @@ def leather(name, color=(0.30, 0.19, 0.10), dark=(0.12, 0.07, 0.035), roughness=
     height = g.math("ADD", height, g.math("MULTIPLY", mottle, 0.15))
     g.set("Normal", g.bump(height, strength=0.4, distance=0.0012))
     return g.mat
+
+def blackberry(name, color=(0.016, 0.007, 0.013), glint=(0.040, 0.011, 0.028), crevice=(0.012, 0.003, 0.007),
+               red=0.0, drupelet=0.0030, seed=0.0):
+    """Aggregate berry (blackberry/raspberry) skin. pcoord is berry-local rest position
+    in meters (offset per berry for variety). Each Voronoi cell of ~``drupelet`` metres is
+    one drupelet: a glossy rounded dome with a faint purple-red body glow and a tiny dry
+    style scar, separated by dark, rough crevices. ``red`` (0..1) shifts some drupelets
+    towards the dark red of a not-quite-ripe berry. Ripe blackberries reflect only a few
+    percent, so albedo stays very low; the readable shape comes from the specular domes."""
+    g = Graph(name)
+    p = g.coord()
+    seeded = g.vmath("ADD", p, (seed * 0.031, seed * 0.017, seed * 0.023))
+    scale = 1.0 / drupelet
+    cell = g.voronoi(seeded, scale=scale, randomness=0.35, feature="F1")
+    centre = cell.outputs["Distance"]
+    edge = g.voronoi(seeded, scale=scale, randomness=0.35, feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    # Packed spheres: a round dome sqrt(1 - (d / R)^2) about each seed, with R larger
+    # than the cells so neighbouring domes meet in sharp creases instead of flat gaps.
+    ratio = g.math("DIVIDE", centre, 0.68)
+    dome = g.math("SQRT", g.math("SUBTRACT", 1.0, g.math("MULTIPLY", ratio, ratio), clamp=True))
+    dome = g.math("MULTIPLY", dome, g.remap(edge, 0.0, 0.03, 0.7, 1.0))
+    tint = g.separate(cell.outputs["Color"])[0]
+    body = g.mix(color, glint, g.remap(tint, 0.2, 0.9))
+    if red:
+        body = g.mix(body, (0.16, 0.012, 0.022), g.remap(tint, 0.85 - 0.6 * red, 1.0, 0.0, red))
+    base = g.mix(crevice, body, g.remap(dome, 0.0, 0.4))
+    scar = g.remap(centre, 0.07, 0.02)
+    base = g.mix(base, (0.05, 0.035, 0.028), g.math("MULTIPLY", scar, 0.7))
+    g.set("Base Color", base)
+    g.set("Roughness", g.remap(dome, 0.1, 0.8, 0.62, 0.2))
+    g.set("Coat Weight", 0.25)
+    g.set("Coat Roughness", 0.12)
+    g.set("Subsurface Weight", 0.15)
+    g.set("Subsurface Radius", (0.004, 0.0008, 0.002))
+    height = g.math("SUBTRACT", dome, g.math("MULTIPLY", scar, 0.25))
+    g.set("Normal", g.bump(height, strength=1.0, distance=0.0009))
+    return g.mat
+
+
+def leaf_pcoord(name, color=(0.045, 0.085, 0.022), vein=(0.10, 0.15, 0.05), tip=(0.06, 0.10, 0.03),
+                roughness=0.5, translucency=0.25, rugose=1.0, serrate_dark=0.0):
+    """``leaf`` driven by pcoord = (u across 0..1 with the midrib at 0.5, v base 0..tip 1, 0)
+    instead of UVs, so it survives the bake repack. Adds the quilted, sunken-vein
+    (rugose) relief of bramble leaves between the laterals."""
+    g = Graph(name)
+    u, v, _ = g.separate(g.coord())
+    uv = g.combine(u, v, 0.0)
+    across = g.math("ABSOLUTE", g.math("SUBTRACT", u, 0.5))
+    midrib = g.remap(across, 0.0, 0.025, 1.0, 0.0)
+    lateral_phase = g.math("SUBTRACT", g.math("MULTIPLY", v, 9.0), g.math("MULTIPLY", across, 7.0))
+    wave = g.math("ABSOLUTE", g.math("SINE", g.math("MULTIPLY", lateral_phase, 3.1416)))
+    lateral = g.remap(wave, 0.94, 1.0, 0.0, 0.75)
+    veins = g.math("MAXIMUM", midrib, lateral)
+    mottle = g.noise(uv, scale=18.0, detail=5.0).outputs["Fac"]
+    fine = g.voronoi(uv, scale=60.0, feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    tissue = g.mix(color, tip, g.remap(v, 0.5, 1.0))
+    tissue = g.mix(tissue, tuple(c * 0.75 for c in color), g.remap(mottle, 0.42, 0.62, 0.0, 0.7))
+    tissue = g.mix(tissue, vein, veins)
+    if serrate_dark:
+        rim = g.remap(across, 0.40, 0.5, 0.0, serrate_dark)
+        tissue = g.mix(tissue, (0.06, 0.05, 0.02), rim)
+    g.set("Base Color", tissue)
+    g.set("Roughness", g.remap(mottle, 0.4, 0.6, roughness - 0.06, roughness + 0.06))
+    g.set("Subsurface Weight", translucency)
+    g.set("Subsurface Radius", (0.01, 0.02, 0.005))
+    quilt = g.math("MULTIPLY", g.remap(wave, 0.5, 1.0, 1.0, 0.0), rugose)
+    height = g.math("ADD", g.math("MULTIPLY", quilt, 0.5), g.math("MULTIPLY", g.remap(fine, 0.0, 0.12), 0.15))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", veins, 0.6))
+    g.set("Normal", g.bump(height, strength=0.45, distance=0.0005))
+    return g.mat
+
+
+def root(name, skin=(0.46, 0.33, 0.18), dark=(0.33, 0.22, 0.12), soil=(0.14, 0.10, 0.065),
+         dry_soil=(0.27, 0.21, 0.145), dirt=0.55, ring_spacing=0.0045, seed=0.0):
+    """Freshly pulled taproot skin (wild carrot / yampah): cream-tan with fine
+    transverse growth rings and lenticel scars, faint longitudinal wrinkles, and
+    damp soil smeared into the creases and in patches (``dirt`` 0..1), drying paler
+    at its thin edges. pcoord is the tube frame (x, y, arclength from the crown)."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.21, seed * 0.13, seed * 0.07))
+    angle = g.math("ARCTAN2", y, x)
+    wob = g.noise(seeded, scale=90.0, detail=3.0).outputs["Fac"]
+    phase = g.math("ADD", g.math("DIVIDE", z, ring_spacing), g.math("MULTIPLY", wob, 3.0))
+    ring = g.math("ABSOLUTE", g.math("SINE", g.math("MULTIPLY", phase, 3.1416)))
+    groove = g.remap(ring, 0.12, 0.0)
+    broken = g.noise(g.combine(g.math("MULTIPLY", angle, 1.3), g.math("MULTIPLY", z, 60.0), 3.0),
+                     scale=3.0, detail=2.0).outputs["Fac"]
+    groove = g.math("MULTIPLY", groove, g.remap(broken, 0.5, 0.6))
+    streak = g.noise(g.combine(g.math("MULTIPLY", angle, 5.0), g.math("MULTIPLY", z, 25.0), seed),
+                     scale=4.0, detail=4.0).outputs["Fac"]
+    lent = g.voronoi(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.35)), scale=700.0, feature="F1").outputs["Distance"]
+    lenticel = g.remap(lent, 0.12, 0.05)
+    base = g.mix(dark, skin, g.remap(streak, 0.25, 0.68))
+    base = g.mix(base, tuple(c * 0.6 for c in dark), g.math("MAXIMUM", g.math("MULTIPLY", groove, 0.5),
+                                                               g.math("MULTIPLY", lenticel, 0.6)))
+    patch = g.noise(seeded, scale=60.0, detail=6.0, roughness=0.65).outputs["Fac"]
+    grain = g.noise(seeded, scale=2200.0, detail=2.0).outputs["Fac"]
+    film = g.noise(seeded, scale=14.0, detail=3.0).outputs["Fac"]
+    cover = g.math("ADD", g.remap(patch, 0.56 - 0.12 * dirt, 0.70 - 0.12 * dirt),
+                   g.math("MULTIPLY", groove, 0.6 * dirt))
+    cover = g.math("MAXIMUM", cover, g.remap(film, 0.35, 0.65, 0.05 * dirt, 0.4 * dirt))
+    cover = g.math("MINIMUM", cover, 1.0)
+    earth = g.mix(soil, dry_soil, g.remap(patch, 0.6 - 0.14 * dirt, 0.52 - 0.14 * dirt))
+    earth = g.mix(earth, tuple(c * 0.6 for c in soil), g.remap(grain, 0.45, 0.6))
+    base = g.mix(base, earth, cover)
+    g.set("Base Color", base)
+    g.set("Roughness", g.math("ADD", g.math("MULTIPLY", cover, 0.4), g.remap(streak, 0.3, 0.7, 0.46, 0.56)))
+    g.set("Subsurface Weight", 0.08)
+    height = g.math("SUBTRACT", g.math("MULTIPLY", cover, 0.5), g.math("MULTIPLY", groove, 0.6))
+    height = g.math("ADD", height, g.math("MULTIPLY", g.math("MULTIPLY", grain, cover), 0.35))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", lenticel, 0.25))
+    g.set("Normal", g.bump(height, strength=0.6, distance=0.0006))
+    return g.mat
+
+
+def soil(name, damp=(0.12, 0.085, 0.055), dry=(0.26, 0.20, 0.135), seed=0.0):
+    """Clinging clods of forest loam: crumbly grit, tiny pale mineral grains and
+    fibrous organic bits, damp and dark in the core, paler where it has dried."""
+    g = Graph(name)
+    p = g.coord()
+    seeded = g.vmath("ADD", p, (seed * 0.3, seed * 0.2, seed * 0.1))
+    crumb = g.voronoi(seeded, scale=900.0, feature="F1").outputs["Distance"]
+    lumps = g.noise(seeded, scale=240.0, detail=5.0, roughness=0.7).outputs["Fac"]
+    grit = g.noise(seeded, scale=3000.0, detail=2.0).outputs["Fac"]
+    base = g.mix(damp, dry, g.remap(lumps, 0.42, 0.62))
+    base = g.mix(base, tuple(c * 0.55 for c in damp), g.remap(crumb, 0.35, 0.6))
+    base = g.mix(base, (0.36, 0.33, 0.28), g.remap(grit, 0.68, 0.72, 0.0, 0.6))
+    g.set("Base Color", base)
+    g.set("Roughness", 0.95)
+    height = g.math("ADD", g.math("MULTIPLY", g.remap(crumb, 0.6, 0.0), 0.6), g.math("MULTIPLY", lumps, 0.4))
+    g.set("Normal", g.bump(height, strength=0.8, distance=0.0008))
+    return g.mat
