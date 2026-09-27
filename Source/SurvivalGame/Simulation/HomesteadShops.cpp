@@ -25,10 +25,7 @@ bool NearCounter(const Shop& shop, Point player)
     const double dx = player.x - shop.counterX, dy = player.y - shop.counterY;
     return dx * dx + dy * dy <= CounterReach * CounterReach;
 }
-std::string Plural(int quantity, Item item)
-{
-    return std::to_string(quantity) + " " + ItemName(item);
-}
+std::string Plural(int quantity, Item item) { return CountedName(item, quantity); }
 }
 
 std::string FormatMoney(Cents cents)

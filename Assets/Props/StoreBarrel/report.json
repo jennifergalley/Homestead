@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "StoreBarrel",
+  "description": "Dry-goods coopered oak barrel with iron hoops and a loose lid ajar; lid lift faces -Y.",
+  "collision": "convex",
+  "triangle_budget": 15000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/store_barrel.py",
+  "source_sha256": "8e0199465fdedcc69ccf82222e4fd451ceced33bc23f516a0e4b8e840e80e99a",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Store_Barrel": {
+      "vertices": 6976,
+      "triangles": 13434,
+      "size_cm": [
+        66.22,
+        66.59,
+        99.96
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Barrel",
+          "textures": {
+            "basecolor": "T_Store_Barrel_basecolor.png",
+            "roughness": "T_Store_Barrel_roughness.png",
+            "metallic": "T_Store_Barrel_metallic.png",
+            "normal": "T_Store_Barrel_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Store_Barrel_basecolor.png",
+          "roughness": "T_Store_Barrel_roughness.png",
+          "normal": "T_Store_Barrel_normal.png",
+          "ao": "T_Store_Barrel_ao.png",
+          "metallic": "T_Store_Barrel_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -22
+        ],
+        "focus": [
+          -0.0001356750726699829,
+          -0.17747242033481597,
+          0.7200975714065134
+        ]
+      },
+      "fbx": "SM_Store_Barrel.fbx",
+      "sha256": "03e9dce7f54245dcf0e6feaacdca9cfcf673b1ea7b8eee8e9cde22751d53f658",
+      "preview": "preview_SM_Store_Barrel.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Store_Barrel_hero.png",
+          "detail": "beauty_SM_Store_Barrel_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -22
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "height": 0.95,
+    "bilge_diameter": 0.62,
+    "head_diameter": 0.52
+  },
+  "front": "barrel is round; the ajar lid opens toward -Y",
+  "textures": {
+    "T_Store_Barrel_basecolor.png": "68057ac491f22a7a73e5a579fa6f1ecb1bf21451486f7b892293366179e0a175",
+    "T_Store_Barrel_roughness.png": "7c6aceb76e99f68f6e1c016a331e60a3fb6704c35c1dab29a62620d8f1731469",
+    "T_Store_Barrel_metallic.png": "8f827a5d2d24d0763386c2263d68e313ed697b747949971accb36e73a9e709de",
+    "T_Store_Barrel_normal.png": "ef16ac2fb45e92d3b77c994b11086fd93b4f167d9da224a2590998fa7f75585c"
+  }
+}

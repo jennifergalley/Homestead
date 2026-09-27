@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "StoreCounter",
+  "description": "1851 Cornish village shop counter, raised-panel customer front -Y, plainer drawer/shelf back +Y.",
+  "collision": "box",
+  "triangle_budget": 40000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/store_counter.py",
+  "source_sha256": "c85fbc50bca5d3e6c4742e60a716ac565a33a764b656bcb9eae83a1b7df55b59",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Store_Counter": {
+      "vertices": 3912,
+      "triangles": 7544,
+      "size_cm": [
+        534.01,
+        88.48,
+        98.89
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Counter",
+          "textures": {
+            "basecolor": "T_Store_Counter_basecolor.png",
+            "roughness": "T_Store_Counter_roughness.png",
+            "metallic": "T_Store_Counter_metallic.png",
+            "normal": "T_Store_Counter_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Store_Counter_basecolor.png",
+          "roughness": "T_Store_Counter_roughness.png",
+          "normal": "T_Store_Counter_normal.png",
+          "ao": "T_Store_Counter_ao.png",
+          "metallic": "T_Store_Counter_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -9.751319885253906e-05,
+          -0.3796097278594971,
+          0.6675158369541169
+        ]
+      },
+      "fbx": "SM_Store_Counter.fbx",
+      "sha256": "b7466483c3eb3a5126794e0b18c9a0821107b2e29de13c51e4928e91072e447e",
+      "preview": "preview_SM_Store_Counter.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Store_Counter_hero.png",
+          "detail": "beauty_SM_Store_Counter_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "length": 5.2,
+    "body_depth": 0.66,
+    "body_height": 0.96,
+    "top_depth": 0.78,
+    "top_thickness": 0.04
+  },
+  "front": "customer-facing raised-panel front points -Y",
+  "textures": {
+    "T_Store_Counter_basecolor.png": "204e5270de85107fe8bef198726761c08011c58ef99eafbcfb08f1c045705926",
+    "T_Store_Counter_roughness.png": "17a64a9234570b45666afe80dfdc83d52b191543325de74c199014900bb0f25b",
+    "T_Store_Counter_metallic.png": "44cf8a4b3a16af867f28af98ca6b8609baf710e213e508b57afd3e54b43dc25f",
+    "T_Store_Counter_normal.png": "dfd692527e4156900966345112973ab59942bc09876047cebb136a1078d4f51b"
+  }
+}

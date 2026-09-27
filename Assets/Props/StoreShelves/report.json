@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "StoreShelves",
+  "description": "Stained pine wall shelving unit stocked with period jars, tins, bottles, packets, cloth and candles; open front -Y.",
+  "collision": "box",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/store_shelves.py",
+  "source_sha256": "6cf7b7b00a9fdc85014e5bb9d67893c4a44a73832a880c621383d180c2eac996",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Store_Shelves": {
+      "vertices": 11406,
+      "triangles": 22388,
+      "size_cm": [
+        240.08,
+        43.9,
+        220.04
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Shelves",
+          "textures": {
+            "basecolor": "T_Store_Shelves_basecolor.png",
+            "roughness": "T_Store_Shelves_roughness.png",
+            "metallic": "T_Store_Shelves_metallic.png",
+            "normal": "T_Store_Shelves_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Store_Shelves_basecolor.png",
+          "roughness": "T_Store_Shelves_roughness.png",
+          "normal": "T_Store_Shelves_normal.png",
+          "ao": "T_Store_Shelves_ao.png",
+          "metallic": "T_Store_Shelves_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -2.8014183044433594e-06,
+          -0.17054674804210662,
+          1.2502952814102173
+        ]
+      },
+      "fbx": "SM_Store_Shelves.fbx",
+      "sha256": "ecdfc4039c4fd48344bfcefd21552b76da3df2d565248946d2ced941ad1a514c",
+      "preview": "preview_SM_Store_Shelves.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Store_Shelves_hero.png",
+          "detail": "beauty_SM_Store_Shelves_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "width": 2.4,
+    "depth": 0.36,
+    "height": 2.2
+  },
+  "front": "open shelving faces -Y; back touches wall at +Y",
+  "textures": {
+    "T_Store_Shelves_basecolor.png": "b3c99d05bd892fedca1484612b47b523ccdfaa963d102ffae4afa80a88921859",
+    "T_Store_Shelves_roughness.png": "068dcdb1c193f07a594cf250a328446c6c2a8e710a75b72d6f1051b629741cdd",
+    "T_Store_Shelves_metallic.png": "0c03643c330cbd9148ed5c2de398419514ecd138aba7d34c76bdd13d1e023e09",
+    "T_Store_Shelves_normal.png": "adf74f61bea17541ed91f337c883bf793d4119f2588247a872fd8de2b0a8d3db"
+  }
+}
