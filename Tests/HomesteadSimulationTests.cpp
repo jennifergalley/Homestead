@@ -2716,6 +2716,14 @@ void FixedEstateNewGameAndSave()
     CHECK(PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, spawn));
     CHECK(!PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points,
         layout.PointOr(Anchor::TownSquare, {})));
+    // The standing room is the carved-out corner of the ruin, and the starter forage lies outside it.
+    const auto& footprint = layout.FindPolygon(Anchor::ManorFootprint)->points;
+    CHECK(!PointInPolygon(footprint, spawn));
+    for (const auto& placement : ProvisionalEstatePlacements().placements)
+    {
+        CHECK(PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, placement.position));
+        CHECK(!PointInPolygon(footprint, placement.position));
+    }
     EstatePlacements placements;
     placements.bakeVersion = 3;
     placements.placements = {
