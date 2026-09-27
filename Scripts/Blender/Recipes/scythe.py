@@ -14,8 +14,9 @@ Real-object research (written before modeling):
 Everything is generated here: no scanned or downloaded geometry or textures.
 Units are meters. Orientation (for the two-handed sweep): the pivot is the centre of the lower
 (right-hand) nib's grip. The snath rises roughly along +Z to its top end and falls to the heel
-at the bottom; the nibs stick out along -Y (toward her); the blade runs from the heel along +X,
-lying flat (in the XY plane) with its cutting edge toward -Y.
+at the bottom; the nibs stick out along -Y (toward her); the blade runs from the heel along +X
+with its cutting edge toward -Y, hung LAY_DEGREES off flat (the edge raised toward the nibs) so
+it lies flat on the ground when the snath leans back toward her by that angle.
 """
 import math
 
@@ -32,6 +33,8 @@ BEAUTY = {"pose": (90, 0, 0), "focus": (0.3, 0.0, -1.05)}
 
 SNATH_TOP = 0.62
 SNATH_BOTTOM = -0.98
+# The angle between blade and snath is set ("hung") so the blade lies flat at the mowing lean.
+LAY_DEGREES = 30.0
 
 
 def smoothstep(a, b, x):
@@ -61,6 +64,15 @@ def nib(kit, name, at_z, wood):
     return kit.tube(name, pts, radii=radii, sides=18, material=wood), grip
 
 
+def lay(p, heel):
+    """The blade's lay: turned about the heel's X axis so that it lies flat on the ground when the
+    snath leans back toward the mower by LAY_DEGREES (Content/Python/homestead_agent/scythe_mow.py LEAN)."""
+    a = math.radians(LAY_DEGREES)
+    c, s = math.cos(a), math.sin(a)
+    y, z = p[1] - heel.y, p[2] - heel.z
+    return (p[0], heel.y + y * c + z * s, heel.z - y * s + z * c)
+
+
 def blade_rows():
     """Loft of the blade from the heel along +X: a curved, tapering plate with a rib on its back."""
     heel = snath_point(0.0) + Vector((0.0, 0.0, -0.02))
@@ -82,10 +94,10 @@ def blade_rows():
         ring = []
         co = []
         for d, th in profile:
-            ring.append((cx, cy - d, z + th * 0.5))
+            ring.append(lay((cx, cy - d, z + th * 0.5), heel))
             co.append((th * 12.0, depth - d, cx))
         for d, th in reversed(profile):
-            ring.append((cx, cy - d, z - th * 0.5))
+            ring.append(lay((cx, cy - d, z - th * 0.5), heel))
             co.append((-th * 12.0, depth - d, cx))
         rows.append(ring)
         coords.append(co)

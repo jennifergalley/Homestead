@@ -365,6 +365,8 @@ private:
     Homestead::Item SwingTool = Homestead::Item::Count;
     FVector2D SwingFrom = FVector2D::ZeroVector;
     bool bSwingPending = false;
+    // The swing plays a felling-timed clip (axe chop or ground strike, pick strike, scythe mow).
+    bool bSwingFellTimed = false;
     double SwingSince = 0;
     uint32 SwingFellStartsBefore = 0;
     // The scythe's sweep: every grass and weed tuft in the forward arc when it began.

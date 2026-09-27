@@ -6,7 +6,7 @@
   "triangle_budget": 10000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/scythe.py",
-  "source_sha256": "bb1dbb942a6e92df626881669464f38956d67ec1473b4f351ffbbf78aa0e5e30",
+  "source_sha256": "dedfeb930c12d8cf994c1876d99bc938d887be4844fe198233f9dbc41b400143",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_Scythe": {
@@ -14,8 +14,8 @@
       "triangles": 2888,
       "size_cm": [
         90.7,
-        24.3,
-        163.09
+        23.22,
+        163.29
       ],
       "materials": [
         {
@@ -55,7 +55,7 @@
         ]
       },
       "fbx": "SM_Scythe.fbx",
-      "sha256": "ae07a3b7dfd69bc7ac8cb92ce67b6a0042e8413d6ee89b5392d7ef714fa5d044",
+      "sha256": "d8a31c1bbde34d10e4cc4f078e45da3522dae1800395c6c4dedb8d4672f2714c",
       "preview": "preview_SM_Scythe.png",
       "beauty": {
         "views": {
@@ -83,9 +83,9 @@
   },
   "warnings": [],
   "textures": {
-    "T_Scythe_basecolor.png": "96462a8400f534d84b630a135bf2ba232528e9618d52f2fdcb49f9ce860122d2",
-    "T_Scythe_roughness.png": "4a37f21608c2da1edac98bdb56b76722c3694b626ebcedf326b2df5b701fb1c2",
-    "T_Scythe_metallic.png": "710e73f062eb52c1c7507db67e8051746c74f0a971b6e50485df5c69e830bdb5",
-    "T_Scythe_normal.png": "570bf8001b1b97a0cfb706e3450d166fbfc38f92423489479f222249aac283c8"
+    "T_Scythe_basecolor.png": "2ef8d0d8ec9ef0f45ccc4f1fa45d2880bf7fd4ec0042168e33e799edb15dcdaf",
+    "T_Scythe_roughness.png": "07fac38a507fce1aa63393a9546b8f126531b9b75141dc3776900e6f55563217",
+    "T_Scythe_metallic.png": "919a7224c488ecb614318365a18a7fd1d3053efa23a38ee4109b58e6d893bb18",
+    "T_Scythe_normal.png": "10c9fd55d79586f2dcd2428d44c35f6bb516b7990db95d1c08699e2e51ccf2b3"
   }
 }

@@ -2115,13 +2115,37 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     SwingFrom = FVector2D(Position.x, Position.y);
     SwingTool = Tool;
     Homestead::Point Aim = Position;
-    for (const auto& Node : State().resources) if (Node.id == Target) Aim = Node.position;
+    auto Kind = Homestead::ResourceKind::Count;
+    for (const auto& Node : State().resources) if (Node.id == Target) { Aim = Node.position; Kind = Node.kind; }
     bool bAnimated = false;
+    bSwingFellTimed = false;
     if (Avatar)
     {
-        if (Tool == Homestead::Item::Hatchet) bAnimated = Avatar->PlayFell(Aim, 1, 12.0f);
-        // The scythe and pickaxe borrow the billhook's hack until their own swings are authored.
-        else bAnimated = Avatar->PlayMacheteHack(Aim, Tool);
+        // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
+        const float Radius = Kind == Homestead::ResourceKind::StumpSmall ? 16.0f
+            : Kind == Homestead::ResourceKind::StumpLarge ? 28.0f
+            : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
+            : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
+            : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
+            : Kind == Homestead::ResourceKind::Rubble ? 35.0f
+            : Kind == Homestead::ResourceKind::Boulder ? 50.0f
+            : Kind == Homestead::ResourceKind::SmallRock ? 18.0f : 8.0f;
+        if (Tool == Homestead::Item::Scythe)
+        {
+            // Mowing turns about her: she keeps facing the swath rather than the first tuft.
+            const Homestead::Point Ahead{Position.x + Forward.X * 100.0, Position.y + Forward.Y * 100.0};
+            bSwingFellTimed = Avatar->PlayStrike(Ahead, Tool, 1, -1.0f);
+        }
+        else if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Pickaxe)
+        {
+            bSwingFellTimed = Avatar->PlayStrike(Aim, Tool, 1, Radius);
+            // Without the strike clip the axe falls back to its felling chop.
+            if (!bSwingFellTimed && Tool == Homestead::Item::Hatchet) bSwingFellTimed = Avatar->PlayFell(Aim, 1, 12.0f);
+        }
+        bAnimated = bSwingFellTimed;
+        // The billhook reuses the machete hack; a scythe without its mowing clip borrows it too.
+        if (!bAnimated && Tool != Homestead::Item::Pickaxe && Tool != Homestead::Item::Hatchet)
+            bAnimated = Avatar->PlayMacheteHack(Aim, Tool);
     }
     if (!bAnimated)
     {
@@ -2141,7 +2165,7 @@ void AHomesteadController::UpdatePendingSwing()
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     const double Age = GetWorld()->GetTimeSeconds() - SwingSince;
-    if (SwingTool == Homestead::Item::Hatchet)
+    if (bSwingFellTimed)
     {
         const bool Felling = Animation && Animation->IsFelling() && Animation->FellStarts() != SwingFellStartsBefore;
         if (Felling && Animation->FellPhase() >= AHomesteadCharacter::FellStrikeSeconds(0))
