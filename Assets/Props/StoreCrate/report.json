@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "StoreCrate",
+  "description": "0.6 m cube nailed deal-board shipping crate; slatted front points -Y.",
+  "collision": "box",
+  "triangle_budget": 8000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/store_crate.py",
+  "source_sha256": "5d0a7aea7173a5e927fecfca6f1590aaeebade271931bfdfe3f297fd3885ec4d",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Store_Crate": {
+      "vertices": 1856,
+      "triangles": 3488,
+      "size_cm": [
+        61.0,
+        61.0,
+        60.56
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Crate",
+          "textures": {
+            "basecolor": "T_Store_Crate_basecolor.png",
+            "roughness": "T_Store_Crate_roughness.png",
+            "metallic": "T_Store_Crate_metallic.png",
+            "normal": "T_Store_Crate_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Store_Crate_basecolor.png",
+          "roughness": "T_Store_Crate_roughness.png",
+          "normal": "T_Store_Crate_normal.png",
+          "ao": "T_Store_Crate_ao.png",
+          "metallic": "T_Store_Crate_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -18
+        ],
+        "focus": [
+          0.0,
+          -0.31,
+          0.35265751034021375
+        ]
+      },
+      "fbx": "SM_Store_Crate.fbx",
+      "sha256": "f486b22811a77ab765a1ebb8e6f094c69f1072aa2e0689ae0e269a3fc503de69",
+      "preview": "preview_SM_Store_Crate.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Store_Crate_hero.png",
+          "detail": "beauty_SM_Store_Crate_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -18
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "width": 0.6,
+    "depth": 0.6,
+    "height": 0.6
+  },
+  "front": "slatted crate face points -Y",
+  "textures": {
+    "T_Store_Crate_basecolor.png": "6a64776cec9e731fa99aa912c890ecac50a338a86d1fd2acf3b4f29cb04de9f0",
+    "T_Store_Crate_roughness.png": "5b25d6cb8fdfd6c2c7e83290618a58303ca031e7f0e9b5831d834bd95c96f9db",
+    "T_Store_Crate_metallic.png": "36219ca83b83dfe54cdd9d3bf6073be4523dd06efb4c93118e64ad18913aa40e",
+    "T_Store_Crate_normal.png": "3b1679cce7573a7a982ce58870a6d60609c828bdcda9fdf551285018698d3b3e"
+  }
+}

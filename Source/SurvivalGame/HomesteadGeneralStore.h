@@ -63,6 +63,7 @@ private:
     bool bDoorOpen = true;
     int32 PartCount = 0;
     UMaterialInterface* Tint(const FLinearColor& Color, float Roughness = 0.8f);
+    UMaterialInterface* Surface(const TCHAR* Name, const FLinearColor& Fallback, float Roughness);
     // A box in store space (centre, full size in cm), yaw about Z in store space.
     UStaticMeshComponent* Box(const FVector& Center, const FVector& Size, UMaterialInterface* Material,
         bool bCollision = true, float LocalYaw = 0.0f, USceneComponent* Parent = nullptr);

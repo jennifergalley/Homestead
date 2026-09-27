@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "StoreSack",
+  "description": "Slumped hessian grain sack, gathered neck tied with twine, flour dust at base; broad face -Y.",
+  "collision": "convex",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/store_sack.py",
+  "source_sha256": "8ac6ae92e90535a553378504c763f5768fa2dcbb3cea48d51394b2162998c990",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Store_Sack": {
+      "vertices": 1285,
+      "triangles": 2428,
+      "size_cm": [
+        56.56,
+        38.96,
+        65.83
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Sack",
+          "textures": {
+            "basecolor": "T_Store_Sack_basecolor.png",
+            "roughness": "T_Store_Sack_roughness.png",
+            "normal": "T_Store_Sack_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Store_Sack_basecolor.png",
+          "roughness": "T_Store_Sack_roughness.png",
+          "normal": "T_Store_Sack_normal.png",
+          "ao": "T_Store_Sack_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -12
+        ],
+        "focus": [
+          0.0018965154886245728,
+          -0.10608252823352815,
+          0.3801879949559225
+        ]
+      },
+      "fbx": "SM_Store_Sack.fbx",
+      "sha256": "a2d84bb1df14ac234a2368fc5b125ef9819de57374ac343c5acc2649b1ea7cdc",
+      "preview": "preview_SM_Store_Sack.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Store_Sack_hero.png",
+          "detail": "beauty_SM_Store_Sack_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -12
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "height": 0.65,
+    "width": 0.5,
+    "depth": 0.33
+  },
+  "front": "broad slumped face and seam face -Y",
+  "textures": {
+    "T_Store_Sack_basecolor.png": "86044329f7a0d368b8d9715104cc0f093e20e140e8c6405591665dc2d6b37b56",
+    "T_Store_Sack_roughness.png": "d9be598794ba5646cc9f64de8f9863a63d3ddb8cd80cc123f89c8ef374f59544",
+    "T_Store_Sack_normal.png": "9321617488ec525d66f130f7fb59474157a258f4591478cf4d03c37f66711ca2"
+  }
+}

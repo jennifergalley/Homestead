@@ -57,6 +57,18 @@ UMaterialInterface* AHomesteadGeneralStore::Tint(const FLinearColor& Color, floa
     return Instance;
 }
 
+UMaterialInterface* AHomesteadGeneralStore::Surface(const TCHAR* Name, const FLinearColor& Fallback, float Roughness)
+{
+    // World-aligned tiling surfaces baked in Blender (store_surfaces.py); flat tints until imported.
+    const FString Path = FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/StoreSurfaces/MI_Store_%s.MI_Store_%s"), Name, Name);
+    if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet))
+    {
+        TintCache.Add(Path, Material);
+        return Material;
+    }
+    return Tint(Fallback, Roughness);
+}
+
 UStaticMeshComponent* AHomesteadGeneralStore::Box(const FVector& Center, const FVector& Size, UMaterialInterface* Material,
     bool bCollision, float LocalYaw, USceneComponent* Parent)
 {
@@ -182,15 +194,17 @@ void AHomesteadGeneralStore::BuildShell(TFunctionRef<float(float, float)> Ground
     SetActorLocation(FVector(GetActorLocation().X, GetActorLocation().Y, Floor));
 
     // Flat dressed-granite tint until the store has its own tiling masonry material.
-    UMaterialInterface* Granite = Tint(GraniteGrey, 0.92f);
-    UMaterialInterface* Wash = Tint(Lime, 0.9f);
+    UMaterialInterface* Granite = Surface(TEXT("WallGranite"), GraniteGrey, 0.92f);
+    UMaterialInterface* Wash = Surface(TEXT("Limewash"), Lime, 0.9f);
     const float OuterHalf = RoomHalfWidth + WallThickness;
     const float Back = RoomDepth + WallThickness * 0.5f;
     // Plinth, floorboards and a granite doorstep.
     Box(FVector(RoomDepth * 0.5f, 0, -160), FVector(RoomDepth + WallThickness * 2, OuterHalf * 2, 320), Granite);
-    Box(FVector(RoomDepth * 0.5f, 0, 3), FVector(RoomDepth, RoomHalfWidth * 2, 6), Tint(Planks, 0.75f));
-    for (int32 Board = 1; Board < 14; ++Board)
-        Box(FVector(RoomDepth * 0.5f, -RoomHalfWidth + Board * 60.0f, 6.2f), FVector(RoomDepth, 1.5f, 0.5f), Tint(DarkOak), false);
+    UMaterialInterface* Boards = Surface(TEXT("Floorboards"), Planks, 0.75f);
+    Box(FVector(RoomDepth * 0.5f, 0, 3), FVector(RoomDepth, RoomHalfWidth * 2, 6), Boards);
+    if (Boards == TintCache.FindRef(FString::Printf(TEXT("%.3f_%.3f_%.3f_%.2f"), Planks.R, Planks.G, Planks.B, 0.75f)))
+        for (int32 Board = 1; Board < 14; ++Board)
+            Box(FVector(RoomDepth * 0.5f, -RoomHalfWidth + Board * 60.0f, 6.2f), FVector(RoomDepth, 1.5f, 0.5f), Tint(DarkOak), false);
     // A granite threshold and as many steps down to the street as the ground needs (risers under 20 cm).
     const FVector Street = GetActorTransform().TransformPosition(FVector(-WallThickness - 200, 0, 0));
     const float Drop = FMath::Max(0.0f, Floor - Ground(Street.X, Street.Y));
@@ -241,7 +255,7 @@ void AHomesteadGeneralStore::BuildShell(TFunctionRef<float(float, float)> Ground
     const float SlabWidth = (OuterHalf + Overhang) * UE_SQRT_2;
     for (float Side : {-1.0f, 1.0f})
     {
-        UStaticMeshComponent* Slab = Box(FVector::ZeroVector, FVector(RoomDepth + WallThickness * 2 + 80, SlabWidth, 14), Tint(Slate, 0.55f));
+        UStaticMeshComponent* Slab = Box(FVector::ZeroVector, FVector(RoomDepth + WallThickness * 2 + 80, SlabWidth, 14), Surface(TEXT("SlateRoof"), Slate, 0.55f));
         Slab->SetRelativeLocationAndRotation(
             FVector(RoomDepth * 0.5f, Side * (OuterHalf + Overhang) * 0.5f, WallHeight + Rise - (OuterHalf + Overhang) * 0.5f + 12),
             FRotator(0, 0, Side * 45.0f));

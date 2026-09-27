@@ -47,13 +47,13 @@ constexpr ItemInfo ItemCatalogue[] = {
     {Item::Fur, "fur", "Fur", "A cured deer hide for warm clothing.",
         ItemCategory::Material, "fur", 60, NoBuyers, 0.0, 0.0, "Deer remains in the woods, with your knife"},
     {Item::Pasty, "pasty", "Cornish pasty", "Beef, potato, swede and onion in a crimped crust. A proper meal.",
-        ItemCategory::Food, "pasty", 80, NoBuyers, 45.0, 25.0},
+        ItemCategory::Food, "pasty", 80, NoBuyers, 45.0, 25.0, "", false, "Cornish pasties"},
     {Item::Bread, "bread", "Bread", "A round loaf from the town bakehouse.",
-        ItemCategory::Food, "bread", 40, NoBuyers, 20.0, 8.0},
+        ItemCategory::Food, "bread", 40, NoBuyers, 20.0, 8.0, "", false, "loaves of bread"},
     {Item::Cheese, "cheese", "Cheese", "A wedge of hard farmhouse cheese.",
-        ItemCategory::Food, "cheese", 60, NoBuyers, 15.0, 12.0},
+        ItemCategory::Food, "cheese", 60, NoBuyers, 15.0, 12.0, "", false, "wedges of cheese"},
     {Item::Twine, "twine", "Twine", "A hank of hemp twine for binding and tying.",
-        ItemCategory::Material, "twine", 20, NoBuyers},
+        ItemCategory::Material, "twine", 20, NoBuyers, 0.0, 0.0, "", false, "hanks of twine"},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 
@@ -90,6 +90,11 @@ bool ValidItem(Item item)
 
 const ItemInfo& GetItemInfo(Item item) { return ValidItem(item) ? ItemCatalogue[static_cast<int>(item)] : UnknownItemInfo; }
 const char* ItemName(Item item) { return GetItemInfo(item).name; }
+std::string CountedName(Item item, int quantity)
+{
+    const ItemInfo& info = GetItemInfo(item);
+    return std::to_string(quantity) + " " + (quantity != 1 && info.plural ? info.plural : info.name);
+}
 const char* ItemKey(Item item) { return GetItemInfo(item).key; }
 Item ItemFromKey(const char* key)
 {
