@@ -13,9 +13,9 @@ enum class Item : int
 {
     Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
     Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
-    Timber, Firewood, Machete, Count
+    Timber, Firewood, Machete, Fur, Count
 };
-enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, Count };
+enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, DeerRemains, Count };
 enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, SplitFirewood, Count };
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Count };
 enum class CropKind : int { Roots, Berries, Count };
@@ -26,7 +26,9 @@ constexpr double CellSize = 300.0;
 constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 10;
+constexpr int SimulationSaveVersion = 11;
+// Saves before this had no fur (one fewer item per stock) and no outer-layer equipment slot.
+constexpr int ClothingSaveVersion = 11;
 // Saves before this kept every structure on the one world-aligned building grid.
 constexpr int FreeBuildingSaveVersion = 10;
 // Saves before this stored crop plots on whole building cells.
@@ -41,8 +43,13 @@ constexpr int MaxUnderbrushIndex = 4096;
 constexpr int MaxWorldDrops = 512;
 constexpr int TransientResourceIdBase = 1000000;
 
-enum class WearableDefinition : int { LinenTunic, LinenApron, LeatherShoes, WovenFootwraps, Count };
-enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Count };
+enum class WearableDefinition : int
+{
+    LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
+    LinenShirt, LinenLongShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes, Count
+};
+// Outer is a coat worn over whatever covers the torso.
+enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Outer, Count };
 enum class WearableOwner : int { Carried, Chest, Equipped, World };
 enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
@@ -54,7 +61,10 @@ struct WearableDefinitionInfo
     const char* name;
     unsigned slots;
     bool dyeable;
-    int fiberCost; // Zero means starter-only, not a free recipe.
+    int fiberCost; // Zero (with no fur) means starter-only, not a free recipe.
+    int furCost = 0;
+    // How much of the cold she stops losing to, in warmth per hour (see Simulation::Insulation).
+    double insulation = 0.0;
 };
 
 struct WearableInstance
@@ -393,6 +403,9 @@ public:
     Result Sleep(double hours, Point player);
     Result SetDayMinutes(double minutes);
     void SetWarmOutfit(bool enabled);
+    // Warmth per hour that her equipped clothing stops her losing to the cold.
+    double Insulation() const;
+    static constexpr double InsulationPerPoint = 0.6;
     void Advance(double realSeconds, Point player, bool paused = false);
     void AdvanceGameHours(double hours, Point player);
     // Playtest aid: jump the clock forward to the next occurrence of hourOfDay (0-24) without

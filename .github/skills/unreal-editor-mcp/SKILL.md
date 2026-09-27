@@ -794,3 +794,13 @@ Dated and short, newest first. Promote anything durable into the sections above.
   (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
   `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
   Move `Saved\Automation\Packaged\native-wardrobe-fixture*` into `History\` before a NativeMenu run.
+- 2026-09-27: `HomesteadWear <key|name>` (console, in PIE) grants the materials, crafts one garment
+  and puts it on, for example `HomesteadWear fur-coat` or `HomesteadWear woven-sandals`. The
+  MetaHuman garments live in `/Game/Characters/Heroine_MH/Assembled/Heroine/Garments`. To
+  re-import them, run `Scripts/Characters/import_heroine_garments.py` in the editor (set
+  `GARMENT_NAMES` first to import a subset). Deer remains show up as `DeerRemains` in
+  `get_play_state`; harvesting gives 3 Fur.
+- 2026-09-27: Slate `Click` does not reach game menus, but a real Win32 click does. With the PIE
+  window pinned at 0,0 1936x1119 by `pietop.ps1`, call `SetProcessDPIAware`, then
+  `SetCursorPos` in window pixels and `mouse_event` down/up (2/4). Park the cursor afterwards.
+  Jenny's own mouse can interfere if she is at the PC.

@@ -155,6 +155,7 @@ namespace
         case Homestead::ResourceKind::Reeds: return TEXT("Reeds");
         case Homestead::ResourceKind::Sapling: return TEXT("Sapling");
         case Homestead::ResourceKind::ForestTree: return TEXT("ForestTree");
+        case Homestead::ResourceKind::DeerRemains: return TEXT("DeerRemains");
         default: return TEXT("Unknown");
         }
     }

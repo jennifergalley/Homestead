@@ -51,6 +51,10 @@ public:
         return ActiveEquipment.Ready ? &ActiveEquipment : nullptr;
     }
     bool HasHeroine() const { return bHeroineReady; }
+    // The garment mesh the MetaHuman heroine shows in a slot (0 top, 1 legs, 2 coat, 3 feet), if any.
+    const USkeletalMesh* MetaHumanGarmentMesh(int32 Slot) const;
+    // Sole thickness of what she wears on her feet: the mesh stands this much higher (cm).
+    float GetFootwearLift() const { return FootwearLift; }
     // The MetaHuman heroine is the default. The legacy heroine is the rollback: homestead.MetaHumanHeroine 0,
     // -HomesteadLegacyHeroine, or smoke/automation tests (their wardrobe contracts cover the legacy stack).
     static bool UsesMetaHumanHeroine();
@@ -321,6 +325,13 @@ private:
     UPROPERTY() TObjectPtr<USkeletalMesh> MetaHumanBody;
     UPROPERTY(VisibleAnywhere) TObjectPtr<USkeletalMeshComponent> MetaHumanFace;
     UPROPERTY(VisibleAnywhere) TObjectPtr<USkeletalMeshComponent> MetaHumanOutfit;
+    // Worn over the homespun base layer: top, legs, coat and feet (MetaHumanGarmentSlots order).
+    UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> MetaHumanGarments;
+    // Wearable definition per MetaHuman garment slot (-1 when nothing is worn there).
+    TArray<int32> MetaHumanWorn, PendingMetaHumanWorn;
+    // How far soled footwear lifts her off the ground, in cm.
+    float FootwearLift = 0;
+    void ApplyMetaHumanGarments();
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UGroomComponent>> MetaHumanGrooms;
     UPROPERTY(VisibleAnywhere) TObjectPtr<ULODSyncComponent> MetaHumanLODSync;
     bool bMetaHumanActive = false;

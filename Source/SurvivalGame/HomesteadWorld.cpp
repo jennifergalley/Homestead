@@ -2850,6 +2850,23 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Authored(Reeds, FVector2D::ZeroVector, static_cast<float>(Variation % 360), bProduceOnly);
         }
         break;
+    case Homestead::ResourceKind::DeerRemains:
+        {
+            // The hide-covered remains while there is fur to take, bare bones after; UpdateVisuals
+            // hides the bones while the remains are showing (both share one pivot and footprint).
+            const TCHAR* Path = bProduceOnly
+                ? TEXT("/Game/SurvivalGame/Environment/Props/DeerRemains/SM_DeerRemains.SM_DeerRemains")
+                : TEXT("/Game/SurvivalGame/Environment/Props/DeerRemains/SM_DeerBones.SM_DeerBones");
+            UStaticMesh* Deer = LoadObject<UStaticMesh>(nullptr, Path);
+            if (!Deer)
+            {
+                bVisualBuildFailed = true;
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Deer remains %d are missing their authored mesh: %s"), Node.id, Path);
+                break;
+            }
+            Authored(Deer, FVector2D::ZeroVector, static_cast<float>(Variation % 360), bProduceOnly);
+        }
+        break;
     case Homestead::ResourceKind::Sapling:
     {
         Homestead::Generation::GeneratedEntity Entity;
@@ -3406,6 +3423,9 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             }
             Produce.Signature = ProduceSignature;
         }
+        if (Node.kind == Homestead::ResourceKind::DeerRemains)
+            for (USceneComponent* Bone : Visual.Components)
+                if (Bone && Bone->IsVisible() == bReady) Bone->SetVisibility(!bReady);
     }
     if (Transition) CancelStagedResources();
 

@@ -18,9 +18,13 @@
 
 ## 2. Unreal integration (coordinator)
 
-- [ ] 2.1 Import the three FBXs onto `metahuman_base_skel`, with materials and a flipped green
+- [x] 2.1 Import the three FBXs onto `metahuman_base_skel`, with materials and a flipped green
   channel on the normals.
-- [ ] 2.2 Apply `BodyCoverageMask_<Name>` while each pair is worn, and lift the character by
-  the sole thickness: FurBoots 1.2 cm, WovenSandals 1.05 cm, TurnShoes 0.5 cm.
-- [ ] 2.3 Hook the warmth ratings (sandals 0, turnshoes 1, fur boots 4) into the survival
-  temperature model, and verify the pairs in walking, kneeling and squatting gameplay views.
+- [x] 2.2 Lift the character by the sole thickness: FurBoots 1.2 cm, WovenSandals 1.05 cm,
+  TurnShoes 0.5 cm (mesh Z and foot-IK ground height).
+- [ ] 2.2a Apply `BodyCoverageMask_<Name>` while each pair is worn. Deferred: the body still
+  renders under footwear, and the fitted clearance hides it at bind pose.
+- [x] 2.3 Hook the warmth ratings (sandals 0, turnshoes 1, fur boots 4) into the survival
+  temperature model (`Insulation()` offsets seasonal cold loss).
+- [ ] 2.4 Verify the pairs in kneeling and squatting gameplay views (standing views are checked
+  in PIE).

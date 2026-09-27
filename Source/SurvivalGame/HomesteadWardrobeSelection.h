@@ -46,7 +46,7 @@ inline bool SelectWardrobe(const State& state, int body, int hair,
     for (const auto& item : state.wearables)
     {
         const auto* definition = GetWearableDefinition(item.definition);
-        if (!definition || !GarmentAssetSuffix(item.definition) || item.id <= 0
+        if (!definition || item.id <= 0
             || !ids.insert(item.id).second || item.dye < 0
             || item.dye >= (definition->dyeable ? 4 : 1))
         {
@@ -59,7 +59,9 @@ inline bool SelectWardrobe(const State& state, int body, int hair,
             error = "Unknown wearable owner in presentation candidate.";
             return false;
         }
-        if (std::find(candidate.ownedDefinitions.begin(), candidate.ownedDefinitions.end(),
+        // Garments made for the MetaHuman heroine have no modular fit; the legacy body skips them.
+        const bool presented = GarmentAssetSuffix(item.definition) != nullptr;
+        if (presented && std::find(candidate.ownedDefinitions.begin(), candidate.ownedDefinitions.end(),
             item.definition) == candidate.ownedDefinitions.end())
             candidate.ownedDefinitions.push_back(item.definition);
         if (item.owner != WearableOwner::Equipped) continue;
@@ -73,7 +75,7 @@ inline bool SelectWardrobe(const State& state, int body, int hair,
             }
             slots[slot] = item.id;
         }
-        candidate.equipped.push_back(item);
+        if (presented) candidate.equipped.push_back(item);
     }
     if (slots != state.equipment
         || (slots[static_cast<int>(EquipmentSlot::Apron)] != 0

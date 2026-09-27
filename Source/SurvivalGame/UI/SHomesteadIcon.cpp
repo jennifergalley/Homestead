@@ -246,6 +246,14 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("linen-apron")), EKind::LinenApron},
         {FName(TEXT("leather-shoes")), EKind::LeatherShoes},
         {FName(TEXT("woven-footwraps")), EKind::WovenFootwraps},
+        {FName(TEXT("fur")), EKind::Fur},
+        {FName(TEXT("linen-shirt")), EKind::LinenShirt},
+        {FName(TEXT("long-linen-shirt")), EKind::LongLinenShirt},
+        {FName(TEXT("trousers")), EKind::Trousers},
+        {FName(TEXT("fur-coat")), EKind::FurCoat},
+        {FName(TEXT("fur-boots")), EKind::FurBoots},
+        {FName(TEXT("woven-sandals")), EKind::WovenSandals},
+        {FName(TEXT("turnshoes")), EKind::TurnShoes},
         {FName(TEXT("slot-torso")), EKind::SlotTorso},
         {FName(TEXT("slot-apron")), EKind::SlotApron},
         {FName(TEXT("slot-feet")), EKind::SlotFeet}
@@ -586,6 +594,77 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{21, 14}, {10, 20}, {21, 26}, {10, 32}}, Wood, 2);
         P.Line({{33, 11}, {44, 17}, {33, 23}, {44, 29}, {33, 35}, {46, 38}}, Wood, 2);
         P.Line({{44, 11}, {33, 17}, {44, 23}}, Wood, 2);
+        break;
+    case EKind::Fur:
+        // A stretched pelt: ragged outline, darker spine, pale belly edges.
+        P.Shape({{18, 7}, {28, 11}, {38, 7}, {41, 16}, {48, 19}, {44, 30}, {49, 41},
+            {39, 44}, {34, 50}, {22, 50}, {17, 44}, {7, 41}, {12, 30}, {8, 19}, {15, 16}}, Wood);
+        P.Shape({{24, 14}, {32, 14}, {34, 44}, {22, 44}}, Gold);
+        P.Line({{28, 12}, {28, 47}}, Charcoal, 2);
+        P.Line({{14, 22}, {19, 25}}, Cream, 1.5f);
+        P.Line({{42, 22}, {37, 25}}, Cream, 1.5f);
+        P.Line({{12, 38}, {18, 36}}, Cream, 1.5f);
+        P.Line({{44, 38}, {38, 36}}, Cream, 1.5f);
+        break;
+    case EKind::LinenShirt:
+        P.Shape({{19, 9}, {24, 12}, {32, 12}, {37, 9}, {48, 17}, {43, 26},
+            {38, 23}, {38, 46}, {18, 46}, {18, 23}, {13, 26}, {8, 17}}, Cream);
+        P.Line({{24, 11}, {28, 18}, {32, 11}}, Gold, 2);
+        P.Line({{19, 43}, {37, 43}}, Gold, 1.5f);
+        P.Line({{13, 24}, {18, 21}}, Wood, 1.5f);
+        P.Line({{43, 24}, {38, 21}}, Wood, 1.5f);
+        break;
+    case EKind::LongLinenShirt:
+        P.Shape({{19, 8}, {24, 11}, {32, 11}, {37, 8}, {45, 14}, {51, 42}, {45, 44},
+            {38, 22}, {38, 47}, {18, 47}, {18, 22}, {11, 44}, {5, 42}, {11, 14}}, Cream);
+        P.Line({{24, 10}, {28, 17}, {32, 10}}, Gold, 2);
+        P.Line({{27, 14}, {29, 14}}, Wood, 3);
+        P.Line({{6, 40}, {11, 41}}, Gold, 2);
+        P.Line({{50, 40}, {45, 41}}, Gold, 2);
+        P.Line({{19, 44}, {37, 44}}, Gold, 1.5f);
+        break;
+    case EKind::Trousers:
+        P.Shape({{15, 8}, {41, 8}, {45, 48}, {33, 48}, {28, 22}, {23, 48}, {11, 48}}, Gold);
+        P.Rect(15, 8, 26, 5, Wood);
+        P.Line({{24, 13}, {27, 19}}, Cream, 1.5f);
+        P.Line({{32, 13}, {29, 19}}, Cream, 1.5f);
+        P.Line({{12, 44}, {23, 44}}, Wood, 2);
+        P.Line({{33, 44}, {44, 44}}, Wood, 2);
+        break;
+    case EKind::FurCoat:
+        P.Shape({{18, 10}, {38, 10}, {47, 18}, {50, 44}, {43, 45}, {40, 26},
+            {41, 50}, {15, 50}, {16, 26}, {13, 45}, {6, 44}, {9, 18}}, Wood);
+        P.Shape({{16, 8}, {28, 16}, {40, 8}, {41, 14}, {28, 24}, {15, 14}}, Cream);
+        P.Line({{28, 22}, {28, 49}}, Charcoal, 2);
+        P.Line({{16, 47}, {40, 47}}, Cream, 3);
+        P.Line({{6, 42}, {13, 43}}, Cream, 3);
+        P.Line({{50, 42}, {43, 43}}, Cream, 3);
+        P.Disc(31, 31, 1.5f, Gold);
+        P.Disc(31, 39, 1.5f, Gold);
+        break;
+    case EKind::FurBoots:
+        P.Shape({{9, 16}, {22, 16}, {23, 38}, {30, 42}, {30, 48}, {8, 48}}, Wood);
+        P.Shape({{31, 10}, {44, 10}, {45, 32}, {52, 36}, {52, 42}, {30, 42}}, Gold);
+        P.Rect(8, 11, 15, 7, Cream);
+        P.Rect(30, 5, 15, 7, Cream);
+        P.Line({{10, 34}, {22, 36}}, Charcoal, 1.5f);
+        P.Line({{32, 28}, {44, 30}}, Pine, 1.5f);
+        break;
+    case EKind::WovenSandals:
+        P.Shape({{9, 14}, {19, 12}, {23, 22}, {22, 46}, {14, 49}, {8, 44}}, Gold);
+        P.Shape({{33, 10}, {43, 8}, {48, 18}, {47, 42}, {39, 46}, {33, 41}}, Gold);
+        P.Line({{9, 22}, {22, 26}, {10, 32}, {22, 36}}, Wood, 1.5f);
+        P.Line({{34, 18}, {47, 22}, {34, 28}, {47, 32}}, Wood, 1.5f);
+        P.Line({{8, 30}, {24, 18}}, Cream, 2);
+        P.Line({{33, 26}, {48, 14}}, Cream, 2);
+        break;
+    case EKind::TurnShoes:
+        P.Shape({{7, 24}, {18, 20}, {23, 27}, {29, 32}, {30, 38}, {26, 40}, {6, 40}}, Wood);
+        P.Shape({{29, 14}, {40, 10}, {45, 18}, {51, 24}, {51, 31}, {47, 33}, {28, 33}}, Gold);
+        P.Line({{15, 22}, {19, 26}, {14, 27}}, Cream, 1.5f);
+        P.Line({{37, 12}, {41, 16}, {36, 17}}, Pine, 1.5f);
+        P.Line({{6, 41}, {26, 41}}, Charcoal, 2);
+        P.Line({{28, 34}, {47, 34}}, Charcoal, 2);
         break;
     case EKind::SlotTorso:
         P.Shape({{16, 10}, {24, 7}, {32, 7}, {40, 10}, {48, 22}, {42, 28},

@@ -31,9 +31,16 @@ bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int 
         Row.IconTint = FLinearColor(0.20f, 0.27f, 0.115f) * HomesteadLook::TunicTint(Instance.dye);
     }
     Row.Detail += FString::Printf(TEXT("\nOwned item #%d\n"), Instance.id);
-    if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Torso))) Row.Detail += TEXT("Torso + legs");
-    else if (Info->slots & (1u << static_cast<int>(Homestead::EquipmentSlot::Apron))) Row.Detail += TEXT("Apron layer (requires tunic)");
+    const auto Has = [Info](Homestead::EquipmentSlot Slot) { return (Info->slots & (1u << static_cast<int>(Slot))) != 0; };
+    if (Has(Homestead::EquipmentSlot::Torso) && Has(Homestead::EquipmentSlot::Legs)) Row.Detail += TEXT("Torso + legs");
+    else if (Has(Homestead::EquipmentSlot::Torso)) Row.Detail += TEXT("Torso");
+    else if (Has(Homestead::EquipmentSlot::Legs)) Row.Detail += TEXT("Legs");
+    else if (Has(Homestead::EquipmentSlot::Outer)) Row.Detail += TEXT("Outer layer, over any shirt");
+    else if (Has(Homestead::EquipmentSlot::Apron)) Row.Detail += TEXT("Apron layer (requires a top)");
     else Row.Detail += TEXT("Feet");
+    if (Info->insulation > 0)
+        Row.Detail += FString::Printf(TEXT("\nWarmth +%.1f per cold hour"),
+            Info->insulation * Homestead::Simulation::InsulationPerPoint);
     Row.Action = Row.ContainerId < 0 ? TEXT("Unequip") : Row.ContainerId == 0 ? TEXT("Equip") : TEXT("Take to pack");
     Row.Icon = Instance.definition == Homestead::WearableDefinition::LeatherShoes ? FName(TEXT("leather-shoes"))
         : FName(UTF8_TO_TCHAR(Info->key));
@@ -70,11 +77,14 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             {
                 const auto Definition = static_cast<Homestead::WearableDefinition>(Index);
                 const auto* Info = Homestead::GetWearableDefinition(Definition);
-                if (!Info || Info->fiberCost <= 0) continue;
+                if (!Info || (Info->fiberCost <= 0 && Info->furCost <= 0)) continue;
                 FHomesteadRow Row;
                 Row.Id = Index; Row.SubjectId = Index; Row.Subject = EHomesteadMenuSubject::GarmentRecipe;
                 Row.Name = Row.Label = FromUtf8(Info->name);
                 Row.Detail = TEXT("Needs: ") + FromUtf8(Homestead::GarmentRequirements(Definition));
+                if (Info->insulation > 0)
+                    Row.Detail += FString::Printf(TEXT("\nWarmth +%.1f per cold hour"),
+                        Info->insulation * Homestead::Simulation::InsulationPerPoint);
                 Row.Action = TEXT("Craft clothing");
                 Row.Icon = FName(UTF8_TO_TCHAR(Info->key));
                 Result.Add(MoveTemp(Row));

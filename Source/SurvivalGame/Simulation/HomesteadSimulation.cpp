@@ -137,6 +137,8 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Reeds: return 24.0;
     case ResourceKind::Sapling: return 168.0;
     case ResourceKind::ForestTree: return 0.0;
+    // Another winter-killed deer turns up in the same hollow about ten days later.
+    case ResourceKind::DeerRemains: return 240.0;
     default: return 0.0;
     }
 }
@@ -152,6 +154,7 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Reeds: return Items({{Item::Fiber, 5}});
     case ResourceKind::Sapling: return Items({{Item::Branch, 8}, {Item::Fiber, 2}});
     case ResourceKind::ForestTree: return Items({{Item::Timber, 6}, {Item::Branch, 4}});
+    case ResourceKind::DeerRemains: return Items({{Item::Fur, 3}});
     default: return {};
     }
 }
@@ -216,6 +219,7 @@ const char* AcquisitionSource(Item item)
     case Item::Roots: return "Wild roots";
     case Item::Flowers: return "Meadow herb patches";
     case Item::Timber: return "Mature trees with Hatchet";
+    case Item::Fur: return "Deer remains in the woods, with your knife";
     default: return "";
     }
 }
@@ -270,6 +274,7 @@ ResourceKind ResourceType(Generation::EntityKind kind)
     case Generation::EntityKind::Flowers: return ResourceKind::Flowers;
     case Generation::EntityKind::Reeds: return ResourceKind::Reeds;
     case Generation::EntityKind::Sapling: return ResourceKind::Sapling;
+    case Generation::EntityKind::DeerRemains: return ResourceKind::DeerRemains;
     default: return ResourceKind::Count;
     }
 }
@@ -488,8 +493,17 @@ constexpr WearableDefinitionInfo Wearables[] = {
         Slot(EquipmentSlot::Torso) | Slot(EquipmentSlot::Legs), true, 12},
     {WearableDefinition::LinenApron, "linen-apron", "Linen apron", Slot(EquipmentSlot::Apron), true, 6},
     {WearableDefinition::LeatherShoes, "legacy-laceup-shoes", "Leather shoes", Slot(EquipmentSlot::Feet), false, 0},
-    {WearableDefinition::WovenFootwraps, "woven-footwraps", "Woven footwraps", Slot(EquipmentSlot::Feet), false, 8}
+    {WearableDefinition::WovenFootwraps, "woven-footwraps", "Woven footwraps", Slot(EquipmentSlot::Feet), false, 8},
+    {WearableDefinition::LinenShirt, "linen-shirt", "Linen shirt", Slot(EquipmentSlot::Torso), false, 8, 0, 0.5},
+    {WearableDefinition::LinenLongShirt, "long-linen-shirt", "Long-sleeved linen shirt",
+        Slot(EquipmentSlot::Torso), false, 12, 0, 1.0},
+    {WearableDefinition::Trousers, "trousers", "Homespun trousers", Slot(EquipmentSlot::Legs), false, 14, 0, 2.0},
+    {WearableDefinition::FurCoat, "fur-coat", "Fur coat", Slot(EquipmentSlot::Outer), false, 4, 6, 6.0},
+    {WearableDefinition::FurBoots, "fur-boots", "Fur boots", Slot(EquipmentSlot::Feet), false, 2, 3, 4.0},
+    {WearableDefinition::WovenSandals, "woven-sandals", "Woven sandals", Slot(EquipmentSlot::Feet), false, 6, 0, 0.0},
+    {WearableDefinition::TurnShoes, "turnshoes", "Turnshoes", Slot(EquipmentSlot::Feet), false, 2, 2, 1.0}
 };
+static_assert(sizeof(Wearables) / sizeof(Wearables[0]) == static_cast<int>(WearableDefinition::Count));
 bool InContainer(const WearableInstance& item, int container)
 {
     return container == 0 ? item.owner == WearableOwner::Carried :
@@ -553,6 +567,7 @@ int InventoryCategory(Item item)
     case Item::Fiber:
     case Item::Timber:
     case Item::Firewood:
+    case Item::Fur:
         return 1;
     case Item::Berries:
     case Item::Roots:
@@ -774,6 +789,13 @@ const char* WearableDescription(WearableDefinition definition)
     case WearableDefinition::LinenApron: return "A separate apron worn over a linen tunic. Cosmetic clothing; no warmth bonus.";
     case WearableDefinition::LeatherShoes: return "Lace-up shoes with socks from older saves. Authored color; not craftable.";
     case WearableDefinition::WovenFootwraps: return "Fiber-woven footwear, worn instead of shoes. Authored color; no warmth bonus.";
+    case WearableDefinition::LinenShirt: return "A short-sleeved shirt of undyed linen, loosely woven for warm days. Slight warmth.";
+    case WearableDefinition::LinenLongShirt: return "A long-sleeved linen shirt with a drawstring neck; keeps the evening chill off her arms.";
+    case WearableDefinition::Trousers: return "Close-woven homespun trousers, tied at the waist and snug below the knee. Warm on cold nights.";
+    case WearableDefinition::FurCoat: return "A hide coat worn fur-side in, sewn with fiber thread. By far her warmest layer.";
+    case WearableDefinition::FurBoots: return "Tall hide boots with a fur lining and a turned-down cuff. Keep her feet warm in snow.";
+    case WearableDefinition::WovenSandals: return "Plaited fiber soles tied on with cords. Cool and light; no warmth.";
+    case WearableDefinition::TurnShoes: return "Soft hide shoes sewn inside out and turned, laced at the instep. A little warmth.";
     default: return "Unknown garment";
     }
 }
@@ -787,8 +809,13 @@ const char* GarmentRequirements(WearableDefinition definition)
     static const auto requirements = [] {
         std::array<std::string, static_cast<int>(WearableDefinition::Count)> result{};
         for (const auto& info : Wearables)
-            result[static_cast<int>(info.id)] = info.fiberCost > 0 ?
-                std::to_string(info.fiberCost) + " Fiber; knife required; work fiber into cloth" : "Starter footwear; not craftable";
+        {
+            std::string& text = result[static_cast<int>(info.id)];
+            if (info.fiberCost <= 0 && info.furCost <= 0) { text = "Starter footwear; not craftable"; continue; }
+            text = std::to_string(info.fiberCost) + " Fiber";
+            if (info.furCost > 0) text += " + " + std::to_string(info.furCost) + " Fur";
+            text += info.furCost > 0 ? "; knife required; cut and sew the hide" : "; knife required; work fiber into cloth";
+        }
         return result;
     }();
     return GetWearableDefinition(definition) ? requirements[static_cast<int>(definition)].c_str() : "Unknown garment";
@@ -797,14 +824,15 @@ const char* ItemName(Item item)
 {
     static const char* names[] = {"Knife", "Branch", "Stone", "Fiber", "Berries", "Roots",
         "Meadow herb", "Seeds", "Crude hatchet", "Stone hoe", "Watering can", "Water",
-        "Roasted roots", "Herbed roots", "Timber", "Firewood", "Machete"};
+        "Roasted roots", "Herbed roots", "Timber", "Firewood", "Machete", "Fur"};
     static_assert(sizeof(names) / sizeof(names[0]) == ItemCount, "Every item needs a name.");
     return ValidEnum(item, Item::Count) ? names[static_cast<int>(item)] : "Unknown item";
 }
 const char* ResourceName(ResourceKind kind)
 {
     static const char* names[] = {"Fallen branches", "Loose stones", "Berry bush", "Wild roots",
-        "Meadow herb", "Stream reeds", "Sapling", "Forest tree"};
+        "Meadow herb", "Stream reeds", "Sapling", "Forest tree", "Deer remains"};
+    static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
 const char* RecipeName(Recipe recipe)
@@ -1104,6 +1132,13 @@ Result Simulation::EquipWearable(int id, std::uint64_t expectedRevision)
     }
     Find(candidate.wearables, id)->owner = WearableOwner::Equipped;
     RefreshEquipment(candidate);
+    // Trousers displace a tunic from the legs, which can leave an apron with nothing to tie over.
+    if (const int apron = candidate.equipment[static_cast<int>(EquipmentSlot::Apron)];
+        apron != 0 && candidate.equipment[static_cast<int>(EquipmentSlot::Torso)] == 0)
+    {
+        Find(candidate.wearables, apron)->owner = WearableOwner::Carried;
+        RefreshEquipment(candidate);
+    }
     return CommitInventory(std::move(candidate), "Garment equipped.");
 }
 Result Simulation::UnequipWearable(int id, std::uint64_t expectedRevision)
@@ -1114,7 +1149,7 @@ Result Simulation::UnequipWearable(int id, std::uint64_t expectedRevision)
     if (!original || original->owner != WearableOwner::Equipped) return Bad("Choose an equipped garment.");
     State candidate = state_;
     Find(candidate.wearables, id)->owner = WearableOwner::Carried;
-    if (original->definition == WearableDefinition::LinenTunic)
+    if (GetWearableDefinition(original->definition)->slots & Slot(EquipmentSlot::Torso))
     {
         const int apron = candidate.equipment[static_cast<int>(EquipmentSlot::Apron)];
         if (apron != 0) Find(candidate.wearables, apron)->owner = WearableOwner::Carried;
@@ -1146,17 +1181,23 @@ Result Simulation::CraftGarment(WearableDefinition definition, Point player, std
     const auto ready = CheckRevision(expectedRevision);
     if (!ready) return ready;
     const auto* info = GetWearableDefinition(definition);
-    if (!info || info->fiberCost <= 0 || !ValidPoint(player)) return Bad("Choose a craftable garment and valid location.");
+    if (!info || (info->fiberCost <= 0 && info->furCost <= 0) || !ValidPoint(player))
+        return Bad("Choose a craftable garment and valid location.");
     if (Count(Item::Knife) == 0) return Bad("Take your knife from storage to work fiber into clothing.");
     if (Count(Item::Fiber) < info->fiberCost)
         return Bad("Gather " + std::to_string(info->fiberCost - Count(Item::Fiber)) + " more Fiber first.");
+    if (Count(Item::Fur) < info->furCost)
+        return Bad("Gather " + std::to_string(info->furCost - Count(Item::Fur)) +
+            " more Fur first. Look for deer remains in the woods.");
     if (!CanAllocate(state_.nextWearableId) || state_.wearables.size() >= MaxObjects)
         return Bad("The homestead has reached its garment identity limit.");
     if (auto rested = CheckExertion(Exertion::GarmentEnergy); !rested) return rested;
     State candidate = state_;
     candidate.inventory[static_cast<int>(Item::Fiber)] -= info->fiberCost;
+    candidate.inventory[static_cast<int>(Item::Fur)] -= info->furCost;
     candidate.wearables.push_back({candidate.nextWearableId++, definition, 0, WearableOwner::Carried, 0});
-    return Exert(Exertion::GarmentEnergy, CommitInventory(std::move(candidate), "Made one garment from fiber."));
+    return Exert(Exertion::GarmentEnergy, CommitInventory(std::move(candidate),
+        info->furCost > 0 ? "Made one garment from hide and fiber." : "Made one garment from fiber."));
 }
 Result Simulation::RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision)
 {
@@ -1548,11 +1589,13 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (!node || node->cleared) return Bad("That resource is no longer available.");
     if (node->kind == ResourceKind::ForestTree) return Clear(nodeId, player);
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
-    if (node->readyAtHour > state_.hour) return Bad("Nothing to gather here.");
+    if (node->readyAtHour > state_.hour)
+        return Bad(node->kind == ResourceKind::DeerRemains ? "Only bones are left here." : "Nothing to gather here.");
     if (node->kind == ResourceKind::Sapling && Count(Item::Hatchet) == 0)
         return Bad("Craft a crude hatchet before cutting a sapling.");
     if (node->kind != ResourceKind::Sapling && Count(Item::Knife) == 0)
-        return Bad("Take your knife from storage before gathering.");
+        return Bad(node->kind == ResourceKind::DeerRemains ? "Take your knife from storage to cut the hide free."
+            : "Take your knife from storage before gathering.");
     const double cost = HarvestCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = Yield(node->kind);
@@ -1561,7 +1604,8 @@ Result Simulation::Harvest(int nodeId, Point player)
     updated->readyAtHour = state_.hour + Regrowth(node->kind);
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
-    const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ".";
+    const std::string message = node->kind == ResourceKind::DeerRemains ? std::string("Cut the fur hide from the deer remains.")
+        : std::string("Gathered ") + ResourceName(node->kind) + ".";
     return Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
 }
 Result Simulation::Clear(int nodeId, Point player)
@@ -2118,14 +2162,28 @@ Result Simulation::SetDayMinutes(double minutes)
     return Good("Day length updated.");
 }
 void Simulation::SetWarmOutfit(bool enabled) { if (!state_.failed) state_.warmOutfit = enabled; }
+double Simulation::Insulation() const
+{
+    double total = 0.0;
+    for (const auto& item : state_.wearables)
+        if (item.owner == WearableOwner::Equipped)
+            if (const auto* info = GetWearableDefinition(item.definition)) total += info->insulation;
+    return total * InsulationPerPoint;
+}
 void Simulation::Step(double hours, Point player, bool sleeping)
 {
     const bool rain = IsRaining();
     const bool sheltered = IsSheltered(player);
     const bool fire = IsNearFire(player);
     double warmthRate = IsNight() ? -6.0 : 3.0;
+    // Cooler autumns and hard winters; spring and summer keep the original day/night rates.
+    const std::string season = SeasonName();
+    if (season == "Autumn") warmthRate = IsNight() ? -8.0 : 1.5;
+    else if (season == "Winter") warmthRate = IsNight() ? -11.0 : -2.0;
     if (rain && !sheltered) warmthRate -= 1.5;
     if (state_.warmOutfit && warmthRate < 0) warmthRate += 2.0;
+    // Clothing only slows heat loss; it never warms her on its own.
+    if (warmthRate < 0) warmthRate = std::min(0.0, warmthRate + Insulation());
     if (sheltered) warmthRate = std::max(1.0, warmthRate + 7.0);
     if (fire) warmthRate = std::max(6.0, warmthRate + 12.0);
     const double hungerRate = sleeping ? -1.3 : -2.0;
@@ -2310,11 +2368,13 @@ Result Simulation::Deserialize(const std::string& data)
     if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD") return invalid();
     header >> std::ws;
     if (!header.eof()) return invalid();
-    if (version != SimulationSaveVersion && version != GardenSquareSaveVersion && version != LegacySimulationSaveVersion
-        && version != GardenSquareSaveVersion - 1) return {false,
+    if (version != SimulationSaveVersion && version != FreeBuildingSaveVersion && version != GardenSquareSaveVersion
+        && version != LegacySimulationSaveVersion && version != GardenSquareSaveVersion - 1) return {false,
         "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
-    const int storedItems = version == LegacySimulationSaveVersion ? static_cast<int>(Item::Machete) : ItemCount;
+    const int storedItems = version == LegacySimulationSaveVersion ? static_cast<int>(Item::Machete)
+        : version < ClothingSaveVersion ? static_cast<int>(Item::Fur) : ItemCount;
+    const int storedSlots = version < ClothingSaveVersion ? static_cast<int>(EquipmentSlot::Outer) : EquipmentSlotCount;
     const std::string payload = data.substr(newline + 1);
     if (size != payload.size() || Checksum(payload) != checksum) return invalid();
     for (unsigned char c : payload) if (c > 127 || (c < 32 && c != '\n' && c != '\r' && c != '\t')) return invalid();
@@ -2473,7 +2533,8 @@ Result Simulation::Deserialize(const std::string& data)
         item.owner = static_cast<WearableOwner>(owner);
         candidate.wearables.push_back(item);
     }
-    for (int& id : candidate.equipment) if (!(input >> id)) return invalid();
+    candidate.equipment.fill(0);
+    for (int slot = 0; slot < storedSlots; ++slot) if (!(input >> candidate.equipment[slot])) return invalid();
     if (!ReadLayout(input, candidate.inventoryLayout)) return invalid();
     if (version != LegacySimulationSaveVersion)
     {

@@ -929,6 +929,34 @@ void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
     Notify(FString::Printf(TEXT("No item called %s."), *ItemName), true);
 }
 
+void AHomesteadController::HomesteadWear(const FString& Garment)
+{
+    const auto Key = [](FString Text) { return Text.Replace(TEXT(" "), TEXT("")).Replace(TEXT("-"), TEXT("")); };
+    for (int32 Index = 0; Index < static_cast<int32>(Homestead::WearableDefinition::Count); ++Index)
+    {
+        const auto Definition = static_cast<Homestead::WearableDefinition>(Index);
+        const auto* Info = Homestead::GetWearableDefinition(Definition);
+        if (!Info || (!Key(UTF8_TO_TCHAR(Info->key)).Equals(Key(Garment), ESearchCase::IgnoreCase)
+            && !Key(UTF8_TO_TCHAR(Info->name)).Equals(Key(Garment), ESearchCase::IgnoreCase)))
+            continue;
+        if (Info->fiberCost <= 0 && Info->furCost <= 0) { Notify(TEXT("That garment cannot be made."), true); return; }
+        if (Sim.Count(Homestead::Item::Knife) == 0) Sim.GrantItems(Homestead::Item::Knife, 1);
+        if (Info->fiberCost > 0) Sim.GrantItems(Homestead::Item::Fiber, Info->fiberCost);
+        if (Info->furCost > 0) Sim.GrantItems(Homestead::Item::Fur, Info->furCost);
+        FHomesteadRow Recipe;
+        Recipe.Subject = EHomesteadMenuSubject::GarmentRecipe;
+        Recipe.Id = Recipe.SubjectId = Index;
+        if (!MenuItemAction(Recipe, EHomesteadItemAction::Equip, 1, Sim.GetRevision())) return;
+        int32 Made = 0;
+        for (const auto& Item : State().wearables)
+            if (Item.definition == Definition && Item.owner == Homestead::WearableOwner::Carried) Made = FMath::Max(Made, Item.id);
+        FHomesteadRow Worn;
+        if (Made && MenuWearableRow(Made, Worn)) MenuItemAction(Worn, EHomesteadItemAction::Equip, 1, Sim.GetRevision());
+        return;
+    }
+    Notify(FString::Printf(TEXT("No garment called %s."), *Garment), true);
+}
+
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
     HideHotbar();
@@ -1499,6 +1527,8 @@ FString AHomesteadController::FocusTitle() const
                     && Sim.Count(Homestead::Item::Hatchet) == 0) Status = TEXT("  (hatchet required)");
                 else if (Node.kind != Homestead::ResourceKind::Sapling && Node.kind != Homestead::ResourceKind::ForestTree
                     && Sim.Count(Homestead::Item::Knife) == 0) Status = TEXT("  (knife required)");
+                if (Node.kind == Homestead::ResourceKind::DeerRemains && Node.readyAtHour > State().hour)
+                    return TEXT("Deer bones");
                 return Text(Homestead::ResourceName(Node.kind)) + Status;
             }
         break;
@@ -1558,6 +1588,7 @@ FString AHomesteadController::FocusActions() const
                     || Node.kind == Homestead::ResourceKind::Sapling;
                 if (Tree) return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
                     ? Use + TEXT(" Fell with Hatchet") : TEXT("Select Hatchet to fell");
+                if (Node.kind == Homestead::ResourceKind::DeerRemains) return A + TEXT(" Cut the hide free");
                 return A + TEXT(" Gather") + (ToolAvailable && SelectedTool == Homestead::Item::Knife
                     ? TEXT("   ") + Use + TEXT(" Clear with Knife") : FString());
             }
@@ -1881,6 +1912,8 @@ void AHomesteadController::Interact()
                     }
                     else if (!Avatar->IsCuttingReeds()) Avatar->PlayKnifeCut(ActionTarget);
                 }
+                else if (Kind == Homestead::ResourceKind::DeerRemains)
+                    Avatar->PlayKnifeCut(ActionTarget); // Work the dried hide free with the knife.
                 else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
                     || Kind == Homestead::ResourceKind::BerryBush)
                 {

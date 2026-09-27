@@ -571,7 +571,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
                         FVector(At.X, At.Y, Base - 60.0f), Capsule->GetCollisionObjectType(), Params, Response)
                     || Hit.ImpactNormal.Z < 0.7f)
                     return false;
-                Height = FMath::Clamp(static_cast<float>(Hit.ImpactPoint.Z - Base), -40.0f, 45.0f);
+                Height = FMath::Clamp(static_cast<float>(Hit.ImpactPoint.Z + Avatar->GetFootwearLift() - Base), -40.0f, 45.0f);
                 if (Normal) *Normal = Hit.ImpactNormal;
                 return true;
             };

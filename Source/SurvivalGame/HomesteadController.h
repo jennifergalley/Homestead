@@ -189,6 +189,9 @@ public:
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
     // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
     UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
+    // Console playtest aid: make one garment from freshly granted materials and put it on
+    // (key or name, e.g. HomesteadWear fur-coat).
+    UFUNCTION(Exec) void HomesteadWear(const FString& Garment);
     // Console playtest aid: open the pack's right-click menu (Mode 0) or Ctrl+click popover (Mode 1)
     // on the Nth pack tile, as a pointer would. Mode 2 opens the nearest storage chest (logging where
     // it is) when she stands within reach of it.

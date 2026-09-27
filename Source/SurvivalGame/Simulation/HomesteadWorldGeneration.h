@@ -54,7 +54,7 @@ bool operator<(GeneratedEntityKey a, GeneratedEntityKey b);
 enum class EntityKind : std::uint8_t
 {
     ForestTree = 1, Branches = 2, Stones = 3, BerryBush = 4,
-    Roots = 5, Flowers = 6, Reeds = 7, Sapling = 8
+    Roots = 5, Flowers = 6, Reeds = 7, Sapling = 8, DeerRemains = 9
 };
 
 // Stable silhouette/age strata, not botanical species or asset identities.

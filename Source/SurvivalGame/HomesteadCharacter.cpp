@@ -12,6 +12,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
+#include "Rendering/SkeletalMeshRenderData.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialParameterCollection.h"
@@ -582,6 +583,16 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
             MetaHumanOutfit->SetMaterial(Index, Material);
     MetaHumanOutfit->RegisterComponent();
     MetaHumanOutfit->SetLeaderPoseComponent(Body);
+    MetaHumanGarments.Reset();
+    for (const TCHAR* Name : {TEXT("MetaHumanTop"), TEXT("MetaHumanLegs"), TEXT("MetaHumanCoat"), TEXT("MetaHumanFeet")})
+    {
+        auto* Garment = MakeSkinned(Name, nullptr);
+        Garment->SetVisibility(false);
+        Garment->RegisterComponent();
+        Garment->SetLeaderPoseComponent(Body);
+        MetaHumanGarments.Add(Garment);
+    }
+    if (MetaHumanWorn.Num() != MetaHumanGarments.Num()) MetaHumanWorn.Init(INDEX_NONE, MetaHumanGarments.Num());
 
     const FMetaHumanGroomSpec Grooms[] = {
         {TEXT("MetaHumanHair"), TEXT("Hair_L_Straight"),
@@ -637,6 +648,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         FComponentSync(Body->GetFName(), ESyncOption::Drive),
         FComponentSync(MetaHumanFace->GetFName(), ESyncOption::Drive),
         FComponentSync(MetaHumanOutfit->GetFName(), ESyncOption::Passive)};
+    for (USkeletalMeshComponent* Garment : MetaHumanGarments)
+        MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Garment->GetFName(), ESyncOption::Passive));
     for (UGroomComponent* Groom : MetaHumanGrooms)
     {
         MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Groom->GetFName(), ESyncOption::Passive));
@@ -681,8 +694,95 @@ bool AHomesteadCharacter::ApplyMetaHumanStack()
     bMetaHumanActive = true;
     if (!bSprintActive) GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
     ApplyMetaHumanLook();
+    ApplyMetaHumanGarments();
     bHeroineReady = true;
     return true;
+}
+
+namespace
+{
+struct FMetaHumanGarmentSpec
+{
+    Homestead::WearableDefinition Definition;
+    int32 Slot; // Index into MetaHumanGarments: 0 top, 1 legs, 2 coat, 3 feet.
+    const TCHAR* Asset;
+    float LiftCm; // Sole thickness (Assets/Characters/Footwear report character_offset_cm).
+};
+// Garments fitted to the MetaHuman body in Blender (Assets/Characters/Garments and Footwear) and
+// imported by Scripts/Characters/import_heroine_garments.py.
+const FMetaHumanGarmentSpec MetaHumanGarmentSpecs[] = {
+    {Homestead::WearableDefinition::LinenShirt, 0, TEXT("SKM_LinenTee"), 0},
+    {Homestead::WearableDefinition::LinenLongShirt, 0, TEXT("SKM_LinenLongShirt"), 0},
+    {Homestead::WearableDefinition::Trousers, 1, TEXT("SKM_WoolTrousers"), 0},
+    {Homestead::WearableDefinition::FurCoat, 2, TEXT("SKM_FurCoat"), 0},
+    {Homestead::WearableDefinition::FurBoots, 3, TEXT("SKM_FurBoots"), 1.2f},
+    {Homestead::WearableDefinition::WovenSandals, 3, TEXT("SKM_WovenSandals"), 1.05f},
+    {Homestead::WearableDefinition::TurnShoes, 3, TEXT("SKM_TurnShoes"), 0.5f},
+};
+const FMetaHumanGarmentSpec* FindMetaHumanGarment(int32 Definition)
+{
+    for (const auto& Spec : MetaHumanGarmentSpecs)
+        if (static_cast<int32>(Spec.Definition) == Definition) return &Spec;
+    return nullptr;
+}
+int32 MetaHumanGarmentSlot(Homestead::WearableDefinition Definition)
+{
+    const auto* Spec = FindMetaHumanGarment(static_cast<int32>(Definition));
+    return Spec ? Spec->Slot : INDEX_NONE;
+}
+// Shows or hides every section of one material slot, on every LOD.
+void ShowMaterialSlot(USkeletalMeshComponent& Component, FName SlotName, bool bShow)
+{
+    USkeletalMesh* Mesh = Component.GetSkeletalMeshAsset();
+    FSkeletalMeshRenderData* Render = Mesh ? Mesh->GetResourceForRendering() : nullptr;
+    if (!Render) return;
+    const int32 Material = Mesh->GetMaterials().IndexOfByPredicate(
+        [SlotName](const FSkeletalMaterial& Slot) { return Slot.MaterialSlotName == SlotName; });
+    if (Material == INDEX_NONE) return;
+    for (int32 Lod = 0; Lod < Render->LODRenderData.Num(); ++Lod)
+    {
+        const auto& Sections = Render->LODRenderData[Lod].RenderSections;
+        for (int32 Section = 0; Section < Sections.Num(); ++Section)
+            if (Sections[Section].MaterialIndex == Material)
+                Component.ShowMaterialSection(Material, Section, bShow, Lod);
+    }
+}
+}
+
+const USkeletalMesh* AHomesteadCharacter::MetaHumanGarmentMesh(int32 Slot) const
+{
+    const USkeletalMeshComponent* Garment = MetaHumanGarments.IsValidIndex(Slot) ? MetaHumanGarments[Slot].Get() : nullptr;
+    return Garment && Garment->IsVisible() ? Garment->GetSkeletalMeshAsset() : nullptr;
+}
+
+void AHomesteadCharacter::ApplyMetaHumanGarments()
+{
+    if (!bMetaHumanActive || !MetaHumanOutfit || MetaHumanGarments.IsEmpty()) return;
+    FootwearLift = 0;
+    for (int32 Slot = 0; Slot < MetaHumanGarments.Num(); ++Slot)
+    {
+        USkeletalMeshComponent* Garment = MetaHumanGarments[Slot];
+        const FMetaHumanGarmentSpec* Spec = MetaHumanWorn.IsValidIndex(Slot) ? FindMetaHumanGarment(MetaHumanWorn[Slot]) : nullptr;
+        USkeletalMesh* Fitted = Spec ? LoadMetaHumanAsset<USkeletalMesh>(
+            FString::Printf(TEXT("Assembled/Heroine/Garments/%s"), Spec->Asset)) : nullptr;
+        if (Spec && (!Fitted || Fitted->GetSkeleton() != MetaHumanBody->GetSkeleton()))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("MetaHuman garment %s is not imported; she wears the base layer there."), Spec->Asset);
+            Fitted = nullptr;
+        }
+        if (Garment->GetSkeletalMeshAsset() != Fitted)
+        {
+            Garment->EmptyOverrideMaterials();
+            Garment->SetSkeletalMesh(Fitted, false);
+            if (Fitted) Garment->SetLeaderPoseComponent(GetMesh(), true);
+        }
+        Garment->SetVisibility(Fitted != nullptr);
+        if (Fitted && Spec) FootwearLift = FMath::Max(FootwearLift, Spec->LiftCm);
+    }
+    // The homespun tank top and shorts stay on as the base layer, hidden where a garment covers them.
+    ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveTankTop"), MetaHumanGarmentMesh(0) == nullptr);
+    ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveShorts"), MetaHumanGarmentMesh(1) == nullptr);
+    GetMesh()->SetRelativeLocation(FVector(0, 0, FootwearLift - GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 }
 
 void AHomesteadCharacter::ApplyMetaHumanLook()
@@ -834,6 +934,11 @@ bool AHomesteadCharacter::PrepareEquipment(const Homestead::State& CandidateStat
 {
     ClearPreparedEquipment();
     PendingMetaHumanLook = Look;
+    PendingMetaHumanWorn.Init(INDEX_NONE, 4);
+    for (const auto& Item : CandidateState.wearables)
+        if (Item.owner == Homestead::WearableOwner::Equipped)
+            if (const int32 Slot = MetaHumanGarmentSlot(Item.definition); Slot != INDEX_NONE)
+                PendingMetaHumanWorn[Slot] = static_cast<int32>(Item.definition);
     if (!LoadHeroineAssets())
     {
         Error = TEXT("Original heroine skeleton or animations are unavailable.");
@@ -865,6 +970,7 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         ActiveEquipment = MoveTemp(PreparedEquipment);
         ClearPreparedEquipment();
         MetaHumanLook = PendingMetaHumanLook;
+        MetaHumanWorn = PendingMetaHumanWorn;
         if (ApplyMetaHumanStack()) return true;
         Error = TEXT("MetaHuman heroine assets are unavailable.");
         return false;

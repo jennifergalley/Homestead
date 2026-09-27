@@ -165,6 +165,12 @@ std::uint32_t LocalId(EntityKind kind, int slot)
     return (static_cast<std::uint32_t>(kind) << 24) | static_cast<std::uint32_t>(slot + 1);
 }
 
+int CandidateCount(EntityKind kind)
+{
+    return kind == EntityKind::ForestTree ? TreeCandidateCount :
+        (kind == EntityKind::Branches || kind == EntityKind::DeerRemains ? 1 : ForageCandidatesPerKind);
+}
+
 std::uint64_t EntityHash(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int slot)
 {
     return Hash(world, chunk.x, chunk.y,
@@ -288,6 +294,9 @@ Status Candidate(WorldDescriptor world, ChunkCoord chunk, EntityKind kind, int s
     }
     else
     {
+        // A winter-killed deer lies in roughly one chunk in three, away from the creek.
+        if (kind == EntityKind::DeerRemains && Mix(hash ^ UINT64_C(0x9e3779b97f4a7c15)) % 3 != 0)
+            return Status::NotFound;
         // Each source kind has its own small patch; optional members keep their original slot IDs.
         const auto anchor = EntityHash(world, chunk, kind, 0);
         entity.xCm = originX + 400 + static_cast<std::int64_t>(anchor % 1601);
@@ -428,11 +437,10 @@ Status FindEntity(WorldDescriptor world, GeneratedEntityKey key, GeneratedEntity
     const auto tag = key.localId >> 24;
     const auto index = key.localId & SlotMask;
     if (tag < static_cast<std::uint32_t>(EntityKind::ForestTree) ||
-        tag > static_cast<std::uint32_t>(EntityKind::Sapling) || index == 0)
+        tag > static_cast<std::uint32_t>(EntityKind::DeerRemains) || index == 0)
         return Status::InvalidKey;
     const auto kind = static_cast<EntityKind>(tag);
-    const auto count = kind == EntityKind::ForestTree ? TreeCandidateCount :
-        (kind == EntityKind::Branches ? 1 : ForageCandidatesPerKind);
+    const auto count = CandidateCount(kind);
     if (index > static_cast<std::uint32_t>(count)) return Status::InvalidKey;
     return Candidate(world, key.chunk, kind, static_cast<int>(index) - 1, output);
 }
@@ -452,11 +460,10 @@ Status GenerateChunk(WorldDescriptor world, ChunkCoord chunk, ChunkBaseline& out
             if (status != Status::Ok) return status;
         }
     baseline.entities.reserve(MaxEntitiesPerChunk);
-    for (std::uint32_t tag = 1; tag <= static_cast<std::uint32_t>(EntityKind::Sapling); ++tag)
+    for (std::uint32_t tag = 1; tag <= static_cast<std::uint32_t>(EntityKind::DeerRemains); ++tag)
     {
         const auto kind = static_cast<EntityKind>(tag);
-        const int count = kind == EntityKind::ForestTree ? TreeCandidateCount :
-            (kind == EntityKind::Branches ? 1 : ForageCandidatesPerKind);
+        const int count = CandidateCount(kind);
         for (int slot = 0; slot < count; ++slot)
         {
             GeneratedEntity entity;

@@ -121,7 +121,7 @@ const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("gui
 const TCHAR* ItemIcons[] = {TEXT("knife"), TEXT("branch"), TEXT("stone"), TEXT("fiber"),
     TEXT("berries"), TEXT("roots"), TEXT("flowers"), TEXT("seeds"), TEXT("hatchet"),
     TEXT("digging-stick"), TEXT("watering-can"), TEXT("water"), TEXT("roasted-roots"), TEXT("herbed-roots"),
-    TEXT("timber"), TEXT("firewood"), TEXT("machete")};
+    TEXT("timber"), TEXT("firewood"), TEXT("machete"), TEXT("fur")};
 static_assert(UE_ARRAY_COUNT(ItemIcons) == Homestead::ItemCount, "Every item needs an icon.");
 FName RequirementIcon(Homestead::Item Item)
 {
@@ -137,8 +137,13 @@ const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("wate
     TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
 const TCHAR* PieceIcons[] = {TEXT("foundation"), TEXT("wall"), TEXT("doorway"), TEXT("roof"),
     TEXT("fire"), TEXT("bed"), TEXT("chest")};
+// The legacy apron still works but has no slot of its own here; it shows under the Top it ties over.
 constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
-    Homestead::EquipmentSlot::Torso, Homestead::EquipmentSlot::Apron, Homestead::EquipmentSlot::Feet};
+    Homestead::EquipmentSlot::Torso, Homestead::EquipmentSlot::Legs, Homestead::EquipmentSlot::Outer,
+    Homestead::EquipmentSlot::Feet};
+constexpr int32 VisibleEquipmentSlotCount = UE_ARRAY_COUNT(VisibleEquipmentSlots);
+const TCHAR* EquipmentSlotNames[] = {TEXT("Top"), TEXT("Legs"), TEXT("Coat"), TEXT("Feet")};
+const TCHAR* EquipmentSlotIcons[] = {TEXT("slot-torso"), TEXT("trousers"), TEXT("fur-coat"), TEXT("slot-feet")};
 constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
 
 int32 ShiftFieldBookPage(int32 Page, int32 Direction)
@@ -994,9 +999,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         TSharedPtr<SHorizontalBox> EquipmentBar;
         InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Text(TEXT("Equipped slots"), 16) ];
         InventoryColumn->AddSlot().AutoHeight()[ SAssignNew(EquipmentBar, SHorizontalBox) ];
-        for (int32 Index = 0; Index < 3; ++Index)
+        for (int32 Index = 0; Index < VisibleEquipmentSlotCount; ++Index)
         {
-            const TCHAR* SlotIcons[] = {TEXT("slot-torso"), TEXT("slot-apron"), TEXT("slot-feet")};
             TSharedRef<SMenuButton> SlotButton = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(8)
                 .ButtonColorAndOpacity_Lambda([this, Index]()
                     { return Region == ERegion::Equipment && EquipmentSelection == Index ? MenuGold : Selected; })
@@ -1007,7 +1011,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)
                     [ SNew(SBox).WidthOverride(36).HeightOverride(36)
-                        [ SNew(SHomesteadIcon).Kind(FName(SlotIcons[Index])) ] ]
+                        [ SNew(SHomesteadIcon).Kind(FName(EquipmentSlotIcons[Index])) ] ]
                     + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                     [ Text(EquipmentLabel(Index), 15) ]
                 ];
@@ -1552,16 +1556,15 @@ void SHomesteadMenu::ChangeInventoryView(int32 View)
 }
 FString SHomesteadMenu::EquipmentLabel(int32 Index) const
 {
-    const TCHAR* Names[] = {TEXT("Torso + legs"), TEXT("Apron"), TEXT("Feet")};
-    if (!Controller.IsValid() || Index < 0 || Index >= 3) return {};
+    if (!Controller.IsValid() || Index < 0 || Index >= VisibleEquipmentSlotCount) return {};
     const int32 Id = Controller->State().equipment[static_cast<int32>(VisibleEquipmentSlots[Index])];
     const auto* Item = Controller->Simulation().GetWearable(Id);
-    return FString(Names[Index]) + TEXT("\n") + (Item
+    return FString(EquipmentSlotNames[Index]) + TEXT("\n") + (Item
         ? FString(UTF8_TO_TCHAR(Homestead::WearableName(Item->definition))) : TEXT("Empty"));
 }
 void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
 {
-    if (!Controller.IsValid() || Dialog != EDialog::None || Index < 0 || Index >= 3) return;
+    if (!Controller.IsValid() || Dialog != EDialog::None || Index < 0 || Index >= VisibleEquipmentSlotCount) return;
     const auto Slot = VisibleEquipmentSlots[Index];
     const int32 Id = Controller->State().equipment[static_cast<int32>(Slot)];
     EquipmentSelection = Index;
@@ -1575,9 +1578,8 @@ void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
         return;
     }
     // An empty slot offers the carried garments that fit it.
-    const TCHAR* Names[] = {TEXT("Torso + legs"), TEXT("Apron"), TEXT("Feet")};
     PopupOptions.Reset();
-    PopupTitle = FString(Names[Index]) + TEXT(": empty");
+    PopupTitle = FString(EquipmentSlotNames[Index]) + TEXT(": empty");
     for (const auto& Instance : Controller->State().wearables)
     {
         const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
@@ -2292,7 +2294,7 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
         break;
     }
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
-    case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, 3, 3, Direction); break;
+    case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction); break;
     case ERegion::Portrait:
         if (PortraitSelection >= 0) Moved = MoveWithin(PortraitSelection, 3, 3, Direction);
         break;

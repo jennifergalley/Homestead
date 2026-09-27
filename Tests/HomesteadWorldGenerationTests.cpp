@@ -164,14 +164,15 @@ void IdentitiesAndDistribution()
         std::set<GeneratedEntityKey> keys;
         int trees = 0;
         int nearSpawnTrees = 0;
-        std::array<bool, 9> bootstrap{};
+        int deer = 0;
+        std::array<bool, 10> bootstrap{};
         for (int cy = -1; cy <= 1; ++cy)
             for (int cx = -2; cx <= 0; ++cx)
             {
                 ChunkBaseline chunk;
                 CHECK(GenerateChunk(world, {cx, cy}, chunk) == Status::Ok);
                 CHECK(chunk.entities.size() <= MaxEntitiesPerChunk);
-                std::array<int, 9> counts{};
+                std::array<int, 10> counts{};
                 for (const auto& entity : chunk.entities)
                 {
                     CHECK(keys.insert(entity.key).second);
@@ -234,9 +235,13 @@ void IdentitiesAndDistribution()
                 }
                 CHECK(counts[static_cast<int>(EntityKind::Branches)] == 1);
                 for (int kind = 3; kind <= 8; ++kind) CHECK(counts[kind] <= ForageCandidatesPerKind);
+                CHECK(counts[static_cast<int>(EntityKind::DeerRemains)] <= 1);
+                deer += counts[static_cast<int>(EntityKind::DeerRemains)];
             }
         CHECK(trees >= 250);
         CHECK(nearSpawnTrees >= 5);
+        // Roughly one chunk in three holds deer remains; nine chunks always find at least one.
+        CHECK(deer >= 1 && deer <= 7);
         CHECK(bootstrap[static_cast<int>(EntityKind::Branches)]);
         CHECK(bootstrap[static_cast<int>(EntityKind::Stones)]);
         CHECK(bootstrap[static_cast<int>(EntityKind::Reeds)]);

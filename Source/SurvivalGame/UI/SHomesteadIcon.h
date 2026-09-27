@@ -36,6 +36,7 @@ private:
         DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots, Timber, Firewood, Machete,
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,
         LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
+        Fur, LinenShirt, LongLinenShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes,
         SlotTorso, SlotApron, SlotFeet
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};

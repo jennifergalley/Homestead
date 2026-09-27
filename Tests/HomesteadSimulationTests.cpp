@@ -53,8 +53,8 @@ std::string Envelope(const std::string& body, int version = SimulationSaveVersio
 // Independent fixture writer intentionally permits invalid states so parser validation is exercised.
 std::string Encode(const State& s, int version = SimulationSaveVersion)
 {
-    // Version 7 stocks predate the machete (the last item).
-    const int stockItems = version >= 8 ? ItemCount : ItemCount - 1;
+    // Version 7 stocks predate the machete, and versions before 11 predate fur (the last item).
+    const int stockItems = version >= ClothingSaveVersion ? ItemCount : version >= 8 ? ItemCount - 1 : ItemCount - 2;
     std::ostringstream out;
     out.imbue(std::locale::classic());
     out << std::setprecision(17) << s.hour << ' ' << s.dayMinutes << ' ' << s.hunger << ' '
@@ -107,7 +107,8 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
         for (const auto& w : s.wearables)
             out << w.id << ' ' << static_cast<int>(w.definition) << ' ' << w.dye << ' '
                 << static_cast<int>(w.owner) << ' ' << w.chestId << '\n';
-        for (int id : s.equipment) out << id << ' ';
+        for (int slot = 0; slot < (version >= ClothingSaveVersion ? EquipmentSlotCount : 4); ++slot)
+            out << s.equipment[slot] << ' ';
         out << '\n' << s.inventoryLayout.size() << '\n';
         for (const auto& e : s.inventoryLayout)
             out << e.groupId << ' ' << static_cast<int>(e.item) << ' ' << e.quantity << ' ' << e.wearableId << '\n';
@@ -851,7 +852,8 @@ void TimberAndFirewoodTransactions()
     static_assert(static_cast<int>(Item::Timber) == 14, "Timber appends after existing items");
     static_assert(static_cast<int>(Item::Firewood) == 15, "Firewood appends after Timber");
     static_assert(static_cast<int>(Item::Machete) == 16, "The machete appends after Firewood");
-    static_assert(ItemCount == 17, "Two processing materials and the machete are present");
+    static_assert(static_cast<int>(Item::Fur) == 17, "Fur appends after the machete");
+    static_assert(ItemCount == 18, "Two processing materials, the machete and fur are present");
     static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
     static_assert(static_cast<int>(Recipe::SplitFirewood) == 5, "Split Firewood appends after existing recipes");
     static_assert(static_cast<int>(Recipe::Count) == 6, "One processing recipe is present");
@@ -1264,6 +1266,72 @@ void ClockPauseAndBatching()
     CHECK(std::string(sim.SeasonName()) == "Spring");
 }
 
+void WinterClothingAndFur()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 60}});
+    UnchangedFailure(sim, [&] { return sim.CraftGarment(WearableDefinition::FurCoat, Home, sim.GetRevision()); });
+
+    // Scavenged deer remains give fur, then lie as bones until another deer turns up.
+    int deer = -1;
+    for (const auto& node : sim.GetState().resources)
+        if (node.kind == ResourceKind::DeerRemains && sim.CanHarvest(node.id)) { deer = node.id; break; }
+    CHECK(deer != -1);
+    for (const auto& node : sim.GetState().resources)
+        if (node.id == deer)
+        {
+            OK(sim.Harvest(deer, node.position));
+            CHECK(sim.Count(Item::Fur) == 3);
+            CHECK(!sim.Harvest(deer, node.position).ok);
+            break;
+        }
+    Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 60}, {Item::Fur, 20}});
+    for (auto definition : {WearableDefinition::FurCoat, WearableDefinition::FurBoots,
+        WearableDefinition::Trousers, WearableDefinition::LinenLongShirt})
+        OK(sim.CraftGarment(definition, Home, sim.GetRevision()));
+    CHECK(sim.Count(Item::Fur) == 20 - 6 - 3);
+    CHECK(sim.Count(Item::Fiber) == 60 - 4 - 2 - 14 - 12);
+    CHECK(sim.CraftGarment(WearableDefinition::LeatherShoes, Home, sim.GetRevision()).ok == false);
+
+    // Trousers take the legs from the starter tunic, which also frees its apron.
+    int coat = 0, trousers = 0, shirt = 0, boots = 0;
+    for (const auto& item : sim.GetState().wearables)
+    {
+        if (item.definition == WearableDefinition::FurCoat) coat = item.id;
+        if (item.definition == WearableDefinition::Trousers) trousers = item.id;
+        if (item.definition == WearableDefinition::LinenLongShirt) shirt = item.id;
+        if (item.definition == WearableDefinition::FurBoots) boots = item.id;
+    }
+    OK(sim.EquipWearable(trousers, sim.GetRevision()));
+    CHECK(sim.GetWearable(1)->owner == WearableOwner::Carried);
+    for (int id : {coat, shirt, boots}) OK(sim.EquipWearable(id, sim.GetRevision()));
+    CHECK(sim.GetState().equipment == (std::array<int, 5>{shirt, trousers, 0, boots, coat}));
+    CHECK(Close(sim.Insulation(), (6.0 + 2.0 + 1.0 + 4.0) * Simulation::InsulationPerPoint));
+
+    // Current saves keep fur and the outer layer; older ones load with none.
+    Simulation restored;
+    OK(restored.Deserialize(sim.Serialize()));
+    CHECK(restored.GetState().equipment == sim.GetState().equipment && restored.Count(Item::Fur) == sim.Count(Item::Fur));
+    Simulation older;
+    OK(older.Deserialize(Encode(Simulation().GetState(), FreeBuildingSaveVersion)));
+    CHECK(older.Count(Item::Fur) == 0 && older.GetState().equipment[static_cast<int>(EquipmentSlot::Outer)] == 0);
+
+    // A winter night strips warmth fast; the winter kit slows it to a trickle.
+    Simulation bare;
+    Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.warmth = 80; });
+    Edit(sim, [](State& state) { state.hour = 42 * 24 + 20; state.warmth = 80; state.energy = 100; });
+    CHECK(std::string(bare.SeasonName()) == "Winter");
+    bare.AdvanceGameHours(2, Home);
+    sim.AdvanceGameHours(2, Home);
+    CHECK(Close(bare.GetState().warmth, 80 - 11 * 2));
+    CHECK(Close(sim.GetState().warmth, 80 - (11 - 13 * Simulation::InsulationPerPoint) * 2));
+    // By day in winter she still cools unless dressed, and clothing never warms her past zero loss.
+    Edit(bare, [](State& state) { state.hour = 42 * 24 + 12; state.warmth = 50; });
+    Edit(sim, [](State& state) { state.hour = 42 * 24 + 12; state.warmth = 50; });
+    bare.AdvanceGameHours(1, Home);
+    sim.AdvanceGameHours(1, Home);
+    CHECK(Close(bare.GetState().warmth, 48) && Close(sim.GetState().warmth, 50));
+}
 void WarmthSleepAndFailure()
 {
     Simulation bare, clothed, indoor, fire;
@@ -1484,7 +1552,7 @@ void WardrobeDefaultsAndCrafting()
     static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
     Simulation sim;
     CHECK(sim.GetState().wearables.size() == 1);
-    CHECK(sim.GetState().equipment == (std::array<int, 4>{1, 1, 0, 0}));
+    CHECK(sim.GetState().equipment == (std::array<int, 5>{1, 1, 0, 0, 0}));
     CHECK(sim.GetWearable(1)->definition == WearableDefinition::LinenTunic);
     CHECK(sim.GetWearable(2) == nullptr);
     CHECK(sim.GetState().nextWearableId == 2);
@@ -1550,7 +1618,7 @@ void AtomicEquipmentAndDye()
     const auto revision = sim.GetRevision();
     OK(sim.EquipWearable(tunic, revision));
     CHECK(sim.UsedCapacity() == 120);
-    CHECK(sim.GetState().equipment == (std::array<int, 4>{tunic, tunic, apron, 2}));
+    CHECK(sim.GetState().equipment == (std::array<int, 5>{tunic, tunic, apron, 2, 0}));
     CHECK(sim.GetWearable(1)->owner == WearableOwner::Carried);
     UnchangedFailure(sim, [&] { return sim.EquipWearable(tunic, revision); });
     UnchangedFailure(sim, [&] { return sim.UnequipWearable(2, sim.GetRevision()); });
@@ -1560,7 +1628,7 @@ void AtomicEquipmentAndDye()
     Stock(sim, {{Item::Knife, 1}, {Item::Branch, 116}});
     OK(sim.UnequipWearable(tunic, sim.GetRevision()));
     CHECK(sim.UsedCapacity() == 120);
-    CHECK(sim.GetState().equipment == (std::array<int, 4>{0, 0, 0, 2}));
+    CHECK(sim.GetState().equipment == (std::array<int, 5>{0, 0, 0, 2, 0}));
     CHECK(sim.GetWearable(apron)->owner == WearableOwner::Carried);
     UnchangedFailure(sim, [&] { return sim.EquipWearable(apron, sim.GetRevision()); });
     OK(sim.EquipWearable(1, sim.GetRevision()));
@@ -2662,6 +2730,7 @@ int main()
     Run("sprint consumes existing Energy with a reserve", SprintEnergyContract);
     Run("work spends Energy and time drains it slowly", ActionEnergyContract);
     Run("warmth, sleep and failure recovery", WarmthSleepAndFailure);
+    Run("scavenged fur, winter clothing and seasonal cold", WinterClothingAndFur);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
     Run("strict atomic persistence", PersistenceRejection);
     Run("wardrobe defaults, truthful crafting and independent identities", WardrobeDefaultsAndCrafting);
