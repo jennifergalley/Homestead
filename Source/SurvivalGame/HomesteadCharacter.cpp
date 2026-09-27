@@ -1442,12 +1442,13 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         Grip = 1;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
         Carry = CuttingReeds || Hoeing ? 0.0f : FMath::Min(Spec.CarryDegrees, RestWristDegrees);
-        // Resting carries that differ from the working grip: the hatchet hangs edge-down (turned
-        // about its haft) and the hoe is carried blade-low in front, turned end for end from how
-        // she works it. The turn eases out with the tilt when an authored action takes over.
+        // Resting carries that differ from the working grip: the hatchet and knife hang edge-down
+        // (turned about the haft) and the hoe is carried blade-low in front, turned end for end from
+        // how she works it. The turn eases out with the tilt when an authored action takes over.
         FQuat Flip = FQuat::Identity;
         float Slide = 0;
-        if (Spec.Tool == Homestead::Item::Hatchet) Flip = FQuat(FVector::ZAxisVector, PI);
+        if (Spec.Tool == Homestead::Item::Hatchet || Spec.Tool == Homestead::Item::Knife)
+            Flip = FQuat(FVector::ZAxisVector, PI);
         else if (Spec.Tool == Homestead::Item::DiggingStick && Prop->GetStaticMesh()
             && Prop->GetStaticMesh()->GetName() == TEXT("SM_StoneHoe"))
         {

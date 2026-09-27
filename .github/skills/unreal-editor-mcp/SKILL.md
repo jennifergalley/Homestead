@@ -489,6 +489,29 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-28: Tree sinking, relaxed idle, knife carry:
+  - **Measure tree bases against the terrain meshes, not engine traces.** `line_trace_multi`
+    mostly hits tree capsules or nothing. HomesteadWorld's 25 terrain
+    `ProceduralMeshComponent`s answer `line_trace_component(start, end, True, False, False)`
+    (it returns a tuple, or None on a miss). Compare against the tree mesh's lowest LOD-rim
+    vertices (active trees render at MinLOD 1, outer trees at LOD 2).
+    `ResolveGeneratedTreeVisual` sinks each tree by `4 + RimLift * Scale` below the lowest ground
+    sampled at 0.5× and 1× footprint in 8 directions. RimLift is 30 for the conifer, 19 for the
+    accent and 3 for the broadleaf.
+  - **Live Coding can crash PIE.** A patched module crashed in `UsesMetaHumanHeroine`: a CVar
+    was null during BeginPlay. To recover, quit the editor, delete `Binaries\Win64\*patch*`,
+    then rebuild through `Start-EditorMcp.ps1`. Prefer a full rebuild for changes to world
+    generation.
+  - **Finger spread on the rig.** Pitch on `{finger}_01_{l,r}_ctrl` fans the fingers. On the
+    left hand, positive index and negative pinky draw them together. `active_idle.py` keys the
+    curl and spread for both hands (`CURL_*`, `SPREAD_*`).
+  - **PIE stills.** `HighResShot 1920x1080` (via `execute_console_command(w, cmd, pc)`) writes
+    to `Saved\Screenshots\WindowsEditor\`.
+  - **Resting carries are turned by `Flip` in `UpdateHeldTools`.** The hatchet and knife are
+    turned about the haft (Z) so the edge hangs down. The hoe is turned about the palm normal
+    (X) so its blade sits low in front. The flip eases out with `HeldToolTilt`, so authored
+    actions keep their working grip.
+
 - 2026-09-27: Heroine polish (grip, knee hand, felling, barefoot):
   - **Held-prop placement must run inside `UpdateHeldTools`.** `UpdateHeldTools` runs in Tick
     (TG_PostUpdateWork) and rewrites every held prop's relative transform. A placement done from

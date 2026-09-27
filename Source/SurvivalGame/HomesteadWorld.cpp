@@ -2081,15 +2081,23 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
     const float Scale = Entity.scalePermille / 1000.0f;
     const auto& Capsule = Mesh->GetBodySetup()->AggGeom.SphylElems[0];
     const FVector Anchor(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
-    const float Radius = Capsule.Radius * Scale;
-    const float Embed = Entity.paletteRole == Homestead::Generation::TreePaletteRole::ConiferMature ? 14.0f
-        : Entity.paletteRole == Homestead::Generation::TreePaletteRole::WoodlandAccent ? 9.0f : 7.0f;
+    // Measured from each mesh's LOD0: how far the underside of the root flare rim rises above the
+    // mesh's lowest vertex, and how far the flare reaches from the trunk axis. The fir's skirt
+    // curls up to 30 cm and the jacaranda's surface roots lift up to 19 cm, so sinking by less leaves
+    // the flare floating with a shadow under it.
+    const bool bConifer = Entity.paletteRole == Homestead::Generation::TreePaletteRole::ConiferMature;
+    const bool bAccent = Entity.paletteRole == Homestead::Generation::TreePaletteRole::WoodlandAccent;
+    const float RimLift = bConifer ? 30.0f : bAccent ? 19.0f : 3.0f;
+    const float Footprint = bConifer ? 76.0f : bAccent ? 240.0f : 41.0f;
+    const float Radius = FMath::Max(Capsule.Radius, Footprint) * Scale;
+    const float Embed = 4.0f + RimLift * Scale;
     float RootGround = CachedGroundHeight(Node.position.x, Node.position.y);
-    for (const FVector2D Direction : {FVector2D(1,0), FVector2D(-1,0), FVector2D(0,1),
-        FVector2D(0,-1), FVector2D(0.7071f,0.7071f), FVector2D(-0.7071f,0.7071f),
-        FVector2D(0.7071f,-0.7071f), FVector2D(-0.7071f,-0.7071f)})
-        RootGround = FMath::Min(RootGround, CachedGroundHeight(
-            Node.position.x + Direction.X * Radius, Node.position.y + Direction.Y * Radius));
+    for (const float Reach : {0.5f, 1.0f})
+        for (const FVector2D Direction : {FVector2D(1,0), FVector2D(-1,0), FVector2D(0,1),
+            FVector2D(0,-1), FVector2D(0.7071f,0.7071f), FVector2D(-0.7071f,0.7071f),
+            FVector2D(0.7071f,-0.7071f), FVector2D(-0.7071f,-0.7071f)})
+            RootGround = FMath::Min(RootGround, CachedGroundHeight(
+                Node.position.x + Direction.X * Radius * Reach, Node.position.y + Direction.Y * Radius * Reach));
     const FVector Base(Node.position.x, Node.position.y, RootGround - Embed);
     Instance.MeshPath = Mesh->GetPathName();
     Instance.Transform = FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Scale), FVector(Scale));
