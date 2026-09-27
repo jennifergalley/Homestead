@@ -122,7 +122,7 @@ No durability, repair or crafting levels exist.
 | `Piece::Roof` (3) | 4 Branch, 3 Fiber | 1 roof | Foundation in same cell | 0.10 |
 | `Piece::Fire` (4) | 3 Branch, 4 Stone | 1 unlit cookfire | Clear cell within 700 cm | 0.10 |
 | `Piece::Bed` (5) | 4 Branch, 4 Fiber | 1 bed | Separate furniture cell | 0.10 |
-| `Piece::Chest` (6) | 5 Branch, 2 Fiber | 1 chest, 120 units | Separate furniture cell | 0.10 |
+| `Piece::Chest` (6) | 5 Branch, 2 Fiber | 1 chest, 1200 units | Separate furniture cell | 0.10 |
 | `WearableDefinition::LinenTunic` (0) | 12 Fiber | 1 carried tunic | Knife; cosmetic | 0 |
 | `WearableDefinition::LinenApron` (1) | 6 Fiber | 1 carried apron | Knife; cosmetic | 0 |
 | `WearableDefinition::WovenFootwraps` (3) | 8 Fiber | 1 carried footwraps | Knife; cosmetic | 0 |

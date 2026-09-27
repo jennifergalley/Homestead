@@ -104,7 +104,7 @@ headers, third-party libraries, or exceptions. Checks execute in Release builds.
 No test writes to the filesystem or requires network access.
 
 The wardrobe authority scenarios cover independent garment IDs, tunic/apron
-dependencies, footwear slots, 120-unit pack/chest capacity, full-pack swaps,
+dependencies, footwear slots, 120-unit pack and 1200-unit chest capacity, full-pack swaps,
 280 cm chest reach, exact 12/6/8-Fiber recipes with the existing knife, per-item
 dye, stable split/merge/reorder groups, stale confirmations, and atomic save
 rejection. `EatGroup` checks preserve the selected carried food stack, all three
@@ -350,7 +350,7 @@ or continuous smoothness.
   uncleared saplings block buildings and garden plots. Picking other forage
   does not obstruct construction.
 - `Transfer` uses positive amounts for pack-to-chest and negative for
-  chest-to-pack. Both have a 120-item total capacity; every transaction is
+  chest-to-pack. The pack holds 120 items and each chest 1200; every transaction is
   all-or-nothing. Nothing is silently dropped. Water refills the carried stock
   to six, requiring enough inventory room for the full refill.
 - One branch fuels one selected fire for four game hours, up to 48 hours.

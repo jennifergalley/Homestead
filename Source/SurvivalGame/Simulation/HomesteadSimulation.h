@@ -26,6 +26,10 @@ constexpr double CellSize = 300.0;
 constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
+// A storage chest holds ten packs' worth. Saves store plain counts, so no version change was needed.
+constexpr int ChestCapacity = 1200;
+// Container 0 is her pack; any positive id is a chest.
+constexpr int ContainerCapacity(int containerId) { return containerId > 0 ? ChestCapacity : InventoryCapacity; }
 constexpr int SimulationSaveVersion = 11;
 // Saves before this had no fur (one fewer item per stock) and no outer-layer equipment slot.
 constexpr int ClothingSaveVersion = 11;
@@ -221,7 +225,7 @@ struct State
     double dayMinutes = 60.0;
     double hunger = 85.0;
     double energy = 100.0;
-    double warmth = 90.0;
+    double warmth = 100.0; // Retired (summer): always full, kept so saves keep their layout.
     bool failed = false;
     bool warmOutfit = false;
     int nextId = 1;
@@ -300,6 +304,7 @@ constexpr double CraftEnergy = 0.8;
 constexpr double CookEnergy = 0.3;
 constexpr double SplitFirewoodEnergy = 1.5;
 constexpr double BuildEnergy = 1.5;
+constexpr double DeconstructEnergy = 1.0;
 constexpr double GarmentEnergy = 0.8;
 constexpr double TillEnergy = 2.0;
 constexpr double PlantEnergy = 0.4;
@@ -367,6 +372,14 @@ public:
     Result Place(const PlacementTarget& target, Point player);
     // Whether she carries what the piece costs.
     Result CheckBuildCost(Piece kind) const;
+    // Taking pieces down. The placed piece under `aim`: what sits on a floor (furniture, then walls,
+    // then the roof) wins over the floor itself; otherwise the nearest within maxDistance. -1: none.
+    int FindDeconstructTarget(Point aim, double maxDistance) const;
+    // Why the piece can't be taken down now, without changing anything. A foundation must be bare.
+    Result CheckDeconstruct(int structureId, Point player) const;
+    // Take down a placed piece and get its whole build cost back. A chest's contents come out with
+    // it; whatever the pack can't hold is set down on clear ground beside her, never lost.
+    Result Deconstruct(int structureId, Point player);
     Point StructureCenter(const Structure& structure) const { return Homestead::StructureCenter(state_, structure); }
     // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
     // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.

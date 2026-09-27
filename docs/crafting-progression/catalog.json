@@ -43,7 +43,7 @@
     {"key":"piece:Roof","status":"current","runtimeEnum":"Piece","runtimeId":3,"capacity":0,"role":"Each enclosed occupied cell needs roof and foundation."},
     {"key":"piece:Fire","status":"current","runtimeEnum":"Piece","runtimeId":4,"capacity":0,"role":"Unlit on placement. Nearby fueled fire enables cooking."},
     {"key":"piece:Bed","status":"current","runtimeEnum":"Piece","runtimeId":5,"capacity":0,"role":"Enables sleep within 300 cm; separate furniture cell from chest."},
-    {"key":"piece:Chest","status":"current","runtimeEnum":"Piece","runtimeId":6,"capacity":0,"role":"120 units per chest; transfer reach 280 cm."},
+    {"key":"piece:Chest","status":"current","runtimeEnum":"Piece","runtimeId":6,"capacity":0,"role":"1200 units per chest; transfer reach 280 cm."},
     {"key":"wearable:LinenTunic","status":"current","runtimeEnum":"WearableDefinition","runtimeId":0,"capacity":1,"role":"Cosmetic, torso+legs; starter equipped version uses no pack space."},
     {"key":"wearable:LinenApron","status":"current","runtimeEnum":"WearableDefinition","runtimeId":1,"capacity":1,"role":"Cosmetic separate apron, not insulation."},
     {"key":"wearable:LeatherShoes","status":"current","runtimeEnum":"WearableDefinition","runtimeId":2,"capacity":1,"role":"Starter equipped only; not craftable."},

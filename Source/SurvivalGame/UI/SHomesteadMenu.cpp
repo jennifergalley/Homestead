@@ -653,7 +653,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(24)[ Text(TEXT("Time to try again"), 32) ]
             + SVerticalBox::Slot().FillHeight(1).Padding(24)
-            [ Text(TEXT("You ran out of warmth, food, or energy.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
+            [ Text(TEXT("You ran out of food or energy.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
             [ RegisterButton(MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
@@ -2061,7 +2061,8 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
             {
                 const int32 Used = Row.ContainerId > 0 ? Controller->Simulation().UsedCapacity()
                     : Controller->Simulation().ChestUsedCapacity(Row.DestinationId);
-                MaximumAmount = Used < 0 ? 0 : FMath::Min(MaximumAmount, Homestead::InventoryCapacity - Used);
+                MaximumAmount = Used < 0 ? 0 : FMath::Min(MaximumAmount,
+                    Homestead::ContainerCapacity(Row.ContainerId > 0 ? 0 : Row.DestinationId) - Used);
             }
             if (MaximumAmount < 1)
             { Controller->MenuItemAction(Row, Action, 1, PendingRevision); return; }

@@ -5,6 +5,7 @@ param(
     [string]$Map,
     [string[]]$ExtraPlugins = @(),
     [switch]$AllowPython,
+    [switch]$RayTracing,
     [switch]$SkipBuild,
     [int]$TimeoutSeconds = 600
 )
@@ -59,8 +60,15 @@ $arguments += @(
     "-ModelContextProtocolPort=$Port"
     # Agents drive the editor while another window has focus; don't throttle PIE in the background.
     '-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False'
+    # Live Coding's console group is shared across worktrees, so an active one blocks every other
+    # worktree's SurvivalGameEditor build. Keep it off; rebuild and relaunch instead.
+    '-ini:EditorPerProjectUserSettings:[/Script/LiveCoding.LiveCodingSettings]:bEnabled=False'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
+# Several agent editors share one GPU. Building ray-tracing pipelines in all of them at once has
+# reset the driver (DXGI_ERROR_DEVICE_REMOVED / DRIVER_INTERNAL_ERROR), taking every Unreal process
+# down with it, so agent editors render without ray tracing unless -RayTracing is passed.
+if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0' }
 # Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
 if ($AllowPython) { $arguments += '-HomesteadAgentPython' }
 

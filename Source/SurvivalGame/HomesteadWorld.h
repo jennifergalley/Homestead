@@ -153,6 +153,11 @@ public:
     // (cm). False when it isn't a standing mature tree.
     bool TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const;
     void SetPlacementPreview(bool Visible, const Homestead::PlacementTarget& Target, bool bValid);
+    // Outlines placed piece StructureId for taking down: amber when it can come down, red when not.
+    // -1 hides it (and so does SetPlacementPreview, which shares the preview visual).
+    void SetDeconstructPreview(const Homestead::State& State, int32 StructureId, bool bValid);
+    // The placed piece a traced component belongs to, or -1.
+    int32 StructureForComponent(const UPrimitiveComponent* Component) const;
     static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
     float GroundHeight(float X, float Y) const;
     bool IsPreparedFor(const Homestead::State& State) const;
@@ -379,7 +384,8 @@ private:
     bool RebuildActiveTreeBatches(const Homestead::Simulation& Simulation);
     void ClearActiveTreeBatches();
     void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
-        const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid = true);
+        const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid = true,
+        bool bDeconstruct = false);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
     void UpdateLighting(const Homestead::State& State);

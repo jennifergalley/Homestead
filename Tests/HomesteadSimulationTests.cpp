@@ -530,9 +530,9 @@ void AtomicTransactions()
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::Hatchet, Home); });
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -3, 0, 0, Home); });
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
-    Stock(sim, {{Item::WateringCan, 1}, {Item::Water, 1}, {Item::Stone, 117}});
-    UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
-    Stock(sim, {{Item::Knife, 1}, {Item::WateringCan, 1}, {Item::Branch, 112}});
+    Stock(sim, {{Item::WateringCan, 1}, {Item::Water, 1}, {Item::Stone, 119}});
+    // Water rides in the can, not the pack, so even a full pack can refill it.
+    CHECK(sim.UsedCapacity() == 120);
     OK(sim.FillWater(WaterSource));
     CHECK(sim.UsedCapacity() == 120);
     CHECK(sim.Count(Item::Water) == 6);
@@ -835,12 +835,160 @@ void FireAndStorage()
     UnchangedFailure(sim, [&] { return sim.Transfer(ch, Item::Branch, -1, chest); });
     Edit(sim, [](State& state) {
         state.structures[2].storage.fill(0);
-        state.structures[2].storage[static_cast<int>(Item::Branch)] = 120;
+        state.structures[2].storage[static_cast<int>(Item::Branch)] = ChestCapacity;
     });
     UnchangedFailure(sim, [&] { return sim.Transfer(ch, Item::Stone, 1, chest); });
     Stock(sim, {{Item::Branch, 20}});
     for (int i = 0; i < 12; ++i) OK(sim.AddFuel(fa, a));
     UnchangedFailure(sim, [&] { return sim.AddFuel(fa, a); });
+    Simulation restored;
+    OK(restored.Deserialize(sim.Serialize()));
+    CHECK(restored.Serialize() == sim.Serialize());
+}
+Structure PieceById(const Simulation& sim, int id)
+{
+    for (const auto& piece : sim.GetState().structures)
+        if (piece.id == id) return piece;
+    CHECK(false);
+    return {};
+}
+int PieceWithRotation(const Simulation& sim, Piece kind, int rotation)
+{
+    for (const auto& piece : sim.GetState().structures)
+        if (piece.kind == kind && piece.rotation == rotation) return piece.id;
+    CHECK(false);
+    return -1;
+}
+void DeconstructTransactions()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    BuildRoom(sim);
+    const Point center = CellCenter(-3, 0);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, center));
+    const int chest = StructureId(sim, Piece::Chest, center);
+    const int floor = StructureId(sim, Piece::Foundation, center);
+    const int roof = StructureId(sim, Piece::Roof, center);
+    const int eastWall = PieceWithRotation(sim, Piece::Wall, 1);
+    CHECK(sim.IsSheltered(center));
+
+    // Aiming: what stands on the floor is taken before the floor; near misses still catch a wall.
+    CHECK(sim.FindDeconstructTarget(center, 100) == roof);
+    CHECK(sim.FindDeconstructTarget(StructureFootprint(sim.GetState(), PieceById(sim, chest)).center, 100) == chest);
+    const Point wallCenter = StructureFootprint(sim.GetState(), PieceById(sim, eastWall)).center;
+    CHECK(sim.FindDeconstructTarget({wallCenter.x + 30, wallCenter.y}, 100) == eastWall);
+    CHECK(sim.FindDeconstructTarget({wallCenter.x - 30, wallCenter.y}, 100) == eastWall);
+    CHECK(sim.FindDeconstructTarget({-900000, -900000}, 100) == -1);
+    CHECK(sim.FindDeconstructTarget({std::numeric_limits<double>::quiet_NaN(), 0}, 100) == -1);
+
+    // A floor with anything on it is refused; so are missing pieces, distance and exhaustion.
+    UnchangedFailure(sim, [&] { return sim.Deconstruct(floor, center); });
+    CHECK(!sim.CheckDeconstruct(floor, center).ok);
+    UnchangedFailure(sim, [&] { return sim.Deconstruct(99999, center); });
+    UnchangedFailure(sim, [&] { return sim.Deconstruct(eastWall, {center.x - 2000, center.y}); });
+    {
+        Simulation tired = sim;
+        Edit(tired, [](State& state) { state.energy = Exertion::Reserve + 0.5; }, false);
+        UnchangedFailure(tired, [&] { return tired.Deconstruct(eastWall, center); });
+    }
+
+    // A wall gives back its whole cost and the room is no longer closed.
+    const auto before = sim.GetState().inventory;
+    const double energy = sim.GetState().energy;
+    const auto pieces = sim.GetState().structures.size();
+    OK(sim.CheckDeconstruct(eastWall, center));
+    OK(sim.Deconstruct(eastWall, center));
+    CHECK(sim.GetState().inventory[static_cast<int>(Item::Branch)] == before[static_cast<int>(Item::Branch)] + 3);
+    CHECK(sim.GetState().inventory[static_cast<int>(Item::Fiber)] == before[static_cast<int>(Item::Fiber)] + 1);
+    CHECK(Close(sim.GetState().energy, energy - Exertion::DeconstructEnergy));
+    CHECK(sim.GetState().structures.size() == pieces - 1);
+    CHECK(!sim.IsSheltered(center));
+
+    // A chest's contents come out with it. The pack takes what fits; the rest is set down on clear
+    // ground, never lost, garments included.
+    Edit(sim, [chest](State& state) {
+        for (auto& piece : state.structures)
+            if (piece.id == chest)
+            {
+                piece.storage[static_cast<int>(Item::Stone)] = 300;
+                piece.storage[static_cast<int>(Item::Berries)] = 7;
+            }
+        state.wearables.push_back({state.nextWearableId++, WearableDefinition::LinenShirt, 0, WearableOwner::Chest, chest});
+        state.inventory.fill(0);
+        state.inventory[static_cast<int>(Item::Knife)] = 1;
+        state.inventory[static_cast<int>(Item::Branch)] = 100;
+    });
+    const int shirt = sim.GetState().wearables.back().id;
+    CHECK(sim.ChestUsedCapacity(chest) == 308);
+    OK(sim.Deconstruct(chest, center));
+    const auto& state = sim.GetState();
+    CHECK(sim.ChestUsedCapacity(chest) == -1);
+    CHECK(sim.UsedCapacity() == InventoryCapacity);
+    CHECK(sim.Count(Item::Branch) == 105 && sim.Count(Item::Fiber) == 2 && sim.Count(Item::Stone) == 12);
+    int droppedStone = 0, droppedBerries = 0, droppedGarments = 0;
+    for (const auto& drop : state.worldDrops)
+    {
+        CHECK(std::abs(drop.position.x - center.x) > 150 || std::abs(drop.position.y - center.y) > 150);
+        CHECK(drop.quantity <= InventoryCapacity);
+        if (drop.wearableId == shirt) ++droppedGarments;
+        else if (drop.item == Item::Stone) droppedStone += drop.quantity;
+        else if (drop.item == Item::Berries) droppedBerries += drop.quantity;
+    }
+    CHECK(droppedStone == 288 && droppedBerries == 7 && droppedGarments == 1);
+    CHECK(sim.GetWearable(shirt)->owner == WearableOwner::World);
+    for (const auto& item : state.wearables) CHECK(item.owner != WearableOwner::Chest);
+    CHECK(sim.FindNearestStructure(center, Piece::Chest, 1) == -1);
+    {
+        Simulation restored;
+        OK(restored.Deserialize(sim.Serialize()));
+        CHECK(restored.Serialize() == sim.Serialize());
+        CHECK(restored.GetState().structures.size() == sim.GetState().structures.size());
+    }
+
+    // With the floor bare, it comes up too; the pack has room again.
+    Stock(sim, {{Item::Knife, 1}});
+    for (Piece kind : {Piece::Roof, Piece::Doorway, Piece::Wall, Piece::Wall})
+    {
+        int id = -1;
+        for (const auto& piece : sim.GetState().structures) if (piece.kind == kind) { id = piece.id; break; }
+        if (kind == Piece::Roof) UnchangedFailure(sim, [&] { return sim.Deconstruct(floor, center); });
+        OK(sim.Deconstruct(id, center));
+    }
+    OK(sim.Deconstruct(floor, center));
+    CHECK(sim.GetState().structures.empty());
+    // Roof 4+3, doorway 4+1, two walls 3+1 each, foundation 4 branch + 2 stone.
+    CHECK(sim.Count(Item::Branch) == 4 + 4 + 6 + 4 && sim.Count(Item::Fiber) == 3 + 1 + 2 && sim.Count(Item::Stone) == 2);
+
+    // A free-standing piece founds its own building; taking the last piece down retires it.
+    BuildingStock(sim);
+    const auto target = sim.ResolvePlacement(Piece::Fire, {-750, -600}, 17.0, 0);
+    CHECK(target.buildingId < 0);
+    OK(sim.Place(target, {-750, -500}));
+    CHECK(sim.GetState().buildings.size() == 1);
+    const int fire = sim.GetState().structures.back().id;
+    OK(sim.AddFuel(fire, {-750, -500}));
+    OK(sim.Deconstruct(fire, {-750, -500}));
+    CHECK(sim.GetState().buildings.empty() && sim.GetState().structures.empty());
+    Simulation restored;
+    OK(restored.Deserialize(sim.Serialize()));
+    CHECK(restored.Serialize() == sim.Serialize());
+}
+void ChestHoldsTenPacks()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    const int chest = StructureId(sim, Piece::Chest, Home);
+    for (int load = 0; load < 10; ++load)
+    {
+        Stock(sim, {{Item::Stone, InventoryCapacity}});
+        OK(sim.Transfer(chest, Item::Stone, InventoryCapacity, Home));
+    }
+    CHECK(sim.ChestUsedCapacity(chest) == ChestCapacity);
+    Stock(sim, {{Item::Knife, 1}});
+    UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Knife, 1, Home); });
+    OK(sim.Transfer(chest, Item::Stone, -InventoryCapacity + 1, Home));
+    CHECK(sim.UsedCapacity() == InventoryCapacity && sim.ChestUsedCapacity(chest) == ChestCapacity - 119);
     Simulation restored;
     OK(restored.Deserialize(sim.Serialize()));
     CHECK(restored.Serialize() == sim.Serialize());
@@ -1280,9 +1428,11 @@ void WinterClothingAndFur()
     for (const auto& node : sim.GetState().resources)
         if (node.id == deer)
         {
-            OK(sim.Harvest(deer, node.position));
+            // Harvesting replaces the state, so keep a copy of where the deer lay, not a reference.
+            const Point where = node.position;
+            OK(sim.Harvest(deer, where));
             CHECK(sim.Count(Item::Fur) == 3);
-            CHECK(!sim.Harvest(deer, node.position).ok);
+            CHECK(!sim.Harvest(deer, where).ok);
             break;
         }
     Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 60}, {Item::Fur, 20}});
@@ -1316,43 +1466,22 @@ void WinterClothingAndFur()
     OK(older.Deserialize(Encode(Simulation().GetState(), FreeBuildingSaveVersion)));
     CHECK(older.Count(Item::Fur) == 0 && older.GetState().equipment[static_cast<int>(EquipmentSlot::Outer)] == 0);
 
-    // A winter night strips warmth fast; the winter kit slows it to a trickle.
+    // Warmth is retired (it's summer): even a winter-calendar night leaves her full, dressed or not.
     Simulation bare;
     Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.warmth = 80; });
-    Edit(sim, [](State& state) { state.hour = 42 * 24 + 20; state.warmth = 80; state.energy = 100; });
+    CHECK(bare.GetState().warmth == 100);
     CHECK(std::string(bare.SeasonName()) == "Winter");
     bare.AdvanceGameHours(2, Home);
     sim.AdvanceGameHours(2, Home);
-    CHECK(Close(bare.GetState().warmth, 80 - 11 * 2));
-    CHECK(Close(sim.GetState().warmth, 80 - (11 - 13 * Simulation::InsulationPerPoint) * 2));
-    // By day in winter she still cools unless dressed, and clothing never warms her past zero loss.
-    Edit(bare, [](State& state) { state.hour = 42 * 24 + 12; state.warmth = 50; });
-    Edit(sim, [](State& state) { state.hour = 42 * 24 + 12; state.warmth = 50; });
-    bare.AdvanceGameHours(1, Home);
-    sim.AdvanceGameHours(1, Home);
-    CHECK(Close(bare.GetState().warmth, 48) && Close(sim.GetState().warmth, 50));
+    CHECK(bare.GetState().warmth == 100 && sim.GetState().warmth == 100 && !bare.GetState().failed);
 }
 void WarmthSleepAndFailure()
 {
-    Simulation bare, clothed, indoor, fire;
-    Edit(bare, [](State& state) { state.hour = 19; state.warmth = 80; });
-    OK(clothed.Deserialize(bare.Serialize()));
-    clothed.SetWarmOutfit(true);
-    OK(indoor.Deserialize(bare.Serialize()));
-    BuildingStock(indoor);
-    BuildRoom(indoor);
-    OK(fire.Deserialize(bare.Serialize()));
-    BuildingStock(fire);
-    OK(fire.Place(Piece::Fire, -3, 0, 0, Home));
-    OK(fire.AddFuel(fire.GetState().structures[0].id, Home));
+    Simulation bare;
+    Edit(bare, [](State& state) { state.hour = 19; });
+    // A night outdoors with no shelter or fire no longer chills her.
     bare.AdvanceGameHours(3, Home);
-    clothed.AdvanceGameHours(3, Home);
-    indoor.AdvanceGameHours(3, Home);
-    fire.AdvanceGameHours(3, Home);
-    CHECK(bare.GetState().warmth < clothed.GetState().warmth);
-    CHECK(clothed.GetState().warmth < indoor.GetState().warmth);
-    CHECK(fire.GetState().warmth > indoor.GetState().warmth);
-    CHECK(Close(bare.GetState().warmth, 62));
+    CHECK(bare.GetState().warmth == 100 && !bare.GetState().failed);
     UnchangedFailure(bare, [&] { return bare.Sleep(8, Home); });
     BuildingStock(bare);
     OK(bare.Place(Piece::Bed, -3, 0, 0, Home));
@@ -1380,10 +1509,16 @@ void WarmthSleepAndFailure()
     CHECK(savedFailure.GetState().failed);
     OK(bare.Deserialize(checkpoint));
     CHECK(!bare.GetState().failed);
-    Edit(bare, [](State& state) { state.hunger = 80; state.warmth = 3; state.energy = 100; });
-    CHECK(!bare.Sleep(8, Home));
-    CHECK(bare.GetState().warmth == 0);
-    CHECK(Close(bare.GetState().hour, 19.5));
+    // An old save that failed only from the cold loads recovered, with warmth full.
+    State cold = bare.GetState();
+    cold.hunger = 80;
+    cold.warmth = 0;
+    cold.failed = true;
+    FixtureLayouts(cold);
+    OK(bare.Deserialize(Encode(cold)));
+    CHECK(!bare.GetState().failed && bare.GetState().warmth == 100);
+    OK(bare.Sleep(8, Home));
+    CHECK(bare.GetState().warmth == 100);
     Simulation tired;
     Edit(tired, [](State& state) { state.energy = 1.2; });
     tired.AdvanceGameHours(10, Home);
@@ -1405,7 +1540,7 @@ void SleepAndFiniteBoundaries()
     OK(once.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     OK(once.Plant(once.GetState().plots[0].id, CellCenter(-2, -1)));
     CHECK(once.Count(Item::Seeds) == 0);
-    Edit(once, [](State& state) { state.hour = 31; state.energy = 15; state.warmth = 50; });
+    Edit(once, [](State& state) { state.hour = 31; state.energy = 15; });
     Simulation split;
     OK(split.Deserialize(once.Serialize()));
     OK(once.Sleep(8, Home));
@@ -1488,7 +1623,7 @@ void PersistenceRejection()
         [](State& s) { s.structures[0].fuelHours = 1; },
         [](State& s) { s.structures[0].storage[0] = 1; },
         [](State& s) { s.structures.back().storage[0] = -1; },
-        [](State& s) { s.structures.back().storage[0] = 121; },
+        [](State& s) { s.structures.back().storage[0] = ChestCapacity + 1; },
         [](State& s) { s.structures.back().kind = Piece::Fire; s.structures.back().fuelHours = 49; },
         [](State& s) { s.structures[0].cellX = 0; },
         [](State& s) { auto p = s.structures[0]; p.id = s.nextId++; s.structures.push_back(p); },
@@ -1544,7 +1679,7 @@ void InventoryRoundTrip(const Simulation& sim)
     CHECK(loaded.Serialize() == sim.Serialize());
     CHECK(loaded.UsedCapacity() <= InventoryCapacity);
     for (const auto& piece : loaded.GetState().structures)
-        if (piece.kind == Piece::Chest) CHECK(loaded.ChestUsedCapacity(piece.id) <= InventoryCapacity);
+        if (piece.kind == Piece::Chest) CHECK(loaded.ChestUsedCapacity(piece.id) <= ChestCapacity);
 }
 void WardrobeDefaultsAndCrafting()
 {
@@ -1674,6 +1809,14 @@ void WardrobeStorageAndReach()
     Stock(sim, {{Item::Knife, 1}, {Item::Branch, 119}});
     OK(sim.Transfer(chest, Item::Branch, 119, edge));
     CHECK(sim.ChestUsedCapacity(chest) == 120);
+    // A chest holds ten packs: 120 is nowhere near full.
+    OK(sim.Transfer(chest, Item::Knife, 1, edge));
+    OK(sim.Transfer(chest, Item::Knife, -1, edge));
+    Edit(sim, [chest](State& state) {
+        for (auto& piece : state.structures)
+            if (piece.id == chest) piece.storage[static_cast<int>(Item::Branch)] = ChestCapacity - 1;
+    }, false);
+    CHECK(sim.ChestUsedCapacity(chest) == ChestCapacity);
     UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Knife, 1, edge); });
     OK(sim.UnequipWearable(2, sim.GetRevision()));
     UnchangedFailure(sim, [&] { return sim.MoveWearable(2, chest, Home, sim.GetRevision()); });
@@ -1683,7 +1826,7 @@ void WardrobeStorageAndReach()
     UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Branch, -1, edge); });
     OK(sim.EquipWearable(2, sim.GetRevision()));
     OK(sim.MoveWearable(tunic, 0, edge, sim.GetRevision()));
-    CHECK(sim.UsedCapacity() == 120 && sim.ChestUsedCapacity(chest) == 119);
+    CHECK(sim.UsedCapacity() == 120 && sim.ChestUsedCapacity(chest) == ChestCapacity - 1);
     CHECK(sim.GetWearable(tunic)->dye == 2);
     InventoryRoundTrip(sim);
 }
@@ -2058,7 +2201,7 @@ void WardrobeSaveRejection()
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
     }
     State full = sim.GetState();
-    full.structures.back().storage[static_cast<int>(Item::Branch)] = 120;
+    full.structures.back().storage[static_cast<int>(Item::Branch)] = ChestCapacity;
     FixtureLayouts(full);
     CHECK(sim.Deserialize(Encode(full)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
@@ -2709,6 +2852,8 @@ void Run(const char* name, void (*test)())
 
 int main()
 {
+    // Flush each PASS line so a crash shows which scenario it happened in.
+    std::cout << std::unitbuf;
     Run("defaults and input validation", DefaultsAndValidation);
     Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
@@ -2721,6 +2866,8 @@ int main()
     Run("free-standing buildings, snapping and persistence", FreeStandingBuildings);
     Run("ordinal cardinal edges and 700cm build reach", CardinalEdgesAndPlacementReach);
     Run("independent fires and chest storage", FireAndStorage);
+    Run("taking down placed pieces: refunds, chest contents, floors and reload", DeconstructTransactions);
+    Run("chests hold ten packs", ChestHoldsTenPacks);
     Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("small garden squares, per-square planting and plot migration", GardenSquares);

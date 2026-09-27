@@ -114,7 +114,7 @@ void AHomesteadHUD::DrawHUD()
         Panel(0, 0, ViewWidth, ViewHeight, FLinearColor(0.025f, 0.04f, 0.035f, 0.85f));
         const float X = (ViewWidth - 760) * 0.5f;
         Write(TEXT("Time to try again"), X, ViewHeight * 0.39f, 43, Ink);
-        Wrap(TEXT("You ran out of warmth, food, or energy. Return to a recovery checkpoint and try a different preparation."),
+        Wrap(TEXT("You ran out of food or energy. Return to a recovery checkpoint and try a different preparation."),
             X, ViewHeight * 0.39f + 76, 740, 25, Muted);
         Write(PC->UsesGamepad() ? TEXT("[A] Retry checkpoint") : TEXT("[E / Enter] Retry checkpoint"),
             X, ViewHeight * 0.39f + 180, 27, HudGold);
@@ -128,7 +128,6 @@ void AHomesteadHUD::DrawHUD()
         const float Bottom = ViewHeight - 90;
         Meter(TEXT("Food"), State.hunger, 46, Bottom, FLinearColor(0.77f, 0.66f, 0.37f, 1));
         Meter(TEXT("Energy"), State.energy, 46 + MeterWidth + 11, Bottom, FLinearColor(0.66f, 0.76f, 0.52f, 1));
-        Meter(TEXT("Warmth"), State.warmth, 46 + (MeterWidth + 11) * 2, Bottom, FLinearColor(0.83f, 0.56f, 0.37f, 1));
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
         if (PC->IsPlanning())
@@ -137,8 +136,12 @@ void AHomesteadHUD::DrawHUD()
             ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 262, Width, 132);
             Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 249, Width - 44, 24, Ink, 1);
             Wrap(PC->PlacementStatus(), X + 22, ViewHeight - 217, Width - 44, 21, PC->IsPlacementValid() ? Muted : HudWarning, 2);
-            Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   LB / RB: rotate   A: place   B: done")
-                : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
+            if (PC->IsDeconstructing())
+                Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   A: take down   Y: build instead   B: done")
+                    : TEXT("WASD + mouse: walk and aim   E / click: take down   X: build instead   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
+            else
+                Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   LB / RB: rotate   A: place   Y: take down   B: done")
+                    : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   X: take down   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
         else DrawInteractCue(*PC);
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);

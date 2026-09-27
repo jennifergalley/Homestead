@@ -20,7 +20,6 @@ constexpr double FireReach = 450.0;
 constexpr double MaxHour = 1000000.0;
 constexpr double TimeStep = 1.0 / 120.0;
 constexpr int MaxObjects = 4096;
-constexpr int MaxStock = 120;
 constexpr double DropReach = 220.0;
 constexpr double DropMergeReach = 120.0;
 constexpr double MaxFuel = 48.0;
@@ -101,15 +100,17 @@ Inventory Items(std::initializer_list<std::pair<Item, int>> values)
     for (const auto& value : values) result[static_cast<int>(value.first)] += value.second;
     return result;
 }
-bool StockValid(const Inventory& stock)
+// Water portions ride in the watering can, so they never take pack or chest space.
+constexpr bool TakesSpace(Item item) { return item != Item::Water; }
+bool StockValid(const Inventory& stock, int capacity = InventoryCapacity)
 {
     int total = 0;
-    for (int count : stock)
+    for (int i = 0; i < ItemCount; ++i)
     {
-        if (count < 0 || count > MaxStock) return false;
-        total += count;
+        if (stock[i] < 0 || stock[i] > capacity) return false;
+        if (TakesSpace(static_cast<Item>(i))) total += stock[i];
     }
-    return total <= InventoryCapacity;
+    return total <= capacity;
 }
 bool Empty(const Inventory& stock)
 {
@@ -476,11 +477,11 @@ bool ReadUnsigned(std::istream& stream, std::uint64_t& value)
     value = parsed;
     return true;
 }
-bool ReadStock(std::istream& stream, Inventory& stock, int stored = ItemCount)
+bool ReadStock(std::istream& stream, Inventory& stock, int stored = ItemCount, int capacity = InventoryCapacity)
 {
     stock.fill(0);
     for (int i = 0; i < stored; ++i) if (!(stream >> stock[i])) return false;
-    return StockValid(stock);
+    return StockValid(stock, capacity);
 }
 void WriteStock(std::ostream& stream, const Inventory& stock)
 {
@@ -538,7 +539,8 @@ int ContainerUsed(const State& state, int container)
     const auto* stock = ContainerStock(state, container);
     if (!stock) return -1;
     int total = 0;
-    for (int count : *stock) total += count;
+    for (int i = 0; i < ItemCount; ++i)
+        if (TakesSpace(static_cast<Item>(i))) total += (*stock)[i];
     for (const auto& item : state.wearables) if (InContainer(item, container)) ++total;
     return total;
 }
@@ -671,9 +673,10 @@ Result ValidateInventory(const State& state)
     const auto validateContainer = [&](int container) -> Result {
         const auto* stock = ContainerStock(state, container);
         const auto* layout = ContainerLayout(state, container);
-        if (!stock || !layout || !StockValid(*stock) || ContainerUsed(state, container) > InventoryCapacity)
+        const int capacity = ContainerCapacity(container);
+        if (!stock || !layout || !StockValid(*stock, capacity) || ContainerUsed(state, container) > capacity)
             return {false, container == 0 ? "Not enough pack space." : "The chest does not have enough space.", ResultCode::Capacity};
-        if (layout->size() > InventoryCapacity) return Bad("Inventory layout has too many entries.");
+        if (layout->size() > static_cast<std::size_t>(capacity)) return Bad("Inventory layout has too many entries.");
         Inventory total{};
         for (const auto& entry : *layout)
         {
@@ -687,7 +690,7 @@ Result ValidateInventory(const State& state)
             else
             {
                 if (entry.groupId <= 0 || entry.groupId >= state.nextGroupId || !groupIds.insert(entry.groupId).second ||
-                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > InventoryCapacity)
+                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > capacity)
                     return Bad("A fungible group has invalid identity, item or quantity.");
                 total[static_cast<int>(entry.item)] += entry.quantity;
             }
@@ -759,7 +762,8 @@ void WriteLayout(std::ostream& output, const InventoryLayout& layout)
 bool ReadLayout(std::istream& input, InventoryLayout& layout)
 {
     int count = 0;
-    if (!(input >> count) || count < 0 || count > InventoryCapacity) return false;
+    // Chests hold the most; ValidateInventory applies each container's own limit afterwards.
+    if (!(input >> count) || count < 0 || count > ChestCapacity) return false;
     for (int i = 0; i < count; ++i)
     {
         LayoutEntry entry;
@@ -1434,7 +1438,7 @@ Result Simulation::PickUpDrop(int dropId, Point player)
         [dropId](const WorldDrop& value) { return value.id == dropId; });
     if (drop->wearableId == 0)
     {
-        if (ContainerUsed(candidate, 0) > InventoryCapacity - drop->quantity)
+        if (TakesSpace(drop->item) && ContainerUsed(candidate, 0) > InventoryCapacity - drop->quantity)
             return {false, "Not enough pack space to pick up the complete stack.", ResultCode::Capacity, revision_};
         candidate.inventory[static_cast<int>(drop->item)] += drop->quantity;
     }
@@ -1958,6 +1962,160 @@ Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point p
     target.rotation = rotation;
     return Place(target, player);
 }
+namespace
+{
+constexpr double DeconstructReach = 450.0;
+double FootprintDistance(const Footprint& box, Point p)
+{
+    const Point local = RotateYaw({p.x - box.center.x, p.y - box.center.y}, -box.yaw);
+    const double dx = std::max(0.0, std::abs(local.x) - box.half.x);
+    const double dy = std::max(0.0, std::abs(local.y) - box.half.y);
+    return std::sqrt(dx * dx + dy * dy);
+}
+// Several pieces can lie under one aim; take what stands on a floor before the floor itself.
+int DeconstructPriority(Piece kind)
+{
+    return Furniture(kind) ? 0 : EdgePiece(kind) ? 1 : kind == Piece::Roof ? 2 : 3;
+}
+// Thin walls and small furniture are hard to aim at exactly, so they catch a near miss.
+double AimTolerance(Piece kind) { return EdgePiece(kind) ? 45.0 : Furniture(kind) ? 30.0 : 0.0; }
+// Where to set down what her pack can't hold: beside her, clear of buildings, plots and water.
+Point ClearDropSpot(const State& state, Point player)
+{
+    const auto clear = [&](Point p)
+    {
+        if (!ValidPoint(p) || IsNearWater(p)) return false;
+        for (const auto& piece : state.structures)
+            if (FootprintDistance(StructureFootprint(state, piece), p) < 40.0) return false;
+        for (const auto& plot : state.plots)
+            if (Near(p, PlotCenter(plot), 100.0)) return false;
+        return true;
+    };
+    if (clear(player)) return player;
+    for (double radius : {70.0, 140.0, 200.0})
+        for (int step = 0; step < 12; ++step)
+        {
+            const double angle = step * 3.14159265358979323846 / 6.0;
+            const Point p{player.x + std::cos(angle) * radius, player.y + std::sin(angle) * radius};
+            if (clear(p)) return p;
+        }
+    return player;
+}
+}
+int Simulation::FindDeconstructTarget(Point aim, double maxDistance) const
+{
+    if (!ValidPoint(aim)) return -1;
+    int best = -1, bestPriority = 0;
+    double bestScore = 0.0;
+    for (const auto& piece : state_.structures)
+    {
+        const double distance = FootprintDistance(StructureFootprint(state_, piece), aim);
+        if (distance > maxDistance) continue;
+        const double score = std::max(0.0, distance - AimTolerance(piece.kind));
+        const int priority = DeconstructPriority(piece.kind);
+        if (best < 0 || score < bestScore - 1e-6 || (score <= bestScore + 1e-6 && priority < bestPriority))
+        {
+            best = piece.id;
+            bestScore = score;
+            bestPriority = priority;
+        }
+    }
+    return best;
+}
+Result Simulation::CheckDeconstruct(int structureId, Point player) const
+{
+    if (state_.failed) return Failed();
+    const auto* piece = Find(state_.structures, structureId);
+    if (!piece) return Bad("Aim at something you built to take it down.");
+    if (!ValidPoint(player) || FootprintDistance(StructureFootprint(state_, *piece), player) > DeconstructReach)
+        return Bad("Move closer to take this down.");
+    if (piece->kind == Piece::Foundation)
+        for (const auto& other : state_.structures)
+            if (other.id != piece->id && other.buildingId == piece->buildingId
+                && other.cellX == piece->cellX && other.cellY == piece->cellY)
+                return Bad("Take down the walls, roof and furnishings on this floor first.");
+    return CheckExertion(Exertion::DeconstructEnergy);
+}
+Result Simulation::Deconstruct(int structureId, Point player)
+{
+    const auto ready = CheckDeconstruct(structureId, player);
+    if (!ready) return ready;
+    State candidate = state_;
+    const auto found = std::find_if(candidate.structures.begin(), candidate.structures.end(),
+        [structureId](const Structure& value) { return value.id == structureId; });
+    const Structure piece = *found;
+    candidate.structures.erase(found);
+    if (piece.buildingId > 0 && std::none_of(candidate.structures.begin(), candidate.structures.end(),
+        [&](const Structure& value) { return value.buildingId == piece.buildingId; }))
+        candidate.buildings.erase(std::remove_if(candidate.buildings.begin(), candidate.buildings.end(),
+            [&](const Building& value) { return value.id == piece.buildingId; }), candidate.buildings.end());
+
+    const Inventory cost = BuildCost(piece.kind);
+    const bool chest = piece.kind == Piece::Chest;
+    const Point spot = ClearDropSpot(candidate, player);
+    const Result crowded = Bad("Too many possessions are already resting in the world. Pick some up before taking this down.");
+    int setDown = 0;
+    const auto dropItems = [&](Item item, int quantity)
+    {
+        while (quantity > 0)
+        {
+            WorldDrop* merge = nullptr;
+            for (auto& drop : candidate.worldDrops)
+                if (drop.wearableId == 0 && drop.item == item && drop.quantity < InventoryCapacity
+                    && Near(spot, drop.position, DropMergeReach)) { merge = &drop; break; }
+            int moved = 0;
+            if (merge)
+            {
+                moved = std::min(quantity, InventoryCapacity - merge->quantity);
+                merge->quantity += moved;
+            }
+            else
+            {
+                if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
+                    return false;
+                moved = std::min(quantity, InventoryCapacity);
+                candidate.worldDrops.push_back({candidate.nextId++, spot, item, moved, 0});
+            }
+            quantity -= moved;
+            setDown += moved;
+        }
+        return true;
+    };
+    // The build cost comes back first, then whatever the chest held; each fills the pack before
+    // any is set down.
+    for (const bool contents : {false, true})
+        for (int i = 0; i < ItemCount; ++i)
+        {
+            const int back = contents ? (chest ? piece.storage[i] : 0) : -cost[i];
+            if (back <= 0) continue;
+            const int kept = TakesSpace(static_cast<Item>(i)) ? std::min(back, std::max(0, InventoryCapacity - ContainerUsed(candidate, 0)))
+                : std::min(back, InventoryCapacity - candidate.inventory[i]);
+            candidate.inventory[i] += kept;
+            if (!dropItems(static_cast<Item>(i), back - kept)) return crowded;
+        }
+    for (auto& wearable : candidate.wearables)
+    {
+        if (wearable.owner != WearableOwner::Chest || wearable.chestId != piece.id) continue;
+        wearable.chestId = 0;
+        if (ContainerUsed(candidate, 0) < InventoryCapacity)
+        {
+            wearable.owner = WearableOwner::Carried;
+            continue;
+        }
+        if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
+            return crowded;
+        wearable.owner = WearableOwner::World;
+        candidate.worldDrops.push_back({candidate.nextId++, spot, Item::Count, 1, wearable.id});
+        ++setDown;
+    }
+    std::string message = std::string("Took down the ") + PieceName(piece.kind) + ": " + DescribeCost(cost) + " back";
+    if (chest) message += ", and its contents";
+    message += ".";
+    if (setDown > 0)
+        message += " Your pack is full, so " + std::to_string(setDown) + (setDown == 1 ? " thing is" : " things are")
+            + " set down beside you.";
+    return Exert(Exertion::DeconstructEnergy, CommitInventory(std::move(candidate), message.c_str()));
+}
 Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds)
 {
     if (state_.failed) return Failed();
@@ -2121,7 +2279,7 @@ Result Simulation::FillWater(Point player)
     if (Count(Item::Water) >= 6) return Bad("Your watering can is already full.");
     const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
-    if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
+    if (!TryAdjust(change)) return Bad("Your watering can could not be filled.");
     return Exert(Exertion::FillWaterEnergy, Good("Watering can filled with six water portions."));
 }
 Result Simulation::AddFuel(int structureId, Point player)
@@ -2172,30 +2330,19 @@ double Simulation::Insulation() const
 }
 void Simulation::Step(double hours, Point player, bool sleeping)
 {
+    (void)player;
     const bool rain = IsRaining();
-    const bool sheltered = IsSheltered(player);
-    const bool fire = IsNearFire(player);
-    double warmthRate = IsNight() ? -6.0 : 3.0;
-    // Cooler autumns and hard winters; spring and summer keep the original day/night rates.
-    const std::string season = SeasonName();
-    if (season == "Autumn") warmthRate = IsNight() ? -8.0 : 1.5;
-    else if (season == "Winter") warmthRate = IsNight() ? -11.0 : -2.0;
-    if (rain && !sheltered) warmthRate -= 1.5;
-    if (state_.warmOutfit && warmthRate < 0) warmthRate += 2.0;
-    // Clothing only slows heat loss; it never warms her on its own.
-    if (warmthRate < 0) warmthRate = std::min(0.0, warmthRate + Insulation());
-    if (sheltered) warmthRate = std::max(1.0, warmthRate + 7.0);
-    if (fire) warmthRate = std::max(6.0, warmthRate + 12.0);
+    // It's summer: the cold no longer drains her, so warmth stays full and never fails her.
+    // Shelter and fire still matter to the checkpoint and cooking rules elsewhere.
     const double hungerRate = sleeping ? -1.3 : -2.0;
     const double energyRate = sleeping ? 10.0 : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
     elapsed = std::min(elapsed, state_.hunger / -hungerRate);
     if (energyRate < 0) elapsed = std::min(elapsed, state_.energy / -energyRate);
-    if (warmthRate < 0) elapsed = std::min(elapsed, state_.warmth / -warmthRate);
     state_.hunger = Clamp(state_.hunger + hungerRate * elapsed, 0.0, 100.0);
     state_.energy = Clamp(state_.energy + energyRate * elapsed, 0.0, 100.0);
-    state_.warmth = Clamp(state_.warmth + warmthRate * elapsed, 0.0, 100.0);
+    state_.warmth = 100.0;
     for (auto& piece : state_.structures)
         if (piece.kind == Piece::Fire) piece.fuelHours = std::max(0.0, piece.fuelHours - elapsed);
     for (auto& plot : state_.plots)
@@ -2211,11 +2358,10 @@ void Simulation::Step(double hours, Point player, bool sleeping)
         }
     }
     state_.hour += elapsed;
-    if (state_.hunger <= 1e-10 || state_.energy <= 1e-10 || state_.warmth <= 1e-10)
+    if (state_.hunger <= 1e-10 || state_.energy <= 1e-10)
     {
         if (state_.hunger <= 1e-10) state_.hunger = 0.0;
         if (state_.energy <= 1e-10) state_.energy = 0.0;
-        if (state_.warmth <= 1e-10) state_.warmth = 0.0;
         state_.failed = true;
     }
 }
@@ -2389,6 +2535,10 @@ Result Simulation::Deserialize(const std::string& data)
         candidate.nextId >= TransientResourceIdBase) return invalid();
     const bool critical = candidate.hunger == 0 || candidate.energy == 0 || candidate.warmth == 0;
     if (critical != candidate.failed || !ReadStock(input, candidate.inventory, storedItems)) return invalid();
+    // Warmth no longer matters (summer): it loads full, and a save that failed only from cold
+    // is her recovered.
+    candidate.warmth = 100.0;
+    candidate.failed = candidate.hunger == 0 || candidate.energy == 0;
     std::set<int> ids;
     const auto acceptId = [&](int id) { return id > 0 && id < candidate.nextId && ids.insert(id).second; };
     int count = 0;
@@ -2447,7 +2597,7 @@ Result Simulation::Deserialize(const std::string& data)
         if (!(input >> piece.id >> kind) ||
             (version >= FreeBuildingSaveVersion && !(input >> piece.buildingId)) ||
             !(input >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours) ||
-            !ReadStock(input, piece.storage, storedItems) || !ReadLayout(input, piece.layout)) return invalid();
+            !ReadStock(input, piece.storage, storedItems, ChestCapacity) || !ReadLayout(input, piece.layout)) return invalid();
         piece.kind = static_cast<Piece>(kind);
         PlacementTarget site;
         site.kind = piece.kind;

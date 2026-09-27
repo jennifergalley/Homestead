@@ -131,6 +131,9 @@ public:
     // Where the construction preview currently resolves (snapped or free-standing).
     const Homestead::PlacementTarget& CurrentPlacement() const { return BuildTarget; }
     bool IsPlacementValid() const { return bBuildValid; }
+    // Build mode's take-down variant: aim at something you built and press place to remove it.
+    bool IsDeconstructing() const { return bPlanning && bDeconstructing; }
+    int32 DeconstructTarget() const { return DeconstructId; }
     bool HasNativeMenu() const { return NativeMenu.IsValid(); }
     void MenuPage(int32 TargetPage);
     void MenuSelect(int32 Row);
@@ -161,8 +164,11 @@ public:
     static int32 AppearanceChoiceCount(int32 Id);
     int32 AppearanceChoice(int32 Id) const;
     float MenuAudioVolume(int32 Id) const;
-    // How long a bed rest lasts from now: until just after dawn from the evening or night.
+    // How long a bed rest lasts from now: to 6:45 from dusk or night (eight hours after about
+    // 2:45 AM), or a two-hour nap by day that ends by dusk.
     double BedSleepHours() const;
+    // Sleep in the bed beside her for BedSleepHours.
+    Homestead::Result SleepInBed(Homestead::Point Position);
     void MenuPreviewAudioVolume(int32 Id, float Value);
     bool MenuCommitAudioVolume(int32 Id, float Value, float Previous);
     bool IsAutosaveEnabled() const { return bAutosaveEnabled; }
@@ -295,6 +301,8 @@ private:
     double BuildYawOffset = 0.0;
     Homestead::PlacementTarget BuildTarget;
     bool bBuildValid = false;
+    bool bDeconstructing = false;
+    int32 DeconstructId = -1;
     FString BuildBlocker;
     FString BuildCheckKey;
     double LastBuildCheckTime = -1.0;
@@ -438,6 +446,9 @@ private:
     void CloseBook();
     void UpdateFocus();
     void BeginPlacement(Homestead::Piece Kind);
+    // Switch build mode between placing the chosen plan and taking pieces down (Y / X).
+    void ToggleDeconstruct();
+    void UpdateDeconstruct(bool bForce);
     void EndPlacement();
     void Notify(const Homestead::Result& Result, USoundBase* SuccessCue = nullptr);
     void Notify(const FString& Text, bool Error = false);

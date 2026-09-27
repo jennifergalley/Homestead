@@ -51,6 +51,7 @@ const FLinearColor Soil(0.16f, 0.085f, 0.039f);
 const FLinearColor Cloth(0.55f, 0.43f, 0.25f);
 const FLinearColor PreviewColor(0.65f, 0.79f, 0.77f);
 const FLinearColor PreviewBlockedColor(0.86f, 0.33f, 0.26f);
+const FLinearColor DeconstructColor(0.93f, 0.62f, 0.2f);
 
 bool RegionalReachLess(const Homestead::RegionalGeneration::RiverReach& A,
     const Homestead::RegionalGeneration::RiverReach& B)
@@ -2940,7 +2941,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
 }
 
 void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
-    const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid)
+    const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid, bool bDeconstruct)
 {
     const Homestead::Point Center = Homestead::BuildingCellCenter(Frame, Structure.cellX, Structure.cellY);
     FVector Base(Center.x, Center.y, StructureBase(Center, Frame.yaw));
@@ -2976,8 +2977,13 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         bool bSolid = false, FRotator LocalRotation = FRotator::ZeroRotator, float Glow = 0.0f)
     {
         const FRotator Combined = (Rotation.Quaternion() * LocalRotation.Quaternion()).Rotator();
-        return AddPart(Visual, Mesh, Base + Rotation.RotateVector(Offset), Size,
-            bPreview ? (bValid ? PreviewColor : PreviewBlockedColor) : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
+        // A take-down outline wraps the standing piece a little proud of it, so it doesn't flicker
+        // through the real surfaces.
+        const FVector Shown = bDeconstruct ? Size * 1.02f + FVector(4.0f) : Size;
+        const FLinearColor PreviewTint = bDeconstruct ? (bValid ? DeconstructColor : PreviewBlockedColor)
+            : bValid ? PreviewColor : PreviewBlockedColor;
+        return AddPart(Visual, Mesh, Base + Rotation.RotateVector(Offset), Shown,
+            bPreview ? PreviewTint : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
     };
     switch (Structure.kind)
     {
@@ -3593,4 +3599,33 @@ void AHomesteadWorld::SetPlacementPreview(bool Visible, const Homestead::Placeme
     Structure.rotation = Target.rotation;
     BuildStructure(Preview, Structure, Target.frame, bOnFoundation, true, bValid);
     Preview.Signature = Signature;
+}
+
+void AHomesteadWorld::SetDeconstructPreview(const Homestead::State& State, int32 StructureId, bool bValid)
+{
+    const Homestead::Structure* Found = nullptr;
+    for (const auto& Structure : State.structures)
+        if (Structure.id == StructureId) { Found = &Structure; break; }
+    if (!Found || !bInitialized)
+    {
+        ClearVisual(Preview);
+        return;
+    }
+    const bool bOnFoundation = FoundationCells.Contains(FIntVector(Found->cellX, Found->cellY, Found->buildingId));
+    const FString Signature = FString::Printf(TEXT("D:%d:%d:%d:%d:%d:%d:%d"), Found->id, static_cast<int>(Found->kind),
+        Found->cellX, Found->cellY, Found->rotation, bOnFoundation, bValid);
+    if (Preview.Signature == Signature) return;
+    ClearVisual(Preview);
+    const Homestead::Building* Frame = Homestead::FindBuilding(State, Found->buildingId);
+    BuildStructure(Preview, *Found, Frame ? *Frame : Homestead::Building{}, bOnFoundation, true, bValid, true);
+    Preview.Signature = Signature;
+}
+
+int32 AHomesteadWorld::StructureForComponent(const UPrimitiveComponent* Component) const
+{
+    if (!Component) return -1;
+    for (const auto& Entry : StructureVisuals)
+        for (const USceneComponent* Part : Entry.Value.Components)
+            if (Part == Component) return Entry.Key;
+    return -1;
 }
