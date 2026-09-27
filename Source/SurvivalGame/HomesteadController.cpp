@@ -361,7 +361,8 @@ void AHomesteadController::BeginPlay()
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
     if (!Loaded) GrantPlaytestKit(true);
     bHasPlayableSession = !bTestResetRequired;
-    if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
+    if (!Loaded && bEstateMap && !bTestResetRequired && !SmokeTest && !VisualPlaytest) BeginNewGameSetup();
+    else if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     ShowHotbar();
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();
@@ -1411,7 +1412,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
         LastStepPosition = PendingLocation;
         LastSafeWorldPosition = PendingLocation;
         StepDistance = 0;
-        if (bFreshTerrainSpawn)
+        // The estate spawn anchor faces the standing-room door on purpose; the open-terrain view search would turn her to a wall.
+        if (bFreshTerrainSpawn && !bEstateMap)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                 PendingRotation = Avatar->ChooseStartingView(*Landscape, PendingRotation);
         SetControlRotation(PendingRotation);
@@ -3208,7 +3210,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
         || !FGuid::Parse(Save->WorldId, ParsedWorld) || !ParsedWorld.IsValid()
         || FMath::Abs(Save->PlayerLocation.X) > Homestead::MaxWorldCoordinate
         || FMath::Abs(Save->PlayerLocation.Y) > Homestead::MaxWorldCoordinate
-        || FMath::Abs(Save->PlayerLocation.Z) > 5000 || !FMath::IsFinite(Save->CameraSensitivity)
+        || FMath::Abs(Save->PlayerLocation.Z) > Homestead::MaxWorldCoordinate || !FMath::IsFinite(Save->CameraSensitivity)
         || Save->CameraSensitivity < 0.2 || Save->CameraSensitivity > 3
         || !FMath::IsFinite(Save->MusicVolume) || Save->MusicVolume < 0 || Save->MusicVolume > 1
         || !FMath::IsFinite(Save->AmbienceVolume) || Save->AmbienceVolume < 0 || Save->AmbienceVolume > 1
@@ -3538,6 +3540,7 @@ void AHomesteadController::NewGame()
     AutosaveRemaining = AutosaveMinutes * 60.0f;
     EndPlacement();
     GrantPlaytestKit(true);
+    if (bEstateMap) { BeginNewGameSetup(); return; }
     OpenBook(3);
     Notify(TEXT("A new seeded woodland. Choose where to build; previous save files are still available."));
 }

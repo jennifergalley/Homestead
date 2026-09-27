@@ -27,10 +27,11 @@
 
 ### 1. The standing room is seeded Simulation structures, not level art
 
-- At a new game, a free-standing `Building` is created at `StandingRoomSpawn`'s room origin.
-  It holds:
+- At a new game, a free-standing `Building` of 2 × 2 cells (6 × 6 m) is created, centred on
+  `StandingRoomOrigin` and flush with the ruin's south-east corner. Its doorway is on the west
+  side, into the ruined hall, and `StandingRoomSpawn` faces it. It holds:
   - foundations;
-  - walls on the ruin-facing sides, with a new `StoneWall` skin of the Wall piece;
+  - walls on every other edge, with a new `Stone` skin (the imported stone kit);
   - a Doorway;
   - Roof pieces;
   - a Hearth, a new Piece that behaves as Fire, always fuelled for round 1 so fuel isn't a
@@ -76,8 +77,11 @@
   - Estate: "Trevennor", a Cornish "tre-" farmstead name.
 - Each field is limited to 24 characters and must be non-empty after trimming. There's no
   word filtering.
-- Controller use: the fields open the platform virtual keyboard on focus. The page follows
-  standard directional focus, B goes back, and Start begins.
+- Controller use: Windows offers a gamepad no platform virtual keyboard, so A on a field opens an
+  on-screen letter grid. Capitals start each word, X deletes, Y adds a space and B closes the
+  grid. The page follows standard directional focus, B goes back to Appearance, and Start
+  begins. Keyboard players type straight into the highlighted field.
+- During setup, closing the Appearance page moves on to Names.
 - Names live in Simulation state (`heroineName`, `familyName`, `estateName`) and in the save
   header metadata for the save list.
 
@@ -87,8 +91,11 @@
   in the existing serif display style. It fades in for 1 s, holds for 3 s and fades out, and it
   doesn't block input after 1 s.
 - The field book gains a **Journal** entry list, which starts with one arrival note. That's
-  the minimal version of a journal round 12 may grow. It lives under the existing Inventory or
-  Map region rather than a new top-level tab, to limit tab sprawl.
+  the minimal version of a journal round 12 may grow. Its entries head the existing Guidebook
+  page, which the G/H and View "journal" bindings already open, rather than a new top-level tab,
+  to limit tab sprawl. Entries are saved by key (`State::journal`).
+- The title card uses EB Garamond (SIL OFL), the game's first period display face, and the Names
+  step shares it.
 
 ### 6. Hearth cooking
 

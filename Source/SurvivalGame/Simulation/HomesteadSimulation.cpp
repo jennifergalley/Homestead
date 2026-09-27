@@ -2058,8 +2058,12 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
         chests += piece.kind == Piece::Chest;
     }
     std::vector<Piece> wanted;
-    if (beds == 0) wanted.push_back(Piece::Bed);
-    for (int i = chests; i < 2; ++i) wanted.push_back(Piece::Chest);
+    // The estate's standing room already furnishes her.
+    if (Manor::HeritageBuildingId(state_) == 0)
+    {
+        if (beds == 0) wanted.push_back(Piece::Bed);
+        for (int i = chests; i < 2; ++i) wanted.push_back(Piece::Chest);
+    }
     // Clear cells nearest a spot ahead and to the side of her, never the cell she stands in.
     const int homeX = Cell(anchor.x), homeY = Cell(anchor.y);
     const double length = std::sqrt(facing.x * facing.x + facing.y * facing.y);
