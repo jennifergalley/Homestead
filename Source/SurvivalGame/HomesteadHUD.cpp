@@ -80,6 +80,26 @@ void AHomesteadHUD::Meter(const FString& Label, double Value, float X, float Y, 
     Panel(X, Y + 29, (MeterWidth - 24) * FMath::Clamp(static_cast<float>(Value / 100), 0.0f, 1.0f), 5, Color);
 }
 
+void AHomesteadHUD::Wallet(const AHomesteadController& PC, float X, float Y)
+{
+    const FString Balance = UTF8_TO_TCHAR(Homestead::FormatMoney(PC.State().money).c_str());
+    const float Width = FMath::Max(MeterWidth, TextWidth(Balance, 21) + 104);
+    Panel(X - 12, Y - 8, Width, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
+    ProtectFeedback(TEXT("wallet"), X - 12, Y - 8, Width, 55);
+    Write(TEXT("Purse"), X, Y, 19, Ink);
+    Write(Balance, X + Width - 24 - TextWidth(Balance, 21), Y - 1, 21, HudGold);
+    Panel(X, Y + 29, Width - 24, 2, FLinearColor(0.2f, 0.25f, 0.2f, 1));
+    // The last change floats up from the purse and fades.
+    const float Alpha = PC.WalletDeltaAlpha();
+    if (Alpha > 0 && PC.WalletDelta() != 0)
+    {
+        const FString Delta = UTF8_TO_TCHAR(Homestead::FormatMoneyDelta(PC.WalletDelta()).c_str());
+        const FLinearColor Color = PC.WalletDelta() > 0 ? FLinearColor(0.72f, 0.90f, 0.56f, Alpha)
+            : FLinearColor(HudWarning.R, HudWarning.G, HudWarning.B, Alpha);
+        Write(Delta, X + Width - 24 - TextWidth(Delta, 22), Y - 40 - (1 - Alpha) * 18, 22, Color);
+    }
+}
+
 void AHomesteadHUD::DrawHUD()
 {
     Super::DrawHUD();
@@ -107,7 +127,7 @@ void AHomesteadHUD::DrawHUD()
     ProtectFeedback(TEXT("calendar-panel"), 30, 26, 460, 73);
     Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(PC->Simulation().SeasonName()), PC->Simulation().DayNumber()), 48, 38, 24, Ink);
     Write(FString::Printf(TEXT("%02d:%02d   %s%s"), H, M, PC->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear"),
-        PC->IsPlanning() || PC->IsBookOpen() ? TEXT("   -   time paused") : TEXT("")), 48, 72, 18, Muted);
+        PC->IsPlanning() || PC->IsBookOpen() || PC->IsShopScreenOpen() ? TEXT("   -   time paused") : TEXT("")), 48, 72, 18, Muted);
 
     if (PC->IsFailed())
     {
@@ -126,9 +146,11 @@ void AHomesteadHUD::DrawHUD()
     else
     {
         const float Bottom = ViewHeight - 90;
+        if (PC->IsShopScreenOpen()) return;
         Meter(TEXT("Food"), State.hunger, 46, Bottom, FLinearColor(0.77f, 0.66f, 0.37f, 1));
         Meter(TEXT("Energy"), State.energy, 46 + MeterWidth + 11, Bottom, FLinearColor(0.66f, 0.76f, 0.52f, 1));
         Meter(TEXT("Warmth"), State.warmth, 46 + (MeterWidth + 11) * 2, Bottom, FLinearColor(0.83f, 0.56f, 0.37f, 1));
+        Wallet(*PC, 46 + (MeterWidth + 11) * 3, Bottom);
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
         if (PC->IsPlanning())

@@ -1092,7 +1092,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     const bool Lab = !PC && InCharacterLab();
     auto* Movement = GetCharacterMovement();
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
-    const bool Blocked = (Lab ? false : !PC || !PC->IsWorldReady() || PC->IsBookOpen()
+    const bool Blocked = (Lab ? false : !PC || !PC->IsWorldReady() || PC->IsBookOpen() || PC->IsShopScreenOpen()
         || PC->IsPlanning() || PC->IsFailed()) || bPlanning || bAppearancePreview
         || !Movement->IsMovingOnGround() || !bHeroineReady
         || (Animation && Animation->ActionWeight() > 0.01f);
@@ -2039,7 +2039,7 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
 {
     AHomesteadController* PC = Cast<AHomesteadController>(Controller);
     if (!PC && !InCharacterLab()) return;
-    if (PC && (!PC->IsWorldReady() || PC->IsBookOpen() || PC->IsFailed())) return;
+    if (PC && (!PC->IsWorldReady() || PC->IsBookOpen() || PC->IsShopScreenOpen() || PC->IsFailed())) return;
     const FVector2D Axis = Value.Get<FVector2D>();
     if (!Axis.IsNearlyZero()) CancelAction();
     const FRotator Facing(0, Controller->GetControlRotation().Yaw, 0);
@@ -2075,7 +2075,7 @@ void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)
         AddControllerPitchInput(Value.Y * Scale);
         return;
     }
-    if (!PC || (PC->IsBookOpen() && PC->BookPage() != 6) || PC->IsFailed()) return;
+    if (!PC || (PC->IsBookOpen() && PC->BookPage() != 6) || PC->IsShopScreenOpen() || PC->IsFailed()) return;
     AddControllerYawInput(Value.X * Scale * PC->Sensitivity);
     AddControllerPitchInput(Value.Y * Scale * PC->Sensitivity * (PC->bInvertY ? -1.0f : 1.0f));
 }

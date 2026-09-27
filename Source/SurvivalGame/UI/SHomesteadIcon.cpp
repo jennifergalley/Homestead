@@ -256,7 +256,13 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("turnshoes")), EKind::TurnShoes},
         {FName(TEXT("slot-torso")), EKind::SlotTorso},
         {FName(TEXT("slot-apron")), EKind::SlotApron},
-        {FName(TEXT("slot-feet")), EKind::SlotFeet}
+        {FName(TEXT("slot-feet")), EKind::SlotFeet},
+        {FName(TEXT("pasty")), EKind::Pasty},
+        {FName(TEXT("bread")), EKind::Bread},
+        {FName(TEXT("cheese")), EKind::Cheese},
+        {FName(TEXT("twine")), EKind::Twine},
+        {FName(TEXT("coin")), EKind::Coin},
+        {FName(TEXT("shop")), EKind::Shop}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -685,8 +691,57 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{11, 39}, {25, 39}}, Wood, 2);
         P.Line({{33, 35}, {47, 35}}, Cream, 2);
         break;
-    case EKind::Unknown:
-        P.Unknown();
+    case EKind::Pasty:
+        // A half-moon pasty with its crimped edge along the top.
+        P.Shape({{7, 38}, {10, 27}, {18, 18}, {28, 15}, {38, 18}, {46, 27}, {49, 38}, {40, 43}, {28, 45}, {16, 43}}, RootOrange);
+        P.Shape({{12, 36}, {16, 28}, {28, 22}, {40, 28}, {44, 36}, {28, 40}}, Gold);
+        for (int32 Crimp = 0; Crimp < 7; ++Crimp)
+        {
+            const float X = 11.0f + Crimp * 5.6f;
+            const float Y = 27.0f - FMath::Sin(Crimp / 6.0f * PI) * 10.0f;
+            P.Disc(X, Y, 2.6f, Cream);
+        }
+        P.Line({{22, 33}, {26, 31}}, Wood, 1.5f);
+        P.Line({{31, 31}, {35, 33}}, Wood, 1.5f);
+        break;
+    case EKind::Bread:
+        P.Shape({{7, 40}, {8, 29}, {15, 19}, {28, 15}, {41, 19}, {48, 29}, {49, 40}, {40, 45}, {16, 45}}, Wood);
+        P.Shape({{11, 36}, {14, 27}, {22, 21}, {28, 20}, {38, 23}, {44, 30}, {45, 37}, {28, 40}}, RootOrange);
+        P.Line({{18, 25}, {22, 33}}, Cream, 2);
+        P.Line({{27, 22}, {29, 32}}, Cream, 2);
+        P.Line({{36, 24}, {35, 33}}, Cream, 2);
+        break;
+    case EKind::Cheese:
+        P.Shape({{7, 34}, {44, 14}, {49, 22}, {49, 44}, {7, 44}}, Gold);
+        P.Shape({{7, 34}, {44, 14}, {49, 22}, {12, 38}}, Cream);
+        P.Disc(20, 40, 2.5f, Wood);
+        P.Disc(33, 36, 3.2f, Wood);
+        P.Disc(43, 40, 2.2f, Wood);
+        P.Disc(40, 29, 2, Wood);
+        break;
+    case EKind::Twine:
+        P.Disc(28, 29, 17, Wood);
+        P.Disc(28, 29, 13, Gold);
+        P.Line({{14, 22}, {42, 36}}, Wood, 1.5f);
+        P.Line({{13, 29}, {43, 29}}, Wood, 1.5f);
+        P.Line({{15, 36}, {41, 22}}, Wood, 1.5f);
+        P.Line({{42, 38}, {47, 45}, {40, 49}, {44, 52}}, Gold, 2);
+        break;
+    case EKind::Coin:
+        P.Disc(28, 28, 19, Wood);
+        P.Disc(28, 28, 16, Gold);
+        P.Disc(28, 28, 12, RootOrange);
+        P.Line({{32, 20}, {24, 20}, {23, 27}, {33, 29}, {32, 36}, {23, 36}}, Cream, 2.5f);
+        P.Line({{28, 16}, {28, 40}}, Cream, 1.5f);
+        break;
+    case EKind::Shop:
+        P.Shape({{6, 22}, {28, 8}, {50, 22}}, Gold);
+        P.Rect(10, 22, 36, 26, Wood);
+        P.Rect(14, 27, 12, 10, Cream);
+        P.Rect(31, 27, 11, 21, Pine);
+        P.Rect(8, 22, 40, 4, Cream);
+        break;
+    case EKind::Unknown:        P.Unknown();
         break;
     }
     return P.GetLayer();

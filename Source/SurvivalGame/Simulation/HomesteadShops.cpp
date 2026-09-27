@@ -188,16 +188,17 @@ Result Simulation::GrantMoney(Cents cents)
     return ShopGood(FormatMoneyDelta(cents), ++revision_);
 }
 
-Result Simulation::PlaceShop(ShopKind kind, Point counter)
+Result Simulation::PlaceShop(ShopKind kind, Point counter, double yaw)
 {
     if (!std::isfinite(counter.x) || !std::isfinite(counter.y) || std::abs(counter.x) > MaxWorldCoordinate
-        || std::abs(counter.y) > MaxWorldCoordinate)
+        || std::abs(counter.y) > MaxWorldCoordinate || !std::isfinite(yaw))
         return ShopBad("The counter is outside the world.", revision_);
     for (auto& shop : state_.shops)
         if (shop.kind == kind)
         {
             shop.counterX = counter.x;
             shop.counterY = counter.y;
+            shop.counterYaw = yaw;
             return ShopGood("Shop moved.", ++revision_);
         }
     Shop shop;
@@ -206,6 +207,7 @@ Result Simulation::PlaceShop(ShopKind kind, Point counter)
     shop.name = ShopDisplayName(kind);
     shop.counterX = counter.x;
     shop.counterY = counter.y;
+    shop.counterYaw = yaw;
     state_.shops.push_back(shop);
     return ShopGood("Shop opened.", ++revision_);
 }
@@ -213,13 +215,15 @@ Result Simulation::PlaceShop(ShopKind kind, Point counter)
 void Simulation::SeedEstateShops(State& candidate, const EstateLayout& layout)
 {
     candidate.money = StartingMoney;
-    const Point counter = layout.PointOr(Anchor::GeneralStoreCounter, {});
+    const Landmark* landmark = layout.FindLandmark(Anchor::GeneralStoreCounter);
+    const Point counter = landmark ? landmark->position : Point{};
     Shop store;
     store.id = candidate.nextId++;
     store.kind = ShopKind::GeneralStore;
     store.name = ShopDisplayName(ShopKind::GeneralStore);
     store.counterX = counter.x;
     store.counterY = counter.y;
+    store.counterYaw = landmark ? landmark->yaw : 0.0;
     candidate.shops.push_back(store);
 }
 
@@ -230,7 +234,7 @@ void Simulation::RefreshShopCounters(State& candidate, const EstateLayout& layou
         if (shop.kind == ShopKind::GeneralStore)
         {
             const Landmark* counter = layout.FindLandmark(Anchor::GeneralStoreCounter);
-            if (counter) { shop.counterX = counter->position.x; shop.counterY = counter->position.y; }
+            if (counter) { shop.counterX = counter->position.x; shop.counterY = counter->position.y; shop.counterYaw = counter->yaw; }
         }
 }
 
@@ -245,8 +249,8 @@ void Simulation::WriteEconomy(std::ostream& body) const
     body << "economy " << state_.money << ' ' << state_.shops.size() << '\n';
     for (const auto& shop : state_.shops)
     {
-        body << shop.id << ' ' << static_cast<int>(shop.kind) << ' ' << shop.counterX << ' ' << shop.counterY << ' '
-             << shop.greetings;
+        body << shop.id << ' ' << static_cast<int>(shop.kind) << ' ' << shop.counterX << ' ' << shop.counterY << ' ' << shop.counterYaw
+             << ' ' << shop.greetings;
         int stocked = 0;
         for (int quantity : shop.heroineStock) if (quantity > 0) ++stocked;
         body << ' ' << stocked;
@@ -277,10 +281,10 @@ bool Simulation::ReadEconomy(std::istream& input, State& candidate, std::set<int
     {
         Shop shop;
         int kind = -1, stocked = 0;
-        if (!(input >> shop.id >> kind >> shop.counterX >> shop.counterY >> shop.greetings >> stocked)
+        if (!(input >> shop.id >> kind >> shop.counterX >> shop.counterY >> shop.counterYaw >> shop.greetings >> stocked)
             || kind < 0 || kind >= static_cast<int>(ShopKind::Count) || shop.id <= 0 || shop.id >= candidate.nextId
             || !ids.insert(shop.id).second || shop.greetings < 0 || stocked < 0 || stocked > ItemCount
-            || !std::isfinite(shop.counterX) || !std::isfinite(shop.counterY)
+            || !std::isfinite(shop.counterX) || !std::isfinite(shop.counterY) || !std::isfinite(shop.counterYaw)
             || std::abs(shop.counterX) > MaxWorldCoordinate || std::abs(shop.counterY) > MaxWorldCoordinate)
             return false;
         shop.kind = static_cast<ShopKind>(kind);

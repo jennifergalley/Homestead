@@ -470,7 +470,7 @@ public:
     Result GreetShopkeeper(int shopId);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
     Result GrantMoney(Cents cents);
-    Result PlaceShop(ShopKind kind, Point counter);
+    Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);
     std::string Serialize() const;
     Result Deserialize(const std::string& data);
     Result Deserialize(const std::string& data, Generation::WorldDescriptor expectedWorld);

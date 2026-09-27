@@ -9,7 +9,7 @@
 
 - [ ] 2.1 Add the HUD wallet readout with signed deltas at 720p and 4K
 - [ ] 2.2 Build the general-store interior and door at `GeneralStoreDoor`, with Blender counter, shelves, barrels, sacks and crates, and the closed sign
-- [ ] 2.3 Add `AHomesteadShopkeeper` with a labelled stand-in body, a greeting panel and an interaction that opens the shop
+- [x] 2.3 Add `AHomesteadShopkeeper` with a labelled stand-in body, a greeting panel and an interaction that opens the shop
 - [ ] 2.4 Add `SHomesteadShop` Sell and Buy panes with the From {Estate} section, the Quantity dialog, total preview and pause. Verify mouse and controller parity
 - [ ] 2.5 Package, carry hay and scrap from the estate to town, sell them, see them listed, buy and eat a pasty, then sleep and see the stock drain. Capture in-game views, commit and push
 

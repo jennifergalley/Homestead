@@ -38,6 +38,7 @@ struct Shop
     double closeHour = 18.0;
     double counterX = 0.0; // Where the shopkeeper stands.
     double counterY = 0.0;
+    double counterYaw = 0.0; // Unreal yaw the shopkeeper faces, toward the customer and the door.
     // Her sold goods, which townsfolk buy down each morning and she can buy back.
     std::array<int, ItemCount> heroineStock{};
     int greetings = 0; // Times she has been greeted, a stub for later friendship.

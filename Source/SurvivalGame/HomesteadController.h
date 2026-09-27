@@ -18,6 +18,8 @@ namespace HomesteadMenus { class SHomesteadMenu; }
 using SHomesteadMenu = HomesteadMenus::SHomesteadMenu;
 namespace HomesteadMenus { class SHomesteadHotbar; }
 using SHomesteadHotbar = HomesteadMenus::SHomesteadHotbar;
+namespace HomesteadMenus { class SHomesteadShop; }
+class AHomesteadGeneralStore;
 class IInputProcessor;
 class AHomesteadMenuPortrait;
 class SWidget;
@@ -205,6 +207,25 @@ public:
     // it is) when she stands within reach of it.
     UFUNCTION(Exec) void HomesteadPackMenu(int32 Tile = 0, int32 Mode = 0);
 
+    // General store (HomesteadShopFlow.cpp).
+    bool IsShopScreenOpen() const { return ShopScreen.IsValid(); }
+    TSharedPtr<HomesteadMenus::SHomesteadShop> GetShopScreen() const { return ShopScreen; }
+    // Greets her (counted) and opens the shop screen, pausing the game.
+    void OpenShopScreen(int32 ShopId, bool bGreet = true);
+    void CloseShopScreen();
+    // One Sell or Buy at the shop's counter; shows the wallet delta on success.
+    Homestead::Result ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell, bool bHeroineStock);
+    void ShopClick();
+    void NoteShopDevice(bool bPad);
+    FString EstateName() const { return TEXT("Trevennor"); }
+    // The signed change of the last trade and how visible its readout still is (1 fresh, 0 gone).
+    int64 WalletDelta() const { return LastWalletDelta; }
+    float WalletDeltaAlpha() const { return FMath::Clamp(WalletDeltaRemaining / 1.0f, 0.0f, 1.0f); }
+    // Console playtest aid: open the general store on the ground ahead of her (moving it if it exists).
+    UFUNCTION(Exec) void HomesteadOpenStore();
+    // Console playtest aid: add (or with a negative amount remove) cents from her purse.
+    UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
+
     float Sensitivity = 1.0f;
     bool bInvertY = false;
     float MusicVolume = 0.65f;
@@ -228,7 +249,19 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor };
+    // General store (HomesteadShopFlow.cpp).
+    TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
+    UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
+    int64 LastWalletDelta = 0;
+    float WalletDeltaRemaining = 0.0f;
+    void SyncStores();
+    void TickStores(float DeltaSeconds);
+    void ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
+    FString StoreFocusTitle() const;
+    FString StoreFocusActions() const;
+    void InteractWithStore();
+    FString GreetingFor(const Homestead::Shop& Shop) const;
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;

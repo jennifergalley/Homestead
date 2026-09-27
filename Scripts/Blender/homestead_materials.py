@@ -649,6 +649,234 @@ def soil(name, damp=(0.12, 0.085, 0.055), dry=(0.26, 0.20, 0.135), seed=0.0):
     g.set("Roughness", 0.95)
     height = g.math("ADD", g.math("MULTIPLY", g.remap(crumb, 0.6, 0.0), 0.6), g.math("MULTIPLY", lumps, 0.4))
     g.set("Normal", g.bump(height, strength=0.8, distance=0.0008))
+
+    return g.mat
+
+
+def painted_wood(name, paint=(0.055, 0.095, 0.065), under=(0.18, 0.11, 0.055), wear=0.45,
+                 grime=0.45, seed=0.0):
+    """Scuffed oil-painted pine for shop fixtures. pcoord is part-local meters:
+    fine wood grain shows through the paint, with worn brown undercoat, scratches,
+    rubbed hand-polished bands and soot/grime in recesses."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.37, seed * 0.19, seed * 0.11))
+    grain_vec = g.combine(g.math("MULTIPLY", x, 28.0), g.math("MULTIPLY", y, 28.0),
+                          g.math("ADD", g.math("MULTIPLY", z, 1.7), seed))
+    fibres = g.noise(grain_vec, scale=8.0, detail=8.0, roughness=0.62).outputs["Fac"]
+    rings = g.wave(g.combine(x, y, g.math("MULTIPLY", z, 0.10)), scale=24.0,
+                   distortion=8.0, detail=3.0, kind="RINGS", direction="Z").outputs["Fac"]
+    wood_tone = g.math("ADD", g.math("MULTIPLY", fibres, 0.65), g.math("MULTIPLY", rings, 0.35))
+    exposed = g.ramp(wood_tone, [(0.22, tuple(c * 0.48 for c in under)),
+                                 (0.58, under),
+                                 (0.90, tuple(min(1.0, c * 1.35) for c in under))])
+    brush = g.noise(g.combine(g.math("MULTIPLY", x, 6.0), g.math("MULTIPLY", y, 9.0),
+                              g.math("MULTIPLY", z, 0.45)), scale=10.0, detail=5.0,
+                    roughness=0.58).outputs["Fac"]
+    paint_col = g.mix(tuple(c * 0.72 for c in paint), tuple(min(1.0, c * 1.25) for c in paint),
+                      g.remap(brush, 0.25, 0.75))
+    scratches = g.noise(g.combine(g.math("MULTIPLY", x, 70.0), g.math("MULTIPLY", y, 70.0),
+                                  g.math("MULTIPLY", z, 5.0)), scale=25.0, detail=4.0,
+                        roughness=0.7).outputs["Fac"]
+    scratch_mask = g.remap(scratches, 0.72, 0.82, 0.0, wear)
+    long_rubs = g.wave(g.combine(g.math("MULTIPLY", x, 1.5), g.math("MULTIPLY", y, 1.5), z),
+                       scale=18.0, distortion=9.0, detail=2.0, kind="BANDS",
+                       direction="Z").outputs["Fac"]
+    rub_mask = g.remap(long_rubs, 0.76, 0.92, 0.0, wear * 0.55)
+    mask = g.math("MAXIMUM", scratch_mask, rub_mask)
+    color = g.mix(paint_col, exposed, mask)
+    dirt = g.noise(seeded, scale=38.0, detail=6.0, roughness=0.7).outputs["Fac"]
+    ao = g.math("SUBTRACT", 1.0, g.ao(distance=0.05, samples=16))
+    grime_mask = g.math("MAXIMUM", g.remap(dirt, 0.58, 0.78, 0.0, grime * 0.55),
+                        g.math("MULTIPLY", ao, grime))
+    color = g.mix(color, (0.035, 0.030, 0.024), grime_mask)
+    g.set("Base Color", color)
+    rough = g.math("ADD", 0.62, g.math("MULTIPLY", brush, 0.20))
+    rough = g.math("SUBTRACT", rough, g.math("MULTIPLY", mask, 0.22))
+    rough = g.math("MAXIMUM", rough, g.math("MULTIPLY", grime_mask, 0.88))
+    g.set("Roughness", rough)
+    height = g.math("ADD", g.math("MULTIPLY", fibres, 0.45), g.math("MULTIPLY", brush, 0.28))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", mask, 0.20))
+    g.set("Normal", g.bump(height, strength=0.45, distance=0.0016))
+    return g.mat
+
+
+def aged_wood(name, light=(0.34, 0.23, 0.13), dark=(0.12, 0.075, 0.038), roughness=0.82,
+              saw=0.5, grime=0.25, seed=0.0):
+    """Rough stained or unfinished pine/deal boards: saw kerfs across the grain,
+    torn fibres, dark checks and dirty handling marks."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.31, seed * 0.13, seed * 0.41))
+    length = g.combine(g.math("MULTIPLY", x, 24.0), g.math("MULTIPLY", y, 24.0),
+                       g.math("MULTIPLY", z, 1.4))
+    fibres = g.noise(length, scale=7.0, detail=8.0, roughness=0.64).outputs["Fac"]
+    rings = g.wave(g.combine(x, y, g.math("MULTIPLY", z, 0.08)), scale=20.0,
+                   distortion=7.0, detail=3.0, kind="RINGS", direction="Z").outputs["Fac"]
+    tone = g.math("ADD", g.math("MULTIPLY", fibres, 0.62), g.math("MULTIPLY", rings, 0.38))
+    color = g.ramp(tone, [(0.2, dark), (0.6, light), (0.92, tuple(min(1.0, c * 1.25) for c in light))])
+    saw_phase = g.math("ADD", g.math("MULTIPLY", x, 115.0), g.math("MULTIPLY", y, 19.0))
+    kerf = g.math("ABSOLUTE", g.math("SINE", saw_phase))
+    kerf_mask = g.remap(kerf, 0.91, 1.0, 0.0, saw)
+    color = g.mix(color, tuple(c * 0.72 for c in dark), g.math("MULTIPLY", kerf_mask, 0.35))
+    checks = g.voronoi(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.2)), scale=18.0,
+                       feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    crack = g.remap(checks, 0.0, 0.012, 0.45, 0.0)
+    color = g.mix(color, (0.045, 0.030, 0.018), crack)
+    dirt = g.noise(seeded, scale=45.0, detail=6.0, roughness=0.7).outputs["Fac"]
+    color = g.mix(color, (0.060, 0.045, 0.030), g.remap(dirt, 0.55, 0.78, 0.0, grime))
+    g.set("Base Color", color)
+    rough = g.math("ADD", roughness, g.math("MULTIPLY", kerf_mask, 0.10))
+    rough = g.math("MAXIMUM", rough, g.math("MULTIPLY", crack, 0.94))
+    g.set("Roughness", rough)
+    height = g.math("ADD", g.math("MULTIPLY", fibres, 0.50), g.math("MULTIPLY", kerf_mask, 0.35))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", crack, 0.4))
+    g.set("Normal", g.bump(height, strength=0.55, distance=0.0022))
+    return g.mat
+
+
+def hessian(name, base=(0.34, 0.285, 0.19), dark=(0.13, 0.105, 0.070), dust=0.15, seed=0.0):
+    """Plain woven jute/hessian: over-under warp and weft ribs, slubs, frayed dark
+    holes and optional pale flour dust caught on high threads."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.21, seed * 0.47, seed * 0.16))
+    warp = g.math("ABSOLUTE", g.math("SINE", g.math("MULTIPLY", x, 1050.0)))
+    weft = g.math("ABSOLUTE", g.math("SINE", g.math("MULTIPLY", z, 920.0)))
+    ribs = g.math("MAXIMUM", g.remap(warp, 0.90, 1.0), g.remap(weft, 0.90, 1.0))
+    slub = g.noise(seeded, scale=80.0, detail=5.0, roughness=0.68).outputs["Fac"]
+    color = g.mix(dark, base, g.remap(g.math("ADD", g.math("MULTIPLY", ribs, 0.42),
+                                           g.math("MULTIPLY", slub, 0.58)), 0.18, 0.9))
+    holes = g.voronoi(g.vmath("MULTIPLY", seeded, (1.2, 0.6, 1.0)), scale=58.0,
+                      feature="F1").outputs["Distance"]
+    hole_mask = g.remap(holes, 0.045, 0.018, 0.0, 0.28)
+    color = g.mix(color, (0.045, 0.036, 0.026), hole_mask)
+    dust_mask = g.math("MULTIPLY", dust, g.remap(g.noise(seeded, scale=24.0, detail=4.0).outputs["Fac"],
+                                                 0.52, 0.78))
+    color = g.mix(color, (0.72, 0.66, 0.54), dust_mask)
+    g.set("Base Color", color)
+    g.set("Roughness", 0.93)
+    height = g.math("ADD", g.math("MULTIPLY", ribs, 0.8), g.math("MULTIPLY", slub, 0.35))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", hole_mask, 0.35))
+    g.set("Normal", g.bump(height, strength=0.38, distance=0.0007))
+    return g.mat
+
+
+def paper(name, color=(0.58, 0.50, 0.36), string_shadow=0.25, seed=0.0):
+    """Brown rag paper with fibre flecks and shallow creases for wrapped packets."""
+    g = Graph(name)
+    p = g.coord()
+    seeded = g.vmath("ADD", p, (seed * 0.17, seed * 0.23, seed * 0.31))
+    fibre = g.noise(seeded, scale=95.0, detail=5.0, roughness=0.7).outputs["Fac"]
+    broad = g.noise(seeded, scale=12.0, detail=4.0).outputs["Fac"]
+    base = g.mix(tuple(c * 0.72 for c in color), tuple(min(1.0, c * 1.18) for c in color),
+                 g.remap(broad, 0.25, 0.75))
+    flecks = g.remap(fibre, 0.65, 0.82, 0.0, 0.45)
+    base = g.mix(base, (0.18, 0.13, 0.08), flecks)
+    crease = g.voronoi(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.4)), scale=21.0,
+                       feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    crease_mask = g.remap(crease, 0.0, 0.011, string_shadow, 0.0)
+    g.set("Base Color", g.mix(base, (0.16, 0.115, 0.07), crease_mask))
+    g.set("Roughness", 0.88)
+    g.set("Normal", g.bump(g.math("ADD", g.math("MULTIPLY", fibre, 0.25),
+                                  g.math("MULTIPLY", crease_mask, -0.45)),
+                           strength=0.42, distance=0.0009))
+    return g.mat
+
+
+def stoneware(name, glaze=(0.36, 0.32, 0.25), clay=(0.22, 0.12, 0.065), seed=0.0):
+    """Salt-glazed stoneware: warm clay body, tan/grey glaze mottling, iron specks
+    and a darker unglazed foot."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.43, seed * 0.12, seed * 0.29))
+    mottle = g.noise(seeded, scale=34.0, detail=6.0, roughness=0.6).outputs["Fac"]
+    speck = g.noise(seeded, scale=430.0, detail=2.0).outputs["Fac"]
+    color = g.ramp(mottle, [(0.18, tuple(c * 0.65 for c in glaze)),
+                            (0.55, glaze),
+                            (0.9, tuple(min(1.0, c * 1.28) for c in glaze))])
+    foot = g.remap(z, 0.045, 0.0)
+    color = g.mix(color, clay, foot)
+    color = g.mix(color, (0.12, 0.065, 0.035), g.remap(speck, 0.78, 0.88, 0.0, 0.45))
+    g.set("Base Color", color)
+    g.set("Roughness", g.math("ADD", 0.48, g.math("MULTIPLY", foot, 0.35)))
+    g.set("Normal", g.bump(g.math("ADD", g.math("MULTIPLY", mottle, 0.28),
+                                  g.math("MULTIPLY", speck, 0.12)),
+                           strength=0.22, distance=0.0008))
+    return g.mat
+
+
+def tinplate(name, base=(0.50, 0.49, 0.45), rust=0.28, seed=0.0):
+    """Dull nineteenth-century tinplate: grey metal with solder seams, rubbed edges,
+    tea/cocoa staining and small rust freckles. Include a metallic bake map."""
+    g = Graph(name)
+    p = g.coord()
+    seeded = g.vmath("ADD", p, (seed * 0.37, seed * 0.07, seed * 0.19))
+    blotch = g.noise(seeded, scale=35.0, detail=5.0, roughness=0.65).outputs["Fac"]
+    scratches = g.noise(g.vmath("MULTIPLY", seeded, (35.0, 35.0, 6.0)), scale=9.0,
+                        detail=4.0).outputs["Fac"]
+    color = g.mix(tuple(c * 0.72 for c in base), tuple(min(1.0, c * 1.2) for c in base),
+                  g.remap(blotch, 0.25, 0.75))
+    rust_noise = g.noise(seeded, scale=95.0, detail=5.0, roughness=0.7).outputs["Fac"]
+    rust_mask = g.remap(rust_noise, 0.68, 0.82, 0.0, rust)
+    color = g.mix(color, (0.28, 0.13, 0.045), rust_mask)
+    rub = g.remap(scratches, 0.72, 0.88, 0.0, 0.35)
+    color = g.mix(color, (0.62, 0.60, 0.55), rub)
+    g.set("Base Color", color)
+    g.set("Metallic", g.math("SUBTRACT", 1.0, rust_mask))
+    g.set("Roughness", g.math("ADD", 0.43, g.math("MULTIPLY", rust_mask, 0.42)))
+    g.set("Normal", g.bump(g.math("ADD", g.math("MULTIPLY", blotch, 0.3),
+                                  g.math("MULTIPLY", scratches, 0.2)),
+                           strength=0.25, distance=0.0006))
+    return g.mat
+
+
+def green_glass(name, tint=(0.10, 0.16, 0.12), grime=0.25, seed=0.0):
+    """Dark green hand-blown bottle glass represented as baked opaque tinted glass:
+    uneven thickness, seed bubbles, rubbed shoulders and dusty punt."""
+    g = Graph(name)
+    p = g.coord()
+    seeded = g.vmath("ADD", p, (seed * 0.29, seed * 0.41, seed * 0.17))
+    thickness = g.noise(seeded, scale=18.0, detail=5.0).outputs["Fac"]
+    bubbles = g.voronoi(seeded, scale=90.0, feature="F1").outputs["Distance"]
+    bubble_mask = g.remap(bubbles, 0.08, 0.02, 0.0, 0.55)
+    color = g.mix(tuple(c * 0.55 for c in tint), tuple(min(1.0, c * 1.45) for c in tint),
+                  g.remap(thickness, 0.25, 0.75))
+    color = g.mix(color, (0.42, 0.48, 0.40), bubble_mask)
+    dust = g.noise(seeded, scale=55.0, detail=5.0).outputs["Fac"]
+    color = g.mix(color, (0.18, 0.16, 0.13), g.remap(dust, 0.62, 0.82, 0.0, grime))
+    g.set("Base Color", color)
+    g.set("Roughness", g.remap(thickness, 0.2, 0.8, 0.16, 0.42))
+    g.set("Normal", g.bump(g.math("ADD", g.math("MULTIPLY", thickness, 0.3),
+                                  g.math("MULTIPLY", bubble_mask, -0.2)),
+                           strength=0.18, distance=0.0008))
+    return g.mat
+
+
+def candle_wax(name, color=(0.78, 0.70, 0.54), soot=0.15, seed=0.0):
+    """Hand-dipped tallow/beeswax: creamy uneven wax, drips, wick soot and finger dents."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.13, seed * 0.17, seed * 0.19))
+    mottle = g.noise(seeded, scale=38.0, detail=5.0, roughness=0.6).outputs["Fac"]
+    angle = g.math("ARCTAN2", y, x)
+    drip = g.noise(g.combine(g.math("MULTIPLY", angle, 2.0), g.math("MULTIPLY", z, 9.0), seed),
+                   scale=12.0, detail=4.0).outputs["Fac"]
+    color = g.mix(tuple(c * 0.85 for c in color), color, g.remap(mottle, 0.25, 0.75))
+    color = g.mix(color, (0.12, 0.10, 0.08), g.remap(drip, 0.73, 0.86, 0.0, soot))
+    g.set("Base Color", color)
+    g.set("Roughness", 0.64)
+    g.set("Normal", g.bump(g.math("ADD", g.math("MULTIPLY", mottle, 0.25),
+                                  g.math("MULTIPLY", drip, 0.40)),
+                           strength=0.25, distance=0.0007))
+    return g.mat
+
+
 # ------------------------------------------------------------------ granite
 
 # Sierra Nevada granodiorite/granite, linear albedo. Plagioclase is chalky white, quartz a

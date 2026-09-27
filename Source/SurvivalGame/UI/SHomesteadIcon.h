@@ -37,7 +37,8 @@ private:
         Foundation, Wall, Doorway, Roof, Fire, Bed, Chest,
         LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
         Fur, LinenShirt, LongLinenShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes,
-        SlotTorso, SlotApron, SlotFeet
+        SlotTorso, SlotApron, SlotFeet,
+        Pasty, Bread, Cheese, Twine, Coin, Shop
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{FLinearColor(0.92f, 0.74f, 0.43f, 1.0f)};

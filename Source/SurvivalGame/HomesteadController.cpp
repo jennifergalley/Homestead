@@ -35,6 +35,7 @@
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWave.h"
 #include "UI/SHomesteadMenu.h"
+#include "UI/SHomesteadShop.h"
 #include "UI/SHomesteadHotbar.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/IInputProcessor.h"
@@ -404,6 +405,11 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         const auto Menu = NativeMenu;
         return Menu->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
     }
+    if (ShopScreen.IsValid())
+    {
+        const auto Shop = ShopScreen;
+        return Shop->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
+    }
     if (bPlanning && !bBookOpen && !IsFailed() && Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
         && FMath::Abs(Params.AmountDepressed) >= 1.0f
         && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)))
@@ -549,7 +555,7 @@ void AHomesteadController::HideHotbar()
 
 bool AHomesteadController::ShouldShowHotbar() const
 {
-    return bWorldReady && !bBookOpen && !bPlanning && !IsFailed();
+    return bWorldReady && !bBookOpen && !bPlanning && !IsFailed() && !ShopScreen.IsValid();
 }
 
 void AHomesteadController::ResetHotbar()
@@ -963,6 +969,7 @@ void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
     HideHotbar();
     HideNativeMenu();
+    if (ShopScreen.IsValid()) CloseShopScreen();
     if (const UWorld* World = GetWorld())
         if (FAudioDeviceHandle Device = World->GetAudioDevice())
             Device->SetTransientPrimaryVolume(1.0f);
@@ -1415,7 +1422,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
         LastSafeWorldPosition = ControlledPawn->GetActorLocation();
     }
 
-    Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired);
+    Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired || ShopScreen.IsValid());
+    TickStores(DeltaSeconds);
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
     if (IsFailed() && !bWasFailed)
     {
@@ -1598,6 +1606,7 @@ void AHomesteadController::UpdateFocus()
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
+    ConsiderStoreFocus(Consider);
     if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
@@ -1677,6 +1686,8 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Chest: return TEXT("Storage chest");
     case EFocus::Water: return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
+    case EFocus::Shopkeeper:
+    case EFocus::StoreDoor: return StoreFocusTitle();
     default: break;
     }
     return TEXT("Woodland");
@@ -1729,6 +1740,8 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
         ? Use + TEXT(" Fill Watering Can") : A + TEXT(" Fill carried Watering Can");
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
+    case EFocus::Shopkeeper:
+    case EFocus::StoreDoor: return StoreFocusActions();
     default: return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -2101,6 +2114,8 @@ void AHomesteadController::Interact()
     case EFocus::Chest: OpenChestStorage(FocusId); break;
     case EFocus::Water: Notify(Sim.FillWater(Position)); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
+    case EFocus::Shopkeeper:
+    case EFocus::StoreDoor: InteractWithStore(); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 

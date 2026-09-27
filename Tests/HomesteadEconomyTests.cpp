@@ -136,6 +136,7 @@ Store OpenStore()
     store.shop = shop->id;
     store.counter = ProvisionalEstateLayout().PointOr(Anchor::GeneralStoreCounter, {});
     CHECK(shop->counterX == store.counter.x && shop->counterY == store.counter.y);
+    CHECK(shop->counterYaw == ProvisionalEstateLayout().FindLandmark(Anchor::GeneralStoreCounter)->yaw);
     store.customer = {store.counter.x, store.counter.y - 150.0};
     store.sim.SkipToHourOfDay(9.0);
     return store;
@@ -315,7 +316,7 @@ void PlaytestShopPlacement()
     OK(sim.PlaceShop(ShopKind::GeneralStore, {100.0, 200.0}));
     const Shop* shop = sim.FindShop(ShopKind::GeneralStore);
     CHECK(shop && shop->counterX == 100.0 && shop->counterY == 200.0);
-    OK(sim.PlaceShop(ShopKind::GeneralStore, {300.0, 200.0}));
+    OK(sim.PlaceShop(ShopKind::GeneralStore, {300.0, 200.0}, 45.0));
     CHECK(sim.GetState().shops.size() == 1 && sim.FindShop(ShopKind::GeneralStore)->counterX == 300.0);
     CHECK(!sim.PlaceShop(ShopKind::GeneralStore, {1e12, 0.0}).ok);
     CHECK(!sim.GrantMoney(-1).ok);
@@ -323,6 +324,7 @@ void PlaytestShopPlacement()
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(loaded.GetState().money == 250 && loaded.FindShop(ShopKind::GeneralStore)->counterX == 300.0);
+    CHECK(loaded.FindShop(ShopKind::GeneralStore)->counterYaw == 45.0);
 }
 
 const char* filter = nullptr;void Run(const char* name, void (*test)())
