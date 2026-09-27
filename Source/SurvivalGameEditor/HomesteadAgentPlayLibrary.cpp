@@ -271,7 +271,6 @@ FString UHomesteadAgentPlayLibrary::GetPlayState(int32 NearbyCount, float Radius
         Root->SetNumberField(TEXT("hour"), Sim.hour);
         Root->SetNumberField(TEXT("hunger"), Sim.hunger);
         Root->SetNumberField(TEXT("energy"), Sim.energy);
-        Root->SetNumberField(TEXT("warmth"), Sim.warmth);
     }
     if (PC)
     {

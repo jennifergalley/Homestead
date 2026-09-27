@@ -249,7 +249,7 @@ immediately; observe with `get_play_state` and `shot`.
 
 | Tool | Use |
 | --- | --- |
-| `get_play_state(nearby_count, radius_cm)` | JSON: `worldReady`, `bookOpen`, `bookPage`, `selectedRow`, `focusTitle`, `focusActions`, `toast`, `inventory` (units), `hunger/energy/warmth`, `hour`, `location`, `controlYaw`, `speedCmPerSec`, `hotbarSlot`, `walk`, `nearbyResources[]` (`id, kind, x, y, distanceCm, bearingDeg, cleared, ready, focused`) |
+| `get_play_state(nearby_count, radius_cm)` | JSON: `worldReady`, `bookOpen`, `bookPage`, `selectedRow`, `focusTitle`, `focusActions`, `toast`, `inventory` (units), `hunger/energy`, `hour`, `location`, `controlYaw`, `speedCmPerSec`, `hotbarSlot`, `walk`, `nearbyResources[]` (`id, kind, x, y, distanceCm, bearingDeg, cleared, ready, focused`) |
 | `tap_key(key)` | Press and release one FKey (`E`, `Tab`, `Escape`, `Two`, `Gamepad_FaceButton_Bottom`, ...) |
 | `hold_key(key, seconds)` | Hold a key/button (crafting, sprint) |
 | `set_sticks(move_x, move_y, look_x, look_y, seconds)` | Hold sticks; move is camera-relative (Y forward), look X turns right |
@@ -273,12 +273,19 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   Filter targets by `ready`.
 - `nearbyResources` covers only the currently streamed chunks. After walking far, nodes elsewhere
   (for example creek reeds) drop out of the list; walk back toward them to reload.
-- `focusActions` shows the prompt, for example `[A] Gather   [RT] Clear with Knife`,
-  `[RT] Fell with Hatchet`. Use the named button. With keyboard/mouse input last used it reads
-  `[LMB] Fell with Hatchet`; `tap_key LeftMouseButton` works then. The same text floats above her
-  head as the interact cue.
-- Hotbar keys are `One`..`Zero`. The starter kit puts knife, hatchet, stone hoe, pail and
-  machete in slots 1-5. Check `hotbarSlot` (0-based) and `focusActions` after selecting.
+- `focusActions` shows the prompt, for example `[A] Gather`, `[RT] Hack with Billhook`,
+  `[RT] Fell with Axe`, `Select the scythe`. Use the named button. With keyboard/mouse input last
+  used it reads `[LMB] Hack with Billhook`; `tap_key LeftMouseButton` works then. The same text
+  floats above her head as the interact cue. `focusTitle` names a missing tool or tier, e.g.
+  `Bramble thicket  (needs an iron billhook)`.
+- Hotbar keys are `One`..`Zero`. The default layout is billhook, axe, scythe, pickaxe, hoe, pail
+  (slots 1-6) and berries (7); the knife and machete are retired. On the woodland the playtest kit
+  grants all six tools; on the fixed estate she hafts them from salvage (a hafted tool is slotted
+  and selected). Check `hotbarSlot` (0-based) and `focusActions` after selecting.
+- Overgrowth (add-overgrown-estate-clearing): stumps, rocks and thickets take several swings; each
+  non-final swing toasts "N more swings.", the last one clears and toasts the yield. Walking more
+  than 1.5 m away resets the count. `HomesteadGive RustedBillhookHead 1` + two Branches lets the
+  Craft page's "Haft a billhook" run anywhere.
 - An action that silently does nothing usually left a reason in `toast` (`toastIsError: true`),
   for example "Not enough pack space." when a felled tree's wood won't fit. Read it before
   debugging the animation.
@@ -289,8 +296,8 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - `HomesteadGive <Item> [count]` (console, pass the player controller) adds to the pack by item
   name, spaces optional: `HomesteadGive Berries 10`, `HomesteadGive RoastedRoots 3`. The toast
   says what was added or why not (full pack, unknown name).
-- Energy: work costs it (gather 0.5, fell 4, till 2, machete 0.8-1.5, build 1.5; the full table
-  is `Homestead::Exertion` in `HomesteadSimulation.h`), time awake drains only 0.6/game hour.
+- Energy: work costs it (gather 0.5, fell 4, till 2, overgrowth 0.3-6 by kind and tier, build 1.5; the full tables
+  are `Homestead::Exertion` and `HomesteadOvergrowth.cpp`), time awake drains only 0.6/game hour.
   Below a 5-Energy reserve work is refused with "You're too exhausted to keep working." Eat or
   sleep before a long test loop.
 - Eating (MetaHuman): food in the hotbar (Berries start in slot 6; the field book's pack page
