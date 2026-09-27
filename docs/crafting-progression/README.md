@@ -18,7 +18,7 @@ is a hatchet, not a research point or permission from a villager.
 The current enums, exact ordinal IDs and transactions are preserved in the
 catalog. `Item::Branch` remains ID1, `Stone` ID2 and `Fiber` ID3. The display
 name of `Flowers` (ID6) is **Meadow herb**, not a promise that every decorative
-flower is edible. `Knife` ID0 starts owned; LeatherShoes are starter-only.
+flower is edible. `Knife` ID0 starts owned; she starts barefoot, and LeatherShoes survive only in older saves.
 Proposed entities have **null runtime IDs**; design keys are not enum values.
 
 Reuse: `HomesteadSimulation.h/.cpp` already supplies inventory transactions,
@@ -128,8 +128,8 @@ No durability, repair or crafting levels exist.
 | `WearableDefinition::WovenFootwraps` (3) | 8 Fiber | 1 carried footwraps | Knife; cosmetic | 0 |
 | `AddFuel` | 1 Branch | 4 fuel hours | Fire within 300 cm, maximum 48 hours | 0 |
 
-`LeatherShoes` (wearable ID2) cannot be crafted. Equipped starter tunic/shoes
-use no pack units; a carried garment uses one. All item quantities count one
+`LeatherShoes` (wearable ID2) cannot be crafted and a new game no longer starts in
+them; woven footwraps are the craftable footwear. Equipped garments use no pack units; a carried garment uses one. All item quantities count one
 unit each: **120 is neither kilograms nor stack slots**. A whole tree is not a
 single free-weight pocket object.
 

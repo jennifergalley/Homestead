@@ -32,10 +32,11 @@ POUCH_EVENTS = {
 # Pickup spots: the stick gather's, so AHomesteadCharacter aligns her the same way.
 PICK_1 = (-24.0, 34.0, 4.0)
 PICK_2 = (-28.0, 30.0, 4.0)
-# Pouch opening at her right hip in the standing pose (it hangs from a belt at the hip, pelvis
-# frame). The wrist sits above it so the fingers reach in.
-POUCH_OPENING = (-19.0, 7.0, 93.0)
-STOW_WRIST = (-20.0, 9.0, 103.0)
+# Pouch opening at her right hip in the standing pose (the flat pouch on her thigh hangs from the
+# belt; Scripts/Blender/Recipes/forage_pouch.py, pelvis frame). The wrist sits above it, just
+# outside the belt, so the fingers reach down in.
+POUCH_OPENING = (-18.5, 4.0, 97.0)
+STOW_WRIST = (-21.0, 5.5, 106.5)
 
 
 def build():
@@ -147,13 +148,18 @@ def _author(pelvis_anim):
     # Left hand: braced on the forward knee for the whole kneel, then back to her side.
     side_l = (24.0, 5.0, 86.0)
     hang_l = s.hand_turn('l', down, (-1, 0, 0))
-    knee_l = s.hand_turn('l', fwd, (0, 0, -1))
+    knee_l = kg.knee_turn(s)
     s.key_world(F['stand'], 'hand_l_ik_ctrl', side_l, hang_l)
-    s.key_world(F['kneel'], 'hand_l_ik_ctrl', (16.0, 38.0, 54.0), knee_l)
+    s.key_world(F['kneel'], 'hand_l_ik_ctrl', kg.KNEE_WRIST_L, knee_l)
     for name in ('grab1', 'stow1', 'grab2', 'stow2', 'out2'):
-        s.key_world(F[name], 'hand_l_ik_ctrl', (16.0, 38.0, 55.0 if name.startswith('stow') else 54.0), knee_l)
-    s.key_world(F['rise'] - 2, 'hand_l_ik_ctrl', (18.0, 34.0, 66.0), knee_l)
+        # The palm shifts a touch on the kneecap as she leans out and back.
+        s.key_world(F[name], 'hand_l_ik_ctrl', kg._add(kg.KNEE_WRIST_L, (0, -0.8, 1.0) if name.startswith('stow') else (0, 0.4, 0)), knee_l)
+    s.key_world(F['rise'] - 2, 'hand_l_ik_ctrl', (18.0, 28.0, 66.0), knee_l)
     s.key_world(F['end'], 'hand_l_ik_ctrl', side_l, hang_l)
+    kg.key_knee_fingers(s, F['stand'], 0)
+    for f in (F['kneel'], F['out2']):
+        kg.key_knee_fingers(s, f)
+    kg.key_knee_fingers(s, F['rise'] + 2, 0)
     # Elbows: right elbow out and back; left elbow out to the side while bracing.
     s.key_world(F['stand'], 'arm_r_pv_ik_ctrl', (-45.0, -30.0, 100.0))
     s.key_world(F['kneel'], 'arm_r_pv_ik_ctrl', (-60.0, 0.0, 70.0))

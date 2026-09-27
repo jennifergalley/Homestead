@@ -131,13 +131,17 @@ def build():
     # Left hand braced on the forward knee throughout the kneel.
     side_l = (24.0, 5.0, 86.0)
     hang_l = s.hand_turn('l', down, (-1, 0, 0))
-    knee_l = s.hand_turn('l', fwd, (0, 0, -1))
+    knee_l = kg.knee_turn(s)
     s.key_world(F['stand'], 'hand_l_ik_ctrl', side_l, hang_l)
-    s.key_world(F['kneel'], 'hand_l_ik_ctrl', (16.0, 38.0, 54.0), knee_l)
+    s.key_world(F['kneel'], 'hand_l_ik_ctrl', kg.KNEE_WRIST_L, knee_l)
     for name in ('pick', 'press', 'draw2', 'covered'):
-        s.key_world(F[name], 'hand_l_ik_ctrl', (16.0, 38.0, 54.0), knee_l)
-    s.key_world(F['rise'] - 2, 'hand_l_ik_ctrl', (18.0, 34.0, 66.0), knee_l)
+        s.key_world(F[name], 'hand_l_ik_ctrl', kg._add(kg.KNEE_WRIST_L, (0, 0.6, 0.3) if name == 'press' else (0, 0, 0)), knee_l)
+    s.key_world(F['rise'] - 2, 'hand_l_ik_ctrl', (18.0, 28.0, 66.0), knee_l)
     s.key_world(F['end'], 'hand_l_ik_ctrl', side_l, hang_l)
+    kg.key_knee_fingers(s, F['stand'], 0)
+    for f in (F['kneel'], F['covered']):
+        kg.key_knee_fingers(s, f)
+    kg.key_knee_fingers(s, F['rise'] + 2, 0)
 
     s.key_world(F['stand'], 'arm_r_pv_ik_ctrl', (-45.0, -30.0, 100.0))
     s.key_world(F['kneel'], 'arm_r_pv_ik_ctrl', (-60.0, 0.0, 70.0))

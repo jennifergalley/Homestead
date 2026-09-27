@@ -772,7 +772,7 @@ const char* WearableDescription(WearableDefinition definition)
     {
     case WearableDefinition::LinenTunic: return "A fiber-worked tunic covering torso and legs. Cosmetic clothing; no warmth bonus.";
     case WearableDefinition::LinenApron: return "A separate apron worn over a linen tunic. Cosmetic clothing; no warmth bonus.";
-    case WearableDefinition::LeatherShoes: return "Starter lace-up shoes with socks. Authored color; not craftable.";
+    case WearableDefinition::LeatherShoes: return "Lace-up shoes with socks from older saves. Authored color; not craftable.";
     case WearableDefinition::WovenFootwraps: return "Fiber-woven footwear, worn instead of shoes. Authored color; no warmth bonus.";
     default: return "Unknown garment";
     }
@@ -982,9 +982,9 @@ Result Simulation::NewGame(std::uint64_t seed)
     candidate.world.seed = seed;
     candidate.inventory[static_cast<int>(Item::Knife)] = 1;
     candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::Knife, 1, 0});
-    candidate.wearables = {
-        {1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0},
-        {2, WearableDefinition::LeatherShoes, 0, WearableOwner::Equipped, 0}};
+    // She starts barefoot in her tunic; footwear is crafted (woven footwraps).
+    candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
+    candidate.nextWearableId = 2;
     RefreshEquipment(candidate);
     const auto status = Generation::ChunkAt(-1000, 0, candidate.activeChunk);
     if (status != Generation::Status::Ok) return GenerationFailure(status);

@@ -151,10 +151,10 @@ public:
     bool IsApproachingFell() const { return bFellApproach; }
     // At impact in AN_HeroineMH_AxeFell (axe_fell.bit_at_strike): the bit's centre relative to her
     // root (cm to her left, cm forward) and its horizontal travel into the trunk (left, forward).
-    static constexpr float FellBitLeft = -26.9f;
-    static constexpr float FellBitForward = 67.4f;
-    static constexpr float FellCutLeft = 0.835f;
-    static constexpr float FellCutForward = 0.550f;
+    static constexpr float FellBitLeft = -27.7f;
+    static constexpr float FellBitForward = 66.2f;
+    static constexpr float FellCutLeft = 0.863f;
+    static constexpr float FellCutForward = 0.505f;
     UAnimSequence* GetFellAnimation() const { return FellAnimation; }
     // A berry (or piece of root) from the hip pouch to her mouth (MetaHuman only; false otherwise).
     bool PlayEat(bool bBerry);
@@ -233,6 +233,12 @@ private:
     // The forage pouch on her right hip (shown on the MetaHuman heroine).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> ForagePouch;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
+    // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
+    // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.
+    FTransform PelvisRefPose;
+    FVector PouchPivotRef = FVector::ZeroVector, HipRef = FVector::ZeroVector, ThighDirRef = -FVector::UpVector;
+    FDelegateHandle PouchSwingHandle;
+    void UpdatePouchSwing();
     EHomesteadKneelGather KneelKind = EHomesteadKneelGather::Sticks;
     bool bForageBerries = false;
     int32 StickStage = 0;
@@ -246,6 +252,9 @@ private:
     void UpdateStickAlignment(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UGroomComponent> MetaHumanHair;
     float HairSprintBlend = 0;
+    FTransform HairLastHead;
+    double HairLastRealTime = 0;
+    bool bHairHasLastHead = false;
     void UpdateHairMotion(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;

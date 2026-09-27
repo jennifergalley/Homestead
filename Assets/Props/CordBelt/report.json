@@ -6,16 +6,16 @@
   "triangle_budget": 4000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/cord_belt.py",
-  "source_sha256": "3107233f147eac87f48f04dd7c396abb1da17c43680400a644c641ccb7c755b6",
+  "source_sha256": "12f2a773830a34873b79fc098287eb79d241339c2230992b4cad37264f9799f4",
   "provenance": "Original project-authored geometry; no third-party asset or texture",
   "meshes": {
     "SM_CordBelt": {
       "vertices": 1746,
       "triangles": 3480,
       "size_cm": [
-        29.24,
-        24.12,
-        12.7
+        34.51,
+        25.49,
+        16.02
       ],
       "materials": [
         {
@@ -53,35 +53,14 @@
         ]
       },
       "fbx": "SM_CordBelt.fbx",
-      "sha256": "654ed2144e8868617191a994314941b8202f10c4fe01516479d6335cbb5212be",
-      "preview": "preview_SM_CordBelt.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_CordBelt_hero.png",
-          "detail": "beauty_SM_CordBelt_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 256,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          20
-        ]
-      }
+      "sha256": "44310647a12bdd7273cde1ec134f9ec83edbb35d38a2003169dedde7e5441662",
+      "preview": "preview_SM_CordBelt.png"
     }
   },
   "warnings": [],
   "textures": {
-    "T_CordBelt_basecolor.png": "b93b29aeb2e1ae79756e194db65923e44fcca336d7315ebfe7b4ed46c0083cfc",
-    "T_CordBelt_roughness.png": "6083388625f0e399c8b114ccd3c600e0c8c6262835fa39a99a5b0d4bf8584c12",
-    "T_CordBelt_normal.png": "ca89754d8881a759210eec0613763eab6e58ef685efc41ffa5d43216076b4581"
+    "T_CordBelt_basecolor.png": "f7690f2fe75bf4b286b26d6d93b21b12e1d07621c9e6e8f7f1f8e67c687a1657",
+    "T_CordBelt_roughness.png": "30fc091cbb72a8c3a644b4001db0371e3322ce024542b7a0f4be7be6b220a36a",
+    "T_CordBelt_normal.png": "a63698836c5fe4dedccca38f4d56b9aaf3eea6433699345f5a99f67e0cbc546a"
   }
 }

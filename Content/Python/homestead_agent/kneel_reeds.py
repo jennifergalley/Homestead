@@ -114,7 +114,7 @@ def build():
     grasp = (STEMS[0], STEMS[1], GRASP_Z)
     wrist_l = _wrist_for_fist(grasp, grip_fingers_l, grip_palm_l)
     s.key_world(F['stand'], 'hand_l_ik_ctrl', side_l, hang_l)
-    s.key_world(F['kneel'], 'hand_l_ik_ctrl', (16.0, 38.0, 54.0), s.hand_turn('l', fwd, (0, 0, -1)))
+    s.key_world(F['kneel'], 'hand_l_ik_ctrl', kg.KNEE_WRIST_L, kg.knee_turn(s))
     s.key_world(F['reach'], 'hand_l_ik_ctrl', kg._add(wrist_l, (3, -2, 10)), grip_l)
     s.key_world(F['grab'], 'hand_l_ik_ctrl', wrist_l, grip_l)
     # She holds the bunch taut, drawing it back a touch with each pull of the blade.

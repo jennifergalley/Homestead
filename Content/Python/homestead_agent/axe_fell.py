@@ -47,8 +47,11 @@ LOOP = FRAMES['rock2'] - FRAMES['rock1']
 # to her left and down into the trunk (a 45-degree notch face), not along it; the tree therefore
 # stands a little to her right (FELL_BIT). The wind-up carries the head behind her right shoulder.
 STROKE = {
-    'lift': ((-18.0, 14.0, 126.0), (-0.35, 0.1, 0.93), 30.0),
-    'back': ((-24.0, -4.0, 140.0), (-0.6, -0.5, 0.6), 32.0),
+    'lift': ((-16.0, 22.0, 124.0), (-0.3, 0.05, 0.95), 30.0),
+    # Top of the backswing: the knob hand stays in front of her right shoulder (so the left arm
+    # crosses in front of her chest rather than through it) while the right hand, choked up under
+    # the head, draws back and up beside her right ear with the head behind that shoulder.
+    'back': ((-14.0, 16.0, 138.0), (-0.4, -0.55, 0.73), 32.0),
     'strike': ((-8.0, 30.0, 102.0), (-0.65, 0.72, -0.2), 11.0),
     'bite': ((-7.0, 31.0, 99.0), (-0.63, 0.72, -0.28), 11.0),
     'rock': ((-10.0, 25.0, 104.0), (-0.62, 0.76, -0.1), 13.0),

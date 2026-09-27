@@ -1936,7 +1936,7 @@ void AHomesteadSmokeTest::PrepareNativeResetChecks()
         [this, Before, World, Incompatible]() { return !Controller->MenuNeedsTestReset()
             && Controller->WorldId != *World && Controller->Simulation().Serialize() != *Before
             && Controller->Simulation().Count(Homestead::Item::Knife) == 1
-            && Controller->State().wearables.size() == 2
+            && Controller->State().wearables.size() == 1
             && IFileManager::Get().FileExists(**Incompatible); });
 }
 
@@ -2134,7 +2134,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                         const FString Expected = FString::Printf(TEXT("SK_Modular_%s_Base_%s"), Bodies[Body], Styles[Hair]);
                         return Presentation && Presentation->Base.Mesh
                             && Presentation->Base.Mesh->GetName() == Expected
-                            && Presentation->Garments.Num() == 2
+                            && Presentation->Garments.Num() == 1
                             && Controller->MenuPortraitBrush() != nullptr
                             && VerifyNativeMenuPresentation();
                     }, 0.8f);

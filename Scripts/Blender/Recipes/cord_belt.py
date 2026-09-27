@@ -36,8 +36,27 @@ B = 0.110          # half depth (Y)
 CORD_R = 0.004
 SIDES = 10
 
+# Fitted path round her shorts' waistband (cord_belt_fit.py); the ellipse is the fallback.
+import json
+import os
+_CONTOUR_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..',
+                             'Assets', 'Props', 'CordBelt', 'cord_belt_contour.json')
+CONTOUR = None
+if os.path.exists(_CONTOUR_FILE):
+    with open(_CONTOUR_FILE) as _f:
+        CONTOUR = [Vector(p) for p in json.load(_f)['points']]
+
 
 def ellipse(theta):
+    if CONTOUR:
+        f = (theta % (2 * math.pi)) / (2 * math.pi) * len(CONTOUR)
+        i = int(f) % len(CONTOUR)
+        p = CONTOUR[i].lerp(CONTOUR[(i + 1) % len(CONTOUR)], f - int(f))
+        # Only ever wobble outward: the fit already sits the cord on the cloth.
+        out = Vector((p.x, p.y, 0.0)).normalized()
+        wobble = 0.0008 * (1 + noise.noise(Vector((math.cos(theta) * 1.7, math.sin(theta) * 1.7, 0.5))))
+        lift = 0.0015 * noise.noise(Vector((math.cos(theta) * 2.3, math.sin(theta) * 2.3, 3.0)))
+        return p + out * wobble + Vector((0, 0, lift))
     wobble = 0.0025 * noise.noise(Vector((math.cos(theta) * 1.7, math.sin(theta) * 1.7, 0.5)))
     lift = 0.003 * noise.noise(Vector((math.cos(theta) * 2.3, math.sin(theta) * 2.3, 3.0)))
     return Vector(((A + wobble) * math.cos(theta), (B + wobble) * math.sin(theta), lift))

@@ -94,7 +94,8 @@ FTransform HandGripTransform(const USkeletalMesh& Mesh)
     Across = (Across - Along * FVector::DotProduct(Across, Along)).GetSafeNormal();
     // Into the palm (Across x Along points out of the back of the hand).
     const FVector Palm = FVector::CrossProduct(Along, Across).GetSafeNormal();
-    const FVector Centre = HandT.GetLocation() + (Knuckle - HandT.GetLocation()) * 0.78f + Palm * 2.6f;
+    // Seated in the palm just below the knuckles so the index knuckle clears the haft.
+    const FVector Centre = HandT.GetLocation() + (Knuckle - HandT.GetLocation()) * 0.75f + Palm * 3.3f;
     const FTransform Grip(FRotationMatrix::MakeFromZY(Across, -Along).ToQuat(), Centre);
     return Grip.GetRelativeTransform(HandT);
 }
@@ -450,19 +451,38 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     if (UStaticMesh* Pouch = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/ForagePouch/SM_ForagePouch.SM_ForagePouch")))
     {
         ForagePouch = MakeProp(TEXT("ForagePouch"), Pouch);
-        // Hangs from her right hip, back against the body, neck just below POUCH_OPENING in
-        // kneel_pouch.py (pelvis frame of the clip's standing pose).
+        // A flat pouch fitted to her right hip and thigh (Scripts/Blender/Recipes/forage_pouch_fit.py),
+        // authored about the belt cord where its thong wraps it, in the reference pose.
         ForagePouch->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("pelvis"));
-        ForagePouch->SetRelativeTransform(FTransform(FRotator(0.0f, -92.05f, 90.0f), FVector(4.79f, 4.61f, 21.0f)));
+        const FReferenceSkeleton& Skeleton = MetaHumanBody->GetRefSkeleton();
+        const int32 Pelvis = Skeleton.FindBoneIndex(TEXT("pelvis"));
+        const int32 Thigh = Skeleton.FindBoneIndex(TEXT("thigh_r"));
+        const int32 Calf = Skeleton.FindBoneIndex(TEXT("calf_r"));
+        PouchPivotRef = FVector(-16.79f, 4.01f, 103.09f);
+        if (Pelvis != INDEX_NONE && Thigh != INDEX_NONE && Calf != INDEX_NONE)
+        {
+            PelvisRefPose = RefComponentTransform(Skeleton, Pelvis);
+            HipRef = RefComponentTransform(Skeleton, Thigh).GetLocation();
+            ThighDirRef = (RefComponentTransform(Skeleton, Calf).GetLocation() - HipRef).GetSafeNormal();
+            ForagePouch->SetRelativeTransform(FTransform(PouchPivotRef).GetRelativeTransform(PelvisRefPose));
+            if (!PouchSwingHandle.IsValid())
+                PouchSwingHandle = GetMesh()->RegisterOnBoneTransformsFinalizedDelegate(
+                    FOnBoneTransformsFinalizedMultiCast::FDelegate::CreateUObject(this, &AHomesteadCharacter::UpdatePouchSwing));
+        }
         ForagePouch->SetVisibility(true);
     }
-    // The rawhide cord belt the pouch hangs from, on the shorts' waistband with the knot in front.
-    // The loop is stretched to her hip width and depth so it wraps rather than floating.
+    // The rawhide cord belt the pouch hangs from, tied on the shorts' waistband with the knot in
+    // front. Its path is fitted to the shorts (Scripts/Blender/Recipes/cord_belt_fit.py) and
+    // authored about its pivot in the skeleton's reference pose, so it rides the pelvis from there.
     if (UStaticMesh* Belt = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/CordBelt/SM_CordBelt.SM_CordBelt")))
     {
         CordBelt = MakeProp(TEXT("CordBelt"), Belt);
         CordBelt->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("pelvis"));
-        CordBelt->SetRelativeTransform(FTransform(FRotator(-90.0f, -2.05f, 0.0f), FVector(4.25f, 1.07f, -0.02f), FVector(1.24f, 1.12f, 1.0f)));
+        const FReferenceSkeleton& Skeleton = MetaHumanBody->GetRefSkeleton();
+        const int32 Pelvis = Skeleton.FindBoneIndex(TEXT("pelvis"));
+        const FTransform BeltPivot(FVector(0.0f, 2.25f, 103.28f));
+        CordBelt->SetRelativeTransform(Pelvis == INDEX_NONE ? FTransform::Identity
+            : BeltPivot.GetRelativeTransform(RefComponentTransform(Skeleton, Pelvis)));
         CordBelt->SetVisibility(true);
     }
     if (UStaticMesh* Machete = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/Machete/SM_Machete.SM_Machete")))
@@ -487,7 +507,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         {Homestead::Item::Hatchet, TEXT("FlintHatchet/SM_FlintHatchet"), 58, false, FTransform::Identity},
         // The stone hoe (pivot at the right hand's grip, blade at the far end) is carried tipped
         // well forward so its head clears the ground; the digging stick is the fallback.
-        {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 64, false, FTransform::Identity},
+        {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 54, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
         {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
     };
@@ -507,9 +527,6 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         HeldProps.Add(Prop);
         HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs, Asset.Offset * Grip});
     }
-    // After the pose is final each frame, lay the felling hatchet through both fists.
-    GetMesh()->RegisterOnBoneTransformsFinalizedDelegate(
-        FOnBoneTransformsFinalizedMultiCast::FDelegate::CreateUObject(this, &AHomesteadCharacter::UpdateFellingHatchet));
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
     UClass* FaceAnimClass = LoadObject<UClass>(nullptr,
@@ -1004,9 +1021,57 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
     return true;
 }
 
+void AHomesteadCharacter::UpdatePouchSwing()
+{
+    USkeletalMeshComponent* Body = GetMesh();
+    if (!ForagePouch || !Body || !ForagePouch->IsVisible()) return;
+    const TArray<FTransform>& Pose = Body->GetComponentSpaceTransforms();
+    const int32 Pelvis = Body->GetBoneIndex(TEXT("pelvis"));
+    const int32 Thigh = Body->GetBoneIndex(TEXT("thigh_r"));
+    const int32 Calf = Body->GetBoneIndex(TEXT("calf_r"));
+    if (!Pose.IsValidIndex(Pelvis) || !Pose.IsValidIndex(Thigh) || !Pose.IsValidIndex(Calf)) return;
+    // The thigh's direction as her pelvis sees it, in the reference pose's frame.
+    const FVector Dir = PelvisRefPose.TransformVectorNoScale(Pose[Pelvis].InverseTransformVectorNoScale(
+        Pose[Calf].GetLocation() - Pose[Thigh].GetLocation())).GetSafeNormal();
+    const auto Swing = [this, &Dir](const FVector& Axis, float Alpha, float MinDegrees, float MaxDegrees)
+    {
+        const FVector From = FVector::VectorPlaneProject(ThighDirRef, Axis).GetSafeNormal();
+        const FVector To = FVector::VectorPlaneProject(Dir, Axis).GetSafeNormal();
+        if (From.IsNearlyZero() || To.IsNearlyZero()) return FQuat::Identity;
+        const float Angle = FMath::Atan2(FVector::DotProduct(FVector::CrossProduct(From, To), Axis), FVector::DotProduct(From, To));
+        return FQuat(Axis, FMath::Clamp(Angle * Alpha, FMath::DegreesToRadians(MinDegrees), FMath::DegreesToRadians(MaxDegrees)));
+    };
+    // Forward and back it pivots on the belt (the thigh swings under it about the same lateral
+    // axis, so it stays flush); out and in it rides the thigh about the hip.
+    const FQuat Flex = Swing(FVector::XAxisVector, 0.9f, -40.0f, 55.0f);
+    const FQuat Abduct = Swing(FVector::YAxisVector, 1.0f, -20.0f, 20.0f);
+    const FTransform AboutHip(Abduct, HipRef - Abduct.RotateVector(HipRef));
+    const FTransform Placed = FTransform(Flex, PouchPivotRef) * AboutHip;
+    ForagePouch->SetRelativeTransform(Placed.GetRelativeTransform(PelvisRefPose));
+}
+
 void AHomesteadCharacter::UpdateHairMotion(float DeltaSeconds)
 {
     if (!MetaHumanHair) return;
+    // Strands left over from a hitch, a pause or a snap of the head fly out stiff; start them fresh instead.
+    // Actors don't tick while paused, so a pause shows up as a gap in real time between ticks.
+    const double Now = GetWorld()->GetRealTimeSeconds();
+    const FTransform Head = MetaHumanFace ? MetaHumanFace->GetSocketTransform(TEXT("head")) : GetActorTransform();
+    bool bReset = false;
+    if (bHairHasLastHead)
+    {
+        const float Step = FVector::Dist(Head.GetLocation(), HairLastHead.GetLocation());
+        const float Turn = FMath::RadiansToDegrees(Head.GetRotation().AngularDistance(HairLastHead.GetRotation()));
+        bReset = DeltaSeconds > 0.1f || Now - HairLastRealTime > 0.25 || Step > 25.0f || Turn > 40.0f;
+    }
+    if (bReset)
+    {
+        MetaHumanHair->ResetSimulation();
+        UE_LOG(LogTemp, Verbose, TEXT("Homestead hair simulation reset"));
+    }
+    HairLastHead = Head;
+    HairLastRealTime = Now;
+    bHairHasLastHead = true;
     const float Walk = WalkSpeed(), Sprint = SprintSpeed();
     float Target = FMath::Clamp((GetVelocity().Size2D() - Walk) / FMath::Max(Sprint - Walk, 1.0f), 0.0f, 1.0f);
     // Swinging an axe or machete throws her head and shoulders about as much as a sprint does.
@@ -1377,11 +1442,29 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         Grip = 1;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
         Carry = CuttingReeds || Hoeing ? 0.0f : FMath::Min(Spec.CarryDegrees, RestWristDegrees);
-        if (!Spec.bHangs) Prop->SetRelativeTransform(Tilt(Spec.Rest, Spec.CarryDegrees - Carry));
+        // Resting carries that differ from the working grip: the hatchet hangs edge-down (turned
+        // about its haft) and the hoe is carried blade-low in front, turned end for end from how
+        // she works it. The turn eases out with the tilt when an authored action takes over.
+        FQuat Flip = FQuat::Identity;
+        float Slide = 0;
+        if (Spec.Tool == Homestead::Item::Hatchet) Flip = FQuat(FVector::ZAxisVector, PI);
+        else if (Spec.Tool == Homestead::Item::DiggingStick && Prop->GetStaticMesh()
+            && Prop->GetStaticMesh()->GetName() == TEXT("SM_StoneHoe"))
+        {
+            // Carried, her hand rides near the top of the haft so its end clears her hip.
+            Flip = FQuat(FVector::XAxisVector, PI);
+            Slide = -26.0f;
+        }
+        const FTransform Turn = FTransform(FVector(0, 0, Slide * HeldToolTilt))
+            * FTransform(FQuat::Slerp(FQuat::Identity, Flip, HeldToolTilt));
+        if (!Spec.bHangs) Prop->SetRelativeTransform(Turn * Tilt(Spec.Rest, Spec.CarryDegrees - Carry));
         if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
     }
     if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
     Animation->SetRightHandGrip(Grip, Carry);
+    // She ticks after the pose is final (TG_PostUpdateWork), so the felling haft is laid through
+    // both fists here, over the one-handed placement just set.
+    UpdateFellingHatchet();
 }
 
 void AHomesteadCharacter::UpdateFellingHatchet()
@@ -1403,7 +1486,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
         Along = (Knuckle - Hand).GetSafeNormal();
         const bool bLeft = Side[0] == TEXT('l');
         const FVector Palm = (bLeft ? FVector::CrossProduct(Across, Along) : FVector::CrossProduct(Along, Across)).GetSafeNormal();
-        return Hand + (Knuckle - Hand) * 0.78f + Palm * 2.6f;
+        return Hand + (Knuckle - Hand) * 0.75f + Palm * 3.3f;
     };
     FVector AlongL, AlongR;
     const FVector Knob = GripCentre(TEXT("l"), AlongL);

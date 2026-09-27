@@ -489,6 +489,33 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 Dated and short, newest first. Promote anything durable into the sections above.
 
+- 2026-09-27: Heroine polish (grip, knee hand, felling, barefoot):
+  - **Held-prop placement must run inside `UpdateHeldTools`.** `UpdateHeldTools` runs in Tick
+    (TG_PostUpdateWork) and rewrites every held prop's relative transform. A placement done from
+    `OnBoneTransformsFinalized` was overwritten each frame, so the felling hatchet stayed in her
+    right fist only. `UpdateFellingHatchet()` is now called at the end of `UpdateHeldTools`. If
+    you change the felling clip, re-measure `FellBit*`/`FellCut*` in `HomesteadCharacter.h` from
+    `axe_fell.py`'s `bit_at_strike` report.
+  - **Keep the two-handed backswing in front of her.** Check the left arm against the chest in
+    front and side lab captures. An early `back` key sent the left forearm through her chest.
+  - **Finger curl on the rig.** On `{index,middle,ring,pinky}_0N_l_ctrl`, yaw curls the finger
+    and negative yaw curls toward the palm. Roll does nothing. `kneel_gather.key_knee_fingers`
+    and the `KNEE_*` constants (knee joint at about (16, 36, 51) component space when kneeling)
+    rest the left palm on top of the kneecap in all four kneel clips. Key the curl on at the
+    kneel and off at the rise.
+  - **Hair auto-reset.** `UpdateHairMotion` calls `ResetSimulation()` after long frames
+    (> 0.1 s), real-time gaps > 0.25 s between ticks (pause and menus stop actor ticks), or a
+    head jump > 25 cm or > 40° in one frame. This is a defensive fix for stray flyaways, which
+    haven't been reproduced since.
+  - **She starts barefoot.** `NewGame` equips only the tunic (`nextWearableId` 2). Woven
+    footwraps (8 Fiber) are the craftable footwear; LeatherShoes remain only in older saves.
+    Tests needing shoes use the `Shod(sim)` helper in `Tests/HomesteadSimulationTests.cpp`.
+  - **Live Coding patch files stay locked** for about 60 s after `quit_editor`. Wait for the
+    process to exit, then delete `Binaries\Win64\*patch*` before `Build-Game.ps1 -Package`.
+  - **`Test-Game.ps1` switches:** pass them by hashtable splatting (`$a=@{Packaged=$true;
+    Hotbar=$true}; .\Scripts\Test-Game.ps1 @a`). An empty switch string errors with "Generated
+    resume requires...".
+
 - 2026-09-26: Adding a prop to the game mid-session:
   - **Never cache a loaded asset in a function-local `static UStaticMesh*`.** `static M =
     LoadObject(...)` caches nullptr forever if the asset didn't exist (or wasn't saved) when the
@@ -545,11 +572,12 @@ Dated and short, newest first. Promote anything durable into the sections above.
     fingers curl the opposite way. `FHandGrip` and `HandGripTransform` curl and seat props toward
     `along x across`. Getting it backwards bends the fingers backwards (the "cursed" grip).
   - **Resting idle.** `AN_HeroineMH_ActiveIdle` (`active_idle.py`) replaces LivingIdle02 when
-    present: shoulder-width stance, knees apart, weight on the right leg, hands clear of the
-    pouch. Held tools tip forward in the fist (`HeldToolTilt`) instead of bending the wrist.
+    present: shoulder-width stance, knees tracking straight over the feet (Jenny found them too
+    wide at first), arms hanging close, weight on the right leg, hands clear of the pouch. Held
+    tools tip forward in the fist (`HeldToolTilt`) instead of bending the wrist.
   - **Felling is a right-shoulder chop.** In `axe_fell.py` the left hand holds the knob and the
-    right hand slides; `UpdateFellingHatchet` lays the hatchet through both fists after the pose is
-    final. The bit lands to her right (`FellBitLeft` is negative).
+    right hand slides; `UpdateFellingHatchet` lays the hatchet through both fists. The bit lands
+    to her right (`FellBitLeft` is negative).
   - **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
     (`-HomesteadSmokeTest`). To see the MetaHuman, launch
     `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the

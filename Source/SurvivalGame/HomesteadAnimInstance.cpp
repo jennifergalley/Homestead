@@ -12,6 +12,8 @@
 #include "BoneControllers/AnimNode_TwoBoneIK.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/IConsoleManager.h"
@@ -88,13 +90,25 @@ struct FGatherPose : FAnimNode_SequenceEvaluator_Standalone
     virtual bool IsLooping() const override { return false; }
 };
 
-// Closes the right hand around a held tool handle on top of whatever the clip does: each finger
-// joint flexes toward the palm about the across-the-knuckles axis, and the thumb wraps over.
+// Closes a hand around a held tool handle on top of whatever the clip does. With bWrap each
+// finger joint flexes toward the palm about the across-the-knuckles axis until that segment meets
+// the haft (a cylinder), and the thumb comes forward along the handle beside the curled index, the
+// way a hand holds a hammer or hatchet haft. Without it (the eating pinch) the joints take fixed Angles.
 struct FHandGrip : FAnimNode_SkeletalControlBase
 {
     static constexpr int32 Chains = 5;
     FBoneReference Joints[Chains][3];
     float Angles[Chains][3] = {{72, 84, 52}, {76, 86, 54}, {80, 86, 54}, {84, 86, 54}, {18, 38, 32}};
+    // Wrap limits: a joint stops at contact, or at its maximum (a closed fist) if it never touches.
+    float MinAngles[Chains][3] = {{8, 16, 8}, {8, 16, 8}, {8, 16, 8}, {8, 16, 8}, {0, 0, 0}};
+    float MaxAngles[Chains][3] = {{88, 100, 66}, {90, 100, 66}, {92, 100, 66}, {94, 100, 66}, {34, 56, 60}};
+    bool bWrap = true;
+    // The held haft in the hand bone's space (from the attached prop), or a virtual one across the
+    // palm when no prop is in this hand.
+    bool bHaft = false;
+    FVector HaftPoint = FVector::ZeroVector;
+    FVector HaftDir = FVector::UpVector;
+    float HaftRadius = 1.6f;
     FBoneReference Hand, IndexBase, MiddleBase, PinkyBase;
     // The left hand's bones mirror the right's, so its palm faces the other way.
     bool bLeft = false;
@@ -148,6 +162,34 @@ struct FHandGrip : FAnimNode_SkeletalControlBase
             const FCompactPoseBoneIndex HandIndex = Hand.GetCompactPoseIndex(Bones);
             OutBoneTransforms.Add(FBoneTransform(HandIndex, CS(Hand) * Wrist));
         }
+        // The haft in the pre-wrist pose (the wrist turn carries fingers and prop together).
+        const FTransform HandPose = CS(Hand);
+        const FVector VirtualCentre = HandAt + (CS(MiddleBase).GetLocation() - HandAt) * 0.75f + Palm * 3.3f;
+        FVector HaftC = VirtualCentre, HaftD = Across;
+        float HaftR = 1.6f;
+        if (bHaft)
+        {
+            const FVector C = HandPose.TransformPosition(HaftPoint);
+            const FVector D = HandPose.TransformVectorNoScale(HaftDir).GetSafeNormal();
+            const FVector Off = VirtualCentre - C;
+            // Only a haft that actually runs through this palm (a two-handed tool, the left fist).
+            if (!D.IsNearlyZero() && (Off - D * FVector::DotProduct(Off, D)).Size() < 4.5f)
+            {
+                HaftC = C;
+                HaftD = D;
+                HaftR = HaftRadius;
+            }
+        }
+        const auto AxisOffset = [&](const FVector& P)
+        {
+            const FVector V = P - HaftC;
+            return V - HaftD * FVector::DotProduct(V, HaftD);
+        };
+        // Palm-side flesh from each segment's bone line; the thumb lies over the curled fingers.
+        const float Flesh[3] = {0.85f, 0.75f, 0.65f};
+        const float ThumbClearance = 2.1f;
+        // Where each finger joint ended up (pre-wrist), so the thumb can aim at the curled index.
+        FVector Placed[Chains][3];
         for (int32 Chain = 0; Chain < Chains; ++Chain)
         {
             const bool bThumb = Chain == Chains - 1;
@@ -155,20 +197,142 @@ struct FHandGrip : FAnimNode_SkeletalControlBase
             FTransform ParentOld = Output.Pose.GetComponentSpaceTransform(Bones.GetParentBoneIndex(First));
             FTransform ParentNew = ParentOld;
             FVector Direction = Along;
+            FVector TipLocal = FVector::ZeroVector;
+            FVector FingerHinge = Across;
             for (int32 Joint = 0; Joint < 3; ++Joint)
             {
                 const FCompactPoseBoneIndex Index = Joints[Chain][Joint].GetCompactPoseIndex(Bones);
                 const FTransform Old = Output.Pose.GetComponentSpaceTransform(Index);
                 FTransform New = Old.GetRelativeTransform(ParentOld) * ParentNew;
+                // The segment this joint swings: to the next joint, or past the last one to the tip.
+                FVector EndLocal;
                 if (Joint < 2)
-                    Direction = (Output.Pose.GetComponentSpaceTransform(Joints[Chain][Joint + 1].GetCompactPoseIndex(Bones)).GetLocation()
-                        - Old.GetLocation()).GetSafeNormal();
+                {
+                    const FTransform Next = Output.Pose.GetComponentSpaceTransform(Joints[Chain][Joint + 1].GetCompactPoseIndex(Bones));
+                    Direction = (Next.GetLocation() - Old.GetLocation()).GetSafeNormal();
+                    EndLocal = Next.GetRelativeTransform(Old).GetLocation();
+                    if (Joint == 1) TipLocal = EndLocal * 0.85f;
+                }
+                else
+                    EndLocal = TipLocal;
+                if (bThumb && bWrap)
+                {
+                    // The thumb comes forward along the handle rather than round it. The whole thumb
+                    // swings from its base joint (the mobile one) as the rest pose's gentle curve, aimed
+                    // down the front of the handle toward the tool head; the two outer joints then only
+                    // hinge a little, so the pad settles on the wood without any joint kinking.
+                    const FVector At = New.GetLocation();
+                    const float PadRadius = HaftR + 0.95f;
+                    if (Joint == 0)
+                    {
+                        const FVector Top = HaftD * (FVector::DotProduct(HaftD, Across) >= 0.0f ? 1.0f : -1.0f);
+                        const FVector Side = AxisOffset(At).GetSafeNormal();
+                        const FVector IndexSide = AxisOffset(Placed[0][2]).GetSafeNormal();
+                        const float IndexTurn = FMath::Atan2(FVector::DotProduct(FVector::CrossProduct(Side, IndexSide), Top),
+                            FVector::DotProduct(Side, IndexSide));
+                        // Part way round the front toward the curled fingertips.
+                        const float TurnTip = FMath::Clamp(FMath::Abs(IndexTurn) - FMath::DegreesToRadians(30.0f),
+                            FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(60.0f));
+                        const float Sign = IndexTurn >= 0.0f ? 1.0f : -1.0f;
+                        const float IndexHeight = FVector::DotProduct(Placed[0][0] - HaftC, Top);
+                        const FVector ThumbTip = HaftC + Top * (IndexHeight + 1.5f) + FQuat(Top, Sign * TurnTip).RotateVector(Side) * PadRadius;
+                        const FVector P1 = Output.Pose.GetComponentSpaceTransform(Joints[Chain][1].GetCompactPoseIndex(Bones)).GetLocation();
+                        const FVector P2 = Output.Pose.GetComponentSpaceTransform(Joints[Chain][2].GetCompactPoseIndex(Bones)).GetLocation();
+                        const FVector RestTip = P2 + (P2 - P1) * 0.85f;
+                        const FVector From = (RestTip - At).GetSafeNormal();
+                        const FVector Aim = (ThumbTip - At).GetSafeNormal();
+                        if (!From.IsNearlyZero() && !Aim.IsNearlyZero())
+                        {
+                            FVector SwingAxis;
+                            float SwingAngle;
+                            FQuat::FindBetweenNormals(From, Aim).ToAxisAndAngle(SwingAxis, SwingAngle);
+                            SwingAngle = FMath::Min(SwingAngle, FMath::DegreesToRadians(42.0f));
+                            New.SetRotation(FQuat(SwingAxis, SwingAngle) * New.GetRotation());
+                        }
+                    }
+                    else
+                    {
+                        // A small hinge toward the wood (or a touch of straightening off it), chosen so
+                        // the segment's end rests on the pad radius.
+                        const FVector Seg = New.TransformVectorNoScale(EndLocal).GetSafeNormal();
+                        const FVector ToWood = -AxisOffset(At).GetSafeNormal();
+                        FVector Hinge = FVector::CrossProduct(Seg, ToWood).GetSafeNormal();
+                        if (!Hinge.IsNearlyZero())
+                        {
+                            if (FVector::DotProduct(FVector::CrossProduct(Hinge, Seg), ToWood) < 0) Hinge = -Hinge;
+                            float Best = 0, BestError = BIG_NUMBER;
+                            for (float Try = -6.0f; Try <= 22.0f; Try += 1.0f)
+                            {
+                                FTransform Swung = New;
+                                Swung.SetRotation(FQuat(Hinge, FMath::DegreesToRadians(Try)) * New.GetRotation());
+                                const float Error = FMath::Abs(AxisOffset(Swung.TransformPosition(EndLocal)).Size() - PadRadius);
+                                if (Error < BestError - 0.02f) { BestError = Error; Best = Try; }
+                            }
+                            New.SetRotation(FQuat(Hinge, FMath::DegreesToRadians(Best)) * New.GetRotation());
+                        }
+                    }
+                    Placed[Chain][Joint] = New.GetLocation();
+                    OutBoneTransforms.Add(FBoneTransform(Index, New * Wrist));
+                    ParentOld = Old;
+                    ParentNew = New;
+                    continue;
+                }
                 // Rotating about Axis moves the segment toward Axis x Direction; pick the sign that
-                // curls toward the palm. The thumb bends straight toward the palm.
-                FVector Axis = bThumb ? FVector::CrossProduct(Direction, Palm).GetSafeNormal() : Across;
-                if (FVector::DotProduct(FVector::CrossProduct(Axis, Direction), Palm) < 0) Axis = -Axis;
+                // curls toward the palm.
+                FVector Axis;
+                FVector Toward = Palm;
+                if (!bThumb && bWrap)
+                {
+                    // A fist closes the fingers together, each wrapping straight round the haft:
+                    // turn the splayed rest finger (in the palm plane) square across the handle,
+                    // then hinge every joint about the one axis across that finger.
+                    if (Joint == 0)
+                    {
+                        const auto InPalm = [&Palm](const FVector& V) { return (V - Palm * FVector::DotProduct(V, Palm)).GetSafeNormal(); };
+                        const FVector From = InPalm(Direction);
+                        const FVector Handle = InPalm(HaftD);
+                        const FVector To = (From - Handle * FVector::DotProduct(From, Handle)).GetSafeNormal();
+                        if (!From.IsNearlyZero() && !To.IsNearlyZero())
+                        {
+                            const float Turn = FMath::Clamp(FMath::Atan2(FVector::DotProduct(FVector::CrossProduct(From, To), Palm),
+                                FVector::DotProduct(From, To)), FMath::DegreesToRadians(-24.0f), FMath::DegreesToRadians(24.0f));
+                            const FQuat Swing(Palm, Turn);
+                            New.SetRotation(Swing * New.GetRotation());
+                            Direction = Swing.RotateVector(Direction);
+                        }
+                        FingerHinge = FVector::CrossProduct(Direction, Palm).GetSafeNormal();
+                        if (FingerHinge.IsNearlyZero()) FingerHinge = Across;
+                    }
+                    Axis = FingerHinge;
+                }
+                else
+                    Axis = bThumb ? FVector::CrossProduct(Direction, Palm).GetSafeNormal() : Across;
+                if (FVector::DotProduct(FVector::CrossProduct(Axis, Direction), Toward) < 0) Axis = -Axis;
+                float Angle = Angles[Chain][Joint];
+                if (bWrap && !Axis.IsNearlyZero())
+                {
+                    // Close until the segment's far end meets the haft, so each joint follows the
+                    // handle round; the middle of a long segment may press into it a little (flesh).
+                    const float Limit = HaftR + (bThumb ? ThumbClearance : Flesh[Joint]);
+                    const float Press = HaftR + (bThumb ? ThumbClearance : Flesh[Joint]) * 0.35f;
+                    const float Low = MinAngles[Chain][Joint], High = MaxAngles[Chain][Joint];
+                    Angle = High;
+                    for (float Try = Low; Try <= High; Try += 2.0f)
+                    {
+                        FTransform Swung = New;
+                        Swung.SetRotation(FQuat(Axis, FMath::DegreesToRadians(Try)) * New.GetRotation());
+                        const bool bTouch = AxisOffset(Swung.TransformPosition(EndLocal)).Size() < Limit
+                            || AxisOffset(Swung.TransformPosition(EndLocal * 0.5f)).Size() < Press;
+                        if (bTouch)
+                        {
+                            Angle = Try;
+                            break;
+                        }
+                    }
+                }
                 if (!Axis.IsNearlyZero())
-                    New.SetRotation(FQuat(Axis, FMath::DegreesToRadians(Angles[Chain][Joint])) * New.GetRotation());
+                    New.SetRotation(FQuat(Axis, FMath::DegreesToRadians(Angle)) * New.GetRotation());
+                Placed[Chain][Joint] = New.GetLocation();
                 OutBoneTransforms.Add(FBoneTransform(Index, New * Wrist));
                 ParentOld = Old;
                 ParentNew = New;
@@ -218,6 +382,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         // A pinch for food: index fingertip meets the thumb, the other fingers tuck into the palm.
         const float PinchAngles[FHandGrip::Chains][3] = {{34, 58, 40}, {62, 78, 48}, {82, 88, 52}, {86, 88, 52}, {44, 32, 26}};
         FMemory::Memcpy(Pinch.Angles, PinchAngles, sizeof(PinchAngles));
+        Pinch.bWrap = false;
         PelvisPlacement.BoneToModify.BoneName = TEXT("pelvis");
         PelvisPlacement.TranslationMode = BMM_Additive;
         PelvisPlacement.TranslationSpace = BCS_ComponentSpace;
@@ -447,10 +612,42 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Node->Alpha = PlacementAlpha;
     }
 
+    // Where the tool in her right hand runs, in each hand bone's space, so the grips close on it.
+    void UpdateHafts(const AHomesteadCharacter* Avatar)
+    {
+        Grip.bHaft = LeftGrip.bHaft = false;
+        const USkeletalMeshComponent* Mesh = Avatar ? Avatar->GetMesh() : nullptr;
+        if (!Mesh) return;
+        for (const USceneComponent* Child : Mesh->GetAttachChildren())
+        {
+            const auto* Prop = Cast<UStaticMeshComponent>(Child);
+            if (!Prop || !Prop->IsVisible() || !Prop->GetStaticMesh() || Prop->IsUsingAbsoluteRotation()
+                || Prop->GetAttachSocketName() != TEXT("hand_r")) continue;
+            // Handle radii at the grip, measured from the Blender props.
+            const FString Name = Prop->GetStaticMesh()->GetName();
+            float Radius = 1.5f;
+            if (Name.Contains(TEXT("Hatchet"))) Radius = 1.63f;
+            else if (Name.Contains(TEXT("Hoe"))) Radius = 1.57f;
+            else if (Name.Contains(TEXT("Knife"))) Radius = 0.98f;
+            else if (Name.Contains(TEXT("Machete"))) Radius = 1.3f;
+            const FTransform Tool = Prop->GetComponentTransform();
+            for (FHandGrip* Fist : {&Grip, &LeftGrip})
+            {
+                const FTransform HandT = Mesh->GetSocketTransform(Fist->bLeft ? TEXT("hand_l") : TEXT("hand_r"));
+                Fist->HaftPoint = HandT.InverseTransformPosition(Tool.GetLocation());
+                Fist->HaftDir = HandT.InverseTransformVectorNoScale(Tool.GetUnitAxis(EAxis::Z));
+                Fist->HaftRadius = Radius;
+                Fist->bHaft = true;
+            }
+            return;
+        }
+    }
+
     virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
     {
         FAnimInstanceProxy::PreUpdate(Instance, DeltaSeconds);
         const auto* Avatar = Cast<AHomesteadCharacter>(Instance->TryGetPawnOwner());
+        UpdateHafts(Avatar);
         const auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
         const bool Lab = Avatar && !PC && Avatar->InCharacterLab();
         const float Speed = Avatar && (Lab || (PC && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()))

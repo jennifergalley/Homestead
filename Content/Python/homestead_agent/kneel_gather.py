@@ -61,6 +61,27 @@ REST_FINGERS_R = (0.35, 1.0, -0.35)
 REST_DRAPE_R = 0.14
 # Right elbow out to her side and forward while the hand rests, so the forearm stays in front of her.
 REST_ELBOW_POLE_R = (-70.0, 50.0, 100.0)
+# Left palm braced on top of the forward kneecap (the knee joint sits near (16, 36, 51) while she
+# kneels): the wrist rests back on the thigh so the palm, not the wrist, covers the kneecap, and the
+# fingers drape loosely down over its front. Shared by the kneeling clips.
+KNEE_WRIST_L = (16.0, 31.0, 56.5)
+KNEE_FINGERS_L = (-0.12, 1.0, -0.12)
+# Relaxed curl over the kneecap, degrees per finger joint (01, 02, 03); negative yaw on a left finger
+# control curls it toward the palm.
+KNEE_CURL_L = {'index': (-12.0, -18.0, -10.0), 'middle': (-15.0, -22.0, -12.0),
+               'ring': (-18.0, -24.0, -13.0), 'pinky': (-22.0, -26.0, -14.0)}
+
+
+def knee_turn(s):
+    """Left-hand rotation for ``key_world`` bracing on the kneecap."""
+    return s.hand_turn('l', KNEE_FINGERS_L, (0, 0, -1))
+
+
+def key_knee_fingers(s, frame, weight=1.0):
+    """Key the left fingers' kneecap curl (``weight`` 0 = the rig's straight rest)."""
+    for finger, degrees in KNEE_CURL_L.items():
+        for joint, deg in zip(('01', '02', '03'), degrees):
+            s.key_rotation(frame, f'{finger}_{joint}_l_ctrl', yaw=deg * weight)
 
 
 def _add(a, b):
@@ -237,12 +258,16 @@ def _author(chest_anim):
     side_l = (24.0, 5.0, 86.0)
     hang_l = s.hand_turn('l', down, (-1, 0, 0))
     cradle_l = s.hand_turn('l', (-1, 0.2, 0), (0, 0, 1))
-    knee_l = s.hand_turn('l', fwd, (0, 0, -1))
+    knee_l = knee_turn(s)
     s.key_world(F['stand'], 'hand_l_ik_ctrl', side_l, hang_l)
-    s.key_world(F['kneel'], 'hand_l_ik_ctrl', (16.0, 38.0, 54.0), knee_l)
-    s.key_world(F['grab1'], 'hand_l_ik_ctrl', (16.0, 38.0, 54.0), knee_l)
+    s.key_world(F['kneel'], 'hand_l_ik_ctrl', KNEE_WRIST_L, knee_l)
+    s.key_world(F['grab1'], 'hand_l_ik_ctrl', _add(KNEE_WRIST_L, (0, 0, 0.5)), knee_l)
     # Keep bracing on the knee while the torso comes up, so the arm doesn't sweep through it.
-    s.key_world(F['lift1'] - 3, 'hand_l_ik_ctrl', (16.0, 38.0, 56.0), knee_l)
+    s.key_world(F['lift1'] - 3, 'hand_l_ik_ctrl', _add(KNEE_WRIST_L, (0, 0, 2)), knee_l)
+    key_knee_fingers(s, F['stand'], 0)
+    for f in (F['kneel'], F['lift1'] - 3):
+        key_knee_fingers(s, f)
+    key_knee_fingers(s, F['lift1'] + 1, 0)
     s.key_world(F['lift1'] + 1, 'hand_l_ik_ctrl', on_chest(F['lift1'] + 1, cradle_ahead), chest_turn(F['lift1'] + 1, cradle_l))
     cradle_frames = sorted(set(range(F['place1'] - 4, F['settle'], 3)) | {F['reach2'], F['grab2'], F['lift2'], F['place2'], F['settle']})
     for f in cradle_frames:

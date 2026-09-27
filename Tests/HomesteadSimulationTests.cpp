@@ -160,6 +160,16 @@ void Edit(Simulation& sim, const std::function<void(State&)>& edit, bool prepare
     FixtureLayouts(state);
     OK(sim.Deserialize(Encode(state)));
 }
+// A new game starts barefoot; wardrobe fixtures written for the old starter shoes put them back on
+// as garment 2 (the Feet slot), exactly as earlier saves carry them.
+void Shod(Simulation& sim)
+{
+    Edit(sim, [](State& state) {
+        state.wearables.push_back({2, WearableDefinition::LeatherShoes, 0, WearableOwner::Equipped, 0});
+        state.equipment[static_cast<int>(EquipmentSlot::Feet)] = 2;
+        state.nextWearableId = 3;
+    });
+}
 void Stock(Simulation& sim, std::initializer_list<std::pair<Item, int>> items)
 {
     Edit(sim, [&](State& state) {
@@ -1467,10 +1477,11 @@ void WardrobeDefaultsAndCrafting()
     static_assert(static_cast<int>(Item::HerbedRoots) == 13, "Existing fungible save IDs are unchanged");
     static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
     Simulation sim;
-    CHECK(sim.GetState().wearables.size() == 2);
-    CHECK(sim.GetState().equipment == (std::array<int, 4>{1, 1, 0, 2}));
+    CHECK(sim.GetState().wearables.size() == 1);
+    CHECK(sim.GetState().equipment == (std::array<int, 4>{1, 1, 0, 0}));
     CHECK(sim.GetWearable(1)->definition == WearableDefinition::LinenTunic);
-    CHECK(sim.GetWearable(2)->definition == WearableDefinition::LeatherShoes);
+    CHECK(sim.GetWearable(2) == nullptr);
+    CHECK(sim.GetState().nextWearableId == 2);
     CHECK(sim.GetWearable(0) == nullptr);
     CHECK(sim.GetLayout(-1) == nullptr);
     CHECK(sim.ChestUsedCapacity(0) == -1);
@@ -1518,6 +1529,7 @@ void WardrobeDefaultsAndCrafting()
 void AtomicEquipmentAndDye()
 {
     Simulation sim;
+    Shod(sim);
     Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 40}});
     OK(sim.CraftGarment(WearableDefinition::LinenApron, Home, sim.GetRevision()));
     const int apron = sim.GetState().wearables.back().id;
@@ -1565,6 +1577,7 @@ void AtomicEquipmentAndDye()
 void WardrobeStorageAndReach()
 {
     Simulation sim;
+    Shod(sim);
     BuildingStock(sim);
     OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
     const int chest = sim.GetState().structures.back().id;
@@ -1921,6 +1934,7 @@ void SelectedFoodGroupTransactions()
 void WardrobeSaveRejection()
 {
     Simulation sim;
+    Shod(sim);
     BuildingStock(sim);
     OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
     const int chest = sim.GetState().structures.back().id;

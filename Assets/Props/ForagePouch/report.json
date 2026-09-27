@@ -1,21 +1,21 @@
 {
   "schema": 1,
   "name": "ForagePouch",
-  "description": "Forager's drawstring waist pouch in smoke-tanned buckskin with plant-fibre cord (original). Pivot = top of the hanging loop; hangs along -Z, front faces -Y.",
+  "description": "Forager's flat drawstring thigh pouch in smoke-tanned buckskin, whip-stitched with rawhide, on a plant-fibre thong (original). Fitted to the heroine's right hip; pivot = the belt cord where the thong wraps it, in her reference pose.",
   "collision": "none",
-  "triangle_budget": 6000,
+  "triangle_budget": 9000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/forage_pouch.py",
-  "source_sha256": "e011de6ba1b8915ef3ad0a000245ae58ae216778bf37d2346ea6a552b3ee0c67",
+  "source_sha256": "50d7981ab610f5d877a4c8856cb13d0df968e50ec1856d4d95a1fce0ce4850bc",
   "provenance": "Original project-authored geometry; no third-party asset or texture",
   "meshes": {
     "SM_ForagePouch": {
-      "vertices": 2953,
-      "triangles": 5882,
+      "vertices": 3552,
+      "triangles": 7076,
       "size_cm": [
-        14.01,
-        7.76,
-        21.9
+        6.92,
+        12.58,
+        23.34
       ],
       "materials": [
         {
@@ -44,44 +44,23 @@
         "pose": [
           0,
           0,
-          18
+          90
         ],
         "focus": [
+          -0.02,
           0.0,
-          -0.03,
-          -0.075
+          -0.12
         ]
       },
       "fbx": "SM_ForagePouch.fbx",
-      "sha256": "2a35530380013ee2f43dfe8b95f39ba0222500d14deb45cb5a1718271d1eb362",
-      "preview": "preview_SM_ForagePouch.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_ForagePouch_hero.png",
-          "detail": "beauty_SM_ForagePouch_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 256,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          18
-        ]
-      }
+      "sha256": "5451f0c6276a0bae0d1674257b1d5c88e40c3fd5386f973448260994c4796d34",
+      "preview": "preview_SM_ForagePouch.png"
     }
   },
   "warnings": [],
   "textures": {
-    "T_ForagePouch_basecolor.png": "42af771a943c9a9943eb859d55efe8ac236317ba5de76057702e7f022c43a7f5",
-    "T_ForagePouch_roughness.png": "6e88a9daeac98282f7f84b9b798d3f57784f01816edb456bb18b3f65db177644",
-    "T_ForagePouch_normal.png": "c8123afa266af05ccc1af958aaf4f4b17e4560bb3c5740edaae2db077a08c973"
+    "T_ForagePouch_basecolor.png": "691ebe0f008ba894603c14657d6a45b4737f7efd090967f914cf0a6ecff46cd1",
+    "T_ForagePouch_roughness.png": "64eeae165cd1105c34cbf02a8c693d36e8652a09d511e0d2e2d6fd9ead730e7b",
+    "T_ForagePouch_normal.png": "c7c3902ffe9e1602794cc8d3f5d0cd5382f20af0c9e07161f51c1a25bd28ee97"
   }
 }

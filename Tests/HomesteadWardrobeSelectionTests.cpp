@@ -14,7 +14,14 @@ int main()
 {
     using namespace Homestead;
     Simulation simulation;
-    const State original = simulation.GetState();
+    const State fresh = simulation.GetState();
+    Check(fresh.wearables.size() == 1 && fresh.equipment[static_cast<int>(EquipmentSlot::Feet)] == 0,
+        "A new game should start barefoot in the tunic");
+    // The legacy starter outfit (tunic and lace-up shoes), as earlier saves carry it.
+    State original = fresh;
+    original.wearables.push_back({2, WearableDefinition::LeatherShoes, 0, WearableOwner::Equipped, 0});
+    original.equipment[static_cast<int>(EquipmentSlot::Feet)] = 2;
+    original.nextWearableId = 3;
     WardrobeSelection result;
     std::string error;
     for (int body = 0; body < 3; ++body)
@@ -56,7 +63,8 @@ int main()
     Check(!SelectWardrobe(bad, 0, 0, result, error), "Unknown garment admitted");
     Check(!SelectWardrobe(original, 3, 0, result, error), "Unknown body admitted");
     Check(!SelectWardrobe(original, 0, -1, result, error), "Unknown hair admitted");
-    Check(original.wearables.size() == simulation.GetState().wearables.size()
-        && original.equipment == simulation.GetState().equipment, "Selection mutated authority");
+    Check(SelectWardrobe(fresh, 0, 0, result, error) && result.equipped.size() == 1, "Barefoot start rejected");
+    Check(fresh.wearables.size() == simulation.GetState().wearables.size()
+        && fresh.equipment == simulation.GetState().equipment, "Selection mutated authority");
     std::cout << "Wardrobe selection checks passed\n";
 }

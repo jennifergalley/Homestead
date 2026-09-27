@@ -213,7 +213,7 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         [Avatar, Probe, Animation]()
         {
             const auto* Presentation = Avatar->GetEquipmentPresentation();
-            return Probe->Ready && Presentation && Presentation->Garments.Num() == 2
+            return Probe->Ready && Presentation && Presentation->Garments.Num() == 1
                 && Avatar->GetMesh()->GetSkeletalMeshAsset()->GetName() == TEXT("SK_Modular_Willow_Base_Ponytail")
                 && Animation() && Animation()->GatherWeight() < 0.001f && Animation()->WalkWeight() < 0.001f;
         });
