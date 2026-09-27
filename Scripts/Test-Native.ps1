@@ -1,5 +1,15 @@
+<#
+.SYNOPSIS
+Builds and runs the native simulation test suites (CMake + CTest, no Unreal).
+.DESCRIPTION
+Debug (the default) keeps assertions but the simulation suite takes about 10 minutes. -Configuration Release
+runs every suite in about 3 minutes; use it for routine checks. To run one suite directly, build it and
+redirect its output to a file (stdout is buffered, so a crash loses unredirected output):
+  cmake --build Build\Native --config Release --target HomesteadSimulationTests
+  Build\Native\Release\HomesteadSimulationTests.exe *> Build\Native\sim-tests.log
+#>
 [CmdletBinding()]
-param()
+param([ValidateSet('Debug','Release')][string]$Configuration = 'Debug')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
@@ -24,7 +34,7 @@ if (Test-Path -LiteralPath $cache) {
 }
 & $cmake @configure
 if ($LASTEXITCODE -ne 0) { throw "Native CMake configuration failed ($LASTEXITCODE)." }
-& $cmake --build $build --config Debug
+& $cmake --build $build --config $Configuration
 if ($LASTEXITCODE -ne 0) { throw "Native compilation failed ($LASTEXITCODE)." }
-& $ctest --test-dir $build -C Debug --output-on-failure
+& $ctest --test-dir $build -C $Configuration --output-on-failure --timeout 1800
 if ($LASTEXITCODE -ne 0) { throw "Native tests failed ($LASTEXITCODE)." }

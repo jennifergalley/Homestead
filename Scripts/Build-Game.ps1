@@ -100,8 +100,13 @@ if (-not (Test-Path -LiteralPath $map)) { throw 'Content bootstrap did not produ
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Clearing
 if ($Package) {
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
-    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output
-    if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE)." }
+    # UAT's own log folder (%APPDATA%\Unreal Engine\AutomationTool\Logs) is shared by every worktree and
+    # gets overwritten, so keep this worktree's full packaging output alongside the bootstrap log.
+    $packageLog = Join-Path $logDirectory "package-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+    Write-Host "Packaging; full output: $packageLog"
+    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output *>&1 |
+        Tee-Object -LiteralPath $packageLog
+    if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE). See $packageLog and Saved\Logs\UnrealPak.log." }
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive
     $credits = Join-Path $packageRoot 'asset-credits.md'
     Copy-Item -LiteralPath (Join-Path $root 'docs\asset-credits.md') -Destination $credits -Force
