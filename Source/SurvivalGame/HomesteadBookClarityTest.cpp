@@ -138,15 +138,15 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
         [this]() { return Controller->BookPage() == 0 && Controller->Rows()[Controller->SelectedRow()].Id == static_cast<int32>(Homestead::Item::Berries); });
     Add(TEXT("Close inventory for recipe supplies"), [this]() { Tap(EKeys::Escape); }, []() { return true; });
     QueueGatherTo(Homestead::Item::Stone, 4);
-    QueueGatherTo(Homestead::Item::Fiber, 5);
-    Add(TEXT("Open affordable hatchet recipe"), [this]() { Tap(EKeys::C); },
+    QueueGrant(Homestead::Item::RustedAxeHead, 1);
+    Add(TEXT("Open affordable axe hafting recipe"), [this]() { Tap(EKeys::C); },
         [this]() { return Controller->BookPage() == 1 && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; });
     QueueBookCapture(TEXT("book-recipes-supplied"));
     Add(TEXT("Affordable recipe performs exactly the existing transaction and time cost"),
         [this, Expected]()
         {
             *Expected = Controller->Simulation();
-            Expected->Craft(Homestead::Recipe::Hatchet, Controller->PlayerPoint());
+            Expected->Craft(Homestead::Recipe::HaftAxe, Controller->PlayerPoint());
             Expected->AdvanceGameHours(0.05, Controller->PlayerPoint());
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
@@ -155,7 +155,7 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
     Add(TEXT("Close recipes for disclosed functional storage setup"), [this]() { Tap(EKeys::Escape); },
         [this]() { return !Controller->IsBookOpen(); });
     QueueGatherTo(Homestead::Item::Branch, 10);
-    QueueGatherTo(Homestead::Item::Fiber, 4);
+    QueueGrant(Homestead::Item::BrambleCanes, 4);
     QueueClearCell(-4, -3);
     QueuePlace(Homestead::Piece::Chest, -4, -3);
     Add(TEXT("Approach the newly crafted test chest; fixture teleport, not ordinary footage"),

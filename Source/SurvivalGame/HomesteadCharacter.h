@@ -144,7 +144,10 @@ public:
     void PlayTill(Homestead::Point Target);
     // Machete hack through underbrush at Target: two diagonal forehand cuts. False when the
     // clip is unavailable (legacy heroine), so the caller clears at once instead.
+    // The billhook (and, until their own swings exist, the scythe and pickaxe) reuse the hack with
+    // their own held prop; false when that prop is missing.
     bool PlayMacheteHack(Homestead::Point Target);
+    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool);
     // Seconds into the hack when the second cut lands and the plant is cleared.
     static constexpr float MacheteClearSeconds = 1.25f;
     UAnimSequence* GetMacheteAnimation() const { return MacheteAnimation; }
@@ -304,6 +307,8 @@ private:
         FTransform Rest;
     };
     FTransform MacheteGrip;
+    // The tool swinging the hack clip.
+    Homestead::Item HackTool{};
     // Resting carry: the wrist deviates only this far; the rest of CarryDegrees tips the tool in
     // the fist instead, so the hand stays in line with the forearm.
     static constexpr float RestWristDegrees = 12.0f;

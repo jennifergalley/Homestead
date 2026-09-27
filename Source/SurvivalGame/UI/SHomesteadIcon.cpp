@@ -18,6 +18,9 @@ namespace
     const FLinearColor RootOrange(0.86f, 0.46f, 0.21f);
     const FLinearColor WaterBlue(0.36f, 0.65f, 0.68f);
     const FLinearColor StoneGray(0.53f, 0.59f, 0.55f);
+const FLinearColor Rust(0.55f, 0.25f, 0.11f);
+const FLinearColor Iron(0.34f, 0.35f, 0.36f);
+const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
 
     class FIconPainter
     {
@@ -262,7 +265,25 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("cheese")), EKind::Cheese},
         {FName(TEXT("twine")), EKind::Twine},
         {FName(TEXT("coin")), EKind::Coin},
-        {FName(TEXT("shop")), EKind::Shop}
+        {FName(TEXT("shop")), EKind::Shop},
+        {FName(TEXT("scythe")), EKind::Scythe},
+        {FName(TEXT("billhook")), EKind::Billhook},
+        {FName(TEXT("pickaxe")), EKind::Pickaxe},
+        {FName(TEXT("rusted-axe-head")), EKind::RustedAxeHead},
+        {FName(TEXT("rusted-hoe-blade")), EKind::RustedHoeBlade},
+        {FName(TEXT("rusted-scythe-blade")), EKind::RustedScytheBlade},
+        {FName(TEXT("rusted-billhook-head")), EKind::RustedBillhookHead},
+        {FName(TEXT("rusted-pick-head")), EKind::RustedPickHead},
+        {FName(TEXT("hay")), EKind::Hay},
+        {FName(TEXT("weeds")), EKind::Weeds},
+        {FName(TEXT("bramble-canes")), EKind::BrambleCanes},
+        {FName(TEXT("kindling")), EKind::Kindling},
+        {FName(TEXT("scrap-iron")), EKind::ScrapIron},
+        {FName(TEXT("scrap-lead")), EKind::ScrapLead},
+        {FName(TEXT("primroses")), EKind::Primroses},
+        {FName(TEXT("bluebells")), EKind::Bluebells},
+        {FName(TEXT("wild-daffodils")), EKind::WildDaffodils},
+        {FName(TEXT("wild-garlic")), EKind::WildGarlic}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -740,6 +761,145 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Rect(14, 27, 12, 10, Cream);
         P.Rect(31, 27, 11, 21, Pine);
         P.Rect(8, 22, 40, 4, Cream);
+        break;
+    case EKind::Scythe:
+        // A long bowed snath with its hand nib, the blade sweeping out from the top.
+        P.Line({{12, 51}, {17, 36}, {22, 22}, {25, 8}}, Wood, 4);
+        P.Line({{15, 40}, {9, 35}}, Wood, 3);
+        P.Shape({{24, 7}, {36, 8}, {46, 13}, {52, 21}, {44, 17}, {34, 14}, {25, 13}}, StoneGray);
+        P.Line({{27, 13}, {36, 14}, {46, 18}, {52, 21}}, Cream, 1.5f);
+        break;
+    case EKind::Billhook:
+        // A deep hooked blade over a turned handle with its ferrule.
+        P.Shape({{22, 34}, {31, 20}, {39, 10}, {47, 6}, {50, 10}, {45, 11}, {42, 15}, {41, 22}, {29, 38}}, StoneGray);
+        P.Line({{25, 34}, {36, 20}}, Cream, 1.5f);
+        P.Line({{10, 50}, {21, 37}}, Wood, 7);
+        P.Line({{19, 35}, {25, 41}}, Iron, 3);
+        break;
+    case EKind::Pickaxe:
+        P.Line({{12, 51}, {37, 15}}, Wood, 5);
+        P.Line({{19, 7}, {28, 9}, {37, 14}, {45, 21}, {52, 31}}, Iron, 5);
+        P.Line({{21, 8}, {29, 10}}, StoneGray, 1.5f);
+        P.Disc(37, 15, 3.5f, Iron);
+        break;
+    case EKind::RustedAxeHead:
+        P.Shape({{13, 21}, {30, 18}, {41, 10}, {47, 26}, {44, 44}, {32, 36}, {13, 33}}, Rust);
+        P.Disc(19, 27, 4, Pine);
+        P.Line({{41, 11}, {46, 26}, {44, 42}}, StoneGray, 1.5f);
+        break;
+    case EKind::RustedHoeBlade:
+        P.Shape({{10, 31}, {46, 25}, {49, 42}, {12, 45}}, Rust);
+        P.Line({{25, 28}, {27, 12}, {33, 10}}, Rust, 4);
+        P.Line({{12, 45}, {49, 42}}, StoneGray, 1.5f);
+        break;
+    case EKind::RustedScytheBlade:
+        P.Shape({{8, 16}, {24, 12}, {40, 16}, {51, 28}, {42, 23}, {26, 20}, {9, 22}}, Rust);
+        P.Line({{9, 22}, {26, 20}, {42, 23}, {51, 28}}, StoneGray, 1.5f);
+        P.Line({{8, 16}, {6, 26}}, Rust, 3);
+        break;
+    case EKind::RustedBillhookHead:
+        P.Shape({{16, 46}, {24, 30}, {33, 16}, {42, 8}, {48, 11}, {43, 13}, {40, 19}, {38, 27}, {25, 48}}, Rust);
+        P.Line({{25, 48}, {38, 27}, {40, 19}, {43, 13}}, StoneGray, 1.5f);
+        P.Line({{16, 46}, {12, 52}}, Rust, 3);
+        break;
+    case EKind::RustedPickHead:
+        P.Line({{8, 20}, {18, 14}, {28, 12}, {38, 14}, {48, 20}}, Rust, 7);
+        P.Disc(28, 14, 5, Rust);
+        P.Disc(28, 14, 2.5f, Pine);
+        P.Line({{8, 20}, {5, 25}}, Rust, 3);
+        P.Line({{48, 20}, {51, 25}}, Rust, 3);
+        break;
+    case EKind::Hay:
+        // A bound sheaf of mown grass.
+        for (int32 I = 0; I < 7; ++I)
+        {
+            const float X = 16.0f + I * 4.0f;
+            P.Line({{28, 30}, {X, 8.0f + (I % 2) * 3.0f}}, I % 2 ? HayGold : Cream, 2.5f);
+            P.Line({{28, 30}, {X - 2.0f, 50.0f}}, I % 2 ? Cream : HayGold, 2.5f);
+        }
+        P.Line({{19, 30}, {37, 30}}, Wood, 4);
+        break;
+    case EKind::Weeds:
+        P.Line({{28, 50}, {28, 30}}, LeafGreen, 2);
+        P.Leaf({28, 48}, {10, 30}, 6);
+        P.Leaf({28, 48}, {46, 28}, 6);
+        P.Leaf({28, 44}, {18, 14}, 5);
+        P.Leaf({28, 44}, {38, 12}, 5);
+        P.Disc(28, 25, 4, HayGold);
+        break;
+    case EKind::BrambleCanes:
+        // Three cut canes, prickled, tied in a bundle.
+        P.Line({{8, 46}, {22, 28}, {48, 10}}, Berry * 0.7f + LeafGreen * 0.3f, 3);
+        P.Line({{10, 50}, {28, 32}, {50, 18}}, LeafGreen * 0.8f, 3);
+        P.Line({{6, 40}, {20, 24}, {42, 8}}, Berry * 0.6f + Wood * 0.4f, 2.5f);
+        for (const FVector2D& Prickle : {FVector2D(16, 36), FVector2D(30, 22), FVector2D(40, 18), FVector2D(24, 36)})
+            P.Line({Prickle, Prickle + FVector2D(3, 3)}, Cream, 1.5f);
+        P.Line({{19, 38}, {27, 28}}, HayGold, 3);
+        break;
+    case EKind::Kindling:
+        P.Line({{8, 44}, {48, 30}}, Wood, 3);
+        P.Line({{10, 34}, {46, 44}}, Wood * 0.8f, 3);
+        P.Line({{12, 40}, {44, 22}}, Wood * 1.15f, 2.5f);
+        P.Line({{14, 26}, {42, 38}}, Cream * 0.7f + Wood * 0.3f, 2);
+        P.Line({{30, 30}, {33, 22}}, Wood, 2);
+        break;
+    case EKind::ScrapIron:
+        P.Shape({{8, 38}, {20, 30}, {30, 36}, {26, 46}, {10, 47}}, Iron);
+        P.Line({{24, 24}, {38, 14}, {48, 18}}, Rust, 5);
+        P.Line({{32, 44}, {48, 34}}, Iron, 4);
+        P.Line({{12, 42}, {22, 36}}, StoneGray, 1.5f);
+        break;
+    case EKind::ScrapLead:
+        P.Shape({{10, 34}, {22, 24}, {40, 22}, {48, 32}, {42, 44}, {18, 46}}, FLinearColor(0.38f, 0.42f, 0.48f));
+        P.Line({{16, 34}, {28, 28}, {40, 30}}, StoneGray, 2);
+        P.Line({{20, 42}, {36, 38}}, Cream * 0.6f, 1.5f);
+        break;
+    case EKind::Primroses:
+        P.Leaf({28, 50}, {10, 38}, 7);
+        P.Leaf({28, 50}, {46, 38}, 7);
+        for (const FVector2D& Centre : {FVector2D(19, 20), FVector2D(36, 16), FVector2D(29, 32)})
+        {
+            for (int32 Petal = 0; Petal < 5; ++Petal)
+            {
+                const float Angle = Petal * 2 * PI / 5;
+                P.Disc(Centre.X + FMath::Cos(Angle) * 4.5f, Centre.Y + FMath::Sin(Angle) * 4.5f, 3.2f,
+                    FLinearColor(0.96f, 0.9f, 0.55f));
+            }
+            P.Disc(Centre.X, Centre.Y, 2, RootOrange);
+        }
+        break;
+    case EKind::Bluebells:
+        P.Line({{16, 50}, {20, 30}, {28, 14}, {40, 10}}, LeafGreen, 2.5f);
+        P.Leaf({18, 50}, {8, 24}, 4);
+        for (const FVector2D& Bell : {FVector2D(26, 20), FVector2D(33, 15), FVector2D(40, 14), FVector2D(22, 28)})
+        {
+            P.Shape({Bell, Bell + FVector2D(-3, 8), Bell + FVector2D(4, 9), Bell + FVector2D(3, 1)},
+                FLinearColor(0.34f, 0.40f, 0.86f));
+        }
+        break;
+    case EKind::WildDaffodils:
+        P.Line({{28, 50}, {28, 24}}, LeafGreen, 2.5f);
+        P.Leaf({26, 50}, {12, 20}, 4);
+        P.Leaf({30, 50}, {44, 22}, 4);
+        for (int32 Petal = 0; Petal < 6; ++Petal)
+        {
+            const float Angle = Petal * PI / 3;
+            P.Leaf({28, 20}, {28 + FMath::Cos(Angle) * 12, 20 + FMath::Sin(Angle) * 12}, 5);
+        }
+        P.Disc(28, 20, 5, FLinearColor(0.98f, 0.78f, 0.18f));
+        P.Disc(28, 20, 2.5f, RootOrange);
+        break;
+    case EKind::WildGarlic:
+        P.Leaf({22, 52}, {8, 18}, 8);
+        P.Leaf({30, 52}, {46, 20}, 8);
+        P.Line({{27, 50}, {27, 18}}, LeafGreen, 2);
+        for (int32 Floret = 0; Floret < 7; ++Floret)
+        {
+            const float Angle = Floret * 2 * PI / 7;
+            const FVector2D At(27 + FMath::Cos(Angle) * 7, 13 + FMath::Sin(Angle) * 5);
+            P.Line({{27, 18}, At}, LeafGreen, 1);
+            P.Disc(At.X, At.Y, 2.2f, Cream);
+        }
         break;
     case EKind::Unknown:        P.Unknown();
         break;

@@ -525,6 +525,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 24, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
         {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
+        // Authored in the machete's frame (grip pivot, blade +Z, edge -Y), so the hack fits it as is.
+        {Homestead::Item::Billhook, TEXT("Billhook/SM_Billhook"), MacheteCarryDegrees, false, FTransform::Identity},
     };
     for (const FHeldToolAsset& Asset : Assets)
     {
@@ -1667,7 +1669,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     };
     if (HeldMachete)
     {
-        const bool Held = Hacking || (HandsFree && Presented == Homestead::Item::Machete);
+        const bool Held = (Hacking && HackTool == Homestead::Item::Machete) || (HandsFree && Presented == Homestead::Item::Machete);
         HeldMachete->SetVisibility(Held);
         if (Held)
         {
@@ -1684,6 +1686,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const bool Held = Spec.Tool == Homestead::Item::Hatchet && Felling
             || Spec.Tool == Homestead::Item::Knife && CuttingReeds
             || Spec.Tool == Homestead::Item::DiggingStick && Hoeing
+            || (Hacking && Spec.Tool == HackTool)
             || (HandsFree && !Hacking && Presented == Spec.Tool);
         Prop->SetVisibility(Held);
         if (!Held) continue;
@@ -1695,7 +1698,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
             : StoneHoe ? CVarCarryHoe.GetValueOnGameThread() : -1.0f;
         const float CarryDegrees = Tuned >= 0 ? Tuned : Spec.CarryDegrees;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
-        Carry = CuttingReeds || Hoeing ? 0.0f : FMath::Min(CarryDegrees, RestWristDegrees);
+        Carry = CuttingReeds || Hoeing ? 0.0f : Hacking ? RestWristDegrees : FMath::Min(CarryDegrees, RestWristDegrees);
         // Resting carries that differ from the working grip: the hatchet and knife hang edge-down
         // (turned about the haft) and the hoe is carried blade-low in front, turned end for end from
         // how she works it. The turn eases out with the tilt when an authored action takes over.
@@ -1860,7 +1863,13 @@ void AHomesteadCharacter::UpdateHangingPail(UStaticMeshComponent& Pail, float De
 
 bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target)
 {
-    if (!bMetaHumanActive || !MacheteAnimation || !HeldMachete) return false;
+    return PlayMacheteHack(Target, Homestead::Item::Machete);
+}
+
+bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool)
+{
+    if (!bMetaHumanActive || !MacheteAnimation || !GetHeldProp(Tool)) return false;
+    HackTool = Tool;
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     if (!Animation) return false;
     CancelSprint();

@@ -603,26 +603,26 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
 
 void AHomesteadSmokeTest::PrepareCraftingChecks()
 {
-    Add(TEXT("CONTROLLED unmet Fiber reveals Reeds on directional focus without crafting"),
+    Add(TEXT("CONTROLLED unmet rusted head reveals the salvage piles on directional focus without crafting"),
         [this]()
         {
             Controller->Sim = Homestead::Simulation();
             Controller->OpenBook(1);
             if (!Controller->NativeMenu
                 || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
-                    static_cast<int32>(Homestead::Recipe::Hatchet), 0))
+                    static_cast<int32>(Homestead::Recipe::HaftAxe), 0))
             {
-                Finish(false, TEXT("Hatchet details are unavailable for the unmet Fiber focus test."));
+                Finish(false, TEXT("Axe hafting details are unavailable for the unmet head focus test."));
                 return;
             }
             Tap(EKeys::Tab);
-            for (int32 Step = 0; Step < 4; ++Step) Tap(EKeys::Down);
+            for (int32 Step = 0; Step < 3; ++Step) Tap(EKeys::Down);
         },
         [this]()
         {
             return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Details")
-                && Controller->NativeMenu->GetFocusedRequirementHint() == TEXT("Reeds near water")
-                && Controller->Simulation().Count(Homestead::Item::Fiber) == 0
+                && Controller->NativeMenu->GetFocusedRequirementHint() == TEXT("Salvage piles around the manor")
+                && Controller->Simulation().Count(Homestead::Item::RustedAxeHead) == 0
                 && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0;
         });
     const auto ResetCraftingStock = [this]()
@@ -636,17 +636,17 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
                     Controller->Sim.Harvest(Node.id, Node.position);
             return Controller->Sim.Count(Item) >= Target;
         };
-        if (!Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 8)
-            || !Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 6)
-            || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 4))
+        // Two rusted axe heads (stand-ins for estate salvage) allow two complete hafting cycles.
+        if (!Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 4)
+            || !Controller->Sim.GrantItems(Homestead::Item::RustedAxeHead, 2))
         { Finish(false, TEXT("Could not gather isolated crafting stock.")); return; }
         Controller->OpenBook(1);
         if (!Controller->NativeMenu.IsValid()
             || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
-                static_cast<int32>(Homestead::Recipe::Hatchet), 0))
-            Finish(false, TEXT("Hatchet recipe tile was unavailable."));
+                static_cast<int32>(Homestead::Recipe::HaftAxe), 0))
+            Finish(false, TEXT("Axe hafting recipe tile was unavailable."));
     };
-    Add(TEXT("Structured recipe rows expose exact counts and Fiber source"),
+    Add(TEXT("Structured recipe rows expose exact counts and the salvage source"),
         ResetCraftingStock,
         [this]()
         {
@@ -654,8 +654,9 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
             const FString Details = Controller->NativeMenu->GetDisplayedDetails();
             return Row && Row->Subject == EHomesteadMenuSubject::Recipe
                 && Row->HasRecipeState && Row->RecipeState.craftable
-                && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 4"))
-                && Details.Contains(TEXT("Fiber: Have")) && Details.Contains(TEXT("/ Need 2 (Reeds near water)"))
+                && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 2"))
+                && Details.Contains(TEXT("Rusted axe head: Have"))
+                && Details.Contains(TEXT("/ Need 1 (Salvage piles around the manor)"))
                 && Controller->NativeMenu->GetActionCount() == 0;
         });
     Add(TEXT("Capture ready crafting requirements"),
@@ -746,7 +747,7 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
             && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; }, 0.4f);
     Add(TEXT("Changing recipe focus cancels incomplete progress"),
         [this]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe,
-            static_cast<int32>(Homestead::Recipe::DiggingStick), 0); },
+            static_cast<int32>(Homestead::Recipe::HaftHoe), 0); },
         [this]() { return FMath::IsNearlyZero(Controller->NativeMenu->GetCraftProgress())
             && Controller->Simulation().Count(Homestead::Item::Hatchet) == 0; }, 0.2f);
     Add(TEXT("Begin a hold before changing page"),
@@ -779,12 +780,12 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
             return Controller->Sim.Count(Item) >= Target;
         };
         bool Ready = true;
-        if (Recipe == Homestead::Recipe::DiggingStick)
-            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 3)
-                && Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 1);
-        else if (Recipe == Homestead::Recipe::WateringCan)
-            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 3)
-                && Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2);
+        if (Recipe == Homestead::Recipe::HaftHoe)
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 2)
+                && Controller->Sim.GrantItems(Homestead::Item::RustedHoeBlade, 1).ok;
+        else if (Recipe == Homestead::Recipe::HaftBillhook)
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 2)
+                && Controller->Sim.GrantItems(Homestead::Item::RustedBillhookHead, 1).ok;
         else if (Recipe == Homestead::Recipe::RoastedRoots || Recipe == Homestead::Recipe::HerbedRoots)
         {
             Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 4)
@@ -806,10 +807,9 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
         }
         else if (Recipe == Homestead::Recipe::SplitFirewood)
         {
-            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 4)
-                && Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 3)
-                && Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2)
-                && Controller->Sim.Craft(Homestead::Recipe::Hatchet, Controller->PlayerPoint()).ok;
+            Ready = Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 2)
+                && Controller->Sim.GrantItems(Homestead::Item::RustedAxeHead, 1).ok
+                && Controller->Sim.Craft(Homestead::Recipe::HaftAxe, Controller->PlayerPoint()).ok;
             if (Ready)
             {
                 const auto Nodes = Controller->State().resources;
@@ -829,11 +829,11 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
             static_cast<int32>(Recipe), 0))
             Finish(false, TEXT("Prepared recipe tile was unavailable."));
     };
-    const Homestead::Recipe Recipes[] = {Homestead::Recipe::DiggingStick,
-        Homestead::Recipe::WateringCan, Homestead::Recipe::RoastedRoots,
+    const Homestead::Recipe Recipes[] = {Homestead::Recipe::HaftHoe,
+        Homestead::Recipe::HaftBillhook, Homestead::Recipe::RoastedRoots,
         Homestead::Recipe::HerbedRoots, Homestead::Recipe::SplitFirewood};
     const Homestead::Item Outputs[] = {Homestead::Item::DiggingStick,
-        Homestead::Item::WateringCan, Homestead::Item::RoastedRoots,
+        Homestead::Item::Billhook, Homestead::Item::RoastedRoots,
         Homestead::Item::HerbedRoots, Homestead::Item::Firewood};
     const int32 Counts[] = {1, 1, 1, 1, 4};
     for (int32 Index = 0; Index < UE_ARRAY_COUNT(Recipes); ++Index)
@@ -1209,7 +1209,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 return true;
             };
             if (!Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 12)
-                || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 2))
+                || !Controller->Sim.GrantItems(Homestead::Item::BrambleCanes, 2))
             { Finish(false, TEXT("Could not gather real transaction stock.")); return; }
             FIntPoint FirstCell(0, 0);
             for (const FIntPoint Cell : {FIntPoint(-4,0), FIntPoint(-3,0), FIntPoint(-4,-1), FIntPoint(-3,-1)})
@@ -1224,8 +1224,9 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             }
             if (*Chest <= 0 || !Gather(Homestead::ResourceKind::Branches, Homestead::Item::Branch, 20)
                 || !Gather(Homestead::ResourceKind::Stones, Homestead::Item::Stone, 3)
-                || !Gather(Homestead::ResourceKind::Reeds, Homestead::Item::Fiber, 7)
-                || !Controller->Sim.Craft(Homestead::Recipe::Hatchet, Controller->PlayerPoint()))
+                || !Controller->Sim.GrantItems(Homestead::Item::BrambleCanes, 7)
+                || !Controller->Sim.GrantItems(Homestead::Item::RustedAxeHead, 1)
+                || !Controller->Sim.Craft(Homestead::Recipe::HaftAxe, Controller->PlayerPoint()))
             { Finish(false, TEXT("Could not gather the second-chest fixture stock.")); return; }
             const FIntPoint Neighbors[] = {
                 {FirstCell.X + 1, FirstCell.Y}, {FirstCell.X - 1, FirstCell.Y},

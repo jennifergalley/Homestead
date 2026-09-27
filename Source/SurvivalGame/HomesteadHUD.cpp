@@ -134,7 +134,7 @@ void AHomesteadHUD::DrawHUD()
         Panel(0, 0, ViewWidth, ViewHeight, FLinearColor(0.025f, 0.04f, 0.035f, 0.85f));
         const float X = (ViewWidth - 760) * 0.5f;
         Write(TEXT("Time to try again"), X, ViewHeight * 0.39f, 43, Ink);
-        Wrap(TEXT("You ran out of warmth, food, or energy. Return to a recovery checkpoint and try a different preparation."),
+        Wrap(TEXT("You ran out of food or energy. Return to a recovery checkpoint and try a different preparation."),
             X, ViewHeight * 0.39f + 76, 740, 25, Muted);
         Write(PC->UsesGamepad() ? TEXT("[A] Retry checkpoint") : TEXT("[E / Enter] Retry checkpoint"),
             X, ViewHeight * 0.39f + 180, 27, HudGold);
@@ -149,8 +149,7 @@ void AHomesteadHUD::DrawHUD()
         if (PC->IsShopScreenOpen()) return;
         Meter(TEXT("Food"), State.hunger, 46, Bottom, FLinearColor(0.77f, 0.66f, 0.37f, 1));
         Meter(TEXT("Energy"), State.energy, 46 + MeterWidth + 11, Bottom, FLinearColor(0.66f, 0.76f, 0.52f, 1));
-        Meter(TEXT("Warmth"), State.warmth, 46 + (MeterWidth + 11) * 2, Bottom, FLinearColor(0.83f, 0.56f, 0.37f, 1));
-        Wallet(*PC, 46 + (MeterWidth + 11) * 3, Bottom);
+        Wallet(*PC, 46 + (MeterWidth + 11) * 2, Bottom);
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
         if (PC->IsPlanning())

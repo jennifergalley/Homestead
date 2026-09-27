@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadOvergrowth.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
@@ -64,7 +65,11 @@ constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
 constexpr const TCHAR* ActionHintSection = TEXT("Homestead.ActionHints");
 constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
 
-bool IsHotbarTool(Homestead::Item Item) { return Homestead::IsTool(Item); }
+// The estate's tools. The retired knife and machete no longer ride on the hotbar.
+bool IsHotbarTool(Homestead::Item Item)
+{
+    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count;
+}
 
 template <typename FPredicate>
 const Homestead::Plot* FindPlotWhere(const std::vector<Homestead::Plot>& Plots, FPredicate Predicate)
@@ -85,8 +90,34 @@ bool IsFoodItem(Homestead::Item Item) { return Homestead::IsEdible(Item); }
 
 FName HotbarIcon(Homestead::Item Item)
 {
-    const bool Pinnable = IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
-    return Pinnable ? FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item))) : NAME_None;
+    switch (Item)
+    {
+    case Homestead::Item::Berries: return TEXT("berries");
+    case Homestead::Item::Seeds: return TEXT("seeds");
+    case Homestead::Item::RoastedRoots: return TEXT("roasted-roots");
+    case Homestead::Item::HerbedRoots: return TEXT("herbed-roots");
+    case Homestead::Item::Knife: return TEXT("knife");
+    case Homestead::Item::Hatchet: return TEXT("hatchet");
+    case Homestead::Item::DiggingStick: return TEXT("digging-stick");
+    case Homestead::Item::WateringCan: return TEXT("watering-can");
+    case Homestead::Item::Machete: return TEXT("machete");
+    case Homestead::Item::Scythe: return TEXT("scythe");
+    case Homestead::Item::Billhook: return TEXT("billhook");
+    case Homestead::Item::Pickaxe: return TEXT("pickaxe");
+    default: return NAME_None;
+    }
+}
+
+const TCHAR* SwingVerb(Homestead::Item Tool)
+{
+    switch (Tool)
+    {
+    case Homestead::Item::Hatchet: return TEXT("Chop with Axe");
+    case Homestead::Item::Billhook: return TEXT("Hack with Billhook");
+    case Homestead::Item::Scythe: return TEXT("Mow with Scythe");
+    case Homestead::Item::Pickaxe: return TEXT("Break with Pickaxe");
+    default: return TEXT("Clear");
+    }
 }
 
 struct FCameraConfigSnapshot
@@ -165,12 +196,14 @@ const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
 {
     switch (Recipe)
     {
-    case Homestead::Recipe::Hatchet: return TEXT("A simple stone-headed tool for felling young and mature trees.");
-    case Homestead::Recipe::DiggingStick: return TEXT("A sturdy hand tool for preparing and tending garden soil.");
-    case Homestead::Recipe::WateringCan: return TEXT("A light wooden vessel for carrying stream water to crops.");
+    case Homestead::Recipe::HaftAxe: return TEXT("Fit a salvaged axe head to a new haft. Fells trees and clears stumps and fallen timber.");
+    case Homestead::Recipe::HaftHoe: return TEXT("Fit a salvaged hoe blade to a new handle, to break and tend garden soil.");
+    case Homestead::Recipe::HaftScythe: return TEXT("Fit a salvaged scythe blade to a snath. Mows tall grass and weeds in a wide sweep.");
+    case Homestead::Recipe::HaftBillhook: return TEXT("Fit a salvaged billhook head to a handle. Hacks through bramble and saplings.");
+    case Homestead::Recipe::HaftPickaxe: return TEXT("Fit a salvaged pick head to a haft. Breaks rubble and rocks into stone and scrap.");
     case Homestead::Recipe::RoastedRoots: return TEXT("Wild roots softened and warmed over a fueled cookfire.");
     case Homestead::Recipe::HerbedRoots: return TEXT("Roasted roots brightened with meadow herbs.");
-    case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried hatchet.");
+    case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried axe.");
     default: return TEXT("");
     }
 }
@@ -561,12 +594,14 @@ bool AHomesteadController::ShouldShowHotbar() const
 void AHomesteadController::ResetHotbar()
 {
     HotbarSlots.Init(-1, 10);
-    HotbarSlots[0] = static_cast<int32>(Homestead::Item::Knife);
+    // In the order she hafts them: the billhook first, for the bramble at the door.
+    HotbarSlots[0] = static_cast<int32>(Homestead::Item::Billhook);
     HotbarSlots[1] = static_cast<int32>(Homestead::Item::Hatchet);
-    HotbarSlots[2] = static_cast<int32>(Homestead::Item::DiggingStick);
-    HotbarSlots[3] = static_cast<int32>(Homestead::Item::WateringCan);
-    HotbarSlots[4] = static_cast<int32>(Homestead::Item::Machete);
-    HotbarSlots[5] = static_cast<int32>(Homestead::Item::Berries);
+    HotbarSlots[2] = static_cast<int32>(Homestead::Item::Scythe);
+    HotbarSlots[3] = static_cast<int32>(Homestead::Item::Pickaxe);
+    HotbarSlots[4] = static_cast<int32>(Homestead::Item::DiggingStick);
+    HotbarSlots[5] = static_cast<int32>(Homestead::Item::WateringCan);
+    HotbarSlots[6] = static_cast<int32>(Homestead::Item::Berries);
     SelectedHotbarSlot = 0;
     HoveredHotbarSlot = INDEX_NONE;
 }
@@ -584,9 +619,10 @@ void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Sele
             Seen.Add(Slots[Index]);
         }
     }
-    // Hotbars saved before the machete and pinned food existed get them once, in free slots.
+    // Older hotbars get the estate tools and pinned food once, in free slots.
     if (Layout < UHomesteadSave::CurrentHotbarLayout)
-        for (const auto Item : {Homestead::Item::Machete, Homestead::Item::Berries})
+        for (const auto Item : {Homestead::Item::Billhook, Homestead::Item::Scythe, Homestead::Item::Pickaxe,
+            Homestead::Item::Berries})
         {
             const int32 Value = static_cast<int32>(Item);
             const int32 Free = HotbarSlots.IndexOfByKey(-1);
@@ -768,47 +804,24 @@ void AHomesteadController::UseSelectedTool()
     const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("RT") : TEXT("LMB"));
     ON_SCOPE_EXIT { EndHintUse(Hint); };
 
-    if (Tool == Homestead::Item::Machete)
-    {
-        if (Focus != EFocus::Underbrush) Notify(TEXT("Aim at a bush, bramble or fern."), true);
-        else StartMacheteHack();
-        return;
-    }
-
-    if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Knife)
-    {
-        if (Focus != EFocus::Resource)
-        {
-            Notify(Tool == Homestead::Item::Hatchet
-                ? TEXT("Aim at a sapling or tree.") : TEXT("Aim at low brush or a resource patch."), true);
-            return;
-        }
-        bool NeedsHatchet = false;
-        Homestead::Point Target = Position;
+    if (Tool == Homestead::Item::Hatchet && Focus == EFocus::Resource)
         for (const auto& Node : State().resources)
-            if (Node.id == FocusId)
+            if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
             {
-                NeedsHatchet = Node.kind == Homestead::ResourceKind::Sapling
-                    || Node.kind == Homestead::ResourceKind::ForestTree;
-                Target = Node.position;
-                break;
+                // Standing trees keep the axe's felling presentation.
+                const Homestead::Point Target = Node.position;
+                const int32 Cleared = FocusId;
+                auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+                const bool bFell = Avatar && Avatar->CanFell();
+                const auto Result = Sim.Clear(FocusId, Position);
+                NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
+                if (Result.ok && Avatar) PresentFelling(Cleared, Target, true);
+                return;
             }
-        if (NeedsHatchet != (Tool == Homestead::Item::Hatchet))
-        {
-            Notify(NeedsHatchet ? TEXT("Select the hatchet for trees and saplings.")
-                : TEXT("Select the knife for this low growth."), true);
-            return;
-        }
-        const int32 Cleared = FocusId;
-        auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-        const bool bFell = NeedsHatchet && Avatar && Avatar->CanFell();
-        const auto Result = Sim.Clear(FocusId, Position);
-        NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
-        if (Result.ok && Avatar)
-        {
-            if (Tool == Homestead::Item::Knife) Avatar->PlayKnifeCut(Target);
-            else PresentFelling(Cleared, Target, false);
-        }
+    if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Billhook
+        || Tool == Homestead::Item::Scythe || Tool == Homestead::Item::Pickaxe)
+    {
+        SwingAtOvergrowth(Tool);
         return;
     }
 
@@ -1013,8 +1026,36 @@ bool AHomesteadController::MenuCraftRecipe(Homestead::Recipe Recipe)
     }
     const auto Result = Sim.Craft(Recipe, PlayerPoint());
     Notify(Result);
-    if (Result.ok) Sim.AdvanceGameHours(0.05, PlayerPoint());
+    if (Result.ok)
+    {
+        Sim.AdvanceGameHours(0.05, PlayerPoint());
+        SlotHaftedTool(Recipe);
+    }
     return Result.ok;
+}
+
+void AHomesteadController::SlotHaftedTool(Homestead::Recipe Recipe)
+{
+    Homestead::Item Tool = Homestead::Item::Count;
+    switch (Recipe)
+    {
+    case Homestead::Recipe::HaftAxe: Tool = Homestead::Item::Hatchet; break;
+    case Homestead::Recipe::HaftHoe: Tool = Homestead::Item::DiggingStick; break;
+    case Homestead::Recipe::HaftScythe: Tool = Homestead::Item::Scythe; break;
+    case Homestead::Recipe::HaftBillhook: Tool = Homestead::Item::Billhook; break;
+    case Homestead::Recipe::HaftPickaxe: Tool = Homestead::Item::Pickaxe; break;
+    default: return;
+    }
+    // A newly hafted tool goes straight to hand: onto the hotbar if it isn't there, and selected.
+    const int32 Value = static_cast<int32>(Tool);
+    int32 Slot = HotbarSlots.IndexOfByKey(Value);
+    if (Slot == INDEX_NONE)
+    {
+        Slot = HotbarSlots.IndexOfByKey(-1);
+        if (Slot == INDEX_NONE) return;
+        HotbarSlots[Slot] = Value;
+    }
+    SelectedHotbarSlot = Slot;
 }
 void AHomesteadController::MenuCraftBeat(int32 Beat)
 {
@@ -1468,6 +1509,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
     UpdatePendingHack();
+    UpdatePendingSwing();
     UpdatePendingFell();
     if (HeldPlot != INDEX_NONE)
     {
@@ -1660,12 +1702,18 @@ FString AHomesteadController::FocusTitle() const
             if (Node.id == FocusId)
             {
                 FString Status;
-                if ((Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree)
-                    && Sim.Count(Homestead::Item::Hatchet) == 0) Status = TEXT("  (hatchet required)");
-                else if (Node.kind != Homestead::ResourceKind::Sapling && Node.kind != Homestead::ResourceKind::ForestTree
-                    && Sim.Count(Homestead::Item::Knife) == 0) Status = TEXT("  (knife required)");
-                if (Node.kind == Homestead::ResourceKind::DeerRemains && Node.readyAtHour > State().hour)
-                    return TEXT("Deer bones");
+                if (Node.kind == Homestead::ResourceKind::ForestTree && Sim.Count(Homestead::Item::Hatchet) == 0)
+                    Status = TEXT("  (axe needed)");
+                else if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind);
+                    Overgrowth && Overgrowth->tool != Homestead::ToolKind::Count && !Overgrowth->byHand)
+                {
+                    const auto Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
+                    if (Sim.Count(Homestead::ToolItem(Overgrowth->tool)) == 0)
+                        Status = FString::Printf(TEXT("  (%s needed)"), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
+                    else if (Sim.GetToolTier(Overgrowth->tool) < Needed)
+                        Status = TEXT("  (") + Text(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str()).ToLower() + TEXT(")");
+                }
+                if (Node.kind == Homestead::ResourceKind::DeerRemains) return TEXT("Deer bones");
                 return Text(Homestead::ResourceName(Node.kind)) + Status;
             }
         break;
@@ -1723,13 +1771,21 @@ FString AHomesteadController::FocusActions() const
             if (Node.id == FocusId)
             {
                 if (Node.readyAtHour > State().hour) return FString();
-                const bool Tree = Node.kind == Homestead::ResourceKind::ForestTree
-                    || Node.kind == Homestead::ResourceKind::Sapling;
-                if (Tree) return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
-                    ? Use + TEXT(" Fell with Hatchet") : TEXT("Select Hatchet to fell");
-                if (Node.kind == Homestead::ResourceKind::DeerRemains) return A + TEXT(" Cut the hide free");
-                return A + TEXT(" Gather") + (ToolAvailable && SelectedTool == Homestead::Item::Knife
-                    ? TEXT("   ") + Use + TEXT(" Clear with Knife") : FString());
+                if (Node.kind == Homestead::ResourceKind::ForestTree)
+                    return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
+                        ? Use + TEXT(" Fell with Axe") : TEXT("Select the axe to fell");
+                if (Node.kind == Homestead::ResourceKind::DeerRemains || Node.kind == Homestead::ResourceKind::Reeds)
+                    return FString();
+                if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
+                {
+                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
+                    if (Node.kind == Homestead::ResourceKind::SalvagePile) return A + TEXT(" Search");
+                    if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
+                        + (Overgrowth->byHand ? TEXT("   ") + A + TEXT(" Gather") : FString());
+                    if (Overgrowth->byHand) return A + TEXT(" Gather");
+                    return TEXT("Select the ") + FString(UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
+                }
+                return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");
     case EFocus::Plot:
@@ -1742,7 +1798,7 @@ FString AHomesteadController::FocusActions() const
                     return Use + TEXT(" Water");
                 if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
                     return Use + TEXT(" Weed");
-                return TEXT("Select Watering Can or Stone Hoe");
+                return TEXT("Select the pail or hoe");
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -1750,7 +1806,7 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
-        ? Use + TEXT(" Fill Watering Can") : A + TEXT(" Fill carried Watering Can");
+        ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
@@ -1985,6 +2041,181 @@ void AHomesteadController::UpdatePendingHack()
         bHackPending = false;
 }
 
+void AHomesteadController::ResetOvergrowthSwing()
+{
+    SwingNode = INDEX_NONE;
+    SwingsLanded = 0;
+    bSwingPending = false;
+    ScytheTargets.Reset();
+}
+
+void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
+{
+    if (bSwingPending) return;
+    const auto Position = PlayerPoint();
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
+    const Homestead::Point Facing{Forward.X, Forward.Y};
+    // Walking off resets a half-cleared target: its earlier blows never persist.
+    if (SwingNode != INDEX_NONE && FVector2D::Distance(SwingFrom, FVector2D(Position.x, Position.y)) > 150.0)
+        ResetOvergrowthSwing();
+
+    int32 Target = INDEX_NONE;
+    if (Tool == Homestead::Item::Scythe)
+    {
+        const auto Arc = Sim.ScytheArcTargets(Position, Facing);
+        ScytheTargets.Reset();
+        for (const int32 Id : Arc) if (Sim.CheckOvergrowth(Id, Tool, Position)) ScytheTargets.Add(Id);
+        if (!ScytheTargets.IsEmpty()) Target = ScytheTargets[0];
+    }
+    else
+    {
+        // What she's aimed at wins; otherwise the nearest thing this tool handles just ahead of her.
+        const Homestead::Point Ahead{Position.x + Forward.X * 80.0, Position.y + Forward.Y * 80.0};
+        Target = Sim.FindNearestOvergrowth(Ahead, 200.0, Tool);
+        if (Focus == EFocus::Resource)
+            for (const auto& Node : State().resources)
+                if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind)
+                    && Homestead::FindOvergrowth(Node.kind)->tool == Homestead::ToolForItem(Tool))
+                    Target = FocusId;
+    }
+    if (Target == INDEX_NONE)
+    {
+        // Aimed at overgrowth another tool clears: say which.
+        if (Focus == EFocus::Resource)
+            for (const auto& Node : State().resources)
+                if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind))
+                {
+                    Notify(Sim.CheckOvergrowth(FocusId, Tool, Position));
+                    return;
+                }
+        Notify(Tool == Homestead::Item::Scythe ? TEXT("Face tall grass or weeds to mow.")
+            : Tool == Homestead::Item::Billhook ? TEXT("Aim at bramble or a sapling.")
+            : Tool == Homestead::Item::Pickaxe ? TEXT("Aim at rubble or a rock.")
+            : TEXT("Aim at a tree, stump or fallen timber."), true);
+        return;
+    }
+    const auto Ready = Sim.CheckOvergrowth(Target, Tool, Position);
+    if (!Ready)
+    {
+        Notify(Ready);
+        // Out of tier: the blade glances off with a dull knock, and nothing changes.
+        if (Ready.code == Homestead::ResultCode::ToolTier)
+        {
+            PlayEffect(WoodTapA, 0.45f);
+            if (Avatar) Avatar->PlayClear();
+        }
+        return;
+    }
+    if (Target != SwingNode)
+    {
+        SwingNode = Target;
+        SwingsLanded = 0;
+    }
+    SwingFrom = FVector2D(Position.x, Position.y);
+    SwingTool = Tool;
+    Homestead::Point Aim = Position;
+    for (const auto& Node : State().resources) if (Node.id == Target) Aim = Node.position;
+    bool bAnimated = false;
+    if (Avatar)
+    {
+        if (Tool == Homestead::Item::Hatchet) bAnimated = Avatar->PlayFell(Aim, 1, 12.0f);
+        // The scythe and pickaxe borrow the billhook's hack until their own swings are authored.
+        else bAnimated = Avatar->PlayMacheteHack(Aim, Tool);
+    }
+    if (!bAnimated)
+    {
+        if (Avatar) Avatar->PlayClear(Aim);
+        LandOvergrowthSwing();
+        return;
+    }
+    bSwingPending = true;
+    SwingSince = GetWorld()->GetTimeSeconds();
+    if (const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()))
+        SwingFellStartsBefore = Animation->FellStarts();
+}
+
+void AHomesteadController::UpdatePendingSwing()
+{
+    if (!bSwingPending) return;
+    const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    const double Age = GetWorld()->GetTimeSeconds() - SwingSince;
+    if (SwingTool == Homestead::Item::Hatchet)
+    {
+        const bool Felling = Animation && Animation->IsFelling() && Animation->FellStarts() != SwingFellStartsBefore;
+        if (Felling && Animation->FellPhase() >= AHomesteadCharacter::FellStrikeSeconds(0))
+        {
+            bSwingPending = false;
+            LandOvergrowthSwing();
+            return;
+        }
+        // Still stepping into the stance, or the clip hasn't started yet.
+        if (!Felling && Animation && (Avatar->IsApproachingFell() || Age < 0.5))
+        {
+            if (Avatar->IsApproachingFell()) SwingSince = GetWorld()->GetTimeSeconds();
+            return;
+        }
+        if (!Felling) bSwingPending = false;
+        return;
+    }
+    if (Animation && Animation->IsHacking() && Animation->MachetePhase() >= AHomesteadCharacter::MacheteClearSeconds)
+    {
+        bSwingPending = false;
+        LandOvergrowthSwing();
+        return;
+    }
+    // Interrupted before the blow landed: this swing doesn't count.
+    if (!Animation || (!Animation->IsHacking() && Age > 0.4)) bSwingPending = false;
+}
+
+void AHomesteadController::LandOvergrowthSwing()
+{
+    const auto Position = PlayerPoint();
+    if (SwingTool == Homestead::Item::Scythe)
+    {
+        // One sweep mows everything in the arc, each tuft its own transaction, with one summary.
+        const int32 HayBefore = Sim.Count(Homestead::Item::Hay), WeedsBefore = Sim.Count(Homestead::Item::Weeds);
+        int32 Mown = 0;
+        FString Problem;
+        for (const int32 Id : ScytheTargets)
+        {
+            const auto Result = Sim.ClearOvergrowth(Id, Homestead::Item::Scythe, Position);
+            if (Result.ok) ++Mown;
+            else if (Problem.IsEmpty()) Problem = UTF8_TO_TCHAR(Result.message.c_str());
+        }
+        ResetOvergrowthSwing();
+        if (Mown == 0)
+        {
+            Notify(Problem.IsEmpty() ? TEXT("Nothing left in reach to mow.") : Problem, true);
+            return;
+        }
+        FString Summary = FString::Printf(TEXT("Mowed %d %s"), Mown, Mown == 1 ? TEXT("tuft") : TEXT("tufts"));
+        const int32 Hay = Sim.Count(Homestead::Item::Hay) - HayBefore, Weeds = Sim.Count(Homestead::Item::Weeds) - WeedsBefore;
+        if (Hay > 0 || Weeds > 0) Summary += TEXT(":");
+        if (Hay > 0) Summary += FString::Printf(TEXT(" +%d Hay"), Hay);
+        if (Weeds > 0) Summary += FString::Printf(TEXT("%s +%d Weeds"), Hay > 0 ? TEXT(",") : TEXT(""), Weeds);
+        Notify(Summary + TEXT("."));
+        PlayEffect(GrassStepA, 0.8f);
+        return;
+    }
+    if (SwingNode == INDEX_NONE) return;
+    ++SwingsLanded;
+    const int32 Needed = Sim.OvergrowthSwings(SwingNode);
+    if (SwingsLanded < Needed)
+    {
+        // A hit that doesn't break it yet: a chop or a crack, and how much is left.
+        if (!ChopStrokes.IsEmpty()) PlayEffect(ChopStrokes[SwingsLanded % ChopStrokes.Num()].Get(), 0.75f);
+        else PlayEffect(WoodTapA, 0.6f);
+        const int32 Left = Needed - SwingsLanded;
+        Notify(FString::Printf(TEXT("%d more %s."), Left, Left == 1 ? TEXT("swing") : TEXT("swings")));
+        return;
+    }
+    const auto Result = Sim.ClearOvergrowth(SwingNode, SwingTool, Position);
+    ResetOvergrowthSwing();
+    Notify(Result, SwingTool == Homestead::Item::Pickaxe ? CraftStrikeA.Get() : WoodTapB.Get());
+}
+
 void AHomesteadController::Notify(const FString& Message, bool Error)
 {
     ++NoticeSerial;
@@ -2118,7 +2349,7 @@ void AHomesteadController::Interact()
         {
             if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
                 AutoSaveIndex = (AutoSaveIndex + 1) % 3;
-            if (Sim.IsSheltered(Position) && State().hunger >= 35 && State().warmth >= 45)
+            if (Sim.IsSheltered(Position) && State().hunger >= 35)
                 SaveSlot(TEXT("Homestead_Recovery"), true);
         }
         break;
@@ -2187,7 +2418,7 @@ void AHomesteadController::Secondary()
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
-                Sapling = Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree;
+                Sapling = Node.kind == Homestead::ResourceKind::ForestTree;
                 ActionTarget = Node.position;
                 break;
             }
@@ -2198,8 +2429,8 @@ void AHomesteadController::Secondary()
         NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
         if (Result.ok && Avatar)
         {
-            if (Sapling) PresentFelling(Cleared, ActionTarget, false);
-            else Avatar->PlayKnifeCut(ActionTarget);
+            if (Sapling) PresentFelling(Cleared, ActionTarget, true);
+            else Avatar->PlayClear(ActionTarget);
         }
     }
     else if (Focus == EFocus::Plot)
@@ -2482,7 +2713,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)),         TEXT("Natural, warm, deep or light. Her face and body change together.")});
                 Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Blue, green, hazel or grey. The view moves close to her face while you choose.")});
         Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
-        Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), TEXT("Cosmetic linen choices; an apron is not winter insulation.")});
+        Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), TEXT("Cosmetic linen choices.")});
     }
     else
     {
@@ -2655,7 +2886,11 @@ void AHomesteadController::ActivateRow()
     {
         const auto Result = Sim.Craft(static_cast<Homestead::Recipe>(Id), PlayerPoint());
         Notify(Result, WoodTapB);
-        if (Result.ok) Sim.AdvanceGameHours(0.05, PlayerPoint());
+        if (Result.ok)
+        {
+            Sim.AdvanceGameHours(0.05, PlayerPoint());
+            SlotHaftedTool(static_cast<Homestead::Recipe>(Id));
+        }
     }
     else if (Page == 2) BeginPlacement(static_cast<Homestead::Piece>(Id));
     else if (Page == 6) MenuStepAppearance(Id, 1);
@@ -3323,6 +3558,8 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
         if (FParse::Param(Command, Automation) || FString(Command).Contains(FString(TEXT("-")) + Automation + TEXT("=")))
             return;
     if (bSaveRoutingTestPending || !StartupProbeDirectory.IsEmpty()) return;
+    // On the estate her first tools are hafted from salvage; handing them over would skip that.
+    if (Sim.GetState().fixedEstate) return;
     const FVector Facing = PendingRotation.Vector();
     const auto Result = Sim.GrantStarterKit({PendingLocation.X, PendingLocation.Y}, {Facing.X, Facing.Y}, bNewGame);
     if (!Result)
@@ -3330,8 +3567,8 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
         UE_LOG(LogTemp, Warning, TEXT("Playtest kit was not granted: %s"), UTF8_TO_TCHAR(Result.message.c_str()));
         return;
     }
-    for (const auto Tool : {Homestead::Item::Knife, Homestead::Item::Hatchet, Homestead::Item::DiggingStick,
-        Homestead::Item::WateringCan, Homestead::Item::Machete, Homestead::Item::Seeds})
+    for (const auto Tool : {Homestead::Item::Billhook, Homestead::Item::Hatchet, Homestead::Item::Scythe,
+        Homestead::Item::Pickaxe, Homestead::Item::DiggingStick, Homestead::Item::WateringCan, Homestead::Item::Seeds})
     {
         const int32 Value = static_cast<int32>(Tool);
         if (HotbarSlots.Contains(Value)) continue;
@@ -3370,7 +3607,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
             if (!Decoded || Candidate.GetState().failed) continue;
             if (RecoveryOnly && (Save->WorldId != WorldId || Candidate.GetState().hunger < 20
-                || Candidate.GetState().warmth < 20 || Candidate.GetState().energy < 20)) continue;
+                || Candidate.GetState().energy < 20)) continue;
             if (RecoveryOnly && Slot == TEXT("Homestead_Recovery"))
             {
                 if (!ApplySave(*Save)) return false;

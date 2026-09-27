@@ -3041,6 +3041,14 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         break;
     case Homestead::ResourceKind::Sapling:
     {
+        // Estate saplings are placed, not generated.
+        if (Node.id >= Homestead::EstatePlacementIdBase && Node.id < Homestead::TransientResourceIdBase)
+        {
+            if (!bProduceOnly)
+                BuildOvergrowth(Node, Variation, [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale)
+                    { Authored(Mesh, Offset, Yaw, bProduce, Scale); });
+            break;
+        }
         Homestead::Generation::GeneratedEntity Entity;
         if (Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
         {
@@ -3080,6 +3088,70 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         break;
     }
     default:
+        // Estate overgrowth and flowers (add-overgrown-estate-clearing).
+        BuildOvergrowth(Node, Variation, [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale)
+            { Authored(Mesh, Offset, Yaw, bProduce, Scale); });
+        break;
+    }
+}
+
+void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
+    const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float)>& Place)
+{
+    auto Load = [&](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
+    {
+        const FString Path = FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"), Folder, Name, Name);
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
+        if (!Mesh)
+        {
+            bVisualBuildFailed = true;
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Overgrowth %d is missing authored mesh %s"), Node.id, *Path);
+        }
+        return Mesh;
+    };
+    FRandomStream Random(static_cast<int32>(Variation * 2654435761u));
+    const float Yaw = static_cast<float>(Variation % 360);
+    // Overgrowth has no separate produce: the whole clump goes when she clears it.
+    auto Whole = [&](UStaticMesh* Mesh, FVector2D Offset, float Turn, float Scale) { Place(Mesh, Offset, Yaw + Turn, false, Scale); };
+    switch (Node.kind)
+    {
+    case Homestead::ResourceKind::BrambleThin:
+        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThin")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        break;
+    case Homestead::ResourceKind::BrambleThicket:
+        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThicket")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.1f));
+        break;
+    case Homestead::ResourceKind::BrambleBank:
+        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleBank")), FVector2D::ZeroVector, 0, Random.FRandRange(1.0f, 1.12f));
+        break;
+    case Homestead::ResourceKind::TallGrass:
+        for (int32 I = 0; I < 3; ++I)
+            Whole(Load(TEXT("GrassYarrowTuft"), TEXT("SM_GrassYarrowTuft")),
+                FVector2D(FMath::Cos(I * 2.1f) * 16, FMath::Sin(I * 2.1f) * 16), I * 97.0f, Random.FRandRange(1.05f, 1.3f));
+        break;
+    case Homestead::ResourceKind::Weeds:
+        Whole(Load(TEXT("GrassYarrowTuft"), TEXT("SM_GrassYarrowTuft")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.85f));
+        Whole(Load(TEXT("Thimbleberry"), TEXT("SM_Thimbleberry")), FVector2D(10, -6), 140, 0.35f);
+        break;
+    case Homestead::ResourceKind::Sapling:
+        Whole(Load(TEXT("Hazel"), TEXT("SM_Hazel")), FVector2D::ZeroVector, 0, Random.FRandRange(0.45f, 0.6f));
+        break;
+    case Homestead::ResourceKind::Rubble:
+        Whole(Load(TEXT("GraniteRubble"), TEXT("SM_GraniteRubble")), FVector2D::ZeroVector, 0, Random.FRandRange(0.8f, 1.0f));
+        break;
+    case Homestead::ResourceKind::SmallRock:
+        Whole(Load(TEXT("GraniteSpalls"), TEXT("SM_GraniteSpalls")), FVector2D::ZeroVector, 0, Random.FRandRange(0.8f, 1.0f));
+        break;
+    case Homestead::ResourceKind::Boulder:
+        Whole(Load(TEXT("GraniteBoulderLoaf"), TEXT("SM_GraniteBoulderLoaf")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.05f));
+        break;
+    case Homestead::ResourceKind::SalvagePile:
+        // Stand-in until add-ruined-manor-and-arrival dresses its piles: fallen masonry.
+        Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.7f);
+        break;
+    default:
+        // Stumps, logs, fallen boughs and the spring flowers get authored meshes with their tools
+        // (tasks 3.1); until then they stand unseen.
         break;
     }
 }

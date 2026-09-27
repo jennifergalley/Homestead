@@ -111,7 +111,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
     case 3:
     {
         const bool Digging = WaterStage == 2;
-        const int32 Recipe = static_cast<int32>(bClearRoute ? Homestead::Recipe::Hatchet : Digging ? Homestead::Recipe::DiggingStick : Homestead::Recipe::WateringCan);
+        const int32 Recipe = static_cast<int32>(bClearRoute ? Homestead::Recipe::HaftAxe : Homestead::Recipe::HaftHoe);
         if (bWaterInputPending)
         {
             if (WaterStageElapsed < 0.3f) break;

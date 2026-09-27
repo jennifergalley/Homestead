@@ -96,7 +96,7 @@ void AHomesteadVisualPlaytest::PrepareEndurance()
         || (E.DeadlineUtc - FDateTime::UtcNow()).GetTotalSeconds() < E.Duration + 90))
     { FinishEndurance(TEXT("failed"), TEXT("Run deadline does not allow this exercise.")); return; }
     E.FrameHistogram.Init(0, 10001);
-    E.Samples.Add(TEXT("wall_seconds,paused_seconds,unpaused_seconds,engine_unpaused_seconds,game_hour,hunger,energy,warmth,moving_seconds,distance_cm,physical_bytes,virtual_bytes,object_slots_in_use,resources,available_resources,structures,plots,gathers,eats,waypoints,autosave_writes,refreshes"));
+    E.Samples.Add(TEXT("wall_seconds,paused_seconds,unpaused_seconds,engine_unpaused_seconds,game_hour,hunger,energy,moving_seconds,distance_cm,physical_bytes,virtual_bytes,object_slots_in_use,resources,available_resources,structures,plots,gathers,eats,waypoints,autosave_writes,refreshes"));
     if (E.FreshWorld)
     {
         if (IFileManager::Get().FileExists(*PC->SavePath(TEXT("Homestead_Manual"))) || PC->WorldId.IsEmpty())
@@ -343,8 +343,8 @@ void AHomesteadVisualPlaytest::TickEndurance(float EngineDelta)
                 else E.PreviouslyUnavailable.Add(Node.id);
             }
             const auto Memory = FPlatformMemory::GetStats();
-            E.Samples.Add(FString::Printf(TEXT("%.3f,%.3f,%.3f,%.3f,%.8f,%.5f,%.5f,%.5f,%.3f,%.2f,%llu,%llu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d"),
-                Age, E.Paused, E.Unpaused, E.EngineUnpaused, PC->State().hour, PC->State().hunger, PC->State().energy, PC->State().warmth,
+            E.Samples.Add(FString::Printf(TEXT("%.3f,%.3f,%.3f,%.3f,%.8f,%.5f,%.5f,%.3f,%.2f,%llu,%llu,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d"),
+                Age, E.Paused, E.Unpaused, E.EngineUnpaused, PC->State().hour, PC->State().hunger, PC->State().energy,
                 E.Moving, E.Distance, Memory.UsedPhysical, Memory.UsedVirtual, GUObjectArray.GetObjectArrayNumMinusAvailable(),
                 static_cast<int32>(PC->State().resources.size()), Available, static_cast<int32>(PC->State().structures.size()),
                 static_cast<int32>(PC->State().plots.size()), E.Gathers, E.Eats, E.Waypoints, E.AutosaveWrites, E.Refreshes));

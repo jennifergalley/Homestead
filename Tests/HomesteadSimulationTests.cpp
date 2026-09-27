@@ -2850,6 +2850,27 @@ void OvergrowthTableAndPrompts()
     CHECK(std::string(ItemName(Item::WateringCan)) == "Pail" && std::string(RecipeName(Recipe::HaftBillhook)) == "Haft a billhook");
     CHECK(std::string(RecipeRequirements(Recipe::HaftBillhook)) == "2 Branch + 1 Rusted billhook head; by hand, no station");
     CHECK(std::string(ResourceName(ResourceKind::FallenBranch)) == "Fallen bough");
+
+    // Provisional overgrowth and salvage sit on the estate, outside the ruin's footprint.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
+    const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
+    int overgrowth = 0, salvage = 0, doorway = 0, teases = 0;
+    for (const auto& placement : ProvisionalEstatePlacements().placements)
+    {
+        if (placement.id < 510000 || placement.id >= 530000) continue;
+        CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
+        const auto* info = FindOvergrowth(placement.kind);
+        overgrowth += info && placement.kind != ResourceKind::SalvagePile;
+        salvage += placement.kind == ResourceKind::SalvagePile;
+        doorway += placement.kind == ResourceKind::BrambleThin
+            && std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y) < 1300.0;
+        teases += info && info->minTier > ToolTier::Worn;
+    }
+    CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && teases >= 4);
+    Simulation estate;
+    OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
 }
 
 void HaftingBootstrapAndClearing()

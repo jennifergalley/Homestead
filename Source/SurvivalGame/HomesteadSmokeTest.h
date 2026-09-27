@@ -91,6 +91,7 @@ private:
     void QueueSelectRow(int32 Id);
     void QueueGatherTo(Homestead::Item Item, int32 TargetCount);
     void QueueCraft(Homestead::Recipe Recipe);
+    void QueueGrant(Homestead::Item Item, int32 Count);
     void QueuePlace(Homestead::Piece Kind, int32 CellX, int32 CellY, int32 Rotation = 0);
     void QueueClearCell(int32 CellX, int32 CellY);
     void QueueEat(Homestead::Item Item);

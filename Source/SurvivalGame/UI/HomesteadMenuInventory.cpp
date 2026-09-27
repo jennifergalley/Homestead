@@ -35,9 +35,6 @@ bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int 
     else if (Has(Homestead::EquipmentSlot::Outer)) Row.Detail += TEXT("Outer layer, over any shirt");
     else if (Has(Homestead::EquipmentSlot::Apron)) Row.Detail += TEXT("Apron layer (requires a top)");
     else Row.Detail += TEXT("Feet");
-    if (Info->insulation > 0)
-        Row.Detail += FString::Printf(TEXT("\nWarmth +%.1f per cold hour"),
-            Info->insulation * Homestead::Simulation::InsulationPerPoint);
     Row.Action = Row.ContainerId < 0 ? TEXT("Unequip") : Row.ContainerId == 0 ? TEXT("Equip") : TEXT("Take to pack");
     Row.Icon = Instance.definition == Homestead::WearableDefinition::LeatherShoes ? FName(TEXT("leather-shoes"))
         : FName(UTF8_TO_TCHAR(Info->key));
@@ -68,25 +65,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         auto Result = Rows();
         if (Page == 6)
             Result.RemoveAll([](const FHomesteadRow& Row) { return Row.Id == 4 || Row.Id == 5; });
-        if (Page == 1)
-        {
-            for (int Index = 0; Index < static_cast<int>(Homestead::WearableDefinition::Count); ++Index)
-            {
-                const auto Definition = static_cast<Homestead::WearableDefinition>(Index);
-                const auto* Info = Homestead::GetWearableDefinition(Definition);
-                if (!Info || (Info->fiberCost <= 0 && Info->furCost <= 0)) continue;
-                FHomesteadRow Row;
-                Row.Id = Index; Row.SubjectId = Index; Row.Subject = EHomesteadMenuSubject::GarmentRecipe;
-                Row.Name = Row.Label = FromUtf8(Info->name);
-                Row.Detail = TEXT("Needs: ") + FromUtf8(Homestead::GarmentRequirements(Definition));
-                if (Info->insulation > 0)
-                    Row.Detail += FString::Printf(TEXT("\nWarmth +%.1f per cold hour"),
-                        Info->insulation * Homestead::Simulation::InsulationPerPoint);
-                Row.Action = TEXT("Craft clothing");
-                Row.Icon = FName(UTF8_TO_TCHAR(Info->key));
-                Result.Add(MoveTemp(Row));
-            }
-        }
+        // Garment recipes needed the retired knife and fibre; the dressmaker (round 3) sells clothing.
         return Result;
     }
 
