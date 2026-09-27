@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadEstate.h"
 
 #include <algorithm>
 #include <cmath>
@@ -300,6 +301,7 @@ bool GeneratedNode(const State& state, const Generation::GeneratedEntity& entity
 Result Materialize(State& candidate, const State* previous, int& nextHandle,
     const PreparedWorldRegion* prepared = nullptr)
 {
+    if (candidate.fixedEstate) return Good("");
     if (prepared && (candidate.world.seed != prepared->world.seed
         || candidate.world.generationVersion != prepared->world.generationVersion))
         return Bad("Prepared woodland belongs to a different world.");
@@ -1003,6 +1005,81 @@ bool FootprintsOverlap(const Footprint& a, const Footprint& b)
 }
 
 Simulation::Simulation() { NewGame(); }
+
+namespace
+{
+// Fixed-estate resources reuse the ResourceEdit machinery with a synthetic key: chunk (0, 0) and
+// the placement id, which is unique within one bake.
+Generation::GeneratedEntityKey EstateKey(int placementId)
+{
+    Generation::GeneratedEntityKey key{};
+    key.localId = static_cast<std::uint32_t>(placementId);
+    return key;
+}
+
+// Rebuilds the estate's resource nodes from the baked placements plus saved edits.
+Result MaterializeEstate(State& candidate, const EstatePlacements& placements)
+{
+    std::vector<ResourceNode> resources;
+    resources.reserve(placements.placements.size());
+    std::set<int> seen;
+    for (const auto& placement : placements.placements)
+    {
+        if (placement.id < EstatePlacementIdBase || placement.id >= TransientResourceIdBase
+            || !seen.insert(placement.id).second || !ValidPoint(placement.position)
+            || static_cast<int>(placement.kind) < 0 || placement.kind >= ResourceKind::Count)
+            return Bad("The estate placement table is invalid.");
+        ResourceNode node;
+        node.id = placement.id;
+        node.kind = placement.kind;
+        node.position = placement.position;
+        node.key = EstateKey(placement.id);
+        const auto edit = std::lower_bound(candidate.resourceEdits.begin(), candidate.resourceEdits.end(), node.key,
+            [](const ResourceEdit& value, const Generation::GeneratedEntityKey& key) { return value.key < key; });
+        if (edit != candidate.resourceEdits.end() && edit->key == node.key)
+        {
+            node.cleared = edit->cleared;
+            node.readyAtHour = edit->readyAtHour;
+        }
+        resources.push_back(node);
+    }
+    candidate.resources = std::move(resources);
+    return Good("");
+}
+}
+
+Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlacements& placements)
+{
+    State candidate;
+    candidate.fixedEstate = true;
+    candidate.placementBakeVersion = placements.bakeVersion;
+    // She arrives in her tunic; clothing is cosmetic on the estate.
+    candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
+    candidate.nextWearableId = 2;
+    RefreshEquipment(candidate);
+    const auto populated = MaterializeEstate(candidate, placements);
+    if (!populated) return populated;
+    // Round-1 lanes seed their parts from `layout` here, each in its own helper.
+    layout_ = std::make_shared<const EstateLayout>(layout);
+    placements_ = std::make_shared<const EstatePlacements>(placements);
+    state_ = std::move(candidate);
+    return {true, "You arrive home to Trevennor.", ResultCode::None, ++revision_};
+}
+
+const EstateLayout& Simulation::Layout() const
+{
+    return layout_ ? *layout_ : ProvisionalEstateLayout();
+}
+
+void Simulation::SetLayout(const EstateLayout& layout)
+{
+    layout_ = std::make_shared<const EstateLayout>(layout);
+}
+
+void Simulation::SetPlacements(const EstatePlacements& placements)
+{
+    placements_ = std::make_shared<const EstatePlacements>(placements);
+}
 Result Simulation::NewGame() { return NewGame(0); }
 Result Simulation::NewGame(std::uint64_t seed)
 {
@@ -1026,6 +1103,7 @@ Result Simulation::NewGame(std::uint64_t seed)
 Result Simulation::SetActiveWorldRegion(Point player,
     const PreparedWorldRegion* prepared)
 {
+    if (state_.fixedEstate) return {true, "The estate has no streamed regions.", ResultCode::None, revision_};
     if (!ValidPoint(player)) return Bad("Exploration supports coordinates within 1000000 cm of the origin.");
     Generation::ChunkCoord coord;
     const auto status = Generation::ChunkAt(static_cast<std::int64_t>(std::floor(player.x)),
@@ -2312,7 +2390,9 @@ std::string Simulation::Serialize() const
          << state_.energy << ' ' << state_.warmth << ' ' << state_.failed << ' '
          << state_.warmOutfit << ' ' << state_.nextId << '\n';
     WriteStock(body, state_.inventory);
-    body << state_.world.seed << ' ' << state_.world.generationVersion << ' '
+    // The fixed estate stores its placement bake version in the seed slot, marked by the version.
+    body << (state_.fixedEstate ? static_cast<std::uint64_t>(state_.placementBakeVersion) : state_.world.seed) << ' '
+         << (state_.fixedEstate ? EstateWorldMarker : state_.world.generationVersion) << ' '
          << state_.activeChunk.x << ' ' << state_.activeChunk.y << '\n';
     body << state_.resourceEdits.size() << '\n';
     for (const auto& edit : state_.resourceEdits)
@@ -2394,6 +2474,16 @@ Result Simulation::Deserialize(const std::string& data)
     int count = 0;
     std::uint64_t generationVersion = 0;
     if (!ReadUnsigned(input, candidate.world.seed) || !ReadUnsigned(input, generationVersion)) return invalid();
+    candidate.fixedEstate = generationVersion == EstateWorldMarker;
+    if (candidate.fixedEstate)
+    {
+        if (!placements_ || candidate.world.seed != static_cast<std::uint64_t>(placements_->bakeVersion)) return {false,
+            "This test save belongs to a different estate layout. Start a new game with this build; no save was changed.",
+            ResultCode::UnsupportedVersion, revision_};
+        candidate.placementBakeVersion = placements_->bakeVersion;
+        candidate.world.seed = 0;
+        generationVersion = Generation::WorldGenerationVersion;
+    }
     if (generationVersion != Generation::WorldGenerationVersion) return {false,
         "This save uses an unsupported world generation version. No terrain or saved changes were regenerated.",
         ResultCode::UnsupportedVersion, revision_};
@@ -2411,6 +2501,17 @@ Result Simulation::Deserialize(const std::string& data)
             !ReadBool(input, edit.cleared) || !(input >> edit.readyAtHour)) return invalid();
         edit.key.localId = static_cast<std::uint32_t>(localId);
         if (!candidate.resourceEdits.empty() && !(candidate.resourceEdits.back().key < edit.key)) return invalid();
+        if (candidate.fixedEstate)
+        {
+            const auto& all = placements_->placements;
+            const auto placement = std::find_if(all.begin(), all.end(),
+                [&](const EstatePlacement& value) { return value.id == static_cast<int>(edit.key.localId); });
+            if (placement == all.end() || edit.key.chunk.x != 0 || edit.key.chunk.y != 0) continue;
+            if (!FiniteRange(edit.readyAtHour, 0.0, candidate.hour + Regrowth(placement->kind))
+                || (edit.cleared && edit.readyAtHour != 0.0)) return invalid();
+            candidate.resourceEdits.push_back(edit);
+            continue;
+        }
         Generation::GeneratedEntity entity;
         const auto found = Generation::FindEntity(candidate.world, edit.key, entity);
         // A candidate the generator has since retired (e.g. a tree now under a granite knob) drops quietly.
@@ -2556,6 +2657,11 @@ Result Simulation::Deserialize(const std::string& data)
     int nextHandle = nextResourceHandle_;
     const bool sameWorld = candidate.world.seed == state_.world.seed &&
         candidate.world.generationVersion == state_.world.generationVersion;
+    if (candidate.fixedEstate)
+    {
+        const auto estate = MaterializeEstate(candidate, *placements_);
+        if (!estate) return estate;
+    }
     const auto populated = Materialize(candidate, sameWorld ? &state_ : nullptr, nextHandle);
     if (!populated) return populated;
     state_ = std::move(candidate);

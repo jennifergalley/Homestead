@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadEstate.h"
 
 #include <algorithm>
 #include <cmath>
@@ -2705,11 +2706,54 @@ void Run(const char* name, void (*test)())
     ++cases;
     std::cout << "PASS " << name << '\n';
 }
+
+void FixedEstateNewGameAndSave()
+{
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    CHECK(layout.FindLandmark(Anchor::StandingRoomSpawn) != nullptr);
+    CHECK(layout.FindPolygon(Anchor::EstateBoundary) != nullptr);
+    const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
+    CHECK(PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, spawn));
+    CHECK(!PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points,
+        layout.PointOr(Anchor::TownSquare, {})));
+    EstatePlacements placements;
+    placements.bakeVersion = 3;
+    placements.placements = {
+        {EstatePlacementIdBase + 1, ResourceKind::Branches, {spawn.x + 100, spawn.y}, 0, 0, 1, 0},
+        {EstatePlacementIdBase + 2, ResourceKind::Stones, {spawn.x - 100, spawn.y}, 0, 0, 1, 0},
+    };
+    Simulation sim;
+    OK(sim.NewEstateGame(layout, placements));
+    CHECK(sim.GetState().fixedEstate);
+    CHECK(sim.GetState().resources.size() == 2);
+    CHECK(sim.GetState().resources[0].id == EstatePlacementIdBase + 1);
+    OK(sim.SetActiveWorldRegion({spawn.x + 900000, spawn.y}));
+    CHECK(sim.GetState().resources.size() == 2);
+    OK(sim.GrantItems(Item::Knife, 1));
+    OK(sim.Harvest(EstatePlacementIdBase + 1, spawn));
+    const std::string saved = sim.Serialize();
+    Simulation loaded;
+    CHECK(!loaded.Deserialize(saved));
+    loaded.SetPlacements(placements);
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetState().fixedEstate && loaded.GetState().placementBakeVersion == 3);
+    CHECK(loaded.GetState().resources.size() == 2);
+    CHECK(loaded.GetState().resources[0].cleared == sim.GetState().resources[0].cleared);
+    CHECK(loaded.GetState().resources[0].readyAtHour == sim.GetState().resources[0].readyAtHour);
+    CHECK(loaded.Count(Item::Branch) == sim.Count(Item::Branch));
+    EstatePlacements rebaked = placements;
+    rebaked.bakeVersion = 4;
+    Simulation other;
+    other.SetPlacements(rebaked);
+    CHECK(other.Deserialize(saved).code == ResultCode::UnsupportedVersion);
+}
+
 }
 
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
+    Run("fixed estate new game and save", FixedEstateNewGameAndSave);
     Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
     Run("pure structured recipe assessment", StructuredRecipeAssessment);

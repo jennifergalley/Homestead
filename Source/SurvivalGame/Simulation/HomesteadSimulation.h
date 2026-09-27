@@ -4,11 +4,15 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace Homestead
 {
+struct EstateLayout;
+struct EstatePlacements;
+
 enum class Item : int
 {
     Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
@@ -42,6 +46,11 @@ constexpr int MaxUnderbrushEdits = 16384;
 constexpr int MaxUnderbrushIndex = 4096;
 constexpr int MaxWorldDrops = 512;
 constexpr int TransientResourceIdBase = 1000000;
+// Fixed-estate placement ids live in [EstatePlacementIdBase, TransientResourceIdBase), apart from
+// structure, plot and drop ids.
+constexpr int EstatePlacementIdBase = 500000;
+// Written in a save's world generation-version slot to mark a fixed-estate game.
+constexpr std::uint32_t EstateWorldMarker = 0xE57A7Eu;
 
 enum class WearableDefinition : int
 {
@@ -240,6 +249,10 @@ struct State
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
     std::vector<UnderbrushEdit> clearedUnderbrush; // Sorted, unique.
+    // Round 1 fixed Cornish estate: resources come from the baked EstatePlacements (resource id =
+    // placement id) instead of the seeded woodland generator, and there are no chunks.
+    bool fixedEstate = false;
+    int placementBakeVersion = 0;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -323,6 +336,14 @@ public:
     const State& GetState() const { return state_; }
     Result NewGame();
     Result NewGame(std::uint64_t seed);
+    // Round 1: a new game on the fixed estate. Each round-1 lane seeds its part from `layout`
+    // inside this call (parcels, the heritage standing room, shops, starting money and names).
+    Result NewEstateGame(const EstateLayout& layout, const EstatePlacements& placements);
+    // The fixed estate's anchors; the provisional layout until the game supplies the level's.
+    const EstateLayout& Layout() const;
+    void SetLayout(const EstateLayout& layout);
+    // The baked placements a fixed-estate save is loaded against; set before Deserialize.
+    void SetPlacements(const EstatePlacements& placements);
     Result SetActiveWorldRegion(Point player,
         const PreparedWorldRegion* prepared = nullptr);
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
@@ -424,6 +445,8 @@ public:
 
 private:
     State state_;
+    std::shared_ptr<const EstateLayout> layout_;
+    std::shared_ptr<const EstatePlacements> placements_;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     bool TryAdjust(const Inventory& change);
