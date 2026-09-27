@@ -2,6 +2,10 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
+#include "HomesteadEstateTerrain.h"
+#include "Simulation/HomesteadEstate.h"
+#include "Components/SplineComponent.h"
+#include "EngineUtils.h"
 #include "HomesteadSave.h"
 #include "Engine/GameViewportClient.h"
 #include "Misc/SecureHash.h"
@@ -309,11 +313,30 @@ void AHomesteadController::BeginPlay()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    bEstateMap = UGameplayStatics::GetCurrentLevelName(this, true) == TEXT("Estate");
+    if (bEstateMap)
+    {
+        if (!HomesteadEstateTerrain::Activate())
+        {
+            Notify(TEXT("The estate terrain data is missing from this build. Check the game log."), true);
+            return;
+        }
+        PrepareEstateSimulation(Sim);
+        // Estate saves are a separate line from the generated-woodland saves.
+        SaveRoute.Directory = FPaths::Combine(SaveRoute.Directory, TEXT("Estate"));
+    }
+    else
+    {
+        HomesteadEstateTerrain::Deactivate();
+    }
     if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
     {
         const FGuid Seed = FGuid::NewGuid();
-        const auto Result = Sim.NewGame((static_cast<uint64>(Seed.A) << 32) | Seed.B);
+        const auto Result = bEstateMap
+            ? Sim.NewEstateGame(Homestead::ProvisionalEstateLayout(), Homestead::ProvisionalEstatePlacements())
+            : Sim.NewGame((static_cast<uint64>(Seed.A) << 32) | Seed.B);
         if (!Result) { Notify(Result); return; }
+        if (bEstateMap) SetEstateSpawn();
     }
     Landscape = GetWorld()->SpawnActor<AHomesteadWorld>();
     if (!Landscape)
@@ -1093,6 +1116,67 @@ float AHomesteadController::GroundHeight(float X, float Y) const
     return AHomesteadWorld::GroundHeight(X, Y, State().world);
 }
 
+void AHomesteadController::PrepareEstateSimulation(Homestead::Simulation& Target) const
+{
+    Target.SetLayout(Homestead::ProvisionalEstateLayout());
+    Target.SetPlacements(Homestead::ProvisionalEstatePlacements());
+    const TWeakObjectPtr<const AHomesteadController> Self(this);
+    Target.SetWaterProbe([Self](Homestead::Point Position)
+    {
+        return Self.IsValid() && Self->WaterEdgeDistance(Position) <= 120.0;
+    });
+}
+
+void AHomesteadController::SetEstateSpawn()
+{
+    const Homestead::EstateLayout& Layout = Sim.Layout();
+    const Homestead::Landmark* Spawn = Layout.FindLandmark(Homestead::Anchor::StandingRoomSpawn);
+    const Homestead::Point At = Spawn ? Spawn->position : Homestead::Point{};
+    PendingLocation = FVector(At.x, At.y, GroundHeight(At.x, At.y) + 100.0f);
+    PendingRotation = FRotator(-12.0f, Spawn ? Spawn->yaw : 0.0f, 0.0f);
+    LastSafeWorldPosition = PendingLocation;
+    bFreshTerrainSpawn = true;
+    EstateSpawnWait = 0;
+}
+
+double AHomesteadController::WaterEdgeDistance(Homestead::Point Position) const
+{
+    if (!bEstateMap)
+        return FMath::Abs(Position.x - Homestead::StreamX(Position.y)) - Homestead::Generation::StreamWaterHalfWidthCm;
+    const double Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
+    if (Now - EstateWaterScanTime > 5.0 || Now < EstateWaterScanTime)
+    {
+        // Rivers and ponds are splines tagged HomesteadWater in the Estate level.
+        EstateWaterScanTime = Now;
+        EstateWaterSplines.Reset();
+        if (UWorld* World = GetWorld())
+            for (TActorIterator<AActor> It(World); It; ++It)
+                if (It->ActorHasTag(TEXT("HomesteadWater")))
+                    for (USplineComponent* Spline : TInlineComponentArray<USplineComponent*>(*It))
+                        EstateWaterSplines.Add(Spline);
+    }
+    double Best = TNumericLimits<double>::Max();
+    const FVector Here(Position.x, Position.y, GroundHeight(Position.x, Position.y));
+    for (const auto& Weak : EstateWaterSplines)
+        if (const USplineComponent* Spline = Weak.Get())
+        {
+            const FVector Point = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
+            const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
+            const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
+            Best = FMath::Min(Best, FVector::Dist2D(Point, Here) - HalfWidth);
+        }
+    // The sea and the estuary: ground below sea level within a couple of metres.
+    if (HomesteadEstateTerrain::Height(Position.x, Position.y) < -15.0f)
+        return 0.0;
+    for (const double Radius : {60.0, 120.0, 180.0, 240.0})
+        for (int32 Step = 0; Step < 8; ++Step)
+        {
+            const double Angle = Step * UE_PI / 4.0;
+            if (HomesteadEstateTerrain::Height(Position.x + Radius * FMath::Cos(Angle), Position.y + Radius * FMath::Sin(Angle)) < -15.0f)
+                return FMath::Min(Best, Radius);
+        }
+    return Best;
+}
 bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
 {
     const Homestead::Point PlayerPosition = PlayerPoint();
@@ -1105,7 +1189,7 @@ bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
             const FVector Direction = FRotator(0, Yaw + Angle, 0).Vector();
             const Homestead::Point Candidate{PlayerPosition.x + Direction.X * Distance,
                 PlayerPosition.y + Direction.Y * Distance};
-            if (Homestead::IsNearWater(Candidate)) continue;
+            if (Sim.NearWater(Candidate)) continue;
             bool Clear = true;
             for (const auto& Structure : State().structures)
                 if (FVector2D::Distance(FVector2D(Candidate.x, Candidate.y),
@@ -1147,6 +1231,19 @@ bool AHomesteadController::CollectPreparedBaselines(Homestead::Generation::Chunk
 
 bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
 {
+    if (State().fixedEstate)
+    {
+        // The Estate level streams itself; only the first publication needs the world actor.
+        if (bWorldReady && Landscape && Landscape->IsPreparedFor(State())) return true;
+        if (!Landscape || !Landscape->Refresh(Sim))
+        {
+            bWorldReady = false;
+            Notify(TEXT("The estate could not be prepared. Movement stopped; existing saves are untouched."), true);
+            return false;
+        }
+        bWorldReady = true;
+        return true;
+    }
     Homestead::Generation::ChunkCoord Chunk;
     if (!FMath::IsFinite(Position.x) || !FMath::IsFinite(Position.y)
         || FMath::Abs(Position.x) > Homestead::MaxWorldCoordinate
@@ -1200,6 +1297,24 @@ void AHomesteadController::UpdateCreekAudio()
     FVector Listener;
     FRotator View;
     GetPlayerViewPoint(Listener, View);
+    if (bEstateMap)
+    {
+        // The burble follows the nearest point of the estate's river splines.
+        double Best = TNumericLimits<double>::Max();
+        FVector Where = FVector::ZeroVector;
+        WaterEdgeDistance({Listener.X, Listener.Y});
+        for (const auto& Weak : EstateWaterSplines)
+            if (const USplineComponent* Spline = Weak.Get())
+            {
+                const FVector Point = Spline->FindLocationClosestToWorldLocation(Listener, ESplineCoordinateSpace::World);
+                const double Distance = FVector::Dist2D(Point, Listener);
+                if (Distance < Best) { Best = Distance; Where = Point; }
+            }
+        if (Best > 6000.0) { if (Creek->IsPlaying()) Creek->FadeOut(2.0f, 0.0f); return; }
+        Creek->SetWorldLocation(Where + FVector(0, 0, 20));
+        if (!Creek->IsPlaying()) Creek->FadeIn(2.0f, 1.0f);
+        return;
+    }
     // Nearest point of the meandering centreline: a coarse sweep, then a fine one.
     auto Distance = [&](double Y) { return FMath::Square(Homestead::StreamX(Y) - Listener.X) + FMath::Square(Y - Listener.Y); };
     double BestY = Listener.Y;
@@ -1234,6 +1349,21 @@ void AHomesteadController::Tick(float DeltaSeconds)
     {
         if (!PrepareWorldAt({PendingLocation.X, PendingLocation.Y})) return;
         const float Ground = GroundHeight(PendingLocation.X, PendingLocation.Y);
+        if (bEstateMap && EstateSpawnWait < 20.0f)
+        {
+            // Wait for World Partition to stream in the ground under the spawn before placing her.
+            FHitResult Hit;
+            FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadEstateSpawn), false, GetPawn());
+            if (!GetWorld()->LineTraceSingleByChannel(Hit, FVector(PendingLocation.X, PendingLocation.Y, Ground + 500),
+                FVector(PendingLocation.X, PendingLocation.Y, Ground - 500), ECC_WorldStatic, Params))
+            {
+                EstateSpawnWait += DeltaSeconds;
+                GetPawn()->SetActorLocation(FVector(PendingLocation.X, PendingLocation.Y, Ground + 100), false, nullptr, ETeleportType::TeleportPhysics);
+                if (auto* Waiting = Cast<AHomesteadCharacter>(GetPawn())) Waiting->GetCharacterMovement()->StopMovementImmediately();
+                return;
+            }
+        }
+        EstateSpawnWait = 0;
         PendingLocation.Z = bFreshTerrainSpawn ? Ground + 100.0f : FMath::Max(PendingLocation.Z, Ground + 100.0f);
         GetPawn()->SetActorLocation(PendingLocation, false, nullptr, ETeleportType::TeleportPhysics);
         LastStepPosition = PendingLocation;
@@ -1468,7 +1598,7 @@ void AHomesteadController::UpdateFocus()
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
-    if (Homestead::IsNearWater(Position))
+    if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
         // is at least as close to the water's edge, and always once the can is empty.
@@ -1476,8 +1606,7 @@ void AHomesteadController::UpdateFocus()
             && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::WateringCan)
             && Sim.Count(Homestead::Item::WateringCan) > 0;
         const int32 Water = Sim.Count(Homestead::Item::Water);
-        const double Edge = FMath::Max(0.0,
-            FMath::Abs(Position.x - Homestead::StreamX(Position.y)) - Homestead::Generation::StreamWaterHalfWidthCm);
+        const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position));
         if (Focus == EFocus::None || (bCan && Water < 6 && (Water == 0 || Edge <= Best)))
         {
             Focus = EFocus::Water;
@@ -3010,6 +3139,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     SavedLook.BodyPreset = Save->BodyPreset;
     if (!SavedLook.IsValid()) return nullptr;
     Homestead::Simulation Candidate;
+    if (bEstateMap) PrepareEstateSimulation(Candidate);
     const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
     if (!Decoded) { bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion; return nullptr; }
     return Save;
@@ -3209,6 +3339,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 continue;
             }
             Homestead::Simulation Candidate;
+    if (bEstateMap) PrepareEstateSimulation(Candidate);
             const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
             if (!Decoded || Candidate.GetState().failed) continue;
             if (RecoveryOnly && (Save->WorldId != WorldId || Candidate.GetState().hunger < 20
@@ -3289,7 +3420,9 @@ void AHomesteadController::NewGame()
 {
     Homestead::Simulation Candidate = Sim;
     const FGuid Seed = FGuid::NewGuid();
-    const auto Result = Candidate.NewGame((static_cast<uint64>(Seed.A) << 32) | Seed.B);
+    const auto Result = bEstateMap
+        ? Candidate.NewEstateGame(Homestead::ProvisionalEstateLayout(), Homestead::ProvisionalEstatePlacements())
+        : Candidate.NewGame((static_cast<uint64>(Seed.A) << 32) | Seed.B);
     if (!Result) { Notify(Result); return; }
     if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("The new woodland could not be prepared. Your current session is retained."), true); return; }
     Sim = MoveTemp(Candidate);
@@ -3309,6 +3442,7 @@ void AHomesteadController::NewGame()
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);
     bFreshTerrainSpawn = true;
+    if (bEstateMap) SetEstateSpawn();
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     bPendingSpawn = true;
     bWasFailed = false;

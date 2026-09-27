@@ -1003,6 +1003,13 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     return {true, "You arrive home to Trevennor.", ResultCode::None, ++revision_};
 }
 
+bool Simulation::NearWater(Point position) const
+{
+    if (state_.fixedEstate)
+        return ValidPoint(position) && waterProbe_ && waterProbe_(position);
+    return IsNearWater(position);
+}
+
 const EstateLayout& Simulation::Layout() const
 {
     return layout_ ? *layout_ : ProvisionalEstateLayout();
@@ -1372,7 +1379,7 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
     if (!ValidPoint(position) || std::abs(position.x) > MaxWorldCoordinate
         || std::abs(position.y) > MaxWorldCoordinate || !Near(player, position, DropReach))
         return Bad("Choose safe ground close to you.");
-    if (IsNearWater(position)) return Bad("Choose dry ground for this item.");
+    if (NearWater(position)) return Bad("Choose dry ground for this item.");
     for (const auto& structure : state_.structures)
         if (Near(position, Homestead::StructureCenter(state_, structure), 100.0))
             return Bad("Keep dropped items clear of structures.");
@@ -1416,7 +1423,7 @@ Result Simulation::DropWearable(int wearableId, Point position, Point player,
     if (!ValidPoint(position) || std::abs(position.x) > MaxWorldCoordinate
         || std::abs(position.y) > MaxWorldCoordinate || !Near(player, position, DropReach))
         return Bad("Choose safe ground close to you.");
-    if (IsNearWater(position)) return Bad("Choose dry ground for this garment.");
+    if (NearWater(position)) return Bad("Choose dry ground for this garment.");
     for (const auto& structure : state_.structures)
         if (Near(position, Homestead::StructureCenter(state_, structure), 100.0))
             return Bad("Keep dropped garments clear of structures.");
@@ -2133,7 +2140,7 @@ Result Simulation::FillWater(Point player)
 {
     if (state_.failed) return Failed();
     if (Count(Item::WateringCan) == 0) return Bad("Craft a watering can before collecting water.");
-    if (!IsNearWater(player)) return Bad("Walk to the stream to refill your watering can.");
+    if (!NearWater(player)) return Bad("Walk to the stream to refill your watering can.");
     if (Count(Item::Water) >= 6) return Bad("Your watering can is already full.");
     const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;

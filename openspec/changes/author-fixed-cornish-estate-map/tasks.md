@@ -2,14 +2,14 @@
 
 ## 1. Terrain source and import
 
-- [ ] 1.1 Download EA LIDAR Composite DTM 1 m tiles for the St Agnes, Trevaunance and Chapel Porth coast. Record tile IDs, URLs and verified OGL attribution wording. Keep raw tiles out of git
-- [ ] 1.2 Clip, reshape and export a 4033² 16-bit heightmap via `Scripts\Terrain`, a QGIS/GDAL script plus a README with the exact commands and Z scale. Verify the size against the 5.8 Landscape guide
-- [ ] 1.3 Create the World Partition `Estate` level, import the Landscape, and set it as the game and editor default map. Verify walkable slopes, the cove and cliffs in ordinary play
+- [x] 1.1 Download EA LIDAR Composite DTM 1 m tiles for the St Agnes, Trevaunance and Chapel Porth coast. Record tile IDs, URLs and verified OGL attribution wording. Keep raw tiles out of git
+- [x] 1.2 Clip, reshape and export a 4033² 16-bit heightmap via `Scripts\Terrain`, a QGIS/GDAL script plus a README with the exact commands and Z scale. Verify the size against the 5.8 Landscape guide. _Done with numpy/scipy/rasterio scripts rather than QGIS; see `Scripts/Terrain/README.md`._
+- [ ] 1.3 Create the World Partition `Estate` level, import the Landscape, and set it as the game and editor default map. Verify walkable slopes, the cove and cliffs in ordinary play. _Level and Landscape exist (257 WP proxies, 7 paint layers); the default-map switch waits for integration and the walk is unverified._
 
 ## 2. First playable walk (first delivery)
 
-- [ ] 2.1 Publish `DA_EstateLandmarks` v1 with rough anchors for the standing room, gateway, cove, mine, mill, both road ends, the town square and the store door. Share the anchor names with the other lanes
-- [ ] 2.2 Add the fixed-world mode to `AHomesteadWorld`: Landscape ground, trace heights and no chunk streaming. Verify spawning, movement, camera collision and the hotbar on the new map
+- [ ] 2.1 Publish `DA_EstateLandmarks` v1 with rough anchors for the standing room, gateway, cove, mine, mill, both road ends, the town square and the store door. Share the anchor names with the other lanes. _Interim: the v2 layout lives in `ProvisionalEstateLayout()` and `Scripts/Terrain/estate_layout.json`; lanes are using it. The data asset is still to do._
+- [ ] 2.2 Add the fixed-world mode to `AHomesteadWorld`: Landscape ground, trace heights and no chunk streaming. Verify spawning, movement, camera collision and the hotbar on the new map. _Mode landed; spawn in the standing room verified in PIE, movement and camera still to verify._
 - [ ] 2.3 Prove the ocean and estate river on a cut-down heightmap with the Water plugin, and record editor and runtime cost. Choose Water or the Single Layer Water fallback and implement the ocean, river and pail refill
 - [ ] 2.4 Lay the dirt-road Landscape spline with rut and verge meshes from the gateway to the town edge. Walk it end to end in the game
 - [ ] 2.5 Package and playtest the walk from the standing room to the cove, then along the road to the town edge. Capture in-game views, commit and push

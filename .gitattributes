@@ -18,3 +18,4 @@ docs/research/environment-assets/grass-*/** -text -whitespace
 docs/research/environment-assets/readability-*/** -text -whitespace
 docs/research/environment-assets/woodland-*/** -text -whitespace
 Assets/Environment/GrassMedium01Prepared/** -text -whitespace
+*.r16 filter=lfs diff=lfs merge=lfs -text

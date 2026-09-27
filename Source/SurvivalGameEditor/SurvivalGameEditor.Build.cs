@@ -10,7 +10,7 @@ public class SurvivalGameEditor : ModuleRules
         PrivateDependencyModuleNames.AddRange(new[] {
             "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "Projects", "DerivedDataCache",
             "MaterialEditor", "MeshDescription", "StaticMeshDescription", "PhysicsCore", "RHI", "RenderCore",
-            "InputCore", "SurvivalGame"
+            "InputCore", "Landscape", "ImageWrapper", "AssetRegistry", "SurvivalGame"
         });
     }
 }

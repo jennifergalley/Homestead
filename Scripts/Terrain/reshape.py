@@ -206,6 +206,10 @@ def main():
     img = z[::-1, :].T
     u16 = np.clip(np.round(32768 + img * 12800.0 / Z_SCALE), 0, 65535).astype(np.uint16)
     Image.fromarray(u16).save(os.path.join(HERE, "Estate_Heightmap_4033.png"))
+    # The runtime heightfield the game samples for ground height (row = +Y, column = +X, little-endian).
+    runtime = os.path.join(HERE, "..", "..", "Content", "SurvivalGame", "Estate", "Runtime")
+    os.makedirs(runtime, exist_ok=True)
+    u16.astype("<u2").tofile(os.path.join(runtime, "EstateHeightfield.r16"))
 
     def zat(p):
         return round(float(sample(z, np.array([p]))[0]), 2)

@@ -126,6 +126,10 @@ public:
     Homestead::Point PlayerPoint() const;
     float GroundHeight(float X, float Y) const;
     bool PrepareWorldAt(Homestead::Point Position);
+    // True on the fixed Estate map, where the Landscape and baked placements replace the generated woodland.
+    bool IsEstateMap() const { return bEstateMap; }
+    // Distance (cm) from a point to the nearest drawable water's edge; <= 0 is in the water.
+    double WaterEdgeDistance(Homestead::Point Position) const;
     bool IsWorldReady() const { return bWorldReady; }
     uint32 WorldRecoveryCount() const { return WorldRecoveries; }
     // Where the construction preview currently resolves (snapped or free-standing).
@@ -277,6 +281,12 @@ private:
     FHomesteadPromptIntent PromptIntent;
     bool bPendingSpawn = true;
     bool bFreshTerrainSpawn = true;
+    bool bEstateMap = false;
+    float EstateSpawnWait = 0;
+    mutable TArray<TWeakObjectPtr<class USplineComponent>> EstateWaterSplines;
+    mutable double EstateWaterScanTime = -1000;
+    void PrepareEstateSimulation(Homestead::Simulation& Target) const;
+    void SetEstateSpawn();
     bool bWorldReady = false;
     double LastRegionSimulationMilliseconds = 0;
     double LastRegionWorldMilliseconds = 0;

@@ -1279,14 +1279,12 @@ void WinterClothingAndFur()
     for (const auto& node : sim.GetState().resources)
         if (node.kind == ResourceKind::DeerRemains && sim.CanHarvest(node.id)) { deer = node.id; break; }
     CHECK(deer != -1);
+    Point deerAt{};
     for (const auto& node : sim.GetState().resources)
-        if (node.id == deer)
-        {
-            OK(sim.Harvest(deer, node.position));
-            CHECK(sim.Count(Item::Fur) == 3);
-            CHECK(!sim.Harvest(deer, node.position).ok);
-            break;
-        }
+        if (node.id == deer) deerAt = node.position;
+    OK(sim.Harvest(deer, deerAt));
+    CHECK(sim.Count(Item::Fur) == 3);
+    CHECK(!sim.Harvest(deer, deerAt).ok);
     Stock(sim, {{Item::Knife, 1}, {Item::Fiber, 60}, {Item::Fur, 20}});
     for (auto definition : {WearableDefinition::FurCoat, WearableDefinition::FurBoots,
         WearableDefinition::Trousers, WearableDefinition::LinenLongShirt})
@@ -2758,6 +2756,13 @@ void FixedEstateNewGameAndSave()
     Simulation other;
     other.SetPlacements(rebaked);
     CHECK(other.Deserialize(saved).code == ResultCode::UnsupportedVersion);
+    // Water on the estate comes only from the game's probe, never the generated stream.
+    OK(sim.GrantItems(Item::WateringCan, 1));
+    const Point stream{StreamX(spawn.y), spawn.y};
+    CHECK(!sim.FillWater(stream).ok);
+    sim.SetWaterProbe([spawn](Point p) { return std::abs(p.x - spawn.x) < 50 && std::abs(p.y - spawn.y) < 50; });
+    CHECK(!sim.FillWater(stream).ok);
+    OK(sim.FillWater(spawn));
 }
 
 }

@@ -257,6 +257,8 @@ private:
     FRotator AppliedSunRotation = FRotator::ZeroRotator;
     FRotator AppliedMoonRotation = FRotator::ZeroRotator;
     bool bLightRotationApplied = false;
+    // True while showing a fixed-estate game on the Estate level's Landscape.
+    bool bFixedEstate = false;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
     UPROPERTY()

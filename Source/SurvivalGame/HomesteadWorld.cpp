@@ -1,4 +1,5 @@
 #include "HomesteadWorld.h"
+#include "HomesteadEstateTerrain.h"
 
 #include "HomesteadCharacter.h"
 #include "Async/Async.h"
@@ -830,6 +831,8 @@ bool AHomesteadWorld::RebuildRegionalWater()
 
 float AHomesteadWorld::GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World)
 {
+    if (HomesteadEstateTerrain::IsActive())
+        return HomesteadEstateTerrain::Height(X, Y);
     namespace Gen = Homestead::Generation;
     if (!FMath::IsFinite(X) || !FMath::IsFinite(Y)
         || FMath::Abs(X) > Homestead::MaxWorldCoordinate + Gen::ChunkSizeCm * 4
@@ -871,6 +874,8 @@ FVector AHomesteadWorld::AtGround(float X, float Y, float Offset) const
 
 float AHomesteadWorld::CachedGroundHeight(float X, float Y) const
 {
+    if (HomesteadEstateTerrain::IsActive())
+        return HomesteadEstateTerrain::Height(X, Y);
     namespace Gen = Homestead::Generation;
     if (!FMath::IsFinite(X) || !FMath::IsFinite(Y))
         return GroundHeight(X, Y);
@@ -1029,6 +1034,38 @@ int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) c
 
 bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
 {
+    if (State.fixedEstate)
+    {
+        // The Estate level's Landscape is the ground; no generated chunks, creek or regional water.
+        if (!bFixedEstate)
+        {
+            for (auto& Entry : TerrainChunks)
+            {
+                if (Entry.Value.Terrain) Entry.Value.Terrain->DestroyComponent();
+                if (Entry.Value.Water) Entry.Value.Water->DestroyComponent();
+                ClearVisual(Entry.Value.Cover);
+            }
+            TerrainChunks.Reset();
+            ClearRegionalWater();
+            ChunkBaselineCache.clear();
+            Ground = nullptr;
+            bFixedEstate = true;
+        }
+        if (!HomesteadEstateTerrain::IsActive())
+        {
+            UE_LOG(LogHomesteadWorld, Error, TEXT("A fixed-estate game needs the Estate map's heightfield."));
+            return false;
+        }
+        Descriptor = State.world;
+        PreparedChunk = State.activeChunk;
+        bTerrainReady = true;
+        return true;
+    }
+    if (bFixedEstate)
+    {
+        bFixedEstate = false;
+        bTerrainReady = false;
+    }
     if (IsPreparedFor(State)) return true;
     TerrainChunkProfile.Reset();
     namespace Gen = Homestead::Generation;
@@ -1059,6 +1096,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
                 {
                     Entry.Value.Terrain->DestroyComponent();
                     if (Entry.Value.Water) Entry.Value.Water->DestroyComponent();
+                ClearVisual(Entry.Value.Cover);
                 }
                 UE_LOG(LogHomesteadWorld, Error, TEXT("Chunk %d,%d preparation failed; previous terrain retained."),
                     Key.X, Key.Y);
@@ -2081,7 +2119,18 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
     FHomesteadOuterTreeInstance& Instance)
 {
     Homestead::Generation::GeneratedEntity Entity;
-    if (Node.kind != Homestead::ResourceKind::ForestTree
+    if (bFixedEstate && Node.kind == Homestead::ResourceKind::ForestTree)
+    {
+        // Estate trees are baked placements, not generated entities: pick a period-plausible
+        // broadleaf or conifer and a stable yaw and size from the placement id.
+        const uint32 Hash = HashCombine(GetTypeHash(Node.id), 0x9E3779B9u);
+        Entity.paletteRole = Hash % 5 == 0 ? Homestead::Generation::TreePaletteRole::ConiferMature
+            : Homestead::Generation::TreePaletteRole::BroadleafMature;
+        Entity.variantIndex = 0;
+        Entity.yawDegrees = static_cast<decltype(Entity.yawDegrees)>((Hash >> 8) % 360);
+        Entity.scalePermille = static_cast<decltype(Entity.scalePermille)>(900 + (Hash >> 16) % 260);
+    }
+    else if (Node.kind != Homestead::ResourceKind::ForestTree
         || Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
     {
         UE_LOG(LogHomesteadWorld, Error, TEXT("Generated tree key cannot resolve; no visual substitute."));
@@ -3296,7 +3345,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         Layout += FString::Printf(TEXT("D:%d:%.3f:%.3f;"), Drop.id, Drop.position.x, Drop.position.y);
     if (ResourceLayoutSignature != Layout)
     {
-        if (!BuildDecorations(Simulation)) return false;
+        if (!State.fixedEstate && !BuildDecorations(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
@@ -3323,7 +3372,12 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     }
     ClearedOuterTreeEdits.Sort();
     OuterLayout += FString::Join(ClearedOuterTreeEdits, TEXT(""));
-    if (OuterTreeLayoutSignature != OuterLayout)
+    if (State.fixedEstate)
+    {
+        ClearOuterTreeBatches();
+        OuterTreeLayoutSignature = OuterLayout;
+    }
+    else if (OuterTreeLayoutSignature != OuterLayout)
     {
         if (!RebuildOuterTreeBatches(Simulation)) return false;
         OuterTreeLayoutSignature = MoveTemp(OuterLayout);
@@ -3427,6 +3481,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     std::vector<Homestead::WorldDrop> NearDrops;
     auto Near = [&](Homestead::Point Center)
     {
+        if (State.fixedEstate) return true;
         return FMath::Abs(Center.x - (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm) <= 6000
             && FMath::Abs(Center.y - (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm) <= 6000;
     };
@@ -3437,7 +3492,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     const double ChunkCenterX = (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm;
     const double ChunkCenterY = (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm;
     for (const auto& Drop : State.worldDrops)
-        if (FMath::Abs(Drop.position.x - ChunkCenterX) <= 6000
+        if (State.fixedEstate || FMath::Abs(Drop.position.x - ChunkCenterX) <= 6000
             && FMath::Abs(Drop.position.y - ChunkCenterY) <= 6000)
             NearDrops.push_back(Drop);
     RemoveMissing(StructureVisuals, NearStructures);

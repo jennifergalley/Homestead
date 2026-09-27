@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <iosfwd>
 #include <memory>
 #include <set>
@@ -353,6 +354,10 @@ public:
     void SetLayout(const EstateLayout& layout);
     // The baked placements a fixed-estate save is loaded against; set before Deserialize.
     void SetPlacements(const EstatePlacements& placements);
+    // On the fixed estate, water comes from the level's authored water bodies (sea, estuary, river):
+    // the game supplies the probe. Generated worlds keep the procedural stream test.
+    void SetWaterProbe(std::function<bool(Point)> probe) { waterProbe_ = std::move(probe); }
+    bool NearWater(Point position) const;
     Result SetActiveWorldRegion(Point player,
         const PreparedWorldRegion* prepared = nullptr);
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
@@ -474,6 +479,7 @@ private:
     State state_;
     std::shared_ptr<const EstateLayout> layout_;
     std::shared_ptr<const EstatePlacements> placements_;
+    std::function<bool(Point)> waterProbe_;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     bool TryAdjust(const Inventory& change);
