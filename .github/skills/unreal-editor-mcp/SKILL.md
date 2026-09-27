@@ -60,8 +60,9 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   not in `%LOCALAPPDATA%`.
 - **Git with sub-agents.** Don't `git stash -u` while a sub-agent may be writing files; use
   `git pull --rebase --autostash`. Never commit `Content/Trials/Probe/` or `.uasset`/`.umap`
-  changes that aren't yours (the editor dirties shared map files such as `Estate.umap` and
-  `__ExternalObjects__`).
+  changes that aren't yours. The Estate level uses one file per actor: commit only your own
+  `__ExternalActors__` files plus the `__ExternalObjects__` file for any new Outliner folder, and
+  `git checkout` the re-saved `Estate.umap`.
 
 **Lane quick-start** (one worktree, port `$p` from the round's registry in `docs\handoff\`):
 
@@ -103,6 +104,12 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
 | C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
+| `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
+| Estate "Save failed..." / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejects `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on the manor lane's branch (bound by `MaxWorldCoordinate`); until it merges, estate saves fail on `main`. |
+| Spawn yaw ignored on Estate | `ChooseStartingView` (fresh terrain) and `SetAppearancePreview(false)` restoring a `SavedViewRotation` captured before spawn both overwrite it | See the manor lane's fix; check `controlYaw` and a capture after the book closes. |
+| "The cookfire recipe could not be selected." | The Fire/Hearth cook action calls `FocusLegacySubject`, but craft rows are now `EHomesteadMenuSubject::Recipe` (`HomesteadController.cpp` ~2111) | Open bug on `main` (round-1 page). |
+| Save strings with non-ASCII characters break the save | The save payload rejects bytes above 127 | Hex-encode free text (the manor lane does this for names). |
+| An editor toast "source content changed, import?" covers captures | The editor watches `Assets\` and Blender writes there | `Start-EditorMcp.ps1` now starts with `bMonitorContentDirectories=False`; import explicitly with `import_props.py`. |
 | Default argument errors with `Homestead::` enums in `HomesteadCharacter.h` | The header only forward-declares the enum | Use overloads or `{}`, not enum default arguments. |
 | `System.Exception: A conflicting instance of AutomationTool is already running` (in `%LOCALAPPDATA%\UnrealEngine\Programs\AutomationTool\Saved\Logs\ErrorLog.txt`); the script only says "Game packaging failed (1)" | UAT is single-instance machine-wide and another worktree is packaging | `Build-Game.ps1` now passes `-WaitForUATMutex` and waits. For a hand-run `RunUAT.bat`, add it yourself. |
 | `git status` shows dozens of modified `.uasset`s (Audio, heroine animations and materials) after `Build-Game.ps1` | The content bootstrap re-saves generated assets | Restore the ones your change didn't intend (`git checkout -- <paths>`) before committing. `-PackageOnly` skips the bootstrap when content is current. |
@@ -216,8 +223,15 @@ do { Start-Sleep 3; $s = st } until ($s.worldReady)   # StartPIE may report a ti
 hk release_all; mcp $E StopPIE
 ```
 
-- Every PIE start with no save in this checkout generates a **new woodland seed**. Once an
-  autosave exists, PIE resumes it (same position/time), so positions and node ids persist.
+- On the **Homestead** (woodland) map, every PIE start with no save in this checkout generates a
+  **new woodland seed**. Once an autosave exists, PIE resumes it (same position/time), so positions
+  and node ids persist. The **Estate** map is a fixed world: same layout every time.
+- **Estate PIE recipe:** `py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"`;
+  for a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
+  until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
+  captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
+  failed save. Code written for the woodland can still assume woodland heights (estate ground is
+  about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
   `I` opens Inventory (page 0), Menu opens Settings (page 4).
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).

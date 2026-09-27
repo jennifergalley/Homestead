@@ -46,7 +46,15 @@ manor and boundary lanes haven't merged yet.
 - `SHomesteadMenu` edits and engine packaging are serialized through the orchestrator.
 - Jenny's playable builds: see the editor skill, section 0.
 
-## Open blockers
+## Open blockers and known bugs
+
+- **Estate saves fail on `main`:** `ReadSave` rejects `abs(PlayerLocation.Z) > 5000`, and estate ground
+  sits at Z ≈ 8700-9500. Fixed on the manor lane's branch; lands when it merges.
+- **Cookfire/Hearth cook action broken on `main`:** it calls `FocusLegacySubject`, but craft rows
+  are now `EHomesteadMenuSubject::Recipe`, so the toast "The cookfire recipe could not be
+  selected." appears (`HomesteadController.cpp` ~2111). Owner to be assigned by the orchestrator.
+- **Estate spawn yaw** is overwritten by `ChooseStartingView` and by `SetAppearancePreview(false)`
+  restoring an earlier `SavedViewRotation`. Being fixed on the manor lane.
 
 - **Packaging with several worktrees:** `LogIoStore: Error: Failed to launch ZenServer` when another
   worktree's zenserver holds port 8558. A per-worktree `[Zen.AutoLaunch] DesiredPort` is being

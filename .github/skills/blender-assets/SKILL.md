@@ -97,6 +97,11 @@ before each pass.
 - **Knapped stone.** Uniform Voronoi scars read as crumpled paper or turtle shell. Scars are struck from the
   edges, so elongate the cells across the blade and keep them few and broad. Soil-worn chert is waxy
   (roughness ~0.45); only the use-polished bit is glossy.
+- **Review HDRI.** `render_beauty` needs the Kloofendal sky in the git-ignored Poly Haven cache. On a
+  fresh worktree fetch it first:
+  `.\Scripts\Blender\Get-PolyHavenAsset.ps1 kloofendal_48d_partly_cloudy_puresky -Resolution 2k -Kind hdri`.
+- **Pillow/cushion UV frames.** An "up" vector parallel to the surface normal gives NaN UVs; for top
+  stones use up (1, 0, 0).
 - **SDF parts.** Evaluate only near the surface (`homestead_sdf` does coarse-to-fine) or a skull takes a
   minute. Never smart-project decimated SDF meshes; unwrap each part with `homestead_rocks.unwrap` first.
   Settle every loose part onto the ground (`deer.common.settle`/`lay_flat`); authored layouts float.

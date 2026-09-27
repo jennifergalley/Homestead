@@ -86,6 +86,9 @@ $arguments += @(
     # Several worktrees share this machine; an active Live Coding session blocks every other
     # worktree's SurvivalGameEditor build, so agent editors run without it.
     '-ini:EditorPerProjectUserSettings:[/Script/LiveCoding.LiveCodingSettings]:bEnabled=False'
+    # Blender and other sessions write under Assets\ constantly; the "source content changed, import?"
+    # toast covers captures. Agents import explicitly (import_props.py), so don't watch for changes.
+    '-ini:EditorPerProjectUserSettings:[/Script/UnrealEd.EditorLoadingSavingSettings]:bMonitorContentDirectories=False'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 # Several agent editors share one GPU. Building ray-tracing pipelines in all of them at once has
