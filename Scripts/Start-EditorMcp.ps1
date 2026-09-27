@@ -5,6 +5,7 @@ param(
     [string]$Map,
     [string[]]$ExtraPlugins = @(),
     [switch]$AllowPython,
+    [switch]$RayTracing,
     [switch]$SkipBuild,
     [int]$TimeoutSeconds = 600
 )
@@ -64,6 +65,10 @@ $arguments += @(
     '-ini:EditorPerProjectUserSettings:[/Script/LiveCoding.LiveCodingSettings]:bEnabled=False'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
+# Several agent editors share one GPU. Building ray-tracing pipelines in all of them at once has
+# reset the driver (DXGI_ERROR_DEVICE_REMOVED / DRIVER_INTERNAL_ERROR), taking every Unreal process
+# down with it, so agent editors render without ray tracing unless -RayTracing is passed.
+if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0' }
 # Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
 if ($AllowPython) { $arguments += '-HomesteadAgentPython' }
 
