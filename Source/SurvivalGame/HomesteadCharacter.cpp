@@ -386,6 +386,11 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     // Optional: the two-handed stone hoe authored with homestead_agent.hoe_till.
     if (auto* Hoe = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_HoeTill")))
         if (Hoe->GetSkeleton() == MetaHumanBody->GetSkeleton()) { TillAnimation = Hoe; bHoeTill = true; }
+    // Optional: filling and pouring the carved pail (homestead_agent.pail_fill / pail_pour).
+    PailPourAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_PailPour"));
+    if (PailPourAnimation && PailPourAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton()) PailPourAnimation = nullptr;
+    PailFillAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_PailFill"));
+    if (PailFillAnimation && PailFillAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton()) PailFillAnimation = nullptr;
     // Optional: authored with homestead_agent.kneel_gather; without it sticks use the plain gather.
     GatherSticksAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelGatherSticks"));
     if (GatherSticksAnimation && GatherSticksAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
@@ -508,8 +513,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         HeldMachete->SetRelativeTransform(MacheteGrip);
         HeldMachete->SetCastShadow(true);
     }
-    // Blender hand tools, each authored with its pivot at the main hand's grip, the handle along
-    // +Z and the working edge toward -Y (docs/blender-assets.md). Offsets adapt tools held elsewhere.
+    // Blender hand tools, each authored with its pivot at the main hand's grip and the handle along
+    // +Z (docs/blender-assets.md). The Blender export mirrors Y, so in the engine their working edges
+    // face +Y. Offsets adapt tools held elsewhere.
     HeldProps.Reset();
     HeldToolSpecs.Reset();
     const FTransform Grip = HandGripTransform(*MetaHumanBody);
@@ -541,6 +547,19 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         Prop->SetCastShadow(true);
         HeldProps.Add(Prop);
         HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs, Asset.Offset * Grip});
+    }
+    // Pouring water: an engine cylinder with the translucent stream material, stretched from the
+    // pail's lip down to the soil while she pours (UpdateWaterPail).
+    if (UStaticMesh* Column = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder")))
+    {
+        PourStream = MakeProp(TEXT("PourStream"), Column);
+        PourStream->SetUsingAbsoluteLocation(true);
+        PourStream->SetUsingAbsoluteRotation(true);
+        PourStream->SetUsingAbsoluteScale(true);
+        PourStream->SetCastShadow(false);
+        if (auto* Water = LoadObject<UMaterialInterface>(nullptr,
+            TEXT("/Game/SurvivalGame/Environment/Props/WaterPail/M_PourStream.M_PourStream"), nullptr, LOAD_NoWarn | LOAD_Quiet))
+            PourStream->SetMaterial(0, Water);
     }
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
@@ -1546,6 +1565,7 @@ void AHomesteadCharacter::PlayWater()
     CancelSprint();
     GetCharacterMovement()->StopMovementImmediately();
     WaterYaw.Reset();
+    bFillingPail = false;
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestWater();
     else
@@ -1556,6 +1576,7 @@ void AHomesteadCharacter::PlayWater(Homestead::Point Target)
 {
     CancelSprint();
     GetCharacterMovement()->StopMovementImmediately();
+    bFillingPail = false;
     const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
     if (!FMath::IsFinite(Delta.X) || !FMath::IsFinite(Delta.Y) || Delta.SizeSquared() < 1)
     {
@@ -1564,10 +1585,39 @@ void AHomesteadCharacter::PlayWater(Homestead::Point Target)
         return;
     }
     WaterYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+    if (PailPourAnimation && bMetaHumanActive)
+    {
+        // Step up to the square so the stream lands on its middle (pail_pour.SPOT).
+        const float Yaw = *WaterYaw - FMath::RadiansToDegrees(FMath::Atan2(PourRight, PourForward));
+        const FVector To = FVector(Target.x, Target.y, GetActorLocation().Z)
+            - FRotator(0, Yaw, 0).RotateVector(FVector(PourForward, PourRight, 0));
+        WaterYaw = Yaw;
+        BeginStanceStep(FVector::Dist2D(To, GetActorLocation()) < 150.0f ? To : GetActorLocation(), Yaw);
+    }
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->RequestWater();
     else
         UE_LOG(LogTemp, Error, TEXT("Watering succeeded but its animation instance is unavailable."));
+}
+
+void AHomesteadCharacter::PlayFillPail(Homestead::Point Stream)
+{
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!PailFillAnimation || !bMetaHumanActive || !Animation) return;
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    bFillingPail = true;
+    const FVector2D Delta(Stream.x - GetActorLocation().X, Stream.y - GetActorLocation().Y);
+    if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
+    {
+        // Kneel facing the water so the pail goes in ahead of her (pail_fill.SPOT), without
+        // stepping further in than the bank she stands on.
+        const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X))
+            - FMath::RadiansToDegrees(FMath::Atan2(FillRight, FillForward));
+        WaterYaw = Yaw;
+        BeginStanceStep(GetActorLocation(), Yaw);
+    }
+    Animation->RequestWater();
 }
 
 void AHomesteadCharacter::CancelAction(bool Immediate)
@@ -1654,6 +1704,9 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     const bool Felling = Animation->FellWeight() > 0.01f;
     const bool CuttingReeds = IsCuttingReeds();
     const bool Hoeing = bHoeTill && Animation->TillWeight() > 0.01f;
+    // Filling or pouring with the carved pail's own clips: the pail stays in her hand throughout.
+    const bool PailWork = Animation->WaterWeight() > 0.01f && GetWaterAnimation() != WaterAnimation;
+    bool bPouring = false;
     float Grip = 0, Carry = RestWristDegrees;
     // At rest a tool's handle crosses the palm diagonally (heel of the hand to the index knuckle),
     // which tips its head forward and down with the wrist nearly straight. Authored actions set
@@ -1684,6 +1737,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const bool Held = Spec.Tool == Homestead::Item::Hatchet && Felling
             || Spec.Tool == Homestead::Item::Knife && CuttingReeds
             || Spec.Tool == Homestead::Item::DiggingStick && Hoeing
+            || Spec.Tool == Homestead::Item::WateringCan && PailWork
             || (HandsFree && !Hacking && Presented == Spec.Tool);
         Prop->SetVisibility(Held);
         if (!Held) continue;
@@ -1710,17 +1764,30 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
             Slide = -26.0f;
         }
         // The hoe keeps its carried grip through the tilling clip (hoe_till.py is authored for
-        // it), so nothing turns in her hand as she starts or stops.
-        const float TurnWeight = StoneHoe ? 1.0f : HeldToolTilt;
-        const FTransform Turn = FTransform(FVector(0, 0, Slide * TurnWeight))
+        // it), so nothing turns in her hand as she starts or stops. The hatchet keeps its turn
+        // too: turned, its edge runs along her knuckles, which is how she swings it.
+        const float TurnWeight = StoneHoe || Spec.Tool == Homestead::Item::Hatchet ? 1.0f : HeldToolTilt;
+        // The imported props have their blades on +Y (the Blender export mirrors Y), but
+        // hoe_till.py authored the strokes for a blade on -Y. As she sets the hoe she rolls the
+        // haft half a turn so the blade bites down into the soil instead of facing up.
+        const float Roll = StoneHoe && Hoeing ? FMath::SmoothStep(0.0f, 1.0f, Animation->TillWeight()) : 0.0f;
+        const FTransform Turn = FTransform(FQuat(FVector::ZAxisVector, PI * Roll))
+            * FTransform(FVector(0, 0, Slide * TurnWeight))
             * FTransform(FQuat::Slerp(FQuat::Identity, Flip, TurnWeight));
         const float Lean = CarryDegrees - (StoneHoe ? FMath::Min(CarryDegrees, RestWristDegrees) : Carry);
         const FTransform HeldPose = StoneHoe
             ? FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Lean))) * Spec.Rest
             : Tilt(Spec.Rest, Lean);
         if (!Spec.bHangs) Prop->SetRelativeTransform(Turn * HeldPose);
-        if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
+        if (Spec.bHangs)
+        {
+            // Hanging from the fist unless the pour lays it in both hands (UpdateWaterPail).
+            Prop->SetRelativeLocation(Spec.Rest.GetLocation());
+            if (PailWork && !bFillingPail) { UpdateWaterPail(*Prop, DeltaSeconds); bPouring = true; }
+            else UpdateHangingPail(*Prop, DeltaSeconds);
+        }
     }
+    if (PourStream && !bPouring) PourStream->SetVisibility(false);
     if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
     Animation->SetRightHandGrip(Grip, Carry);
     // She ticks after the pose is final (TG_PostUpdateWork), so the felling haft is laid through
@@ -1758,8 +1825,9 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     const FVector Haft = (AcrossL + AcrossR).GetSafeNormal().IsNearlyZero() ? AcrossL : (AcrossL + AcrossR).GetSafeNormal();
     const FVector Edge = (AlongL - Haft * FVector::DotProduct(AlongL, Haft)).GetSafeNormal();
     if (Edge.IsNearlyZero()) return;
-    // Hatchet convention: head along +Z, edge toward -Y.
-    const FTransform TwoHanded(FRotationMatrix::MakeFromZY(Haft, -Edge).ToQuat(), Knob, Prop->GetComponentScale());
+    // The imported hatchet's edge is on +Y (the Blender export mirrors Y; the report says -Y), so
+    // +Y goes along the edge to face the tree.
+    const FTransform TwoHanded(FRotationMatrix::MakeFromZY(Haft, Edge).ToQuat(), Knob, Prop->GetComponentScale());
     const FTransform OneHanded = Prop->GetComponentTransform();
     FTransform Blended;
     Blended.Blend(OneHanded, TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
@@ -1856,6 +1924,63 @@ void AHomesteadCharacter::UpdateHangingPail(UStaticMeshComponent& Pail, float De
     const FQuat Yaw(FVector::UpVector, FMath::DegreesToRadians(GetActorRotation().Yaw + 90.0f));
     const FQuat Swing = FQuat::FindBetweenNormals(-FVector::UpVector, FVector(PailSwing.X, PailSwing.Y, -1.0f).GetSafeNormal());
     Pail.SetWorldRotation(Swing * Yaw);
+}
+
+void AHomesteadCharacter::UpdateWaterPail(UStaticMeshComponent& Pail, float DeltaSeconds)
+{
+    // SM_WaterPail's pouring lip in its own space (pivot at the bail grip, hanging -Z, lip +X).
+    static const FVector PailLipLocal(11.5f, 0.0f, -14.0f);
+    // pail_pour.GRIP_DROP / GRIP_RADIUS: she holds its sides this far below the pivot.
+    constexpr float GripDrop = 18.0f;
+    constexpr float GripRadius = 11.5f;
+    // Keep the pendulum running so the pail swings on naturally once she lets go.
+    UpdateHangingPail(Pail, DeltaSeconds);
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!Animation) return;
+    const float Time = Animation->WaterPhase();
+    const float Hold = Animation->WaterWeight() * FMath::SmoothStep(PailTakeStart, PailTakeEnd, Time)
+        * (1.0f - FMath::SmoothStep(PailGiveStart, PailGiveEnd, Time));
+    if (Hold > 0.001f)
+    {
+        // Between the take and the give the pail rides against her left palm like a pot: its
+        // side at the palm, its axis up her fingers, the lip ahead (the right hand mirrors it).
+        USkeletalMeshComponent* Body = GetMesh();
+        const FVector HandL = Body->GetSocketLocation(TEXT("hand_l"));
+        const FVector KnuckleL = Body->GetSocketLocation(TEXT("middle_01_l"));
+        const FVector FingersL = (KnuckleL - HandL).GetSafeNormal();
+        const FVector AcrossL = Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"));
+        const FVector PalmL = FVector::CrossProduct(AcrossL, FingersL).GetSafeNormal();
+        const FVector Up = FVector::VectorPlaneProject(FingersL, PalmL).GetSafeNormal();
+        if (!PalmL.IsNearlyZero() && !Up.IsNearlyZero())
+        {
+            const FVector PalmPoint = HandL + (KnuckleL - HandL) * 0.6f + PalmL * 2.0f;
+            const FTransform Held(FRotationMatrix::MakeFromYZ(PalmL, Up).ToQuat(),
+                PalmPoint + PalmL * GripRadius + Up * GripDrop, Pail.GetComponentScale());
+            FTransform Placed;
+            Placed.Blend(Pail.GetComponentTransform(), Held, FMath::SmoothStep(0.0f, 1.0f, Hold));
+            Pail.SetWorldTransform(Placed);
+        }
+    }
+
+    if (!PourStream) return;
+    const float Flow = Hold * FMath::SmoothStep(PailPourStart - 0.1f, PailPourStart + 0.15f, Time)
+        * (1.0f - FMath::SmoothStep(PailPourStop - 0.15f, PailPourStop + 0.1f, Time));
+    if (Flow < 0.02f || !GetWorld())
+    {
+        PourStream->SetVisibility(false);
+        return;
+    }
+    // The water runs from the pouring lip straight down to the soil.
+    const FVector LipPoint = Pail.GetComponentTransform().TransformPosition(PailLipLocal);
+    FHitResult Hit;
+    const FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadPourStream), false, this);
+    const FVector Reach = LipPoint - FVector(0, 0, 250);
+    const FVector Ground = GetWorld()->LineTraceSingleByChannel(Hit, LipPoint, Reach, ECC_Visibility, Query) ? Hit.ImpactPoint : Reach;
+    const float Length = FMath::Max(1.0f, FVector::Dist(LipPoint, Ground));
+    const float Width = FMath::Lerp(1.5f, 3.6f, Flow) * (1.0f + 0.08f * FMath::Sin(GetWorld()->GetTimeSeconds() * 37.0f));
+    PourStream->SetWorldLocationAndRotation((LipPoint + Ground) * 0.5f, FRotationMatrix::MakeFromZ(LipPoint - Ground).ToQuat());
+    PourStream->SetWorldScale3D(FVector(Width / 100.0f, Width / 100.0f, Length / 100.0f));
+    PourStream->SetVisibility(true);
 }
 
 bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target)

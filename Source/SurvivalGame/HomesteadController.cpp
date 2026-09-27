@@ -810,7 +810,7 @@ void AHomesteadController::UseSelectedTool()
     {
         if (Focus == EFocus::Water)
         {
-            Notify(Sim.FillWater(Position));
+            FillPailAtStream(Position);
             return;
         }
         if (Focus != EFocus::Plot)
@@ -831,6 +831,16 @@ void AHomesteadController::UseSelectedTool()
     }
 
     if (Tool == Homestead::Item::DiggingStick) HoeSquareAhead();
+}
+
+void AHomesteadController::FillPailAtStream(Homestead::Point Position)
+{
+    const auto Result = Sim.FillWater(Position);
+    Notify(Result);
+    // She kneels at the bank and dips the pail into the stream beside her.
+    if (Result.ok)
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+            Avatar->PlayFillPail({Homestead::StreamX(Position.y), Position.y});
 }
 
 void AHomesteadController::RefreshMenuPortrait()
@@ -2009,7 +2019,7 @@ void AHomesteadController::Interact()
         break;
     }
     case EFocus::Chest: OpenChestStorage(FocusId); break;
-    case EFocus::Water: Notify(Sim.FillWater(Position)); break;
+    case EFocus::Water: FillPailAtStream(Position); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }

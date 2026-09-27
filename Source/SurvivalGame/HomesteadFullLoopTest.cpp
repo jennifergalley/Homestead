@@ -797,7 +797,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                     return Controller->Simulation().IsSheltered(Controller->PlayerPoint())
                         && Controller->Simulation().IsNearFire(Controller->PlayerPoint())
                         && Controller->State().warmth >= 80;
-                });            Add(TEXT("Settle night exposure at the cabin entrance"),
+                });
+            Add(TEXT("Settle night exposure at the cabin entrance"),
                 [this, Home]()
                 {
                     Controller->Sim.SkipToHourOfDay(21);

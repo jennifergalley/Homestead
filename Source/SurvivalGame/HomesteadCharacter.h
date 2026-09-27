@@ -95,7 +95,28 @@ public:
         default: return GatherSticksAnimation.Get();
         }
     }
-    UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
+    UAnimSequence* GetWaterAnimation() const
+    {
+        // The carved pail's own clips (homestead_agent.pail_fill / pail_pour) when present.
+        if (bFillingPail && PailFillAnimation) return PailFillAnimation;
+        if (!bFillingPail && PailPourAnimation) return PailPourAnimation;
+        return WaterAnimation;
+    }
+    // homestead_agent.pail_pour EVENTS (seconds): her left hand takes the pail by its side, the
+    // water starts and stops running, and her right fist takes the bail again. SPOT: where the
+    // stream lands, ahead of her.
+    static constexpr float PailTakeStart = 16.0f / 30.0f;
+    static constexpr float PailTakeEnd = 22.0f / 30.0f;
+    static constexpr float PailPourStart = 36.0f / 30.0f;
+    static constexpr float PailPourStop = 64.0f / 30.0f;
+    static constexpr float PailGiveStart = 80.0f / 30.0f;
+    static constexpr float PailGiveEnd = 86.0f / 30.0f;
+    static constexpr float PourForward = 43.0f;
+    static constexpr float PourRight = 0.0f;
+    // homestead_agent.pail_fill: the pail goes into the water this far ahead and to her right.
+    static constexpr float FillForward = 59.0f;
+    static constexpr float FillRight = 12.0f;
+    bool IsFillingPail() const { return bFillingPail; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
     UAnimSequence* GetClearAnimation() const { return ClearAnimation; }
     UAnimSequence* GetKnifeCutAnimation() const { return KnifeCutAnimation; }
@@ -138,6 +159,8 @@ public:
     static float StonePileSize(int32 Index, bool bHandStone) { return bHandStone ? 13.0f + Index * 3.0f : 24.0f + Index * 4.0f; }
     void PlayWater();
     void PlayWater(Homestead::Point Target);
+    // Kneel at the bank and fill the pail in the stream at Stream (a point on the water).
+    void PlayFillPail(Homestead::Point Stream);
     void PlayClear();
     void PlayClear(Homestead::Point Target);
     void PlayKnifeCut(Homestead::Point Target);
@@ -269,6 +292,13 @@ private:
     bool bHairHasLastHead = false;
     void UpdateHairMotion(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> PailPourAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> PailFillAnimation;
+    bool bFillingPail = false;
+    // The water running from the pail's lip while she pours (a thin translucent column).
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> PourStream;
+    // Two-handed pouring: the pail laid between her fists instead of hanging from the bail.
+    void UpdateWaterPail(UStaticMeshComponent& Pail, float DeltaSeconds);
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> KnifeCutAnimation;

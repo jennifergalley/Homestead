@@ -449,6 +449,8 @@ private:
     // Switch build mode between placing the chosen plan and taking pieces down (Y / X).
     void ToggleDeconstruct();
     void UpdateDeconstruct(bool bForce);
+    // Fill the watering pail at the stream, with her kneeling fill when it succeeds.
+    void FillPailAtStream(Homestead::Point Position);
     void EndPlacement();
     void Notify(const Homestead::Result& Result, USoundBase* SuccessCue = nullptr);
     void Notify(const FString& Text, bool Error = false);
