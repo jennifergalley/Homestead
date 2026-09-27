@@ -55,6 +55,12 @@ manor and boundary lanes haven't merged yet.
   assume.
 - Shared-doc findings go through the docs agent (`docs\handoff\README.md`).
 
+## Tooling requests (unassigned)
+
+- A launch argument for the packaged Development build to set the start hour and take a screenshot
+  without typing into the console (for example `-HomesteadStartHour=`), for night-lighting QA
+  in the packaged build, since PIE runs without ray tracing. Asked for by the MVP lane.
+
 ## Next
 
 - Integrate the remaining lanes, bump the save version once, package the estate build to its own

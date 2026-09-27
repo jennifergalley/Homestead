@@ -89,6 +89,10 @@ Search this table for the error text before debugging. Add a row when you solve 
 | C++ duplicate-symbol or redefinition errors between unrelated `.cpp` files | Unreal unity builds merge translation units, including anonymous namespaces | Give file-local helpers unique prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`). |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | Default argument errors with `Homestead::` enums in `HomesteadCharacter.h` | The header only forward-declares the enum | Use overloads or `{}`, not enum default arguments. |
+| `System.Exception: A conflicting instance of AutomationTool is already running` (in `%LOCALAPPDATA%\UnrealEngine\Programs\AutomationTool\Saved\Logs\ErrorLog.txt`); the script only says "Game packaging failed (1)" | UAT is single-instance machine-wide and another worktree is packaging | `Build-Game.ps1` now passes `-WaitForUATMutex` and waits. For a hand-run `RunUAT.bat`, add it yourself. |
+| `git status` shows dozens of modified `.uasset`s (Audio, heroine animations and materials) after `Build-Game.ps1` | The content bootstrap re-saves generated assets | Restore the ones your change didn't intend (`git checkout -- <paths>`) before committing. `-PackageOnly` skips the bootstrap when content is current. |
+| PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
+| `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
 | `LogIoStore: Error: Failed to launch ZenServer` while packaging (see `Saved\Logs\UnrealPak.log`) | Another worktree's `zenserver` holds port 8558 | Unconfirmed workaround: a unique `[Zen.AutoLaunch] DesiredPort=` in this worktree's `Saved\Config\WindowsEditor\Engine.ini` and `Saved\Config\Windows\Engine.ini`. Or wait until the other package finishes. |
 | UAT log shows another worktree's build | `%APPDATA%\Unreal Engine\AutomationTool\Logs\E+Program+Files+UE_5.8\` is shared and overwritten | Redirect `Build-Game.ps1` output to a log in your worktree (`*> Build\Logs\package.log`). |
 | `git pull`/`rebase`: `unable to unlink ... Invalid argument` on `.uasset` | Your editor holds the file | Close the editor, then `git status` and finish the rebase. |
@@ -380,10 +384,10 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete|Fell`,
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Water|Chop|Knife|Till|Machete|Fell`,
   `LabHold Knife|Hatchet|DiggingStick|Pail|Machete|None` (the hand-carry prop for that tool, as
   when it's selected on the hotbar),
-  `LabProp Sticks|Stones|Roots|Berries|None` (puts that pile on the ground in front of her, the way the
+  `LabProp Sticks|Stones|Roots|Berries|Reeds|None` (puts that pile on the ground in front of her, the way the
   woodland does), `LabLoop <action>|Off` (replays the action every few seconds from the same
   spot with a fresh pile, so Jenny can watch it repeat), `LabSun <hour>`, `LabCourse`
   (10/20/30° ramps and 10/20 cm steps at x = 2500), `LabTeleport <x> <y>`, `slomo 0.25`,
@@ -400,6 +404,8 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
   her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
   when she kneels; use them only for a specific close-up, and share the full-body view too.
+- Contact sheets of an action: `hshot` (HighResShot) takes about 3 s per still, so slow the action
+  with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below).
 - `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
   worst clearance per carried stick and body part in PIE (negative cm = inside her).
 
@@ -408,6 +414,10 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
 `homestead_agent.rig_authoring.Session` builds a level sequence with the heroine body and her
 `MetaHuman_ControlRig`, keys controls, and bakes an AnimSequence. Details that cost time to find:
 
+- **Plan poses within her reach before keying.** In authoring component space (forward +Y, her
+  left +X, up +Z) the shoulders sit at about (±15, 0..11, 140) and shoulder to wrist is about 50 cm.
+  Two-handed holds need the hands' span to fit the object (a pail pour designed for a 33 cm span
+  was unreachable; the hands reached only 16-22 cm). The bake report's IK error is the only signal.
 - `ControlRigSequencerLibrary.set_local_control_rig_*` doesn't key from Python here. Write the
   section channels directly (`control.Location.X`, `control.Rotation.X` = roll/Y = pitch/Z = yaw);
   the Session helpers do this.
@@ -595,12 +605,16 @@ Extend it there when play needs a capability; prefer real input over state edits
   `Build\Native\Release\<Suite>.exe *> <log>`; stdout is buffered, so a crash loses unredirected output.
 - **Package:** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
-  commandlets, one at a time) and runs UAT. Each of those counts toward the 3-process limit, and the
-  cook starts more. It writes `Build\Logs\bootstrap.log` and `Build\Logs\package-<time>.log` in your
-  worktree; the UAT log under `%APPDATA%` is shared and unreliable. The script refuses to package
-  over a running player; close `SurvivalGame`/`JennysHomesteadGame` processes from that folder
-  first (for Jenny's builds, see section 7 and section 0).
-- **Packaged smoke and route tests:** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1).
+  commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
+  this worktree's generated content is already current. UAT is single-instance machine-wide; the
+  script waits (`-WaitForUATMutex`) behind another worktree's package. Each Unreal step counts
+  toward the 3-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
+  `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
+  unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
+  script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
+  processes from that folder first (for Jenny's builds, see sections 0 and 7).
+- **Packaged smoke and route tests:** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
+  point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
   the MetaHuman heroine yourself (field notes).
 - **Blender props into Unreal:** import them in your running editor with `py` (see Props in the
