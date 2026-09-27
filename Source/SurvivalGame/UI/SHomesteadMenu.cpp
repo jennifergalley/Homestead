@@ -99,6 +99,7 @@ float PortraitColumnWidth()
 {
     return FMath::Min(420.0f, 240.0f + (LogicalBookWidth() - 1280.0f) * 0.14f);
 }
+constexpr float AppearancePanelWidth = 470.0f;
 float DetailsColumnWidth()
 {
     return FMath::Min(560.0f, 340.0f + (LogicalBookWidth() - 1280.0f) * 0.18f);
@@ -323,7 +324,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     ChildSlot
     [
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-        .BorderBackgroundColor(FLinearColor(0.015f, 0.03f, 0.02f, 0.28f)).Padding(0)
+        .BorderBackgroundColor_Lambda([this]() { return FLinearColor(0.015f, 0.03f, 0.02f, SeenPage == 6 ? 0.0f : 0.28f); }).Padding(0)
         [
             SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
             [
@@ -537,7 +538,7 @@ int32 SHomesteadMenu::Columns() const
 {
     const bool Expanded = LogicalBookWidth() >= 1800;
     return SeenPage == 0 ? (Expanded ? 12 : 9)
-        : SeenPage <= 2 ? (Expanded ? 10 : 6) : SeenPage == 6 ? 2 : 1;
+        : SeenPage <= 2 ? (Expanded ? 10 : 6) : 1;
 }
 
 void SHomesteadMenu::Refresh()
@@ -847,7 +848,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     const bool PackOnly = SeenPage == 0 && !Storage;
     TSharedPtr<SHorizontalBox> ColumnsBox;
     Body->AddSlot().FillHeight(1).HAlign(PackOnly ? HAlign_Center : HAlign_Fill)[ SAssignNew(ColumnsBox, SHorizontalBox) ];
-    if ((SeenPage == 0 || SeenPage == 6) && !Storage && Controller->MenuPortraitBrush())
+    if (SeenPage == 0 && !Storage && Controller->MenuPortraitBrush())
     {
         ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, 12, 0)
         [
@@ -898,6 +899,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             SAssignNew(InventoryColumn, SVerticalBox)
         ];
     if (PackOnly) ColumnsBox->AddSlot().AutoWidth()[ InventoryPanel ];
+    // Appearance is a narrow column at the left; she stands in the world to its right.
+    else if (SeenPage == 6) ColumnsBox->AddSlot().AutoWidth()[ SNew(SBox).WidthOverride(AppearancePanelWidth)[ InventoryPanel ] ];
     else ColumnsBox->AddSlot().FillWidth(1).Padding(0, 0, SeenPage == 0 ? 0 : 16, 0)[ InventoryPanel ];
     if (SeenPage == 0 && !Storage)
     {
@@ -1028,6 +1031,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             .Text_Lambda([this]() { return FText::FromString(PackHint()); })
         ];
     }
+    else if (SeenPage == 6) { DetailsHost.Reset(); DetailsScroll.Reset(); }
     else
     ColumnsBox->AddSlot().AutoWidth()
         [
@@ -1119,12 +1123,21 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         && Entries[Index].Subject == EHomesteadMenuSubject::ItemGroup)
                         OpenQuantityPrompt(Entries[Index]);
                     if (Entries.IsValidIndex(ContentSelection)
-                        && IsDirectCameraSetting(Entries[ContentSelection]))
+                        && (IsDirectCameraSetting(Entries[ContentSelection]) || SeenPage == 2 || SeenPage == 6))
                         RunAction(EHomesteadItemAction::Primary);
                 }
                 return FReply::Handled();
             })
             [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
+        if (SeenPage == 6)
+            StaticCastSharedRef<SMenuButton>(Button)->RightClick = [this, Index]()
+            {
+                if (!PointerAction() || Dialog != EDialog::None || !Entries.IsValidIndex(Index)) return;
+                Region = ERegion::Content;
+                Select(Index);
+                Controller->MenuStepAppearance(Entries[Index].Id, -1);
+                Refresh();
+            };
         if (SeenPage == 0 && (Row.Subject == EHomesteadMenuSubject::ItemGroup || Row.Subject == EHomesteadMenuSubject::Wearable))
             StaticCastSharedRef<SMenuButton>(Button)->RightClick = [this, Index]()
             {
@@ -1196,7 +1209,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         if (SeenPage > 1)
             Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
         Cell = SNew(SBox).WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth) : FOptionalSize())
-            .MinDesiredWidth(SeenPage <= 2 ? ItemCellWidth : SeenPage == 4 ? 330 : SeenPage == 6 ? 250 : 670)
+            .MinDesiredWidth(SeenPage <= 2 ? ItemCellWidth : SeenPage == 4 ? 330 : SeenPage == 6 ? AppearancePanelWidth - 60 : 670)
             .MinDesiredHeight(SeenPage == 0 ? 76 : SeenPage == 1 ? 96 : SeenPage <= 2 ? 144 : 72)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
@@ -1999,7 +2012,7 @@ void SHomesteadMenu::Activate()
     }
     else if (Region == ERegion::Actions && Actions.IsValidIndex(ActionSelection)) RunAction(Actions[ActionSelection]);
     else if (Region == ERegion::Content && Entries.IsValidIndex(ContentSelection)
-        && SeenPage == 4)
+        && (SeenPage == 4 || SeenPage == 2 || SeenPage == 6))
         RunAction(EHomesteadItemAction::Primary);
     else if (SeenPage == 0)
     {
@@ -2111,11 +2124,11 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
         SynchronizeFocus();
         return;
     }
-    if (Controller->MenuPortraitBrush()) Regions.Add(ERegion::Portrait);
+    if (Controller->MenuPortraitBrush() && SeenPage == 0) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
-    if (SeenPage != 0) Regions.Add(ERegion::Details);
-    if (!Actions.IsEmpty() && SeenPage != 0) Regions.Add(ERegion::Actions);
+    if (SeenPage != 0 && SeenPage != 6) Regions.Add(ERegion::Details);
+    if (!Actions.IsEmpty() && SeenPage != 0 && SeenPage != 6) Regions.Add(ERegion::Actions);
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
     ScrollActionIntoView();
@@ -2166,6 +2179,12 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     {
     case ERegion::Content:
     {
+        if (SeenPage == 6 && Direction.x && Entries.IsValidIndex(ContentSelection))
+        {
+            Controller->MenuStepAppearance(Entries[ContentSelection].Id, Direction.x);
+            Refresh();
+            return;
+        }
         if (SeenPage == 4 && Entries.IsValidIndex(ContentSelection))
         {
             // Save / Load / Quit form one row above the Game / Sound / Video tabs; the tab's
@@ -2691,17 +2710,28 @@ void SHomesteadMenu::BuildDialog()
     AmountControl.Reset();
     ModalHost->SetVisibility(EVisibility::Visible);
     ModalHost->SetContent(
+        // A compact card centred over a dimmed screen, not a full-width sheet.
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-        .BorderBackgroundColor(FLinearColor(0.01f, 0.025f, 0.015f, 0.8f)).Padding(170, 110)
+        .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.45f)).Padding(0)
+        .HAlign(HAlign_Center).VAlign(VAlign_Center)
         [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)[ Text(Title, 30) ]
-            + SVerticalBox::Slot().FillHeight(1)
-            [ SNew(SScrollBox) + SScrollBox::Slot()[ Text(Description, 20) ] ]
-            + SVerticalBox::Slot().AutoHeight()
+            SNew(SBox).WidthOverride(Dialog == EDialog::Exit || Dialog == EDialog::Unsaved ? 620.0f : 760.0f)
+            .MaxDesiredHeight(820)
             [
-                SNew(SBox).MaxDesiredHeight(230)
-                [ SAssignNew(DialogScroll, SScrollBox) + SScrollBox::Slot()[ SAssignNew(Choices, SVerticalBox) ] ]
+                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                .BorderBackgroundColor(FLinearColor(0.01f, 0.025f, 0.015f, 0.92f)).Padding(FMargin(44, 34))
+                [
+                    SNew(SVerticalBox)
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ Text(Title, 30) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 18)
+                    [ SNew(SBox).MaxDesiredHeight(360)
+                        [ SNew(SScrollBox) + SScrollBox::Slot()[ Text(Description, 20) ] ] ]
+                    + SVerticalBox::Slot().AutoHeight()
+                    [
+                        SNew(SBox).MaxDesiredHeight(230)
+                        [ SAssignNew(DialogScroll, SScrollBox) + SScrollBox::Slot()[ SAssignNew(Choices, SVerticalBox) ] ]
+                    ]
+                ]
             ]
         ]);
     if (Dialog == EDialog::Amount)

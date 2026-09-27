@@ -448,7 +448,6 @@ void AHomesteadSmokeTest::Prepare()
             if (!Controller->NativeMenu.IsValid() || !Controller->NativeMenu->FocusLegacySubject(0))
             { Finish(false, TEXT("The hairstyle control is unavailable in the native Appearance page.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this]() { return Controller->HasHeroine() && Controller->GetAppearance().HairStyle == 1; }, 0.8f);
     Add(TEXT("Capture the bob-haired heroine"),
@@ -458,7 +457,6 @@ void AHomesteadSmokeTest::Prepare()
     {
         if (!Controller->NativeMenu.IsValid() || !Controller->NativeMenu->FocusLegacySubject(Id))
         { Finish(false, TEXT("A required native Appearance control is unavailable.")); return; }
-        Tap(EKeys::Gamepad_FaceButton_Bottom);
         Tap(EKeys::Gamepad_FaceButton_Bottom);
     };
     for (int32 Row = 1; Row <= 3; ++Row)
@@ -473,7 +471,6 @@ void AHomesteadSmokeTest::Prepare()
         Add(FString::Printf(TEXT("Change appearance color row %d"), Row),
             [this]()
             {
-                Tap(EKeys::Gamepad_FaceButton_Bottom);
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
             [this, Row]()
@@ -497,8 +494,19 @@ void AHomesteadSmokeTest::Prepare()
         }, 0.8f);
     Add(TEXT("Capture the ponytail"), [this]() { Screenshot(TEXT("heroine-ponytail")); },
         []() { return true; }, 0.8f);
-    Add(TEXT("Cycle back to long hair"), [ActivateAppearance]() { ActivateAppearance(0); },
-        [this]() { return Controller->GetAppearance().HairStyle == 0; });
+    for (int32 Style = 3; Style <= HomesteadLook::MetaHairCount; ++Style)
+    {
+        const int32 Next = Style % HomesteadLook::MetaHairCount;
+        Add(Next == 0 ? FString(TEXT("Cycle back to long hair"))
+                : FString::Printf(TEXT("Choose MetaHuman hairstyle: %s"), HomesteadLook::MetaHairName(Next)),
+            [ActivateAppearance]() { ActivateAppearance(0); },
+            [this, Next]() { return Controller->GetAppearance().MetaHair == Next
+                && Controller->GetAppearance().HairStyle == HomesteadLook::LegacyHairStyle(Next); }, 0.8f);
+        if (Next != 0)
+            Add(TEXT("Capture the MetaHuman hairstyle"),
+                [this, Next]() { Screenshot(FString::Printf(TEXT("heroine-hair-%s"), HomesteadLook::MetaHairGroom(Next))); },
+                []() { return true; }, 0.6f);
+    }
     Add(TEXT("Return to the bob"), [ActivateAppearance]() { ActivateAppearance(0); },
         [this]() { return Controller->GetAppearance().HairStyle == 1; });
     const TCHAR* BodyNames[] = {TEXT("Preferred"), TEXT("Willow"), TEXT("Hazel")};
@@ -673,11 +681,7 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Open the building page"),
         [this]() { Tap(EKeys::B); },
         [this]() { return Controller->BookPage() == 2 && Controller->SelectedRow() == 0; });
-    Add(TEXT("Enter the selected foundation's native actions"),
-        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return !Controller->HasNativeMenu()
-            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
-    Add(TEXT("Enter construction preview"),
+    Add(TEXT("Enter construction preview straight from the foundation tile"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && !Controller->IsBookOpen(); });
     Add(TEXT("Commit a foundation from the preview"),

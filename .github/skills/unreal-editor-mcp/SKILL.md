@@ -781,3 +781,16 @@ Dated and short, newest first. Promote anything durable into the sections above.
   traces, require the `ProceduralMeshComponent` hit and a single hit per column; otherwise a
   teleport lands the heroine on a tree canopy.
 - 2026-09-25: The view tool sometimes reports a freshly written PNG as missing; view it again.
+- 2026-09-27: Sequencer animation bakes (`homestead_agent.axe_fell`, `hoe_till`) fail and hang while
+  PIE runs ("Editor is currently in a play mode"). Stop PIE before baking.
+- 2026-09-27: `homestead_agent.metahuman_hair` copies stock MetaHuman grooms into
+  `/Game/Characters/Heroine_MH/Common/Optional/Grooms/GroomAssets/Hair/<Style>`, repoints their
+  materials at the heroine's hair instances and builds a `<Style>_Binding` against her face. Its
+  `STYLES` order must match `HomesteadLook::MetaHairGroom`.
+- 2026-09-27: Idle tool angles can be tuned live with `homestead.CarryHatchet`, `CarryHoe`,
+  `CarryMachete` and `CarryKnife` (degrees; -1 keeps the default). If the hoe carry changes, re-read
+  its transform relative to `hand_r` and update `HELD` in `hoe_till.py` before rebaking.
+- 2026-09-27: When scripting the packaged suites, pass switches as a hashtable splat
+  (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
+  `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
+  Move `Saved\Automation\Packaged\native-wardrobe-fixture*` into `History\` before a NativeMenu run.

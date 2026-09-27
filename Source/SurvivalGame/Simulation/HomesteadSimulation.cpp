@@ -1765,6 +1765,28 @@ PlacementTarget Simulation::ResolvePlacement(Piece kind, Point aim, double freeY
             for (int side = 0; side < 4; ++side)
                 if (!floors.count({buildingId, x + dx[side], y + dy[side]})) consider(x + dx[side], y + dy[side]);
         }
+        else if (EdgePiece(kind))
+        {
+            // Walls and doorways take the floor edge nearest the aim, turned to lie along it, so
+            // they never need rotating by hand. The floor under the aim wins a shared edge.
+            static const double ex[] = {0.0, 0.5, 0.0, -0.5};
+            static const double ey[] = {0.5, 0.0, -0.5, 0.0};
+            const Point center = CellCenter(x, y);
+            for (int side = 0; side < 4; ++side)
+            {
+                const Point edge{center.x + ex[side] * CellSize, center.y + ey[side] * CellSize};
+                const double distance = std::sqrt(DistanceSquared(local, edge)) + (insideFloor ? 0.0 : 1.0);
+                if (distance >= SnapReach && !insideFloor) continue;
+                PlacementTarget snap = target;
+                snap.buildingId = buildingId;
+                snap.cellX = x;
+                snap.cellY = y;
+                snap.rotation = side;
+                snap.frame = *building;
+                snap.snapped = true;
+                snaps.emplace_back(distance, std::move(snap));
+            }
+        }
         // Furniture joins a floor only when aimed inside it; walls and roofs take the nearest floor.
         else if (!Furniture(kind) || insideFloor) consider(x, y);
     }

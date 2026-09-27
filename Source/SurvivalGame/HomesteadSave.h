@@ -29,6 +29,8 @@ public:
     UPROPERTY() int32 TunicColor = 0;
     UPROPERTY() int32 Outfit = 0;
     UPROPERTY() int32 BodyPreset = 0;
+    // MetaHuman hairstyle; -1 in saves written before it existed (derived from HairStyle).
+    UPROPERTY() int32 MetaHair = -1;
     UPROPERTY() TArray<int32> HotbarSlots;
     UPROPERTY() int32 SelectedHotbarSlot = 0;
     // 0: saved before food could be pinned; 1: pinned food and the machete migration applied.

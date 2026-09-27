@@ -326,7 +326,9 @@ void AHomesteadController::BeginPlay()
     ResetHotbar();
     if (!SmokeTest && !VisualPlaytest
         && FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01")))
-        Appearance.HairStyle = 1;
+    {
+        Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
+    }
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
     {
@@ -831,7 +833,8 @@ void AHomesteadController::UseSelectedTool()
 
 void AHomesteadController::RefreshMenuPortrait()
 {
-    if (!bBookOpen || (Page != 0 && Page != 6))
+    // Appearance shows her in the world itself; only the pack page has a portrait.
+    if (!bBookOpen || Page != 0)
     {
         if (MenuPortrait) MenuPortrait->Destroy();
         MenuPortrait = nullptr;
@@ -2114,7 +2117,8 @@ void AHomesteadController::OpenBook(int32 TargetPage)
         Avatar->CancelAction(true);
         Avatar->CancelSprint();
         Avatar->GetCharacterMovement()->StopMovementImmediately();
-        Avatar->SetAppearancePreview(false);
+        // Appearance turns the camera to face her where she stands, beside its column of choices.
+        Avatar->SetAppearancePreview(Page == 6);
     }
     ShowNativeMenu();
 }
@@ -2296,7 +2300,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     }
     else if (Page == 6)
     {
-        Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::HairStyleName(Appearance.HairStyle)), TEXT("Long waves, a straight bob, or a practical ponytail.")});
+        Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::MetaHairName(Appearance.MetaHair)), TEXT("MetaHuman hairstyles: long, bobbed, tied back, braided or cropped.")});
         Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("Chestnut, dark brown, black, copper, or blonde. Hair color is independent of hairstyle.")});
         Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)), TEXT("Prototype tone adjustments; deeper presets follow.")});
         Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Iris color changes preserve the whites and pupils.")});
@@ -2339,7 +2343,9 @@ FString AHomesteadController::BookSummary() const
         ? TEXT("Move whole stacks between this chest and your pack.")
         : TEXT("Carried items and equipped clothing.");
     case 1: return FString();
-    case 2: return TEXT("Choose a plan to preview placement. Materials are spent when you place it.");
+    case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
+    case 6: return bGamepad ? TEXT("A or Right: next choice   Left: previous. She changes as you choose.")
+        : TEXT("Click for the next choice, right-click for the previous. She changes as you choose.");
     case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
         static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
     default: return {};
@@ -2374,6 +2380,36 @@ FString AHomesteadController::BookFooter() const
     return Footer;
 }
 
+void AHomesteadController::MenuStepAppearance(int32 Id, int32 Direction)
+{
+    if (!bBookOpen || Page != 6 || bMenuSaveInProgress) return;
+    if (IsFailed()) { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
+    const auto Step = [Direction](int32 Value, int32 Count) { return ((Value + (Direction < 0 ? -1 : 1)) % Count + Count) % Count; };
+    FHomesteadAppearance Next = Appearance;
+    switch (Id)
+    {
+    case 0: Next.MetaHair = Step(Next.MetaHair, HomesteadLook::MetaHairCount); Next.HairStyle = HomesteadLook::LegacyHairStyle(Next.MetaHair); break;
+    case 1: Next.HairColor = Step(Next.HairColor, HomesteadLook::HairColorCount); break;
+    case 2: Next.SkinTone = Step(Next.SkinTone, 4); break;
+    case 3: Next.EyeColor = Step(Next.EyeColor, 4); break;
+    case 4: Next.TunicColor = Step(Next.TunicColor, 4); break;
+    case 5: Next.Outfit = Step(Next.Outfit, 2); break;
+    case 6: Next.BodyPreset = Step(Next.BodyPreset, 3); break;
+    default: Notify(TEXT("More character presets and clothes are planned. These controls are a first prototype.")); return;
+    }
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    FString AppearanceError;
+    const bool Applied = Avatar && (Avatar->IsEquipmentPresentationReady()
+        ? Avatar->PrepareEquipment(State(), Next, AppearanceError) && Avatar->ApplyPreparedEquipment(AppearanceError)
+        : Avatar->ApplyAppearance(Next));
+    if (!Applied)
+    {
+        Notify(TEXT("That appearance could not be applied. Your saved selection has not changed. ") + AppearanceError, true);
+        return;
+    }
+    Appearance = Next;
+    PlayEffect(UIClick, 0.08f);
+}
 void AHomesteadController::ActivateRow()
 {
     const auto Items = Rows();
@@ -2403,33 +2439,7 @@ void AHomesteadController::ActivateRow()
         if (Result.ok) Sim.AdvanceGameHours(0.05, PlayerPoint());
     }
     else if (Page == 2) BeginPlacement(static_cast<Homestead::Piece>(Id));
-    else if (Page == 6)
-    {
-        FHomesteadAppearance Next = Appearance;
-        switch (Id)
-        {
-        case 0: Next.HairStyle = (Next.HairStyle + 1) % 3; break;
-        case 1: Next.HairColor = (Next.HairColor + 1) % HomesteadLook::HairColorCount; break;
-        case 2: Next.SkinTone = (Next.SkinTone + 1) % 4; break;
-        case 3: Next.EyeColor = (Next.EyeColor + 1) % 4; break;
-        case 4: Next.TunicColor = (Next.TunicColor + 1) % 4; break;
-        case 5: Next.Outfit = (Next.Outfit + 1) % 2; break;
-        case 6: Next.BodyPreset = (Next.BodyPreset + 1) % 3; break;
-        default: Notify(TEXT("More character presets and clothes are planned. These controls are a first prototype.")); return;
-        }
-        auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-        FString AppearanceError;
-        const bool Applied = Avatar && (Avatar->IsEquipmentPresentationReady()
-            ? Avatar->PrepareEquipment(State(), Next, AppearanceError) && Avatar->ApplyPreparedEquipment(AppearanceError)
-            : Avatar->ApplyAppearance(Next));
-        if (!Applied)
-        {
-            Notify(TEXT("That appearance could not be applied. Your saved selection has not changed. ") + AppearanceError, true);
-            return;
-        }
-        Appearance = Next;
-        PlayEffect(UIClick, 0.08f);
-    }
+    else if (Page == 6) MenuStepAppearance(Id, 1);
     else if (Page == 4)
     {
         switch (Id)
@@ -2913,7 +2923,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
         || !FMath::IsFinite(Save->EffectsVolume) || Save->EffectsVolume < 0 || Save->EffectsVolume > 1)
         return nullptr;
     FHomesteadAppearance SavedLook;
-    SavedLook.HairStyle = Save->HairStyle;
+    SavedLook.HairStyle = Save->HairStyle; SavedLook.MetaHair = Save->MetaHair >= 0 ? Save->MetaHair : HomesteadLook::MetaHairForLegacy(Save->HairStyle);
     SavedLook.HairColor = Save->HairColor;
     SavedLook.SkinTone = Save->SkinTone;
     SavedLook.EyeColor = Save->EyeColor;
@@ -2935,7 +2945,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
     if (!Save) { Notify(TEXT("Could not create a save record."), true); return false; }
     Save->WorldId = WorldId;
-    Save->HairStyle = Appearance.HairStyle;
+    Save->HairStyle = Appearance.HairStyle; Save->MetaHair = Appearance.MetaHair;
     Save->HairColor = Appearance.HairColor;
     Save->SkinTone = Appearance.SkinTone;
     Save->EyeColor = Appearance.EyeColor;
@@ -3003,7 +3013,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     const auto Region = Candidate.SetActiveWorldRegion({Save.PlayerLocation.X, Save.PlayerLocation.Y});
     if (!Region) { Notify(Region); return false; }
     FHomesteadAppearance Look;
-    Look.HairStyle = Save.HairStyle; Look.HairColor = Save.HairColor;
+    Look.HairStyle = Save.HairStyle; Look.MetaHair = Save.MetaHair >= 0 ? Save.MetaHair : HomesteadLook::MetaHairForLegacy(Save.HairStyle); Look.HairColor = Save.HairColor;
     Look.SkinTone = Save.SkinTone; Look.EyeColor = Save.EyeColor;
     Look.TunicColor = Save.TunicColor; Look.Outfit = Save.Outfit; Look.BodyPreset = Save.BodyPreset;
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -3046,7 +3056,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     }
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
-    Appearance.HairStyle = Save.HairStyle;
+    Appearance.HairStyle = Save.HairStyle; Appearance.MetaHair = Save.MetaHair >= 0 ? Save.MetaHair : HomesteadLook::MetaHairForLegacy(Save.HairStyle);
     Appearance.HairColor = Save.HairColor;
     Appearance.SkinTone = Save.SkinTone;
     Appearance.EyeColor = Save.EyeColor;
@@ -3213,7 +3223,9 @@ void AHomesteadController::NewGame()
     LoadProblem.Reset();
     Appearance = FHomesteadAppearance();
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadHeroineTrialVitruvian01")))
-        Appearance.HairStyle = 1;
+    {
+        Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
+    }
     ResetHotbar();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);

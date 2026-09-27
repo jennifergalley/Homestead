@@ -650,7 +650,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         UpdateHafts(Avatar);
         const auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
         const bool Lab = Avatar && !PC && Avatar->InCharacterLab();
-        const float Speed = Avatar && (Lab || (PC && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()))
+        // She walks around freely while planning a building, so her gait keeps playing then.
+        const float Speed = Avatar && (Lab || (PC && !PC->IsBookOpen() && !PC->IsFailed()))
             ? Avatar->GetVelocity().Size2D() : 0.0f;
         if (bTrialFootLock)
         {

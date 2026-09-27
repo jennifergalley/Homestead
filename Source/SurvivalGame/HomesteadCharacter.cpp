@@ -47,6 +47,13 @@ TAutoConsoleVariable<float> CVarHairAngularWalk(TEXT("homestead.HairAngularWalk"
 TAutoConsoleVariable<float> CVarHairAngularSprint(TEXT("homestead.HairAngularSprint"), 0.45f,
     TEXT("MetaHuman hair angular velocity scale at full sprint."));
 
+// Resting tool carries: degrees the head tips down from level (the wrist supplies RestWristDegrees
+// of it). Small values carry the tool nearly parallel to the ground. Negative = authored default.
+TAutoConsoleVariable<float> CVarCarryHatchet(TEXT("homestead.CarryHatchet"), -1.0f, TEXT("Hatchet carry tilt (deg)."));
+TAutoConsoleVariable<float> CVarCarryHoe(TEXT("homestead.CarryHoe"), -1.0f, TEXT("Stone hoe carry tilt (deg)."));
+TAutoConsoleVariable<float> CVarCarryMachete(TEXT("homestead.CarryMachete"), -1.0f, TEXT("Machete carry tilt (deg)."));
+TAutoConsoleVariable<float> CVarCarryKnife(TEXT("homestead.CarryKnife"), -1.0f, TEXT("Knife carry tilt (deg)."));
+
 
 const TCHAR* const MetaHumanRoot = TEXT("/Game/Characters/Heroine_MH");
 
@@ -504,10 +511,10 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     const FTransform StickTrail(FQuat(FVector::XAxisVector, PI), FVector(0, 0, -25));
     const FHeldToolAsset Assets[] = {
         {Homestead::Item::Knife, TEXT("FlintKnife/SM_FlintKnife"), 30, false, FTransform::Identity},
-        {Homestead::Item::Hatchet, TEXT("FlintHatchet/SM_FlintHatchet"), 58, false, FTransform::Identity},
-        // The stone hoe (pivot at the right hand's grip, blade at the far end) is carried tipped
-        // well forward so its head clears the ground; the digging stick is the fallback.
-        {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 54, false, FTransform::Identity},
+        {Homestead::Item::Hatchet, TEXT("FlintHatchet/SM_FlintHatchet"), 20, false, FTransform::Identity},
+        // Tools ride nearly level in a relaxed hand, heads a little low. The stone hoe (blade at the
+        // far end) is carried out in front from the top of its haft; the digging stick is the fallback.
+        {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 24, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
         {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
     };
@@ -673,8 +680,65 @@ bool AHomesteadCharacter::ApplyMetaHumanStack()
     Body->SetVisibility(true);
     bMetaHumanActive = true;
     if (!bSprintActive) GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
+    ApplyMetaHumanLook();
     bHeroineReady = true;
     return true;
+}
+
+void AHomesteadCharacter::ApplyMetaHumanLook()
+{
+    if (!MetaHumanHair || !MetaHumanLook.IsValid()) return;
+    const int32 Style = MetaHumanLook.MetaHair;
+    if (Style != AppliedMetaHair)
+    {
+        // Style 0 is the assembled groom; the rest are stock MetaHuman grooms copied into the
+        // project and bound to her face (homestead_agent.metahuman_hair).
+        const FString Groom = HomesteadLook::MetaHairGroom(Style);
+        const FString Base = Style == 0 ? FString::Printf(TEXT("Assembled/Heroine/Grooms/%s"), *Groom)
+            : FString::Printf(TEXT("Common/Optional/Grooms/GroomAssets/Hair/%s/%s"), *Groom, *Groom);
+        auto* Asset = LoadMetaHumanAsset<UGroomAsset>(Base);
+        auto* Binding = LoadMetaHumanAsset<UGroomBindingAsset>(Base + TEXT("_Binding"));
+        if (!Asset || !Binding)
+        {
+            UE_LOG(LogTemp, Error, TEXT("MetaHuman hairstyle %s is unavailable; keeping the current one."), *Groom);
+            return;
+        }
+        MetaHumanHair->SetGroomAsset(Asset, Binding);
+        AppliedMetaHair = Style;
+        bHairHasLastHead = false;
+    }
+    // Every groom's slots share the heroine's hair materials; the pigment follows her hair colour.
+    const TPair<const TCHAR*, const TCHAR*> Slots[] = {
+        {TEXT("MI_Hair"), TEXT("MI_WI_Hair_L_Straight_Hair")},
+        {TEXT("MI_Hair_Cards"), TEXT("MI_WI_Hair_L_Straight_Hair_Cards")},
+        {TEXT("MI_Hair_Helmet"), TEXT("MI_WI_Hair_L_Straight_Hair_Helmet")}};
+    const FVector2D Pigment = HomesteadLook::HairPigment(MetaHumanLook.HairColor);
+    for (const auto& Slot : Slots)
+    {
+        const int32 Index = MetaHumanHair->GetMaterialIndex(Slot.Key);
+        if (Index == INDEX_NONE) continue;
+        auto* Material = LoadMetaHumanAsset<UMaterialInterface>(FString::Printf(TEXT("Assembled/Heroine/Grooms/%s"), Slot.Value));
+        if (!Material) continue;
+        auto* Dynamic = UMaterialInstanceDynamic::Create(Material, MetaHumanHair);
+        Dynamic->SetScalarParameterValue(TEXT("hairMelanin"), Pigment.X);
+        Dynamic->SetScalarParameterValue(TEXT("hairRedness"), Pigment.Y);
+        MetaHumanHair->SetMaterial(Index, Dynamic);
+    }
+    for (UGroomComponent* Groom : MetaHumanGrooms)
+    {
+        if (!Groom || Groom == MetaHumanHair || Groom->GetName() != TEXT("MetaHumanEyebrows")) continue;
+        for (int32 Index = 0; Index < Groom->GetNumMaterials(); ++Index)
+            if (UMaterialInterface* Material = Groom->GetMaterial(Index))
+            {
+                auto* Dynamic = Cast<UMaterialInstanceDynamic>(Material);
+                if (!Dynamic) Dynamic = Groom->CreateDynamicMaterialInstance(Index, Material);
+                if (Dynamic)
+                {
+                    Dynamic->SetScalarParameterValue(TEXT("hairMelanin"), Pigment.X);
+                    Dynamic->SetScalarParameterValue(TEXT("hairRedness"), Pigment.Y);
+                }
+            }
+    }
 }
 
 bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance)
@@ -723,6 +787,7 @@ bool AHomesteadCharacter::ApplyAppearance(const FHomesteadAppearance& Appearance
         }
     }
     CancelAction(true);
+    MetaHumanLook = Appearance;
     if (UsesMetaHumanHeroine()) return ApplyMetaHumanStack();
     USkeletalMeshComponent* VisualMesh = GetMesh();
     if (VisualMesh->GetSkeletalMeshAsset() != Desired)
@@ -768,6 +833,7 @@ bool AHomesteadCharacter::PrepareEquipment(const Homestead::State& CandidateStat
     const FHomesteadAppearance& Look, FString& Error)
 {
     ClearPreparedEquipment();
+    PendingMetaHumanLook = Look;
     if (!LoadHeroineAssets())
     {
         Error = TEXT("Original heroine skeleton or animations are unavailable.");
@@ -798,6 +864,7 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         // The trial keeps the authoritative equipment record but presents the MetaHuman's own outfit.
         ActiveEquipment = MoveTemp(PreparedEquipment);
         ClearPreparedEquipment();
+        MetaHumanLook = PendingMetaHumanLook;
         if (ApplyMetaHumanStack()) return true;
         Error = TEXT("MetaHuman heroine assets are unavailable.");
         return false;
@@ -1426,7 +1493,9 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         if (Held)
         {
             Grip = 1;
-            HeldMachete->SetRelativeTransform(Tilt(MacheteGrip, MacheteCarryDegrees - RestWristDegrees));
+            const float MacheteCarry = CVarCarryMachete.GetValueOnGameThread() >= 0
+                ? CVarCarryMachete.GetValueOnGameThread() : MacheteCarryDegrees;
+            HeldMachete->SetRelativeTransform(Tilt(MacheteGrip, MacheteCarry - RestWristDegrees));
         }
     }
     for (int32 Index = 0; Index < HeldProps.Num(); ++Index)
@@ -1440,8 +1509,14 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         Prop->SetVisibility(Held);
         if (!Held) continue;
         Grip = 1;
+        const bool StoneHoe = Spec.Tool == Homestead::Item::DiggingStick && Prop->GetStaticMesh()
+            && Prop->GetStaticMesh()->GetName() == TEXT("SM_StoneHoe");
+        const float Tuned = Spec.Tool == Homestead::Item::Hatchet ? CVarCarryHatchet.GetValueOnGameThread()
+            : Spec.Tool == Homestead::Item::Knife ? CVarCarryKnife.GetValueOnGameThread()
+            : StoneHoe ? CVarCarryHoe.GetValueOnGameThread() : -1.0f;
+        const float CarryDegrees = Tuned >= 0 ? Tuned : Spec.CarryDegrees;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
-        Carry = CuttingReeds || Hoeing ? 0.0f : FMath::Min(Spec.CarryDegrees, RestWristDegrees);
+        Carry = CuttingReeds || Hoeing ? 0.0f : FMath::Min(CarryDegrees, RestWristDegrees);
         // Resting carries that differ from the working grip: the hatchet and knife hang edge-down
         // (turned about the haft) and the hoe is carried blade-low in front, turned end for end from
         // how she works it. The turn eases out with the tilt when an authored action takes over.
@@ -1449,16 +1524,22 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         float Slide = 0;
         if (Spec.Tool == Homestead::Item::Hatchet || Spec.Tool == Homestead::Item::Knife)
             Flip = FQuat(FVector::ZAxisVector, PI);
-        else if (Spec.Tool == Homestead::Item::DiggingStick && Prop->GetStaticMesh()
-            && Prop->GetStaticMesh()->GetName() == TEXT("SM_StoneHoe"))
+        else if (StoneHoe)
         {
             // Carried, her hand rides near the top of the haft so its end clears her hip.
             Flip = FQuat(FVector::XAxisVector, PI);
             Slide = -26.0f;
         }
-        const FTransform Turn = FTransform(FVector(0, 0, Slide * HeldToolTilt))
-            * FTransform(FQuat::Slerp(FQuat::Identity, Flip, HeldToolTilt));
-        if (!Spec.bHangs) Prop->SetRelativeTransform(Turn * Tilt(Spec.Rest, Spec.CarryDegrees - Carry));
+        // The hoe keeps its carried grip through the tilling clip (hoe_till.py is authored for
+        // it), so nothing turns in her hand as she starts or stops.
+        const float TurnWeight = StoneHoe ? 1.0f : HeldToolTilt;
+        const FTransform Turn = FTransform(FVector(0, 0, Slide * TurnWeight))
+            * FTransform(FQuat::Slerp(FQuat::Identity, Flip, TurnWeight));
+        const float Lean = CarryDegrees - (StoneHoe ? FMath::Min(CarryDegrees, RestWristDegrees) : Carry);
+        const FTransform HeldPose = StoneHoe
+            ? FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Lean))) * Spec.Rest
+            : Tilt(Spec.Rest, Lean);
+        if (!Spec.bHangs) Prop->SetRelativeTransform(Turn * HeldPose);
         if (Spec.bHangs) UpdateHangingPail(*Prop, DeltaSeconds);
     }
     if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
@@ -1475,8 +1556,8 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     if (!Animation || !Prop || !Prop->IsVisible()) return;
     const float Weight = Animation->FellWeight();
     if (Weight <= 0.01f) return;
-    // The left fist holds the knob and the right slides along the haft (axe_fell.py): the haft
-    // runs from the left grip centre toward the right, the edge along the left knuckles.
+    // The left fist holds the knob and the right closes just above it (axe_fell.py): the haft
+    // runs up from the left grip centre, the edge along the left knuckles.
     USkeletalMeshComponent* Body = GetMesh();
     const auto GripCentre = [Body](const TCHAR* Side, FVector& Along)
     {
@@ -1489,13 +1570,13 @@ void AHomesteadCharacter::UpdateFellingHatchet()
         const FVector Palm = (bLeft ? FVector::CrossProduct(Across, Along) : FVector::CrossProduct(Along, Across)).GetSafeNormal();
         return Hand + (Knuckle - Hand) * 0.75f + Palm * 3.3f;
     };
-    FVector AlongL, AlongR;
+    FVector AlongL;
     const FVector Knob = GripCentre(TEXT("l"), AlongL);
-    const FVector Upper = GripCentre(TEXT("r"), AlongR);
-    FVector Haft = Upper - Knob;
-    // With the hands together (address, impact) their spacing can't set the line; use the left fist's across axis.
+    // Both fists stay together at the base of the haft (axe_fell.py), so their spacing can't set
+    // the line; each closed fist's pinky-to-index axis runs along the haft.
     const FVector AcrossL = (Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"))).GetSafeNormal();
-    Haft = Haft.Size() > 6.0f ? Haft.GetSafeNormal() : AcrossL;
+    const FVector AcrossR = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
+    const FVector Haft = (AcrossL + AcrossR).GetSafeNormal().IsNearlyZero() ? AcrossL : (AcrossL + AcrossR).GetSafeNormal();
     const FVector Edge = (AlongL - Haft * FVector::DotProduct(AlongL, Haft)).GetSafeNormal();
     if (Edge.IsNearlyZero()) return;
     // Hatchet convention: head along +Z, edge toward -Y.
@@ -1867,7 +1948,28 @@ void AHomesteadCharacter::SetAppearancePreview(bool Enabled)
         SavedCameraDistance = CameraArm->TargetArmLength;
         CameraArm->TargetArmLength = 280;
         UpdateAppearanceFraming();
-        Controller->SetControlRotation(FRotator(-6, GetActorRotation().Yaw + 180, 0));
+        // Face her from the front, but swing around a trunk or wall that would pull the arm in close.
+        const float Front = GetActorRotation().Yaw + 180;
+        float Yaw = Front;
+        if (UWorld* World = GetWorld())
+        {
+            const FVector Pivot = CameraArm->GetComponentLocation();
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(AppearancePreview), false, this);
+            const float Swings[] = {0, 25, -25, 50, -50, 80, -80, 115, -115};
+            for (const float Swing : Swings)
+            {
+                const FRotator View(-6, Front + Swing, 0);
+                const FVector End = Pivot - View.Vector() * CameraArm->TargetArmLength
+                    + View.Quaternion().RotateVector(CameraArm->SocketOffset);
+                if (!World->SweepTestByChannel(Pivot, End, FQuat::Identity, ECC_Camera,
+                    FCollisionShape::MakeSphere(CameraArm->ProbeSize), Query))
+                {
+                    Yaw = Front + Swing;
+                    break;
+                }
+            }
+        }
+        Controller->SetControlRotation(FRotator(-6, Yaw, 0));
     }
     else
     {

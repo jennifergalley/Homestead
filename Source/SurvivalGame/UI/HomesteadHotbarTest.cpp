@@ -492,7 +492,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     Add(TEXT("Open Appearance without showing a Knife through the field book"),
         [this, OldHairStyle, OldBodyPreset]()
         {
-            *OldHairStyle = Controller->Appearance.HairStyle;
+            *OldHairStyle = Controller->Appearance.MetaHair;
             *OldBodyPreset = Controller->Appearance.BodyPreset;
             Controller->MenuPage(6);
         },
@@ -512,7 +512,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             const bool Passed = Controller->IsBookOpen() && Controller->BookPage() == 6
-                && Controller->Appearance.HairStyle == (*OldHairStyle + 1) % 3
+                && Controller->Appearance.MetaHair == (*OldHairStyle + 1) % HomesteadLook::MetaHairCount
                 && Controller->SelectedHotbarIndex() == 0
                 && Avatar && Avatar->IsEquipmentPresentationReady()
                 && !Avatar->GetKnife()->IsPresented();

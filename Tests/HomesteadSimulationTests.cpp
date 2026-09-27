@@ -662,19 +662,25 @@ void FreeStandingBuildings()
     // A world-grid foundation overlapping the turned floor is refused too.
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -2, 0, 0, site); });
 
-    // Walls and roofs need a foundation; aimed at one, they join its cell and edges.
+    // Walls and roofs need a foundation; aimed at one, they join its cell and edges. Walls and
+    // doorways take the edge nearest the aim whatever rotation is asked for.
     const auto stray = sim.ResolvePlacement(Piece::Wall, {-1300, -800}, 0.0, 0);
     CHECK(!stray.blocker.empty());
     UnchangedFailure(sim, [&] { return sim.Place(stray, {-1300, -800}); });
-    const std::pair<Piece, int> cabin[] = {{Piece::Roof, 0}, {Piece::Doorway, 0}, {Piece::Wall, 1},
-        {Piece::Wall, 2}, {Piece::Wall, 3}};
+    struct CabinPiece { Piece kind; Point aim; int rotation; };
+    const CabinPiece cabin[] = {{Piece::Roof, {40, 30}, 0}, {Piece::Doorway, {10, 120}, 0},
+        {Piece::Wall, {125, 20}, 1}, {Piece::Wall, {-15, -110}, 2}, {Piece::Wall, {-140, 40}, 3}};
     for (const auto& piece : cabin)
     {
-        const auto target = sim.ResolvePlacement(piece.first, offset(site, {40, 30}, 30.0), 200.0, piece.second);
+        const auto target = sim.ResolvePlacement(piece.kind, offset(site, piece.aim, 30.0), 200.0, 3);
         CHECK(target.snapped && target.buildingId == building && target.cellX == 0 && target.cellY == 0);
         OK(sim.Place(target, site));
-        CHECK(sim.GetState().structures.back().rotation == piece.second);
+        CHECK(piece.kind == Piece::Roof || sim.GetState().structures.back().rotation == piece.rotation);
     }
+    // Aimed at a shared edge that is already walled, a wall moves on to the nearest free edge.
+    const auto again = sim.ResolvePlacement(Piece::Wall, offset(site, {165, 10}, 30.0), 0.0, 2);
+    CHECK(again.snapped && again.buildingId == building && again.cellX == 1 && again.cellY == 0 && again.rotation == 0);
+    CHECK(sim.CheckPlacement(again, site).ok);
     CHECK(sim.IsSheltered(site));
     CHECK(sim.IsSheltered(offset(site, {120, 120}, 30.0)));
     CHECK(!sim.IsSheltered(offset(site, {300, 0}, 30.0)));

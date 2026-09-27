@@ -2,21 +2,23 @@
 
     from homestead_agent import hoe_till as ht
     anim = ht.build()      # bakes /Game/Characters/Heroine_MH/Animations/AN_HeroineMH_HoeTill
-    print(ht.report(anim)) # blade edge against the soil at each key
+    print(ht.report(anim)) # blade tip against the soil at each key
 
-She sets her feet (left foot forward, knees bent), bends from the hips over the square, raises the
-hoe with the right hand down the haft and the left on its end, and chops the blade down into the
-soil in front of her, then draws it back toward her to turn the earth. A second chop lands a hand's
-width to the side, then she straightens and lets the hoe down to the carry. The game shows the
-square's turned soil from EVENTS['chop1'].
+She keeps the hoe in the grip she carries it with (right hand at the top of the haft, blade out in
+front), so nothing turns in her hand as she starts or stops: she sets her feet, bends from the
+hips over the square and lays the blade on the soil, brings her left hand onto the haft, lifts the
+blade a little, chops it down into the earth in front of her and draws it back toward her along
+the ground to turn the soil. A second chop lands a hand's width to the side, then she lets the hoe
+back up into the carry. The game shows the square's turned soil from EVENTS['chop1'].
 
-SM_StoneHoe (Assets/Props/StoneHoe/report.json "attach"): pivot at the right hand's grip centre,
-haft along +Z toward its top end (the left hand at LEFT_ALONG), blade at the far -Z end pointing
--Y (the direction the right hand's knuckles face in its closed grip, as for the hatchet).
+The keys name where the blade's tip is and the direction the haft points toward the blade; the
+right wrist follows from the hoe's carried placement in her hand (``HELD``, read from the running
+game's ``Held_SM_StoneHoe`` component relative to ``hand_r`` with ``homestead.CarryHoe`` at its
+default). SM_StoneHoe (Assets/Props/StoneHoe/report.json "attach"): pivot at the old working grip,
+haft along +Z toward its top end, blade tip at (0, -EDGE_OUT, EDGE_ALONG).
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
 """
-import math
 import unreal
 from homestead_agent import rig_authoring as ra
 from homestead_agent import kneel_gather as kg
@@ -26,63 +28,79 @@ SEQUENCE = 'LS_HoeTill'
 ANIM = 'AN_HeroineMH_HoeTill'
 
 FRAMES = {
-    'stand': 0, 'set': 12, 'raise1': 22, 'chop1': 30, 'bite1': 33, 'draw1': 42,
-    'raise2': 52, 'chop2': 60, 'bite2': 63, 'draw2': 72, 'recover': 86, 'end': 100,
+    'stand': 0, 'set': 14, 'raise1': 24, 'chop1': 31, 'bite1': 34, 'draw1': 44,
+    'raise2': 54, 'chop2': 61, 'bite2': 64, 'draw2': 74, 'recover': 88, 'end': 102,
 }
 EVENTS = {'chop1': FRAMES['chop1'] / 30, 'chop2': FRAMES['chop2'] / 30}
-# From the grip pivot (report.json attach), cm.
-LEFT_ALONG = 32.0
 EDGE_ALONG = -75.45
 EDGE_OUT = 19.31
+# The hoe's transform relative to hand_r while carried (AHomesteadCharacter::UpdateHeldTools):
+# location (cm) and rotation (x, y, z, w).
+HELD = ((-10.8226, -1.6719, 26.0197), (-0.709149, 0.694266, 0.003177, 0.122849))
+# Where her left hand closes on the haft, from the prop pivot toward the blade (cm).
+LEFT_ALONG = -4.0
+
+# Blade tip (cm) and the haft's direction toward the blade at each key. The strokes stay low:
+# the blade lifts under half a metre, chops into the square and drags back along the soil with
+# the haft at a steady slope, so the hoe moves smoothly over the ground.
+CHOP = (0.14, 0.70, -0.70)
+KEYS = {
+    'set': ((-4.0, 76.0, 3.0), (0.14, 0.78, -0.61)),
+    'raise1': ((-4.0, 84.0, 44.0), (0.14, 0.94, -0.30)),
+    'chop1': ((-4.0, 72.0, 0.5), CHOP),
+    'bite1': ((-4.0, 71.0, -1.5), CHOP),
+    'draw1': ((-4.0, 60.0, 0.5), CHOP),
+    'raise2': ((-10.0, 84.0, 44.0), (0.08, 0.94, -0.30)),
+    'chop2': ((-10.0, 72.0, 0.5), (0.08, 0.70, -0.70)),
+    'bite2': ((-10.0, 71.0, -1.5), (0.08, 0.70, -0.70)),
+    'draw2': ((-10.0, 60.0, 0.5), (0.08, 0.70, -0.70)),
+    'recover': ((-7.0, 80.0, 24.0), (0.14, 0.86, -0.50)),
+}
+# Pelvis drop/forward (cm) and forward bend (deg).
+BODY = {
+    'stand': ((0, 0, 0), 0), 'set': ((0, 2, -12), 32), 'raise1': ((0, 1, -10), 26),
+    'chop1': ((0, 4, -16), 42), 'bite1': ((0, 4, -17), 44), 'draw1': ((0, 1, -15), 40),
+    'raise2': ((0, 1, -10), 26), 'chop2': ((0, 4, -16), 42), 'bite2': ((0, 4, -17), 44),
+    'draw2': ((0, 1, -15), 40), 'recover': ((0, 1, -6), 14), 'end': ((0, 0, 0), 0),
+}
+POLE_R = (-60.0, -25.0, 95.0)
+POLE_L = (55.0, 10.0, 70.0)
+FOOT_L_FORWARD = (14.0, 18.0, 8.6)
+FOOT_R_BACK = (-15.0, -12.0, 8.6)
 
 
 def _v(t):
     return unreal.Vector(*t)
 
 
-def _dirs(toward_crook):
-    """Haft (+Z, toward the top) and blade (-Y) directions for a haft whose crook end points along
-    ``toward_crook`` in her sagittal plane (plus a little sideways)."""
-    c = _v(toward_crook).normal()
-    haft = c * -1.0
-    # The blade stands perpendicular to the haft in the swing plane, facing back toward her feet.
-    side = unreal.Vector(1, 0, 0)
-    blade = side.cross(haft).normal()
-    if blade.z > 0 and c.z < 0:
-        blade = blade * -1.0
-    return haft, blade
+def _frame(key):
+    """Haft direction toward the blade and the blade's hang (down and back, square to the haft)."""
+    tip, toward = KEYS[key]
+    h = _v(toward).normal()
+    down = unreal.Vector(0, 0, -1)
+    b = (down - h * down.dot(h)).normal()
+    return _v(tip), h, b
 
 
-# Right grip centre and the crook-ward direction of the haft at each key.
-KEYS = {
-    'set': ((-9.0, 30.0, 88.0), (0.02, 0.8, -0.6)),
-    'raise1': ((-9.0, 30.0, 104.0), (0.02, 0.66, 0.75)),
-    'chop1': ((-9.0, 40.0, 70.0), (0.02, 0.62, -0.78)),
-    'bite1': ((-9.0, 39.0, 67.0), (0.02, 0.6, -0.8)),
-    'draw1': ((-9.0, 27.0, 72.0), (0.02, 0.72, -0.69)),
-    'raise2': ((-13.0, 30.0, 104.0), (-0.05, 0.66, 0.75)),
-    'chop2': ((-13.0, 40.0, 70.0), (-0.05, 0.62, -0.78)),
-    'bite2': ((-13.0, 39.0, 67.0), (-0.05, 0.6, -0.8)),
-    'draw2': ((-13.0, 27.0, 72.0), (-0.05, 0.72, -0.69)),
-    'recover': ((-18.0, 20.0, 86.0), (0.0, 0.55, -0.83)),
-}
-# Pelvis drop/forward (cm) and forward bend (deg).
-BODY = {
-    'stand': ((0, 0, 0), 0), 'set': ((0, 2, -8), 18), 'raise1': ((0, 0, -6), 12),
-    'chop1': ((0, 5, -14), 38), 'bite1': ((0, 5, -15), 40), 'draw1': ((0, 2, -12), 32),
-    'raise2': ((0, 0, -6), 12), 'chop2': ((0, 5, -14), 38), 'bite2': ((0, 5, -15), 40),
-    'draw2': ((0, 2, -12), 32), 'recover': ((0, 1, -5), 10), 'end': ((0, 0, 0), 0),
-}
-POLE_R = (-60.0, -20.0, 80.0)
-POLE_L = (60.0, -10.0, 90.0)
-FOOT_L_FORWARD = (14.0, 18.0, 8.6)
-FOOT_R_BACK = (-15.0, -12.0, 8.6)
+def prop_transform(key):
+    """Component-space transform of the hoe: +Z toward the top end (-h), -Y along the blade (b)."""
+    tip, h, b = _frame(key)
+    origin = tip - h * (-EDGE_ALONG) - b * EDGE_OUT
+    rot = unreal.MathLibrary.make_rot_from_zy(h * -1.0, b * -1.0)
+    return unreal.Transform(origin, rot, unreal.Vector(1, 1, 1))
 
 
-def edge_point(key):
-    centre, crook = KEYS[key]
-    haft, blade = _dirs(crook)
-    return _v(centre) + haft * EDGE_ALONG + blade * EDGE_OUT
+def _held():
+    loc, q = HELD
+    return unreal.Transform(_v(loc), unreal.Quat(*q).rotator(), unreal.Vector(1, 1, 1))
+
+
+def right_hand(s, key):
+    """hand_r_ik_ctrl location and extra rotation that put the carried hoe at ``prop_transform``."""
+    # Prop = Held * Hand, so Hand = Held^-1 * Prop.
+    hand = unreal.MathLibrary.compose_transforms(unreal.MathLibrary.invert_transform(_held()), prop_transform(key))
+    rest = s.bone('hand_r').rotation
+    return hand.translation, (hand.rotation * rest.inversed()).rotator()
 
 
 def build():
@@ -98,7 +116,7 @@ def build():
         for control in ('spine_01_ctrl', 'spine_02_ctrl', 'spine_03_ctrl'):
             s.key_rotation(frame, control, roll=bend * 0.18)
         s.key_rotation(frame, 'neck_01_ctrl', roll=bend * 0.05)
-        s.key_rotation(frame, 'head_ctrl', roll=(6 + bend * 0.1) if frame else 0)
+        s.key_rotation(frame, 'head_ctrl', roll=(8 + bend * 0.12) if frame else 0)
         s.key_world(frame, 'arm_r_pv_ik_ctrl', POLE_R if name not in ('stand', 'end') else (-45.0, -30.0, 100.0))
         s.key_world(frame, 'arm_l_pv_ik_ctrl', POLE_L if name not in ('stand', 'end') else (45.0, -30.0, 100.0))
         if name in ('stand', 'end'):
@@ -107,11 +125,12 @@ def build():
             s.key_world(frame, 'hand_r_ik_ctrl', position, right.turn(b, (e - b * e.dot(b)).normal()))
             s.key_world(frame, 'hand_l_ik_ctrl', af.WRIST_L_STAND, s.hand_turn('l', (0, 0.2, -1), (-1, 0, 0)))
             continue
-        centre, crook = KEYS[name]
-        haft, blade = _dirs(crook)
-        s.key_world(frame, 'hand_r_ik_ctrl', right.wrist(centre, haft, blade), right.turn(haft, blade))
-        top = _v(centre) + haft * LEFT_ALONG
-        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((top.x, top.y, top.z), haft, blade), left.turn(haft, blade))
+        position, turn = right_hand(s, name)
+        s.key_world(frame, 'hand_r_ik_ctrl', (position.x, position.y, position.z), turn)
+        _, h, b = _frame(name)
+        grip = prop_transform(name).translation + h * LEFT_ALONG
+        # Left hand overhand on the haft: index toward the blade, knuckles down its hang.
+        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((grip.x, grip.y, grip.z), h, b), left.turn(h, b))
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (0, 9, 6)))
     s.key_world(F['set'], 'foot_l_ik_ctrl', FOOT_L_FORWARD)
@@ -128,16 +147,15 @@ def build():
 
 
 def report(anim):
-    """Baked right grip centre vs keyed, the left grip's spacing up the haft, and the edge point."""
-    bones = [f'{b}_{side}' for side in 'lr' for b in ('hand', 'middle_01', 'index_01', 'pinky_01')]
+    """Baked blade tip (through the carried hoe in the baked right hand) vs keyed, and hand spacing."""
+    bones = ['hand_r', 'hand_l']
+    tip_local = unreal.Vector(0, -EDGE_OUT, EDGE_ALONG)
     lines = []
     for name, frame in FRAMES.items():
         b = ra.bone_positions(anim, bones, frame / 30)
-        centre_r, across_r = af._grip_frame(b, 'r')
-        centre_l, _ = af._grip_frame(b, 'l')
+        prop = unreal.MathLibrary.compose_transforms(_held(), b['hand_r'])
+        tip = unreal.MathLibrary.transform_location(prop, tip_local)
         want = KEYS.get(name, (None,))[0]
-        edge = edge_point(name) if name in KEYS else None
-        e = f"edge ({edge.x:5.1f},{edge.y:5.1f},{edge.z:5.1f})" if edge else ''
-        lines.append(f"{name:8s} grip ({centre_r.x:6.1f},{centre_r.y:6.1f},{centre_r.z:6.1f}) want {want}  "
-                     f"hands {(centre_l - centre_r).length():5.1f} cm  {e}")
+        lines.append(f"{name:8s} tip ({tip.x:6.1f},{tip.y:6.1f},{tip.z:6.1f}) want {want}  "
+                     f"hands {(b['hand_l'].translation - b['hand_r'].translation).length():5.1f} cm")
     return '\n'.join(lines)

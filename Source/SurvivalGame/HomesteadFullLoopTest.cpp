@@ -228,11 +228,19 @@ void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
 void AHomesteadSmokeTest::QueuePlace(Homestead::Piece Kind, int32 CellX, int32 CellY, int32 Rotation)
 {
     const auto Center = Homestead::CellCenter(CellX, CellY);
+    const bool bEdge = Kind == Homestead::Piece::Wall || Kind == Homestead::Piece::Doorway;
+    // Walls and doorways take the foundation edge she aims at, so aim at that edge's middle.
+    static const double EdgeX[] = {0.0, 0.5, 0.0, -0.5};
+    static const double EdgeY[] = {0.5, 0.0, -0.5, 0.0};
+    const Homestead::Point Aim = bEdge
+        ? Homestead::Point{Center.x + EdgeX[Rotation & 3] * Homestead::CellSize * 0.85,
+            Center.y + EdgeY[Rotation & 3] * Homestead::CellSize * 0.85}
+        : Center;
     const auto Before = MakeShared<int32>(0);
     Add(FString::Printf(TEXT("Approach %s site (%d,%d)"), UTF8_TO_TCHAR(Homestead::PieceName(Kind)), CellX, CellY),
-        [this, Center]()
+        [this, Aim]()
         {
-            Teleport({Center.x - 350, Center.y});
+            Teleport({Aim.x - 350, Aim.y});
             Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
             Controller->SetControlRotation(FRotator(-15, 0, 0));
         },
@@ -241,14 +249,10 @@ void AHomesteadSmokeTest::QueuePlace(Homestead::Piece Kind, int32 CellX, int32 C
         [this]() { Tap(EKeys::B); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 2; });
     QueueSelectRow(static_cast<int32>(Kind));
-    Add(TEXT("Enter the selected building piece's native actions"),
-        [this]() { if (Controller->HasNativeMenu()) Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return !Controller->HasNativeMenu()
-            || Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
-    Add(TEXT("Enter the selected building preview"),
+    Add(TEXT("Enter the selected building preview straight from its tile"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && !Controller->IsBookOpen(); });
-    for (int32 Turn = 0; Turn < Rotation; ++Turn)
+    for (int32 Turn = 0; !bEdge && Turn < Rotation; ++Turn)
         Add(TEXT("Rotate preview one cardinal edge with the right bumper"),
             [this]() { Tap(EKeys::Gamepad_RightShoulder); },
             [this]() { return Controller->IsPlanning(); }, 0.2f);

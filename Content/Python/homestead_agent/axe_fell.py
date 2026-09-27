@@ -5,15 +5,14 @@
     print(af.report(anim)) # grip centres, haft directions and hand spacing at each key
 
 Technique, after felling references: a stance side-on to the trunk, lead foot forward and knees
-soft; the axe addressed against the trunk to set the distance; lifted over the shoulder with the
-top hand choked up under the head; then the power flows hips, chest, shoulders, arms as the
-weight moves onto the lead foot, the top hand sliding down the haft to meet the bottom hand at
-impact, which lands a 45-degree cut into the trunk at waist height. After each strike she rocks
-the bit free and lifts again. She chops right-handed, from over her right shoulder: the left
-hand stays at the knob and the right hand, choked up under the head on the backswing, slides
-down the haft to meet it, so her right arm draws back on her right side and drives down and
-across to her left. The game carries the hatchet in the left fist while she fells and lays the
-haft through both fists (``AHomesteadCharacter::UpdateFellingHatchet``).
+soft; the axe addressed against the trunk to set the distance; lifted over the shoulder with both
+fists together at the base of the short haft; then the power flows hips, chest, shoulders, arms
+as the weight moves onto the lead foot, and the cut lands at 45 degrees into the trunk at waist
+height. After each strike she rocks the bit free and lifts again. She chops right-handed, from
+over her right shoulder: the left hand stays at the knob and the right fist stays rooted just
+above it (a hatchet is too short to choke up), so her right arm draws back on her right side and
+drives down and across to her left. The game carries the hatchet in the left fist while she fells
+and lays the haft through both fists (``AHomesteadCharacter::UpdateFellingHatchet``).
 
 The clip holds two identical strokes. ``AHomesteadCharacter`` repeats the stroke cycle
 (``LOOP_START``..``LOOP_START + LOOP``) for as many strokes as the tree needs and keeps the intro
@@ -43,22 +42,25 @@ LOOP_START = FRAMES['rock1']
 LOOP = FRAMES['rock2'] - FRAMES['rock1']
 
 # Grip centre of the left (knob) hand, haft direction, right hand's distance up the haft (cm).
+# A hatchet is short: the right fist closes right above the left at the base of the haft and stays
+# there through the whole swing instead of choking up under the head.
+HANDS = 9.5
 # At impact the haft points forward and a little to her right, so the bit travels forward, across
 # to her left and down into the trunk (a 45-degree notch face), not along it; the tree therefore
 # stands a little to her right (FELL_BIT). The wind-up carries the head behind her right shoulder.
 STROKE = {
-    'lift': ((-16.0, 22.0, 124.0), (-0.3, 0.05, 0.95), 30.0),
+    'lift': ((-16.0, 22.0, 124.0), (-0.3, 0.05, 0.95), HANDS),
     # Top of the backswing: the knob hand stays in front of her right shoulder (so the left arm
-    # crosses in front of her chest rather than through it) while the right hand, choked up under
-    # the head, draws back and up beside her right ear with the head behind that shoulder.
-    'back': ((-14.0, 16.0, 138.0), (-0.4, -0.55, 0.73), 32.0),
-    'strike': ((-8.0, 30.0, 102.0), (-0.65, 0.72, -0.2), 11.0),
-    'bite': ((-7.0, 31.0, 99.0), (-0.63, 0.72, -0.28), 11.0),
-    'rock': ((-10.0, 25.0, 104.0), (-0.62, 0.76, -0.1), 13.0),
+    # crosses in front of her chest rather than through it) while the right fist, just above it,
+    # draws back and up beside her right shoulder with the head behind that shoulder.
+    'back': ((-14.0, 16.0, 138.0), (-0.4, -0.55, 0.73), HANDS),
+    'strike': ((-8.0, 30.0, 102.0), (-0.65, 0.72, -0.2), HANDS),
+    'bite': ((-7.0, 31.0, 99.0), (-0.63, 0.72, -0.28), HANDS),
+    'rock': ((-10.0, 25.0, 104.0), (-0.62, 0.76, -0.1), HANDS),
 }
 GRIP = {
-    'address': ((-8.0, 27.0, 100.0), (-0.63, 0.75, -0.15), 18.0),
-    'recover': ((-12.0, 24.0, 94.0), (-0.3, 0.8, -0.5), 8.0),
+    'address': ((-8.0, 27.0, 100.0), (-0.63, 0.75, -0.15), HANDS),
+    'recover': ((-12.0, 24.0, 94.0), (-0.3, 0.8, -0.5), HANDS),
 }
 # SM_FlintHatchet (report.json attach.edge_centre): the bit's centre from the knob grip pivot.
 HEAD_ALONG = 43.0

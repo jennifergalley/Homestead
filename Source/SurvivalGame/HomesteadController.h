@@ -154,6 +154,8 @@ public:
     FString MenuLoadProblem() const { return LoadProblem; }
     void MenuSetGameSpeed(double DayMinutes);
     void MenuAdjustSetting(int32 Id, int32 Direction);
+    // Appearance rows: the next (+1) or previous (-1) choice, applied to her at once.
+    void MenuStepAppearance(int32 Id, int32 Direction);
     float MenuAudioVolume(int32 Id) const;
     void MenuPreviewAudioVolume(int32 Id, float Value);
     bool MenuCommitAudioVolume(int32 Id, float Value, float Previous);

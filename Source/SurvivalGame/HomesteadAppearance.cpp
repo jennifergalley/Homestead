@@ -17,6 +17,40 @@ const TCHAR* HairStyleName(int32 Index)
     static const TCHAR* Values[] = {TEXT("Long waves"), TEXT("Straight bob"), TEXT("Ponytail")};
     return Choice(Values, Index);
 }
+const TCHAR* MetaHairName(int32 Index)
+{
+    static const TCHAR* Values[] = {TEXT("Long and straight"), TEXT("Straight bob"), TEXT("Low ponytail"),
+        TEXT("Braided updo"), TEXT("Twin buns"), TEXT("Long and tousled"), TEXT("Curly bob"),
+        TEXT("Long with a fringe"), TEXT("Pixie crop")};
+    static_assert(UE_ARRAY_COUNT(Values) == MetaHairCount);
+    return Choice(Values, Index);
+}
+const TCHAR* MetaHairGroom(int32 Index)
+{
+    static const TCHAR* Values[] = {TEXT("Hair_L_Straight"), TEXT("Hair_M_BobStraight"), TEXT("Hair_S_LowPonytail"),
+        TEXT("Hair_S_UpdoBraids"), TEXT("Hair_S_UpdoBuns"), TEXT("Hair_L_MessyClumps"), TEXT("Hair_M_BobCurly"),
+        TEXT("Hair_L_StraightBangs"), TEXT("Hair_S_Pixie")};
+    static_assert(UE_ARRAY_COUNT(Values) == MetaHairCount);
+    return Choice(Values, Index);
+}
+int32 LegacyHairStyle(int32 MetaHair)
+{
+    static const int32 Values[] = {0, 1, 2, 2, 2, 0, 1, 0, 1};
+    static_assert(UE_ARRAY_COUNT(Values) == MetaHairCount);
+    return Choice(Values, MetaHair);
+}
+int32 MetaHairForLegacy(int32 HairStyle)
+{
+    return FMath::Clamp(HairStyle, 0, 2);
+}
+FVector2D HairPigment(int32 Index)
+{
+    // Chestnut, dark brown, black, copper, blonde (MetaHuman hairMelanin, hairRedness).
+    static const FVector2D Values[] = {FVector2D(0.72f, 0.35f), FVector2D(0.86f, 0.22f), FVector2D(0.98f, 0.08f),
+        FVector2D(0.42f, 0.9f), FVector2D(0.16f, 0.3f)};
+    static_assert(UE_ARRAY_COUNT(Values) == HairColorCount);
+    return Choice(Values, Index);
+}
 const TCHAR* HairColorName(int32 Index)
 {
     static const TCHAR* Values[] = {TEXT("Chestnut"), TEXT("Dark brown"), TEXT("Black"), TEXT("Copper"), TEXT("Blonde")};

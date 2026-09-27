@@ -547,7 +547,6 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         {
             *Before = Controller->Simulation().Serialize();
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, Before]() { return Controller->IsPlanning() && !Controller->IsBookOpen()
             && Controller->Simulation().Serialize() == *Before; });
@@ -1065,13 +1064,13 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
                 *Expected = Controller->Simulation();
                 switch (Id)
                 {
-                case 0: ExpectedLook->HairStyle = (ExpectedLook->HairStyle + 1) % 3; break;
+                case 0: ExpectedLook->MetaHair = (ExpectedLook->MetaHair + 1) % HomesteadLook::MetaHairCount;
+                    ExpectedLook->HairStyle = HomesteadLook::LegacyHairStyle(ExpectedLook->MetaHair); break;
                 case 1: ExpectedLook->HairColor = (ExpectedLook->HairColor + 1) % HomesteadLook::HairColorCount; break;
                 case 2: ExpectedLook->SkinTone = (ExpectedLook->SkinTone + 1) % 4; break;
                 case 3: ExpectedLook->EyeColor = (ExpectedLook->EyeColor + 1) % 4; break;
                 case 6: ExpectedLook->BodyPreset = (ExpectedLook->BodyPreset + 1) % 3; break;
                 }
-                Tap(EKeys::Enter);
                 Tap(EKeys::Enter);
             },
             [this, ExpectedLook, Expected]() { return !Controller->ToastIsError()

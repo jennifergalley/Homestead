@@ -96,7 +96,7 @@ public:
     // Tilling is the two-handed stone hoe clip (MetaHuman with AN_HeroineMH_HoeTill).
     bool UsesHoeTill() const { return bHoeTill; }
     // homestead_agent.hoe_till EVENTS: the first chop turns the soil.
-    static constexpr float HoeFirstChop = 30.0f / 30.0f;
+    static constexpr float HoeFirstChop = 31.0f / 30.0f;
     UHomesteadHatchet* GetHatchet() const { return Hatchet; }
     UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
     UHomesteadKnife* GetKnife() const { return Knife; }
@@ -251,6 +251,10 @@ private:
     float StickAlignRemaining = 0;
     void UpdateStickAlignment(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UGroomComponent> MetaHumanHair;
+    // The look the MetaHuman stack presents: groom style and hair pigment (ApplyMetaHumanLook).
+    FHomesteadAppearance MetaHumanLook, PendingMetaHumanLook;
+    int32 AppliedMetaHair = 0;
+    void ApplyMetaHumanLook();
     float HairSprintBlend = 0;
     FTransform HairLastHead;
     double HairLastRealTime = 0;
@@ -295,7 +299,7 @@ private:
     // Resting carry: the wrist deviates only this far; the rest of CarryDegrees tips the tool in
     // the fist instead, so the hand stays in line with the forearm.
     static constexpr float RestWristDegrees = 12.0f;
-    static constexpr float MacheteCarryDegrees = 46.0f;
+    static constexpr float MacheteCarryDegrees = 22.0f;
     float HeldToolTilt = 0;
     void UpdateFellingHatchet();
     TArray<FHeldToolSpec> HeldToolSpecs;
