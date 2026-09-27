@@ -9,25 +9,23 @@ namespace HomesteadMenus
 {
 namespace
 {
-using namespace HomesteadMapPaint;
-using HomesteadMap::Vec;
-constexpr double MaxPixelsPerCm = 0.06;  // 6 px per metre: close enough to read the lanes.
-constexpr double PlacePixelsPerCm = 0.025;
-constexpr float StickDeadZone = 0.2f;
-constexpr double StaleAxisSeconds = 0.25;
-const FLinearColor Backdrop(0.05f, 0.075f, 0.065f, 0.95f);
-const FLinearColor Plate(0.025f, 0.05f, 0.038f, 0.82f);
-const FLinearColor Cream(0.95f, 0.92f, 0.82f, 1.0f);
-const FLinearColor Gold(0.92f, 0.74f, 0.43f, 1.0f);
-FVector2D ToLocal(Vec Value) { return FVector2D(Value.x, Value.y); }
-Vec ToVec(FVector2D Value) { return {Value.X, Value.Y}; }
-HomesteadMap::MapTransform TransformOf(const UHomesteadMapComponent* Map)
+constexpr double MvMaxPixelsPerCm = 0.06;  // 6 px per metre: close enough to read the lanes.
+constexpr double MvPlacePixelsPerCm = 0.025;
+constexpr float MvStickDeadZone = 0.2f;
+constexpr double MvStaleAxisSeconds = 0.25;
+const FLinearColor MvBackdrop(0.05f, 0.075f, 0.065f, 0.95f);
+const FLinearColor MvPlate(0.025f, 0.05f, 0.038f, 0.82f);
+const FLinearColor MvCream(0.95f, 0.92f, 0.82f, 1.0f);
+const FLinearColor MvGold(0.92f, 0.74f, 0.43f, 1.0f);
+FVector2D MvToLocal(HomesteadMap::Vec Value) { return FVector2D(Value.x, Value.y); }
+HomesteadMap::Vec MvToVec(FVector2D Value) { return {Value.X, Value.Y}; }
+HomesteadMap::MapTransform MvTransformOf(const UHomesteadMapComponent* Map)
 {
     return Map && Map->Frame().Model.IsValid() ? Map->Frame().Model->Transform : HomesteadMap::MapTransform{};
 }
-float Live(const auto& Axis, double Now)
+float MvLive(const auto& Axis, double Now)
 {
-    return Axis.At >= 0 && Now - Axis.At <= StaleAxisSeconds ? Axis.Value : 0.0f;
+    return Axis.At >= 0 && Now - Axis.At <= MvStaleAxisSeconds ? Axis.Value : 0.0f;
 }
 }
 
@@ -47,19 +45,19 @@ FHomesteadMapViewState& SHomesteadMapView::State() const
 
 double SHomesteadMapView::FitPixelsPerCm() const
 {
-    const HomesteadMap::MapTransform T = TransformOf(Map.Get());
+    const HomesteadMap::MapTransform T = MvTransformOf(Map.Get());
     return FMath::Max(1e-6, FMath::Min(Size.X / T.sizeY, Size.Y / T.sizeX));
 }
 
 double SHomesteadMapView::PixelsPerCm() const { return State().PixelsPerCm; }
-Vec SHomesteadMapView::Center() const { return State().Center; }
+HomesteadMap::Vec SHomesteadMapView::Center() const { return State().Center; }
 
 void SHomesteadMapView::EnsureState()
 {
     FHomesteadMapViewState& S = State();
     if (!S.bValid)
     {
-        const HomesteadMap::MapTransform T = TransformOf(Map.Get());
+        const HomesteadMap::MapTransform T = MvTransformOf(Map.Get());
         S.PixelsPerCm = FitPixelsPerCm();
         S.Center = {T.minX + T.sizeX * 0.5, T.minY + T.sizeY * 0.5};
         S.Selected = INDEX_NONE;
@@ -71,9 +69,9 @@ void SHomesteadMapView::EnsureState()
 void SHomesteadMapView::Clamp()
 {
     FHomesteadMapViewState& S = State();
-    const HomesteadMap::MapTransform T = TransformOf(Map.Get());
+    const HomesteadMap::MapTransform T = MvTransformOf(Map.Get());
     const double Fit = FitPixelsPerCm();
-    S.PixelsPerCm = FMath::Clamp(S.PixelsPerCm, Fit, FMath::Max(Fit, MaxPixelsPerCm));
+    S.PixelsPerCm = FMath::Clamp(S.PixelsPerCm, Fit, FMath::Max(Fit, MvMaxPixelsPerCm));
     const auto Keep = [](double Value, double Low, double Extent, double Half)
     {
         return Extent > Half * 2.0 ? FMath::Clamp(Value, Low + Half, Low + Extent - Half) : Low + Extent * 0.5;
@@ -104,11 +102,11 @@ void SHomesteadMapView::ZoomBy(double Factor, FVector2D AnchorLocal)
 {
     EnsureState();
     FHomesteadMapViewState& S = State();
-    const Vec Anchor = ToVec(AnchorLocal);
-    const Vec Before = HomesteadMap::ScreenToWorld(MakeView(), Anchor);
+    const HomesteadMap::Vec Anchor = MvToVec(AnchorLocal);
+    const HomesteadMap::Vec Before = HomesteadMap::ScreenToWorld(MakeView(), Anchor);
     S.PixelsPerCm *= Factor;
     Clamp();
-    const Vec After = HomesteadMap::ScreenToWorld(MakeView(), Anchor);
+    const HomesteadMap::Vec After = HomesteadMap::ScreenToWorld(MakeView(), Anchor);
     S.Center.x += Before.x - After.x;
     S.Center.y += Before.y - After.y;
     Clamp();
@@ -118,8 +116,8 @@ void SHomesteadMapView::PanPixels(FVector2D Delta)
 {
     EnsureState();
     const HomesteadMap::View View = MakeView();
-    const Vec From = HomesteadMap::ScreenToWorld(View, View.screenCenter);
-    const Vec To = HomesteadMap::ScreenToWorld(View, {View.screenCenter.x + Delta.X, View.screenCenter.y + Delta.Y});
+    const HomesteadMap::Vec From = HomesteadMap::ScreenToWorld(View, View.screenCenter);
+    const HomesteadMap::Vec To = HomesteadMap::ScreenToWorld(View, {View.screenCenter.x + Delta.X, View.screenCenter.y + Delta.Y});
     State().Center.x += To.x - From.x;
     State().Center.y += To.y - From.y;
     Clamp();
@@ -129,7 +127,7 @@ void SHomesteadMapView::Reveal(int32 Index)
 {
     const UHomesteadMapComponent* Component = Map.Get();
     if (!Component || !Component->Frame().Model.IsValid() || !Component->Frame().Model->Landmarks.IsValidIndex(Index)) return;
-    const FVector2D At = ToLocal(HomesteadMap::WorldToScreen(MakeView(), Component->Frame().Model->Landmarks[Index].Position));
+    const FVector2D At = MvToLocal(HomesteadMap::WorldToScreen(MakeView(), Component->Frame().Model->Landmarks[Index].Position));
     const FVector2D Margin = Size * 0.15f;
     if (At.X < Margin.X || At.Y < Margin.Y || At.X > Size.X - Margin.X || At.Y > Size.Y - Margin.Y)
     {
@@ -146,7 +144,7 @@ bool SHomesteadMapView::Step(int32 Dx, int32 Dy)
     const auto& Places = Component->Frame().Model->Landmarks;
     FHomesteadMapViewState& S = State();
     const HomesteadMap::View View = MakeView();
-    const Vec Origin = HomesteadMap::WorldToScreen(View, Places.IsValidIndex(S.Selected) ? Places[S.Selected].Position
+    const HomesteadMap::Vec Origin = HomesteadMap::WorldToScreen(View, Places.IsValidIndex(S.Selected) ? Places[S.Selected].Position
         : Component->Frame().Player);
     const FVector2D Direction = FVector2D(Dx, Dy).GetSafeNormal();
     int32 Best = INDEX_NONE;
@@ -154,7 +152,7 @@ bool SHomesteadMapView::Step(int32 Dx, int32 Dy)
     for (int32 Index = 0; Index < Places.Num(); ++Index)
     {
         if (Index == S.Selected) continue;
-        const FVector2D Delta = ToLocal(HomesteadMap::WorldToScreen(View, Places[Index].Position)) - ToLocal(Origin);
+        const FVector2D Delta = MvToLocal(HomesteadMap::WorldToScreen(View, Places[Index].Position)) - MvToLocal(Origin);
         const double Along = FVector2D::DotProduct(Delta, Direction);
         const double Across = FMath::Abs(FVector2D::CrossProduct(Delta, Direction));
         // Within about 56 degrees of the direction pressed.
@@ -178,9 +176,9 @@ void SHomesteadMapView::ToggleZoomOnSelected()
     if (!Component || !Component->Frame().Model.IsValid()) return;
     FHomesteadMapViewState& S = State();
     const auto& Places = Component->Frame().Model->Landmarks;
-    if (S.PixelsPerCm >= PlacePixelsPerCm * 0.9) { S.PixelsPerCm = FitPixelsPerCm(); Clamp(); return; }
+    if (S.PixelsPerCm >= MvPlacePixelsPerCm * 0.9) { S.PixelsPerCm = FitPixelsPerCm(); Clamp(); return; }
     S.Center = Places.IsValidIndex(S.Selected) ? Places[S.Selected].Position : Component->Frame().Player;
-    S.PixelsPerCm = PlacePixelsPerCm;
+    S.PixelsPerCm = MvPlacePixelsPerCm;
     Clamp();
 }
 
@@ -199,11 +197,11 @@ void SHomesteadMapView::Tick(const FGeometry& Geometry, const double, const floa
     EnsureState();
     const double Now = FPlatformTime::Seconds();
     const float Dt = FMath::Min(DeltaTime, 0.1f);
-    FVector2D Stick(Live(LeftX, Now), -Live(LeftY, Now));
-    if (Stick.Size() > StickDeadZone)
-        PanPixels(Stick * ((Stick.Size() - StickDeadZone) / (1 - StickDeadZone) / Stick.Size()) * Size.GetMin() * 0.9f * Dt);
-    const float Zoom = Live(RightY, Now) + Live(RightTrigger, Now) - Live(LeftTrigger, Now);
-    if (FMath::Abs(Zoom) > StickDeadZone) ZoomBy(FMath::Pow(2.0, Zoom * 1.6 * Dt), Size * 0.5f);
+    FVector2D Stick(MvLive(LeftX, Now), -MvLive(LeftY, Now));
+    if (Stick.Size() > MvStickDeadZone)
+        PanPixels(Stick * ((Stick.Size() - MvStickDeadZone) / (1 - MvStickDeadZone) / Stick.Size()) * Size.GetMin() * 0.9f * Dt);
+    const float Zoom = MvLive(RightY, Now) + MvLive(RightTrigger, Now) - MvLive(LeftTrigger, Now);
+    if (FMath::Abs(Zoom) > MvStickDeadZone) ZoomBy(FMath::Pow(2.0, Zoom * 1.6 * Dt), Size * 0.5f);
 }
 
 FReply SHomesteadMapView::OnMouseButtonDown(const FGeometry& Geometry, const FPointerEvent& Event)
@@ -229,7 +227,7 @@ FReply SHomesteadMapView::OnMouseButtonUp(const FGeometry& Geometry, const FPoin
         double Nearest = 22.0;
         for (int32 Index = 0; Index < Places.Num(); ++Index)
         {
-            const double Distance = FVector2D::Distance(At, ToLocal(HomesteadMap::WorldToScreen(MakeView(), Places[Index].Position)));
+            const double Distance = FVector2D::Distance(At, MvToLocal(HomesteadMap::WorldToScreen(MakeView(), Places[Index].Position)));
             if (Distance < Nearest) { Nearest = Distance; Hit = Index; }
         }
         State().Selected = Hit;
@@ -267,20 +265,20 @@ FCursorReply SHomesteadMapView::OnCursorQuery(const FGeometry&, const FPointerEv
 int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&,
     FSlateWindowElementList& Out, int32 LayerId, const FWidgetStyle&, bool) const
 {
-    FPainter Paint(Geometry, Out, LayerId);
+    HomesteadMapPaint::FPainter Paint(Geometry, Out, LayerId);
     const FVector2D Local = Geometry.GetLocalSize();
-    Paint.Fill({FVector2D(0, 0), FVector2D(Local.X, 0), Local, FVector2D(0, Local.Y)}, Backdrop);
+    Paint.Fill({FVector2D(0, 0), FVector2D(Local.X, 0), Local, FVector2D(0, Local.Y)}, MvBackdrop);
     const UHomesteadMapComponent* Component = Map.Get();
     if (!Component || !Component->Frame().Model.IsValid() || !State().bValid) return Paint.GetLayer();
     const FHomesteadMapFrame& Frame = Component->Frame();
     const FHomesteadMapModel& Model = *Frame.Model;
     const HomesteadMap::View View = MakeView();
     const HomesteadMap::MapTransform& T = Model.Transform;
-    const Vec Min{0, 0}, Max{Local.X, Local.Y};
+    const HomesteadMap::Vec Min{0, 0}, Max{Local.X, Local.Y};
 
     // The sheet: the part of the baked texture inside the page.
-    const FVector2D TopLeft = ToLocal(HomesteadMap::WorldToScreen(View, {T.minX + T.sizeX, T.minY}));
-    const FVector2D BottomRight = ToLocal(HomesteadMap::WorldToScreen(View, {T.minX, T.minY + T.sizeY}));
+    const FVector2D TopLeft = MvToLocal(HomesteadMap::WorldToScreen(View, {T.minX + T.sizeX, T.minY}));
+    const FVector2D BottomRight = MvToLocal(HomesteadMap::WorldToScreen(View, {T.minX, T.minY + T.sizeY}));
     const FVector2D A(FMath::Max(0.0, TopLeft.X), FMath::Max(0.0, TopLeft.Y));
     const FVector2D B(FMath::Min(Local.X, BottomRight.X), FMath::Min(Local.Y, BottomRight.Y));
     if (B.X > A.X && B.Y > A.Y)
@@ -289,46 +287,46 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         TArray<FVector2D> UVs;
         for (const FVector2D& Corner : Quad) UVs.Add((Corner - TopLeft) / (BottomRight - TopLeft));
         if (Frame.MapBrush) Paint.TexturedFan(Frame.MapBrush, Quad, UVs, FLinearColor::White);
-        else Paint.Fill(Quad, Parchment);
+        else Paint.Fill(Quad, HomesteadMapPaint::Parchment);
     }
     const float Scale = FMath::Clamp(Local.GetMin() / 560.0f, 0.8f, 1.6f);
 
     // Parcels: for-sale land dimmed and hatched, the owned estate dashed in oxblood.
     for (const FHomesteadMapParcel& Parcel : Model.Parcels)
     {
-        std::vector<Vec> Screen;
+        std::vector<HomesteadMap::Vec> Screen;
         TArray<FVector2D> Outline;
-        for (const Vec& Point : Parcel.Ring)
+        for (const HomesteadMap::Vec& Point : Parcel.Ring)
         {
             Screen.push_back(HomesteadMap::WorldToScreen(View, Point));
-            Outline.Add(ToLocal(Screen.back()));
+            Outline.Add(MvToLocal(Screen.back()));
         }
         if (Parcel.bForSale)
         {
             Paint.Fill(Outline, FLinearColor(0.05f, 0.03f, 0.02f, 0.22f));
             for (auto Line : HomesteadMap::HatchPolygon(Screen, 9.0 * Scale, 45.0))
                 if (HomesteadMap::ClipSegmentToRect(Line.first, Line.second, Min, Max))
-                    Paint.Segment(ToLocal(Line.first), ToLocal(Line.second), FLinearColor(Ink.R, Ink.G, Ink.B, 0.38f), 1.1f);
+                    Paint.Segment(MvToLocal(Line.first), MvToLocal(Line.second), FLinearColor(HomesteadMapPaint::Ink.R, HomesteadMapPaint::Ink.G, HomesteadMapPaint::Ink.B, 0.38f), 1.1f);
             for (auto Dash : HomesteadMap::DashRing(Screen, 3.0 * Scale, 4.0 * Scale))
                 if (HomesteadMap::ClipSegmentToRect(Dash.first, Dash.second, Min, Max))
-                    Paint.Segment(ToLocal(Dash.first), ToLocal(Dash.second), FLinearColor(Ink.R, Ink.G, Ink.B, 0.7f), 1.4f);
+                    Paint.Segment(MvToLocal(Dash.first), MvToLocal(Dash.second), FLinearColor(HomesteadMapPaint::Ink.R, HomesteadMapPaint::Ink.G, HomesteadMapPaint::Ink.B, 0.7f), 1.4f);
         }
         else if (Parcel.bOwned)
             for (auto Dash : HomesteadMap::DashRing(Screen, 11.0 * Scale, 6.0 * Scale))
                 if (HomesteadMap::ClipSegmentToRect(Dash.first, Dash.second, Min, Max))
                 {
-                    Paint.Segment(ToLocal(Dash.first), ToLocal(Dash.second), Halo, 5.0f * Scale);
-                    Paint.Segment(ToLocal(Dash.first), ToLocal(Dash.second), BoundaryInk, 2.4f * Scale);
+                    Paint.Segment(MvToLocal(Dash.first), MvToLocal(Dash.second), HomesteadMapPaint::Halo, 5.0f * Scale);
+                    Paint.Segment(MvToLocal(Dash.first), MvToLocal(Dash.second), HomesteadMapPaint::BoundaryInk, 2.4f * Scale);
                 }
     }
     // Landmarks: badges first, then as many names as fit without overlapping (the focused place
     // first, then the list order, which starts with the manor).
     const int32 Selected = State().Selected;
-    const FVector2D Here = ToLocal(HomesteadMap::WorldToScreen(View, Frame.Player));
+    const FVector2D Here = MvToLocal(HomesteadMap::WorldToScreen(View, Frame.Player));
     const auto OnPage = [&Local](FVector2D At) { return At.X >= -40 && At.Y >= -40 && At.X <= Local.X + 40 && At.Y <= Local.Y + 40; };
     TArray<FBox2D> Taken;
     {
-        const FVector2D HereExtent = FPainter::MeasureText(TEXT("You are here"), 12.0f * Scale);
+        const FVector2D HereExtent = HomesteadMapPaint::FPainter::MeasureText(TEXT("You are here"), 12.0f * Scale);
         Taken.Add(FBox2D(Here + FVector2D(-HereExtent.X * 0.5f, 13 * Scale), Here + FVector2D(HereExtent.X * 0.5f, 15 * Scale + HereExtent.Y)));
     }
     TArray<int32> Order;
@@ -338,7 +336,7 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     Badges.SetNum(Model.Landmarks.Num());
     for (int32 Index = 0; Index < Model.Landmarks.Num(); ++Index)
     {
-        const FVector2D At = ToLocal(HomesteadMap::WorldToScreen(View, Model.Landmarks[Index].Position));
+        const FVector2D At = MvToLocal(HomesteadMap::WorldToScreen(View, Model.Landmarks[Index].Position));
         const float Radius = (Index == Selected ? 15.0f : 12.0f) * Scale;
         Badges[Index] = FBox2D(At - FVector2D(Radius, Radius), At + FVector2D(Radius, Radius));
     }
@@ -349,7 +347,7 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         if (!OnPage(At)) continue;
         const bool bSelected = Index == Selected;
         const float Radius = Badges[Index].GetExtent().X;
-        const FVector2D Extent = FPainter::MeasureText(Model.Landmarks[Index].Name, (bSelected ? 13.5f : 12.0f) * Scale) + FVector2D(8, 2);
+        const FVector2D Extent = HomesteadMapPaint::FPainter::MeasureText(Model.Landmarks[Index].Name, (bSelected ? 13.5f : 12.0f) * Scale) + FVector2D(8, 2);
         const FVector2D Candidates[] = {At + FVector2D(Radius + 3 * Scale, -Extent.Y * 0.5f),
             At - FVector2D(Radius + 3 * Scale + Extent.X, Extent.Y * 0.5f),
             At - FVector2D(Extent.X * 0.5f, Radius + 3 * Scale + Extent.Y), At + FVector2D(-Extent.X * 0.5f, Radius + 3 * Scale)};
@@ -376,10 +374,10 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         const bool bSelected = Label.Key == Selected;
         const FString& Name = Model.Landmarks[Label.Key].Name;
         const float LabelSize = (bSelected ? 13.5f : 12.0f) * Scale;
-        const FVector2D Extent = FPainter::MeasureText(Name, LabelSize) + FVector2D(8, 2);
+        const FVector2D Extent = HomesteadMapPaint::FPainter::MeasureText(Name, LabelSize) + FVector2D(8, 2);
         const FVector2D& Corner = Label.Value;
-        Paint.Fill({Corner, Corner + FVector2D(Extent.X, 0), Corner + Extent, Corner + FVector2D(0, Extent.Y)}, Plate);
-        Paint.Text(Name, Corner + FVector2D(4, 1), LabelSize, bSelected ? Gold : Cream);
+        Paint.Fill({Corner, Corner + FVector2D(Extent.X, 0), Corner + Extent, Corner + FVector2D(0, Extent.Y)}, MvPlate);
+        Paint.Text(Name, Corner + FVector2D(4, 1), LabelSize, bSelected ? MvGold : MvCream);
     }
 
     // For-sale names where they don't cover a place.
@@ -387,41 +385,41 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     {
         if (!Parcel.bForSale) continue;
         double Low = 1e300, High = -1e300;
-        for (const Vec& Point : Parcel.Ring)
+        for (const HomesteadMap::Vec& Point : Parcel.Ring)
         {
-            const Vec S = HomesteadMap::WorldToScreen(View, Point);
+            const HomesteadMap::Vec S = HomesteadMap::WorldToScreen(View, Point);
             Low = FMath::Min(Low, S.x); High = FMath::Max(High, S.x);
         }
-        const FVector2D At = ToLocal(HomesteadMap::WorldToScreen(View, Parcel.LabelAt));
+        const FVector2D At = MvToLocal(HomesteadMap::WorldToScreen(View, Parcel.LabelAt));
         if (High - Low < 70 || At.X < 0 || At.Y < 0 || At.X > Local.X || At.Y > Local.Y) continue;
         const float LabelSize = 12.0f * Scale;
-        const FVector2D Title = FPainter::MeasureText(TEXT("FOR SALE"), LabelSize);
-        const FVector2D Name = FPainter::MeasureText(Parcel.Label, LabelSize * 0.9f, false);
+        const FVector2D Title = HomesteadMapPaint::FPainter::MeasureText(TEXT("FOR SALE"), LabelSize);
+        const FVector2D Name = HomesteadMapPaint::FPainter::MeasureText(Parcel.Label, LabelSize * 0.9f, false);
         const FBox2D Box(At - FVector2D(FMath::Max(Title.X, Name.X) * 0.5f, Title.Y), At + FVector2D(FMath::Max(Title.X, Name.X) * 0.5f, Name.Y));
         bool bClear = true;
         for (const FBox2D& Other : Taken) bClear &= !Box.Intersect(Other);
         for (const FBox2D& Other : Badges) bClear &= !Box.Intersect(Other);
         if (!bClear) continue;
-        Paint.Text(TEXT("FOR SALE"), At - FVector2D(Title.X * 0.5f, Title.Y), LabelSize, Cream);
-        Paint.Text(Parcel.Label, At - FVector2D(Name.X * 0.5f, 0), LabelSize * 0.9f, Cream, false);
+        Paint.Text(TEXT("FOR SALE"), At - FVector2D(Title.X * 0.5f, Title.Y), LabelSize, MvCream);
+        Paint.Text(Parcel.Label, At - FVector2D(Name.X * 0.5f, 0), LabelSize * 0.9f, MvCream, false);
     }
 
     // You are here: a slow pulse under her arrow.
     const float Pulse = FMath::Frac(static_cast<float>(Time) * 0.7f);
-    Paint.Circle(Here, (10 + 22 * Pulse) * Scale, FLinearColor(Gold.R, Gold.G, Gold.B, 1.0f - Pulse), 2.5f * Scale, 32);
-    Paint.PlayerArrow(Here, ToLocal(HomesteadMap::ScreenDirection(View, Frame.FacingYaw)), 11.0f * Scale);
+    Paint.Circle(Here, (10 + 22 * Pulse) * Scale, FLinearColor(MvGold.R, MvGold.G, MvGold.B, 1.0f - Pulse), 2.5f * Scale, 32);
+    Paint.PlayerArrow(Here, MvToLocal(HomesteadMap::ScreenDirection(View, Frame.FacingYaw)), 11.0f * Scale);
     {
         const float LabelSize = 12.0f * Scale;
-        const FVector2D Extent = FPainter::MeasureText(TEXT("You are here"), LabelSize);
-        Paint.Text(TEXT("You are here"), Here + FVector2D(-Extent.X * 0.5f, 15 * Scale), LabelSize, Cream);
+        const FVector2D Extent = HomesteadMapPaint::FPainter::MeasureText(TEXT("You are here"), LabelSize);
+        Paint.Text(TEXT("You are here"), Here + FVector2D(-Extent.X * 0.5f, 15 * Scale), LabelSize, MvCream);
     }
 
     // North and a scale bar, like a surveyor's sheet.
     const FVector2D NorthAt(Local.X - 34 * Scale, 38 * Scale);
-    Paint.Disc(NorthAt, 20 * Scale, Plate, 24);
-    Paint.Fill({NorthAt + FVector2D(0, -15) * Scale, NorthAt + FVector2D(6, 4) * Scale, NorthAt + FVector2D(-6, 4) * Scale}, Gold);
-    const FVector2D Letter = FPainter::MeasureText(TEXT("N"), 11 * Scale);
-    Paint.Text(TEXT("N"), NorthAt + FVector2D(-Letter.X * 0.5f, 3 * Scale), 11 * Scale, Cream, true, false);
+    Paint.Disc(NorthAt, 20 * Scale, MvPlate, 24);
+    Paint.Fill({NorthAt + FVector2D(0, -15) * Scale, NorthAt + FVector2D(6, 4) * Scale, NorthAt + FVector2D(-6, 4) * Scale}, MvGold);
+    const FVector2D Letter = HomesteadMapPaint::FPainter::MeasureText(TEXT("N"), 11 * Scale);
+    Paint.Text(TEXT("N"), NorthAt + FVector2D(-Letter.X * 0.5f, 3 * Scale), 11 * Scale, MvCream, true, false);
     {
         static const double Metres[] = {25, 50, 100, 200, 500, 1000};
         double Length = Metres[0];
@@ -429,12 +427,12 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         const float Pixels = static_cast<float>(Length * 100.0 * View.pixelsPerCm);
         const FVector2D Left(18 * Scale, Local.Y - 26 * Scale);
         Paint.Fill({Left + FVector2D(-8, -22) * Scale, Left + FVector2D(Pixels + 60 * Scale, -22 * Scale),
-            Left + FVector2D(Pixels + 60 * Scale, 12 * Scale), Left + FVector2D(-8, 12) * Scale}, Plate);
-        Paint.Segment(Left, Left + FVector2D(Pixels, 0), Cream, 3.0f * Scale);
-        Paint.Segment(Left, Left + FVector2D(0, -7 * Scale), Cream, 2.0f * Scale);
-        Paint.Segment(Left + FVector2D(Pixels, 0), Left + FVector2D(Pixels, -7 * Scale), Cream, 2.0f * Scale);
+            Left + FVector2D(Pixels + 60 * Scale, 12 * Scale), Left + FVector2D(-8, 12) * Scale}, MvPlate);
+        Paint.Segment(Left, Left + FVector2D(Pixels, 0), MvCream, 3.0f * Scale);
+        Paint.Segment(Left, Left + FVector2D(0, -7 * Scale), MvCream, 2.0f * Scale);
+        Paint.Segment(Left + FVector2D(Pixels, 0), Left + FVector2D(Pixels, -7 * Scale), MvCream, 2.0f * Scale);
         const FString Label = Length >= 1000 ? FString::Printf(TEXT("%.0f km"), Length / 1000) : FString::Printf(TEXT("%.0f m"), Length);
-        Paint.Text(Label, Left + FVector2D(Pixels + 8 * Scale, -15 * Scale), 11 * Scale, Cream);
+        Paint.Text(Label, Left + FVector2D(Pixels + 8 * Scale, -15 * Scale), 11 * Scale, MvCream);
     }
 
     // The focused place, and how to drive the map.
@@ -443,38 +441,38 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     FString Detail = Model.Landmarks.IsValidIndex(Selected) ? Model.Landmarks[Selected].Description
         : FString(Frame.bInsideEstate ? TEXT("You are on your own land.") : TEXT("You are off your land just now."));
     if (Title.IsEmpty()) Title = FString::Printf(TEXT("The %s estate"), *Model.EstateName);
-    const FVector2D TitleSize = FPainter::MeasureText(Title, CardSize);
-    const FVector2D DetailSize = FPainter::MeasureText(Detail, CardSize * 0.8f, false);
+    const FVector2D TitleSize = HomesteadMapPaint::FPainter::MeasureText(Title, CardSize);
+    const FVector2D DetailSize = HomesteadMapPaint::FPainter::MeasureText(Detail, CardSize * 0.8f, false);
     const FVector2D CardAt(14 * Scale, 14 * Scale);
     const float CardWidth = FMath::Max(TitleSize.X, DetailSize.X) + 24 * Scale;
     const float CardHeight = TitleSize.Y + DetailSize.Y + 20 * Scale;
-    Paint.Fill({CardAt, CardAt + FVector2D(CardWidth, 0), CardAt + FVector2D(CardWidth, CardHeight), CardAt + FVector2D(0, CardHeight)}, Plate);
-    Paint.Text(Title, CardAt + FVector2D(12, 8) * Scale, CardSize, Gold);
-    Paint.Text(Detail, CardAt + FVector2D(12 * Scale, 10 * Scale + TitleSize.Y), CardSize * 0.8f, Cream, false);
+    Paint.Fill({CardAt, CardAt + FVector2D(CardWidth, 0), CardAt + FVector2D(CardWidth, CardHeight), CardAt + FVector2D(0, CardHeight)}, MvPlate);
+    Paint.Text(Title, CardAt + FVector2D(12, 8) * Scale, CardSize, MvGold);
+    Paint.Text(Detail, CardAt + FVector2D(12 * Scale, 10 * Scale + TitleSize.Y), CardSize * 0.8f, MvCream, false);
 
     const bool bGamepad = UsesGamepad.Get(false);
     const FString Hints = bGamepad
         ? TEXT("Left stick: pan    Right stick / triggers: zoom    D-pad: places    A: zoom to place    LB / RB: pages")
         : TEXT("Drag: pan    Wheel: zoom    Click: choose a place    Arrows: places    Enter: zoom to place");
     const float HintSize = 11.0f * Scale;
-    const FVector2D HintExtent = FPainter::MeasureText(Hints, HintSize, false);
+    const FVector2D HintExtent = HomesteadMapPaint::FPainter::MeasureText(Hints, HintSize, false);
     const FVector2D HintAt(Local.X - HintExtent.X - 16 * Scale, Local.Y - HintExtent.Y - 12 * Scale);
     Paint.Fill({HintAt - FVector2D(8, 5) * Scale, HintAt + FVector2D(HintExtent.X + 8 * Scale, -5 * Scale),
-        HintAt + HintExtent + FVector2D(8, 5) * Scale, HintAt + FVector2D(-8 * Scale, HintExtent.Y + 5 * Scale)}, Plate);
-    Paint.Text(Hints, HintAt, HintSize, Cream, false, false);
+        HintAt + HintExtent + FVector2D(8, 5) * Scale, HintAt + FVector2D(-8 * Scale, HintExtent.Y + 5 * Scale)}, MvPlate);
+    Paint.Text(Hints, HintAt, HintSize, MvCream, false, false);
     // Legend, above the hints.
     const FVector2D LegendAt(HintAt.X, HintAt.Y - 26 * Scale);
     Paint.Fill({LegendAt - FVector2D(8, 5) * Scale, LegendAt + FVector2D(300, -5) * Scale, LegendAt + FVector2D(300, 18) * Scale,
-        LegendAt + FVector2D(-8, 18) * Scale}, Plate);
+        LegendAt + FVector2D(-8, 18) * Scale}, MvPlate);
     for (int32 Dash = 0; Dash < 3; ++Dash)
-        Paint.Segment(LegendAt + FVector2D(Dash * 9, 7) * Scale, LegendAt + FVector2D(Dash * 9 + 6, 7) * Scale, BoundaryInk, 2.4f * Scale);
-    Paint.Text(TEXT("Your estate"), LegendAt + FVector2D(30, -1) * Scale, 11 * Scale, Cream, false, false);
+        Paint.Segment(LegendAt + FVector2D(Dash * 9, 7) * Scale, LegendAt + FVector2D(Dash * 9 + 6, 7) * Scale, HomesteadMapPaint::BoundaryInk, 2.4f * Scale);
+    Paint.Text(TEXT("Your estate"), LegendAt + FVector2D(30, -1) * Scale, 11 * Scale, MvCream, false, false);
     const FVector2D Swatch = LegendAt + FVector2D(140, 0) * Scale;
     Paint.Fill({Swatch, Swatch + FVector2D(22, 0) * Scale, Swatch + FVector2D(22, 14) * Scale, Swatch + FVector2D(0, 14) * Scale},
         FLinearColor(0.6f, 0.5f, 0.35f, 0.9f));
     for (int32 Line = 0; Line < 4; ++Line)
-        Paint.Segment(Swatch + FVector2D(Line * 6, 14) * Scale, Swatch + FVector2D(Line * 6 + 8, 0) * Scale, Ink, 1.0f);
-    Paint.Text(TEXT("For sale"), Swatch + FVector2D(30, -1) * Scale, 11 * Scale, Cream, false, false);
+        Paint.Segment(Swatch + FVector2D(Line * 6, 14) * Scale, Swatch + FVector2D(Line * 6 + 8, 0) * Scale, HomesteadMapPaint::Ink, 1.0f);
+    Paint.Text(TEXT("For sale"), Swatch + FVector2D(30, -1) * Scale, 11 * Scale, MvCream, false, false);
     return Paint.GetLayer();
 }
 }

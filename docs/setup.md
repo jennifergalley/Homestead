@@ -106,7 +106,10 @@ road changes meaningfully (and before a release):
    per texel) and its transform JSON from `Scripts\Terrain\Estate_Heightmap_4033.png` and
    `estate_layout.json`: parchment hillshade, 10 m contours, a water-lined inked coast, the river
    and the lightened road. Pass `--capture <png>` with a north-up orthographic capture of the
-   Estate level to fold its woods and fields in.
+   Estate level to fold its woods and fields in. Make that capture with the editor console
+   command `Homestead.CaptureEstateMap [resolution]` (default 8192) while the Estate level is
+   open: it loads the whole World Partition square and writes a base-colour capture to
+   `Saved\EstateMap\EstateCapture.png`.
 2. Import it: in the editor run the console command `Homestead.ImportEstateMap`, or headless
    `UnrealEditor-Cmd.exe SurvivalGame.uproject -run=HomesteadImportEstateMap -unattended -nullrhi`.
    It replaces the texture (all mips resident, never streamed) and rewrites `DA_EstateMap`.

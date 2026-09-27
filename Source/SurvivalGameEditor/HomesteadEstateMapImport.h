@@ -15,6 +15,10 @@ public:
     // Returns an empty string on success, otherwise what went wrong.
     UFUNCTION(BlueprintCallable, Category = "Homestead|Map")
     static FString ImportEstateMap(const FString& SourcePng);
+    // Captures the open level straight down (base colour, north up) over the whole estate square
+    // in tiles, writing a Resolution-square PNG for bake_estate_map.py --capture.
+    UFUNCTION(BlueprintCallable, Category = "Homestead|Map")
+    static FString CaptureEstateMap(int32 Resolution, const FString& OutputPng);
 };
 
 UCLASS()

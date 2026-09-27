@@ -1,11 +1,22 @@
 #include "HomesteadEstateMapImport.h"
 
 #include "AssetImportTask.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Editor.h"
+#include "Engine/SceneCapture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "RenderingThread.h"
+#include "TextureResource.h"
+#include "WorldPartition/LoaderAdapter/LoaderAdapterShape.h"
+#include "WorldPartition/WorldPartition.h"
+#include "WorldPartition/WorldPartitionEditorLoaderAdapter.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "Dom/JsonObject.h"
 #include "Engine/Texture2D.h"
 #include "FileHelpers.h"
+#include "HAL/FileManager.h"
 #include "HAL/IConsoleManager.h"
 #include "HomesteadEstateMap.h"
 #include "Misc/FileHelper.h"
@@ -32,8 +43,90 @@ FAutoConsoleCommand ImportCommand(
         if (Error.IsEmpty()) { UE_LOG(LogTemp, Display, TEXT("ESTATE_MAP_IMPORTED")); }
         else { UE_LOG(LogTemp, Error, TEXT("ESTATE_MAP_IMPORT_FAILED: %s"), *Error); }
     }));
+FAutoConsoleCommand CaptureCommand(
+    TEXT("Homestead.CaptureEstateMap"),
+    TEXT("Captures the open Estate level straight down (base colour, north up) to Saved/EstateMap/EstateCapture.png for bake_estate_map.py --capture. Optional argument: resolution (default 8192)."),
+    FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Args)
+    {
+        const int32 Resolution = Args.Num() ? FCString::Atoi(*Args[0]) : 8192;
+        const FString Error = UHomesteadEstateMapImport::CaptureEstateMap(Resolution, FString());
+        if (Error.IsEmpty()) { UE_LOG(LogTemp, Display, TEXT("ESTATE_MAP_CAPTURED")); }
+        else { UE_LOG(LogTemp, Error, TEXT("ESTATE_MAP_CAPTURE_FAILED: %s"), *Error); }
+    }));
 }
 
+FString UHomesteadEstateMapImport::CaptureEstateMap(int32 Resolution, const FString& OutputPng)
+{
+    UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+    if (!World) return TEXT("No editor world is open.");
+    Resolution = FMath::Clamp(Resolution > 0 ? Resolution : 8192, 1024, 16384);
+    const int32 Tiles = FMath::Max(1, Resolution / 2048);
+    const int32 TileSize = Resolution / Tiles;
+    Resolution = TileSize * Tiles;
+    constexpr double Min = -201600.0, Extent = 403200.0;
+    const double TileWorld = Extent / Tiles;
+    const FString Output = OutputPng.IsEmpty()
+        ? FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("EstateMap/EstateCapture.png"))) : OutputPng;
+
+    // World Partition keeps most of the estate unloaded in the editor; load the whole square.
+    if (UWorldPartition* Partition = World->GetWorldPartition())
+    {
+        UWorldPartitionEditorLoaderAdapter* Adapter = Partition->CreateEditorLoaderAdapter<FLoaderAdapterShape>(World,
+            FBox(FVector(Min, Min, -100000.0), FVector(Min + Extent, Min + Extent, 100000.0)), TEXT("Estate map capture"));
+        Adapter->GetLoaderAdapter()->Load();
+    }
+    FlushRenderingCommands();
+
+    FActorSpawnParameters Spawn;
+    Spawn.ObjectFlags = RF_Transient;
+    ASceneCapture2D* Camera = World->SpawnActor<ASceneCapture2D>(Spawn);
+    if (!Camera) return TEXT("Could not place the capture camera.");
+    USceneCaptureComponent2D* Capture = Camera->GetCaptureComponent2D();
+    Capture->ProjectionType = ECameraProjectionMode::Orthographic;
+    Capture->OrthoWidth = TileWorld;
+    Capture->CaptureSource = ESceneCaptureSource::SCS_BaseColor;
+    Capture->bCaptureEveryFrame = false;
+    Capture->bCaptureOnMovement = false;
+    Capture->ShowFlags.SetFog(false);
+    Capture->ShowFlags.SetAtmosphere(false);
+    Capture->ShowFlags.SetSkeletalMeshes(false);
+    Capture->ShowFlags.SetParticles(false);
+    Capture->ShowFlags.SetDecals(false);
+    UTextureRenderTarget2D* Target = NewObject<UTextureRenderTarget2D>();
+    Target->InitCustomFormat(TileSize, TileSize, PF_B8G8R8A8, false);
+    Target->UpdateResourceImmediate(true);
+    Capture->TextureTarget = Target;
+
+    TArray64<FColor> Image;
+    Image.SetNumZeroed(static_cast<int64>(Resolution) * Resolution);
+    for (int32 Row = 0; Row < Tiles; ++Row)
+        for (int32 Column = 0; Column < Tiles; ++Column)
+        {
+            // Rows run north to south, columns west to east; looking straight down with yaw 0 puts
+            // north (+X) at the top of each tile and east (+Y) on the right.
+            const FVector Centre(Min + Extent - (Row + 0.5) * TileWorld, Min + (Column + 0.5) * TileWorld, 150000.0);
+            Camera->SetActorLocationAndRotation(Centre, FRotator(-90.0, 0.0, 0.0));
+            Capture->CaptureScene();
+            FlushRenderingCommands();
+            TArray<FColor> Pixels;
+            if (!Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels) || Pixels.Num() != TileSize * TileSize)
+            {
+                Camera->Destroy();
+                return TEXT("Reading a capture tile failed.");
+            }
+            for (int32 Y = 0; Y < TileSize; ++Y)
+                FMemory::Memcpy(&Image[(static_cast<int64>(Row) * TileSize + Y) * Resolution + static_cast<int64>(Column) * TileSize],
+                    &Pixels[Y * TileSize], TileSize * sizeof(FColor));
+        }
+    Camera->Destroy();
+    for (FColor& Pixel : Image) Pixel.A = 255;
+    TArray64<uint8> Png;
+    FImageUtils::PNGCompressImageArray(Resolution, Resolution, Image, Png);
+    IFileManager::Get().MakeDirectory(*FPaths::GetPath(Output), true);
+    if (!FFileHelper::SaveArrayToFile(Png, *Output)) return FString::Printf(TEXT("Could not write %s."), *Output);
+    UE_LOG(LogTemp, Display, TEXT("Estate map capture written to %s (%dx%d, %d tiles)."), *Output, Resolution, Resolution, Tiles * Tiles);
+    return FString();
+}
 FString UHomesteadEstateMapImport::ImportEstateMap(const FString& SourcePng)
 {
     const FString Png = SourcePng.IsEmpty() ? DefaultSource() : FPaths::ConvertRelativePathToFull(SourcePng);

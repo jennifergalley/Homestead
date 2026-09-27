@@ -2,12 +2,12 @@
 
 ## 1. Parcels
 
-- [ ] 1.1 Add Simulation parcels from the landmark polygons, with point-in-parcel queries, ownership save fields and a new-game default. Add portable tests for polygon edge cases and save/reload
+- [x] 1.1 Add Simulation parcels from the landmark polygons, with point-in-parcel queries, ownership save fields and a new-game default. Add portable tests for polygon edge cases and save/reload
 - [ ] 1.2 Make build placement call `CanBuildAt` and reject placements outside the estate with an explicit reason. Verify that nothing is consumed and that foraging outside still works
 
 ## 2. First playable minimap (first delivery)
 
-- [ ] 2.1 Add the orthographic capture-and-stylise editor utility, and bake `T_EstateMap` plus its transform from the first Estate terrain
+- [x] 2.1 Add the capture-and-stylise bake (`Scripts\Map\bake_estate_map.py` + `Homestead.ImportEstateMap`), and bake `T_EstateMap` plus its transform from the first Estate terrain (the LIDAR heightmap). The orthographic-capture fold-in (`--capture`) waits for the level's water and dressing
 - [ ] 2.2 Add the `SHomesteadMinimap` overlay: a north-up crop, the player arrow, the dashed owned boundary and landmark glyphs, a protected HUD region, and hiding with the HUD. Verify it at 720p and 4K
 - [ ] 2.3 Add the boundary-crossing toast with hysteresis, using the estate name. Package, walk off the estate along the road, capture in-game views, commit and push
 
