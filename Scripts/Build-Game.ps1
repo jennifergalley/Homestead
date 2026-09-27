@@ -1,9 +1,24 @@
+<#
+.SYNOPSIS
+Builds the editor module, regenerates content and (with -Package) packages the Development game.
+.DESCRIPTION
+-Package              also runs UAT BuildCookRun into -ArchiveDirectory (default Build\Windows).
+-PackageOnly          packages without re-running Fetch-Assets, the content bootstrap and the character/
+                      locomotion imports (about 25 minutes). Use it only when generated content is already
+                      current in this worktree; the editor module build still runs (a no-op when current).
+-SkipAssets           skips Fetch-Assets.ps1.
+UAT is single-instance machine-wide; this script waits for another worktree's package to finish
+(-WaitForUATMutex) instead of failing. Output: Build\Logs\bootstrap.log and Build\Logs\package-<time>.log.
+The bootstrap re-saves many tracked .uassets; review git status and restore the ones you didn't mean
+to change. Shared-machine rules: .github\skills\unreal-editor-mcp\SKILL.md, sections 0 and 8.
+#>
 [CmdletBinding()]
-param([string]$EngineRoot, [switch]$Package, [switch]$SkipAssets,
+param([string]$EngineRoot, [switch]$Package, [switch]$PackageOnly, [switch]$SkipAssets,
     [string]$ArchiveDirectory = 'Build\Windows',
     [ValidateSet('Development','Shipping')][string]$Configuration = 'Development',
     [switch]$ReuseCooked, [string]$ReusePakDirectory)
 $ErrorActionPreference = 'Stop'
+if ($PackageOnly) { $Package = [switch]$true }
 $root = Split-Path $PSScriptRoot -Parent
 $archive = [IO.Path]::GetFullPath($ArchiveDirectory, $root)
 if ($Package) {
@@ -52,7 +67,7 @@ if ($ReuseCooked) {
     $null = New-Item -ItemType Directory -Path $stagedPaks -Force
     $paks | Copy-Item -Destination $stagedPaks
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
-    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Shipping -skipbuild -skipcook -skippak -stage -archive "-stagingdirectory=$stage" "-archivedirectory=$archive" -unattended -utf8output
+    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Shipping -skipbuild -skipcook -skippak -stage -archive "-stagingdirectory=$stage" "-archivedirectory=$archive" -unattended -utf8output -WaitForUATMutex
     if ($LASTEXITCODE -ne 0) { throw "Shipping staging failed ($LASTEXITCODE)." }
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive
     foreach ($container in $containerHashes) {
@@ -75,7 +90,7 @@ if ($ReuseCooked) {
 if ($Configuration -ne 'Development' -or $ReusePakDirectory) {
     throw 'Shipping builds require the explicit -ReuseCooked path; no editor will be launched implicitly.'
 }
-if (-not $SkipAssets) { & (Join-Path $PSScriptRoot 'Fetch-Assets.ps1') }
+if (-not $SkipAssets -and -not $PackageOnly) { & (Join-Path $PSScriptRoot 'Fetch-Assets.ps1') }
 $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
 & $build SurvivalGameEditor Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
 if ($LASTEXITCODE -ne 0) { throw "Unreal editor-module build failed ($LASTEXITCODE)." }
@@ -84,6 +99,7 @@ $offlineArguments = @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1
 $bootstrap = Join-Path $PSScriptRoot 'bootstrap_unreal.py'
 $logDirectory = Join-Path $root 'Build\Logs'
 $null = New-Item -ItemType Directory -Path $logDirectory -Force
+if (-not $PackageOnly) {
 $bootstrapLog = Join-Path $logDirectory 'bootstrap.log'
 Write-Host "Generating content; full output: $bootstrapLog"
 & $editor $project -run=pythonscript "-script=$bootstrap" @offlineArguments -unattended -nop4 -nosplash -nullrhi -stdout -FullStdOutLogOutput *> $bootstrapLog
@@ -98,6 +114,7 @@ if (-not (Test-Path -LiteralPath $map)) { throw 'Content bootstrap did not produ
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Gathering
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Watering
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Clearing
+}
 if ($Package) {
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
     # UAT's own log folder (%APPDATA%\Unreal Engine\AutomationTool\Logs) is shared by every worktree and
