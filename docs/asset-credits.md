@@ -23,6 +23,12 @@ MetaHuman assets (Unreal Engine EULA) and are included only for fitting and revi
 review renders use Poly Haven's CC0 `kloofendal_48d_partly_cloudy_puresky` HDRI (Greg Zaal, sky edits by
 Jarod Guest, https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky). It isn't part of the game asset.
 
+Her wardrobe in `Assets\Characters\Clothing` (linen tee, laced long shirt, wool trousers and the
+sheepskin coat with horn toggles) is project-authored in the same way:
+`Scripts\Blender\Recipes\clothing_wardrobe.py` fits, skins and textures every garment from numpy
+procedural maps, with no scanned or downloaded texture or mesh. `Clothing.blend` includes the
+MetaHuman body and face for fitting and review only. The review renders use the same CC0 HDRI.
+
 The granite rocks and boulders in `Assets\Props` (GraniteCobbles, GraniteSpalls,
 GraniteRubble, GraniteBoulderLoaf, GraniteBlockTalus, GraniteBoulderLow,
 GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones)

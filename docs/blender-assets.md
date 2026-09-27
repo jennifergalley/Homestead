@@ -24,6 +24,7 @@ Everything lives in `Scripts\Blender`:
 | `build_prop.py` | Blender-side builder used by `New-Prop.ps1` (both live and headless) |
 | `Recipes\*.py` | One recipe per asset set (`bush.py` = scanned composition, `chopping_block.py` = primitive blockout) |
 | `Recipes\primitive_outfit.py` + `Recipes\outfit\` | Standalone skinned-garment recipe for the MetaHuman heroine: fit, procedural cloth textures, weights, test poses, FBX. Run it directly with `blender --background --python`, not through `New-Prop.ps1`. See `Assets\Characters\PrimitiveOutfit\README.md` |
+| `Recipes\clothing_wardrobe.py` | Her wardrobe (tee, long shirt, wool trousers, sheepskin coat) on the same `outfit\` modules: layered fitting over the base outfit, sleeves, drape, fleece, test poses, per-garment coverage masks. See `Assets\Characters\Clothing\README.md` |
 | `Get-PolyHavenAsset.ps1` | Fetches a CC0 Poly Haven `.blend` + maps (or HDRI) into `Assets\Source\Blender\polyhaven`, MD5-verified, with `receipt.json` |
 | `render_beauty.py` | Headless Cycles review renders (GPU/OptiX, HDRI sky, 4K hero + close detail) |
 | `Import-Props.ps1` / `import_props.py` | Unreal import of built props |
