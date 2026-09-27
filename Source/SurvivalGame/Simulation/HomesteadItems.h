@@ -14,6 +14,11 @@ enum class Item : int
     Timber, Firewood, Machete, Fur,
     // Round 1 general-store goods.
     Pasty, Bread, Cheese, Twine,
+    // add-overgrown-estate-clearing: tools, salvaged heads, clearing yields and spring flowers.
+    Scythe, Billhook, Pickaxe,
+    RustedAxeHead, RustedHoeBlade, RustedScytheBlade, RustedBillhookHead, RustedPickHead,
+    Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
+    Primroses, Bluebells, WildDaffodils, WildGarlic,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);
