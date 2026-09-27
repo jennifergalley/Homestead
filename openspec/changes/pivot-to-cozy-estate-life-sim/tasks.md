@@ -16,5 +16,5 @@
 
 ## 3. Acceptance
 
-- [ ] 3.1 Jenny reviews the direction documents and round-1 plans. Fold any corrections back into `design.md` and the affected changes
-- [ ] 3.2 Commit and push the planning set. Point the coordinator at round 1 when Jenny says to start implementing
+- [x] 3.1 Jenny reviews the direction documents and round-1 plans. Fold any corrections back into `design.md` and the affected changes
+- [x] 3.2 Commit and push the planning set. Point the coordinator at round 1 when Jenny says to start implementing (handoff in `round-1-kickoff.md`)
