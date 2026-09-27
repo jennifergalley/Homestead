@@ -276,9 +276,9 @@ def poke_metrics(garment, body_surf, edge_dist):
 
 # ------------------------------------------------------------------- coverage
 
-def coverage_mask(body_obj, garments, edge_attr, path, R=2048, margin=0.012):
+def coverage_mask(body_obj, garments, edge_attr, path, R=2048, margin=0.012, max_dist=0.04, z_min=0.6):
     """White where the body is fully under cloth (safe to hide), in the body's UV0 space.
-    A body vertex is covered when a ray along its normal meets a garment within 4 cm at a
+    A body vertex is covered when a ray along its normal meets a garment within `max_dist` at a
     point at least ``margin`` inside the garment's open edges; faces need all corners covered."""
     Vb, Nb, Tb = mesh_arrays(body_obj)
     cover = np.zeros(len(Vb), bool)
@@ -289,9 +289,9 @@ def coverage_mask(body_obj, garments, edge_attr, path, R=2048, margin=0.012):
         ed = edge_attr[g.name]
         c = np.zeros(len(Vb), bool)
         for i in range(len(Vb)):
-            if Vb[i, 2] < 0.6 or Vb[i, 2] > 1.6:
+            if Vb[i, 2] < z_min or Vb[i, 2] > 1.6:
                 continue
-            hit = gs.bvh.ray_cast(Vector(Vb[i] + Nb[i] * 0.0005), Vector(Nb[i]), 0.04)
+            hit = gs.bvh.ray_cast(Vector(Vb[i] + Nb[i] * 0.0005), Vector(Nb[i]), max_dist)
             if hit[0] is None:
                 continue
             tri = Tg[hit[2]]

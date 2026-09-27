@@ -31,6 +31,12 @@ numpy, with no scanned or downloaded images. The `.blend` files carry the MetaHu
 only for fitting and review. The review renders use the same CC0 Kloofendal HDRI, which ships
 with no asset.
 
+Her wardrobe in `Assets\Characters\Clothing` (linen tee, laced long shirt, wool trousers and the
+sheepskin coat with horn toggles) is project-authored in the same way:
+`Scripts\Blender\Recipes\clothing_wardrobe.py` fits, skins and textures every garment from numpy
+procedural maps, with no scanned or downloaded texture or mesh. `Clothing.blend` includes the
+MetaHuman body and face for fitting and review only. The review renders use the same CC0 HDRI.
+
 The granite rocks and boulders in `Assets\Props` (GraniteCobbles, GraniteSpalls,
 GraniteRubble, GraniteBoulderLoaf, GraniteBlockTalus, GraniteBoulderLow,
 GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones)

@@ -1,0 +1,1118 @@
+{
+ "recipe": "Scripts/Blender/Recipes/clothing_wardrobe.py",
+ "seed": 20260927,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf",
+  "SKM_PrimitiveShorts.fbx": "2e9b5357e74e7c5fa819e8a4d8b1a3358ff1550f1fd0c68f02b6f5a186dc11e0",
+  "cord_belt_contour.json": "83db3d4eb7f032e6dd87a3d60e3e699f5ba534134bb5e962859f4bad2ac9ead0"
+ },
+ "landmarks": {
+  "jugular_z": 1.4477414407730103,
+  "shoulder_x": 0.1509849727153778,
+  "navel": [
+   0.0,
+   -0.1257217824459076,
+   1.11
+  ],
+  "navel_dip_mm": 7.048740863800049,
+  "apex": [
+   0.07201766967773438,
+   -0.13629230856895447,
+   1.3172551393508911
+  ],
+  "underbust_z": 1.2592551393508875,
+  "armpit_z": 1.3210744857788086,
+  "neck_x": 0.06,
+  "perineum": [
+   0.0,
+   -0.012500000186264515,
+   0.8593802452087402
+  ],
+  "hip_joint_z": 0.9609218239784241,
+  "height_body_top": 1.7889848947525024
+ },
+ "params": {
+  "SKM_WoolTrousers": {
+   "name": "SKM_WoolTrousers",
+   "kind": "trousers",
+   "pitch": 0.0112,
+   "waist_front_z": 1.032,
+   "waist_back_rise": 0.036,
+   "junction_z": 0.9043802452087403,
+   "knee_z": 0.5078586935997009,
+   "hem_z": 0.08430229532718658,
+   "offset": 0.0035
+  },
+  "SKM_LinenTee": {
+   "kind": "tee",
+   "pitch": 0.0095,
+   "hem_gap": 0.008,
+   "name": "SKM_LinenTee",
+   "ua_z": 1.2910744857788086,
+   "x_in": 0.066,
+   "x_out": 0.142,
+   "zc": 1.4157414407730102,
+   "z_in": 1.4377414407730102,
+   "z_out": 1.3890744857788087,
+   "zcb": 1.4737414407730103,
+   "z_inb": 1.4777414407730103,
+   "z_outb": 1.3850744857788087,
+   "sleeve_end": 0.14,
+   "base": 0.0035,
+   "hang": 0.45,
+   "sleeve_ease": 0.0065,
+   "opening": false
+  },
+  "SKM_LinenLongShirt": {
+   "kind": "longshirt",
+   "pitch": 0.0095,
+   "hem_gap": 0.008,
+   "name": "SKM_LinenLongShirt",
+   "ua_z": 1.2850744857788086,
+   "x_in": 0.064,
+   "x_out": 0.142,
+   "zc": 1.4217414407730102,
+   "z_in": 1.4397414407730103,
+   "z_out": 1.3890744857788087,
+   "zcb": 1.4757414407730103,
+   "z_inb": 1.4797414407730103,
+   "z_outb": 1.3850744857788087,
+   "base": 0.0045,
+   "hang": 0.72,
+   "sleeve_ease": 0.011,
+   "cuff": 0.034,
+   "cuff_ease": 0.0035,
+   "slit": 0.11,
+   "slit_open": 0.012,
+   "opening": false
+  },
+  "SKM_FurCoat": {
+   "kind": "coat",
+   "pitch": 0.0105,
+   "hem_gap": 0.016,
+   "name": "SKM_FurCoat",
+   "ua_z": 1.2710744857788085,
+   "x_in": 0.072,
+   "x_out": 0.143,
+   "zc": 1.4277414407730102,
+   "z_in": 1.4437414407730103,
+   "z_out": 1.3910744857788087,
+   "zcb": 1.4777414407730103,
+   "z_inb": 1.4817414407730103,
+   "z_outb": 1.3870744857788087,
+   "base": 0.01,
+   "hang": 0.8,
+   "sleeve_ease": 0.012,
+   "cuff": 0.055,
+   "cuff_ease": 0.012,
+   "opening": true,
+   "open_gap": 0.003,
+   "facing": 0.032
+  }
+ },
+ "garments": {
+  "SKM_WoolTrousers": {
+   "vertices": 22266,
+   "triangles": 44506,
+   "bones_weighted": 36,
+   "accessories": 3,
+   "texel_uv_per_m": 0.7479011293445178,
+   "textures": {
+    "basecolor": "T_WoolTrousers_basecolor.png",
+    "normal": "T_WoolTrousers_normal.png",
+    "roughness": "T_WoolTrousers_roughness.png",
+    "ao": "T_WoolTrousers_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.3021036982536316,
+    "albedo_mean": [
+     0.08312330394983292,
+     0.0534093864262104,
+     0.03414520248770714
+    ],
+    "rough_mean": 0.9223405718803406,
+    "px_per_cm": 15.317015128975724,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 1.93,
+    "air_gap_mm_median": 4.82,
+    "air_gap_mm_mean": 7.95
+   },
+   "below_knee_outer_mm": {
+    "max": 9.81,
+    "p99": 9.09,
+    "mean": 6.33
+   }
+  },
+  "SKM_LinenTee": {
+   "vertices": 13200,
+   "triangles": 26394,
+   "bones_weighted": 47,
+   "accessories": 2,
+   "texel_uv_per_m": 1.1150329669470522,
+   "textures": {
+    "basecolor": "T_LinenTee_basecolor.png",
+    "normal": "T_LinenTee_normal.png",
+    "roughness": "T_LinenTee_roughness.png",
+    "ao": "T_LinenTee_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.5234419703483582,
+    "albedo_mean": [
+     0.19017648696899414,
+     0.22737759351730347,
+     0.26341819763183594
+    ],
+    "rough_mean": 0.8881738185882568,
+    "px_per_cm": 22.83587516307563,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 1.19,
+    "air_gap_mm_median": 7.32,
+    "air_gap_mm_mean": 8.91
+   }
+  },
+  "SKM_LinenLongShirt": {
+   "vertices": 20492,
+   "triangles": 40972,
+   "bones_weighted": 67,
+   "accessories": 2,
+   "texel_uv_per_m": 0.8562983278166238,
+   "textures": {
+    "basecolor": "T_LinenLongShirt_basecolor.png",
+    "normal": "T_LinenLongShirt_normal.png",
+    "roughness": "T_LinenLongShirt_roughness.png",
+    "ao": "T_LinenLongShirt_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.6684103012084961,
+    "albedo_mean": [
+     0.5347279906272888,
+     0.5017997622489929,
+     0.4311663508415222
+    ],
+    "rough_mean": 0.8881608247756958,
+    "px_per_cm": 17.536989753684455,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 0.96,
+    "air_gap_mm_median": 10.99,
+    "air_gap_mm_mean": 11.98
+   }
+  },
+  "SKM_FurCoat": {
+   "vertices": 18064,
+   "triangles": 36048,
+   "bones_weighted": 65,
+   "accessories": 9,
+   "texel_uv_per_m": 0.66663074208666,
+   "textures": {
+    "basecolor": "T_FurCoat_basecolor.png",
+    "normal": "T_FurCoat_normal.png",
+    "roughness": "T_FurCoat_roughness.png",
+    "ao": "T_FurCoat_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.5926045775413513,
+    "albedo_mean": [
+     0.23777452111244202,
+     0.1847219467163086,
+     0.1231178343296051
+    ],
+    "rough_mean": 0.8973673582077026,
+    "px_per_cm": 27.305225051370034,
+    "resolution": 4096
+   },
+   "loft": {
+    "loft_mm_mean": 18.0,
+    "loft_mm_body": 17.3,
+    "loft_mm_trims": 24.0,
+    "air_gap_to_skin_mm_median": 16.2
+   }
+  },
+  "detail_maps": {
+   "normal": "T_HomespunWool_Detail_normal.png",
+   "roughness": "T_HomespunWool_Detail_roughness.png",
+   "tone": "T_HomespunWool_Detail_tone.png"
+  }
+ },
+ "bind_pose": {
+  "SKM_WoolTrousers": {
+   "verts": 22266,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_LinenTee": {
+   "verts": 13200,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_LinenLongShirt": {
+   "verts": 20492,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_FurCoat": {
+   "verts": 18064,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  }
+ },
+ "test_poses": {
+  "walk": {
+   "SKM_WoolTrousers": {
+    "verts": 22266,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_LinenTee": {
+    "verts": 13200,
+    "inside": 300,
+    "inside_pct": 2.272727272727273,
+    "inside_near_edge": 25,
+    "max_depth_mm": 14.604173081603394,
+    "p99_depth_mm": 4.203044555243745
+   },
+   "SKM_LinenLongShirt": {
+    "verts": 20492,
+    "inside": 334,
+    "inside_pct": 1.629904352918212,
+    "inside_near_edge": 0,
+    "max_depth_mm": 15.198142285450825,
+    "p99_depth_mm": 3.529693303231334
+   },
+   "SKM_FurCoat": {
+    "verts": 18064,
+    "inside": 475,
+    "inside_pct": 2.6295394154118688,
+    "inside_near_edge": 0,
+    "max_depth_mm": 27.432288272915763,
+    "p99_depth_mm": 8.959510319031946
+   },
+   "layers": {
+    "SKM_LinenTee over SKM_PrimitiveShorts": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenTee over SKM_WoolTrousers": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_WoolTrousers": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenTee": {
+     "checked": 8324,
+     "inside": 196,
+     "inside_pct": 2.3546371936568957,
+     "max_depth_mm": 13.542547707414588,
+     "through_outer": 60,
+     "through_outer_pct": 0.7208073041806823
+    },
+    "SKM_FurCoat over SKM_LinenLongShirt": {
+     "checked": 8324,
+     "inside": 248,
+     "inside_pct": 2.9793368572801535,
+     "max_depth_mm": 8.36475933490008,
+     "through_outer": 22,
+     "through_outer_pct": 0.2642960115329169
+    }
+   }
+  },
+  "kneel_left_forward": {
+   "SKM_WoolTrousers": {
+    "verts": 22266,
+    "inside": 225,
+    "inside_pct": 1.0105092966855296,
+    "inside_near_edge": 2,
+    "max_depth_mm": 7.970051934467155,
+    "p99_depth_mm": 0.5118243082191334
+   },
+   "SKM_LinenTee": {
+    "verts": 13200,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_LinenLongShirt": {
+    "verts": 20492,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_FurCoat": {
+    "verts": 18064,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "layers": {
+    "SKM_LinenTee over SKM_PrimitiveShorts": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenTee over SKM_WoolTrousers": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_WoolTrousers": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenTee": {
+     "checked": 8324,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenLongShirt": {
+     "checked": 8324,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    }
+   }
+  },
+  "squat": {
+   "SKM_WoolTrousers": {
+    "verts": 22266,
+    "inside": 1186,
+    "inside_pct": 5.326506781640169,
+    "inside_near_edge": 275,
+    "max_depth_mm": 22.837056454205,
+    "p99_depth_mm": 5.671564827956195
+   },
+   "SKM_LinenTee": {
+    "verts": 13200,
+    "inside": 312,
+    "inside_pct": 2.3636363636363638,
+    "inside_near_edge": 64,
+    "max_depth_mm": 11.987742683804568,
+    "p99_depth_mm": 5.344283304483432
+   },
+   "SKM_LinenLongShirt": {
+    "verts": 20492,
+    "inside": 363,
+    "inside_pct": 1.7714229943392543,
+    "inside_near_edge": 73,
+    "max_depth_mm": 16.07497793874716,
+    "p99_depth_mm": 5.678947514017198
+   },
+   "SKM_FurCoat": {
+    "verts": 18064,
+    "inside": 561,
+    "inside_pct": 3.1056244464127545,
+    "inside_near_edge": 291,
+    "max_depth_mm": 26.451426655676904,
+    "p99_depth_mm": 12.020750845703066
+   },
+   "layers": {
+    "SKM_LinenTee over SKM_PrimitiveShorts": {
+     "checked": 3382,
+     "inside": 83,
+     "inside_pct": 2.4541691306918985,
+     "max_depth_mm": 8.417888903966324
+    },
+    "SKM_LinenTee over SKM_WoolTrousers": {
+     "checked": 3382,
+     "inside": 160,
+     "inside_pct": 4.730928444707274,
+     "max_depth_mm": 10.759179751640154
+    },
+    "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
+     "checked": 6837,
+     "inside": 116,
+     "inside_pct": 1.6966505777387744,
+     "max_depth_mm": 13.435545788534737
+    },
+    "SKM_LinenLongShirt over SKM_WoolTrousers": {
+     "checked": 6837,
+     "inside": 224,
+     "inside_pct": 3.2762907708059092,
+     "max_depth_mm": 15.422899088756704
+    },
+    "SKM_FurCoat over SKM_LinenTee": {
+     "checked": 8324,
+     "inside": 184,
+     "inside_pct": 2.2104757328207594,
+     "max_depth_mm": 15.194966429266428,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenLongShirt": {
+     "checked": 8324,
+     "inside": 273,
+     "inside_pct": 3.2796732340221046,
+     "max_depth_mm": 7.593075273077616,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    }
+   }
+  },
+  "arms_overhead": {
+   "SKM_WoolTrousers": {
+    "verts": 22266,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_LinenTee": {
+    "verts": 13200,
+    "inside": 58,
+    "inside_pct": 0.43939393939393934,
+    "inside_near_edge": 19,
+    "max_depth_mm": 3.727924690783035,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_LinenLongShirt": {
+    "verts": 20492,
+    "inside": 60,
+    "inside_pct": 0.2927971891469842,
+    "inside_near_edge": 8,
+    "max_depth_mm": 4.438884598949972,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_FurCoat": {
+    "verts": 18064,
+    "inside": 65,
+    "inside_pct": 0.3598317094774136,
+    "inside_near_edge": 17,
+    "max_depth_mm": 7.583474475053545,
+    "p99_depth_mm": 0.0
+   },
+   "layers": {
+    "SKM_LinenTee over SKM_PrimitiveShorts": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenTee over SKM_WoolTrousers": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_WoolTrousers": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenTee": {
+     "checked": 8324,
+     "inside": 18,
+     "inside_pct": 0.2162421912542047,
+     "max_depth_mm": 2.930480033214276,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenLongShirt": {
+     "checked": 8324,
+     "inside": 23,
+     "inside_pct": 0.2763094666025949,
+     "max_depth_mm": 3.279335453602621,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    }
+   }
+  },
+  "felling_swing": {
+   "SKM_WoolTrousers": {
+    "verts": 22266,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_LinenTee": {
+    "verts": 13200,
+    "inside": 417,
+    "inside_pct": 3.159090909090909,
+    "inside_near_edge": 190,
+    "max_depth_mm": 18.26774672174331,
+    "p99_depth_mm": 6.210484044826825
+   },
+   "SKM_LinenLongShirt": {
+    "verts": 20492,
+    "inside": 428,
+    "inside_pct": 2.0886199492484874,
+    "inside_near_edge": 156,
+    "max_depth_mm": 18.041872209149112,
+    "p99_depth_mm": 4.241674638535012
+   },
+   "SKM_FurCoat": {
+    "verts": 18064,
+    "inside": 338,
+    "inside_pct": 1.8711248892825507,
+    "inside_near_edge": 28,
+    "max_depth_mm": 19.71293754979334,
+    "p99_depth_mm": 5.111811703490528
+   },
+   "layers": {
+    "SKM_LinenTee over SKM_PrimitiveShorts": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenTee over SKM_WoolTrousers": {
+     "checked": 3382,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_LinenLongShirt over SKM_WoolTrousers": {
+     "checked": 6837,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_FurCoat over SKM_LinenTee": {
+     "checked": 8324,
+     "inside": 56,
+     "inside_pct": 0.6727534839019702,
+     "max_depth_mm": 11.471132209611316,
+     "through_outer": 4,
+     "through_outer_pct": 0.04805382027871216
+    },
+    "SKM_FurCoat over SKM_LinenLongShirt": {
+     "checked": 8324,
+     "inside": 72,
+     "inside_pct": 0.8649687650168189,
+     "max_depth_mm": 7.1695286897559845,
+     "through_outer": 0,
+     "through_outer_pct": 0.0
+    }
+   }
+  }
+ },
+ "exports": {
+  "SKM_WoolTrousers": {
+   "file": "WoolTrousers/SKM_WoolTrousers.fbx",
+   "bones": 48,
+   "bone_names": [
+    "ankle_bck_l",
+    "ankle_bck_r",
+    "ankle_fwd_l",
+    "ankle_fwd_r",
+    "calf_correctiveRoot_l",
+    "calf_correctiveRoot_r",
+    "calf_kneeBack_l",
+    "calf_kneeBack_r",
+    "calf_knee_l",
+    "calf_knee_r",
+    "calf_l",
+    "calf_r",
+    "calf_twistCor_02_l",
+    "calf_twistCor_02_r",
+    "calf_twist_01_l",
+    "calf_twist_01_r",
+    "calf_twist_02_l",
+    "calf_twist_02_r",
+    "foot_l",
+    "foot_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twistCor_02_l",
+    "thigh_twistCor_02_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thigh_twist_02_l",
+    "thigh_twist_02_r"
+   ]
+  },
+  "SKM_LinenTee": {
+   "file": "LinenTee/SKM_LinenTee.fbx",
+   "bones": 66,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "lowerarm_correctiveRoot_l",
+    "lowerarm_correctiveRoot_r",
+    "lowerarm_fwd_l",
+    "lowerarm_fwd_r",
+    "lowerarm_l",
+    "lowerarm_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_bicep_l",
+    "upperarm_bicep_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_tricep_l",
+    "upperarm_tricep_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twistCor_02_l",
+    "upperarm_twistCor_02_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r",
+    "upperarm_twist_02_l",
+    "upperarm_twist_02_r"
+   ]
+  },
+  "SKM_LinenLongShirt": {
+   "file": "LinenLongShirt/SKM_LinenLongShirt.fbx",
+   "bones": 86,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "hand_l",
+    "hand_r",
+    "lowerarm_bck_l",
+    "lowerarm_bck_r",
+    "lowerarm_correctiveRoot_l",
+    "lowerarm_correctiveRoot_r",
+    "lowerarm_fwd_l",
+    "lowerarm_fwd_r",
+    "lowerarm_in_l",
+    "lowerarm_in_r",
+    "lowerarm_l",
+    "lowerarm_out_l",
+    "lowerarm_out_r",
+    "lowerarm_r",
+    "lowerarm_twist_01_l",
+    "lowerarm_twist_01_r",
+    "lowerarm_twist_02_l",
+    "lowerarm_twist_02_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thumb_01_l",
+    "thumb_01_r",
+    "thumb_01_side_out_l",
+    "thumb_01_side_out_r",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_bicep_l",
+    "upperarm_bicep_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_tricep_l",
+    "upperarm_tricep_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twistCor_02_l",
+    "upperarm_twistCor_02_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r",
+    "upperarm_twist_02_l",
+    "upperarm_twist_02_r",
+    "wrist_inner_l",
+    "wrist_inner_r",
+    "wrist_outer_l",
+    "wrist_outer_r"
+   ]
+  },
+  "SKM_FurCoat": {
+   "file": "FurCoat/SKM_FurCoat.fbx",
+   "bones": 84,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "hand_l",
+    "hand_r",
+    "lowerarm_bck_l",
+    "lowerarm_bck_r",
+    "lowerarm_correctiveRoot_l",
+    "lowerarm_correctiveRoot_r",
+    "lowerarm_fwd_l",
+    "lowerarm_fwd_r",
+    "lowerarm_in_l",
+    "lowerarm_in_r",
+    "lowerarm_l",
+    "lowerarm_out_l",
+    "lowerarm_out_r",
+    "lowerarm_r",
+    "lowerarm_twist_01_l",
+    "lowerarm_twist_01_r",
+    "lowerarm_twist_02_l",
+    "lowerarm_twist_02_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thumb_01_l",
+    "thumb_01_r",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_bicep_l",
+    "upperarm_bicep_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_tricep_l",
+    "upperarm_tricep_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twistCor_02_l",
+    "upperarm_twistCor_02_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r",
+    "upperarm_twist_02_l",
+    "upperarm_twist_02_r",
+    "wrist_inner_l",
+    "wrist_inner_r",
+    "wrist_outer_l",
+    "wrist_outer_r"
+   ]
+  }
+ },
+ "coverage": {
+  "SKM_WoolTrousers": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 11462,
+   "total_triangles": 60816,
+   "covered_vertices": 6021,
+   "per_garment_triangles": {
+    "SKM_WoolTrousers": 11462
+   },
+   "margin_m": 0.012,
+   "file": "WoolTrousers/BodyCoverageMask_WoolTrousers.png"
+  },
+  "SKM_LinenTee": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 7942,
+   "total_triangles": 60816,
+   "covered_vertices": 4331,
+   "per_garment_triangles": {
+    "SKM_LinenTee": 7942
+   },
+   "margin_m": 0.012,
+   "file": "LinenTee/BodyCoverageMask_LinenTee.png"
+  },
+  "SKM_LinenLongShirt": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 14886,
+   "total_triangles": 60816,
+   "covered_vertices": 7892,
+   "per_garment_triangles": {
+    "SKM_LinenLongShirt": 14886
+   },
+   "margin_m": 0.012,
+   "file": "LinenLongShirt/BodyCoverageMask_LinenLongShirt.png"
+  },
+  "SKM_FurCoat": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 14226,
+   "total_triangles": 60816,
+   "covered_vertices": 7565,
+   "per_garment_triangles": {
+    "SKM_FurCoat": 14226
+   },
+   "margin_m": 0.012,
+   "file": "FurCoat/BodyCoverageMask_FurCoat.png"
+  }
+ },
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0, raw cm values like the UE export)",
+  "axes": "Z up, -Y forward (FBX UpAxis Z, FrontAxis -Y), same as input",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "smoothing": "FACE",
+  "tangents": true,
+  "normal_maps": "OpenGL (+Y): flip green in Unreal"
+ },
+ "pouch_clearance": {
+  "pouch_vertices_inside_trousers": 127,
+  "min_signed_mm": -0.95,
+  "placement_error_m": 0.037,
+  "axis_flip": [
+   1,
+   -1
+  ],
+  "note": "pouch placed at its belt pivot; positive = clear of the trousers' outer surface"
+ },
+ "belt_clearance": {
+  "SKM_LinenTee": {
+   "min_hem_above_belt_top_mm": 6.8
+  },
+  "SKM_LinenLongShirt": {
+   "min_hem_above_belt_top_mm": 6.3
+  },
+  "SKM_FurCoat": {
+   "min_hem_above_belt_top_mm": 6.3
+  }
+ },
+ "files": {
+  "WoolTrousers/BodyCoverageMask_WoolTrousers.png": "126cd62d2d48f8809c119ca93009f631bb657dad494f45c8161c480079162f16",
+  "WoolTrousers/SKM_WoolTrousers.fbx": "6db949e1f35c641799521bbcd73ee03f84ab858b5d56da58f8b8547c59c2a9fa",
+  "WoolTrousers/Textures/T_HomespunWool_Detail_normal.png": "d1c1d1903f5db2799bd053444b2e66d981d1099a1935d81662f9b98ab1c33b10",
+  "WoolTrousers/Textures/T_HomespunWool_Detail_roughness.png": "506d68582dfdf37206f29fc7e537977f3e7ee7c16fe26fd1c8429b68af83b77e",
+  "WoolTrousers/Textures/T_HomespunWool_Detail_tone.png": "bcef5a69e945adce13393a3818be5629082686c8e82533598d3ef23bd7d51243",
+  "WoolTrousers/Textures/T_WoolTrousers_ao.png": "b30364937617bfb6a2cf8595d10be7cea606e89b1731b022b9cb1e5886d5a197",
+  "WoolTrousers/Textures/T_WoolTrousers_basecolor.png": "e172bf59a4b99089e85492ad45c4d62fd5c3ee7e0ee6ea6cfaf7fa8bd1d1f46a",
+  "WoolTrousers/Textures/T_WoolTrousers_normal.png": "969e708ed97d5a69c70f4e1413fa618811febe3c27f4b5d007d9bf8545a46c19",
+  "WoolTrousers/Textures/T_WoolTrousers_roughness.png": "1eec161bae07f44bdf4dddaa404e95b96154d502f1ae51b65f5a2ba945e6eacc",
+  "LinenTee/BodyCoverageMask_LinenTee.png": "bc1c7d96308fba466a1e55eb803062a439b15c0502efedd271e31acbaafabf90",
+  "LinenTee/SKM_LinenTee.fbx": "15f8046dc4ad6caa94c1b44b06ceee549eebba1d117dab15d129db4657fb8481",
+  "LinenTee/Textures/T_LinenTee_ao.png": "0d65c9db5202bf74a361be975512666dc48819ec8a6543316f89ed2eebaf88a6",
+  "LinenTee/Textures/T_LinenTee_basecolor.png": "aadf31814d6f099468728fb08aedaae71254bde8207de72141bd3b8868b9a0ad",
+  "LinenTee/Textures/T_LinenTee_normal.png": "718963170877d2cd719a274cb0b0c8a81fbcbc0275bfea7c48d2bf5cbcf2e56e",
+  "LinenTee/Textures/T_LinenTee_roughness.png": "3eb518df4bf5f92bc1fc0397e57a926d71123a6819734dcb9068b8ce5f93858d",
+  "LinenLongShirt/BodyCoverageMask_LinenLongShirt.png": "f6aaea0312bcf9ec4fc064a631aa0c37609ad2d2d2b6fef1302f8fd5d782ff2d",
+  "LinenLongShirt/SKM_LinenLongShirt.fbx": "d20e569c1fe1afeb9a935cc17b7f5ad8515bc9018d8eeef47749a1156a7c3491",
+  "LinenLongShirt/Textures/T_LinenLongShirt_ao.png": "006ce5b4baa5bc3a528a8a73093d68037e8714e73d45b27b33b3d310e8a94e41",
+  "LinenLongShirt/Textures/T_LinenLongShirt_basecolor.png": "2b080839e6bbd706854e97cfb3dbd1e92648fbb2ac66978bc678299ce0023ea6",
+  "LinenLongShirt/Textures/T_LinenLongShirt_normal.png": "2b0d05767e0d9372629b220a76b4a6408574f479c070c844b2a0378ac27c143f",
+  "LinenLongShirt/Textures/T_LinenLongShirt_roughness.png": "69fe792b6e18a4932d038726d28da1458d628ba8ddb024873815f29a992be6ec",
+  "FurCoat/BodyCoverageMask_FurCoat.png": "8ff6036ace35486a9daf9d67791823e970e8781e31d4dd88a214ae00ad20f309",
+  "FurCoat/SKM_FurCoat.fbx": "0e7372c9c63d8c3561c23cc464f20ab86a004e8b2b1302e146d0be5e7120634b",
+  "FurCoat/Textures/T_FurCoat_ao.png": "5195c1d80b17ada028fc8adbcf375103fca0523f5cb67b821bb14a7238261b0b",
+  "FurCoat/Textures/T_FurCoat_basecolor.png": "1d3eacb2c136c53199c3d0dcdfcb6c79a45cd6ed9022838a0535e9196a7e7a2b",
+  "FurCoat/Textures/T_FurCoat_normal.png": "dbedc181b5ad3dea53a077e12810a53ff84ecebf9ad9a8c05463a112fbda9346",
+  "FurCoat/Textures/T_FurCoat_roughness.png": "bf1fb3457388497a7f2325416833f2f99b7ba0342c46621b43de4bc4059b998d"
+ },
+ "warmth": {
+  "scale": "0-10, relative; rough clo equivalents from typical garment tables",
+  "ranking": [
+   "SKM_FurCoat",
+   "SKM_WoolTrousers",
+   "SKM_LinenLongShirt",
+   "SKM_LinenTee"
+  ],
+  "SKM_FurCoat": {
+   "suggested": 6.5,
+   "clo": 1.0,
+   "why": "~18 mm fleece loft (24 mm at trims), windproof skin, collar and closed cuffs, insulates when damp; hip length"
+  },
+  "SKM_WoolTrousers": {
+   "suggested": 2.0,
+   "clo": 0.28,
+   "why": "1.9 mm fulled wool + ~5 mm trapped air, full legs, warm when wet"
+  },
+  "SKM_LinenLongShirt": {
+   "suggested": 1.0,
+   "clo": 0.2,
+   "why": "1 mm linen but loose (11 mm air gap), long sleeves, cuffs"
+  },
+  "SKM_LinenTee": {
+   "suggested": 0.5,
+   "clo": 0.1,
+   "why": "1.2 mm linen, short sleeves, 7 mm air gap"
+  }
+ }
+}
