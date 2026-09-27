@@ -1,5 +1,6 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadEstate.h"
+#include "HomesteadParcels.h"
 
 #include <algorithm>
 #include <cmath>
@@ -403,7 +404,8 @@ Result CheckFootprintResources(const State& state, const Footprint& area, bool q
         const double dy = std::max(0.0, std::abs(local.y) - area.half.y);
         return dx * dx + dy * dy <= 50.0 * 50.0;
     };
-    if (quick)
+    // The fixed estate's trees are all in state.resources; it has no generated chunks.
+    if (quick || state.fixedEstate)
     {
         for (const auto& node : state.resources)
             if (blocks(node)) return Bad(blockedMessage);
@@ -1060,6 +1062,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     const auto populated = MaterializeEstate(candidate, placements);
     if (!populated) return populated;
     // Round-1 lanes seed their parts from `layout` here, each in its own helper.
+    SeedEstateParcels(candidate, layout);
     layout_ = std::make_shared<const EstateLayout>(layout);
     placements_ = std::make_shared<const EstatePlacements>(placements);
     state_ = std::move(candidate);
@@ -1967,6 +1970,7 @@ Result Simulation::CheckSite(const PlacementTarget& target, bool quick) const
     if (state_.structures.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 2
         || (!existing && state_.buildings.size() >= MaxObjects))
         return Bad("The homestead has reached its structure limit.");
+    if (auto owned = CanBuildAt(target); !owned) return owned;
     const bool onFoundation = existing && HasPiece(state_, Piece::Foundation, target.buildingId, cellX, cellY);
     const Footprint ground = ResourceFootprint(*building, kind, cellX, cellY, rotation, onFoundation);
     const auto space = CheckFootprintResources(state_, ground, quick);
@@ -2427,6 +2431,8 @@ std::string Simulation::Serialize() const
     body << state_.clearedUnderbrush.size() << '\n';
     for (const auto& plant : state_.clearedUnderbrush)
         body << plant.chunk.x << ' ' << plant.chunk.y << ' ' << plant.index << '\n';
+    // Optional trailing sections; saves without them still load.
+    WriteParcelOwnership(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2650,6 +2656,9 @@ Result Simulation::Deserialize(const std::string& data)
             candidate.clearedUnderbrush.push_back(plant);
         }
     }
+    // Optional trailing sections. The parcels themselves come from the current layout.
+    if (candidate.fixedEstate) SeedEstateParcels(candidate, Layout());
+    if (!ReadParcelOwnership(input, candidate)) return invalid();
     input >> std::ws;
     if (!input.eof()) return invalid();
     const auto inventory = ValidateInventory(candidate);

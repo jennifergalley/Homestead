@@ -11,7 +11,8 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadRegionalTerrainAdapter.cpp
     Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp
-    Source/SurvivalGame/Simulation/HomesteadEstate.cpp)
+    Source/SurvivalGame/Simulation/HomesteadEstate.cpp
+    Source/SurvivalGame/Simulation/HomesteadParcels.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
 set_target_properties(HomesteadSimulation PROPERTIES CXX_EXTENSIONS OFF)
@@ -49,3 +50,12 @@ else()
     target_compile_options(HomesteadRegionalGenerationTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadRegionalGenerationTests COMMAND HomesteadRegionalGenerationTests)
+
+add_executable(HomesteadParcelTests Tests/HomesteadParcelTests.cpp)
+target_link_libraries(HomesteadParcelTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadParcelTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadParcelTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadParcelTests COMMAND HomesteadParcelTests)

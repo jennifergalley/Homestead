@@ -224,6 +224,16 @@ struct WorldDrop
     int wearableId = 0;
 };
 
+// A piece of estate land (see HomesteadParcels.h). The polygon comes from the level's landmark
+// layout; only `owned` is saved, keyed by the stable `id` (the landmark polygon's name).
+struct Parcel
+{
+    std::string id;
+    std::vector<Point> polygon;
+    bool owned = false;
+    bool forSale = false;
+};
+
 struct State
 {
     double hour = 6.0;
@@ -253,6 +263,7 @@ struct State
     // placement id) instead of the seeded woodland generator, and there are no chunks.
     bool fixedEstate = false;
     int placementBakeVersion = 0;
+    std::vector<Parcel> parcels; // Fixed estate only; empty in the seeded woodland.
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -388,6 +399,11 @@ public:
     Result Place(const PlacementTarget& target, Point player);
     // Whether she carries what the piece costs.
     Result CheckBuildCost(Piece kind) const;
+    // Estate land (HomesteadParcels.cpp). The seeded woodland has no parcels and is all hers.
+    const Parcel* ParcelAt(Point point) const;
+    bool IsOwned(Point point) const;
+    // Whether every corner of the target's footprint lies on owned land ("Outside your estate").
+    Result CanBuildAt(const PlacementTarget& target) const;
     Point StructureCenter(const Structure& structure) const { return Homestead::StructureCenter(state_, structure); }
     // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
     // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.
