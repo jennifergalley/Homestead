@@ -128,7 +128,7 @@ if ($ShippingQA -and (-not $Packaged -or -not $OutputDirectory -or $Weeding -or 
 $null = New-Item -ItemType Directory -Path $output -Force
 if ($Weeding) { & (Join-Path $PSScriptRoot 'Initialize-TestWorldFixture.ps1') -SourceSave $FixtureSave -OutputDirectory $output }
 $report = Join-Path $output 'smoke-result.txt'
-$captures = @('clearing.png', 'field-book.png', 'first-foundation.png', 'heroine-long.png', 'heroine-bob.png', 'heroine-colors.png', 'heroine-ponytail.png', 'heroine-willow.png', 'heroine-hazel.png')
+$captures = @('clearing.png', 'field-book.png', 'first-foundation.png', 'heroine-long.png', 'heroine-bob.png', 'heroine-colors.png', 'heroine-ponytail.png')
 if ($FullLoop) { $captures += @('garden.png', 'shelter-night.png', 'failure-retry.png') }
 if ($Presentation) {
     $captures = @('face-day-front.png','face-day-angle.png','face-night-front.png','face-night-angle.png','face-day-colors.png')

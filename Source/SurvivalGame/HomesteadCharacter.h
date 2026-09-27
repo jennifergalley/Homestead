@@ -36,6 +36,7 @@ public:
     AHomesteadCharacter();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
+    virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
     void SetPlanning(bool Enabled);
     void Zoom(float Amount);
@@ -69,6 +70,8 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // While previewing appearance, bring the camera in close on her face (eye choices).
+    void SetAppearanceFaceFocus(bool bFace);
     FRotator GameplayViewRotation() const;
     float CameraDistance() const;
     UAnimSequence* GetIdleAnimation() const { return IdleAnimation; }
@@ -259,6 +262,7 @@ private:
     FHomesteadAppearance MetaHumanLook, PendingMetaHumanLook;
     int32 AppliedMetaHair = 0;
     void ApplyMetaHumanLook();
+    void ApplyMetaHumanSkinAndEyes();
     float HairSprintBlend = 0;
     FTransform HairLastHead;
     double HairLastRealTime = 0;
@@ -342,6 +346,10 @@ private:
     bool bAttemptedAssetLoad = false;
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;
+    bool bAppearanceFaceFocus = false;
+    float FaceFocusBlend = 0.0f;
+    float FaceFocusBodyArm = 280.0f;
+    TOptional<float> SavedNearClip;
     bool bSprintHeld = false;
     bool bSprintActive = false;
     float SavedCameraDistance = 470;
@@ -356,6 +364,7 @@ private:
     bool ApplyMetaHumanStack();
     float InferMeshYaw(const USkeletalMesh& Asset) const;
     void UpdateAppearanceFraming();
+    void RestoreNearClip();
     void Move(const FInputActionValue& Value);
     void BeginSprint(const FInputActionValue& Value);
     void EndSprint(const FInputActionValue& Value);

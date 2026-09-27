@@ -212,7 +212,7 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 ### Field book (native menu)
 
 - Menu opens the book on **Settings** (page 4). LB/RB change pages in the order 0 Inventory,
-  1 Craft, 2 Build, 3 Guidebook, 6 (not inspected; likely Appearance), 4 Settings, wrapping.
+  1 Craft, 2 Build, 3 Guidebook, 6 Appearance, 4 Settings, wrapping.
   Loop LB until `st().bookPage` is the page you want. B closes/backs out.
 - **Settings** is a centred single column: Resume (focused on open), a top row Save | Load latest
   save | Quit game, Game/Sound/Video tabs, then the current tab's list. D-pad Down from Resume
@@ -258,6 +258,20 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   `[Homestead.ActionHints]` (id = verb + `_` + resource kind, alphanumerics only, e.g.
   `Gather_Berrybush=3`). Delete the section or use Settings > "Show action hints again" before
   a playtest that needs to see the cues.
+- **Appearance** (page 6) is a compact vertical list (no Grid): Hairstyle chips, then Hair
+  colour / Skin / Eyes swatch strips. A click on a chip or swatch applies it immediately
+  (`MenuSetAppearance`); D-pad Left/Right steps the highlighted row. Selecting the Eyes row
+  (id 3) eases the camera to her face. While the preview is open the character raises the near
+  clip plane to ~60% of the camera distance (restored on close/EndPlay) so no-collision branches
+  can't block the view.
+- **MetaHuman eye colour** only works because `MI_EyeL/R_Homestead` have `Use Baked Material`
+  False and the static switch `Use Custom Iris` True; without that switch the iris hue/value
+  scalars do nothing (`Iris Color Multiply` never shows). Iris hue 0 = blue, 0.5 = green,
+  0.9 = amber-brown. Skin tone uses `Basecolor Global Multiply Post-Bake` on face and body MIDs.
+- **Screen capture of the book**: run PIE with `PlayMode_InEditorFloating` and use a Win32 window
+  grab; `CaptureEditorImage` misses the floating window. Real clicks (Win32 `SetCursorPos` +
+  `mouse_event`) land on Slate normally. Save assets (`save_asset`) only with PIE stopped; it
+  returns False during PIE.
 
 Settings changes persist ("Choice saved in game settings") in
 `Saved\Config\WindowsEditor\GameUserSettings.ini`, so restore anything you change.

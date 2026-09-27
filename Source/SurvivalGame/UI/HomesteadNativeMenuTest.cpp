@@ -402,7 +402,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, To, To, TSet<FKey>(),
             EKeys::LeftMouseButton, 0, FModifierKeysState()));
     };
-    for (const int32 AudioId : {5, 6, 7})
+    for (const int32 AudioId : {16, 5, 6, 7})
     {
         const auto Stayed = MakeShared<bool>(false);
         const auto Prior = MakeShared<float>(0);
@@ -420,7 +420,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             {
                 *Prior = Controller->MenuAudioVolume(AudioId);
                 // Volumes persist in GameUserSettings between runs, so aim away from the saved level.
-                const float Preferred = AudioId == 5 ? 0.26f : AudioId == 6 ? 0.42f : 0.58f;
+                const float Preferred = AudioId == 16 ? 0.62f : AudioId == 5 ? 0.26f : AudioId == 6 ? 0.42f : 0.58f;
                 *Target = FMath::Abs(Preferred - *Prior) > 0.15f ? Preferred : Preferred + 0.3f;
                 DragAudioSlider(AudioId, AudioId == 5 ? *Target : (*Target > 0.7f ? 0.1f : 0.8f),
                     *Target, AudioId != 5, *Stayed);
@@ -1051,7 +1051,7 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
         [this]() { Screenshot(TEXT("native-wardrobe-dyed")); },
         [this]() { return VerifyNativeMenuPresentation(); }, 0.8f);
 
-    for (int32 Id : {0, 1, 1, 1, 1, 2, 3, 6})
+    for (int32 Id : {0, 1, 1, 1, 1, 2, 3})
     {
         Add(FString::Printf(TEXT("Change real Appearance control %d before persistence"), Id),
             [this, Id, ExpectedLook, Expected]()

@@ -30,6 +30,7 @@
 #include "GroomAsset.h"
 #include "GroomBindingAsset.h"
 #include "HAL/IConsoleManager.h"
+#include "RenderCore.h"
 #include "HomesteadLab.h"
 
 namespace
@@ -176,6 +177,12 @@ AHomesteadCharacter::AHomesteadCharacter()
         Garment->SetVisibility(false);
         GarmentComponents.Add(Garment);
     }
+}
+
+void AHomesteadCharacter::EndPlay(const EEndPlayReason::Type Reason)
+{
+    RestoreNearClip();
+    Super::EndPlay(Reason);
 }
 
 void AHomesteadCharacter::BeginPlay()
@@ -838,6 +845,72 @@ void AHomesteadCharacter::ApplyMetaHumanLook()
                     Dynamic->SetScalarParameterValue(TEXT("hairRedness"), Pigment.Y);
                 }
             }
+    }
+    ApplyMetaHumanSkinAndEyes();
+}
+
+namespace
+{
+// Post-bake multiply on the baked MetaHuman skin: natural, warm, deep, light.
+FLinearColor MetaHumanSkinMultiply(int32 Tone)
+{
+    static const FLinearColor Values[] = {FLinearColor::White, FLinearColor(0.9f, 0.76f, 0.6f),
+        FLinearColor(0.45f, 0.31f, 0.21f), FLinearColor(1.06f, 1.03f, 1.01f)};
+    return Values[FMath::Clamp(Tone, 0, 3)];
+}
+struct FMetaHumanIris { float PrimaryHue, PrimaryValue, SecondaryHue, SecondaryValue, Saturation; };
+// Custom MetaHuman iris (MI_Eye*_Homestead, "Use Custom Iris" on). Hue runs blue (0) through
+// green (0.5) to amber-brown (0.9): blue, green, hazel, grey.
+FMetaHumanIris MetaHumanIris(int32 Eye)
+{
+    static const FMetaHumanIris Values[] = {
+        {0.1f, 0.8f, 0.15f, 0.5f, 1.2f}, {0.5f, 0.7f, 0.45f, 0.45f, 1.25f},
+        {0.92f, 0.55f, 0.62f, 0.45f, 1.2f}, {0.2f, 0.7f, 0.2f, 0.5f, 0.0f}};
+    return Values[FMath::Clamp(Eye, 0, 3)];
+}
+UMaterialInstanceDynamic* DynamicFrom(UMeshComponent& Component, int32 Index, UMaterialInterface* Parent)
+{
+    UMaterialInterface* Current = Component.GetMaterial(Index);
+    auto* Dynamic = Cast<UMaterialInstanceDynamic>(Current);
+    if (Dynamic && (!Parent || Dynamic->Parent == Parent)) return Dynamic;
+    Dynamic = UMaterialInstanceDynamic::Create(Parent ? Parent : Current, &Component);
+    Component.SetMaterial(Index, Dynamic);
+    return Dynamic;
+}
+}
+
+void AHomesteadCharacter::ApplyMetaHumanSkinAndEyes()
+{
+    if (!MetaHumanFace || !MetaHumanLook.IsValid()) return;
+    const FLinearColor Skin = MetaHumanSkinMultiply(MetaHumanLook.SkinTone);
+    const auto TintSkin = [&Skin](UMeshComponent& Component, int32 Index)
+    {
+        if (!Component.GetMaterial(Index)) return;
+        if (auto* Dynamic = DynamicFrom(Component, Index, nullptr))
+            Dynamic->SetVectorParameterValue(TEXT("Basecolor Global Multiply Post-Bake"), Skin);
+    };
+    const TArray<FName> FaceSlots = MetaHumanFace->GetMaterialSlotNames();
+    for (int32 Index = 0; Index < FaceSlots.Num(); ++Index)
+        if (FaceSlots[Index].ToString().StartsWith(TEXT("head_"))) TintSkin(*MetaHumanFace, Index);
+    if (USkeletalMeshComponent* Body = GetMesh(); Body && Body->GetSkeletalMeshAsset() == MetaHumanBody)
+        for (int32 Index = 0; Index < Body->GetNumMaterials(); ++Index) TintSkin(*Body, Index);
+
+    // The baked eye materials ignore iris colour; MI_Eye*_Homestead switch to the procedural iris.
+    const FMetaHumanIris Iris = MetaHumanIris(MetaHumanLook.EyeColor);
+    const TPair<const TCHAR*, const TCHAR*> Eyes[] = {
+        {TEXT("eyeLeft_shader_shader"), TEXT("Assembled/Heroine/Face/Materials/MI_EyeL_Homestead")},
+        {TEXT("eyeRight_shader_shader"), TEXT("Assembled/Heroine/Face/Materials/MI_EyeR_Homestead")}};
+    for (const auto& Eye : Eyes)
+    {
+        const int32 Index = MetaHumanFace->GetMaterialIndex(Eye.Key);
+        auto* Parent = Index == INDEX_NONE ? nullptr : LoadMetaHumanAsset<UMaterialInterface>(Eye.Value);
+        if (!Parent) continue;
+        auto* Dynamic = DynamicFrom(*MetaHumanFace, Index, Parent);
+        Dynamic->SetScalarParameterValue(TEXT("Iris Primary Color Hue"), Iris.PrimaryHue);
+        Dynamic->SetScalarParameterValue(TEXT("Iris Primary Color Value"), Iris.PrimaryValue);
+        Dynamic->SetScalarParameterValue(TEXT("Iris Secondary Color Hue"), Iris.SecondaryHue);
+        Dynamic->SetScalarParameterValue(TEXT("Iris Secondary Color Value"), Iris.SecondaryValue);
+        Dynamic->SetScalarParameterValue(TEXT("Iris Global Saturation"), Iris.Saturation);
     }
 }
 
@@ -2081,10 +2154,18 @@ void AHomesteadCharacter::SetAppearancePreview(bool Enabled)
     {
         CameraArm->TargetArmLength = SavedCameraDistance;
         CameraArm->SocketOffset = FVector(0, 45, 55);
+        CameraArm->TargetOffset = FVector::ZeroVector;
+        bAppearanceFaceFocus = false;
+        RestoreNearClip();
         Camera->PostProcessSettings.bOverride_AutoExposureBias = false;
         Controller->SetControlRotation(SavedViewRotation);
     }
     bAppearancePreview = Enabled;
+}
+
+void AHomesteadCharacter::SetAppearanceFaceFocus(bool bFace)
+{
+    bAppearanceFaceFocus = bAppearancePreview && bFace;
 }
 
 void AHomesteadCharacter::UpdateAppearanceFraming()
@@ -2094,16 +2175,40 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
     int32 Width = 0, Height = 0;
     PC->GetViewportSize(Width, Height);
     if (Width <= 0 || Height <= 0) return;
+    // Eye choices bring the camera in close on her face; other rows ease back to full length.
+    const float Delta = GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f;
+    if (bAppearanceFaceFocus && FaceFocusBlend <= KINDA_SMALL_NUMBER) FaceFocusBodyArm = CameraArm->TargetArmLength;
+    FaceFocusBlend = FMath::FInterpTo(FaceFocusBlend, bAppearanceFaceFocus ? 1.0f : 0.0f, Delta, 6.0f);
+    if (FaceFocusBlend > KINDA_SMALL_NUMBER || bAppearanceFaceFocus)
+    {
+        CameraArm->TargetArmLength = FMath::Lerp(FaceFocusBodyArm, 70.0f, FaceFocusBlend);
+        CameraArm->TargetOffset = FVector(0, 0, (66.0f + GetFootwearLift()) * FaceFocusBlend);
+    }
+    else FaceFocusBlend = 0.0f;
     const float Scale = FMath::Clamp(Height / 1080.0f, 0.4f, 3.0f);
     const float VirtualWidth = Width / Scale;
     const float PanelRight = (32.0f + FMath::Min(500.0f, VirtualWidth * 0.35f)) * Scale;
     const float Offset = -(PanelRight / Width) * CameraArm->TargetArmLength
         * FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView * 0.5f));
     CameraArm->SocketOffset = FVector(0, Offset, 10);
+    // Branches and ferns have no collision, so the arm can't avoid them; clip away anything
+    // well in front of her instead so the preview always shows her clearly.
+    const FVector Pivot = CameraArm->GetComponentLocation() + CameraArm->TargetOffset;
+    const float ViewDistance = FVector::Dist(Camera->GetComponentLocation(), Pivot);
+    const float NearClip = FMath::Max(10.0f, ViewDistance * 0.6f);
+    if (!SavedNearClip.IsSet()) SavedNearClip = GNearClippingPlane;
+    if (FMath::Abs(GNearClippingPlane - NearClip) > 1.0f) SetNearClipPlaneGlobals(NearClip);
     const auto* GameController = Cast<AHomesteadController>(Controller);
     Camera->PostProcessSettings.bOverride_AutoExposureBias = true;
     Camera->PostProcessSettings.AutoExposureBias =
         GameController && GameController->Simulation().IsNight() ? 0.5f : 0.0f;
+}
+
+void AHomesteadCharacter::RestoreNearClip()
+{
+    if (!SavedNearClip.IsSet()) return;
+    SetNearClipPlaneGlobals(SavedNearClip.GetValue());
+    SavedNearClip.Reset();
 }
 
 bool AHomesteadCharacter::InCharacterLab() const

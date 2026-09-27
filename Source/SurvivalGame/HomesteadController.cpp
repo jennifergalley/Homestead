@@ -9,6 +9,7 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadTestPaths.h"
 #include "Components/AudioComponent.h"
+#include "AudioDevice.h"
 #include "Sound/SoundAttenuation.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameUserSettings.h"
@@ -49,7 +50,8 @@ constexpr const TCHAR* CameraSettingsSection = TEXT("Homestead.Camera");
 constexpr const TCHAR* CameraSensitivityKey = TEXT("Sensitivity");
 constexpr const TCHAR* CameraInvertYKey = TEXT("InvertY");
 constexpr const TCHAR* AudioSettingsSection = TEXT("Homestead.Audio");
-constexpr const TCHAR* AudioKeys[] = {TEXT("Music"), TEXT("Ambience"), TEXT("Effects")};
+constexpr const TCHAR* AudioKeys[] = {TEXT("Music"), TEXT("Ambience"), TEXT("Effects"), TEXT("Master")};
+int32 AudioKeyIndex(int32 Id) { return Id == 16 ? 3 : Id >= 5 && Id <= 7 ? Id - 5 : -1; }
 constexpr const TCHAR* LastMusicTrackKey = TEXT("LastMusicTrack");
 constexpr const TCHAR* AutosaveSettingsSection = TEXT("Homestead.Autosave");
 constexpr const TCHAR* AutosaveEnabledKey = TEXT("Enabled");
@@ -961,6 +963,9 @@ void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
     HideHotbar();
     HideNativeMenu();
+    if (const UWorld* World = GetWorld())
+        if (FAudioDeviceHandle Device = World->GetAudioDevice())
+            Device->SetTransientPrimaryVolume(1.0f);
     Super::EndPlay(Reason);
 }
 
@@ -971,6 +976,11 @@ void AHomesteadController::MenuPage(int32 TargetPage)
 void AHomesteadController::MenuSelect(int32 Row)
 {
     Selection = FMath::Clamp(Row, 0, FMath::Max(0, Rows().Num() - 1));
+    if (bBookOpen && Page == 6)
+    {
+        const auto Items = Rows();
+        MenuFocusAppearance(Items.IsValidIndex(Selection) ? Items[Selection].Id : -1);
+    }
 }
 void AHomesteadController::MenuActivate()
 {
@@ -2301,6 +2311,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({2, TEXT("Game speed: ") + Speed, TEXT("Leisurely, Balanced, or Fast.")});
         Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), TEXT("Cycle a comfortable turn speed.")});
         Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), TEXT("Change vertical look direction.")});
+        Result.Add({16, FString::Printf(TEXT("Overall volume: %d%%"), FMath::RoundToInt(MasterVolume * 100)), TEXT("Scales every sound in the game.")});
         Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Music playback level.")});
         Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind, woodland and creek ambience.")});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
@@ -2335,12 +2346,10 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     {
         Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::MetaHairName(Appearance.MetaHair)), TEXT("MetaHuman hairstyles: long, bobbed, tied back, braided or cropped.")});
         Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("Chestnut, dark brown, black, copper, or blonde. Hair color is independent of hairstyle.")});
-        Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)), TEXT("Prototype tone adjustments; deeper presets follow.")});
-        Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Iris color changes preserve the whites and pupils.")});
+        Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)),         TEXT("Natural, warm, deep or light. Her face and body change together.")});
+                Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Blue, green, hazel or grey. The view moves close to her face while you choose.")});
         Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
         Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), TEXT("Cosmetic linen choices; an apron is not winter insulation.")});
-        Result.Add({6, FString::Printf(TEXT("Preset: %s"), HomesteadLook::BodyPresetName(Appearance.BodyPreset)), TEXT("Preferred, leaner/defined Willow, or softer/full Hazel.")});
-        Result.Add({7, TEXT("An early character creator"), TEXT("Three complete presets. Detailed face/body sliders and clothing physics follow later.")});
     }
     else
     {
@@ -2377,8 +2386,8 @@ FString AHomesteadController::BookSummary() const
         : TEXT("Carried items and equipped clothing.");
     case 1: return FString();
     case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
-    case 6: return bGamepad ? TEXT("A or Right: next choice   Left: previous. She changes as you choose.")
-        : TEXT("Click for the next choice, right-click for the previous. She changes as you choose.");
+    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. She changes as you choose.")
+        : TEXT("Click a swatch or style to wear it. She changes as you choose.");
     case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
         static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
     default: return {};
@@ -2417,18 +2426,62 @@ void AHomesteadController::MenuStepAppearance(int32 Id, int32 Direction)
 {
     if (!bBookOpen || Page != 6 || bMenuSaveInProgress) return;
     if (IsFailed()) { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
-    const auto Step = [Direction](int32 Value, int32 Count) { return ((Value + (Direction < 0 ? -1 : 1)) % Count + Count) % Count; };
+    const int32 Count = AppearanceChoiceCount(Id);
+    if (Count <= 0) return;
+    const int32 Current = AppearanceChoice(Id);
+    MenuSetAppearance(Id, ((Current + (Direction < 0 ? -1 : 1)) % Count + Count) % Count);
+}
+
+int32 AHomesteadController::AppearanceChoiceCount(int32 Id)
+{
+    switch (Id)
+    {
+    case 0: return HomesteadLook::MetaHairCount;
+    case 1: return HomesteadLook::HairColorCount;
+    case 2: case 3: case 4: return 4;
+    case 5: return 2;
+    default: return 0;
+    }
+}
+
+int32 AHomesteadController::AppearanceChoice(int32 Id) const
+{
+    switch (Id)
+    {
+    case 0: return Appearance.MetaHair;
+    case 1: return Appearance.HairColor;
+    case 2: return Appearance.SkinTone;
+    case 3: return Appearance.EyeColor;
+    case 4: return Appearance.TunicColor;
+    case 5: return Appearance.Outfit;
+    default: return 0;
+    }
+}
+
+void AHomesteadController::MenuFocusAppearance(int32 Id)
+{
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+        Avatar->SetAppearanceFaceFocus(bBookOpen && Page == 6 && Id == 3);
+}
+
+void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
+{
+    if (!bBookOpen || Page != 6 || bMenuSaveInProgress) return;
+    if (IsFailed()) { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
+    const int32 Count = AppearanceChoiceCount(Id);
+    if (Count <= 0 || Value < 0 || Value >= Count) return;
+    MenuFocusAppearance(Id);
+    if (AppearanceChoice(Id) == Value) return;
     FHomesteadAppearance Next = Appearance;
     switch (Id)
     {
-    case 0: Next.MetaHair = Step(Next.MetaHair, HomesteadLook::MetaHairCount); Next.HairStyle = HomesteadLook::LegacyHairStyle(Next.MetaHair); break;
-    case 1: Next.HairColor = Step(Next.HairColor, HomesteadLook::HairColorCount); break;
-    case 2: Next.SkinTone = Step(Next.SkinTone, 4); break;
-    case 3: Next.EyeColor = Step(Next.EyeColor, 4); break;
-    case 4: Next.TunicColor = Step(Next.TunicColor, 4); break;
-    case 5: Next.Outfit = Step(Next.Outfit, 2); break;
-    case 6: Next.BodyPreset = Step(Next.BodyPreset, 3); break;
-    default: Notify(TEXT("More character presets and clothes are planned. These controls are a first prototype.")); return;
+    case 0: Next.MetaHair = Value; Next.HairStyle = HomesteadLook::LegacyHairStyle(Value); break;
+    case 1: Next.HairColor = Value; break;
+    case 2: Next.SkinTone = Value; break;
+    case 3: Next.EyeColor = Value; break;
+    case 4: Next.TunicColor = Value; break;
+    case 5: Next.Outfit = Value; break;
+    default: return;
     }
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     FString AppearanceError;
@@ -2489,6 +2542,7 @@ void AHomesteadController::ActivateRow()
             PersistAudioVolume(6, AmbienceVolume >= 0.99f ? 0 : AmbienceVolume + 0.2f, AmbienceVolume);
             break;
         case 7: PersistAudioVolume(7, EffectsVolume >= 0.99f ? 0 : EffectsVolume + 0.2f, EffectsVolume); break;
+        case 16: PersistAudioVolume(16, MasterVolume >= 0.99f ? 0 : MasterVolume + 0.2f, MasterVolume); break;
         case 8: if (bConfirmRestart) NewGame(); else bConfirmRestart = true; break;
         case 9:
             MenuRequestExit();
@@ -2542,6 +2596,8 @@ void AHomesteadController::LoadUserPreferences()
     MusicVolume = 0.65f;
     AmbienceVolume = 0.70f;
     EffectsVolume = 0.80f;
+    MasterVolume = 1.0f;
+    ApplyMasterVolume();
     bAutosaveEnabled = true;
     AutosaveMinutes = 5;
     LoadActionHints();
@@ -2552,12 +2608,12 @@ void AHomesteadController::LoadUserPreferences()
         AutosaveRemaining = AutosaveMinutes * 60.0f;
         return;
     }
-    for (int32 Index = 0; Index < 3; ++Index)
+    for (const int32 AudioId : {5, 6, 7, 16})
     {
-        float Stored = MenuAudioVolume(Index + 5);
-        if (Disk.GetFloat(AudioSettingsSection, AudioKeys[Index], Stored) && FMath::IsFinite(Stored)
+        float Stored = MenuAudioVolume(AudioId);
+        if (Disk.GetFloat(AudioSettingsSection, AudioKeys[AudioKeyIndex(AudioId)], Stored) && FMath::IsFinite(Stored)
             && Stored >= 0 && Stored <= 1)
-            MenuPreviewAudioVolume(Index + 5, Stored);
+            MenuPreviewAudioVolume(AudioId, Stored);
     }
     FString EnabledText;
     if (Disk.GetString(AutosaveSettingsSection, AutosaveEnabledKey, EnabledText))
@@ -2574,13 +2630,25 @@ void AHomesteadController::LoadUserPreferences()
 
 float AHomesteadController::MenuAudioVolume(int32 Id) const
 {
-    return Id == 5 ? MusicVolume : Id == 6 ? AmbienceVolume : EffectsVolume;
+    return Id == 16 ? MasterVolume : Id == 5 ? MusicVolume : Id == 6 ? AmbienceVolume : EffectsVolume;
+}
+
+void AHomesteadController::ApplyMasterVolume() const
+{
+    if (const UWorld* World = GetWorld())
+        if (FAudioDeviceHandle Device = World->GetAudioDevice())
+            Device->SetTransientPrimaryVolume(MasterVolume);
 }
 
 void AHomesteadController::MenuPreviewAudioVolume(int32 Id, float Value)
 {
     Value = FMath::Clamp(Value, 0.0f, 1.0f);
-    if (Id == 5)
+    if (Id == 16)
+    {
+        MasterVolume = Value;
+        ApplyMasterVolume();
+    }
+    else if (Id == 5)
     {
         MusicVolume = Value;
         Music->SetVolumeMultiplier(MusicLevel());
@@ -2597,9 +2665,9 @@ void AHomesteadController::MenuPreviewAudioVolume(int32 Id, float Value)
 bool AHomesteadController::PersistAudioVolume(int32 Id, float Requested, float Previous)
 {
     const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
-    const int32 Index = Id - 5;
+    const int32 Index = AudioKeyIndex(Id);
     Requested = FMath::Clamp(Requested, 0.0f, 1.0f);
-    if (!Branch || Index < 0 || Index >= 3
+    if (!Branch || Index < 0
         || !PersistFloatProperty(Branch->IniPath, AudioSettingsSection, AudioKeys[Index], Requested))
     {
         MenuPreviewAudioVolume(Id, Previous);
@@ -2673,7 +2741,7 @@ void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
     }
     else if (Id == 3) PersistCameraSensitivity(FMath::Clamp(Sensitivity + Direction * 0.2f, 0.2f, 3.0f));
     else if (Id == 4) PersistCameraInversion(Direction > 0);
-    else if (Id >= 5 && Id <= 7)
+    else if ((Id >= 5 && Id <= 7) || Id == 16)
     {
         const float Previous = MenuAudioVolume(Id);
         PersistAudioVolume(Id, Previous + Direction * 0.05f, Previous);

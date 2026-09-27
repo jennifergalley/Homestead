@@ -156,6 +156,10 @@ public:
     void MenuAdjustSetting(int32 Id, int32 Direction);
     // Appearance rows: the next (+1) or previous (-1) choice, applied to her at once.
     void MenuStepAppearance(int32 Id, int32 Direction);
+    void MenuSetAppearance(int32 Id, int32 Value);
+    void MenuFocusAppearance(int32 Id);
+    static int32 AppearanceChoiceCount(int32 Id);
+    int32 AppearanceChoice(int32 Id) const;
     float MenuAudioVolume(int32 Id) const;
     void MenuPreviewAudioVolume(int32 Id, float Value);
     bool MenuCommitAudioVolume(int32 Id, float Value, float Previous);
@@ -202,6 +206,9 @@ public:
     float MusicVolume = 0.65f;
     float AmbienceVolume = 0.7f;
     float EffectsVolume = 0.8f;
+    // Scales every sound through the audio device's primary volume.
+    float MasterVolume = 1.0f;
+    void ApplyMasterVolume() const;
 
 private:
     struct FHintUse { FString Id; uint32 Serial = 0; bool bHackPending = false; };

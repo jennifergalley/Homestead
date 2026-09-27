@@ -493,7 +493,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, OldHairStyle, OldBodyPreset]()
         {
             *OldHairStyle = Controller->Appearance.MetaHair;
-            *OldBodyPreset = Controller->Appearance.BodyPreset;
+            *OldBodyPreset = Controller->Appearance.HairColor;
             Controller->MenuPage(6);
         },
         [this]()
@@ -524,17 +524,17 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                     Avatar && Avatar->GetKnife()->IsPresented()));
             return Passed;
         }, 0.3f);
-    Add(TEXT("Changing body and fitted garments never ghosts the selected Knife"),
+    Add(TEXT("Changing hair colour and fitted garments never ghosts the selected Knife"),
         [this]()
         {
-            Controller->MenuSelect(6);
+            Controller->MenuSelect(1);
             Controller->MenuActivate();
         },
         [this, OldBodyPreset]()
         {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Controller->IsBookOpen() && Controller->BookPage() == 6
-                && Controller->Appearance.BodyPreset == (*OldBodyPreset + 1) % 3
+                && Controller->Appearance.HairColor == (*OldBodyPreset + 1) % HomesteadLook::HairColorCount
                 && Avatar && Avatar->IsEquipmentPresentationReady()
                 && !Avatar->GetKnife()->IsPresented();
         }, 0.3f);

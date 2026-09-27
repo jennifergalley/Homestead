@@ -509,35 +509,12 @@ void AHomesteadSmokeTest::Prepare()
     }
     Add(TEXT("Return to the bob"), [ActivateAppearance]() { ActivateAppearance(0); },
         [this]() { return Controller->GetAppearance().HairStyle == 1; });
-    const TCHAR* BodyNames[] = {TEXT("Preferred"), TEXT("Willow"), TEXT("Hazel")};
-    for (int32 Body = 1; Body <= 2; ++Body)
-    {
-        Add(TEXT("Choose an independently authored face/body preset"),
-            [ActivateAppearance]() { ActivateAppearance(6); },
-            [this, Body, BodyNames]()
-        {
-                const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-                const auto* Presentation = Avatar ? Avatar->GetEquipmentPresentation() : nullptr;
-                const FString Expected = FString::Printf(TEXT("SK_Modular_%s_Base_Bob"), BodyNames[Body]);
-                return Presentation && Presentation->Base.Mesh && Controller->GetAppearance().BodyPreset == Body
-                    && Presentation->Base.Mesh->GetName() == Expected;
-            });
-        const FString Name = Body == 1 ? TEXT("heroine-willow") : TEXT("heroine-hazel");
-        Add(TEXT("Capture the alternate face/body preset"), [this, Name]() { Screenshot(Name); },
-            []() { return true; }, 0.8f);
-    }
-    Add(TEXT("Cycle body selection back through the preferred preset"),
-        [ActivateAppearance]() { ActivateAppearance(6); },
-        [this]() { return Controller->GetAppearance().BodyPreset == 0; });
-    Add(TEXT("Choose Willow for appearance persistence verification"),
-        [ActivateAppearance]() { ActivateAppearance(6); },
-        [this]() { return Controller->GetAppearance().BodyPreset == 1; });
     Add(TEXT("Save appearance without saving the temporary portrait camera"),
         [this]() { Tap(EKeys::F5); },
         [this]() { return !Controller->ToastIsError(); });
-    Add(TEXT("Change the body preset again before restoring"),
-        [ActivateAppearance]() { ActivateAppearance(6); },
-        [this]() { return Controller->GetAppearance().BodyPreset == 2; });
+    Add(TEXT("Change the hair colour again before restoring"),
+        [ActivateAppearance]() { ActivateAppearance(1); },
+        [this]() { return Controller->GetAppearance().HairColor == 2; });
     Add(TEXT("Restore appearance and gameplay camera"),
         [this]() { Tap(EKeys::F9); },
         [this]()
@@ -545,7 +522,7 @@ void AHomesteadSmokeTest::Prepare()
             const auto& Look = Controller->GetAppearance();
             return !Controller->IsBookOpen() && Controller->HasHeroine()
                 && Look.HairStyle == 1 && Look.HairColor == 1 && Look.SkinTone == 1
-                && Look.EyeColor == 1 && Look.BodyPreset == 1
+                && Look.EyeColor == 1
                 && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) < 0.1f;
         }, 0.6f);
 

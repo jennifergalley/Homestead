@@ -11,11 +11,13 @@
 #include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
+#include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Images/SImage.h"
 #include "Brushes/SlateColorBrush.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 #include "Input/NavigationReply.h"
 #include "Types/NavigationMetaData.h"
 #include "Layout/WidgetPath.h"
@@ -113,6 +115,39 @@ const FButtonStyle& MenuButtonStyle()
         .SetDisabled(FSlateColorBrush(FLinearColor(0.65f, 0.65f, 0.65f, 1)))
         .SetNormalPadding(FMargin(0)).SetPressedPadding(FMargin(0));
     return Style;
+}
+// A pale track with a large, easy-to-grab round handle.
+const FSliderStyle& MenuSliderStyle()
+{
+    static const FSliderStyle Style = FSliderStyle()
+        .SetNormalBarImage(FSlateRoundedBoxBrush(FLinearColor(0.93f, 0.93f, 0.88f, 1), 5.0f))
+        .SetHoveredBarImage(FSlateRoundedBoxBrush(FLinearColor::White, 5.0f))
+        .SetDisabledBarImage(FSlateRoundedBoxBrush(FLinearColor(0.6f, 0.6f, 0.58f, 0.6f), 5.0f))
+        .SetNormalThumbImage(FSlateRoundedBoxBrush(MenuGold, 17.0f, PineInk, 2.0f, FVector2f(34, 34)))
+        .SetHoveredThumbImage(FSlateRoundedBoxBrush(FLinearColor(1.0f, 0.84f, 0.55f), 17.0f, PineInk, 2.0f, FVector2f(38, 38)))
+        .SetDisabledThumbImage(FSlateRoundedBoxBrush(Muted, 17.0f, PineInk, 2.0f, FVector2f(34, 34)))
+        .SetBarThickness(10.0f);
+    return Style;
+}
+bool IsAudioSetting(int32 Id) { return (Id >= 5 && Id <= 7) || Id == 16; }
+int32 AudioSliderSlot(int32 Id) { return Id == 16 ? 3 : Id - 5; }
+// Display colours for the Appearance swatches (hair colour, skin, eyes, tunic dye).
+FLinearColor AppearanceSwatchColor(int32 Id, int32 Value)
+{
+    static const TCHAR* Hair[] = {TEXT("6B3E26"), TEXT("3B2A20"), TEXT("161312"), TEXT("A0522D"), TEXT("D8B878")};
+    static const TCHAR* Skin[] = {TEXT("D9A98A"), TEXT("C68B66"), TEXT("6E4631"), TEXT("F2D5C2")};
+    static const TCHAR* Eyes[] = {TEXT("5E8FB0"), TEXT("5A8A4E"), TEXT("8A6A3A"), TEXT("8C939A")};
+    static const TCHAR* Tunic[] = {TEXT("6B7A45"), TEXT("7A2F45"), TEXT("566A80"), TEXT("CDBE9A")};
+    const auto Pick = [Value](const TCHAR* const* Values, int32 Count)
+    { return FLinearColor(FColor::FromHex(Values[FMath::Clamp(Value, 0, Count - 1)])); };
+    switch (Id)
+    {
+    case 1: return Pick(Hair, UE_ARRAY_COUNT(Hair));
+    case 2: return Pick(Skin, UE_ARRAY_COUNT(Skin));
+    case 3: return Pick(Eyes, UE_ARRAY_COUNT(Eyes));
+    case 4: return Pick(Tunic, UE_ARRAY_COUNT(Tunic));
+    default: return FLinearColor::White;
+    }
 }
 const TCHAR* Tabs[] = {TEXT("Inventory"), TEXT("Craft"), TEXT("Build"), TEXT("Guidebook"),
     TEXT("Settings"), TEXT("Credits"), TEXT("Appearance")};
@@ -571,7 +606,7 @@ void SHomesteadMenu::Refresh()
     if (SeenPage == 4)
     {
         // Session rows first, then only the rows of the chosen Game / Sound / Video tab.
-        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 12, 13, 15, 8, 14, 5, 6, 7, 10, 11};
+        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 12, 13, 15, 8, 14, 16, 5, 6, 7, 10, 11};
         TArray<FHomesteadRow> Sorted;
         TArray<int32> SortedIndices;
         const auto Take = [&](int32 Found)
@@ -626,6 +661,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     }
     TSharedPtr<SVerticalBox> Body;
     TSharedPtr<SUniformGridPanel> Grid;
+    TSharedPtr<SVerticalBox> AppearanceList;
     TSharedPtr<SUniformGridPanel> ChestGrid;
     TSharedPtr<SUniformGridPanel> PackGrid;
     auto Result = SNew(SVerticalBox)
@@ -635,7 +671,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         ];
     const auto BuildSettings = [this]() -> TSharedRef<SWidget>
     {
-        AudioSliders.Init(nullptr, 3);
+        AudioSliders.Init(nullptr, 4);
         TSharedPtr<SVerticalBox> RowsBox;
         TSharedPtr<SHorizontalBox> TopRow;
         TSharedPtr<SHorizontalBox> TabStrip;
@@ -732,10 +768,10 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         {
             const FHomesteadRow& Row = Entries[Index];
             TAttribute<FText> RowLabel = FText::FromString(Row.Label);
-            if (Row.Id >= 5 && Row.Id <= 7)
+            if (IsAudioSetting(Row.Id))
             {
                 const int32 AudioId = Row.Id;
-                const FString Prefix = Row.Id == 5 ? TEXT("Music volume")
+                const FString Prefix = Row.Id == 16 ? TEXT("Overall volume") : Row.Id == 5 ? TEXT("Music volume")
                     : Row.Id == 6 ? TEXT("Ambience volume") : TEXT("Effects volume");
                 RowLabel = TAttribute<FText>::CreateLambda([this, AudioId, Prefix]()
                 {
@@ -770,14 +806,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     [OptionButton(Option.Key, FMath::IsNearlyEqual(Current, Option.Value),
                         [this, Value = Option.Value]() { Controller->MenuSetGameSpeed(Value); Refresh(); })];
             }
-            else if (Row.Id >= 5 && Row.Id <= 7)
+            else if (IsAudioSetting(Row.Id))
             {
                 const int32 AudioId = Row.Id;
-                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+                RowContent->AddSlot().AutoHeight().Padding(0, 10, 0, 2)
                 [
-                    SNew(SBox)
+                    SNew(SBox).HeightOverride(40)
                     [
-                        SAssignNew(AudioSliders[AudioId - 5], SSlider)
+                        SAssignNew(AudioSliders[AudioSliderSlot(AudioId)], SSlider)
+                        .Style(&MenuSliderStyle())
+                        .SliderBarColor(FLinearColor::White)
+                        .SliderHandleColor(FLinearColor::White)
                         .Value_Lambda([this, AudioId]() { return Controller->MenuAudioVolume(AudioId); })
                         .OnMouseCaptureBegin_Lambda([this, AudioId, Index]()
                         {
@@ -837,7 +876,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         {
                             Region = ERegion::Content;
                             Select(Index);
-                            if (Id != 2 && (Id < 5 || Id > 7) && Id != 12 && Id != 13)
+                            if (Id != 2 && !IsAudioSetting(Id) && Id != 12 && Id != 13)
                                 RunAction(EHomesteadItemAction::Primary);
                         }
                         return FReply::Handled();
@@ -985,6 +1024,15 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             ]
         ];
     }
+    else if (SeenPage == 6)
+    {
+        // Rows differ a lot in height (style chips vs. one swatch row), so stack them instead of a uniform grid.
+        InventoryColumn->AddSlot().FillHeight(1)
+        [
+            SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
+            + SScrollBox::Slot().HAlign(HAlign_Fill)[ SAssignNew(AppearanceList, SVerticalBox) ]
+        ];
+    }
     else
     {
         InventoryColumn->AddSlot().FillHeight(1)
@@ -1127,21 +1175,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         && Entries[Index].Subject == EHomesteadMenuSubject::ItemGroup)
                         OpenQuantityPrompt(Entries[Index]);
                     if (Entries.IsValidIndex(ContentSelection)
-                        && (IsDirectCameraSetting(Entries[ContentSelection]) || SeenPage == 2 || SeenPage == 6))
+                        && (IsDirectCameraSetting(Entries[ContentSelection]) || SeenPage == 2))
                         RunAction(EHomesteadItemAction::Primary);
                 }
                 return FReply::Handled();
             })
             [ SAssignNew(Contents, SVerticalBox) ], ERegion::Content, Index);
-        if (SeenPage == 6)
-            StaticCastSharedRef<SMenuButton>(Button)->RightClick = [this, Index]()
-            {
-                if (!PointerAction() || Dialog != EDialog::None || !Entries.IsValidIndex(Index)) return;
-                Region = ERegion::Content;
-                Select(Index);
-                Controller->MenuStepAppearance(Entries[Index].Id, -1);
-                Refresh();
-            };
         if (SeenPage == 0 && (Row.Subject == EHomesteadMenuSubject::ItemGroup || Row.Subject == EHomesteadMenuSubject::Wearable))
             StaticCastSharedRef<SMenuButton>(Button)->RightClick = [this, Index]()
             {
@@ -1212,6 +1251,55 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         }
         if (SeenPage > 1)
             Contents->AddSlot().AutoHeight()[ Text(Name, SeenPage <= 2 ? 16 : 18) ];
+        if (SeenPage == 6)
+        {
+            const int32 Id = Row.Id;
+            const int32 Count = AHomesteadController::AppearanceChoiceCount(Id);
+            const int32 Current = Controller->AppearanceChoice(Id);
+            const bool Swatches = Id >= 1 && Id <= 4;
+            TSharedPtr<SWrapBox> Choices;
+            Contents->AddSlot().AutoHeight().Padding(0, 8, 0, 2)
+            [ SAssignNew(Choices, SWrapBox).UseAllottedSize(true).InnerSlotPadding(FVector2D(6, 6)) ];
+            for (int32 Value = 0; Value < Count; ++Value)
+            {
+                const bool Chosen = Value == Current;
+                const FString ChoiceName = Id == 0 ? HomesteadLook::MetaHairName(Value)
+                    : Id == 1 ? HomesteadLook::HairColorName(Value) : Id == 2 ? HomesteadLook::SkinToneName(Value)
+                    : Id == 3 ? HomesteadLook::EyeColorName(Value) : Id == 4 ? HomesteadLook::TunicColorName(Value)
+                    : HomesteadLook::OutfitName(Value);
+                const auto Choose = [this, Index, Id, Value]()
+                {
+                    if (!PointerAction() || Dialog != EDialog::None) return FReply::Handled();
+                    Region = ERegion::Content;
+                    Select(Index);
+                    Controller->MenuSetAppearance(Id, Value);
+                    Refresh();
+                    return FReply::Handled();
+                };
+                TSharedRef<SWidget> Face = Swatches
+                    ? StaticCastSharedRef<SWidget>(SNew(SBox).WidthOverride(38).HeightOverride(38)
+                        [
+                            SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                            .BorderBackgroundColor(Chosen ? MenuGold : FLinearColor(0.02f, 0.04f, 0.03f, 0.85f)).Padding(Chosen ? 4 : 2)
+                            [
+                                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                                .BorderBackgroundColor(AppearanceSwatchColor(Id, Value))
+                            ]
+                        ])
+                    : StaticCastSharedRef<SWidget>(SNew(STextBlock).Text(FText::FromString(ChoiceName))
+                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+                        .ColorAndOpacity(Chosen ? FSlateColor(PineInk) : FSlateColor(Ink)));
+                Choices->AddSlot()
+                [
+                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+                    .ContentPadding(Swatches ? FMargin(0) : FMargin(9, 5))
+                    .ButtonColorAndOpacity(Swatches ? FLinearColor::Transparent : Chosen ? MenuGold : Selected)
+                    .ToolTipText(FText::FromString(ChoiceName))
+                    .OnClicked_Lambda(Choose)
+                    [ Face ]
+                ];
+            }
+        }
         Cell = SNew(SBox).WidthOverride(SeenPage <= 2 ? FOptionalSize(ItemCellWidth) : FOptionalSize())
             .MinDesiredWidth(SeenPage <= 2 ? ItemCellWidth : SeenPage == 4 ? 330 : SeenPage == 6 ? AppearancePanelWidth - 60 : 670)
             .MinDesiredHeight(SeenPage == 0 ? 76 : SeenPage == 1 ? 96 : SeenPage <= 2 ? 144 : 72)
@@ -1228,6 +1316,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             auto TargetGrid = InChest ? ChestGrid : PackGrid;
             TargetGrid->AddSlot(CellIndex % StorageColumns(), CellIndex / StorageColumns())[ Cell.ToSharedRef() ];
         }
+        else if (AppearanceList) AppearanceList->AddSlot().AutoHeight().Padding(4)[ Cell.ToSharedRef() ];
         else Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
     }
     // Pad the grids with empty slots to at least four full rows, and always complete the last row.
@@ -1542,8 +1631,8 @@ FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
 
 TSharedPtr<SWidget> SHomesteadMenu::GetAudioSliderWidget(int32 AudioId) const
 {
-    return SeenPage == 4 && AudioSliders.IsValidIndex(AudioId - 5)
-        ? StaticCastSharedPtr<SWidget>(AudioSliders[AudioId - 5]) : nullptr;
+    return SeenPage == 4 && IsAudioSetting(AudioId) && AudioSliders.IsValidIndex(AudioSliderSlot(AudioId))
+        ? StaticCastSharedPtr<SWidget>(AudioSliders[AudioSliderSlot(AudioId)]) : nullptr;
 }
 void SHomesteadMenu::ChangeInventoryView(int32 View)
 {
@@ -2040,7 +2129,7 @@ int32 SHomesteadMenu::SettingsTabOf(int32 SettingId)
     switch (SettingId)
     {
     case 0: case 1: case 9: return -1;
-    case 5: case 6: case 7: return 1;
+    case 5: case 6: case 7: case 16: return 1;
     case 10: case 11: return 2;
     default: return 0;
     }
