@@ -162,12 +162,15 @@ class Graph:
 
 def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, roughness=0.62,
          weathering=0.0, grime=0.0, seed=0.0, polish=0.0, polish_center=0.0, polish_length=0.06,
-         relief=1.0):
+         relief=1.0, char_above=None, char_band=0.05, soot_band=0.12):
     """Stripped/seasoned wood: fine long grain along Z, growth-ring banding,
     long tonal streaks, pores, optional grey weathering and dark handling grime.
     ``polish`` burnishes a band of part-local Z (``polish_center`` +- ``polish_length``)
     darker and glossier, as where a hand has gripped a tool handle for years.
-    ``polish_center`` may be a list for tools held with two hands (one band per grip)."""
+    ``polish_center`` may be a list for tools held with two hands (one band per grip).
+    ``char_above`` chars the wood above that part-local Z (a torch stake under its head):
+    black alligator-cracked charcoal over ``char_band`` m, with brown scorch and soot
+    reaching ``soot_band`` m further down."""
     g = Graph(name)
     p = g.coord((1.0, 1.0, 1.0))
     x, y, z = g.separate(p)
@@ -205,9 +208,26 @@ def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, rou
         color = g.mix(color, (0.62, 0.52, 0.44), mask, blend="MULTIPLY")
         rough = g.math("MULTIPLY", rough, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", mask, 0.5)))
         pores = g.math("MULTIPLY", pores, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", mask, 0.6)))
+    height = g.math("ADD", g.math("MULTIPLY", fibres, 1.0), g.math("MULTIPLY", pores, 0.4))
+    if char_above is not None:
+        edge = g.noise(p, scale=40.0, detail=3.0).outputs["Fac"]
+        zc = g.math("ADD", z, g.math("MULTIPLY", g.math("SUBTRACT", edge, 0.5), char_band * 0.8))
+        soot = g.remap(zc, char_above - char_band - soot_band, char_above - char_band)
+        char = g.remap(zc, char_above - char_band, char_above)
+        color = g.mix(color, (0.34, 0.24, 0.16), soot, blend="MULTIPLY")
+        cells = g.voronoi(g.vmath("MULTIPLY", p, (1.0, 1.0, 0.55)), scale=180.0,
+                          feature="DISTANCE_TO_EDGE").outputs["Distance"]
+        crack = g.remap(cells, 0.0, 0.07, 1.0, 0.0)
+        sheen = g.noise(p, scale=90.0, detail=3.0).outputs["Fac"]
+        coal = g.mix((0.018, 0.016, 0.015), (0.045, 0.042, 0.04), g.remap(sheen, 0.4, 0.7))
+        coal = g.mix(coal, (0.006, 0.005, 0.005), crack)
+        color = g.mix(color, coal, char)
+        rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=char, A=rough,
+                       B=g.remap(sheen, 0.3, 0.7, 0.62, 0.9)).outputs[0]
+        height = g.node("ShaderNodeMix", data_type="FLOAT", Factor=char, A=height,
+                        B=g.math("SUBTRACT", g.math("MULTIPLY", sheen, 0.3), crack)).outputs[0]
     g.set("Base Color", color)
     g.set("Roughness", rough)
-    height = g.math("ADD", g.math("MULTIPLY", fibres, 1.0), g.math("MULTIPLY", pores, 0.4))
     g.set("Normal", g.bump(height, strength=0.35 * relief, distance=0.0015))
     return g.mat
 
@@ -714,7 +734,8 @@ def _granite_grains(g, vector, grain, w=None):
 
 def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45, moss=0.12,
             iron=0.25, streaks=0.3, soil=0.2, soil_height=0.12, enclaves=0.4, megacrysts=0.0,
-            relief=1.0, north=(0.0, 1.0, 0.0), seed=0.0, fresh="fresh", spots=1.0, film=0.5):
+            relief=1.0, north=(0.0, 1.0, 0.0), seed=0.0, fresh="fresh", spots=1.0, film=0.5,
+            offset_attr=None, tint_attr=None):
     """Weathered Sierra Nevada granite for rocks meshed in meters with pcoord = object
     coordinates and the ground line at z = 0.
 
@@ -731,10 +752,17 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
     - ``fresh``: name of a 0..1 point attribute marking newly spalled surfaces (written by
       ``homestead_rocks.sheets`` recipes); they keep a cleaner, paler face with less rind
       and lichen. Missing attributes read as 0 (all weathered).
+    - ``offset_attr`` / ``tint_attr``: optional per-point vector attributes for masonry built
+      from many stones: the offset (m) shifts every noise pattern so neighbouring stones
+      don't continue each other's markings, and the tint (~1, 1, 1) multiplies each stone's
+      colour. The soil line and facing masks still use the shared object coordinates.
     """
     g = Graph(name)
     p = g.coord()
     ps = g.vmath("ADD", p, (seed * 7.13, seed * 3.37, seed * 5.71))
+    if offset_attr:
+        shift = g.node("ShaderNodeAttribute", attribute_name=offset_attr, attribute_type="GEOMETRY")
+        ps = g.vmath("ADD", ps, shift.outputs["Vector"])
     px, py, pz = g.separate(p)
     normal = g.node("ShaderNodeTexCoord").outputs["Normal"]
     nx, ny, nz = g.separate(normal)
@@ -772,6 +800,9 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
         fine = g.noise(ps, scale=1.0 / (grain * 0.5), detail=2.0).outputs["Fac"]
         color = g.mix(color, g.mix((0.10, 0.10, 0.095), (0.2, 0.2, 0.19), g.remap(fine, 0.35, 0.65)),
                       g.math("MULTIPLY", encl_mask, 0.85))
+    if tint_attr:
+        tint = g.node("ShaderNodeAttribute", attribute_name=tint_attr, attribute_type="GEOMETRY")
+        color = g.mix(color, tint.outputs["Color"], 1.0, blend="MULTIPLY")
 
     # Weathering rind: crystals lose contrast and the surface warms to grey-buff.
     zone = g.noise(ps, scale=1.1 / scale, detail=4.0, roughness=0.55).outputs["Fac"]
@@ -949,4 +980,214 @@ def granite_detail(name, tile=1.0, grain=0.0045):
     g.set("Roughness", rough)
     g.math("ADD", height, 0.0).node.label = "HOMESTEAD_HEIGHT"
     g.set("Normal", g.bump(height, strength=0.6, distance=0.0007))
+    return g.mat
+
+
+# ------------------------------------------------------------------ masonry, roofing, torches
+
+def lime_mortar(name, color=(0.22, 0.21, 0.185), dirt=(0.09, 0.08, 0.065), grime=0.6, seed=0.0):
+    """Weathered lime mortar pointing between fieldstones: off-white lime binder with
+    visible sand and small grit, trowel-struck lumps, fine shrinkage cracks, rain-washed
+    grime and green-black algae in the damp lower joints. pcoord in meters, ground at z = 0.
+    Lime ages from near-white to a dull oatmeal grey (linear ~0.35-0.45)."""
+    g = Graph(name)
+    p = g.coord()
+    ps = g.vmath("ADD", p, (seed * 3.1, seed * 1.7, seed * 2.3))
+    _, _, z = g.separate(p)
+    lumps = g.noise(ps, scale=28.0, detail=5.0, roughness=0.6).outputs["Fac"]
+    sand = g.noise(ps, scale=900.0, detail=2.0).outputs["Fac"]
+    grit = g.voronoi(ps, scale=260.0, feature="F1")
+    grit_mask = g.math("MULTIPLY", g.remap(g.channel(grit.outputs["Color"], 0), 0.86, 0.87),
+                       g.remap(grit.outputs["Distance"], 0.45, 0.3))
+    base = g.mix(tuple(c * 0.86 for c in color), color, g.remap(lumps, 0.35, 0.68))
+    base = g.mix(base, (0.82, 0.8, 0.76), g.remap(sand, 0.3, 0.7, 0.0, 0.5), blend="MULTIPLY")
+    grit_color = g.mix((0.10, 0.095, 0.09), (0.28, 0.25, 0.21), g.channel(grit.outputs["Color"], 1))
+    base = g.mix(base, grit_color, grit_mask)
+    cracks = g.voronoi(ps, scale=55.0, feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    crack_mask = g.remap(cracks, 0.0, 0.025, 1.0, 0.0)
+    base = g.mix(base, tuple(c * 0.45 for c in color), g.math("MULTIPLY", crack_mask, 0.7))
+    stain = g.noise(g.vmath("MULTIPLY", ps, (6.0, 6.0, 1.2)), scale=3.0, detail=4.0).outputs["Fac"]
+    low = g.remap(z, 0.9, 0.0)
+    base = g.mix(base, dirt, g.math("MULTIPLY", g.remap(stain, 0.45, 0.7, 0.0, grime),
+                                     g.math("ADD", 0.35, g.math("MULTIPLY", low, 0.65))))
+    algae = g.noise(ps, scale=9.0, detail=5.0).outputs["Fac"]
+    base = g.mix(base, (0.05, 0.06, 0.035), g.math("MULTIPLY", g.remap(algae, 0.55, 0.7, 0.0, 0.6), low))
+    recess = g.remap(g.ao(distance=0.03, samples=12), 0.4, 0.95, 1.0, 0.0)
+    base = g.mix(base, (0.55, 0.5, 0.44), g.math("MULTIPLY", recess, 0.7), blend="MULTIPLY")
+    g.set("Base Color", base)
+    g.set("Roughness", g.remap(sand, 0.3, 0.7, 0.86, 0.96))
+    height = g.math("ADD", g.math("MULTIPLY", lumps, 1.0), g.math("MULTIPLY", sand, 0.25))
+    height = g.math("SUBTRACT", height, g.math("MULTIPLY", crack_mask, 0.4))
+    height = g.math("ADD", height, g.math("MULTIPLY", grit_mask, 0.3))
+    # Pointed by trowel: broad lumpy ridges and hollows under the sand grain.
+    trowel = g.noise(g.vmath("MULTIPLY", ps, (1.0, 1.0, 1.6)), scale=9.0, detail=3.0, roughness=0.55).outputs["Fac"]
+    broad = g.bump(trowel, strength=0.9, distance=0.012)
+    g.set("Normal", g.bump(height, strength=0.7, distance=0.003, normal=broad))
+    return g.mat
+
+
+def slate(name, dark=(0.045, 0.05, 0.055), light=(0.12, 0.125, 0.13), lichen=0.35, moss=0.15,
+          seed=0.0, offset_attr=None):
+    """Split roofing stone (grey-blue slate / flaggy sandstone tilestone). pcoord is the
+    slate-local frame in meters: x/y across the plate, z through its thickness, so the
+    cleavage laminae show as fine bands on the chipped edges. Weathered upper faces carry
+    pale crustose lichen and a grey bloom; the tails keep moss and dark water stains.
+    ``offset_attr`` shifts the patterns per slate."""
+    g = Graph(name)
+    p = g.coord()
+    ps = g.vmath("ADD", p, (seed * 2.3, seed * 4.1, seed * 1.3))
+    if offset_attr:
+        shift = g.node("ShaderNodeAttribute", attribute_name=offset_attr, attribute_type="GEOMETRY")
+        ps = g.vmath("ADD", ps, shift.outputs["Vector"])
+    x, y, z = g.separate(ps)
+    normal = g.node("ShaderNodeTexCoord").outputs["Normal"]
+    _, _, nz = g.separate(normal)
+    face = g.remap(nz, 0.35, 0.8)
+    laminae = g.noise(g.combine(g.math("MULTIPLY", x, 3.0), g.math("MULTIPLY", y, 3.0),
+                                g.math("MULTIPLY", z, 900.0)), scale=1.0, detail=3.0).outputs["Fac"]
+    mottle = g.noise(ps, scale=7.0, detail=5.0, roughness=0.6).outputs["Fac"]
+    color = g.mix(dark, light, g.remap(mottle, 0.35, 0.72))
+    color = g.mix(color, (0.8, 0.8, 0.82), g.math("MULTIPLY", g.remap(laminae, 0.4, 0.7),
+                                                 g.math("SUBTRACT", 1.0, face)), blend="MULTIPLY")
+    rust = g.noise(ps, scale=4.0, detail=4.0).outputs["Fac"]
+    color = g.mix(color, (1.35, 1.05, 0.8), g.remap(rust, 0.64, 0.76, 0.0, 0.6), blend="MULTIPLY")
+    bloom = g.noise(ps, scale=2.5, detail=3.0).outputs["Fac"]
+    color = g.mix(color, (0.2, 0.2, 0.19), g.math("MULTIPLY", g.remap(bloom, 0.45, 0.7, 0.0, 0.45), face))
+    grain = g.noise(ps, scale=1400.0, detail=2.0).outputs["Fac"]
+    lichen_mask = None
+    if lichen:
+        crust = g.noise(ps, scale=11.0, detail=7.0, roughness=0.62).outputs["Fac"]
+        colony = g.noise(ps, scale=1.6, detail=2.0).outputs["Fac"]
+        threshold = g.math("SUBTRACT", 0.72, g.math("MULTIPLY", g.remap(colony, 0.3, 0.7), 0.35 * lichen))
+        lichen_mask = g.math("MULTIPLY", g.remap(g.math("SUBTRACT", crust, threshold), 0.0, 0.015), face)
+        species = g.channel(g.noise(ps, scale=3.0, detail=1.0).outputs["Color"], 0)
+        crust_color = g.ramp(species, [(0.0, (0.30, 0.31, 0.28)), (0.5, (0.36, 0.33, 0.16)),
+                                       (0.62, (0.22, 0.24, 0.20))], interpolation="CONSTANT")
+        color = g.mix(color, crust_color, g.math("MULTIPLY", lichen_mask, 0.9))
+    moss_mask = None
+    if moss:
+        tail = g.node("ShaderNodeAttribute", attribute_name="slate_tail", attribute_type="GEOMETRY").outputs["Fac"]
+        clump = g.noise(ps, scale=30.0, detail=5.0).outputs["Fac"]
+        moss_mask = g.math("MULTIPLY", g.remap(g.math("ADD", g.math("MULTIPLY", tail, moss * 3.0),
+                                                      g.math("SUBTRACT", clump, 0.5)), 0.5, 0.62), face)
+        tuft = g.noise(ps, scale=400.0, detail=3.0).outputs["Fac"]
+        color = g.mix(color, g.mix((0.03, 0.045, 0.015), (0.07, 0.085, 0.03), tuft), moss_mask)
+    cavity = g.remap(g.ao(distance=0.02, samples=12), 0.4, 0.95, 1.0, 0.0)
+    color = g.mix(color, (0.5, 0.5, 0.5), g.math("MULTIPLY", cavity, 0.6), blend="MULTIPLY")
+    g.set("Base Color", color)
+    rough = g.remap(mottle, 0.3, 0.7, 0.58, 0.74)
+    for mask, value in ((lichen_mask, 0.9), (moss_mask, 0.95)):
+        if mask is not None:
+            rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=mask, A=rough, B=value).outputs[0]
+    g.set("Roughness", rough)
+    ripple = g.noise(g.vmath("MULTIPLY", ps, (1.0, 5.0, 1.0)), scale=18.0, detail=4.0).outputs["Fac"]
+    height = g.math("ADD", g.math("MULTIPLY", ripple, 0.6), g.math("MULTIPLY", grain, 0.15))
+    height = g.math("ADD", height, g.math("MULTIPLY", laminae, g.math("SUBTRACT", 1.0, face)))
+    if lichen_mask is not None:
+        height = g.math("ADD", height, g.math("MULTIPLY", lichen_mask, 0.3))
+    g.set("Normal", g.bump(height, strength=0.45, distance=0.002))
+    return g.mat
+
+
+def pitch_rag(name, spent=False, cloth=(0.33, 0.27, 0.19), seed=0.0):
+    """Torch head: strips of coarse linen wound round the stake and soaked in pine pitch.
+    pcoord is the tube frame (x, y, arclength). Fresh: a brown-black soak through the
+    whole wrap with the plain weave still reading through it, glossy black clots of tar
+    in the hollows and runs, and dull brown cloth where the strip edges stand proud and
+    soaked thin; fibres fuzz at the edges. ``spent``: the pitch has burnt off, leaving
+    brittle charred cloth, grey ash and white ash ghosts of the weave, dry and matte."""
+    g = Graph(name)
+    p = g.coord()
+    ps = g.vmath("ADD", p, (seed * 1.1, seed * 2.9, seed * 0.7))
+    x, y, s = g.separate(p)
+    angle = g.math("ARCTAN2", y, x)
+    # Unrolled cloth coordinates: around the head (meters of circumference) and along it.
+    around = g.math("MULTIPLY", angle, 0.045)
+    cloth_uv = g.combine(around, s, seed)
+    warp_threads = g.wave(cloth_uv, scale=380.0, kind="BANDS", direction="X", distortion=0.6,
+                          detail=1.0).outputs["Fac"]
+    weft_threads = g.wave(cloth_uv, scale=340.0, kind="BANDS", direction="Y", distortion=0.6,
+                          detail=1.0).outputs["Fac"]
+    weave = g.math("MULTIPLY", g.remap(warp_threads, 0.2, 0.9), g.remap(weft_threads, 0.2, 0.9))
+    fuzz = g.noise(ps, scale=900.0, detail=3.0, roughness=0.7).outputs["Fac"]
+    soak = g.noise(ps, scale=28.0, detail=5.0, roughness=0.6).outputs["Fac"]
+    curvature = g.node("ShaderNodeNewGeometry").outputs["Pointiness"]
+    hollow = g.remap(curvature, 0.5, 0.44)
+    proud = g.remap(curvature, 0.52, 0.6)
+    if not spent:
+        clots = g.math("ADD", g.math("MULTIPLY", hollow, 0.55), g.remap(soak, 0.5, 0.68))
+        drips = g.noise(g.combine(g.math("MULTIPLY", angle, 1.3), 0.0, g.math("MULTIPLY", s, 9.0)),
+                        scale=6.0, detail=3.0).outputs["Fac"]
+        clots = g.math("MINIMUM", g.math("MAXIMUM", clots, g.remap(drips, 0.6, 0.66)), 1.0)
+        bare = g.math("MULTIPLY", g.math("ADD", g.math("MULTIPLY", proud, 0.7),
+                                         g.remap(soak, 0.36, 0.26, 0.0, 0.6)),
+                      g.math("SUBTRACT", 1.0, clots))
+        cloth_color = g.mix(tuple(c * 0.55 for c in cloth), cloth, g.remap(fuzz, 0.35, 0.65))
+        cloth_color = g.mix(cloth_color, (0.55, 0.5, 0.45), g.math("SUBTRACT", 1.0, weave), blend="MULTIPLY")
+        soaked = g.mix((0.028, 0.018, 0.010), (0.075, 0.048, 0.026), g.math("MULTIPLY", weave, 0.8))
+        soaked = g.mix(soaked, (0.05, 0.035, 0.02), g.remap(soak, 0.3, 0.7, 0.0, 0.5))
+        tar = g.mix((0.010, 0.007, 0.004), (0.022, 0.013, 0.006), g.remap(soak, 0.5, 0.8))
+        color = g.mix(soaked, cloth_color, g.math("MINIMUM", bare, 1.0))
+        color = g.mix(color, tar, clots)
+        rough = g.remap(fuzz, 0.3, 0.7, 0.52, 0.66)
+        rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=g.math("MINIMUM", bare, 1.0), A=rough,
+                       B=0.9).outputs[0]
+        rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=clots, A=rough,
+                       B=g.remap(fuzz, 0.3, 0.7, 0.16, 0.3)).outputs[0]
+        # Tar fills the weave: its relief fades under the clots.
+        height = g.math("ADD", g.math("MULTIPLY", weave, g.math("SUBTRACT", 1.0, g.math("MULTIPLY", clots, 0.85))),
+                        g.math("MULTIPLY", clots, g.math("MULTIPLY", soak, 1.4)))
+        height = g.math("ADD", height, g.math("MULTIPLY", g.math("MULTIPLY", fuzz, bare), 0.4))
+        strength = 0.45
+    else:
+        ash = g.remap(g.math("ADD", g.math("MULTIPLY", weave, 0.55), g.math("MULTIPLY", fuzz, 0.45)), 0.45, 0.75)
+        ash = g.math("MULTIPLY", ash, g.math("ADD", 0.35, g.math("MULTIPLY", proud, 1.0)))
+        char = g.mix((0.012, 0.011, 0.011), (0.04, 0.038, 0.036), g.remap(soak, 0.35, 0.75))
+        cracks = g.voronoi(ps, scale=160.0, feature="DISTANCE_TO_EDGE").outputs["Distance"]
+        char = g.mix(char, (0.004, 0.004, 0.004), g.remap(cracks, 0.0, 0.08, 1.0, 0.0))
+        grey = g.mix((0.16, 0.155, 0.15), (0.42, 0.41, 0.39), g.remap(fuzz, 0.45, 0.8))
+        edge = g.remap(soak, 0.6, 0.75, 0.0, 0.7)
+        color = g.mix(char, grey, g.math("MINIMUM", g.math("MAXIMUM", g.math("MULTIPLY", ash, 0.6), edge), 1.0))
+        rough = g.remap(ash, 0.0, 1.0, 0.82, 0.97)
+        height = g.math("SUBTRACT", weave, g.remap(cracks, 0.0, 0.08, 0.8, 0.0))
+        strength = 0.7
+    g.set("Base Color", color)
+    g.set("Roughness", rough)
+    g.set("Normal", g.bump(height, strength=strength, distance=0.0012))
+    return g.mat
+
+def wrought_iron(name, rust=0.4, wear=0.35, seed=0.0):
+    """Blacksmith-forged wrought iron (brackets, straps, nails): black-brown forge scale
+    with hammer dimples and the fibrous slag streaks of wrought iron along part-local Z,
+    rust blooming in pits and on upper surfaces, grey steel showing on worn edges.
+    Metallic ~0.75 on scale, 1 on bare iron, 0 on rust."""
+    g = Graph(name)
+    p = g.coord()
+    ps = g.vmath("ADD", p, (seed * 0.7, seed * 1.9, seed * 1.3))
+    _, _, z = g.separate(ps)
+    scale_noise = g.noise(ps, scale=60.0, detail=5.0, roughness=0.65).outputs["Fac"]
+    fibre = g.noise(g.vmath("MULTIPLY", ps, (40.0, 40.0, 3.0)), scale=4.0, detail=4.0).outputs["Fac"]
+    blooms = g.noise(ps, scale=14.0, detail=5.0, roughness=0.7).outputs["Fac"]
+    pits = g.noise(ps, scale=380.0, detail=2.0).outputs["Fac"]
+    rust_mask = g.math("MINIMUM", g.math("ADD", g.remap(blooms, 0.62 - 0.12 * rust, 0.72 - 0.12 * rust),
+                                        g.math("MULTIPLY", g.remap(pits, 0.66, 0.74), rust)), 1.0)
+    curvature = g.node("ShaderNodeNewGeometry").outputs["Pointiness"]
+    worn = g.math("MULTIPLY", g.remap(curvature, 0.52, 0.6), wear)
+    forge = g.mix((0.028, 0.026, 0.025), (0.07, 0.062, 0.055), g.remap(scale_noise, 0.35, 0.72))
+    forge = g.mix(forge, (0.7, 0.7, 0.72), g.remap(fibre, 0.45, 0.62, 0.0, 0.35), blend="MULTIPLY")
+    rust_color = g.mix((0.07, 0.03, 0.014), (0.19, 0.075, 0.03), g.remap(pits, 0.5, 0.8))
+    color = g.mix(forge, (0.34, 0.33, 0.32), worn)
+    color = g.mix(color, rust_color, rust_mask)
+    g.set("Base Color", color)
+    metal = g.math("ADD", 0.72, g.math("MULTIPLY", worn, 0.28))
+    g.set("Metallic", g.math("MULTIPLY", metal, g.math("SUBTRACT", 1.0, rust_mask)))
+    rough = g.remap(scale_noise, 0.3, 0.7, 0.55, 0.7)
+    rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=worn, A=rough, B=0.38).outputs[0]
+    rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=rust_mask, A=rough, B=0.9).outputs[0]
+    g.set("Roughness", rough)
+    dimples = g.voronoi(ps, scale=90.0, feature="SMOOTH_F1").outputs["Distance"]
+    height = g.math("ADD", g.math("MULTIPLY", g.math("MULTIPLY", dimples, dimples), 1.0),
+                    g.math("MULTIPLY", fibre, 0.25))
+    height = g.math("ADD", height, g.math("MULTIPLY", rust_mask, g.math("MULTIPLY", pits, 0.5)))
+    g.set("Normal", g.bump(height, strength=0.6, distance=0.0015))
     return g.mat

@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "name": "StoneDoorway",
+  "description": "Building kit: 3 m granite rubble wall with a centred 130 x 220 cm doorway under a single granite lintel, dressed jambs, +X quoin pier and coping; LOD1/LOD2 (original). Pivot = cell centre on the floor; wall faces at Unreal Y 130/158.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/stone_doorway.py",
+  "source_sha256": "1293dde26ac2220e52aae79f1dec89efce1304ad4df2f8c76daea034d4048ab8",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StoneDoorway": {
+      "vertices": 5055,
+      "triangles": 8554,
+      "size_cm": [
+        311.61,
+        33.16,
+        270.3
+      ],
+      "materials": [
+        {
+          "name": "M_StoneDoorway",
+          "textures": {
+            "basecolor": "T_StoneDoorway_basecolor.png",
+            "roughness": "T_StoneDoorway_roughness.png",
+            "normal": "T_StoneDoorway_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneDoorway_basecolor.png",
+          "roughness": "T_StoneDoorway_roughness.png",
+          "normal": "T_StoneDoorway_normal.png",
+          "ao": "T_StoneDoorway_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.55,
+          -1.6,
+          2.15
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_StoneDoorway.fbx",
+      "sha256": "d221c7761aa299cadf7f2fbcf06a41c873847de98247b9d4c40adbcbf95255f8",
+      "preview": "preview_SM_StoneDoorway.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StoneDoorway_hero.png",
+          "detail": "beauty_SM_StoneDoorway_detail.png",
+          "eye": "beauty_SM_StoneDoorway_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StoneDoorway_LOD1": {
+      "vertices": 2590,
+      "triangles": 3849,
+      "size_cm": [
+        311.69,
+        33.16,
+        270.21
+      ],
+      "materials": [
+        {
+          "name": "M_StoneDoorway",
+          "textures": {
+            "basecolor": "T_StoneDoorway_basecolor.png",
+            "roughness": "T_StoneDoorway_roughness.png",
+            "normal": "T_StoneDoorway_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneDoorway_basecolor.png",
+          "roughness": "T_StoneDoorway_roughness.png",
+          "normal": "T_StoneDoorway_normal.png",
+          "ao": "T_StoneDoorway_ao.png"
+        },
+        "shared_with": "SM_StoneDoorway"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.55,
+          -1.6,
+          2.15
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_StoneDoorway_LOD1.fbx",
+      "sha256": "77a70116137c71394cb808572b67274563f8a68069d4d70e2b67242024cba11e",
+      "preview": "preview_SM_StoneDoorway_LOD1.png"
+    },
+    "SM_StoneDoorway_LOD2": {
+      "vertices": 1070,
+      "triangles": 1368,
+      "size_cm": [
+        310.78,
+        32.33,
+        270.21
+      ],
+      "materials": [
+        {
+          "name": "M_StoneDoorway",
+          "textures": {
+            "basecolor": "T_StoneDoorway_basecolor.png",
+            "roughness": "T_StoneDoorway_roughness.png",
+            "normal": "T_StoneDoorway_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneDoorway_basecolor.png",
+          "roughness": "T_StoneDoorway_roughness.png",
+          "normal": "T_StoneDoorway_normal.png",
+          "ao": "T_StoneDoorway_ao.png"
+        },
+        "shared_with": "SM_StoneDoorway"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.55,
+          -1.6,
+          2.15
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_StoneDoorway_LOD2.fbx",
+      "sha256": "b106b1c70b285b652ea90e28fa42b434660cdecdbbe467ffafca50742bbbf012",
+      "preview": "preview_SM_StoneDoorway_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Cell centre on the floor (0, 0, 0)",
+  "extent_cm": {
+    "x": [
+      -150,
+      160.5
+    ],
+    "y": [
+      128,
+      160.5
+    ],
+    "z": [
+      -10,
+      260
+    ]
+  },
+  "faces_y_cm": {
+    "inner": 130,
+    "outer": 158,
+    "quoin_pier": [
+      128,
+      160
+    ]
+  },
+  "opening_cm": {
+    "x": [
+      -65,
+      65
+    ],
+    "z": [
+      0,
+      220
+    ],
+    "lintel_z": [
+      220,
+      248
+    ]
+  },
+  "collision_note": "Use per-poly (complex) collision; a box would plug the doorway.",
+  "placement": "Yaw 0/90/180/270 about the cell centre, interchangeable with SM_StoneWall. The +X end carries the corner pier; the plain -X end tucks inside the neighbour's pier.",
+  "textures": {
+    "T_StoneDoorway_basecolor.png": "46e766e7bee9ad454a13a5cbcaf0b40cc4cfaf8ace2dc0d3c597f1cdfcd16ee3",
+    "T_StoneDoorway_roughness.png": "4b2d6660fad5d6b4a751a092141c35719f16dd9f95dd32e68ddf970c80137b54",
+    "T_StoneDoorway_normal.png": "a1b4a80438221c565703504717d43a62e91ff83923d3fc9d49c8e69b489173b2"
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "StoneRoof",
+  "description": "Building kit: near-flat roof of lapped stone slates on boards, joists and wall plates, tiling at 300 cm; LOD1/LOD2 (original). Pivot = cell centre on the floor; mesh at Z 258..~289.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/stone_roof.py",
+  "source_sha256": "c7d2638defe57ecc8f067b6c6af68d98670b9e540920fa31e8c03b327435c4b4",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StoneRoof": {
+      "vertices": 8550,
+      "triangles": 16416,
+      "size_cm": [
+        320.12,
+        324.9,
+        30.68
+      ],
+      "materials": [
+        {
+          "name": "M_StoneRoof",
+          "textures": {
+            "basecolor": "T_StoneRoof_basecolor.png",
+            "roughness": "T_StoneRoof_roughness.png",
+            "normal": "T_StoneRoof_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneRoof_basecolor.png",
+          "roughness": "T_StoneRoof_roughness.png",
+          "normal": "T_StoneRoof_normal.png",
+          "ao": "T_StoneRoof_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          -1.1,
+          1.58,
+          2.86
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_StoneRoof.fbx",
+      "sha256": "666ba7cf392cff8ffda6309f5b513160c40dc2cfcb861f3b97304ffbb3c1c80c",
+      "preview": "preview_SM_StoneRoof.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StoneRoof_hero.png",
+          "detail": "beauty_SM_StoneRoof_detail.png",
+          "eye": "beauty_SM_StoneRoof_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StoneRoof_LOD1": {
+      "vertices": 4035,
+      "triangles": 7386,
+      "size_cm": [
+        319.9,
+        324.8,
+        30.65
+      ],
+      "materials": [
+        {
+          "name": "M_StoneRoof",
+          "textures": {
+            "basecolor": "T_StoneRoof_basecolor.png",
+            "roughness": "T_StoneRoof_roughness.png",
+            "normal": "T_StoneRoof_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneRoof_basecolor.png",
+          "roughness": "T_StoneRoof_roughness.png",
+          "normal": "T_StoneRoof_normal.png",
+          "ao": "T_StoneRoof_ao.png"
+        },
+        "shared_with": "SM_StoneRoof"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          -1.1,
+          1.58,
+          2.86
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_StoneRoof_LOD1.fbx",
+      "sha256": "ccf7c1c9b1f262929c2890d981de8605ef951d105272e055749b5f7f951dfe17",
+      "preview": "preview_SM_StoneRoof_LOD1.png"
+    },
+    "SM_StoneRoof_LOD2": {
+      "vertices": 1655,
+      "triangles": 2626,
+      "size_cm": [
+        319.91,
+        324.66,
+        30.32
+      ],
+      "materials": [
+        {
+          "name": "M_StoneRoof",
+          "textures": {
+            "basecolor": "T_StoneRoof_basecolor.png",
+            "roughness": "T_StoneRoof_roughness.png",
+            "normal": "T_StoneRoof_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneRoof_basecolor.png",
+          "roughness": "T_StoneRoof_roughness.png",
+          "normal": "T_StoneRoof_normal.png",
+          "ao": "T_StoneRoof_ao.png"
+        },
+        "shared_with": "SM_StoneRoof"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          -1.1,
+          1.58,
+          2.86
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_StoneRoof_LOD2.fbx",
+      "sha256": "caedbc7a09e15b222a79451c405de545b8f228f2d2ec3ad13f900085f401ad9a",
+      "preview": "preview_SM_StoneRoof_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Cell centre on the floor (0, 0, 0); the mesh sits at roof height",
+  "extent_cm": {
+    "x": [
+      -160,
+      160
+    ],
+    "y": [
+      -158,
+      166
+    ],
+    "z": [
+      258,
+      289
+    ]
+  },
+  "layers_z_cm": {
+    "wall_plates": [
+      258,
+      268
+    ],
+    "joists": [
+      268,
+      279
+    ],
+    "deck": [
+      279,
+      281.5
+    ],
+    "slates_top": 288.5
+  },
+  "placement": "300 cm grid, always yaw 0 (independent of the building's rotation): the slate courses run up +Y (Unreal) and lap under the next roof's eaves; verges lap under the X neighbour. Rotated roofs would clash in the 10-16 cm lap zones.",
+  "textures": {
+    "T_StoneRoof_basecolor.png": "7e8b59c609e7311654abe0df6ca57aea0a3fbd371becd5500be5e32b81c32c2e",
+    "T_StoneRoof_roughness.png": "4cf321b0f6189e2f46de06d3a992815a6793ac4467ef190f0f292e2e5d6881c5",
+    "T_StoneRoof_normal.png": "eba20714b642e962ef02f942b7565ded43ad55195eb29c890f4d3384bb515abb"
+  }
+}

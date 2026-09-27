@@ -67,6 +67,15 @@ and `Recipes\deer\`) is project-authored:
 
 It uses no scanned or downloaded geometry or textures.
 
+The stone building kit (`Assets\Props\` StoneFoundation, StoneWall, StoneDoorway and StoneRoof,
+built by `Scripts\Blender\Recipes\stone_*.py` and `Recipes\stone_building\`) and the pitch torches
+(TorchGround and TorchWall with their `_Spent` variants, `Recipes\torch_*.py` and
+`Recipes\torches\`) are project-authored. The masonry, slates, timber, stakes, wrapped heads and
+forged sconce are all generated from code. Their granite, lime mortar, slate, wood, pitch-soaked
+linen and wrought-iron materials are procedural and baked to textures. They use no scanned or
+downloaded geometry or textures. Their review renders use the same CC0 Kloofendal HDRI, which
+ships with no asset.
+
 ## Music
 
 All music is by **Kevin MacLeod** (incompetech.com), licensed under

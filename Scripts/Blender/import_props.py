@@ -255,8 +255,11 @@ def foliage_parent():
 
 
 GRANITE_PARENT = "/Game/SurvivalGame/Materials/M_PropGranite"
-# Per-prop overrides of report.json: a convex hull would fill the split boulder's gap.
-COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex"}
+# Per-prop overrides of report.json: a convex hull would fill the split boulder's gap, and a box
+# would plug the stone doorway's opening.
+COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "complex"}
+# Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
+COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.
 NANITE_PROPS = {"GraniteDome", "GraniteSplitBoulder"}
 DETAIL_DEST = f"{DEST_ROOT}/GraniteDetail/Textures"
@@ -598,7 +601,8 @@ def import_prop(name, parent):
             if LIB.does_asset_exist(stale):
                 LIB.delete_asset(stale)
         if COLLISION_OVERRIDES.get(name) == "complex":
-            mesh.set_editor_property("lod_for_collision", max(index for index, _ in entries))
+            mesh.set_editor_property("lod_for_collision",
+                                     COLLISION_LOD.get(name, max(index for index, _ in entries)))
         save(mesh)
         result[base]["lods"] = mesh.get_num_lods()
     return result
