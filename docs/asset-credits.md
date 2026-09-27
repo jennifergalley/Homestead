@@ -23,6 +23,14 @@ MetaHuman assets (Unreal Engine EULA) and are included only for fitting and revi
 review renders use Poly Haven's CC0 `kloofendal_48d_partly_cloudy_puresky` HDRI (Greg Zaal, sky edits by
 Jarod Guest, https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky). It isn't part of the game asset.
 
+The heroine's footwear (`Assets\Characters\Footwear`: sheepskin FurBoots, plant-fibre
+WovenSandals and leather TurnShoes) is project-authored. `Scripts\Blender\Recipes\footwear.py`
+and its `shoemaking\` package build a last from her MetaHuman body, model every part on it, and
+skin each pair to `metahuman_base_skel`. Every leather, wool and fibre texture is synthesized in
+numpy, with no scanned or downloaded images. The `.blend` files carry the MetaHuman body and face
+only for fitting and review. The review renders use the same CC0 Kloofendal HDRI, which ships
+with no asset.
+
 The granite rocks and boulders in `Assets\Props` (GraniteCobbles, GraniteSpalls,
 GraniteRubble, GraniteBoulderLoaf, GraniteBlockTalus, GraniteBoulderLow,
 GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones)

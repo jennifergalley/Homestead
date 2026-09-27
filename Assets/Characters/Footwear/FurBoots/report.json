@@ -1,0 +1,374 @@
+{
+ "recipe": "Scripts/Blender/Recipes/footwear.py",
+ "seed": 20260927,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf"
+ },
+ "asset": "SKM_FurBoots",
+ "material": "M_FurBoots",
+ "geometry": {
+  "vertices": 38208,
+  "triangles": 76000,
+  "bones_weighted": 18,
+  "max_influences": 4
+ },
+ "bones_exported": 25,
+ "bone_names": [
+  "ankle_bck_l",
+  "ankle_bck_r",
+  "ankle_fwd_l",
+  "ankle_fwd_r",
+  "ball_l",
+  "ball_r",
+  "calf_correctiveRoot_l",
+  "calf_correctiveRoot_r",
+  "calf_kneeBack_l",
+  "calf_kneeBack_r",
+  "calf_knee_l",
+  "calf_knee_r",
+  "calf_l",
+  "calf_r",
+  "calf_twistCor_02_l",
+  "calf_twistCor_02_r",
+  "calf_twist_01_l",
+  "calf_twist_01_r",
+  "calf_twist_02_l",
+  "calf_twist_02_r",
+  "foot_l",
+  "foot_r",
+  "pelvis",
+  "thigh_l",
+  "thigh_r"
+ ],
+ "sole_thickness_mm": 12.0,
+ "character_offset_cm": 1.2,
+ "footbed_z_mm": -0.5,
+ "fit": {
+  "l": {
+   "pivot": [
+    -0.12099449411034584,
+    0.14
+   ],
+   "gap_worst_deficit_mm": 0.14703711715715206,
+   "shaft_inner_gap_min_mm": 18.96833066869391,
+   "shaft_inner_gap_median_mm": 19.217465208890502,
+   "foot_inner_gap_min_mm": 3.8597586201789933,
+   "loft_mean_mm": 16.636235109315372
+  }
+ },
+ "textures": {
+  "resolution": 2048,
+  "uv_coverage": 0.8260238170623779,
+  "px_per_cm": {
+   "1": 9.1,
+   "2": 30.2,
+   "3": 30.2,
+   "4": 30.3
+  },
+  "albedo_mean": [
+   0.23216986656188965,
+   0.17690367996692657,
+   0.12170793861150742
+  ],
+  "albedo_max": 0.5946499109268188,
+  "roughness_mean": 0.8682006597518921
+ },
+ "bind_pose": {
+  "verts": 38208,
+  "inside": 0,
+  "inside_pct": 0.0,
+  "inside_near_opening": 0,
+  "max_depth_mm": 0.0,
+  "p999_depth_mm": 0.0,
+  "inside_left": 0,
+  "inside_right": 0
+ },
+ "test_poses": {
+  "walk_heel_strike": {
+   "verts": 38208,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  },
+  "walk_toe_off": {
+   "verts": 38208,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  },
+  "kneel_toes_flexed": {
+   "verts": 38208,
+   "inside": 98,
+   "inside_pct": 0.256,
+   "inside_near_opening": 0,
+   "max_depth_mm": 10.38,
+   "p999_depth_mm": 2.68,
+   "inside_left": 50,
+   "inside_right": 48
+  },
+  "deep_squat": {
+   "verts": 38208,
+   "inside": 566,
+   "inside_pct": 1.481,
+   "inside_near_opening": 74,
+   "max_depth_mm": 39.38,
+   "p999_depth_mm": 32.32,
+   "inside_left": 283,
+   "inside_right": 283
+  },
+  "tiptoe": {
+   "verts": 38208,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  }
+ },
+ "test_pose_definitions": {
+  "walk_heel_strike": [
+   [
+    "thigh_l",
+    "X",
+    -25
+   ],
+   [
+    "calf_l",
+    "X",
+    5
+   ],
+   [
+    "thigh_r",
+    "X",
+    12
+   ],
+   [
+    "calf_r",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    5
+   ],
+   [
+    "ball_r",
+    "X",
+    -50
+   ]
+  ],
+  "walk_toe_off": [
+   [
+    "thigh_r",
+    "X",
+    -25
+   ],
+   [
+    "calf_r",
+    "X",
+    5
+   ],
+   [
+    "thigh_l",
+    "X",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    40
+   ],
+   [
+    "foot_l",
+    "X",
+    5
+   ],
+   [
+    "ball_l",
+    "X",
+    -50
+   ]
+  ],
+  "kneel_toes_flexed": [
+   [
+    "thigh_l",
+    "X",
+    -8
+   ],
+   [
+    "thigh_r",
+    "X",
+    -8
+   ],
+   [
+    "calf_l",
+    "X",
+    100
+   ],
+   [
+    "calf_r",
+    "X",
+    100
+   ],
+   [
+    "foot_l",
+    "X",
+    -5
+   ],
+   [
+    "foot_r",
+    "X",
+    -5
+   ],
+   [
+    "ball_l",
+    "X",
+    -80
+   ],
+   [
+    "ball_r",
+    "X",
+    -80
+   ]
+  ],
+  "deep_squat": [
+   [
+    "pelvis",
+    "X",
+    18
+   ],
+   [
+    "thigh_l",
+    "X",
+    -118
+   ],
+   [
+    "thigh_r",
+    "X",
+    -118
+   ],
+   [
+    "thigh_l",
+    "Y",
+    -12
+   ],
+   [
+    "thigh_r",
+    "Y",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    135
+   ],
+   [
+    "calf_r",
+    "X",
+    135
+   ],
+   [
+    "foot_l",
+    "X",
+    -35
+   ],
+   [
+    "foot_r",
+    "X",
+    -35
+   ],
+   [
+    "spine_01",
+    "X",
+    3
+   ],
+   [
+    "spine_02",
+    "X",
+    3
+   ],
+   [
+    "spine_03",
+    "X",
+    3
+   ],
+   [
+    "spine_04",
+    "X",
+    3
+   ],
+   [
+    "spine_05",
+    "X",
+    3
+   ]
+  ],
+  "tiptoe": [
+   [
+    "foot_l",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    40
+   ],
+   [
+    "ball_l",
+    "X",
+    -40
+   ],
+   [
+    "ball_r",
+    "X",
+    -40
+   ]
+  ]
+ },
+ "coverage": {
+  "resolution": 2048,
+  "uv_channel": 0,
+  "uv_name": "DiffuseUV",
+  "udim_u_offset": 1.0,
+  "covered_triangles": 14764,
+  "total_triangles": 60816,
+  "margin_m": 0.012,
+  "foot_triangles_below_4cm": 10802,
+  "foot_triangles_below_4cm_covered_pct": 97.2
+ },
+ "suggested_warmth_0_10": 4,
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0, raw cm values like the UE export)",
+  "axes": "Z up, -Y forward (FBX UpAxis Z, FrontAxis -Y)",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "smoothing": "FACE",
+  "tangents": true,
+  "normal_maps": "OpenGL (+Y): flip green in Unreal"
+ },
+ "loft_mean_mm": 16.64,
+ "files": {
+  "SKM_FurBoots.fbx": "625082a0d272794a85c9f0431348767d3144c51d9718f4c8508510a673f028bc",
+  "BodyCoverageMask_FurBoots.png": "0af147c19acc36d95aef347174002566599df7f19ea4a9704b786084c3d5082f",
+  "Textures/T_FurBoots_ao.png": "83af23e47c2d54c798c0ff73308645aff6cbf144ee0203ab7fb61dc06959f9be",
+  "Textures/T_FurBoots_basecolor.png": "af0f68e1d83e55e3ac53fb70a7261ce96434cba95b70d252755a93123ebfc35e",
+  "Textures/T_FurBoots_normal.png": "6f630e9cd897fafbc9f2f62256cda5782f0d7a893a33dd006ad1e8bfaa0b438b",
+  "Textures/T_FurBoots_roughness.png": "edb7cc02c94c86d59d66293fe5e897b168ab7848e99695b5f02e8b48ae00ccf0"
+ }
+}
