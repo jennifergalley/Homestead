@@ -84,10 +84,17 @@ distributed build.
 | Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 |
 | Tree chop fall thud (hatchet chops ChopA/ChopB and the TreeFall landing) | kheetor | https://opengameart.org/content/tree-chop-fall-thud | CC0 |
 | 100 CC0 metal and wood SFX (`wood_hammer_02`, chop ChopC) | rubberduck | https://opengameart.org/content/100-cc0-metal-and-wood-sfx | CC0 |
+| Small brook, stream, water sound (the creek's burbling loop, CreekLoop) | SamsterBirdies | https://freesound.org/s/584269/ | CC0 |
 
 The felling sounds are cut, band-limited and normalised from those two recordings by
 `Scripts\generate_chop_sounds.py`. The generated WAVs are tracked in `Assets\Audio\Effects`; to
 regenerate, download the two Ogg sources into `Assets\Source\oga-wood-chop` (gitignored).
+
+The creek loop (`Assets\Audio\Ambience\CreekLoop.wav`) is cut, band-limited and seam-crossfaded from
+the SamsterBirdies brook recording by `Scripts\generate_creek_assets.py`; to regenerate, download
+its HQ preview to `Assets\Source\freesound-brook\SmallBrook.mp3` (gitignored). The same script
+synthesizes the creek's ripple normal map and foam flecks (`Assets\Environment\Creek`) from filtered
+noise; they are original to this project.
 
 The MetaHuman heroine's bare-foot footsteps (`Assets\Audio\Footsteps`) are original to this
 project. `Scripts\generate_bare_footsteps.py` synthesizes them from noise and decaying tones, with

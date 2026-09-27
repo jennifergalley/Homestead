@@ -125,9 +125,126 @@ def textured_material(name, source_folder, prefix):
     return material
 
 
+def creek_water_material(rebuild=False):
+    """Flowing creek water on the Single Layer Water shading model, from the generated ripple and foam maps.
+
+    Single Layer Water renders in the opaque pass, so the surface receives the woodland's shadows and
+    Lumen reflections, and the bed shows through tinted by how much water lies over it: the
+    absorption and scattering act over the real distance to the bed, which also clears the shallows
+    and the shoreline by itself. Mesh UVs are metres (U across the stream, V along it) and vertex
+    colour carries the depth over the rendered bed: R reaches 1 at 35 cm deep, G at 8 cm, which
+    thins the foam and softens the shoreline highlight. Pass rebuild=True to re-author in place.
+    """
+    creek = ROOT / "Assets" / "Environment" / "Creek"
+    ripples = import_asset("T_CreekRipples_N.png", "Textures", "T_CreekRipples_N", source_root=creek)
+    ripples.set_editor_property("srgb", False)
+    ripples.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_NORMALMAP)
+    foam = import_asset("T_CreekFoam.png", "Textures", "T_CreekFoam", source_root=creek)
+    foam.set_editor_property("srgb", False)
+    foam.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_GRAYSCALE)
+    for texture in (ripples, foam):
+        if not LIB.save_loaded_asset(texture, only_if_is_dirty=False):
+            raise RuntimeError(f"Could not save texture settings for {texture.get_name()}.")
+    material, created = new_material("M_CreekWater")
+    if not created and not rebuild:
+        return material
+    MATERIALS.delete_all_material_expressions(material)
+    material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_OPAQUE)
+    material.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_SINGLE_LAYER_WATER)
+    material.set_editor_property("refraction_method", unreal.RefractionMode.RM_PIXEL_NORMAL_OFFSET)
+
+    def node(cls, x, y, **props):
+        expression = MATERIALS.create_material_expression(material, cls, x, y)
+        for key, value in props.items():
+            expression.set_editor_property(key, value)
+        return expression
+
+    def link(source, output, target, target_input=""):
+        if not MATERIALS.connect_material_expressions(source, output, target, target_input):
+            raise RuntimeError(f"Could not wire {source.get_name()}.{output} -> {target.get_name()}.{target_input}.")
+
+    def sample(texture, tiling, speed, x, y, normal=False):
+        coords = node(unreal.MaterialExpressionTextureCoordinate, x - 600, y, utiling=tiling, vtiling=tiling)
+        pan = node(unreal.MaterialExpressionPanner, x - 400, y, speed_x=speed[0], speed_y=speed[1])
+        link(coords, "", pan, "Coordinate")
+        tex = node(unreal.MaterialExpressionTextureSample, x - 200, y, texture=texture,
+                   sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL if normal
+                   else unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_GRAYSCALE)
+        link(pan, "", tex, "UVs")
+        return tex
+
+    # Two ripple layers drifting downstream (-V) at different scales and speeds.
+    broad = sample(ripples, 0.8, (0.015, -0.32), 0, -500, normal=True)
+    fine = sample(ripples, 2.1, (-0.03, -0.62), 0, -300, normal=True)
+    summed = node(unreal.MaterialExpressionAdd, 50, -420)
+    link(broad, "RGB", summed, "A")
+    link(fine, "RGB", summed, "B")
+    flatten = node(unreal.MaterialExpressionMultiply, 200, -420)
+    calm = node(unreal.MaterialExpressionVectorParameter, 50, -300, parameter_name="RippleScale",
+                default_value=unreal.LinearColor(0.3, 0.3, 1, 0))
+    link(summed, "", flatten, "A")
+    link(calm, "", flatten, "B")
+    normal = node(unreal.MaterialExpressionNormalize, 350, -420)
+    link(flatten, "", normal, "")
+
+    # Parameters keep the look tunable from a material instance while playtesting.
+    def scalar(name, value, x, y):
+        return node(unreal.MaterialExpressionScalarParameter, x, y, parameter_name=name, default_value=value)
+
+    def vector(name, value, x, y):
+        return node(unreal.MaterialExpressionVectorParameter, x, y, parameter_name=name,
+                    default_value=unreal.LinearColor(*value, 0))
+
+    def lerp(a, b, alpha, x, y):
+        result = node(unreal.MaterialExpressionLinearInterpolate, x, y)
+        link(a, "", result, "A")
+        link(b, "", result, "B")
+        link(*alpha, result, "Alpha")
+        return result
+
+    color = node(unreal.MaterialExpressionVertexColor, -300, 0)
+
+    flecks = sample(foam, 1.3, (0.0, -0.75), 0, 350)
+    froth = lerp(scalar("ShallowFoam", 0.55, -50, 450), scalar("DeepFoam", 0.1, -50, 520), (color, "R"), 150, 300)
+    foam_amount = node(unreal.MaterialExpressionMultiply, 300, 350)
+    link(flecks, "R", foam_amount, "A")
+    link(froth, "", foam_amount, "B")
+    base = node(unreal.MaterialExpressionMultiply, 450, -100)
+    link(vector("FoamColor", (0.62, 0.65, 0.62), 300, -20), "", base, "A")
+    link(foam_amount, "", base, "B")
+
+    # The highlight and the refraction both fade out over the last few centimetres of shore.
+    shine = lerp(scalar("ShoreSpecular", 0.0, 450, 200), scalar("Specular", 0.6, 450, 270), (color, "G"), 600, 220)
+    rough = lerp(scalar("Roughness", 0.04, 450, 400), scalar("FoamRoughness", 0.5, 450, 470),
+                 (foam_amount, ""), 600, 400)
+    bend = lerp(scalar("EdgeRefraction", 1.0, 450, 540), scalar("Refraction", 1.2, 450, 610),
+                (color, "G"), 600, 520)
+
+    water = node(unreal.MaterialExpressionSingleLayerWaterMaterialOutput, 900, 700)
+    # The coefficients act per centimetre of water: absorbing red fastest leaves a clear green-teal
+    # over the 25-38 cm deep channel, and a trace of scattering keeps the deep middle from going black.
+    for source, pin in ((vector("Scattering", (0.0003, 0.0006, 0.0007), 700, 650), "ScatteringCoefficients"),
+                        (vector("Absorption", (0.062, 0.025, 0.02), 700, 720), "AbsorptionCoefficients"),
+                        (scalar("PhaseG", 0.1, 700, 790), "PhaseG"),
+                        (scalar("ColorScaleBehindWater", 0.8, 700, 860), "ColorScaleBehindWater")):
+        link(source, "", water, pin)
+
+    properties = unreal.MaterialProperty
+    for source, prop in ((base, properties.MP_BASE_COLOR), (normal, properties.MP_NORMAL),
+                         (foam_amount, properties.MP_OPACITY), (shine, properties.MP_SPECULAR),
+                         (rough, properties.MP_ROUGHNESS), (bend, properties.MP_REFRACTION)):
+        if not MATERIALS.connect_material_property(source, "", prop):
+            raise RuntimeError(f"Could not connect {prop} in M_CreekWater.")
+    MATERIALS.recompile_material(material)
+    if not LIB.save_loaded_asset(material, only_if_is_dirty=False):
+        raise RuntimeError("Could not save M_CreekWater.")
+    return material
+
+
 def main():
     LIB.make_directory(CONTENT)
     field_material()
+    creek_water_material()
     textured_material("M_Ground", "forest-ground", "Ground")
     rock_material = textured_material("M_Rock", "moss-rocks", "Rock")
     rocks = import_asset("moss-rocks/MossRocks.fbx", "Environment", "MossRocks", static_mesh=True)
@@ -144,6 +261,11 @@ def main():
     ambience.set_editor_property("looping", True)
     if not LIB.save_loaded_asset(ambience, only_if_is_dirty=False):
         raise RuntimeError("Could not save ambience loop settings.")
+    # The creek's burble, cut from a CC0 brook recording by Scripts/generate_creek_assets.py.
+    creek = import_asset("CreekLoop.wav", "Audio/Ambience", "CreekLoop", source_root=ROOT / "Assets" / "Audio" / "Ambience")
+    creek.set_editor_property("looping", True)
+    if not LIB.save_loaded_asset(creek, only_if_is_dirty=False):
+        raise RuntimeError("Could not save the creek loop settings.")
     for pack, name in (
         ("kenney-impact", "GrassStepA"), ("kenney-impact", "GrassStepB"),
         ("kenney-impact", "WoodTapA"), ("kenney-impact", "WoodTapB"),

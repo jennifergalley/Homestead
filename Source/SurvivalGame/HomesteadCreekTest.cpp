@@ -46,38 +46,58 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
             return;
         }
     }
-    Add(TEXT("Natural creek uses one noncolliding varied water section over muddy terrain"),
+    Add(TEXT("Natural creek uses one noncolliding shadowless water surface over muddy terrain"),
         []() {}, [this]()
         {
             const auto* Landscape = Controller->Landscape.Get();
             const auto* Chunk = Landscape
                 ? Landscape->TerrainChunks.Find(FIntPoint(0, 0)) : nullptr;
             auto* Terrain = Chunk ? Chunk->Terrain.Get() : nullptr;
+            auto* Surface = Chunk ? Chunk->Water.Get() : nullptr;
             const auto* Ground = Terrain ? Terrain->GetProcMeshSection(0) : nullptr;
-            const auto* Water = Terrain ? Terrain->GetProcMeshSection(1) : nullptr;
-            if (!Ground || !Water || Terrain->GetProcMeshSection(2)
-                || Terrain->GetProcMeshSection(3) || Water->bEnableCollision
-                || Water->ProcVertexBuffer.Num() != 50
-                || Water->ProcIndexBuffer.Num() != 144)
+            const auto* Water = Surface ? Surface->GetProcMeshSection(0) : nullptr;
+            constexpr int32 Columns = AHomesteadWorld::CreekSurfaceColumns + 1;
+            constexpr int32 Rows = Homestead::Generation::TerrainCellsPerChunk * 2 + 1;
+            if (!Ground || !Water || Terrain->GetProcMeshSection(1) || Surface->GetProcMeshSection(1)
+                || Water->bEnableCollision || Surface->IsCollisionEnabled() || Surface->CastShadow
+                || !GetPathNameSafe(Surface->GetMaterial(0)).Contains(TEXT("M_CreekWater"))
+                || Water->ProcVertexBuffer.Num() != Rows * Columns || Water->ProcIndexBuffer.IsEmpty())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("CREEK_SURFACE ground=%d water=%d material=%s vertices=%d"),
+                    Ground != nullptr, Water != nullptr, *GetPathNameSafe(Surface ? Surface->GetMaterial(0) : nullptr),
+                    Water ? Water->ProcVertexBuffer.Num() : -1);
                 return false;
+            }
+            // The visible shoreline is where the surface stands over the bed (vertex G > 0). Wet
+            // vertices sit on a 20 cm column grid, so the true edge lies between the outermost wet
+            // vertex and the next column out; the 6 cm drop pulls it a little up the bank.
+            constexpr double Spacing = AHomesteadWorld::CreekSurfaceHalfSpanCm * 2.0 / AHomesteadWorld::CreekSurfaceColumns;
             double MinimumWidth = DBL_MAX;
             double MaximumWidth = -DBL_MAX;
             bool Asymmetric = false;
-            for (int32 Row = 0; Row < 25; ++Row)
+            for (int32 Row = 0; Row < Rows; ++Row)
             {
-                const FVector Left(Water->ProcVertexBuffer[Row * 2].Position);
-                const FVector Right(Water->ProcVertexBuffer[Row * 2 + 1].Position);
-                const double Center = Homestead::StreamX(Left.Y);
-                const double LeftWidth = Center - Left.X;
-                const double RightWidth = Right.X - Center;
-                if (LeftWidth < Homestead::Generation::CreekWaterMinimumHalfWidthCm - 0.1
-                    || LeftWidth > Homestead::Generation::CreekWaterMaximumHalfWidthCm + 0.1
-                    || RightWidth < Homestead::Generation::CreekWaterMinimumHalfWidthCm - 0.1
-                    || RightWidth > Homestead::Generation::CreekWaterMaximumHalfWidthCm + 0.1)
+                const double Center = Homestead::StreamX(Water->ProcVertexBuffer[Row * Columns].Position.Y);
+                double Left = 0;
+                double Right = 0;
+                for (int32 Column = 0; Column < Columns; ++Column)
+                {
+                    const auto& Vertex = Water->ProcVertexBuffer[Row * Columns + Column];
+                    if (Vertex.Color.G == 0) continue;
+                    Left = FMath::Max(Left, Center - Vertex.Position.X);
+                    Right = FMath::Max(Right, Vertex.Position.X - Center);
+                }
+                if (Left + Spacing < Homestead::Generation::CreekWaterMinimumHalfWidthCm - 10
+                    || Right + Spacing < Homestead::Generation::CreekWaterMinimumHalfWidthCm - 10
+                    || Left > Homestead::Generation::CreekWaterMaximumHalfWidthCm + Spacing
+                    || Right > Homestead::Generation::CreekWaterMaximumHalfWidthCm + Spacing)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("CREEK_SHORE row=%d left=%.1f right=%.1f"), Row, Left, Right);
                     return false;
-                MinimumWidth = FMath::Min(MinimumWidth, FMath::Min(LeftWidth, RightWidth));
-                MaximumWidth = FMath::Max(MaximumWidth, FMath::Max(LeftWidth, RightWidth));
-                Asymmetric |= !FMath::IsNearlyEqual(LeftWidth, RightWidth, 0.01);
+                }
+                MinimumWidth = FMath::Min(MinimumWidth, FMath::Min(Left, Right));
+                MaximumWidth = FMath::Max(MaximumWidth, FMath::Max(Left, Right));
+                Asymmetric |= !FMath::IsNearlyEqual(Left, Right, 0.01);
             }
             int32 MudVertices = 0;
             int32 ForestVertices = 0;
@@ -93,7 +113,8 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
             for (USceneComponent* Component : Chunk->Cover.Components)
             {
                 const auto* Batch = Cast<UHierarchicalInstancedStaticMeshComponent>(Component);
-                if (!Batch) continue;
+                // Boulders and large shrubs block on purpose; the bank's reeds and grass must not.
+                if (!Batch || Batch->ComponentHasTag(TEXT("HomesteadBlocking"))) continue;
                 Nonblocking &= Batch->GetCollisionEnabled() == ECollisionEnabled::NoCollision
                     && !Batch->CanEverAffectNavigation();
                 for (int32 Index = 0; Index < Batch->GetInstanceCount(); ++Index)

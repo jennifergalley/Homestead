@@ -218,6 +218,11 @@ private:
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;
     UPROPERTY() TObjectPtr<UAudioComponent> Music;
     UPROPERTY() TObjectPtr<UAudioComponent> Ambience;
+    // The creek's burble: a looping, attenuated source kept at the point of the stream nearest
+    // the listener, so it swells as she walks up to the water and fades into the woods.
+    UPROPERTY() TObjectPtr<UAudioComponent> Creek;
+    static constexpr float CreekGain = 0.35f;
+    void UpdateCreekAudio();
     UPROPERTY() TObjectPtr<USoundBase> GrassStepA;
     UPROPERTY() TObjectPtr<USoundBase> GrassStepB;
     UPROPERTY() TArray<TObjectPtr<USoundBase>> BareWalkSteps;

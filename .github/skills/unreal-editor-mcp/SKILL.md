@@ -608,6 +608,24 @@ Dated and short, newest first. Promote anything durable into the sections above.
     capture a short ddagrab burst (`-t 1.2 out_%02d.png`); a single `-frames:v 1` grab sometimes
     writes nothing.
 
+- 2026-09-27: Creek water (`M_CreekWater`, `creek_water_material` in `bootstrap_unreal.py`):
+  - **Single Layer Water, not Translucent.** A translucent surface read as a flat dark sheet under
+    the canopy. SLW renders in the opaque pass, so it takes the woodland's shadows and Lumen
+    reflections, and the bed shows through tinted by the real water depth.
+  - **SLW coefficients act per centimetre.** Absorption around 4/1.6/1.2 made the 25-38 cm creek
+    opaque. The shipped defaults are Absorption (0.062, 0.025, 0.02) and Scattering
+    (0.0003, 0.0006, 0.0007). Absorb red fastest for a clear green-teal.
+  - **Transient compile errors.** While the graph is being authored, the log fills with
+    "No inputs to Single Layer Water Material" / `Failed to compile` lines from the intermediate
+    compiles. Judge only the final state: `recompile_material`, then
+    `MaterialEditingLibrary.get_statistics(m).num_pixel_shader_instructions` > 0 (about 1048) and
+    `get_inputs_for_material_expression` on the SLW output node. Stop PIE before re-authoring,
+    because `import_asset` fails during PIE.
+  - **Tune live with a MID.** In PIE, find the `ProceduralMeshComponent`s tagged `CreekWater`
+    (5 around the start), make one `create_dynamic_material_instance(0, M_CreekWater)`, set it on
+    all of them, and drive `set_scalar/vector_parameter_value`. Bake the winners into the bootstrap
+    defaults. Confirm the flow with a 3 s ddagrab clip; compare frames 0 and 25.
+
 - 2026-09-25: Original props are authored in Blender by the `blender-assets` skill
   (`docs\blender-assets.md`, `Assets\Props\*`). Its `Import-Props.ps1` opens the project in its own
   editor, so quit an MCP editor session first; never run both at once. The heroine's MetaHuman

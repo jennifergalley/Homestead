@@ -44,6 +44,9 @@ struct FHomesteadTerrainChunk
     UPROPERTY()
     TObjectPtr<UProceduralMeshComponent> Terrain;
 
+    // Creek surface over this tile, when the stream crosses it. Single Layer Water, shadowless.
+    UPROPERTY()
+    TObjectPtr<UProceduralMeshComponent> Water;
     UPROPERTY()
     FHomesteadWorldVisual Cover;
 
@@ -120,6 +123,11 @@ class SURVIVALGAME_API AHomesteadWorld : public AActor
 
 public:
     AHomesteadWorld();
+    // Creek surface mesh: columns across the stream, half its span either side of the centreline,
+    // and how far it sits under the generator's water level (a shallower, clearer brook).
+    static constexpr int CreekSurfaceColumns = 24;
+    static constexpr double CreekSurfaceHalfSpanCm = 240.0;
+    static constexpr double CreekSurfaceDropCm = 6.0;
     virtual void Tick(float DeltaSeconds) override;
     bool Initialize(const Homestead::Simulation& Simulation);
     bool Refresh(const Homestead::Simulation& Simulation);
@@ -214,6 +222,8 @@ private:
     TObjectPtr<UStaticMesh> SoilMoundMesh;
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
+    UPROPERTY()
+    TObjectPtr<UMaterialInterface> CreekWaterMaterial;
     UPROPERTY()
     TObjectPtr<UMaterialInterface> GroundMaterial;
     UPROPERTY()
@@ -353,7 +363,7 @@ private:
     void ClearRegionalWater();
     void QueueRegionalDescriptorBuild();
     UProceduralMeshComponent* BuildTerrainChunk(const Homestead::Generation::ChunkBaseline& Baseline,
-        Homestead::Generation::WorldDescriptor World, bool bCollision);
+        Homestead::Generation::WorldDescriptor World, bool bCollision, TObjectPtr<UProceduralMeshComponent>& OutWater);
     FVector AtGround(float X, float Y, float Offset = 0) const;
     float CachedGroundHeight(float X, float Y) const;
     void BuildLighting();

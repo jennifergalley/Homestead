@@ -9,6 +9,7 @@
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadTestPaths.h"
 #include "Components/AudioComponent.h"
+#include "Sound/SoundAttenuation.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameUserSettings.h"
 #include "HAL/IConsoleManager.h"
@@ -227,6 +228,28 @@ AHomesteadController::AHomesteadController()
     Ambience = CreateDefaultSubobject<UAudioComponent>(TEXT("Ambience"));
     Ambience->bAutoActivate = false;
     Ambience->bAllowSpatialization = false;
+    Creek = CreateDefaultSubobject<UAudioComponent>(TEXT("Creek"));
+    Creek->bAutoActivate = false;
+    Creek->bAllowSpatialization = true;
+    Creek->SetUsingAbsoluteLocation(true);
+    Creek->bOverrideAttenuation = true;
+    FSoundAttenuationSettings& Falloff = Creek->AttenuationOverrides;
+    Falloff.bAttenuate = true;
+    Falloff.bSpatialize = true;
+    Falloff.AttenuationShape = EAttenuationShape::Sphere;
+    Falloff.AttenuationShapeExtents = FVector(250, 0, 0);
+    Falloff.FalloffDistance = 2200;
+    Falloff.DistanceAlgorithm = EAttenuationDistanceModel::NaturalSound;
+    Falloff.dBAttenuationAtMax = -48;
+    // Standing at the bank the water surrounds her; farther off it narrows to a point and the
+    // highs roll off, the way a brook muffles through the trees.
+    Falloff.NonSpatializedRadiusStart = 150;
+    Falloff.NonSpatializedRadiusEnd = 400;
+    Falloff.bAttenuateWithLPF = true;
+    Falloff.LPFRadiusMin = 400;
+    Falloff.LPFRadiusMax = 2400;
+    Falloff.LPFFrequencyAtMin = 20000;
+    Falloff.LPFFrequencyAtMax = 2500;
 }
 
 void AHomesteadController::BeginPlay()
@@ -1153,11 +1176,34 @@ bool AHomesteadController::HasHeroine() const
     return Avatar && Avatar->HasHeroine();
 }
 
+void AHomesteadController::UpdateCreekAudio()
+{
+    if (!Creek->Sound || !bAudioEnabled) return;
+    FVector Listener;
+    FRotator View;
+    GetPlayerViewPoint(Listener, View);
+    // Nearest point of the meandering centreline: a coarse sweep, then a fine one.
+    auto Distance = [&](double Y) { return FMath::Square(Homestead::StreamX(Y) - Listener.X) + FMath::Square(Y - Listener.Y); };
+    double BestY = Listener.Y;
+    for (double Step : {50.0, 5.0})
+    {
+        const double From = BestY - (Step > 10 ? 1000.0 : 50.0);
+        const double To = BestY + (Step > 10 ? 1000.0 : 50.0);
+        for (double Y = From; Y <= To; Y += Step)
+            if (Distance(Y) < Distance(BestY)) BestY = Y;
+    }
+    const APawn* Avatar = GetPawn();
+    const double Z = Avatar ? Avatar->GetActorLocation().Z - 60.0 : Listener.Z - 200.0;
+    Creek->SetWorldLocation(FVector(Homestead::StreamX(BestY), BestY, Z));
+    if (!Creek->IsPlaying()) Creek->FadeIn(2.0f, 1.0f);
+}
+
 void AHomesteadController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (!Landscape) return;
     if (!StartupProbeDirectory.IsEmpty()) TickStartupProbe();
+    UpdateCreekAudio();
 #if !UE_BUILD_SHIPPING
     if (bSaveRoutingTestPending && GetPawn())
     {
@@ -2219,7 +2265,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), TEXT("Cycle a comfortable turn speed.")});
         Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), TEXT("Change vertical look direction.")});
         Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Music playback level.")});
-        Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind and woodland ambience.")});
+        Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind, woodland and creek ambience.")});
         Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
         Result.Add({8, TEXT("Start a new woodland"), TEXT("Create a new seed after confirmation. Cancel keeps your current woodland. This build uses a new test-save version.")});
         Result.Add({9, TEXT("Quit game"), TEXT("Choose Save & Quit or Quit without Saving.")});
@@ -2264,7 +2310,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({0, TEXT("Music by Kevin MacLeod (incompetech.com)"), TEXT("Evening Fall (Harp), Ascending the Vale, Teller of the Tales, Meditation Impromptu 02, At Rest")});
         Result.Add({1, TEXT("Creative Commons Attribution 4.0"), TEXT("https://creativecommons.org/licenses/by/4.0/")});
         Result.Add({2, TEXT("Music playback"), TEXT("Converted for game playback; playback fades and level matching applied.")});
-        Result.Add({3, TEXT("Forest ambience"), TEXT("TinyWorlds - OpenGameArt - CC0")});
+        Result.Add({3, TEXT("Forest and creek ambience"), TEXT("TinyWorlds - OpenGameArt - CC0; creek: SamsterBirdies - Freesound - CC0")});
         Result.Add({4, TEXT("Brown Mud Leaves 01"), TEXT("Rob Tuytel - Poly Haven - CC0")});
         Result.Add({5, TEXT("Rock Moss Set 02"), TEXT("Kless Gyzen - Poly Haven - CC0")});
         Result.Add({6, TEXT("Complete credits"), TEXT("See docs/asset-credits.md in the project or packaged build.")});
@@ -2500,6 +2546,7 @@ void AHomesteadController::MenuPreviewAudioVolume(int32 Id, float Value)
     {
         AmbienceVolume = Value;
         Ambience->SetVolumeMultiplier(Value);
+        Creek->SetVolumeMultiplier(Value * CreekGain);
     }
     else EffectsVolume = Value;
 }
@@ -3015,6 +3062,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
     Music->SetVolumeMultiplier(MusicLevel());
     Ambience->SetVolumeMultiplier(AmbienceVolume);
+    Creek->SetVolumeMultiplier(AmbienceVolume * CreekGain);
     EndPlacement();
     CloseBook();
     RefreshRemaining = 0;
@@ -3251,6 +3299,13 @@ void AHomesteadController::InitializeAudio()
         if (bAudioEnabled) Ambience->FadeIn(3, 1);
     }
     else UE_LOG(LogTemp, Warning, TEXT("Forest ambience is not imported. Run Scripts/bootstrap_unreal.py."));
+    if (USoundWave* Brook = LoadObject<USoundWave>(nullptr, TEXT("/Game/SurvivalGame/Audio/Ambience/CreekLoop.CreekLoop")))
+    {
+        Brook->bLooping = true;
+        Creek->SetSound(Brook);
+        Creek->SetVolumeMultiplier(AmbienceVolume * CreekGain);
+    }
+    else UE_LOG(LogTemp, Warning, TEXT("Creek loop is not imported. Run Scripts/bootstrap_unreal.py."));
     // Kevin MacLeod tracks (CC BY 4.0), shuffled with no immediate repeat. Loudness is the gated,
     // K-weighted level measured from each source file (dBFS); every track is matched to the same
     // level, which sits about 14 dB under the old harp-only mix at the default 65% setting, so music

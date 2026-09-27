@@ -1050,17 +1050,23 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
             if (SameWorld && TerrainChunks.Contains(Key)) continue;
             Gen::ChunkBaseline Baseline;
             const bool Generated = GetChunkBaseline(State.world, {Key.X, Key.Y}, Baseline);
+            TObjectPtr<UProceduralMeshComponent> Water;
             auto* Mesh = Generated
-                ? BuildTerrainChunk(Baseline, State.world, FMath::Abs(X) <= 1 && FMath::Abs(Y) <= 1) : nullptr;
+                ? BuildTerrainChunk(Baseline, State.world, FMath::Abs(X) <= 1 && FMath::Abs(Y) <= 1, Water) : nullptr;
             if (!Mesh)
             {
-                for (auto& Entry : Prepared) Entry.Value.Terrain->DestroyComponent();
+                for (auto& Entry : Prepared)
+                {
+                    Entry.Value.Terrain->DestroyComponent();
+                    if (Entry.Value.Water) Entry.Value.Water->DestroyComponent();
+                }
                 UE_LOG(LogHomesteadWorld, Error, TEXT("Chunk %d,%d preparation failed; previous terrain retained."),
                     Key.X, Key.Y);
                 return false;
             }
             FHomesteadTerrainChunk Chunk;
             Chunk.Terrain = Mesh;
+            Chunk.Water = Water;
             Chunk.bCollision = FMath::Abs(X) <= 1 && FMath::Abs(Y) <= 1;
             Prepared.Add(Key, MoveTemp(Chunk));
         }
@@ -1073,6 +1079,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
             const double TeardownStarted = FPlatformTime::Seconds();
             ClearVisual(It.Value().Cover);
             It.Value().Terrain->DestroyComponent();
+            if (It.Value().Water) It.Value().Water->DestroyComponent();
             It.RemoveCurrent();
             OldChunkTeardownMilliseconds += (FPlatformTime::Seconds() - TeardownStarted) * 1000;
         }
@@ -1201,9 +1208,11 @@ void AHomesteadWorld::QueueRegionalDescriptorBuild()
 }
 
 UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
-    const Homestead::Generation::ChunkBaseline& Baseline, Homestead::Generation::WorldDescriptor World, bool bCollision)
+    const Homestead::Generation::ChunkBaseline& Baseline, Homestead::Generation::WorldDescriptor World, bool bCollision,
+    TObjectPtr<UProceduralMeshComponent>& OutWater)
 {
     namespace Gen = Homestead::Generation;
+    OutWater = nullptr;
     const double Started = FPlatformTime::Seconds();
     auto* Mesh = NewObject<UProceduralMeshComponent>(this);
     Mesh->SetupAttachment(GetRootComponent());
@@ -1258,8 +1267,27 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
     }
 
     const double WaterStarted = FPlatformTime::Seconds();
-    // The colliding terrain carries the muddy bank blend; only water needs an overlay.
-    auto WaterRibbon = [&](int Section)
+    // The colliding terrain carries the muddy bank blend and the channel; the creek surface is its
+    // own Single Layer Water, shadowless mesh. It spans the whole channel at the water level, and each
+    // vertex's colour records how deep the water stands over the rendered bed (the triangulated
+    // terrain, not the finer generator profile) so the material turns the shallows clear and fades
+    // the shoreline exactly where the surface meets the bank.
+    auto RenderedHeight = [&](double PX, double PY)
+    {
+        const double LX = FMath::Clamp((PX - OriginX) / Spacing, 0.0, Cells - 1e-6);
+        const double LY = FMath::Clamp((PY - OriginY) / Spacing, 0.0, Cells - 1e-6);
+        const int IX = FMath::FloorToInt(LX);
+        const int IY = FMath::FloorToInt(LY);
+        const double FX = LX - IX;
+        const double FY = LY - IY;
+        auto H = [&](int X, int Y) { return Baseline.terrain[Y * (Cells + 1) + X].heightCm; };
+        // Quads split along the (X+1, Y) - (X, Y+1) diagonal, matching the terrain triangles.
+        return FX + FY <= 1.0
+            ? H(IX, IY) + FX * (H(IX + 1, IY) - H(IX, IY)) + FY * (H(IX, IY + 1) - H(IX, IY))
+            : H(IX + 1, IY + 1) + (1 - FX) * (H(IX, IY + 1) - H(IX + 1, IY + 1))
+                + (1 - FY) * (H(IX + 1, IY) - H(IX + 1, IY + 1));
+    };
+    auto CreekSurface = [&]()
     {
         Vertices.Reset();
         Triangles.Reset();
@@ -1267,45 +1295,63 @@ UProceduralMeshComponent* AHomesteadWorld::BuildTerrainChunk(
         UV.Reset();
         Colors.Reset();
         Tangents.Reset();
-        constexpr int Columns = 1;
-        for (int Y = 0; Y <= Cells; ++Y)
+        TArray<float> Depths;
+        constexpr int Rows = Cells * 2;
+        constexpr int Columns = CreekSurfaceColumns;
+        for (int Y = 0; Y <= Rows; ++Y)
         {
-            const float PY = OriginY + Y * Spacing;
-            const float Center = Homestead::StreamX(PY);
-            const double Left = Gen::CreekWaterHalfWidthCm(World, PY, false);
-            const double Right = Gen::CreekWaterHalfWidthCm(World, PY, true);
+            const double PY = OriginY + Y * Spacing * 0.5;
+            const double Center = Homestead::StreamX(PY);
+            Gen::TerrainSample Sample;
+            const auto Status = Gen::SampleTerrain(World, FMath::RoundToInt64(Center), FMath::RoundToInt64(PY), Sample);
+            if (Status != Gen::Status::Ok)
+            {
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Generated creek sample failed: %s"), UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
+                return false;
+            }
+            const double Z = Sample.waterHeightCm - CreekSurfaceDropCm;
             for (int X = 0; X <= Columns; ++X)
             {
-                const double PX = FMath::Clamp<double>(Center + (X == 0 ? -Left : Right),
-                    OriginX, OriginX + Gen::ChunkSizeCm);
-                Gen::TerrainSample Sample;
-                const auto Status = Gen::SampleTerrain(World, FMath::RoundToInt64(PX), FMath::RoundToInt64(PY), Sample);
-                if (Status != Gen::Status::Ok)
-                {
-                    UE_LOG(LogHomesteadWorld, Error, TEXT("Generated ribbon sample failed: %s"), UTF8_TO_TCHAR(Gen::StatusMessage(Status)));
-                    return false;
-                }
-                const float Z = Sample.waterHeightCm;
+                const double Offset = (X - Columns * 0.5) * CreekSurfaceHalfSpanCm * 2.0 / Columns;
+                const double PX = FMath::Clamp<double>(Center + Offset, OriginX, OriginX + Gen::ChunkSizeCm);
+                const double Depth = Z - RenderedHeight(PX, PY);
+                Depths.Add(Depth);
                 Vertices.Add(FVector(PX, PY, Z));
                 Normals.Add(FVector::UpVector);
-                UV.Add(FVector2D((PX - Center) / 100.0f, PY / 300.0f));
+                UV.Add(FVector2D(Offset / 100.0, PY / 100.0));
+                Colors.Add(FLinearColor(FMath::Clamp(Depth / 35.0, 0.0, 1.0), FMath::Clamp(Depth / 8.0, 0.0, 1.0), 0, 1));
                 Tangents.Add(FProcMeshTangent(1, 0, 0));
-                if (Y < Cells && X < Columns)
-                {
-                    const int A = Y * (Columns + 1) + X;
-                    Triangles.Append({A, A + Columns + 1, A + 1,
-                        A + 1, A + Columns + 1, A + Columns + 2});
-                }
             }
         }
-        Mesh->CreateMeshSection_LinearColor(Section, Vertices, Triangles, Normals, UV, Colors, Tangents, false);
-        Mesh->SetMaterial(Section, Material(FLinearColor(0.075f, 0.26f, 0.29f), 0.16f));
+        for (int Y = 0; Y < Rows; ++Y)
+            for (int X = 0; X < Columns; ++X)
+            {
+                const int A = Y * (Columns + 1) + X;
+                const int C = A + Columns + 1;
+                // Quads wholly under the bank are never visible; leave them out.
+                if (FMath::Max(FMath::Max(Depths[A], Depths[A + 1]), FMath::Max(Depths[C], Depths[C + 1])) <= 0) continue;
+                Triangles.Append({A, C, A + 1, A + 1, C, C + 1});
+            }
+        if (Triangles.IsEmpty()) return true;
+        auto* Water = NewObject<UProceduralMeshComponent>(this);
+        Water->SetupAttachment(GetRootComponent());
+        Water->SetMobility(EComponentMobility::Static);
+        Water->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+        Water->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Water->SetGenerateOverlapEvents(false);
+        Water->SetCanEverAffectNavigation(false);
+        Water->SetCastShadow(false);
+        Water->ComponentTags.Add(TEXT("CreekWater"));
+        Water->RegisterComponent();
+        Water->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UV, Colors, Tangents, false);
+        Water->SetMaterial(0, CreekWaterMaterial ? CreekWaterMaterial.Get()
+            : Material(FLinearColor(0.075f, 0.26f, 0.29f), 0.16f));
+        OutWater = Water;
         return true;
     };
-    if (OriginX <= 1680 + Gen::CreekWaterMaximumHalfWidthCm
-        && OriginX + Gen::ChunkSizeCm >= 1320 - Gen::CreekWaterMaximumHalfWidthCm)
+    if (OriginX <= 1680 + CreekSurfaceHalfSpanCm && OriginX + Gen::ChunkSizeCm >= 1320 - CreekSurfaceHalfSpanCm)
     {
-        if (!WaterRibbon(1))
+        if (!CreekSurface())
         {
             Mesh->DestroyComponent();
             return nullptr;
@@ -3151,6 +3197,10 @@ bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
     {
         FieldMaterial = LoadObject<UMaterialInterface>(nullptr,
             TEXT("/Game/SurvivalGame/Materials/M_Field.M_Field"));
+        CreekWaterMaterial = LoadObject<UMaterialInterface>(nullptr,
+            TEXT("/Game/SurvivalGame/Materials/M_CreekWater.M_CreekWater"));
+        if (!CreekWaterMaterial)
+            UE_LOG(LogHomesteadWorld, Warning, TEXT("M_CreekWater is missing; the creek falls back to a flat tint. Run Scripts/bootstrap_unreal.py."));
         GroundMaterial = LoadObject<UMaterialInterface>(nullptr,
             TEXT("/Game/Trials/GrassGround_20260921_01/Materials/M_GrassGroundBlend.M_GrassGroundBlend"));
         if (!GroundMaterial)
