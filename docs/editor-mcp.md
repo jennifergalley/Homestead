@@ -19,8 +19,10 @@ updated as you learn better recipes; this page records setup and verification.
 .\Scripts\Start-EditorMcp.ps1 -SkipBuild # when the editor module is already built
 ```
 
-The server listens only on `127.0.0.1:8765/mcp` (`-Port` overrides it) and rejects browser
-origins other than localhost. It lives as long as that editor window; closing the editor stops it.
+The server listens only on `127.0.0.1:8765/mcp` by default and rejects browser origins other than
+localhost. Several worktrees run editors on this machine, so give each its own `-Port` and use
+`Scripts\McpHelpers.ps1 -Port <p>` (see section 0 of the skill). It lives as long as that editor
+window; closing the editor stops it.
 The script also passes the project's usual offline arguments (`Get-UnrealOfflineArguments.ps1`).
 `-ExtraPlugins A,B` enables more engine plugins for that session (for example MetaHuman
 Creator). `-AllowPython` registers an opt-in `run_python` tool that executes arbitrary editor Python;
@@ -33,9 +35,11 @@ Enabled toolset plugins: `EditorToolset`, `AutomationTestToolset`, `ConfigSettin
 
 ## Use it from Copilot
 
-`.github\mcp.json` registers the server as `unreal`. Copilot connects to MCP servers when a
-session starts, so start the editor first, then start (or restart) the session. Run `/mcp` to
-confirm `unreal` is connected. Project-level MCP config is loaded only for trusted folders.
+`.github\mcp.json` registers the server as `unreal` at port 8765 only. Copilot connects to MCP
+servers when a session starts, so start the editor first, then start (or restart) the session. Run
+`/mcp` to confirm `unreal` is connected. Project-level MCP config is loaded only for trusted folders.
+With several editors on the machine, 8765 may belong to another worktree; the shell helpers are the
+safe default.
 
 The server uses tool search, so only three MCP tools appear:
 

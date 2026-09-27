@@ -113,9 +113,31 @@ before each pass.
 - Hand-modeled work: name objects `SM_*` and run `New-Prop.ps1 -FromLive <Name>`. This exports a snapshot
   and never modifies her open file.
 - **Unreal import.**
-  - Run `.\Scripts\Blender\Import-Props.ps1 -Name <Name>`.
-  - It needs exclusive use of the project's editor; **don't run it when another session is using Unreal**.
-  - Textured and baked props need a textured/foliage parent material in the importer first. Flip the normal-map green channel for Unreal.
+  - Import into **your own running editor** (`Scripts\McpHelpers.ps1`, `py`):
+    `sys.path.insert(0, r'<repo>\Scripts\Blender'); import import_props; import_props.main(['<Name>'])`
+    (reload with `importlib.util.spec_from_file_location` after editing it). The headless
+    `Import-Props.ps1` runs under `-run=pythonscript`, which lacks `StaticMeshEditorSubsystem`, so its
+    meshes get no LODs or collision. It also needs a free Unreal process slot (at most 3 on the
+    machine) and must not run while this worktree's editor is open.
+  - `import_props.py` picks the parent material itself: `M_PropTextured` for baked props,
+    `M_PropFoliage` when the report has a `wind` block, and `M_PropGranite` for rocks. It flips the
+    OpenGL normal map's green channel on import (`flip_green_channel`). Don't flip it again.
+  - Blender exports mirror Y: props authored facing -Y arrive facing +Y, and blade edges that the
+    report lists on -Y are on +Y in the engine (`SM_FlintHatchet`, `SM_StoneHoe`). Check in the
+    engine before keying grips.
   - A Blender render is not in-game evidence.
+- **Live window on a shared machine.** `Start-BlenderLive.ps1` listens on port 9876 by default; if
+  another worktree's live Blender holds it, pass `-Port`. A stale `Saved\BlenderLive\session.json`
+  (Blender closed) makes `Invoke-BlenderLive.ps1` fail to connect; restart the live window.
+- Blender is `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`. For clean probes use
+  `-b --factory-startup --python <file>`, and give headless probe scripts a timeout (one hung with
+  no output). Set `TEMP`/`TMP` to `E:\CopilotScratch\<session-id>\tmp` for renders.
+- New asset file types need an LFS rule in `.gitattributes` before the first commit (`.exr` was
+  added this way; fonts need `*.ttf`). The Poly Haven cache under `Assets\Source\Blender\polyhaven\` stays
+  git-ignored.
+- **Delegating an asset to a sub-agent.** Put the quality bar (this skill's first paragraph), the
+  real-object research, polycount and texture budgets, a reference recipe to copy, "headless only;
+  don't commit" and "view and self-critique the 4K hero and detail renders before reporting" in its
+  prompt. First passes without these came back well below the bar.
 - The character pipeline (`Scripts\Characters`) uses its own pinned Blender 4.5.14 and
   MPFB; don't move it to 5.2 as a side effect.

@@ -30,3 +30,41 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
 - The editor skill (`.github/skills/unreal-editor-mcp/SKILL.md`) covers driving the live editor,
   playtesting, and the character lab (`-HomesteadCharacterLab` / `homestead.CharacterLab 1`).
 - Record bugs and features as OpenSpec changes under `openspec/changes/`.
+
+## Start here, and report to the docs agent (every session)
+
+Several sessions work on this repo in parallel. A blocker solved once must not be re-solved by the
+next five sessions.
+
+- **New to the work, or starting a round?** Read `docs/handoff/README.md` (roles, direction,
+  protocol) and the current `docs/handoff/round-<n>.md` (who's who, lane status, open blockers)
+  first.
+- **Report what you learn to the docs agent** listed on the round page, via `send_session_message`.
+  That covers failures and fixes, missing or wrong docs, recipes, and interfaces other lanes need.
+  The docs agent verifies each finding and records it once in the canonical place. The report
+  template is in `docs/handoff/README.md`. Send reports as you go; don't batch them until your
+  feature lands.
+- **No docs agent listed, or it's archived?** Ask the orchestrator to spawn one. Until one exists,
+  fix the canonical doc yourself in the same change, and commit it to `main` promptly. The
+  orchestrator reconciles merge conflicts.
+- **Blockers:** anything that blocks you for more than about 15 minutes, or affects other worktrees
+  (shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), goes to the docs agent and the
+  orchestrator immediately, with the exact error and what you tried.
+- **Before debugging a tool or build failure,** check "Known failures → fixes" (section 0.1 of
+  `.github/skills/unreal-editor-mcp/SKILL.md`).
+- **Lanes still maintain their own OpenSpec change** and feature-only docs. Shared docs (skills,
+  `docs/setup.md`, `docs/version-control.md`, `docs/handoff/`) go through the docs agent.
+
+## Parallel sessions on one machine (hard rules)
+
+The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
+
+- **At most 3 Unreal processes on the machine** in total: editors, packaged games and commandlets
+  all count. Check with `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*`.
+- **Give your editor its own MCP port** (`Start-EditorMcp.ps1 -Port 87xx`) and set
+  `$env:UNREAL_MCP_URL` to match. Port 8765 and the native `unreal` MCP tools may belong to another
+  worktree's editor.
+- Close your editor before `git pull`/`rebase`, and before building your editor module.
+- Never retarget or overwrite `Desktop\Homestead.lnk` or anything under `E:\Repos\HomesteadMVP\`.
+  Never merge `mvp-survival` with `main`.
+- No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.

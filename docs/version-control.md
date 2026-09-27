@@ -30,11 +30,32 @@ retained source/license manifests.
 ## Autonomous work
 
 Commit a known-good baseline before changes, then use a focused worker branch
-and small, verified commits. A Git repository does not itself make folder-backed
-Copilot sessions isolated: until a separate worktree is explicitly verified, keep
-only one coding writer in this folder. Preserve unrelated user edits.
+and small, verified commits. Preserve unrelated user edits.
 
 Candidate packages belong under a versioned `Build\Releases` directory. Never
 overwrite the running player's known-good `Build\Windows` package merely because
 new source compiled. No force-pushes, destructive resets, or automatic public
 visibility changes are part of this workflow.
+
+## Parallel worktrees
+
+Each agent session works in its own git worktree under
+`E:\Repos\copilot-worktrees\SurvivalGame\<name>` (never on C:), on its own branch. Machine-wide
+rules for editors, ports and builds are in section 0 of `.github\skills\unreal-editor-mcp\SKILL.md`.
+
+- **Delivering to `main`:** `git pull --rebase origin main` (add `--autostash` if you have
+  uncommitted work), rerun the relevant check, then `git push origin HEAD:main`. Keep commits small
+  and push often; long-lived lane branches conflict in shared files (`HomesteadItems.cpp`,
+  `SHomesteadMenu`, saves).
+- **Close your editor before `pull`/`rebase`.** It holds `.uasset`/`.umap` files open, and git fails
+  with `unable to unlink ... Invalid argument`.
+- **Don't `git stash -u`** while a sub-agent may be writing files in the worktree; it sweeps up
+  their new files. Use `--autostash`, which only stashes tracked changes.
+- **Only commit your own assets.** The editor dirties shared maps (`Estate.umap`,
+  `__ExternalObjects__`) and probe content (`Content/Trials/Probe/`); leave those out unless your
+  lane owns them.
+- **Line endings:** `core.autocrlf=true` with `* text=auto`, so working copies are CRLF while files
+  an agent just wrote may be LF. Detect the newline before a PowerShell string `.Replace()` with
+  `` `n ``, or use the edit tool.
+- **`mvp-survival`** is a separate long-lived product line. Never merge it with `main` in either
+  direction.

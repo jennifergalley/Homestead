@@ -59,6 +59,12 @@ The final heroine pipeline remains a separate feasibility/visual approval step.
 
 ## Repeatable workflow
 
+**Several agent sessions share this machine.** Read `docs\handoff\README.md` and section 0
+("Shared-machine rules") of `.github\skills\unreal-editor-mcp\SKILL.md` before building, launching
+an editor or packaging. In short: at most 3 Unreal processes in total, one MCP port per worktree,
+and close your editor before building or rebasing. Failures and their fixes are in that skill's
+table 0.1.
+
 **Offline release note:** Development/editor tools compile UE TraceLog and open
 its in-process TraceControl TCP listener on port 1985. In the installed 5.8
 engine this listener is unconditional; `-notraceserver` prevents the sponsored
@@ -73,7 +79,8 @@ Shipping/reused-container path and its separate runtime proof remain documented
 in `offline-startup.md`. Honor the coordinator launch hold before running
 Development tools.
 
-1. Run `Scripts\Test-Native.ps1` to exercise game rules and persistence.
+1. Run `Scripts\Test-Native.ps1` to exercise game rules and persistence
+   (`-Configuration Release` takes about 3 minutes; Debug about 10).
 2. Run `Scripts\Build-Game.ps1`. It imports only source assets whose expected
    sizes are recorded in `Assets\asset-manifest.json`.
 3. Run `Scripts\Test-Game.ps1` for actual engine input/gameplay/save integration

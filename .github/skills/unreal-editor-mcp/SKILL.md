@@ -11,40 +11,129 @@ without touching `SurvivalGame.uproject`, and adds a project toolset,
 `homestead_agent.toolset.HomesteadPlayTools`, for playing the game with real controller input.
 Setup and verification history: `docs\editor-mcp.md`.
 
-**Keep this skill current.** When you discover a working recipe, a schema gotcha, a failure mode or
-a better workflow, update the relevant section below (and the Field notes) in the same change.
-Record outcomes, not diaries. Remove advice that proves wrong.
+**Keep this skill current.** Several sessions share this machine and this file. Report what you
+discover (a working recipe, a schema gotcha, a failure and its fix, a better workflow) to the
+round's docs agent (`docs\handoff\README.md`); it records each finding once, here or in the right
+doc. With no docs agent running, update the relevant section yourself in the same change, add
+failures to table 0.1, and commit to `main` promptly; the orchestrator reconciles conflicts. Record
+outcomes, not diaries. Fix or remove advice that proves wrong instead of adding a contradicting note.
+
+## 0. Shared-machine rules (read first)
+
+Several agent sessions (one worktree each, under `E:\Repos\copilot-worktrees\SurvivalGame\`)
+build, run editors and package on one PC with one RTX 5080 at the same time.
+
+- **At most 3 Unreal processes on the machine**, counting editors, packaged games and commandlets
+  (`UnrealEditor-Cmd` imports and bootstraps too). Check before launching:
+  `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
+  More processes than that have reset the GPU driver and exhausted VRAM, which takes every
+  session's editor down.
+- **One editor per worktree, on its own MCP port.** Pick a free port in 8766-8799:
+  `8766..8799 | ? { -not (Get-NetTCPConnection -LocalPort $_ -State Listen -EA 0) } | select -First 1`.
+  Pass it as `Start-EditorMcp.ps1 -Port <p>`, then dot-source `Scripts\McpHelpers.ps1 -Port <p>`
+  (section 3). The script refuses a port another worktree's editor is serving. Never drive or close
+  another session's editor.
+- **The native `unreal` MCP tools are hard-wired to port 8765** (`.github\mcp.json`). In a session
+  whose editor uses another port they talk to someone else's editor. Use the shell helpers instead.
+  If you do use native tools, confirm the worktree first:
+  `print(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))`.
+- **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). An
+  active Live Coding session blocks every other worktree's editor build. For C++ changes, quit the
+  editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when you must judge RT
+  lighting and fewer than three Unreal processes are running. PIE lighting therefore differs from
+  the packaged build, which has RT on.
+- **Close your editor** before `git pull`/`rebase` (it locks `.uasset` files), before building
+  `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
+  `py "unreal.SystemLibrary.quit_editor()"`, not by killing it (killing it leaves a restore dialog;
+  see 0.1).
+- **Launch without `-Map`** and load big levels after MCP answers:
+  `py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"`.
+- **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
+  `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
+  fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
+- **Jenny's playable builds.** Never retarget or overwrite `Desktop\Homestead.lnk` or anything
+  under `E:\Repos\HomesteadMVP\`. The estate build gets its own "Homestead Estate" shortcut. Never
+  merge the `mvp-survival` branch with `main`, in either direction.
+- **Saves.** During round 1, lanes never bump `SimulationSaveVersion`; the coordinator bumps it
+  once at integration. PIE saves live in the worktree's `Saved\SaveGames` (Estate in
+  `SaveGames\Estate\`). Packaged saves live inside the package at `SurvivalGame\Saved\SaveGames`,
+  not in `%LOCALAPPDATA%`.
+- **Git with sub-agents.** Don't `git stash -u` while a sub-agent may be writing files; use
+  `git pull --rebase --autostash`. Never commit `Content/Trials/Probe/` or `.uasset`/`.umap`
+  changes that aren't yours (the editor dirties shared map files such as `Estate.umap` and
+  `__ExternalObjects__`).
+
+### 0.1 Known failures → fixes
+
+Search this table for the error text before debugging. Add a row when you solve a new one.
+
+| Symptom (exact text where known) | Cause | Fix |
+| --- | --- | --- |
+| `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
+| `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
+| Editor never shows a window; the log stops at `Build.bat -Mode=ValidatePlatforms` | The AutoSDK platform check waits on another worktree's UBT mutex | Find the editor's `cmd.exe` child (`Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`) and `Stop-Process -Id` it and its children. The editor continues. |
+| MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map during startup | Start without `-Map`, then `load_level` (under 1 s). |
+| MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
+| `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
+| `Video memory has been exhausted` | 3 editors plus the 4 km Estate landscape | Close idle editors; don't run a packaged game next to two editors on Estate. |
+| MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
+| Modal "Restore Packages" at startup blocks MCP | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | Delete that file before relaunching; quit with `quit_editor()` next time. |
+| Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
+| `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`. |
+| `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
+| PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
+| A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
+| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. |
+| `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
+| Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
+| C++ duplicate-symbol or redefinition errors between unrelated `.cpp` files | Unreal unity builds merge translation units, including anonymous namespaces | Give file-local helpers unique prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`). |
+| `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
+| Default argument errors with `Homestead::` enums in `HomesteadCharacter.h` | The header only forward-declares the enum | Use overloads or `{}`, not enum default arguments. |
+| `LogIoStore: Error: Failed to launch ZenServer` while packaging (see `Saved\Logs\UnrealPak.log`) | Another worktree's `zenserver` holds port 8558 | Unconfirmed workaround: a unique `[Zen.AutoLaunch] DesiredPort=` in this worktree's `Saved\Config\WindowsEditor\Engine.ini` and `Saved\Config\Windows\Engine.ini`. Or wait until the other package finishes. |
+| UAT log shows another worktree's build | `%APPDATA%\Unreal Engine\AutomationTool\Logs\E+Program+Files+UE_5.8\` is shared and overwritten | Redirect `Build-Game.ps1` output to a log in your worktree (`*> Build\Logs\package.log`). |
+| `git pull`/`rebase`: `unable to unlink ... Invalid argument` on `.uasset` | Your editor holds the file | Close the editor, then `git status` and finish the rebase. |
+| PowerShell ``.Replace("a`nb", ...)`` silently changes nothing | Working copies are CRLF (`core.autocrlf=true`); agent-written files may be LF | Detect the newline first (``$t.Contains("`r`n")``), or use the edit tool. |
+| ctest reports `HomesteadSimulationTests` failed or timed out | The Debug build takes about 10 min | `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min). Redirect a single test exe's output to a file; stdout is buffered. |
+| `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 | That World Partition cell isn't loaded in the editor | Load the region first. In game, `GroundHeight()` uses the runtime heightfield everywhere. |
+| `Test-Game.ps1` runs only the default smoke test, or errors "Generated resume requires..." | Switches passed as an array or as empty strings | Use a hashtable splat: `$p=@{Packaged=$true; Hotbar=$true}; .\Scripts\Test-Game.ps1 @p`. |
+| `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
+| `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
 
 ## 1. Is the server up?
 
 ```powershell
+. .\Scripts\McpHelpers.ps1 -Port <your port>   # sets $env:UNREAL_MCP_URL for this process
 python Scripts\editor_mcp.py call list_toolsets
 ```
 
 - Toolsets listed (including `homestead_agent.toolset.HomesteadPlayTools`): ready, go to step 3.
 - `Cannot reach Unreal MCP`: start it (step 2).
-- Another session may already own an editor (`Get-Process UnrealEditor`). Reuse a running MCP
-  editor rather than opening a second one on the same project, and don't close an editor another
-  session is using.
+- Your worktree may already have an editor running (`Get-CimInstance Win32_Process -Filter
+  "Name='UnrealEditor.exe'" | select ProcessId,CommandLine`). The command line shows the project
+  path and `-ModelContextProtocolPort`. Reuse your own editor; don't touch other worktrees' editors.
 
 ## 2. Start the editor with MCP
 
 ```powershell
-pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1            # builds SurvivalGameEditor first
-pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -SkipBuild # module already built
+pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython            # builds SurvivalGameEditor first
+pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -SkipBuild # module already built
 ```
 
 - Opens the visible editor on the startup map (`/Game/SurvivalGame/Maps/Homestead`), enables the
   MCP and toolset plugins for this process only, disables background CPU throttling (so PIE runs at
-  full speed while another window has focus), and returns once `http://127.0.0.1:8765/mcp`
-  answers (localhost only). Options: `-Port`, `-Map`, `-TimeoutSeconds`, `-EngineRoot`.
+  full speed while another window has focus), turns Live Coding and ray tracing off, and returns
+  once `http://127.0.0.1:<port>/mcp` answers (localhost only). Options: `-Port`, `-Map` (avoid for
+  Estate; see section 0), `-TimeoutSeconds` (default 600; use 1200 after a build), `-RayTracing`,
+  `-ExtraPlugins`, `-AllowPython`, `-EngineRoot`.
 - The editor keeps running after the script returns.
-- A fresh worktree has no `Binaries\`; the build step compiles the editor module (minutes).
-- A cold start can take minutes. Quiet is not hung; check `Saved\Logs\SurvivalGame.log`.
-- C++ changes: function-body edits can be hot-patched with Live Coding (section 5). New
-  classes/UFUNCTIONs or `.Build.cs` changes need: stop the editor, run `Build.bat` (the script's build
-  step), relaunch. The editor locks its module DLLs, so build with it closed. Live Coding patches
-  live only in memory: relaunch without `-SkipBuild` afterwards so the DLL on disk matches source.
+- A fresh worktree has no `Binaries\`; the build step compiles the editor module (2-5 min, longer if
+  another worktree is building).
+- A cold start can take more than 10 minutes. Quiet is not hung; check `Saved\Logs\SurvivalGame.log`
+  and table 0.1 (the `ValidatePlatforms` hang).
+- C++ changes: quit the editor (it locks its module DLLs), run the build (the script's build step,
+  or `Build.bat SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject"
+  -WaitMutex -NoHotReloadFromIDE`), and relaunch with `-SkipBuild`. Live Coding is off in agent
+  editors because it blocks other worktrees' builds.
 - `-ExtraPlugins A,B` enables more engine plugins for the session (for example
   `MetaHumanCharacter,MetaHumanSDK,MetaHumanCoreTech,MetaHumanGenerator`).
 - `-AllowPython` registers `homestead_agent.toolset.HomesteadEditorPython.run_python`, which runs
@@ -54,10 +143,13 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -SkipBuild # module already 
 
 ## 3. Choose how to call tools
 
-- **Native MCP tools** (`unreal` server from `.github\mcp.json`): available only if the editor was
-  serving when the Copilot session started. Check with `/mcp`. Prefer these when present.
-- **Shell client** (always works): `Scripts\editor_mcp.py`. Images in results are saved to
-  `Saved\McpCaptures\*.png` and replaced with `<saved to PATH>`; open them with the `view` tool.
+- **Shell helpers (default on this shared machine):** dot-source `Scripts\McpHelpers.ps1 -Port <p>`
+  at the start of each command (shell state doesn't persist between calls). It uses
+  `Scripts\editor_mcp.py`, which saves images in results to `Saved\McpCaptures\*.png` and replaces
+  them with `<saved to PATH>`; open them with the `view` tool.
+- **Native MCP tools** (`unreal` server from `.github\mcp.json`): fixed to port 8765 and available
+  only if an editor was serving there when the Copilot session started (check with `/mcp`). Use
+  them only when your own editor is the one on 8765 (section 0).
 
 The server exposes three meta-tools (tool search mode):
 
@@ -69,31 +161,23 @@ The server exposes three meta-tools (tool search mode):
 
 Run `describe_toolset` before first use of a toolset; required arguments are enforced strictly.
 
-Shell helpers (write arguments to a file to avoid PowerShell quoting problems). Put them in a
-session scratch `.ps1` and dot-source it in each command:
+`Scripts\McpHelpers.ps1` defines the helpers used throughout this skill. It writes each call's
+arguments to its own file under `Saved\McpArgs`, which avoids PowerShell quoting problems and
+clashes between parallel callers.
 
-```powershell
-function mcp($ts, $tool, $a = '{}') {
-  $j = @{ toolset_name = $ts; tool_name = $tool; arguments = (ConvertFrom-Json $a -AsHashtable) } |
-    ConvertTo-Json -Depth 20 -Compress
-  $j | Set-Content "$env:TEMP\mcpargs.json"
-  python Scripts\editor_mcp.py call call_tool "@$env:TEMP\mcpargs.json"
-}
-$E = 'EditorToolset.EditorAppToolset'
-$S = 'editor_toolset.toolsets.scene.SceneTools'
-$L = 'EditorToolset.LogsToolset'
-$SL = 'SlateInspectorToolset.SlateInspectorToolset'
-$H = 'homestead_agent.toolset.HomesteadPlayTools'
-function hk($tool, $a = '{}') { (mcp $H $tool $a | Out-String | ConvertFrom-Json).content[0].text }
-function st([int]$n = 6) {   # parsed play state
-  $o = mcp $H get_play_state "{`"nearby_count`": $n, `"radius_cm`": 4000}" | Out-String
-  (($o | ConvertFrom-Json).content[0].text | ConvertFrom-Json).returnValue | ConvertFrom-Json
-}
-function shot() {            # capture the editor window (shows the game during PIE); returns PNG path
-  $o = mcp $E CaptureEditorImage | Out-String
-  if ($o -match 'saved to ([^>]+?\.png)') { $Matches[1].Replace('\\\\', '\') } else { $o }
-}
-```
+| Helper | Does |
+| --- | --- |
+| `mcp <toolset> <tool> [json] [timeout]` | `call_tool`, raw JSON result |
+| `hk <tool> [json]` | a `HomesteadPlayTools` call, returns its text |
+| `st [nearby]` | parsed `get_play_state` |
+| `py <code>` | `run_python` (needs `-AllowPython`), returns the output text |
+| `con <command>` | console command in PIE with the player controller (editor world outside PIE) |
+| `shot` | `CaptureEditorImage`, returns the PNG path |
+| `hshot [WxH]` | `HighResShot` in PIE, returns the new `Saved\Screenshots\WindowsEditor` PNG (more reliable than `shot`) |
+
+Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
+`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. Keep session-specific helpers (probes,
+callbacks) in your own files and load them from `py` with `sys.path.insert`.
 
 ## 4. Play the game
 
@@ -283,7 +367,8 @@ mcp $S get_current_level
 mcp $S load_level '{"level_path":"/Game/SurvivalGame/Maps/Homestead"}'
 mcp $L GetLogEntries '{"category":"","pattern":"LogHomestead|Error","maxEntries":40}'   # pattern is a required regex
 mcp $E CaptureViewport '{"captureTransform":null,"annotations":null,"bShowUI":false}'   # editor camera, not the game
-mcp 'LiveCodingToolset.LiveCodingToolset' CompileLiveCoding    # hot-patch C++ function bodies into the running editor/PIE
+mcp 'LiveCodingToolset.LiveCodingToolset' CompileLiveCoding    # only works if Live Coding is on; it's off in agent editors (section 0)
+con 'HomesteadMorning 8'                                        # console command with the player controller
 ```
 
 ### Character lab (model and animation iteration)
@@ -499,205 +584,158 @@ Extend it there when play needs a capability; prefer real input over state edits
   hitches. Test both capped (60 FPS) and uncapped. PIE timing is indicative only; smoothness
   sign-off needs the packaged build.
 
-## 8. Field notes
+## 8. Build, package and test
 
-Dated and short, newest first. Promote anything durable into the sections above.
+- **Editor module:** close your editor, then `& 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat'
+  SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex
+  -NoHotReloadFromIDE` (2-5 min; it queues behind other worktrees' builds).
+- **Native rules and persistence:** `Scripts\Test-Native.ps1 -Configuration Release` runs every
+  CMake suite (Simulation, WorldGeneration, RegionalGeneration, Parcel, Economy, ...) in about
+  3 min; Debug takes about 10. For one suite, build its target and run
+  `Build\Native\Release\<Suite>.exe *> <log>`; stdout is buffered, so a crash loses unredirected output.
+- **Package:** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
+  (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
+  commandlets, one at a time) and runs UAT. Each of those counts toward the 3-process limit, and the
+  cook starts more. It writes `Build\Logs\bootstrap.log` and `Build\Logs\package-<time>.log` in your
+  worktree; the UAT log under `%APPDATA%` is shared and unreliable. The script refuses to package
+  over a running player; close `SurvivalGame`/`JennysHomesteadGame` processes from that folder
+  first (for Jenny's builds, see section 7 and section 0).
+- **Packaged smoke and route tests:** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1).
+  They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
+  the MetaHuman heroine yourself (field notes).
+- **Blender props into Unreal:** import them in your running editor with `py` (see Props in the
+  field notes), not with the headless `Import-Props.ps1`, which drops LODs and collision.
+- **C++ conventions that bite:** see the unity-build, C2487 and enum-default rows in 0.1. UI code
+  includes Simulation headers as `../Simulation/<Header>.h`. Hold loaded assets in `UPROPERTY()`
+  members, never function-local statics (field notes). Font assets: a `FontFace` needs
+  `loading_policy` INLINE, and an `FTypefaceEntry` is built with `Emplace_GetRef(name)` then
+  `.Font = FFontData(Face)`.
 
-- 2026-09-28: Tree sinking, relaxed idle, knife carry:
-  - **Measure tree bases against the terrain meshes, not engine traces.** `line_trace_multi`
-    mostly hits tree capsules or nothing. HomesteadWorld's 25 terrain
-    `ProceduralMeshComponent`s answer `line_trace_component(start, end, True, False, False)`
-    (it returns a tuple, or None on a miss). Compare against the tree mesh's lowest LOD-rim
-    vertices (active trees render at MinLOD 1, outer trees at LOD 2).
-    `ResolveGeneratedTreeVisual` sinks each tree by `4 + RimLift * Scale` below the lowest ground
-    sampled at 0.5× and 1× footprint in 8 directions. RimLift is 30 for the conifer, 19 for the
-    accent and 3 for the broadleaf.
-  - **Live Coding can crash PIE.** A patched module crashed in `UsesMetaHumanHeroine`: a CVar
-    was null during BeginPlay. To recover, quit the editor, delete `Binaries\Win64\*patch*`,
-    then rebuild through `Start-EditorMcp.ps1`. Prefer a full rebuild for changes to world
-    generation.
-  - **Finger spread on the rig.** Pitch on `{finger}_01_{l,r}_ctrl` fans the fingers. On the
-    left hand, positive index and negative pinky draw them together. `active_idle.py` keys the
-    curl and spread for both hands (`CURL_*`, `SPREAD_*`).
-  - **PIE stills.** `HighResShot 1920x1080` (via `execute_console_command(w, cmd, pc)`) writes
-    to `Saved\Screenshots\WindowsEditor\`.
-  - **Resting carries are turned by `Flip` in `UpdateHeldTools`.** The hatchet and knife are
-    turned about the haft (Z) so the edge hangs down. The hoe is turned about the palm normal
-    (X) so its blade sits low in front. The flip eases out with `HeldToolTilt`, so authored
-    actions keep their working grip.
+## 9. Field notes
 
-- 2026-09-27: Heroine polish (grip, knee hand, felling, barefoot):
-  - **Held-prop placement must run inside `UpdateHeldTools`.** `UpdateHeldTools` runs in Tick
-    (TG_PostUpdateWork) and rewrites every held prop's relative transform. A placement done from
-    `OnBoneTransformsFinalized` was overwritten each frame, so the felling hatchet stayed in her
-    right fist only. `UpdateFellingHatchet()` is now called at the end of `UpdateHeldTools`. If
-    you change the felling clip, re-measure `FellBit*`/`FellCut*` in `HomesteadCharacter.h` from
-    `axe_fell.py`'s `bit_at_strike` report.
-  - **Keep the two-handed backswing in front of her.** Check the left arm against the chest in
-    front and side lab captures. An early `back` key sent the left forearm through her chest.
-  - **Finger curl on the rig.** On `{index,middle,ring,pinky}_0N_l_ctrl`, yaw curls the finger
-    and negative yaw curls toward the palm. Roll does nothing. `kneel_gather.key_knee_fingers`
-    and the `KNEE_*` constants (knee joint at about (16, 36, 51) component space when kneeling)
-    rest the left palm on top of the kneecap in all four kneel clips. Key the curl on at the
-    kneel and off at the rise.
-  - **Hair auto-reset.** `UpdateHairMotion` calls `ResetSimulation()` after long frames
-    (> 0.1 s), real-time gaps > 0.25 s between ticks (pause and menus stop actor ticks), or a
-    head jump > 25 cm or > 40° in one frame. This is a defensive fix for stray flyaways, which
-    haven't been reproduced since.
-  - **She starts barefoot.** `NewGame` equips only the tunic (`nextWearableId` 2). Woven
-    footwraps (8 Fiber) are the craftable footwear; LeatherShoes remain only in older saves.
-    Tests needing shoes use the `Shod(sim)` helper in `Tests/HomesteadSimulationTests.cpp`.
-  - **Live Coding patch files stay locked** for about 60 s after `quit_editor`. Wait for the
-    process to exit, then delete `Binaries\Win64\*patch*` before `Build-Game.ps1 -Package`.
-  - **`Test-Game.ps1` switches:** pass them by hashtable splatting (`$a=@{Packaged=$true;
-    Hotbar=$true}; .\Scripts\Test-Game.ps1 @a`). An empty switch string errors with "Generated
-    resume requires...".
+Grouped by topic, dated, newest first within a topic where it matters. Promote anything durable
+into the sections above, and add failures with a clear fix to table 0.1. Playtest bugs go in
+OpenSpec changes, not here.
 
-- 2026-09-26: Adding a prop to the game mid-session:
-  - **Never cache a loaded asset in a function-local `static UStaticMesh*`.** `static M =
-    LoadObject(...)` caches nullptr forever if the asset didn't exist (or wasn't saved) when the
-    line first ran. Worse, a raw static is not a GC root: once no component uses the asset, GC
-    frees it and the next use crashes. The packaged FullLoop crashed in `SetStaticMesh` from
-    `BuildPlot` after the sown-seed mound mesh went unused. Hold it in a `UPROPERTY()
-    TObjectPtr<>` member loaded on first use (`if (!Member) Member = LoadObject(...)`). Save new
-    assets with `EditorAssetLibrary.save_asset(path, only_if_is_dirty=False)` before testing.
-  - **Reloading `import_props` after editing it:** a plain `import` returns the cached module.
-    Load it fresh with `importlib.util.spec_from_file_location('import_props',
-    r'<repo>\Scripts\Blender\import_props.py')` + `module_from_spec` + `exec_module`, then
-    `m.main(['TilledBed', 'Seeds'])`. Extra textures (for example a `_wet` variant) go through an
-    `AssetImportTask` with `replace_existing=True`.
-  - **An invisible ground prop is usually back-face culled.** Check the FBX's average face
-    normal z in Blender; an open sheet from `kit.recalc_normals` can face down (see
-    docs/blender-assets.md).
+### Editor, MCP and PIE
 
-- 2026-09-26: Inspecting the generated woodland scatter:
-  - **Count decorations by tag.** In the PIE world, loop over actors, then
-    `get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent)`, keep
-    `component_has_tag('WoodlandGranite')` (or `'WoodlandUnderbrush'`), and read
-    `get_instance_transform(i, True)` per mesh. The log line `Generated cover refresh: ...
-    underbrush= granite= big_granite=` gives the totals.
-  - **Go and look.** Put her next to the target with `get_player_pawn(w, 0).set_actor_location(v,
-    False, True)` at z ≈ 200 (she drops to the ground) and `set_actor_rotation`. Then use `walk_to`
-    into a boulder to prove collision: `stuck` at about the footprint radius.
-  - `EditorAssetLibrary.save_asset(path, False)` returned False on material instances during PIE.
-    After stopping PIE, `save_loaded_asset(obj, False)` saved them.
+- 2026-09-28: **PIE stills.** `HighResShot 1920x1080` (via `execute_console_command(w, cmd, pc)`) writes
+  to `Saved\Screenshots\WindowsEditor\`.
+  `hshot` in `Scripts\McpHelpers.ps1` wraps this.
+- 2026-09-26: **Go and look.** Put her next to the target with `get_player_pawn(w, 0).set_actor_location(v,
+  False, True)` at z ≈ 200 (she drops to the ground) and `set_actor_rotation`. Then use `walk_to`
+  into a boulder to prove collision: `stuck` at about the footprint radius.
+- 2026-09-26: `EditorAssetLibrary.save_asset(path, False)` returned False on material instances during PIE.
+  After stopping PIE, `save_loaded_asset(obj, False)` saved them.
+- 2026-09-26: **Modal dialogs block MCP.** One modal (for example "Overwrite Existing Object" during a
+  reimport while PIE runs) blocks every later `run_python` call indefinitely. Find it with
+  user32 `EnumWindows` on the editor PID and click its button. Call `SetProcessDPIAware` first,
+  because the desktop is scaled. Stop PIE before reimports.
+- 2026-09-25: Killing the editor leaves `Saved\Autosaves\PackageRestoreData.json`. The next launch
+  opens a modal "Restore Packages" dialog that blocks startup and the MCP server, and synthetic
+  clicks on Skip Restore don't dismiss it. After a kill, delete that file (and scratch autosaves)
+  before relaunching. Quitting via `run_python` `unreal.SystemLibrary.quit_editor()` (after
+  `LevelEditorSubsystem.editor_request_end_play()`) exits cleanly in seconds and leaves restore
+  disabled.
+- 2026-09-25: Console commands in PIE: `run_python` with
+  `unreal.SystemLibrary.execute_console_command(unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world(), '<cmd>')`.
+  To A/B lighting live, call `set_actor_tick_enabled(False)` on `HomesteadController` so its
+  Refresh stops overwriting the sun. Then set the sun's rotation, intensity and colour, and the
+  `MeadowExposure` post-process settings (set `override_<name>` too), and capture. Turn the tick
+  back on afterwards. A new game starts at hour 6 (dawn), and one game hour is 2.5 real minutes.
+  `con '<cmd>'` in `Scripts\McpHelpers.ps1` does this with the player controller.
+- 2026-09-25: Slate `Click`/`PressKey` on game menu widgets only moved hover/focus; the game reads
+  input through the PlayerController, not Slate focus. That is why `HomesteadPlayTools` exists.
+- 2026-09-25: PIE shows an on-screen editor warning, "Multiple directional lights are competing to
+  be the single one used for forward shading...". It comes from the game's lighting setup, not MCP.
+- 2026-09-25: A fresh headless Copilot session loaded `unreal` from `.github\mcp.json` and called
+  `list_toolsets` and `get_current_level` natively.
+- 2026-09-25: First PIE start took about 76 s (shader and animation compilation); `StartPIE`
+  returned "Timed out waiting for PIE to start" while PIE was running.
+- 2026-09-25: `CaptureViewport` rejects calls that omit `captureTransform`/`annotations`; pass `null`.
+  It returns the PNG inside JSON text (`returnValue.image`), which `editor_mcp.py` extracts.
+- 2026-09-25: `find_actors` with `{}` fails; it needs explicit keys (check `describe_toolset`).
+- 2026-09-25: The view tool sometimes reports a freshly written PNG as missing; view it again.
+- 2026-09-27: Slate `Click` does not reach game menus, but a real Win32 click does. With the PIE
+  window pinned at 0,0 1936x1119 by `pietop.ps1`, call `SetProcessDPIAware`, then
+  `SetCursorPos` in window pixels and `mouse_event` down/up (2/4). Park the cursor afterwards.
+  Jenny's own mouse can interfere if she is at the PC.
+- 2026-09-25: Python can't spawn actors into the PIE world. Test through the character's own component stack
+  instead.
+- 2026-09-25: Tools like the hatchet are hidden except during their action, so capture a burst about
+  0.5-1.3 s after the action key. Prompts switch to keyboard after `tap_key` of a keyboard key
+  (`[LMB] Fell`); a `Gamepad_RightTriggerAxis` tap then doesn't act. Use `LeftMouseButton`.
+- 2026-09-25: For a face close-up in PIE, set the `CameraArm` `target_arm_length` (about 90),
+  `socket_offset` 0 and `target_offset` (0,0,70) via `run_python`. Restore afterwards (330,
+  (0,45,55)).
 
-- 2026-09-26: Props, materials and checking the packaged heroine:
-  - **Masks samplers need non-sRGB textures.** Engine `WhiteSquareTexture` and `Black` are sRGB. On
-    a Masks sampler the whole material fails to compile and silently renders as the default grid,
-    so search the log for `Failed to compile`. `import_props.py` uses its own
-    `T_PropDefault{White,Black}` textures and `/Engine/EngineMaterials/DefaultNormal`.
-  - **Import props in the running editor.** Under `-run=pythonscript` the
-    `StaticMeshEditorSubsystem` is missing, so collision and LOD import fail. Instead, `run_python`
-    `sys.path.insert(0, r'<repo>\Scripts\Blender'); import import_props; import_props.main([...])`
-    (or `import_prop(name, M_Field)` per prop), with a long `editor_mcp.py --timeout`. `_LODn` FBXs
-    become LODs of their base mesh. Reports with a `wind` block get `M_PropFoliage`: masked,
-    two-sided foliage, packed R roughness / G translucency / B AO, vertex-colour wind WPO and a
-    camera-safe dither.
-  - **Modal dialogs block MCP.** One modal (for example "Overwrite Existing Object" during a
-    reimport while PIE runs) blocks every later `run_python` call indefinitely. Find it with
-    user32 `EnumWindows` on the editor PID and click its button. Call `SetProcessDPIAware` first,
-    because the desktop is scaled. Stop PIE before reimports.
-  - **Baked underwear on the body.** The MetaHuman body textures (`T_Body_{BC,N,SRMF}_VT`) have the
-    grey top and briefs painted in. `Scripts\Characters\remove_body_underwear.py` inpaints every
-    underwear pixel, covered or not (the tank top's back scoop and straps showed grey otherwise).
-    Export the three textures with `AssetExportTask` + `TextureExporterTGA`, run the script, and
-    reimport the `_Clean.tga` files over the originals with `replace_existing_settings=False`,
-    then re-check `srgb`, compression and VT streaming.
-  - **Hand palm direction.** For these MetaHuman hands, `across x along` (index-minus-pinky
-    crossed with wrist-to-knuckle) points out of the *back* of the right hand, and the relaxed
-    fingers curl the opposite way. `FHandGrip` and `HandGripTransform` curl and seat props toward
-    `along x across`. Getting it backwards bends the fingers backwards (the "cursed" grip).
-  - **Resting idle.** `AN_HeroineMH_ActiveIdle` (`active_idle.py`) replaces LivingIdle02 when
-    present: shoulder-width stance, knees tracking straight over the feet (Jenny found them too
-    wide at first), arms hanging close, weight on the right leg, hands clear of the pouch. Held
-    tools tip forward in the fist (`HeldToolTilt`) instead of bending the wrist.
-  - **Felling is a right-shoulder chop.** In `axe_fell.py` the left hand holds the knob and the
-    right hand slides; `UpdateFellingHatchet` lays the hatchet through both fists. The bit lands
-    to her right (`FellBitLeft` is negative).
-  - **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
-    (`-HomesteadSmokeTest`). To see the MetaHuman, launch
-    `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the
-    Alt `keybd_event` trick before `SetForegroundWindow`, or the Copilot app stays on top. Then
-    capture a short ddagrab burst (`-t 1.2 out_%02d.png`); a single `-frames:v 1` grab sometimes
-    writes nothing.
+### C++, builds and Live Coding
 
-- 2026-09-27: Creek water (`M_CreekWater`, `creek_water_material` in `bootstrap_unreal.py`):
-  - **Single Layer Water, not Translucent.** A translucent surface read as a flat dark sheet under
-    the canopy. SLW renders in the opaque pass, so it takes the woodland's shadows and Lumen
-    reflections, and the bed shows through tinted by the real water depth.
-  - **SLW coefficients act per centimetre.** Absorption around 4/1.6/1.2 made the 25-38 cm creek
-    opaque. The shipped defaults are Absorption (0.062, 0.025, 0.02) and Scattering
-    (0.0003, 0.0006, 0.0007). Absorb red fastest for a clear green-teal.
-  - **Transient compile errors.** While the graph is being authored, the log fills with
-    "No inputs to Single Layer Water Material" / `Failed to compile` lines from the intermediate
-    compiles. Judge only the final state: `recompile_material`, then
-    `MaterialEditingLibrary.get_statistics(m).num_pixel_shader_instructions` > 0 (about 1048) and
-    `get_inputs_for_material_expression` on the SLW output node. Stop PIE before re-authoring,
-    because `import_asset` fails during PIE.
-  - **Tune live with a MID.** In PIE, find the `ProceduralMeshComponent`s tagged `CreekWater`
-    (5 around the start), make one `create_dynamic_material_instance(0, M_CreekWater)`, set it on
-    all of them, and drive `set_scalar/vector_parameter_value`. Bake the winners into the bootstrap
-    defaults. Confirm the flow with a 3 s ddagrab clip; compare frames 0 and 25.
+- 2026-09-28: **Live Coding can crash PIE.** A patched module crashed in `UsesMetaHumanHeroine`: a CVar
+  was null during BeginPlay. To recover, quit the editor, delete `Binaries\Win64\*patch*`,
+  then rebuild through `Start-EditorMcp.ps1`. Prefer a full rebuild for changes to world
+  generation.
+- 2026-09-27: **Live Coding patch files stay locked** for about 60 s after `quit_editor`. Wait for the
+  process to exit, then delete `Binaries\Win64\*patch*` before `Build-Game.ps1 -Package`.
+- 2026-09-25: Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs.
+  Standalone `-game` runs load the DLL from disk, so do a real build first.
+  Live Coding is now off in agent editors (section 0); rebuild instead.
+- 2026-09-26: **Never cache a loaded asset in a function-local `static UStaticMesh*`.** `static M =
+  LoadObject(...)` caches nullptr forever if the asset didn't exist (or wasn't saved) when the
+  line first ran. Worse, a raw static is not a GC root: once no component uses the asset, GC
+  frees it and the next use crashes. The packaged FullLoop crashed in `SetStaticMesh` from
+  `BuildPlot` after the sown-seed mound mesh went unused. Hold it in a `UPROPERTY()
+  TObjectPtr<>` member loaded on first use (`if (!Member) Member = LoadObject(...)`). Save new
+  assets with `EditorAssetLibrary.save_asset(path, only_if_is_dirty=False)` before testing.
 
-- 2026-09-25: Original props are authored in Blender by the `blender-assets` skill
-  (`docs\blender-assets.md`, `Assets\Props\*`). Its `Import-Props.ps1` opens the project in its own
-  editor, so quit an MCP editor session first; never run both at once. The heroine's MetaHuman
-  pipeline doesn't use Blender.
+### Tests and packaging
 
-- 2026-09-25: The sun uses ray-traced shadows (`homestead.RayTracedSun`, default 1) and moves every
-  refresh. `homestead.RayTracedSun 0` restores VSM with 0.5° steps. Don't reintroduce continuous
-  rotation on the VSM path. See `docs/research/rendering-baseline/README.md`. The `-Presentation`
-  smoke route fails at its first case for a pre-existing reason: `ApplyAppearance` rejects
-  "Owned wardrobe appearance requires PrepareEquipment".
-- 2026-09-25: MetaHuman body shape, GASP locomotion and tests:
-  - **Body shape via Python works.** `try_add_object_to_edit`, then `get_body_constraints`; build a
-    *new list* (changing the Array's structs in place doesn't stick), set `is_active` and
-    `target_measurement`, then `set_body_constraints` and `commit_body_state`. The model shifts
-    other measurements (Hip down pushed Waist up), so pin those too.
-  - A rigged character must have its face rig removed first (`remove_face_rig`), then be re-rigged
-    (`request_auto_rigging`, ~25 s), reassembled, and re-retargeted.
-  - `metahuman_look.set_body` wraps this. Always `remove_object_to_edit` afterwards, or Creator
-    later fails to open the asset ("already added for editing... may be corrupted").
-  - **Migrating from another project headless:** run `UnrealEditor-Cmd <other>.uproject
-    -run=pythonscript` with `AssetTools.migrate_packages(pkgs, <our Content dir>, MigrationOptions(prompt=False))`.
-    It follows every dependency. The GASP clips dragged in 272 foley sounds and about 40 extra
-    clips via notifies, which had to be pruned.
-  - **Retargeting UEFN → `IK_MH_IKRig`:** keep the Root Motion op **off**. Even with target root
-    `root` and `COPY_FROM_SOURCE_ROOT`, it wrote a root that snaked and yawed up to 16° per step.
-    Locking that root in game made the heroine's head and shoulders wobble. `gasp_locomotion`
-    retargets with the op off, then `straighten_root` puts the travel on a straight root before
-    locking the clips in place (`set_root_motion_enabled`). Check a new clip with
-    `get_bone_pose_for_time(anim, 'root', t, False)`: the root should have no yaw and no sideways
-    drift.
-  - `Test-Game.ps1` smoke routes run a plain `-game` process (not UE automation) with
-    `-HomesteadSmokeTest`, which selects the legacy heroine.
-  - The Hotbar route's "Held mapped Shift again reaches active grounded sprint" step is flaky
-    after `NewGame`; it passed on rerun.
+- 2026-09-27: When scripting the packaged suites, pass switches as a hashtable splat
+  (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
+  `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
+  Move `Saved\Automation\Packaged\native-wardrobe-fixture*` into `History\` before a NativeMenu run. An empty switch string errors with "Generated resume requires...".
+- 2026-09-26: **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
+  (`-HomesteadSmokeTest`). To see the MetaHuman, launch
+  `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the
+  Alt `keybd_event` trick before `SetForegroundWindow`, or the Copilot app stays on top. Then
+  capture a short ddagrab burst (`-t 1.2 out_%02d.png`); a single `-frames:v 1` grab sometimes
+  writes nothing.
+- 2026-09-25: `Test-Game.ps1` smoke routes run a plain `-game` process (not UE automation) with
+  `-HomesteadSmokeTest`, which selects the legacy heroine.
+- 2026-09-25: The Hotbar route's "Held mapped Shift again reaches active grounded sprint" step is flaky
+  after `NewGame`; it passed on rerun.
+- 2026-09-25: Frame-cost breakdown: `-ExecCmds "t.MaxFPS 0, r.GPUCsvStatsEnabled 1, csvprofile start"` on
+  `Playtest-Visual.ps1`. The CSV lands in `Saved\Profiling\CSV\`. Before timing, check for other
+  heavy processes (a Blender render from another session skewed runs).
 
-- 2026-09-25: Assembling and playing the MetaHuman heroine:
-  - `build_meta_human` can raise RuntimeError (Control Rig "Cannot break link") even when the log
-    says the assembly succeeded, **and it doesn't save**. Call
-    `EditorAssetLibrary.save_directory(path, False, True)` on the Assembled and Common folders.
-  - Texture resolution: set all eight `skin_settings.desired_texture_sources_resolutions` fields to
-    `RES4K` before `request_texture_sources`. `has_high_resolution_textures` is a property.
-  - Retargeting to `IK_MH_IKRig`: the "Run IK Rig" op blew poses out to about -9000 cm, and "Root
-    Motion" sank the pelvis. Disable both by index (`set_retarget_op_enabled(i, False)`). After
-    fuzzy auto-mapping, clear the bad maps (Root from a foot, metacarpals from fingers).
-  - Python can't spawn actors into the PIE world. Test through the character's own component stack
-    instead.
-  - Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs.
-    Standalone `-game` runs load the DLL from disk, so do a real build first.
-  - Tools like the hatchet are hidden except during their action, so capture a burst about
-    0.5-1.3 s after the action key. Prompts switch to keyboard after `tap_key` of a keyboard key
-    (`[LMB] Fell`); a `Gamepad_RightTriggerAxis` tap then doesn't act. Use `LeftMouseButton`.
-  - For a face close-up in PIE, set the `CameraArm` `target_arm_length` (about 90),
-    `socket_offset` 0 and `target_offset` (0,0,70) via `run_python`. Restore afterwards (330,
-    (0,45,55)).
-  - Frame-cost breakdown: `-ExecCmds "t.MaxFPS 0, r.GPUCsvStatsEnabled 1, csvprofile start"` on
-    `Playtest-Visual.ps1`. The CSV lands in `Saved\Profiling\CSV\`. Before timing, check for other
-    heavy processes (a Blender render from another session skewed runs).
+### Heroine: MetaHuman, Creator, hair and clothing
 
+- 2026-09-27: **She starts barefoot.** `NewGame` equips only the tunic (`nextWearableId` 2). Woven
+  footwraps (8 Fiber) are the craftable footwear; LeatherShoes remain only in older saves.
+  Tests needing shoes use the `Shod(sim)` helper in `Tests/HomesteadSimulationTests.cpp`.
+- 2026-09-27: **Hair auto-reset.** `UpdateHairMotion` calls `ResetSimulation()` after long frames
+  (> 0.1 s), real-time gaps > 0.25 s between ticks (pause and menus stop actor ticks), or a
+  head jump > 25 cm or > 40° in one frame. This is a defensive fix for stray flyaways, which
+  haven't been reproduced since.
+- 2026-09-26: **Baked underwear on the body.** The MetaHuman body textures (`T_Body_{BC,N,SRMF}_VT`) have the
+  grey top and briefs painted in. `Scripts\Characters\remove_body_underwear.py` inpaints every
+  underwear pixel, covered or not (the tank top's back scoop and straps showed grey otherwise).
+  Export the three textures with `AssetExportTask` + `TextureExporterTGA`, run the script, and
+  reimport the `_Clean.tga` files over the originals with `replace_existing_settings=False`,
+  then re-check `srgb`, compression and VT streaming.
+- 2026-09-25: **Body shape via Python works.** `try_add_object_to_edit`, then `get_body_constraints`; build a
+  *new list* (changing the Array's structs in place doesn't stick), set `is_active` and
+  `target_measurement`, then `set_body_constraints` and `commit_body_state`. The model shifts
+  other measurements (Hip down pushed Waist up), so pin those too.
+- 2026-09-25: A rigged character must have its face rig removed first (`remove_face_rig`), then be re-rigged
+  (`request_auto_rigging`, ~25 s), reassembled, and re-retargeted.
+- 2026-09-25: `metahuman_look.set_body` wraps this. Always `remove_object_to_edit` afterwards, or Creator
+  later fails to open the asset ("already added for editing... may be corrupted").
+- 2026-09-25: `build_meta_human` can raise RuntimeError (Control Rig "Cannot break link") even when the log
+  says the assembly succeeded, **and it doesn't save**. Call
+  `EditorAssetLibrary.save_directory(path, False, True)` on the Assembled and Common folders.
+- 2026-09-25: Texture resolution: set all eight `skin_settings.desired_texture_sources_resolutions` fields to
+  `RES4K` before `request_texture_sources`. `has_high_resolution_textures` is a property.
 - 2026-09-25: `homestead_agent.metahuman_look` wraps the Creator scripting: `set_hair`,
   `apply_colours` (groom Melanin/Redness, eye presets) and `sculpt_face` (81 mapped landmarks).
   Gotchas:
@@ -708,23 +746,6 @@ Dated and short, newest first. Promote anything durable into the sections above.
   - Creator's eye presets aren't Python-visible. Export `EyePresets` to T3D and `import_text` the
     settings (the module does this).
   - `translate_face_landmarks` moves points only part of the way (about 40%), so scale the deltas.
-
-- 2026-09-25: Killing the editor leaves `Saved\Autosaves\PackageRestoreData.json`. The next launch
-  opens a modal "Restore Packages" dialog that blocks startup and the MCP server, and synthetic
-  clicks on Skip Restore don't dismiss it. After a kill, delete that file (and scratch autosaves)
-  before relaunching. Quitting via `run_python` `unreal.SystemLibrary.quit_editor()` (after
-  `LevelEditorSubsystem.editor_request_end_play()`) exits cleanly in seconds and leaves restore
-  disabled.
-- 2026-09-25: Rotating a directional light invalidates every cached Virtual Shadow Map page. The
-  world refresh (every 0.25 s) used to rotate the sun continuously, causing paired 30-39 ms stalls
-  at 4K. On the VSM path `UpdateLighting` steps rotation by 0.5°; the default ray-traced sun
-  moves continuously.
-- 2026-09-25: Console commands in PIE: `run_python` with
-  `unreal.SystemLibrary.execute_console_command(unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world(), '<cmd>')`.
-  To A/B lighting live, call `set_actor_tick_enabled(False)` on `HomesteadController` so its
-  Refresh stops overwriting the sun. Then set the sun's rotation, intensity and colour, and the
-  `MeadowExposure` post-process settings (set `override_<name>` too), and capture. Turn the tick
-  back on afterwards. A new game starts at hour 6 (dawn), and one game hour is 2.5 real minutes.
 - 2026-09-25: Creator scripting recipes (via `run_python`). Duplicate a preset from
   `/MetaHumanCharacter/Optional/Presets/<Name>` to start a character. Swap hair with
   `c.internal_collection.try_add_item_from_wardrobe_item('Hair', wi)` plus
@@ -733,18 +754,12 @@ Dated and short, newest first. Promote anything durable into the sections above.
   Creator window, even after Refresh Preview.** Close the editor (`close_all_editors_for_asset`),
   release edit mode, save, then reopen. For review shots, set `viewport_settings.camera_frame`
   (FACE/BODY) and `show_viewport_overlays = False` before opening, then use Slate `Screenshot` on
-  the `MHC_<name>` window. `set_body_constraints` + `commit_body_state` rebuilt the body mesh but
-  `get_body_constraints` read back unchanged values, even on a blank MetaHuman. Body shaping
-  through Python is unverified; use Creator's Body sliders until proven. `CaptureAssetImage`
-  doesn't support MetaHuman characters.
-- 2026-09-25: The Epic Launcher queues engine-option installs indefinitely while an editor is open.
-  Exit the launcher from the tray and reopen it.
+  the `MHC_<name>` window. Body shaping through Python works (see the body-shape note).
 - 2026-09-25: Rendering presets one at a time opens and closes a Creator window every ~40 s.
   Warn the human before starting, because it looks like the editor is restarting and it steals
   any window they're clicking in. Creator's "Missing Project Settings → Enable Missing" writes
   the three `r.GPUSkin`/`r.SkinCache` lines to `DefaultEngine.ini`. They only take effect after
   the next editor restart.
-
 - 2026-09-25: There is no general Epic sign-in in the editor. MetaHuman cloud sign-in lives in the
   person icon on the MetaHuman Creator toolbar ("No user signed in, please autorig to trigger
   log-in flow"). Only **Create Full Rig** starts the login flow. **Download Texture Sources**
@@ -769,52 +784,142 @@ Dated and short, newest first. Promote anything durable into the sections above.
   commits, `request_auto_rigging`, `request_texture_sources`, `build_meta_human` and
   `spawn_meta_human_actor`. The stock `MetaHumanGenerator` toolset didn't appear in
   `list_toolsets` even with its plugin enabled.
-- 2026-09-25: Slate `Click`/`PressKey` on game menu widgets only moved hover/focus; the game reads
-  input through the PlayerController, not Slate focus. That is why `HomesteadPlayTools` exists.
-- 2026-09-25: PIE shows an on-screen editor warning, "Multiple directional lights are competing to
-  be the single one used for forward shading...". It comes from the game's lighting setup, not MCP.
-- 2026-09-25: Felled trees vanished within 0.8 s with no visible fall or stump in captures.
-- 2026-09-25: The creek renders as a flat, saturated blue ribbon in PIE captures.
-- 2026-09-25: The book feedback banner ("Ate Berries.") pushes the Inventory layout down about 60 px.
-- 2026-09-25: Live Coding through `CompileLiveCoding` patched `HomesteadAgentPlayLibrary` while PIE
-  was running (about 5 s).
-- 2026-09-25: A fresh headless Copilot session loaded `unreal` from `.github\mcp.json` and called
-  `list_toolsets` and `get_current_level` natively.
-- 2026-09-25: First PIE start took about 76 s (shader and animation compilation); `StartPIE`
-  returned "Timed out waiting for PIE to start" while PIE was running.
-- 2026-09-25: `CaptureViewport` rejects calls that omit `captureTransform`/`annotations`; pass `null`.
-  It returns the PNG inside JSON text (`returnValue.image`), which `editor_mcp.py` extracts.
-- 2026-09-25: `find_actors` with `{}` fails; it needs explicit keys (check `describe_toolset`).
-- 2026-09-25: `IKRetargetBatchOperation.run_batch_retarget` returns nothing while PIE runs; stop
-  PIE first.
-- 2026-09-25: After `AnimationDataController.set_bone_track_keys`,
-  `AnimationLibrary.get_bone_pose_for_frame` reports the pelvis about 10.7 cm lower than the
-  written keys (a skeleton-vs-retarget-source offset). The game doesn't apply that offset. Write,
-  read back, and compensate (see `gasp_locomotion.straighten_root`).
-- 2026-09-25: Trees are components of the `HomesteadWorld` actor. When searching for terrain with
-  traces, require the `ProceduralMeshComponent` hit and a single hit per column; otherwise a
-  teleport lands the heroine on a tree canopy.
-- 2026-09-25: The view tool sometimes reports a freshly written PNG as missing; view it again.
-- 2026-09-27: Sequencer animation bakes (`homestead_agent.axe_fell`, `hoe_till`) fail and hang while
-  PIE runs ("Editor is currently in a play mode"). Stop PIE before baking.
 - 2026-09-27: `homestead_agent.metahuman_hair` copies stock MetaHuman grooms into
   `/Game/Characters/Heroine_MH/Common/Optional/Grooms/GroomAssets/Hair/<Style>`, repoints their
   materials at the heroine's hair instances and builds a `<Style>_Binding` against her face. Its
   `STYLES` order must match `HomesteadLook::MetaHairGroom`.
-- 2026-09-27: Idle tool angles can be tuned live with `homestead.CarryHatchet`, `CarryHoe`,
-  `CarryMachete` and `CarryKnife` (degrees; -1 keeps the default). If the hoe carry changes, re-read
-  its transform relative to `hand_r` and update `HELD` in `hoe_till.py` before rebaking.
-- 2026-09-27: When scripting the packaged suites, pass switches as a hashtable splat
-  (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
-  `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
-  Move `Saved\Automation\Packaged\native-wardrobe-fixture*` into `History\` before a NativeMenu run.
 - 2026-09-27: `HomesteadWear <key|name>` (console, in PIE) grants the materials, crafts one garment
   and puts it on, for example `HomesteadWear fur-coat` or `HomesteadWear woven-sandals`. The
   MetaHuman garments live in `/Game/Characters/Heroine_MH/Assembled/Heroine/Garments`. To
   re-import them, run `Scripts/Characters/import_heroine_garments.py` in the editor (set
   `GARMENT_NAMES` first to import a subset). Deer remains show up as `DeerRemains` in
   `get_play_state`; harvesting gives 3 Fur.
-- 2026-09-27: Slate `Click` does not reach game menus, but a real Win32 click does. With the PIE
-  window pinned at 0,0 1936x1119 by `pietop.ps1`, call `SetProcessDPIAware`, then
-  `SetCursorPos` in window pixels and `mouse_event` down/up (2/4). Park the cursor afterwards.
-  Jenny's own mouse can interfere if she is at the PC.
+
+### Animation authoring and held tools
+
+- 2026-09-28: **Finger spread on the rig.** Pitch on `{finger}_01_{l,r}_ctrl` fans the fingers. On the
+  left hand, positive index and negative pinky draw them together. `active_idle.py` keys the
+  curl and spread for both hands (`CURL_*`, `SPREAD_*`).
+- 2026-09-28: **Resting carries are turned by `Flip` in `UpdateHeldTools`.** The hatchet and knife are
+  turned about the haft (Z) so the edge hangs down. The hoe is turned about the palm normal
+  (X) so its blade sits low in front. The flip eases out with `HeldToolTilt`, so authored
+  actions keep their working grip.
+- 2026-09-27: **Held-prop placement must run inside `UpdateHeldTools`.** `UpdateHeldTools` runs in Tick
+  (TG_PostUpdateWork) and rewrites every held prop's relative transform. A placement done from
+  `OnBoneTransformsFinalized` was overwritten each frame, so the felling hatchet stayed in her
+  right fist only. `UpdateFellingHatchet()` is now called at the end of `UpdateHeldTools`. If
+  you change the felling clip, re-measure `FellBit*`/`FellCut*` in `HomesteadCharacter.h` from
+  `axe_fell.py`'s `bit_at_strike` report.
+- 2026-09-27: **Keep the two-handed backswing in front of her.** Check the left arm against the chest in
+  front and side lab captures. An early `back` key sent the left forearm through her chest.
+- 2026-09-27: **Finger curl on the rig.** On `{index,middle,ring,pinky}_0N_l_ctrl`, yaw curls the finger
+  and negative yaw curls toward the palm. Roll does nothing. `kneel_gather.key_knee_fingers`
+  and the `KNEE_*` constants (knee joint at about (16, 36, 51) component space when kneeling)
+  rest the left palm on top of the kneecap in all four kneel clips. Key the curl on at the
+  kneel and off at the rise.
+- 2026-09-26: **Hand palm direction.** For these MetaHuman hands, `across x along` (index-minus-pinky
+  crossed with wrist-to-knuckle) points out of the *back* of the right hand, and the relaxed
+  fingers curl the opposite way. `FHandGrip` and `HandGripTransform` curl and seat props toward
+  `along x across`. Getting it backwards bends the fingers backwards (the "cursed" grip).
+- 2026-09-26: **Resting idle.** `AN_HeroineMH_ActiveIdle` (`active_idle.py`) replaces LivingIdle02 when
+  present: shoulder-width stance, knees tracking straight over the feet (Jenny found them too
+  wide at first), arms hanging close, weight on the right leg, hands clear of the pouch. Held
+  tools tip forward in the fist (`HeldToolTilt`) instead of bending the wrist.
+- 2026-09-26: **Felling is a right-shoulder chop.** In `axe_fell.py` the left hand holds the knob and the
+  right hand slides; `UpdateFellingHatchet` lays the hatchet through both fists. The bit lands
+  to her right (`FellBitLeft` is negative).
+- 2026-09-25: **Migrating from another project headless:** run `UnrealEditor-Cmd <other>.uproject
+  -run=pythonscript` with `AssetTools.migrate_packages(pkgs, <our Content dir>, MigrationOptions(prompt=False))`.
+  It follows every dependency. The GASP clips dragged in 272 foley sounds and about 40 extra
+  clips via notifies, which had to be pruned.
+- 2026-09-25: **Retargeting UEFN → `IK_MH_IKRig`:** keep the Root Motion op **off**. Even with target root
+  `root` and `COPY_FROM_SOURCE_ROOT`, it wrote a root that snaked and yawed up to 16° per step.
+  Locking that root in game made the heroine's head and shoulders wobble. `gasp_locomotion`
+  retargets with the op off, then `straighten_root` puts the travel on a straight root before
+  locking the clips in place (`set_root_motion_enabled`). Check a new clip with
+  `get_bone_pose_for_time(anim, 'root', t, False)`: the root should have no yaw and no sideways
+  drift.
+- 2026-09-25: Retargeting to `IK_MH_IKRig`: the "Run IK Rig" op blew poses out to about -9000 cm, and "Root
+  Motion" sank the pelvis. Disable both by index (`set_retarget_op_enabled(i, False)`). After
+  fuzzy auto-mapping, clear the bad maps (Root from a foot, metacarpals from fingers).
+- 2026-09-25: `IKRetargetBatchOperation.run_batch_retarget` returns nothing while PIE runs; stop
+  PIE first.
+- 2026-09-25: After `AnimationDataController.set_bone_track_keys`,
+  `AnimationLibrary.get_bone_pose_for_frame` reports the pelvis about 10.7 cm lower than the
+  written keys (a skeleton-vs-retarget-source offset). The game doesn't apply that offset. Write,
+  read back, and compensate (see `gasp_locomotion.straighten_root`).
+- 2026-09-27: Sequencer animation bakes (`homestead_agent.axe_fell`, `hoe_till`) fail and hang while
+  PIE runs ("Editor is currently in a play mode"). Stop PIE before baking.
+- 2026-09-27: Idle tool angles can be tuned live with `homestead.CarryHatchet`, `CarryHoe`,
+  `CarryMachete` and `CarryKnife` (degrees; -1 keeps the default). If the hoe carry changes, re-read
+  its transform relative to `hand_r` and update `HELD` in `hoe_till.py` before rebaking.
+
+### Props, materials and imports
+
+- 2026-09-25: Original props are authored in Blender by the `blender-assets` skill
+  (`docs\blender-assets.md`, `Assets\Props\*`). Its `Import-Props.ps1` opens the project in its own
+  editor, so quit an MCP editor session first; never run both at once. The heroine's MetaHuman
+  pipeline doesn't use Blender.
+- 2026-09-26: **Masks samplers need non-sRGB textures.** Engine `WhiteSquareTexture` and `Black` are sRGB. On
+  a Masks sampler the whole material fails to compile and silently renders as the default grid,
+  so search the log for `Failed to compile`. `import_props.py` uses its own
+  `T_PropDefault{White,Black}` textures and `/Engine/EngineMaterials/DefaultNormal`.
+- 2026-09-26: **Import props in the running editor.** Under `-run=pythonscript` the
+  `StaticMeshEditorSubsystem` is missing, so collision and LOD import fail. Instead, `run_python`
+  `sys.path.insert(0, r'<repo>\Scripts\Blender'); import import_props; import_props.main([...])`
+  (or `import_prop(name, M_Field)` per prop), with a long `editor_mcp.py --timeout`. `_LODn` FBXs
+  become LODs of their base mesh. Reports with a `wind` block get `M_PropFoliage`: masked,
+  two-sided foliage, packed R roughness / G translucency / B AO, vertex-colour wind WPO and a
+  camera-safe dither.
+- 2026-09-26: **Reloading `import_props` after editing it:** a plain `import` returns the cached module.
+  Load it fresh with `importlib.util.spec_from_file_location('import_props',
+  r'<repo>\Scripts\Blender\import_props.py')` + `module_from_spec` + `exec_module`, then
+  `m.main(['TilledBed', 'Seeds'])`. Extra textures (for example a `_wet` variant) go through an
+  `AssetImportTask` with `replace_existing=True`.
+- 2026-09-26: **An invisible ground prop is usually back-face culled.** Check the FBX's average face
+  normal z in Blender; an open sheet from `kit.recalc_normals` can face down (see
+  docs/blender-assets.md).
+
+### World, terrain, water and lighting
+
+- 2026-09-28: **Measure tree bases against the terrain meshes, not engine traces.** `line_trace_multi`
+  mostly hits tree capsules or nothing. HomesteadWorld's 25 terrain
+  `ProceduralMeshComponent`s answer `line_trace_component(start, end, True, False, False)`
+  (it returns a tuple, or None on a miss). Compare against the tree mesh's lowest LOD-rim
+  vertices (active trees render at MinLOD 1, outer trees at LOD 2).
+  `ResolveGeneratedTreeVisual` sinks each tree by `4 + RimLift * Scale` below the lowest ground
+  sampled at 0.5× and 1× footprint in 8 directions. RimLift is 30 for the conifer, 19 for the
+  accent and 3 for the broadleaf.
+- 2026-09-26: **Count decorations by tag.** In the PIE world, loop over actors, then
+  `get_components_by_class(unreal.HierarchicalInstancedStaticMeshComponent)`, keep
+  `component_has_tag('WoodlandGranite')` (or `'WoodlandUnderbrush'`), and read
+  `get_instance_transform(i, True)` per mesh. The log line `Generated cover refresh: ...
+  underbrush= granite= big_granite=` gives the totals.
+- 2026-09-25: Trees are components of the `HomesteadWorld` actor. When searching for terrain with
+  traces, require the `ProceduralMeshComponent` hit and a single hit per column; otherwise a
+  teleport lands the heroine on a tree canopy.
+- 2026-09-27: **Single Layer Water, not Translucent.** A translucent surface read as a flat dark sheet under
+  the canopy. SLW renders in the opaque pass, so it takes the woodland's shadows and Lumen
+  reflections, and the bed shows through tinted by the real water depth.
+- 2026-09-27: **SLW coefficients act per centimetre.** Absorption around 4/1.6/1.2 made the 25-38 cm creek
+  opaque. The shipped defaults are Absorption (0.062, 0.025, 0.02) and Scattering
+  (0.0003, 0.0006, 0.0007). Absorb red fastest for a clear green-teal.
+- 2026-09-27: **Transient compile errors.** While the graph is being authored, the log fills with
+  "No inputs to Single Layer Water Material" / `Failed to compile` lines from the intermediate
+  compiles. Judge only the final state: `recompile_material`, then
+  `MaterialEditingLibrary.get_statistics(m).num_pixel_shader_instructions` > 0 (about 1048) and
+  `get_inputs_for_material_expression` on the SLW output node. Stop PIE before re-authoring,
+  because `import_asset` fails during PIE.
+- 2026-09-27: **Tune live with a MID.** In PIE, find the `ProceduralMeshComponent`s tagged `CreekWater`
+  (5 around the start), make one `create_dynamic_material_instance(0, M_CreekWater)`, set it on
+  all of them, and drive `set_scalar/vector_parameter_value`. Bake the winners into the bootstrap
+  defaults. Confirm the flow with a 3 s ddagrab clip; compare frames 0 and 25.
+- 2026-09-25: The sun uses ray-traced shadows (`homestead.RayTracedSun`, default 1) and moves every
+  refresh. `homestead.RayTracedSun 0` restores VSM with 0.5° steps. Don't reintroduce continuous
+  rotation on the VSM path. See `docs/research/rendering-baseline/README.md`. The `-Presentation`
+  smoke route fails at its first case for a pre-existing reason: `ApplyAppearance` rejects
+  "Owned wardrobe appearance requires PrepareEquipment".
+- 2026-09-25: Rotating a directional light invalidates every cached Virtual Shadow Map page. The
+  world refresh (every 0.25 s) used to rotate the sun continuously, causing paired 30-39 ms stalls
+  at 4K. On the VSM path `UpdateLighting` steps rotation by 0.5°; the default ray-traced sun
+  moves continuously.

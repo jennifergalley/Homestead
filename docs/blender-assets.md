@@ -349,7 +349,7 @@ scratch with two shared modules in `Scripts\Blender`:
   from a silhouette (`F.ovate` or a custom shape) and a vein list. The result is saved as
   three PNGs under `Assets\Props\<Name>\Textures`:
   - `_basecolor`: sRGB, alpha is the opacity mask, clip at 0.5.
-  - `_normal`: OpenGL; flip green in Unreal.
+  - `_normal`: OpenGL; `import_props.py` flips green on import (`flip_green_channel`).
   - `_roughness`: packed as R roughness, G translucency mask, B AO.
 
   `atlas.material()` makes the two-sided, masked Principled material.
@@ -393,18 +393,25 @@ Conventions match the other exports: meters, Z up, -Y forward, FBX
 
 ## Unreal import
 
+Import into your worktree's running editor (the normal path, and the only one that gives LODs and
+collision), through the MCP `run_python` tool (`Scripts\McpHelpers.ps1`, `py`):
+`sys.path.insert(0, r"<repo>\Scripts\Blender")`, `import import_props`, then
+`import_props.main(['<Name>'])` (or `import_props.import_prop(name, unreal.load_asset(M_Field))`
+per prop). The headless form,
+
 ```powershell
 .\Scripts\Blender\Import-Props.ps1 -Name ChoppingBlock
 ```
 
-Requires the built editor module and `M_Field` (from `Scripts\Build-Game.ps1`). It
+runs as a `-run=pythonscript` commandlet, which lacks `StaticMeshEditorSubsystem`, so its meshes
+get no LODs or collision. It also needs this worktree's editor closed and counts toward the
+machine's 3-Unreal-process limit.
+
+Either way it requires the built editor module and `M_Field` (from `Scripts\Build-Game.ps1`). It
 verifies the FBX hashes against the report, imports to
 `/Game/SurvivalGame/Environment/Props/<Name>`, merges `_LODn` meshes into one LOD chain,
 assigns material instances, adds the requested simple collision and checks the imported
-height against Blender. The headless commandlet lacks `StaticMeshEditorSubsystem`, so LOD
-and collision work needs a running editor: `sys.path.insert(0, r"<repo>\Scripts\Blender")`,
-`import import_props`, then `import_props.import_prop(name, unreal.load_asset(M_Field))`
-through the MCP `run_python` tool.
+height against Blender.
 
 Material parents by report type:
 
