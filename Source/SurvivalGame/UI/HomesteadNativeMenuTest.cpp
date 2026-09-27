@@ -6,6 +6,7 @@
 #include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
 #include "SHomesteadMenu.h"
+#include "SHomesteadMapView.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Components/PrimitiveComponent.h"
@@ -571,6 +572,44 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { Controller->OpenBook(3); },
         [this]() { return Controller->BookPage() == 3
             && Controller->NativeMenu->GetActionCount() == 0; });
+    Add(TEXT("Map tab sits between Build and Guidebook"),
+        [this, Before]()
+        {
+            *Before = Controller->Simulation().Serialize();
+            Tap(EKeys::Gamepad_LeftShoulder);
+        },
+        [this]() { return Controller->BookPage() == 7 && Controller->NativeMenu->GetMapView().IsValid()
+            && Controller->NativeMenu->GetMapView()->PixelsPerCm() > 0; });
+    Capture(TEXT("native-map"));
+    Add(TEXT("Controller triggers zoom the map in"),
+        [this]() { Axis(EKeys::Gamepad_RightTriggerAxis, 1.0f); },
+        [this]()
+        {
+            const auto View = Controller->NativeMenu->GetMapView();
+            return View && View->PixelsPerCm() > View->FitPixelsPerCm() * 1.05;
+        });
+    const TSharedRef<double> PanStart = MakeShared<double>(0.0);
+    Add(TEXT("Controller left stick pans the map"),
+        [this, PanStart]()
+        {
+            const auto View = Controller->NativeMenu->GetMapView();
+            // Zoom in far enough that the sheet is wider than the page, then push the stick east.
+            View->ZoomBy(4.0, View->GetCachedGeometry().GetLocalSize() * 0.5f);
+            *PanStart = View->Center().y;
+            Axis(EKeys::Gamepad_LeftX, 1.0f);
+        },
+        [this, PanStart]()
+        {
+            const auto View = Controller->NativeMenu->GetMapView();
+            return View && View->Center().y > *PanStart + 100.0;
+        });
+    Add(TEXT("D-pad steps between named landmarks"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Right); },
+        [this]() { return !Controller->NativeMenu->GetMapView()->SelectedName().IsEmpty(); });
+    Add(TEXT("Map input stays in the book and LB / RB still switch tabs"),
+        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
+        [this, Before]() { return Controller->BookPage() == 3 && Controller->IsBookOpen()
+            && Controller->Simulation().Serialize() == *Before; });
     Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
         [this]() { return Controller->BookPage() == 6; });

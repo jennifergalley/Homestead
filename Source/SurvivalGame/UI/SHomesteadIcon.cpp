@@ -218,6 +218,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("guide")), EKind::Guide},
         {FName(TEXT("settings")), EKind::Settings},
         {FName(TEXT("appearance")), EKind::Appearance},
+        {FName(TEXT("map")), EKind::Map},
         {FName(TEXT("knife")), EKind::Knife},
         {FName(TEXT("branch")), EKind::Branch},
         {FName(TEXT("stone")), EKind::Stone},
@@ -333,6 +334,18 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Rect(7, 17, 10, 7, Gold);
         P.Rect(23, 33, 10, 7, Gold);
         P.Rect(39, 22, 10, 7, Gold);
+        break;
+    case EKind::Map:
+        // A folded estate map: three panels, a dashed boundary and a pin.
+        P.Shape({{7, 14}, {20, 9}, {20, 43}, {7, 48}}, Cream);
+        P.Shape({{20, 9}, {36, 14}, {36, 48}, {20, 43}}, Gold);
+        P.Shape({{36, 14}, {49, 9}, {49, 43}, {36, 48}}, Cream);
+        P.Line({{11, 36}, {16, 30}}, Wood, 2);
+        P.Line({{19, 26}, {24, 22}}, Wood, 2);
+        P.Line({{28, 24}, {33, 28}}, Wood, 2);
+        P.Line({{38, 31}, {44, 27}}, Wood, 2);
+        P.Disc(28, 34, 4, Berry);
+        P.Disc(28, 34, 1.5f, Cream);
         break;
     case EKind::Appearance:
         P.Line({{28, 38}, {28, 49}}, Wood, 6);

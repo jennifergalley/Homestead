@@ -1,5 +1,6 @@
 #include "HomesteadHUD.h"
 #include "HomesteadController.h"
+#include "HomesteadMapComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
@@ -163,6 +164,11 @@ void AHomesteadHUD::DrawHUD()
                 : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
         else DrawInteractCue(*PC);
+        if (const UHomesteadMapComponent* Map = PC->MapPresenter(); Map && Map->IsMinimapVisible())
+        {
+            const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth);
+            ProtectFeedback(TEXT("minimap"), Minimap.Min.X, Minimap.Min.Y, Minimap.GetSize().X, Minimap.GetSize().Y);
+        }
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);
         Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [L3] Sprint   [R3] Camera distance")
                 : TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] Sprint   Ctrl+wheel: zoom"),

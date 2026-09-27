@@ -37,6 +37,7 @@
 #include "UI/SHomesteadMenu.h"
 #include "UI/SHomesteadShop.h"
 #include "UI/SHomesteadHotbar.h"
+#include "HomesteadMapComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/IInputProcessor.h"
 #include "UI/HomesteadMenuPortrait.h"
@@ -62,7 +63,7 @@ constexpr const TCHAR* AutosaveSettingsSection = TEXT("Homestead.Autosave");
 constexpr const TCHAR* AutosaveEnabledKey = TEXT("Enabled");
 constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
 constexpr const TCHAR* ActionHintSection = TEXT("Homestead.ActionHints");
-constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
+constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
 
 bool IsHotbarTool(Homestead::Item Item) { return Homestead::IsTool(Item); }
 
@@ -206,6 +207,7 @@ private:
 AHomesteadController::AHomesteadController()
 {
     PrimaryActorTick.bCanEverTick = true;
+    Map = CreateDefaultSubobject<UHomesteadMapComponent>(TEXT("Map"));
     Music = CreateDefaultSubobject<UAudioComponent>(TEXT("Music"));
     Music->bAutoActivate = false;
     Music->bAllowSpatialization = false;
@@ -1095,6 +1097,7 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::C, IE_Pressed, this, &AHomesteadController::OpenCraft);
     InputComponent->BindKey(EKeys::B, IE_Pressed, this, &AHomesteadController::OpenBuild);
     InputComponent->BindKey(EKeys::H, IE_Pressed, this, &AHomesteadController::OpenJournal);
+    InputComponent->BindKey(EKeys::M, IE_Pressed, this, &AHomesteadController::OpenMap);
     InputComponent->BindKey(EKeys::Gamepad_Special_Left, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::Left, IE_Pressed, this, &AHomesteadController::PreviousPage);
     InputComponent->BindKey(EKeys::Right, IE_Pressed, this, &AHomesteadController::NextPage);
@@ -2284,7 +2287,7 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     EndPlacement();
     HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
-    Page = FMath::Clamp(TargetPage, 0, 6);
+    Page = FMath::Clamp(TargetPage, 0, 7);
     Selection = 0;
     bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
@@ -2328,6 +2331,7 @@ void AHomesteadController::OpenSettings() { if (bBookOpen && Page == 4) CloseBoo
 void AHomesteadController::OpenCraft() { if (!IsFailed()) OpenBook(1); }
 void AHomesteadController::OpenBuild() { if (!IsFailed()) OpenBook(2); }
 void AHomesteadController::OpenJournal() { if (!IsFailed()) OpenBook(3); }
+void AHomesteadController::OpenMap() { if (!IsFailed()) OpenBook(7); }
 void AHomesteadController::Back()
 {
     if (IsFailed()) { RetryCheckpoint(); return; }
@@ -2470,10 +2474,17 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             TEXT("Periodic rotating saves. Recovery checkpoints remain separate.")});
         Result.Add({13, FString::Printf(TEXT("Autosave interval: %d minutes"), AutosaveMinutes),
             bAutosaveEnabled ? TEXT("Counts only unpaused gameplay time.") : TEXT("Stored interval; Autosave is Off.")});
+        if (Map)
+            Result.Add({17, FString::Printf(TEXT("Minimap: %s"), Map->RotatesWithCamera() ? TEXT("turns with your view") : TEXT("north up")),
+                TEXT("North up keeps the map still; turning with your view keeps ahead at the top, and the N marker shows north.")});
         Result.Add({15, TEXT("Show action hints again"),
             FString::Printf(TEXT("Each floating action hint retires after you've done that action %d times. This brings them all back."), HintRetireUses)});
         if (!PreviewLabel().IsEmpty())
             Result.Add({14, PreviewLabel(), TEXT("This preview uses isolated saves.")});
+    }
+    else if (Page == 7)
+    {
+        Result.Add({0, TEXT("Map"), TEXT("The estate and the country around it.")});
     }
     else if (Page == 6)
     {
@@ -2693,6 +2704,7 @@ void AHomesteadController::ActivateRow()
         case 12: MenuSetAutosaveEnabled(!bAutosaveEnabled); break;
         case 13: MenuSetAutosaveInterval(AutosaveMinutes == 5 ? 10 : AutosaveMinutes == 10 ? 20 : AutosaveMinutes == 20 ? 30 : 5); break;
         case 15: ResetActionHints(); break;
+        case 17: if (Map) Map->SetRotatesWithCamera(!Map->RotatesWithCamera()); break;
         default: break;
         }
     }
@@ -2880,6 +2892,7 @@ void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
         PersistAudioVolume(Id, Previous + Direction * 0.05f, Previous);
     }
     else if (Id == 12) MenuSetAutosaveEnabled(Direction > 0);
+    else if (Id == 17 && Map) Map->SetRotatesWithCamera(Direction > 0);
     else if (Id == 13 && bAutosaveEnabled)
     {
         const int32 Values[] = {5, 10, 20, 30};

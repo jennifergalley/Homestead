@@ -22,6 +22,7 @@ namespace HomesteadMenus { class SHomesteadShop; }
 class AHomesteadGeneralStore;
 class IInputProcessor;
 class AHomesteadMenuPortrait;
+class UHomesteadMapComponent;
 class SWidget;
 
 enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe };
@@ -194,6 +195,8 @@ public:
     // field book is open, so its preview shows it), or Item::Count.
     Homestead::Item SelectedCarriedTool() const;
     bool ShouldShowHotbar() const;
+    // The estate map's snapshot, minimap and boundary toast.
+    UHomesteadMapComponent* MapPresenter() const { return Map; }
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
@@ -249,6 +252,7 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class UHomesteadMapComponent;
     enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
@@ -265,6 +269,7 @@ private:
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;
+    UPROPERTY() TObjectPtr<UHomesteadMapComponent> Map;
     UPROPERTY() TObjectPtr<UAudioComponent> Music;
     UPROPERTY() TObjectPtr<UAudioComponent> Ambience;
     // The creek's burble: a looping, attenuated source kept at the point of the stream nearest
@@ -461,6 +466,7 @@ private:
     void OpenCraft();
     void OpenBuild();
     void OpenJournal();
+    void OpenMap();
     void PreviousPage();
     void NextPage();
     void PreviousRow();

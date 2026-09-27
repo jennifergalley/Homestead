@@ -1,6 +1,8 @@
 #include "SHomesteadMenu.h"
 #include "SHomesteadIcon.h"
 #include "HomesteadMenuNavigation.h"
+#include "SHomesteadMapView.h"
+#include "../HomesteadMapComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
 #include "Styling/SlateTypes.h"
@@ -150,9 +152,9 @@ FLinearColor AppearanceSwatchColor(int32 Id, int32 Value)
     }
 }
 const TCHAR* Tabs[] = {TEXT("Inventory"), TEXT("Craft"), TEXT("Build"), TEXT("Guidebook"),
-    TEXT("Settings"), TEXT("Credits"), TEXT("Appearance")};
+    TEXT("Settings"), TEXT("Credits"), TEXT("Appearance"), TEXT("Map")};
 const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("guide"),
-    TEXT("settings"), TEXT("credits"), TEXT("appearance")};
+    TEXT("settings"), TEXT("credits"), TEXT("appearance"), TEXT("map")};
 FName RequirementIcon(Homestead::Item Item)
 {
     const int32 Index = static_cast<int32>(Item);
@@ -174,7 +176,7 @@ constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
 constexpr int32 VisibleEquipmentSlotCount = UE_ARRAY_COUNT(VisibleEquipmentSlots);
 const TCHAR* EquipmentSlotNames[] = {TEXT("Top"), TEXT("Legs"), TEXT("Coat"), TEXT("Feet")};
 const TCHAR* EquipmentSlotIcons[] = {TEXT("slot-torso"), TEXT("trousers"), TEXT("fur-coat"), TEXT("slot-feet")};
-constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
+constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
 
 int32 ShiftFieldBookPage(int32 Page, int32 Direction)
 {
@@ -601,7 +603,7 @@ void SHomesteadMenu::Refresh()
     if (SeenPage == 4)
     {
         // Session rows first, then only the rows of the chosen Game / Sound / Video tab.
-        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 12, 13, 15, 8, 14, 16, 5, 6, 7, 10, 11};
+        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 17, 12, 13, 15, 8, 14, 16, 5, 6, 7, 10, 11};
         TArray<FHomesteadRow> Sorted;
         TArray<int32> SortedIndices;
         const auto Take = [&](int32 Found)
@@ -845,6 +847,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [OptionButton(TEXT("Off"), !Controller->IsAutosaveEnabled(),
                     [this]() { Controller->MenuSetAutosaveEnabled(false); Refresh(); })];
             }
+            else if (Row.Id == 17 && Controller->MapPresenter())
+            {
+                TSharedPtr<SHorizontalBox> Choices;
+                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
+                Choices->AddSlot().AutoWidth().Padding(0, 0, 6, 0)
+                [OptionButton(TEXT("North up"), !Controller->MapPresenter()->RotatesWithCamera(),
+                    [this]() { Controller->MapPresenter()->SetRotatesWithCamera(false); Refresh(); })];
+                Choices->AddSlot().AutoWidth()
+                [OptionButton(TEXT("Turns with view"), Controller->MapPresenter()->RotatesWithCamera(),
+                    [this]() { Controller->MapPresenter()->SetRotatesWithCamera(true); Refresh(); })];
+            }
             else if (Row.Id == 13)
             {
                 TSharedPtr<SHorizontalBox> Choices;
@@ -883,6 +896,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return Result;
     };
     if (SeenPage == 4) return BuildSettings();
+    if (SeenPage == 7) return BuildMap();
     const bool Storage = SeenPage == 0 && Controller->ActiveStorageChest().IsSet();
     const bool PackOnly = SeenPage == 0 && !Storage;
     TSharedPtr<SHorizontalBox> ColumnsBox;
@@ -1530,7 +1544,7 @@ FName SHomesteadMenu::EntryIcon(const FHomesteadRow& Row) const
         return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(static_cast<Homestead::Item>(Row.Id))));
     if (SeenPage == 1 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(RecipeIcons)) return FName(RecipeIcons[Row.Id]);
     if (SeenPage == 2 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(PieceIcons)) return FName(PieceIcons[Row.Id]);
-    return FName(TabIcons[FMath::Clamp(SeenPage, 0, 6)]);
+    return FName(TabIcons[FMath::Clamp(SeenPage, 0, 7)]);
 }
 bool SHomesteadMenu::IsDirectCameraSetting(const FHomesteadRow& Row) const
 {
@@ -2213,7 +2227,7 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     if (Controller->MenuPortraitBrush() && SeenPage == 0) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
-    if (SeenPage != 0 && SeenPage != 6) Regions.Add(ERegion::Details);
+    if (SeenPage != 0 && SeenPage != 6 && SeenPage != 7) Regions.Add(ERegion::Details);
     if (!Actions.IsEmpty() && SeenPage != 0 && SeenPage != 6) Regions.Add(ERegion::Actions);
     Region = Regions[HomesteadMenuNavigation::Cycle(Regions.IndexOfByKey(Region), Regions.Num(), Direction)];
     Hover = INDEX_NONE;
@@ -2464,8 +2478,71 @@ FNavigationReply SHomesteadMenu::OnNavigation(const FGeometry&, const FNavigatio
     return FNavigationReply::Stop();
 }
 
+TSharedRef<SWidget> SHomesteadMenu::BuildMap()
+{
+    const TWeakObjectPtr<UHomesteadMapComponent> Presenter = Controller.IsValid() ? Controller->MapPresenter() : nullptr;
+    return SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine).Padding(4)
+    [
+        FocusAnchor(SAssignNew(MapView, SHomesteadMapView).Map(Presenter)
+            .UsesGamepad_Lambda([this]() { return Controller.IsValid() && Controller->UsesGamepad(); }), ERegion::Content, 0)
+    ];
+}
+
+bool SHomesteadMenu::HandleMapKey(FKey Key, EInputEvent Event, float InputAmount)
+{
+    if (Event == IE_Axis)
+    {
+        if (Key == EKeys::Gamepad_LeftX || Key == EKeys::Gamepad_LeftY || Key == EKeys::Gamepad_RightY
+            || Key == EKeys::Gamepad_LeftTriggerAxis || Key == EKeys::Gamepad_RightTriggerAxis)
+        {
+            MapView->SetAnalog(Key, InputAmount);
+            return true;
+        }
+        return false;
+    }
+    const bool Arrow = Key == EKeys::Left || Key == EKeys::Right || Key == EKeys::Up || Key == EKeys::Down
+        || Key == EKeys::Gamepad_DPad_Left || Key == EKeys::Gamepad_DPad_Right || Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_DPad_Down;
+    if (Event == IE_Repeat && Arrow) Event = IE_Pressed;
+    if (Event != IE_Pressed) return false;
+    // The triggers zoom here (through their axes) instead of cycling sections.
+    if (Key == EKeys::Gamepad_LeftTrigger || Key == EKeys::Gamepad_RightTrigger) return true;
+    if (Key == EKeys::M) { Back(); return true; }
+    const int32 Dx = Key == EKeys::Right || Key == EKeys::Gamepad_DPad_Right ? 1 : Key == EKeys::Left || Key == EKeys::Gamepad_DPad_Left ? -1 : 0;
+    const int32 Dy = Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down ? 1 : Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up ? -1 : 0;
+    if (Region == ERegion::Tabs)
+    {
+        if (Dy <= 0) return false;
+        Region = ERegion::Content;
+        bFocusPending = true;
+        SynchronizeFocus();
+        return true;
+    }
+    if (Region != ERegion::Content) return false;
+    if (Dx || Dy)
+    {
+        Hover = INDEX_NONE;
+        // Past the last place upward, the focus climbs to the tabs as on every other page.
+        if (!MapView->Step(Dx, Dy) && Dy < 0)
+        {
+            Region = ERegion::Tabs;
+            FocusedTab = SeenPage;
+            bFocusPending = true;
+            SynchronizeFocus();
+        }
+        return true;
+    }
+    if (Key == EKeys::Enter || Key == EKeys::SpaceBar || Key == EKeys::E || Key == EKeys::Gamepad_FaceButton_Bottom)
+    { MapView->ToggleZoomOnSelected(); return true; }
+    if (Key == EKeys::Equals || Key == EKeys::Add) { MapView->ZoomBy(1.5, MapView->GetCachedGeometry().GetLocalSize() * 0.5f); return true; }
+    if (Key == EKeys::Hyphen || Key == EKeys::Subtract) { MapView->ZoomBy(1 / 1.5, MapView->GetCachedGeometry().GetLocalSize() * 0.5f); return true; }
+    // Pointer clicks belong to the map itself (drag, choose a place).
+    return Key == EKeys::LeftMouseButton;
+}
+
 bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
 {
+    if (SeenPage == 7 && MapView && Dialog == EDialog::None && !bRecovery && !bSaving
+        && HandleMapKey(Key, Event, InputAmount)) return true;
     if (Key == EKeys::LeftControl || Key == EKeys::RightControl) bControl = Event != IE_Released;
     if (Key == EKeys::LeftShift || Key == EKeys::RightShift) bShift = Event != IE_Released;
     if (Event == IE_Axis)

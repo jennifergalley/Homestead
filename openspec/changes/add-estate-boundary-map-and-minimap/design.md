@@ -38,14 +38,19 @@
 
 ### 2. One baked cartographic texture
 
-- An editor utility places a temporary orthographic `SceneCapture2D` over the Estate level.
-  Its show flags are limited to landscape, water, foliage and static meshes.
-- It captures at 8192² for 4 km, which is about 0.5 m per texel. A stylising pass then
-  tints to parchment, inks the coastline and water edges, and lightens the road.
-- The output is `T_EstateMap`, a texture with mips, together with an origin and size
-  transform.
-- The texture is re-baked whenever the terrain changes meaningfully. The re-bake is a
-  one-click editor action, documented in `docs\setup.md`.
+- The stylising bake is `Scripts\Map\bake_estate_map.py`. It renders the map from the terrain
+  heightmap and layout the Estate level is built from: a parchment hillshade, 10 m contours, a
+  muted sea with a water-lined, inked coastline, the river inked in and the road lightened.
+  This reads as an estate plan even before the level is dressed, and it re-bakes in under a
+  minute.
+- Once the level has water and dressing, an orthographic capture of it (a temporary
+  `SceneCapture2D` over the whole square, show flags limited to landscape, water, foliage and
+  static meshes) is passed to the same bake with `--capture`, which folds its woods and fields
+  into the parchment palette.
+- The output is `T_EstateMap` (4096², about 1 m per texel, all mips resident), with
+  `DA_EstateMap` holding its origin and size. `Homestead.ImportEstateMap` (or the
+  `HomesteadImportEstateMap` commandlet) imports it; the steps are in `docs\setup.md`.
+- The texture is re-baked whenever the terrain changes meaningfully.
 - **Alternative considered:** a live `SceneCapture2D` every frame. Rejected, because it adds
   constant GPU cost for a static world.
 
