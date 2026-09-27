@@ -1,6 +1,7 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadEstate.h"
 #include "HomesteadParcels.h"
+#include "HomesteadManor.h"
 
 #include <algorithm>
 #include <cmath>
@@ -196,7 +197,7 @@ std::string MissingMessage(const Inventory& change, const Inventory& stock)
 }
 const char* AcquisitionSource(Item item) { return ItemSource(item); }
 bool EdgePiece(Piece kind) { return kind == Piece::Wall || kind == Piece::Doorway; }
-bool Furniture(Piece kind) { return kind == Piece::Fire || kind == Piece::Bed || kind == Piece::Chest; }
+bool Furniture(Piece kind) { return IsFurniture(kind); }
 using Edge = std::tuple<int, int, int>;
 // Canonical shared edges: axis 0 is vertical, axis 1 is horizontal.
 Edge EdgeKey(int x, int y, int rotation)
@@ -331,6 +332,23 @@ Result CheckGardenResources(const State& state, int gardenX, int gardenY)
 }
 Result CheckAreaResources(const State& state, double left, double bottom, double size, const char* blockedMessage)
 {
+    const auto blocks = [&](const ResourceNode& node)
+    {
+        if (node.cleared) return false;
+        return node.kind == ResourceKind::Sapling ?
+            node.position.x >= left && node.position.x < left + size
+                && node.position.y >= bottom && node.position.y < bottom + size :
+            DistanceSquared(node.position, {Clamp(node.position.x, left, left + size),
+                Clamp(node.position.y, bottom, bottom + size)}) <= 50.0 * 50.0;
+    };
+    // The fixed estate has no woodland generator; its trees are the baked placements.
+    if (state.fixedEstate)
+    {
+        for (const auto& node : state.resources)
+            if ((node.kind == ResourceKind::ForestTree || node.kind == ResourceKind::Sapling) && blocks(node))
+                return Bad(blockedMessage);
+        return Good("");
+    }
     Generation::ChunkCoord low, high;
     const auto lowStatus = Generation::ChunkAt(static_cast<std::int64_t>(left - 50),
         static_cast<std::int64_t>(bottom - 50), low);
@@ -349,12 +367,7 @@ Result CheckAreaResources(const State& state, double left, double bottom, double
                 if (entity.kind != Generation::EntityKind::ForestTree && entity.kind != Generation::EntityKind::Sapling) continue;
                 ResourceNode node;
                 if (!GeneratedNode(state, entity, node) || node.cleared) continue;
-                const bool blocked = node.kind == ResourceKind::Sapling ?
-                    node.position.x >= left && node.position.x < left + size
-                        && node.position.y >= bottom && node.position.y < bottom + size :
-                    DistanceSquared(node.position, {Clamp(node.position.x, left, left + size),
-                        Clamp(node.position.y, bottom, bottom + size)}) <= 50.0 * 50.0;
-                if (blocked) return Bad(blockedMessage);
+                if (blocks(node)) return Bad(blockedMessage);
             }
         }
     return Good("");
@@ -407,7 +420,7 @@ Result CheckFootprintResources(const State& state, const Footprint& area, bool q
 }
 Footprint ResourceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation)
 {
-    const bool furniture = kind == Piece::Fire || kind == Piece::Bed || kind == Piece::Chest;
+    const bool furniture = IsFurniture(kind);
     return furniture ? PieceFootprint(building, kind, cellX, cellY, rotation, onFoundation)
         : PieceFootprint(building, Piece::Foundation, cellX, cellY, 0, true);
 }
@@ -780,7 +793,7 @@ const char* RecipeName(Recipe recipe)
 }
 const char* PieceName(Piece piece)
 {
-    static const char* names[] = {"Foundation", "Wall", "Doorway", "Roof", "Cookfire", "Bed", "Chest"};
+    static const char* names[] = {"Foundation", "Wall", "Doorway", "Roof", "Cookfire", "Bed", "Chest", "Hearth"};
     return ValidEnum(piece, Piece::Count) ? names[static_cast<int>(piece)] : "Unknown structure";
 }
 const char* CropName(CropKind kind)
@@ -818,10 +831,16 @@ const char* PieceRequirements(Piece piece)
             result[i] = DescribeCost(BuildCost(kind));
             if (EdgePiece(kind) || kind == Piece::Roof) result[i] += "; foundation required";
             if (kind == Piece::Fire) result[i] += "; add firewood or a branch after placement to light";
+            if (kind == Piece::Hearth) result[i] = "Part of the old house; always lit";
         }
         return result;
     }();
     return ValidEnum(piece, Piece::Count) ? descriptions[static_cast<int>(piece)].c_str() : "Unknown structure";
+}
+bool IsBuildable(Piece piece) { return ValidEnum(piece, Piece::Count) && piece != Piece::Hearth; }
+bool IsFurniture(Piece piece)
+{
+    return piece == Piece::Fire || piece == Piece::Bed || piece == Piece::Chest || piece == Piece::Hearth;
 }
 double StreamX(double y) { return Generation::StreamCenterCm(y); }
 bool IsNearWater(Point position)
@@ -895,6 +914,8 @@ Point FurnitureOffset(Piece kind)
     case Piece::Bed: return {95.0, -10.0};
     case Piece::Chest: return {-100.0, -100.0};
     case Piece::Fire: return {-100.0, 95.0};
+    // Against the wall on the piece's own edge, its back to the masonry's inner face.
+    case Piece::Hearth: return {0.0, 98.0};
     default: return {};
     }
 }
@@ -914,6 +935,7 @@ Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int ce
     case Piece::Bed: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {35.0, 78.0});
     case Piece::Chest: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {35.0, 28.0});
     case Piece::Fire: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {40.0, 40.0});
+    case Piece::Hearth: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {85.0, 32.0});
     default: return {center, {CellSize * 0.5, CellSize * 0.5}, building.yaw};
     }
 }
@@ -997,10 +1019,34 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     // Round-1 lanes seed their parts from `layout` here, each in its own helper.
     SeedEstateParcels(candidate, layout);
     SeedEstateShops(candidate, layout);
+    candidate.heroineName = Manor::DefaultHeroineName;
+    candidate.familyName = Manor::DefaultFamilyName;
+    candidate.estateName = Manor::DefaultEstateName;
+    if (!Manor::SeedStandingRoom(candidate, layout))
+        return Bad("The estate layout has no standing room. No new game was started.");
+    const auto inventory = ValidateInventory(candidate);
+    if (!inventory) return inventory;
     layout_ = std::make_shared<const EstateLayout>(layout);
     placements_ = std::make_shared<const EstatePlacements>(placements);
     state_ = std::move(candidate);
-    return {true, "You arrive home to Trevennor.", ResultCode::None, ++revision_};
+    return {true, "You arrive home to " + state_.estateName + ".", ResultCode::None, ++revision_};
+}
+
+Result Simulation::SetNames(const std::string& heroine, const std::string& family, const std::string& estate)
+{
+    const std::string names[] = {Manor::TrimName(heroine), Manor::TrimName(family), Manor::TrimName(estate)};
+    const char* fields[] = {"first name", "surname", "estate name"};
+    for (int i = 0; i < 3; ++i)
+        if (const std::string problem = Manor::NameProblem(names[i], fields[i]); !problem.empty()) return Bad(problem);
+    state_.heroineName = names[0];
+    state_.familyName = names[1];
+    state_.estateName = names[2];
+    return {true, "Welcome home, " + names[0] + ".", ResultCode::None, ++revision_};
+}
+
+std::string Simulation::EstateName() const
+{
+    return state_.estateName.empty() ? std::string("the estate") : state_.estateName;
 }
 
 bool Simulation::NearWater(Point position) const
@@ -1537,7 +1583,7 @@ bool Simulation::IsSheltered(Point position) const
 bool Simulation::IsNearFire(Point position) const
 {
     for (const auto& piece : state_.structures)
-        if (piece.kind == Piece::Fire && piece.fuelHours > 0.0 &&
+        if (((piece.kind == Piece::Fire && piece.fuelHours > 0.0) || piece.kind == Piece::Hearth) &&
             Near(position, Homestead::StructureCenter(state_, piece), FireReach)) return true;
     return false;
 }
@@ -1710,7 +1756,7 @@ Result Simulation::Craft(Recipe recipe, Point player)
     if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player)) return Bad("Choose a valid recipe and location.");
     const Inventory change = CraftChange(recipe);
     const bool cooking = recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots;
-    if (cooking && !IsNearFire(player)) return Bad("Move beside a fueled cookfire to cook roots; no pot is needed.");
+    if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook roots; no pot is needed.");
     if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
         return Bad("Take your crude hatchet from storage to split firewood.");
     if (!cooking && recipe != Recipe::SplitFirewood && Count(Item::Knife) == 0)
@@ -1912,8 +1958,10 @@ Result Simulation::CheckSite(const PlacementTarget& target, bool quick) const
         || (!existing && state_.buildings.size() >= MaxObjects))
         return Bad("The homestead has reached its structure limit.");
     if (auto owned = CanBuildAt(target); !owned) return owned;
+    if (!IsBuildable(kind)) return Bad("That belongs to the old house and can't be built.");
     const bool onFoundation = existing && HasPiece(state_, Piece::Foundation, target.buildingId, cellX, cellY);
     const Footprint ground = ResourceFootprint(*building, kind, cellX, cellY, rotation, onFoundation);
+    if (Manor::BlockedByManor(state_, Layout(), target, ground)) return Bad(Manor::FootprintBlocked);
     const auto space = CheckFootprintResources(state_, ground, quick);
     if (!space) return space;
     for (const auto& plot : state_.plots)
@@ -2050,6 +2098,43 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
     }
     ++revision_;
     return Good("Your starter tools, bed and storage chests are ready.");
+}
+Result Simulation::SeedStandingRoomAt(Point origin, double yaw)
+{
+    if (state_.failed) return Failed();
+    if (!ValidPoint(origin) || !std::isfinite(yaw)) return Bad("Choose a valid place for the standing room.");
+    if (Manor::HeritageBuildingId(state_) != 0) return Bad("The standing room already stands.");
+    EstateLayout layout;
+    layout.landmarks.push_back({Anchor::StandingRoomOrigin, origin, 0.0, yaw});
+    State candidate = state_;
+    const std::size_t first = candidate.structures.size();
+    if (!Manor::SeedStandingRoom(candidate, layout)) return Bad("The standing room could not be laid out.");
+    for (std::size_t i = first; i < candidate.structures.size(); ++i)
+    {
+        const Structure& piece = candidate.structures[i];
+        const Building& frame = *FindBuilding(candidate, piece.buildingId);
+        const bool floor = HasPiece(candidate, Piece::Foundation, piece.buildingId, piece.cellX, piece.cellY);
+        const Footprint ground = ResourceFootprint(frame, piece.kind, piece.cellX, piece.cellY, piece.rotation, floor);
+        if (!CheckFootprintResources(candidate, ground, false))
+            return Bad("Trees stand where the room would go. Try a clearer spot.");
+        for (const auto& plot : candidate.plots)
+            if (FootprintsOverlap(Inset(ground), Inset(GardenFootprint(plot))))
+                return Bad("A crop plot is in the way of the room.");
+        for (std::size_t j = 0; j < first; ++j)
+            if (!EdgePiece(piece.kind) && !EdgePiece(candidate.structures[j].kind)
+                && FootprintsOverlap(Inset(ground), Inset(StructureFootprint(candidate, candidate.structures[j]))))
+                return Bad("Another building is in the way of the room.");
+    }
+    if (candidate.heroineName.empty())
+    {
+        candidate.heroineName = Manor::DefaultHeroineName;
+        candidate.familyName = Manor::DefaultFamilyName;
+        candidate.estateName = Manor::DefaultEstateName;
+    }
+    const auto inventory = ValidateInventory(candidate);
+    if (!inventory) return inventory;
+    state_ = std::move(candidate);
+    return {true, "The standing room is ready.", ResultCode::None, ++revision_};
 }
 Result Simulation::GrantItems(Item item, int count)
 {
@@ -2379,6 +2464,8 @@ std::string Simulation::Serialize() const
     // Optional trailing sections; saves without them still load.
     WriteParcelOwnership(body, state_);
     WriteEconomy(body);
+    // Optional tagged trailing sections; saves without them still load.
+    if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2608,7 +2695,15 @@ Result Simulation::Deserialize(const std::string& data)
     if (!ReadEconomy(input, candidate, ids)) return invalid();
     RefreshShopCounters(candidate, Layout());
     input >> std::ws;
-    if (!input.eof()) return invalid();
+    // Optional tagged trailing sections, each introduced by its tag word.
+    while (!input.eof())
+    {
+        std::string tag;
+        if (!(input >> tag)) return invalid();
+        if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
+        else return invalid();
+        input >> std::ws;
+    }
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
     int nextHandle = nextResourceHandle_;

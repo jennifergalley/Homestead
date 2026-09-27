@@ -324,6 +324,7 @@ void RequirementsMatchTransactions()
     for (int i = 0; i < static_cast<int>(Piece::Count); ++i)
     {
         const auto piece = static_cast<Piece>(i);
+        if (!IsBuildable(piece)) continue;
         Simulation sim;
         BuildingStock(sim);
         if (piece == Piece::Wall || piece == Piece::Doorway || piece == Piece::Roof)

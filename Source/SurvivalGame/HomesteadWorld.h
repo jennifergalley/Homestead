@@ -220,6 +220,17 @@ private:
     TObjectPtr<UMaterialInterface> TilledBedWetMaterial;
     UPROPERTY()
     TObjectPtr<UStaticMesh> SoilMoundMesh;
+    // The manor's granite kit and hearth (StoneFoundation, StoneWall, StoneDoorway, StoneRoof,
+    // StoneHearth), loaded on first use by name.
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UStaticMesh>> ManorMeshes;
+    UPROPERTY()
+    TObjectPtr<class USoundWave> HearthCrackle;
+    UStaticMesh* ManorMesh(const TCHAR* Name);
+    // Hearth firelight, flickered every tick.
+    TArray<TWeakObjectPtr<class UPointLightComponent>> HearthLights;
+    float HearthFlickerTime = 0.0f;
+    void UpdateHearthFlicker(float DeltaSeconds);
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()

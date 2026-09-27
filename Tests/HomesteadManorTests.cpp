@@ -1,0 +1,225 @@
+// add-ruined-manor-and-arrival: the heritage standing room, the reserved manor footprint and the
+// new-game names. Kept apart from HomesteadSimulationTests so it builds and runs in seconds.
+#include "HomesteadEstate.h"
+#include "HomesteadManor.h"
+#include "HomesteadSimulation.h"
+
+#include <cstdlib>
+#include <iostream>
+#include <string>
+
+using namespace Homestead;
+
+namespace
+{
+int checks = 0;
+void Check(bool condition, const char* expression, int line)
+{
+    ++checks;
+    if (!condition)
+    {
+        std::cerr << "FAIL line " << line << ": " << expression << '\n';
+        std::exit(1);
+    }
+}
+#define CHECK(expression) Check(static_cast<bool>(expression), #expression, __LINE__)
+void Okay(const Result& result, int line)
+{
+    ++checks;
+    if (!result.ok)
+    {
+        std::cerr << "FAIL line " << line << ": " << result.message << '\n';
+        std::exit(1);
+    }
+}
+#define OK(expression) Okay(expression, __LINE__)
+
+bool StartsWith(const std::string& text, const std::string& prefix) { return text.rfind(prefix, 0) == 0; }
+
+Simulation NewEstate()
+{
+    Simulation sim;
+    sim.SetPlacements(ProvisionalEstatePlacements());
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    return sim;
+}
+
+const Structure* Find(const State& state, Piece kind)
+{
+    for (const auto& piece : state.structures) if (piece.kind == kind) return &piece;
+    return nullptr;
+}
+
+int CountOf(const State& state, Piece kind)
+{
+    int count = 0;
+    for (const auto& piece : state.structures) count += piece.kind == kind;
+    return count;
+}
+
+Point Spawn() { return ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {}); }
+
+void SeededStandingRoom()
+{
+    Simulation sim = NewEstate();
+    const State& state = sim.GetState();
+    CHECK(sim.DayNumber() == 1 && std::string(sim.SeasonName()) == "Spring" && state.hour == 6.0);
+    CHECK(state.heroineName == "Eleanor" && state.familyName == "Trelawney" && state.estateName == "Trevennor");
+    CHECK(sim.EstateName() == "Trevennor");
+    CHECK(state.buildings.size() == 1);
+    const int room = Manor::HeritageBuildingId(state);
+    CHECK(room == state.buildings[0].id);
+    const Landmark* origin = ProvisionalEstateLayout().FindLandmark(Anchor::StandingRoomOrigin);
+    CHECK(state.buildings[0].origin.x == origin->position.x && state.buildings[0].origin.y == origin->position.y);
+    CHECK(CountOf(state, Piece::Foundation) == 4 && CountOf(state, Piece::Roof) == 4);
+    CHECK(CountOf(state, Piece::Wall) == 7 && CountOf(state, Piece::Doorway) == 1);
+    CHECK(CountOf(state, Piece::Hearth) == 1 && CountOf(state, Piece::Bed) == 1 && CountOf(state, Piece::Chest) == 1);
+    for (const auto& piece : state.structures)
+    {
+        CHECK(piece.heritage && piece.buildingId == room);
+        const bool masonry = piece.kind == Piece::Foundation || piece.kind == Piece::Wall
+            || piece.kind == Piece::Doorway || piece.kind == Piece::Roof;
+        CHECK((piece.skin == StructureSkin::Stone) == masonry);
+    }
+    const Structure* chest = Find(state, Piece::Chest);
+    CHECK(chest->storage[static_cast<int>(Item::WateringCan)] == 1);
+    CHECK(chest->storage[static_cast<int>(Item::Branch)] == Manor::SeededBranches);
+    // She wakes indoors, under the roof, with the doorway ahead of her.
+    const Point spawn = Spawn();
+    CHECK(sim.IsSheltered(spawn));
+    const Structure* door = Find(state, Piece::Doorway);
+    const Point doorCenter = StructureCenter(state, *door);
+    const double yaw = ProvisionalEstateLayout().FindLandmark(Anchor::StandingRoomSpawn)->yaw;
+    const Point facing = RotateYaw({1.0, 0.0}, yaw);
+    const Point toDoor{doorCenter.x - spawn.x, doorCenter.y - spawn.y};
+    CHECK(facing.x * toDoor.x + facing.y * toDoor.y > 0.0);
+    CHECK(std::abs(facing.x * toDoor.y - facing.y * toDoor.x) < 1.0);
+    // Heritage furniture and the always-lit hearth are consistent with ordinary validation.
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.GetState().structures.size() == state.structures.size());
+}
+
+void SleepChestAndHearth()
+{
+    Simulation sim = NewEstate();
+    const State& state = sim.GetState();
+    const Structure* bed = Find(state, Piece::Bed);
+    const int chestId = Find(state, Piece::Chest)->id;
+    const int hearthId = Find(state, Piece::Hearth)->id;
+    const Point chestSide = StructureCenter(state, *Find(state, Piece::Chest));
+    const Point hearthSide = StructureCenter(state, *Find(state, Piece::Hearth));
+    const Point bedSide = StructureCenter(state, *bed);
+    const int day = sim.DayNumber();
+    sim.SkipToHourOfDay(22.0);
+    OK(sim.Sleep(8.0, bedSide));
+    CHECK(sim.DayNumber() == day + 1);
+    // Take the pail and branches out of the seeded chest.
+    OK(sim.Transfer(chestId, Item::WateringCan, -1, chestSide));
+    OK(sim.Transfer(chestId, Item::Branch, -Manor::SeededBranches, chestSide));
+    CHECK(sim.Count(Item::WateringCan) == 1 && sim.Count(Item::Branch) == Manor::SeededBranches);
+    // The hearth cooks like a cookfire, needs no fuel and stays lit.
+    CHECK(sim.IsNearFire(hearthSide));
+    CHECK(!sim.AddFuel(hearthId, hearthSide));
+    sim.AdvanceGameHours(12.0, hearthSide);
+    CHECK(sim.IsNearFire(hearthSide));
+    OK(sim.GrantItems(Item::Roots, 2));
+    OK(sim.Craft(Recipe::RoastedRoots, hearthSide));
+    CHECK(sim.Count(Item::Roots) == 0 && sim.Count(Item::RoastedRoots) == 1);
+    CHECK(!sim.Craft(Recipe::RoastedRoots, hearthSide));
+    const Point faraway{hearthSide.x + 5000.0, hearthSide.y};
+    OK(sim.GrantItems(Item::Roots, 2));
+    CHECK(!sim.Craft(Recipe::RoastedRoots, faraway));
+    CHECK(sim.AssessRecipe(Recipe::RoastedRoots, hearthSide).stationMet);
+}
+
+void ManorFootprintReservation()
+{
+    Simulation sim = NewEstate();
+    const LandmarkPolygon* manor = ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint);
+    CHECK(manor != nullptr);
+    // A foundation previewed in the old hall.
+    const Point hall{-54000.0, -41000.0};
+    CHECK(PointInPolygon(manor->points, hall));
+    const auto blocked = sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, hall, 0.0, 0), hall);
+    CHECK(!blocked && blocked.message == Manor::FootprintBlocked);
+    // A foundation snapped on beside the room, into the ruin, is refused too.
+    const Point door = StructureCenter(sim.GetState(), *Find(sim.GetState(), Piece::Doorway));
+    const Point west{door.x, door.y - 250.0};
+    const auto snapped = sim.ResolvePlacement(Piece::Foundation, west, 0.0, 0);
+    CHECK(!sim.CheckPlacement(snapped, west));
+    // Outside the manor, the same foundation is fine.
+    const Point lawn{-56500.0, -41000.0};
+    CHECK(!PointInPolygon(manor->points, lawn));
+    OK(sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, lawn, 0.0, 0), lawn));
+    // The room itself stays furnishable, and the hearth is never a plan.
+    const Point doorCell = StructureCenter(sim.GetState(), *Find(sim.GetState(), Piece::Foundation));
+    const auto fire = sim.ResolvePlacement(Piece::Fire, doorCell, 0.0, 0);
+    CHECK(fire.buildingId == Manor::HeritageBuildingId(sim.GetState()));
+    OK(sim.CheckPlacement(fire, doorCell));
+    CHECK(!IsBuildable(Piece::Hearth) && IsBuildable(Piece::Fire));
+    CHECK(!sim.CheckPlacement(sim.ResolvePlacement(Piece::Hearth, lawn, 0.0, 0), lawn));
+    // Woodland games have no manor.
+    Simulation woodland;
+    CHECK(!Manor::BlockedByManor(woodland.GetState(), ProvisionalEstateLayout(),
+        woodland.ResolvePlacement(Piece::Foundation, hall, 0.0, 0), Footprint{hall, {150, 150}, 0}));
+}
+
+void NamesValidationAndPersistence()
+{
+    CHECK(Manor::TrimName("  Clara \t") == "Clara");
+    CHECK(Manor::TrimName("\xC2\xA0Tr\xC3\xA9vose\xC2\xA0") == "Tr\xC3\xA9vose");
+    CHECK(Manor::NameLength("Tr\xC3\xA9vose") == 7);
+    CHECK(Manor::NameLength("bad\xC3") == -1 && Manor::NameLength("tab\tname") == -1);
+    Simulation sim = NewEstate();
+    CHECK(!sim.SetNames("   ", "Pendarves", "Trevennor"));
+    CHECK(!sim.SetNames("Clara", "", "Trevennor"));
+    CHECK(!sim.SetNames("Clara", "Pendarves", std::string(25, 'a')));
+    OK(sim.SetNames("Clara", "Pendarves", std::string(24, 'a')));
+    OK(sim.SetNames("  Clara ", "Pendarves", " Trevennor"));
+    CHECK(sim.GetState().heroineName == "Clara" && sim.GetState().estateName == "Trevennor");
+    CHECK(Manor::SaveLabel(sim.GetState(), sim.SeasonName(), sim.DayNumber())
+        == "Clara Pendarves \xE2\x80\x94 Trevennor, Spring 1");
+    OK(sim.SetNames("\xC3\x89lise", "Tr\xC3\xA9vose", "Chy an Mor"));
+    const std::string saved = sim.Serialize();
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetState().heroineName == "\xC3\x89lise" && loaded.GetState().familyName == "Tr\xC3\xA9vose");
+    CHECK(loaded.EstateName() == "Chy an Mor");
+    CHECK(Manor::HeritageBuildingId(loaded.GetState()) != 0);
+    for (const auto& piece : loaded.GetState().structures) CHECK(piece.heritage);
+    CHECK(Find(loaded.GetState(), Piece::Wall)->skin == StructureSkin::Stone);
+    // A damaged section is rejected rather than half-loaded.
+    const auto at = saved.find("manor ");
+    CHECK(at != std::string::npos);
+    Simulation broken;
+    broken.SetPlacements(ProvisionalEstatePlacements());
+    std::string damaged = saved;
+    damaged.replace(at, 5, "manoz");
+    CHECK(!broken.Deserialize(damaged));
+    // Woodland saves carry no section and load as before.
+    Simulation woodland;
+    const std::string plain = woodland.Serialize();
+    CHECK(plain.find("manor ") == std::string::npos);
+    Simulation plainLoaded;
+    OK(plainLoaded.Deserialize(plain));
+    CHECK(plainLoaded.GetState().estateName.empty() && plainLoaded.EstateName() == "the estate");
+    CHECK(Manor::SaveLabel(plainLoaded.GetState(), "Spring", 1).empty());
+}
+}
+
+int main()
+{
+    SeededStandingRoom();
+    std::cout << "PASS seeded heritage standing room\n";
+    SleepChestAndHearth();
+    std::cout << "PASS sleep, chest and hearth cooking\n";
+    ManorFootprintReservation();
+    std::cout << "PASS manor footprint reservation\n";
+    NamesValidationAndPersistence();
+    std::cout << "PASS names validation and persistence\n";
+    std::cout << checks << " checks passed.\n";
+    return 0;
+}
