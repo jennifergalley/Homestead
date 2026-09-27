@@ -2110,6 +2110,34 @@ Result Simulation::SeedStandingRoomAt(Point origin, double yaw)
     State candidate = state_;
     const std::size_t first = candidate.structures.size();
     if (!Manor::SeedStandingRoom(candidate, layout)) return Bad("The standing room could not be laid out.");
+    // A playtest aid: fell any woodland trees and saplings standing where the room goes.
+    if (!candidate.fixedEstate)
+    {
+        constexpr double Clearance = 600.0;
+        Generation::ChunkCoord low, high;
+        if (Generation::ChunkAt(static_cast<std::int64_t>(origin.x - Clearance), static_cast<std::int64_t>(origin.y - Clearance), low)
+                == Generation::Status::Ok
+            && Generation::ChunkAt(static_cast<std::int64_t>(origin.x + Clearance), static_cast<std::int64_t>(origin.y + Clearance), high)
+                == Generation::Status::Ok)
+            for (int cy = low.y; cy <= high.y; ++cy)
+                for (int cx = low.x; cx <= high.x; ++cx)
+                {
+                    Generation::ChunkBaseline baseline;
+                    if (Generation::GenerateChunk(candidate.world, {cx, cy}, baseline) != Generation::Status::Ok) continue;
+                    for (const auto& entity : baseline.entities)
+                    {
+                        ResourceNode node;
+                        if ((entity.kind != Generation::EntityKind::ForestTree && entity.kind != Generation::EntityKind::Sapling)
+                            || !GeneratedNode(candidate, entity, node) || node.cleared
+                            || !Near(node.position, origin, Clearance)) continue;
+                        node.cleared = true;
+                        node.readyAtHour = 0.0;
+                        if (!SaveResourceEdit(candidate, node)) return Bad("The woodland has too many edits to clear the room.");
+                        for (auto& live : candidate.resources)
+                            if (live.key == node.key) { live.cleared = true; live.readyAtHour = 0.0; }
+                    }
+                }
+    }
     for (std::size_t i = first; i < candidate.structures.size(); ++i)
     {
         const Structure& piece = candidate.structures[i];
