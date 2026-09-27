@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "name": "DeerRemains",
+  "description": "Winter-killed mule-deer remains in oak litter: dried furred hide over the skeleton (SM_DeerRemains) and the bleached, mossy bones after the hide is taken (SM_DeerBones); LOD1/LOD2 each (original). Pivot = ground centre; skull -X, back +Y.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/deer_remains.py",
+  "source_sha256": "c17183a60e47b01a2d63e6a120cf1ea8dab9affa25e38b11a25589e5a45aecd1",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_DeerRemains": {
+      "vertices": 27222,
+      "triangles": 53351,
+      "size_cm": [
+        156.75,
+        68.38,
+        22.49
+      ],
+      "materials": [
+        {
+          "name": "M_DeerRemains",
+          "textures": {
+            "basecolor": "T_DeerRemains_basecolor.png",
+            "roughness": "T_DeerRemains_roughness.png",
+            "normal": "T_DeerRemains_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DeerRemains_basecolor.png",
+          "roughness": "T_DeerRemains_roughness.png",
+          "normal": "T_DeerRemains_normal.png",
+          "ao": "T_DeerRemains_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          -0.08277982274613431,
+          0.1267683927144162,
+          0.12124041935894764
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.6
+      },
+      "fbx": "SM_DeerRemains.fbx",
+      "sha256": "9a76111bdbbcbb98fa6f7d23a55138e857659281c8e63580d45cf6b3616adf84",
+      "preview": "preview_SM_DeerRemains.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DeerRemains_hero.png",
+          "detail": "beauty_SM_DeerRemains_detail.png",
+          "eye": "beauty_SM_DeerRemains_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_DeerRemains_LOD1": {
+      "vertices": 9458,
+      "triangles": 18000,
+      "size_cm": [
+        156.72,
+        68.43,
+        22.48
+      ],
+      "materials": [
+        {
+          "name": "M_DeerRemains",
+          "textures": {
+            "basecolor": "T_DeerRemains_basecolor.png",
+            "roughness": "T_DeerRemains_roughness.png",
+            "normal": "T_DeerRemains_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DeerRemains_basecolor.png",
+          "roughness": "T_DeerRemains_roughness.png",
+          "normal": "T_DeerRemains_normal.png",
+          "ao": "T_DeerRemains_ao.png"
+        },
+        "shared_with": "SM_DeerRemains"
+      },
+      "review": {},
+      "fbx": "SM_DeerRemains_LOD1.fbx",
+      "sha256": "ee404b3fa7040e2307b0b86b5b5b09071041f54e3de8e12569cb896525a03c3d",
+      "preview": "preview_SM_DeerRemains_LOD1.png"
+    },
+    "SM_DeerRemains_LOD2": {
+      "vertices": 3390,
+      "triangles": 5999,
+      "size_cm": [
+        156.8,
+        68.55,
+        22.38
+      ],
+      "materials": [
+        {
+          "name": "M_DeerRemains",
+          "textures": {
+            "basecolor": "T_DeerRemains_basecolor.png",
+            "roughness": "T_DeerRemains_roughness.png",
+            "normal": "T_DeerRemains_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DeerRemains_basecolor.png",
+          "roughness": "T_DeerRemains_roughness.png",
+          "normal": "T_DeerRemains_normal.png",
+          "ao": "T_DeerRemains_ao.png"
+        },
+        "shared_with": "SM_DeerRemains"
+      },
+      "review": {},
+      "fbx": "SM_DeerRemains_LOD2.fbx",
+      "sha256": "10ca75ab020601b938a6db0c72285b182ce5c11e7afc444c4e0ab5f0edb37cc5",
+      "preview": "preview_SM_DeerRemains_LOD2.png"
+    },
+    "SM_DeerBones": {
+      "vertices": 38194,
+      "triangles": 75651,
+      "size_cm": [
+        152.61,
+        69.79,
+        26.98
+      ],
+      "materials": [
+        {
+          "name": "M_DeerBones",
+          "textures": {
+            "basecolor": "T_DeerBones_basecolor.png",
+            "roughness": "T_DeerBones_roughness.png",
+            "normal": "T_DeerBones_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DeerBones_basecolor.png",
+          "roughness": "T_DeerBones_roughness.png",
+          "normal": "T_DeerBones_normal.png",
+          "ao": "T_DeerBones_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          -0.5369593355895665,
+          -0.029065051829901017,
+          0.062222008749926117
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.6
+      },
+      "fbx": "SM_DeerBones.fbx",
+      "sha256": "a01f03a8f530e2ce702dff868f9895687a6177dd2f2f4a53a7ea78da192b5712",
+      "preview": "preview_SM_DeerBones.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DeerBones_hero.png",
+          "detail": "beauty_SM_DeerBones_detail.png",
+          "eye": "beauty_SM_DeerBones_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_DeerBones_LOD1": {
+      "vertices": 9368,
+      "triangles": 17999,
+      "size_cm": [
+        152.62,
+        69.75,
+        27.03
+      ],
+      "materials": [
+        {
+          "name": "M_DeerBones",
+          "textures": {
+            "basecolor": "T_DeerBones_basecolor.png",
+            "roughness": "T_DeerBones_roughness.png",
+            "normal": "T_DeerBones_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DeerBones_basecolor.png",
+          "roughness": "T_DeerBones_roughness.png",
+          "normal": "T_DeerBones_normal.png",
+          "ao": "T_DeerBones_ao.png"
+        },
+        "shared_with": "SM_DeerBones"
+      },
+      "review": {},
+      "fbx": "SM_DeerBones_LOD1.fbx",
+      "sha256": "5a7a9785b1497083f9396b693f33e8cc6d1aca3526123353977aa6a267c5f7a6",
+      "preview": "preview_SM_DeerBones_LOD1.png"
+    },
+    "SM_DeerBones_LOD2": {
+      "vertices": 3368,
+      "triangles": 5999,
+      "size_cm": [
+        152.47,
+        69.63,
+        26.96
+      ],
+      "materials": [
+        {
+          "name": "M_DeerBones",
+          "textures": {
+            "basecolor": "T_DeerBones_basecolor.png",
+            "roughness": "T_DeerBones_roughness.png",
+            "normal": "T_DeerBones_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DeerBones_basecolor.png",
+          "roughness": "T_DeerBones_roughness.png",
+          "normal": "T_DeerBones_normal.png",
+          "ao": "T_DeerBones_ao.png"
+        },
+        "shared_with": "SM_DeerBones"
+      },
+      "review": {},
+      "fbx": "SM_DeerBones_LOD2.fbx",
+      "sha256": "2909be848d24d75850a4d95c1bad9bd847614aa4b76a792b9ee07d7532c67970",
+      "preview": "preview_SM_DeerBones_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "pivot": "Ground centre: XY centre of the footprint, z = 0 on the ground (moss and bone sink a few mm).",
+    "axes": "Spine along X (skull -X, tail +X), back +Y, legs -Y; the deer lies on its right side.",
+    "swap": "SM_DeerRemains and SM_DeerBones share pivot, axes and footprint: swap in place once the hide is taken.",
+    "footprint_cm": [
+      156.8,
+      69.8
+    ],
+    "collision": "None needed (non-blocking in game).",
+    "lods": "LOD1 ~18000 and LOD2 ~6000 triangles, decimated from LOD0 and sharing its UVs.",
+    "materials": "One baked 4K texture set per mesh (basecolor, roughness, OpenGL normal, AO; opaque). Remains: dried fur hide, rawhide, weathered bone, antler, hoof, teeth, oak leaves, moss. Bones: bleached cracked bone with algae and moss, antler, hoof, teeth, leaves, moss."
+  },
+  "textures": {
+    "T_DeerRemains_basecolor.png": "9666c7f3d1af3e3d8b76419b147a1a535bfd3ce0b35ff6f5fa2e89e459add258",
+    "T_DeerRemains_roughness.png": "2461d96d12b3a85eafaa990e81e3a35ab5ba2239e92a0313c3e05a0ad528490d",
+    "T_DeerRemains_normal.png": "4c8d3b070d58dcf336792b4cf0a2da89e77816edac90eecb440920533ed508b4",
+    "T_DeerBones_basecolor.png": "65dec9013fd89283b54e1c403cadee01bfff5911a94c6fe52b9e4c790790da86",
+    "T_DeerBones_roughness.png": "daa14dff6f6f205031d97441bd645f85c88a9925e29af1a8d85d2862db199cad",
+    "T_DeerBones_normal.png": "ac8eba068e4dbf22ef80beb956f08e61bb0f4188877b3e2508aba7c0708e5a81"
+  }
+}

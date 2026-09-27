@@ -23,6 +23,7 @@ Reference recipes:
 | `wild_garlic.py` | From scratch foliage: real-geometry leaves/flowers on a shared UV atlas (`BAKE repack: False`) |
 | `bush.py` | Scan composition: instanced, varied Poly Haven shoots with LODs |
 | `granite_*.py`, `hand_stones.py` | From scratch rocks: `homestead_rocks` implicit fields, exfoliation plates, `kit.mats.granite`, shared LOD UVs; big ones layer the tiling `granite_detail.py` maps |
+| `deer_remains.py` | From scratch anatomy: `homestead_sdf` signed-distance bones (OpenVDB meshing), a solved hide membrane over them, two swap-in-place meshes with LODs |
 
 ## Choose the mode Jenny asks for
 
@@ -96,6 +97,9 @@ before each pass.
 - **Knapped stone.** Uniform Voronoi scars read as crumpled paper or turtle shell. Scars are struck from the
   edges, so elongate the cells across the blade and keep them few and broad. Soil-worn chert is waxy
   (roughness ~0.45); only the use-polished bit is glossy.
+- **SDF parts.** Evaluate only near the surface (`homestead_sdf` does coarse-to-fine) or a skull takes a
+  minute. Never smart-project decimated SDF meshes; unwrap each part with `homestead_rocks.unwrap` first.
+  Settle every loose part onto the ground (`deer.common.settle`/`lay_flat`); authored layouts float.
 
 ## Rules
 

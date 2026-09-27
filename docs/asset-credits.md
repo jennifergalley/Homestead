@@ -45,6 +45,14 @@ covered-seed SoilMound, `Scripts\Blender\Recipes\seeds.py`) are project-authored
 with procedural materials baked to textures; they use no scanned or downloaded geometry or
 textures. Their review renders use the same CC0 Kloofendal HDRI, which ships with no asset.
 
+The DeerRemains set (`SM_DeerRemains` and `SM_DeerBones`, `Scripts\Blender\Recipes\deer_remains.py`
+and `Recipes\deer\`) is project-authored:
+- The bones are signed-distance geometry meshed by Blender's bundled OpenVDB.
+- The hide is a solved membrane; the ribs, antlers and leaves are swept or lofted.
+- The materials are procedural and baked to textures.
+
+It uses no scanned or downloaded geometry or textures.
+
 ## Music
 
 All music is by **Kevin MacLeod** (incompetech.com), licensed under
