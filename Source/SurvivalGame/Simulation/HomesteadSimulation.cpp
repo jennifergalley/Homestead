@@ -75,7 +75,8 @@ std::string ApplyMeal(State& state, Item item)
 Result CanEat(const State& state, Item item)
 {
     if (state.failed) return Failed();
-    if (FoodNutrition(item) == 0.0) return Bad("Eat berries, roasted roots, or herbed roots. Raw roots need cooking.");
+    if (FoodNutrition(item) == 0.0) return Bad(item == Item::Roots ? std::string("Raw roots need cooking first.")
+        : std::string(ItemName(item)) + " isn't something to eat.");
     if (state.hunger >= 100.0) return Bad("You are already full. Save this food for later.");
     return Good("");
 }
@@ -995,6 +996,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     if (!populated) return populated;
     // Round-1 lanes seed their parts from `layout` here, each in its own helper.
     SeedEstateParcels(candidate, layout);
+    SeedEstateShops(candidate, layout);
     layout_ = std::make_shared<const EstateLayout>(layout);
     placements_ = std::make_shared<const EstatePlacements>(placements);
     state_ = std::move(candidate);
@@ -2224,7 +2226,11 @@ void Simulation::Step(double hours, Point player, bool sleeping)
             plot.growth = Clamp(plot.growth + elapsed * moistureFactor * weedFactor / growingHours, 0.0, 1.0);
         }
     }
+    const double before = state_.hour;
     state_.hour += elapsed;
+    // Townsfolk buy down her goods in the shops each morning.
+    if (std::floor((state_.hour - DayRolloverHour) / 24.0) > std::floor((before - DayRolloverHour) / 24.0))
+        SellDownShops();
     if (state_.hunger <= 1e-10 || state_.energy <= 1e-10 || state_.warmth <= 1e-10)
     {
         if (state_.hunger <= 1e-10) state_.hunger = 0.0;
@@ -2365,6 +2371,7 @@ std::string Simulation::Serialize() const
         body << plant.chunk.x << ' ' << plant.chunk.y << ' ' << plant.index << '\n';
     // Optional trailing sections; saves without them still load.
     WriteParcelOwnership(body, state_);
+    WriteEconomy(body);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2591,6 +2598,8 @@ Result Simulation::Deserialize(const std::string& data)
     // Optional trailing sections. The parcels themselves come from the current layout.
     if (candidate.fixedEstate) SeedEstateParcels(candidate, Layout());
     if (!ReadParcelOwnership(input, candidate)) return invalid();
+    if (!ReadEconomy(input, candidate, ids)) return invalid();
+    RefreshShopCounters(candidate, Layout());
     input >> std::ws;
     if (!input.eof()) return invalid();
     const auto inventory = ValidateInventory(candidate);

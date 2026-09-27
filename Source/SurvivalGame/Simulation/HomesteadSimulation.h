@@ -1,11 +1,14 @@
 #pragma once
 
 #include "HomesteadItems.h"
+#include "HomesteadShops.h"
 #include "HomesteadWorldGeneration.h"
 
 #include <array>
 #include <cstdint>
+#include <iosfwd>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -258,6 +261,8 @@ struct State
     bool fixedEstate = false;
     int placementBakeVersion = 0;
     std::vector<Parcel> parcels; // Fixed estate only; empty in the seeded woodland.
+    Cents money = 0; // HomesteadShops.h; changes only through Sell, Buy and playtest grants.
+    std::vector<Shop> shops;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -448,6 +453,19 @@ public:
     double HarvestCost(int nodeId) const;
     double ClearCost(int nodeId) const;
 
+    // Shops (HomesteadShops.cpp). Trading needs the shop open and her within CounterReach of its
+    // counter; each is one transaction moving goods, money and the shop's stock of her goods.
+    const Shop* FindShop(int shopId) const;
+    const Shop* FindShop(ShopKind kind) const;
+    Result CheckShopAccess(int shopId, Point player) const;
+    Result Sell(int shopId, Item item, int quantity, Point player);
+    // Buys the shop's own goods, or with `fromHeroineStock` her own sold goods back.
+    Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
+    // Counts a shopkeeper greeting (a friendship stub).
+    Result GreetShopkeeper(int shopId);
+    // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
+    Result GrantMoney(Cents cents);
+    Result PlaceShop(ShopKind kind, Point counter);
     std::string Serialize() const;
     Result Deserialize(const std::string& data);
     Result Deserialize(const std::string& data, Generation::WorldDescriptor expectedWorld);
@@ -466,5 +484,11 @@ private:
     // Charges `cost` Energy when `done` succeeded.
     Result Exert(double cost, Result done);
     void Step(double hours, Point player, bool sleeping);
+    // Shops (HomesteadShops.cpp).
+    static void SeedEstateShops(State& candidate, const EstateLayout& layout);
+    static void RefreshShopCounters(State& candidate, const EstateLayout& layout);
+    void SellDownShops();
+    void WriteEconomy(std::ostream& body) const;
+    static bool ReadEconomy(std::istream& input, State& candidate, std::set<int>& ids);
 };
 }

@@ -55,7 +55,8 @@ std::string Envelope(const std::string& body, int version = SimulationSaveVersio
 std::string Encode(const State& s, int version = SimulationSaveVersion)
 {
     // Version 7 stocks predate the machete, and versions before 11 predate fur (the last item).
-    const int stockItems = version >= ClothingSaveVersion ? ItemCount : version >= 8 ? ItemCount - 1 : ItemCount - 2;
+    const int stockItems = version >= ClothingSaveVersion ? ItemCount
+        : version >= 8 ? static_cast<int>(Item::Fur) : static_cast<int>(Item::Machete);
     std::ostringstream out;
     out.imbue(std::locale::classic());
     out << std::setprecision(17) << s.hour << ' ' << s.dayMinutes << ' ' << s.hunger << ' '
@@ -854,7 +855,7 @@ void TimberAndFirewoodTransactions()
     static_assert(static_cast<int>(Item::Firewood) == 15, "Firewood appends after Timber");
     static_assert(static_cast<int>(Item::Machete) == 16, "The machete appends after Firewood");
     static_assert(static_cast<int>(Item::Fur) == 17, "Fur appends after the machete");
-    static_assert(ItemCount == 18, "Two processing materials, the machete and fur are present");
+    static_assert(ItemCount > static_cast<int>(Item::Fur), "Later items append after fur");
     static_assert(static_cast<int>(Recipe::HerbedRoots) == 4, "Existing recipe IDs are unchanged");
     static_assert(static_cast<int>(Recipe::SplitFirewood) == 5, "Split Firewood appends after existing recipes");
     static_assert(static_cast<int>(Recipe::Count) == 6, "One processing recipe is present");

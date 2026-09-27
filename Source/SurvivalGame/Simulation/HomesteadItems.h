@@ -11,7 +11,10 @@ enum class Item : int
 {
     Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
     Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
-    Timber, Firewood, Machete, Fur, Count
+    Timber, Firewood, Machete, Fur,
+    // Round 1 general-store goods.
+    Pasty, Bread, Cheese, Twine,
+    Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 
@@ -41,6 +44,8 @@ struct ItemInfo
 const ItemInfo& GetItemInfo(Item item);
 const char* ItemName(Item item);
 const char* ItemKey(Item item);
+// The item with this stable key, or Item::Count.
+Item ItemFromKey(const char* key);
 const char* ItemDescription(Item item);
 const char* ItemIcon(Item item);
 const char* ItemSource(Item item);
