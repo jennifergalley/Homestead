@@ -32,6 +32,12 @@ manor and boundary lanes haven't merged yet.
 
 - Estate anchors and placements: `Source\SurvivalGame\Simulation\HomesteadEstate.cpp`
   (`ProvisionalEstateLayout`) mirrors `Scripts\Terrain\estate_layout.json`; update both together.
+- Ground height for snapping level actors: `HomesteadEstateTerrain::Height` works outside the
+  controller once the terrain is `Activate()`d. In the editor,
+  `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 where World Partition cells
+  aren't loaded.
+- Blender props face -Y in their recipes and import facing +Y, so C++ placement applies
+  `LocalYaw - 90` (see the store's `Prop()`).
 - The item catalogue: `Simulation\HomesteadItems.{h,cpp}`. Append only; rows must match enum order.
   Serialize edits between lanes.
 - Saves: lanes never bump `SimulationSaveVersion`; the orchestrator bumps once at integration. New

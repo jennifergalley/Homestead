@@ -15,6 +15,11 @@ Functions:
     con <command>                          console command in PIE (or the editor world), with the player controller
     shot                                   CaptureEditorImage; returns the PNG path (can fail: "Failed to capture any editor windows")
     hshot [WxH]                            HighResShot in PIE; returns the new Saved\Screenshots\WindowsEditor PNG path (more reliable)
+    pie / unpie                            start PIE in the viewport / stop it (then poll st for worldReady)
+    quit                                   stop PIE and quit the editor cleanly (releases DLL and .uasset locks)
+    pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
+    tp <x> <y> [z]                         move the player pawn (z default 200; she drops to the ground)
+    click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
 Variables: $E $S $L $SL $H $PY (toolset names). Full playbook: .github\skills\unreal-editor-mcp\SKILL.md.
 #>
 param([Parameter(Mandatory)][int]$Port)
@@ -83,4 +88,54 @@ function hshot([string]$res = '1920x1080') {
         if ($new) { Start-Sleep 1; return $new.FullName }
     }
     'HighResShot wrote nothing within 30 s (is PIE running?)'
+}
+
+function pie() {
+    $null = mcp $E StartPIE '{"options":{"bSimulate":false,"playMode":"PlayMode_InViewPort","warmupSeconds":5}}'
+    'PIE requested; StartPIE may report a timeout while it loads. Poll st until worldReady.'
+}
+
+function unpie() { py 'unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_end_play()' }
+
+function quit() {
+    py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_end_play()`nunreal.SystemLibrary.quit_editor()"
+}
+
+function pyfile([string]$path, [int]$timeout = 600) {
+    $full = (Resolve-Path -LiteralPath $path).Path
+    py "p = $(ConvertTo-Json $full)`nexec(compile(open(p, encoding='utf-8').read(), p, 'exec'), {'__file__': p, '__name__': '__main__', 'unreal': unreal})" $timeout
+}
+
+function tp([double]$x, [double]$y, [double]$z = 200) {
+    py ("w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()`n" +
+        "pawn = unreal.GameplayStatics.get_player_pawn(w, 0) if w else None`n" +
+        "print(pawn.set_actor_location(unreal.Vector($x, $y, $z), False, True) if pawn else 'No PIE pawn')")
+}
+
+$script:McpUser32 = @"
+[DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+[DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+[DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+[DllImport("user32.dll")] public static extern void mouse_event(uint f, uint dx, uint dy, uint d, UIntPtr e);
+[DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, uint f, UIntPtr e);
+public struct RECT { public int Left, Top, Right, Bottom; }
+"@
+
+function click([int]$x, [int]$y) {
+    if (-not ('HomesteadMcp.User32' -as [type])) { Add-Type -Namespace HomesteadMcp -Name User32 -MemberDefinition $script:McpUser32 }
+    $u = [HomesteadMcp.User32]
+    $port = ([uri]$env:UNREAL_MCP_URL).Port
+    $owner = Get-CimInstance Win32_Process -Filter "Name = 'UnrealEditor.exe'" |
+        Where-Object { $_.CommandLine -match "-ModelContextProtocolPort=$port(\D|$)" } | Select-Object -First 1
+    if (-not $owner) { return "No editor found on port $port" }
+    $hwnd = (Get-Process -Id $owner.ProcessId).MainWindowHandle
+    $null = $u::SetProcessDPIAware()
+    $u::keybd_event(0x12, 0, 0, [UIntPtr]::Zero); $u::keybd_event(0x12, 0, 2, [UIntPtr]::Zero)  # an Alt tap lets SetForegroundWindow work
+    $null = $u::SetForegroundWindow($hwnd)
+    $r = New-Object 'HomesteadMcp.User32+RECT'; $null = $u::GetWindowRect($hwnd, [ref]$r)
+    $null = $u::SetCursorPos($r.Left + $x, $r.Top + $y); Start-Sleep -Milliseconds 80
+    $u::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 60
+    $u::mouse_event(4, 0, 0, 0, [UIntPtr]::Zero)
+    "Clicked ($x, $y) in the editor window at ($($r.Left), $($r.Top))"
 }

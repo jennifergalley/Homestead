@@ -108,6 +108,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `git status` shows dozens of modified `.uasset`s (Audio, heroine animations and materials) after `Build-Game.ps1` | The content bootstrap re-saves generated assets | Restore the ones your change didn't intend (`git checkout -- <paths>`) before committing. `-PackageOnly` skips the bootstrap when content is current. |
 | PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
+| `NameError: name '__file__' is not defined` in `run_python` | `run_python` executes a code string, not a file | `pyfile <path>` (McpHelpers), or `exec(compile(open(p).read(), p, 'exec'), {'__file__': p, '__name__': '__main__'})`. |
+| Saved actors, but the level still shows a dirty package or a teammate's checkout lacks your new Outliner folder | A new Outliner folder lives in its own `__ExternalObjects__/.../<Map>/...` package | Also save `EditorLoadingAndSavingUtils.get_dirty_map_packages()` and commit that package. |
 | `LogIoStore: Error: Failed to launch ZenServer` while packaging (see `Saved\Logs\UnrealPak.log`) | Another worktree's `zenserver` holds port 8558 | Unconfirmed workaround: a unique `[Zen.AutoLaunch] DesiredPort=` in this worktree's `Saved\Config\WindowsEditor\Engine.ini` and `Saved\Config\Windows\Engine.ini`. Or wait until the other package finishes. |
 | UAT log shows another worktree's build | `%APPDATA%\Unreal Engine\AutomationTool\Logs\E+Program+Files+UE_5.8\` is shared and overwritten | Redirect `Build-Game.ps1` output to a log in your worktree (`*> Build\Logs\package.log`). |
 | `git pull`/`rebase`: `unable to unlink ... Invalid argument` on `.uasset` | Your editor holds the file | Close the editor, then `git status` and finish the rebase. |
@@ -193,6 +195,11 @@ clashes between parallel callers.
 | `con <command>` | console command in PIE with the player controller (editor world outside PIE) |
 | `shot` | `CaptureEditorImage`, returns the PNG path |
 | `hshot [WxH]` | `HighResShot` in PIE, returns the new `Saved\Screenshots\WindowsEditor` PNG (more reliable than `shot`) |
+| `pie` / `unpie` | start PIE in the viewport / stop it; poll `st` for `worldReady` |
+| `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
+| `pyfile <path>` | run a Python file in the editor with `__file__` set |
+| `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
+| `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
 
 Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
 `$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. Keep session-specific helpers (probes,
@@ -214,6 +221,8 @@ hk release_all; mcp $E StopPIE
 - **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
   `I` opens Inventory (page 0), Menu opens Settings (page 4).
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).
+  On the Estate map PIE also opens with the book (reported on Appearance, page 6, for the names
+  step); close it (Escape or B) before captures.
 - An editor "Missing Project Settings / Shader Model 6" notification covers the view after launch.
   Dismiss it: `mcp $SL Snapshot '{"ref":"","maxDepth":12,"bIncludeSourceLocations":false}'`, find
   `button "Dismiss" [ref=bN]`, then `mcp $SL Click '{"ref":"bN"}'`.
@@ -577,7 +586,8 @@ Extend it there when play needs a capability; prefer real input over state edits
   captures show something. After `worldReady`, run
   `py "w=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()\nunreal.SystemLibrary.execute_console_command(w,'HomesteadMorning')"`
   (optional hour argument, default 8). It jumps the clock to the next morning without simulating
-  the skipped hours; the same console command works in the packaged Development build. The
+  the skipped hours, so day-rollover logic (the store's sell-down, weed creep) doesn't run; only
+  Advance or Sleep steps it. The same console command works in the packaged Development build. The
   character lab has its own sun (`LabSun <hour>`, default 10).
 - Jenny likes to watch you work. Prefer `PlayMode_InEditorFloating` with the PIE window brought to
   the front (section 5) over hidden in-viewport PIE.
