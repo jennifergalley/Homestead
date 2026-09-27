@@ -20,6 +20,7 @@ Everything lives in `Scripts\Blender`:
 | `New-Prop.ps1` | Builds an asset set: FBX + `.blend` + preview sheet + `report.json` |
 | `homestead_kit.py` | Recipe helpers: primitives, `tube`/`warp`/`displace`/`subdivide`, `join`, `bake`, export, previews, beauty renders, Poly Haven append/instance, `reference_image` |
 | `homestead_materials.py` | Procedural PBR material library (`kit.mats`): wood, bark, flint, rawhide, leaf, stem, daub |
+| `homestead_sdf.py` | Signed-distance modelling (numpy SDF trees meshed with the bundled OpenVDB) for bones and other organic parts |
 | `Show-Prop.ps1` | Loads a built asset set into the live window with EEVEE rendered shading and the review sky |
 | `build_prop.py` | Blender-side builder used by `New-Prop.ps1` (both live and headless) |
 | `Recipes\*.py` | One recipe per asset set (`bush.py` = scanned composition, `chopping_block.py` = primitive blockout) |
@@ -173,6 +174,25 @@ reuses the berry builders by loading `berry_cluster.py` beside it. `seeds.py` bu
 props: `SM_Seeds`, a pinch of four tepary beans (pivot at the cluster centre), and
 `SM_SoilMound` (+ `_LOD1`), a covered-seed loose-loam mound with a fingertip press (pivot at the
 bottom centre, rim sunk 3 mm).
+
+**Signed-distance modelling (`homestead_sdf.py`).** Organic parts that a tube or loft can't make
+(skulls, vertebrae, pelvis, knuckled long bones, moss cushions) are written as numpy signed-distance
+trees: `sphere`, `ellipsoid`, `round_cone`, `tube`, `box`, `torus`, `prism`, `halfspace`, combined
+with `union`, `smooth_union(k)`, `subtract(k)`, `intersect`, `offset`, `displaced` and
+`transformed`. `sdf.mesh(name, node, voxel, target_tris)` evaluates it on a coarse grid, refines
+only a 3-voxel band around the surface, polygonises it with Blender's bundled `openvdb` and
+decimates it. A 26 cm skull at 0.7 mm voxels takes about 10 s. Decimated SDF meshes smart-project
+into thousands of splinters, so unwrap each part with `homestead_rocks.unwrap` before joining.
+
+`deer_remains.py` (with the `Recipes\deer\` package) is the large example:
+- `skeleton.py` lays a mule-deer skeleton along a spine curve and settles every part onto the
+  ground.
+- `hide.py` solves the dried hide as a membrane resting on the rasterised bones, with torn edges.
+- `litter.py` adds oak leaves and moss.
+- `materials.py` holds the weathered bone, antler, fur, rawhide, leaf and moss materials.
+
+The recipe writes two meshes that swap in place, `SM_DeerRemains` and `SM_DeerBones` (each with
+LOD1/LOD2). `HOMESTEAD_DRAFT=1` bakes at 1K with 16 samples for quick passes.
 `tilled_bed.py` builds `SM_TilledBed` (+ `_LOD1`), one 1 m garden square of hoe-turned loam: a
 heightfield sheet with ridges, clods and a feathered edge that sinks into the grass, pivot at
 the bottom centre, planar UVs. The game swaps in `MI_TilledBed_Wet` (basecolor darkened to

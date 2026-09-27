@@ -1,0 +1,354 @@
+{
+ "recipe": "Scripts/Blender/Recipes/footwear.py",
+ "seed": 20260927,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf"
+ },
+ "asset": "SKM_WovenSandals",
+ "material": "M_WovenSandals",
+ "geometry": {
+  "vertices": 24802,
+  "triangles": 49456,
+  "bones_weighted": 10,
+  "max_influences": 3
+ },
+ "bones_exported": 15,
+ "bone_names": [
+  "ankle_bck_l",
+  "ankle_bck_r",
+  "ankle_fwd_l",
+  "ankle_fwd_r",
+  "ball_l",
+  "ball_r",
+  "calf_l",
+  "calf_r",
+  "calf_twist_01_l",
+  "calf_twist_01_r",
+  "foot_l",
+  "foot_r",
+  "pelvis",
+  "thigh_l",
+  "thigh_r"
+ ],
+ "sole_thickness_mm": 10.5,
+ "character_offset_cm": 1.05,
+ "footbed_z_mm": -0.6,
+ "fit": {
+  "l": {
+   "sole_length_mm": 276.3382712313332,
+   "sole_width_mm": 120.63239284513446
+  }
+ },
+ "textures": {
+  "resolution": 2048,
+  "uv_coverage": 0.3398599624633789,
+  "px_per_cm": {
+   "20": 37.2,
+   "21": 52.7
+  },
+  "albedo_mean": [
+   0.20261670649051666,
+   0.17172971367835999,
+   0.12244356423616409
+  ],
+  "albedo_max": 0.3599412739276886,
+  "roughness_mean": 0.8435158729553223
+ },
+ "bind_pose": {
+  "verts": 24802,
+  "inside": 4,
+  "inside_pct": 0.016,
+  "inside_near_opening": 0,
+  "max_depth_mm": 0.73,
+  "p999_depth_mm": 0.0,
+  "inside_left": 2,
+  "inside_right": 2
+ },
+ "test_poses": {
+  "walk_heel_strike": {
+   "verts": 24802,
+   "inside": 4,
+   "inside_pct": 0.016,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.77,
+   "p999_depth_mm": 0.0,
+   "inside_left": 2,
+   "inside_right": 2
+  },
+  "walk_toe_off": {
+   "verts": 24802,
+   "inside": 4,
+   "inside_pct": 0.016,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.78,
+   "p999_depth_mm": 0.0,
+   "inside_left": 2,
+   "inside_right": 2
+  },
+  "kneel_toes_flexed": {
+   "verts": 24802,
+   "inside": 72,
+   "inside_pct": 0.29,
+   "inside_near_opening": 0,
+   "max_depth_mm": 1.94,
+   "p999_depth_mm": 1.05,
+   "inside_left": 36,
+   "inside_right": 36
+  },
+  "deep_squat": {
+   "verts": 24802,
+   "inside": 4,
+   "inside_pct": 0.016,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.73,
+   "p999_depth_mm": 0.0,
+   "inside_left": 2,
+   "inside_right": 2
+  },
+  "tiptoe": {
+   "verts": 24802,
+   "inside": 4,
+   "inside_pct": 0.016,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.77,
+   "p999_depth_mm": 0.0,
+   "inside_left": 2,
+   "inside_right": 2
+  }
+ },
+ "test_pose_definitions": {
+  "walk_heel_strike": [
+   [
+    "thigh_l",
+    "X",
+    -25
+   ],
+   [
+    "calf_l",
+    "X",
+    5
+   ],
+   [
+    "thigh_r",
+    "X",
+    12
+   ],
+   [
+    "calf_r",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    5
+   ],
+   [
+    "ball_r",
+    "X",
+    -50
+   ]
+  ],
+  "walk_toe_off": [
+   [
+    "thigh_r",
+    "X",
+    -25
+   ],
+   [
+    "calf_r",
+    "X",
+    5
+   ],
+   [
+    "thigh_l",
+    "X",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    40
+   ],
+   [
+    "foot_l",
+    "X",
+    5
+   ],
+   [
+    "ball_l",
+    "X",
+    -50
+   ]
+  ],
+  "kneel_toes_flexed": [
+   [
+    "thigh_l",
+    "X",
+    -8
+   ],
+   [
+    "thigh_r",
+    "X",
+    -8
+   ],
+   [
+    "calf_l",
+    "X",
+    100
+   ],
+   [
+    "calf_r",
+    "X",
+    100
+   ],
+   [
+    "foot_l",
+    "X",
+    -5
+   ],
+   [
+    "foot_r",
+    "X",
+    -5
+   ],
+   [
+    "ball_l",
+    "X",
+    -80
+   ],
+   [
+    "ball_r",
+    "X",
+    -80
+   ]
+  ],
+  "deep_squat": [
+   [
+    "pelvis",
+    "X",
+    18
+   ],
+   [
+    "thigh_l",
+    "X",
+    -118
+   ],
+   [
+    "thigh_r",
+    "X",
+    -118
+   ],
+   [
+    "thigh_l",
+    "Y",
+    -12
+   ],
+   [
+    "thigh_r",
+    "Y",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    135
+   ],
+   [
+    "calf_r",
+    "X",
+    135
+   ],
+   [
+    "foot_l",
+    "X",
+    -35
+   ],
+   [
+    "foot_r",
+    "X",
+    -35
+   ],
+   [
+    "spine_01",
+    "X",
+    3
+   ],
+   [
+    "spine_02",
+    "X",
+    3
+   ],
+   [
+    "spine_03",
+    "X",
+    3
+   ],
+   [
+    "spine_04",
+    "X",
+    3
+   ],
+   [
+    "spine_05",
+    "X",
+    3
+   ]
+  ],
+  "tiptoe": [
+   [
+    "foot_l",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    40
+   ],
+   [
+    "ball_l",
+    "X",
+    -40
+   ],
+   [
+    "ball_r",
+    "X",
+    -40
+   ]
+  ]
+ },
+ "coverage": {
+  "resolution": 2048,
+  "uv_channel": 0,
+  "uv_name": "DiffuseUV",
+  "udim_u_offset": 1.0,
+  "covered_triangles": 2373,
+  "total_triangles": 60816,
+  "margin_m": 0.012,
+  "foot_triangles_below_4cm": 10802,
+  "foot_triangles_below_4cm_covered_pct": 21.97
+ },
+ "suggested_warmth_0_10": 0,
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0, raw cm values like the UE export)",
+  "axes": "Z up, -Y forward (FBX UpAxis Z, FrontAxis -Y)",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "smoothing": "FACE",
+  "tangents": true,
+  "normal_maps": "OpenGL (+Y): flip green in Unreal"
+ },
+ "files": {
+  "SKM_WovenSandals.fbx": "a18f1f185c4e9eba03f15937f694d4903e2b39bf0c7245d40fff310d236e81b0",
+  "BodyCoverageMask_WovenSandals.png": "90ff0035ff295b8e3c0eb6b19d1e66ffb46270c0f357dfa244dfe36abc13833a",
+  "Textures/T_WovenSandals_ao.png": "ac02b0baf8c64d31b6f4cbf7194ae85290104df83eb572036b8a3998e8f05df7",
+  "Textures/T_WovenSandals_basecolor.png": "ec536099948beda0cd4f434734253dd7bde51fe9532186dcc752a2db437872f7",
+  "Textures/T_WovenSandals_normal.png": "75bf673f7fb963f098d1a9d9f93db92c65757907f2a54a267f01d3827b12aaa5",
+  "Textures/T_WovenSandals_roughness.png": "91020150cad4756f355572ba6e309c7026aa893c7540caa6ff9c4a96976bb7bb"
+ }
+}

@@ -1,0 +1,367 @@
+{
+ "recipe": "Scripts/Blender/Recipes/footwear.py",
+ "seed": 20260927,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf"
+ },
+ "asset": "SKM_TurnShoes",
+ "material": "M_TurnShoes",
+ "geometry": {
+  "vertices": 32814,
+  "triangles": 65520,
+  "bones_weighted": 10,
+  "max_influences": 3
+ },
+ "bones_exported": 15,
+ "bone_names": [
+  "ankle_bck_l",
+  "ankle_bck_r",
+  "ankle_fwd_l",
+  "ankle_fwd_r",
+  "ball_l",
+  "ball_r",
+  "calf_l",
+  "calf_r",
+  "calf_twist_01_l",
+  "calf_twist_01_r",
+  "foot_l",
+  "foot_r",
+  "pelvis",
+  "thigh_l",
+  "thigh_r"
+ ],
+ "sole_thickness_mm": 5.0,
+ "character_offset_cm": 0.5,
+ "footbed_z_mm": -0.5,
+ "fit": {
+  "l": {
+   "pivot": [
+    -0.10990708395838737,
+    0.14
+   ],
+   "inner_gap_min_mm": 1.081402991282965,
+   "inner_gap_median_mm": 1.8061895580469358,
+   "topline_z_mm": {
+    "heel": 68.0,
+    "lateral": 46.720462627972466,
+    "throat": 80.0,
+    "medial": 54.69002021270644
+   },
+   "gap_worst_deficit_mm": 0.19940802953820444
+  }
+ },
+ "textures": {
+  "resolution": 2048,
+  "uv_coverage": 0.6961262226104736,
+  "px_per_cm": {
+   "10": 58.2,
+   "11": 23.3,
+   "12": 58.2,
+   "13": 106.0
+  },
+  "albedo_mean": [
+   0.12605449557304382,
+   0.08153238147497177,
+   0.049202144145965576
+  ],
+  "albedo_max": 0.34166115522384644,
+  "roughness_mean": 0.609793484210968
+ },
+ "bind_pose": {
+  "verts": 32814,
+  "inside": 0,
+  "inside_pct": 0.0,
+  "inside_near_opening": 0,
+  "max_depth_mm": 0.0,
+  "p999_depth_mm": 0.0,
+  "inside_left": 0,
+  "inside_right": 0
+ },
+ "test_poses": {
+  "walk_heel_strike": {
+   "verts": 32814,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  },
+  "walk_toe_off": {
+   "verts": 32814,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  },
+  "kneel_toes_flexed": {
+   "verts": 32814,
+   "inside": 277,
+   "inside_pct": 0.844,
+   "inside_near_opening": 0,
+   "max_depth_mm": 2.87,
+   "p999_depth_mm": 2.09,
+   "inside_left": 139,
+   "inside_right": 138
+  },
+  "deep_squat": {
+   "verts": 32814,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  },
+  "tiptoe": {
+   "verts": 32814,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  }
+ },
+ "test_pose_definitions": {
+  "walk_heel_strike": [
+   [
+    "thigh_l",
+    "X",
+    -25
+   ],
+   [
+    "calf_l",
+    "X",
+    5
+   ],
+   [
+    "thigh_r",
+    "X",
+    12
+   ],
+   [
+    "calf_r",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    5
+   ],
+   [
+    "ball_r",
+    "X",
+    -50
+   ]
+  ],
+  "walk_toe_off": [
+   [
+    "thigh_r",
+    "X",
+    -25
+   ],
+   [
+    "calf_r",
+    "X",
+    5
+   ],
+   [
+    "thigh_l",
+    "X",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    40
+   ],
+   [
+    "foot_l",
+    "X",
+    5
+   ],
+   [
+    "ball_l",
+    "X",
+    -50
+   ]
+  ],
+  "kneel_toes_flexed": [
+   [
+    "thigh_l",
+    "X",
+    -8
+   ],
+   [
+    "thigh_r",
+    "X",
+    -8
+   ],
+   [
+    "calf_l",
+    "X",
+    100
+   ],
+   [
+    "calf_r",
+    "X",
+    100
+   ],
+   [
+    "foot_l",
+    "X",
+    -5
+   ],
+   [
+    "foot_r",
+    "X",
+    -5
+   ],
+   [
+    "ball_l",
+    "X",
+    -80
+   ],
+   [
+    "ball_r",
+    "X",
+    -80
+   ]
+  ],
+  "deep_squat": [
+   [
+    "pelvis",
+    "X",
+    18
+   ],
+   [
+    "thigh_l",
+    "X",
+    -118
+   ],
+   [
+    "thigh_r",
+    "X",
+    -118
+   ],
+   [
+    "thigh_l",
+    "Y",
+    -12
+   ],
+   [
+    "thigh_r",
+    "Y",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    135
+   ],
+   [
+    "calf_r",
+    "X",
+    135
+   ],
+   [
+    "foot_l",
+    "X",
+    -35
+   ],
+   [
+    "foot_r",
+    "X",
+    -35
+   ],
+   [
+    "spine_01",
+    "X",
+    3
+   ],
+   [
+    "spine_02",
+    "X",
+    3
+   ],
+   [
+    "spine_03",
+    "X",
+    3
+   ],
+   [
+    "spine_04",
+    "X",
+    3
+   ],
+   [
+    "spine_05",
+    "X",
+    3
+   ]
+  ],
+  "tiptoe": [
+   [
+    "foot_l",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    40
+   ],
+   [
+    "ball_l",
+    "X",
+    -40
+   ],
+   [
+    "ball_r",
+    "X",
+    -40
+   ]
+  ]
+ },
+ "coverage": {
+  "resolution": 2048,
+  "uv_channel": 0,
+  "uv_name": "DiffuseUV",
+  "udim_u_offset": 1.0,
+  "covered_triangles": 11102,
+  "total_triangles": 60816,
+  "margin_m": 0.012,
+  "foot_triangles_below_4cm": 10802,
+  "foot_triangles_below_4cm_covered_pct": 97.65
+ },
+ "suggested_warmth_0_10": 1,
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0, raw cm values like the UE export)",
+  "axes": "Z up, -Y forward (FBX UpAxis Z, FrontAxis -Y)",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "smoothing": "FACE",
+  "tangents": true,
+  "normal_maps": "OpenGL (+Y): flip green in Unreal"
+ },
+ "files": {
+  "SKM_TurnShoes.fbx": "00aef4b65a46a49c46e9fb9e637be54dac5d845af6ef793e642508dab2c57489",
+  "BodyCoverageMask_TurnShoes.png": "138170346eaa86a553c9753233a853622cfc32fc238848c31d41c034ebaa38fb",
+  "Textures/T_TurnShoes_ao.png": "9d6f40e4b8cc8f105f94efbbd9178981f634b6c9d4cd777f67be6b33bdf63a6b",
+  "Textures/T_TurnShoes_basecolor.png": "7397e4c36c503c6a03dda6c85f21d5343b995c9d85ccba1512d3f41f43e6da6c",
+  "Textures/T_TurnShoes_normal.png": "d4f428ac929c21d34549e107e190d3ac63f6c8dd080aff507d466aa54b5f6ddc",
+  "Textures/T_TurnShoes_roughness.png": "85470a27a895e27c0865dcae7f8181291fc6a5826c553418d1f5fd15c9ac52d4"
+ }
+}

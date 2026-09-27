@@ -23,6 +23,14 @@ MetaHuman assets (Unreal Engine EULA) and are included only for fitting and revi
 review renders use Poly Haven's CC0 `kloofendal_48d_partly_cloudy_puresky` HDRI (Greg Zaal, sky edits by
 Jarod Guest, https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky). It isn't part of the game asset.
 
+The heroine's footwear (`Assets\Characters\Footwear`: sheepskin FurBoots, plant-fibre
+WovenSandals and leather TurnShoes) is project-authored. `Scripts\Blender\Recipes\footwear.py`
+and its `shoemaking\` package build a last from her MetaHuman body, model every part on it, and
+skin each pair to `metahuman_base_skel`. Every leather, wool and fibre texture is synthesized in
+numpy, with no scanned or downloaded images. The `.blend` files carry the MetaHuman body and face
+only for fitting and review. The review renders use the same CC0 Kloofendal HDRI, which ships
+with no asset.
+
 The granite rocks and boulders in `Assets\Props` (GraniteCobbles, GraniteSpalls,
 GraniteRubble, GraniteBoulderLoaf, GraniteBlockTalus, GraniteBoulderLow,
 GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones)
@@ -44,6 +52,14 @@ The StoneHoe (`Scripts\Blender\Recipes\stone_hoe.py`), the TilledBed garden squa
 covered-seed SoilMound, `Scripts\Blender\Recipes\seeds.py`) are project-authored procedural geometry
 with procedural materials baked to textures; they use no scanned or downloaded geometry or
 textures. Their review renders use the same CC0 Kloofendal HDRI, which ships with no asset.
+
+The DeerRemains set (`SM_DeerRemains` and `SM_DeerBones`, `Scripts\Blender\Recipes\deer_remains.py`
+and `Recipes\deer\`) is project-authored:
+- The bones are signed-distance geometry meshed by Blender's bundled OpenVDB.
+- The hide is a solved membrane; the ribs, antlers and leaves are swept or lofted.
+- The materials are procedural and baked to textures.
+
+It uses no scanned or downloaded geometry or textures.
 
 ## Music
 
