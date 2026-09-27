@@ -87,6 +87,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | --- | --- | --- |
 | `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
+| `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's inner UBT build doesn't pass `-WaitMutex`, and another worktree's UBT was running | Fixed: `Build-Game.ps1` passes `-WaitMutex` through `-UbtArgs`. For a hand-run BuildCookRun, add `"-UbtArgs=... -WaitMutex"`. |
 | Editor never shows a window; the log stops at `Build.bat -Mode=ValidatePlatforms` | The AutoSDK platform check waits on another worktree's UBT mutex | Find the editor's `cmd.exe` child (`Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`) and `Stop-Process -Id` it and its children. The editor continues. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map during startup | Start without `-Map`, then `load_level` (under 1 s). |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
@@ -652,7 +653,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
-  script waits (`-WaitForUATMutex`) behind another worktree's package. Each Unreal step counts
+  script waits (`-WaitForUATMutex`, plus `-WaitMutex` for UAT's inner UBT step) behind other worktrees' packages and builds. Each Unreal step counts
   toward the 3-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
   `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
