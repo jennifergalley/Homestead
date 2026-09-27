@@ -241,6 +241,7 @@ void AHomesteadVisualPlaytest::RecordGeneratedInventory()
         }
         Homestead::State CoverState;
         CoverState.structures = State.structures;
+        CoverState.buildings = State.buildings;
         CoverState.plots = State.plots;
         bool ExpectedReady = true;
         for (int DY = -1; DY <= 1 && ExpectedReady; ++DY)

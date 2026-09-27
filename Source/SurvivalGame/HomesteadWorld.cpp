@@ -33,6 +33,12 @@ namespace
 TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
     TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
          "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
+TAutoConsoleVariable<float> CVarNightMoonLux(TEXT("homestead.NightMoonLux"), 2.0f,
+    TEXT("Moonlight intensity (lux) at full night."));
+TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
+    TEXT("Sky light intensity at full night (1 by day)."));
+TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
+    TEXT("Lowest auto-exposure EV100 at full night, so eyes adapt to see by moonlight (0 by day)."));
 
 // Original provisional shapes, not the final realistic environment asset set.
 const FLinearColor Meadow(0.22f, 0.31f, 0.095f);
@@ -1443,6 +1449,14 @@ void AHomesteadWorld::BuildLighting()
     Fog->RegisterComponent();
 }
 
+static float DistanceToFootprint(const Homestead::Footprint& Box, double X, double Y)
+{
+    const Homestead::Point Local = Homestead::RotateYaw({X - Box.center.x, Y - Box.center.y}, -Box.yaw);
+    const double DX = FMath::Max(0.0, FMath::Abs(Local.x) - Box.half.x);
+    const double DY = FMath::Max(0.0, FMath::Abs(Local.y) - Box.half.y);
+    return static_cast<float>(FMath::Sqrt(DX * DX + DY * DY));
+}
+
 bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float X, float Y,
     float FootprintRadius, float CanopyRadius, bool bLowCover)
 {
@@ -1466,7 +1480,8 @@ bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float 
     for (const auto& Structure : State.structures)
     {
         const auto Center = Homestead::StructureCenter(State, Structure);
-        if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 225.0f)
+        if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 225.0f
+            || DistanceToFootprint(Homestead::StructureFootprint(State, Structure), X, Y) < OccupiedRadius + 20.0f)
             return true;
     }
     for (const auto& Plot : State.plots)
@@ -1655,6 +1670,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
         }
         Homestead::State CoverState;
         CoverState.structures = State.structures;
+        CoverState.buildings = State.buildings;
         CoverState.plots = State.plots;
         for (int DY = -1; DY <= 1; ++DY)
             for (int DX = -1; DX <= 1; ++DX)
@@ -1883,6 +1899,17 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                 const float ClearingDistance = FVector2D::Distance(FVector2D(Plant.X, Plant.Y), StartingClearing);
                 const double StreamDistance = FMath::Abs(Plant.X - Homestead::StreamX(Plant.Y));
                 const bool bLow = Plant.Species >= 6;
+                // Keep the whole bush clear of every placed piece's real footprint, so no branch
+                // pokes through a wall or floor. These bushes can't normally be cleared by hand.
+                bool bUnderPiece = false;
+                for (const auto& Structure : CoverState.structures)
+                    if (DistanceToFootprint(Homestead::StructureFootprint(CoverState, Structure), Plant.X, Plant.Y)
+                        < Radius + 25.0f)
+                    {
+                        bUnderPiece = true;
+                        break;
+                    }
+                if (bUnderPiece) continue;
                 if (ClearingDistance < (Species.bBlocking ? StartingClearingBlockingRadius : StartingClearingShrubRadius) + Radius
                     || StreamDistance < (bLow ? 150.0 : 230.0) + Radius * 0.5
                     || IsDecorationReserved(CoverState, Plant.X, Plant.Y, Radius * (bLow ? 0.5f : 0.7f), 0, bLow))
@@ -3200,8 +3227,14 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // extra tint so dawn stays golden instead of saturating to orange.
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
-    Moon->SetIntensity(0.5f * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight));
+    const float NightMoonLux = CVarNightMoonLux.GetValueOnGameThread();
+    const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
+    const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
+    // Nights stay very dim but readable: a brighter moon, some sky fill, and room for the eye to
+    // adapt a couple of stops further than by day.
+    Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
+    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight));
+    Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
     Fog->SetFogDensity(bRaining ? 0.035f : FMath::Lerp(0.016f, 0.007f, Daylight));
     Fog->SetFogInscatteringColor(bRaining ? FLinearColor(0.43f, 0.49f, 0.52f)
         : FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight));
@@ -3294,7 +3327,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     }
     for (const auto& Structure : State.structures)
     {
-        Layout += FString::Printf(TEXT("S:%d:%d:%d;"), Structure.buildingId, Structure.cellX, Structure.cellY);
+        Layout += FString::Printf(TEXT("S:%d:%d:%d:%d:%d;"), Structure.id, Structure.buildingId, Structure.cellX, Structure.cellY, Structure.rotation);
     }
     for (const auto& Plot : State.plots)
     {

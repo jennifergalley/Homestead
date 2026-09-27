@@ -161,6 +161,8 @@ public:
     static int32 AppearanceChoiceCount(int32 Id);
     int32 AppearanceChoice(int32 Id) const;
     float MenuAudioVolume(int32 Id) const;
+    // How long a bed rest lasts from now: until just after dawn from the evening or night.
+    double BedSleepHours() const;
     void MenuPreviewAudioVolume(int32 Id, float Value);
     bool MenuCommitAudioVolume(int32 Id, float Value, float Previous);
     bool IsAutosaveEnabled() const { return bAutosaveEnabled; }

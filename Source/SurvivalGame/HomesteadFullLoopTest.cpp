@@ -939,25 +939,27 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         }, 0.65f);
     const auto RegrowthHour = MakeShared<double>(0);
     const auto RegrowthBefore = MakeShared<double>(0);
+    const auto RegrowthSleep = MakeShared<double>(8);
     Add(TEXT("Sheltered sleep regrows the harvested bush and protects a mixed-crop checkpoint"),
-        [this, RegrowthHour, RegrowthBefore, BerryPlotId]()
+        [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId]()
         {
             *RegrowthHour = Controller->State().hour;
+            *RegrowthSleep = Controller->BedSleepHours();
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             *RegrowthBefore = Plot ? Plot->growth : -1;
             Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
             Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
         },
-        [this, RegrowthHour, RegrowthBefore, BerryPlotId, ProtectedRecovery, RecoveryPosition]()
+        [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId, ProtectedRecovery, RecoveryPosition]()
         {
             const auto& State = Controller->State();
             const auto* Plot = FindPlot(State, *BerryPlotId);
             if (Controller->IsFailed() || Controller->ToastIsError() || !Controller->IsBookOpen()
                 || !Plot || !Plot->planted || Plot->kind != Homestead::CropKind::Berries
                 || Plot->growth <= *RegrowthBefore || Plot->growth >= 1
-                || FMath::Abs(State.hour - *RegrowthHour - 8.0) > 0.01
-                || State.hunger <= 40 || State.warmth < 80 || State.energy <= 99) return false;
+                || FMath::Abs(State.hour - *RegrowthHour - *RegrowthSleep) > 0.01
+                || State.hunger <= 40 || State.warmth < 80 || (*RegrowthSleep >= 6 && State.energy <= 99)) return false;
             // Input dispatch has completed and the pack pauses time at the saved sleep checkpoint.
             *ProtectedRecovery = Controller->Simulation().Serialize();
             *RecoveryPosition = Controller->PlayerPoint();
@@ -1193,20 +1195,23 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     {
         const auto BeforeHour = MakeShared<double>(0);
         const auto BeforeHunger = MakeShared<double>(0);
+        const auto Expected = MakeShared<double>(8);
         Add(FString::Printf(TEXT("Outdoor sleep %d advances real survival needs until failure"), Rest + 1),
-            [this, BeforeHour, BeforeHunger]()
+            [this, BeforeHour, BeforeHunger, Expected]()
             {
                 *BeforeHour = Controller->State().hour;
                 *BeforeHunger = Controller->State().hunger;
+                *Expected = Controller->BedSleepHours();
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
-            [this, BeforeHour, BeforeHunger]()
+            [this, BeforeHour, BeforeHunger, Expected]()
             {
                 const auto& State = Controller->State();
                 const double Advanced = State.hour - *BeforeHour;
                 if (Controller->IsFailed())
-                    return Advanced > 0 && Advanced <= 8.1 && (State.hunger == 0 || State.warmth == 0);
-                return Advanced >= 7.99 && Advanced < 8.1 && State.hunger < *BeforeHunger - 10
+                    return Advanced > 0 && Advanced <= *Expected + 0.1 && (State.hunger == 0 || State.warmth == 0);
+                return Advanced >= *Expected - 0.01 && Advanced < *Expected + 0.1
+                    && State.hunger < *BeforeHunger - FMath::Min(10.0, *Expected)
                     && !Controller->ToastIsError()
                     && !Controller->Simulation().IsSheltered(Controller->PlayerPoint());
             }, 0.6f);

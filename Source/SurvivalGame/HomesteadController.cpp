@@ -1982,7 +1982,7 @@ void AHomesteadController::Interact()
         break;
     case EFocus::Bed:
     {
-        Notify(Sim.Sleep(8, Position));
+        Notify(Sim.Sleep(BedSleepHours(), Position));
         if (!IsFailed())
         {
             if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
@@ -2626,6 +2626,19 @@ void AHomesteadController::LoadUserPreferences()
         && (Minutes == 5 || Minutes == 10 || Minutes == 20 || Minutes == 30))
         AutosaveMinutes = Minutes;
     AutosaveRemaining = AutosaveMinutes * 60.0f;
+}
+
+double AHomesteadController::BedSleepHours() const
+{
+    // An evening or night in bed lasts until just after dawn, when there is light to work by.
+    constexpr double WakeHour = 6.75;
+    const double Hour = FMath::Fmod(State().hour, 24.0);
+    const double ToDawn = FMath::Fmod(WakeHour - Hour + 48.0, 24.0);
+    if (ToDawn >= 4.0 && ToDawn <= 12.0) return ToDawn;
+    if (ToDawn < 4.0) return 8.0;
+    // A daytime nap ends before dusk instead of waking her in the dark.
+    if (Hour >= 18.0) return 12.0;
+    return FMath::Clamp(18.0 - Hour, 0.25, 8.0);
 }
 
 float AHomesteadController::MenuAudioVolume(int32 Id) const
