@@ -853,7 +853,7 @@ void AHomesteadController::UseSelectedTool()
     {
         if (Focus == EFocus::Water)
         {
-            Notify(Sim.FillWater(Position));
+            FillPailAtStream(Position);
             return;
         }
         if (Focus != EFocus::Plot)
@@ -874,6 +874,47 @@ void AHomesteadController::UseSelectedTool()
     }
 
     if (Tool == Homestead::Item::DiggingStick) HoeSquareAhead();
+}
+
+Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Position) const
+{
+    if (!bEstateMap)
+        return {Homestead::StreamX(Position.y), Position.y};
+
+    // Refresh the tagged HomesteadWater spline cache and aim the pail at the nearest fresh-water edge,
+    // not the retired procedural creek curve.
+    WaterEdgeDistance(Position, false);
+    const FVector Here(Position.x, Position.y, GroundHeight(Position.x, Position.y));
+    double Best = TNumericLimits<double>::Max();
+    FVector BestPoint(Homestead::StreamX(Position.y), Position.y, Here.Z);
+    for (const auto& Weak : EstateWaterSplines)
+        if (const USplineComponent* Spline = Weak.Get())
+        {
+            const FVector Center = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
+            const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
+            const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
+            const FVector2D Out(Position.x - Center.X, Position.y - Center.Y);
+            const FVector Edge = Out.SizeSquared() > 1.0
+                ? Center + FVector(Out.GetSafeNormal().X * HalfWidth, Out.GetSafeNormal().Y * HalfWidth, 0.0)
+                : Center;
+            const double Distance = FVector::Dist2D(Edge, Here);
+            if (Distance < Best)
+            {
+                Best = Distance;
+                BestPoint = Edge;
+            }
+        }
+    return {BestPoint.X, BestPoint.Y};
+}
+
+void AHomesteadController::FillPailAtStream(Homestead::Point Position)
+{
+    const auto Result = Sim.FillWater(Position);
+    Notify(Result);
+    // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon.
+    if (Result.ok)
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+            Avatar->PlayFillPail(FreshWaterDipPoint(Position));
 }
 
 void AHomesteadController::RefreshMenuPortrait()
@@ -2462,7 +2503,7 @@ void AHomesteadController::Interact()
         break;
     }
     case EFocus::Chest: OpenChestStorage(FocusId); break;
-    case EFocus::Water: Notify(Sim.FillWater(Position)); break;
+    case EFocus::Water: FillPailAtStream(Position); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
