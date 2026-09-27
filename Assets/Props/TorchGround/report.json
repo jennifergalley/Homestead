@@ -1,0 +1,378 @@
+{
+  "schema": 1,
+  "name": "TorchGround",
+  "description": "Pitch torch on a knife-pointed hazel stake: pitch-soaked linen head, twine tie, drips; plus a burnt-out variant (original). Pivot = ground level on the stake axis; point to Z -12 cm.",
+  "collision": "box",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/torch_ground.py",
+  "source_sha256": "f7aecc9cffa4eb0a2deb975f7434352194ca95bc5f8dd0878dd7433feabeccb6",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_TorchGround": {
+      "vertices": 3164,
+      "triangles": 6274,
+      "size_cm": [
+        10.6,
+        10.57,
+        124.44
+      ],
+      "materials": [
+        {
+          "name": "M_TorchGround",
+          "textures": {
+            "basecolor": "T_TorchGround_basecolor.png",
+            "roughness": "T_TorchGround_roughness.png",
+            "normal": "T_TorchGround_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchGround_basecolor.png",
+          "roughness": "T_TorchGround_roughness.png",
+          "normal": "T_TorchGround_normal.png",
+          "ao": "T_TorchGround_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "fbx": "SM_TorchGround.fbx",
+      "sha256": "1239ec87d5e409b5e8d0620cdf6c9b2094daaeb25100085173d892802c25c4db",
+      "preview": "preview_SM_TorchGround.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_TorchGround_hero.png",
+          "detail": "beauty_SM_TorchGround_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 48,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_TorchGround_Spent": {
+      "vertices": 2959,
+      "triangles": 5846,
+      "size_cm": [
+        8.57,
+        8.69,
+        117.44
+      ],
+      "materials": [
+        {
+          "name": "M_TorchGround_Spent",
+          "textures": {
+            "basecolor": "T_TorchGround_Spent_basecolor.png",
+            "roughness": "T_TorchGround_Spent_roughness.png",
+            "normal": "T_TorchGround_Spent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchGround_Spent_basecolor.png",
+          "roughness": "T_TorchGround_Spent_roughness.png",
+          "normal": "T_TorchGround_Spent_normal.png",
+          "ao": "T_TorchGround_Spent_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.96
+        ]
+      },
+      "fbx": "SM_TorchGround_Spent.fbx",
+      "sha256": "2d356752a6613662a5c15d5f812ab0c7d1f72b0836fb3750ea66cb6c3d618320",
+      "preview": "preview_SM_TorchGround_Spent.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_TorchGround_Spent_hero.png",
+          "detail": "beauty_SM_TorchGround_Spent_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 48,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_TorchGround_LOD1": {
+      "vertices": 1595,
+      "triangles": 3136,
+      "size_cm": [
+        10.6,
+        10.56,
+        124.44
+      ],
+      "materials": [
+        {
+          "name": "M_TorchGround",
+          "textures": {
+            "basecolor": "T_TorchGround_basecolor.png",
+            "roughness": "T_TorchGround_roughness.png",
+            "normal": "T_TorchGround_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchGround_basecolor.png",
+          "roughness": "T_TorchGround_roughness.png",
+          "normal": "T_TorchGround_normal.png",
+          "ao": "T_TorchGround_ao.png"
+        },
+        "shared_with": "SM_TorchGround"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchGround_LOD1.fbx",
+      "sha256": "3fb3a3c9344a56ac13a3cac5a66baa4b910b54ccf5d12eafe550473daba56e3c",
+      "preview": "preview_SM_TorchGround_LOD1.png"
+    },
+    "SM_TorchGround_LOD2": {
+      "vertices": 647,
+      "triangles": 1253,
+      "size_cm": [
+        10.63,
+        10.51,
+        124.45
+      ],
+      "materials": [
+        {
+          "name": "M_TorchGround",
+          "textures": {
+            "basecolor": "T_TorchGround_basecolor.png",
+            "roughness": "T_TorchGround_roughness.png",
+            "normal": "T_TorchGround_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchGround_basecolor.png",
+          "roughness": "T_TorchGround_roughness.png",
+          "normal": "T_TorchGround_normal.png",
+          "ao": "T_TorchGround_ao.png"
+        },
+        "shared_with": "SM_TorchGround"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchGround_LOD2.fbx",
+      "sha256": "6f8cd35ca6e8bd627d5acc6047f594ed3d14039b030c091129ca8541e2da4b08",
+      "preview": "preview_SM_TorchGround_LOD2.png"
+    },
+    "SM_TorchGround_Spent_LOD1": {
+      "vertices": 1497,
+      "triangles": 2922,
+      "size_cm": [
+        8.57,
+        8.68,
+        117.44
+      ],
+      "materials": [
+        {
+          "name": "M_TorchGround_Spent",
+          "textures": {
+            "basecolor": "T_TorchGround_Spent_basecolor.png",
+            "roughness": "T_TorchGround_Spent_roughness.png",
+            "normal": "T_TorchGround_Spent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchGround_Spent_basecolor.png",
+          "roughness": "T_TorchGround_Spent_roughness.png",
+          "normal": "T_TorchGround_Spent_normal.png",
+          "ao": "T_TorchGround_Spent_ao.png"
+        },
+        "shared_with": "SM_TorchGround_Spent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchGround_Spent_LOD1.fbx",
+      "sha256": "cc21609807682ac2dc55428998e873117d5309a01d3d4a96c934746a8ae18482",
+      "preview": "preview_SM_TorchGround_Spent_LOD1.png"
+    },
+    "SM_TorchGround_Spent_LOD2": {
+      "vertices": 607,
+      "triangles": 1168,
+      "size_cm": [
+        8.54,
+        8.7,
+        117.42
+      ],
+      "materials": [
+        {
+          "name": "M_TorchGround_Spent",
+          "textures": {
+            "basecolor": "T_TorchGround_Spent_basecolor.png",
+            "roughness": "T_TorchGround_Spent_roughness.png",
+            "normal": "T_TorchGround_Spent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchGround_Spent_basecolor.png",
+          "roughness": "T_TorchGround_Spent_roughness.png",
+          "normal": "T_TorchGround_Spent_normal.png",
+          "ao": "T_TorchGround_Spent_ao.png"
+        },
+        "shared_with": "SM_TorchGround_Spent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchGround_Spent_LOD2.fbx",
+      "sha256": "a73b9ed47b472f895c0090cfbdeb4a15a358086fd93ec558337c1210fda36feb",
+      "preview": "preview_SM_TorchGround_Spent_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Sockets and extents are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Ground level on the stake axis (0, 0, 0); the knife-cut point reaches Z -12",
+  "flameSocket_note": "Top centre of the wrapped head (lit) or of the burnt stake end (spent). Put the emissive flame and point light here; the lit head body spans Z ~88..110, ~9 cm across, so a flame volume centred ~6 cm above the socket reads right.",
+  "placement": "Stand upright on terrain; sink up to 12 cm (the point is meant to be buried).",
+  "flameSocket": {
+    "SM_TorchGround": [
+      0.0,
+      -0.0,
+      112.4
+    ],
+    "SM_TorchGround_Spent": [
+      0.0,
+      -0.0,
+      105.0
+    ]
+  },
+  "textures": {
+    "T_TorchGround_basecolor.png": "d98c5ef0730c2243d184a7e53cb8511800aedf0bf6cbf308397503176a39507a",
+    "T_TorchGround_roughness.png": "3b2be2928218de9d819651cfdf5855c9f8a70e2d113129e9c30d4a602376496b",
+    "T_TorchGround_normal.png": "639f11ffc0e6efae5272c0471d92664cf43f42f08575c70ebd92260aca6fbe2e",
+    "T_TorchGround_Spent_basecolor.png": "0d4bfba7850d2d6739760fe5bedbdba3ec50184066467bc6cc85d5092d5bf2be",
+    "T_TorchGround_Spent_roughness.png": "c5c0dfa45eb287a3a5d7823613417405d76918078fed4d317e78086e9a558eb9",
+    "T_TorchGround_Spent_normal.png": "ec4dee6a610385c327e8670f3b63d120d3f9afa2959e863ede570dcc03d80b6f"
+  }
+}

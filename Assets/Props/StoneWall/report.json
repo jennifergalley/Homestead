@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "name": "StoneWall",
+  "description": "Building kit: 3 m wall of pointed granite rubble with a long-and-short quoin pier on its +X end and a capstone coping; LOD1/LOD2 (original). Pivot = cell centre on the floor; wall faces at Unreal Y 130/158.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/stone_wall.py",
+  "source_sha256": "e427bf4b0d5dfdb433e439de8ad3443f66a661a2b3feba07f547b2efd6d595c1",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StoneWall": {
+      "vertices": 10488,
+      "triangles": 18395,
+      "size_cm": [
+        311.69,
+        33.19,
+        270.54
+      ],
+      "materials": [
+        {
+          "name": "M_StoneWall",
+          "textures": {
+            "basecolor": "T_StoneWall_basecolor.png",
+            "roughness": "T_StoneWall_roughness.png",
+            "normal": "T_StoneWall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneWall_basecolor.png",
+          "roughness": "T_StoneWall_roughness.png",
+          "normal": "T_StoneWall_normal.png",
+          "ao": "T_StoneWall_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.35,
+          -1.6,
+          1.9
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_StoneWall.fbx",
+      "sha256": "fbf8a48ccdcfc9e2b610bb127d7a4378213e1cec64458f08ecca87cdf2112bd7",
+      "preview": "preview_SM_StoneWall.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StoneWall_hero.png",
+          "detail": "beauty_SM_StoneWall_detail.png",
+          "eye": "beauty_SM_StoneWall_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StoneWall_LOD1": {
+      "vertices": 5209,
+      "triangles": 8276,
+      "size_cm": [
+        311.71,
+        33.19,
+        270.51
+      ],
+      "materials": [
+        {
+          "name": "M_StoneWall",
+          "textures": {
+            "basecolor": "T_StoneWall_basecolor.png",
+            "roughness": "T_StoneWall_roughness.png",
+            "normal": "T_StoneWall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneWall_basecolor.png",
+          "roughness": "T_StoneWall_roughness.png",
+          "normal": "T_StoneWall_normal.png",
+          "ao": "T_StoneWall_ao.png"
+        },
+        "shared_with": "SM_StoneWall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.35,
+          -1.6,
+          1.9
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_StoneWall_LOD1.fbx",
+      "sha256": "1e8f86971b24cceec919a9a382d6753a401ecdbf731d143776d4c44f33c3c23d",
+      "preview": "preview_SM_StoneWall_LOD1.png"
+    },
+    "SM_StoneWall_LOD2": {
+      "vertices": 2115,
+      "triangles": 2942,
+      "size_cm": [
+        310.86,
+        32.1,
+        270.25
+      ],
+      "materials": [
+        {
+          "name": "M_StoneWall",
+          "textures": {
+            "basecolor": "T_StoneWall_basecolor.png",
+            "roughness": "T_StoneWall_roughness.png",
+            "normal": "T_StoneWall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneWall_basecolor.png",
+          "roughness": "T_StoneWall_roughness.png",
+          "normal": "T_StoneWall_normal.png",
+          "ao": "T_StoneWall_ao.png"
+        },
+        "shared_with": "SM_StoneWall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.35,
+          -1.6,
+          1.9
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_StoneWall_LOD2.fbx",
+      "sha256": "e3e3681a442276937352bd340900fbcbd7cbefee9ceb9528e03869f11ec70442",
+      "preview": "preview_SM_StoneWall_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Cell centre on the floor (0, 0, 0)",
+  "extent_cm": {
+    "x": [
+      -150,
+      160.5
+    ],
+    "y": [
+      128,
+      160.5
+    ],
+    "z": [
+      -10,
+      260
+    ]
+  },
+  "faces_y_cm": {
+    "inner": 130,
+    "outer": 158,
+    "quoin_pier": [
+      128,
+      160
+    ]
+  },
+  "placement": "Yaw 0/90/180/270 about the cell centre (like the wooden wall). The +X end carries a proud quoin pier that fills the corner; the plain -X end tucks inside the neighbour's pier. The plinth course below Z 0 is meant to be buried.",
+  "textures": {
+    "T_StoneWall_basecolor.png": "70ece29f08876820765d1ebd1c3d4d7a649f46e1efad0bbdb92a5d8fe59ba784",
+    "T_StoneWall_roughness.png": "984eda514885650161ec6bfd2e3d602a8fbbbf1e863f77a2365a7d7e8a0d6402",
+    "T_StoneWall_normal.png": "eaa39e441b8da03579b1dd5f58083b8630229aa664abf9c7d6a549995d09dd09"
+  }
+}

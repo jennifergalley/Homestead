@@ -1,0 +1,387 @@
+{
+  "schema": 1,
+  "name": "TorchWall",
+  "description": "Pitch torch leaning out of a forged wrought-iron wall sconce (nailed strap, twisted arm, two rings); plus a burnt-out variant (original). Pivot = mounting point, strap back on Unreal Y = 0 with the wall on +Y.",
+  "collision": "box",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/torch_wall.py",
+  "source_sha256": "0b5d7cb98f23a7848ab7440dec94c4363e7f9980e730d079673d4a7010f81ec0",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_TorchWall": {
+      "vertices": 3852,
+      "triangles": 7630,
+      "size_cm": [
+        9.56,
+        34.36,
+        84.31
+      ],
+      "materials": [
+        {
+          "name": "M_TorchWall",
+          "textures": {
+            "basecolor": "T_TorchWall_basecolor.png",
+            "roughness": "T_TorchWall_roughness.png",
+            "metallic": "T_TorchWall_metallic.png",
+            "normal": "T_TorchWall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchWall_basecolor.png",
+          "roughness": "T_TorchWall_roughness.png",
+          "normal": "T_TorchWall_normal.png",
+          "metallic": "T_TorchWall_metallic.png",
+          "ao": "T_TorchWall_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.07,
+          0.0
+        ]
+      },
+      "fbx": "SM_TorchWall.fbx",
+      "sha256": "6c9fbf4c296fdad6f103e91a77ccc130366d2dc226aae002f430d6b19252821e",
+      "preview": "preview_SM_TorchWall.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_TorchWall_hero.png",
+          "detail": "beauty_SM_TorchWall_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 48,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_TorchWall_Spent": {
+      "vertices": 3647,
+      "triangles": 7202,
+      "size_cm": [
+        7.61,
+        30.52,
+        77.57
+      ],
+      "materials": [
+        {
+          "name": "M_TorchWall_Spent",
+          "textures": {
+            "basecolor": "T_TorchWall_Spent_basecolor.png",
+            "roughness": "T_TorchWall_Spent_roughness.png",
+            "metallic": "T_TorchWall_Spent_metallic.png",
+            "normal": "T_TorchWall_Spent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchWall_Spent_basecolor.png",
+          "roughness": "T_TorchWall_Spent_roughness.png",
+          "normal": "T_TorchWall_Spent_normal.png",
+          "metallic": "T_TorchWall_Spent_metallic.png",
+          "ao": "T_TorchWall_Spent_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.2,
+          0.42
+        ]
+      },
+      "fbx": "SM_TorchWall_Spent.fbx",
+      "sha256": "fd91f6327941044d588bd49298996eb83e9d58e2f886efd5ed12f23a094a6cbc",
+      "preview": "preview_SM_TorchWall_Spent.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_TorchWall_Spent_hero.png",
+          "detail": "beauty_SM_TorchWall_Spent_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 48,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_TorchWall_LOD1": {
+      "vertices": 1944,
+      "triangles": 3814,
+      "size_cm": [
+        9.54,
+        34.36,
+        84.32
+      ],
+      "materials": [
+        {
+          "name": "M_TorchWall",
+          "textures": {
+            "basecolor": "T_TorchWall_basecolor.png",
+            "roughness": "T_TorchWall_roughness.png",
+            "metallic": "T_TorchWall_metallic.png",
+            "normal": "T_TorchWall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchWall_basecolor.png",
+          "roughness": "T_TorchWall_roughness.png",
+          "normal": "T_TorchWall_normal.png",
+          "metallic": "T_TorchWall_metallic.png",
+          "ao": "T_TorchWall_ao.png"
+        },
+        "shared_with": "SM_TorchWall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchWall_LOD1.fbx",
+      "sha256": "d7931b9c03ed607dbcb72888a389a1f9fb9459e961f66bba55bb6993fb5f18cc",
+      "preview": "preview_SM_TorchWall_LOD1.png"
+    },
+    "SM_TorchWall_LOD2": {
+      "vertices": 793,
+      "triangles": 1526,
+      "size_cm": [
+        9.53,
+        34.33,
+        84.27
+      ],
+      "materials": [
+        {
+          "name": "M_TorchWall",
+          "textures": {
+            "basecolor": "T_TorchWall_basecolor.png",
+            "roughness": "T_TorchWall_roughness.png",
+            "metallic": "T_TorchWall_metallic.png",
+            "normal": "T_TorchWall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchWall_basecolor.png",
+          "roughness": "T_TorchWall_roughness.png",
+          "normal": "T_TorchWall_normal.png",
+          "metallic": "T_TorchWall_metallic.png",
+          "ao": "T_TorchWall_ao.png"
+        },
+        "shared_with": "SM_TorchWall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchWall_LOD2.fbx",
+      "sha256": "20fc66456aed15fb31a15f2c59b2082b2bd6557c13a28a30690ac86acbf69920",
+      "preview": "preview_SM_TorchWall_LOD2.png"
+    },
+    "SM_TorchWall_Spent_LOD1": {
+      "vertices": 1846,
+      "triangles": 3601,
+      "size_cm": [
+        7.59,
+        30.53,
+        77.57
+      ],
+      "materials": [
+        {
+          "name": "M_TorchWall_Spent",
+          "textures": {
+            "basecolor": "T_TorchWall_Spent_basecolor.png",
+            "roughness": "T_TorchWall_Spent_roughness.png",
+            "metallic": "T_TorchWall_Spent_metallic.png",
+            "normal": "T_TorchWall_Spent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchWall_Spent_basecolor.png",
+          "roughness": "T_TorchWall_Spent_roughness.png",
+          "normal": "T_TorchWall_Spent_normal.png",
+          "metallic": "T_TorchWall_Spent_metallic.png",
+          "ao": "T_TorchWall_Spent_ao.png"
+        },
+        "shared_with": "SM_TorchWall_Spent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchWall_Spent_LOD1.fbx",
+      "sha256": "6c268f184f1852e5569d51b0e5b124cffc49452ad43ddee135309b94dd83c35e",
+      "preview": "preview_SM_TorchWall_Spent_LOD1.png"
+    },
+    "SM_TorchWall_Spent_LOD2": {
+      "vertices": 752,
+      "triangles": 1440,
+      "size_cm": [
+        7.67,
+        30.51,
+        77.54
+      ],
+      "materials": [
+        {
+          "name": "M_TorchWall_Spent",
+          "textures": {
+            "basecolor": "T_TorchWall_Spent_basecolor.png",
+            "roughness": "T_TorchWall_Spent_roughness.png",
+            "metallic": "T_TorchWall_Spent_metallic.png",
+            "normal": "T_TorchWall_Spent_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TorchWall_Spent_basecolor.png",
+          "roughness": "T_TorchWall_Spent_roughness.png",
+          "normal": "T_TorchWall_Spent_normal.png",
+          "metallic": "T_TorchWall_Spent_metallic.png",
+          "ao": "T_TorchWall_Spent_ao.png"
+        },
+        "shared_with": "SM_TorchWall_Spent"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_TorchWall_Spent_LOD2.fbx",
+      "sha256": "781375ae7632c6d61c0930e9ed9246f049aa88847efbe5d682b16cd200ff3fe3",
+      "preview": "preview_SM_TorchWall_Spent_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Sockets and extents are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Sconce mounting point (0, 0, 0): back of the strap on the plane Y = 0, wall on +Y",
+  "lean_deg": 20,
+  "flameSocket_note": "Top centre of the wrapped head (lit) or of the burnt stake end (spent), leaning 20 deg toward -Y. Put the emissive flame and point light here; flames rise vertically, so offset the flame volume straight up (+Z) from the socket.",
+  "placement": "On a stone wall's inner face (Unreal wall-local Y 130, rubble proud to ~128): place at wall-local (x, 128.5, 140..170) with the wall's yaw so the torch leans into the room.",
+  "flameSocket": {
+    "SM_TorchWall": [
+      0.0,
+      -31.3,
+      60.0
+    ],
+    "SM_TorchWall_Spent": [
+      0.0,
+      -28.9,
+      53.3
+    ]
+  },
+  "textures": {
+    "T_TorchWall_basecolor.png": "6d55e2ad90e6964116d8aded77018ee48e35a84e811b302765a0f967cdcbb353",
+    "T_TorchWall_roughness.png": "8f12e95d2e199a02b6e62875b340dab529352900e3a67b55937201642a45657d",
+    "T_TorchWall_metallic.png": "7703bdd2ee1aeb84218e13503e4fb9a92e824e2cdc3a4b25d31534758f091951",
+    "T_TorchWall_normal.png": "1ae8555db70cfb149c241838575cbc1babbe0188fd590108d52c23e8f5dff79d",
+    "T_TorchWall_Spent_basecolor.png": "7066089821398ccc3efa5d6e2788c15a57a1f30f4f901b924330eaae69919e6a",
+    "T_TorchWall_Spent_roughness.png": "fa7fec4d7a52c7b36aa1b273a78ea604058c4fe164b9b762d84f513ab0c9b757",
+    "T_TorchWall_Spent_metallic.png": "32fecbecd7e4749981515adb39d46686494208f4313c30d9631de8a502871510",
+    "T_TorchWall_Spent_normal.png": "ddf261f1544cd92ca81ab1dd33b6f649f76ca262ed93d02c3c547951c481c8dc"
+  }
+}
