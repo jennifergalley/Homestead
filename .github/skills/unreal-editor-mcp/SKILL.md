@@ -337,8 +337,9 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 
 ### Field book (native menu)
 
-- Menu opens the book on **Settings** (page 4). LB/RB change pages in the order 0 Inventory,
-  1 Craft, 2 Build, 3 Guidebook, 6 Appearance, 4 Settings, wrapping.
+- Menu (or Escape) opens the book on **Settings** (page 4), which has no tab bar and isn't in the
+  LB/RB cycle. LB/RB cycle the tabs `FieldBookPages` (`HomesteadController.cpp`): 0 Inventory,
+  1 Craft, 2 Build, 3 Guidebook, 6 Appearance, wrapping (`I` opens Inventory directly).
   Loop LB until `st().bookPage` is the page you want. B closes/backs out.
 - **Settings** is a centred single column: Resume (focused on open), a top row Save | Load latest
   save | Quit game, Game/Sound/Video tabs, then the current tab's list. D-pad Down from Resume

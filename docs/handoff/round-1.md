@@ -13,7 +13,7 @@ page current; report changes to it rather than editing lane rows yourself.
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
 | Ruined manor and arrival | `f8b77021-941d-47e8-8bbd-1e93a632e5e8` | `jennifergalley-ruined-manor-and-arrival` | `jennifergalley-studious-doodle` | 8768 | `add-ruined-manor-and-arrival` |
-| Estate boundary and minimap | `6e131c6a-a333-4f65-a10b-a634a2f04117` | `jennifergalley-estate-boundary-and-minimap` | `jennifergalley-automatic-spork` | unknown | `add-estate-boundary-map-and-minimap` |
+| Estate boundary and minimap | `6e131c6a-a333-4f65-a10b-a634a2f04117` | `jennifergalley-estate-boundary-and-minimap` | `jennifergalley-automatic-spork` | 8766 | `add-estate-boundary-map-and-minimap` |
 | MVP survival polish (separate product line; never merge with `main`) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | `mvp-survival` (session branch `jennifergalley-mvp-survival-polish`) | `jennifergalley-probable-barnacle` | 8770 | none |
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
@@ -71,9 +71,9 @@ manor and boundary lanes haven't merged yet.
 
 ## Pending doc updates on merge
 
-- Estate boundary lane: the field book gains a Map tab (page 7). Once it's on `main`, the skill's
-  LB/RB page order becomes 0 Inventory, 1 Craft, 2 Build, 7 Map, 3 Guidebook, 6 Appearance, 4
-  Settings. Update section 4 "Field book" then.
+- Estate boundary lane: the field book gains a Map tab (page 7, `M` opens it directly). Once it's on
+  `main`, update the `FieldBookPages` cycle in skill section 4 "Field book" to 0 Inventory, 1 Craft,
+  2 Build, 7 Map, 3 Guidebook, 6 Appearance (Settings stays outside the cycle). The docs agent does this.
 
 ## Tooling requests (unassigned)
 
