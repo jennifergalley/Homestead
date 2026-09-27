@@ -238,3 +238,27 @@ The separate `CMUWalk02` upright-head retarget uses those same
 digest-pinned source files, the existing heroine skeleton and original
 face; it does not reuse the rejected Vitruvian geometry. This is not
 visual approval of the resulting walk or Sprint.
+
+## Estate terrain and ground textures
+
+The Estate map's landscape is reshaped from Environment Agency LIDAR Composite DTM 2022 at 1 m. It
+covers tiles SW6545, SW6550, SW7045, SW7050, SW7545 and SW7550 of the St Agnes coast, Cornwall, and
+was downloaded from the Defra Data Services Platform. The data is under the Open Government
+Licence v3.0 (https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/):
+
+> Contains Environment Agency information © Environment Agency and/or database right 2022. All rights reserved.
+
+`Scripts\Terrain\README.md` records the tile URLs and every processing step. The seabed is
+generated below the tideline and isn't survey data.
+
+The landscape paint layers use CC0 textures from Poly Haven (https://polyhaven.com), 2k JPG:
+
+- WoodlandFloor: `forest_leaves_02`
+- Moorland: `withered_grass`
+- DuneSand: `coast_sand_01`
+- Beach: `damp_beach_sand`
+- CliffRock: `rock_face`
+- DirtRoad: `stony_dirt_path`
+
+Pasture uses the admitted `GrassGround_20260921_01` set, and `leafy_grass` was imported but isn't
+used. The sea and the river reuse the project-authored `M_CreekWater` Single Layer Water material.
