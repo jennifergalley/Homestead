@@ -238,3 +238,9 @@ The separate `CMUWalk02` upright-head retarget uses those same
 digest-pinned source files, the existing heroine skeleton and original
 face; it does not reuse the rejected Vitruvian geometry. This is not
 visual approval of the resulting walk or Sprint.
+
+The estate clearing props (add-overgrown-estate-clearing) are project-authored procedural geometry and
+materials with no scanned or downloaded geometry or textures: the Billhook (`Scripts\Blender\Recipes\billhook.py`) and
+the spring BrambleOvergrowth set (thin bramble, thicket and bank, `Scripts\Blender\Recipes\bramble_overgrowth.py`, built
+with `blackberry_bramble.py`'s plant and atlas with its fruiting switched off). Their review renders use the same CC0
+Kloofendal HDRI, which ships with no asset.

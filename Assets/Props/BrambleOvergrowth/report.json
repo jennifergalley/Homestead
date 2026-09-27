@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "BrambleOvergrowth",
   "description": "Spring bramble overgrowth for estate clearing: thin clump, thicket and old bank of blackberry canes without flowers or fruit (original, from the BlackberryBramble recipe).",
-  "collision": "convex",
+  "collision": "none",
   "triangle_budget": 60000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/bramble_overgrowth.py",

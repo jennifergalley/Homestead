@@ -3149,10 +3149,35 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         // Stand-in until add-ruined-manor-and-arrival dresses its piles: fallen masonry.
         Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.7f);
         break;
-    default:
-        // Stumps, logs, fallen boughs and the spring flowers get authored meshes with their tools
-        // (tasks 3.1); until then they stand unseen.
+    case Homestead::ResourceKind::StumpSmall:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_StumpSmall")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.15f));
         break;
+    case Homestead::ResourceKind::StumpLarge:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_StumpLarge")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        break;
+    case Homestead::ResourceKind::StumpAncient:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_StumpAncient")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.05f));
+        break;
+    case Homestead::ResourceKind::FallenBranch:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_FallenBough")), FVector2D::ZeroVector, 0, Random.FRandRange(0.85f, 1.1f));
+        break;
+    case Homestead::ResourceKind::FallenLog:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_FallenLog")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        break;
+    case Homestead::ResourceKind::GiantLog:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_GiantLog")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.05f));
+        break;
+    default:
+        break;
+    }
+    if (Node.kind == Homestead::ResourceKind::Primroses || Node.kind == Homestead::ResourceKind::Bluebells
+        || Node.kind == Homestead::ResourceKind::WildDaffodils || Node.kind == Homestead::ResourceKind::WildGarlic)
+    {
+        // Stand-in: the meadow-herb flowers in a grass tuft, until each spring flower is authored.
+        auto* Flower = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a"));
+        for (int32 I = 0; I < 3 && Flower; ++I)
+            Place(Flower, FVector2D(FMath::Cos(I * 2.1f) * 12, FMath::Sin(I * 2.1f) * 12), Yaw + I * 120.0f, true, 1.0f);
+        Whole(Load(TEXT("GrassYarrowTuft"), TEXT("SM_GrassYarrowTuft")), FVector2D::ZeroVector, 0, 0.6f);
     }
 }
 

@@ -213,14 +213,15 @@ def wood(name, light=(0.42, 0.29, 0.17), dark=(0.20, 0.12, 0.06), grain=1.0, rou
 
 
 def bark(name, light=(0.23, 0.19, 0.15), dark=(0.055, 0.045, 0.035), scale=1.0, roughness=0.9,
-         lichen=0.0):
-    """Furrowed bark: vertical plates split by dark fissures, optional lichen."""
+         lichen=0.0, stretch=0.32):
+    """Furrowed bark: vertical plates split by dark fissures, optional lichen. ``stretch`` squeezes
+    the plate pattern along Z (smaller: longer plates, as in oak's long ridges)."""
     g = Graph(name)
     p = g.coord()
     x, y, z = g.separate(p)
     warp = g.noise(p, scale=4.0 / scale, detail=3.0).outputs["Fac"]
     plates_vec = g.combine(g.math("MULTIPLY", x, 1.0), g.math("MULTIPLY", y, 1.0),
-                           g.math("ADD", g.math("MULTIPLY", z, 0.32), g.math("MULTIPLY", warp, 0.03)))
+                           g.math("ADD", g.math("MULTIPLY", z, stretch), g.math("MULTIPLY", warp, 0.03)))
     cells = g.voronoi(plates_vec, scale=26.0 / scale, feature="DISTANCE_TO_EDGE").outputs["Distance"]
     fissure = g.remap(cells, 0.0, 0.12)
     grit = g.noise(p, scale=90.0 / scale, detail=6.0, roughness=0.7).outputs["Fac"]

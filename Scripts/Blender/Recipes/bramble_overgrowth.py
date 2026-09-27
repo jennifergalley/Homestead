@@ -21,7 +21,7 @@ F = bramble.F
 NAME = "BrambleOvergrowth"
 DESCRIPTION = ("Spring bramble overgrowth for estate clearing: thin clump, thicket and old bank of "
                "blackberry canes without flowers or fruit (original, from the BlackberryBramble recipe).")
-COLLISION = "convex"
+# Walk-through for now: the world presents resources without collision, and a blocking ring at the`r`n# doorway could trap her before she has a billhook.`r`nCOLLISION = "none"
 TRIANGLE_BUDGET = 60000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
 BEAUTY = {"pose": (0, 0, 0), "focus": (0.05, -0.4, 0.45),

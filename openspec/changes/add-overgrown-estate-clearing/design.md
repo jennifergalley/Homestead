@@ -149,3 +149,33 @@ It shares:
 
 - Stardew-like clutter density against Jenny's sense of "massively overgrown". This gets tuned
   in the first playtest.
+
+## Status and implementation notes
+
+- **Model** (`Simulation/HomesteadOvergrowth.*`): the per-kind table, tiers in `State::toolTiers`
+  (saved as a tagged trailing `tools` section), `CheckOvergrowth`/`ClearOvergrowth`, the scythe
+  arc, salvage and weed creep. Yields roll deterministically per node, so a clear never depends on
+  hidden RNG state. Yield that doesn't fit the pack is left as a world drop rather than refusing
+  the clear. Uncleared overgrowth blocks tilling and building on the estate.
+- **Salvage**: one `SalvagePile` kind, searched by hand. Each pile gives the next head she lacks
+  (as a head or a hafted tool), billhook first, then axe, scythe, pickaxe and hoe, plus one scrap
+  iron; once she has all five, piles give scrap only. So the arrival lane places piles without
+  saying which head is where.
+- **Retirements**: new games start without the knife; gathering and hafting need none. Reeds and
+  deer remains stay in woodland generation as inert scenery. Build pieces take bramble canes in
+  place of fibre (wattle); garment crafting leaves the Craft page (the dressmaker, round 3).
+  Knife, machete, fibre and fur are `hiddenFromNewGames` catalogue rows so older saves still parse.
+  Pre-pivot vitals lines (with warmth and the warm-outfit flag) still load.
+- **Presentation**: bramble thin/thicket/bank are spring meshes from `bramble_overgrowth.py`
+  (fruitless; the fruiting meshes wait for round 2's seasons). Grass, weeds, saplings, rubble,
+  rocks and boulders reuse admitted meshes; salvage piles and the spring flowers use labelled
+  stand-ins. Overgrowth has no collision yet, so the doorway bramble can't trap her before she has
+  a billhook.
+- **Swings**: the billhook uses the machete hack with its own prop; the axe uses the felling clip
+  for stumps and logs, one blow per press; the scythe and pickaxe borrow the hack as labelled
+  stand-ins until their swings are authored (tasks 3.2, 3.3).
+- **Packaged suites** still walking the survival loop (knife, fibre, woodland warmth) were
+  retargeted where cheap, with stand-in salvage grants: clearing, watering, full loop, book
+  clarity and native-menu crafting. The creek suite's knife/reed section is retired. The watering
+  visual playtest's can stage and parts of the native-menu and full-loop suites still assume the
+  old loop and need retargeting to the estate; they haven't been rerun.
