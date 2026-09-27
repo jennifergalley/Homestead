@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Scythe",
+  "description": "English scythe: rusted riveted-back blade on a crooked ash snath with two nibs (original). Pivot = lower nib grip; snath +Z, nibs -Y, blade +X with its edge -Y.",
+  "collision": "none",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/scythe.py",
+  "source_sha256": "bb1dbb942a6e92df626881669464f38956d67ec1473b4f351ffbbf78aa0e5e30",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Scythe": {
+      "vertices": 1456,
+      "triangles": 2888,
+      "size_cm": [
+        90.7,
+        24.3,
+        163.09
+      ],
+      "materials": [
+        {
+          "name": "M_Scythe",
+          "textures": {
+            "basecolor": "T_Scythe_basecolor.png",
+            "roughness": "T_Scythe_roughness.png",
+            "metallic": "T_Scythe_metallic.png",
+            "normal": "T_Scythe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Scythe_basecolor.png",
+          "roughness": "T_Scythe_roughness.png",
+          "normal": "T_Scythe_normal.png",
+          "metallic": "T_Scythe_metallic.png",
+          "ao": "T_Scythe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          90,
+          0,
+          0
+        ],
+        "focus": [
+          0.3,
+          0.0,
+          -1.05
+        ]
+      },
+      "fbx": "SM_Scythe.fbx",
+      "sha256": "ae07a3b7dfd69bc7ac8cb92ce67b6a0042e8413d6ee89b5392d7ef714fa5d044",
+      "preview": "preview_SM_Scythe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Scythe_hero.png",
+          "detail": "beauty_SM_Scythe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          90,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_Scythe_basecolor.png": "96462a8400f534d84b630a135bf2ba232528e9618d52f2fdcb49f9ce860122d2",
+    "T_Scythe_roughness.png": "4a37f21608c2da1edac98bdb56b76722c3694b626ebcedf326b2df5b701fb1c2",
+    "T_Scythe_metallic.png": "710e73f062eb52c1c7507db67e8051746c74f0a971b6e50485df5c69e830bdb5",
+    "T_Scythe_normal.png": "570bf8001b1b97a0cfb706e3450d166fbfc38f92423489479f222249aac283c8"
+  }
+}

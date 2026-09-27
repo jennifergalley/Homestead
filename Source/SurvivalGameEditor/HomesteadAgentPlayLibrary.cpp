@@ -156,6 +156,25 @@ namespace
         case Homestead::ResourceKind::Sapling: return TEXT("Sapling");
         case Homestead::ResourceKind::ForestTree: return TEXT("ForestTree");
         case Homestead::ResourceKind::DeerRemains: return TEXT("DeerRemains");
+        case Homestead::ResourceKind::TallGrass: return TEXT("TallGrass");
+        case Homestead::ResourceKind::Weeds: return TEXT("Weeds");
+        case Homestead::ResourceKind::BrambleThin: return TEXT("BrambleThin");
+        case Homestead::ResourceKind::BrambleThicket: return TEXT("BrambleThicket");
+        case Homestead::ResourceKind::BrambleBank: return TEXT("BrambleBank");
+        case Homestead::ResourceKind::FallenBranch: return TEXT("FallenBranch");
+        case Homestead::ResourceKind::StumpSmall: return TEXT("StumpSmall");
+        case Homestead::ResourceKind::StumpLarge: return TEXT("StumpLarge");
+        case Homestead::ResourceKind::StumpAncient: return TEXT("StumpAncient");
+        case Homestead::ResourceKind::FallenLog: return TEXT("FallenLog");
+        case Homestead::ResourceKind::GiantLog: return TEXT("GiantLog");
+        case Homestead::ResourceKind::Rubble: return TEXT("Rubble");
+        case Homestead::ResourceKind::SmallRock: return TEXT("SmallRock");
+        case Homestead::ResourceKind::Boulder: return TEXT("Boulder");
+        case Homestead::ResourceKind::SalvagePile: return TEXT("SalvagePile");
+        case Homestead::ResourceKind::Primroses: return TEXT("Primroses");
+        case Homestead::ResourceKind::Bluebells: return TEXT("Bluebells");
+        case Homestead::ResourceKind::WildDaffodils: return TEXT("WildDaffodils");
+        case Homestead::ResourceKind::WildGarlic: return TEXT("WildGarlic");
         default: return TEXT("Unknown");
         }
     }

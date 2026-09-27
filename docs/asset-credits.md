@@ -242,5 +242,7 @@ visual approval of the resulting walk or Sprint.
 The estate clearing props (add-overgrown-estate-clearing) are project-authored procedural geometry and
 materials with no scanned or downloaded geometry or textures: the Billhook (`Scripts\Blender\Recipes\billhook.py`) and
 the spring BrambleOvergrowth set (thin bramble, thicket and bank, `Scripts\Blender\Recipes\bramble_overgrowth.py`, built
-with `blackberry_bramble.py`'s plant and atlas with its fruiting switched off). Their review renders use the same CC0
+with `blackberry_bramble.py`'s plant and atlas with its fruiting switched off), the EstateTimber set (small, large
+and ancient stumps, a fallen log, a giant log and a fallen bough, `Scripts\Blender\Recipes\estate_timber.py`), the
+Pickaxe (`Scripts\Blender\Recipes\pickaxe.py`) and the Scythe (`Scripts\Blender\Recipes\scythe.py`). Their review renders use the same CC0
 Kloofendal HDRI, which ships with no asset.

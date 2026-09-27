@@ -2268,7 +2268,9 @@ void AHomesteadController::Interact()
         const auto* Feller = Cast<AHomesteadCharacter>(GetPawn());
         const bool bFell = Tree && Feller && Feller->CanFell();
         const auto Result = Sim.Harvest(FocusId, Position);
-        NotifyResourceAction(Result, bFell ? nullptr : Tree ? WoodTapB.Get() : GrassStepA.Get());
+        // Salvage and fallen boughs say what she found; ordinary forage shows it in her hands instead.
+        if (Homestead::IsOvergrowth(Kind)) Notify(Result, WoodTapA);
+        else NotifyResourceAction(Result, bFell ? nullptr : Tree ? WoodTapB.Get() : GrassStepA.Get());
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                 if (Reeds)
