@@ -59,6 +59,9 @@ $arguments += @(
     "-ModelContextProtocolPort=$Port"
     # Agents drive the editor while another window has focus; don't throttle PIE in the background.
     '-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False'
+    # Several worktrees share this machine; an active Live Coding session blocks every other
+    # worktree's SurvivalGameEditor build, so agent editors run without it.
+    '-ini:EditorPerProjectUserSettings:[/Script/LiveCoding.LiveCodingSettings]:bEnabled=False'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 # Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
