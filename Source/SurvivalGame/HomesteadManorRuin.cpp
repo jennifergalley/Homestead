@@ -21,32 +21,32 @@ struct FRuinPiece
 
 // Walls stand 28 cm in from the footprint's edge (their 56 cm thickness flush with it). The
 // standing room is the south-east corner, U 2400..3000 by V 0..600.
-constexpr float Face = 28.0f;
-const FRuinPiece Plan[] = {
+constexpr float RuinWallInset = 28.0f;
+const FRuinPiece ManorRuinPlan[] = {
     // South front: a collapsed south-west corner, two tall window runs either side of the
     // fallen front door, and a lower run meeting the standing room.
-    {TEXT("RuinWallLow"), 150, Face, 90},
-    {TEXT("RuinWallTall"), 600, Face, 90},
-    {TEXT("RuinWallTall"), 1500, Face, 270},
-    {TEXT("RuinWallMid"), 2100, Face, 90},
+    {TEXT("RuinWallLow"), 150, RuinWallInset, 90},
+    {TEXT("RuinWallTall"), 600, RuinWallInset, 90},
+    {TEXT("RuinWallTall"), 1500, RuinWallInset, 270},
+    {TEXT("RuinWallMid"), 2100, RuinWallInset, 90},
     // West gable with its chimney stack still standing.
-    {TEXT("RuinWallMid"), Face, 300, 0},
-    {TEXT("RuinWallTall"), Face, 900, 180},
-    {TEXT("RuinWallLow"), Face, 1350, 0},
-    {TEXT("RuinWallLow"), Face, 1650, 180},
+    {TEXT("RuinWallMid"), RuinWallInset, 300, 0},
+    {TEXT("RuinWallTall"), RuinWallInset, 900, 180},
+    {TEXT("RuinWallLow"), RuinWallInset, 1350, 0},
+    {TEXT("RuinWallLow"), RuinWallInset, 1650, 180},
     {TEXT("RuinChimney"), 55, 900, 0},
     // The rear wall, fallen almost to its footings.
-    {TEXT("RuinWallLow"), 150, 1800 - Face, 270},
-    {TEXT("RuinWallMid"), 600, 1800 - Face, 270},
-    {TEXT("RuinWallLow"), 1050, 1800 - Face, 90},
-    {TEXT("RuinWallLow"), 1650, 1800 - Face, 270},
-    {TEXT("RuinWallMid"), 2100, 1800 - Face, 90},
-    {TEXT("RuinWallLow"), 2550, 1800 - Face, 270},
-    {TEXT("RuinWallLow"), 2850, 1800 - Face, 90},
+    {TEXT("RuinWallLow"), 150, 1800 - RuinWallInset, 270},
+    {TEXT("RuinWallMid"), 600, 1800 - RuinWallInset, 270},
+    {TEXT("RuinWallLow"), 1050, 1800 - RuinWallInset, 90},
+    {TEXT("RuinWallLow"), 1650, 1800 - RuinWallInset, 270},
+    {TEXT("RuinWallMid"), 2100, 1800 - RuinWallInset, 90},
+    {TEXT("RuinWallLow"), 2550, 1800 - RuinWallInset, 270},
+    {TEXT("RuinWallLow"), 2850, 1800 - RuinWallInset, 90},
     // East gable, north of the standing room.
-    {TEXT("RuinWallMid"), 3000 - Face, 900, 180},
-    {TEXT("RuinWallLow"), 3000 - Face, 1350, 0},
-    {TEXT("RuinWallLow"), 3000 - Face, 1650, 180},
+    {TEXT("RuinWallMid"), 3000 - RuinWallInset, 900, 180},
+    {TEXT("RuinWallLow"), 3000 - RuinWallInset, 1350, 0},
+    {TEXT("RuinWallLow"), 3000 - RuinWallInset, 1650, 180},
     // The cross wall between the hall and the rooms to the west.
     {TEXT("RuinWallLow"), 1800, 750, 0},
     {TEXT("RuinWallLow"), 1800, 1350, 180},
@@ -112,7 +112,7 @@ int32 AHomesteadManorRuin::Rebuild()
     }
     const double Ground = Room ? Room->z : GetActorLocation().Z;
     SetActorLocation(FVector(MinX, MinY, Ground));
-    for (const FRuinPiece& Entry : Plan)
+    for (const FRuinPiece& Entry : ManorRuinPlan)
     {
         UStaticMesh* Asset = Mesh(Entry.Mesh);
         if (!Asset) continue;

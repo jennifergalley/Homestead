@@ -3156,11 +3156,12 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             bPreview ? (bValid ? PreviewColor : PreviewBlockedColor) : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
     };
     // An imported kit mesh at the piece's pivot, keeping its own baked materials.
-    auto KitPart = [&](const TCHAR* Name) -> UStaticMeshComponent*
+    auto KitPart = [&](const TCHAR* Name, float HeightScale = 1.0f) -> UStaticMeshComponent*
     {
         UStaticMesh* Mesh = ManorMesh(Name);
         if (!Mesh) return nullptr;
-        UStaticMeshComponent* Placed = Part(Mesh, FVector::ZeroVector, FVector(100.0f), FLinearColor::White, true);
+        UStaticMeshComponent* Placed = Part(Mesh, FVector::ZeroVector, FVector(100.0f, 100.0f, 100.0f * HeightScale),
+            FLinearColor::White, true);
         if (Placed && !bPreview)
             for (int32 Slot = 0; Slot < Mesh->GetStaticMaterials().Num(); ++Slot)
                 Placed->SetMaterial(Slot, Mesh->GetMaterial(Slot));
@@ -3174,7 +3175,10 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             : Structure.kind == Homestead::Piece::Roof ? TEXT("StoneRoof") : nullptr;
         // The roof tiles only at yaw 0 about the building's own grid.
         if (Kit && Structure.kind == Homestead::Piece::Roof) Rotation = FRotator(0, Frame.yaw, 0);
-        if (Kit && KitPart(Kit)) return;
+        // The roof's joists run one way only, so the walls rise past their coping (258 cm) to the deck
+        // underside (279 cm): the joist ends bed into the masonry instead of leaving daylight between them.
+        const bool bWallPiece = Structure.kind == Homestead::Piece::Wall || Structure.kind == Homestead::Piece::Doorway;
+        if (Kit && KitPart(Kit, bWallPiece ? 1.085f : 1.0f)) return;
     }
     if (Structure.kind == Homestead::Piece::Hearth)
     {

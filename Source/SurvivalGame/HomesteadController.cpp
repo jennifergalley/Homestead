@@ -1419,6 +1419,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
         SetControlRotation(PendingRotation);
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         {
+            Avatar->SetRestingViewRotation(PendingRotation);
+            if (bEstateMap && bFreshTerrainSpawn) Avatar->SetActorRotation(FRotator(0, PendingRotation.Yaw, 0));
             Avatar->GetCharacterMovement()->StopMovementImmediately();
             Avatar->GetCharacterMovement()->AddTickPrerequisiteActor(this);
             FString Error;
@@ -2146,7 +2148,7 @@ void AHomesteadController::Interact()
     case EFocus::Hearth:
         OpenBook(1);
         Selection = static_cast<int32>(Homestead::Recipe::RoastedRoots);
-        if (NativeMenu && !NativeMenu->FocusLegacySubject(Selection))
+        if (NativeMenu && !NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe, Selection, 0))
             Notify(TEXT("The cookfire recipe could not be selected."), true);
         break;
     case EFocus::Bed:

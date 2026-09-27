@@ -271,7 +271,17 @@ void SHomesteadNames::PressGridCell()
 void SHomesteadNames::TryBegin()
 {
     Warning = Problem();
-    if (!Warning.IsEmpty()) return;
+    if (!Warning.IsEmpty())
+    {
+        // Put her straight back on the field that needs attention.
+        for (int32 Field = 0; Field < FieldCount; ++Field)
+            if (!Homestead::Manor::NameProblem(Homestead::Manor::TrimName(ToUtf8(Values[Field])), "name").empty())
+            {
+                Row = Field;
+                break;
+            }
+        return;
+    }
     OnBegin.ExecuteIfBound(Values[0], Values[1], Values[2]);
 }
 

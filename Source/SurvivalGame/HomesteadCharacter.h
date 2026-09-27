@@ -70,6 +70,8 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // The view the appearance preview returns to (a spawn placed while it was open).
+    void SetRestingViewRotation(const FRotator& Rotation) { SavedViewRotation = Rotation; }
     // While previewing appearance, bring the camera in close on her face (eye choices).
     void SetAppearanceFaceFocus(bool bFace);
     FRotator GameplayViewRotation() const;
