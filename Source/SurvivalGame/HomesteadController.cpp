@@ -1130,7 +1130,8 @@ void AHomesteadController::PrepareEstateSimulation(Homestead::Simulation& Target
     const TWeakObjectPtr<const AHomesteadController> Self(this);
     Target.SetWaterProbe([Self](Homestead::Point Position)
     {
-        return Self.IsValid() && Self->WaterEdgeDistance(Position) <= 120.0;
+        // Only fresh water counts for the pail; the sea is salt.
+        return Self.IsValid() && Self->WaterEdgeDistance(Position, false) <= 120.0;
     });
 }
 
@@ -1146,7 +1147,7 @@ void AHomesteadController::SetEstateSpawn()
     EstateSpawnWait = 0;
 }
 
-double AHomesteadController::WaterEdgeDistance(Homestead::Point Position) const
+double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea) const
 {
     if (!bEstateMap)
         return FMath::Abs(Position.x - Homestead::StreamX(Position.y)) - Homestead::Generation::StreamWaterHalfWidthCm;
@@ -1172,6 +1173,8 @@ double AHomesteadController::WaterEdgeDistance(Homestead::Point Position) const
             const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
             Best = FMath::Min(Best, FVector::Dist2D(Point, Here) - HalfWidth);
         }
+    if (!bIncludeSea)
+        return Best;
     // The sea and the estuary: ground below sea level within a couple of metres.
     if (HomesteadEstateTerrain::Height(Position.x, Position.y) < -15.0f)
         return 0.0;
@@ -1196,7 +1199,7 @@ bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
             const FVector Direction = FRotator(0, Yaw + Angle, 0).Vector();
             const Homestead::Point Candidate{PlayerPosition.x + Direction.X * Distance,
                 PlayerPosition.y + Direction.Y * Distance};
-            if (Sim.NearWater(Candidate)) continue;
+            if (bEstateMap ? WaterEdgeDistance(Candidate) <= 60.0 : Homestead::IsNearWater(Candidate)) continue;
             bool Clear = true;
             for (const auto& Structure : State().structures)
                 if (FVector2D::Distance(FVector2D(Candidate.x, Candidate.y),
@@ -1412,6 +1415,15 @@ void AHomesteadController::Tick(float DeltaSeconds)
             return;
         }
         const float Surface = GroundHeight(Position.X, Position.Y);
+        if (bEstateMap && Surface < -70.0f)
+        {
+            // No swimming in round 1: she wades to about knee depth and no further.
+            if (auto* Avatar = Cast<AHomesteadCharacter>(ControlledPawn))
+                Avatar->GetCharacterMovement()->StopMovementImmediately();
+            ControlledPawn->SetActorLocation(LastSafeWorldPosition, false, nullptr, ETeleportType::TeleportPhysics);
+            if (ToastRemaining <= 0) Notify(TEXT("The water's too deep to wade any further."));
+            return;
+        }
         if (Position.Z < Surface - 200)
         {
             ++WorldRecoveries;
@@ -1615,7 +1627,7 @@ void AHomesteadController::UpdateFocus()
             && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::WateringCan)
             && Sim.Count(Homestead::Item::WateringCan) > 0;
         const int32 Water = Sim.Count(Homestead::Item::Water);
-        const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position));
+        const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position, false));
         if (Focus == EFocus::None || (bCan && Water < 6 && (Water == 0 || Edge <= Best)))
         {
             Focus = EFocus::Water;

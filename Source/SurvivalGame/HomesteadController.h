@@ -131,7 +131,7 @@ public:
     // True on the fixed Estate map, where the Landscape and baked placements replace the generated woodland.
     bool IsEstateMap() const { return bEstateMap; }
     // Distance (cm) from a point to the nearest drawable water's edge; <= 0 is in the water.
-    double WaterEdgeDistance(Homestead::Point Position) const;
+    double WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea = true) const;
     bool IsWorldReady() const { return bWorldReady; }
     uint32 WorldRecoveryCount() const { return WorldRecoveries; }
     // Where the construction preview currently resolves (snapped or free-standing).

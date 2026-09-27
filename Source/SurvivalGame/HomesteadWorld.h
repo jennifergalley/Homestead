@@ -259,6 +259,11 @@ private:
     bool bLightRotationApplied = false;
     // True while showing a fixed-estate game on the Estate level's Landscape.
     bool bFixedEstate = false;
+    // Baked decorative trees, shrubs and rocks for the Estate map (Content/SurvivalGame/Estate/Runtime).
+    bool BuildEstateScenery();
+    bool bEstateSceneryBuilt = false;
+    UPROPERTY()
+    TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
     UPROPERTY()

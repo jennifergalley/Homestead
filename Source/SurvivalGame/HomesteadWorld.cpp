@@ -1,5 +1,7 @@
 #include "HomesteadWorld.h"
 #include "HomesteadEstateTerrain.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 #include "HomesteadCharacter.h"
 #include "Async/Async.h"
@@ -1032,6 +1034,127 @@ int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) c
     return Count;
 }
 
+namespace
+{
+struct FEstateSceneryKind
+{
+    const TCHAR* Path;
+    bool bCollision;
+    float CullCm;
+    bool bTree;
+    float RimLift;
+    float Footprint;
+};
+// Index = the kind byte written by Scripts/Terrain/scatter.py. Keep the two in step.
+const FEstateSceneryKind EstateSceneryKinds[] = {
+    {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"), true, 0, true, 3, 41},
+    {TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"), true, 0, true, 30, 76},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Hazel/SM_Hazel.SM_Hazel"), false, 14000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/BrackenFern/SM_BrackenFern.SM_BrackenFern"), false, 9000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GrassYarrowTuft/SM_GrassYarrowTuft.SM_GrassYarrowTuft"), false, 6000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteCobbles/SM_GraniteCobbles.SM_GraniteCobbles"), false, 9000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderLoaf/SM_GraniteBoulderLoaf.SM_GraniteBoulderLoaf"), true, 24000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteErratic/SM_GraniteErratic.SM_GraniteErratic"), true, 60000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteDome/SM_GraniteDome.SM_GraniteDome"), true, 0, false, 0, 0},
+    {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_a.SM_Fern02_a"), false, 7000, false, 0, 0},
+    {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tall_a.SM_GrassMedium01_tall_a"), false, 4500, false, 0, 0},
+    {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b.SM_GrassMedium01_mid_b"), false, 4500, false, 0, 0},
+    {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_Shrub04_a.SM_Shrub04_a"), false, 12000, false, 0, 0},
+};
+
+#pragma pack(push, 1)
+struct FEstateSceneryRecord
+{
+    uint8 Kind;
+    uint8 Pad[3];
+    float X, Y, Yaw, Scale;
+};
+#pragma pack(pop)
+static_assert(sizeof(FEstateSceneryRecord) == 20, "EstateScenery.bin records are 20 bytes");
+}
+
+bool AHomesteadWorld::BuildEstateScenery()
+{
+    if (bEstateSceneryBuilt) return true;
+    const FString Path = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("SurvivalGame/Estate/Runtime/EstateScenery.bin"));
+    TArray<uint8> Raw;
+    if (!FFileHelper::LoadFileToArray(Raw, *Path) || Raw.Num() < 8 || FMemory::Memcmp(Raw.GetData(), "HSC1", 4) != 0)
+    {
+        UE_LOG(LogHomesteadWorld, Warning, TEXT("Estate scenery is missing or unreadable: %s"), *Path);
+        bEstateSceneryBuilt = true;
+        return true;
+    }
+    uint32 Count = 0;
+    FMemory::Memcpy(&Count, Raw.GetData() + 4, 4);
+    if (Raw.Num() != 8 + static_cast<int64>(Count) * sizeof(FEstateSceneryRecord))
+    {
+        UE_LOG(LogHomesteadWorld, Error, TEXT("Estate scenery has %d bytes for %u records."), Raw.Num(), Count);
+        bEstateSceneryBuilt = true;
+        return true;
+    }
+    const auto* Records = reinterpret_cast<const FEstateSceneryRecord*>(Raw.GetData() + 8);
+    constexpr int32 KindCount = UE_ARRAY_COUNT(EstateSceneryKinds);
+    UHierarchicalInstancedStaticMeshComponent* Batches[KindCount] = {};
+    TArray<FTransform> Transforms[KindCount];
+    for (uint32 Index = 0; Index < Count; ++Index)
+    {
+        const FEstateSceneryRecord& Record = Records[Index];
+        if (Record.Kind >= KindCount) continue;
+        const FEstateSceneryKind& Kind = EstateSceneryKinds[Record.Kind];
+        if (!Batches[Record.Kind])
+        {
+            UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, Kind.Path);
+            if (!Mesh)
+            {
+                UE_LOG(LogHomesteadWorld, Warning, TEXT("Estate scenery mesh missing: %s"), Kind.Path);
+                continue;
+            }
+            auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+            Batch->SetupAttachment(GetRootComponent());
+            Batch->SetMobility(EComponentMobility::Static);
+            Batch->SetStaticMesh(Mesh);
+            Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
+            Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+            Batch->SetCanEverAffectNavigation(false);
+            Batch->SetCastShadow(Kind.bTree || Kind.bCollision);
+            if (Kind.CullCm > 0) Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
+            Batch->ComponentTags.Add(TEXT("EstateScenery"));
+            ApplyCameraSafeFoliageMaterials(*Batch);
+            Batches[Record.Kind] = Batch;
+        }
+        UStaticMesh* Mesh = Batches[Record.Kind]->GetStaticMesh();
+        const FRotator Rotation(0, Record.Yaw, 0);
+        FVector Base(Record.X, Record.Y, HomesteadEstateTerrain::Height(Record.X, Record.Y));
+        FVector Anchor = FVector::ZeroVector;
+        if (Kind.bTree && Mesh->GetBodySetup() && Mesh->GetBodySetup()->AggGeom.SphylElems.Num() > 0)
+        {
+            // Sink the root flare as the woodland trees do, so no base floats on a slope.
+            const auto& Capsule = Mesh->GetBodySetup()->AggGeom.SphylElems[0];
+            Anchor = FVector(Capsule.Center.X, Capsule.Center.Y, Mesh->GetBoundingBox().Min.Z);
+            const float Radius = FMath::Max(Capsule.Radius, Kind.Footprint) * Record.Scale;
+            float Root = Base.Z;
+            for (int32 Step = 0; Step < 8; ++Step)
+            {
+                const float Angle = Step * UE_PI / 4.0f;
+                Root = FMath::Min(Root, HomesteadEstateTerrain::Height(Record.X + Radius * FMath::Cos(Angle), Record.Y + Radius * FMath::Sin(Angle)));
+            }
+            Base.Z = Root - (4.0f + Kind.RimLift * Record.Scale);
+        }
+        Transforms[Record.Kind].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
+    }
+    int32 Total = 0;
+    for (int32 Kind = 0; Kind < KindCount; ++Kind)
+    {
+        if (!Batches[Kind]) continue;
+        Batches[Kind]->RegisterComponent();
+        Batches[Kind]->AddInstances(Transforms[Kind], false, true);
+        EstateScenery.Add(Batches[Kind]);
+        Total += Transforms[Kind].Num();
+    }
+    bEstateSceneryBuilt = true;
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches."), Total, EstateScenery.Num());
+    return true;
+}
 bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
 {
     if (State.fixedEstate)
@@ -1059,7 +1182,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
         Descriptor = State.world;
         PreparedChunk = State.activeChunk;
         bTerrainReady = true;
-        return true;
+        return BuildEstateScenery();
     }
     if (bFixedEstate)
     {

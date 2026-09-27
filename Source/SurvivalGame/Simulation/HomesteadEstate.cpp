@@ -71,7 +71,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
     static const EstatePlacements Placements = []
     {
         EstatePlacements table;
-        table.bakeVersion = 1;
+        table.bakeVersion = 2;
         const Point room = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
         auto add = [&](int id, ResourceKind kind, double dx, double dy, int minTier = 0)
         {
@@ -85,6 +85,12 @@ const EstatePlacements& ProvisionalEstatePlacements()
         add(500005, ResourceKind::Flowers, -1800.0, -300.0);
         add(500006, ResourceKind::ForestTree, -3000.0, 1500.0);
         add(500007, ResourceKind::ForestTree, -3400.0, -1800.0);
+        // World lane: the estate's interactive woodland and forage, baked by Scripts/Terrain/scatter.py.
+        auto world = [&](int id, ResourceKind kind, double x, double y)
+        {
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateWorldPlacements.inc"
         // Overgrowth lane (510000+).
         // Salvage lane (520000+).
         // Town lane (530000+).
