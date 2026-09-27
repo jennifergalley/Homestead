@@ -1022,6 +1022,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     candidate.heroineName = Manor::DefaultHeroineName;
     candidate.familyName = Manor::DefaultFamilyName;
     candidate.estateName = Manor::DefaultEstateName;
+    candidate.journal.push_back(Manor::ArrivalEntry);
     if (!Manor::SeedStandingRoom(candidate, layout))
         return Bad("The estate layout has no standing room. No new game was started.");
     const auto inventory = ValidateInventory(candidate);
@@ -2131,6 +2132,8 @@ Result Simulation::SeedStandingRoomAt(Point origin, double yaw)
         candidate.familyName = Manor::DefaultFamilyName;
         candidate.estateName = Manor::DefaultEstateName;
     }
+    if (std::find(candidate.journal.begin(), candidate.journal.end(), Manor::ArrivalEntry) == candidate.journal.end())
+        candidate.journal.push_back(Manor::ArrivalEntry);
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return inventory;
     state_ = std::move(candidate);

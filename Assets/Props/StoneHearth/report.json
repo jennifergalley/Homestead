@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "StoneHearth",
+  "description": "Standing room hearth: an open granite kitchen fireplace with dressed jambs, one lintel, a rubble chimney breast, sooted firebox, ash bed, wrought-iron firedogs and charred split logs; LOD1/LOD2 (original). Pivot = cell centre on the floor; its back meets the wall's inner face at Unreal Y 130.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/stone_hearth.py",
+  "source_sha256": "dd66969cbb75dbe1d7af4192f7433d592fc9d8553a39822ee265acf4a1f51697",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StoneHearth": {
+      "vertices": 7093,
+      "triangles": 13108,
+      "size_cm": [
+        192.33,
+        90.15,
+        261.32
+      ],
+      "materials": [
+        {
+          "name": "M_StoneHearth",
+          "textures": {
+            "basecolor": "T_StoneHearth_basecolor.png",
+            "roughness": "T_StoneHearth_roughness.png",
+            "normal": "T_StoneHearth_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneHearth_basecolor.png",
+          "roughness": "T_StoneHearth_roughness.png",
+          "normal": "T_StoneHearth_normal.png",
+          "ao": "T_StoneHearth_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.0,
+          0.9,
+          0.45
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_StoneHearth.fbx",
+      "sha256": "e3a7a9678f04f33f9a7bb0ba60ffdb3761037c9ec0c66f663f761f9ec9ae53aa",
+      "preview": "preview_SM_StoneHearth.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StoneHearth_hero.png",
+          "detail": "beauty_SM_StoneHearth_detail.png",
+          "eye": "beauty_SM_StoneHearth_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StoneHearth_LOD1": {
+      "vertices": 3421,
+      "triangles": 5898,
+      "size_cm": [
+        192.2,
+        90.14,
+        261.32
+      ],
+      "materials": [
+        {
+          "name": "M_StoneHearth",
+          "textures": {
+            "basecolor": "T_StoneHearth_basecolor.png",
+            "roughness": "T_StoneHearth_roughness.png",
+            "normal": "T_StoneHearth_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneHearth_basecolor.png",
+          "roughness": "T_StoneHearth_roughness.png",
+          "normal": "T_StoneHearth_normal.png",
+          "ao": "T_StoneHearth_ao.png"
+        },
+        "shared_with": "SM_StoneHearth"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.0,
+          0.9,
+          0.45
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_StoneHearth_LOD1.fbx",
+      "sha256": "4b98970c944054e2b2d00dcadce759059e600d01701ac81f0d7b0a44d4f45cd0",
+      "preview": "preview_SM_StoneHearth_LOD1.png"
+    },
+    "SM_StoneHearth_LOD2": {
+      "vertices": 1348,
+      "triangles": 2096,
+      "size_cm": [
+        191.8,
+        89.81,
+        261.29
+      ],
+      "materials": [
+        {
+          "name": "M_StoneHearth",
+          "textures": {
+            "basecolor": "T_StoneHearth_basecolor.png",
+            "roughness": "T_StoneHearth_roughness.png",
+            "normal": "T_StoneHearth_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneHearth_basecolor.png",
+          "roughness": "T_StoneHearth_roughness.png",
+          "normal": "T_StoneHearth_normal.png",
+          "ao": "T_StoneHearth_ao.png"
+        },
+        "shared_with": "SM_StoneHearth"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.0,
+          0.9,
+          0.45
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_StoneHearth_LOD2.fbx",
+      "sha256": "560037a5f8fb6dfa1fda51ca0d0c87a245bc22f7d8bdcb144ca368767a1c7e28",
+      "preview": "preview_SM_StoneHearth_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Cell centre on the floor (0, 0, 0)",
+  "extent_cm": {
+    "x": [
+      -96,
+      96
+    ],
+    "y": [
+      40,
+      130
+    ],
+    "z": [
+      -3,
+      258
+    ]
+  },
+  "fire_cm": {
+    "opening_x": [
+      -56,
+      56
+    ],
+    "opening_z": [
+      3,
+      108
+    ],
+    "logs_centre": [
+      0,
+      100,
+      20
+    ]
+  },
+  "placement": "Rotated with its piece (yaw 0/90/180/270 about the cell centre) so its back meets the wall on that edge. Put the flame and point light at the logs' centre.",
+  "textures": {
+    "T_StoneHearth_basecolor.png": "22641e6e2c404c46199406638f153ad7414c7a53bd9576520626a3fb47b70817",
+    "T_StoneHearth_roughness.png": "64d25ad4a0e6bbe1312db92f1db8bb609fa2c5a4bbd49ec07dcae07c0e1bd9c1",
+    "T_StoneHearth_normal.png": "030ab1dd90f728e0f29c78a930f3b3c5963bc89d8be47d5863777f689604945c"
+  }
+}

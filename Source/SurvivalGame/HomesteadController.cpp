@@ -38,6 +38,9 @@
 #include "UI/SHomesteadShop.h"
 #include "UI/SHomesteadHotbar.h"
 #include "HomesteadMapComponent.h"
+#include "Simulation/HomesteadManor.h"
+#include "UI/SHomesteadNames.h"
+#include "UI/SHomesteadArrival.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/IInputProcessor.h"
 #include "UI/HomesteadMenuPortrait.h"
@@ -395,6 +398,12 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
     {
         if (Params.Event == IE_Pressed) bControlDown = true;
         else if (Params.Event == IE_Released) bControlDown = false;
+    }
+    if (NamesWidget.IsValid())
+    {
+        // The Names step owns input; real keys reach it through Slate focus first.
+        if (Params.Event == IE_Pressed) NamesWidget->HandleKey(Params.Key);
+        return true;
     }
     if (NativeMenu.IsValid()) bShowMouseCursor = !bGamepad;
     if (NativeMenu.IsValid() && (bBookOpen || IsFailed()))
@@ -924,6 +933,20 @@ void AHomesteadController::HomesteadMorning(float Hour)
     RefreshRemaining = 0;
 }
 
+void AHomesteadController::HomesteadStandingRoom()
+{
+    const APawn* Avatar = GetPawn();
+    if (!Avatar) return;
+    // She wakes facing the doorway on the room's west side, so the grid heading is her yaw + 90.
+    const double RoomYaw = FMath::Fmod(Avatar->GetActorRotation().Yaw + 90.0 + 720.0, 360.0);
+    const Homestead::Point Offset = Homestead::RotateYaw({-150.0, 0.0}, RoomYaw);
+    const auto Position = PlayerPoint();
+    const auto Result = Sim.SeedStandingRoomAt({Position.x - Offset.x, Position.y - Offset.y}, RoomYaw);
+    Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result);
+    RefreshRemaining = 0;
+    if (Result) ShowArrival();
+}
+
 void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
 {
     const FString Wanted = ItemName.Replace(TEXT(" "), TEXT(""));
@@ -969,6 +992,10 @@ void AHomesteadController::HomesteadWear(const FString& Garment)
 
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
+    HideNames();
+    if (ArrivalCard.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(StaticCastSharedPtr<SWidget>(ArrivalCard).ToSharedRef());
+    ArrivalCard.Reset();
     HideHotbar();
     HideNativeMenu();
     if (ShopScreen.IsValid()) CloseShopScreen();
@@ -1045,8 +1072,9 @@ FString AHomesteadController::MenuSaveStatus() const
 {
     const FString When = LastSuccessfulSave.GetTicks() > 0
         ? LastSuccessfulSave.ToString(TEXT("%Y-%m-%d %H:%M:%S UTC")) : TEXT("not known in this session");
+    const FString Label = CurrentSaveLabel();
     return FString::Printf(TEXT("%s\nLast successful save: %s"),
-        PreviewLabel().IsEmpty() ? TEXT("Current homestead") : *PreviewLabel(), *When);
+        !Label.IsEmpty() ? *Label : PreviewLabel().IsEmpty() ? TEXT("Current homestead") : *PreviewLabel(), *When);
 }
 void AHomesteadController::MenuSaveAndQuit()
 {
@@ -1347,6 +1375,7 @@ void AHomesteadController::UpdateCreekAudio()
 void AHomesteadController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    UpdateArrival();
     if (!Landscape) return;
     if (!StartupProbeDirectory.IsEmpty()) TickStartupProbe();
     UpdateCreekAudio();
@@ -1617,6 +1646,7 @@ void AHomesteadController::UpdateFocus()
     {
         EFocus Kind = EFocus::None;
         if (Structure.kind == Homestead::Piece::Fire) Kind = EFocus::Fire;
+        if (Structure.kind == Homestead::Piece::Hearth) Kind = EFocus::Hearth;
         if (Structure.kind == Homestead::Piece::Bed) Kind = EFocus::Bed;
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
@@ -1697,6 +1727,7 @@ FString AHomesteadController::FocusTitle() const
             }
         break;
     case EFocus::Fire: return TEXT("Cookfire");
+    case EFocus::Hearth: return TEXT("Hearth");
     case EFocus::Bed: return TEXT("Bedroll");
     case EFocus::Chest: return TEXT("Storage chest");
     case EFocus::Water: return TEXT("Fresh stream water");
@@ -1749,6 +1780,7 @@ FString AHomesteadController::FocusActions() const
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
+    case EFocus::Hearth: return A + TEXT(" Cook");
     case EFocus::Drop: return A + TEXT(" Pick up");
     case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
@@ -2109,6 +2141,7 @@ void AHomesteadController::Interact()
         }
         break;
     case EFocus::Fire:
+    case EFocus::Hearth:
         OpenBook(1);
         Selection = static_cast<int32>(Homestead::Recipe::RoastedRoots);
         if (NativeMenu && !NativeMenu->FocusLegacySubject(Selection))
@@ -2325,6 +2358,8 @@ void AHomesteadController::CloseBook()
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(false);
     if (IsFailed()) ShowNativeMenu();
     else HideNativeMenu();
+    // New-game setup: leaving Appearance moves on to the Names step.
+    if (bNewGameSetup && !IsFailed() && !NamesWidget.IsValid()) ShowNames();
 }
 void AHomesteadController::ToggleBook() { if (IsFailed()) return; if (bBookOpen) CloseBook(); else OpenBook(0); }
 void AHomesteadController::OpenSettings() { if (bBookOpen && Page == 4) CloseBook(); else OpenBook(4); }
@@ -2424,12 +2459,20 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         for (int Index = 0; Index < static_cast<int>(Homestead::Piece::Count); ++Index)
         {
             const auto Piece = static_cast<Homestead::Piece>(Index);
+            if (!Homestead::IsBuildable(Piece)) continue;
             Result.Add({ Index, Text(Homestead::PieceName(Piece)),
                 FString::Printf(TEXT("Needs: %s"), *Text(Homestead::PieceRequirements(Piece))), TEXT("plan") });
         }
     }
     else if (Page == 3)
     {
+        // Journal entries head the guidebook once there are any (the arrival note on the estate).
+        for (int32 Entry = 0; Entry < static_cast<int32>(State().journal.size()); ++Entry)
+        {
+            const std::string& Key = State().journal[Entry];
+            Result.Add({100 + Entry, FString(TEXT("Journal: ")) + UTF8_TO_TCHAR(Homestead::Manor::JournalTitle(Key).c_str()),
+                UTF8_TO_TCHAR(Homestead::Manor::JournalText(Key, State()).c_str())});
+        }
         Result.Add({0, TEXT("Choose your own home"), TEXT("Explore the seeded woodland. There is no prepared house clearing; find a place you like and make room.")});
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
         Result.Add({2, TEXT("2. Make your first tools"), TEXT("Branches, loose stones and reeds supply wood, stone and fiber.")});
@@ -2443,7 +2486,9 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     else if (Page == 4)
     {
         Result.Add({0, TEXT("Save"), TEXT("Write a manual save and remain in Settings.")});
-        Result.Add({1, TEXT("Load latest save"), TEXT("Resume the newest valid manual or automatic save.")});
+        Result.Add({1, TEXT("Load latest save"), LatestSaveLabel.IsEmpty()
+            ? FString(TEXT("Resume the newest valid manual or automatic save."))
+            : FString::Printf(TEXT("Resume the newest valid manual or automatic save: %s."), *LatestSaveLabel)});
         const FString Speed = State().dayMinutes >= 119 ? TEXT("Leisurely") : State().dayMinutes <= 31 ? TEXT("Fast") : TEXT("Balanced");
         Result.Add({2, TEXT("Game speed: ") + Speed, TEXT("Leisurely, Balanced, or Fast.")});
         Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), TEXT("Cycle a comfortable turn speed.")});
@@ -3215,6 +3260,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     Save->HotbarSlots = HotbarSlots;
     Save->SelectedHotbarSlot = SelectedHotbarSlot;
     Save->HotbarLayout = UHomesteadSave::CurrentHotbarLayout;
+    Save->SaveLabel = CurrentSaveLabel();
     TArray<uint8> Data;
     const FString Path = SavePath(Slot);
     const FString Temporary = Path + TEXT(".tmp");
@@ -3250,6 +3296,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     }
     if (!Quiet) Notify(TEXT("Your homestead is saved."));
     LastSuccessfulSave = FDateTime::UtcNow();
+    LatestSaveLabel = Save->SaveLabel;
     return true;
 }
 
@@ -3304,6 +3351,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     }
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
+    LatestSaveLabel = Save.SaveLabel;
     Appearance.HairStyle = Save.HairStyle; Appearance.MetaHair = Save.MetaHair >= 0 ? Save.MetaHair : HomesteadLook::MetaHairForLegacy(Save.HairStyle);
     Appearance.HairColor = Save.HairColor;
     Appearance.SkinTone = Save.SkinTone;

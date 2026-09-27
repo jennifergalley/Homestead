@@ -275,6 +275,8 @@ struct State
     std::string heroineName;
     std::string familyName;
     std::string estateName;
+    // Field-book journal entries, oldest first, by key ("arrival"); see Manor::JournalTitle.
+    std::vector<std::string> journal;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -430,9 +432,9 @@ public:
     // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
     // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.
     Result GrantStarterKit(Point anchor, Point facing, bool includeSeeds);
-    // Playtest aid for woodland games: raise the heritage standing room with its cell (0, 0) corner
-    // at `origin` and its grid turned `yaw` degrees, if nothing stands in the way.
-    Result SeedStandingRoomAt(Point origin, double yaw);
+    // Playtest aid for woodland games: raise the heritage standing room centred on `centre`, its grid
+    // turned `yaw` degrees, if nothing stands in the way.
+    Result SeedStandingRoomAt(Point centre, double yaw);
     // Playtest aid: put `count` of an item in her pack if there is room.
     Result GrantItems(Item item, int count);
     // Till one garden square (garden coordinates, see GardenCell) with the stone hoe.

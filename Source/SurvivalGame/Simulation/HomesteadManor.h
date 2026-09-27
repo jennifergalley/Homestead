@@ -40,7 +40,7 @@ int NameLength(const std::string& utf8);
 // the field ("first name", "surname", "estate name").
 std::string NameProblem(const std::string& trimmed, const char* what);
 
-// Adds the heritage standing room at the layout's StandingRoomOrigin: stone foundations, walls,
+// Adds the heritage standing room centred on the layout's StandingRoomOrigin: stone foundations, walls,
 // a doorway and roof, the hearth, the bed and a chest holding the pail and four branches.
 // Returns false (leaving `state` unchanged) when the layout has no room anchor.
 bool SeedStandingRoom(State& state, const EstateLayout& layout);
@@ -52,6 +52,12 @@ bool BlockedByManor(const State& state, const EstateLayout& layout, const Placem
 
 // "Eleanor Trelawney — Trevennor, Spring 1" (an empty string for unnamed woodland games).
 std::string SaveLabel(const State& state, const char* season, int day);
+
+// Journal entries: the arrival note is written when she first comes home.
+constexpr const char* ArrivalEntry = "arrival";
+// Title and body of a journal entry, or empty strings for an unknown key.
+std::string JournalTitle(const std::string& key);
+std::string JournalText(const std::string& key, const State& state);
 
 // Optional trailing save section (tag "manor"): names plus per-structure skins and heritage flags.
 constexpr const char* SaveTag = "manor";

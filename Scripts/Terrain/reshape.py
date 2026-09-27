@@ -119,7 +119,7 @@ def pad(z, center, half, falloff, mode="flat", target=None, yaw_deg=0.0):
 # ---- The agreed layout (game metres) -------------------------------------------------------
 MANOR_CENTER = (-250.0, -650.0)          # ruin long axis runs east-west, facing the sea
 MANOR_RECT = (-259.0, -241.0, -665.0, -635.0)   # x0, x1, y0, y1 (18 x 30 m)
-ROOM = (-259.0, -251.0, -643.0, -635.0)  # standing room: the carved-out south-east corner, 8 x 8 m
+ROOM = (-259.0, -253.0, -641.0, -635.0)  # standing room: the carved-out south-east corner, 2 x 2 cells (6 x 6 m)
 MINE = (-405.0, -1000.0)
 MILL = (-118.0, -92.0)
 FORD = (-15.0, -30.0)
@@ -220,7 +220,7 @@ def main():
         "zScale": Z_SCALE, "seaLevel": SEA_LEVEL, "size": SIZE,
         "landmarks": {
             "StandingRoomOrigin": [*room_c, manor_z, 0.0],
-            "StandingRoomSpawn": [room_c[0] + 1.5, room_c[1] - 1.5, manor_z, 90.0],
+            "StandingRoomSpawn": [room_c[0] - 1.5, room_c[1], manor_z, -90.0],  # in line with the west doorway, facing it
             "EstateGateway": [*ESTATE_GATEWAY, zat(ESTATE_GATEWAY), 60.0],
             "CoveBeach": [*COVE, zat(COVE), 215.0],
             "MineEntrance": [*MINE, mine_z, 0.0],

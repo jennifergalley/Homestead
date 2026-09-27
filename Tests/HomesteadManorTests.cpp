@@ -70,7 +70,12 @@ void SeededStandingRoom()
     const int room = Manor::HeritageBuildingId(state);
     CHECK(room == state.buildings[0].id);
     const Landmark* origin = ProvisionalEstateLayout().FindLandmark(Anchor::StandingRoomOrigin);
-    CHECK(state.buildings[0].origin.x == origin->position.x && state.buildings[0].origin.y == origin->position.y);
+    const Point centre = RotateYaw({CellSize, CellSize}, state.buildings[0].yaw);
+    CHECK(std::abs(state.buildings[0].origin.x + centre.x - origin->position.x) < 1e-6
+        && std::abs(state.buildings[0].origin.y + centre.y - origin->position.y) < 1e-6);
+    CHECK(state.journal.size() == 1 && state.journal[0] == Manor::ArrivalEntry);
+    CHECK(Manor::JournalTitle(Manor::ArrivalEntry) == "Home at last");
+    CHECK(Manor::JournalText(Manor::ArrivalEntry, state).find("Trevennor") != std::string::npos);
     CHECK(CountOf(state, Piece::Foundation) == 4 && CountOf(state, Piece::Roof) == 4);
     CHECK(CountOf(state, Piece::Wall) == 7 && CountOf(state, Piece::Doorway) == 1);
     CHECK(CountOf(state, Piece::Hearth) == 1 && CountOf(state, Piece::Bed) == 1 && CountOf(state, Piece::Chest) == 1);
@@ -140,7 +145,7 @@ void ManorFootprintReservation()
     const LandmarkPolygon* manor = ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint);
     CHECK(manor != nullptr);
     // A foundation previewed in the old hall.
-    const Point hall{-54000.0, -41000.0};
+    const Point hall{-25000.0, -65000.0};
     CHECK(PointInPolygon(manor->points, hall));
     const auto blocked = sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, hall, 0.0, 0), hall);
     CHECK(!blocked && blocked.message == Manor::FootprintBlocked);
@@ -150,7 +155,7 @@ void ManorFootprintReservation()
     const auto snapped = sim.ResolvePlacement(Piece::Foundation, west, 0.0, 0);
     CHECK(!sim.CheckPlacement(snapped, west));
     // Outside the manor, the same foundation is fine.
-    const Point lawn{-56500.0, -41000.0};
+    const Point lawn{-27000.0, -65000.0};
     CHECK(!PointInPolygon(manor->points, lawn));
     OK(sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, lawn, 0.0, 0), lawn));
     // The room itself stays furnishable, and the hearth is never a plan.
@@ -191,6 +196,7 @@ void NamesValidationAndPersistence()
     CHECK(Manor::HeritageBuildingId(loaded.GetState()) != 0);
     for (const auto& piece : loaded.GetState().structures) CHECK(piece.heritage);
     CHECK(Find(loaded.GetState(), Piece::Wall)->skin == StructureSkin::Stone);
+    CHECK(loaded.GetState().journal == sim.GetState().journal);
     // A damaged section is rejected rather than half-loaded.
     const auto at = saved.find("manor ");
     CHECK(at != std::string::npos);
@@ -207,6 +213,18 @@ void NamesValidationAndPersistence()
     OK(plainLoaded.Deserialize(plain));
     CHECK(plainLoaded.GetState().estateName.empty() && plainLoaded.EstateName() == "the estate");
     CHECK(Manor::SaveLabel(plainLoaded.GetState(), "Spring", 1).empty());
+    // The woodland playtest aid raises the same room wherever the ground is clear.
+    Simulation aid;
+    Result raised;
+    for (int attempt = 0; attempt < 40 && !raised; ++attempt)
+        raised = aid.SeedStandingRoomAt({-800.0 - 450.0 * (attempt % 8), 200.0 - 450.0 * (attempt / 8)}, 30.0 * attempt);
+    OK(raised);
+    CHECK(Manor::HeritageBuildingId(aid.GetState()) != 0 && CountOf(aid.GetState(), Piece::Hearth) == 1);
+    CHECK(aid.GetState().estateName == "Trevennor" && aid.GetState().journal.size() == 1);
+    CHECK(!aid.SeedStandingRoomAt({5000.0, 5000.0}, 0.0));
+    Simulation aidLoaded;
+    OK(aidLoaded.Deserialize(aid.Serialize()));
+    CHECK(aidLoaded.GetState().structures.size() == aid.GetState().structures.size());
 }
 }
 

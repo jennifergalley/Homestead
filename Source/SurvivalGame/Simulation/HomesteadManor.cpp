@@ -133,7 +133,9 @@ bool SeedStandingRoom(State& state, const EstateLayout& layout)
     if (yaw < 0.0) yaw += 360.0;
     if (yaw >= 360.0) yaw = 0.0;
     const int buildingId = state.nextId++;
-    state.buildings.push_back({buildingId, origin->position, yaw});
+    // The anchor is the room's centre; the grid's cell (0, 0) corner sits half the room back from it.
+    const Point corner = RotateYaw({RoomCells * CellSize * 0.5, RoomCells * CellSize * 0.5}, yaw);
+    state.buildings.push_back({buildingId, {origin->position.x - corner.x, origin->position.y - corner.y}, yaw});
     for (int x = 0; x < RoomCells; ++x)
         for (int y = 0; y < RoomCells; ++y)
             Add(state, Piece::Foundation, buildingId, x, y, 0);
@@ -197,7 +199,8 @@ std::string SaveLabel(const State& state, const char* season, int day)
 
 bool HasSaveSection(const State& state)
 {
-    if (!state.heroineName.empty() || !state.familyName.empty() || !state.estateName.empty()) return true;
+    if (!state.heroineName.empty() || !state.familyName.empty() || !state.estateName.empty()
+        || !state.journal.empty()) return true;
     for (const auto& piece : state.structures)
         if (piece.heritage || piece.skin != StructureSkin::Timber) return true;
     return false;
@@ -213,6 +216,9 @@ void WriteSaveSection(std::ostream& output, const State& state)
     for (const auto& piece : state.structures)
         if (piece.heritage || piece.skin != StructureSkin::Timber)
             output << piece.id << ' ' << static_cast<int>(piece.skin) << ' ' << (piece.heritage ? 1 : 0) << '\n';
+    output << state.journal.size();
+    for (const auto& key : state.journal) output << ' ' << key;
+    output << '\n';
 }
 
 bool ReadSaveSection(std::istream& input, State& state)
@@ -235,7 +241,33 @@ bool ReadSaveSection(std::istream& input, State& state)
         found->skin = static_cast<StructureSkin>(skin);
         found->heritage = heritage == 1;
     }
+    int entries = -1;
+    if (!(input >> entries) || entries < 0 || entries > 1000) return false;
+    state.journal.clear();
+    for (int i = 0; i < entries; ++i)
+    {
+        std::string key;
+        if (!(input >> key) || JournalTitle(key).empty()
+            || std::find(state.journal.begin(), state.journal.end(), key) != state.journal.end()) return false;
+        state.journal.push_back(key);
+    }
     return true;
+}
+
+std::string JournalTitle(const std::string& key)
+{
+    if (key == ArrivalEntry) return "Home at last";
+    return {};
+}
+
+std::string JournalText(const std::string& key, const State& state)
+{
+    if (key != ArrivalEntry) return {};
+    const std::string estate = state.estateName.empty() ? DefaultEstateName : state.estateName;
+    return "Spring 1, " + std::to_string(ArrivalYear) + ". Home at last, to " + estate + ". The house is a ruin, "
+        "the fields are bramble to the hedgerow, and the roof of the old hall lies where it fell. One room still keeps "
+        "the weather out: the corner by the kitchen hearth, with a bed and a chest. The pail is in the chest, with a few "
+        "dry branches. It will do for a beginning.";
 }
 }
 }
