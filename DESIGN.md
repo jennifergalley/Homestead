@@ -87,7 +87,7 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
 - Trees combine cylindrical trunks with tiered cones or rounded crowns; grass and wildflower clumps are instanced. Trunks/large rocks block movement; decorative plants do not.
 - The shallow meandering stream uses low-roughness colored water and bank ribbons over the terrain, not a fluid simulation.
 - Optional imported moss rocks are bounds-normalized and use simple hidden collision proxies; unavailable assets retain logged primitive/material fallbacks.
-- Buildings use a 300 cm cell grid, timber-colored slabs/beams, 260 cm walls, and a doorway with a 130 cm structural opening and tied-back nonblocking cloth.
+- Buildings have no world grid. Each building is an origin and a yaw set by its first foundation; inside it, pieces use a 300 cm local cell frame. Pieces are timber-colored slabs/beams, with 260 cm walls and a doorway that has a 130 cm structural opening and tied-back nonblocking cloth. The placement preview snaps to the nearest open side, edge or cell of a nearby building and turns red when the spot is blocked. Saves are version 10 (`buildings` plus a `buildingId` per structure); version 7–9 saves load with every structure in building 0 at the old grid origin.
 
 ## Components
 

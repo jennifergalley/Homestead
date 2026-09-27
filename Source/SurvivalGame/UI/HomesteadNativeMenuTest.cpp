@@ -2308,7 +2308,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                     bool StructureBlocksView = false;
                     for (const auto& Structure : Controller->State().structures)
                     {
-                        const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+                        const auto Center = Homestead::StructureCenter(Controller->State(), Structure);
                         if (FMath::PointDistToSegment(
                             FVector(Center.x, Center.y, 0),
                             FVector(Camera.X, Camera.Y, 0),

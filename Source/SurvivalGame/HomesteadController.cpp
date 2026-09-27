@@ -377,6 +377,13 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         const auto Menu = NativeMenu;
         return Menu->HandleKey(Params.Key, Params.Event, Params.AmountDepressed);
     }
+    if (bPlanning && !bBookOpen && !IsFailed() && Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
+        && FMath::Abs(Params.AmountDepressed) >= 1.0f
+        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)))
+    {
+        RotatePlacementBy(Params.AmountDepressed > 0 ? 1 : -1);
+        return true;
+    }
     if (!bBookOpen && !bPlanning && !IsFailed())
     {
         static const FKey NumberKeys[] = {
@@ -677,6 +684,8 @@ void AHomesteadController::CycleHotbar(int32 Direction)
 
 void AHomesteadController::UseSelectedTool()
 {
+    // While planning, the left mouse button or right trigger places the piece, as E / A does.
+    if (bPlanning && !bBookOpen) { Interact(); return; }
     if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)) return;
     const int32 ToolValue = HotbarSlots[SelectedHotbarSlot];
     // Seeds or a berry on bare tilled soil: plant it there (a berry is eaten anywhere else).
@@ -855,12 +864,12 @@ void AHomesteadController::HomesteadPackMenu(int32 Tile, int32 Mode)
         for (const auto& Structure : State().structures)
         {
             if (Structure.kind != Homestead::Piece::Chest) continue;
-            const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+            const auto Center = Homestead::StructureCenter(State(), Structure);
             const float Distance = FMath::Square(Center.x - Position.x) + FMath::Square(Center.y - Position.y);
             if (Distance < Best) { Best = Distance; Nearest = &Structure; }
         }
         if (!Nearest) { Notify(TEXT("There is no storage chest nearby."), true); return; }
-        const auto ChestCenter = Homestead::CellCenter(Nearest->cellX, Nearest->cellY);
+        const auto ChestCenter = Homestead::StructureCenter(State(), *Nearest);
         UE_LOG(LogTemp, Display, TEXT("HomesteadPackMenu: nearest chest %d at (%.0f, %.0f)"), Nearest->id, ChestCenter.x, ChestCenter.y);
         if (bBookOpen) CloseBook();
         OpenChestStorage(Nearest->id);
@@ -1059,8 +1068,8 @@ bool AHomesteadController::ResolveDropPoint(Homestead::Point& Result) const
             bool Clear = true;
             for (const auto& Structure : State().structures)
                 if (FVector2D::Distance(FVector2D(Candidate.x, Candidate.y),
-                    FVector2D(Homestead::CellCenter(Structure.cellX, Structure.cellY).x,
-                    Homestead::CellCenter(Structure.cellX, Structure.cellY).y)) < 240)
+                    FVector2D(Homestead::StructureCenter(State(), Structure).x,
+                    Homestead::StructureCenter(State(), Structure).y)) < 240)
                 { Clear = false; break; }
             if (!Clear) continue;
             for (const auto& Plot : State().plots)
@@ -1213,6 +1222,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
 
     Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired);
+    if (bPlanning && !bBookOpen) UpdatePlacement(false);
     if (IsFailed() && !bWasFailed)
     {
         EndPlacement();
@@ -1392,7 +1402,7 @@ void AHomesteadController::UpdateFocus()
         if (Structure.kind == Homestead::Piece::Fire) Kind = EFocus::Fire;
         if (Structure.kind == Homestead::Piece::Bed) Kind = EFocus::Bed;
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
-        if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::CellCenter(Structure.cellX, Structure.cellY));
+        if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
     if (Focus == EFocus::None && Homestead::IsNearWater(Position)) Focus = EFocus::Water;
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
@@ -1756,9 +1766,11 @@ void AHomesteadController::Interact()
     if (!bWorldReady || !PrepareWorldAt(Position)) return;
     if (bPlanning)
     {
-        const auto Result = Sim.Place(BuildKind, BuildCellX, BuildCellY, BuildRotation, Position);
+        UpdatePlacement(true);
+        const auto Result = Sim.Place(BuildTarget, Position);
         Notify(Result, WoodTapA);
         if (Result.ok) Sim.AdvanceGameHours(0.1, Position);
+        UpdatePlacement(true);
         return;
     }
     UpdateFocus();
@@ -1898,7 +1910,7 @@ bool AHomesteadController::OpenChestStorage(int32 ChestId)
         { Target = &Structure; break; }
     if (!Target)
     { Notify(TEXT("That storage chest is no longer available."), true); return false; }
-    const auto Center = Homestead::CellCenter(Target->cellX, Target->cellY);
+    const auto Center = Homestead::StructureCenter(State(), *Target);
     if (FMath::Square(Center.x - Position.x) + FMath::Square(Center.y - Position.y)
         > FMath::Square(Homestead::ChestReach))
     { Notify(TEXT("Move within 280 cm of this chest."), true); return false; }
@@ -2084,7 +2096,7 @@ void AHomesteadController::Back()
 }
 void AHomesteadController::PreviousPage()
 {
-    if (bPlanning) { RotatePlacement(); return; }
+    if (bPlanning) { RotatePlacementBy(-1); return; }
     if (!bBookOpen) { CycleHotbar(-1); return; }
     Page = ShiftFieldBookPage(Page, -1); Selection = 0; bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
@@ -2741,50 +2753,70 @@ void AHomesteadController::BeginPlacement(Homestead::Piece Kind)
     bPlanning = true;
     BuildKind = Kind;
     BuildRotation = 0;
-    const auto Position = PlayerPoint();
-    const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
-    BuildCellX = FMath::FloorToInt((Position.x + Forward.X * 350) / Homestead::CellSize);
-    BuildCellY = FMath::FloorToInt((Position.y + Forward.Y * 350) / Homestead::CellSize);
+    BuildYawOffset = 0.0;
+    BuildCheckKey.Reset();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetPlanning(true);
-    if (Landscape) Landscape->SetPlacementPreview(true, BuildKind, BuildCellX, BuildCellY, BuildRotation);
+    UpdatePlacement(true);
 }
 
 void AHomesteadController::EndPlacement()
 {
     bPlanning = false;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetPlanning(false);
-    if (Landscape) Landscape->SetPlacementPreview(false, BuildKind, BuildCellX, BuildCellY, BuildRotation);
+    if (Landscape) Landscape->SetPlacementPreview(false, BuildTarget, false);
 }
 
-void AHomesteadController::NudgePlacement(FVector2D Axis)
-{
-    if (!bPlanning || Axis.SizeSquared() < 0.2) return;
-    const double Now = GetWorld()->GetRealTimeSeconds();
-    if (Now - LastNudgeTime < 0.18) return;
-    LastNudgeTime = Now;
-    const FRotator View(0, GetControlRotation().Yaw, 0);
-    const FVector Direction = FRotationMatrix(View).GetUnitAxis(EAxis::X) * Axis.Y
-        + FRotationMatrix(View).GetUnitAxis(EAxis::Y) * Axis.X;
-    const int StepX = FMath::Abs(Direction.X) > FMath::Abs(Direction.Y) ? (Direction.X > 0 ? 1 : -1) : 0;
-    const int StepY = StepX == 0 ? (Direction.Y > 0 ? 1 : -1) : 0;
-    const auto Target = Homestead::CellCenter(BuildCellX + StepX, BuildCellY + StepY);
-    const auto Position = PlayerPoint();
-    if (FMath::Square(Target.x - Position.x) + FMath::Square(Target.y - Position.y) > FMath::Square(700.0)) return;
-    BuildCellX += StepX;
-    BuildCellY += StepY;
-    Landscape->SetPlacementPreview(true, BuildKind, BuildCellX, BuildCellY, BuildRotation);
-}
-
-void AHomesteadController::RotatePlacement()
+void AHomesteadController::UpdatePlacement(bool bForce)
 {
     if (!bPlanning) return;
-    BuildRotation = (BuildRotation + 1) % 4;
-    Landscape->SetPlacementPreview(true, BuildKind, BuildCellX, BuildCellY, BuildRotation);
+    const auto Position = PlayerPoint();
+    // Aim 3.5 m ahead of her along the camera; whole centimetres keep the snap search stable.
+    const FRotator View(0, GetControlRotation().Yaw, 0);
+    const FVector Forward = View.Vector();
+    const Homestead::Point Aim{FMath::RoundToDouble(Position.x + Forward.X * 350.0),
+        FMath::RoundToDouble(Position.y + Forward.Y * 350.0)};
+    // Free-standing pieces face the way the camera does, in 5 degree steps, plus her own turns.
+    const double FreeYaw = FMath::RoundToDouble(View.Yaw / 5.0) * 5.0 + BuildYawOffset;
+    BuildTarget = Sim.ResolvePlacement(BuildKind, Aim, FreeYaw, BuildRotation);
+    const FString Key = FString::Printf(TEXT("%d:%d:%d:%d:%d:%.0f:%.0f:%.1f:%llu"), static_cast<int>(BuildTarget.kind),
+        BuildTarget.buildingId, BuildTarget.cellX, BuildTarget.cellY, BuildTarget.rotation,
+        BuildTarget.frame.origin.x, BuildTarget.frame.origin.y, BuildTarget.frame.yaw,
+        static_cast<unsigned long long>(Sim.GetRevision()));
+    const double Now = GetWorld() ? GetWorld()->GetRealTimeSeconds() : 0.0;
+    if (bForce || (Key != BuildCheckKey && Now - LastBuildCheckTime >= 0.1))
+    {
+        auto Check = Sim.CheckPlacement(BuildTarget, Position, true);
+        if (Check.ok) Check = Sim.CheckBuildCost(BuildKind);
+        bBuildValid = Check.ok;
+        BuildBlocker = Check.ok ? FString() : Text(Check.message.c_str());
+        BuildCheckKey = Key;
+        LastBuildCheckTime = Now;
+    }
+    if (Landscape) Landscape->SetPlacementPreview(true, BuildTarget, bBuildValid);
+}
+
+void AHomesteadController::RotatePlacement() { RotatePlacementBy(1); }
+
+void AHomesteadController::RotatePlacementBy(int32 Direction)
+{
+    if (!bPlanning) return;
+    const bool bQuarterTurns = BuildTarget.snapped || BuildKind == Homestead::Piece::Wall
+        || BuildKind == Homestead::Piece::Doorway || BuildKind == Homestead::Piece::Roof;
+    if (bQuarterTurns) BuildRotation = ((BuildRotation + Direction) % 4 + 4) % 4;
+    else BuildYawOffset = FMath::Fmod(BuildYawOffset + 15.0 * Direction + 360.0, 360.0);
+    UpdatePlacement(true);
 }
 
 FString AHomesteadController::PlacementLabel() const
 {
     return FString::Printf(TEXT("%s  |  %s"), *Text(Homestead::PieceName(BuildKind)), *Text(Homestead::PieceRequirements(BuildKind)));
+}
+
+FString AHomesteadController::PlacementStatus() const
+{
+    if (!BuildBlocker.IsEmpty()) return BuildBlocker;
+    return BuildTarget.snapped ? FString(TEXT("Snaps onto your building."))
+        : FString(TEXT("Free-standing: it faces the way you look; rotate turns it."));
 }
 
 void AHomesteadController::CycleZoom()

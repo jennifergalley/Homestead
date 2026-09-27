@@ -133,11 +133,12 @@ void AHomesteadHUD::DrawHUD()
         const float X = (ViewWidth - Width) * 0.5f;
         if (PC->IsPlanning())
         {
-            Panel(X, ViewHeight - 230, Width, 100, Pine);
-            ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 230, Width, 100);
-            Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 217, Width - 44, 24, Ink, 2);
-            Write(PC->UsesGamepad() ? TEXT("Left stick: position   RB: rotate   A: place   B: done")
-                : TEXT("WASD: position   R: rotate   E: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
+            Panel(X, ViewHeight - 262, Width, 132, Pine);
+            ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 262, Width, 132);
+            Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 249, Width - 44, 24, Ink, 1);
+            Wrap(PC->PlacementStatus(), X + 22, ViewHeight - 217, Width - 44, 21, PC->IsPlacementValid() ? Muted : HudWarning, 2);
+            Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   LB / RB: rotate   A: place   B: done")
+                : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
         else DrawInteractCue(*PC);
         Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);

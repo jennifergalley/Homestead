@@ -144,7 +144,7 @@ public:
     // Where an axe meets active tree ResourceId at waist height: the trunk's centre and radius
     // (cm). False when it isn't a standing mature tree.
     bool TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const;
-    void SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation);
+    void SetPlacementPreview(bool Visible, const Homestead::PlacementTarget& Target, bool bValid);
     static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
     float GroundHeight(float X, float Y) const;
     bool IsPreparedFor(const Homestead::State& State) const;
@@ -277,7 +277,7 @@ private:
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> StructureVisuals;
     // Cells holding a foundation; furniture elsewhere rests on the bare ground instead of floor height.
-    TSet<FIntPoint> FoundationCells;
+    TSet<FIntVector> FoundationCells; // (cellX, cellY, buildingId)
     UPROPERTY()
     TMap<int32, FHomesteadWorldVisual> PlotVisuals;
     UPROPERTY()
@@ -368,12 +368,14 @@ private:
     void ClearOuterTreeBatches();
     bool RebuildActiveTreeBatches(const Homestead::Simulation& Simulation);
     void ClearActiveTreeBatches();
-    void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview);
+    void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
+        const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid = true);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
     void UpdateLighting(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
-    float CellBase(int CellX, int CellY) const;
+    // Floor height for a turned cell: its highest ground plus a lip.
+    float StructureBase(Homestead::Point Center, double Yaw) const;
     static bool IsDecorationReserved(const Homestead::State& State, float X, float Y,
         float FootprintRadius, float CanopyRadius = 0, bool bLowCover = false);
 };

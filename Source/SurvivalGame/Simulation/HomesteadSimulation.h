@@ -26,7 +26,9 @@ constexpr double CellSize = 300.0;
 constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 9;
+constexpr int SimulationSaveVersion = 10;
+// Saves before this kept every structure on the one world-aligned building grid.
+constexpr int FreeBuildingSaveVersion = 10;
 // Saves before this stored crop plots on whole building cells.
 constexpr int GardenSquareSaveVersion = 9;
 // Version 7 saves predate the machete (one fewer item per stock) and cleared underbrush.
@@ -135,16 +137,50 @@ struct UnderbrushEdit
 };
 bool operator<(const UnderbrushEdit& a, const UnderbrushEdit& b);
 
+// A building's own grid, placed anywhere at any heading. Local cell (x, y) spans
+// [x, x + 1] x [y, y + 1] CellSize units from `origin`, turned `yaw` degrees (Unreal yaw: +X toward
+// +Y). Building 0 is the world-aligned grid (origin 0, yaw 0) that every structure used before
+// version 10 saves; it is implicit and never stored.
+struct Building
+{
+    int id = 0;
+    Point origin;
+    double yaw = 0.0;
+};
+
 struct Structure
 {
     int id = 0;
     Piece kind = Piece::Foundation;
-    int cellX = 0;
+    int cellX = 0; // Cell in its building's grid.
     int cellY = 0;
-    int rotation = 0; // Quarter turns: 0=north (+Y), 1=east (+X), 2=south, 3=west.
+    int rotation = 0; // Quarter turns within the building: 0=north (+Y), 1=east (+X), 2=south, 3=west.
     double fuelHours = 0.0;
     Inventory storage{};
     InventoryLayout layout;
+    int buildingId = 0;
+};
+
+// A turned rectangle on the ground: centre, half extents along its own axes, Unreal yaw in degrees.
+struct Footprint
+{
+    Point center;
+    Point half;
+    double yaw = 0.0;
+};
+
+// Where a piece would go. Snapped pieces join an existing building's grid; free-standing ones
+// found a new building (buildingId -1) whose cell (0, 0) is centred on the aim point.
+struct PlacementTarget
+{
+    Piece kind = Piece::Foundation;
+    int buildingId = 0;
+    int cellX = 0;
+    int cellY = 0;
+    int rotation = 0;
+    Building frame;
+    bool snapped = false;
+    std::string blocker; // Set when no valid site could be resolved at all.
 };
 
 struct Plot
@@ -181,6 +217,7 @@ struct State
     int nextId = 1;
     Inventory inventory{};
     std::vector<ResourceNode> resources;
+    std::vector<Building> buildings; // Free-standing building grids; building 0 is implicit.
     std::vector<Structure> structures;
     std::vector<Plot> plots;
     std::vector<WorldDrop> worldDrops;
@@ -218,6 +255,24 @@ int GardenToCell(int garden);
 inline int CellToGarden(int cell) { return cell * GardenCellsPerCell + GardenCellsPerCell / 2; }
 Point PlotCenter(const Plot& plot);
 bool PlotInCell(const Plot& plot, int cellX, int cellY);
+// Rotates a vector by an Unreal yaw in degrees.
+Point RotateYaw(Point value, double yaw);
+// The building a structure belongs to; building 0 (the world grid) always resolves.
+const Building* FindBuilding(const State& state, int buildingId);
+Point BuildingCellCenter(const Building& building, int cellX, int cellY);
+// A world point in the building's unrotated cell space (cm from its origin).
+Point BuildingLocal(const Building& building, Point world);
+// A structure's cell centre in the world, and the Unreal yaw of the piece itself.
+Point StructureCenter(const State& state, const Structure& structure);
+double StructureYaw(const State& state, const Structure& structure);
+double PieceYaw(const Building& building, int rotation);
+bool HasFoundation(const State& state, int buildingId, int cellX, int cellY);
+// Where furniture sits inside a foundation cell (piece space); off a foundation it is centred.
+Point FurnitureOffset(Piece kind);
+// The ground a piece covers. Walls and doorways cover their edge; furniture covers only itself.
+Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation);
+Footprint StructureFootprint(const State& state, const Structure& structure);
+bool FootprintsOverlap(const Footprint& a, const Footprint& b);
 
 // Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
 // below Reserve, so exertion alone never collapses her.
@@ -289,7 +344,20 @@ public:
     Result Eat(Item item);
     Result EatGroup(int groupId, std::uint64_t expectedRevision);
     Result Craft(Recipe recipe, Point player);
+    // Places on the world grid (building 0).
     Result Place(Piece kind, int cellX, int cellY, int rotation, Point player);
+    // Build anywhere: aimed at one of your foundations a piece snaps onto its grid (foundations join
+    // the nearest open side, walls take an edge, roofs and furniture take the aimed cell); aimed
+    // anywhere else, foundations and furniture stand free at `freeYaw`. Walls and roofs always
+    // need a foundation.
+    PlacementTarget ResolvePlacement(Piece kind, Point aim, double freeYaw, int rotation) const;
+    // Why the target cannot be built now, without spending anything. `quick` checks trees against
+    // the loaded region instead of regenerating chunks (for a live preview).
+    Result CheckPlacement(const PlacementTarget& target, Point player, bool quick = false) const;
+    Result Place(const PlacementTarget& target, Point player);
+    // Whether she carries what the piece costs.
+    Result CheckBuildCost(Piece kind) const;
+    Point StructureCenter(const Structure& structure) const { return Homestead::StructureCenter(state_, structure); }
     // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
     // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.
     Result GrantStarterKit(Point anchor, Point facing, bool includeSeeds);
@@ -347,6 +415,8 @@ private:
     int nextResourceHandle_ = TransientResourceIdBase;
     bool TryAdjust(const Inventory& change);
     Result CheckRevision(std::uint64_t expectedRevision) const;
+    // CheckPlacement without the reach and exertion rules (the starter kit places from afar).
+    Result CheckSite(const PlacementTarget& target, bool quick) const;
     Result CommitInventory(State&& candidate, const char* message);
     // Charges `cost` Energy when `done` succeeded.
     Result Exert(double cost, Result done);

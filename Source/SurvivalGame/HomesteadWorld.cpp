@@ -44,6 +44,7 @@ const FLinearColor Stone(0.32f, 0.36f, 0.34f);
 const FLinearColor Soil(0.16f, 0.085f, 0.039f);
 const FLinearColor Cloth(0.55f, 0.43f, 0.25f);
 const FLinearColor PreviewColor(0.65f, 0.79f, 0.77f);
+const FLinearColor PreviewBlockedColor(0.86f, 0.33f, 0.26f);
 
 bool RegionalReachLess(const Homestead::RegionalGeneration::RiverReach& A,
     const Homestead::RegionalGeneration::RiverReach& B)
@@ -897,15 +898,15 @@ float AHomesteadWorld::CachedGroundHeight(float X, float Y) const
         : D + (1 - U) * (C - D) + (1 - V) * (B - D);
 }
 
-float AHomesteadWorld::CellBase(int CellX, int CellY) const
+float AHomesteadWorld::StructureBase(Homestead::Point Center, double Yaw) const
 {
-    const Homestead::Point Center = Homestead::CellCenter(CellX, CellY);
     float Height = GroundHeight(Center.x, Center.y);
     for (int X : {-1, 1})
     {
         for (int Y : {-1, 1})
         {
-            Height = FMath::Max(Height, GroundHeight(Center.x + X * 150.0, Center.y + Y * 150.0));
+            const auto Corner = Homestead::RotateYaw({X * 150.0, Y * 150.0}, Yaw);
+            Height = FMath::Max(Height, GroundHeight(Center.x + Corner.x, Center.y + Corner.y));
         }
     }
     return Height + 16.0f;
@@ -1418,7 +1419,7 @@ bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float 
     }
     for (const auto& Structure : State.structures)
     {
-        const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+        const auto Center = Homestead::StructureCenter(State, Structure);
         if (FVector2D(X - Center.x, Y - Center.y).Size() < OccupiedRadius + 225.0f)
             return true;
     }
@@ -1568,7 +1569,7 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
                     Signature += FString::Printf(TEXT("R%d,%d,%u;"), Edit.key.chunk.x, Edit.key.chunk.y, Edit.key.localId);
             }
         for (const auto& Structure : State.structures)
-            if (Nearby((Structure.cellX + 0.5) * Homestead::CellSize, (Structure.cellY + 0.5) * Homestead::CellSize))
+            if (Nearby(Homestead::StructureCenter(State, Structure).x, Homestead::StructureCenter(State, Structure).y))
                 Signature += FString::Printf(TEXT("S%d;"), Structure.id);
         for (const auto& Plot : State.plots)
             if (Nearby(Homestead::PlotCenter(Plot).x, Homestead::PlotCenter(Plot).y))
@@ -2840,23 +2841,24 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     }
 }
 
-void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure, bool bPreview)
+void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
+    const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid)
 {
-    const Homestead::Point Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
-    FVector Base(Center.x, Center.y, CellBase(Structure.cellX, Structure.cellY));
+    const Homestead::Point Center = Homestead::BuildingCellCenter(Frame, Structure.cellX, Structure.cellY);
+    FVector Base(Center.x, Center.y, StructureBase(Center, Frame.yaw));
     // UE positive yaw rotates +X toward +Y; negative yaw maps the north edge to east.
-    FRotator Rotation(0, -90.0f * (Structure.rotation % 4), 0);
+    FRotator Rotation(0, Homestead::PieceYaw(Frame, Structure.rotation), 0);
     const bool bFurniture = Structure.kind == Homestead::Piece::Bed || Structure.kind == Homestead::Piece::Chest
         || Structure.kind == Homestead::Piece::Fire;
-    if (bFurniture && !FoundationCells.Contains(FIntPoint(Structure.cellX, Structure.cellY)))
+    if (bFurniture && !bOnFoundation)
     {
-        // Off a foundation, set the piece on the ground under its own footprint and lean it with the
-        // slope so a bedroll or chest doesn't hover over the downhill side of the cell.
+        // Off a foundation the piece stands centred where it was placed, on the ground under its own
+        // footprint, leaning with the slope so a bedroll or chest doesn't hover on the downhill side.
         const FVector2D Local = Structure.kind == Homestead::Piece::Bed ? FVector2D(95, -10)
             : Structure.kind == Homestead::Piece::Chest ? FVector2D(-100, -100) : FVector2D(-100, 95);
         const FVector2D Half = Structure.kind == Homestead::Piece::Bed ? FVector2D(35, 78)
             : Structure.kind == Homestead::Piece::Chest ? FVector2D(35, 28) : FVector2D(34, 34);
-        const FVector Pivot = FVector(Center.x, Center.y, 0) + Rotation.RotateVector(FVector(Local, 0));
+        const FVector Pivot = FVector(Center.x, Center.y, 0);
         const FVector AxisX = Rotation.RotateVector(FVector::ForwardVector);
         const FVector AxisY = Rotation.RotateVector(FVector::RightVector);
         auto GroundAt = [&](float DX, float DY)
@@ -2877,7 +2879,7 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
     {
         const FRotator Combined = (Rotation.Quaternion() * LocalRotation.Quaternion()).Rotator();
         return AddPart(Visual, Mesh, Base + Rotation.RotateVector(Offset), Size,
-            bPreview ? PreviewColor : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
+            bPreview ? (bValid ? PreviewColor : PreviewBlockedColor) : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
     };
     switch (Structure.kind)
     {
@@ -3217,7 +3219,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     }
     for (const auto& Structure : State.structures)
     {
-        Layout += FString::Printf(TEXT("S:%d:%d;"), Structure.cellX, Structure.cellY);
+        Layout += FString::Printf(TEXT("S:%d:%d:%d;"), Structure.buildingId, Structure.cellX, Structure.cellY);
     }
     for (const auto& Plot : State.plots)
     {
@@ -3353,16 +3355,15 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     std::vector<Homestead::Structure> NearStructures;
     std::vector<Homestead::Plot> NearPlots;
     std::vector<Homestead::WorldDrop> NearDrops;
-    auto Near = [&](int X, int Y)
+    auto Near = [&](Homestead::Point Center)
     {
-        const auto Center = Homestead::CellCenter(X, Y);
         return FMath::Abs(Center.x - (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm) <= 6000
             && FMath::Abs(Center.y - (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm) <= 6000;
     };
     for (const auto& Structure : State.structures)
-        if (Near(Structure.cellX, Structure.cellY)) NearStructures.push_back(Structure);
+        if (Near(Homestead::StructureCenter(State, Structure))) NearStructures.push_back(Structure);
     for (const auto& Plot : State.plots)
-        if (Near(Homestead::GardenToCell(Plot.cellX), Homestead::GardenToCell(Plot.cellY))) NearPlots.push_back(Plot);
+        if (Near(Homestead::PlotCenter(Plot))) NearPlots.push_back(Plot);
     const double ChunkCenterX = (State.activeChunk.x + 0.5) * Homestead::Generation::ChunkSizeCm;
     const double ChunkCenterY = (State.activeChunk.y + 0.5) * Homestead::Generation::ChunkSizeCm;
     for (const auto& Drop : State.worldDrops)
@@ -3372,17 +3373,20 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     RemoveMissing(StructureVisuals, NearStructures);
     FoundationCells.Reset();
     for (const auto& Structure : State.structures)
-        if (Structure.kind == Homestead::Piece::Foundation) FoundationCells.Add(FIntPoint(Structure.cellX, Structure.cellY));
+        if (Structure.kind == Homestead::Piece::Foundation)
+            FoundationCells.Add(FIntVector(Structure.cellX, Structure.cellY, Structure.buildingId));
     for (const auto& Structure : NearStructures)
     {
-        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d"),
-            static_cast<int>(Structure.kind), Structure.cellX, Structure.cellY, Structure.rotation,
-            Structure.fuelHours > 0, FoundationCells.Contains(FIntPoint(Structure.cellX, Structure.cellY)));
+        const bool bOnFoundation = FoundationCells.Contains(FIntVector(Structure.cellX, Structure.cellY, Structure.buildingId));
+        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d"),
+            static_cast<int>(Structure.kind), Structure.buildingId, Structure.cellX, Structure.cellY, Structure.rotation,
+            Structure.fuelHours > 0, bOnFoundation);
         FHomesteadWorldVisual& Visual = StructureVisuals.FindOrAdd(Structure.id);
         if (Visual.Signature != Signature)
         {
             ClearVisual(Visual);
-            BuildStructure(Visual, Structure, false);
+            const Homestead::Building* Frame = Homestead::FindBuilding(State, Structure.buildingId);
+            BuildStructure(Visual, Structure, Frame ? *Frame : Homestead::Building{}, bOnFoundation, false);
             Visual.Signature = Signature;
         }
     }
@@ -3453,24 +3457,29 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     return true;
 }
 
-void AHomesteadWorld::SetPlacementPreview(bool Visible, Homestead::Piece Kind, int CellX, int CellY, int Rotation)
+void AHomesteadWorld::SetPlacementPreview(bool Visible, const Homestead::PlacementTarget& Target, bool bValid)
 {
-    if (!Visible || !bInitialized || Kind == Homestead::Piece::Count)
+    if (!Visible || !bInitialized || Target.kind == Homestead::Piece::Count)
     {
         ClearVisual(Preview);
         return;
     }
-    const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d"), static_cast<int>(Kind), CellX, CellY, Rotation);
+    const bool bOnFoundation = Target.buildingId >= 0
+        && FoundationCells.Contains(FIntVector(Target.cellX, Target.cellY, Target.buildingId));
+    const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%.1f:%.1f:%.2f:%d:%d"), static_cast<int>(Target.kind),
+        Target.buildingId, Target.cellX, Target.cellY, Target.rotation, Target.frame.origin.x, Target.frame.origin.y,
+        Target.frame.yaw, bOnFoundation, bValid);
     if (Preview.Signature == Signature)
     {
         return;
     }
     ClearVisual(Preview);
     Homestead::Structure Structure;
-    Structure.kind = Kind;
-    Structure.cellX = CellX;
-    Structure.cellY = CellY;
-    Structure.rotation = Rotation;
-    BuildStructure(Preview, Structure, true);
+    Structure.kind = Target.kind;
+    Structure.buildingId = Target.buildingId;
+    Structure.cellX = Target.cellX;
+    Structure.cellY = Target.cellY;
+    Structure.rotation = Target.rotation;
+    BuildStructure(Preview, Structure, Target.frame, bOnFoundation, true, bValid);
     Preview.Signature = Signature;
 }

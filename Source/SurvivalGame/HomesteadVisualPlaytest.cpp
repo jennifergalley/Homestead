@@ -355,7 +355,7 @@ void AHomesteadVisualPlaytest::RecordGroveInventory()
                 FVector2D::Distance(Position, FVector2D(Node.position.x, Node.position.y)) - Footprint - 130);
         for (const auto& Structure : PC->State().structures)
         {
-            const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+            const auto Center = Homestead::StructureCenter(PC->State(), Structure);
             StructureMargin = FMath::Min(StructureMargin,
                 FVector2D::Distance(Position, FVector2D(Center.x, Center.y)) - Radius - 225);
         }
@@ -462,7 +462,7 @@ void AHomesteadVisualPlaytest::RecordGrassGroundInventory()
                     FVector2D::Distance(FVector2D(Position), FVector2D(Node.position.x, Node.position.y)) - 55);
             for (const auto& Structure : PC->State().structures)
             {
-                const auto Center = Homestead::CellCenter(Structure.cellX, Structure.cellY);
+                const auto Center = Homestead::StructureCenter(PC->State(), Structure);
                 StructureMargin = FMath::Min(StructureMargin,
                     FVector2D::Distance(FVector2D(Position), FVector2D(Center.x, Center.y)) - 245);
             }

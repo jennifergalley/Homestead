@@ -233,10 +233,10 @@ Edge EdgeKey(int x, int y, int rotation)
     default: return {x, y, 0};
     }
 }
-bool HasPiece(const State& state, Piece kind, int x, int y)
+bool HasPiece(const State& state, Piece kind, int buildingId, int x, int y)
 {
     for (const auto& piece : state.structures)
-        if (piece.kind == kind && piece.cellX == x && piece.cellY == y) return true;
+        if (piece.kind == kind && piece.buildingId == buildingId && piece.cellX == x && piece.cellY == y) return true;
     return false;
 }
 bool RequiresHatchet(ResourceKind kind)
@@ -346,11 +346,6 @@ bool SaveResourceEdit(State& candidate, const ResourceNode& node)
     return true;
 }
 Result CheckAreaResources(const State& state, double left, double bottom, double size, const char* blocked);
-Result CheckBuildingResources(const State& state, int x, int y)
-{
-    return CheckAreaResources(state, x * CellSize, y * CellSize, CellSize,
-        "Fell the standing tree or clear the sapling before using this building cell.");
-}
 Result CheckGardenResources(const State& state, int gardenX, int gardenY)
 {
     return CheckAreaResources(state, gardenX * GardenCellSize, gardenY * GardenCellSize, GardenCellSize,
@@ -385,6 +380,68 @@ Result CheckAreaResources(const State& state, double left, double bottom, double
             }
         }
     return Good("");
+}
+// Standing trees within 50 cm of the ground a piece covers, or saplings inside it, block it.
+// Walls, doorways and roofs are checked against their whole cell, like the foundation beneath.
+Result CheckFootprintResources(const State& state, const Footprint& area, bool quick)
+{
+    const char* blockedMessage = "Fell the standing tree or clear the sapling before using this building cell.";
+    const auto blocks = [&](const ResourceNode& node)
+    {
+        if (node.cleared || (node.kind != ResourceKind::ForestTree && node.kind != ResourceKind::Sapling)) return false;
+        const Point local = RotateYaw({node.position.x - area.center.x, node.position.y - area.center.y}, -area.yaw);
+        if (node.kind == ResourceKind::Sapling)
+            return std::abs(local.x) < area.half.x && std::abs(local.y) < area.half.y;
+        const double dx = std::max(0.0, std::abs(local.x) - area.half.x);
+        const double dy = std::max(0.0, std::abs(local.y) - area.half.y);
+        return dx * dx + dy * dy <= 50.0 * 50.0;
+    };
+    if (quick)
+    {
+        for (const auto& node : state.resources)
+            if (blocks(node)) return Bad(blockedMessage);
+        return Good("");
+    }
+    const Point x = RotateYaw({area.half.x, 0}, area.yaw), y = RotateYaw({0, area.half.y}, area.yaw);
+    const double reachX = std::abs(x.x) + std::abs(y.x) + 50.0, reachY = std::abs(x.y) + std::abs(y.y) + 50.0;
+    Generation::ChunkCoord low, high;
+    const auto lowStatus = Generation::ChunkAt(static_cast<std::int64_t>(area.center.x - reachX),
+        static_cast<std::int64_t>(area.center.y - reachY), low);
+    const auto highStatus = Generation::ChunkAt(static_cast<std::int64_t>(area.center.x + reachX),
+        static_cast<std::int64_t>(area.center.y + reachY), high);
+    if (lowStatus != Generation::Status::Ok) return GenerationFailure(lowStatus);
+    if (highStatus != Generation::Status::Ok) return GenerationFailure(highStatus);
+    for (int cy = low.y; cy <= high.y; ++cy)
+        for (int cx = low.x; cx <= high.x; ++cx)
+        {
+            Generation::ChunkBaseline baseline;
+            const auto status = Generation::GenerateChunk(state.world, {cx, cy}, baseline);
+            if (status != Generation::Status::Ok) return GenerationFailure(status);
+            for (const auto& entity : baseline.entities)
+            {
+                if (entity.kind != Generation::EntityKind::ForestTree && entity.kind != Generation::EntityKind::Sapling) continue;
+                ResourceNode node;
+                if (GeneratedNode(state, entity, node) && blocks(node)) return Bad(blockedMessage);
+            }
+        }
+    return Good("");
+}
+Footprint ResourceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation)
+{
+    const bool furniture = kind == Piece::Fire || kind == Piece::Bed || kind == Piece::Chest;
+    return furniture ? PieceFootprint(building, kind, cellX, cellY, rotation, onFoundation)
+        : PieceFootprint(building, Piece::Foundation, cellX, cellY, 0, true);
+}
+Footprint GardenFootprint(const Plot& plot)
+{
+    return {PlotCenter(plot), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0};
+}
+// A slightly shrunken copy, so neighbours that only touch never count as overlapping.
+Footprint Inset(Footprint area, double amount = 1.0)
+{
+    area.half.x = std::max(0.0, area.half.x - amount);
+    area.half.y = std::max(0.0, area.half.y - amount);
+    return area;
 }
 std::uint64_t Checksum(const std::string& body)
 {
@@ -476,7 +533,7 @@ Result ContainerAccess(const State& state, int container, Point player)
     if (container == 0) return Good("");
     const auto* chest = Find(state.structures, container);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose an existing storage chest.");
-    if (!Near(player, CellCenter(chest->cellX, chest->cellY), ChestReach))
+    if (!Near(player, Homestead::StructureCenter(state, *chest), ChestReach))
         return Bad("Move within 280 cm of this chest.");
     return Good("");
 }
@@ -825,6 +882,97 @@ Point CellCenter(int cellX, int cellY)
     return {(static_cast<double>(cellX) + 0.5) * CellSize,
         (static_cast<double>(cellY) + 0.5) * CellSize};
 }
+Point RotateYaw(Point value, double yaw)
+{
+    const double radians = yaw * 3.14159265358979323846 / 180.0;
+    const double c = std::cos(radians), s = std::sin(radians);
+    return {value.x * c - value.y * s, value.x * s + value.y * c};
+}
+const Building* FindBuilding(const State& state, int buildingId)
+{
+    static const Building worldGrid{};
+    if (buildingId == 0) return &worldGrid;
+    for (const auto& building : state.buildings)
+        if (building.id == buildingId) return &building;
+    return nullptr;
+}
+Point BuildingCellCenter(const Building& building, int cellX, int cellY)
+{
+    const Point local = RotateYaw(CellCenter(cellX, cellY), building.yaw);
+    return {building.origin.x + local.x, building.origin.y + local.y};
+}
+Point BuildingLocal(const Building& building, Point world)
+{
+    return RotateYaw({world.x - building.origin.x, world.y - building.origin.y}, -building.yaw);
+}
+Point StructureCenter(const State& state, const Structure& structure)
+{
+    const Building* building = FindBuilding(state, structure.buildingId);
+    return BuildingCellCenter(building ? *building : Building{}, structure.cellX, structure.cellY);
+}
+double PieceYaw(const Building& building, int rotation) { return building.yaw - 90.0 * (rotation % 4); }
+double StructureYaw(const State& state, const Structure& structure)
+{
+    const Building* building = FindBuilding(state, structure.buildingId);
+    return PieceYaw(building ? *building : Building{}, structure.rotation);
+}
+bool HasFoundation(const State& state, int buildingId, int cellX, int cellY)
+{
+    for (const auto& piece : state.structures)
+        if (piece.kind == Piece::Foundation && piece.buildingId == buildingId
+            && piece.cellX == cellX && piece.cellY == cellY) return true;
+    return false;
+}
+Point FurnitureOffset(Piece kind)
+{
+    switch (kind)
+    {
+    case Piece::Bed: return {95.0, -10.0};
+    case Piece::Chest: return {-100.0, -100.0};
+    case Piece::Fire: return {-100.0, 95.0};
+    default: return {};
+    }
+}
+Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation)
+{
+    const Point center = BuildingCellCenter(building, cellX, cellY);
+    const double yaw = PieceYaw(building, rotation);
+    const auto at = [&](Point offset, Point half)
+    {
+        const Point turned = RotateYaw(offset, yaw);
+        return Footprint{{center.x + turned.x, center.y + turned.y}, half, yaw};
+    };
+    switch (kind)
+    {
+    case Piece::Wall:
+    case Piece::Doorway: return at({0.0, 144.0}, {150.0, 8.0});
+    case Piece::Bed: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {35.0, 78.0});
+    case Piece::Chest: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {35.0, 28.0});
+    case Piece::Fire: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {40.0, 40.0});
+    default: return {center, {CellSize * 0.5, CellSize * 0.5}, building.yaw};
+    }
+}
+Footprint StructureFootprint(const State& state, const Structure& structure)
+{
+    const Building* building = FindBuilding(state, structure.buildingId);
+    return PieceFootprint(building ? *building : Building{}, structure.kind, structure.cellX, structure.cellY,
+        structure.rotation, HasFoundation(state, structure.buildingId, structure.cellX, structure.cellY));
+}
+bool FootprintsOverlap(const Footprint& a, const Footprint& b)
+{
+    // Separating axes: the two axes of each rectangle.
+    const Point delta{b.center.x - a.center.x, b.center.y - a.center.y};
+    const Point axes[] = {RotateYaw({1, 0}, a.yaw), RotateYaw({0, 1}, a.yaw),
+        RotateYaw({1, 0}, b.yaw), RotateYaw({0, 1}, b.yaw)};
+    const auto radius = [](const Footprint& box, Point axis)
+    {
+        const Point x = RotateYaw({1, 0}, box.yaw), y = RotateYaw({0, 1}, box.yaw);
+        return box.half.x * std::abs(x.x * axis.x + x.y * axis.y) + box.half.y * std::abs(y.x * axis.x + y.y * axis.y);
+    };
+    for (const Point& axis : axes)
+        if (std::abs(delta.x * axis.x + delta.y * axis.y) >= radius(a, axis) + radius(b, axis)) return false;
+    return true;
+}
 
 Simulation::Simulation() { NewGame(); }
 Result Simulation::NewGame() { return NewGame(0); }
@@ -1170,7 +1318,7 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
         return Bad("Choose safe ground close to you.");
     if (IsNearWater(position)) return Bad("Choose dry ground for this item.");
     for (const auto& structure : state_.structures)
-        if (Near(position, CellCenter(structure.cellX, structure.cellY), 100.0))
+        if (Near(position, Homestead::StructureCenter(state_, structure), 100.0))
             return Bad("Keep dropped items clear of structures.");
     for (const auto& plot : state_.plots)
         if (Near(position, PlotCenter(plot), 100.0))
@@ -1214,7 +1362,7 @@ Result Simulation::DropWearable(int wearableId, Point position, Point player,
         return Bad("Choose safe ground close to you.");
     if (IsNearWater(position)) return Bad("Choose dry ground for this garment.");
     for (const auto& structure : state_.structures)
-        if (Near(position, CellCenter(structure.cellX, structure.cellY), 100.0))
+        if (Near(position, Homestead::StructureCenter(state_, structure), 100.0))
             return Bad("Keep dropped garments clear of structures.");
     for (const auto& plot : state_.plots)
         if (Near(position, PlotCenter(plot), 100.0))
@@ -1282,40 +1430,52 @@ bool Simulation::IsSheltered(Point position) const
 {
     if (!ValidPoint(position)) return false;
     using CellKey = std::pair<int, int>;
-    const CellKey start{Cell(position.x), Cell(position.y)};
-    std::set<CellKey> floors, roofs;
-    std::set<Edge> edges;
+    std::set<int> candidates;
     for (const auto& piece : state_.structures)
+        if (piece.kind == Piece::Foundation) candidates.insert(piece.buildingId);
+    for (const int buildingId : candidates)
     {
-        if (piece.kind == Piece::Foundation) floors.insert({piece.cellX, piece.cellY});
-        if (piece.kind == Piece::Roof) roofs.insert({piece.cellX, piece.cellY});
-        if (EdgePiece(piece.kind)) edges.insert(EdgeKey(piece.cellX, piece.cellY, piece.rotation));
-    }
-    if (!floors.count(start) || !roofs.count(start)) return false;
-    std::set<CellKey> visited{start};
-    std::queue<CellKey> pending;
-    pending.push(start);
-    static const int dx[] = {0, 1, 0, -1};
-    static const int dy[] = {1, 0, -1, 0};
-    while (!pending.empty())
-    {
-        const auto current = pending.front();
-        pending.pop();
-        for (int side = 0; side < 4; ++side)
+        const Building* building = FindBuilding(state_, buildingId);
+        if (!building) continue;
+        const Point local = BuildingLocal(*building, position);
+        const CellKey start{Cell(local.x), Cell(local.y)};
+        std::set<CellKey> floors, roofs;
+        std::set<Edge> edges;
+        for (const auto& piece : state_.structures)
         {
-            if (edges.count(EdgeKey(current.first, current.second, side))) continue;
-            const CellKey adjacent{current.first + dx[side], current.second + dy[side]};
-            if (!floors.count(adjacent) || !roofs.count(adjacent)) return false;
-            if (visited.insert(adjacent).second) pending.push(adjacent);
+            if (piece.buildingId != buildingId) continue;
+            if (piece.kind == Piece::Foundation) floors.insert({piece.cellX, piece.cellY});
+            if (piece.kind == Piece::Roof) roofs.insert({piece.cellX, piece.cellY});
+            if (EdgePiece(piece.kind)) edges.insert(EdgeKey(piece.cellX, piece.cellY, piece.rotation));
         }
+        if (!floors.count(start) || !roofs.count(start)) continue;
+        std::set<CellKey> visited{start};
+        std::queue<CellKey> pending;
+        pending.push(start);
+        static const int dx[] = {0, 1, 0, -1};
+        static const int dy[] = {1, 0, -1, 0};
+        bool enclosed = true;
+        while (enclosed && !pending.empty())
+        {
+            const auto current = pending.front();
+            pending.pop();
+            for (int side = 0; side < 4; ++side)
+            {
+                if (edges.count(EdgeKey(current.first, current.second, side))) continue;
+                const CellKey adjacent{current.first + dx[side], current.second + dy[side]};
+                if (!floors.count(adjacent) || !roofs.count(adjacent)) { enclosed = false; break; }
+                if (visited.insert(adjacent).second) pending.push(adjacent);
+            }
+        }
+        if (enclosed) return true;
     }
-    return true;
+    return false;
 }
 bool Simulation::IsNearFire(Point position) const
 {
     for (const auto& piece : state_.structures)
         if (piece.kind == Piece::Fire && piece.fuelHours > 0.0 &&
-            Near(position, CellCenter(piece.cellX, piece.cellY), FireReach)) return true;
+            Near(position, Homestead::StructureCenter(state_, piece), FireReach)) return true;
     return false;
 }
 bool Simulation::CanHarvest(int nodeId) const
@@ -1375,7 +1535,7 @@ int Simulation::FindNearestStructure(Point position, Piece kind, double maxDista
     double distance = maxDistance * maxDistance;
     for (const auto& piece : state_.structures)
     {
-        const double current = DistanceSquared(position, CellCenter(piece.cellX, piece.cellY));
+        const double current = DistanceSquared(position, Homestead::StructureCenter(state_, piece));
         if (piece.kind == kind && current <= distance && !(current == distance && nearest != -1))
         { nearest = piece.id; distance = current; }
     }
@@ -1545,35 +1705,192 @@ RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
         || assessment.blocker != "Not enough pack space. Store some items in a chest first.";
     return assessment;
 }
-Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point player)
+namespace
+{
+constexpr int MaxBuildingCells = 200;
+constexpr double SnapReach = 260.0;
+constexpr double BuildReach = 700.0;
+// The frame the target builds in, or null when the target names no valid site.
+const Building* SiteBuilding(const State& state, const PlacementTarget& target)
+{
+    if (!ValidEnum(target.kind, Piece::Count)) return nullptr;
+    if (target.buildingId == 0) return ValidCell(target.cellX, target.cellY) ? FindBuilding(state, 0) : nullptr;
+    const Building* building = target.buildingId > 0 ? FindBuilding(state, target.buildingId) : &target.frame;
+    if (!building || std::abs(target.cellX) > MaxBuildingCells || std::abs(target.cellY) > MaxBuildingCells) return nullptr;
+    if (target.buildingId < 0 && (target.cellX != 0 || target.cellY != 0 || !ValidPoint(target.frame.origin)
+        || !FiniteRange(target.frame.yaw, 0.0, 360.0))) return nullptr;
+    const Point center = BuildingCellCenter(*building, target.cellX, target.cellY);
+    if (!ValidPoint(center) || std::abs(center.x) > MaxWorldCoordinate - CellSize
+        || std::abs(center.y) > MaxWorldCoordinate - CellSize) return nullptr;
+    return building;
+}
+}
+PlacementTarget Simulation::ResolvePlacement(Piece kind, Point aim, double freeYaw, int rotation) const
+{
+    PlacementTarget target;
+    target.kind = kind;
+    target.rotation = ((rotation % 4) + 4) % 4;
+    if (!ValidEnum(kind, Piece::Count) || !ValidPoint(aim) || !std::isfinite(freeYaw))
+    {
+        target.blocker = "Choose a valid structure and building site.";
+        return target;
+    }
+    std::set<std::tuple<int, int, int>> floors;
+    for (const auto& piece : state_.structures)
+        if (piece.kind == Piece::Foundation) floors.insert({piece.buildingId, piece.cellX, piece.cellY});
+    std::vector<std::pair<double, PlacementTarget>> snaps;
+    for (const auto& floor : floors)
+    {
+        const int buildingId = std::get<0>(floor), x = std::get<1>(floor), y = std::get<2>(floor);
+        const Building* building = FindBuilding(state_, buildingId);
+        if (!building) continue;
+        const Point local = BuildingLocal(*building, aim);
+        const bool insideFloor = Cell(local.x) == x && Cell(local.y) == y;
+        const auto consider = [&](int cellX, int cellY)
+        {
+            const double distance = std::sqrt(DistanceSquared(local, CellCenter(cellX, cellY)));
+            if (distance >= SnapReach && !insideFloor) return;
+            PlacementTarget snap = target;
+            snap.buildingId = buildingId;
+            snap.cellX = cellX;
+            snap.cellY = cellY;
+            snap.frame = *building;
+            snap.snapped = true;
+            snaps.emplace_back(distance, std::move(snap));
+        };
+        if (kind == Piece::Foundation)
+        {
+            static const int dx[] = {0, 1, 0, -1};
+            static const int dy[] = {1, 0, -1, 0};
+            for (int side = 0; side < 4; ++side)
+                if (!floors.count({buildingId, x + dx[side], y + dy[side]})) consider(x + dx[side], y + dy[side]);
+        }
+        // Furniture joins a floor only when aimed inside it; walls and roofs take the nearest floor.
+        else if (!Furniture(kind) || insideFloor) consider(x, y);
+    }
+    if (!snaps.empty())
+    {
+        // Prefer the nearest snap that can actually be built, so a taken side yields to a free one.
+        std::stable_sort(snaps.begin(), snaps.end(),
+            [](const auto& a, const auto& b) { return a.first < b.first; });
+        for (const auto& snap : snaps)
+            if (CheckSite(snap.second, true)) return snap.second;
+        return snaps.front().second;
+    }
+
+    double yaw = std::fmod(freeYaw, 360.0);
+    if (yaw < 0.0) yaw += 360.0;
+    if (yaw >= 360.0) yaw = 0.0;
+    if (EdgePiece(kind) || kind == Piece::Roof) target.blocker = "Aim at one of your foundations to build this.";
+    target.rotation = 0;
+    const double quarters = std::round(yaw / 90.0);
+    const int gridX = Cell(aim.x), gridY = Cell(aim.y);
+    if (std::abs(yaw - quarters * 90.0) < 1e-6 && DistanceSquared(aim, CellCenter(gridX, gridY)) <= 5.0 * 5.0)
+    {
+        // Squared up within 5 cm of a world grid cell: take exactly that cell on building 0.
+        target.buildingId = 0;
+        target.cellX = gridX;
+        target.cellY = gridY;
+        target.rotation = (4 - static_cast<int>(quarters) % 4) % 4;
+        return target;
+    }
+    const Point corner = RotateYaw(CellCenter(0, 0), yaw);
+    target.buildingId = -1;
+    target.cellX = 0;
+    target.cellY = 0;
+    target.frame = {0, {aim.x - corner.x, aim.y - corner.y}, yaw};
+    return target;
+}
+Result Simulation::CheckPlacement(const PlacementTarget& target, Point player, bool quick) const
 {
     if (state_.failed) return Failed();
-    if (!ValidEnum(kind, Piece::Count) || !ValidCell(cellX, cellY))
-        return Bad("Choose a valid structure and building cell.");
-    rotation = ((rotation % 4) + 4) % 4;
-    if (!Near(player, CellCenter(cellX, cellY), 700.0)) return Bad("Move closer to this building site.");
-    if (state_.structures.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
+    if (!target.blocker.empty()) return Bad(target.blocker);
+    const Building* building = SiteBuilding(state_, target);
+    if (!building) return Bad("Choose a valid structure and building cell.");
+    if (!Near(player, BuildingCellCenter(*building, target.cellX, target.cellY), BuildReach))
+        return Bad("Move closer to this building site.");
+    return CheckSite(target, quick);
+}
+Result Simulation::CheckSite(const PlacementTarget& target, bool quick) const
+{
+    if (!target.blocker.empty()) return Bad(target.blocker);
+    const Building* building = SiteBuilding(state_, target);
+    if (!building) return Bad("Choose a valid structure and building cell.");
+    const Piece kind = target.kind;
+    const int cellX = target.cellX, cellY = target.cellY;
+    const int rotation = ((target.rotation % 4) + 4) % 4;
+    const bool existing = target.buildingId >= 0;
+    if (state_.structures.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 2
+        || (!existing && state_.buildings.size() >= MaxObjects))
         return Bad("The homestead has reached its structure limit.");
-    const auto space = CheckBuildingResources(state_, cellX, cellY);
+    const bool onFoundation = existing && HasPiece(state_, Piece::Foundation, target.buildingId, cellX, cellY);
+    const Footprint ground = ResourceFootprint(*building, kind, cellX, cellY, rotation, onFoundation);
+    const auto space = CheckFootprintResources(state_, ground, quick);
     if (!space) return space;
     for (const auto& plot : state_.plots)
-        if (PlotInCell(plot, cellX, cellY)) return Bad("Keep this crop plot clear of buildings.");
-    for (const auto& piece : state_.structures)
-    {
-        if (EdgePiece(kind) && EdgePiece(piece.kind) &&
-            EdgeKey(cellX, cellY, rotation) == EdgeKey(piece.cellX, piece.cellY, piece.rotation))
-            return Bad("There is already a wall or doorway along that edge.");
-        if (piece.cellX != cellX || piece.cellY != cellY) continue;
-        if ((!EdgePiece(kind) && piece.kind == kind) || (Furniture(kind) && Furniture(piece.kind)))
-            return Bad("That building space is already occupied.");
-    }
-    if ((kind == Piece::Roof || EdgePiece(kind)) && !HasPiece(state_, Piece::Foundation, cellX, cellY))
+        if (FootprintsOverlap(Inset(ground), Inset(GardenFootprint(plot))))
+            return Bad("Keep this crop plot clear of buildings.");
+    if (existing)
+        for (const auto& piece : state_.structures)
+        {
+            if (piece.buildingId != target.buildingId) continue;
+            if (EdgePiece(kind) && EdgePiece(piece.kind) &&
+                EdgeKey(cellX, cellY, rotation) == EdgeKey(piece.cellX, piece.cellY, piece.rotation))
+                return Bad("There is already a wall or doorway along that edge.");
+            if (piece.cellX != cellX || piece.cellY != cellY) continue;
+            if ((!EdgePiece(kind) && piece.kind == kind) || (Furniture(kind) && Furniture(piece.kind)))
+                return Bad("That building space is already occupied.");
+        }
+    if ((kind == Piece::Roof || EdgePiece(kind)) && !onFoundation)
         return Bad("Build a foundation in this cell first.");
+    if (!EdgePiece(kind))
+    {
+        const Footprint mine = Inset(PieceFootprint(*building, kind, cellX, cellY, rotation, onFoundation));
+        for (const auto& piece : state_.structures)
+        {
+            if ((existing && piece.buildingId == target.buildingId) || EdgePiece(piece.kind)) continue;
+            if (FootprintsOverlap(mine, Inset(StructureFootprint(state_, piece))))
+                return Bad("That overlaps another building. Move it clear, or aim at a foundation to snap on.");
+        }
+    }
+    return Good("");
+}
+Result Simulation::Place(const PlacementTarget& target, Point player)
+{
+    const auto ready = CheckPlacement(target, player);
+    if (!ready) return ready;
+    const Piece kind = target.kind;
     const Inventory cost = BuildCost(kind);
-    if (auto ready = CheckExertion(Exertion::BuildEnergy); !ready) return ready;
+    if (auto rested = CheckExertion(Exertion::BuildEnergy); !rested) return rested;
     if (!TryAdjust(cost)) return Bad(MissingMessage(cost, state_.inventory));
-    state_.structures.push_back({state_.nextId++, kind, cellX, cellY, rotation, 0.0, {}});
+    int buildingId = target.buildingId;
+    if (buildingId < 0)
+    {
+        buildingId = state_.nextId++;
+        state_.buildings.push_back({buildingId, target.frame.origin, target.frame.yaw});
+    }
+    Structure piece{state_.nextId++, kind, target.cellX, target.cellY, ((target.rotation % 4) + 4) % 4, 0.0, {}};
+    piece.buildingId = buildingId;
+    state_.structures.push_back(std::move(piece));
     return Exert(Exertion::BuildEnergy, Good(std::string("Placed ") + PieceName(kind) + "."));
+}
+Result Simulation::CheckBuildCost(Piece kind) const
+{
+    if (!ValidEnum(kind, Piece::Count)) return Bad("Choose a valid structure.");
+    const Inventory cost = BuildCost(kind);
+    for (int i = 0; i < ItemCount; ++i)
+        if (state_.inventory[i] + cost[i] < 0) return Bad(MissingMessage(cost, state_.inventory));
+    return Good("");
+}
+Result Simulation::Place(Piece kind, int cellX, int cellY, int rotation, Point player)
+{
+    PlacementTarget target;
+    target.kind = kind;
+    target.buildingId = 0;
+    target.cellX = cellX;
+    target.cellY = cellY;
+    target.rotation = rotation;
+    return Place(target, player);
 }
 Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds)
 {
@@ -1622,7 +1939,8 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
     std::sort(cells.begin(), cells.end());
     const auto used = [this](int x, int y)
     {
-        for (const auto& piece : state_.structures) if (piece.cellX == x && piece.cellY == y) return true;
+        for (const auto& piece : state_.structures)
+            if (piece.buildingId == 0 && piece.cellX == x && piece.cellY == y) return true;
         for (const auto& plot : state_.plots) if (PlotInCell(plot, x, y)) return true;
         return false;
     };
@@ -1631,7 +1949,12 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
     {
         if (placed == static_cast<int>(wanted.size())) break;
         const int x = cell.second.first, y = cell.second.second;
-        if (used(x, y) || !CheckBuildingResources(state_, x, y)) continue;
+        PlacementTarget site;
+        site.kind = wanted[placed];
+        site.cellX = x;
+        site.cellY = y;
+        site.rotation = 2;
+        if (used(x, y) || !CheckSite(site, false)) continue;
         if (state_.structures.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1) break;
         state_.structures.push_back({state_.nextId++, wanted[placed], x, y, 2, 0.0, {}});
         ++placed;
@@ -1660,8 +1983,10 @@ Result Simulation::Till(int cellX, int cellY, Point player)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);
     if (!space) return space;
+    const Footprint square{GardenCellCenter(cellX, cellY), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0};
     for (const auto& structure : state_.structures)
-        if (structure.cellX == buildingX && structure.cellY == buildingY) return Bad("Choose soil away from buildings.");
+        if (FootprintsOverlap(Inset(square), Inset(StructureFootprint(state_, structure))))
+            return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("This cell is already tilled.");
     if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
@@ -1738,7 +2063,7 @@ Result Simulation::AddFuel(int structureId, Point player)
     if (state_.failed) return Failed();
     auto* fire = Find(state_.structures, structureId);
     if (!fire || fire->kind != Piece::Fire) return Bad("Choose a cookfire to fuel.");
-    if (!Near(player, CellCenter(fire->cellX, fire->cellY))) return Bad("Move closer to fuel this cookfire.");
+    if (!Near(player, Homestead::StructureCenter(state_, *fire))) return Bad("Move closer to fuel this cookfire.");
     if (fire->fuelHours > MaxFuel - 4.0) return Bad("This fire has enough fuel. Add more after it burns down.");
     const Item fuel = Count(Item::Firewood) > 0 ? Item::Firewood : Item::Branch;
     if (auto ready = CheckExertion(Exertion::FuelEnergy); !ready) return ready;
@@ -1752,7 +2077,7 @@ Result Simulation::Transfer(int chestId, Item item, int amount, Point player)
     if (state_.failed) return Failed();
     auto* chest = Find(state_.structures, chestId);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose a storage chest.");
-    if (!Near(player, CellCenter(chest->cellX, chest->cellY), ChestReach)) return Bad("Move within 280 cm of this chest.");
+    if (!Near(player, Homestead::StructureCenter(state_, *chest), ChestReach)) return Bad("Move within 280 cm of this chest.");
     if (!ValidEnum(item, Item::Count) || amount == 0 || amount < -InventoryCapacity || amount > InventoryCapacity)
         return Bad("Choose an item and a transfer amount between one and 120.");
     const int index = static_cast<int>(item);
@@ -1913,10 +2238,13 @@ std::string Simulation::Serialize() const
     for (const auto& edit : state_.resourceEdits)
         body << edit.key.chunk.x << ' ' << edit.key.chunk.y << ' ' << edit.key.localId << ' '
              << edit.cleared << ' ' << edit.readyAtHour << '\n';
+    body << state_.buildings.size() << '\n';
+    for (const auto& building : state_.buildings)
+        body << building.id << ' ' << building.origin.x << ' ' << building.origin.y << ' ' << building.yaw << '\n';
     body << state_.structures.size() << '\n';
     for (const auto& piece : state_.structures)
     {
-        body << piece.id << ' ' << static_cast<int>(piece.kind) << ' ' << piece.cellX << ' '
+        body << piece.id << ' ' << static_cast<int>(piece.kind) << ' ' << piece.buildingId << ' ' << piece.cellX << ' '
              << piece.cellY << ' ' << piece.rotation << ' ' << piece.fuelHours;
         WriteStock(body, piece.storage);
         WriteLayout(body, piece.layout);
@@ -1960,7 +2288,7 @@ Result Simulation::Deserialize(const std::string& data)
     if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD") return invalid();
     header >> std::ws;
     if (!header.eof()) return invalid();
-    if (version != SimulationSaveVersion && version != LegacySimulationSaveVersion
+    if (version != SimulationSaveVersion && version != GardenSquareSaveVersion && version != LegacySimulationSaveVersion
         && version != GardenSquareSaveVersion - 1) return {false,
         "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
@@ -2014,34 +2342,59 @@ Result Simulation::Deserialize(const std::string& data)
             (!edit.cleared && (edit.readyAtHour == 0.0 || node.kind == ResourceKind::ForestTree))) return invalid();
         candidate.resourceEdits.push_back(edit);
     }
-    std::set<std::tuple<int, int, int>> cells;
-    std::set<Edge> edges;
-    std::set<std::pair<int, int>> furniture;
+    std::set<std::tuple<int, int, int, int>> cells;
+    std::set<std::pair<int, Edge>> edges;
+    std::set<std::tuple<int, int, int>> furniture;
+    if (version >= FreeBuildingSaveVersion)
+    {
+        if (!(input >> count) || count < 0 || count > MaxObjects) return invalid();
+        for (int i = 0; i < count; ++i)
+        {
+            Building building;
+            if (!(input >> building.id >> building.origin.x >> building.origin.y >> building.yaw)
+                || !acceptId(building.id) || !ValidPoint(building.origin)
+                || !FiniteRange(building.yaw, 0.0, 360.0) || building.yaw >= 360.0) return invalid();
+            candidate.buildings.push_back(building);
+        }
+    }
     if (!(input >> count) || count < 0 || count > MaxObjects) return invalid();
     for (int i = 0; i < count; ++i)
     {
         Structure piece;
         int kind = 0;
-        if (!(input >> piece.id >> kind >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours) ||
+        if (!(input >> piece.id >> kind) ||
+            (version >= FreeBuildingSaveVersion && !(input >> piece.buildingId)) ||
+            !(input >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours) ||
             !ReadStock(input, piece.storage, storedItems) || !ReadLayout(input, piece.layout)) return invalid();
         piece.kind = static_cast<Piece>(kind);
-        if (!acceptId(piece.id) || !ValidEnum(piece.kind, Piece::Count) || !ValidCell(piece.cellX, piece.cellY) ||
+        PlacementTarget site;
+        site.kind = piece.kind;
+        site.buildingId = piece.buildingId;
+        site.cellX = piece.cellX;
+        site.cellY = piece.cellY;
+        if (!acceptId(piece.id) || !ValidEnum(piece.kind, Piece::Count) || piece.buildingId < 0 ||
+            !SiteBuilding(candidate, site) ||
             piece.rotation < 0 || piece.rotation >= 4 ||
             !FiniteRange(piece.fuelHours, 0.0, MaxFuel) ||
             (piece.kind != Piece::Fire && piece.fuelHours != 0.0) ||
-            (piece.kind != Piece::Chest && !Empty(piece.storage)) ||
-            !CheckBuildingResources(candidate, piece.cellX, piece.cellY)) return invalid();
+            (piece.kind != Piece::Chest && !Empty(piece.storage))) return invalid();
         if (EdgePiece(piece.kind))
         {
-            if (!edges.insert(EdgeKey(piece.cellX, piece.cellY, piece.rotation)).second) return invalid();
+            if (!edges.insert({piece.buildingId, EdgeKey(piece.cellX, piece.cellY, piece.rotation)}).second) return invalid();
         }
-        else if (!cells.insert({piece.cellX, piece.cellY, kind}).second) return invalid();
-        if (Furniture(piece.kind) && !furniture.insert({piece.cellX, piece.cellY}).second) return invalid();
+        else if (!cells.insert({piece.buildingId, piece.cellX, piece.cellY, kind}).second) return invalid();
+        if (Furniture(piece.kind) && !furniture.insert({piece.buildingId, piece.cellX, piece.cellY}).second) return invalid();
         candidate.structures.push_back(piece);
     }
     for (const auto& piece : candidate.structures)
+    {
         if ((piece.kind == Piece::Roof || EdgePiece(piece.kind)) &&
-            !HasPiece(candidate, Piece::Foundation, piece.cellX, piece.cellY)) return invalid();
+            !HasPiece(candidate, Piece::Foundation, piece.buildingId, piece.cellX, piece.cellY)) return invalid();
+        const Building* building = FindBuilding(candidate, piece.buildingId);
+        if (!CheckFootprintResources(candidate, ResourceFootprint(*building, piece.kind, piece.cellX, piece.cellY,
+            piece.rotation, HasPiece(candidate, Piece::Foundation, piece.buildingId, piece.cellX, piece.cellY)), false))
+            return invalid();
+    }
     std::set<std::pair<int, int>> plots;
     if (!(input >> count) || count < 0 || count > MaxObjects) return invalid();
     for (int i = 0; i < count; ++i)
@@ -2067,7 +2420,10 @@ Result Simulation::Deserialize(const std::string& data)
             !plots.insert({plot.cellX, plot.cellY}).second ||
             !CheckGardenResources(candidate, plot.cellX, plot.cellY)) return invalid();
         for (const auto& piece : candidate.structures)
-            if (PlotInCell(plot, piece.cellX, piece.cellY)) return invalid();
+            if (FootprintsOverlap(Inset(GardenFootprint(plot)),
+                Inset(ResourceFootprint(*FindBuilding(candidate, piece.buildingId), piece.kind, piece.cellX, piece.cellY,
+                    piece.rotation, HasPiece(candidate, Piece::Foundation, piece.buildingId, piece.cellX, piece.cellY)))))
+                return invalid();
         candidate.plots.push_back(plot);
     }
     if (!(input >> count) || count < 0 || count > MaxWorldDrops) return invalid();

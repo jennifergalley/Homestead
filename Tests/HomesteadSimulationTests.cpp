@@ -65,10 +65,17 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
     for (const auto& edit : s.resourceEdits)
         out << edit.key.chunk.x << ' ' << edit.key.chunk.y << ' ' << edit.key.localId << ' '
             << edit.cleared << ' ' << edit.readyAtHour << '\n';
+    if (version >= FreeBuildingSaveVersion)
+    {
+        out << s.buildings.size() << '\n';
+        for (const auto& b : s.buildings) out << b.id << ' ' << b.origin.x << ' ' << b.origin.y << ' ' << b.yaw << '\n';
+    }
     out << s.structures.size() << '\n';
     for (const auto& p : s.structures)
     {
-        out << p.id << ' ' << static_cast<int>(p.kind) << ' ' << p.cellX << ' ' << p.cellY << ' '
+        out << p.id << ' ' << static_cast<int>(p.kind) << ' ';
+        if (version >= FreeBuildingSaveVersion) out << p.buildingId << ' ';
+        out << p.cellX << ' ' << p.cellY << ' '
             << p.rotation << ' ' << p.fuelHours << ' ';
         for (int i = 0; i < stockItems; ++i) out << p.storage[i] << ' ';
         out << '\n';
@@ -608,6 +615,116 @@ void PlacementAndShelter()
     OK(sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)));
     UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-2), CellToGarden(-1), CellCenter(-2, -1)); });
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Fire, -2, -1, 0, CellCenter(-2, -1)); });
+}
+
+void FreeStandingBuildings()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    const auto offset = [](Point base, Point local, double yaw) {
+        const Point turned = RotateYaw(local, yaw);
+        return Point{base.x + turned.x, base.y + turned.y};
+    };
+    // A first foundation stands wherever it is aimed, at the free heading.
+    const Point site{-600, 100};
+    const auto first = sim.ResolvePlacement(Piece::Foundation, site, 30.0, 0);
+    CHECK(!first.snapped && first.buildingId == -1 && first.blocker.empty());
+    CHECK(Close(BuildingCellCenter(first.frame, 0, 0).x, site.x, 1e-6));
+    CHECK(Close(BuildingCellCenter(first.frame, 0, 0).y, site.y, 1e-6));
+    OK(sim.Place(first, site));
+    CHECK(sim.GetState().buildings.size() == 1 && Close(sim.GetState().buildings[0].yaw, 30.0));
+    const int building = sim.GetState().structures.back().buildingId;
+    CHECK(building == sim.GetState().buildings[0].id);
+    CHECK(Close(sim.StructureCenter(sim.GetState().structures.back()).x, site.x, 1e-6));
+
+    // Aimed near its open east side, the next foundation snaps onto the same turned grid whatever
+    // the free heading says.
+    const auto east = sim.ResolvePlacement(Piece::Foundation, offset(site, {330, -40}, 30.0), 77.0, 0);
+    CHECK(east.snapped && east.buildingId == building && east.cellX == 1 && east.cellY == 0);
+    OK(sim.Place(east, site));
+    CHECK(Close(sim.StructureCenter(sim.GetState().structures.back()).x, offset(site, {300, 0}, 30.0).x, 1e-6));
+    // Aimed at the middle of the floor, a foundation snaps onto one of its open sides.
+    const auto middle = sim.ResolvePlacement(Piece::Foundation, site, 77.0, 0);
+    CHECK(middle.snapped && middle.buildingId == building && middle.cellX == 0 && middle.cellY == 1);
+    CHECK(sim.CheckPlacement(middle, site).ok);
+    const auto nearWest = sim.ResolvePlacement(Piece::Foundation, offset(site, {-120, 20}, 30.0), 77.0, 0);
+    CHECK(nearWest.snapped && nearWest.cellX == -1 && nearWest.cellY == 0);
+    // A world-grid foundation overlapping the turned floor is refused too.
+    UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -2, 0, 0, site); });
+
+    // Walls and roofs need a foundation; aimed at one, they join its cell and edges.
+    const auto stray = sim.ResolvePlacement(Piece::Wall, {-1300, -800}, 0.0, 0);
+    CHECK(!stray.blocker.empty());
+    UnchangedFailure(sim, [&] { return sim.Place(stray, {-1300, -800}); });
+    const std::pair<Piece, int> cabin[] = {{Piece::Roof, 0}, {Piece::Doorway, 0}, {Piece::Wall, 1},
+        {Piece::Wall, 2}, {Piece::Wall, 3}};
+    for (const auto& piece : cabin)
+    {
+        const auto target = sim.ResolvePlacement(piece.first, offset(site, {40, 30}, 30.0), 200.0, piece.second);
+        CHECK(target.snapped && target.buildingId == building && target.cellX == 0 && target.cellY == 0);
+        OK(sim.Place(target, site));
+        CHECK(sim.GetState().structures.back().rotation == piece.second);
+    }
+    CHECK(sim.IsSheltered(site));
+    CHECK(sim.IsSheltered(offset(site, {120, 120}, 30.0)));
+    CHECK(!sim.IsSheltered(offset(site, {300, 0}, 30.0)));
+    CHECK(!sim.IsSheltered(offset(site, {0, 200}, 30.0)));
+
+    // Furniture aimed inside a floor joins it; elsewhere it stands centred on the aim.
+    const auto bed = sim.ResolvePlacement(Piece::Bed, site, 0.0, 1);
+    CHECK(bed.snapped && bed.buildingId == building && bed.rotation == 1);
+    OK(sim.Place(bed, site));
+    const Point chestSpot{-600, -500};
+    const auto chest = sim.ResolvePlacement(Piece::Chest, chestSpot, 45.0, 3);
+    CHECK(!chest.snapped && chest.buildingId == -1 && chest.rotation == 0);
+    OK(sim.Place(chest, chestSpot));
+    const Structure placedChest = sim.GetState().structures.back();
+    const Footprint chestGround = StructureFootprint(sim.GetState(), placedChest);
+    CHECK(Close(chestGround.center.x, chestSpot.x, 1e-6) && Close(chestGround.center.y, chestSpot.y, 1e-6));
+    CHECK(Close(chestGround.yaw, 45.0));
+    CHECK(sim.FindNearestStructure(chestSpot, Piece::Chest, 1) == placedChest.id);
+    CHECK(sim.GetState().buildings.size() == 2);
+
+    // Squared up on a world grid cell, a free piece is simply that grid cell.
+    const auto grid = sim.ResolvePlacement(Piece::Foundation, {CellCenter(2, -2).x + 3, CellCenter(2, -2).y}, 0.0, 0);
+    CHECK(!grid.snapped && grid.buildingId == 0 && grid.cellX == 2 && grid.cellY == -2);
+    const auto turnedGrid = sim.ResolvePlacement(Piece::Chest, CellCenter(2, -2), 90.0, 0);
+    CHECK(turnedGrid.buildingId == 0 && turnedGrid.rotation == 3);
+
+    // Buildings persist exactly; structures naming a missing building are corrupt.
+    const std::string saved = sim.Serialize();
+    Simulation loaded;
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.Serialize() == saved);
+    CHECK(loaded.IsSheltered(site));
+    State missing = sim.GetState();
+    missing.structures.back().buildingId = missing.nextId + 5;
+    CHECK(!loaded.Deserialize(Encode(missing)).ok);
+    State turned = sim.GetState();
+    turned.buildings[0].yaw = 360.0;
+    CHECK(!loaded.Deserialize(Encode(turned)).ok);
+
+    // Soil under the free chest cannot be tilled; the garden works around it.
+    Stock(sim, {{Item::DiggingStick, 1}});
+    const int gardenX = GardenCell(chestSpot.x), gardenY = GardenCell(chestSpot.y);
+    UnchangedFailure(sim, [&] { return sim.Till(gardenX, gardenY, GardenCellCenter(gardenX, gardenY)); });
+    OK(sim.Till(gardenX, gardenY - 3, GardenCellCenter(gardenX, gardenY - 3)));
+
+    // A snap blocked by something else standing there yields to the next-nearest free side.
+    Stock(sim, {{Item::Branch, 20}, {Item::Fiber, 6}, {Item::Stone, 6}});
+    const Point northSpot = offset(site, {0, 300}, 30.0);
+    OK(sim.Place(sim.ResolvePlacement(Piece::Chest, northSpot, 10.0, 0), northSpot));
+    const auto corner = sim.ResolvePlacement(Piece::Foundation, offset(site, {-160, 180}, 30.0), 0.0, 0);
+    CHECK(corner.snapped && corner.buildingId == building && corner.cellX == -1 && corner.cellY == 0);
+    OK(sim.Place(corner, site));
+
+    // Older saves put everything on building 0.
+    Simulation legacy;
+    BuildingStock(legacy);
+    OK(legacy.Place(Piece::Foundation, -3, 0, 0, Home));
+    Simulation migrated;
+    OK(migrated.Deserialize(Encode(legacy.GetState(), GardenSquareSaveVersion)));
+    CHECK(migrated.GetState().buildings.empty() && migrated.GetState().structures.back().buildingId == 0);
 }
 
 void MultiCellShelter()
@@ -2513,6 +2630,7 @@ int main()
     Run("regrowth and persistent clearing", RegrowthAndClearing);
     Run("placement and enclosure", PlacementAndShelter);
     Run("multi-cell enclosure", MultiCellShelter);
+    Run("free-standing buildings, snapping and persistence", FreeStandingBuildings);
     Run("ordinal cardinal edges and 700cm build reach", CardinalEdgesAndPlacementReach);
     Run("independent fires and chest storage", FireAndStorage);
     Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);

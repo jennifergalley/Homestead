@@ -203,8 +203,9 @@ use the explicit procedure in `docs\offline-startup.md` for this release.
 | Book pages | LB / RB | Left / right |
 | Back / pause menu | B | Escape |
 | Camera distance | Right stick click | Mouse wheel |
-| Placement position | Left stick | WASD |
-| Rotate placement | RB or X | R or F |
+| Aim placement | Walk + right stick | WASD + mouse |
+| Rotate placement | RB / LB or X | R, F or mouse wheel |
+| Place piece | A | E or left click |
 | Save / load | Field book Settings | Settings or F5 / F9 |
 
 The retained `hotkey-safety-01` correction removes inherited engine
@@ -259,7 +260,12 @@ cosmetic apron into free winter insulation.
 - Character hair/cloth motion and lighting are provisional; small garment overlap
   can occur in some poses. Fine-grained face/body sliders are a later feature.
 - Construction is a small snapping kit, not voxel terrain editing or a full
-  furnishing catalog. The landscape is a compact authored clearing, not the
+  furnishing catalog. There is no world grid: a foundation goes wherever she
+  aims (about 3.5 m ahead, at any angle) and starts a new building. Pieces aimed
+  near a building snap onto it, Satisfactory-style: foundations lock to a free
+  side, walls, doorways and roofs to its edges and cells, and furniture inside
+  its floor. Unsnapped pieces rotate in 15° steps and snapped ones in quarter
+  turns. A red preview means the spot is blocked; the panel says why. The landscape is a compact authored clearing, not the
   eventual river/lake/waterfall world.
 - Villagers, romance, companions, carcass scavenging, hunting/predators, and a
   complete winter economy are roadmap features, not hidden unfinished buttons.

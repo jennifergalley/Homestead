@@ -1698,11 +1698,6 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     if (PC && (!PC->IsWorldReady() || PC->IsBookOpen() || PC->IsFailed())) return;
     const FVector2D Axis = Value.Get<FVector2D>();
     if (!Axis.IsNearlyZero()) CancelAction();
-    if (bPlanning && PC)
-    {
-        PC->NudgePlacement(Axis);
-        return;
-    }
     const FRotator Facing(0, Controller->GetControlRotation().Yaw, 0);
     AddMovementInput(FRotationMatrix(Facing).GetUnitAxis(EAxis::X), Axis.Y);
     AddMovementInput(FRotationMatrix(Facing).GetUnitAxis(EAxis::Y), Axis.X);

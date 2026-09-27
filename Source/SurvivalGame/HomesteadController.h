@@ -119,6 +119,8 @@ public:
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
     FString PlacementLabel() const;
+    // Whether the preview snaps, stands free, or why it can't be built there.
+    FString PlacementStatus() const;
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
@@ -126,7 +128,9 @@ public:
     bool PrepareWorldAt(Homestead::Point Position);
     bool IsWorldReady() const { return bWorldReady; }
     uint32 WorldRecoveryCount() const { return WorldRecoveries; }
-    void NudgePlacement(FVector2D Axis);
+    // Where the construction preview currently resolves (snapped or free-standing).
+    const Homestead::PlacementTarget& CurrentPlacement() const { return BuildTarget; }
+    bool IsPlacementValid() const { return bBuildValid; }
     bool HasNativeMenu() const { return NativeMenu.IsValid(); }
     void MenuPage(int32 TargetPage);
     void MenuSelect(int32 Row);
@@ -267,9 +271,14 @@ private:
     int32 Page = 3;
     int32 Selection = 0;
     int32 AutoSaveIndex = 0;
-    int32 BuildCellX = 0;
-    int32 BuildCellY = 0;
+    // Quarter turns for pieces snapped onto a building; free-standing pieces turn by BuildYawOffset.
     int32 BuildRotation = 0;
+    double BuildYawOffset = 0.0;
+    Homestead::PlacementTarget BuildTarget;
+    bool bBuildValid = false;
+    FString BuildBlocker;
+    FString BuildCheckKey;
+    double LastBuildCheckTime = -1.0;
     Homestead::Piece BuildKind = Homestead::Piece::Foundation;
     EFocus Focus = EFocus::None;
     int32 FocusId = -1;
@@ -314,7 +323,6 @@ private:
     int32 HeldPartsFirst = 0, HeldPartsCount = 0;
     float MusicGapRemaining = 18;
     float MusicElapsed = 0;
-    double LastNudgeTime = -1;
     FString ToastText;
     bool bToastError = false;
     FString SessionCheckpoint;
@@ -398,6 +406,10 @@ private:
     void PreviousRow();
     void NextRow();
     void RotatePlacement();
+    void RotatePlacementBy(int32 Direction);
+    // Re-aims the preview ahead of the camera; revalidates it when it moved (at most ten times a
+    // second unless forced).
+    void UpdatePlacement(bool bForce);
     void CycleZoom();
     void QuickSave();
     void QuickLoad();

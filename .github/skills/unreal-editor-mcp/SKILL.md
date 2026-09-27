@@ -228,6 +228,16 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
 - **Craft**: D-pad selects a recipe; details list requirements. Crafting is **hold A**
   (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
+- **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
+  Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
+  *last* page (often Inventory), so close it fully (loop Escape until `bookOpen` and `planning`
+  are both false) and press B again. Enter on a plan enters the preview; it sometimes takes two
+  presses, so check `st`. In the preview she walks freely. The piece sits about 350 cm ahead
+  along the camera yaw, so aim with `pc.set_control_rotation(...)`, then `E` places and `R`
+  rotates. Pieces snap to the nearest open side, edge or cell of a building within reach, and
+  aiming mid-floor snaps a foundation to a free side. A red preview means blocked, and the
+  planning panel's second line says why (for example "Gather 2 Branch first."). Top up with
+  `HomesteadGive Branch 20` / `Fiber 12` / `Stone 8`.
 - Feedback messages ("Ate Berries.", "Made Crude hatchet.") appear as a banner on the book and in
   `toast` briefly. World-side hints (for example "Craft a crude hatchet before felling trees") may be
   visible in captures without appearing in `toast`, so capture after actions.
