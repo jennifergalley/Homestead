@@ -153,20 +153,15 @@ const TCHAR* Tabs[] = {TEXT("Inventory"), TEXT("Craft"), TEXT("Build"), TEXT("Gu
     TEXT("Settings"), TEXT("Credits"), TEXT("Appearance")};
 const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("guide"),
     TEXT("settings"), TEXT("credits"), TEXT("appearance")};
-const TCHAR* ItemIcons[] = {TEXT("knife"), TEXT("branch"), TEXT("stone"), TEXT("fiber"),
-    TEXT("berries"), TEXT("roots"), TEXT("flowers"), TEXT("seeds"), TEXT("hatchet"),
-    TEXT("digging-stick"), TEXT("watering-can"), TEXT("water"), TEXT("roasted-roots"), TEXT("herbed-roots"),
-    TEXT("timber"), TEXT("firewood"), TEXT("machete"), TEXT("fur")};
-static_assert(UE_ARRAY_COUNT(ItemIcons) == Homestead::ItemCount, "Every item needs an icon.");
 FName RequirementIcon(Homestead::Item Item)
 {
     const int32 Index = static_cast<int32>(Item);
-    if (Index < 0 || Index >= UE_ARRAY_COUNT(ItemIcons))
+    if (Index < 0 || Index >= Homestead::ItemCount)
     {
         UE_LOG(LogTemp, Error, TEXT("Crafting requirement has no known item icon: %d"), Index);
         return NAME_None;
     }
-    return FName(ItemIcons[Index]);
+    return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
 }
 const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("watering-can"),
     TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
@@ -1531,7 +1526,8 @@ FString SHomesteadMenu::EntryName(const FHomesteadRow& Row) const
 FName SHomesteadMenu::EntryIcon(const FHomesteadRow& Row) const
 {
     if (!Row.Icon.IsNone()) return Row.Icon;
-    if (SeenPage == 0 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(ItemIcons)) return FName(ItemIcons[Row.Id]);
+    if (SeenPage == 0 && Row.Id >= 0 && Row.Id < Homestead::ItemCount)
+        return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(static_cast<Homestead::Item>(Row.Id))));
     if (SeenPage == 1 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(RecipeIcons)) return FName(RecipeIcons[Row.Id]);
     if (SeenPage == 2 && Row.Id >= 0 && Row.Id < UE_ARRAY_COUNT(PieceIcons)) return FName(PieceIcons[Row.Id]);
     return FName(TabIcons[FMath::Clamp(SeenPage, 0, 6)]);
@@ -1767,8 +1763,7 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         const auto Item = static_cast<Homestead::Item>(Row.Id);
         if (Row.ContainerId == 0)
         {
-            if (Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots
-                || Item == Homestead::Item::HerbedRoots)
+            if (Known && Homestead::IsEdible(Item))
                 Add(TEXT("Eat 1"), Act(EHomesteadItemAction::Primary, 1), EHomesteadItemAction::Primary);
             if (Known && AHomesteadController::CanPinToHotbar(Item))
                 Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),

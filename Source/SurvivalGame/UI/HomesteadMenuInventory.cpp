@@ -3,10 +3,7 @@
 
 namespace
 {
-bool IsFood(Homestead::Item Item)
-{
-    return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
-}
+bool IsFood(Homestead::Item Item) { return Homestead::IsEdible(Item); }
 FString FromUtf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
 bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int Chest, FHomesteadRow& Row)
 {
@@ -128,7 +125,8 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             Row.Quantity = Entry.quantity;
             Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
             Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
-            Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
+            Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
+                *FromUtf8(Homestead::ItemDescription(Entry.item)),
                 IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
             Row.CanStore = false;
             Row.CanTake = false;

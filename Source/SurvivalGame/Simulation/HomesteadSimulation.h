@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HomesteadItems.h"
 #include "HomesteadWorldGeneration.h"
 
 #include <array>
@@ -13,18 +14,11 @@ namespace Homestead
 struct EstateLayout;
 struct EstatePlacements;
 
-enum class Item : int
-{
-    Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
-    Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
-    Timber, Firewood, Machete, Fur, Count
-};
 enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, DeerRemains, Count };
 enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, SplitFirewood, Count };
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Count };
 enum class CropKind : int { Roots, Berries, Count };
 
-constexpr int ItemCount = static_cast<int>(Item::Count);
 constexpr double CellSize = 300.0;
 // Garden squares: each building cell holds 3 x 3 of them, and the middle one shares its centre.
 constexpr int GardenCellsPerCell = 3;
@@ -271,7 +265,6 @@ const char* WearableName(WearableDefinition definition);
 const char* WearableDescription(WearableDefinition definition);
 const char* DyeName(int dye);
 const char* GarmentRequirements(WearableDefinition definition);
-const char* ItemName(Item item);
 const char* ResourceName(ResourceKind kind);
 const char* RecipeName(Recipe recipe);
 const char* PieceName(Piece piece);

@@ -67,11 +67,12 @@ class MenuSourceContracts(unittest.TestCase):
         self.assertIn("if (PC->HasNativeMenu()) return;", hud)
 
     def test_icon_keys_cover_existing_items(self):
-        declaration = re.search(r"const TCHAR\* ItemIcons\[\] = \{(.*?)\};", MENU, re.S)
-        self.assertIsNotNone(declaration)
-        keys = re.findall(r'TEXT\("([^"]+)"\)', declaration.group(1))
-        self.assertEqual(len(keys), 16)
-        self.assertEqual(keys[-2:], ["timber", "firewood"])
+        catalogue = (SOURCE / "Simulation" / "HomesteadItems.cpp").read_text()
+        rows = re.findall(r'\{Item::(\w+), "[^"]+", "[^"]+", "[^"]*",\s*ItemCategory::\w+, "([^"]+)"', catalogue)
+        self.assertGreaterEqual(len(rows), 18)
+        self.assertIn(("Timber", "timber"), rows)
+        self.assertIn(("Firewood", "firewood"), rows)
+        self.assertNotIn("ItemIcons[]", MENU)
         recipes = re.search(r"const TCHAR\* RecipeIcons\[\] = \{(.*?)\};", MENU, re.S)
         self.assertIsNotNone(recipes)
         self.assertEqual(re.findall(r'TEXT\("([^"]+)"\)', recipes.group(1))[-1], "firewood")

@@ -2,7 +2,7 @@
 
 ## 1. Money and catalogue
 
-- [ ] 1.1 Add the `HomesteadItems` catalogue table with completeness assertion. Migrate `ItemName` and the other metadata lookups to it, keeping behaviour unchanged under the existing tests
+- [x] 1.1 Add the `HomesteadItems` catalogue table with completeness assertion. Migrate `ItemName` and the other metadata lookups to it, keeping behaviour unchanged under the existing tests
 - [ ] 1.2 Add money in cents, a formatting helper, and the shop records, including the `Sell`/`Buy` transactions, opening hours and the daily sell-down. Portable tests cover money, rejects, capacity, rollover and save/reload
 
 ## 2. First playable sale (first delivery)

@@ -1,0 +1,54 @@
+#pragma once
+
+#include <cstdint>
+
+// The item catalogue: every item's identity and metadata in one table (HomesteadItems.cpp).
+// Adding an item means one enum value here and one row there, in the same order; the build fails
+// otherwise.
+namespace Homestead
+{
+enum class Item : int
+{
+    Knife, Branch, Stone, Fiber, Berries, Roots, Flowers, Seeds,
+    Hatchet, DiggingStick, WateringCan, Water, RoastedRoots, HerbedRoots,
+    Timber, Firewood, Machete, Fur, Count
+};
+constexpr int ItemCount = static_cast<int>(Item::Count);
+
+enum class ItemCategory : int { Tool, Material, Forage, Food, Salvage, Supply, Count };
+
+enum class ShopKind : int { GeneralStore, Count };
+using ShopMask = unsigned;
+constexpr ShopMask ShopBit(ShopKind kind) { return 1u << static_cast<int>(kind); }
+
+struct ItemInfo
+{
+    Item item;
+    const char* key;         // Stable identifier, never shown.
+    const char* name;
+    const char* description;
+    ItemCategory category;
+    const char* icon;        // SHomesteadIcon glyph key.
+    std::int64_t basePriceCents;
+    ShopMask buyers;         // Shops that buy it from her.
+    double hunger = 0.0;     // Eating restores these; zero hunger means not edible.
+    double energy = 0.0;
+    const char* source = ""; // Where to find it, for recipe requirements.
+    bool hiddenFromNewGames = false;
+};
+
+// The catalogue row for an item; an "Unknown item" row for values outside the enum.
+const ItemInfo& GetItemInfo(Item item);
+const char* ItemName(Item item);
+const char* ItemKey(Item item);
+const char* ItemDescription(Item item);
+const char* ItemIcon(Item item);
+const char* ItemSource(Item item);
+ItemCategory CategoryOf(Item item);
+bool IsEdible(Item item);
+bool IsTool(Item item);
+// Pack sort order: tools, then materials and salvage, forage and food, then supplies.
+int ItemSortRank(Item item);
+std::int64_t BasePrice(Item item);
+bool ShopBuys(ShopKind shop, Item item);
+}

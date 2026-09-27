@@ -3131,20 +3131,12 @@ void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::
     if (Drop.wearableId != 0) Tint = FLinearColor(0.64f, 0.42f, 0.52f);
     else
     {
-        switch (Drop.item)
+        switch (Homestead::CategoryOf(Drop.item))
         {
-        case Homestead::Item::Knife:
-        case Homestead::Item::Hatchet:
-        case Homestead::Item::DiggingStick:
-        case Homestead::Item::WateringCan:
-        case Homestead::Item::Machete: Tint = FLinearColor(0.22f, 0.28f, 0.26f); break;
-        case Homestead::Item::Berries:
-        case Homestead::Item::Roots:
-        case Homestead::Item::Flowers:
-        case Homestead::Item::RoastedRoots:
-        case Homestead::Item::HerbedRoots: Tint = FLinearColor(0.62f, 0.30f, 0.19f); break;
-        case Homestead::Item::Seeds:
-        case Homestead::Item::Water: Tint = FLinearColor(0.34f, 0.54f, 0.48f); break;
+        case Homestead::ItemCategory::Tool: Tint = FLinearColor(0.22f, 0.28f, 0.26f); break;
+        case Homestead::ItemCategory::Forage:
+        case Homestead::ItemCategory::Food: Tint = FLinearColor(0.62f, 0.30f, 0.19f); break;
+        case Homestead::ItemCategory::Supply: Tint = FLinearColor(0.34f, 0.54f, 0.48f); break;
         default: break;
         }
     }

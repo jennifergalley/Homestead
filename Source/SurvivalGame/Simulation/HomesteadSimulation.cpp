@@ -58,27 +58,9 @@ double Clamp(double value, double low, double high) { return std::max(low, std::
 Result Good(const std::string& text) { return {true, text}; }
 Result Bad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
 Result Failed() { return Bad("You need to recover. Load your recent checkpoint to continue."); }
-double FoodNutrition(Item item)
-{
-    switch (item)
-    {
-    case Item::Berries: return 12.0;
-    case Item::RoastedRoots: return 28.0;
-    case Item::HerbedRoots: return 38.0;
-    default: return 0.0;
-    }
-}
+double FoodNutrition(Item item) { return GetItemInfo(item).hunger; }
 // Stamina from a meal: a handful of berries is a quick pick-me-up, cooked roots a real rest.
-double FoodEnergy(Item item)
-{
-    switch (item)
-    {
-    case Item::Berries: return 6.0;
-    case Item::RoastedRoots: return 12.0;
-    case Item::HerbedRoots: return 18.0;
-    default: return 0.0;
-    }
-}
+double FoodEnergy(Item item) { return GetItemInfo(item).energy; }
 // Applies a meal to hunger and energy and describes what it did, e.g. "Ate Berries: Food +12, Energy +6."
 std::string ApplyMeal(State& state, Item item)
 {
@@ -211,20 +193,7 @@ std::string MissingMessage(const Inventory& change, const Inventory& stock)
     }
     return first ? "Not enough pack space. Store some items in a chest first." : result + " first.";
 }
-const char* AcquisitionSource(Item item)
-{
-    switch (item)
-    {
-    case Item::Branch: return "Fallen branches";
-    case Item::Stone: return "Loose stones";
-    case Item::Fiber: return "Reeds near water";
-    case Item::Roots: return "Wild roots";
-    case Item::Flowers: return "Meadow herb patches";
-    case Item::Timber: return "Mature trees with Hatchet";
-    case Item::Fur: return "Deer remains in the woods, with your knife";
-    default: return "";
-    }
-}
+const char* AcquisitionSource(Item item) { return ItemSource(item); }
 bool EdgePiece(Piece kind) { return kind == Piece::Wall || kind == Piece::Doorway; }
 bool Furniture(Piece kind) { return kind == Piece::Fire || kind == Piece::Bed || kind == Piece::Chest; }
 using Edge = std::tuple<int, int, int>;
@@ -556,36 +525,7 @@ Result ContainerAccess(const State& state, int container, Point player)
     return Good("");
 }
 bool CanAllocate(int next) { return next > 0 && next < std::numeric_limits<int>::max() - 1; }
-int InventoryCategory(Item item)
-{
-    switch (item)
-    {
-    case Item::Knife:
-    case Item::Hatchet:
-    case Item::DiggingStick:
-    case Item::WateringCan:
-    case Item::Machete:
-        return 0;
-    case Item::Branch:
-    case Item::Stone:
-    case Item::Fiber:
-    case Item::Timber:
-    case Item::Firewood:
-    case Item::Fur:
-        return 1;
-    case Item::Berries:
-    case Item::Roots:
-    case Item::Flowers:
-    case Item::RoastedRoots:
-    case Item::HerbedRoots:
-        return 2;
-    case Item::Seeds:
-    case Item::Water:
-        return 3;
-    default:
-        return 5;
-    }
-}
+int InventoryCategory(Item item) { return ItemSortRank(item); }
 
 bool ReconcileLayout(State& state, int container)
 {
@@ -823,14 +763,6 @@ const char* GarmentRequirements(WearableDefinition definition)
         return result;
     }();
     return GetWearableDefinition(definition) ? requirements[static_cast<int>(definition)].c_str() : "Unknown garment";
-}
-const char* ItemName(Item item)
-{
-    static const char* names[] = {"Knife", "Branch", "Stone", "Fiber", "Berries", "Roots",
-        "Meadow herb", "Seeds", "Crude hatchet", "Stone hoe", "Watering can", "Water",
-        "Roasted roots", "Herbed roots", "Timber", "Firewood", "Machete", "Fur"};
-    static_assert(sizeof(names) / sizeof(names[0]) == ItemCount, "Every item needs a name.");
-    return ValidEnum(item, Item::Count) ? names[static_cast<int>(item)] : "Unknown item";
 }
 const char* ResourceName(ResourceKind kind)
 {

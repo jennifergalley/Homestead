@@ -12,7 +12,8 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp
     Source/SurvivalGame/Simulation/HomesteadEstate.cpp
-    Source/SurvivalGame/Simulation/HomesteadParcels.cpp)
+    Source/SurvivalGame/Simulation/HomesteadParcels.cpp
+    Source/SurvivalGame/Simulation/HomesteadItems.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
 set_target_properties(HomesteadSimulation PROPERTIES CXX_EXTENSIONS OFF)
@@ -59,3 +60,12 @@ else()
     target_compile_options(HomesteadParcelTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadParcelTests COMMAND HomesteadParcelTests)
+
+add_executable(HomesteadEconomyTests Tests/HomesteadEconomyTests.cpp)
+target_link_libraries(HomesteadEconomyTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadEconomyTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadEconomyTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadEconomyTests COMMAND HomesteadEconomyTests)

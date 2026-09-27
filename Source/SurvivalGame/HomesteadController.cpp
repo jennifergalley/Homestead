@@ -59,12 +59,7 @@ constexpr const TCHAR* AutosaveMinutesKey = TEXT("IntervalMinutes");
 constexpr const TCHAR* ActionHintSection = TEXT("Homestead.ActionHints");
 constexpr int32 FieldBookPages[] = {0, 1, 2, 3, 6};
 
-bool IsHotbarTool(Homestead::Item Item)
-{
-    return Item == Homestead::Item::Knife || Item == Homestead::Item::Hatchet
-        || Item == Homestead::Item::DiggingStick || Item == Homestead::Item::WateringCan
-        || Item == Homestead::Item::Machete;
-}
+bool IsHotbarTool(Homestead::Item Item) { return Homestead::IsTool(Item); }
 
 template <typename FPredicate>
 const Homestead::Plot* FindPlotWhere(const std::vector<Homestead::Plot>& Plots, FPredicate Predicate)
@@ -81,27 +76,12 @@ TOptional<Homestead::CropKind> PlantingCrop(Homestead::Item Item)
     return {};
 }
 
-bool IsFoodItem(Homestead::Item Item)
-{
-    return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots
-        || Item == Homestead::Item::HerbedRoots;
-}
+bool IsFoodItem(Homestead::Item Item) { return Homestead::IsEdible(Item); }
 
 FName HotbarIcon(Homestead::Item Item)
 {
-    switch (Item)
-    {
-    case Homestead::Item::Berries: return TEXT("berries");
-    case Homestead::Item::Seeds: return TEXT("seeds");
-    case Homestead::Item::RoastedRoots: return TEXT("roasted-roots");
-    case Homestead::Item::HerbedRoots: return TEXT("herbed-roots");
-    case Homestead::Item::Knife: return TEXT("knife");
-    case Homestead::Item::Hatchet: return TEXT("hatchet");
-    case Homestead::Item::DiggingStick: return TEXT("digging-stick");
-    case Homestead::Item::WateringCan: return TEXT("watering-can");
-    case Homestead::Item::Machete: return TEXT("machete");
-    default: return NAME_None;
-    }
+    const bool Pinnable = IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
+    return Pinnable ? FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item))) : NAME_None;
 }
 
 struct FCameraConfigSnapshot
@@ -175,10 +155,7 @@ bool PersistIntProperty(const FString& Path, const TCHAR* Section, const TCHAR* 
 }
 
 FString Text(const char* Value) { return UTF8_TO_TCHAR(Value); }
-bool Edible(Homestead::Item Item)
-{
-    return Item == Homestead::Item::Berries || Item == Homestead::Item::RoastedRoots || Item == Homestead::Item::HerbedRoots;
-}
+bool Edible(Homestead::Item Item) { return Homestead::IsEdible(Item); }
 const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
 {
     switch (Recipe)
