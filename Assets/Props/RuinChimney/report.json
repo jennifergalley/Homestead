@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "RuinChimney",
+  "description": "Ruined manor: a free-standing granite chimney stack 8.8 m tall, left when its gable fell (original).",
+  "collision": "box",
+  "triangle_budget": 400000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/ruin_chimney.py",
+  "source_sha256": "cf4922c2df3878cdd72d74d180706914649071cd62dd1ad50be78d4a3d11d061",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RuinChimney": {
+      "vertices": 25752,
+      "triangles": 47055,
+      "size_cm": [
+        160.4,
+        120.37,
+        917.15
+      ],
+      "materials": [
+        {
+          "name": "M_RuinChimney",
+          "textures": {
+            "basecolor": "T_RuinChimney_basecolor.png",
+            "roughness": "T_RuinChimney_roughness.png",
+            "normal": "T_RuinChimney_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinChimney_basecolor.png",
+          "roughness": "T_RuinChimney_roughness.png",
+          "normal": "T_RuinChimney_normal.png",
+          "ao": "T_RuinChimney_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          1.0,
+          7.9
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinChimney.fbx",
+      "sha256": "e7698c039db7dc6f16ac519ae06171937074084a65158312ad5970a4d4bb5adf",
+      "preview": "preview_SM_RuinChimney.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RuinChimney_hero.png",
+          "detail": "beauty_SM_RuinChimney_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RuinChimney_LOD1": {
+      "vertices": 9902,
+      "triangles": 16469,
+      "size_cm": [
+        160.31,
+        120.36,
+        917.11
+      ],
+      "materials": [
+        {
+          "name": "M_RuinChimney",
+          "textures": {
+            "basecolor": "T_RuinChimney_basecolor.png",
+            "roughness": "T_RuinChimney_roughness.png",
+            "normal": "T_RuinChimney_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinChimney_basecolor.png",
+          "roughness": "T_RuinChimney_roughness.png",
+          "normal": "T_RuinChimney_normal.png",
+          "ao": "T_RuinChimney_ao.png"
+        },
+        "shared_with": "SM_RuinChimney"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          1.0,
+          7.9
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinChimney_LOD1.fbx",
+      "sha256": "e34a89394bb814bdb3b71c32b32415f1f6d39b7de3a68c367728bc7971897ffe",
+      "preview": "preview_SM_RuinChimney_LOD1.png"
+    },
+    "SM_RuinChimney_LOD2": {
+      "vertices": 3949,
+      "triangles": 5646,
+      "size_cm": [
+        159.86,
+        119.91,
+        916.88
+      ],
+      "materials": [
+        {
+          "name": "M_RuinChimney",
+          "textures": {
+            "basecolor": "T_RuinChimney_basecolor.png",
+            "roughness": "T_RuinChimney_roughness.png",
+            "normal": "T_RuinChimney_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinChimney_basecolor.png",
+          "roughness": "T_RuinChimney_roughness.png",
+          "normal": "T_RuinChimney_normal.png",
+          "ao": "T_RuinChimney_ao.png"
+        },
+        "shared_with": "SM_RuinChimney"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          1.0,
+          7.9
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinChimney_LOD2.fbx",
+      "sha256": "2a1e723d0ea2d03fc1e2e8575307d6d9370ffd5848e4e17fb9022c854ba6ea69",
+      "preview": "preview_SM_RuinChimney_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Plan centre at the footing top (0, 0, 0).",
+  "placement": "Any yaw; stand it on a gable line.",
+  "textures": {
+    "T_RuinChimney_basecolor.png": "c0ce1adb4fd5d7cb0c2e98ea1a26f68f5365d632b880f9a7820b751b825cf8ca",
+    "T_RuinChimney_roughness.png": "94611ddf944288538c8caa3a945a4e81bdeefe7b64bb9d86360db4c826c274bf",
+    "T_RuinChimney_normal.png": "057098353a90cdeddefce794011a694c7e92b2605cca83d1c65ee4d19205c524"
+  }
+}

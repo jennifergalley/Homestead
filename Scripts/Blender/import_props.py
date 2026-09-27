@@ -261,7 +261,7 @@ COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "comple
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
 COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.
-NANITE_PROPS = {"GraniteDome", "GraniteSplitBoulder"}
+NANITE_PROPS = {"GraniteDome", "GraniteSplitBoulder", "RuinWallTall", "RuinWallMid", "RuinWallLow", "RuinChimney"}
 DETAIL_DEST = f"{DEST_ROOT}/GraniteDetail/Textures"
 TRIPLANAR_CODE = """
 float3 w = pow(abs(normalize(N)), 4.0);
