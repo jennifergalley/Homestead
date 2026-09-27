@@ -1,3 +1,17 @@
+<#
+.SYNOPSIS
+Builds the editor module and opens this worktree's Unreal Editor with Epic's MCP server.
+.DESCRIPTION
+Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 first on a shared machine).
+- Several worktrees share this PC. Give each editor its own -Port (for example 8766-8799) and set
+  $env:UNREAL_MCP_URL = 'http://127.0.0.1:<port>/mcp' for Scripts\editor_mcp.py. The script refuses a
+  port that another worktree's editor is serving.
+- Don't pass -Map for the 4 km Estate map: the editor has hung at startup that way. Open it after
+  MCP answers with LevelEditorSubsystem.load_level('/Game/SurvivalGame/Maps/Estate').
+- The first launch after a build can take more than 10 minutes before MCP answers. Raise -TimeoutSeconds
+  rather than killing it; watch Saved\Logs\SurvivalGame.log.
+- Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
+#>
 [CmdletBinding()]
 param(
     [string]$EngineRoot,
@@ -38,7 +52,16 @@ function Test-McpServer {
 }
 
 if (Test-McpServer) {
-    Write-Host "Unreal MCP server is already answering at $url"
+    # Several worktrees run editors at once; make sure the one on this port is ours.
+    $owners = @(Get-CimInstance Win32_Process -Filter "Name = 'UnrealEditor.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match "-ModelContextProtocolPort=$Port(\D|$)" })
+    $ours = @($owners | Where-Object { $_.CommandLine.IndexOf($project, [StringComparison]::OrdinalIgnoreCase) -ge 0 })
+    if ($owners.Count -and -not $ours.Count) {
+        $other = ($owners[0].CommandLine -split '"')[3]
+        throw "MCP port $Port belongs to another worktree's editor (PID $($owners[0].ProcessId), $other). Pass a free -Port and set `$env:UNREAL_MCP_URL to match."
+    }
+    Write-Host "Unreal MCP server is already answering at $url$(if ($ours.Count) { " (this worktree's editor, PID $($ours[0].ProcessId))" } else { ' (owner not identified)' })"
+    Write-Host "Shell client: `$env:UNREAL_MCP_URL = '$url'"
     return
 }
 
@@ -80,6 +103,7 @@ while ((Get-Date) -lt $deadline) {
     if ($process.HasExited) { throw "Unreal Editor exited early with code $($process.ExitCode). See Saved\Logs\SurvivalGame.log." }
     if (Test-McpServer) {
         Write-Host "Unreal MCP server ready at $url (editor PID $($process.Id))."
+        Write-Host "Shell client: `$env:UNREAL_MCP_URL = '$url'"
         return
     }
     Start-Sleep -Seconds 3
