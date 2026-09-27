@@ -2,6 +2,14 @@ schema: spec-driven
 
 context: |
   Homestead is a Windows-native Unreal Engine game, not a web application.
+  It is a cozy Coral Island-style life sim set on an early-Victorian Cornish
+  coast: restore a derelict family estate, clear, farm, ranch, fish and mine,
+  haul goods to town to sell, rebuild the manor, and restore the family name.
+  The authoritative design and round order are in
+  openspec\changes\pivot-to-cozy-estate-life-sim\design.md; product rules are in
+  its specs\estate-life-sim-direction. No cold, death, predators, hunting or
+  spoilage; energy and hunger only. One fixed hand-authored map, no procedural
+  world. Money is shown in US dollars and cents.
   Read docs\game-plan.md, especially "Working policy: playable iteration first"
   and "Apply these lessons to every feature round", before planning changes.
   Deliver frequent, small playable improvements toward indie-game quality.

@@ -1,7 +1,9 @@
 # Homestead
 
-A Windows-native, offline, controller-first survival and homesteading game.
-The design and roadmap are in `docs\game-plan.md`.
+A Windows-native, offline cozy life sim: restore a derelict family estate on the
+early-Victorian Cornish coast, then farm, ranch, fish and mine your way to a fortune.
+The direction and round order are in `docs\game-plan.md`; the survival-era prototype plan
+is archived in `docs\archive\`.
 
 Bounded autonomous development, status updates, pause/stop controls and protected
 candidate builds are described in `docs\autonomous-development.md`.
