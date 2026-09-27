@@ -229,7 +229,8 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 - **Craft**: D-pad selects a recipe; details list requirements. Crafting is **hold A**
   (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
 - **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
-  Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
+  Wall (row 1); the last plan is **Take down**. Read `selectedRow` rather than counting rows,
+  because the grid grows as plans are added. `B` reopens the book on its
   *last* page (often Inventory), so close it fully (loop Escape until `bookOpen` and `planning`
   are both false) and press B again. Enter on a plan enters the preview; it sometimes takes two
   presses, so check `st`. In the preview she walks freely. The piece sits about 350 cm ahead
@@ -238,6 +239,12 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   aiming mid-floor snaps a foundation to a free side. A red preview means blocked, and the
   planning panel's second line says why (for example "Gather 2 Branch first."). Top up with
   `HomesteadGive Branch 20` / `Fiber 12` / `Stone 8`.
+- **Take down** (MVP survival line): in build mode, X (keyboard) or Y (gamepad) toggles the
+  take-down variant, or pick the Build page's last plan. Aim at anything she built and press
+  Interact (E / A). The whole build cost comes back to the pack, along with a chest's contents
+  and any garments; whatever doesn't fit is dropped beside her. A foundation is refused while
+  walls, a roof or furnishings stand on it ("Take down the walls, roof and furnishings on this
+  floor first."). Removals are saved.
 - Feedback messages ("Ate Berries.", "Made Crude hatchet.") appear as a banner on the book and in
   `toast` briefly. World-side hints (for example "Craft a crude hatchet before felling trees") may be
   visible in captures without appearing in `toast`, so capture after actions.
@@ -295,7 +302,7 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Water|Chop|Knife|Till|Machete|Fell`,
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Water|Fill|Chop|Knife|Till|Machete|Fell`,
   `LabHold Knife|Hatchet|DiggingStick|Pail|Machete|None` (the hand-carry prop for that tool, as
   when it's selected on the hotbar),
   `LabProp Sticks|Stones|Roots|Berries|None` (puts that pile on the ground in front of her, the way the
@@ -818,3 +825,53 @@ Dated and short, newest first. Promote anything durable into the sections above.
   window pinned at 0,0 1936x1119 by `pietop.ps1`, call `SetProcessDPIAware`, then
   `SetCursorPos` in window pixels and `mouse_event` down/up (2/4). Park the cursor afterwards.
   Jenny's own mouse can interfere if she is at the PC.
+
+## MVP survival line (`origin/mvp-survival`)
+
+`main` is pivoting to the Estate game. Jenny's playable forest survival build lives on
+`origin/mvp-survival` and is never merged with main (fixes are ported to main one way only).
+
+- Package it to its own folder so it never collides with main's `Build\Windows`:
+  `.\Scripts\Build-Game.ps1 -Package -ArchiveDirectory E:\Repos\HomesteadMVP\Windows`, and point
+  the packaged suites at it with `.\Scripts\Test-Game.ps1 -Packaged -PackageDirectory
+  E:\Repos\HomesteadMVP\Windows`. Packaged saves live inside the package
+  (`SurvivalGame\Saved\SaveGames`); back them up before a packaged test and restore after.
+- Keep `SimulationSaveVersion` at 11 so her saves keep loading. Warmth is still serialized but is
+  normalised to 100 on load; there is no cold survival any more (failure is Food or Energy 0).
+- Bed (`AHomesteadController::BedSleepHours`): from 18:00 to about 2:45 she sleeps until 6:45
+  (first light); from 2:45 to 6:45 a full eight hours; by day a two-hour nap that ends by 18:00.
+  Nights longer than twelve hours are split into two `Sim.Sleep` calls (the simulation's cap).
+- Night floor: `homestead.NightMoonLux` (2.0), `homestead.NightSky` (0.6) and
+  `homestead.NightMinExposure` (-2) in `HomesteadWorld.cpp`. PIE with ray tracing off is not a
+  fair judge of night brightness; check the packaged build.
+- Water weighs nothing and takes no pack space; chests hold 1200 units.
+- Watering pail: `LabAction Fill` (kneel and dip, `pail_fill.py`) and `LabAction Water` (lift,
+  take the side with the other hand, tip like a pot, `pail_pour.py`). The event frames in those
+  scripts must match `PailTakeStart/End`, `PailGiveStart/End`, `PourForward` and `FillForward`
+  in `HomesteadCharacter.h`. The stream uses `WaterPail/M_PourStream`.
+- Blade meshes (`SM_FlintHatchet`, the stone hoe) have their cutting edge on local **+Y** in the
+  engine. `UpdateFellingHatchet` builds the hand frame with `MakeFromZY(Haft, Edge)`; the hoe rolls
+  PI about Z while tilling.
+
+Editor and build notes learned on this line:
+
+- `Start-EditorMcp.ps1` launches with Live Coding off and ray tracing off (`-RayTracing` opts
+  back in) to keep the editor light when several sessions share the machine. Run at most three
+  Unreal processes on the machine at once.
+- If `Start-EditorMcp.ps1` hangs at `Build.bat -Mode=ValidatePlatforms` (another session holds
+  the AutoSDK mutex), kill that `cmd.exe` child by PID; the launch carries on.
+- `StartPIE` needs its options object:
+  `mcp $E StartPIE '{"options":{"bSimulate":false,"playMode":"PlayMode_InViewPort","warmupSeconds":8}}'`.
+  Assets saved while PIE runs can return False; save again after stopping PIE.
+- MSVC C2487 in a `_API`-exported UCLASS: `static constexpr float A = 1, B = 2;` fails. Declare
+  one constant per line.
+- The lab controller is `HomesteadLabController`, which has no `get_pawn` in Python; use
+  `unreal.GameplayStatics.get_player_pawn(world, 0)`.
+- `CaptureEditorImage` can fail with "Failed to capture any editor windows"; use `HighResShot`
+  through the player controller (`hshot` in `Scripts\McpHelpers.ps1` on main) instead. A
+  HighResShot takes about 3 s, so for animation contact sheets run `slomo 0.08`-`0.1`.
+- UAT is single-instance across the machine. `Build-Game.ps1` passes `-WaitForUATMutex`, so a
+  package started while another worktree is packaging waits instead of failing after the
+  25-minute editor build and content bootstrap. The bootstrap re-saves many tracked `.uasset`s
+  (audio, legacy heroine animations and materials); `git checkout` those afterwards rather than
+  committing them.
