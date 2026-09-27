@@ -2,9 +2,9 @@
 
 ## 1. Standing room (first delivery)
 
-- [ ] 1.1 Add the Hearth piece (Fire cooking, a light, ambience) and the `StoneWall` skin. Seed the heritage standing-room building at `StandingRoomSpawn` with its bed, hearth and chest (pail and branches)
+- [ ] 1.1 Merge the stone kit from `jennifergalley-stone-building-and-torch-assets` (d0a2a73c) and import StoneWall, StoneDoorway, StoneFoundation and StoneRoof. Add the Hearth piece (Fire cooking, a light, ambience) and the `StoneWall` skin using the kit. Seed the heritage standing-room building at `StandingRoomSpawn` with its bed, hearth and chest (pail and branches)
 - [ ] 1.2 Spawn a new game in the room facing the door. Verify sleep and save, chest access and hearth cooking on the Estate map with mouse and controller
-- [ ] 1.3 Author the coarse ruin massing (wall runs, chimney stack, rubble) as Blender recipes and place it on `ManorFootprint`. Reserve the footprint in `CanBuildAt`
+- [ ] 1.3 Author the coarse ruin massing (wall runs, chimney stack, rubble) as broken-top variants of the stone-kit recipes, and place it on `ManorFootprint`. Reserve the footprint in `CanBuildAt`
 - [ ] 1.4 Place the salvage piles, with the billhook head near the door, together with the clearing lane. Package, walk out of the room into the ruin, capture in-game views, commit and push
 
 ## 2. Names and arrival

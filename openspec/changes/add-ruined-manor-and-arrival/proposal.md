@@ -51,8 +51,14 @@ character has no name.
     which the ruin masonry and rubble build on.
   - The appearance page, the save list, the field-book pages, and the toast.
 - **In-flight stone building work:** the paused "Stone building and torch assets" session
-  produced no diff yet. The ruin's granite wall and slate kit is authored here as Blender
-  procedural recipes. The rebuild's stone building pieces (round 5) will reuse that kit.
+  pushed a full-quality granite rubble kit on branch
+  `jennifergalley-stone-building-and-torch-assets` (d0a2a73c). The kit is StoneWall,
+  StoneDoorway, StoneFoundation and a stone-slate StoneRoof, with lime-mortar joints, 4K
+  bakes and LOD0–2. Its status is in `docs\stone-kit-and-torches-status.md`, and it hasn't
+  been imported into Unreal yet. Merge it and import it as the base of the standing room's
+  `StoneWall` skin and of the ruin masonry. The ruin's broken-top and window variants extend
+  the same recipes, and round 5's rebuild reuses the intact pieces. Its unfinished
+  TorchGround and TorchWall props can become estate and mine lighting later.
 - **Comparative references (conventions only):**
   - Stardew Valley and Coral Island open with a modest dwelling and a short welcome letter.
   - Coral Island's character-then-name setup flow.
