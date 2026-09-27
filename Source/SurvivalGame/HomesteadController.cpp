@@ -1404,7 +1404,22 @@ void AHomesteadController::UpdateFocus()
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
-    if (Focus == EFocus::None && Homestead::IsNearWater(Position)) Focus = EFocus::Water;
+    if (Homestead::IsNearWater(Position))
+    {
+        // With the watering can out and not full, the stream wins over a crop on the bank when she
+        // is at least as close to the water's edge, and always once the can is empty.
+        const bool bCan = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
+            && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::WateringCan)
+            && Sim.Count(Homestead::Item::WateringCan) > 0;
+        const int32 Water = Sim.Count(Homestead::Item::Water);
+        const double Edge = FMath::Max(0.0,
+            FMath::Abs(Position.x - Homestead::StreamX(Position.y)) - Homestead::Generation::StreamWaterHalfWidthCm);
+        if (Focus == EFocus::None || (bCan && Water < 6 && (Water == 0 || Edge <= Best)))
+        {
+            Focus = EFocus::Water;
+            FocusId = -1;
+        }
+    }
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
     const bool bMachete = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
         && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::Machete)
