@@ -83,6 +83,11 @@ struct EstatePlacements
 // Unreal game replaces these with the level's DA_EstateLandmarks when it loads the Estate map.
 const EstateLayout& ProvisionalEstateLayout();
 
+// Provisional interactive placements until the world lane bakes DA_EstatePlacements from the
+// Estate level. Each lane appends its own section (ids: world 500000+, overgrowth 510000+,
+// salvage 520000+, town 530000+).
+const EstatePlacements& ProvisionalEstatePlacements();
+
 // Even-odd point-in-polygon test for simple rings in world XY.
 bool PointInPolygon(const std::vector<Point>& ring, Point point);
 }

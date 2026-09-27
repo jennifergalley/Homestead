@@ -2722,6 +2722,9 @@ void FixedEstateNewGameAndSave()
         {EstatePlacementIdBase + 1, ResourceKind::Branches, {spawn.x + 100, spawn.y}, 0, 0, 1, 0},
         {EstatePlacementIdBase + 2, ResourceKind::Stones, {spawn.x - 100, spawn.y}, 0, 0, 1, 0},
     };
+    Simulation provisional;
+    OK(provisional.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    CHECK(!provisional.GetState().resources.empty());
     Simulation sim;
     OK(sim.NewEstateGame(layout, placements));
     CHECK(sim.GetState().fixedEstate);

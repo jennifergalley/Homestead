@@ -56,6 +56,33 @@ const EstateLayout& ProvisionalEstateLayout()
     return Layout;
 }
 
+const EstatePlacements& ProvisionalEstatePlacements()
+{
+    static const EstatePlacements Placements = []
+    {
+        EstatePlacements table;
+        table.bakeVersion = 1;
+        const Point room = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+        auto add = [&](int id, ResourceKind kind, double dx, double dy, int minTier = 0)
+        {
+            table.placements.push_back({id, kind, {room.x + dx, room.y + dy}, 0.0, 0.0, 1.0, minTier});
+        };
+        // World lane: loose forage around the manor, so branches exist before the first axe.
+        add(500001, ResourceKind::Branches, 900.0, 400.0);
+        add(500002, ResourceKind::Branches, 1200.0, -700.0);
+        add(500003, ResourceKind::Branches, 1600.0, 900.0);
+        add(500004, ResourceKind::Stones, 1400.0, 200.0);
+        add(500005, ResourceKind::Flowers, 1800.0, -300.0);
+        add(500006, ResourceKind::ForestTree, 3000.0, 1500.0);
+        add(500007, ResourceKind::ForestTree, 3400.0, -1800.0);
+        // Overgrowth lane (510000+).
+        // Salvage lane (520000+).
+        // Town lane (530000+).
+        return table;
+    }();
+    return Placements;
+}
+
 bool PointInPolygon(const std::vector<Point>& ring, Point point)
 {
     bool inside = false;
