@@ -38,6 +38,9 @@ manor and boundary lanes haven't merged yet.
   aren't loaded.
 - Blender props face -Y in their recipes and import facing +Y, so C++ placement applies
   `LocalYaw - 90` (see the store's `Prop()`).
+- Fixed-estate resource persistence: cleared or edited placements are saved as `ResourceEdit`
+  entries with chunk (0, 0) and `localId` = the placement id. Placement id ranges per lane are in
+  `Simulation\HomesteadEstate.h` (world 500000+, overgrowth 510000+, ...).
 - The item catalogue: `Simulation\HomesteadItems.{h,cpp}`. Append only; rows must match enum order.
   Serialize edits between lanes.
 - Saves: lanes never bump `SimulationSaveVersion`; the orchestrator bumps once at integration. New
@@ -74,6 +77,10 @@ manor and boundary lanes haven't merged yet.
 - Estate boundary lane: the field book gains a Map tab (page 7, `M` opens it directly). Once it's on
   `main`, update the `FieldBookPages` cycle in skill section 4 "Field book" to 0 Inventory, 1 Craft,
   2 Build, 7 Map, 3 Guidebook, 6 Appearance (Settings stays outside the cycle). The docs agent does this.
+- Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. On the fixed estate
+  the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. When it merges,
+  update the skill's starter-kit, hotbar and energy notes in section 4 (they still describe the
+  woodland kit: knife, hatchet, stone hoe, pail and machete in slots 1-5).
 
 ## Tooling requests (unassigned)
 

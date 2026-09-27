@@ -451,7 +451,11 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
 ### Author an animation with the MetaHuman Control Rig
 
 `homestead_agent.rig_authoring.Session` builds a level sequence with the heroine body and her
-`MetaHuman_ControlRig`, keys controls, and bakes an AnimSequence. Details that cost time to find:
+`MetaHuman_ControlRig`, keys controls, and bakes an AnimSequence. To author a new clip, copy the
+closest existing clip module in `Content\Python\homestead_agent\` and run its `build()` in the editor
+(not PIE): `active_idle`, `axe_fell`, `eat_berry`, `hoe_till`, `kneel_gather`, `kneel_plant`,
+`kneel_pouch`, `kneel_reeds`, `machete_hack`. Their docstrings describe the timing contracts with
+C++. Details that cost time to find:
 
 - **Plan poses within her reach before keying.** In authoring component space (forward +Y, her
   left +X, up +Z) the shoulders sit at about (±15, 0..11, 140) and shoulder to wrist is about 50 cm.

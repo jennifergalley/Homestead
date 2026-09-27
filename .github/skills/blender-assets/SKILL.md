@@ -127,6 +127,8 @@ before each pass.
   - `import_props.py` picks the parent material itself: `M_PropTextured` for baked props,
     `M_PropFoliage` when the report has a `wind` block, and `M_PropGranite` for rocks. It flips the
     OpenGL normal map's green channel on import (`flip_green_channel`). Don't flip it again.
+    It reads textures only from `Assets\Props\<Name>\Textures`; copy a shared atlas there first
+    (the bramble overgrowth set needed this).
   - Blender exports mirror Y: props authored facing -Y arrive facing +Y, and blade edges that the
     report lists on -Y are on +Y in the engine (`SM_FlintHatchet`, `SM_StoneHoe`). Check in the
     engine before keying grips.
