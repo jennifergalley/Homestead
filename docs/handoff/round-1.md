@@ -55,6 +55,12 @@ manor and boundary lanes haven't merged yet.
   assume.
 - Shared-doc findings go through the docs agent (`docs\handoff\README.md`).
 
+## Pending doc updates on merge
+
+- Estate boundary lane: the field book gains a Map tab (page 7). Once it's on `main`, the skill's
+  LB/RB page order becomes 0 Inventory, 1 Craft, 2 Build, 7 Map, 3 Guidebook, 6 Appearance, 4
+  Settings. Update section 4 "Field book" then.
+
 ## Tooling requests (unassigned)
 
 - A launch argument for the packaged Development build to set the start hour and take a screenshot

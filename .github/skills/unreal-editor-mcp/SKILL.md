@@ -63,6 +63,21 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   changes that aren't yours (the editor dirties shared map files such as `Estate.umap` and
   `__ExternalObjects__`).
 
+**Lane quick-start** (one worktree, port `$p` from the round's registry in `docs\handoff\`):
+
+```powershell
+$p = 8768                                                     # your registered port
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
+pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200
+. .\Scripts\McpHelpers.ps1 -Port $p                             # every later command
+py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"
+# ...work, StartPIE, hk/st/hshot...
+py "unreal.SystemLibrary.quit_editor()"                         # before building, rebasing, or when done
+.\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 10-16
+.\Scripts\Build-Game.ps1 -Package -PackageOnly                  # waits for other worktrees' UAT; then check git status
+git status --short                                               # restore bootstrap re-saves you didn't mean
+```
+
 ### 0.1 Known failures → fixes
 
 Search this table for the error text before debugging. Add a row when you solve a new one.
@@ -86,7 +101,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. |
 | `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
-| C++ duplicate-symbol or redefinition errors between unrelated `.cpp` files | Unreal unity builds merge translation units, including anonymous namespaces | Give file-local helpers unique prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`). |
+| C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | Default argument errors with `Homestead::` enums in `HomesteadCharacter.h` | The header only forward-declares the enum | Use overloads or `{}`, not enum default arguments. |
 | `System.Exception: A conflicting instance of AutomationTool is already running` (in `%LOCALAPPDATA%\UnrealEngine\Programs\AutomationTool\Saved\Logs\ErrorLog.txt`); the script only says "Game packaging failed (1)" | UAT is single-instance machine-wide and another worktree is packaging | `Build-Game.ps1` now passes `-WaitForUATMutex` and waits. For a hand-run `RunUAT.bat`, add it yourself. |
@@ -521,9 +536,10 @@ Console variables can be flipped live for A/B captures with
 `unreal.SystemLibrary.execute_console_command(world, 'homestead.FootPlacement 0')`.
 
 A PIE screenshot that is always the right window: run the console command `shot showui`
-(through `execute_console_command` with the player controller). It writes
-`Saved\Screenshots\WindowsEditor\ScreenShotNNNNN.png` with the HUD, independent of which monitor
-or window is in front. To judge foliage wind while she stands still, record about 6 s with
+(`con 'shot showui'`). It writes `Saved\Screenshots\WindowsEditor\ScreenShotNNNNN.png` with the
+HUD, independent of which monitor or window is in front. With in-viewport PIE it captures the whole
+editor window at native resolution (3840x2076 here), so crop the viewport yourself; `hshot`
+(HighResShot) captures just the game view. To judge foliage wind while she stands still, record about 6 s with
 ddagrab, decode to grayscale at half size and look at the per-pixel standard deviation over
 time (`v.std(0)`, scaled ×8); moving leaves light up, still ground stays black.
 
@@ -623,7 +639,9 @@ Extend it there when play needs a capability; prefer real input over state edits
   includes Simulation headers as `../Simulation/<Header>.h`. Hold loaded assets in `UPROPERTY()`
   members, never function-local statics (field notes). Font assets: a `FontFace` needs
   `loading_policy` INLINE, and an `FTypefaceEntry` is built with `Emplace_GetRef(name)` then
-  `.Font = FFontData(Face)`.
+  `.Font = FFontData(Face)`. Slate: `FSlateDrawElement::MakeCustomVerts` expects sRGB vertex
+  colours (`ToFColor(true)`), and `FGeometry::GetLocalSize()` returns `FVector2f` (convert before
+  mixing with `FVector2D`).
 
 ## 9. Field notes
 
