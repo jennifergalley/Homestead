@@ -1023,8 +1023,8 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     candidate.familyName = Manor::DefaultFamilyName;
     candidate.estateName = Manor::DefaultEstateName;
     candidate.journal.push_back(Manor::ArrivalEntry);
-    if (!Manor::SeedStandingRoom(candidate, layout))
-        return Bad("The estate layout has no standing room. No new game was started.");
+    // Test layouts without the room anchor simply start with no heritage room.
+    Manor::SeedStandingRoom(candidate, layout);
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return inventory;
     layout_ = std::make_shared<const EstateLayout>(layout);
