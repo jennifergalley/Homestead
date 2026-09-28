@@ -156,6 +156,9 @@ starting.
    Send findings and blockers to the docs agent `<id>`. Your MCP port is `<p>`. Don't package:
    deliver through 'Delivering lane work' and message me when an increment is ready."
 4. Point lanes at the shared-machine rules (editor skill, section 0).
+5. `create_session` can time out creating the worktree (`git command timed out after 300 seconds`)
+   and still start the session on a half-checked-out tree. Every lane's first step is to confirm that
+   `git status` is clean and `SurvivalGame.uproject` exists; if not, `git reset --hard HEAD`.
 
 ## End-of-round handoff (docs agent)
 

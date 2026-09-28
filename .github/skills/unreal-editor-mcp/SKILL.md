@@ -79,6 +79,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 **Lane quick-start** (one worktree, port `$p` from the round's registry in `docs\handoff\`):
 
 ```powershell
+git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
 Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200
@@ -120,6 +121,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
+| New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
 | Estate "Save failed..." / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejects `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on the manor lane's branch (bound by `MaxWorldCoordinate`); until it merges, estate saves fail on `main`. |
 | Spawn yaw ignored on Estate | `ChooseStartingView` (fresh terrain) and `SetAppearancePreview(false)` restoring a `SavedViewRotation` captured before spawn both overwrite it | See the manor lane's fix; check `controlYaw` and a capture after the book closes. |
 | "The cookfire recipe could not be selected." | The Fire/Hearth cook action calls `FocusLegacySubject`, but craft rows are now `EHomesteadMenuSubject::Recipe` (`HomesteadController.cpp` ~2111) | Open bug on `main` (round-1 page). |
