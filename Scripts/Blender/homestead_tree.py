@@ -99,12 +99,15 @@ def paint_bark(atlas, key, nrng, *, size_m=1.0, style="fissured", base=(0.10, 0.
                ridge=(0.16, 0.15, 0.13), fissure=(0.03, 0.025, 0.02), depth=0.02, ridges=9.0,
                breaks=0.5, plates=0, plate_color=(0.20, 0.13, 0.08), lichen=0.3,
                lichen_color=(0.24, 0.26, 0.19), moss=0.2, moss_color=(0.05, 0.08, 0.02),
-               algae=0.0, lenticels=0.0, rough=0.82, stripes=0.0):
+               algae=0.0, lenticels=0.0, rough=0.82, stripes=0.0, crack=(0.004, 0.018), fresh=0.28,
+               broken=0.0):
     """Tileable bark column covering ``size_m`` x ``size_m``.
 
     ``style``: ``fissured`` (oak, hawthorn: anastomosing vertical ridges broken into blocks),
     ``smooth`` (beech, holly: thin grey skin, faint horizontal lenticel dashes, algae),
-    ``plated`` (sycamore: smooth grey flaking in ``plates`` irregular scales)."""
+    ``plated`` (sycamore: smooth grey flaking in ``plates`` irregular scales; ``crack`` is the
+    (sharp, soft) crack half-width in tile units, ``fresh`` the fraction of freshly bared plates,
+    ``broken`` 0-1 how much of the plate net fades to faint seams so it doesn't read as cobbles)."""
     U, V = atlas.column_grid(key)
     shp = U.shape
     fine = F.noise(shp, nrng, freq=160.0, beta=1.3)
@@ -146,14 +149,20 @@ def paint_bark(atlas, key, nrng, *, size_m=1.0, style="fissured", base=(0.10, 0.
             height = height - depth * 0.3 * dash
     elif style == "plated":
         edge, cell, f1 = _voronoi_edges(shp, nrng, plates, aniso=(1.0, 1.6))
-        crack = 1.0 - F.smoothstep(0.004, 0.018, edge)
+        crack = 1.0 - F.smoothstep(crack[0], crack[1], edge)
+        if broken:
+            # Only some plate borders have actually split; the rest stay as faint seams.
+            open_ = F.smoothstep(0.35, 0.65, F.noise(shp, nrng, freq=max(plates, 1) ** 0.5 * 1.5, beta=2.0))
+            crack = crack * (1.0 - broken + broken * open_)
         cell_rand = (np.sin(cell * 12.9898 + 4.1) * 43758.5453) % 1.0
-        fresh = (cell_rand > 0.72) * F.smoothstep(0.02, 0.05, edge)
+        fresh = (cell_rand > 1.0 - fresh) * F.smoothstep(0.02, 0.05, edge)
         lift = F.smoothstep(0.0, 0.08, edge) * (0.5 + 0.5 * cell_rand)
         height = depth * (lift - 1.0) * (1 - crack) - depth * crack + depth * 0.1 * (mid - 0.5)
+        # Each plate weathers a little differently.
+        color = color * (0.88 + 0.24 * cell_rand)[..., None]
         color = F.lerp(color, plate_color, fresh * 0.85)
         color = F.lerp(color, fissure, crack)
-        ao = 0.55 + 0.45 * (1 - crack)
+        ao = 0.7 + 0.3 * (1 - crack)
     if algae:
         a = F.smoothstep(0.5, 0.85, F.noise(shp, nrng, freq=4.0, beta=2.8, aniso=(1.0, 2.0))) * algae
         color = F.lerp(color, (0.07, 0.10, 0.04), a)
