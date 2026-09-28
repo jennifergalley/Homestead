@@ -14,7 +14,7 @@ build_outer_land.py imports it. Run from the repo root:
 import os
 
 import numpy as np
-from scipy.ndimage import gaussian_filter, map_coordinates
+from scipy.ndimage import binary_dilation, gaussian_filter, label, map_coordinates
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -38,7 +38,8 @@ def axis():
     def grow(start, sign):
         out, step, p = [], EDGE_STEP, start
         while abs(p - start) < FAR + OVERLAP:
-            step *= 1.25
+            # Fine enough out to 7 km for the coast to read, then coarser to the horizon.
+            step = min(step * 1.12, 80.0) if abs(p - start) < 7000.0 else step * 1.15
             p += sign * step
             out.append(p)
         return out
@@ -78,12 +79,32 @@ def ring():
 
     land_edge = edge_s > 1.5
     grow = smoothstep(0.0, 2500.0, d)
-    hills = UPLAND + 38.0 * broad + 6.0 * fine / max(fine.std(), 1e-6)
-    z = np.where(land_edge, base + (hills - base) * grow, np.minimum(base, -4.0) - 0.004 * d)
-    # South of the map is open Atlantic: headlands that run off the south edge drop into the sea.
-    south = X < -H
-    z = np.where(south & land_edge, base - (base + 12.0) * smoothstep(0.0, 260.0, d), z)
-    z = np.where(south & ~land_edge, np.minimum(z, -8.0), z)
+    fine_n = fine / max(fine.std(), 1e-6)
+    hills = UPLAND + 38.0 * broad + 6.0 * fine_n
+    land = base + (hills - base) * grow
+    sea = np.minimum(base, -4.0) - 0.004 * d
+    # Land or sea past the map starts from the edge's own profile, then broad noise bends the coast
+    # as it goes out, so no coastline runs ruler-straight to the horizon. South of the map is open
+    # Atlantic, so headlands that run off the south edge fall away within a few hundred metres.
+    # Warp where each point reads the edge in proportion to its distance, so a coastline that meets
+    # the map edge turns and wanders as it leaves instead of extruding straight outwards.
+    warp = 1.0 * d
+    shore = map_coordinates(noise, [nv, nu], order=3, mode="reflect")   # an independent field
+    wx = np.clip(X + warp * (shore + 0.4 * fine_n), -H, H)
+    wy = np.clip(Y + warp * (broad - 0.4 * fine_n), -H, H)
+    edge_w = map_coordinates(hs, [wy + H, wx + H], order=1, mode="nearest")
+    score = edge_w - 1.5 + 60.0 * smoothstep(200.0, 3000.0, d) * (broad + 0.6 * fine_n)
+    score -= 0.6 * np.maximum(0.0, -X - H + 500.0 * shore)
+    # The land comes down to the water over ~150 m, a steep coast rather than a sheer wall.
+    # Only sea joined to the open water in the south stays sea; inland hollows would show the ocean
+    # sheet as flat lakes, so they stay land.
+    wet, _ = label(score <= 0.0)
+    open_sea = np.setdiff1d(np.unique(wet[0, :]), [0])
+    near_sea = binary_dilation(np.isin(wet, open_sea), iterations=4)
+    score = np.where(near_sea, score, np.maximum(score, 22.0))
+    z = sea + (land - sea) * smoothstep(0.0, 22.0, score)
+    # Right at the seam keep the edge's own land/sea split, so the ring meets the landscape cleanly.
+    z = np.where(land_edge, land, sea) * np.exp(-d / 100.0) + z * (1.0 - np.exp(-d / 100.0))
     # Hug the landscape at the seam and fade the far rim down behind the haze.
     z = np.where(d < 1.0, edge - SINK, z)
     z -= 40.0 * smoothstep(0.6 * FAR, FAR, d)
