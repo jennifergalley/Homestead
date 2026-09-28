@@ -83,6 +83,12 @@ next five sessions.
 
 The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 
+- **Waiting means ending your turn** (Jenny, all sessions). Never sleep, poll or loop in a shell while waiting (for an editor slot, the UBT queue, a `[ready]`
+  or a perf window): a blocking wait keeps your turn open, so queued `send_session_message`s never
+  arrive. Schedule a wake-up with `save_session_automation` (`interval: "once"` with a `run_at` a few
+  minutes ahead, or `"minutes"` with `every_minutes`), say in its prompt what to check, end your turn,
+  and clear the automation when it's no longer needed. Waiting on a build or command you started
+  yourself is fine through the tool's own completion notification (async shell / `initial_wait`).
 - **At most 2 Unreal processes on the machine** in total: editors, packaged games and commandlets
   all count. `Start-EditorMcp.ps1` refuses a third; check other launches with
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*`. Each editor commits 15-17 GB, and three

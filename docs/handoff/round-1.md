@@ -148,6 +148,10 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Decisions during the round
 
+- **Waiting means ending your turn** (Jenny, 2026-09-28, all sessions): no sleep/poll loops while waiting
+  for a slot, the UBT queue, a `[ready]` or a perf window. Schedule a wake-up with
+  `save_session_automation`, end the turn, and clear it afterwards (`docs\handoff\README.md`). The
+  orchestrator checks in every 30 minutes the same way.
 - **Perf measurements get the machine to themselves** (Jenny, 2026-09-28): one Unreal process, no
   builds. Claim it with `Scripts\Start-PerfWindow.ps1` and release it with `Stop-PerfWindow.ps1`; other
   worktrees' `Start-EditorMcp.ps1` waits while the lock is fresh.

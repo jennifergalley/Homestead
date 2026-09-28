@@ -84,7 +84,7 @@ $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRo
 . (Join-Path $PSScriptRoot 'PerfLock.ps1')
 $perfLock = Get-PerfLock
 if ($perfLock -and -not $perfLock.stale -and $perfLock.worktree -ne (Split-Path $root -Leaf) -and -not $Force) {
-    throw "Perf window held by $($perfLock.worktree) since $($perfLock.startedUtc) ($($perfLock.ageMinutes) min; '$($perfLock.purpose)'). Launching an editor would skew its measurement. Wait for Stop-PerfWindow.ps1 or $PerfLockStaleMinutes min, or pass -Force."
+    throw "Perf window held by $($perfLock.worktree) since $($perfLock.startedUtc) ($($perfLock.ageMinutes) min; '$($perfLock.purpose)'). Launching an editor would skew its measurement. Schedule a wake-up with save_session_automation and end your turn (don't loop); the lock goes stale after $PerfLockStaleMinutes min. -Force overrides."
 }
 
 # Machine rule: at most 2 Unreal processes in total (editors, packaged games, commandlets). Each editor
@@ -97,7 +97,7 @@ if ($unreal.Count -ge 2 -and -not $Force) {
         $where = if ($_.CommandLine -match 'copilot-worktrees\\SurvivalGame\\([^\\"]+)') { $Matches[1] } elseif ($_.ExecutablePath -match 'HomesteadMVP') { 'HomesteadMVP' } else { '?' }
         "  PID $($_.ProcessId) $($_.Name) $([int]($_.WorkingSetSize / 1MB)) MB since $($_.CreationDate.ToString('HH:mm')) ($where)"
     }) -join "`n"
-    throw "$($unreal.Count) Unreal processes are already running (the machine limit is 2):`n$list`nWait for one to finish, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
+    throw "$($unreal.Count) Unreal processes are already running (the machine limit is 2):`n$list`nDon't retry in a loop: schedule a wake-up with save_session_automation (about 5 min) and end your turn, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
 }
 
 # Belt and braces for the -ini: Live Coding opt-out below: also write it into this worktree's saved

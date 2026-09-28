@@ -23,6 +23,14 @@ outcomes, not diaries. Fix or remove advice that proves wrong instead of adding 
 Several agent sessions (one worktree each, under `E:\Repos\copilot-worktrees\SurvivalGame\`)
 build, run editors and package on one PC with one RTX 5080 at the same time.
 
+- **Waiting means ending your turn** (Jenny, all sessions). Never sleep, poll or loop in a shell while waiting (for an editor slot, the UBT queue, a `[ready]`
+  or a perf window): a blocking wait keeps your turn open, so queued `send_session_message`s never
+  arrive. Schedule a wake-up with `save_session_automation` (`interval: "once"` with a `run_at` a few
+  minutes ahead, or `"minutes"` with `every_minutes`), say in its prompt what to check, end your turn,
+  and clear the automation when it's no longer needed. Waiting on a build or command you started
+  yourself is fine through the tool's own completion notification (async shell / `initial_wait`).
+  For a full editor slot: check `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*` once; if 2 are
+  running, schedule a wake-up about 5 minutes out and end the turn. Don't retry `Start-EditorMcp.ps1` in a loop.
 - **Only the integration session packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
   BuildCookRun`) and packaged-game tests run only in the integration session's worktree (registry in
   `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
@@ -111,7 +119,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 ```powershell
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
-Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 2? (Start-EditorMcp checks too)
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # 2 running? save_session_automation ~5 min out and end your turn; never loop
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
