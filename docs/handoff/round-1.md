@@ -79,6 +79,10 @@ integration session merges and packages.
 
 **Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
 the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+**Append only:** placements added with `grow()`/`along()` in `HomesteadEstate.cpp` take sequential ids
+(`next++`), so inserting a line mid-run renumbers every later placement, and saves then clear the
+wrong nodes. Moving or removing placements needs `table.bakeVersion` raised (the orchestrator's call,
+like the save version).
 
 | Placement ids | Owner |
 | --- | --- |
@@ -128,6 +132,10 @@ The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by
   If your branch adds anything to the save format, tell the orchestrator before your `[ready]`. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
+  **Appending a `Homestead::Item` breaks same-version saves:** `WriteStock` writes every stock
+  positionally with no count, so a new item widens the line and existing saves read as "corrupt".
+  Until `openspec/changes/harden-save-item-stocks` lands, tell the orchestrator before appending an
+  item (also in the architecture agent's `homestead-add-item-or-interactable` skill).
 - `SHomesteadMenu` edits are serialized through the orchestrator.
 - **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
   game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
