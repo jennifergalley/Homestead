@@ -88,7 +88,7 @@ py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/S
 # ...work, StartPIE, hk/st/hshot...
 py "unreal.SystemLibrary.quit_editor()"                         # before building, rebasing, or when done
 & 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # compile-check
-.\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 10-16
+.\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 16-19 min
 git status --short                                               # commit only your files, rebase, push
 # then send_session_message the orchestrator: branch + SHA, what changed, what you verified, what to try.
 # Don't package: only the orchestrator runs Build-Game.ps1 -Package.
@@ -110,12 +110,15 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
 | MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
 | Modal "Restore Packages" at startup blocks MCP; `Start-EditorMcp.ps1` times out with "MCP did not answer"; Escape doesn't dismiss it | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | `Start-EditorMcp.ps1` now deletes a stale restore file before launching (when this worktree has no editor running). If a dialog is already up: kill that editor, delete `Saved\Autosaves`, relaunch. Quit with `quit_editor()` next time. |
+| Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`. |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
-| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. That call can leave about half the nodes behind (71 → 35), which gives "only one Single Layer Water Material node" / missing-input errors and `get_statistics` vs/ps 0. Loop until `get_num_material_expressions(m) == 0`. |
+| A mesh draws the Default Material only in the packaged build (for example the ruin kit, scenery granite) | The base material lacks a usage flag for how the mesh is drawn; the editor log says `missing usage flag InstancedStaticMeshes/Nanite! Default Material will be used in game` | Set the usage flag on the base material (`bUsedWithInstancedStaticMeshes`, `bUsedWithNanite`), not the instance. `M_PropTextured` now has both, and `Scripts\Blender\import_props.py` keeps them on every bootstrap; `M_Fern02` and `M_Shrub04` got ISM. Search the editor log for that line before packaging new materials. |
+| Landscape grass (`LandscapeGrassOutput` + `LandscapeGrassType`) produces empty `GrassInstancedStaticMeshComponent`s in PIE on the Estate | Unknown (UE 5.8); also with `grass.GrassMap.UseRuntimeGeneration=1`, which needs an editor restart because the value is cached per shader platform | Gated off. Don't spend time on it without a new idea; scatter grass another way. |
+| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset and clear its graph. `MaterialEditingLibrary.delete_all_material_expressions` alone leaves nodes behind on rebuilds (71 → 35; a second `LandscapeGrassOutput` survived). Symptoms: "only one Single Layer Water Material node", "The material can contain only one Landscape Grass node", missing-input errors, `get_statistics` vs/ps 0, and a silent fallback to the default grid. After `delete_all`, loop over `get_material_expressions` calling `delete_material_expression`, then assert `get_num_material_expressions(m) == 0` (`Scripts\Terrain\build_landscape_material.py` does this). |
 | `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
 | A `VolumeTexture` built from Python has the wrong tile size, or property errors | Setting `source2d_texture` resets the tile size to a default (102 for a 1024² atlas); `VolumeTexture` has a single address mode (no `address_x`) and no `blueprint_get_size_x` | Set `source2d_texture` first, then `source2d_tile_size_x/y`. In a Custom node sample it with `Texture3DSample(Vol, VolSampler, uvw)`. |
 | An Estate actor edited from Python looks unchanged in PIE | Spatially loaded World Partition actors stream into PIE from their **saved** external-actor packages (non-spatially-loaded ones such as `EstateSea` show edits live), and Python setters such as `AHomesteadWaterRibbon.set_course()` don't dirty the package | Call `actor.modify()` before editing, then `unreal.EditorLoadingAndSavingUtils.save_packages([actor.get_outermost()], False)` before PIE. |
@@ -145,11 +148,17 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `LogIoStore: Error: Failed to launch ZenServer`, `Failed to add sponsor process IDs to launched ZenServer`, or `Failed to read oplog from Zen at [::1]:8558 ... HTTP NotFound` while staging (see `Saved\Logs\UnrealPak.log`) | The cook used the machine-shared Zen server (port 8558), and another worktree's zenserver held the port, restarted or was stopped mid-run | `Build-Game.ps1` now cooks with `-AdditionalCookerOptions=-SkipZenStore` and deletes a stale `Saved\Cooked\Windows\ue.projectstore` first (staging reads Zen whenever that marker exists). Never stop `zenserver.exe`: other worktrees may be cooking through it. |
 | UAT log shows another worktree's build | `%APPDATA%\Unreal Engine\AutomationTool\Logs\E+Program+Files+UE_5.8\` is shared and overwritten | Redirect `Build-Game.ps1` output to a log in your worktree (`*> Build\Logs\package.log`). |
 | `git pull`/`rebase`: `unable to unlink ... Invalid argument` on `.uasset` | Your editor holds the file | Close the editor, then `git status` and finish the rebase. |
+| `git merge`/`rebase`: `Your local changes to the following files would be overwritten` on `.uasset`s you didn't mean to change | The editor or a bootstrap re-saved them incidentally | Close the editor, then `git checkout -- Content` (or the specific paths) for the incidental files, and merge. |
 | PowerShell ``.Replace("a`nb", ...)`` silently changes nothing | Working copies are CRLF (`core.autocrlf=true`); agent-written files may be LF | Detect the newline first (``$t.Contains("`r`n")``), or use the edit tool. |
 | ctest reports `HomesteadSimulationTests` failed or timed out | The Debug build takes about 10 min | `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min). Redirect a single test exe's output to a file; stdout is buffered. |
 | `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 | That World Partition cell isn't loaded in the editor | Load the region first. In game, `GroundHeight()` uses the runtime heightfield everywhere. |
 | `Test-Game.ps1` runs only the default smoke test, or errors "Generated resume requires..." | Switches passed as an array or as empty strings | Use a hashtable splat: `$p=@{Packaged=$true; Hotbar=$true}; .\Scripts\Test-Game.ps1 @p`. |
 | `tap_key` letters type nothing into a text box (for example the Names card); BackSpace works | `HomesteadPlayTools` sends key events through `InputKey`, which produces no character events for Slate text boxes | Use real Win32 keys: bring the editor's main window forward (the Alt `keybd_event` trick, as in `click`), then send `keybd_event` VK codes, with Shift for capitals. |
+| Slate Inspector `Snapshot` returns nothing useful, non-JSON, or refs that don't match last run | It needs `{"ref":"","maxDepth":60}` and a prior `Observe`; output is occasionally malformed; widget refs (`b30`, `b97`...) change between runs | Observe first, retry on non-JSON, and look refs up by name each run rather than hard-coding them. |
+| Clicking a button in a custom Slate panel breaks Tab or typing (Tab runs Slate navigation, keys go to the old row) | `SButton`s take keyboard focus on click | Give such buttons `.IsFocusable(false)`. |
+| UI is double-scaled at 4K but fine in PIE | The engine DPI curve (`bAllowHighDPIInGameMode`) already scales viewport widgets, so an extra height/1080 `SScaleBox` doubles them | Don't add your own resolution scaling. Check real resolutions in a standalone window (section 8), because PIE at editor size hides it. |
+| A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
+| A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
 | A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
@@ -236,9 +245,11 @@ clashes between parallel callers.
 | `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
 
-Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
-`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. PowerShell names are case-insensitive, so
-a local `$s`, `$e`, `$l` or `$h` overwrites these; the helpers themselves don't depend on them. Keep session-specific helpers (probes,
+Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,
+`$McpSlate` (SlateInspector), `$McpPlay` (HomesteadPlayTools), `$McpPython` (HomesteadEditorPython).
+The short aliases `$E`, `$S`, `$L`, `$SL`, `$H`, `$PY` used below are set only when you haven't
+already defined those names. PowerShell names are case-insensitive, and dot-sourcing never overwrites
+your own `$s` or `$e`; if you have one, use the `$Mcp*` names instead. Keep session-specific helpers (probes,
 callbacks) in your own files and load them from `py` with `sys.path.insert`.
 
 ## 4. Play the game
@@ -259,7 +270,8 @@ hk release_all; mcp $E StopPIE
   for a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
   until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
   captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
-  failed save. **Packaged Estate runs resume too:** after the first run the build loads its own
+  failed save. Text in a `.sav` (such as the save label) is UTF-16, so search it with
+  `[Text.Encoding]::Unicode`, not as ASCII. **Packaged Estate runs resume too:** after the first run the build loads its own
   estate save (inside the package's `SurvivalGame\Saved\SaveGames`), so the Appearance → Names setup
   only shows on the first run. Move that save aside to see it again. On a resumed game, Enter by the
   hearth opens Cook (the Craft page). Code written for the woodland can still assume woodland heights (estate ground is
@@ -304,6 +316,8 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - **Focus is the nearest interactable within 2.8 m, regardless of facing** (`UpdateFocus`). To target
   a node, get closer to it than to anything else: `walk_to` with `stop_distance_cm` about 45, then
   confirm `nearbyResources[].focused` on your target before pressing the action.
+- `walk_to` reports `arrived` about 150 cm short of the target and stops in doorways; check
+  `location` and walk again, or finish with a short `set_sticks`.
 - Trees block movement, so `walk_to` a tree usually ends `stuck` at the trunk. That's fine if the
   tree is `focused`.
 - Depleted nodes stay focusable with no actions (`cleared: false`, `ready: false`) and can steal focus.
@@ -408,8 +422,8 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   (`Eat 1`, `Drop 1`, `Move to chest N`, ...). X splits in half, S sorts. RT cycles content and
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
 - **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
-  doesn't). The details list requirements. Crafting is **hold A**
-  (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
+  doesn't). The details list requirements. Crafting is **press and hold**; a tap does nothing
+  (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard).
 - **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
   Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
   *last* page (often Inventory), so close it fully (loop Escape until `bookOpen` and `planning`
@@ -714,6 +728,13 @@ Extend it there when play needs a capability; prefer real input over state edits
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
   processes from that folder first (for Jenny's builds, see sections 0 and 7).
+- **UI at real resolutions and DPI (standalone window, not PIE):** launch
+  `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
+  -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720), wait for `MUSIC_TRACK started` in that log
+  plus about 20 s, then dot-source `Scripts\GameWindow.ps1`: `Find-GameWindow -ProcessId <pid>`,
+  `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
+  and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 3-process limit; close it
+  by PID. This isn't packaging, so lanes may run it.
 - **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check

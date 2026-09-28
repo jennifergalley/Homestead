@@ -14,7 +14,7 @@ page current; report changes to it rather than editing lane rows yourself.
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
 | Ruined manor and arrival | `f8b77021-941d-47e8-8bbd-1e93a632e5e8` | `jennifergalley-ruined-manor-and-arrival` | `jennifergalley-studious-doodle` | 8768 | `add-ruined-manor-and-arrival` |
 | Estate boundary and minimap | `6e131c6a-a333-4f65-a10b-a634a2f04117` | `jennifergalley-estate-boundary-and-minimap` | `jennifergalley-automatic-spork` | 8766 | `add-estate-boundary-map-and-minimap` |
-| Estate ocean and water | `89914e30-d8b6-4605-8635-5735406c97a2` | `jennifergalley-estate-ocean-and-water` | `jennifergalley-silver-guide` | ask the lane | ask the orchestrator |
+| Estate ocean and water | `89914e30-d8b6-4605-8635-5735406c97a2` | `jennifergalley-estate-ocean-and-water` | `jennifergalley-silver-guide` | 8771 | `author-fixed-cornish-estate-map` (task 2.3: ocean, river, pail refill) |
 | MVP survival polish (separate product line; never merge with `main`) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | `mvp-survival` (session branch `jennifergalley-mvp-survival-polish`) | `jennifergalley-probable-barnacle` | 8770 | none |
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
@@ -43,6 +43,12 @@ desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
   aren't loaded.
 - Blender props face -Y in their recipes and import facing +Y, so C++ placement applies
   `LocalYaw - 90` (see the store's `Prop()`).
+- Estate stand-in visuals (`AHomesteadWorld`, `HomesteadWorld.cpp` ~3140-3185): `SalvagePile` shows
+  granite cobbles until the manor lane dresses the piles, and the spring flowers (`Primroses`,
+  `Bluebells`, `WildDaffodils`, `WildGarlic`) show meadow-herb flowers in a grass tuft until each is
+  authored.
+- The standing room's door opens **west** into the ruin's south range. The comment at
+  `HomesteadEstate.cpp` ~99 that says it "faces east onto the forecourt" is stale (clearing lane to fix).
 - Fixed-estate resource persistence: cleared or edited placements are saved as `ResourceEdit`
   entries with chunk (0, 0) and `localId` = the placement id. Placement id ranges per lane are in
   `Simulation\HomesteadEstate.h` (world 500000+, overgrowth 510000+, ...).
@@ -102,7 +108,7 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Tooling requests (unassigned)
 
-- `HomesteadPlayTools` additions asked for by the clearing lane:
+- The `HomesteadPlayTools` additions asked for by the clearing lane:
   - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and
     slot the hotbar in one call.
   - `swing` (or an action tool generally): press the action and return the resulting toast or

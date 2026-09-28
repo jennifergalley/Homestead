@@ -34,7 +34,7 @@ BEAUTY = {"pose": (90, 0, 0), "focus": (0.3, 0.0, -1.05)}
 SNATH_TOP = 0.62
 SNATH_BOTTOM = -0.98
 # The angle between blade and snath is set ("hung") so the blade lies flat at the mowing lean.
-LAY_DEGREES = 30.0
+LAY_DEGREES = 45.0
 
 
 def smoothstep(a, b, x):

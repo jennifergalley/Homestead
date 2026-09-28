@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "EstateAxe",
+  "description": "Salvaged English-pattern axe: rusted forged iron head on a new ash haft (original). Pivot = lower-hand grip 7 cm above the butt; head +Z, edge -Y.",
+  "collision": "none",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/estate_axe.py",
+  "source_sha256": "8bad0108afebc14efb5ab8e4616523e34a446d6c207e0ed623f8fdc40ac25678",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_EstateAxe": {
+      "vertices": 2888,
+      "triangles": 5764,
+      "size_cm": [
+        4.44,
+        17.32,
+        58.75
+      ],
+      "materials": [
+        {
+          "name": "M_EstateAxe",
+          "textures": {
+            "basecolor": "T_EstateAxe_basecolor.png",
+            "roughness": "T_EstateAxe_roughness.png",
+            "metallic": "T_EstateAxe_metallic.png",
+            "normal": "T_EstateAxe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_EstateAxe_basecolor.png",
+          "roughness": "T_EstateAxe_roughness.png",
+          "normal": "T_EstateAxe_normal.png",
+          "metallic": "T_EstateAxe_metallic.png",
+          "ao": "T_EstateAxe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          28
+        ],
+        "focus": [
+          0.0,
+          -0.07,
+          0.45
+        ]
+      },
+      "fbx": "SM_EstateAxe.fbx",
+      "sha256": "34918befe30a3b1339652f267b08c61bb184317143907353a7eac26a4204cd96",
+      "preview": "preview_SM_EstateAxe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_EstateAxe_hero.png",
+          "detail": "beauty_SM_EstateAxe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "attach": {
+    "units": "cm, from the mesh pivot (lower-hand grip centre), mesh space",
+    "pivot": "lower (dominant) hand grip centre, 7 cm above the butt",
+    "handle_axis": "+Z (head end)",
+    "edge_direction": "-Y",
+    "upper_hand_choke": [
+      0.0,
+      0.0,
+      18.0
+    ],
+    "edge_centre": [
+      0.0,
+      -13.9,
+      43.4
+    ],
+    "butt_end": [
+      0.0,
+      0.0,
+      -7.000000000000001
+    ],
+    "haft_top": [
+      0.0,
+      0.0,
+      51.5
+    ]
+  },
+  "textures": {
+    "T_EstateAxe_basecolor.png": "32674a5c5e7e5666b10301f0435a65b849166eb220dd9a5013e39b41cc8d146a",
+    "T_EstateAxe_roughness.png": "13bd14b1c13bbad75fe65016f8877d10533a1ed3a87bd003c6e3b493140984b7",
+    "T_EstateAxe_metallic.png": "38b59085a2beca75598a11f55e787a5caec3289ef683448075e7c406ee0703c0",
+    "T_EstateAxe_normal.png": "1616e863aa32e8ac10143d9a09bb3f8ff23d92e9dd9580cbc5e81d2345554ca9"
+  }
+}

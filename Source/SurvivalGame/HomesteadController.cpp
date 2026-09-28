@@ -2125,7 +2125,10 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             for (const auto& Node : State().resources)
                 if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind))
                 {
-                    Notify(Sim.CheckOvergrowth(FocusId, Tool, Position));
+                    const auto Check = Sim.CheckOvergrowth(FocusId, Tool, Position);
+                    // This tool handles it, but it's past the swing's reach (the scythe's arc is short).
+                    if (Check) Notify(Tool == Homestead::Item::Scythe ? TEXT("Step closer to mow.") : TEXT("Step closer."), true);
+                    else Notify(Check);
                     return;
                 }
         Notify(Tool == Homestead::Item::Scythe ? TEXT("Face tall grass or weeds to mow.")

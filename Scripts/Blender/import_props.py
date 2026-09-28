@@ -79,10 +79,13 @@ def repair_textured_parent(material):
         if wanted and node.get_editor_property("texture") != wanted:
             node.set_editor_property("texture", wanted)
             changed = True
-    if not material.get_editor_property("used_with_skeletal_mesh"):
-        # Worn garments (Scripts\Characters\import_primitive_outfit.py) share this parent.
-        material.set_editor_property("used_with_skeletal_mesh", True)
-        changed = True
+    # Worn garments (Scripts\Characters\import_primitive_outfit.py) share this parent, the Estate's
+    # scenery draws props as instanced meshes, and the ruin kit is Nanite. A cooked build falls back
+    # to the default material for any usage that isn't flagged here.
+    for usage in ("used_with_skeletal_mesh", "used_with_instanced_static_meshes", "used_with_nanite"):
+        if not material.get_editor_property(usage):
+            material.set_editor_property(usage, True)
+            changed = True
     if changed:
         EDIT.recompile_material(material)
         save(material)
@@ -98,7 +101,8 @@ def textured_parent():
     material = TOOLS.create_asset(name, folder, unreal.Material, unreal.MaterialFactoryNew())
     if not material:
         raise RuntimeError("Could not create " + TEXTURED_PARENT)
-    material.set_editor_property("used_with_skeletal_mesh", True)
+    for usage in ("used_with_skeletal_mesh", "used_with_instanced_static_meshes", "used_with_nanite"):
+        material.set_editor_property(usage, True)
     masks = unreal.MaterialSamplerType.SAMPLERTYPE_MASKS
     samplers = [
         ("BaseColorTexture", WHITE, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR, "RGB",

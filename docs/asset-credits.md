@@ -86,6 +86,12 @@ is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it use
 RuinFallenTimbers (`Scripts\Blender\Recipes\ruin_fallen_timbers.py`) is project-authored procedural charred/weathered oak roof-timber debris with adzed beam geometry, split fibre, alligator-char relief, an iron spike and procedural materials.
 RuinSlateScatter (`Scripts\Blender\Recipes\ruin_slate_scatter.py`) is project-authored procedural Delabole-style slate-roof debris with thick split-cleavage slate geometry, nail holes, subdued soil/moss pockets and procedural materials.
 RuinIvy (`Scripts\Blender\Recipes\ruin_ivy.py`) is project-authored procedural common-ivy wall mat geometry with woody clinging stems, rootlets, alpha-free lobed leaves on a shared UV atlas and procedural plant materials.
+The Estate ocean (`Content\SurvivalGame\Estate\Water`: `M_EstateOcean`, `MI_EstateOcean`,
+`SM_EstateOcean`, `T_EstateOceanShore`, `T_OceanRipples_N`, `T_OceanFoam` and `VT_OceanWaves` with its atlas) is project-authored.
+`Scripts\Terrain\bake_ocean.py` generates the mesh and all three textures in numpy: the shore data
+from the estate heightfield, the capillary-ripple normals from an FFT of a synthetic wave spectrum,
+the foam lace from Worley and fBm noise, and the looping wind-sea volume from an FFT of a Phillips spectrum. The waves themselves are analytic HLSL in the
+material. No scanned, photographed or downloaded texture or mesh is used.
 
 ## Fonts
 
@@ -274,7 +280,8 @@ materials with no scanned or downloaded geometry or textures: the Billhook (`Scr
 the spring BrambleOvergrowth set (thin bramble, thicket and bank, `Scripts\Blender\Recipes\bramble_overgrowth.py`, built
 with `blackberry_bramble.py`'s plant and atlas with its fruiting switched off), the EstateTimber set (small, large
 and ancient stumps, a fallen log, a giant log and a fallen bough, `Scripts\Blender\Recipes\estate_timber.py`), the
-Pickaxe (`Scripts\Blender\Recipes\pickaxe.py`) and the Scythe (`Scripts\Blender\Recipes\scythe.py`). Their review renders use the same CC0
+Pickaxe (`Scripts\Blender\Recipes\pickaxe.py`), the Scythe (`Scripts\Blender\Recipes\scythe.py`), the restyled
+EstateAxe (`Scripts\Blender\Recipes\estate_axe.py`) and the swan-neck DrawHoe (`Scripts\Blender\Recipes\draw_hoe.py`). Their review renders use the same CC0
 Kloofendal HDRI, which ships with no asset.
 
 ## Estate terrain and ground textures

@@ -93,7 +93,11 @@ UBT mutex (`Result: Failed (ConflictingInstance)`, UAT exit 10) and the shared Z
 A lane delivers an increment like this:
 
 1. Implement it, and verify it in your own editor (MCP/PIE).
-2. Run the native tests: `Scripts\Test-Native.ps1 -Configuration Release`.
+2. Run the native tests: `Scripts\Test-Native.ps1 -Configuration Release`. Rebase onto `main` first
+   and run them again after the rebase. Other lanes' changes can break your tests (a pail added to
+   the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say
+   so in your `[ready]` rather than silently patching the other lane's code; the orchestrator
+   assigns it.
 3. Compile-check the editor module: `Build.bat SurvivalGameEditor Win64 Development
    "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`.
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
@@ -112,6 +116,16 @@ A lane delivers an increment like this:
 The orchestrator merges ready lane work in its worktree, resolves conflicts, runs the native tests,
 packages once, runs the packaged tests, and pushes the integrated result to `main`. Then it tells
 the lanes to rebase and reports to Jenny what she can try.
+
+Orchestrator merge notes:
+
+- All worktrees share one `.git`, so a lane's local branch can be merged without a push. Lanes
+  sometimes rewrite history before pushing (for example ocean `e777db71` became `8a407908`), so
+  always merge the exact SHA named in the latest `[ready]`, not the branch tip you saw earlier.
+- Incidental `.uasset` re-saves block merges ("Your local changes ... would be overwritten"). Close
+  the editor, then `git checkout -- Content` for files you didn't mean to change.
+- Run the integration check with `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min).
+  Debug takes 16-19 min here.
 
 The separate MVP survival line (`mvp-survival`) packages its own build to
 `E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
