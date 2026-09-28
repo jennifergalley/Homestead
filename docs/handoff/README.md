@@ -26,6 +26,23 @@ agent keeps both current.
 If the round page lists no docs agent, or the one listed is archived, ask the orchestrator to spawn
 one (`send_session_message`). Until one exists, record findings yourself in the canonical doc.
 
+## Waiting: end your turn, don't loop
+
+Jenny's standing rule for every session. A session that's waiting (for an editor slot, the UBT queue,
+another lane's `[ready]`, an `[integrated]`, or a perf window) must never sleep, poll or loop in a shell:
+a blocking wait keeps its turn open, so queued `send_session_message`s never arrive. Instead:
+
+1. Schedule a wake-up with `save_session_automation`: `interval: "once"` with a `run_at` a few
+   minutes ahead, or `interval: "minutes"` with `every_minutes`. Its prompt says what to check.
+2. End the turn, so the session goes idle and messages can reach it.
+3. Clear the automation (`clear: true`) when it's no longer needed.
+
+Waiting on a build or command the session itself started is fine through the tool's own completion
+notification (async shells / `initial_wait`); a sleep loop isn't. For an editor slot, check
+`Get-Process UnrealEditor*` once, and if 2 Unreal processes are running, schedule a wake-up about 5
+minutes out and end the turn. The orchestrator uses the same pattern: it checks in every 30 minutes
+through its own session automation.
+
 ## Reaching a busy session fast: the mailbox
 
 `send_session_message` is delivered only when the target's turn ends. That can be hours for an
