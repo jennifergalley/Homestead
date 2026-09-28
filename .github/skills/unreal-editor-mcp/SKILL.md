@@ -352,6 +352,35 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   non-final swing toasts "N more swings.", the last one clears and toasts the yield. Walking more
   than 1.5 m away resets the count. `HomesteadGive RustedBillhookHead 1` + two Branches lets the
   Craft page's "Haft a billhook" run anywhere.
+- **Estate tool route (new game, verified in PIE on main 17a64854):**
+  - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
+    `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
+    the standing room at about (-25750, -63800). To leave on foot, `walk_to` (-25750, -64300) and
+    then (-25750, -64900).
+  - Salvage piles: 520001 (-25600, -64350), 520002 (-25450, -65250), 520004 (-23950, -65150),
+    520003 (-24600, -66200) and 520005 (-26100, -66100). Search each with `E`/A.
+    - Each search gives the next missing head plus 1 scrap iron, in the order billhook, axe,
+      scythe, pickaxe, hoe. The order follows your search order, not the pile.
+    - `walk_to` steers straight and gets stuck on the ruin walls around 520003 and 520005. For
+      those, `tp` to the pile ±90 cm and check that `focusTitle` is "Salvage pile".
+  - Branch piles (each haft takes 2 Branch; a pile gives about 5): 500001 (-26650, -63400), 500002 (-26950, -64500)
+    and 500003 (-27350, -62900).
+  - Craft (`C`) tiles, left to right: Haft an axe, hoe, scythe, billhook, pickaxe, then the two root
+    dishes and Split firewood. Hold `Gamepad_FaceButton_Bottom` (or `Enter`) about 3 s to haft.
+  - Hafted tools auto-slot to the hotbar: `One` billhook, `Two` axe, `Three` scythe, `Four`
+    pickaxe, `Five` hoe (`hotbarSlot` 0-4).
+  - Worn-tier targets near the manor:
+    - thin bramble 510001 (-26050, -63000);
+    - forecourt tall grass and weeds 510008-510037, around (-26450, -62100);
+    - rubble 510040 (-26550, -65800) and a small rock 510043 (-25150, -66600);
+    - a two-swing sapling 510076 (-30592, -61863);
+    - a three-swing small stump 510086 (-30981, -63104);
+    - a fallen bough 510062 (-24272, -61097).
+  - Iron-tier prompts: thicket 510087 (-28972, -64048), boulder 510095 (-23350, -67000), large
+    stump 510091 (-33451, -62959) and fallen log 510092 (-33729, -59833).
+  - Approach by teleporting 260 cm short of the target, then `walk_to` it with a 10 cm stop.
+    Tapping during the axe's ~3 s recovery is dropped, so wait about 3.5 s between axe swings.
+  - The scythe arc reaches only about 1.6 m ahead ("Step closer to mow.").
 - An action that silently does nothing usually left a reason in `toast` (`toastIsError: true`),
   for example "Not enough pack space." when a felled tree's wood won't fit. Read it before
   debugging the animation.
