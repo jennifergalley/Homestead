@@ -83,6 +83,11 @@ next five sessions.
 
 The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 
+- **Session names** (Jenny, standing preference). Every session keeps its app name as
+  "<one or two words> Agent", describing its current work ("Clearing Agent", "Integration Agent",
+  "Lamp Agent"). Rename yourself with `rename_session` (`force: true`) when you start and whenever your
+  main task changes. The orchestrator names new sessions this way when it creates them. If the tool
+  refuses because Jenny renamed the session herself, keep her name.
 - **Waiting means ending your turn** (Jenny, all sessions). Never sleep, poll or loop in a shell while waiting (for an editor slot, the UBT queue, a `[ready]`
   or a perf window): a blocking wait keeps your turn open, so queued `send_session_message`s never
   arrive. Schedule a wake-up with `save_session_automation` (`interval: "once"` with a `run_at` a few

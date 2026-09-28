@@ -23,6 +23,11 @@ agent keeps both current.
 | **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
 
+**Session names:** every session keeps its app name as "<one or two words> Agent", describing its
+current work ("Clearing Agent", "Integration Agent", "Docs Agent"), and renames itself with
+`rename_session` (`force: true`) when it starts and whenever its main task changes. The orchestrator
+names sessions this way when it creates them. The round page maps names to session IDs and work.
+
 If the round page lists no docs agent, or the one listed is archived, ask the orchestrator to spawn
 one (`send_session_message`). Until one exists, record findings yourself in the canonical doc.
 

@@ -20,6 +20,22 @@ page current; report changes to it rather than editing lane rows yourself.
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
 
+**Current app names** (each session keeps "<one or two words> Agent" and renames itself when its main
+task changes; `docs\handoff\README.md`):
+
+| Name | Session | Work |
+| --- | --- | --- |
+| Orchestrator Agent | `92eac339` | coordinates the lanes |
+| Integration Agent | `e251051b` | merges and builds; the only session that packages |
+| Clearing Agent | `ce241dd6` | clearing |
+| UI Agent, then Lamp Agent | `5cf73757` | UI, then the oil lamp |
+| Farm Agent | `f8b77021` | the derelict farm |
+| Ground Agent, then Sleep Agent | `89914e30` | ground, then the sleep change |
+| Trees Agent | `65a2408b` | trees |
+| Woodland Agent | `fd682909` | the MVP woodland biome |
+| Build Speed Agent | `6e131c6a` | build speed |
+| Documentation Agent | `a9f10974` (project session `d99bb15c`) | docs; named by Jenny, so kept |
+
 Session IDs are the app's project-session IDs: use them with `send_session_message`. The worktree
 folder name is the session's **mailbox address** for urgent `mailbox_send` messages
 (`docs\handoff\README.md`).
