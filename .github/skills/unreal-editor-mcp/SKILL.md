@@ -376,7 +376,7 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   - Hafted tools auto-slot to the hotbar: `One` billhook, `Two` axe, `Three` scythe, `Four`
     pickaxe, `Five` hoe (`hotbarSlot` 0-4).
   - Worn-tier targets near the manor:
-    - thin bramble 510001 (-26050, -63000);
+    - thin bramble 510001-510007 across the gap outside the fallen front door, around (-26400, -65450). `EstateManorFrontDoor()` is (-25900, -65450). Walk out from (-25750, -64900) to (-25650, -65450), then south to (-26000, -65450);
     - forecourt tall grass and weeds 510008-510037, around (-26450, -62100);
     - rubble 510040 (-26550, -65800) and a small rock 510043 (-25150, -66600);
     - a two-swing sapling 510076 (-30592, -61863);

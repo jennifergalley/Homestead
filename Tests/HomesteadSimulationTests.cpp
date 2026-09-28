@@ -2862,12 +2862,14 @@ void OvergrowthTableAndPrompts()
     CHECK(std::string(ResourceName(ResourceKind::FallenBranch)) == "Fallen bough");
 
     // Overgrowth sits on the estate outside the ruin's footprint; salvage lies in and around the
-    // ruin, never in the standing room, with one pile a few steps from its door.
+    // ruin, never in the standing room, with one pile a few steps from its door. Thin bramble chokes
+    // the gap outside the fallen front door, and the billhook's pile stays indoors on her side of it.
     const EstateLayout& layout = ProvisionalEstateLayout();
     const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
     const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
     const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
     const Point roomCentre = layout.PointOr(Anchor::StandingRoomOrigin, {});
+    const Point frontDoor = EstateManorFrontDoor(layout);
     int overgrowth = 0, salvage = 0, doorway = 0, teases = 0;
     double nearestSalvage = 1e9;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
@@ -2883,8 +2885,9 @@ void OvergrowthTableAndPrompts()
             CHECK(std::abs(placement.position.x - roomCentre.x) > 300.0 || std::abs(placement.position.y - roomCentre.y) > 300.0);
             nearestSalvage = std::min(nearestSalvage, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
         }
-        doorway += placement.kind == ResourceKind::BrambleThin
-            && std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y) < 1300.0;
+        doorway += placement.kind == ResourceKind::BrambleThin && placement.position.x < frontDoor.x
+            && std::hypot(placement.position.x - frontDoor.x, placement.position.y - frontDoor.y) < 900.0;
+        if (placement.id == 520001) CHECK(PointInPolygon(manor, placement.position));
         teases += info && info->minTier > ToolTier::Worn;
     }
     CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && teases >= 4);

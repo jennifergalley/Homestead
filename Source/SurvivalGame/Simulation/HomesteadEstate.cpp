@@ -71,6 +71,19 @@ const EstateLayout& ProvisionalEstateLayout()
     return Layout;
 }
 
+Point EstateManorFrontDoor(const EstateLayout& layout)
+{
+    const LandmarkPolygon* manor = layout.FindPolygon(Anchor::ManorFootprint);
+    if (!manor || manor->points.empty()) return layout.PointOr(Anchor::StandingRoomSpawn, {});
+    double south = manor->points.front().x, west = manor->points.front().y;
+    for (const Point& corner : manor->points)
+    {
+        south = std::min(south, corner.x);
+        west = std::min(west, corner.y);
+    }
+    return {south, west + 1050.0};
+}
+
 const EstatePlacements& ProvisionalEstatePlacements()
 {
     static const EstatePlacements Placements = []
@@ -97,7 +110,8 @@ const EstatePlacements& ProvisionalEstatePlacements()
         };
 #include "HomesteadEstateWorldPlacements.inc"
         // Overgrowth lane (510000+). Offsets are from the spawn (x north, y east). The standing room's
-        // door opens west into the ruin's south range; the drive climbs north-east toward the gateway and the
+        // door opens west into the ruin's south range, and she leaves the ruin through the fallen front
+        // door on its south front (x = -25900). The drive climbs north-east toward the gateway and the
         // valley falls south toward the cove. Everything stays outside ManorFootprint.
         int next = 510001;
         auto grow = [&](ResourceKind kind, double dx, double dy, int minTier = 0) { add(next++, kind, dx, dy, minTier); };
@@ -113,10 +127,12 @@ const EstatePlacements& ProvisionalEstatePlacements()
         {
             grow(kind, heading.x * distance - heading.y * side, heading.y * distance + heading.x * side, minTier);
         };
-        // Thin bramble chokes the doorway.
-        for (const Point p : {Point{-300, 800}, Point{0, 850}, Point{300, 780}, Point{-150, 1050}, Point{200, 1100},
-                 Point{450, 950}, Point{-450, 1000}})
-            grow(ResourceKind::BrambleThin, p.x, p.y);
+        // Thin bramble chokes the gap outside the fallen front door, 10.5 m east of the footprint's
+        // west end, so she meets it before the open pasture. The billhook's salvage pile is indoors.
+        const Point frontDoor = EstateManorFrontDoor();
+        for (const Point p : {Point{-200, 0}, Point{-250, -230}, Point{-250, 250}, Point{-450, -80}, Point{-450, 180},
+                 Point{-650, -250}, Point{-700, 120}})
+            grow(ResourceKind::BrambleThin, frontDoor.x + p.x - room.x, frontDoor.y + p.y - room.y);
         // The forecourt is a meadow of tall grass with weeds through it.
         for (int row = 0; row < 4; ++row)
             for (int column = 0; column < 6; ++column)
