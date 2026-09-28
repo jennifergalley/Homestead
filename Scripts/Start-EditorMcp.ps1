@@ -156,6 +156,9 @@ $arguments += @(
     # Blender and other sessions write under Assets\ constantly; the "source content changed, import?"
     # toast covers captures. Agents import explicitly (import_props.py), so don't watch for changes.
     '-ini:EditorPerProjectUserSettings:[/Script/UnrealEd.EditorLoadingSavingSettings]:bMonitorContentDirectories=False'
+    # New Estate games in agent PIE start with the default names instead of stopping on the Appearance
+    # and "Who comes home?" steps. `homestead.SkipNewGameSetup 0` in the console brings them back.
+    '-HomesteadSkipNewGameSetup'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 # Several agent editors share one GPU. Building ray-tracing pipelines in all of them at once has

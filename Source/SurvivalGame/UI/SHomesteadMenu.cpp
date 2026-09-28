@@ -16,6 +16,8 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
+#include "Widgets/SLeafWidget.h"
+#include "Rendering/DrawElements.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Images/SImage.h"
 #include "Brushes/SlateColorBrush.h"
@@ -75,6 +77,46 @@ public:
     { return FReply::Unhandled(); }
 private:
     FSimpleDelegate Focused;
+};
+// A recipe square's craft progress: translucent white rising from the bottom with a bright edge,
+// then a white flash as the cycle completes.
+class SHomesteadCraftFill : public SLeafWidget
+{
+public:
+    SLATE_BEGIN_ARGS(SHomesteadCraftFill) {}
+        SLATE_ATTRIBUTE(float, Progress)
+        SLATE_ATTRIBUTE(float, Flash)
+    SLATE_END_ARGS()
+    void Construct(const FArguments& Args) { Progress = Args._Progress; Flash = Args._Flash; }
+    virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D::ZeroVector; }
+    virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&,
+        FSlateWindowElementList& Out, int32 LayerId, const FWidgetStyle& Style, bool) const override
+    {
+        const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+        const FVector2D Size = Geometry.GetLocalSize();
+        const float Fill = FMath::Clamp(Progress.Get(0.0f), 0.0f, 1.0f);
+        const float Bright = FMath::Clamp(Flash.Get(0.0f), 0.0f, 1.0f);
+        const FLinearColor Tint = Style.GetColorAndOpacityTint();
+        if (Fill > 0)
+        {
+            // Ease in so the first moments of a hold already show.
+            const float Height = Size.Y * FMath::InterpEaseOut(0.0f, 1.0f, Fill, 1.6f);
+            FSlateDrawElement::MakeBox(Out, LayerId, Geometry.ToPaintGeometry(FVector2D(Size.X, Height),
+                FSlateLayoutTransform(FVector2D(0, Size.Y - Height))), White, ESlateDrawEffect::None,
+                FLinearColor(1, 1, 1, 0.38f) * Tint);
+            const float Edge = FMath::Min(3.0f, Height);
+            FSlateDrawElement::MakeBox(Out, LayerId + 1, Geometry.ToPaintGeometry(FVector2D(Size.X, Edge),
+                FSlateLayoutTransform(FVector2D(0, Size.Y - Height))), White, ESlateDrawEffect::None,
+                FLinearColor(1, 1, 1, 0.9f) * Tint);
+        }
+        if (Bright > 0)
+            FSlateDrawElement::MakeBox(Out, LayerId + 1, Geometry.ToPaintGeometry(), White, ESlateDrawEffect::None,
+                FLinearColor(1, 1, 1, 0.75f * Bright * Bright) * Tint);
+        return LayerId + 2;
+    }
+private:
+    TAttribute<float> Progress;
+    TAttribute<float> Flash;
 };
 const FLinearColor Ink(0.93f, 0.93f, 0.84f);
 const FLinearColor Muted(0.71f, 0.77f, 0.69f);
@@ -512,6 +554,8 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
                     }
                     else
                     {
+                        CraftFlashRecipe = CraftHoldRecipe;
+                        CraftFlashStart = FPlatformTime::Seconds();
                         CraftHoldElapsed = FMath::Fmod(CraftHoldElapsed, CraftCycleSeconds);
                         CraftBeat = 0;
                         Refresh();
@@ -568,6 +612,13 @@ void SHomesteadMenu::StopCraftHold()
 bool SHomesteadMenu::IsHoldingRecipe(int32 Recipe) const
 {
     return CraftInput != ECraftInput::None && CraftHoldRecipe == Recipe;
+}
+
+float SHomesteadMenu::CraftFlash(int32 Recipe) const
+{
+    if (Recipe != CraftFlashRecipe) return 0.0f;
+    constexpr double FlashSeconds = 0.45;
+    return FMath::Clamp(1.0f - static_cast<float>((FPlatformTime::Seconds() - CraftFlashStart) / FlashSeconds), 0.0f, 1.0f);
 }
 
 int32 SHomesteadMenu::StorageColumns() const { return LogicalBookWidth() >= 1800 ? 8 : 6; }
@@ -1226,29 +1277,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [
                     SNew(SBox).WidthOverride(58).HeightOverride(58)
                     [
-                        SNew(SOverlay)
-                        + SOverlay::Slot()
-                        [
-                            SNew(SHomesteadIcon).Kind(EntryIcon(Row))
-                            .Tint(MenuGold).Desaturation(1.0f)
-                        ]
-                        + SOverlay::Slot().VAlign(VAlign_Bottom)
-                        [
-                            SNew(SBox).WidthOverride(58)
-                            .HeightOverride_Lambda([this, Recipe = Row.SubjectId]()
-                            {
-                                return IsHoldingRecipe(Recipe)
-                                    ? 58.0f * FMath::Clamp(GetCraftProgress(), 0.0f, 1.0f) : 58.0f;
-                            })
-                            .Clipping(EWidgetClipping::ClipToBounds)
-                            [
-                                SNew(SBox).WidthOverride(58).HeightOverride(58).VAlign(VAlign_Bottom)
-                                [
-                                    SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(MenuGold)
-                                    .Desaturation(Row.RecipeState.craftable ? 0.0f : 1.0f)
-                                ]
-                            ]
-                        ]
+                        SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(MenuGold)
+                        .Desaturation(Row.RecipeState.craftable ? 0.0f : 1.0f)
                     ]
                 ];
             }
@@ -1315,7 +1345,22 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
                 .BorderBackgroundColor_Lambda([this, Index]() { return Index == ContentSelection ? MenuGold : FLinearColor::Transparent; })
-                [ Button ]
+                [
+                    SNew(SOverlay)
+                    + SOverlay::Slot()[ Button ]
+                    // While she crafts this recipe its square fills with white from the bottom, then flashes.
+                    + SOverlay::Slot()
+                    [
+                        SNew(SHomesteadCraftFill)
+                        .Visibility(SeenPage == 1 && Row.Subject == EHomesteadMenuSubject::Recipe
+                            ? EVisibility::HitTestInvisible : EVisibility::Collapsed)
+                        .Progress_Lambda([this, Recipe = Row.SubjectId]()
+                        {
+                            return IsHoldingRecipe(Recipe) ? FMath::Clamp(GetCraftProgress(), 0.0f, 1.0f) : 0.0f;
+                        })
+                        .Flash_Lambda([this, Recipe = Row.SubjectId]() { return CraftFlash(Recipe); })
+                    ]
+                ]
             ];
         Cells.Add(Cell);
         if (Storage)
