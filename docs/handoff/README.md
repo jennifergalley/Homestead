@@ -99,10 +99,16 @@ A lane delivers an increment like this:
    the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say
    so in your `[ready]` rather than silently patching the other lane's code; the orchestrator
    assigns it.
-3. Compile-check the editor module: `Build.bat SurvivalGameEditor Win64 Development
-   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`. If you touched C++,
-   also compile the game target (`Build.bat SurvivalGame Win64 Development ...`): the editor build
-   skips unity merging for files you've changed, so name clashes only show up in the game build.
+3. **Build only when your C++ changed** (Jenny's build policy, 2026-09-28). Close your editor (and
+   Blender, if it's yours) first: on a loaded machine UBT runs out of memory and retries, and a
+   5-minute build took 40. Batch several fixes, then
+   one editor build and one PIE pass, not a build per fix. Asset, Blender, Python and config work needs
+   no build: launch with `Start-EditorMcp.ps1 -SkipBuild` if your binaries are current. When C++ did
+   change, build the editor module once: `Build.bat SurvivalGameEditor Win64 Development
+   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`. Don't compile the
+   `SurvivalGame` game target; the integration session does that once per batch (unity-build clashes
+   the editor build hides show up there; see the editor skill's table 0.1). Keep running the native
+   tests (step 2).
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
    lane branch. All worktrees share one local repository, so the integration session can read
    unpushed lane branches directly.
@@ -125,6 +131,11 @@ Message flow:
    reports `[integrated] <what> @ <sha>` (with anything that failed) to the orchestrator.
 4. The orchestrator tells the lanes to rebase, relays to Jenny what she can try, and assigns
    follow-ups.
+
+**Batching (integration session):** merge `[ready]`s in batches, with one editor build, one game-target
+build, one native test run and one PIE pass per batch. A single `[ready]` may wait up to about 60
+minutes for company, unless it unblocks another lane. Package only at the end of a round, or when the
+orchestrator asks for a playtest build.
 
 Integration merge notes:
 

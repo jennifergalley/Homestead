@@ -60,10 +60,27 @@ integration session merges and packages.
 - Decorative scenery is hidden around every `State.resources` node.
 - The "Homestead Estate" shortcut uses `Homestead.ico`.
 
-**Estate id ranges:** world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved)
-are in the comment at `Simulation\HomesteadEstate.h` ~87. The polish round assigns berry bushes
-540000+ (clearing) and the derelict farm 550000+ (manor); whoever lands first should add them to that
-comment.
+**Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
+the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+
+| Placement ids | Owner |
+| --- | --- |
+| 500000+ | world lane |
+| 510000+ | overgrowth (clearing lane) |
+| 520000+ | salvage piles |
+| 530000+ | town (reserved) |
+| 540000-540043 | berry brambles (clearing lane) |
+| 550000+ | derelict-farm clearables (manor lane) |
+| 560000-569999 | MVP woodland biome interactables (`fd682909`) |
+| 570000-579999 | Coral Island-style clear-out near the manor (clearing lane) |
+
+| Scenery kinds (`EstateSceneryKinds` in `HomesteadWorld.cpp`; `scatter.py` kind bytes must match) | Owner |
+| --- | --- |
+| 13-15: oak, beech, sycamore; 16-18: hawthorn, holly, hazel coppice | trees lane |
+| 19-47 | MVP woodland biome |
+
+The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by `scatter.py` and
+`bake_ground.py` (on its lane branch; not on `main` yet).
 
 **Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
 `build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
@@ -95,6 +112,11 @@ comment.
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
+- **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
+  game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
+  or when the orchestrator asks for a playtest build (Jenny, 2026-09-28). Lanes build only the editor
+  module, and only when their C++ changed. Build acceleration (UBA cache, mutex, unity/PCH, faster
+  cooking) is being investigated by the map lane (`6e131c6a`); findings go to the docs agent.
 - **Packaging is centralized with the integration session** (`e251051b`). Lanes deliver through "Delivering lane work"
   in `docs\handoff\README.md`: verify, native tests, editor compile-check, commit/push, then message
   the orchestrator with branch, SHA, what changed, what was verified and what to try.
