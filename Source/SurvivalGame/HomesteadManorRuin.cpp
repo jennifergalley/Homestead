@@ -145,13 +145,21 @@ int32 AHomesteadManorRuin::Rebuild()
         MinY = FMath::Min(MinY, Point.y);
     }
     const double Ground = Room ? Room->z : GetActorLocation().Z;
-    SetActorLocation(FVector(MinX, MinY, Ground));
+    const FVector Target(MinX, MinY, Ground);
+    if (!GetActorLocation().Equals(Target, 1.0))
+    {
+        // The static root may only move in the editor; a game world that finds the anchor moved
+        // since the level was saved makes it movable rather than drawing the ruin off its footprint.
+        UWorld* World = GetWorld();
+        if (World && World->IsGameWorld()) GetRootComponent()->SetMobility(EComponentMobility::Movable);
+        SetActorLocation(Target);
+    }
     auto Place = [this](const TCHAR* MeshName, const FTransform& Relative) -> UStaticMeshComponent* {
         UStaticMesh* Asset = Mesh(MeshName);
         if (!Asset) return nullptr;
         UStaticMeshComponent* Piece = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
         Piece->SetupAttachment(GetRootComponent());
-        Piece->SetMobility(EComponentMobility::Static);
+        Piece->SetMobility(GetRootComponent()->Mobility);
         Piece->SetStaticMesh(Asset);
         Piece->SetRelativeTransform(Relative);
         if (RuinPieceBlocks(MeshName))
