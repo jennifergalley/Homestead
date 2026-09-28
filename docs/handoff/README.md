@@ -99,7 +99,9 @@ A lane delivers an increment like this:
    the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say
    so in your `[ready]` rather than silently patching the other lane's code; the orchestrator
    assigns it.
-3. **Build only when your C++ changed** (Jenny's build policy, 2026-09-28). Batch several fixes, then
+3. **Build only when your C++ changed** (Jenny's build policy, 2026-09-28). Close your editor (and
+   Blender, if it's yours) first: on a loaded machine UBT runs out of memory and retries, and a
+   5-minute build took 40. Batch several fixes, then
    one editor build and one PIE pass, not a build per fix. Asset, Blender, Python and config work needs
    no build: launch with `Start-EditorMcp.ps1 -SkipBuild` if your binaries are current. When C++ did
    change, build the editor module once: `Build.bat SurvivalGameEditor Win64 Development
