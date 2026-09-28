@@ -7,8 +7,8 @@
   - Verified in PIE on the Estate with the controller: she spawns facing the door, sleeps and saves, the chest holds the pail and four branches, and she cooks Roasted roots at the hearth. The keyboard and mouse pass is also verified in PIE: Escape leaves Appearance, the Names rows are clicked and edited, Begin is clicked, E opens the chest (pail and four branches), E at the hearth then holding Enter makes Roasted roots, and E at the bedroll sleeps and writes the autosave. Under the roof the chase camera shortens to 300 cm; pinned against a wall, it lifts to an over-the-shoulder view.
 - [x] 1.3 Author the coarse ruin massing (wall runs, chimney stack, rubble) as broken-top variants of the stone-kit recipes, and place it on `ManorFootprint`. Reserve the footprint in `CanBuildAt`
   - `AHomesteadManorRuin` is in the Estate level's `Manor` folder. The reservation is in `CheckSite`: previewing a foundation in the ruin shows "The old manor stands here."
-- [ ] 1.4 Place the salvage piles, with the billhook head near the door, together with the clearing lane. Package, walk out of the room into the ruin, capture in-game views, commit and push
-  - Walking out through the door into the ruin works in PIE. The salvage piles wait for the clearing lane's SalvagePile kind. Packaging is now the orchestrator's.
+- [x] 1.4 Place the salvage piles, with the billhook head near the door, together with the clearing lane. Package, walk out of the room into the ruin, capture in-game views, commit and push
+  - Five piles (520001-520005) lie in and around the ruin. The first is in the south range, 2.5 m from the standing room's door. In PIE on the Estate she walks out of the door and searches it for a rusted billhook head and scrap iron; the pile is then spent. The piles still use the clearing lane's stand-in mesh (a small cobble heap), to be dressed with the 3.1 props. Packaging is the orchestrator's.
 
 ## 2. Names and arrival
 
@@ -22,4 +22,5 @@
 
 - [ ] 3.1 Add the detail pass: window openings with lintels, quoins, fallen timbers, slate scatter, lichen and soot, and ivy and bramble cling. Check its silhouette from the road approach and the cove in ordinary play
 - [ ] 3.2 Run the whole new-game flow with mouse and controller, name save/reload, footprint rejection, and 720p/4K checks
+  - Done: the flow with the controller and with the keyboard and mouse (1.2, 2.1), the save label, and footprint rejection (1.3). In standalone 1280x720 and 3840x2160 windows with real keyboard input, the Names panel, its two-line hints and the arrival card fit and read cleanly; at 4K the panel is scaled once, by the engine's DPI curve. Still to do: reload a named save in game.
 - [ ] 3.3 Jenny playtests the arrival. Collect her default names, the year and her ruin feedback, and fold them in
