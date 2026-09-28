@@ -25,6 +25,28 @@ agent keeps both current.
 If the round page lists no docs agent, or the one listed is archived, ask the orchestrator to spawn
 one (`send_session_message`). Until one exists, record findings yourself in the canonical doc.
 
+## Reaching a busy session fast: the mailbox
+
+`send_session_message` is delivered only when the target's turn ends. That can be hours for an
+autopilot lane, even with `delivery_mode: "immediate"`. For anything time-sensitive, use the
+**agent mailbox** as well. It's a user-level extension
+(`~\.copilot\extensions\agent-mailbox\extension.mjs`, messages stored under
+`E:\CopilotScratch\agent-mailbox`). The target sees the message **after its next tool call,
+mid-turn**, usually within seconds.
+
+- `mailbox_send(to, message, from_label)`: `to` is a worktree folder name (for example
+  `jennifergalley-cautious-pancake`), a branch, a Copilot session id, or `all`.
+- `mailbox_who()` lists the sessions that can receive right now.
+- A session loads the extension when it starts. A session that was already running needs one
+  `extensions_reload` call first.
+- A message to an address with no live session is kept as pending and delivered to the next
+  session that starts in that worktree or branch.
+- The mailbox doesn't replace `send_session_message`; send both for anything that must not be
+  lost. The session registry and the handoff docs still use the app session ids.
+
+Use the mailbox for blockers, rule changes, "stop" or "rebase now" requests, and replies to them.
+Keep routine reports on `send_session_message`.
+
 ## Reporting to the docs agent
 
 Send a message whenever you:
@@ -49,8 +71,9 @@ items. Template:
 ```
 
 **Blockers:** if something blocks you for more than about 15 minutes, or affects other worktrees
-(shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), send the report immediately, with
-`delivery_mode: "immediate"` to the docs agent and the orchestrator. Include what you tried.
+(shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), report it immediately with
+`mailbox_send` to the docs agent's and orchestrator's worktrees (see the mailbox section above),
+and also with `send_session_message`. Include what you tried.
 
 **What lanes still write themselves:** their own OpenSpec change (tasks, design notes), docs that
 belong only to their feature, and code comments. Shared docs (`.github\skills\**`,

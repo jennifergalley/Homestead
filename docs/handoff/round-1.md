@@ -18,7 +18,9 @@ page current; report changes to it rather than editing lane rows yourself.
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
 
-Session IDs are the app's project-session IDs: use them with `send_session_message`.
+Session IDs are the app's project-session IDs: use them with `send_session_message`. The worktree
+folder name is the session's **mailbox address** for urgent `mailbox_send` messages
+(`docs\handoff\README.md`).
 
 ## Lane status
 
