@@ -89,7 +89,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth()
                     [
-                        SNew(SButton)
+                        SNew(SButton).IsFocusable(false)
                         .ButtonColorAndOpacity(FLinearColor(0, 0, 0, 0))
                         .OnClicked_Lambda([this]() { Row = BackRow; OnBack.ExecuteIfBound(); return FReply::Handled(); })
                         [
@@ -100,7 +100,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                     + SHorizontalBox::Slot().FillWidth(1)
                     + SHorizontalBox::Slot().AutoWidth()
                     [
-                        SNew(SButton)
+                        SNew(SButton).IsFocusable(false)
                         .ButtonColorAndOpacity(FLinearColor(0, 0, 0, 0))
                         .OnClicked_Lambda([this]() { Row = BeginRow; TryBegin(); return FReply::Handled(); })
                         [
@@ -122,7 +122,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
 
 TSharedRef<SWidget> SHomesteadNames::FieldWidget(int32 Field, const FText& Label)
 {
-    return SNew(SButton)
+    return SNew(SButton).IsFocusable(false)
         .ButtonColorAndOpacity(FLinearColor(0, 0, 0, 0))
         .ContentPadding(0)
         .OnClicked_Lambda([this, Field]() { Row = Field; bGrid = false; Warning.Reset(); return FReply::Handled(); })
@@ -193,7 +193,7 @@ TSharedRef<SWidget> SHomesteadNames::GridWidget()
         {
             Line->AddSlot().AutoWidth().Padding(3)
             [
-                SNew(SButton)
+                SNew(SButton).IsFocusable(false)
                 .ButtonColorAndOpacity_Lambda([this, X, Y]()
                 { return FLinearColor(GridX == X && GridY == Y ? NameGold * 0.55f : NameField); })
                 .OnClicked_Lambda([this, X, Y]() { GridX = X; GridY = Y; PressGridCell(); return FReply::Handled(); })
@@ -285,7 +285,7 @@ void SHomesteadNames::TryBegin()
     OnBegin.ExecuteIfBound(Values[0], Values[1], Values[2]);
 }
 
-bool SHomesteadNames::HandleKey(const FKey& Key)
+bool SHomesteadNames::HandleKey(const FKey& Key, bool bShiftDown)
 {
     const bool Up = Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_LeftStick_Up || Key == EKeys::Up;
     const bool Down = Key == EKeys::Gamepad_DPad_Down || Key == EKeys::Gamepad_LeftStick_Down || Key == EKeys::Down;
@@ -309,7 +309,7 @@ bool SHomesteadNames::HandleKey(const FKey& Key)
         else return false;
         return true;
     }
-    if (Up || (Key == EKeys::Tab && FSlateApplication::Get().GetModifierKeys().IsShiftDown())) Move(-1);
+    if (Up || (Key == EKeys::Tab && (bShiftDown || FSlateApplication::Get().GetModifierKeys().IsShiftDown()))) Move(-1);
     else if (Down || Key == EKeys::Tab) Move(1);
     else if ((Left || Right) && Row >= BeginRow) Row = Row == BeginRow ? BackRow : BeginRow;
     else if (Key == EKeys::BackSpace) Delete();
@@ -327,7 +327,7 @@ bool SHomesteadNames::HandleKey(const FKey& Key)
 
 FReply SHomesteadNames::OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
 {
-    return HandleKey(Event.GetKey()) ? FReply::Handled() : FReply::Unhandled();
+    return HandleKey(Event.GetKey(), Event.IsShiftDown()) ? FReply::Handled() : FReply::Unhandled();
 }
 
 FReply SHomesteadNames::OnKeyChar(const FGeometry& Geometry, const FCharacterEvent& Event)

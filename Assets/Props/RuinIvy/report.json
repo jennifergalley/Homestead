@@ -1,0 +1,210 @@
+{
+  "schema": 1,
+  "name": "RuinIvy",
+  "description": "Ruined manor detail: dense common-ivy wall mat with woody clinging runners, rootlet fuzz and thousands of alpha-free lobed leaves.",
+  "collision": "none",
+  "triangle_budget": 500000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/ruin_ivy.py",
+  "source_sha256": "8588bc9e6e1751c041e385257677037a6f72188f61251a9f212bb529bfee62c7",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RuinIvy": {
+      "vertices": 97538,
+      "triangles": 100311,
+      "size_cm": [
+        256.59,
+        85.52,
+        233.3
+      ],
+      "materials": [
+        {
+          "name": "M_RuinIvy",
+          "textures": {
+            "basecolor": "T_RuinIvy_basecolor.png",
+            "roughness": "T_RuinIvy_roughness.png",
+            "normal": "T_RuinIvy_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 80,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinIvy_basecolor.png",
+          "roughness": "T_RuinIvy_roughness.png",
+          "normal": "T_RuinIvy_normal.png",
+          "ao": "T_RuinIvy_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.1,
+          -0.92
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "detail_distance": 0.75,
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RuinIvy.fbx",
+      "sha256": "c525a419fba632eb59dea9954444119373dffc0a7cdc04224f285d67029ff9d3",
+      "preview": "preview_SM_RuinIvy.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RuinIvy_hero.png",
+          "detail": "beauty_SM_RuinIvy_detail.png",
+          "eye": "beauty_SM_RuinIvy_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RuinIvy_LOD1": {
+      "vertices": 46964,
+      "triangles": 38118,
+      "size_cm": [
+        256.53,
+        86.04,
+        234.0
+      ],
+      "materials": [
+        {
+          "name": "M_RuinIvy",
+          "textures": {
+            "basecolor": "T_RuinIvy_basecolor.png",
+            "roughness": "T_RuinIvy_roughness.png",
+            "normal": "T_RuinIvy_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 80,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinIvy_basecolor.png",
+          "roughness": "T_RuinIvy_roughness.png",
+          "normal": "T_RuinIvy_normal.png",
+          "ao": "T_RuinIvy_ao.png"
+        },
+        "shared_with": "SM_RuinIvy"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.1,
+          -0.92
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "detail_distance": 0.75,
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RuinIvy_LOD1.fbx",
+      "sha256": "61ae9ec129e004d0e22868268b4e0732bac0f99b7262dda03f40d446fd9ee679",
+      "preview": "preview_SM_RuinIvy_LOD1.png"
+    },
+    "SM_RuinIvy_LOD2": {
+      "vertices": 25782,
+      "triangles": 15046,
+      "size_cm": [
+        256.53,
+        86.54,
+        233.78
+      ],
+      "materials": [
+        {
+          "name": "M_RuinIvy",
+          "textures": {
+            "basecolor": "T_RuinIvy_basecolor.png",
+            "roughness": "T_RuinIvy_roughness.png",
+            "normal": "T_RuinIvy_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 80,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinIvy_basecolor.png",
+          "roughness": "T_RuinIvy_roughness.png",
+          "normal": "T_RuinIvy_normal.png",
+          "ao": "T_RuinIvy_ao.png"
+        },
+        "shared_with": "SM_RuinIvy"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.1,
+          -0.92
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "detail_distance": 0.75,
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RuinIvy_LOD2.fbx",
+      "sha256": "04744c341089c172043c7bf8cf794088b0123d977f4b85bb9c1f995a7c796036",
+      "preview": "preview_SM_RuinIvy_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Wall-head outside face centre line: X along wall, +Y over the 56 cm wall top, -Y out from/down the visible wall face, Z=0 at broken top.",
+  "placement": "Place the origin on the top/front edge of a RuinWall run. The mat hangs into Blender -Y / Unreal +Y and negative Z.",
+  "foliage": "Leaves are individual alpha-free lobed meshes using a shared non-repacked UV atlas; no masked cards.",
+  "textures": {
+    "T_RuinIvy_basecolor.png": "677a35d79ce0e9d93bcdc059625d5bfaaf8bf974d9b34a8f856b387c4e59cd77",
+    "T_RuinIvy_roughness.png": "3241f6c3c273e19141d5f67a31a2a091d15a1d2465b641b9af700cbdee943cc6",
+    "T_RuinIvy_normal.png": "814248d5406e2ee1e6892c956ca892472c91bec34ca258107b8c81bed30efc2e"
+  }
+}
