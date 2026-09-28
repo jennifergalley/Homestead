@@ -120,11 +120,14 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   lane: `-PackageOnly` packaged successfully (BuildCookRun 200 s, UAT about 6 min) and the packaged
   smoke, NativeMenu, Hotbar and FullLoop suites passed. The orchestrator has adopted it, and only the
   orchestrator packages now.
-- **Blender prop import** needs a free editor slot (3-process limit). Props are imported in a
+- **Blender prop import** needs a free editor slot (2-process limit). Props are imported in a
   running editor via `run_python`, not the headless script.
 
 ## Decisions during the round
 
+- **At most 2 Unreal processes machine-wide** (Jenny, 2026-09-28; it was 3). Each editor commits
+  15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
+  `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
 - Agent editors start with Live Coding and ray tracing off (`bedbb9b8`, `50f9c64c`).
 - The Estate is the default editor startup and game map (`b07d4a82`). Packaged woodland test
   scripts pass `/Game/SurvivalGame/Maps/Homestead` explicitly until each suite is retargeted.

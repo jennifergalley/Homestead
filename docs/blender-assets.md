@@ -405,7 +405,7 @@ per prop). The headless form,
 
 runs as a `-run=pythonscript` commandlet, which lacks `StaticMeshEditorSubsystem`, so its meshes
 get no LODs or collision. It also needs this worktree's editor closed and counts toward the
-machine's 3-Unreal-process limit.
+machine's 2-Unreal-process limit.
 
 Either way it requires the built editor module and `M_Field` (from `Scripts\Build-Game.ps1`). It
 verifies the FBX hashes against the report, imports to
