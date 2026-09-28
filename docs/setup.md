@@ -88,6 +88,7 @@ Development tools.
    rather than normal saves; previous reports/images are archived before a run.
 4. Run `Scripts\Start-Game.ps1` for standalone gameplay through the engine.
 5. Run `Scripts\Build-Game.ps1 -Package` for a standalone Windows distribution.
+   In multi-session rounds only the orchestrator packages (`docs\handoff\README.md`).
    For autonomous work, use `-ArchiveDirectory 'Build\Releases\<candidate>'` to
    preserve the known-good player build. Test it with `Test-Game.ps1 -Packaged
    -PackageDirectory 'Build\Releases\<candidate>' -OutputDirectory

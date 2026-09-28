@@ -8,7 +8,7 @@ page current; report changes to it rather than editing lane rows yourself.
 
 | Role / lane | Session | Branch | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | MCP port | OpenSpec change |
 | --- | --- | --- | --- | --- | --- |
-| Orchestrator + world/terrain lane | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | ask the orchestrator | ask the orchestrator | `author-fixed-cornish-estate-map` |
+| Orchestrator + world/terrain lane (only session that packages) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | ask the orchestrator | `author-fixed-cornish-estate-map` |
 | Docs agent | `d99bb15c-6135-4f9d-b21a-f46b63c3b36f` | `jennifergalley-work-optimizer` | `jennifergalley-stunning-dollop` | none (no editor) | none |
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
@@ -46,7 +46,10 @@ manor and boundary lanes haven't merged yet.
 - Saves: lanes never bump `SimulationSaveVersion`; the orchestrator bumps once at integration. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
-- `SHomesteadMenu` edits and engine packaging are serialized through the orchestrator.
+- `SHomesteadMenu` edits are serialized through the orchestrator.
+- **Packaging is centralized with the orchestrator.** Lanes deliver through "Delivering lane work"
+  in `docs\handoff\README.md`: verify, native tests, editor compile-check, commit/push, then message
+  the orchestrator with branch, SHA, what changed, what was verified and what to try.
 - Jenny's playable builds: see the editor skill, section 0.
 
 ## Open blockers and known bugs
@@ -59,9 +62,11 @@ manor and boundary lanes haven't merged yet.
 - **Estate spawn yaw** is overwritten by `ChooseStartingView` and by `SetAppearancePreview(false)`
   restoring an earlier `SavedViewRotation`. Being fixed on the manor lane.
 
-- **Packaging with several worktrees:** `LogIoStore: Error: Failed to launch ZenServer` when another
-  worktree's zenserver holds port 8558. A per-worktree `[Zen.AutoLaunch] DesiredPort` is being
-  tested by the orchestrator; not yet confirmed.
+- **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
+  UBT `ConflictingInstance`): `Build-Game.ps1` now builds the game target with `-WaitMutex`, cooks
+  with `-SkipZenStore`, and waits for UAT (`4ffd2372` and later). Not yet verified by a full package
+  on `main`; the MVP lane runs the same fix on its branch. Only the orchestrator packages now, so
+  the collisions shouldn't recur within round 1.
 - **Blender prop import** needs a free editor slot (3-process limit). Props are imported in a
   running editor via `run_python`, not the headless script.
 
@@ -71,12 +76,12 @@ manor and boundary lanes haven't merged yet.
 - Each worktree's editor uses its own MCP port; 8765 and the native `unreal` tools aren't safe to
   assume.
 - Shared-doc findings go through the docs agent (`docs\handoff\README.md`).
+- Packaging is centralized with the orchestrator (Jenny, 2026-09-27): only it runs UAT and packaged
+  tests; lanes implement, push and notify. `mvp-survival` packages its own deliverables to
+  `E:\Repos\HomesteadMVP\Windows` after telling the orchestrator.
 
 ## Pending doc updates on merge
 
-- Estate boundary lane: the field book gains a Map tab (page 7, `M` opens it directly). Once it's on
-  `main`, update the `FieldBookPages` cycle in skill section 4 "Field book" to 0 Inventory, 1 Craft,
-  2 Build, 7 Map, 3 Guidebook, 6 Appearance (Settings stays outside the cycle). The docs agent does this.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. On the fixed estate
   the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. When it merges,
   update the skill's starter-kit, hotbar and energy notes in section 4 (they still describe the
