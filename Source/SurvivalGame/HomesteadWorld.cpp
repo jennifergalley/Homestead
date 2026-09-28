@@ -1628,6 +1628,8 @@ void AHomesteadWorld::BuildLighting()
     Sun->SetupAttachment(GetRootComponent());
     Sun->SetMobility(EComponentMobility::Movable);
     Sun->bAtmosphereSunLight = true;
+    // The moon is also an atmosphere light; the sun wins forward shading (water, translucency, fog).
+    Sun->ForwardShadingPriority = 1;
     Sun->SetIntensity(46000.0f);
     // Ray-traced sun shadows have no cache, so the sun can move every refresh without the Virtual
     // Shadow Map re-render stalls a rotating sun causes over these non-Nanite trees (4K: 85 vs 78 FPS,
