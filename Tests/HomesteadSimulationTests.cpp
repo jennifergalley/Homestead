@@ -343,6 +343,7 @@ void RequirementsMatchTransactions()
     for (int i = 0; i < static_cast<int>(Piece::Count); ++i)
     {
         const auto piece = static_cast<Piece>(i);
+        if (!IsBuildable(piece)) continue;
         Simulation sim;
         BuildingStock(sim);
         if (piece == Piece::Wall || piece == Piece::Doorway || piece == Piece::Roof)
@@ -2739,11 +2740,17 @@ void FixedEstateNewGameAndSave()
     // The standing room is the carved-out corner of the ruin, and the starter forage lies outside it.
     const auto& footprint = layout.FindPolygon(Anchor::ManorFootprint)->points;
     CHECK(!PointInPolygon(footprint, spawn));
+    int misplaced = 0;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
-        CHECK(PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, placement.position));
-        CHECK(!PointInPolygon(footprint, placement.position));
+        const bool onEstate = PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, placement.position);
+        const bool inRuin = PointInPolygon(footprint, placement.position);
+        if (!onEstate || inRuin)
+            std::cout << "Placement " << placement.id << " at (" << placement.position.x << ", " << placement.position.y
+                << ") is " << (inRuin ? "inside the ruin footprint" : "off the estate") << ".\n";
+        misplaced += !onEstate || inRuin;
     }
+    CHECK(misplaced == 0);
     EstatePlacements placements;
     placements.bakeVersion = 3;
     placements.placements = {
@@ -2857,6 +2864,7 @@ void OvergrowthTableAndPrompts()
     const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
     const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
     int overgrowth = 0, salvage = 0, doorway = 0, teases = 0;
+    int misplaced = 0;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
         if (placement.id < 510000 || placement.id >= 530000) continue;
@@ -3088,7 +3096,9 @@ void SalvageOrderAndScytheArc()
 
 void WeedCreepNearOvergrowth()
 {
-    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    // Out on the forecourt, clear of the standing room that a new estate game builds at the spawn.
+    const Point spawn = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    const Point at{spawn.x - 1500, spawn.y + 1500};
     EstatePlacements placements;
     placements.bakeVersion = 9;
     int next = EstatePlacementIdBase + 30000;

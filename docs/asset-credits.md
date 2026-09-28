@@ -67,6 +67,32 @@ and `Recipes\deer\`) is project-authored:
 
 It uses no scanned or downloaded geometry or textures.
 
+The stone building kit (`Assets\Props\` StoneFoundation, StoneWall, StoneDoorway and StoneRoof,
+built by `Scripts\Blender\Recipes\stone_*.py` and `Recipes\stone_building\`) and the pitch torches
+(TorchGround and TorchWall with their `_Spent` variants, `Recipes\torch_*.py` and
+`Recipes\torches\`) are project-authored. The masonry, slates, timber, stakes, wrapped heads and
+forged sconce are all generated from code. Their granite, lime mortar, slate, wood, pitch-soaked
+linen and wrought-iron materials are procedural and baked to textures. They use no scanned or
+downloaded geometry or textures. Their review renders use the same CC0 Kloofendal HDRI, which
+ships with no asset.
+
+The manor's standing-room hearth (`Assets\Props\StoneHearth`, `Recipes\stone_hearth.py` and
+`Recipes\stone_building\hearth.py`) and the ruin kit (RuinWallTall, RuinWallMid, RuinWallLow and
+RuinChimney, `Recipes\ruin_*.py` and `Recipes\stone_building\ruin.py`) are project-authored the
+same way, from the stone kit's masonry code and procedural materials. They use no scanned or
+downloaded geometry or textures. The hearth's crackle loop (`Assets\Audio\Ambience\HearthCrackle.wav`)
+is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it uses no recording.
+
+## Fonts
+
+The title card, the Names step and the display headings use **EB Garamond** (Regular and Italic,
+`Assets\Fonts\EBGaramond`), Copyright 2017 The EB Garamond Project Authors
+(https://github.com/octaviopardo/EBGaramond12), licensed under the
+[SIL Open Font License 1.1](https://openfontlicense.org). The licence text ships beside the fonts in
+`Assets\Fonts\EBGaramond\OFL.txt`. It was downloaded from the Google Fonts repository
+(https://github.com/google/fonts/tree/main/ofl/ebgaramond) on 2026-09-27. The font is embedded in
+the game unmodified. It isn't sold on its own.
+
 ## Music
 
 All music is by **Kevin MacLeod** (incompetech.com), licensed under

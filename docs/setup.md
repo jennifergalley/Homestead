@@ -95,6 +95,28 @@ Development tools.
 6. Review the packaged build, not editor FPS, against the 60 FPS target and
    controller-only playthrough in `game-plan.md`.
 
+## Estate map (T_EstateMap)
+
+The HUD minimap and the field book's Map tab share one baked, stylised top-down map:
+`/Game/SurvivalGame/UI/Map/T_EstateMap` plus `DA_EstateMap`, which records the world rectangle
+it covers (the full ±201600 cm estate square, north up). Re-bake it whenever the terrain, water or
+road changes meaningfully (and before a release):
+
+1. `python Scripts\Map\bake_estate_map.py` renders `Assets\Map\T_EstateMap.png` (4096², about 1 m
+   per texel) and its transform JSON from `Scripts\Terrain\Estate_Heightmap_4033.png` and
+   `estate_layout.json`: parchment hillshade, 10 m contours, a water-lined inked coast, the river
+   and the lightened road. Pass `--capture <png>` with a north-up orthographic capture of the
+   Estate level to fold its woods and fields in. Make that capture with the editor console
+   command `Homestead.CaptureEstateMap [resolution]` (default 8192) while the Estate level is
+   open: it loads the whole World Partition square and writes a base-colour capture to
+   `Saved\EstateMap\EstateCapture.png`.
+2. Import it: in the editor run the console command `Homestead.ImportEstateMap`, or headless
+   `UnrealEditor-Cmd.exe SurvivalGame.uproject -run=HomesteadImportEstateMap -unattended -nullrhi`.
+   It replaces the texture (all mips resident, never streamed) and rewrites `DA_EstateMap`.
+
+The estate boundary, for-sale parcels and landmark glyphs are drawn live from the layout, not
+baked, so moving an anchor or polygon needs no re-bake.
+
 ## Isolated human-play preview
 
 `Preview.cmd` requires **PowerShell 7 (`pwsh`)** and launches the exact separate

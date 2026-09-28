@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "RuinWallTall",
+  "description": "Ruined manor: a 6 m granite rubble front run, two storeys of broken masonry 3.8-6.4 m high with ground- and first-floor sash openings (original).",
+  "collision": "box",
+  "triangle_budget": 400000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/ruin_wall_tall.py",
+  "source_sha256": "a777b104c17d170a3db6a92ef35d5668f70386a21faf7bf8880eac81ce6ba165",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RuinWallTall": {
+      "vertices": 31636,
+      "triangles": 56569,
+      "size_cm": [
+        600.62,
+        61.92,
+        612.75
+      ],
+      "materials": [
+        {
+          "name": "M_RuinWallTall",
+          "textures": {
+            "basecolor": "T_RuinWallTall_basecolor.png",
+            "roughness": "T_RuinWallTall_roughness.png",
+            "normal": "T_RuinWallTall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinWallTall_basecolor.png",
+          "roughness": "T_RuinWallTall_roughness.png",
+          "normal": "T_RuinWallTall_normal.png",
+          "ao": "T_RuinWallTall_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.5,
+          0.9,
+          2.2
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinWallTall.fbx",
+      "sha256": "ca0c1e2d62c7ddb14087d7faf405a28f5a4d540084710820f98c2ee610715d19",
+      "preview": "preview_SM_RuinWallTall.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RuinWallTall_hero.png",
+          "detail": "beauty_SM_RuinWallTall_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RuinWallTall_LOD1": {
+      "vertices": 12438,
+      "triangles": 19799,
+      "size_cm": [
+        600.46,
+        61.75,
+        612.54
+      ],
+      "materials": [
+        {
+          "name": "M_RuinWallTall",
+          "textures": {
+            "basecolor": "T_RuinWallTall_basecolor.png",
+            "roughness": "T_RuinWallTall_roughness.png",
+            "normal": "T_RuinWallTall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinWallTall_basecolor.png",
+          "roughness": "T_RuinWallTall_roughness.png",
+          "normal": "T_RuinWallTall_normal.png",
+          "ao": "T_RuinWallTall_ao.png"
+        },
+        "shared_with": "SM_RuinWallTall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.5,
+          0.9,
+          2.2
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinWallTall_LOD1.fbx",
+      "sha256": "dac465d9642ffc4c501bd03c3e976fd9360e0b3f63991ccfb1c5af0368e87c3b",
+      "preview": "preview_SM_RuinWallTall_LOD1.png"
+    },
+    "SM_RuinWallTall_LOD2": {
+      "vertices": 4913,
+      "triangles": 6787,
+      "size_cm": [
+        599.52,
+        61.5,
+        612.13
+      ],
+      "materials": [
+        {
+          "name": "M_RuinWallTall",
+          "textures": {
+            "basecolor": "T_RuinWallTall_basecolor.png",
+            "roughness": "T_RuinWallTall_roughness.png",
+            "normal": "T_RuinWallTall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinWallTall_basecolor.png",
+          "roughness": "T_RuinWallTall_roughness.png",
+          "normal": "T_RuinWallTall_normal.png",
+          "ao": "T_RuinWallTall_ao.png"
+        },
+        "shared_with": "SM_RuinWallTall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.5,
+          0.9,
+          2.2
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinWallTall_LOD2.fbx",
+      "sha256": "7fea815d5a352e51ef53edabe19bfd7360734ffd1455490a94cadf6671399620",
+      "preview": "preview_SM_RuinWallTall_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Base centre of the run (0, 0, 0); the run lies along X, faces at Y +-28, footing buried to Z -15.",
+  "placement": "Yaw 0/90/180/270 along the manor walls; butt runs end to end (their ends are dressed quoins).",
+  "textures": {
+    "T_RuinWallTall_basecolor.png": "0879615bd6e7718d454e05b243073ef728367e0378fb9a0827860272851065bc",
+    "T_RuinWallTall_roughness.png": "faffc283e5f51d0b7d3ddb6772af8abcf4ee53009e320db312d583718d3d8f11",
+    "T_RuinWallTall_normal.png": "e5d879a781ed5eaae0fb93c3c738b58191fb97ec424b14471fc21c04772e215f"
+  }
+}

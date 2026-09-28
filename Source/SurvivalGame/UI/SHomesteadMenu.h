@@ -11,6 +11,7 @@ class SHorizontalBox;
 class SBox;
 class SButton;
 class SSlider;
+namespace HomesteadMenus { class SHomesteadMapView; }
 
 namespace HomesteadMenus
 {
@@ -74,6 +75,7 @@ public:
     int32 GetSelectedContentIndex() const { return ContentSelection; }
     int32 GetContentColumnCount() const { return Columns(); }
     int32 GetActionCount() const { return Actions.Num(); }
+    TSharedPtr<SHomesteadMapView> GetMapView() const { return MapView; }
     TSharedPtr<SWidget> GetAudioSliderWidget(int32 AudioId) const;
     bool IsEditingQuantity() const { return bEditingAmount; }
     int32 GetDraftQuantity() const { return Amount; }
@@ -125,7 +127,7 @@ private:
     int32 SettingsTab = 0;
     int32 DialogSelection = 0;
     int32 FocusedTab = 0;
-    FString RememberedKeys[7];
+    FString RememberedKeys[8];
     int32 InventorySelection = 0;
     int32 EquipmentSelection = 0;
     int32 PortraitSelection = -1;
@@ -193,6 +195,10 @@ private:
     ECraftInput CraftInput = ECraftInput::None;
 
     TSharedRef<SWidget> BuildBody();
+    // The Map tab (page 7): one focusable map view that takes sticks, triggers and the D-pad.
+    TSharedRef<SWidget> BuildMap();
+    bool HandleMapKey(FKey Key, EInputEvent Event, float InputAmount);
+    TSharedPtr<SHomesteadMapView> MapView;
     TSharedRef<SWidget> BuildDetails();
     TSharedRef<SButton> MakeButton(const FString& Label, TFunction<void()> Action,
         TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.6f)),

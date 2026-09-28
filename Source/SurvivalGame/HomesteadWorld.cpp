@@ -13,6 +13,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundWave.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkyAtmosphereComponent.h"
@@ -564,6 +566,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     UpdateFallingTree(DeltaSeconds);
+    UpdateHearthFlicker(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
         FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();
@@ -3181,6 +3184,33 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     }
 }
 
+UStaticMesh* AHomesteadWorld::ManorMesh(const TCHAR* Name)
+{
+    const FName Key(Name);
+    if (const TObjectPtr<UStaticMesh>* Found = ManorMeshes.Find(Key)) return Found->Get();
+    // Not cached while missing, so a mesh imported mid-session shows up on the next rebuild.
+    UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr,
+        *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/SM_%s.SM_%s"), Name, Name, Name),
+        nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (Mesh) ManorMeshes.Add(Key, Mesh);
+    return Mesh;
+}
+
+void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
+{
+    if (HearthLights.IsEmpty()) return;
+    HearthFlickerTime += DeltaSeconds;
+    HearthLights.RemoveAll([](const TWeakObjectPtr<UPointLightComponent>& Light) { return !Light.IsValid(); });
+    for (int32 Index = 0; Index < HearthLights.Num(); ++Index)
+    {
+        const float T = HearthFlickerTime + Index * 7.3f;
+        // Layered slow breathing and quick licks, like a settled wood fire.
+        const float Flicker = 0.82f + 0.1f * FMath::PerlinNoise1D(T * 1.3f) + 0.08f * FMath::PerlinNoise1D(T * 7.1f)
+            + 0.05f * FMath::PerlinNoise1D(T * 17.0f);
+        HearthLights[Index]->SetIntensity(5200.0f * Flicker);
+    }
+}
+
 void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
     const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid)
 {
@@ -3188,16 +3218,17 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
     FVector Base(Center.x, Center.y, StructureBase(Center, Frame.yaw));
     // UE positive yaw rotates +X toward +Y; negative yaw maps the north edge to east.
     FRotator Rotation(0, Homestead::PieceYaw(Frame, Structure.rotation), 0);
-    const bool bFurniture = Structure.kind == Homestead::Piece::Bed || Structure.kind == Homestead::Piece::Chest
-        || Structure.kind == Homestead::Piece::Fire;
+    const bool bFurniture = Homestead::IsFurniture(Structure.kind);
     if (bFurniture && !bOnFoundation)
     {
         // Off a foundation the piece stands centred where it was placed, on the ground under its own
         // footprint, leaning with the slope so a bedroll or chest doesn't hover on the downhill side.
         const FVector2D Local = Structure.kind == Homestead::Piece::Bed ? FVector2D(95, -10)
-            : Structure.kind == Homestead::Piece::Chest ? FVector2D(-100, -100) : FVector2D(-100, 95);
+            : Structure.kind == Homestead::Piece::Chest ? FVector2D(-100, -100)
+            : Structure.kind == Homestead::Piece::Hearth ? FVector2D(0, 98) : FVector2D(-100, 95);
         const FVector2D Half = Structure.kind == Homestead::Piece::Bed ? FVector2D(35, 78)
-            : Structure.kind == Homestead::Piece::Chest ? FVector2D(35, 28) : FVector2D(34, 34);
+            : Structure.kind == Homestead::Piece::Chest ? FVector2D(35, 28)
+            : Structure.kind == Homestead::Piece::Hearth ? FVector2D(85, 32) : FVector2D(34, 34);
         const FVector Pivot = FVector(Center.x, Center.y, 0);
         const FVector AxisX = Rotation.RotateVector(FVector::ForwardVector);
         const FVector AxisY = Rotation.RotateVector(FVector::RightVector);
@@ -3221,6 +3252,91 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         return AddPart(Visual, Mesh, Base + Rotation.RotateVector(Offset), Size,
             bPreview ? (bValid ? PreviewColor : PreviewBlockedColor) : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
     };
+    // An imported kit mesh at the piece's pivot, keeping its own baked materials.
+    auto KitPart = [&](const TCHAR* Name, float HeightScale = 1.0f) -> UStaticMeshComponent*
+    {
+        UStaticMesh* Mesh = ManorMesh(Name);
+        if (!Mesh) return nullptr;
+        UStaticMeshComponent* Placed = Part(Mesh, FVector::ZeroVector, FVector(100.0f, 100.0f, 100.0f * HeightScale),
+            FLinearColor::White, true);
+        if (Placed && !bPreview)
+            for (int32 Slot = 0; Slot < Mesh->GetStaticMaterials().Num(); ++Slot)
+                Placed->SetMaterial(Slot, Mesh->GetMaterial(Slot));
+        return Placed;
+    };
+    if (Structure.skin == Homestead::StructureSkin::Stone)
+    {
+        const TCHAR* Kit = Structure.kind == Homestead::Piece::Foundation ? TEXT("StoneFoundation")
+            : Structure.kind == Homestead::Piece::Wall ? TEXT("StoneWall")
+            : Structure.kind == Homestead::Piece::Doorway ? TEXT("StoneDoorway")
+            : Structure.kind == Homestead::Piece::Roof ? TEXT("StoneRoof") : nullptr;
+        // The roof tiles only at yaw 0 about the building's own grid.
+        if (Kit && Structure.kind == Homestead::Piece::Roof) Rotation = FRotator(0, Frame.yaw, 0);
+        // The roof's joists run one way only, so the walls rise past their coping (258 cm) to the deck
+        // underside (279 cm): the joist ends bed into the masonry instead of leaving daylight between them.
+        const bool bWallPiece = Structure.kind == Homestead::Piece::Wall || Structure.kind == Homestead::Piece::Doorway;
+        if (Kit && KitPart(Kit, bWallPiece ? 1.085f : 1.0f)) return;
+    }
+    if (Structure.kind == Homestead::Piece::Hearth)
+    {
+        if (!KitPart(TEXT("StoneHearth")))
+        {
+            // Blockout until the hearth mesh is imported: jambs, lintel and breast.
+            Part(Cube, FVector(0, 85, 1.5f), FVector(192, 90, 3), Stone, true);
+            for (int Side : {-1, 1})
+                Part(Cube, FVector(Side * 70.5f, 98, 55), FVector(29, 64, 104), Stone, true);
+            Part(Cube, FVector(0, 97, 124), FVector(180, 67, 32), Stone, true);
+            Part(Cube, FVector(0, 98, 199), FVector(170, 64, 118), Stone, true);
+            Part(Cube, FVector(0, 126, 55), FVector(112, 8, 104), FLinearColor(0.03f, 0.028f, 0.026f));
+        }
+        if (bPreview) return;
+        const FVector Fire(0, 100, 0);
+        // Low flames licking up from the logs, and embers glowing under them.
+        Part(Cube, Fire + FVector(0, 4, 9), FVector(70, 26, 4), FLinearColor(0.9f, 0.18f, 0.02f), false,
+            FRotator::ZeroRotator, 2.2f);
+        const FVector Flames[] = {{-18, 0, 30}, {6, -3, 34}, {24, 3, 28}, {-4, 6, 40}};
+        const FVector FlameSizes[] = {{16, 12, 30}, {20, 14, 40}, {14, 11, 26}, {9, 8, 26}};
+        for (int I = 0; I < 4; ++I)
+        {
+            Part(Cone, Fire + Flames[I], FlameSizes[I], FLinearColor(0.95f, 0.26f, 0.03f), false, FRotator::ZeroRotator, 3.0f);
+            Part(Cone, Fire + Flames[I] - FVector(0, 0, 4), FlameSizes[I] * 0.55f, FLinearColor(1.0f, 0.66f, 0.16f),
+                false, FRotator::ZeroRotator, 4.5f);
+        }
+        UPointLightComponent* Light = NewObject<UPointLightComponent>(this);
+        Light->SetupAttachment(GetRootComponent());
+        Light->SetMobility(EComponentMobility::Movable);
+        // Just in front of the opening, so the room (not the firebox) takes the light.
+        Light->SetRelativeLocation(Base + Rotation.RotateVector(FVector(0, 55, 55)));
+        Light->SetLightColor(FLinearColor(1.0f, 0.45f, 0.16f));
+        Light->SetIntensity(5200.0f);
+        Light->SetAttenuationRadius(900.0f);
+        Light->SetSourceRadius(30.0f);
+        Light->SetCastShadows(true);
+        Light->RegisterComponent();
+        Visual.Components.Add(Light);
+        HearthLights.Add(Light);
+        if (!HearthCrackle)
+            HearthCrackle = LoadObject<USoundWave>(nullptr,
+                TEXT("/Game/SurvivalGame/Audio/Ambience/HearthCrackle.HearthCrackle"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+        if (HearthCrackle)
+        {
+            UAudioComponent* Crackle = NewObject<UAudioComponent>(this);
+            Crackle->SetupAttachment(GetRootComponent());
+            Crackle->SetRelativeLocation(Base + Rotation.RotateVector(Fire + FVector(0, 0, 30)));
+            Crackle->SetSound(HearthCrackle);
+            Crackle->bAutoActivate = false;
+            Crackle->bOverrideAttenuation = true;
+            Crackle->AttenuationOverrides.bAttenuate = true;
+            Crackle->AttenuationOverrides.bSpatialize = true;
+            Crackle->AttenuationOverrides.AttenuationShapeExtents = FVector(250.0f);
+            Crackle->AttenuationOverrides.FalloffDistance = 1600.0f;
+            Crackle->SetVolumeMultiplier(0.55f);
+            Crackle->RegisterComponent();
+            Crackle->Play(FMath::FRandRange(0.0f, 20.0f));
+            Visual.Components.Add(Crackle);
+        }
+        return;
+    }
     switch (Structure.kind)
     {
     case Homestead::Piece::Foundation:
@@ -3723,9 +3839,9 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     for (const auto& Structure : NearStructures)
     {
         const bool bOnFoundation = FoundationCells.Contains(FIntVector(Structure.cellX, Structure.cellY, Structure.buildingId));
-        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d"),
+        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d"),
             static_cast<int>(Structure.kind), Structure.buildingId, Structure.cellX, Structure.cellY, Structure.rotation,
-            Structure.fuelHours > 0, bOnFoundation);
+            Structure.fuelHours > 0, bOnFoundation, static_cast<int>(Structure.skin));
         FHomesteadWorldVisual& Visual = StructureVisuals.FindOrAdd(Structure.id);
         if (Visual.Signature != Signature)
         {

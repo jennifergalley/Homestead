@@ -35,8 +35,10 @@ const EstateLayout& ProvisionalEstateLayout()
         EstateLayout layout;
         layout.version = 2;
         layout.landmarks = {
-            {Anchor::StandingRoomOrigin, {-25500.0, -63900.0}, 8652.6, 0.0},
-            {Anchor::StandingRoomSpawn, {-25350.0, -64050.0}, 8652.6, 90.0},
+            // The standing room is 2 x 2 building cells (6 x 6 m) flush with the ruin's south-east
+            // corner; she wakes in line with its doorway on the west side, facing it.
+            {Anchor::StandingRoomOrigin, {-25600.0, -63800.0}, 8652.6, 0.0},
+            {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
             {Anchor::EstateGateway, {-5500.0, 9000.0}, 4916.0, 60.0},
             {Anchor::CoveBeach, {-65000.0, -51500.0}, 178.0, 215.0},
             {Anchor::MineEntrance, {-40500.0, -100000.0}, 7224.0, 0.0},
@@ -52,10 +54,10 @@ const EstateLayout& ProvisionalEstateLayout()
                 {{16000.0, -115000.0}, {16000.0, -25000.0}, {6000.0, -3000.0}, {-4000.0, 11000.0},
                  {-20000.0, -5000.0}, {-35000.0, -21000.0}, {-52000.0, -32000.0}, {-76000.0, -43000.0},
                  {-76000.0, -115000.0}}},
-            // The ruin is 18 x 30 m; the 8 x 8 m standing room is its carved-out south-east corner.
+            // The ruin is 18 x 30 m; the 6 x 6 m standing room is its carved-out south-east corner.
             {Anchor::ManorFootprint,
-                {{-24100.0, -66500.0}, {-24100.0, -63500.0}, {-25100.0, -63500.0}, {-25100.0, -64300.0},
-                 {-25900.0, -64300.0}, {-25900.0, -66500.0}}},
+                {{-24100.0, -66500.0}, {-24100.0, -63500.0}, {-25300.0, -63500.0}, {-25300.0, -64100.0},
+                 {-25900.0, -64100.0}, {-25900.0, -66500.0}}},
             {std::string(Anchor::ForSaleParcelPrefix) + "Woodland",
                 {{16000.0, -90000.0}, {60000.0, -90000.0}, {60000.0, -25000.0}, {16000.0, -25000.0}}},
             {std::string(Anchor::ForSaleParcelPrefix) + "MoorField",
@@ -121,7 +123,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
         for (const Point p : {Point{-700, 1400}, Point{-200, 1700}, Point{300, 1550}, Point{600, 1900}, Point{-900, 2000}, Point{100, 2100}})
             grow(ResourceKind::Weeds, p.x, p.y);
         // Rubble and rocks shed from the ruin.
-        for (const Point p : {Point{1500, -1500}, Point{1450, -500}, Point{-800, -2000}, Point{-800, -1000}, Point{0, -2700}})
+        for (const Point p : {Point{1900, -1500}, Point{1800, -500}, Point{-800, -2000}, Point{-800, -1000}, Point{0, -3100}})
             grow(ResourceKind::Rubble, p.x, p.y);
         for (const Point p : {Point{600, -2800}, Point{1700, -2400}, Point{-1100, 1800}})
             grow(ResourceKind::SmallRock, p.x, p.y);

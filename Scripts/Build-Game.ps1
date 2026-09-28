@@ -8,7 +8,8 @@ Builds the editor module, regenerates content and (with -Package) packages the D
                       current in this worktree; the editor module build still runs (a no-op when current).
 -SkipAssets           skips Fetch-Assets.ps1.
 UAT is single-instance machine-wide; this script waits for another worktree's package to finish
-(-WaitForUATMutex) instead of failing. Output: Build\Logs\bootstrap.log and Build\Logs\package-<time>.log.
+(-WaitForUATMutex) and makes UAT's inner UBT step wait for other worktrees' builds (-UbtArgs ...
+-WaitMutex) instead of failing. Output: Build\Logs\bootstrap.log and Build\Logs\package-<time>.log.
 The bootstrap re-saves many tracked .uassets; review git status and restore the ones you didn't mean
 to change. Shared-machine rules: .github\skills\unreal-editor-mcp\SKILL.md, sections 0 and 8.
 #>

@@ -35,7 +35,11 @@ enum class ToolKind : int { Axe, Hoe, Pail, Scythe, Billhook, Pickaxe, Count };
 enum class ToolTier : int { Worn, Iron, Steel, Master, Count };
 constexpr int ToolKindCount = static_cast<int>(ToolKind::Count);
 constexpr int ToolTierCount = static_cast<int>(ToolTier::Count);
-enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Count };
+// Hearth: the standing room's granite fireplace. It cooks like a cookfire and is always lit in
+// round 1; it can't be built.
+enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Hearth, Count };
+// How a building piece looks; the rules are the same. Stone is the old manor's granite masonry.
+enum class StructureSkin : int { Timber, Stone, Count };
 enum class CropKind : int { Roots, Berries, Count };
 
 constexpr double CellSize = 300.0;
@@ -192,6 +196,9 @@ struct Structure
     Inventory storage{};
     InventoryLayout layout;
     int buildingId = 0;
+    StructureSkin skin = StructureSkin::Timber;
+    // Part of the old manor (the standing room): not removable until the round-5 rebuild.
+    bool heritage = false;
 };
 
 // A turned rectangle on the ground: centre, half extents along its own axes, Unreal yaw in degrees.
@@ -280,6 +287,12 @@ struct State
     std::vector<Shop> shops;
     // Every tool starts worn; the blacksmith (round 3) raises them.
     std::array<ToolTier, ToolKindCount> toolTiers{};
+    // Chosen on the new-game Names page (UTF-8); empty on woodland games.
+    std::string heroineName;
+    std::string familyName;
+    std::string estateName;
+    // Field-book journal entries, oldest first, by key ("arrival"); see Manor::JournalTitle.
+    std::vector<std::string> journal;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -293,6 +306,10 @@ const char* PieceName(Piece piece);
 const char* CropName(CropKind kind);
 const char* RecipeRequirements(Recipe recipe);
 const char* PieceRequirements(Piece piece);
+// Whether the Build page offers the piece (the hearth belongs to the old house).
+bool IsBuildable(Piece piece);
+// Beds, chests, cookfires and the hearth: one per building cell, set inside it.
+bool IsFurniture(Piece piece);
 double StreamX(double y);
 bool IsNearWater(Point position);
 Point CellCenter(int cellX, int cellY);
@@ -368,6 +385,10 @@ public:
     // The fixed estate's anchors; the provisional layout until the game supplies the level's.
     const EstateLayout& Layout() const;
     void SetLayout(const EstateLayout& layout);
+    // The heroine's, her family's and the estate's names (see HomesteadManor.h for the rules).
+    Result SetNames(const std::string& heroine, const std::string& family, const std::string& estate);
+    // The estate's name for HUD and toasts ("Trevennor"); "the estate" before one is chosen.
+    std::string EstateName() const;
     // The baked placements a fixed-estate save is loaded against; set before Deserialize.
     void SetPlacements(const EstatePlacements& placements);
     // On the fixed estate, water comes from the level's authored water bodies (sea, estuary, river):
@@ -427,6 +448,9 @@ public:
     // Playtest kit: one of each early tool not already owned (carried or chested), a bed and two
     // storage chests in clear cells near `anchor` when none exist, and (for new games) seeds.
     Result GrantStarterKit(Point anchor, Point facing, bool includeSeeds);
+    // Playtest aid for woodland games: raise the heritage standing room centred on `centre`, its grid
+    // turned `yaw` degrees, if nothing stands in the way.
+    Result SeedStandingRoomAt(Point centre, double yaw);
     // Playtest aid: put `count` of an item in her pack if there is room.
     Result GrantItems(Item item, int count);
     // Till one garden square (garden coordinates, see GardenCell) with the stone hoe.

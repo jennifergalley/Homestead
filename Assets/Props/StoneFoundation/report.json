@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "StoneFoundation",
+  "description": "Building kit: 3 x 3 m foundation of pointed granite flagstones inside a ring of kerb stones on a rubble footing to Z -40; LOD1/LOD2 (original). Pivot = centre of the walking surface.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/stone_foundation.py",
+  "source_sha256": "31e43c0f2c409176fcde11dc568cb985e26fc020c0a31917f1714b595bae6d23",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StoneFoundation": {
+      "vertices": 6646,
+      "triangles": 11743,
+      "size_cm": [
+        301.2,
+        301.2,
+        40.3
+      ],
+      "materials": [
+        {
+          "name": "M_StoneFoundation",
+          "textures": {
+            "basecolor": "T_StoneFoundation_basecolor.png",
+            "roughness": "T_StoneFoundation_roughness.png",
+            "normal": "T_StoneFoundation_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneFoundation_basecolor.png",
+          "roughness": "T_StoneFoundation_roughness.png",
+          "normal": "T_StoneFoundation_normal.png",
+          "ao": "T_StoneFoundation_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.2,
+          -1.45,
+          0.35
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.5
+      },
+      "fbx": "SM_StoneFoundation.fbx",
+      "sha256": "2b2fd9c29bda7e23dda3582293c53783094c8a7dd3b854d994081c1aff35bd02",
+      "preview": "preview_SM_StoneFoundation.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StoneFoundation_hero.png",
+          "detail": "beauty_SM_StoneFoundation_detail.png",
+          "eye": "beauty_SM_StoneFoundation_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StoneFoundation_LOD1": {
+      "vertices": 3305,
+      "triangles": 5284,
+      "size_cm": [
+        301.31,
+        301.31,
+        40.25
+      ],
+      "materials": [
+        {
+          "name": "M_StoneFoundation",
+          "textures": {
+            "basecolor": "T_StoneFoundation_basecolor.png",
+            "roughness": "T_StoneFoundation_roughness.png",
+            "normal": "T_StoneFoundation_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneFoundation_basecolor.png",
+          "roughness": "T_StoneFoundation_roughness.png",
+          "normal": "T_StoneFoundation_normal.png",
+          "ao": "T_StoneFoundation_ao.png"
+        },
+        "shared_with": "SM_StoneFoundation"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.2,
+          -1.45,
+          0.35
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.5
+      },
+      "fbx": "SM_StoneFoundation_LOD1.fbx",
+      "sha256": "2c62ceb7ed76850f981c22817666a5973a5a79a86c9adc3504f7f58941f8393f",
+      "preview": "preview_SM_StoneFoundation_LOD1.png"
+    },
+    "SM_StoneFoundation_LOD2": {
+      "vertices": 1354,
+      "triangles": 1877,
+      "size_cm": [
+        301.39,
+        301.51,
+        40.25
+      ],
+      "materials": [
+        {
+          "name": "M_StoneFoundation",
+          "textures": {
+            "basecolor": "T_StoneFoundation_basecolor.png",
+            "roughness": "T_StoneFoundation_roughness.png",
+            "normal": "T_StoneFoundation_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StoneFoundation_basecolor.png",
+          "roughness": "T_StoneFoundation_roughness.png",
+          "normal": "T_StoneFoundation_normal.png",
+          "ao": "T_StoneFoundation_ao.png"
+        },
+        "shared_with": "SM_StoneFoundation"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.2,
+          -1.45,
+          0.35
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.5
+      },
+      "fbx": "SM_StoneFoundation_LOD2.fbx",
+      "sha256": "677472528d0d6a7ef18cffe2eaeeec718222e63c8b035da8633dcd9a3a6ed371",
+      "preview": "preview_SM_StoneFoundation_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Centre of the square on the walking surface (0, 0, 0)",
+  "extent_cm": {
+    "x": [
+      -150,
+      150
+    ],
+    "y": [
+      -150,
+      150
+    ],
+    "z": [
+      -40,
+      0.3
+    ]
+  },
+  "placement": "300 cm grid; yaw irrelevant (any multiple of 90 works). Sink the footing into the ground.",
+  "textures": {
+    "T_StoneFoundation_basecolor.png": "ecf010767f66b2b20438d5dc5add547716bf948d405d7d6a475b48e210e6b4b8",
+    "T_StoneFoundation_roughness.png": "8db843d3280930ae9eeb6350794bba8072fb63539c872db2a776b9435c0dc8f0",
+    "T_StoneFoundation_normal.png": "6ce749a6f1cc0c80b68153708eaf3223cbb90feeb2f22a2e1574149b77ac65e5"
+  }
+}

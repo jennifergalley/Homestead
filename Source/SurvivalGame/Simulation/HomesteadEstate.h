@@ -17,7 +17,7 @@ namespace Anchor
 {
 // Points (position, ground height, facing yaw).
 constexpr const char* StandingRoomSpawn = "StandingRoomSpawn"; // Where she wakes; yaw faces the door.
-constexpr const char* StandingRoomOrigin = "StandingRoomOrigin"; // Cell (0,0) of the heritage room; yaw is its grid heading.
+constexpr const char* StandingRoomOrigin = "StandingRoomOrigin"; // Centre of the heritage room; yaw is its grid heading.
 constexpr const char* EstateGateway = "EstateGateway";
 constexpr const char* CoveBeach = "CoveBeach";
 constexpr const char* MineEntrance = "MineEntrance";

@@ -93,7 +93,8 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
         [this]()
         {
             const auto Rows = Controller->Rows();
-            if (Controller->BookPage() != 2 || Rows.Num() != static_cast<int32>(Homestead::Piece::Count)
+            // Every buildable piece in enum order; the hearth belongs to the old house.
+            if (Controller->BookPage() != 2 || Rows.Num() != static_cast<int32>(Homestead::Piece::Hearth)
                 || Controller->BookTitle() != TEXT("Building plans") || !Controller->BookFooter().Contains(TEXT("A: plan"))) return false;
             for (int32 Id = 0; Id < Rows.Num(); ++Id)
             {

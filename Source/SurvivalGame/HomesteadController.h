@@ -20,8 +20,10 @@ namespace HomesteadMenus { class SHomesteadHotbar; }
 using SHomesteadHotbar = HomesteadMenus::SHomesteadHotbar;
 namespace HomesteadMenus { class SHomesteadShop; }
 class AHomesteadGeneralStore;
+namespace HomesteadMenus { class SHomesteadNames; class SHomesteadArrival; }
 class IInputProcessor;
 class AHomesteadMenuPortrait;
+class UHomesteadMapComponent;
 class SWidget;
 
 enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe };
@@ -194,11 +196,29 @@ public:
     // field book is open, so its preview shows it), or Item::Count.
     Homestead::Item SelectedCarriedTool() const;
     bool ShouldShowHotbar() const;
+    // The estate map's snapshot, minimap and boundary toast.
+    UHomesteadMapComponent* MapPresenter() const { return Map; }
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
     // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
     UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
+    // Console playtest aid (woodland games): raise the manor's standing room around her, its
+    // doorway ahead, as a new estate game would, and replay the arrival title card.
+    UFUNCTION(Exec) void HomesteadStandingRoom();
+    // Console playtest aid: run the new-game setup (Appearance, then Names, then the arrival card)
+    // on the current game without resetting it.
+    UFUNCTION(Exec) void HomesteadNewGameSetup();
+    // The new-game flow after a new estate game: Appearance, then the Names step, then the arrival.
+    void BeginNewGameSetup();
+    bool IsNamingSetup() const { return NamesWidget.IsValid(); }
+    bool IsNewGameSetup() const { return bNewGameSetup; }
+    TSharedPtr<HomesteadMenus::SHomesteadNames> NamesStep() const { return NamesWidget; }
+    // The estate title card over the first view; it never blocks input.
+    void ShowArrival();
+    bool IsArrivalShowing() const { return ArrivalCard.IsValid(); }
+    // "Eleanor Trelawney — Trevennor, Spring 1" for the current game (empty for unnamed woodland).
+    FString CurrentSaveLabel() const;
     // Console playtest aid: make one garment from freshly granted materials and put it on
     // (key or name, e.g. HomesteadWear fur-coat).
     UFUNCTION(Exec) void HomesteadWear(const FString& Garment);
@@ -249,7 +269,8 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor };
+    friend class UHomesteadMapComponent;
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
@@ -265,6 +286,7 @@ private:
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
     UPROPERTY() TObjectPtr<AHomesteadWorld> Landscape;
+    UPROPERTY() TObjectPtr<UHomesteadMapComponent> Map;
     UPROPERTY() TObjectPtr<UAudioComponent> Music;
     UPROPERTY() TObjectPtr<UAudioComponent> Ambience;
     // The creek's burble: a looping, attenuated source kept at the point of the stream nearest
@@ -418,6 +440,16 @@ private:
     TSharedPtr<SHomesteadMenu> NativeMenu;
     TSharedPtr<SHomesteadHotbar> HotbarWidget;
     TSharedPtr<SWidget> HotbarRoot;
+    // add-ruined-manor-and-arrival: the Names step and the arrival title card.
+    bool bNewGameSetup = false;
+    TSharedPtr<HomesteadMenus::SHomesteadNames> NamesWidget;
+    TSharedPtr<SWidget> NamesRoot;
+    TSharedPtr<HomesteadMenus::SHomesteadArrival> ArrivalCard;
+    FString LatestSaveLabel;
+    void ShowNames();
+    void HideNames();
+    void FinishNames(const FString& Heroine, const FString& Family, const FString& Estate);
+    void UpdateArrival();
     TSharedPtr<IInputProcessor> MenuPointerInput;
     UPROPERTY() TObjectPtr<AHomesteadMenuPortrait> MenuPortrait;
     FSlateBrush PortraitBrush;
@@ -480,6 +512,7 @@ private:
     void OpenCraft();
     void OpenBuild();
     void OpenJournal();
+    void OpenMap();
     void PreviousPage();
     void NextPage();
     void PreviousRow();

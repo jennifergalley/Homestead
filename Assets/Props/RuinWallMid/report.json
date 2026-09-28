@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "RuinWallMid",
+  "description": "Ruined manor: a 6 m granite rubble run fallen to 1.8-3.8 m, with one ground-floor sash opening (original).",
+  "collision": "box",
+  "triangle_budget": 400000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/ruin_wall_mid.py",
+  "source_sha256": "45b7f95ce7bd18d8be469aca68fbc0aa39d26488b479b60a8223c30c395463dc",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RuinWallMid": {
+      "vertices": 23622,
+      "triangles": 41908,
+      "size_cm": [
+        600.47,
+        61.76,
+        384.66
+      ],
+      "materials": [
+        {
+          "name": "M_RuinWallMid",
+          "textures": {
+            "basecolor": "T_RuinWallMid_basecolor.png",
+            "roughness": "T_RuinWallMid_roughness.png",
+            "normal": "T_RuinWallMid_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinWallMid_basecolor.png",
+          "roughness": "T_RuinWallMid_roughness.png",
+          "normal": "T_RuinWallMid_normal.png",
+          "ao": "T_RuinWallMid_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.6,
+          0.9,
+          1.4
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinWallMid.fbx",
+      "sha256": "a3d6c3fabc038872b050fc44a9eddd644a48d56ef78545bc7ce2d1f5878fb893",
+      "preview": "preview_SM_RuinWallMid.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RuinWallMid_hero.png",
+          "detail": "beauty_SM_RuinWallMid_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RuinWallMid_LOD1": {
+      "vertices": 9368,
+      "triangles": 14667,
+      "size_cm": [
+        600.53,
+        61.76,
+        384.76
+      ],
+      "materials": [
+        {
+          "name": "M_RuinWallMid",
+          "textures": {
+            "basecolor": "T_RuinWallMid_basecolor.png",
+            "roughness": "T_RuinWallMid_roughness.png",
+            "normal": "T_RuinWallMid_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinWallMid_basecolor.png",
+          "roughness": "T_RuinWallMid_roughness.png",
+          "normal": "T_RuinWallMid_normal.png",
+          "ao": "T_RuinWallMid_ao.png"
+        },
+        "shared_with": "SM_RuinWallMid"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.6,
+          0.9,
+          1.4
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinWallMid_LOD1.fbx",
+      "sha256": "eb7c1b01b757666ac8d8840d54a7cb273da03a8c20058a9d589c7877d9fb9c59",
+      "preview": "preview_SM_RuinWallMid_LOD1.png"
+    },
+    "SM_RuinWallMid_LOD2": {
+      "vertices": 3701,
+      "triangles": 5028,
+      "size_cm": [
+        599.5,
+        61.64,
+        384.31
+      ],
+      "materials": [
+        {
+          "name": "M_RuinWallMid",
+          "textures": {
+            "basecolor": "T_RuinWallMid_basecolor.png",
+            "roughness": "T_RuinWallMid_roughness.png",
+            "normal": "T_RuinWallMid_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinWallMid_basecolor.png",
+          "roughness": "T_RuinWallMid_roughness.png",
+          "normal": "T_RuinWallMid_normal.png",
+          "ao": "T_RuinWallMid_ao.png"
+        },
+        "shared_with": "SM_RuinWallMid"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.6,
+          0.9,
+          1.4
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_RuinWallMid_LOD2.fbx",
+      "sha256": "79d98e4204b9d454f8a651ff11ff822b9177c0f702aedad1787be7bd702b2126",
+      "preview": "preview_SM_RuinWallMid_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents below are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Base centre of the run (0, 0, 0); the run lies along X, faces at Y +-28, footing buried to Z -15.",
+  "placement": "Yaw 0/90/180/270 along the manor walls; butt runs end to end (their ends are dressed quoins).",
+  "textures": {
+    "T_RuinWallMid_basecolor.png": "76a04f09201002e8df0e3af0d267b9b6ad0ae0c2cc746f2209cd50e2f9430809",
+    "T_RuinWallMid_roughness.png": "b60fac98a14dc84615679a391140971b80c9e768c62b9e3e6ba8d71465792b7d",
+    "T_RuinWallMid_normal.png": "324da5bd378f8e14ff01ea53083e68491c58b2721f3b738cae466259d21b8b7b"
+  }
+}
