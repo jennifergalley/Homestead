@@ -129,7 +129,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Modal "Restore Packages" at startup blocks MCP; `Start-EditorMcp.ps1` times out with "MCP did not answer"; Escape doesn't dismiss it | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | `Start-EditorMcp.ps1` now deletes a stale restore file before launching (when this worktree has no editor running). If a dialog is already up: kill that editor, delete `Saved\Autosaves`, relaunch. Quit with `quit_editor()` next time. |
 | Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
-| `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`. |
+| `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
+| The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
@@ -261,7 +262,7 @@ clashes between parallel callers.
 | `py <code>` | `run_python` (needs `-AllowPython`), returns the output text |
 | `con <command>` | console command in PIE with the player controller (editor world outside PIE) |
 | `shot` | `CaptureEditorImage`, returns the PNG path |
-| `hshot [WxH]` | `HighResShot` in PIE, returns the new `Saved\Screenshots\WindowsEditor` PNG (more reliable than `shot`) |
+| `hshot [WxH]` | `HighResShot` in PIE, returns the new `Saved\Screenshots\WindowsEditor` PNG. Reliable for the world and the Canvas HUD, but **Slate widgets (hotbar, `SHomesteadVitals`, the field book) aren't in it**: check UI with `shot` or a standalone `[GameWin]::Capture` |
 | `pie` / `unpie` | start PIE in the viewport / stop it; poll `st` for `worldReady` |
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
@@ -650,6 +651,9 @@ C++. Details that cost time to find:
   `GatherReedsTiming`. The stems stand at `kneel_reeds.STEMS` (34 cm ahead, 10 cm to her right,
   clear of the forward knee); the C++ settle uses the same offsets. The arms can't reach lower
   than about 30 cm while kneeling, so keep grasp and cut heights around there.
+- A bake (`rig_authoring`, `craft_hands`, ...) leaves a `HeroineRigAuthoring` actor in the level and the
+  Sequencer open. Clean up afterwards: `unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)`
+  and `unreal.LevelSequenceEditorBlueprintLibrary.close_level_sequence()`, and don't save the level.
 - Never bake a clip while PIE is running: the bake opens a hidden "Overwrite Existing Object"
   modal behind the PIE window that doesn't take input and blocks MCP. Stop PIE first; if it
   happens anyway, `Stop-Process` the editor by PID and restart it.
@@ -718,7 +722,7 @@ A PIE screenshot that is always the right window: run the console command `shot 
 (`con 'shot showui'`). It writes `Saved\Screenshots\WindowsEditor\ScreenShotNNNNN.png` with the
 HUD, independent of which monitor or window is in front. With in-viewport PIE it captures the whole
 editor window at native resolution (3840x2076 here), so crop the viewport yourself; `hshot`
-(HighResShot) captures just the game view. To judge foliage wind while she stands still, record about 6 s with
+(HighResShot) captures just the game view, without Slate UI. To judge foliage wind while she stands still, record about 6 s with
 ddagrab, decode to grayscale at half size and look at the per-pixel standard deviation over
 time (`v.std(0)`, scaled ×8); moving leaves light up, still ground stays black.
 
