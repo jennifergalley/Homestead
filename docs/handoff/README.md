@@ -171,7 +171,11 @@ starting.
 3. Every lane's kickoff prompt includes: "Read `docs\handoff\README.md` and `round-<n>.md` first.
    Send findings and blockers to the docs agent `<id>`. Your MCP port is `<p>`. Don't package:
    deliver through 'Delivering lane work' and message me when an increment is ready."
-4. Point lanes at the shared-machine rules (editor skill, section 0).
+4. Point lanes at the shared-machine rules (editor skill, section 0), especially the **2-Unreal-process
+   limit**: with several lanes, editors take turns. Lanes close their editor as soon as a verification
+   pass is done. Perf measurements need the machine to themselves (one Unreal process, no builds):
+   claim it with `Scripts\Start-PerfWindow.ps1`, which holds off other launches until
+   `Stop-PerfWindow.ps1`.
 5. `create_session` can time out creating the worktree (`git command timed out after 300 seconds`)
    and still start the session on a half-checked-out tree. Every lane's first step is to confirm that
    `git status` is clean and `SurvivalGame.uproject` exists; if not, `git reset --hard HEAD`.

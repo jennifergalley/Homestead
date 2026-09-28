@@ -77,8 +77,13 @@ next five sessions.
 
 The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 
-- **At most 3 Unreal processes on the machine** in total: editors, packaged games and commandlets
-  all count. Check with `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*`.
+- **At most 2 Unreal processes on the machine** in total: editors, packaged games and commandlets
+  all count. `Start-EditorMcp.ps1` refuses a third; check other launches with
+  `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*`. Each editor commits 15-17 GB, and three
+  filled RAM and grew the pagefile on C: to 81.5 GB. **Close your editor as soon as a verification
+  pass is done.**
+- **Perf measurements get the machine to themselves:** one Unreal process, no builds. Claim it with
+  `Scripts\Start-PerfWindow.ps1` and release it with `Stop-PerfWindow.ps1`.
 - **Give your editor its own MCP port** (`Start-EditorMcp.ps1 -Port 87xx`) and set
   `$env:UNREAL_MCP_URL` to match. Port 8765 and the native `unreal` MCP tools may belong to another
   worktree's editor.

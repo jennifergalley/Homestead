@@ -29,8 +29,11 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   compile-check with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then message
   the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
   line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
-- **At most 3 Unreal processes on the machine**, counting editors, packaged games and commandlets
-  (`UnrealEditor-Cmd` imports and bootstraps too). `Start-EditorMcp.ps1` refuses to launch at 3 and
+- **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
+  packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
+  15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
+  81.5 GB and filled the drive. **Close your editor as soon as a verification pass is done**
+  (`Stop-MyEditor.ps1`). `Start-EditorMcp.ps1` refuses to launch at 2 and
   lists who owns them (`-Force` overrides). For other launches (a standalone game, a commandlet), check
   in the same command, right before starting:
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
@@ -54,7 +57,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   also covers hand-launched editors and `-game` runs), and it no longer loads `LiveCodingToolset`,
   whose `CompileLiveCoding` switches Live Coding on for the session whatever the setting says. For C++
   changes, quit the editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when
-  you must judge RT lighting and fewer than three Unreal processes are running. PIE lighting
+  you must judge RT lighting and no other Unreal process is running. PIE lighting
   therefore differs from the packaged build, which has RT on.
 - **Close your editor** before `git pull`/`rebase` (it locks `.uasset` files), before building
   `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
@@ -70,6 +73,20 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
   Scripts that refuse to run while any Unreal process exists (`Invoke-ShippingQA.ps1`,
   `Test-AuthoringSettings.ps1`) need an idle machine; coordinate through the orchestrator.
+- **Perf and frame-rate measurements need the machine to yourself** (Jenny, 2026-09-28): only ONE
+  Unreal process (the one you measure) and no UBT/`cl.exe` builds. With several editors and builds
+  running, readings swung about 5x (render thread 20 ms vs 97-118 ms). Before measuring, run
+  `Scripts\Start-PerfWindow.ps1 -Purpose '<what>'` (add `-ProcessId <pid>` for a standalone game you
+  launched). It refuses, naming every other Unreal process and build, unless yours is the only one,
+  and then writes `E:\CopilotScratch\homestead-perf.lock`. While that lock is under 20 minutes old,
+  `Start-EditorMcp.ps1` in other worktrees refuses to launch. Ask owners with `mailbox_send` to close or
+  pause, and run `Scripts\Stop-PerfWindow.ps1` as soon as you're done. Don't build while someone
+  else holds the window.
+- **Nothing that pops up on Jenny's desktop.** Don't use `startfpschart`/`stopfpschart`: every dump
+  opens an Explorer window on `Saved\Profiling\FPSChartStats\<timestamp>`, and she asked us to stop.
+  For frame times, use `stat unit` / `ProfileGPU` output from the log, or `Playtest-Visual.ps1
+  -PresentationDiagnostics` and csvprofile (section 9). If you really need an FPS chart, set
+  `t.FPSChart.OpenFolderOnDump 0` first (`ChartCreation.cpp`).
 - **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
   `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
   fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
@@ -93,7 +110,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 ```powershell
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
-Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 2? (Start-EditorMcp checks too)
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
@@ -119,16 +136,18 @@ Search this table for the error text before debugging. Add a row when you solve 
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
 | Every MCP call times out for minutes, but the editor process is still responding | The shared zenserver (`%LOCALAPPDATA%\UnrealEngine\Common\Zen`) stopped answering and the game thread is blocked on it; it recovers by itself (one stall lasted 1009 s: `post recovery finished in 1009.384 seconds`) | Search `Saved\Logs\SurvivalGame.log` for `LogZenServiceInstance` and wait. Don't kill the editor, and never stop `zenserver.exe`. |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
-| `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
-| `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
+| `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 2 Unreal processes. |
+| `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Keep to the 2-process limit, and close idle editors. |
+| C: fills up, and the machine is sluggish with 3 editors open | Each editor commits 15-17 GB of private memory. With three open, only 0.7 GB of RAM was free and the system-managed `C:\pagefile.sys` grew to 81.5 GB. It doesn't shrink until a reboot | At most 2 Unreal processes (`Start-EditorMcp.ps1` enforces it). Close editors as soon as you're done. If C: is already full, ask Jenny to reboot to shrink the pagefile. |
 | MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
 | Modal "Restore Packages" at startup blocks MCP; `Start-EditorMcp.ps1` times out with "MCP did not answer"; Escape doesn't dismiss it | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | `Start-EditorMcp.ps1` now deletes a stale restore file before launching (when this worktree has no editor running). If a dialog is already up: kill that editor, delete `Saved\Autosaves`, relaunch. Quit with `quit_editor()` next time. |
 | Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
-| `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`. |
+| `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
+| The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
-| A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
+| A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
 | A mesh draws the Default Material only in the packaged build (for example the ruin kit, scenery granite) | The base material lacks a usage flag for how the mesh is drawn; the editor log says `missing usage flag InstancedStaticMeshes/Nanite! Default Material will be used in game` | Set the usage flag on the base material (`bUsedWithInstancedStaticMeshes`, `bUsedWithNanite`), not the instance. `M_PropTextured` now has both, and `Scripts\Blender\import_props.py` keeps them on every bootstrap; `M_Fern02` and `M_Shrub04` got ISM. Search the editor log for that line before packaging new materials. |
 | Landscape grass (`LandscapeGrassOutput` + `LandscapeGrassType`) produces empty `GrassInstancedStaticMeshComponent`s in PIE on the Estate | Unknown (UE 5.8); also with `grass.GrassMap.UseRuntimeGeneration=1`, which needs an editor restart because the value is cached per shader platform | Gated off. Don't spend time on it without a new idea; scatter grass another way. |
 | Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset and clear its graph. `MaterialEditingLibrary.delete_all_material_expressions` alone leaves nodes behind on rebuilds (71 → 35; a second `LandscapeGrassOutput` survived). Symptoms: "only one Single Layer Water Material node", "The material can contain only one Landscape Grass node", missing-input errors, `get_statistics` vs/ps 0, and a silent fallback to the default grid. After `delete_all`, loop over `get_material_expressions` calling `delete_material_expression`, then assert `get_num_material_expressions(m) == 0` (`Scripts\Terrain\build_landscape_material.py` does this). |
@@ -175,11 +194,18 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `LineTraceComponent` never hits a mesh (returns false), even in PIE, though world traces do | `UPrimitiveComponent::LineTraceComponent` doesn't hit **Nanite** static mesh components | Trace the world (`World->LineTraceSingleByChannel`, or `line_trace_single` in Python) with other components ignored, and check `Hit.GetComponent()`. The terrain `ProceduralMeshComponent`s aren't Nanite, so component traces still work on them. |
 | Estate traces return None or captures show missing land right after PIE starts | World Partition is still streaming (about 55 s on the Estate) | Wait about a minute after `worldReady` before tracing or capturing, or take Z from the heightmap (row below). |
 | `FMath::Max(SomeTArray)` doesn't compile | There's no TArray overload | Loop, or use `Algo::MaxElement`. |
+| `FVector2D` has no `Rotation()` | Only `FVector` does | Use `GetRotated(Degrees)`, or build the vector yourself. |
+| Every mesh of a runtime-built ISM actor shows twice in PIE | PIE duplicates the editor instance's instance components, but not a transient list of them (`AHomesteadManorRuin` / `AHomesteadDerelictFarm` pattern: a transient `Parts` array plus `AddInstanceComponent`) | In `Rebuild`, destroy every `UInstancedStaticMeshComponent` from `GetComponents<>()`, not only the tracked ones. |
+| `import_props` fails: the FBX `changed after the Blender build` | It checks each FBX's sha256 against the recipe's `report.json`, and a Blender agent was still rebuilding | Import only after the Blender build has finished. |
+| `Start-EditorMcp.ps1` sits in its `Build.bat` step for a long time | The build waits on another worktree's UBT (the queue can take about 50 min) | Expected. If the module is already built (for example you ran `Build.bat SurvivalGameEditor ... -WaitMutex` yourself), launch with `-SkipBuild`. |
 | A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
 | A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. A 3840x2160 PNG is about 11 MB, over the `view` tool's 10 MB limit: downscale or crop it with PIL before viewing. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | After `BugItGo` she walks through walls and counters, sinks knee-deep into floors, or, holding W, flies level and goes under the terrain where the road climbs, so "Recovered the character above the generated terrain" fires over and over (looks like missing landscape collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`): flying, no collision | Send `Walk` straight after every `BugItGo`, including in scripted walk drivers. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
+| An Explorer window pops up on Jenny's desktop during a perf run | `startfpschart`/`stopfpschart` opens the `Saved\Profiling\FPSChartStats\<timestamp>` folder on every dump (`t.FPSChart.OpenFolderOnDump`, default on) | Don't use FPS charts; use `stat unit` / `ProfileGPU` log output or csvprofile. If you must, set `t.FPSChart.OpenFolderOnDump 0` first. |
+| Frame times swing wildly between runs (for example render thread 20 ms vs 97-118 ms) | Other editors or UBT/`cl.exe` builds were running | Measure only inside a perf window: `Start-PerfWindow.ps1` checks one Unreal process and no builds, and holds off other launches. |
+| `Start-EditorMcp.ps1`: "Perf window held by <worktree>" | Another session is measuring performance (`E:\CopilotScratch\homestead-perf.lock`, under 20 min old) | Wait for its `Stop-PerfWindow.ps1` or for the lock to go stale (20 min). `-Force` overrides; don't use it just to skip the wait. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
 | `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
 
@@ -257,7 +283,7 @@ clashes between parallel callers.
 | `py <code>` | `run_python` (needs `-AllowPython`), returns the output text |
 | `con <command>` | console command in PIE with the player controller (editor world outside PIE) |
 | `shot` | `CaptureEditorImage`, returns the PNG path |
-| `hshot [WxH]` | `HighResShot` in PIE, returns the new `Saved\Screenshots\WindowsEditor` PNG (more reliable than `shot`) |
+| `hshot [WxH]` | `HighResShot` in PIE, returns the new `Saved\Screenshots\WindowsEditor` PNG. Reliable for the world and the Canvas HUD, but **Slate widgets (hotbar, `SHomesteadVitals`, the field book) aren't in it**: check UI with `shot` or a standalone `[GameWin]::Capture` |
 | `pie` / `unpie` | start PIE in the viewport / stop it; poll `st` for `worldReady` |
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
@@ -362,6 +388,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   `Gamepad_RightTrigger`, `Gamepad_RightTriggerAxis` and `E` silently do nothing. After gamepad taps,
   `Gamepad_FaceButton_Bottom` works and `E` doesn't. To swing from a gamepad sequence, pick the tool
   with the D-pad or `hotbarSlot` rather than number keys.
+- **Test clearing anywhere without the salvage route:** `HomesteadGive Scythe 1` or `HomesteadGive Billhook 1`
+  (console, with the player controller) grants the tool directly. Then tap `Three` or `One` and
+  `LeftMouseButton` (keyboard mode throughout). Verified on the derelict farm's 550000+ weeds and a thin bramble.
 - **Tool swings are refused while she's moving.** Any velocity or acceleration blocks the action
   in the anim instance, so an action key right after `set_sticks` or `walk_to` is silently dropped.
   `release_all`, wait until `speedCmPerSec` is 0, then act.
@@ -646,6 +675,9 @@ C++. Details that cost time to find:
   `GatherReedsTiming`. The stems stand at `kneel_reeds.STEMS` (34 cm ahead, 10 cm to her right,
   clear of the forward knee); the C++ settle uses the same offsets. The arms can't reach lower
   than about 30 cm while kneeling, so keep grasp and cut heights around there.
+- A bake (`rig_authoring`, `craft_hands`, ...) leaves a `HeroineRigAuthoring` actor in the level and the
+  Sequencer open. Clean up afterwards: `unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)`
+  and `unreal.LevelSequenceEditorBlueprintLibrary.close_level_sequence()`, and don't save the level.
 - Never bake a clip while PIE is running: the bake opens a hidden "Overwrite Existing Object"
   modal behind the PIE window that doesn't take input and blocks MCP. Stop PIE first; if it
   happens anyway, `Stop-Process` the editor by PID and restart it.
@@ -714,7 +746,7 @@ A PIE screenshot that is always the right window: run the console command `shot 
 (`con 'shot showui'`). It writes `Saved\Screenshots\WindowsEditor\ScreenShotNNNNN.png` with the
 HUD, independent of which monitor or window is in front. With in-viewport PIE it captures the whole
 editor window at native resolution (3840x2076 here), so crop the viewport yourself; `hshot`
-(HighResShot) captures just the game view. To judge foliage wind while she stands still, record about 6 s with
+(HighResShot) captures just the game view, without Slate UI. To judge foliage wind while she stands still, record about 6 s with
 ddagrab, decode to grayscale at half size and look at the per-pixel standard deviation over
 time (`v.std(0)`, scaled ×8); moving leaves light up, still ground stays black.
 
@@ -778,6 +810,8 @@ Extend it there when play needs a capability; prefer real input over state edits
   fix this file.
 - Record game bugs you find while playing as OpenSpec changes in `openspec/changes` (repo
   convention; not GitHub issues). The 2026-09-25 findings live in `fix-editor-playtest-findings`.
+- Measure only inside a perf window (section 0: one Unreal process, no builds, `Start-PerfWindow.ps1`);
+  numbers taken alongside other editors or builds aren't comparable.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
   performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
   -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over
@@ -800,7 +834,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
   script builds the game target with `-WaitMutex`, waits for UAT (`-WaitForUATMutex`) behind other worktrees, and cooks without the shared Zen store (`-SkipZenStore`). Each Unreal step counts
-  toward the 3-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
+  toward the 2-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
   `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
@@ -821,7 +855,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   fullscreen), wait for `MUSIC_TRACK started` in that log
   plus about 20 s, then dot-source `Scripts\GameWindow.ps1`: `Find-GameWindow -ProcessId <pid>`,
   `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
-  and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 3-process limit; close it
+  and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 2-process limit; close it
   by PID. This isn't packaging, so lanes may run it.
 - **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
