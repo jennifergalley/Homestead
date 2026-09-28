@@ -148,6 +148,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
+| `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
@@ -396,6 +397,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - **Test clearing anywhere without the salvage route:** `HomesteadGive Scythe 1` or `HomesteadGive Billhook 1`
   (console, with the player controller) grants the tool directly. Then tap `Three` or `One` and
   `LeftMouseButton` (keyboard mode throughout). Verified on the derelict farm's 550000+ weeds and a thin bramble.
+- **Gather props (clearing lane, `bb6eb697`):** kneel-gather props are hidden on cancel, on a chained gather
+  and whenever her hands are idle, and a gather requested while her hands are busy is queued rather than
+  refused. A prop left stuck to her hand or arm is a regression; report it.
 - **Tool swings are refused while she's moving.** Any velocity or acceleration blocks the action
   in the anim instance, so an action key right after `set_sticks` or `walk_to` is silently dropped.
   `release_all`, wait until `speedCmPerSec` is 0, then act.
@@ -623,6 +627,8 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
   her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
   when she kneels; use them only for a specific close-up, and share the full-body view too.
+- A single `hshot` of a short action misses its start (about 3 s to capture): press the action key,
+  wait about 1-1.5 s, then capture, or use the faster `shot` viewport capture.
 - Contact sheets of an action: `hshot` (HighResShot) takes about 3-4 s per still, so slow the action
   with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below). Material
   `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
