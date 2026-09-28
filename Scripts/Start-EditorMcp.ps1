@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-Builds the editor module and opens this worktree's Unreal Editor with Epic's MCP server.
+Builds the editor module (skipped when it's already built from the current sources; -ForceBuild
+builds anyway, -SkipBuild never builds) and opens this worktree's Unreal Editor with Epic's MCP server.
 .DESCRIPTION
 Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 first on a shared machine).
 - Several worktrees share this PC. Give each editor its own -Port (for example 8766-8799) and set
@@ -29,6 +30,7 @@ param(
     [switch]$AllowPython,
     [switch]$RayTracing,
     [switch]$SkipBuild,
+    [switch]$ForceBuild,
     [switch]$Force,
     [int]$TimeoutSeconds = 600
 )
@@ -136,9 +138,8 @@ if (Test-Path -LiteralPath $restore) {
 }
 
 if (-not $SkipBuild) {
-    $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
-    & $build SurvivalGameEditor Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
-    if ($LASTEXITCODE -ne 0) { throw "Unreal editor-module build failed ($LASTEXITCODE)." }
+    # Skips UBT (and its machine-wide queue) when the editor was already built from these exact sources.
+    & (Join-Path $PSScriptRoot 'Invoke-UnrealBuild.ps1') -Target SurvivalGameEditor -EngineRoot $engine -Force:$ForceBuild
 }
 
 $editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
