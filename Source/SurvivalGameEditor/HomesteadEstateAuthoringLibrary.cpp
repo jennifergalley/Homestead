@@ -20,11 +20,11 @@
 
 namespace
 {
-constexpr int32 EstateVerts = 4033;
-constexpr int32 QuadsPerSection = 63;
-constexpr int32 SectionsPerComponent = 2;
+constexpr int32 EstateAuthoringVerts = 4033;
+constexpr int32 EstateAuthoringQuadsPerSection = 63;
+constexpr int32 EstateAuthoringSectionsPerComponent = 2;
 
-bool LoadGreyPng(const FString& Path, int32 BitDepth, int32& OutWidth, int32& OutHeight, TArray64<uint8>& OutRaw)
+bool EstateLoadGreyPng(const FString& Path, int32 BitDepth, int32& OutWidth, int32& OutHeight, TArray64<uint8>& OutRaw)
 {
     TArray64<uint8> File;
     if (!FFileHelper::LoadFileToArray(File, *Path))
@@ -38,7 +38,7 @@ bool LoadGreyPng(const FString& Path, int32 BitDepth, int32& OutWidth, int32& Ou
     return Wrapper->GetRaw(ERGBFormat::Gray, BitDepth, OutRaw);
 }
 
-ULandscapeLayerInfoObject* FindOrCreateLayerInfo(const FString& PackagePath, FName LayerName)
+ULandscapeLayerInfoObject* EstateFindOrCreateLayerInfo(const FString& PackagePath, FName LayerName)
 {
     const FString AssetName = FString::Printf(TEXT("LI_%s"), *LayerName.ToString());
     const FString PackageName = PackagePath / AssetName;
@@ -72,12 +72,12 @@ FString UHomesteadEstateAuthoringLibrary::CreateEstateLandscape(const FString& H
 
     int32 Width = 0, Height = 0;
     TArray64<uint8> Raw;
-    if (!LoadGreyPng(HeightmapPng, 16, Width, Height, Raw))
+    if (!EstateLoadGreyPng(HeightmapPng, 16, Width, Height, Raw))
         return FString::Printf(TEXT("error: can't read 16-bit PNG %s"), *HeightmapPng);
-    if (Width != EstateVerts || Height != EstateVerts)
-        return FString::Printf(TEXT("error: heightmap is %dx%d, expected %d"), Width, Height, EstateVerts);
+    if (Width != EstateAuthoringVerts || Height != EstateAuthoringVerts)
+        return FString::Printf(TEXT("error: heightmap is %dx%d, expected %d"), Width, Height, EstateAuthoringVerts);
     TArray<uint16> Heights;
-    Heights.SetNumUninitialized(EstateVerts * EstateVerts);
+    Heights.SetNumUninitialized(EstateAuthoringVerts * EstateAuthoringVerts);
     FMemory::Memcpy(Heights.GetData(), Raw.GetData(), Heights.Num() * sizeof(uint16));
 
     TArray<FLandscapeImportLayerInfo> Layers;
@@ -85,14 +85,14 @@ FString UHomesteadEstateAuthoringLibrary::CreateEstateLandscape(const FString& H
     for (const FName& Name : LayerNames)
     {
         FLandscapeImportLayerInfo& Layer = Layers.Emplace_GetRef(Name);
-        Layer.LayerInfo = FindOrCreateLayerInfo(LayerInfoPackagePath, Name);
+        Layer.LayerInfo = EstateFindOrCreateLayerInfo(LayerInfoPackagePath, Name);
         const FString WeightPath = WeightmapFolder / (Name.ToString() + TEXT(".png"));
         int32 WW = 0, WH = 0;
         TArray64<uint8> Weights;
-        if (FPaths::FileExists(WeightPath) && LoadGreyPng(WeightPath, 8, WW, WH, Weights)
-            && WW == EstateVerts && WH == EstateVerts)
+        if (FPaths::FileExists(WeightPath) && EstateLoadGreyPng(WeightPath, 8, WW, WH, Weights)
+            && WW == EstateAuthoringVerts && WH == EstateAuthoringVerts)
         {
-            Layer.LayerData.SetNumUninitialized(EstateVerts * EstateVerts);
+            Layer.LayerData.SetNumUninitialized(EstateAuthoringVerts * EstateAuthoringVerts);
             FMemory::Memcpy(Layer.LayerData.GetData(), Weights.GetData(), Layer.LayerData.Num());
             Layer.SourceFilePath = WeightPath;
             LayerReport += FString::Printf(TEXT(" %s(w)"), *Name.ToString());
@@ -103,7 +103,7 @@ FString UHomesteadEstateAuthoringLibrary::CreateEstateLandscape(const FString& H
         }
     }
 
-    const double Half = (EstateVerts - 1) * 100.0 / 2.0;
+    const double Half = (EstateAuthoringVerts - 1) * 100.0 / 2.0;
     ALandscape* Landscape = World->SpawnActor<ALandscape>(FVector(-Half, -Half, 0.0), FRotator::ZeroRotator);
     Landscape->LandscapeMaterial = Material;
     Landscape->SetActorRelativeScale3D(FVector(100.0, 100.0, 100.0));
@@ -113,7 +113,7 @@ FString UHomesteadEstateAuthoringLibrary::CreateEstateLandscape(const FString& H
     HeightData.Add(FGuid(), MoveTemp(Heights));
     TMap<FGuid, TArray<FLandscapeImportLayerInfo>> LayerData;
     LayerData.Add(FGuid(), Layers);
-    Landscape->Import(FGuid::NewGuid(), 0, 0, EstateVerts - 1, EstateVerts - 1, SectionsPerComponent, QuadsPerSection,
+    Landscape->Import(FGuid::NewGuid(), 0, 0, EstateAuthoringVerts - 1, EstateAuthoringVerts - 1, EstateAuthoringSectionsPerComponent, EstateAuthoringQuadsPerSection,
         HeightData, *HeightmapPng, LayerData, ELandscapeImportAlphamapType::Additive, TArrayView<const FLandscapeLayer>());
     Landscape->SetActorLabel(TEXT("EstateLandscape"));
 

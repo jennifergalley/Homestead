@@ -121,7 +121,9 @@ if ($Package) {
     # gets overwritten, so keep this worktree's full packaging output alongside the bootstrap log.
     $packageLog = Join-Path $logDirectory "package-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
     Write-Host "Packaging; full output: $packageLog"
-    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
+    # The editor target was just built above; -nocompileeditor stops UAT rebuilding it, and -WaitMutex
+    # makes UAT's game build queue behind other worktrees' UBT runs instead of failing ConflictingInstance.
+    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -nocompileeditor -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild -WaitMutex" -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
         Tee-Object -LiteralPath $packageLog
     if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE). See $packageLog and Saved\Logs\UnrealPak.log." }
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive

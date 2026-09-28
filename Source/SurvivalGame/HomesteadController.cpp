@@ -2108,7 +2108,7 @@ void AHomesteadController::Interact()
     case EFocus::Fire:
         OpenBook(1);
         Selection = static_cast<int32>(Homestead::Recipe::RoastedRoots);
-        if (NativeMenu && !NativeMenu->FocusLegacySubject(Selection))
+        if (NativeMenu && !NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe, Selection, 0))
             Notify(TEXT("The cookfire recipe could not be selected."), true);
         break;
     case EFocus::Bed:
