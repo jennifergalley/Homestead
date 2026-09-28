@@ -148,6 +148,11 @@ def sync_foliage_wind(material):
     if not isinstance(wind, unreal.MaterialExpressionCustom):
         return material
     changed = wind.get_editor_property("code").strip() != FOLIAGE_WIND_CODE.strip()
+    # Blender trees are Nanite (masked + WPO); a material without the usage flag renders the default.
+    for usage in ("used_with_instanced_static_meshes", "used_with_nanite"):
+        if not material.get_editor_property(usage):
+            material.set_editor_property(usage, True)
+            changed = True
     if changed:
         wind.set_editor_property("code", FOLIAGE_WIND_CODE)
     for source in EDIT.get_inputs_for_material_expression(material, wind):
@@ -179,6 +184,7 @@ def foliage_parent():
     material.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_TWO_SIDED_FOLIAGE)
     material.set_editor_property("opacity_mask_clip_value", 0.5)
     material.set_editor_property("used_with_instanced_static_meshes", True)
+    material.set_editor_property("used_with_nanite", True)
 
     def node(kind, x, y):
         created = EDIT.create_material_expression(material, kind, x, y)
@@ -492,6 +498,11 @@ def textured_instance(spec, info, folder, dest, report=None):
         overrides.set_editor_property("override_two_sided", True)
         overrides.set_editor_property("two_sided", True)
         instance.set_editor_property("base_property_overrides", overrides)
+    if packed_foliage:
+        # Trees sway further than knee-high shrubs: report wind.strength (cm at the top) / flutter.
+        for key, parameter in (("strength", "WindStrength"), ("flutter", "LeafFlutter")):
+            if key in report["wind"]:
+                EDIT.set_material_instance_scalar_parameter_value(instance, parameter, float(report["wind"][key]))
     EDIT.update_material_instance(instance)
     save(instance)
     return instance
@@ -544,7 +555,7 @@ def import_mesh(source, dest, name):
     return mesh
 
 
-def add_collision(mesh, kind):
+def add_collision(mesh, kind, report=None):
     if kind == "none":
         return
     subsystem = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
@@ -552,6 +563,9 @@ def add_collision(mesh, kind):
         raise RuntimeError("Collision needs the StaticMeshEditorSubsystem, which -run=pythonscript lacks; "
                            "run import_props.main([...]) inside the editor (Start-EditorMcp.ps1 -AllowPython)")
     subsystem.remove_collisions(mesh)
+    if kind == "capsule":
+        add_capsule(mesh, subsystem, report["capsule"])
+        return
     if kind == "complex":
         # Walk into splits and slab gaps a convex hull would fill; the collision LOD is set after LODs import.
         body = mesh.get_editor_property("body_setup")
@@ -565,10 +579,54 @@ def add_collision(mesh, kind):
         raise RuntimeError(f"Could not add {kind} collision to {mesh.get_name()}")
 
 
+def add_capsule(mesh, subsystem, capsule):
+    """Trees: one upright capsule round the trunk (SphylElems[0], which the Estate scenery reads
+    to sink the root flare into slopes) and nothing on the leaves. Traces use it too."""
+    if subsystem.add_simple_collisions(mesh, unreal.ScriptCollisionShapeType.CAPSULE) < 0:
+        raise RuntimeError("Could not add capsule collision to " + mesh.get_name())
+    body = mesh.get_editor_property("body_setup")
+    geom = body.get_editor_property("agg_geom")
+    sphyl = geom.get_editor_property("sphyl_elems")[0]
+    x, y, z = capsule["center_cm"]
+    sphyl.set_editor_property("center", unreal.Vector(x, y, z))
+    axis = capsule.get("axis")
+    rot = unreal.MathLibrary.make_rot_from_z(unreal.Vector(*axis)) if axis else unreal.Rotator(0, 0, 0)
+    sphyl.set_editor_property("rotation", rot)
+    sphyl.set_editor_property("radius", float(capsule["radius_cm"]))
+    sphyl.set_editor_property("length", float(capsule["length_cm"]))
+    geom.set_editor_property("sphyl_elems", [sphyl])
+    body.set_editor_property("agg_geom", geom)
+    body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AS_COMPLEX)
+    mesh.set_editor_property("body_setup", body)
+    got = mesh.get_editor_property("body_setup").get_editor_property("agg_geom").get_editor_property("sphyl_elems")
+    if len(got) != 1 or abs(got[0].get_editor_property("radius") - capsule["radius_cm"]) > 0.5:
+        raise RuntimeError("Capsule collision did not stick on " + mesh.get_name())
+
+
+def enable_nanite(mesh, foliage=False):
+    settings = mesh.get_editor_property("nanite_settings")
+    settings.set_editor_property("enabled", True)
+    if foliage:
+        # Keep leaf-card area as Nanite simplifies the canopy, so far trees stay full, not see-through.
+        for prop, value in (("shape_preservation", getattr(unreal.NaniteShapePreservation, "PRESERVE_AREA", None)),
+                            ("preserve_area", True)):
+            if value is None:
+                continue
+            try:
+                settings.set_editor_property(prop, value)
+                break
+            except Exception:
+                continue
+    mesh.set_editor_property("nanite_settings", settings)
+
+
 def import_prop(name, parent):
     folder = PROPS / name
     report = json.loads((folder / "report.json").read_text(encoding="utf-8"))
-    dest = f"{DEST_ROOT}/{name}"
+    # Trees and woodland shrubs live under Environment/Trees (report "unreal_folder").
+    dest = f"{DEST_ROOT.rsplit('/', 1)[0]}/{report['unreal_folder']}/{name}" if report.get("unreal_folder") \
+        else f"{DEST_ROOT}/{name}"
+    nanite = name in NANITE_PROPS or bool(report.get("nanite"))
     result = {}
     lods = {}
     for mesh_name, info in report["meshes"].items():
@@ -589,11 +647,9 @@ def import_prop(name, parent):
             raise RuntimeError(f"{mesh_name} material slots {slots} != report {sorted(instances)}")
         for index, slot in enumerate(slots):
             mesh.set_material(index, instances[slot])
-        add_collision(mesh, COLLISION_OVERRIDES.get(name, report.get("collision", "box")))
-        if name in NANITE_PROPS:
-            settings = mesh.get_editor_property("nanite_settings")
-            settings.set_editor_property("enabled", True)
-            mesh.set_editor_property("nanite_settings", settings)
+        add_collision(mesh, COLLISION_OVERRIDES.get(name, report.get("collision", "box")), report)
+        if nanite:
+            enable_nanite(mesh, foliage=bool(report.get("wind")))
         save(mesh)
         extent = mesh.get_bounds().box_extent
         size = [extent.x * 2, extent.y * 2, extent.z * 2]
