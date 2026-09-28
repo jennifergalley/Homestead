@@ -57,6 +57,12 @@ older planning constraints that conflict with this section.
   about changes, known issues and any save reset. Do not require another
   approval solely to preserve obsolete test progress. Keep cheap code/build
   rollback where useful, without turning compatibility into the main task.
+- **Only the orchestrator packages in multi-session rounds.** Lanes implement,
+  verify in the editor, run native tests, compile-check, commit and push, then
+  notify the orchestrator, which merges, packages once, runs packaged tests
+  and reports what Jenny can try. The Interactive Loop's "package, commit,
+  push" applies to the orchestrator (or a lone session). The procedure is in
+  `docs\handoff\README.md` ("Delivering lane work").
 - **Parallelize independent work.** Use isolated sub-sessions/worktrees whenever
   concrete file and artifact ownership makes later integration practical.
   Agree shared interfaces early, coordinate merges, and serialize only genuinely

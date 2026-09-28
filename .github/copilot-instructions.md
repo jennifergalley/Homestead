@@ -13,6 +13,12 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   3. push to `main`.
 
   Then report what to try. Don't batch several improvements into one delivery.
+
+  **In multi-session rounds only the orchestrator packages.** Lane sessions do steps 2-3 without
+  step 1: implement, verify in the editor, run native tests, compile-check, commit and push (to
+  `main` when rebased and tested, or to the lane branch). Then message the orchestrator with what's
+  ready. The orchestrator merges, packages once, runs the packaged tests and reports to Jenny. See
+  "Delivering lane work" in `docs/handoff/README.md`.
 - **Autonomous / Autopilot Loop**: when she puts the session on autopilot, work continuously for
   hours on long-running improvements or full feature build-outs, selecting the next thing to
   iterate on as each one completes.
@@ -25,8 +31,14 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
 
 ## Builds
 
-- If the packaged game is running from `Build\Windows` when you need to repackage, close it and
-  build in place. She is only experimenting in it for now and prefers getting the newest build.
+- **Only the orchestrator runs UAT** during multi-session rounds: `Scripts\Build-Game.ps1 -Package`
+  or `-PackageOnly`, `RunUAT BuildCookRun`, and packaged-game tests. Several worktrees packaging at
+  once fought over the machine-wide build mutex and the shared Zen server, and each package costs
+  20-40 minutes of CPU, disk and VRAM. The separate `mvp-survival` line packages its own
+  deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+- If the packaged game is running from `Build\Windows` when you (the orchestrator) need to
+  repackage, close it and build in place. She is only experimenting in it for now and prefers
+  getting the newest build.
 - The editor skill (`.github/skills/unreal-editor-mcp/SKILL.md`) covers driving the live editor,
   playtesting, and the character lab (`-HomesteadCharacterLab` / `homestead.CharacterLab 1`).
 - Record bugs and features as OpenSpec changes under `openspec/changes/`.

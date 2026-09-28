@@ -23,6 +23,12 @@ outcomes, not diaries. Fix or remove advice that proves wrong instead of adding 
 Several agent sessions (one worktree each, under `E:\Repos\copilot-worktrees\SurvivalGame\`)
 build, run editors and package on one PC with one RTX 5080 at the same time.
 
+- **Only the orchestrator packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
+  BuildCookRun`) and packaged-game tests run only in the orchestrator's worktree (registry in
+  `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests,
+  compile-check with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then message
+  the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
+  line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
 - **At most 3 Unreal processes on the machine**, counting editors, packaged games and commandlets
   (`UnrealEditor-Cmd` imports and bootstraps too). Check before launching:
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
@@ -79,9 +85,11 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -Timeo
 py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"
 # ...work, StartPIE, hk/st/hshot...
 py "unreal.SystemLibrary.quit_editor()"                         # before building, rebasing, or when done
+& 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # compile-check
 .\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 10-16
-.\Scripts\Build-Game.ps1 -Package -PackageOnly                  # waits for other worktrees' UAT; then check git status
-git status --short                                               # restore bootstrap re-saves you didn't mean
+git status --short                                               # commit only your files, rebase, push
+# then send_session_message the orchestrator: branch + SHA, what changed, what you verified, what to try.
+# Don't package: only the orchestrator runs Build-Game.ps1 -Package.
 ```
 
 ### 0.1 Known failures → fixes
@@ -617,8 +625,8 @@ Extend it there when play needs a capability; prefer real input over state edits
   character lab has its own sun (`LabSun <hour>`, default 10).
 - Jenny likes to watch you work. Prefer `PlayMode_InEditorFloating` with the PIE window brought to
   the front (section 5) over hidden in-viewport PIE.
-- If Jenny has the packaged game open from `Build\Windows` when you need to repackage, close it
-  (`Stop-Process -Id <pid>` on the `SurvivalGame` processes) and build in place. She's only messing
+- If Jenny has the packaged game open from `Build\Windows` when the orchestrator needs to repackage,
+  close it (`Stop-Process -Id <pid>` on the `SurvivalGame` processes) and build in place. She's only messing
   around in it for now and would rather get the newest build. Don't build to a side folder.
 - Homestead's world is generated at play time. The unplayed map shows little or nothing in the
   editor viewport; judge the game from PIE captures.
@@ -655,7 +663,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   CMake suite (Simulation, WorldGeneration, RegionalGeneration, Parcel, Economy, ...) in about
   3 min; Debug takes about 10. For one suite, build its target and run
   `Build\Native\Release\<Suite>.exe *> <log>`; stdout is buffered, so a crash loses unredirected output.
-- **Package:** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
+- **Package (orchestrator only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
@@ -665,7 +673,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
   processes from that folder first (for Jenny's builds, see sections 0 and 7).
-- **Packaged smoke and route tests:** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
+- **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
   the MetaHuman heroine yourself (field notes).

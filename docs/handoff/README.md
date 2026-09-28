@@ -18,7 +18,7 @@ agent keeps both current.
 
 | Role | What it does | How to find it |
 | --- | --- | --- |
-| **Orchestrator** | Plans the round, spawns lane and docs sessions, owns shared interfaces, the save-version bump, integration and packaging, and reconciles merge conflicts, including in docs | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
+| **Orchestrator** | Plans the round, spawns lane and docs sessions, owns shared interfaces and the save-version bump, merges ready lane work, **is the only session that packages** (and runs packaged tests), and reconciles merge conflicts, including in docs | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
 | **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
 
@@ -57,6 +57,41 @@ belong only to their feature, and code comments. Shared docs (`.github\skills\**
 `docs\setup.md`, `docs\version-control.md`, this folder, and cross-cutting script help) go through
 the docs agent, so each finding lands once instead of five times.
 
+## Delivering lane work (only the orchestrator packages)
+
+UAT runs only in the orchestrator's worktree. That covers `Scripts\Build-Game.ps1 -Package` or
+`-PackageOnly`, `RunUAT BuildCookRun`, and packaged-game tests (`Test-Game.ps1 -Packaged`,
+`Playtest-Visual.ps1 -Packaged`). Several worktrees packaging at once fought over the machine-wide
+UBT mutex (`Result: Failed (ConflictingInstance)`, UAT exit 10) and the shared Zen server on port
+8558, and each package costs 20-40 minutes of CPU, disk and VRAM.
+
+A lane delivers an increment like this:
+
+1. Implement it, and verify it in your own editor (MCP/PIE).
+2. Run the native tests: `Scripts\Test-Native.ps1 -Configuration Release`.
+3. Compile-check the editor module: `Build.bat SurvivalGameEditor Win64 Development
+   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`.
+4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
+   lane branch. All worktrees share one local repository, so the orchestrator can read unpushed
+   lane branches directly.
+5. Message the orchestrator (`send_session_message`, `delivery_mode: "enqueue"`):
+
+   ```text
+   [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
+   Changed: ...
+   Verified: native tests ..., editor compile ..., PIE ... (what you saw)
+   Try in the packaged build: ...
+   Known issues / needs from integration: ...
+   ```
+
+The orchestrator merges ready lane work in its worktree, resolves conflicts, runs the native tests,
+packages once, runs the packaged tests, and pushes the integrated result to `main`. Then it tells
+the lanes to rebase and reports to Jenny what she can try.
+
+The separate MVP survival line (`mvp-survival`) packages its own build to
+`E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
+starting.
+
 ## Docs agent duties
 
 - Record each report in the canonical place: `.github\skills\unreal-editor-mcp\SKILL.md` (table
@@ -93,7 +128,8 @@ the docs agent, so each finding lands once instead of five times.
 2. For each lane, record the session ID, branch, worktree, MCP port (unique, 8766-8799), OpenSpec
    change and owned files in the registry before or as you spawn it.
 3. Every lane's kickoff prompt includes: "Read `docs\handoff\README.md` and `round-<n>.md` first.
-   Send findings and blockers to the docs agent `<id>`. Your MCP port is `<p>`."
+   Send findings and blockers to the docs agent `<id>`. Your MCP port is `<p>`. Don't package:
+   deliver through 'Delivering lane work' and message me when an increment is ready."
 4. Point lanes at the shared-machine rules (editor skill, section 0).
 
 ## End-of-round handoff (docs agent)
