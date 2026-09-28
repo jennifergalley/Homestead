@@ -27,11 +27,16 @@ folder name is the session's **mailbox address** for urgent `mailbox_send` messa
 
 The checkboxes on each lane's branch are the source of truth (`openspec\changes\<change>\tasks.md`).
 
-**Integration build `f2e504c5` (2026-09-27, packaged by the orchestrator).** It merges the store
-(`7a3f0a1b`, `d679b64f`), clearing (`fe0abfe6`), manor (`48494ef7`, `38601898`) and map lanes with
-the world lane's water, scenery and placements. Jenny launches it from the **"Homestead Estate"**
-desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
-`/Game/SurvivalGame/Maps/Estate`. All lanes should rebase onto it.
+**Integrated round-1 build: `main` at `3b8172ba` (2026-09-27, packaged by the orchestrator).** It
+contains store `d679b64f`, clearing `96b8fb84` (with the pail fix), manor `dc2c86f9`, map `0bdec5fe`
+and ocean v2 `8a407908`, plus world changes: every landscape proxy stays loaded, the pasture is
+green, and `M_PropTextured` has the ISM and Nanite usage flags. All 7 native test suites pass. The
+package boots the Estate in 3.5 s with no material errors. Jenny launches it from the **"Homestead
+Estate"** desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
+`/Game/SurvivalGame/Maps/Estate`. The first integration build was `f2e504c5`.
+
+**Lanes: close your editor and *merge* `origin/main` into your branch** (merge, not rebase, if you've
+already pushed), then continue and send `[ready]` with a SHA.
 
 ## Shared interfaces and rules this round
 
@@ -65,13 +70,14 @@ desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
 
 ## Open blockers and known bugs
 
-- **Ruin material instances lack `bUsedWithNanite`**, so they draw the Default Material in packaged
-  builds. Owner: manor lane.
-- **Woodland packaged suites fail** (Smoke, FullLoop, Hotbar, NativeMenu) on retired resources and
-  tools (Reeds, Knife, ...). Owner: clearing lane, retargeting them to the estate.
-- **Distant landscape vanishes:** no HLOD, and only about ±400 m streams around the pawn. Owner:
-  world lane (orchestrator).
+- **Packaged test suites fail on retired woodland content.** Smoke and FullLoop (Reeds), Clearing
+  (hatchet vs billhook), NativeMenu and Hotbar (Knife). Owner: clearing lane, retargeting them to
+  the estate.
 - **Strike and mow animations** aren't imported yet. Owner: clearing lane.
+
+Resolved in `3b8172ba`: ruin kit and scenery granite drawing the Default Material in packages
+(`M_PropTextured` now has ISM and Nanite usage flags), and distant landscape vanishing (every
+landscape proxy now stays loaded; there's still no HLOD).
 
 Resolved in `f2e504c5`: estate saves (the `ReadSave` Z bound), the cookfire/Hearth
 `FocusLegacySubject` bug, and the estate spawn yaw. The orchestrator confirmed the yaw by eye in the
