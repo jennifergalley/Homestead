@@ -79,45 +79,74 @@ def _matrix(origin, x_axis, y_axis, z_axis):
                    (0, 0, 0, 1)))
 
 
+def _smooth_outline(points, rounds=3):
+    pts = [Vector((x, y, 0.0)) for x, y in points]
+    for _ in range(rounds):
+        out = []
+        for i, p in enumerate(pts):
+            q = pts[(i + 1) % len(pts)]
+            out.append(p.lerp(q, 0.25))
+            out.append(p.lerp(q, 0.75))
+        pts = out
+    return [(p.x, p.y) for p in pts]
+
+
 def _ivy_outline(lobes=5):
     # Hedera helix juvenile leaves: broad, shallow, rounded lobes with entire margins.
     if lobes == 5:
-        left = [(0.50, 0.000), (0.430, 0.080), (0.340, 0.165), (0.235, 0.285),
-                (0.185, 0.365), (0.265, 0.430), (0.365, 0.485), (0.295, 0.610),
-                (0.340, 0.675), (0.440, 0.745), (0.480, 0.900), (0.50, 1.000)]
+        left = [(0.00, 0.02), (-0.12, 0.08), (-0.28, 0.20), (-0.46, 0.38),
+                (-0.38, 0.49), (-0.27, 0.56), (-0.43, 0.68), (-0.30, 0.79),
+                (-0.13, 0.89), (-0.04, 1.00), (0.00, 1.03)]
     else:
-        left = [(0.50, 0.000), (0.425, 0.095), (0.325, 0.215), (0.205, 0.385),
-                (0.295, 0.475), (0.390, 0.560), (0.455, 0.815), (0.50, 1.000)]
-    return left + [(1.0 - u, v) for u, v in reversed(left[:-1])]
+        left = [(0.00, 0.02), (-0.14, 0.10), (-0.32, 0.27), (-0.47, 0.48),
+                (-0.34, 0.60), (-0.14, 0.78), (-0.04, 1.00), (0.00, 1.03)]
+    outline = left + [(-x, y) for x, y in reversed(left[:-1])]
+    return _smooth_outline(outline, 1 if len(outline) < 20 else 0)
 
 
 def _leaf(kit, name, origin, normal, tip_dir, length, material, seed, uv_rect, young=False):
     rng = random.Random(seed)
     lobes = 3 if rng.random() < (0.36 if young else 0.22) else 5
     outline = _ivy_outline(lobes)
-    center = (0.50 + rng.uniform(-0.012, 0.012), 0.47 + rng.uniform(-0.020, 0.020))
-    width = length * (0.74 if lobes == 5 else 0.60)
+    width = length * rng.uniform(0.92, 1.08)
     verts, coords, uvs = [], [], []
 
-    def local(u, v):
-        # Convex, leathery leaf: shallow V around the palmate midrib plus curled edges.
-        x = (u - 0.5) * width
-        y = v * length
-        midrib = -0.0025 * (1.0 - abs(u - 0.5) * 2.0) * math.sin(math.pi * v)
-        cupping = 0.010 * (abs(u - 0.5) * 2.0) ** 1.7 * math.sin(math.pi * v)
-        ripple = 0.0018 * math.sin((u * 19.0 + v * 13.0 + seed) * 2.1)
-        return Vector((x, y, midrib + cupping + ripple))
+    center = Vector((0.0, length * 0.40, 0.0))
 
-    verts.append(local(*center))
-    coords.append(Vector((center[0], center[1], 0)))
-    uvs.append(_rect(uv_rect, center[0], center[1]))
-    for u, v in outline:
-        uu = max(0.0, min(1.0, u + rng.uniform(-0.010, 0.010)))
-        vv = max(0.0, min(1.0, v + rng.uniform(-0.010, 0.010)))
-        verts.append(local(uu, vv))
-        coords.append(Vector((uu, vv, 0)))
-        uvs.append(_rect(uv_rect, uu, vv))
-    faces = [(0, 1 + i, 1 + ((i + 1) % len(outline))) for i in range(len(outline))]
+    def point(xn, yn, ring=1.0):
+        x = xn * width
+        y = yn * length
+        edge = max(0.0, min(1.0, ring))
+        z = 0.0035 * edge * math.sin(math.pi * max(0.0, min(1.0, yn))) + 0.0008 * math.sin((xn * 11.0 + yn * 7.0 + seed) * 1.7)
+        return Vector((x, y, z))
+
+    verts.append(center)
+    coords.append(Vector((0.5, 0.40, 0.0)))
+    uvs.append(_rect(uv_rect, 0.5, 0.40))
+    inner_start = len(verts)
+    for xn, yn in outline:
+        p = center.lerp(point(xn, yn, 0.55), 0.55)
+        verts.append(p)
+        u = max(0.0, min(1.0, p.x / width + 0.5))
+        v = max(0.0, min(1.0, p.y / length))
+        coords.append(Vector((u, v, 0)))
+        uvs.append(_rect(uv_rect, u, v))
+    outer_start = len(verts)
+    for xn, yn in outline:
+        xn += rng.uniform(-0.012, 0.012)
+        yn += rng.uniform(-0.010, 0.010)
+        p = point(xn, yn, 1.0)
+        verts.append(p)
+        u = max(0.0, min(1.0, p.x / width + 0.5))
+        v = max(0.0, min(1.0, p.y / length))
+        coords.append(Vector((u, v, 0)))
+        uvs.append(_rect(uv_rect, u, v))
+    n = len(outline)
+    faces = []
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((0, inner_start + i, inner_start + j))
+        faces.append((inner_start + i, outer_start + i, outer_start + j, inner_start + j))
     obj = kit.mesh(name, [tuple(v) for v in verts], faces, material)
     kit.tag_coords(obj.data, coords)
     _assign_uvs(obj, uvs)
@@ -234,7 +263,7 @@ def build(kit):
     # Dense shingled wall leaves, but in natural clumps rather than a uniform curtain.
     leaf_index = 0
     clumps = []
-    clump_count = 26 if not DRAFT else 12
+    clump_count = 22 if not DRAFT else 10
     for c in range(clump_count):
         top = rng.uniform(-0.02, -0.45)
         if c % 11 == 0:
@@ -243,7 +272,7 @@ def build(kit):
             drop = rng.choice([rng.uniform(0.30, 0.70), rng.uniform(0.45, 1.05)])
         clumps.append((rng.uniform(-1.05, 1.05), top, min(-0.18, top - drop), rng.uniform(0.10, 0.28)))
     for ci, (cx, z_top, z_bottom, width) in enumerate(clumps):
-        leaf_slots = (70 if not DRAFT else 30) if z_bottom > -1.15 else (84 if not DRAFT else 38)
+        leaf_slots = (48 if not DRAFT else 22) if z_bottom > -1.15 else (62 if not DRAFT else 28)
         side_bias = rng.uniform(-0.18, 0.18)
         for j in range(leaf_slots):
             t = rng.random()
@@ -268,10 +297,6 @@ def build(kit):
             parts.append(_leaf(kit, f"IvyLeafFace_{leaf_index:04d}", (x, y, z + rng.uniform(-0.018, 0.018)),
                                normal, tip, size * (0.82 if young else 1.0),
                                mat, SEED + leaf_index, uv, young))
-            petiole_base = Vector((x + rng.uniform(-0.010, 0.010), -0.030, z + rng.uniform(-0.020, 0.020)))
-            petiole_tip = Vector((x, y, z))
-            parts.append(_tube(kit, f"IvyPetioleFace_{leaf_index:04d}", [petiole_base, petiole_base.lerp(petiole_tip, 0.55), petiole_tip],
-                               [0.0018, 0.0014, 0.0010], root, 4, ROOT_RECT))
             leaf_index += 1
         # A branching runner inside each clump, hugging the wall and visibly joining leaves.
         runner = []
@@ -286,7 +311,7 @@ def build(kit):
         _rootlets(kit, parts, rng, runner[0], runner[-1] - runner[0], 7 if not DRAFT else 3, root, 100 + ci)
 
     # Mound spilling over the wall head/top course (+Y over the 56 cm wall top).
-    top_leaves = 250 if not DRAFT else 120
+    top_leaves = 170 if not DRAFT else 80
     for i in range(top_leaves):
         x = rng.uniform(-1.14, 1.14)
         y = rng.uniform(-0.020, 0.540)
@@ -298,8 +323,6 @@ def build(kit):
         parts.append(_leaf(kit, f"IvyLeafTop_{leaf_index:04d}", (x, y, z), normal, tip,
                            rng.uniform(0.040, 0.095), mat, SEED + leaf_index,
                            LEAF_YOUNG if young else LEAF_DARK, young))
-        parts.append(_tube(kit, f"IvyPetioleTop_{leaf_index:04d}", [Vector((x, max(0.0, y - 0.060), z - 0.010)), Vector((x, y, z))],
-                           [0.0018, 0.0010], root, 4, ROOT_RECT))
         leaf_index += 1
 
     # A few loose edge shoots, deliberately sparse so the asset still reads as a mat.
