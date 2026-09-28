@@ -38,6 +38,7 @@
 #include "UI/SHomesteadMenu.h"
 #include "UI/SHomesteadShop.h"
 #include "UI/SHomesteadHotbar.h"
+#include "UI/SHomesteadVitals.h"
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
 #include "UI/SHomesteadNames.h"
@@ -587,6 +588,17 @@ void AHomesteadController::ShowHotbar()
             ]
         ];
     GEngine->GameViewport->AddViewportWidgetContent(HotbarRoot.ToSharedRef(), 50);
+    // Unlike the hotbar, the vitals stay up while she places a plan.
+    VitalsRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return bWorldReady && !bBookOpen && !IsFailed() && !ShopScreen.IsValid() && !HasNativeMenu()
+                && !IsNewGameSetup() && !IsNamingSetup() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+        })
+        [
+            SNew(HomesteadMenus::SHomesteadVitals).Controller(this)
+        ];
+    GEngine->GameViewport->AddViewportWidgetContent(VitalsRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
@@ -594,6 +606,9 @@ void AHomesteadController::HideHotbar()
     HoveredHotbarSlot = INDEX_NONE;
     if (HotbarRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(HotbarRoot.ToSharedRef());
+    if (VitalsRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(VitalsRoot.ToSharedRef());
+    VitalsRoot.Reset();
     HotbarWidget.Reset();
     HotbarRoot.Reset();
 }

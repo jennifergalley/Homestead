@@ -1152,11 +1152,61 @@ bool AHomesteadWorld::BuildEstateScenery()
         Batches[Kind]->RegisterComponent();
         Batches[Kind]->AddInstances(Transforms[Kind], false, true);
         EstateScenery.Add(Batches[Kind]);
-        Total += Transforms[Kind].Num();
+        const FEstateSceneryKind& Info = EstateSceneryKinds[Kind];
+        const FVector Extent = Batches[Kind]->GetStaticMesh()->GetBounds().BoxExtent;
+        EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
+        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[Kind].Num()));
+        EstateSceneryTransforms.Add(MoveTemp(Transforms[Kind]));
+        Total += EstateSceneryTransforms.Last().Num();
     }
     bEstateSceneryBuilt = true;
     UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches."), Total, EstateScenery.Num());
     return true;
+}
+
+void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& State)
+{
+    TArray<Homestead::Footprint> Pieces;
+    FString Signature;
+    for (const auto& Structure : State.structures)
+    {
+        const auto Box = Homestead::StructureFootprint(State, Structure);
+        Pieces.Add(Box);
+        Signature += FString::Printf(TEXT("%.0f:%.0f:%.0f:%.0f:%.1f;"), Box.center.x, Box.center.y, Box.half.x, Box.half.y, Box.yaw);
+    }
+    if (Signature == EstateSceneryClearSignature) return;
+    EstateSceneryClearSignature = MoveTemp(Signature);
+    constexpr float Margin = 20.0f;
+    for (int32 Batch = 0; Batch < EstateScenery.Num(); ++Batch)
+    {
+        const float Radius = EstateSceneryClearRadius[Batch];
+        if (Radius <= 0 || !EstateScenery[Batch]) continue;
+        const TArray<FTransform>& Transforms = EstateSceneryTransforms[Batch];
+        TBitArray<>& Hidden = EstateSceneryHidden[Batch];
+        bool bChanged = false;
+        for (int32 Index = 0; Index < Transforms.Num(); ++Index)
+        {
+            const FVector Location = Transforms[Index].GetLocation();
+            const float Reach = Radius * Transforms[Index].GetScale3D().X + Margin;
+            bool bUnder = false;
+            for (const auto& Box : Pieces)
+            {
+                const double Near = FMath::Max(Box.half.x, Box.half.y) + Reach;
+                if (FMath::Abs(Location.X - Box.center.x) > Near || FMath::Abs(Location.Y - Box.center.y) > Near) continue;
+                const Homestead::Point Local = Homestead::RotateYaw({Location.X - Box.center.x, Location.Y - Box.center.y}, -Box.yaw);
+                const double DX = FMath::Max(0.0, FMath::Abs(Local.x) - Box.half.x);
+                const double DY = FMath::Max(0.0, FMath::Abs(Local.y) - Box.half.y);
+                if (DX * DX + DY * DY < Reach * Reach) { bUnder = true; break; }
+            }
+            if (Hidden[Index] == bUnder) continue;
+            Hidden[Index] = bUnder;
+            FTransform Shown = Transforms[Index];
+            if (bUnder) Shown.SetScale3D(FVector(0.0001f));
+            EstateScenery[Batch]->UpdateInstanceTransform(Index, Shown, true, false, true);
+            bChanged = true;
+        }
+        if (bChanged) EstateScenery[Batch]->MarkRenderStateDirty();
+    }
 }
 bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
 {
@@ -3684,6 +3734,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         if (!State.fixedEstate && !BuildDecorations(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
     }
+    if (State.fixedEstate) ClearEstateSceneryUnderPieces(State);
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
         State.activeChunk.x, State.activeChunk.y);

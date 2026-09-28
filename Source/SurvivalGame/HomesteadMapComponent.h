@@ -84,8 +84,8 @@ public:
     // The estate's display name: a placeholder until add-ruined-manor-and-arrival stores the
     // player's chosen name.
     static FString EstateName(const AHomesteadController& Controller);
-    // Where the minimap sits, in the HUD's 1080-line logical units for a view `ViewWidth` wide.
-    static FBox2D MinimapBox(float ViewWidth);
+    // Where the minimap sits, in the HUD's 1080-line logical units for a view of that logical size.
+    static FBox2D MinimapBox(float ViewWidth, float ViewHeight);
     // Crossings shown so far (for tests), and the text of the last one.
     int32 CrossingCount() const { return Crossings; }
     const FString& LastCrossing() const { return LastCrossingText; }

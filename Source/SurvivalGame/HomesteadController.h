@@ -441,6 +441,8 @@ private:
     TSharedPtr<SHomesteadMenu> NativeMenu;
     TSharedPtr<SHomesteadHotbar> HotbarWidget;
     TSharedPtr<SWidget> HotbarRoot;
+    // Food, energy and the purse (UI/SHomesteadVitals), shown and removed with the hotbar.
+    TSharedPtr<SWidget> VitalsRoot;
     // add-ruined-manor-and-arrival: the Names step and the arrival title card.
     bool bNewGameSetup = false;
     TSharedPtr<HomesteadMenus::SHomesteadNames> NamesWidget;
