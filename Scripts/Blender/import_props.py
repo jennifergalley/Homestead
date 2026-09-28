@@ -265,7 +265,10 @@ COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "comple
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
 COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.
-NANITE_PROPS = {"GraniteDome", "GraniteSplitBoulder", "RuinWallTall", "RuinWallMid", "RuinWallLow", "RuinChimney"}
+NANITE_PROPS = {"GraniteDome", "GraniteSplitBoulder", "RuinWallTall", "RuinWallMid", "RuinWallLow", "RuinChimney",
+                "RuinIvy", "RuinSlateScatter", "RuinFallenTimbers"}
+# Alpha-free leaf meshes on the opaque textured parent: show both faces of each blade.
+TWO_SIDED_PROPS = {"RuinIvy"}
 DETAIL_DEST = f"{DEST_ROOT}/GraniteDetail/Textures"
 TRIPLANAR_CODE = """
 float3 w = pow(abs(normalize(N)), 4.0);
@@ -484,6 +487,11 @@ def textured_instance(spec, info, folder, dest, report=None):
             source = folder / file
         texture = import_texture(source, f"{dest}/Textures", role)
         EDIT.set_material_instance_texture_parameter_value(instance, parameters[role], texture)
+    if report and report.get("name") in TWO_SIDED_PROPS:
+        overrides = instance.get_editor_property("base_property_overrides")
+        overrides.set_editor_property("override_two_sided", True)
+        overrides.set_editor_property("two_sided", True)
+        instance.set_editor_property("base_property_overrides", overrides)
     EDIT.update_material_instance(instance)
     save(instance)
     return instance
