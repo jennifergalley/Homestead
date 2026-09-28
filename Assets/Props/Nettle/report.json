@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Nettle",
+  "description": "A spring patch of stinging nettle, 60 cm tall and 75 cm across: square bristly shoots flushed purple at the base, opposite heart-shaped coarsely toothed dark leaves, bright young tip rosettes, and last year's grey-brown dead stalks standing among them. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 22000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/nettle.py",
+  "source_sha256": "8b2666f7139d7fc872a7ea0416d4dc6513d5770c570698c6f44e9f20d8fb4357",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_NettlePatch": {
+      "vertices": 9156,
+      "triangles": 9648,
+      "size_cm": [
+        65.54,
+        69.17,
+        63.86
+      ],
+      "materials": [
+        {
+          "name": "M_Nettle",
+          "textures": {
+            "basecolor": "T_Nettle_basecolor.png",
+            "normal": "T_Nettle_normal.png",
+            "roughness": "T_Nettle_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04507364630699158,
+          -0.05099718153476715,
+          0.4
+        ]
+      },
+      "fbx": "SM_NettlePatch.fbx",
+      "sha256": "0542bf261c67a2799d34953fdee163b16de59ecb85514305c992f76a5efb2f68",
+      "preview": "preview_SM_NettlePatch.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_NettlePatch_hero.png",
+          "detail": "beauty_SM_NettlePatch_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_NettlePatch_LOD1": {
+      "vertices": 3828,
+      "triangles": 3152,
+      "size_cm": [
+        68.32,
+        72.47,
+        65.02
+      ],
+      "materials": [
+        {
+          "name": "M_Nettle",
+          "textures": {
+            "basecolor": "T_Nettle_basecolor.png",
+            "normal": "T_Nettle_normal.png",
+            "roughness": "T_Nettle_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04507364630699158,
+          -0.05099718153476715,
+          0.4
+        ]
+      },
+      "fbx": "SM_NettlePatch_LOD1.fbx",
+      "sha256": "e6d2c36408cc97474aa914ba268f1eb21158a89cf388f410c7457d9f6801fa6d",
+      "preview": "preview_SM_NettlePatch_LOD1.png"
+    },
+    "SM_NettlePatch_LOD2": {
+      "vertices": 1110,
+      "triangles": 810,
+      "size_cm": [
+        68.03,
+        77.99,
+        66.17
+      ],
+      "materials": [
+        {
+          "name": "M_Nettle",
+          "textures": {
+            "basecolor": "T_Nettle_basecolor.png",
+            "normal": "T_Nettle_normal.png",
+            "roughness": "T_Nettle_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04507364630699158,
+          -0.05099718153476715,
+          0.4
+        ]
+      },
+      "fbx": "SM_NettlePatch_LOD2.fbx",
+      "sha256": "92d214d7cc2cf959643af9420c52e111d7f38b4470e3cca83c13c785e738a1bc",
+      "preview": "preview_SM_NettlePatch_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_Nettle: T_Nettle_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_Nettle_basecolor.png": "95fb4241b4224921ca2765d8d7605cc045219848433c131c5253fc19fcc42b57",
+    "T_Nettle_normal.png": "c659447f1817dae04fd99ee55369151af15296d430c77cc13df9e6e49be9bdb8",
+    "T_Nettle_roughness.png": "91292e4dbe4e00ec2741a2785c098ecdaeb4c3bc6eb2ac31bf3bb84f6b577bef"
+  }
+}

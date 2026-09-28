@@ -848,7 +848,8 @@ const char* ResourceName(ResourceKind kind)
         "Meadow herb", "Stream reeds", "Sapling", "Forest tree", "Deer remains",
         "Tall grass", "Weeds", "Thin bramble", "Bramble thicket", "Bramble bank", "Fallen bough",
         "Small stump", "Large stump", "Ancient stump", "Fallen log", "Giant log", "Rubble", "Small rock", "Boulder",
-        "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic"};
+        "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic",
+        "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
@@ -2050,6 +2051,7 @@ Result Simulation::CheckSite(const PlacementTarget& target, bool quick) const
     if (Manor::BlockedByManor(state_, Layout(), target, ground)) return Bad(Manor::FootprintBlocked);
     const auto space = CheckFootprintResources(state_, ground, quick);
     if (!space) return space;
+    if (const ResourceNode* spoiler = OvergrowthSpoiling(state_, ground)) return Bad(SpoiledGroundMessage(*spoiler));
     for (const auto& plot : state_.plots)
         if (FootprintsOverlap(Inset(ground), Inset(GardenFootprint(plot))))
             return Bad("Keep this crop plot clear of buildings.");
@@ -2429,6 +2431,7 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     const auto space = CheckGardenResources(state_, cellX, cellY);
     if (!space) return space;
     const Footprint square{GardenCellCenter(cellX, cellY), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0};
+    if (const ResourceNode* spoiler = OvergrowthSpoiling(state_, square)) return Bad(SpoiledGroundMessage(*spoiler));
     for (const auto& structure : state_.structures)
         if (FootprintsOverlap(Inset(square), Inset(StructureFootprint(state_, structure))))
             return Bad("Choose soil away from buildings.");
