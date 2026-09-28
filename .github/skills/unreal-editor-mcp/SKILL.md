@@ -30,7 +30,9 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
   line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
 - **At most 3 Unreal processes on the machine**, counting editors, packaged games and commandlets
-  (`UnrealEditor-Cmd` imports and bootstraps too). Check before launching:
+  (`UnrealEditor-Cmd` imports and bootstraps too). `Start-EditorMcp.ps1` refuses to launch at 3 and
+  lists who owns them (`-Force` overrides). For other launches (a standalone game, a commandlet), check
+  in the same command, right before starting:
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
   More processes than that have reset the GPU driver and exhausted VRAM, which takes every
   session's editor down.
@@ -161,7 +163,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | UI is double-scaled at 4K but fine in PIE | The engine DPI curve (`bAllowHighDPIInGameMode`) already scales viewport widgets, so an extra height/1080 `SScaleBox` doubles them | Don't add your own resolution scaling. Check real resolutions in a standalone window (section 8), because PIE at editor size hides it. |
 | A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
 | A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
-| A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. |
+| A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. A 3840x2160 PNG is about 11 MB, over the `view` tool's 10 MB limit: downscale or crop it with PIL before viewing. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | After `BugItGo` she walks through walls and counters and sinks knee-deep into floors (looks like missing collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`) | Type `Walk` after `BugItGo`. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
@@ -247,7 +249,7 @@ clashes between parallel callers.
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
 | `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
-| `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
+| `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px). To click something seen in a `shot` capture, scale capture pixels by client width / capture width and add the window-rect origin: with a 3840-wide client, a 1280x692 capture and the rect at (-12, -12), `x = cap_x * 3 + 12`, `y = cap_y * 3 + 12` |
 
 Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,
 `$McpSlate` (SlateInspector), `$McpPlay` (HomesteadPlayTools), `$McpPython` (HomesteadEditorPython).
@@ -745,7 +747,9 @@ Extend it there when play needs a capability; prefer real input over state edits
   under that folder instead of the package's own `Saved\`.
 - **UI at real resolutions and DPI (standalone window, not PIE):** launch
   `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
-  -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720), wait for `MUSIC_TRACK started` in that log
+  -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720; for 4K use `-fullscreen` instead of
+  `-windowed`, since a 4K window doesn't fit the 175%-scaled desktop; `[GameWin]::Capture` works in
+  fullscreen), wait for `MUSIC_TRACK started` in that log
   plus about 20 s, then dot-source `Scripts\GameWindow.ps1`: `Find-GameWindow -ProcessId <pid>`,
   `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
   and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 3-process limit; close it
