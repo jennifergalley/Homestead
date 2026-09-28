@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
@@ -4111,7 +4112,30 @@ void AHomesteadController::PlayFootstep(bool bLeftFoot, bool bRun)
         bRun ? TEXT("run") : TEXT("walk"), Now);
     // Bare feet on soft soil are quiet: about 10 dB under the old shod grass step while walking,
     // a little firmer when running, with a small level variation so repeats don't stand out.
-    PlayEffect(Pool[Pick].Get(), (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f));
+    const float Gain = (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f);
+    // On the estate's turf, moor and leaf litter the step is softer still: a few dB down, with a
+    // low-pass taking the grit off the top, as bare feet on grass sound. Other ground is unchanged.
+    const FVector Feet = Avatar->GetActorLocation();
+    if (HomesteadEstateTerrain::IsActive() && HomesteadEstateGround::Activate())
+    {
+        using ESurface = HomesteadEstateGround::ESurface;
+        const ESurface Surface = HomesteadEstateGround::SurfaceAt(Feet.X, Feet.Y);
+        if (HomesteadEstateGround::IsSoft(Surface))
+        {
+            const float Softer = Surface == ESurface::Grass ? 0.55f : Surface == ESurface::Moor ? 0.6f : 0.7f;
+            const float Cutoff = Surface == ESurface::Grass ? 2400.0f : Surface == ESurface::Moor ? 3000.0f : 3600.0f;
+            if (Pool[Pick] && bAudioEnabled && EffectsVolume > 0)
+                if (UAudioComponent* Step = UGameplayStatics::CreateSound2D(this, Pool[Pick].Get(),
+                        EffectsVolume * Gain * Softer, FMath::FRandRange(0.94f, 1.02f)))
+                {
+                    Step->SetLowPassFilterEnabled(true);
+                    Step->SetLowPassFilterFrequency(Cutoff);
+                    Step->Play();
+                }
+            return;
+        }
+    }
+    PlayEffect(Pool[Pick].Get(), Gain);
 }
 
 void AHomesteadController::MusicFinished()

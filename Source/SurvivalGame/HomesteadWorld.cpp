@@ -1,5 +1,8 @@
 #include "HomesteadWorld.h"
 #include "HomesteadEstateTerrain.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
+#include "HomesteadGrassField.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
@@ -3751,6 +3754,20 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     if (State.fixedEstate) ClearEstateSceneryUnderPieces(State);
+    if (State.fixedEstate)
+    {
+        if (!EstateGrass)
+        {
+            EstateGrass = NewObject<UHomesteadGrassField>(this, TEXT("EstateGrass"));
+            EstateGrass->SetupAttachment(GetRootComponent());
+            EstateGrass->RegisterComponent();
+        }
+        const APlayerController* Viewer = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+        if (Viewer && Viewer->PlayerCameraManager)
+            EstateGrass->Update(State, Viewer->PlayerCameraManager->GetCameraLocation());
+    }
+    else if (EstateGrass)
+        EstateGrass->Clear();
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
         State.activeChunk.x, State.activeChunk.y);

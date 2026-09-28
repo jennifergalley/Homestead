@@ -282,6 +282,8 @@ private:
     TArray<TArray<FTransform>> EstateSceneryTransforms;
     TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden.
     TArray<TBitArray<>> EstateSceneryHidden;
+    // The near meadow round the camera on the fixed estate (HomesteadGrassField).
+    UPROPERTY() TObjectPtr<class UHomesteadGrassField> EstateGrass;
     FString EstateSceneryClearSignature;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
