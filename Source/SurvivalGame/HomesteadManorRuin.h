@@ -7,8 +7,9 @@
 class UStaticMeshComponent;
 
 // add-ruined-manor-and-arrival: the ruined manor's set dressing on ManorFootprint. It lays the
-// Blender ruin kit (broken granite wall runs, the chimney stack) and granite rubble out on the
-// footprint's rectangle, leaving the standing room's carved-out corner to the heritage pieces. It
+// Blender ruin kit (broken granite wall runs, the chimney stack), granite rubble and the detail
+// props (fallen timbers, slate scatter, ivy on the wall heads) out on the footprint's rectangle,
+// leaving the standing room's carved-out corner to the heritage pieces. It
 // is scenery only; Simulation reserves the footprint. Placed once in the Estate level (folder
 // "Manor"); it rebuilds from the layout whenever it is constructed, so moving the anchor moves
 // the ruin.
@@ -29,4 +30,6 @@ private:
     UPROPERTY(Transient)
     TMap<FName, TObjectPtr<UStaticMesh>> Meshes;
     UStaticMesh* Mesh(const TCHAR* Name);
+    // Height of a wall run's broken head (run-local cm) under a hanging ivy mat centred at X.
+    float RunHeadHeight(UStaticMeshComponent* Run, float X, float Side, float Fallback);
 };

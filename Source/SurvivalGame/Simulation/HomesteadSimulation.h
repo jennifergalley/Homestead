@@ -47,7 +47,11 @@ constexpr double CellSize = 300.0;
 constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
-constexpr int SimulationSaveVersion = 11;
+// 12 is the estate pivot: no warmth in the vitals, estate items, tool tiers, parcels, money and the manor.
+constexpr int SimulationSaveVersion = 12;
+// Version 11 files came from the woodland MVP and the round-1 test builds, whose item stocks
+// changed width without a version bump, so they can't be read reliably and are refused.
+constexpr int RetiredTestSaveVersion = 11;
 // Saves before this had no fur (one fewer item per stock) and no outer-layer equipment slot.
 constexpr int ClothingSaveVersion = 11;
 // Saves before this kept every structure on the one world-aligned building grid.

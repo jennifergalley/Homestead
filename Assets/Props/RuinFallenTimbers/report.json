@@ -6,12 +6,12 @@
   "triangle_budget": 150000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/ruin_fallen_timbers.py",
-  "source_sha256": "7492004d5524bcb870d2e6171018bbc56a48eee201ca7dd7ae4d1c9c9e5cfd47",
+  "source_sha256": "3a9ef5ac258350b45641d00faf255a2e90fbfcc7a3ca76af63c7a2f226f67a46",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_RuinFallenTimbers": {
-      "vertices": 14610,
-      "triangles": 26498,
+      "vertices": 14726,
+      "triangles": 26616,
       "size_cm": [
         425.22,
         202.04,
@@ -61,7 +61,7 @@
         "eye_distance": 3.6
       },
       "fbx": "SM_RuinFallenTimbers.fbx",
-      "sha256": "1295b94dbb953108cf232ed72e06ec55973250d1760acb25a22320e09072258f",
+      "sha256": "7728ddb88c7b8f965bc1df833a7776f389da26f44a7ac77deb8484fe816d383f",
       "preview": "preview_SM_RuinFallenTimbers.png",
       "beauty": {
         "views": {
@@ -88,11 +88,11 @@
       }
     },
     "SM_RuinFallenTimbers_LOD1": {
-      "vertices": 7190,
-      "triangles": 11658,
+      "vertices": 7273,
+      "triangles": 11710,
       "size_cm": [
         425.17,
-        201.53,
+        201.55,
         39.75
       ],
       "materials": [
@@ -140,15 +140,15 @@
         "eye_distance": 3.6
       },
       "fbx": "SM_RuinFallenTimbers_LOD1.fbx",
-      "sha256": "4f868e231cb2766b3c64ce4c5798185f0b530995675cb917c1de35d5057efa63",
+      "sha256": "177fb7b9e2e011c28c2f72c4a8026d78969414e9481ed2e2a3aa3d4b12f1b6e0",
       "preview": "preview_SM_RuinFallenTimbers_LOD1.png"
     },
     "SM_RuinFallenTimbers_LOD2": {
-      "vertices": 3745,
-      "triangles": 4768,
+      "vertices": 3755,
+      "triangles": 4790,
       "size_cm": [
         425.17,
-        199.75,
+        200.16,
         39.64
       ],
       "materials": [
@@ -196,7 +196,7 @@
         "eye_distance": 3.6
       },
       "fbx": "SM_RuinFallenTimbers_LOD2.fbx",
-      "sha256": "c0320594e766223716e13663e70de96ed0a1437377866ebae8cbd341b7f676b8",
+      "sha256": "4b31bbbb044040bb115c3d3b3e4ac02f63a4d2541aca0623ec931ae0a5f5e074",
       "preview": "preview_SM_RuinFallenTimbers_LOD2.png"
     }
   },
@@ -206,9 +206,9 @@
   "placement": "Drop on the manor floor/yard as collapsed roof debris. Longest beam runs roughly X; crossed purlin is raised and visibly rests on it.",
   "collision_note": "Box collision from the prop importer; authored height stays under 60 cm.",
   "textures": {
-    "T_RuinFallenTimbers_basecolor.png": "941fba1570c08c9bd8d0a864b11e86d080f9294d26440d70da830940770c5a63",
-    "T_RuinFallenTimbers_roughness.png": "ef0ab4637b801518c4bc4d4675c1886f3dbae7fa8bbe46b26c0da7d0f222db02",
-    "T_RuinFallenTimbers_metallic.png": "27af541ce9fa257d53a9d6641f86da2662224c1c803ca1f7607a9904bb39cd76",
-    "T_RuinFallenTimbers_normal.png": "28ac232e589886db133d1eaf8a40dd4ff3c14f7a7ad27c69b3ae73df64fd9f42"
+    "T_RuinFallenTimbers_basecolor.png": "e582c743de04782f3026c27c822271e91cb594ced06defc88b35dbad7a149b68",
+    "T_RuinFallenTimbers_roughness.png": "39f76415fb4e390e55246bf023f3b89e2ee658a1cd9eea9fd0a2fa00b7c3fcae",
+    "T_RuinFallenTimbers_metallic.png": "653027bf71cddcc5c9dba89a729fdfda5e70c76c0dbf363aceb22f1143e75b12",
+    "T_RuinFallenTimbers_normal.png": "af48ae15ba37e805410e19d27170ed030bd3fc42d2f168c1a9b2e8c55d90a597"
   }
 }
