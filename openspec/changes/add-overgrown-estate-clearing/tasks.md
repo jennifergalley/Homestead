@@ -15,12 +15,13 @@
 
 ## 3. Full tool set
 
-- [ ] 3.1 Rename and restyle the axe and hoe. Add stump and log clearing to the axe with multi-swing hit reactions. Verify felling is unchanged
-  - Status: stump clearing with the axe (swing countdown, the ground-strike clip) is verified in PIE. The restyled meshes are authored (`estate_axe.py` SM_EstateAxe, `draw_hoe.py` SM_DrawHoe), imported and wired ahead of the flint fallbacks; the EstateAxe is seen in hand on a stump in PIE. Tree felling with it and tilling with the DrawHoe are not yet re-checked in game.
+- [x] 3.1 Rename and restyle the axe and hoe. Add stump and log clearing to the axe with multi-swing hit reactions. Verify felling is unchanged
+  - Status: verified in PIE on the Estate. Stump clearing with the axe shows the swing countdown and the ground-strike clip. The restyled meshes are SM_EstateAxe (`estate_axe.py`) and SM_DrawHoe (`draw_hoe.py`), listed ahead of the flint fallbacks. With the EstateAxe, a forest tree still fells through the unchanged felling presentation. The DrawHoe tills one square with the hoe clip.
 - [x] 3.2 Author the pickaxe mesh and strike animation, and add rubble, rock and boulder clearing with stone and scrap yields
-- [ ] 3.3 Author the scythe mesh and two-handed sweep animation, add the arc clearing with aggregated feedback, and verify the arc against the visible sweep
-  - Status: the mesh, the mow clip and the arc clearing with an aggregated toast are verified in PIE. The mow pose (arms forward, knees bent into the lean) and the idle carry (snath upright at her right side, blade resting behind) are re-authored from Jenny's feedback; the idle carry is checked in PIE, the new mow pose is not yet captured in game. A mow out of the arc's short reach now says "Step closer to mow." instead of doing nothing.
+- [x] 3.3 Author the scythe mesh and two-handed sweep animation, add the arc clearing with aggregated feedback, and verify the arc against the visible sweep
+  - Status: verified in PIE on the Estate. The mow was re-authored from Jenny's feedback: a wide stance, knees bent into a forward lean, and both arms reaching forward on the nibs. A side view in slow motion shows the sweep crossing in front of her and mowing the tufts in the arc ahead, with the aggregated toast "Mowed 1 tuft: +2 Hay." The idle carry now holds the snath upright at her right side with the blade resting behind her. A swing when nothing is inside the arc's short reach says "Step closer to mow." Before, it silently did nothing. Jenny's re-review of the pose is part of 4.2.
 - [ ] 3.4 Add the daily weed creep near remaining overgrowth, with no regrowth on tilled, built or road ground. Verify it across several slept days
+  - Status: implemented. The native `WeedCreepNearOvergrowth` test covers 12 days: yard grass creeps back, while a distant patch and a tilled square never regrow. It is not yet checked across slept days in game.
 
 ## 4. Acceptance
 
