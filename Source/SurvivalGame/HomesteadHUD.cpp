@@ -218,8 +218,16 @@ void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     const float TitleWidth = FMath::Min(TextWidth(Title, TitleSize), 520.0f);
     const float BoxWidth = FMath::Max(Width, TitleWidth) + 30;
     const float BoxHeight = Title.IsEmpty() ? BadgeH + 16 : BadgeH + 40;
-    const float CenterX = FMath::Clamp(static_cast<float>(Screen.X) / UiScale, BoxWidth * 0.5f + 12, ViewWidth - BoxWidth * 0.5f - 12);
+    float CenterX = FMath::Clamp(static_cast<float>(Screen.X) / UiScale, BoxWidth * 0.5f + 12, ViewWidth - BoxWidth * 0.5f - 12);
     const float Top = FMath::Clamp(static_cast<float>(Screen.Y) / UiScale - BoxHeight, 110.0f, ViewHeight - 260.0f);
+    if (const UHomesteadMapComponent* Map = PC.MapPresenter(); Map && Map->IsMinimapVisible())
+    {
+        // Keep clear of the bottom-right minimap, including its bezel and the N marker on the rim.
+        constexpr float RimClearance = 16, Margin = 10;
+        const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight).ExpandBy(RimClearance);
+        if (Top + BoxHeight + Margin > Minimap.Min.Y && CenterX + BoxWidth * 0.5f + Margin > Minimap.Min.X)
+            CenterX = FMath::Max(BoxWidth * 0.5f + 12, Minimap.Min.X - Margin - BoxWidth * 0.5f);
+    }
     Panel(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, FLinearColor(0.02f, 0.035f, 0.028f, 0.58f));
     ProtectFeedback(TEXT("interact-cue"), CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight);
     float Y = Top + 8;

@@ -83,9 +83,9 @@ same way, from the stone kit's masonry code and procedural materials. They use n
 downloaded geometry or textures. The hearth's crackle loop (`Assets\Audio\Ambience\HearthCrackle.wav`)
 is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it uses no recording.
 
-RuinFallenTimbers (`Scripts\Blender\Recipes\ruin_fallen_timbers.py`) is project-authored procedural charred/weathered oak roof-timber debris with adzed beam geometry, split fibre, alligator-char relief, an iron spike and procedural materials.
+RuinFallenTimbers (`Scripts\Blender\Recipes\ruin_fallen_timbers.py`) is project-authored procedural charred/weathered oak roof-timber debris with adzed beam geometry, split fibre, irregular char and rotten end treatment, hand-forged nails and procedural materials.
 RuinSlateScatter (`Scripts\Blender\Recipes\ruin_slate_scatter.py`) is project-authored procedural Delabole-style slate-roof debris with thick split-cleavage slate geometry, nail holes, subdued soil/moss pockets and procedural materials.
-RuinIvy (`Scripts\Blender\Recipes\ruin_ivy.py`) is project-authored procedural common-ivy wall mat geometry with woody clinging stems, rootlets, alpha-free lobed leaves on a shared UV atlas and procedural plant materials.
+RuinIvy (`Scripts\Blender\Recipes\ruin_ivy.py`) is project-authored procedural common-ivy wall mat geometry with woody clinging stems, rootlets, alpha-free broad Hedera-style lobed leaves with palmate veins on a shared UV atlas and procedural plant materials.
 The Estate ocean (`Content\SurvivalGame\Estate\Water`: `M_EstateOcean`, `MI_EstateOcean`,
 `SM_EstateOcean`, `T_EstateOceanShore`, `T_OceanRipples_N`, `T_OceanFoam` and `VT_OceanWaves` with its atlas) is project-authored.
 `Scripts\Terrain\bake_ocean.py` generates the mesh and all three textures in numpy: the shore data

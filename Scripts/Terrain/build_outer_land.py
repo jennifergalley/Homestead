@@ -60,7 +60,8 @@ def import_mesh():
     settings.set_editor_property("distance_field_resolution_scale", 0.0)
     sms.set_lod_build_settings(mesh, 0, settings)
     nanite = mesh.get_editor_property("nanite_settings")
-    nanite.set_editor_property("enabled", False)
+    # About 450k triangles, always loaded: Nanite keeps the distant ring cheap.
+    nanite.set_editor_property("enabled", True)
     mesh.set_editor_property("nanite_settings", nanite)
     sms.remove_collisions(mesh)
     return mesh
@@ -69,6 +70,7 @@ def import_mesh():
 def build_material():
     path = f"{FOLDER}/M_EstateOuterLand"
     mat = unreal.load_asset(path) or TOOLS.create_asset("M_EstateOuterLand", FOLDER, unreal.Material, unreal.MaterialFactoryNew())
+    mat.set_editor_property("used_with_nanite", True)
     MEL.delete_all_material_expressions(mat)
     for e in list(MEL.get_material_expressions(mat)):
         MEL.delete_material_expression(mat, e)

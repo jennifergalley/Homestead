@@ -102,8 +102,8 @@ def _beam_mesh(kit, name, points, width, depth, material, seed, roll=0.0, spacin
             # Long checks are real geometry: localised grooves running along the grain.
             angle = math.atan2(z / max(depth * 0.5, 1e-4), x / max(width * 0.5, 1e-4))
             groove = 0.0
-            for phase, amp, freq in ((0.20, 0.010, 7.0), (2.65, 0.008, 5.0), (4.55, 0.006, 9.0)):
-                if abs(math.atan2(math.sin(angle - phase), math.cos(angle - phase))) < 0.085:
+            for phase, amp, freq in ((0.20, 0.016, 7.0), (2.65, 0.012, 5.0), (4.55, 0.009, 9.0)):
+                if abs(math.atan2(math.sin(angle - phase), math.cos(angle - phase))) < 0.075:
                     groove -= amp * (0.45 + 0.55 * math.sin(lengths[i] * freq + seed))
             end_jag = 0.0
             if jagged_last and i == len(pts) - 1:
@@ -123,7 +123,7 @@ def _beam_mesh(kit, name, points, width, depth, material, seed, roll=0.0, spacin
         adze = -abs(math.sin(angle * 9.0 + pco.z * 1.7 + seed)) * 0.0015
         end_tear = max(0.0, 0.13 - min(s, 1.0 - s)) / 0.13
         split = 0.0
-        for phase, depth_m in ((0.20, 0.006), (2.65, 0.005), (4.55, 0.004)):
+        for phase, depth_m in ((0.20, 0.010), (2.65, 0.008), (4.55, 0.006)):
             d = abs(math.atan2(math.sin(angle - phase), math.cos(angle - phase)))
             split -= max(0.0, 1.0 - d / 0.070) ** 2 * depth_m * (0.45 + 0.55 * math.sin(pco.z * 8.0 + seed))
         return fibres + adze + split + end_tear * 0.004 * math.sin((pco.x + pco.y) * 95.0 + seed)
@@ -290,12 +290,12 @@ def build(kit):
 
     parts = []
     beams = [
-        dict(label="PrincipalPurlin", start=(-1.88, -0.24, 0.090), mid=(0.00, -0.05, 0.115),
-             end=(1.88, 0.17, 0.095), width=0.215, depth=0.165, roll=math.radians(6)),
-        dict(label="CrossRafter", start=(-1.20, 0.92, 0.235), mid=(-0.05, -0.04, 0.245),
-             end=(1.24, -0.96, 0.240), width=0.190, depth=0.145, roll=math.radians(-18)),
-        dict(label="ShortOffcut", start=(-1.50, -0.80, 0.070), mid=(-0.58, -0.30, 0.090),
-             end=(0.70, 0.76, 0.076), width=0.150, depth=0.115, roll=math.radians(25)),
+        dict(label="PrincipalPurlin", start=(-1.88, -0.22, 0.090), mid=(0.00, -0.14, 0.098),
+             end=(1.88, -0.06, 0.090), width=0.215, depth=0.165, roll=math.radians(6)),
+        dict(label="CrossRafter", start=(-1.20, 0.80, 0.265), mid=(0.02, -0.10, 0.292),
+             end=(1.25, -0.84, 0.265), width=0.190, depth=0.145, roll=math.radians(-18)),
+        dict(label="ShortOffcut", start=(-1.58, 0.92, 0.072), mid=(-0.62, 0.72, 0.082),
+             end=(0.72, 0.62, 0.076), width=0.150, depth=0.115, roll=math.radians(25)),
     ]
     for i, spec in enumerate(beams):
         start, mid, end = Vector(spec["start"]), Vector(spec["mid"]), Vector(spec["end"])
@@ -305,12 +305,17 @@ def build(kit):
         parts.append(_beam_mesh(kit, f"{spec['label']}_SilveredCore", [tuple(a), tuple(mid), tuple(b)],
                                 spec["width"], spec["depth"], grey_oak, SEED + i, spec["roll"]))
         for suffix, inner, outer, sign in (("A", a, start, -1), ("B", b, end, 1)):
+            unburnt_end = (spec["label"] == "ShortOffcut" and suffix == "B") or (spec["label"] == "CrossRafter" and suffix == "A")
             parts.append(_beam_mesh(kit, f"{spec['label']}_ScorchedEnd_{suffix}", [tuple(inner), tuple(outer)],
                                     spec["width"] * 1.015, spec["depth"] * 1.02, scorched,
-                                    SEED + 40 + i * 3 + sign, spec["roll"], spacing=0.038, jagged_last=True))
+                                    SEED + 40 + i * 3 + sign, spec["roll"], spacing=0.038, jagged_last=True) if not unburnt_end
+                         else _beam_mesh(kit, f"{spec['label']}_RottenEnd_{suffix}", [tuple(inner), tuple(outer)],
+                                         spec["width"] * 1.010, spec["depth"] * 1.015, fresh,
+                                         SEED + 40 + i * 3 + sign, spec["roll"], spacing=0.038, jagged_last=True))
             t, side, up = _frame((outer - inner), spec["roll"])
-            _char_tiles(kit, parts, f"{spec['label']}_{suffix}", outer, t, side, up,
-                        spec["width"] * 0.96, spec["depth"] * 0.92, char, SEED + 80 + i * 9 + sign)
+            if not unburnt_end:
+                _char_tiles(kit, parts, f"{spec['label']}_{suffix}", outer, t, side, up,
+                            spec["width"] * 0.96, spec["depth"] * 0.92, char, SEED + 80 + i * 9 + sign)
         # Varied torn fibre bundles on one snapped end.
         snap = end if i != 1 else start
         out_dir = (end - start).normalized() * (1 if i != 1 else -1)
@@ -325,11 +330,11 @@ def build(kit):
         # Deep exposed checks as dark recessed strips on visible faces.
         dvec = (end - start).normalized()
         _, side, up = _frame(dvec, spec["roll"])
-        for k in range(6 if not DRAFT else 3):
+        for k in range(10 if not DRAFT else 5):
             s0 = rng.uniform(0.20, 0.78)
             c = start.lerp(end, s0) + up * (spec["depth"] * 0.515) + side * rng.uniform(-spec["width"] * 0.32, spec["width"] * 0.32)
             parts.append(_dark_check(kit, f"{spec['label']}_OpenCheck_{k}", c, dvec, side, up,
-                                     rng.uniform(0.42, 1.20), rng.uniform(0.004, 0.010), check_mat))
+                                     rng.uniform(0.55, 1.45), rng.uniform(0.005, 0.014), check_mat))
         if i == 0:
             # A rectangular mortise/peg pocket cut into the weathered beam near one end.
             mortise_center = start.lerp(end, 0.18) + up * (spec["depth"] * 0.525) + side * (spec["width"] * 0.10)
