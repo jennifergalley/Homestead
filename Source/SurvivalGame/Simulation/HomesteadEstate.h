@@ -84,8 +84,10 @@ struct EstatePlacements
 const EstateLayout& ProvisionalEstateLayout();
 
 // Provisional interactive placements until the world lane bakes DA_EstatePlacements from the
-// Estate level. Each lane appends its own section (ids: world 500000+, overgrowth 510000+,
-// salvage 520000+, town 530000+).
+// Estate level. Each lane appends its own section. Id ranges (registry: docs/handoff/round-<n>.md):
+// world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved), berry brambles
+// 540000-540043 (clearing), derelict farm 550000+ (manor), MVP woodland biome 560000-569999,
+// clear-out near the manor 570000-579999 (clearing).
 const EstatePlacements& ProvisionalEstatePlacements();
 
 // The gap in the ruin's fallen front door on its south front, 10.5 m east of the ManorFootprint's

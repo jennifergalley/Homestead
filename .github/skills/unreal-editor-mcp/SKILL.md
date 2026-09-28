@@ -23,12 +23,13 @@ outcomes, not diaries. Fix or remove advice that proves wrong instead of adding 
 Several agent sessions (one worktree each, under `E:\Repos\copilot-worktrees\SurvivalGame\`)
 build, run editors and package on one PC with one RTX 5080 at the same time.
 
-- **Only the orchestrator packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
-  BuildCookRun`) and packaged-game tests run only in the orchestrator's worktree (registry in
-  `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests,
-  compile-check with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then message
-  the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
-  line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+- **Only the integration session packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
+  BuildCookRun`) and packaged-game tests run only in the integration session's worktree (registry in
+  `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
+  with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then send `[ready]` to the
+  orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The orchestrator only
+  coordinates and never builds. The separate `mvp-survival` line packages its own deliverables to
+  `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
 - **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
   packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
   15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
@@ -115,11 +116,12 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -Timeo
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
 .\Scripts\Stop-MyEditor.ps1 -Port $p                              # before building, rebasing, or when done (only your editor)
-& 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # compile-check
+# Build only when your C++ changed, once per batch of fixes; asset/Blender/Python/config work: Start-EditorMcp -SkipBuild
+& 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # editor module only; never the game target
 .\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 16-19 min
 git status --short                                               # commit only your files, rebase, push
 # then send_session_message the orchestrator: branch + SHA, what changed, what you verified, what to try.
-# Don't package: only the orchestrator runs Build-Game.ps1 -Package.
+# Don't package: only the integration session runs Build-Game.ps1 -Package.
 ```
 
 ### 0.1 Known failures → fixes
@@ -131,6 +133,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `Unable to build while Live Coding is active` | Some editor on the machine has an active Live Coding session. UBT checks a mutex named after the shared `UnrealEditor.exe` path, so it's any editor, any worktree (a hand-launched editor, one started before the opt-out, or one where `CompileLiveCoding` ran). An editor log shows `LogLiveCoding: Display: Starting LiveCoding` when it starts | Pass `-NoHotReloadFromIDE` to `Build.bat` (the scripts do), which skips the check. To find the culprit, search editors' `Saved\Logs\*.log` for `Starting LiveCoding`. Agent editors now start with Live Coding off (command line plus ini) and without `LiveCodingToolset`. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
 | An editor build (`Build.bat SurvivalGameEditor ... -WaitMutex`) sits silent for many minutes | It's queued behind other worktrees' UBT builds (the mutex is machine-wide). With 4 lanes building at once, one build waited about 50 minutes (3265 s in total) | Expect it and don't kill the waiting UBT: a killed build rejoins the back of the queue. Check who's building with `Get-CimInstance Win32_Process -Filter "Name='dotnet.exe'"` (UnrealBuildTool in the command line) before assuming a hang. |
+| UBT prints `UbaSessionServer - Killed process ... Low on memory (83.3gb/87.6gb)` and retries; an editor build takes about 40 min instead of 5 | The machine is out of memory: editors (15-17 GB each), Blender and other builds | Close your editor, and Blender if it's yours, before building; keep to the 2-process limit. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
@@ -145,6 +148,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
+| `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
@@ -152,13 +156,14 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Landscape grass (`LandscapeGrassOutput` + `LandscapeGrassType`) produces empty `GrassInstancedStaticMeshComponent`s in PIE on the Estate | Unknown (UE 5.8); also with `grass.GrassMap.UseRuntimeGeneration=1`, which needs an editor restart because the value is cached per shader platform | Gated off. Don't spend time on it without a new idea; scatter grass another way. |
 | Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset and clear its graph. `MaterialEditingLibrary.delete_all_material_expressions` alone leaves nodes behind on rebuilds (71 → 35; a second `LandscapeGrassOutput` survived). Symptoms: "only one Single Layer Water Material node", "The material can contain only one Landscape Grass node", missing-input errors, `get_statistics` vs/ps 0, and a silent fallback to the default grid. After `delete_all`, loop over `get_material_expressions` calling `delete_material_expression`, then assert `get_num_material_expressions(m) == 0` (`Scripts\Terrain\build_landscape_material.py` does this). |
 | `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
+| A `MaterialExpressionCollectionParameter` outputs nothing | It needs both `collection` (the MPC asset) and `parameter_name` set | Set both. `MPC_CameraSafeFoliage`'s `CameraPosition` and `HeroTargetPosition` vectors work from any material for player-aware effects. |
 | A `VolumeTexture` built from Python has the wrong tile size, or property errors | Setting `source2d_texture` resets the tile size to a default (102 for a 1024² atlas); `VolumeTexture` has a single address mode (no `address_x`) and no `blueprint_get_size_x` | Set `source2d_texture` first, then `source2d_tile_size_x/y`. In a Custom node sample it with `Texture3DSample(Vol, VolSampler, uvw)`. |
 | An Estate actor edited from Python looks unchanged in PIE | Spatially loaded World Partition actors stream into PIE from their **saved** external-actor packages (non-spatially-loaded ones such as `EstateSea` show edits live), and Python setters such as `AHomesteadWaterRibbon.set_course()` don't dirty the package | Call `actor.modify()` before editing, then `unreal.EditorLoadingAndSavingUtils.save_packages([actor.get_outermost()], False)` before PIE. |
-| An OBJ imported through Interchange comes in mirrored and invisible from outside | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding | Write y negated and swap face winding (a, c, b). |
+| An OBJ imported through Interchange comes in mirrored and invisible from outside, or data stored in UVs comes out wrong | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding, **and** flips texture V (v → 1 − v) | Write y negated and swap face winding (a, c, b). A mesh that stores data in UV0 (for example grass-blade roots) must detect or undo the V flip (`build_ground.py` compares vertex positions with their UVs after import). Set `use_full_precision_u_vs` when UVs hold values above about 16; half floats lose the fraction. |
 | Distant Estate land missing from elevated or far PIE views | PIE streams about 8 landscape proxies (252 m each, roughly ±400 m) around the **pawn**, with no HLOD, and streaming follows the pawn, not the view target | Move or park the pawn (`MOVE_FLYING`) near the camera for distant captures. |
 | `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
-| C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. An anonymous namespace inside a shared named one (`namespace HomesteadMenus { namespace { Gold } }`) still collides across UI files; use a named inner namespace. Compile-check the game target (`Build.bat SurvivalGame Win64 Development ...`) as well as the editor before sending `[ready]`. |
+| C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. An anonymous namespace inside a shared named one (`namespace HomesteadMenus { namespace { Gold } }`) still collides across UI files; use a named inner namespace. The integration session compiles the game target once per batch, so it catches these; lanes build only the editor module. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
@@ -204,7 +209,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | After `BugItGo` she walks through walls and counters, sinks knee-deep into floors, or, holding W, flies level and goes under the terrain where the road climbs, so "Recovered the character above the generated terrain" fires over and over (looks like missing landscape collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`): flying, no collision | Send `Walk` straight after every `BugItGo`, including in scripted walk drivers. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
 | An Explorer window pops up on Jenny's desktop during a perf run | `startfpschart`/`stopfpschart` opens the `Saved\Profiling\FPSChartStats\<timestamp>` folder on every dump (`t.FPSChart.OpenFolderOnDump`, default on) | Don't use FPS charts; use `stat unit` / `ProfileGPU` log output or csvprofile. If you must, set `t.FPSChart.OpenFolderOnDump 0` first. |
-| Frame times swing wildly between runs (for example render thread 20 ms vs 97-118 ms) | Other editors or UBT/`cl.exe` builds were running | Measure only inside a perf window: `Start-PerfWindow.ps1` checks one Unreal process and no builds, and holds off other launches. |
+| Frame times swing wildly between runs (render thread 20 ms vs 97-118 ms; ProfileGPU 12 vs 300 ms) | Other editors or UBT/`cl.exe` builds were running | Measure only inside a perf window: `Start-PerfWindow.ps1` checks one Unreal process and no builds, and holds off other launches. |
+| Frame times from a Slate tick callback in PIE are about 125 ms (8 fps) | An unfocused PIE window is throttled to 8 fps | Give the PIE window focus before sampling (`click` brings it forward), or measure a standalone `-game` window. |
 | `Start-EditorMcp.ps1`: "Perf window held by <worktree>" | Another session is measuring performance (`E:\CopilotScratch\homestead-perf.lock`, under 20 min old) | Wait for its `Stop-PerfWindow.ps1` or for the lock to go stale (20 min). `-Force` overrides; don't use it just to skip the wait. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
 | `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
@@ -396,6 +402,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - **Test clearing anywhere without the salvage route:** `HomesteadGive Scythe 1` or `HomesteadGive Billhook 1`
   (console, with the player controller) grants the tool directly. Then tap `Three` or `One` and
   `LeftMouseButton` (keyboard mode throughout). Verified on the derelict farm's 550000+ weeds and a thin bramble.
+- **Gather props (clearing lane, `bb6eb697`):** kneel-gather props are hidden on cancel, on a chained gather
+  and whenever her hands are idle, and a gather requested while her hands are busy is queued rather than
+  refused. A prop left stuck to her hand or arm is a regression; report it.
 - **Tool swings are refused while she's moving.** Any velocity or acceleration blocks the action
   in the anim instance, so an action key right after `set_sticks` or `walk_to` is silently dropped.
   `release_all`, wait until `speedCmPerSec` is 0, then act.
@@ -629,6 +638,8 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
   her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
   when she kneels; use them only for a specific close-up, and share the full-body view too.
+- A single `hshot` of a short action misses its start (about 3 s to capture): press the action key,
+  wait about 1-1.5 s, then capture, or use the faster `shot` viewport capture.
 - Contact sheets of an action: `hshot` (HighResShot) takes about 3-4 s per still, so slow the action
   with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below). Material
   `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
@@ -800,7 +811,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   character lab has its own sun (`LabSun <hour>`, default 10).
 - Jenny likes to watch you work. Prefer `PlayMode_InEditorFloating` with the PIE window brought to
   the front (section 5) over hidden in-viewport PIE.
-- If Jenny has the packaged game open from `Build\Windows` when the orchestrator needs to repackage,
+- If Jenny has the packaged game open from `Build\Windows` when the integration session needs to repackage,
   close it (`Stop-Process -Id <pid>` on the `SurvivalGame` processes) and build in place. She's only messing
   around in it for now and would rather get the newest build. Don't build to a side folder.
 - Homestead's world is generated at play time. The unplayed map shows little or nothing in the
@@ -840,7 +851,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   CMake suite (Simulation, WorldGeneration, RegionalGeneration, Parcel, Economy, ...) in about
   3 min; Debug takes about 10. For one suite, build its target and run
   `Build\Native\Release\<Suite>.exe *> <log>`; stdout is buffered, so a crash loses unredirected output.
-- **Package (orchestrator only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
+- **Package (integration session only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
@@ -868,7 +879,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
   and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 2-process limit; close it
   by PID. This isn't packaging, so lanes may run it.
-- **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
+- **Packaged smoke and route tests (integration session only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
   the MetaHuman heroine yourself (field notes).
