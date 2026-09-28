@@ -45,7 +45,16 @@ The southeast corner of the square is open for the road in from the estate.
 
 ## Known gaps
 
-- Hay and scrap are sold once the clearing lane lands those items. Until then, sell stone,
-  firewood, meadow herbs or branches.
+- Hay and scrap sell at 6 and 25 cents. The packaged Estate build (main 3b8172ba) passed steps 3-6 with
+  items from `HomesteadGive`. She was teleported to town, so the road walk carrying them is still untested.
 - Store and town surfaces are 2 m tiling textures baked in Blender (`store_surfaces.py`), so the
   repeat can show on broad walls.
+
+## Shortcuts for testing
+
+- Development builds take `EnableCheats`, then `BugItGo <x> <y> <z> <pitch> <yaw> <roll>`.
+  For example, `BugItGo -54000 116500 9350 0 90 0` puts her in front of the store door.
+- **`BugItGo` also turns on `Ghost`**, so she walks through walls, the counter and knee-deep into floors. Type `Walk` afterwards to get collision back before judging anything physical.
+- `HomesteadGive Hay 20` and `HomesteadGive ScrapIron 6` stock her pack.
+- The manor bedroll is next to (-25500, -63720). Sleeping through 6 AM runs the sell-down.
+- `HomesteadOpenStore` **moves** the store to 2.5 m ahead of her. It's for maps without a town. On the Estate the store is gone from the square until the save reloads, and loading puts it back at its anchor.

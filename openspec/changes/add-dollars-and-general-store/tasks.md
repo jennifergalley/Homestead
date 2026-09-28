@@ -11,7 +11,7 @@
 - [x] 2.2 Build the general-store interior and door at `GeneralStoreDoor`, with Blender counter, shelves, barrels, sacks and crates, and the closed sign
 - [x] 2.3 Add `AHomesteadShopkeeper` with a labelled stand-in body, a greeting panel and an interaction that opens the shop
 - [ ] 2.4 Add `SHomesteadShop` Sell and Buy panes with the From {Estate} section, the Quantity dialog, total preview and pause. Verify mouse and controller parity
-- [ ] 2.5 Package, carry hay and scrap from the estate to town, sell them, see them listed, buy and eat a pasty, then sleep and see the stock drain. Capture in-game views, commit and push
+- [ ] 2.5 Package, carry hay and scrap from the estate to town, sell them, see them listed, buy and eat a pasty, then sleep and see the stock drain. Capture in-game views, commit and push. **Packaged Estate build (main 3b8172ba), keyboard:** she walked into the store, sold 20 hay ($1.20) and 6 scrap iron ($1.50), saw both under From Trevennor, bought a Cornish pasty ($1.00, purse $10.00 → $11.70) and ate it (Food +28, Energy +4). She slept at the manor bedroll across 6 AM, and the shelf dropped to 13 hay and 3 scrap (35%, rounded up). **Still open:** the hay and scrap came from `HomesteadGive`, and `BugItGo` teleported her to town, so the road walk carrying them is unverified
 
 ## 3. Town and shopkeeper
 
