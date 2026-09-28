@@ -1,4 +1,5 @@
 #include "SHomesteadIcon.h"
+#include "HomesteadPalette.h"
 
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
@@ -9,8 +10,8 @@ namespace HomesteadIcons
 {
 namespace
 {
-    const FLinearColor Cream(0.93f, 0.93f, 0.84f);
-    const FLinearColor Pine(0.055f, 0.09f, 0.075f);
+    constexpr FLinearColor Cream = HomesteadPalette::Cream;
+    constexpr FLinearColor Pine = HomesteadPalette::Pine;
     const FLinearColor Charcoal(0.045f, 0.035f, 0.025f);
     const FLinearColor Wood(0.49f, 0.29f, 0.13f);
     const FLinearColor LeafGreen(0.32f, 0.52f, 0.19f);
