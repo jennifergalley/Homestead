@@ -113,6 +113,16 @@ The orchestrator merges ready lane work in its worktree, resolves conflicts, run
 packages once, runs the packaged tests, and pushes the integrated result to `main`. Then it tells
 the lanes to rebase and reports to Jenny what she can try.
 
+Orchestrator merge notes:
+
+- All worktrees share one `.git`, so a lane's local branch can be merged without a push. Lanes
+  sometimes rewrite history before pushing (for example ocean `e777db71` became `8a407908`), so
+  always merge the exact SHA named in the latest `[ready]`, not the branch tip you saw earlier.
+- Incidental `.uasset` re-saves block merges ("Your local changes ... would be overwritten"). Close
+  the editor, then `git checkout -- Content` for files you didn't mean to change.
+- Run the integration check with `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min).
+  Debug takes 16-19 min here.
+
 The separate MVP survival line (`mvp-survival`) packages its own build to
 `E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
 starting.
