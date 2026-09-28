@@ -235,7 +235,9 @@ if ($NativeSaveRetry) { $loopArguments += ' -HomesteadNativeSaveRetryTest' }
 if ($DirectionalNavigation) { $loopArguments += ' -HomesteadDirectionalNavigationTest' }
 if ($NativeMenuQuit) { $loopArguments += ' -HomesteadNativeQuitTest' }
 if ($NativeResumeFrom) { $loopArguments += " -HomesteadNativeResumeFrom=`"$([IO.Path]::GetFullPath($NativeResumeFrom))`"" }
-if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadRequireLit' }
+# The estate tools are MetaHuman props (the legacy heroine only ever carried the knife), so the hotbar
+# route presents them on the MetaHuman heroine.
+if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadMetaHuman -HomesteadRequireLit' }
 if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage $RenderScale`"" }

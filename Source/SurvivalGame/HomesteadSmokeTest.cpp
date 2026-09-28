@@ -580,7 +580,7 @@ void AHomesteadSmokeTest::Prepare()
                 && !Controller->ToastIsError();
         }, 0.6f);
 
-    int Branches = 0, Stones = 0, Reeds = 0;
+    int Branches = 0, Stones = 0;
     for (const auto& Node : Controller->State().resources)
     {
         if (Node.kind == Homestead::ResourceKind::Branches && Branches < 3)
@@ -593,12 +593,9 @@ void AHomesteadSmokeTest::Prepare()
             QueueHarvest(Node.id, Homestead::Item::Stone);
             ++Stones;
         }
-        if (Node.kind == Homestead::ResourceKind::Reeds && Reeds < 2)
-        {
-            QueueHarvest(Node.id, Homestead::Item::Fiber);
-            ++Reeds;
-        }
     }
+    // Reed fibre is retired; the first recipe hafts the axe from a rusted head and two branches.
+    QueueGrant(Homestead::Item::RustedAxeHead, 1);
     Add(TEXT("Open crafting with the keyboard"),
         [this]() { Tap(EKeys::C); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 1; });
@@ -813,7 +810,9 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         Finish(false, Step.Name + TEXT(" | Hand-action pose remained active during a menu, planning or failure."));
         return;
     }
+    // The legacy skin/eye material contract doesn't apply to routes that run the MetaHuman heroine.
     const bool MaterialsValid = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
+        || FParse::Param(FCommandLine::Get(), TEXT("HomesteadMetaHuman"))
         || (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             ? VerifyNativeMenuPresentation() : VerifyPresentationMaterials());
     if (!MaterialsValid)

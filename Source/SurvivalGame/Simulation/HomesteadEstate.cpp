@@ -97,7 +97,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
         };
 #include "HomesteadEstateWorldPlacements.inc"
         // Overgrowth lane (510000+). Offsets are from the spawn (x north, y east). The standing room's
-        // door faces east onto the forecourt; the drive climbs north-east toward the gateway and the
+        // door opens west into the ruin's south range; the drive climbs north-east toward the gateway and the
         // valley falls south toward the cove. Everything stays outside ManorFootprint.
         int next = 510001;
         auto grow = [&](ResourceKind kind, double dx, double dy, int minTier = 0) { add(next++, kind, dx, dy, minTier); };

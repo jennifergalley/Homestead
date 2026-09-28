@@ -84,7 +84,7 @@ class MenuSourceContracts(unittest.TestCase):
 
     def test_timber_recipe_and_dual_fuel_are_player_visible(self):
         self.assertIn('TEXT(" Add firewood / branch")', CONTROLLER)
-        self.assertIn("Split timber with a carried hatchet.", CONTROLLER)
+        self.assertIn("Split timber with a carried axe.", CONTROLLER)
         self.assertIn("Cookfires use prepared firewood first, then branches.", CONTROLLER)
 
     def test_current_schema_and_explicit_reset(self):
