@@ -106,9 +106,9 @@ parts, all generated here with no external textures. `python Scripts\Terrain\bak
   in game metres. The material's `ShoreFrame` parameter holds the same four numbers, so update it
   when the heightfield changes.
 - **Mesh.** `SM_EstateOcean` is a tensor grid in world centimetres at the origin. Cells are 8 m
-  wherever the ground is below 1.2 m, and they grow ×1.28 per step outside the map out to 60 km to the
-  south, west and east, so the horizon is sea. Everything south of the map is sea, including off
-  headlands that reach the edge. It's about 89k vertices, without collision, Nanite, lightmap UVs or
+  wherever the ground is below 1.2 m, and they grow ×1.28 per step outside the map out to 60 km on
+  every side, so land that reaches the map edge never shows void behind it and the horizon is sea all
+  round. It's about 131k vertices, without collision, Nanite, lightmap UVs or
   a distance field. Interchange's OBJ reader maps OBJ (x, y, z) to Unreal (x, −y, z), so the bake
   writes y negated and swaps the face winding.
 - **Material.** `M_EstateOcean` / `MI_EstateOcean` evaluate the waves analytically in two Custom
@@ -132,6 +132,10 @@ parts, all generated here with no external textures. `python Scripts\Terrain\bak
     source resets the tile size to a default (102 for a 1024² atlas).  - `ShoreWaves`: crests that follow the baked shore distance and roll in every 9 s. Each one
     throws a sheet of swash foam up the sand that drains into lace, with a thin line that lingers
     at the waterline. Foam lace drifts shoreward on a two-phase flow map.
+  - `MapEdgeDeepening`: the authored seabed stops at the map edge (about −22 m) and the water
+    outside has no floor, which showed as a step from teal to navy along the edge. Over the last
+    400 m inside the map, absorption and scattering are scaled up together (×3.5 at the edge),
+    which keeps the saturated colour and makes the water read as deep.
   - Colour comes from low scattering and red-first absorption: turquoise over the sand shallows,
     deep blue-green offshore. Facets are flattened just enough to keep every reflection above the
     horizon, because a reflection ray into the sea returns black.

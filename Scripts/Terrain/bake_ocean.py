@@ -101,7 +101,7 @@ def ocean_mesh(h, sea):
     # Lowest ground in every 8 m block, dilated by a block so the surface overlaps its shoreline.
     block_low = minimum_filter(np.where(low, h, 99.0), size=int(GRID_STEP * 2 + 1))
     reach = block_low < REACH_HEIGHT
-    xs = axis(-H, H, True, False)      # north edge never meets the sea
+    xs = axis(-H, H, True, True)       # sea on every side, so land at the map edge never shows void behind it
     ys = axis(-H, H, True, True)
     nx, ny = len(xs), len(ys)
     cell = np.zeros((nx - 1, ny - 1), bool)
@@ -114,7 +114,7 @@ def ocean_mesh(h, sea):
             inside = -H <= xc <= H and -H <= yc <= H
             # South of the map it is open Atlantic everywhere, including off headlands that run to
             # the map edge; east and west of the map only where the edge itself is sea.
-            cell[i, j] = reach[yi, xi] if inside else (xc < -H or sea[yi, xi])
+            cell[i, j] = reach[yi, xi] if inside else True
     used = np.zeros((nx, ny), bool)
     used[:-1, :-1] |= cell
     used[1:, :-1] |= cell
