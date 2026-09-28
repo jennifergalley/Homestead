@@ -6,16 +6,16 @@
   "triangle_budget": 200000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/ruin_slate_scatter.py",
-  "source_sha256": "4ad3b1182f337aef855c6ed120c5b97de4dfc88245d6bfbc918ecefa5ed0355e",
+  "source_sha256": "7057eabbecf602edfe75310024ee52b779376e4389c2d58dfca7ccc68348c71e",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_RuinSlateScatter": {
-      "vertices": 24986,
-      "triangles": 37662,
+      "vertices": 67623,
+      "triangles": 101764,
       "size_cm": [
-        328.08,
-        218.56,
-        27.72
+        281.72,
+        197.71,
+        27.42
       ],
       "materials": [
         {
@@ -47,9 +47,9 @@
           0
         ],
         "focus": [
-          -0.3895771384239197,
-          -0.09028476238250732,
-          0.11032250672578811
+          -0.4258066892623902,
+          -0.11709323287010193,
+          0.15
         ],
         "views": [
           "hero",
@@ -59,7 +59,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_RuinSlateScatter.fbx",
-      "sha256": "9709009df765461d7b471bbfaa2b019accc8b0377ff2c0df2979b5f1e8afa997",
+      "sha256": "026e06f411781b9a4133521200263194c4fc73d57b8b1e174274a48ec9b65599",
       "preview": "preview_SM_RuinSlateScatter.png",
       "beauty": {
         "views": {
@@ -86,12 +86,12 @@
       }
     },
     "SM_RuinSlateScatter_LOD1": {
-      "vertices": 13537,
-      "triangles": 15818,
+      "vertices": 36798,
+      "triangles": 42740,
       "size_cm": [
-        328.09,
-        218.56,
-        27.74
+        281.8,
+        197.68,
+        27.42
       ],
       "materials": [
         {
@@ -136,16 +136,16 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_RuinSlateScatter_LOD1.fbx",
-      "sha256": "c22478f0dc91f7e686921ece7df90ece967e21a611fa16b274034c2e55db4aed",
+      "sha256": "5704ac66af62e09428a571c5a1042800677197513c873e826dc2766420c89feb",
       "preview": "preview_SM_RuinSlateScatter_LOD1.png"
     },
     "SM_RuinSlateScatter_LOD2": {
-      "vertices": 6683,
-      "triangles": 6402,
+      "vertices": 18217,
+      "triangles": 17299,
       "size_cm": [
-        328.1,
-        218.85,
-        27.66
+        281.87,
+        197.44,
+        27.86
       ],
       "materials": [
         {
@@ -190,7 +190,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_RuinSlateScatter_LOD2.fbx",
-      "sha256": "d3d6af08f42b5e7d3d60ba71d517e82cf57d696eef2a4efdf0f0eb3b57dd796e",
+      "sha256": "8b1ef564bc2d5602eb4d2fe06826ae2afbc8ad26161c17f5f00eadcfb48a4b15",
       "preview": "preview_SM_RuinSlateScatter_LOD2.png"
     }
   },
@@ -200,8 +200,8 @@
   "placement": "The -X side is deliberately thick and should sit against the ruin wall; debris thins toward +X into the room/yard.",
   "collision_note": "No collision: low walkable decoration.",
   "textures": {
-    "T_RuinSlateScatter_basecolor.png": "a057ecc53656c79c4e71751924c90740ac29958fd4b29c258041a87e142f3545",
-    "T_RuinSlateScatter_roughness.png": "ae2366dff246e95b358bebc2f6acf0a163f7989c61d375d8325ca3223c508a07",
-    "T_RuinSlateScatter_normal.png": "c33b37ad4aac080624af543ab7134cf44f933c2184f2a9810be83259cbb004b0"
+    "T_RuinSlateScatter_basecolor.png": "ee3cdf238e95eb7edd4834c4e2ce1e1d226a26a2e8860e7dcb6e13615865ef41",
+    "T_RuinSlateScatter_roughness.png": "b16ba51fa1cc842ce69249db78c1bacd65d73b70f14ad78b62ee399190156a13",
+    "T_RuinSlateScatter_normal.png": "47b3024ad15db26c4e7771726d84ae43515424b4a5a902dd57d9baf01f2345a5"
   }
 }

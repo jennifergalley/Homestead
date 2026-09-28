@@ -6,16 +6,16 @@
   "triangle_budget": 500000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/ruin_ivy.py",
-  "source_sha256": "8588bc9e6e1751c041e385257677037a6f72188f61251a9f212bb529bfee62c7",
+  "source_sha256": "8d84fa8c7255d4e94d94fa84d9103b6651a5f19d90195f054890026da0cb4de6",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_RuinIvy": {
-      "vertices": 97538,
-      "triangles": 100311,
+      "vertices": 209454,
+      "triangles": 206397,
       "size_cm": [
-        256.59,
-        85.52,
-        233.3
+        251.47,
+        82.64,
+        246.26
       ],
       "materials": [
         {
@@ -60,7 +60,7 @@
         "eye_distance": 3.0
       },
       "fbx": "SM_RuinIvy.fbx",
-      "sha256": "c525a419fba632eb59dea9954444119373dffc0a7cdc04224f285d67029ff9d3",
+      "sha256": "0762aecef7dcb7a60f960fd6df4ce13e4dbac2badef50d0da4a2ca747a3b03fb",
       "preview": "preview_SM_RuinIvy.png",
       "beauty": {
         "views": {
@@ -87,12 +87,12 @@
       }
     },
     "SM_RuinIvy_LOD1": {
-      "vertices": 46964,
-      "triangles": 38118,
+      "vertices": 99624,
+      "triangles": 78430,
       "size_cm": [
-        256.53,
-        86.04,
-        234.0
+        251.26,
+        83.85,
+        245.28
       ],
       "materials": [
         {
@@ -138,16 +138,16 @@
         "eye_distance": 3.0
       },
       "fbx": "SM_RuinIvy_LOD1.fbx",
-      "sha256": "61ae9ec129e004d0e22868268b4e0732bac0f99b7262dda03f40d446fd9ee679",
+      "sha256": "ad42eabc026ed9b9b1e58f7b7b742e0bbb530079bda5decf0ffe965dd62a542d",
       "preview": "preview_SM_RuinIvy_LOD1.png"
     },
     "SM_RuinIvy_LOD2": {
-      "vertices": 25782,
-      "triangles": 15046,
+      "vertices": 55668,
+      "triangles": 30959,
       "size_cm": [
-        256.53,
-        86.54,
-        233.78
+        249.92,
+        84.48,
+        245.65
       ],
       "materials": [
         {
@@ -193,7 +193,7 @@
         "eye_distance": 3.0
       },
       "fbx": "SM_RuinIvy_LOD2.fbx",
-      "sha256": "04744c341089c172043c7bf8cf794088b0123d977f4b85bb9c1f995a7c796036",
+      "sha256": "b46d1feecddf699e15572e1c2a8feb941371b3dc8f663a4ef6f50519808c0165",
       "preview": "preview_SM_RuinIvy_LOD2.png"
     }
   },
@@ -203,8 +203,8 @@
   "placement": "Place the origin on the top/front edge of a RuinWall run. The mat hangs into Blender -Y / Unreal +Y and negative Z.",
   "foliage": "Leaves are individual alpha-free lobed meshes using a shared non-repacked UV atlas; no masked cards.",
   "textures": {
-    "T_RuinIvy_basecolor.png": "677a35d79ce0e9d93bcdc059625d5bfaaf8bf974d9b34a8f856b387c4e59cd77",
-    "T_RuinIvy_roughness.png": "3241f6c3c273e19141d5f67a31a2a091d15a1d2465b641b9af700cbdee943cc6",
-    "T_RuinIvy_normal.png": "814248d5406e2ee1e6892c956ca892472c91bec34ca258107b8c81bed30efc2e"
+    "T_RuinIvy_basecolor.png": "6f4e60bb1d6c51e5e5ab2fd59373cda7b3692a64eda41bf74a717907a9d9ecc9",
+    "T_RuinIvy_roughness.png": "c315df08f199b1dc6b0a27f7b4dc4d37bf1235037d639cd9c1f58d11edc48d8f",
+    "T_RuinIvy_normal.png": "ce7c0018693246e5a7a19058ede9de97c59e92b1a57e5c665c71d5e7552032c8"
   }
 }

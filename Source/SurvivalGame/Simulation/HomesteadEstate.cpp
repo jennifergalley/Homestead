@@ -1,5 +1,6 @@
 #include "HomesteadEstate.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace Homestead
@@ -166,13 +167,26 @@ const EstatePlacements& ProvisionalEstatePlacements()
         grow(ResourceKind::WildDaffodils, 900.0, 2500.0);
         along(ResourceKind::WildGarlic, valley, 4600.0, 1400.0);
         along(ResourceKind::WildGarlic, valley, 7000.0, 1000.0);
-        // Salvage lane (520000+). Provisional piles beside the ruin until add-ruined-manor-and-arrival
-        // places its own; each yields the next rusted head she's missing (billhook first).
-        add(520001, ResourceKind::SalvagePile, 1600.0, 300.0);
-        add(520002, ResourceKind::SalvagePile, -900.0, -600.0);
-        add(520003, ResourceKind::SalvagePile, -900.0, -1800.0);
-        add(520004, ResourceKind::SalvagePile, 1500.0, -2800.0);
-        add(520005, ResourceKind::SalvagePile, 400.0, -3000.0);
+        // Salvage (520000+), placed by add-ruined-manor-and-arrival in and around the ruin. Each pile
+        // yields the next rusted head she's missing, so the one just outside the standing room's door
+        // gives the billhook. Positions use HomesteadManorRuin's frame: u east from the footprint's
+        // west end, v north from its south front (cm), clear of the wall runs and rubble.
+        double manorX = room.x, manorY = room.y;
+        if (const LandmarkPolygon* manor = ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint))
+            for (const Point& corner : manor->points)
+            {
+                manorX = std::min(manorX, corner.x);
+                manorY = std::min(manorY, corner.y);
+            }
+        auto salvage = [&](int id, double u, double v)
+        {
+            table.placements.push_back({id, ResourceKind::SalvagePile, {manorX + v, manorY + u}, 0.0, 0.0, 1.0, 0});
+        };
+        salvage(520001, 2150.0, 300.0);  // In the south range, 2.5 m west of the standing room's door.
+        salvage(520002, 1250.0, 450.0);  // Inside the fallen front door, beside its rubble.
+        salvage(520003, 300.0, 1300.0);  // In the west rooms, north of the chimney breast.
+        salvage(520004, 1350.0, 1950.0); // Outside the gap in the fallen rear wall.
+        salvage(520005, 400.0, -200.0);  // Under the collapsed south-west corner, outside.
         // Town lane (530000+).
         return table;
     }();

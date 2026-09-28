@@ -112,8 +112,8 @@ void SHomesteadNames::Construct(const FArguments& Args)
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 14, 0, 0)
                 [
                     SNew(STextBlock)
-                    .Text(FText::FromString(TEXT("A: edit with letters   Start: begin   B: back        Keyboard: type, Tab to move, Enter")))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 13)).ColorAndOpacity(NameMuted)
+                    .Text(FText::FromString(TEXT("Controller: A edit with letters, Start begin, B back\nKeyboard: type, Tab or Enter for the next field, Esc back")))
+                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14)).ColorAndOpacity(NameMuted).AutoWrapText(true)
                 ]
             ]
         ]

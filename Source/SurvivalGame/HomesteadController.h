@@ -237,7 +237,8 @@ public:
     Homestead::Result ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell, bool bHeroineStock);
     void ShopClick();
     void NoteShopDevice(bool bPad);
-    FString EstateName() const { return TEXT("Trevennor"); }
+    // The name she gave the estate ("the estate" in woodland games), for "From {Estate}" and toasts.
+    FString EstateName() const;
     // The signed change of the last trade and how visible its readout still is (1 fresh, 0 gone).
     int64 WalletDelta() const { return LastWalletDelta; }
     float WalletDeltaAlpha() const { return FMath::Clamp(WalletDeltaRemaining / 1.0f, 0.0f, 1.0f); }
