@@ -52,10 +52,11 @@ void AHomesteadController::MenuInventoryView(int32 View)
 FString AHomesteadController::MenuInventorySummary() const
 {
     if (ActiveChestId.IsSet())
-        return FString::Printf(TEXT("Chest %d: %d / 120  |  Pack: %d / 120"),
-            ActiveChestId.GetValue(), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Sim.UsedCapacity());
+        return FString::Printf(TEXT("Chest %d: %d / %d  |  Pack: %d / %d"),
+            ActiveChestId.GetValue(), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Homestead::ChestCapacity,
+            Sim.UsedCapacity(), Homestead::InventoryCapacity);
     if (MenuInventoryViewIndex == 2) return TEXT("Equipped clothing");
-    return FString::Printf(TEXT("Your pack  |  %d / 120 units"), Sim.UsedCapacity());
+    return FString::Printf(TEXT("Your pack  |  %d / %d units"), Sim.UsedCapacity(), Homestead::InventoryCapacity);
 }
 
 TArray<FHomesteadRow> AHomesteadController::MenuRows() const
@@ -242,7 +243,7 @@ bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
         return MenuItemAction(Target, EHomesteadItemAction::Transfer, 1, Sim.GetRevision());
     if (Row.Subject != EHomesteadMenuSubject::ItemGroup) return false;
     const int32 Used = Row.ContainerId > 0 ? Sim.UsedCapacity() : Sim.ChestUsedCapacity(ActiveChestId.GetValue());
-    const int32 Room = Used < 0 ? 0 : Homestead::InventoryCapacity - Used;
+    const int32 Room = Used < 0 ? 0 : Homestead::ContainerCapacity(Target.DestinationId) - Used;
     // Move what fits; with no room at all the transfer reports why.
     const int32 Count = Room > 0 ? FMath::Min(Row.Quantity, Room) : Row.Quantity;
     return MenuItemAction(Target, EHomesteadItemAction::Transfer, Count, Sim.GetRevision());

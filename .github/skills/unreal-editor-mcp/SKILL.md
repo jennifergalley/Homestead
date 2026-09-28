@@ -46,11 +46,16 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   Lanes use the shell helpers instead.
   If you do use native tools, confirm the worktree first:
   `print(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))`.
-- **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). An
-  active Live Coding session blocks every other worktree's editor build. For C++ changes, quit the
-  editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when you must judge RT
-  lighting and fewer than three Unreal processes are running. PIE lighting therefore differs from
-  the packaged build, which has RT on.
+- **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). One
+  active Live Coding session anywhere blocks **every** worktree's editor build: UBT checks a mutex
+  named after the shared `UnrealEditor.exe` path, not the project (`HotReload.cs`). The script turns
+  it off two ways (an `-ini:` override on the command line, and `bEnabled=False` written into this
+  worktree's `Saved\Config\WindowsEditor\EditorPerProjectUserSettings.ini` before launch, which
+  also covers hand-launched editors and `-game` runs), and it no longer loads `LiveCodingToolset`,
+  whose `CompileLiveCoding` switches Live Coding on for the session whatever the setting says. For C++
+  changes, quit the editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when
+  you must judge RT lighting and fewer than three Unreal processes are running. PIE lighting
+  therefore differs from the packaged build, which has RT on.
 - **Close your editor** before `git pull`/`rebase` (it locks `.uasset` files), before building
   `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
   `quit` (McpHelpers) or `.\Scripts\Stop-MyEditor.ps1 -Port <p>`, which closes only this worktree's
@@ -106,7 +111,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 
 | Symptom (exact text where known) | Cause | Fix |
 | --- | --- | --- |
-| `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
+| `Unable to build while Live Coding is active` | Some editor on the machine has an active Live Coding session. UBT checks a mutex named after the shared `UnrealEditor.exe` path, so it's any editor, any worktree (a hand-launched editor, one started before the opt-out, or one where `CompileLiveCoding` ran). An editor log shows `LogLiveCoding: Display: Starting LiveCoding` when it starts | Pass `-NoHotReloadFromIDE` to `Build.bat` (the scripts do), which skips the check. To find the culprit, search editors' `Saved\Logs\*.log` for `Starting LiveCoding`. Agent editors now start with Live Coding off (command line plus ini) and without `LiveCodingToolset`. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
@@ -365,8 +370,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   and selected). Check `hotbarSlot` (0-based) and `focusActions` after selecting.
 - Overgrowth (add-overgrown-estate-clearing): stumps, rocks and thickets take several swings; each
   non-final swing toasts "N more swings.", the last one clears and toasts the yield. Walking more
-  than 1.5 m away resets the count. `HomesteadGive RustedBillhookHead 1` + two Branches lets the
-  Craft page's "Haft a billhook" run anywhere.
+  than 1.5 m away resets the count. On the estate, take the Branches from the standing-room chest
+  (below). `HomesteadGive RustedBillhookHead 1` + two Branches is only a shortcut for testing
+  "Haft a billhook" elsewhere (for example on the woodland map).
 - **Estate tool route (new game, verified in PIE on main 17a64854):**
   - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
     `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
@@ -376,8 +382,28 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
     520003 (-24600, -66200) and 520005 (-26100, -66100). Search each with `E`/A.
     - Each search gives the next missing head plus 1 scrap iron, in the order billhook, axe,
       scythe, pickaxe, hoe. The order follows your search order, not the pile.
-    - `walk_to` steers straight and gets stuck on the ruin walls around 520003 and 520005. For
-      those, `tp` to the pile ±90 cm and check that `focusTitle` is "Salvage pile".
+    - **All five are reachable on foot** (checked with `walk_to` waypoints and a capsule-swept
+      reachability grid). Walk these waypoints in order (world cm), then check `focusTitle` is
+      "Salvage pile":
+      - 520001: (-25725, -63950) → (-25725, -64150) → (-25580, -64300)
+      - 520002: (-25600, -65400) → (-25450, -65250)
+      - 520003: (-25225, -64150) → (-24650, -65075) (the cross-wall gap) → (-24650, -66100)
+      - 520004: (-24300, -64400) → (-24300, -65050) (the rear gap) → (-23950, -65100)
+      - 520005: (-25650, -66000) → (-25650, -65450) (it snags briefly on the door rubble at about
+        y -65590 but gets through) → (-26100, -65450) → (-26100, -66000)
+    - A straight `walk_to` to 520003 or 520005 gets stuck on the ruin walls; use the waypoints.
+    - **Close the field book before walking.** A by the hearth opens the Cook page, and `walk_to`
+      then reports `stuck` without moving.
+    - If `walk_to` doesn't move her after a Python `set_actor_location` teleport indoors (she stays
+      frozen at the teleport Z), set the movement mode back to `MOVE_WALKING` and teleport again about
+      60 cm higher.
+  - The first haft needs no trip outside: the standing-room chest (about 200 cm +X of the
+    spawn; `walk_to` (-25560, -63950)) holds the pail and 4 Branch. Open it with A, pick the
+    Branch tile, then Y > "Take to pack". Then search 520001 and haft the billhook (Craft tile 4,
+    hold Enter about 3 s). On foot, go (-25750, -64900), then (-25650, -65450), then
+    (-25950, -65450), and the focus reads "Thin bramble [RT] Hack with Billhook" in the doorway
+    (verified in PIE on 31810d1d). If PIE opens on Settings with "Saves from earlier test builds
+    can't be opened", move `Saved\SaveGames\Estate\*` aside and restart PIE.
   - Branch piles (each haft takes 2 Branch; a pile gives about 5): 500001 (-26650, -63400), 500002 (-26950, -64500)
     and 500003 (-27350, -62900).
   - Craft (`C`) tiles, left to right: Haft an axe, hoe, scythe, billhook, pickaxe, then the two root
@@ -385,7 +411,8 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   - Hafted tools auto-slot to the hotbar: `One` billhook, `Two` axe, `Three` scythe, `Four`
     pickaxe, `Five` hoe (`hotbarSlot` 0-4).
   - Worn-tier targets near the manor:
-    - thin bramble 510001 (-26050, -63000);
+    - thin bramble 510001-510007 just outside the fallen front door's 3 m gap, X -26000..-26380, Y -65640..-65270. `EstateManorFrontDoor()` is (-25900, -65450). Walk out from (-25750, -64900) to (-25650, -65450), then south to (-26000, -65450);
+    - three thin bramble outside the rear north-wall gap (-24100, -65150), at (-24040, -65290), (-24040, -65010) and (-23830, -65020), flanking salvage pile 520004;
     - forecourt tall grass and weeds 510008-510037, around (-26450, -62100);
     - rubble 510040 (-26550, -65800) and a small rock 510043 (-25150, -66600);
     - a two-swing sapling 510076 (-30592, -61863);
@@ -529,7 +556,6 @@ mcp $S get_current_level
 mcp $S load_level '{"level_path":"/Game/SurvivalGame/Maps/Homestead"}'
 mcp $L GetLogEntries '{"category":"","pattern":"LogHomestead|Error","maxEntries":40}'   # pattern is a required regex
 mcp $E CaptureViewport '{"captureTransform":null,"annotations":null,"bShowUI":false}'   # editor camera, not the game
-mcp 'LiveCodingToolset.LiveCodingToolset' CompileLiveCoding    # only works if Live Coding is on; it's off in agent editors (section 0)
 con 'HomesteadMorning 8'                                        # console command with the player controller
 ```
 
@@ -703,7 +729,7 @@ time (`v.std(0)`, scaled ×8); moving leaves light up, still ground stays black.
 | Batch several tool calls in one sandboxed Python script | `editor_toolset.toolsets.programmatic.ProgrammaticToolset` |
 | Output log | `EditorToolset.LogsToolset` |
 | Automation tests | `AutomationTestToolset.AutomationTestToolset` |
-| Compile C++ into the running editor | `LiveCodingToolset.LiveCodingToolset` |
+| Compile C++ into the running editor | Not in agent editors: quit, rebuild, relaunch (Live Coding blocks other worktrees' builds; section 0) |
 | Editor UI: snapshot, click, type (editor chrome only; see Field notes) | `SlateInspectorToolset.SlateInspectorToolset` |
 | Sequencer, Control Rig | `animation_toolset.toolsets.*` |
 | Config sections, plugins, physics assets | `ConfigSettingsToolset.*`, `PluginToolset.*`, `PhysicsToolsets.*` |
@@ -876,7 +902,7 @@ OpenSpec changes, not here.
   generation.
 - 2026-09-27: **Live Coding patch files stay locked** for about 60 s after `quit_editor`. Wait for the
   process to exit, then delete `Binaries\Win64\*patch*` before `Build-Game.ps1 -Package`.
-- 2026-09-25: Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs.
+- 2026-09-25: Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs. No longer used by agents: it switches Live Coding on and blocks every other worktree's build (section 0).
   Standalone `-game` runs load the DLL from disk, so do a real build first.
   Live Coding is now off in agent editors (section 0); rebuild instead.
 - 2026-09-26: **Never cache a loaded asset in a function-local `static UStaticMesh*`.** `static M =

@@ -88,6 +88,11 @@ $root = Split-Path $PSScriptRoot -Parent
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $project = Join-Path $root 'SurvivalGame.uproject'
 $output = Join-Path $root 'Saved\Automation'
+# Map per suite. The default game map is the Estate, but every suite here still plays the seeded
+# woodland (estate tools with stand-in salvage grants). Once a suite is retargeted to the fixed
+# estate, add its switch here, for example @($Clearing); a run with any of them uses the Estate.
+$estateSuites = @()
+$suiteMap = if ($estateSuites | Where-Object { $_ }) { '/Game/SurvivalGame/Maps/Estate' } else { '/Game/SurvivalGame/Maps/Homestead' }
 if ($Packaged) {
     $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
     $packageRoot = $package.packageDirectory
@@ -112,15 +117,14 @@ if ($Packaged) {
         }
     }
     $output = Join-Path $output 'Packaged'
-    # The default map is the Estate; these suites still run on the woodland map until each is retargeted.
-    $prefix = '/Game/SurvivalGame/Maps/Homestead '
+    $prefix = "$suiteMap "
 } else {
     $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $map = Join-Path $root 'Content\SurvivalGame\Maps\Homestead.umap'
     if (-not (Test-Path -LiteralPath $map)) { throw 'Build and bootstrap the game before running engine integration tests.' }
     $executable = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
     $offlineArguments = (& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1')) -join ' '
-    $prefix = "`"$project`" /Game/SurvivalGame/Maps/Homestead -game $offlineArguments "
+    $prefix = "`"$project`" $suiteMap -game $offlineArguments "
 }
 if ($OutputDirectory) { $output = [IO.Path]::GetFullPath($OutputDirectory, $root) }
 if ($ShippingQA -and (-not $Packaged -or -not $OutputDirectory -or $Weeding -or (Test-Path -LiteralPath $output))) {

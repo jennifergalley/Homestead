@@ -190,7 +190,9 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                     && FMath::Abs(FMath::FindDeltaAngleDegrees(
                         Avatar->ClearTargetYaw(), ExpectedYaw)) < 0.1f
                     && Controller->State().hour - Probe->Hour < 0.02;
-            }, 0.45f);
+            }, 1.2f);
+        // Sampled as soon as the pose agrees, so a long frame can't skip past the one fixed sample.
+        Steps.Last().bCompleteWhenReady = true;
     };
     Add(TEXT("Close notes for actual gather/craft setup"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this, Hidden]() { return !Controller->IsBookOpen() && Hidden(); });

@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <initializer_list>
+#include <utility>
 
 namespace Homestead
 {
@@ -71,6 +73,19 @@ const EstateLayout& ProvisionalEstateLayout()
     return Layout;
 }
 
+Point EstateManorFrontDoor(const EstateLayout& layout)
+{
+    const LandmarkPolygon* manor = layout.FindPolygon(Anchor::ManorFootprint);
+    if (!manor || manor->points.empty()) return layout.PointOr(Anchor::StandingRoomSpawn, {});
+    double south = manor->points.front().x, west = manor->points.front().y;
+    for (const Point& corner : manor->points)
+    {
+        south = std::min(south, corner.x);
+        west = std::min(west, corner.y);
+    }
+    return {south, west + 1050.0};
+}
+
 const EstatePlacements& ProvisionalEstatePlacements()
 {
     static const EstatePlacements Placements = []
@@ -97,26 +112,28 @@ const EstatePlacements& ProvisionalEstatePlacements()
         };
 #include "HomesteadEstateWorldPlacements.inc"
         // Overgrowth lane (510000+). Offsets are from the spawn (x north, y east). The standing room's
-        // door opens west into the ruin's south range; the drive climbs north-east toward the gateway and the
+        // door opens west into the ruin's south range, and she leaves the ruin through the fallen front
+        // door on its south front (x = -25900). The drive follows the road north-east toward the gateway and the
         // valley falls south toward the cove. Everything stays outside ManorFootprint.
         int next = 510001;
         auto grow = [&](ResourceKind kind, double dx, double dy, int minTier = 0) { add(next++, kind, dx, dy, minTier); };
-        const Point gateway = ProvisionalEstateLayout().PointOr(Anchor::EstateGateway, {room.x + 1.0, room.y + 1.0});
         const Point cove = ProvisionalEstateLayout().PointOr(Anchor::CoveBeach, {room.x - 1.0, room.y});
         const auto unit = [&](Point to) {
             const double x = to.x - room.x, y = to.y - room.y, length = std::sqrt(x * x + y * y);
             return length > 0 ? Point{x / length, y / length} : Point{1.0, 0.0};
         };
-        const Point drive = unit(gateway), valley = unit(cove);
+        const Point valley = unit(cove);
         // `distance` along a heading, `side` metres-in-cm to its left (negative: right).
         auto along = [&](ResourceKind kind, Point heading, double distance, double side, int minTier = 0)
         {
             grow(kind, heading.x * distance - heading.y * side, heading.y * distance + heading.x * side, minTier);
         };
-        // Thin bramble chokes the doorway.
-        for (const Point p : {Point{-300, 800}, Point{0, 850}, Point{300, 780}, Point{-150, 1050}, Point{200, 1100},
-                 Point{450, 950}, Point{-450, 1000}})
-            grow(ResourceKind::BrambleThin, p.x, p.y);
+        // Thin bramble chokes the 3 m gap outside the fallen front door (Y -65600..-65300), so she
+        // meets it before the open pasture. The billhook's salvage pile is indoors.
+        const Point frontDoor = EstateManorFrontDoor();
+        for (const Point p : {Point{-100, 0}, Point{-150, -180}, Point{-150, 180}, Point{-300, -90}, Point{-300, 110},
+                 Point{-480, -190}, Point{-480, 170}})
+            grow(ResourceKind::BrambleThin, frontDoor.x + p.x - room.x, frontDoor.y + p.y - room.y);
         // The forecourt is a meadow of tall grass with weeds through it.
         for (int row = 0; row < 4; ++row)
             for (int column = 0; column < 6; ++column)
@@ -128,16 +145,27 @@ const EstatePlacements& ProvisionalEstatePlacements()
             grow(ResourceKind::Rubble, p.x, p.y);
         for (const Point p : {Point{600, -2800}, Point{1700, -2400}, Point{-1100, 1800}})
             grow(ResourceKind::SmallRock, p.x, p.y);
-        // The drive: bramble, saplings and fallen boughs crowd both verges.
-        for (int step = 0; step < 8; ++step)
-        {
-            const double distance = 2600.0 + step * 900.0;
-            along(step % 3 == 2 ? ResourceKind::Sapling : ResourceKind::BrambleThin, drive, distance, 450.0);
-            along(step % 2 ? ResourceKind::Weeds : ResourceKind::BrambleThin, drive, distance + 400.0, -450.0);
-        }
-        for (const double distance : {3000.0, 5600.0, 8400.0}) along(ResourceKind::FallenBranch, drive, distance, -700.0);
-        for (const double distance : {4200.0, 7300.0}) along(ResourceKind::StumpSmall, drive, distance, 800.0);
-        for (int step = 0; step < 6; ++step) along(ResourceKind::TallGrass, drive, 3300.0 + step * 700.0, step % 2 ? 250.0 : -250.0);
+        // The drive: bramble, saplings and fallen boughs crowd both verges of the road. Absolute points
+        // follow the road polyline (Scripts/Terrain/estate_layout.json) from its estate start at
+        // (-23200, -62800): the same arc distances as before, 4.5 m either side (grass 2.5 m, boughs
+        // and stumps 7-8 m), clear of the graded road and its shoulders (1.45 m).
+        auto place = [&](ResourceKind kind, Point at) { grow(kind, at.x - room.x, at.y - room.y); };
+        for (const auto& [kind, at] : std::initializer_list<std::pair<ResourceKind, Point>>{
+                 {ResourceKind::BrambleThin, {-21422, -60838}}, {ResourceKind::BrambleThin, {-20563, -61319}},
+                 {ResourceKind::BrambleThin, {-20700, -60299}}, {ResourceKind::Weeds, {-19841, -60780}},
+                 {ResourceKind::Sapling, {-19981, -59760}}, {ResourceKind::BrambleThin, {-19118, -60234}},
+                 {ResourceKind::BrambleThin, {-19273, -59217}}, {ResourceKind::Weeds, {-18402, -59678}},
+                 {ResourceKind::BrambleThin, {-18575, -58664}}, {ResourceKind::BrambleThin, {-17695, -59106}},
+                 {ResourceKind::Sapling, {-17890, -58095}}, {ResourceKind::Weeds, {-17002, -58518}},
+                 {ResourceKind::BrambleThin, {-17223, -57515}}, {ResourceKind::BrambleThin, {-16319, -57910}},
+                 {ResourceKind::BrambleThin, {-16566, -56912}}, {ResourceKind::Weeds, {-15654, -57287}},
+                 {ResourceKind::FallenBranch, {-20413, -61519}}, {ResourceKind::FallenBranch, {-18330, -59940}},
+                 {ResourceKind::FallenBranch, {-16149, -58094}},
+                 {ResourceKind::StumpSmall, {-20351, -59600}}, {ResourceKind::StumpSmall, {-17970, -57703}},
+                 {ResourceKind::TallGrass, {-20442, -60980}}, {ResourceKind::TallGrass, {-20181, -60160}},
+                 {ResourceKind::TallGrass, {-19321, -60137}}, {ResourceKind::TallGrass, {-19071, -59314}},
+                 {ResourceKind::TallGrass, {-18212, -59270}}, {ResourceKind::TallGrass, {-17988, -58440}}})
+            place(kind, at);
         // Down the valley the overgrowth thickens, with the iron and steel teases off to the sides.
         for (int step = 0; step < 6; ++step)
         {
@@ -149,7 +177,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
         along(ResourceKind::StumpSmall, valley, 5200.0, 900.0);
         along(ResourceKind::BrambleThicket, valley, 3000.0, 1200.0);
         along(ResourceKind::BrambleThicket, valley, 6800.0, -1300.0);
-        along(ResourceKind::BrambleThicket, drive, 6200.0, 1400.0);
+        place(ResourceKind::BrambleThicket, {-19173, -57925}); // 14 m off the road.
         along(ResourceKind::BrambleBank, valley, 9500.0, 900.0);
         along(ResourceKind::StumpLarge, valley, 7600.0, 1500.0);
         along(ResourceKind::FallenLog, valley, 8800.0, -1400.0);
@@ -158,15 +186,19 @@ const EstatePlacements& ProvisionalEstatePlacements()
         grow(ResourceKind::Boulder, 2400.0, -3200.0);
         along(ResourceKind::Boulder, valley, 10200.0, -300.0);
         // Spring flowers in the verges and the valley, sold at the general store.
-        along(ResourceKind::Primroses, drive, 2900.0, 900.0);
-        along(ResourceKind::Primroses, drive, 6600.0, -900.0);
+        place(ResourceKind::Primroses, {-21451, -60297});
+        place(ResourceKind::Primroses, {-17408, -59453});
         grow(ResourceKind::Primroses, -1300.0, 2600.0);
         along(ResourceKind::Bluebells, valley, 5800.0, 1100.0);
         along(ResourceKind::Bluebells, valley, 8200.0, -900.0);
-        along(ResourceKind::WildDaffodils, drive, 4700.0, -1000.0);
+        place(ResourceKind::WildDaffodils, {-18867, -60734});
         grow(ResourceKind::WildDaffodils, 900.0, 2500.0);
         along(ResourceKind::WildGarlic, valley, 4600.0, 1400.0);
         along(ResourceKind::WildGarlic, valley, 7000.0, 1000.0);
+        // Appended so earlier ids stay stable: thin bramble outside the rear (north-wall) gap at
+        // (-24100, -65150), flanking salvage pile 520004 so the pile keeps its own focus.
+        for (const Point at : {Point{-24040, -65290}, Point{-24040, -65010}, Point{-23830, -65020}})
+            place(ResourceKind::BrambleThin, at);
         // Salvage (520000+), placed by add-ruined-manor-and-arrival in and around the ruin. Each pile
         // yields the next rusted head she's missing, so the one just outside the standing room's door
         // gives the billhook. Positions use HomesteadManorRuin's frame: u east from the footprint's

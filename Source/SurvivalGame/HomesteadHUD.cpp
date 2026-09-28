@@ -129,8 +129,12 @@ void AHomesteadHUD::DrawHUD()
             ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 262, Width, 132);
             Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 249, Width - 44, 24, Ink, 1);
             Wrap(PC->PlacementStatus(), X + 22, ViewHeight - 217, Width - 44, 21, PC->IsPlacementValid() ? Muted : HudWarning, 2);
-            Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   LB / RB: rotate   A: place   B: done")
-                : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
+            if (PC->IsDeconstructing())
+                Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   A: take down   Y / X: build instead   B: done")
+                    : TEXT("WASD + mouse: walk and aim   E / click: take down   X: build instead   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
+            else
+                Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   LB / RB: rotate   A: place   Y / X: take down   B: done")
+                    : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   X: take down   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
         else DrawInteractCue(*PC);
         if (const UHomesteadMapComponent* Map = PC->MapPresenter(); Map && Map->IsMinimapVisible())

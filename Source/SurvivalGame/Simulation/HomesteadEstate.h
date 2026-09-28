@@ -88,6 +88,9 @@ const EstateLayout& ProvisionalEstateLayout();
 // salvage 520000+, town 530000+).
 const EstatePlacements& ProvisionalEstatePlacements();
 
+// The gap in the ruin's fallen front door on its south front, 10.5 m east of the ManorFootprint's
+// west end: the way she walks out of the ruin.
+Point EstateManorFrontDoor(const EstateLayout& layout = ProvisionalEstateLayout());
 // Even-odd point-in-polygon test for simple rings in world XY.
 bool PointInPolygon(const std::vector<Point>& ring, Point point);
 }

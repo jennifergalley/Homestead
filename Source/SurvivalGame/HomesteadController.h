@@ -80,6 +80,8 @@ public:
     bool IsBookOpen() const { return bBookOpen; }
     bool IsFailed() const { return Sim.GetState().failed; }
     bool IsPlanning() const { return bPlanning; }
+    bool IsDeconstructing() const { return bPlanning && bDeconstructing; }
+    int32 DeconstructTarget() const { return DeconstructId; }
     bool UsesGamepad() const { return bGamepad; }
     uint32 PromptDeviceChangeCount() const { return PromptDeviceChanges; }
     uint32 IgnoredExternalInputCount() const { return IgnoredExternalInputs; }
@@ -125,6 +127,7 @@ public:
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
+    double BedSleepHours() const;
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
@@ -332,6 +335,8 @@ private:
     uint32 Footsteps = 0;
     bool bBookOpen = false;
     bool bPlanning = false;
+    bool bDeconstructing = false;
+    int32 DeconstructId = INDEX_NONE;
     bool bGamepad = true;
     uint32 PromptDeviceChanges = 0;
     FHomesteadPromptIntent PromptIntent;
@@ -522,9 +527,12 @@ private:
     void NextRow();
     void RotatePlacement();
     void RotatePlacementBy(int32 Direction);
+    void ToggleDeconstruct();
+    void UpdateDeconstruct(bool bForce);
     // Re-aims the preview ahead of the camera; revalidates it when it moved (at most ten times a
     // second unless forced).
     void UpdatePlacement(bool bForce);
+    Homestead::Result SleepInBed(Homestead::Point Position);
     void CycleZoom();
     void QuickSave();
     void QuickLoad();

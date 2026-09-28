@@ -1172,6 +1172,7 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
     InputComponent->BindKey(EKeys::Gamepad_RightTrigger, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
     InputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AHomesteadController::OpenFocusedChestWithMouse);
+    InputComponent->BindKey(EKeys::X, IE_Pressed, this, &AHomesteadController::ToggleDeconstruct);
     InputComponent->BindKey(EKeys::G, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Top, IE_Pressed, this, &AHomesteadController::Withdraw);
     InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AHomesteadController::Back);
@@ -1857,7 +1858,13 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
     case EFocus::Hearth: return A + TEXT(" Cook");
     case EFocus::Drop: return A + TEXT(" Pick up");
-    case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
+    case EFocus::Bed:
+    {
+        const double Hours = BedSleepHours();
+        if (Hours <= 2.0) return A + TEXT(" Nap");
+        const bool bToDawn = FMath::Abs(FMath::Fmod(State().hour + Hours, 24.0) - 6.75) < 0.02;
+        return A + (bToDawn ? TEXT(" Sleep until morning") : TEXT(" Sleep 8 hours"));
+    }
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
         ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
@@ -2314,6 +2321,21 @@ void AHomesteadController::Interact()
     if (!bWorldReady || !PrepareWorldAt(Position)) return;
     if (bPlanning)
     {
+        if (bDeconstructing)
+        {
+            UpdateDeconstruct(true);
+            const int32 Removed = DeconstructId;
+            const auto Result = Sim.Deconstruct(Removed, Position);
+            Notify(Result, WoodTapB);
+            if (Result.ok)
+            {
+                if (ActiveChestId.IsSet() && ActiveChestId.GetValue() == Removed) ActiveChestId.Reset();
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
+                Sim.AdvanceGameHours(0.1, Position);
+            }
+            UpdateDeconstruct(true);
+            return;
+        }
         UpdatePlacement(true);
         const auto Result = Sim.Place(BuildTarget, Position);
         Notify(Result, WoodTapA);
@@ -2428,7 +2450,7 @@ void AHomesteadController::Interact()
         break;
     case EFocus::Bed:
     {
-        Notify(Sim.Sleep(8, Position));
+        Notify(SleepInBed(Position));
         if (!IsFailed())
         {
             if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
@@ -2490,7 +2512,7 @@ void AHomesteadController::Secondary()
         Selection = FMath::Clamp(Selection, 0, FMath::Max(0, Rows().Num() - 1));
         return;
     }
-    if (bPlanning) { RotatePlacement(); return; }
+    if (bPlanning) { ToggleDeconstruct(); return; }
     if (!bWorldReady || !PrepareWorldAt(PlayerPoint())) return;
     UpdateFocus();
     const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("X") : TEXT("F"));
@@ -2616,7 +2638,8 @@ void AHomesteadController::OpenBook(int32 TargetPage)
 
 void AHomesteadController::Withdraw()
 {
-    if (IsFailed() || bPlanning) return;
+    if (IsFailed()) return;
+    if (bPlanning) { ToggleDeconstruct(); return; }
     if (!bBookOpen) { OpenBook(0); return; }
     if (Page != 0) return;
     const auto Items = Rows();
@@ -2742,6 +2765,12 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             Result.Add({ Index, Text(Homestead::PieceName(Piece)),
                 FString::Printf(TEXT("Needs: %s"), *Text(Homestead::PieceRequirements(Piece))), TEXT("plan") });
         }
+        FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"),
+            TEXT("Aim at anything you built and take it apart for its full cost. A chest's contents come with it; "
+                 "a floor must be bare first. In build mode Y / X switches between building and taking down."),
+            TEXT("plan") };
+        TakeDown.Icon = FName(TEXT("hatchet"));
+        Result.Add(MoveTemp(TakeDown));
     }
     else if (Page == 3)
     {
@@ -2965,6 +2994,24 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
     Appearance = Next;
     PlayEffect(UIClick, 0.08f);
 }
+
+double AHomesteadController::BedSleepHours() const
+{
+    return Homestead::BedSleepHours(State().hour);
+}
+
+Homestead::Result AHomesteadController::SleepInBed(Homestead::Point Position)
+{
+    const double Hours = BedSleepHours();
+    Homestead::Result Slept = Sim.Sleep(Hours > 12.0 ? Hours * 0.5 : Hours, Position);
+    if (Slept && Hours > 12.0) Slept = Sim.Sleep(Hours * 0.5, Position);
+    if (Slept && Hours <= 2.0)
+        Slept.message = "You nap for a while. Sleep in the evening to rest until morning.";
+    else if (Slept && FMath::Abs(FMath::Fmod(State().hour, 24.0) - 6.75) < 0.02)
+        Slept.message = "You wake at first light, rested. Your garden and fires carried on through the night.";
+    return Slept;
+}
+
 void AHomesteadController::ActivateRow()
 {
     const auto Items = Rows();
@@ -3399,7 +3446,9 @@ void AHomesteadController::BeginPlacement(Homestead::Piece Kind)
     CloseBook();
     HoveredHotbarSlot = INDEX_NONE;
     bPlanning = true;
-    BuildKind = Kind;
+    bDeconstructing = Kind == Homestead::Piece::Count;
+    DeconstructId = INDEX_NONE;
+    BuildKind = bDeconstructing ? Homestead::Piece::Foundation : Kind;
     BuildRotation = 0;
     BuildYawOffset = 0.0;
     BuildCheckKey.Reset();
@@ -3410,13 +3459,55 @@ void AHomesteadController::BeginPlacement(Homestead::Piece Kind)
 void AHomesteadController::EndPlacement()
 {
     bPlanning = false;
+    bDeconstructing = false;
+    DeconstructId = INDEX_NONE;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetPlanning(false);
     if (Landscape) Landscape->SetPlacementPreview(false, BuildTarget, false);
+}
+
+void AHomesteadController::ToggleDeconstruct()
+{
+    if (!bPlanning || bBookOpen || IsFailed()) return;
+    bDeconstructing = !bDeconstructing;
+    DeconstructId = INDEX_NONE;
+    BuildCheckKey.Reset();
+    PlayEffect(UIClick, 0.08f);
+    if (Landscape) Landscape->SetPlacementPreview(false, BuildTarget, false);
+    UpdatePlacement(true);
+}
+
+void AHomesteadController::UpdateDeconstruct(bool bForce)
+{
+    const auto Position = PlayerPoint();
+    const FRotator View(0, GetControlRotation().Yaw, 0);
+    Homestead::Point Aim{Position.x + View.Vector().X * 350.0, Position.y + View.Vector().Y * 350.0};
+    FVector Eye;
+    FRotator EyeRotation;
+    GetPlayerViewPoint(Eye, EyeRotation);
+    FHitResult Hit;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadDeconstructAim), false, GetPawn());
+    if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Eye, Eye + EyeRotation.Vector() * 1600.0f,
+        ECC_Visibility, Query))
+        Aim = {Hit.ImpactPoint.X, Hit.ImpactPoint.Y};
+    const int32 Target = Sim.FindDeconstructTarget(Aim, 120.0);
+    const FString Key = FString::Printf(TEXT("D:%d:%llu"), Target, static_cast<unsigned long long>(Sim.GetRevision()));
+    const double Now = GetWorld() ? GetWorld()->GetRealTimeSeconds() : 0.0;
+    if (bForce || Key != BuildCheckKey || Now - LastBuildCheckTime >= 0.25)
+    {
+        DeconstructId = Target;
+        const auto Check = Sim.CheckDeconstruct(Target, Position);
+        bBuildValid = Check.ok;
+        BuildBlocker = Check.ok ? FString() : Text(Check.message.c_str());
+        BuildCheckKey = Key;
+        LastBuildCheckTime = Now;
+    }
+    if (Landscape) Landscape->SetDeconstructPreview(State(), DeconstructId, bBuildValid);
 }
 
 void AHomesteadController::UpdatePlacement(bool bForce)
 {
     if (!bPlanning) return;
+    if (bDeconstructing) { UpdateDeconstruct(bForce); return; }
     const auto Position = PlayerPoint();
     // Aim 3.5 m ahead of her along the camera; whole centimetres keep the snap search stable.
     const FRotator View(0, GetControlRotation().Yaw, 0);
@@ -3447,7 +3538,7 @@ void AHomesteadController::RotatePlacement() { RotatePlacementBy(1); }
 
 void AHomesteadController::RotatePlacementBy(int32 Direction)
 {
-    if (!bPlanning) return;
+    if (!bPlanning || bDeconstructing) return;
     const bool bQuarterTurns = BuildTarget.snapped || BuildKind == Homestead::Piece::Wall
         || BuildKind == Homestead::Piece::Doorway || BuildKind == Homestead::Piece::Roof;
     if (bQuarterTurns) BuildRotation = ((BuildRotation + Direction) % 4 + 4) % 4;
@@ -3457,12 +3548,27 @@ void AHomesteadController::RotatePlacementBy(int32 Direction)
 
 FString AHomesteadController::PlacementLabel() const
 {
+    if (bDeconstructing)
+    {
+        for (const auto& Structure : State().structures)
+            if (Structure.id == DeconstructId)
+            {
+                FString Cost = Text(Homestead::PieceRequirements(Structure.kind));
+                int32 Notes = INDEX_NONE;
+                if (Cost.FindChar(TEXT(';'), Notes)) Cost.LeftInline(Notes);
+                return FString::Printf(TEXT("Take down %s  |  Returns %s"),
+                    *Text(Homestead::PieceName(Structure.kind)), *Cost);
+            }
+        return TEXT("Take down  |  Aim at something you built");
+    }
     return FString::Printf(TEXT("%s  |  %s"), *Text(Homestead::PieceName(BuildKind)), *Text(Homestead::PieceRequirements(BuildKind)));
 }
 
 FString AHomesteadController::PlacementStatus() const
 {
     if (!BuildBlocker.IsEmpty()) return BuildBlocker;
+    if (bDeconstructing)
+        return TEXT("Everything it cost comes back to your pack; a chest's contents come with it.");
     return BuildTarget.snapped ? FString(TEXT("Snaps onto your building."))
         : FString(TEXT("Free-standing: it faces the way you look; rotate turns it."));
 }
@@ -3698,6 +3804,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
     bool Incompatible = false;
+    TArray<FString> IncompatiblePaths;
     for (const auto& Slot : Slots)
     {
         for (const FString& Suffix : { FString(), FString(TEXT(".bak")) })
@@ -3709,6 +3816,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             {
                 Incompatible |= bReadIncompatible;
                 Corrupt |= !bReadIncompatible;
+                if (bReadIncompatible) IncompatiblePaths.Add(Path);
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
                 continue;
             }
@@ -3739,6 +3847,16 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 GEngine->GameViewport->ViewModeIndex, static_cast<int32>(GEngine->GameViewport->EngineShowFlags.ShaderComplexity));
         Notify(Corrupt ? TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.") : TEXT("Welcome back to your homestead."), Corrupt);
         return true;
+    }
+    if (bEstateMap && Incompatible && !Corrupt && !RecoveryOnly && !bHasPlayableSession)
+    {
+        // Saves from earlier test builds are set aside (never deleted) and a new game begins, rather
+        // than holding her on a reset page.
+        const FString Retired = FPaths::Combine(SaveRoute.Directory, TEXT("Retired"));
+        for (const FString& Path : IncompatiblePaths)
+            IFileManager::Get().Move(*FPaths::Combine(Retired, FPaths::GetCleanFilename(Path)), *Path, true, true);
+        Notify(TEXT("Saves from earlier test builds can't be opened by this one, so a new game begins. The old files are kept in the Retired folder."), false);
+        return false;
     }
     if (Corrupt || Incompatible)
     {

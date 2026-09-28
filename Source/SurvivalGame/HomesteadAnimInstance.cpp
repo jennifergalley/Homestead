@@ -751,7 +751,9 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             || !Avatar->GetCharacterMovement()->IsMovingOnGround()
             || !Avatar->GetPendingMovementInputVector().IsNearlyZero()
             || Avatar->GetCharacterMovement()->GetCurrentAcceleration().Size2D() > 1;
-        if (Requested != EHandAction::None && !Blocked && !bCancelled && !bGathering && ActionBlend.Alpha <= 0.001f)
+        // CancelAction clears any earlier request, so a request seen here came after the cancel: an
+        // immediate cancel (a hotbar switch) followed by a click in the same frame still starts it.
+        if (Requested != EHandAction::None && !Blocked && !bGathering && ActionBlend.Alpha <= 0.001f)
         {
             Active = Requested;
             Gather.SetSequence(Active == EHandAction::Till ? Avatar->GetTillAnimation()
@@ -764,7 +766,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         }
         const auto* Clip = Gather.GetSequence();
         if (Blocked || bCancelled) bGathering = false;
-        if (Requested != EHandAction::None && !Blocked && !bCancelled && Clip && !bGathering && ActionBlend.Alpha <= 0.001f)
+        if (Requested != EHandAction::None && Active == Requested && !Blocked && Clip && !bGathering && ActionBlend.Alpha <= 0.001f)
         {
             GatherTime = 0;
             bGathering = true;

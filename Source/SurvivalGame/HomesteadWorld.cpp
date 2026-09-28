@@ -38,6 +38,12 @@ namespace
 TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
     TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
          "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
+TAutoConsoleVariable<float> CVarNightMoonLux(TEXT("homestead.NightMoonLux"), 2.0f,
+    TEXT("Moonlight lux at full night."));
+TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
+    TEXT("Sky light intensity at full night."));
+TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
+    TEXT("Auto exposure min brightness at full night."));
 
 // Original provisional shapes, not the final realistic environment asset set.
 const FLinearColor Meadow(0.22f, 0.31f, 0.095f);
@@ -50,6 +56,7 @@ const FLinearColor Soil(0.16f, 0.085f, 0.039f);
 const FLinearColor Cloth(0.55f, 0.43f, 0.25f);
 const FLinearColor PreviewColor(0.65f, 0.79f, 0.77f);
 const FLinearColor PreviewBlockedColor(0.86f, 0.33f, 0.26f);
+const FLinearColor DeconstructColor(0.93f, 0.62f, 0.2f);
 
 bool RegionalReachLess(const Homestead::RegionalGeneration::RiverReach& A,
     const Homestead::RegionalGeneration::RiverReach& B)
@@ -1621,6 +1628,8 @@ void AHomesteadWorld::BuildLighting()
     Sun->SetupAttachment(GetRootComponent());
     Sun->SetMobility(EComponentMobility::Movable);
     Sun->bAtmosphereSunLight = true;
+    // The moon is also an atmosphere light; the sun wins forward shading (water, translucency, fog).
+    Sun->ForwardShadingPriority = 1;
     Sun->SetIntensity(46000.0f);
     // Ray-traced sun shadows have no cache, so the sun can move every refresh without the Virtual
     // Shadow Map re-render stalls a rotating sun causes over these non-Nanite trees (4K: 85 vs 78 FPS,
@@ -3262,7 +3271,7 @@ void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
 }
 
 void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
-    const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid)
+    const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid, bool bDeconstruct)
 {
     const Homestead::Point Center = Homestead::BuildingCellCenter(Frame, Structure.cellX, Structure.cellY);
     FVector Base(Center.x, Center.y, StructureBase(Center, Frame.yaw));
@@ -3299,8 +3308,11 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         bool bSolid = false, FRotator LocalRotation = FRotator::ZeroRotator, float Glow = 0.0f)
     {
         const FRotator Combined = (Rotation.Quaternion() * LocalRotation.Quaternion()).Rotator();
-        return AddPart(Visual, Mesh, Base + Rotation.RotateVector(Offset), Size,
-            bPreview ? (bValid ? PreviewColor : PreviewBlockedColor) : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
+        const FVector Shown = bDeconstruct ? Size * 1.02f + FVector(4.0f) : Size;
+        const FLinearColor PreviewTint = bDeconstruct ? (bValid ? DeconstructColor : PreviewBlockedColor)
+            : (bValid ? PreviewColor : PreviewBlockedColor);
+        return AddPart(Visual, Mesh, Base + Rotation.RotateVector(Offset), Shown,
+            bPreview ? PreviewTint : Color, bSolid && !bPreview, Combined, 0.85f, bPreview ? 0.0f : Glow);
     };
     // An imported kit mesh at the piece's pivot, keeping its own baked materials.
     auto KitPart = [&](const TCHAR* Name, float HeightScale = 1.0f) -> UStaticMeshComponent*
@@ -3627,8 +3639,12 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // extra tint so dawn stays golden instead of saturating to orange.
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
-    Moon->SetIntensity(0.5f * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(0.35f, 1.0f, Daylight));
+    const float NightMoonLux = CVarNightMoonLux.GetValueOnGameThread();
+    const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
+    const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
+    Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
+    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight));
+    Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
     Fog->SetFogDensity(bRaining ? 0.035f : FMath::Lerp(0.016f, 0.007f, Daylight));
     Fog->SetFogInscatteringColor(bRaining ? FLinearColor(0.43f, 0.49f, 0.52f)
         : FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight));
@@ -3993,5 +4009,29 @@ void AHomesteadWorld::SetPlacementPreview(bool Visible, const Homestead::Placeme
     Structure.cellY = Target.cellY;
     Structure.rotation = Target.rotation;
     BuildStructure(Preview, Structure, Target.frame, bOnFoundation, true, bValid);
+    Preview.Signature = Signature;
+}
+
+void AHomesteadWorld::SetDeconstructPreview(const Homestead::State& State, int32 StructureId, bool bValid)
+{
+    if (!bInitialized || StructureId < 0)
+    {
+        ClearVisual(Preview);
+        return;
+    }
+    const Homestead::Structure* Structure = nullptr;
+    for (const auto& Piece : State.structures)
+        if (Piece.id == StructureId) { Structure = &Piece; break; }
+    if (!Structure)
+    {
+        ClearVisual(Preview);
+        return;
+    }
+    const bool bOnFoundation = Homestead::HasFoundation(State, Structure->buildingId, Structure->cellX, Structure->cellY);
+    const FString Signature = FString::Printf(TEXT("D:%d:%d:%d"), StructureId, bOnFoundation, bValid);
+    if (Preview.Signature == Signature) return;
+    ClearVisual(Preview);
+    const Homestead::Building* Frame = Homestead::FindBuilding(State, Structure->buildingId);
+    BuildStructure(Preview, *Structure, Frame ? *Frame : Homestead::Building{}, bOnFoundation, true, bValid, true);
     Preview.Signature = Signature;
 }
