@@ -115,7 +115,11 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
-| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. |
+| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. That call can leave about half the nodes behind (71 → 35), which gives "only one Single Layer Water Material node" / missing-input errors and `get_statistics` vs/ps 0. Loop until `get_num_material_expressions(m) == 0`. |
+| `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
+| An Estate actor edited from Python looks unchanged in PIE | Spatially loaded World Partition actors stream into PIE from their **saved** external-actor packages (non-spatially-loaded ones such as `EstateSea` show edits live), and Python setters such as `AHomesteadWaterRibbon.set_course()` don't dirty the package | Call `actor.modify()` before editing, then `unreal.EditorLoadingAndSavingUtils.save_packages([actor.get_outermost()], False)` before PIE. |
+| An OBJ imported through Interchange comes in mirrored and invisible from outside | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding | Write y negated and swap face winding (a, c, b). |
+| Distant Estate land missing from elevated or far PIE views | PIE streams about 8 landscape proxies (252 m each, roughly ±400 m) around the **pawn**, with no HLOD, and streaming follows the pawn, not the view target | Move or park the pawn (`MOVE_FLYING`) near the camera for distant captures. |
 | `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
 | C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. |
@@ -226,7 +230,8 @@ clashes between parallel callers.
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
 
 Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
-`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. Keep session-specific helpers (probes,
+`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. PowerShell names are case-insensitive, so
+a local `$s`, `$e`, `$l` or `$h` overwrites these; the helpers themselves don't depend on them. Keep session-specific helpers (probes,
 callbacks) in your own files and load them from `py` with `sys.path.insert`.
 
 ## 4. Play the game
@@ -249,6 +254,11 @@ hk release_all; mcp $E StopPIE
   captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
   failed save. Code written for the woodland can still assume woodland heights (estate ground is
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
+- **Free-camera PIE stills (Estate):** before PIE, spawn a `CameraActor` in the editor world with
+  `is_spatially_loaded = False` (a spatially loaded one isn't streamed into PIE). In PIE, call
+  `set_view_target_with_blend` on the player controller, and park the pawn near the camera so the
+  land around it streams in (table 0.1). `HomesteadMorning <h>` with `h` earlier than the current
+  hour rolls to the next day, which can re-roll the weather to Rain; restart PIE for comparable day-1 stills.
 - **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
   `I` opens Inventory (page 0), Menu opens Settings (page 4).
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).
@@ -461,8 +471,9 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
   her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
   when she kneels; use them only for a specific close-up, and share the full-body view too.
-- Contact sheets of an action: `hshot` (HighResShot) takes about 3 s per still, so slow the action
-  with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below).
+- Contact sheets of an action: `hshot` (HighResShot) takes about 3-4 s per still, so slow the action
+  with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below). Material
+  `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
 - `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
   worst clearance per carried stick and body part in PIE (negative cm = inside her).
 
