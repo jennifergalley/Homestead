@@ -43,9 +43,6 @@ private:
     TArray<FString> WrappedLines(const FString& Text, float Width, float Size);
     void Wrap(const FString& Text, float X, float Y, float Width, float Size, FLinearColor Color, int MaxLines = 3);
     void Panel(float X, float Y, float Width, float Height, FLinearColor Color);
-    void Meter(const FString& Label, double Value, float X, float Y, FLinearColor Color);
-    // Her purse beside the meters, with the last trade's signed change floating above it.
-    void Wallet(const AHomesteadController& PC, float X, float Y);
     void DrawBook(const AHomesteadController& PC);
     // The focus prompt, floating just above the heroine's head: key badges and verbs ("E  Gather")
     // with the target's name small above, on a soft dark backing for contrast.

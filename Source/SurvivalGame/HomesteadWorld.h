@@ -275,6 +275,13 @@ private:
     bool bEstateSceneryBuilt = false;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
+    // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none
+    // pokes through a floor or wall; it comes back if the piece is taken down.
+    void ClearEstateSceneryUnderPieces(const Homestead::State& State);
+    TArray<TArray<FTransform>> EstateSceneryTransforms;
+    TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden.
+    TArray<TBitArray<>> EstateSceneryHidden;
+    FString EstateSceneryClearSignature;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
     UPROPERTY()

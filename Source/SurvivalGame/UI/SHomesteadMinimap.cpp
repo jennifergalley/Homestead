@@ -27,7 +27,7 @@ bool SHomesteadMinimap::CircleLocal(const FGeometry& Geometry, FVector2D& Center
     if (Physical.X < 1 || Physical.Y < 1) return false;
     // The Canvas HUD's rule: 1080 logical lines, clamped for tiny and very large windows.
     const float UiScale = FMath::Clamp(static_cast<float>(Physical.Y) / 1080.0f, 0.4f, 1.5f);
-    const FBox2D Box = UHomesteadMapComponent::MinimapBox(Physical.X / UiScale);
+    const FBox2D Box = UHomesteadMapComponent::MinimapBox(Physical.X / UiScale, Physical.Y / UiScale);
     const float LocalPerLogical = UiScale / Scale;
     Center = Box.GetCenter() * LocalPerLogical;
     Radius = MmLogicalRadius * LocalPerLogical;

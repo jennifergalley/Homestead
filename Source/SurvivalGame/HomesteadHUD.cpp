@@ -1,6 +1,7 @@
 #include "HomesteadHUD.h"
 #include "HomesteadController.h"
 #include "HomesteadMapComponent.h"
+#include "UI/SHomesteadVitals.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
@@ -14,7 +15,6 @@ const FLinearColor Muted(0.71f, 0.77f, 0.69f, 1);
 const FLinearColor HudGold(0.92f, 0.74f, 0.43f, 1);
 const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
 const FLinearColor HudWarning(1.0f, 0.67f, 0.48f, 1);
-constexpr float MeterWidth = 168;
 }
 
 void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLinearColor Color)
@@ -70,37 +70,6 @@ void AHomesteadHUD::Wrap(const FString& Text, float X, float Y, float Width, flo
         Write(Lines[Index], X, Y + Index * (Size + 7), Size, Color);
 }
 
-void AHomesteadHUD::Meter(const FString& Label, double Value, float X, float Y, FLinearColor Color)
-{
-    // Compact enough that all three sit left of the centred hotbar at 1080p.
-    Panel(X - 12, Y - 8, MeterWidth, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
-    ProtectFeedback(TEXT("need-meter"), X - 12, Y - 8, MeterWidth, 55);
-    Write(Label, X, Y, 19, Ink);
-    Write(FString::Printf(TEXT("%.0f"), Value), X + MeterWidth - 50, Y, 19, Value < 25 ? HudWarning : Muted);
-    Panel(X, Y + 29, MeterWidth - 24, 5, FLinearColor(0.2f, 0.25f, 0.2f, 1));
-    Panel(X, Y + 29, (MeterWidth - 24) * FMath::Clamp(static_cast<float>(Value / 100), 0.0f, 1.0f), 5, Color);
-}
-
-void AHomesteadHUD::Wallet(const AHomesteadController& PC, float X, float Y)
-{
-    const FString Balance = UTF8_TO_TCHAR(Homestead::FormatMoney(PC.State().money).c_str());
-    const float Width = FMath::Max(MeterWidth, TextWidth(Balance, 21) + 104);
-    Panel(X - 12, Y - 8, Width, 55, FLinearColor(0.025f, 0.045f, 0.035f, 0.83f));
-    ProtectFeedback(TEXT("wallet"), X - 12, Y - 8, Width, 55);
-    Write(TEXT("Purse"), X, Y, 19, Ink);
-    Write(Balance, X + Width - 24 - TextWidth(Balance, 21), Y - 1, 21, HudGold);
-    Panel(X, Y + 29, Width - 24, 2, FLinearColor(0.2f, 0.25f, 0.2f, 1));
-    // The last change floats up from the purse and fades.
-    const float Alpha = PC.WalletDeltaAlpha();
-    if (Alpha > 0 && PC.WalletDelta() != 0)
-    {
-        const FString Delta = UTF8_TO_TCHAR(Homestead::FormatMoneyDelta(PC.WalletDelta()).c_str());
-        const FLinearColor Color = PC.WalletDelta() > 0 ? FLinearColor(0.72f, 0.90f, 0.56f, Alpha)
-            : FLinearColor(HudWarning.R, HudWarning.G, HudWarning.B, Alpha);
-        Write(Delta, X + Width - 24 - TextWidth(Delta, 22), Y - 40 - (1 - Alpha) * 18, 22, Color);
-    }
-}
-
 void AHomesteadHUD::DrawHUD()
 {
     Super::DrawHUD();
@@ -124,11 +93,13 @@ void AHomesteadHUD::DrawHUD()
     const double Hour = FMath::Fmod(State.hour, 24.0);
     const int H = FMath::FloorToInt(Hour);
     const int M = FMath::FloorToInt((Hour - H) * 60);
-    Panel(30, 26, 460, 73, Pine);
-    ProtectFeedback(TEXT("calendar-panel"), 30, 26, 460, 73);
-    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(PC->Simulation().SeasonName()), PC->Simulation().DayNumber()), 48, 38, 24, Ink);
+    // The calendar sits top-right; the key hints take the top-left.
+    const float CalendarX = FMath::Max(30.0f, ViewWidth - 30 - 460);
+    Panel(CalendarX, 26, 460, 73, Pine);
+    ProtectFeedback(TEXT("calendar-panel"), CalendarX, 26, 460, 73);
+    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(PC->Simulation().SeasonName()), PC->Simulation().DayNumber()), CalendarX + 18, 38, 24, Ink);
     Write(FString::Printf(TEXT("%02d:%02d   %s%s"), H, M, PC->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear"),
-        PC->IsPlanning() || PC->IsBookOpen() || PC->IsShopScreenOpen() ? TEXT("   -   time paused") : TEXT("")), 48, 72, 18, Muted);
+        PC->IsPlanning() || PC->IsBookOpen() || PC->IsShopScreenOpen() ? TEXT("   -   time paused") : TEXT("")), CalendarX + 18, 72, 18, Muted);
 
     if (PC->IsFailed())
     {
@@ -146,11 +117,10 @@ void AHomesteadHUD::DrawHUD()
     }
     else
     {
-        const float Bottom = ViewHeight - 90;
         if (PC->IsShopScreenOpen()) return;
-        Meter(TEXT("Food"), State.hunger, 46, Bottom, FLinearColor(0.77f, 0.66f, 0.37f, 1));
-        Meter(TEXT("Energy"), State.energy, 46 + MeterWidth + 11, Bottom, FLinearColor(0.66f, 0.76f, 0.52f, 1));
-        Wallet(*PC, 46 + (MeterWidth + 11) * 2, Bottom);
+        // Food, energy and the purse are the Slate vitals stack (UI/SHomesteadVitals) at the bottom-left.
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewHeight);
+        ProtectFeedback(TEXT("vitals"), Vitals.Min.X, Vitals.Min.Y, Vitals.GetSize().X, Vitals.GetSize().Y);
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
         if (PC->IsPlanning())
@@ -165,13 +135,14 @@ void AHomesteadHUD::DrawHUD()
         else DrawInteractCue(*PC);
         if (const UHomesteadMapComponent* Map = PC->MapPresenter(); Map && Map->IsMinimapVisible())
         {
-            const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth);
+            const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight);
             ProtectFeedback(TEXT("minimap"), Minimap.Min.X, Minimap.Min.Y, Minimap.GetSize().X, Minimap.GetSize().Y);
         }
-        Panel(FMath::Max(18.0f, ViewWidth - 704), 26, FMath::Min(686.0f, ViewWidth - 36), 46, Pine);
+        const float HintsWidth = FMath::Min(686.0f, ViewWidth - 36);
+        Panel(30, 26, HintsWidth, 46, Pine);
         Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [L3] Sprint   [R3] Camera distance")
                 : TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] Sprint   Ctrl+wheel: zoom"),
-            FMath::Max(30.0f, ViewWidth - 690), 38, 19, Ink);
+            42, 38, 19, Ink);
     }
     const FString Toast = PC->Toast();
     if (!Toast.IsEmpty())
@@ -180,7 +151,8 @@ void AHomesteadHUD::DrawHUD()
         const float Width = FMath::Min(900.0f, FMath::Max(80.0f, ViewWidth - (InBook ? 540 : 80)));
         const auto Lines = WrappedLines(Toast, Width - 44, 23);
         const float Height = FMath::Max(92.0f, 53.0f + (Lines.Num() - 1) * 30);
-        const float X = InBook ? ViewWidth - Width - 30 : (ViewWidth - Width) * 0.5f;
+        // In the book the toast takes the top-left, clear of the calendar at the top-right.
+        const float X = InBook ? 30 : (ViewWidth - Width) * 0.5f;
         const float Y = InBook ? 26 : 113;
         bDrawingToast = true;
         if (bMeasureFeedback)

@@ -47,11 +47,11 @@ FString UHomesteadMapComponent::EstateName(const AHomesteadController& Controlle
     return Name.empty() ? FString(TEXT("Trevennor")) : FString(UTF8_TO_TCHAR(Name.c_str()));
 }
 
-FBox2D UHomesteadMapComponent::MinimapBox(float ViewWidth)
+FBox2D UHomesteadMapComponent::MinimapBox(float ViewWidth, float ViewHeight)
 {
-    // Below the top-right key hints, inset like the other HUD panels; about 220 px at 1080p.
-    constexpr float Size = 220, Right = 24, Top = 94;
-    return FBox2D(FVector2D(ViewWidth - Right - Size, Top), FVector2D(ViewWidth - Right, Top + Size));
+    // The bottom-right corner, level with the hotbar's bottom edge; about 220 px at 1080p.
+    constexpr float Size = 220, Right = 30, Bottom = 22;
+    return FBox2D(FVector2D(ViewWidth - Right - Size, ViewHeight - Bottom - Size), FVector2D(ViewWidth - Right, ViewHeight - Bottom));
 }
 
 void UHomesteadMapComponent::BeginPlay()
