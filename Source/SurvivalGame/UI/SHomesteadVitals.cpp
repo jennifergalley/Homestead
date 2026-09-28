@@ -15,7 +15,7 @@
 
 namespace HomesteadMenus
 {
-namespace
+namespace VitalsStyle
 {
 const FLinearColor Backing(0.025f, 0.045f, 0.035f, 0.78f);
 const FLinearColor Track(0.2f, 0.25f, 0.2f, 1);
@@ -67,26 +67,26 @@ TSharedRef<SWidget> SHomesteadVitals::MeterRow(FName Icon, TFunction<double()> V
     [
         SNew(SOverlay)
         + SOverlay::Slot()
-        [ SNew(SImage).Image(White()).ColorAndOpacity(Backing) ]
+        [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Backing) ]
         + SOverlay::Slot().Padding(6, 0, 12, 0)
         [
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
-            [ SNew(SBox).WidthOverride(IconSize).HeightOverride(IconSize)[ SNew(SHomesteadIcon).Kind(Icon) ] ]
+            [ SNew(SBox).WidthOverride(VitalsStyle::IconSize).HeightOverride(VitalsStyle::IconSize)[ SNew(SHomesteadIcon).Kind(Icon) ] ]
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(10, 0, 0, 0)
             [
-                SNew(SBox).WidthOverride(BarWidth).HeightOverride(BarHeight)
+                SNew(SBox).WidthOverride(VitalsStyle::BarWidth).HeightOverride(VitalsStyle::BarHeight)
                 [
                     SNew(SOverlay)
                     + SOverlay::Slot()
-                    [ SNew(SImage).Image(White()).ColorAndOpacity(Track) ]
+                    [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Track) ]
                     + SOverlay::Slot().HAlign(HAlign_Left)
                     [
                         SNew(SBox)
-                        .WidthOverride_Lambda([Value]() { return BarWidth * FMath::Clamp(static_cast<float>(Value() / 100.0), 0.0f, 1.0f); })
+                        .WidthOverride_Lambda([Value]() { return VitalsStyle::BarWidth * FMath::Clamp(static_cast<float>(Value() / 100.0), 0.0f, 1.0f); })
                         [
-                            SNew(SImage).Image(White())
-                            .ColorAndOpacity_Lambda([Value, Fill]() { return FSlateColor(Value() < 25 ? Warning : Fill); })
+                            SNew(SImage).Image(VitalsStyle::White())
+                            .ColorAndOpacity_Lambda([Value, Fill]() { return FSlateColor(Value() < 25 ? VitalsStyle::Warning : Fill); })
                         ]
                     ]
                 ]
@@ -101,17 +101,17 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
     [
         SNew(SOverlay)
         + SOverlay::Slot()
-        [ SNew(SImage).Image(White()).ColorAndOpacity(Backing) ]
+        [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Backing) ]
         + SOverlay::Slot().Padding(6, 0, 12, 0)
         [
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
-            [ SNew(SBox).WidthOverride(IconSize).HeightOverride(IconSize)[ SNew(SHomesteadIcon).Kind(FName(TEXT("coin"))) ] ]
+            [ SNew(SBox).WidthOverride(VitalsStyle::IconSize).HeightOverride(VitalsStyle::IconSize)[ SNew(SHomesteadIcon).Kind(FName(TEXT("coin"))) ] ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)
             [
                 SNew(STextBlock)
                 .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 15))
-                .ColorAndOpacity(Gold)
+                .ColorAndOpacity(VitalsStyle::Gold)
                 .Text_Lambda([this]()
                 {
                     return Controller.IsValid()
@@ -127,7 +127,7 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
                 {
                     const float Alpha = Controller.IsValid() ? Controller->WalletDeltaAlpha() : 0.0f;
                     const bool bGain = Controller.IsValid() && Controller->WalletDelta() > 0;
-                    const FLinearColor Color = bGain ? FLinearColor(0.72f, 0.90f, 0.56f, 1) : Warning;
+                    const FLinearColor Color = bGain ? FLinearColor(0.72f, 0.90f, 0.56f, 1) : VitalsStyle::Warning;
                     return FSlateColor(FLinearColor(Color.R, Color.G, Color.B, Alpha));
                 })
                 .Text_Lambda([this]()
