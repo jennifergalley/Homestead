@@ -48,6 +48,11 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   see 0.1).
 - **Launch without `-Map`** and load big levels after MCP answers:
   `py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"`.
+- **Never stop shared processes.** `zenserver.exe` (the DDC/Zen server on port 8558),
+  `UnrealTraceServer.exe`, `ShaderCompileWorker.exe` and other worktrees' `UnrealEditor*`/UBT/UAT
+  processes may be serving another session's build or cook. Stop only processes you started, by PID.
+  Scripts that refuse to run while any Unreal process exists (`Invoke-ShippingQA.ps1`,
+  `Test-AuthoringSettings.ps1`) need an idle machine; coordinate through the orchestrator.
 - **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
   `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
   fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
@@ -87,7 +92,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | --- | --- | --- |
 | `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
-| `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's inner UBT build doesn't pass `-WaitMutex`, and another worktree's UBT was running | Fixed: `Build-Game.ps1` passes `-WaitMutex` through `-UbtArgs`. For a hand-run BuildCookRun, add `"-UbtArgs=... -WaitMutex"`. |
+| `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window; the log stops at `Build.bat -Mode=ValidatePlatforms` | The AutoSDK platform check waits on another worktree's UBT mutex | Find the editor's `cmd.exe` child (`Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`) and `Stop-Process -Id` it and its children. The editor continues. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map during startup | Start without `-Map`, then `load_level` (under 1 s). |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
@@ -118,7 +123,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
 | `NameError: name '__file__' is not defined` in `run_python` | `run_python` executes a code string, not a file | `pyfile <path>` (McpHelpers), or `exec(compile(open(p).read(), p, 'exec'), {'__file__': p, '__name__': '__main__'})`. |
 | Saved actors, but the level still shows a dirty package or a teammate's checkout lacks your new Outliner folder | A new Outliner folder lives in its own `__ExternalObjects__/.../<Map>/...` package | Also save `EditorLoadingAndSavingUtils.get_dirty_map_packages()` and commit that package. |
-| `LogIoStore: Error: Failed to launch ZenServer` while packaging (see `Saved\Logs\UnrealPak.log`) | Another worktree's `zenserver` holds port 8558 | Unconfirmed workaround: a unique `[Zen.AutoLaunch] DesiredPort=` in this worktree's `Saved\Config\WindowsEditor\Engine.ini` and `Saved\Config\Windows\Engine.ini`. Or wait until the other package finishes. |
+| `LogIoStore: Error: Failed to launch ZenServer`, `Failed to add sponsor process IDs to launched ZenServer`, or `Failed to read oplog from Zen at [::1]:8558 ... HTTP NotFound` while staging (see `Saved\Logs\UnrealPak.log`) | The cook used the machine-shared Zen server (port 8558), and another worktree's zenserver held the port, restarted or was stopped mid-run | `Build-Game.ps1` now cooks with `-AdditionalCookerOptions=-SkipZenStore` and deletes a stale `Saved\Cooked\Windows\ue.projectstore` first (staging reads Zen whenever that marker exists). Never stop `zenserver.exe`: other worktrees may be cooking through it. |
 | UAT log shows another worktree's build | `%APPDATA%\Unreal Engine\AutomationTool\Logs\E+Program+Files+UE_5.8\` is shared and overwritten | Redirect `Build-Game.ps1` output to a log in your worktree (`*> Build\Logs\package.log`). |
 | `git pull`/`rebase`: `unable to unlink ... Invalid argument` on `.uasset` | Your editor holds the file | Close the editor, then `git status` and finish the rebase. |
 | PowerShell ``.Replace("a`nb", ...)`` silently changes nothing | Working copies are CRLF (`core.autocrlf=true`); agent-written files may be LF | Detect the newline first (``$t.Contains("`r`n")``), or use the edit tool. |
@@ -653,7 +658,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
-  script waits (`-WaitForUATMutex`, plus `-WaitMutex` for UAT's inner UBT step) behind other worktrees' packages and builds. Each Unreal step counts
+  script builds the game target with `-WaitMutex`, waits for UAT (`-WaitForUATMutex`) behind other worktrees, and cooks without the shared Zen store (`-SkipZenStore`). Each Unreal step counts
   toward the 3-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
   `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The

@@ -59,9 +59,10 @@ manor and boundary lanes haven't merged yet.
 - **Estate spawn yaw** is overwritten by `ChooseStartingView` and by `SetAppearancePreview(false)`
   restoring an earlier `SavedViewRotation`. Being fixed on the manor lane.
 
-- **Packaging with several worktrees:** `LogIoStore: Error: Failed to launch ZenServer` when another
-  worktree's zenserver holds port 8558. A per-worktree `[Zen.AutoLaunch] DesiredPort` is being
-  tested by the orchestrator; not yet confirmed.
+- **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
+  UBT `ConflictingInstance`): `Build-Game.ps1` now builds the game target with `-WaitMutex`, cooks
+  with `-SkipZenStore`, and waits for UAT (`4ffd2372` and later). Not yet verified by a full package
+  on `main`; the MVP lane runs the same fix on its branch.
 - **Blender prop import** needs a free editor slot (3-process limit). Props are imported in a
   running editor via `run_python`, not the headless script.
 

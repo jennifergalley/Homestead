@@ -8,8 +8,9 @@ Builds the editor module, regenerates content and (with -Package) packages the D
                       current in this worktree; the editor module build still runs (a no-op when current).
 -SkipAssets           skips Fetch-Assets.ps1.
 UAT is single-instance machine-wide; this script waits for another worktree's package to finish
-(-WaitForUATMutex) and makes UAT's inner UBT step wait for other worktrees' builds (-UbtArgs ...
--WaitMutex) instead of failing. Output: Build\Logs\bootstrap.log and Build\Logs\package-<time>.log.
+(-WaitForUATMutex). It builds the game target itself with -WaitMutex (UAT's build step can't wait for
+other worktrees' UBT) and cooks with -SkipZenStore, so the machine-shared Zen server isn't involved.
+Output: Build\Logs\bootstrap.log and Build\Logs\package-<time>.log.
 The bootstrap re-saves many tracked .uassets; review git status and restore the ones you didn't mean
 to change. Shared-machine rules: .github\skills\unreal-editor-mcp\SKILL.md, sections 0 and 8.
 #>
@@ -121,8 +122,16 @@ if ($Package) {
     # UAT's own log folder (%APPDATA%\Unreal Engine\AutomationTool\Logs) is shared by every worktree and
     # gets overwritten, so keep this worktree's full packaging output alongside the bootstrap log.
     $packageLog = Join-Path $logDirectory "package-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+    # UAT's own build step can't wait for another worktree's UBT (it tucks -UbtArgs inside each
+    # -Target="..." string, where -WaitMutex is ignored), so build the game target here and skip it there.
+    & $build SurvivalGame Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
+    if ($LASTEXITCODE -ne 0) { throw "Game target build failed ($LASTEXITCODE)." }
+    # Cook to loose files, not the machine-shared Zen server on port 8558: another worktree's zenserver
+    # restarting mid-run broke staging ("Failed to read oplog from Zen ... HTTP NotFound"). Staging uses
+    # the Zen store whenever ue.projectstore exists, so remove a stale marker first.
+    Remove-Item -LiteralPath (Join-Path $root 'Saved\Cooked\Windows\ue.projectstore') -Force -ErrorAction SilentlyContinue
     Write-Host "Packaging; full output: $packageLog"
-    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild -WaitMutex" -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
+    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -skipbuild -cook -stage -pak -archive "-archivedirectory=$archive" '-AdditionalCookerOptions=-SkipZenStore' -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
         Tee-Object -LiteralPath $packageLog
     if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE). See $packageLog and Saved\Logs\UnrealPak.log." }
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive
