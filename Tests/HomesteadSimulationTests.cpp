@@ -2867,7 +2867,6 @@ void OvergrowthTableAndPrompts()
     const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
     const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
     int overgrowth = 0, salvage = 0, doorway = 0, teases = 0;
-    int misplaced = 0;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
         if (placement.id < 510000 || placement.id >= 530000) continue;
