@@ -67,9 +67,9 @@ desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
   world lane (orchestrator).
 - **Strike and mow animations** aren't imported yet. Owner: clearing lane.
 
-Resolved in `f2e504c5`: estate saves (the `ReadSave` Z bound) and the cookfire/Hearth
-`FocusLegacySubject` bug. The manor lane's estate spawn-yaw fix is included in its merge, but it
-hasn't been confirmed in the packaged build.
+Resolved in `f2e504c5`: estate saves (the `ReadSave` Z bound), the cookfire/Hearth
+`FocusLegacySubject` bug, and the estate spawn yaw. The orchestrator confirmed the yaw by eye in the
+packaged build (she starts facing the lit doorway); there's no `controlYaw` assertion yet.
 
 - **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
   UBT `ConflictingInstance`): resolved. `Build-Game.ps1` builds the game target with `-WaitMutex`,
