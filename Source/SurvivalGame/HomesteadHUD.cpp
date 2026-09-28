@@ -118,8 +118,8 @@ void AHomesteadHUD::DrawHUD()
     else
     {
         if (PC->IsShopScreenOpen()) return;
-        // Food, energy and the purse are the Slate vitals stack (UI/SHomesteadVitals) at the bottom-left.
-        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewHeight);
+        // Food, energy and the purse are the Slate vitals stack (UI/SHomesteadVitals) under the calendar.
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth);
         ProtectFeedback(TEXT("vitals"), Vitals.Min.X, Vitals.Min.Y, Vitals.GetSize().X, Vitals.GetSize().Y);
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
@@ -152,11 +152,19 @@ void AHomesteadHUD::DrawHUD()
     if (!Toast.IsEmpty())
     {
         const bool InBook = PC->IsBookOpen();
-        const float Width = FMath::Min(900.0f, FMath::Max(80.0f, ViewWidth - (InBook ? 540 : 80)));
+        float Width = FMath::Min(900.0f, FMath::Max(80.0f, ViewWidth - (InBook ? 540 : 80)));
+        // Outside the book the toast is centred, but never runs under the vitals stack at the
+        // top-right (narrow windows): it gives up width, then slides left.
+        const float VitalsLeft = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth).Min.X - 16;
+        float X = InBook ? 30 : (ViewWidth - Width) * 0.5f;
+        if (!InBook && X + Width > VitalsLeft)
+        {
+            Width = FMath::Clamp(VitalsLeft - 30, 300.0f, Width);
+            X = FMath::Max(30.0f, FMath::Min((ViewWidth - Width) * 0.5f, VitalsLeft - Width));
+        }
         const auto Lines = WrappedLines(Toast, Width - 44, 23);
         const float Height = FMath::Max(92.0f, 53.0f + (Lines.Num() - 1) * 30);
         // In the book the toast takes the top-left, clear of the calendar at the top-right.
-        const float X = InBook ? 30 : (ViewWidth - Width) * 0.5f;
         const float Y = InBook ? 26 : 113;
         bDrawingToast = true;
         if (bMeasureFeedback)
@@ -231,6 +239,14 @@ void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight).ExpandBy(RimClearance);
         if (Top + BoxHeight + Margin > Minimap.Min.Y && CenterX + BoxWidth * 0.5f + Margin > Minimap.Min.X)
             CenterX = FMath::Max(BoxWidth * 0.5f + 12, Minimap.Min.X - Margin - BoxWidth * 0.5f);
+    }
+    if (!PC.IsShopScreenOpen())
+    {
+        // And clear of the vitals stack under the calendar at the top-right.
+        constexpr float Margin = 10;
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth);
+        if (Top < Vitals.Max.Y + Margin && CenterX + BoxWidth * 0.5f + Margin > Vitals.Min.X)
+            CenterX = FMath::Max(BoxWidth * 0.5f + 12, Vitals.Min.X - Margin - BoxWidth * 0.5f);
     }
     Panel(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, FLinearColor(0.02f, 0.035f, 0.028f, 0.58f));
     ProtectFeedback(TEXT("interact-cue"), CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight);
