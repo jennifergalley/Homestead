@@ -88,14 +88,7 @@ public:
     // knife), or null.
     UAnimSequence* GetGatherSticksAnimation() const
     {
-        if (!bMetaHumanActive) return nullptr;
-        switch (KneelKind)
-        {
-        case EHomesteadKneelGather::Pouch: return GatherPouchAnimation.Get();
-        case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
-        case EHomesteadKneelGather::Plant: return GatherPlantAnimation.Get();
-        default: return GatherSticksAnimation.Get();
-        }
+        return KneelClip(KneelKind);
     }
     UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
@@ -127,9 +120,9 @@ public:
     bool PlayPlant(Homestead::Point Target);
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
-    bool IsStickPileOnGround() const { return bStickPileOnGround; }
+    bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
     // Sticks lifted off the pile so far in the current kneeling gather (0-2).
-    int32 SticksLiftedFromPile() const { return bStickPileOnGround ? SticksLifted : 2; }
+    int32 SticksLiftedFromPile() const { return PendingKneel.IsSet() ? 0 : bStickPileOnGround ? SticksLifted : 2; }
     // World scale of the carried stick props; the woodland's Branches pile uses the same meshes at this scale.
     static constexpr float CarriedStickScale = 0.6f;
     // Loose single stones (Blender prop set HandStones, A-C), or null until they are imported. The
@@ -286,6 +279,24 @@ private:
     bool bStickGatherStarted = false;
     int32 SticksLifted = 0;
     void UpdateCarriedSticks();
+    // A kneeling gather committed while another hand action is still playing or blending out. It
+    // starts once the hands are free (the old clip keeps its own kind and props until then), and is
+    // re-requested if the animation refused it, e.g. while she was still sliding to a stop.
+    struct FPendingKneel
+    {
+        EHomesteadKneelGather Kind = EHomesteadKneelGather::Sticks;
+        TOptional<FVector2D> Pile;
+        bool bBerries = false;
+        bool bApplied = false;
+        bool bCancelledBlocker = false;
+        double Since = 0;
+    };
+    TOptional<FPendingKneel> PendingKneel;
+    UAnimSequence* KneelClip(EHomesteadKneelGather Kind) const;
+    void StartKneelGather(FPendingKneel& Kneel);
+    void UpdatePendingKneel();
+    // Hides every carried gather prop (sticks, stones, forage, reeds, seed).
+    void HideKneelProps();
     static constexpr float StickAlignSeconds = 0.5f;
     FTransform StickAlignFrom, StickAlignTo;
     float StickAlignRemaining = 0;

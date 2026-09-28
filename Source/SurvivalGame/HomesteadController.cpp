@@ -126,6 +126,28 @@ const TCHAR* SwingVerb(Homestead::Item Tool)
     }
 }
 
+// Where she keeps a tool: 2 in the pack, 1 only in a storage chest, 0 not owned at all.
+int32 ToolWhereabouts(const Homestead::Simulation& Sim, Homestead::Item Tool)
+{
+    if (Sim.Count(Tool) > 0) return 2;
+    for (const auto& Structure : Sim.GetState().structures)
+        if (Structure.storage[static_cast<int>(Tool)] > 0) return 1;
+    return 0;
+}
+
+// "Select the scythe" when it's in her pack but not in hand, "Take the scythe from storage" when it's
+// only in a chest, and "Requires a scythe" when she has none yet.
+FString ToolPrompt(const Homestead::Simulation& Sim, Homestead::Item Tool, const FString& Name, const TCHAR* Purpose = TEXT(""))
+{
+    switch (ToolWhereabouts(Sim, Tool))
+    {
+    case 2: return TEXT("Select the ") + Name + Purpose;
+    case 1: return TEXT("Take the ") + Name + TEXT(" from storage");
+    default:
+        return (FString(TEXT("aeiouAEIOU")).Contains(Name.Left(1)) ? TEXT("Requires an ") : TEXT("Requires a ")) + Name;
+    }
+}
+
 struct FCameraConfigSnapshot
 {
     bool Existed = false;
@@ -1756,13 +1778,13 @@ FString AHomesteadController::FocusTitle() const
             if (Node.id == FocusId)
             {
                 FString Status;
-                if (Node.kind == Homestead::ResourceKind::ForestTree && Sim.Count(Homestead::Item::Hatchet) == 0)
+                if (Node.kind == Homestead::ResourceKind::ForestTree && ToolWhereabouts(Sim, Homestead::Item::Hatchet) == 0)
                     Status = TEXT("  (axe needed)");
                 else if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind);
                     Overgrowth && Overgrowth->tool != Homestead::ToolKind::Count && !Overgrowth->byHand)
                 {
                     const auto Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
-                    if (Sim.Count(Homestead::ToolItem(Overgrowth->tool)) == 0)
+                    if (ToolWhereabouts(Sim, Homestead::ToolItem(Overgrowth->tool)) == 0)
                         Status = FString::Printf(TEXT("  (%s needed)"), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                     else if (Sim.GetToolTier(Overgrowth->tool) < Needed)
                         Status = TEXT("  (") + Text(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str()).ToLower() + TEXT(")");
@@ -1828,7 +1850,7 @@ FString AHomesteadController::FocusActions() const
                 if (Node.readyAtHour > State().hour) return FString();
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
                     return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
-                        ? Use + TEXT(" Fell with Axe") : TEXT("Select the axe to fell");
+                        ? Use + TEXT(" Fell with Axe") : ToolPrompt(Sim, Homestead::Item::Hatchet, TEXT("axe"), TEXT(" to fell"));
                 if (Node.kind == Homestead::ResourceKind::DeerRemains || Node.kind == Homestead::ResourceKind::Reeds)
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
@@ -1838,7 +1860,7 @@ FString AHomesteadController::FocusActions() const
                     if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
                         + (Overgrowth->byHand ? TEXT("   ") + A + TEXT(" Gather") : FString());
                     if (Overgrowth->byHand) return A + TEXT(" Gather");
-                    return TEXT("Select the ") + FString(UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
+                    return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
                 return A + TEXT(" Gather");
             }
@@ -1853,7 +1875,17 @@ FString AHomesteadController::FocusActions() const
                     return Use + TEXT(" Water");
                 if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
                     return Use + TEXT(" Weed");
-                return TEXT("Select the pail or hoe");
+                {
+                    // Plot tools: the pail waters, the hoe weeds.
+                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
+                    const int32 Hoe = ToolWhereabouts(Sim, Homestead::Item::DiggingStick);
+                    if (Pail == 2 && Hoe == 2) return TEXT("Select the pail or hoe");
+                    if (Pail == 2) return TEXT("Select the pail");
+                    if (Hoe == 2) return TEXT("Select the hoe");
+                    if (Pail || Hoe) return ToolPrompt(Sim, Pail ? Homestead::Item::WateringCan : Homestead::Item::DiggingStick,
+                        Pail ? TEXT("pail") : TEXT("hoe"));
+                    return TEXT("Requires a pail or hoe");
+                }
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -2393,17 +2425,23 @@ void AHomesteadController::Interact()
                 else if (Kind == Homestead::ResourceKind::DeerRemains)
                     Avatar->PlayKnifeCut(ActionTarget); // Work the dried hide free with the knife.
                 else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
-                    || Kind == Homestead::ResourceKind::BerryBush)
+                    || Kind == Homestead::ResourceKind::BerryBush || Kind == Homestead::ResourceKind::FallenBranch
+                    || Kind == Homestead::ResourceKind::SalvagePile)
                 {
                     const bool Berries = Kind == Homestead::ResourceKind::BerryBush;
-                    const auto Gather = Sticks ? EHomesteadKneelGather::Sticks
-                        : Kind == Homestead::ResourceKind::Stones ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
+                    // A fallen bough gathered by hand is broken into sticks; searching a salvage pile
+                    // lifts its fallen stones aside, so it plays the stone gather.
+                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch ? EHomesteadKneelGather::Sticks
+                        : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
+                        ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
-                    // Berries are picked from the near side of the bush, not its centre.
+                    // Berries are picked from the near side of the bush, not its centre; an estate
+                    // blackberry bramble is a metre across, so she reaches in at its edge.
                     if (Berries)
                     {
+                        const bool Bramble = FocusId >= Homestead::EstatePlacementIdBase && FocusId < Homestead::TransientResourceIdBase;
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
-                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * 22.0f;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * (Bramble ? 62.0f : 22.0f);
                     }
                     if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
                     {

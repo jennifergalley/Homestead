@@ -49,7 +49,7 @@ Partly Cloudy (Pure Sky) HDRI by Greg Zaal (https://polyhaven.com/a/kloofendal_4
 which ships with no asset.
 
 The woodland underbrush set (`Assets\Props\` BlackberryBramble, ToyonHedge, Hazel, DeerBrush,
-Thimbleberry, BrackenFern, WildStrawberry and GrassYarrowTuft, built with
+Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft and WildMarjoram, built with
 `Scripts\Blender\homestead_foliage.py` and `homestead_shrub.py`) is project-authored: every mesh is generated from
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.

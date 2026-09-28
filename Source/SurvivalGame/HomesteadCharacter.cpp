@@ -1152,6 +1152,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
         }
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
+    UpdatePendingKneel();
     UpdateCarriedSticks();
     UpdateEating();
     UpdateHeldTools(DeltaSeconds);
@@ -1243,23 +1244,90 @@ bool AHomesteadCharacter::PlayGatherSticks(TOptional<FVector2D> Pile)
     return PlayKneelGather(EHomesteadKneelGather::Sticks, Pile);
 }
 
+UAnimSequence* AHomesteadCharacter::KneelClip(EHomesteadKneelGather Kind) const
+{
+    if (!bMetaHumanActive) return nullptr;
+    switch (Kind)
+    {
+    case EHomesteadKneelGather::Pouch: return GatherPouchAnimation.Get();
+    case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
+    case EHomesteadKneelGather::Plant: return GatherPlantAnimation.Get();
+    default: return GatherSticksAnimation.Get();
+    }
+}
+
+void AHomesteadCharacter::HideKneelProps()
+{
+    for (UStaticMeshComponent* Prop : CarriedSticks) if (Prop) Prop->SetVisibility(false);
+    for (UStaticMeshComponent* Prop : CarriedStones) if (Prop) Prop->SetVisibility(false);
+    for (UStaticMeshComponent* Prop : {CarriedForage.Get(), CarriedReeds.Get(), CarriedSeed.Get()})
+        if (Prop) Prop->SetVisibility(false);
+}
+
 bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile, bool bBerries)
 {
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
-    KneelKind = Kind;
-    bForageBerries = bBerries;
     const bool bPropsReady = Kind == EHomesteadKneelGather::Sticks ? CarriedSticks.Num() >= 2
         : Kind == EHomesteadKneelGather::Stones ? CarriedStones.Num() >= 2
         : Kind == EHomesteadKneelGather::Reeds ? CarriedReeds && GetHeldProp(Homestead::Item::Knife)
         : Kind == EHomesteadKneelGather::Plant ? CarriedSeed != nullptr
         : CarriedForage != nullptr;
-    if (!GetGatherSticksAnimation() || !bPropsReady || !Animation)
+    if (!KneelClip(Kind) || !bPropsReady || !Animation)
     {
         const bool bQuiet = Kind == EHomesteadKneelGather::Reeds || Kind == EHomesteadKneelGather::Plant;
-        KneelKind = EHomesteadKneelGather::Sticks;
         if (!bQuiet) PlayGather();
         return false;
     }
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    // A later pickup replaces one still waiting; one that is already playing finishes first, with
+    // its own clip and props, so a quick second pickup never borrows the first one's animation.
+    PendingKneel = FPendingKneel{Kind, Pile, bBerries, false, false, GetWorld()->GetTimeSeconds()};
+    UpdatePendingKneel();
+    return true;
+}
+
+void AHomesteadCharacter::UpdatePendingKneel()
+{
+    if (!PendingKneel) return;
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    FPendingKneel& Kneel = *PendingKneel;
+    const double Waited = GetWorld()->GetTimeSeconds() - Kneel.Since;
+    if (!Animation || Waited > 4.0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("A kneeling gather never started (waited %.1f s); the pickup plays no animation."), Waited);
+        PendingKneel.Reset();
+        return;
+    }
+    if (Kneel.bApplied && Animation->IsGatheringSticks())
+    {
+        PendingKneel.Reset();
+        return;
+    }
+    if (Animation->IsHandActionBusy())
+    {
+        // Something long (a felling, say) still holds her hands: let it go rather than keep her waiting.
+        if (!Kneel.bApplied && !Kneel.bCancelledBlocker && Waited > 1.2 && !Animation->IsGatheringSticks())
+        {
+            Kneel.bCancelledBlocker = true;
+            Animation->CancelAction();
+        }
+        return;
+    }
+    if (!Kneel.bApplied) StartKneelGather(Kneel);
+    else Animation->RequestGatherSticks(); // Refused last update (she was still settling); ask again.
+}
+
+void AHomesteadCharacter::StartKneelGather(FPendingKneel& Kneel)
+{
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    const EHomesteadKneelGather Kind = Kneel.Kind;
+    const TOptional<FVector2D>& Pile = Kneel.Pile;
+    const bool bBerries = Kneel.bBerries;
+    Kneel.bApplied = true;
+    HideKneelProps();
+    KneelKind = Kind;
+    bForageBerries = bBerries;
     if (Kind == EHomesteadKneelGather::Pouch)
     {
         UStaticMesh* ForageMesh = bBerries ? ForageBerryMesh.Get() : ForageRootMesh.Get();
@@ -1303,7 +1371,6 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
         }
     }
     Animation->RequestGatherSticks();
-    return true;
 }
 
 void AHomesteadCharacter::UpdatePouchSwing()
@@ -1423,9 +1490,11 @@ void AHomesteadCharacter::UpdateCarriedSticks()
     const bool bReeds = KneelKind == EHomesteadKneelGather::Reeds;
     const bool bPlant = KneelKind == EHomesteadKneelGather::Plant;
     const auto& Props = bStones ? CarriedStones : CarriedSticks;
-    if (bPlant ? !CarriedSeed : bReeds ? !CarriedReeds : bPouch ? !CarriedForage : Props.Num() < 2) return;
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     const bool Active = Animation && Animation->IsGatheringSticks();
+    // Whatever ended the gather (its clip, a cancel, another action), nothing stays in her hands.
+    if (!Active) HideKneelProps();
+    if (bPlant ? !CarriedSeed : bReeds ? !CarriedReeds : bPouch ? !CarriedForage : Props.Num() < 2) return;
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
     // Reeds come off the clump all at once, with the cut.
     // Reeds come off the clump all at once, with the cut; a planted square stays bare until covered.
@@ -1613,7 +1682,10 @@ void AHomesteadCharacter::CancelAction(bool Immediate)
 {
     if (auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance()))
         Animation->CancelAction(Immediate);
-    for (UStaticMeshComponent* Stick : CarriedSticks) Stick->SetVisibility(false);
+    PendingKneel.Reset();
+    // Every gather prop, not just the sticks: a cancelled stone gather used to leave its stones on
+    // her forearm, because stage 0 then matched and nothing hid them.
+    HideKneelProps();
     StickStage = 0;
     bStickPileOnGround = false;
     StickAlignRemaining = 0;
