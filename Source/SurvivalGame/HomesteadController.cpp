@@ -3743,7 +3743,9 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     if (Corrupt || Incompatible)
     {
         LoadProblem = Incompatible && !Corrupt
-            ? TEXT("These test saves use an incompatible version. Start a new seeded woodland to use this build; old files are retained.")
+            ? (bEstateMap
+                ? TEXT("Saves from earlier test builds can't be opened by this one. Start a new game; the old files are kept.")
+                : TEXT("These test saves use an incompatible version. Start a new seeded woodland to use this build; old files are retained."))
             : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
         Notify(LoadProblem, true);
         // Do not let a fresh startup silently autosave over an unsuccessful load.
