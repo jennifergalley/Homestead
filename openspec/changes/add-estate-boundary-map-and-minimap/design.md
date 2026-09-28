@@ -64,7 +64,10 @@
   - The owned boundary as a dashed line.
   - Landmark glyphs clamped to the rim when off-crop.
   - The player arrow, drawn last.
-- The widget registers a protected region top-right, so toasts and context panels avoid it.
+- The widget sits bottom-right, level with the hotbar's bottom edge (moved from the top-right
+  at Jenny's request once the calendar took that corner). It registers a protected region, so
+  toasts and context panels avoid it, and the interact cue slides left of it when her head
+  projects into that corner.
 - It reads a per-frame snapshot (player XY and yaw) from the controller and never touches
   Simulation.
 
@@ -108,9 +111,8 @@ It reads:
 
 - **The bake goes stale after terrain edits.** → A one-click re-bake, with a check in the
   release checklist.
-- **The top-right space is contended.** The calendar HUD redesign lands in round 2 and must
-  share this corner. → The minimap owns a registered region, and round 2 composes the clock
-  and date around it.
+- **The top-right space is contended.** → Resolved: the calendar took the top-right and the
+  minimap moved bottom-right, with its own registered region.
 - **Polygon precision against the terrain.** → The boundary follows natural features where
   possible (hedge lines, streams, cliff edge) and is refined with Jenny on the map.
 
