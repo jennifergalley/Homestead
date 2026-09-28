@@ -358,6 +358,23 @@ private:
     double HackSince = 0;
     void UpdatePendingHack();
     void StartMacheteHack();
+    // Overgrowth work (add-overgrown-estate-clearing). Blows in progress live here, not in the save:
+    // the node clears on the swing that lands its last blow, and walking off resets the count.
+    int32 SwingNode = INDEX_NONE;
+    int32 SwingsLanded = 0;
+    Homestead::Item SwingTool = Homestead::Item::Count;
+    FVector2D SwingFrom = FVector2D::ZeroVector;
+    bool bSwingPending = false;
+    // The swing plays a felling-timed clip (axe chop or ground strike, pick strike, scythe mow).
+    bool bSwingFellTimed = false;
+    double SwingSince = 0;
+    uint32 SwingFellStartsBefore = 0;
+    // The scythe's sweep: every grass and weed tuft in the forward arc when it began.
+    TArray<int32> ScytheTargets;
+    void SwingAtOvergrowth(Homestead::Item Tool);
+    void UpdatePendingSwing();
+    void LandOvergrowthSwing();
+    void ResetOvergrowthSwing();
     // Felling in progress: the tree is already cleared; its standing copy topples after the last
     // stroke (or at once if she stops), with a chop sound per stroke.
     int32 FellResource = INDEX_NONE;
@@ -433,6 +450,8 @@ private:
     // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
     void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();
+    // Pins a newly hafted tool to the hotbar (if needed) and selects it.
+    void SlotHaftedTool(Homestead::Recipe Recipe);
     void NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue);
     TArray<int32> HotbarSlots;
     int32 SelectedHotbarSlot = 0;

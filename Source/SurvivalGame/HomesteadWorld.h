@@ -379,6 +379,9 @@ private:
     bool BuildDecorations(const Homestead::Simulation& Simulation,
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
+    // The estate's overgrowth kinds, each placed through Place(mesh, offset, yaw, produce, scale).
+    void BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
+        const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float)>& Place);
     bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,
         FHomesteadOuterTreeInstance& Instance);
     bool RebuildOuterTreeBatches(const Homestead::Simulation& Simulation);

@@ -1,0 +1,448 @@
+{
+  "schema": 1,
+  "name": "EstateTimber",
+  "description": "Felled stumps (small, large, ancient) and fallen wood (bough, log, giant log) for estate clearing with the axe (original).",
+  "collision": "none",
+  "triangle_budget": 24000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/estate_timber.py",
+  "source_sha256": "c33f09e6d6e667b987fc29bd045105ff544bc12d5a856dc6e4ae35c42d230f85",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_StumpSmall": {
+      "vertices": 3102,
+      "triangles": 6172,
+      "size_cm": [
+        37.6,
+        37.08,
+        36.06
+      ],
+      "materials": [
+        {
+          "name": "M_StumpSmall",
+          "textures": {
+            "basecolor": "T_StumpSmall_basecolor.png",
+            "roughness": "T_StumpSmall_roughness.png",
+            "normal": "T_StumpSmall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StumpSmall_basecolor.png",
+          "roughness": "T_StumpSmall_roughness.png",
+          "normal": "T_StumpSmall_normal.png",
+          "ao": "T_StumpSmall_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.006343156099319458,
+          0.00549730658531189,
+          0.3025744498707354
+        ]
+      },
+      "fbx": "SM_StumpSmall.fbx",
+      "sha256": "6092273aa6873ab638bf57ef620b546787aa4e7faa332fc684a456faf19574ec",
+      "preview": "preview_SM_StumpSmall.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StumpSmall_hero.png",
+          "detail": "beauty_SM_StumpSmall_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StumpLarge": {
+      "vertices": 3102,
+      "triangles": 6172,
+      "size_cm": [
+        95.7,
+        97.83,
+        54.52
+      ],
+      "materials": [
+        {
+          "name": "M_StumpLarge",
+          "textures": {
+            "basecolor": "T_StumpLarge_basecolor.png",
+            "roughness": "T_StumpLarge_roughness.png",
+            "normal": "T_StumpLarge_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StumpLarge_basecolor.png",
+          "roughness": "T_StumpLarge_roughness.png",
+          "normal": "T_StumpLarge_normal.png",
+          "ao": "T_StumpLarge_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.027624055743217468,
+          -0.0034924298524856567,
+          0.3088780205696821
+        ]
+      },
+      "fbx": "SM_StumpLarge.fbx",
+      "sha256": "2e2309df477505ccf3f7fc67f8d3fc52d48ee3e447d44dfe2daf3f974700a3bd",
+      "preview": "preview_SM_StumpLarge.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StumpLarge_hero.png",
+          "detail": "beauty_SM_StumpLarge_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StumpAncient": {
+      "vertices": 4286,
+      "triangles": 8540,
+      "size_cm": [
+        204.59,
+        197.69,
+        70.95
+      ],
+      "materials": [
+        {
+          "name": "M_StumpAncient",
+          "textures": {
+            "basecolor": "T_StumpAncient_basecolor.png",
+            "roughness": "T_StumpAncient_roughness.png",
+            "normal": "T_StumpAncient_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StumpAncient_basecolor.png",
+          "roughness": "T_StumpAncient_roughness.png",
+          "normal": "T_StumpAncient_normal.png",
+          "ao": "T_StumpAncient_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.031232595443725586,
+          0.029683321714401245,
+          0.5076846405863762
+        ]
+      },
+      "fbx": "SM_StumpAncient.fbx",
+      "sha256": "e0b9357a50ed2edf59ba0cffd7d075497c23a8596f903029f2025374fbfcfdaa",
+      "preview": "preview_SM_StumpAncient.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StumpAncient_hero.png",
+          "detail": "beauty_SM_StumpAncient_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FallenBough": {
+      "vertices": 403,
+      "triangles": 784,
+      "size_cm": [
+        210.89,
+        84.87,
+        21.27
+      ],
+      "materials": [
+        {
+          "name": "M_FallenBough",
+          "textures": {
+            "basecolor": "T_FallenBough_basecolor.png",
+            "roughness": "T_FallenBough_roughness.png",
+            "normal": "T_FallenBough_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FallenBough_basecolor.png",
+          "roughness": "T_FallenBough_roughness.png",
+          "normal": "T_FallenBough_normal.png",
+          "ao": "T_FallenBough_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0006075501441955566,
+          -0.05306236445903778,
+          0.060447490960359576
+        ]
+      },
+      "fbx": "SM_FallenBough.fbx",
+      "sha256": "fff51c067c81add61e1b4231a7c887ca60fa63217e27b1c9c18baf2aaf951cff",
+      "preview": "preview_SM_FallenBough.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FallenBough_hero.png",
+          "detail": "beauty_SM_FallenBough_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FallenLog": {
+      "vertices": 3196,
+      "triangles": 6376,
+      "size_cm": [
+        320.0,
+        48.18,
+        42.42
+      ],
+      "materials": [
+        {
+          "name": "M_FallenLog",
+          "textures": {
+            "basecolor": "T_FallenLog_basecolor.png",
+            "roughness": "T_FallenLog_roughness.png",
+            "normal": "T_FallenLog_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FallenLog_basecolor.png",
+          "roughness": "T_FallenLog_roughness.png",
+          "normal": "T_FallenLog_normal.png",
+          "ao": "T_FallenLog_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.021882086992263794,
+          0.37406150698661805
+        ]
+      },
+      "fbx": "SM_FallenLog.fbx",
+      "sha256": "ac7456da464379a50ccd56f152772f310d7f6ff04bb3b2051e1dc601879b5ee7",
+      "preview": "preview_SM_FallenLog.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FallenLog_hero.png",
+          "detail": "beauty_SM_FallenLog_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_GiantLog": {
+      "vertices": 4554,
+      "triangles": 9088,
+      "size_cm": [
+        520.0,
+        96.57,
+        97.91
+      ],
+      "materials": [
+        {
+          "name": "M_GiantLog",
+          "textures": {
+            "basecolor": "T_GiantLog_basecolor.png",
+            "roughness": "T_GiantLog_roughness.png",
+            "normal": "T_GiantLog_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GiantLog_basecolor.png",
+          "roughness": "T_GiantLog_roughness.png",
+          "normal": "T_GiantLog_normal.png",
+          "ao": "T_GiantLog_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          -0.039762794971466064,
+          0.7882410228252411
+        ]
+      },
+      "fbx": "SM_GiantLog.fbx",
+      "sha256": "d0b2c5d876303089d62dca9973b40c0870293fbaaa1cfb47bbb2ed987fcdef24",
+      "preview": "preview_SM_GiantLog.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GiantLog_hero.png",
+          "detail": "beauty_SM_GiantLog_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_StumpSmall_basecolor.png": "0274bfffa801dc49276814e06c846a5ecb1b6ba7a75029ca7821015818e7ee01",
+    "T_StumpSmall_roughness.png": "7da750f3a07cf33d6fc320ea8cd18b5ced7ea27c707a494613f1eacee3e2aaf4",
+    "T_StumpSmall_normal.png": "0bc856144cdaff9722fcc1329e42134f878c6e3e4fd73736968037b54c655e05",
+    "T_StumpLarge_basecolor.png": "e7a72491743aab7637b386540f40b6c3d058c3bac44dfa98330fd8d4e6551fed",
+    "T_StumpLarge_roughness.png": "acd9217a54db11b4c4867395f32a2af042c9a0bf07fe88e28e2023e221fe3e8e",
+    "T_StumpLarge_normal.png": "78b42a967b80de3854f135c640f1925d26a8a0233b01053519f8be38bf90d9f3",
+    "T_StumpAncient_basecolor.png": "ec40b91a48bf4c702036000d896446c09b81396245da49bfcc67a923169b3c40",
+    "T_StumpAncient_roughness.png": "48e891c0f3e07f733edcf9a4100e3a733774d3add24ba215cc0a5a73cee9f3c6",
+    "T_StumpAncient_normal.png": "9d082c237ccd69507893f42d330ecd78b14fad7c578db6ea58c5903245af365b",
+    "T_FallenBough_basecolor.png": "27fed3fb771055bef698989ee009ae3a6bb03b22b3aab2f6627c2cdfe8d98334",
+    "T_FallenBough_roughness.png": "1d4d864be23026e2dd59b75cf86d382186a0c24f6bdcee43c19b24c0b1d2b49c",
+    "T_FallenBough_normal.png": "7ada044c2b55d60b8149bb6cd4f848defad134ad524c84091c74c212cf9d2960",
+    "T_FallenLog_basecolor.png": "ce0260179a8753077ac207f02b33d38e43a4b32e57d42a10ef9d1114be482a4d",
+    "T_FallenLog_roughness.png": "e0c6be7188b1db1a42df9d070815ab60d5d774bc46977cece60219adc0a7a7cc",
+    "T_FallenLog_normal.png": "3f887953572e7f5c58a6b8fac586d2180d1cbeafd39f1bb3c78e1312ad318a6b",
+    "T_GiantLog_basecolor.png": "da5aece89762b78969bc63cb3d8ac6ed735cd4387cd06e3600d110a3ba734d29",
+    "T_GiantLog_roughness.png": "9c8bc932ef825775e0fb5f8237994a36fac8f75816665279db27cab15a0d778c",
+    "T_GiantLog_normal.png": "96f50e5a5cc5b57dda2df702b44060b4f7ee00738f6bb640fcd9fbc18c1f063b"
+  }
+}

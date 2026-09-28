@@ -71,9 +71,11 @@ Homestead::Item CraftedItem(Homestead::Recipe Recipe)
 {
     switch (Recipe)
     {
-    case Homestead::Recipe::Hatchet: return Homestead::Item::Hatchet;
-    case Homestead::Recipe::DiggingStick: return Homestead::Item::DiggingStick;
-    case Homestead::Recipe::WateringCan: return Homestead::Item::WateringCan;
+    case Homestead::Recipe::HaftAxe: return Homestead::Item::Hatchet;
+    case Homestead::Recipe::HaftHoe: return Homestead::Item::DiggingStick;
+    case Homestead::Recipe::HaftScythe: return Homestead::Item::Scythe;
+    case Homestead::Recipe::HaftBillhook: return Homestead::Item::Billhook;
+    case Homestead::Recipe::HaftPickaxe: return Homestead::Item::Pickaxe;
     case Homestead::Recipe::RoastedRoots: return Homestead::Item::RoastedRoots;
     case Homestead::Recipe::HerbedRoots: return Homestead::Item::HerbedRoots;
     case Homestead::Recipe::SplitFirewood: return Homestead::Item::Firewood;
@@ -191,6 +193,20 @@ void AHomesteadSmokeTest::QueueGatherTo(Homestead::Item Item, int32 TargetCount)
     Add(FString::Printf(TEXT("Foraging supplied at least %d %s"), TargetCount, UTF8_TO_TCHAR(Homestead::ItemName(Item))),
         []() {},
         [this, Item, TargetCount]() { return Controller->Simulation().Count(Item) >= TargetCount; });
+}
+
+void AHomesteadSmokeTest::QueueGrant(Homestead::Item Item, int32 Count)
+{
+    // The seeded woodland has no salvage piles or bramble: these suites hand over the rusted heads
+    // and canes the estate would provide.
+    const auto Before = MakeShared<int32>(0);
+    Add(FString::Printf(TEXT("Stand-in for estate salvage: %d %s"), Count, UTF8_TO_TCHAR(Homestead::ItemName(Item))),
+        [this, Item, Count, Before]()
+        {
+            *Before = Controller->Simulation().Count(Item);
+            if (!Controller->Sim.GrantItems(Item, Count)) Finish(false, TEXT("The stand-in salvage did not fit in the pack."));
+        },
+        [this, Item, Count, Before]() { return Controller->Simulation().Count(Item) == *Before + Count; });
 }
 
 void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
@@ -426,8 +442,9 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueueClearCell(-4, -3);
     QueueClearCell(-5, 0);
     QueueClearCell(-3, 0);
-    QueueCraft(Homestead::Recipe::DiggingStick);
-    QueueCraft(Homestead::Recipe::WateringCan);
+    QueueGrant(Homestead::Item::RustedHoeBlade, 1);
+    QueueCraft(Homestead::Recipe::HaftHoe);
+    QueueGrant(Homestead::Item::WateringCan, 1);
     QueuePlace(Homestead::Piece::Chest, -4, -3);
     const auto StoredTimber = MakeShared<int32>(0);
     Add(TEXT("Approach the early storage chest for surplus timber"),
@@ -451,7 +468,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         });
     QueueGatherTo(Homestead::Item::Branch, 48);
     QueueGatherTo(Homestead::Item::Stone, 8);
-    QueueGatherTo(Homestead::Item::Fiber, 20);
+    QueueGrant(Homestead::Item::BrambleCanes, 20);
     QueueGatherTo(Homestead::Item::Roots, 6);
     QueueGatherTo(Homestead::Item::Flowers, 2);
     QueueGatherTo(Homestead::Item::Berries, 1);
@@ -760,7 +777,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const auto* Piece = FindPiece(State, Homestead::Piece::Fire, -3, -2);
                 return !Controller->IsFailed() && !Controller->ToastIsError() && Plot && Piece && BerryPlot
                     && State.hour >= *BeforeHour + 7.99 && State.hour < *BeforeHour + 8.1
-                    && State.energy > 99 && State.hunger > 40 && State.warmth >= 80
+                    && State.energy > 99 && State.hunger > 40
                     && Plot->planted && Plot->growth >= *BeforeGrowth && Plot->weeds > 0.05
                     && BerryPlot->planted && BerryPlot->kind == Homestead::CropKind::Berries
                     && BerryPlot->growth >= *BeforeBerryGrowth && BerryPlot->weeds > 0.05
@@ -784,8 +801,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 {
                     return Controller->Simulation().IsNight()
                         && Controller->Simulation().IsSheltered(Controller->PlayerPoint())
-                        && Controller->Simulation().IsNearFire(Controller->PlayerPoint())
-                        && Controller->State().warmth >= 80;
+                        && Controller->Simulation().IsNearFire(Controller->PlayerPoint());
                 });
             Add(TEXT("Settle night exposure at the cabin entrance"),
                 [this, Home]()
@@ -957,7 +973,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 || !Plot || !Plot->planted || Plot->kind != Homestead::CropKind::Berries
                 || Plot->growth <= *RegrowthBefore || Plot->growth >= 1
                 || FMath::Abs(State.hour - *RegrowthHour - 8.0) > 0.01
-                || State.hunger <= 40 || State.warmth < 80 || State.energy <= 99) return false;
+                || State.hunger <= 40 || State.energy <= 99) return false;
             // Input dispatch has completed and the pack pauses time at the saved sleep checkpoint.
             *ProtectedRecovery = Controller->Simulation().Serialize();
             *RecoveryPosition = Controller->PlayerPoint();
@@ -1176,7 +1192,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return !Controller->IsBookOpen() && !Controller->IsFailed() && !ProtectedRecovery->empty();
         });
     QueueGatherTo(Homestead::Item::Branch, 4);
-    QueueGatherTo(Homestead::Item::Fiber, 4);
+    QueueGrant(Homestead::Item::BrambleCanes, 4);
     QueueClearCell(0, 8);
     QueuePlace(Homestead::Piece::Bed, 0, 8);
     const Homestead::Point OutdoorBed = Homestead::CellCenter(0, 8);
@@ -1205,7 +1221,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const auto& State = Controller->State();
                 const double Advanced = State.hour - *BeforeHour;
                 if (Controller->IsFailed())
-                    return Advanced > 0 && Advanced <= 8.1 && (State.hunger == 0 || State.warmth == 0);
+                    return Advanced > 0 && Advanced <= 8.1 && (State.hunger == 0 || State.energy == 0);
                 return Advanced >= 7.99 && Advanced < 8.1 && State.hunger < *BeforeHunger - 10
                     && !Controller->ToastIsError()
                     && !Controller->Simulation().IsSheltered(Controller->PlayerPoint());
@@ -1219,7 +1235,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             const auto& State = Controller->State();
-            return Controller->IsFailed() && (State.hunger == 0 || State.warmth == 0)
+            return Controller->IsFailed() && (State.hunger == 0 || State.energy == 0)
                 && Controller->UsesGamepad() && !Controller->IsBookOpen() && !Controller->IsPlanning()
                 && Controller->GetHUD() && Controller->ToastIsError()
                 && Controller->Toast().Contains(TEXT("recovery checkpoint"));
@@ -1250,7 +1266,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             const bool Restored = !Controller->IsFailed() && !Controller->ToastIsError() && Controller->IsBookOpen()
                 && Controller->Toast().Contains(TEXT("sheltered recovery checkpoint"))
                 && Controller->Simulation().Serialize() == *ProtectedRecovery
-                && State.hunger > 40 && State.warmth >= 80 && State.energy > 99
+                && State.hunger > 40 && State.energy > 99
                 && FMath::Abs(Position.x - RecoveryPosition->x) < 5
                 && FMath::Abs(Position.y - RecoveryPosition->y) < 5
                 && Controller->Simulation().IsSheltered(Position)

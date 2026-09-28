@@ -38,7 +38,10 @@ private:
         LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
         Fur, LinenShirt, LongLinenShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes,
         SlotTorso, SlotApron, SlotFeet,
-        Pasty, Bread, Cheese, Twine, Coin, Shop
+        Pasty, Bread, Cheese, Twine, Coin, Shop,
+        Scythe, Billhook, Pickaxe, RustedAxeHead, RustedHoeBlade, RustedScytheBlade, RustedBillhookHead,
+        RustedPickHead, Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
+        Primroses, Bluebells, WildDaffodils, WildGarlic
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{FLinearColor(0.92f, 0.74f, 0.43f, 1.0f)};

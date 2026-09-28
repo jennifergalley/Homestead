@@ -2,9 +2,9 @@
 
 ## 1. Model
 
-- [ ] 1.1 Add the overgrowth `ResourceKind`s with a per-kind table (tool, minimum tier, energy, swings, yields). Add the new items and catalogue rows, and a tool-tier state per tool
-- [ ] 1.2 Implement the `ClearOvergrowth` transaction with a tier gate, multi-swing commit on the final swing, and yield exactly once. Add portable tests for right, wrong and under-tier tools, energy reserve, capacity, and save/reload by stable ID
-- [ ] 1.3 Remove warmth from Simulation, HUD, sleep and clothing. Retire the knife, machete, fibre, reed, deer and fur paths from new games. Bump the save version with a reset notice. Update or retire the affected tests
+- [x] 1.1 Add the overgrowth `ResourceKind`s with a per-kind table (tool, minimum tier, energy, swings, yields). Add the new items and catalogue rows, and a tool-tier state per tool
+- [x] 1.2 Implement the `ClearOvergrowth` transaction with a tier gate, multi-swing commit on the final swing, and yield exactly once. Add portable tests for right, wrong and under-tier tools, energy reserve, capacity, and save/reload by stable ID
+- [x] 1.3 Remove warmth from Simulation, HUD, sleep and clothing. Retire the knife, machete, fibre, reed, deer and fur paths from new games. Bump the save version with a reset notice. Update or retire the affected tests (the version bump is the world lane's single round-1 bump at integration; packaged suites that still walk the survival loop are listed in the design's Status)
 
 ## 2. First playable clearing (first delivery)
 

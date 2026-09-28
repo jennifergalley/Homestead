@@ -18,8 +18,23 @@ namespace Homestead
 struct EstateLayout;
 struct EstatePlacements;
 
-enum class ResourceKind : int { Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, DeerRemains, Count };
-enum class Recipe : int { Hatchet, DiggingStick, WateringCan, RoastedRoots, HerbedRoots, SplitFirewood, Count };
+// Reeds and DeerRemains are retired: they no longer yield anything. The kinds from TallGrass on are
+// the estate's overgrowth (see HomesteadOvergrowth.h) and its spring flowers.
+enum class ResourceKind : int
+{
+    Branches, Stones, BerryBush, Roots, Flowers, Reeds, Sapling, ForestTree, DeerRemains,
+    TallGrass, Weeds, BrambleThin, BrambleThicket, BrambleBank, FallenBranch,
+    StumpSmall, StumpLarge, StumpAncient, FallenLog, GiantLog, Rubble, SmallRock, Boulder, SalvagePile,
+    Primroses, Bluebells, WildDaffodils, WildGarlic,
+    Count
+};
+// First tools are hafted by hand from a salvaged rusted head and two branches.
+enum class Recipe : int { HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood, Count };
+// One of each tool; its tier belongs to the tool type (State::toolTiers).
+enum class ToolKind : int { Axe, Hoe, Pail, Scythe, Billhook, Pickaxe, Count };
+enum class ToolTier : int { Worn, Iron, Steel, Master, Count };
+constexpr int ToolKindCount = static_cast<int>(ToolKind::Count);
+constexpr int ToolTierCount = static_cast<int>(ToolTier::Count);
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Count };
 enum class CropKind : int { Roots, Berries, Count };
 
@@ -58,7 +73,8 @@ enum class WearableDefinition : int
 // Outer is a coat worn over whatever covers the torso.
 enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Outer, Count };
 enum class WearableOwner : int { Carried, Chest, Equipped, World };
-enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable };
+// ToolTier: the target needs a better tool than hers; nothing changed and no energy was spent.
+enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
 
 struct WearableDefinitionInfo
@@ -70,8 +86,6 @@ struct WearableDefinitionInfo
     bool dyeable;
     int fiberCost; // Zero (with no fur) means starter-only, not a free recipe.
     int furCost = 0;
-    // How much of the cold she stops losing to, in warmth per hour (see Simulation::Insulation).
-    double insulation = 0.0;
 };
 
 struct WearableInstance
@@ -115,7 +129,7 @@ struct RecipeIngredientAssessment
 
 struct RecipeAssessment
 {
-    Recipe recipe = Recipe::Hatchet;
+    Recipe recipe = Recipe::HaftAxe;
     Item output = Item::Count;
     int outputCount = 0;
     std::vector<RecipeIngredientAssessment> ingredients;
@@ -136,6 +150,8 @@ struct ResourceNode
     double readyAtHour = 0.0;
     bool cleared = false;
     Generation::GeneratedEntityKey key{};
+    // Tool tier the placement asks for on top of its kind's own minimum (fixed estate only).
+    ToolTier minTier = ToolTier::Worn;
 };
 
 struct ResourceEdit
@@ -238,9 +254,7 @@ struct State
     double dayMinutes = 60.0;
     double hunger = 85.0;
     double energy = 100.0;
-    double warmth = 90.0;
     bool failed = false;
-    bool warmOutfit = false;
     int nextId = 1;
     Inventory inventory{};
     std::vector<ResourceNode> resources;
@@ -264,6 +278,8 @@ struct State
     std::vector<Parcel> parcels; // Fixed estate only; empty in the seeded woodland.
     Cents money = 0; // HomesteadShops.h; changes only through Sell, Buy and playtest grants.
     std::vector<Shop> shops;
+    // Every tool starts worn; the blacksmith (round 3) raises them.
+    std::array<ToolTier, ToolKindCount> toolTiers{};
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -442,10 +458,28 @@ public:
     Result PickUpDrop(int dropId, Point player);
     Result Sleep(double hours, Point player);
     Result SetDayMinutes(double minutes);
-    void SetWarmOutfit(bool enabled);
-    // Warmth per hour that her equipped clothing stops her losing to the cold.
-    double Insulation() const;
-    static constexpr double InsulationPerPoint = 0.6;
+
+    // Overgrowth clearing (HomesteadOvergrowth.cpp). `tool` is the carried tool she swings, or
+    // Item::Count for bare hands (salvage piles, fallen boughs).
+    ToolTier GetToolTier(ToolKind tool) const;
+    // Playtest aid until the blacksmith sells upgrades.
+    Result SetToolTier(ToolKind tool, ToolTier tier);
+    // Whether a swing of `tool` at the overgrowth node could clear it now, without changing
+    // anything. Fails with ResultCode::ToolTier and "Needs an iron axe" when her tool is too worn.
+    Result CheckOvergrowth(int nodeId, Item tool, Point player) const;
+    // Swings her current tool tier needs to clear the node (the last one commits).
+    int OvergrowthSwings(int nodeId) const;
+    double OvergrowthCost(int nodeId) const;
+    // Clears the node, spends energy once and grants its yield exactly once. Yield that doesn't
+    // fit in her pack is left on the ground as a world drop.
+    Result ClearOvergrowth(int nodeId, Item tool, Point player);
+    // The uncleared overgrowth `tool` handles nearest to `position`, or -1.
+    int FindNearestOvergrowth(Point position, double maxDistance, Item tool) const;
+    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
+    std::vector<int> ScytheArcTargets(Point player, Point facing) const;
+    static double ScytheArcRadius(ToolTier tier);
+    static double ScytheArcHalfAngle(ToolTier tier);
+
     void Advance(double realSeconds, Point player, bool paused = false);
     void AdvanceGameHours(double hours, Point player);
     // Playtest aid: jump the clock forward to the next occurrence of hourOfDay (0-24) without
@@ -496,5 +530,7 @@ private:
     void SellDownShops();
     void WriteEconomy(std::ostream& body) const;
     static bool ReadEconomy(std::istream& input, State& candidate, std::set<int>& ids);
+    // Once a day at the 6 AM rollover: cleared grass and weeds near remaining overgrowth may regrow.
+    void CreepWeeds(int day);
 };
 }

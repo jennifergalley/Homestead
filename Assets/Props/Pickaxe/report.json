@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Pickaxe",
+  "description": "Salvaged navvy's pick: rusted point-and-chisel iron head on a new ash haft (original). Pivot = lower-hand grip 7 cm above the butt; head +Z, point -Y.",
+  "collision": "none",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/pickaxe.py",
+  "source_sha256": "ced9a6ecf3df0dbe18ed9cc2ea3e1b5e79d230c8c4dff1cdd404e9a276bd093b",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Pickaxe": {
+      "vertices": 2464,
+      "triangles": 4916,
+      "size_cm": [
+        5.21,
+        46.0,
+        79.72
+      ],
+      "materials": [
+        {
+          "name": "M_Pickaxe",
+          "textures": {
+            "basecolor": "T_Pickaxe_basecolor.png",
+            "roughness": "T_Pickaxe_roughness.png",
+            "metallic": "T_Pickaxe_metallic.png",
+            "normal": "T_Pickaxe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Pickaxe_basecolor.png",
+          "roughness": "T_Pickaxe_roughness.png",
+          "normal": "T_Pickaxe_normal.png",
+          "metallic": "T_Pickaxe_metallic.png",
+          "ao": "T_Pickaxe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          28
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.66
+        ]
+      },
+      "fbx": "SM_Pickaxe.fbx",
+      "sha256": "7421727b9491dc1c5ff394683421354f32580f861c485a90bd3160f8aba00c6a",
+      "preview": "preview_SM_Pickaxe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Pickaxe_hero.png",
+          "detail": "beauty_SM_Pickaxe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_Pickaxe_basecolor.png": "7aef6ede3d219f718c78294054affa9bc34f5c130988438052241fa9343d9fdb",
+    "T_Pickaxe_roughness.png": "e1427db48fd9a7fa91a3e57b13fd6f5516b9c925bbc861ee9a7f386b3cde7e63",
+    "T_Pickaxe_metallic.png": "4d16c265f6e1b7ec9a08c737c6fbc6d53fb6a0edfda285706911b9109a6019e5",
+    "T_Pickaxe_normal.png": "f8f8bd47df778e856ee1958e7b39c7e5014fae26cf2556407b6010e2b6899e48"
+  }
+}

@@ -193,8 +193,8 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         { return Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
     QueueGatherTo(Homestead::Item::Branch, 4);
     QueueGatherTo(Homestead::Item::Stone, 3);
-    QueueGatherTo(Homestead::Item::Fiber, 2);
-    QueueCraft(Homestead::Recipe::Hatchet);
+    QueueGrant(Homestead::Item::RustedAxeHead, 1);
+    QueueCraft(Homestead::Recipe::HaftAxe);
     Add(TEXT("Save actual crafted setup for independent appearance/transaction cases"),
         [this]() { Tap(EKeys::F5); }, [this, Hidden]()
         { return !Controller->ToastIsError() && Controller->Simulation().Count(Homestead::Item::Hatchet) == 1 && Hidden(); });

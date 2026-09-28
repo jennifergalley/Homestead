@@ -1,6 +1,8 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadEstate.h"
 #include "HomesteadParcels.h"
+#include "HomesteadOvergrowth.h"
+#include "HomesteadSimulationDetail.h"
 
 #include <algorithm>
 #include <cmath>
@@ -124,6 +126,11 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::ForestTree: return 0.0;
     // Another winter-killed deer turns up in the same hollow about ten days later.
     case ResourceKind::DeerRemains: return 240.0;
+    // Spring flowers come back in a few days.
+    case ResourceKind::Primroses:
+    case ResourceKind::Bluebells:
+    case ResourceKind::WildDaffodils:
+    case ResourceKind::WildGarlic: return 72.0;
     default: return 0.0;
     }
 }
@@ -136,24 +143,29 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::BerryBush: return Items({{Item::Berries, 5}});
     case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 2}});
     case ResourceKind::Flowers: return Items({{Item::Flowers, 3}});
-    case ResourceKind::Reeds: return Items({{Item::Fiber, 5}});
-    case ResourceKind::Sapling: return Items({{Item::Branch, 8}, {Item::Fiber, 2}});
     case ResourceKind::ForestTree: return Items({{Item::Timber, 6}, {Item::Branch, 4}});
-    case ResourceKind::DeerRemains: return Items({{Item::Fur, 3}});
+    case ResourceKind::Primroses: return Items({{Item::Primroses, 3}});
+    case ResourceKind::Bluebells: return Items({{Item::Bluebells, 3}});
+    case ResourceKind::WildDaffodils: return Items({{Item::WildDaffodils, 3}});
+    case ResourceKind::WildGarlic: return Items({{Item::WildGarlic, 3}});
+    // Reeds, deer remains and the overgrowth kinds (see HomesteadOvergrowth) yield nothing here.
     default: return {};
     }
 }
+// Reeds (fibre) and deer remains (fur) are retired from play; the knife that cut them is gone.
+bool Retired(ResourceKind kind) { return kind == ResourceKind::Reeds || kind == ResourceKind::DeerRemains; }
+// Bramble canes, split and woven as wattle, take the place of the retired fibre lashing.
 Inventory BuildCost(Piece kind)
 {
     switch (kind)
     {
     case Piece::Foundation: return Items({{Item::Branch, -4}, {Item::Stone, -2}});
-    case Piece::Wall: return Items({{Item::Branch, -3}, {Item::Fiber, -1}});
-    case Piece::Doorway: return Items({{Item::Branch, -4}, {Item::Fiber, -1}});
-    case Piece::Roof: return Items({{Item::Branch, -4}, {Item::Fiber, -3}});
+    case Piece::Wall: return Items({{Item::Branch, -3}, {Item::BrambleCanes, -1}});
+    case Piece::Doorway: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -1}});
+    case Piece::Roof: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -3}});
     case Piece::Fire: return Items({{Item::Branch, -3}, {Item::Stone, -4}});
-    case Piece::Bed: return Items({{Item::Branch, -4}, {Item::Fiber, -4}});
-    case Piece::Chest: return Items({{Item::Branch, -5}, {Item::Fiber, -2}});
+    case Piece::Bed: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -4}});
+    case Piece::Chest: return Items({{Item::Branch, -5}, {Item::BrambleCanes, -2}});
     default: return {};
     }
 }
@@ -161,15 +173,18 @@ Inventory CraftChange(Recipe recipe)
 {
     switch (recipe)
     {
-    case Recipe::Hatchet: return Items({{Item::Branch, -4}, {Item::Stone, -3}, {Item::Fiber, -2}, {Item::Hatchet, 1}});
-    case Recipe::DiggingStick: return Items({{Item::Branch, -3}, {Item::Stone, -1}, {Item::DiggingStick, 1}});
-    case Recipe::WateringCan: return Items({{Item::Branch, -3}, {Item::Fiber, -2}, {Item::WateringCan, 1}});
+    case Recipe::HaftAxe: return Items({{Item::RustedAxeHead, -1}, {Item::Branch, -2}, {Item::Hatchet, 1}});
+    case Recipe::HaftHoe: return Items({{Item::RustedHoeBlade, -1}, {Item::Branch, -2}, {Item::DiggingStick, 1}});
+    case Recipe::HaftScythe: return Items({{Item::RustedScytheBlade, -1}, {Item::Branch, -2}, {Item::Scythe, 1}});
+    case Recipe::HaftBillhook: return Items({{Item::RustedBillhookHead, -1}, {Item::Branch, -2}, {Item::Billhook, 1}});
+    case Recipe::HaftPickaxe: return Items({{Item::RustedPickHead, -1}, {Item::Branch, -2}, {Item::Pickaxe, 1}});
     case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::RoastedRoots, 1}});
     case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::HerbedRoots, 1}});
     case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
     default: return {};
     }
 }
+bool Hafting(Recipe recipe) { return recipe >= Recipe::HaftAxe && recipe <= Recipe::HaftPickaxe; }
 std::string DescribeCost(const Inventory& change)
 {
     std::string result;
@@ -217,7 +232,7 @@ bool HasPiece(const State& state, Piece kind, int buildingId, int x, int y)
 }
 bool RequiresHatchet(ResourceKind kind)
 {
-    return kind == ResourceKind::Sapling || kind == ResourceKind::ForestTree;
+    return kind == ResourceKind::ForestTree;
 }
 Result GenerationFailure(Generation::Status status)
 {
@@ -331,6 +346,21 @@ Result CheckGardenResources(const State& state, int gardenX, int gardenY)
 }
 Result CheckAreaResources(const State& state, double left, double bottom, double size, const char* blockedMessage)
 {
+    if (state.fixedEstate)
+    {
+        // The estate's resources are all materialized; there are no chunks to regenerate.
+        for (const auto& node : state.resources)
+        {
+            if (node.cleared) continue;
+            const bool inside = node.position.x >= left && node.position.x < left + size
+                && node.position.y >= bottom && node.position.y < bottom + size;
+            if (node.kind == ResourceKind::ForestTree && DistanceSquared(node.position,
+                {Clamp(node.position.x, left, left + size), Clamp(node.position.y, bottom, bottom + size)}) <= 50.0 * 50.0)
+                return Bad(blockedMessage);
+            if (inside && IsOvergrowth(node.kind)) return Bad("Clear the overgrowth here first.");
+        }
+        return Good("");
+    }
     Generation::ChunkCoord low, high;
     const auto lowStatus = Generation::ChunkAt(static_cast<std::int64_t>(left - 50),
         static_cast<std::int64_t>(bottom - 50), low);
@@ -378,7 +408,15 @@ Result CheckFootprintResources(const State& state, const Footprint& area, bool q
     if (quick || state.fixedEstate)
     {
         for (const auto& node : state.resources)
+        {
             if (blocks(node)) return Bad(blockedMessage);
+            if (!node.cleared && IsOvergrowth(node.kind) && node.kind != ResourceKind::Sapling)
+            {
+                const Point local = RotateYaw({node.position.x - area.center.x, node.position.y - area.center.y}, -area.yaw);
+                if (std::abs(local.x) < area.half.x && std::abs(local.y) < area.half.y)
+                    return Bad("Clear the overgrowth here before building.");
+            }
+        }
         return Good("");
     }
     const Point x = RotateYaw({area.half.x, 0}, area.yaw), y = RotateYaw({0, area.half.y}, area.yaw);
@@ -468,14 +506,14 @@ constexpr WearableDefinitionInfo Wearables[] = {
     {WearableDefinition::LinenApron, "linen-apron", "Linen apron", Slot(EquipmentSlot::Apron), true, 6},
     {WearableDefinition::LeatherShoes, "legacy-laceup-shoes", "Leather shoes", Slot(EquipmentSlot::Feet), false, 0},
     {WearableDefinition::WovenFootwraps, "woven-footwraps", "Woven footwraps", Slot(EquipmentSlot::Feet), false, 8},
-    {WearableDefinition::LinenShirt, "linen-shirt", "Linen shirt", Slot(EquipmentSlot::Torso), false, 8, 0, 0.5},
+    {WearableDefinition::LinenShirt, "linen-shirt", "Linen shirt", Slot(EquipmentSlot::Torso), false, 8, 0},
     {WearableDefinition::LinenLongShirt, "long-linen-shirt", "Long-sleeved linen shirt",
-        Slot(EquipmentSlot::Torso), false, 12, 0, 1.0},
-    {WearableDefinition::Trousers, "trousers", "Homespun trousers", Slot(EquipmentSlot::Legs), false, 14, 0, 2.0},
-    {WearableDefinition::FurCoat, "fur-coat", "Fur coat", Slot(EquipmentSlot::Outer), false, 4, 6, 6.0},
-    {WearableDefinition::FurBoots, "fur-boots", "Fur boots", Slot(EquipmentSlot::Feet), false, 2, 3, 4.0},
-    {WearableDefinition::WovenSandals, "woven-sandals", "Woven sandals", Slot(EquipmentSlot::Feet), false, 6, 0, 0.0},
-    {WearableDefinition::TurnShoes, "turnshoes", "Turnshoes", Slot(EquipmentSlot::Feet), false, 2, 2, 1.0}
+        Slot(EquipmentSlot::Torso), false, 12, 0},
+    {WearableDefinition::Trousers, "trousers", "Homespun trousers", Slot(EquipmentSlot::Legs), false, 14, 0},
+    {WearableDefinition::FurCoat, "fur-coat", "Fur coat", Slot(EquipmentSlot::Outer), false, 4, 6},
+    {WearableDefinition::FurBoots, "fur-boots", "Fur boots", Slot(EquipmentSlot::Feet), false, 2, 3},
+    {WearableDefinition::WovenSandals, "woven-sandals", "Woven sandals", Slot(EquipmentSlot::Feet), false, 6, 0},
+    {WearableDefinition::TurnShoes, "turnshoes", "Turnshoes", Slot(EquipmentSlot::Feet), false, 2, 2}
 };
 static_assert(sizeof(Wearables) / sizeof(Wearables[0]) == static_cast<int>(WearableDefinition::Count));
 bool InContainer(const WearableInstance& item, int container)
@@ -717,6 +755,32 @@ bool ReadLayout(std::istream& input, InventoryLayout& layout)
 }
 }
 
+namespace Detail
+{
+bool SaveResourceEdit(State& candidate, const ResourceNode& node) { return Homestead::SaveResourceEdit(candidate, node); }
+void EraseResourceEdit(State& candidate, const Generation::GeneratedEntityKey& key)
+{
+    auto& edits = candidate.resourceEdits;
+    const auto edit = std::lower_bound(edits.begin(), edits.end(), key,
+        [](const ResourceEdit& value, const Generation::GeneratedEntityKey& wanted) { return value.key < wanted; });
+    if (edit != edits.end() && edit->key == key) edits.erase(edit);
+}
+int PackUsed(const State& state) { return ContainerUsed(state, 0); }
+bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
+{
+    for (auto& drop : candidate.worldDrops)
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= InventoryCapacity - quantity
+            && DistanceSquared(position, drop.position) <= DropMergeReach * DropMergeReach)
+        {
+            drop.quantity += quantity;
+            return true;
+        }
+    if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
+    candidate.worldDrops.push_back({candidate.nextId++, position, item, quantity, 0});
+    return true;
+}
+}
+
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition)
 {
     return ValidEnum(definition, WearableDefinition::Count) ? &Wearables[static_cast<int>(definition)] : nullptr;
@@ -730,17 +794,17 @@ const char* WearableDescription(WearableDefinition definition)
 {
     switch (definition)
     {
-    case WearableDefinition::LinenTunic: return "A fiber-worked tunic covering torso and legs. Cosmetic clothing; no warmth bonus.";
-    case WearableDefinition::LinenApron: return "A separate apron worn over a linen tunic. Cosmetic clothing; no warmth bonus.";
+    case WearableDefinition::LinenTunic: return "A fiber-worked tunic covering torso and legs.";
+    case WearableDefinition::LinenApron: return "A separate apron worn over a linen tunic.";
     case WearableDefinition::LeatherShoes: return "Lace-up shoes with socks from older saves. Authored color; not craftable.";
-    case WearableDefinition::WovenFootwraps: return "Fiber-woven footwear, worn instead of shoes. Authored color; no warmth bonus.";
-    case WearableDefinition::LinenShirt: return "A short-sleeved shirt of undyed linen, loosely woven for warm days. Slight warmth.";
-    case WearableDefinition::LinenLongShirt: return "A long-sleeved linen shirt with a drawstring neck; keeps the evening chill off her arms.";
-    case WearableDefinition::Trousers: return "Close-woven homespun trousers, tied at the waist and snug below the knee. Warm on cold nights.";
-    case WearableDefinition::FurCoat: return "A hide coat worn fur-side in, sewn with fiber thread. By far her warmest layer.";
-    case WearableDefinition::FurBoots: return "Tall hide boots with a fur lining and a turned-down cuff. Keep her feet warm in snow.";
-    case WearableDefinition::WovenSandals: return "Plaited fiber soles tied on with cords. Cool and light; no warmth.";
-    case WearableDefinition::TurnShoes: return "Soft hide shoes sewn inside out and turned, laced at the instep. A little warmth.";
+    case WearableDefinition::WovenFootwraps: return "Fiber-woven footwear, worn instead of shoes. Authored color.";
+    case WearableDefinition::LinenShirt: return "A short-sleeved shirt of undyed linen, loosely woven for warm days.";
+    case WearableDefinition::LinenLongShirt: return "A long-sleeved linen shirt with a drawstring neck.";
+    case WearableDefinition::Trousers: return "Close-woven homespun trousers, tied at the waist and snug below the knee.";
+    case WearableDefinition::FurCoat: return "A hide coat worn fur-side in, sewn with fiber thread.";
+    case WearableDefinition::FurBoots: return "Tall hide boots with a fur lining and a turned-down cuff.";
+    case WearableDefinition::WovenSandals: return "Plaited fiber soles tied on with cords. Cool and light.";
+    case WearableDefinition::TurnShoes: return "Soft hide shoes sewn inside out and turned, laced at the instep.";
     default: return "Unknown garment";
     }
 }
@@ -768,14 +832,18 @@ const char* GarmentRequirements(WearableDefinition definition)
 const char* ResourceName(ResourceKind kind)
 {
     static const char* names[] = {"Fallen branches", "Loose stones", "Berry bush", "Wild roots",
-        "Meadow herb", "Stream reeds", "Sapling", "Forest tree", "Deer remains"};
+        "Meadow herb", "Stream reeds", "Sapling", "Forest tree", "Deer remains",
+        "Tall grass", "Weeds", "Thin bramble", "Bramble thicket", "Bramble bank", "Fallen bough",
+        "Small stump", "Large stump", "Ancient stump", "Fallen log", "Giant log", "Rubble", "Small rock", "Boulder",
+        "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
 const char* RecipeName(Recipe recipe)
 {
-    static const char* names[] = {"Crude hatchet", "Stone hoe", "Watering can",
+    static const char* names[] = {"Haft an axe", "Haft a hoe", "Haft a scythe", "Haft a billhook", "Haft a pickaxe",
         "Roasted roots", "Herbed roots", "Split firewood"};
+    static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Recipe::Count), "Every recipe needs a name.");
     return ValidEnum(recipe, Recipe::Count) ? names[static_cast<int>(recipe)] : "Unknown recipe";
 }
 const char* PieceName(Piece piece)
@@ -800,9 +868,9 @@ const char* RecipeRequirements(Recipe recipe)
             if (kind == Recipe::RoastedRoots || kind == Recipe::HerbedRoots)
                 result[i] += "; nearby fueled fire (no pot needed)";
             else if (kind == Recipe::SplitFirewood)
-                result[i] += "; crude hatchet required";
+                result[i] += "; axe required";
             else
-                result[i] += "; knife required";
+                result[i] += "; by hand, no station";
         }
         return result;
     }();
@@ -969,6 +1037,7 @@ Result MaterializeEstate(State& candidate, const EstatePlacements& placements)
         node.kind = placement.kind;
         node.position = placement.position;
         node.key = EstateKey(placement.id);
+        node.minTier = static_cast<ToolTier>(std::max(0, std::min(placement.minTier, ToolTierCount - 1)));
         const auto edit = std::lower_bound(candidate.resourceEdits.begin(), candidate.resourceEdits.end(), node.key,
             [](const ResourceEdit& value, const Generation::GeneratedEntityKey& key) { return value.key < key; });
         if (edit != candidate.resourceEdits.end() && edit->key == node.key)
@@ -992,6 +1061,10 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
     candidate.nextWearableId = 2;
     RefreshEquipment(candidate);
+    // The pail is her one starting tool (add-ruined-manor-and-arrival may move it into the
+    // standing room's chest); everything else is hafted from salvage.
+    candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;
+    candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::WateringCan, 1, 0});
     const auto populated = MaterializeEstate(candidate, placements);
     if (!populated) return populated;
     // Round-1 lanes seed their parts from `layout` here, each in its own helper.
@@ -1029,9 +1102,7 @@ Result Simulation::NewGame(std::uint64_t seed)
 {
     State candidate;
     candidate.world.seed = seed;
-    candidate.inventory[static_cast<int>(Item::Knife)] = 1;
-    candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::Knife, 1, 0});
-    // She starts barefoot in her tunic; footwear is crafted (woven footwraps).
+    // She starts barefoot in her tunic and empty-handed; footwear is crafted (woven footwraps).
     candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
     candidate.nextWearableId = 2;
     RefreshEquipment(candidate);
@@ -1544,8 +1615,10 @@ bool Simulation::IsNearFire(Point position) const
 bool Simulation::CanHarvest(int nodeId) const
 {
     const auto* node = Find(state_.resources, nodeId);
-    return !state_.failed && node && !node->cleared && node->readyAtHour <= state_.hour &&
-        (RequiresHatchet(node->kind) ? Count(Item::Hatchet) > 0 : Count(Item::Knife) > 0);
+    if (state_.failed || !node || node->cleared || node->readyAtHour > state_.hour || Retired(node->kind)) return false;
+    // Overgrowth is cleared with its tool (ClearOvergrowth); only boughs and salvage piles come away by hand.
+    if (const auto* overgrowth = FindOvergrowth(node->kind)) return overgrowth->byHand;
+    return !RequiresHatchet(node->kind) || Count(Item::Hatchet) > 0;
 }
 int Simulation::FindNearestResource(Point position, double maxDistance) const
 {
@@ -1610,14 +1683,14 @@ Result Simulation::Harvest(int nodeId, Point player)
     auto* node = Find(state_.resources, nodeId);
     if (!node || node->cleared) return Bad("That resource is no longer available.");
     if (node->kind == ResourceKind::ForestTree) return Clear(nodeId, player);
+    if (const auto* overgrowth = FindOvergrowth(node->kind))
+    {
+        if (overgrowth->byHand) return ClearOvergrowth(nodeId, Item::Count, player);
+        return Bad(std::string("Use a ") + ToolName(overgrowth->tool) + " to clear this.");
+    }
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
-    if (node->readyAtHour > state_.hour)
-        return Bad(node->kind == ResourceKind::DeerRemains ? "Only bones are left here." : "Nothing to gather here.");
-    if (node->kind == ResourceKind::Sapling && Count(Item::Hatchet) == 0)
-        return Bad("Craft a crude hatchet before cutting a sapling.");
-    if (node->kind != ResourceKind::Sapling && Count(Item::Knife) == 0)
-        return Bad(node->kind == ResourceKind::DeerRemains ? "Take your knife from storage to cut the hide free."
-            : "Take your knife from storage before gathering.");
+    if (Retired(node->kind)) return Bad("There's nothing here worth taking.");
+    if (node->readyAtHour > state_.hour) return Bad("Nothing to gather here.");
     const double cost = HarvestCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = Yield(node->kind);
@@ -1626,8 +1699,7 @@ Result Simulation::Harvest(int nodeId, Point player)
     updated->readyAtHour = state_.hour + Regrowth(node->kind);
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
-    const std::string message = node->kind == ResourceKind::DeerRemains ? std::string("Cut the fur hide from the deer remains.")
-        : std::string("Gathered ") + ResourceName(node->kind) + ".";
+    const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ".";
     return Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
 }
 Result Simulation::Clear(int nodeId, Point player)
@@ -1635,11 +1707,10 @@ Result Simulation::Clear(int nodeId, Point player)
     if (state_.failed) return Failed();
     auto* node = Find(state_.resources, nodeId);
     if (!node || node->cleared) return Bad("This patch has already been cleared.");
+    if (IsOvergrowth(node->kind)) return Harvest(nodeId, player);
     if (!Near(player, node->position)) return Bad("Move closer to clear this patch.");
     if (RequiresHatchet(node->kind) && Count(Item::Hatchet) == 0)
-        return Bad("Craft a crude hatchet before felling trees or clearing saplings.");
-    if (!RequiresHatchet(node->kind) && Count(Item::Knife) == 0)
-        return Bad("Take your knife from storage before clearing.");
+        return Bad("Haft an axe before felling trees.");
     const double cost = ClearCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = node->readyAtHour <= state_.hour ? Yield(node->kind) : Inventory{};
@@ -1712,13 +1783,17 @@ Result Simulation::Craft(Recipe recipe, Point player)
     const bool cooking = recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots;
     if (cooking && !IsNearFire(player)) return Bad("Move beside a fueled cookfire to cook roots; no pot is needed.");
     if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
-        return Bad("Take your crude hatchet from storage to split firewood.");
-    if (!cooking && recipe != Recipe::SplitFirewood && Count(Item::Knife) == 0)
-        return Bad("Take your knife from storage to craft tools.");
+        return Bad("Take your axe from storage to split firewood.");
     const double cost = cooking ? Exertion::CookEnergy
         : recipe == Recipe::SplitFirewood ? Exertion::SplitFirewoodEnergy : Exertion::CraftEnergy;
     if (auto ready = CheckExertion(cost); !ready) return ready;
     if (!TryAdjust(change)) return Bad(MissingMessage(change, state_.inventory));
+    if (Hafting(recipe))
+    {
+        const auto made = std::find_if(change.begin(), change.end(), [](int value) { return value > 0; });
+        const Item tool = static_cast<Item>(made - change.begin());
+        return Exert(cost, Good(std::string("Hafted a worn ") + ToolName(ToolForItem(tool)) + "."));
+    }
     return Exert(cost, Good(std::string("Made ") + RecipeName(recipe) + "."));
 }
 
@@ -1758,8 +1833,6 @@ RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
     assessment.stationMet = !cooking || IsNearFire(player);
     if (recipe == Recipe::SplitFirewood)
         assessment.retainedTool = Item::Hatchet;
-    else if (!cooking)
-        assessment.retainedTool = Item::Knife;
     assessment.retainedToolMet = assessment.retainedTool == Item::Count
         || Count(assessment.retainedTool) > 0;
 
@@ -1993,7 +2066,7 @@ Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds
         return false;
     };
     Inventory change{};
-    for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Machete})
+    for (Item tool : {Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Scythe, Item::Billhook, Item::Pickaxe})
         if (!owned(tool)) change[static_cast<int>(tool)] = 1;
     if (includeSeeds)
     {
@@ -2067,7 +2140,7 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
     if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
         return Bad("Move closer to a valid garden square.");
-    if (Count(Item::DiggingStick) == 0) return Bad("Craft a stone hoe before tilling soil.");
+    if (Count(Item::DiggingStick) == 0) return Bad("Haft a hoe before tilling soil.");
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);
@@ -2104,10 +2177,10 @@ Result Simulation::Water(int plotId, Point player)
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
-    if (Count(Item::WateringCan) == 0) return Bad("Craft a watering can first.");
+    if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to water crops.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
     if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
-    if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad("Refill your watering can at the stream.");
+    if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad("Refill your pail at the stream.");
     plot->moisture = 1.0;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
@@ -2139,13 +2212,13 @@ Result Simulation::HarvestCrop(int plotId, Point player)
 Result Simulation::FillWater(Point player)
 {
     if (state_.failed) return Failed();
-    if (Count(Item::WateringCan) == 0) return Bad("Craft a watering can before collecting water.");
-    if (!NearWater(player)) return Bad("Walk to the stream to refill your watering can.");
-    if (Count(Item::Water) >= 6) return Bad("Your watering can is already full.");
+    if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to collect water.");
+    if (!NearWater(player)) return Bad("Walk to the stream to refill your pail.");
+    if (Count(Item::Water) >= 6) return Bad("Your pail is already full.");
     const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
     if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
-    return Exert(Exertion::FillWaterEnergy, Good("Watering can filled with six water portions."));
+    return Exert(Exertion::FillWaterEnergy, Good("Pail filled with six water portions."));
 }
 Result Simulation::AddFuel(int structureId, Point player)
 {
@@ -2184,41 +2257,18 @@ Result Simulation::SetDayMinutes(double minutes)
     state_.dayMinutes = minutes;
     return Good("Day length updated.");
 }
-void Simulation::SetWarmOutfit(bool enabled) { if (!state_.failed) state_.warmOutfit = enabled; }
-double Simulation::Insulation() const
-{
-    double total = 0.0;
-    for (const auto& item : state_.wearables)
-        if (item.owner == WearableOwner::Equipped)
-            if (const auto* info = GetWearableDefinition(item.definition)) total += info->insulation;
-    return total * InsulationPerPoint;
-}
 void Simulation::Step(double hours, Point player, bool sleeping)
 {
+    (void)player;
     const bool rain = IsRaining();
-    const bool sheltered = IsSheltered(player);
-    const bool fire = IsNearFire(player);
-    double warmthRate = IsNight() ? -6.0 : 3.0;
-    // Cooler autumns and hard winters; spring and summer keep the original day/night rates.
-    const std::string season = SeasonName();
-    if (season == "Autumn") warmthRate = IsNight() ? -8.0 : 1.5;
-    else if (season == "Winter") warmthRate = IsNight() ? -11.0 : -2.0;
-    if (rain && !sheltered) warmthRate -= 1.5;
-    if (state_.warmOutfit && warmthRate < 0) warmthRate += 2.0;
-    // Clothing only slows heat loss; it never warms her on its own.
-    if (warmthRate < 0) warmthRate = std::min(0.0, warmthRate + Insulation());
-    if (sheltered) warmthRate = std::max(1.0, warmthRate + 7.0);
-    if (fire) warmthRate = std::max(6.0, warmthRate + 12.0);
     const double hungerRate = sleeping ? -1.3 : -2.0;
     const double energyRate = sleeping ? 10.0 : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
     elapsed = std::min(elapsed, state_.hunger / -hungerRate);
     if (energyRate < 0) elapsed = std::min(elapsed, state_.energy / -energyRate);
-    if (warmthRate < 0) elapsed = std::min(elapsed, state_.warmth / -warmthRate);
     state_.hunger = Clamp(state_.hunger + hungerRate * elapsed, 0.0, 100.0);
     state_.energy = Clamp(state_.energy + energyRate * elapsed, 0.0, 100.0);
-    state_.warmth = Clamp(state_.warmth + warmthRate * elapsed, 0.0, 100.0);
     for (auto& piece : state_.structures)
         if (piece.kind == Piece::Fire) piece.fuelHours = std::max(0.0, piece.fuelHours - elapsed);
     for (auto& plot : state_.plots)
@@ -2234,17 +2284,18 @@ void Simulation::Step(double hours, Point player, bool sleeping)
         }
     }
     const double before = state_.hour;
+    const int dayBefore = static_cast<int>(std::floor((before - DayRolloverHour) / 24.0));
     state_.hour += elapsed;
     // Townsfolk buy down her goods in the shops each morning.
     if (std::floor((state_.hour - DayRolloverHour) / 24.0) > std::floor((before - DayRolloverHour) / 24.0))
         SellDownShops();
-    if (state_.hunger <= 1e-10 || state_.energy <= 1e-10 || state_.warmth <= 1e-10)
+    if (state_.hunger <= 1e-10 || state_.energy <= 1e-10)
     {
         if (state_.hunger <= 1e-10) state_.hunger = 0.0;
         if (state_.energy <= 1e-10) state_.energy = 0.0;
-        if (state_.warmth <= 1e-10) state_.warmth = 0.0;
         state_.failed = true;
     }
+    if (const int day = static_cast<int>(std::floor((state_.hour - DayRolloverHour) / 24.0)); day > dayBefore) CreepWeeds(day);
 }
 void Simulation::Advance(double realSeconds, Point player, bool paused)
 {
@@ -2336,8 +2387,7 @@ std::string Simulation::Serialize() const
     body.imbue(std::locale::classic());
     body << std::setprecision(std::numeric_limits<double>::max_digits10);
     body << state_.hour << ' ' << state_.dayMinutes << ' ' << state_.hunger << ' '
-         << state_.energy << ' ' << state_.warmth << ' ' << state_.failed << ' '
-         << state_.warmOutfit << ' ' << state_.nextId << '\n';
+         << state_.energy << ' ' << state_.failed << ' ' << state_.nextId << '\n';
     WriteStock(body, state_.inventory);
     // The fixed estate stores its placement bake version in the seed slot, marked by the version.
     body << (state_.fixedEstate ? static_cast<std::uint64_t>(state_.placementBakeVersion) : state_.world.seed) << ' '
@@ -2379,6 +2429,10 @@ std::string Simulation::Serialize() const
     // Optional trailing sections; saves without them still load.
     WriteParcelOwnership(body, state_);
     WriteEconomy(body);
+    // Tagged trailing section: tool tiers.
+    body << "tools " << ToolKindCount;
+    for (const ToolTier tier : state_.toolTiers) body << ' ' << static_cast<int>(tier);
+    body << '\n';
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2413,13 +2467,28 @@ Result Simulation::Deserialize(const std::string& data)
     std::istringstream input(payload);
     input.imbue(std::locale::classic());
     State candidate;
-    if (!(input >> candidate.hour >> candidate.dayMinutes >> candidate.hunger >> candidate.energy >> candidate.warmth) ||
-        !ReadBool(input, candidate.failed) || !ReadBool(input, candidate.warmOutfit) || !(input >> candidate.nextId)) return invalid();
+    // The first line lost warmth and the warm-outfit flag with the estate pivot; older lines still
+    // carry them (8 fields instead of 6) and they are read and discarded.
+    std::string vitals;
+    if (!std::getline(input, vitals)) return invalid();
+    std::istringstream line(vitals);
+    line.imbue(std::locale::classic());
+    std::vector<std::string> fields;
+    for (std::string field; line >> field;) fields.push_back(field);
+    const bool legacyVitals = fields.size() == 8;
+    if (!legacyVitals && fields.size() != 6) return invalid();
+    std::istringstream vitalsInput(vitals);
+    vitalsInput.imbue(std::locale::classic());
+    double legacyWarmth = 50.0;
+    bool legacyWarmOutfit = false;
+    if (!(vitalsInput >> candidate.hour >> candidate.dayMinutes >> candidate.hunger >> candidate.energy)
+        || (legacyVitals && !(vitalsInput >> legacyWarmth)) || !ReadBool(vitalsInput, candidate.failed)
+        || (legacyVitals && !ReadBool(vitalsInput, legacyWarmOutfit)) || !(vitalsInput >> candidate.nextId)) return invalid();
     if (!FiniteRange(candidate.hour, 6.0, MaxHour) || !FiniteRange(candidate.dayMinutes, 1.0, 1440.0) ||
         !FiniteRange(candidate.hunger, 0.0, 100.0) || !FiniteRange(candidate.energy, 0.0, 100.0) ||
-        !FiniteRange(candidate.warmth, 0.0, 100.0) || candidate.nextId < 1 ||
+        !FiniteRange(legacyWarmth, 0.0, 100.0) || candidate.nextId < 1 ||
         candidate.nextId >= TransientResourceIdBase) return invalid();
-    const bool critical = candidate.hunger == 0 || candidate.energy == 0 || candidate.warmth == 0;
+    const bool critical = candidate.hunger == 0 || candidate.energy == 0 || legacyWarmth == 0;
     if (critical != candidate.failed || !ReadStock(input, candidate.inventory, storedItems)) return invalid();
     std::set<int> ids;
     const auto acceptId = [&](int id) { return id > 0 && id < candidate.nextId && ids.insert(id).second; };
@@ -2608,6 +2677,24 @@ Result Simulation::Deserialize(const std::string& data)
     if (!ReadEconomy(input, candidate, ids)) return invalid();
     RefreshShopCounters(candidate, Layout());
     input >> std::ws;
+    while (!input.eof())
+    {
+        std::string tag;
+        if (!(input >> tag)) return invalid();
+        if (tag == "tools")
+        {
+            // Tiers for tools this build doesn't know are ignored; missing ones stay worn.
+            if (!(input >> count) || count < 0 || count > 64) return invalid();
+            for (int i = 0; i < count; ++i)
+            {
+                int tier = -1;
+                if (!(input >> tier) || tier < 0 || tier >= ToolTierCount) return invalid();
+                if (i < ToolKindCount) candidate.toolTiers[i] = static_cast<ToolTier>(tier);
+            }
+        }
+        else return invalid();
+        input >> std::ws;
+    }
     if (!input.eof()) return invalid();
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};

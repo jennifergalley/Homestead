@@ -142,9 +142,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         [this]() { Tap(EKeys::Gamepad_Special_Right); }, [this, Hidden]() { return !Controller->IsBookOpen() && Hidden(); });
     QueueGatherTo(Homestead::Item::Branch, 10);
     QueueGatherTo(Homestead::Item::Stone, 4);
-    QueueGatherTo(Homestead::Item::Fiber, 4);
     QueueGatherTo(Homestead::Item::Seeds, 1);
-    QueueCraft(Homestead::Recipe::Hatchet);
+    QueueGrant(Homestead::Item::RustedAxeHead, 1);
+    QueueCraft(Homestead::Recipe::HaftAxe);
     QueueClearCell(-5, 0);
     Add(TEXT("Stand east of the cleared garden without a digging stick"),
         [this, Garden, TillApproach]()
@@ -175,7 +175,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
         [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
             && Animation()->TillStarts() == Probe->TillStarts; });
-    QueueCraft(Homestead::Recipe::DiggingStick);
+    QueueGrant(Homestead::Item::RustedHoeBlade, 1);
+    QueueCraft(Homestead::Recipe::HaftHoe);
     Add(TEXT("Stand east of the cleared garden"),
         [this, Garden, TillApproach]()
         {
@@ -260,7 +261,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     Add(TEXT("Plant with gamepad A; no watering prop"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Hidden]() { return !Controller->ToastIsError() && Hidden() && Controller->FocusActions().Contains(TEXT("Water")); });
     Rejected(TEXT("No-can rejection neither debits water nor presents a free tool"));
-    QueueCraft(Homestead::Recipe::WateringCan);
+    QueueGrant(Homestead::Item::WateringCan, 1);
     Rejected(TEXT("Empty-can rejection has no pose, prop or moisture reward"));
     Refill();
     Water(EKeys::Gamepad_FaceButton_Bottom, true);

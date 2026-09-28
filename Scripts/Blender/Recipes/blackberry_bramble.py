@@ -604,7 +604,10 @@ def describe(spec):
         length = rng.uniform(0.14, 0.30) * (H / 1.2) ** 0.3
         pts = [node + direction * length * t + Vector((0, 0, -0.04 * t * t)) +
                outward_at(node) * 0.03 * math.sin(math.pi * t) for t in np.linspace(0, 1, 9)]
-        lat = add_cane("lateral", pts, 0.0032, parent["phase"], zig=False)
+        lat = add_cane("lateral", pts, 0.0032, parent["phase"], zig=False)
+        # Spring canes carry no flowers or fruit yet (blackberry flowers from late May).
+        if not spec.get("fruit", True):
+            continue
         end, tan_end, _ = _at(lat["pts"], lat["acc"], lat["acc"][-1])
         for j in range(rng.randint(4, 10)):
             az = j * 2.39996 + rng.uniform(-0.4, 0.4)

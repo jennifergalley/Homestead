@@ -166,7 +166,7 @@ bool AHomesteadVisualPlaytest::RenewalVisuals(int32 Id, bool Ready, bool Focused
     Row->SetNumberField(TEXT("baseComponents"), BaseCount); Row->SetNumberField(TEXT("produceComponents"), ProduceCount);
     Row->SetStringField(TEXT("focusTitle"), PC->FocusTitle()); Row->SetStringField(TEXT("focusActions"), PC->FocusActions());
     Row->SetStringField(TEXT("toast"), PC->Toast()); Row->SetNumberField(TEXT("toastSeconds"), PC->ToastRemaining);
-    Row->SetNumberField(TEXT("hunger"), PC->State().hunger); Row->SetNumberField(TEXT("warmth"), PC->State().warmth);
+    Row->SetNumberField(TEXT("hunger"), PC->State().hunger);
     FVector2D Screen;
     PC->ProjectWorldLocationToScreen(FVector(Node->position.x, Node->position.y,
         PC->GroundHeight(Node->position.x, Node->position.y) + 35), Screen);
@@ -453,8 +453,8 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
             const double Rest = PC->State().hour - R.ActionHour - Natural;
             if (!RenewalCheck(!PC->ToastIsError() && FMath::Abs(Rest - 8) < 1.e-6, TEXT("Normal mapped8h rest failed."))) return;
             R.SleepHours += Rest; ++R.Sleeps;
-            RenewalEvent(FString::Printf(TEXT("normal bed rest%d advanced%.8fh plus%.8fnatural; hunger%.2f warmth%.2f"),
-                R.Sleeps, Rest, Natural, PC->State().hunger, PC->State().warmth));
+            RenewalEvent(FString::Printf(TEXT("normal bed rest%d advanced%.8fh plus%.8fnatural; hunger%.2f"),
+                R.Sleeps, Rest, Natural, PC->State().hunger));
         }
         for (const int32 Id : {8, 12, 10})
         {

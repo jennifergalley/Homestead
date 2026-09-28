@@ -33,7 +33,8 @@ public:
     UPROPERTY() int32 MetaHair = -1;
     UPROPERTY() TArray<int32> HotbarSlots;
     UPROPERTY() int32 SelectedHotbarSlot = 0;
-    // 0: saved before food could be pinned; 1: pinned food and the machete migration applied.
-    static constexpr int32 CurrentHotbarLayout = 1;
+    // 0: saved before food could be pinned; 1: pinned food and the machete migration applied;
+    // 2: the estate's hafted tools (scythe, billhook, pickaxe) join the hotbar.
+    static constexpr int32 CurrentHotbarLayout = 2;
     UPROPERTY() int32 HotbarLayout = 0;
 };

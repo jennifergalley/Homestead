@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Billhook",
+  "description": "Worn West Country billhook: hooked single-edged blade, turned ash handle, iron ferrule and peened butt washer (original). Pivot = grip centre; blade +Z, edge -Y.",
+  "collision": "none",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/billhook.py",
+  "source_sha256": "3aa814622bef64b7dc97e185a66f7d15aecbf6b34f3f15a1fc0d6be79aaeb05e",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Billhook": {
+      "vertices": 2409,
+      "triangles": 4772,
+      "size_cm": [
+        2.8,
+        6.33,
+        38.1
+      ],
+      "materials": [
+        {
+          "name": "M_Billhook",
+          "textures": {
+            "basecolor": "T_Billhook_basecolor.png",
+            "roughness": "T_Billhook_roughness.png",
+            "metallic": "T_Billhook_metallic.png",
+            "normal": "T_Billhook_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Billhook_basecolor.png",
+          "roughness": "T_Billhook_roughness.png",
+          "normal": "T_Billhook_normal.png",
+          "metallic": "T_Billhook_metallic.png",
+          "ao": "T_Billhook_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          24
+        ],
+        "focus": [
+          0.0,
+          -0.02,
+          0.27
+        ]
+      },
+      "fbx": "SM_Billhook.fbx",
+      "sha256": "2737e89faa891191dfd344c8666d0717fe0b5c918d170fcaff7c37743a1c2c2d",
+      "preview": "preview_SM_Billhook.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Billhook_hero.png",
+          "detail": "beauty_SM_Billhook_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          24
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_Billhook_basecolor.png": "64347564ed69e42be313eeae90fb7d4421a3574f7cd6b25a405f1d72e7c7dced",
+    "T_Billhook_roughness.png": "d11c73a850229e6f6c5b006b9e32201eab7b92ceba366d4077db97fb9f70ed32",
+    "T_Billhook_metallic.png": "30662061b00d981dd621aa02c5915f46aaa0bdacde55b297bf428165fcf654a7",
+    "T_Billhook_normal.png": "b7d7851e257c0b8afad0d12780d512a4c8f9a71d7ada64bf2f4dbf9a9b5ac340"
+  }
+}

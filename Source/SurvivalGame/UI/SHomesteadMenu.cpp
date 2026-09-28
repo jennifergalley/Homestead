@@ -163,8 +163,8 @@ FName RequirementIcon(Homestead::Item Item)
     }
     return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
 }
-const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("watering-can"),
-    TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
+const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("scythe"), TEXT("billhook"),
+    TEXT("pickaxe"), TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
 const TCHAR* PieceIcons[] = {TEXT("foundation"), TEXT("wall"), TEXT("doorway"), TEXT("roof"),
     TEXT("fire"), TEXT("bed"), TEXT("chest")};
 // The legacy apron still works but has no slot of its own here; it shows under the Top it ties over.
@@ -648,7 +648,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(24)[ Text(TEXT("Time to try again"), 32) ]
             + SVerticalBox::Slot().FillHeight(1).Padding(24)
-            [ Text(TEXT("You ran out of warmth, food, or energy.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
+            [ Text(TEXT("You ran out of food or energy.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
             [ RegisterButton(MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)

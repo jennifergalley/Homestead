@@ -50,7 +50,7 @@ void CatalogueCoversEveryItem()
 void CatalogueMatchesLegacyMetadata()
 {
     CHECK(std::string(ItemName(Item::Flowers)) == "Meadow herb");
-    CHECK(std::string(ItemName(Item::DiggingStick)) == "Stone hoe");
+    CHECK(std::string(ItemName(Item::DiggingStick)) == "Hoe");
     CHECK(std::string(ItemIcon(Item::DiggingStick)) == "digging-stick");
     CHECK(std::string(ItemIcon(Item::Fur)) == "fur");
     CHECK(IsEdible(Item::Berries) && IsEdible(Item::RoastedRoots) && IsEdible(Item::HerbedRoots));
@@ -59,7 +59,7 @@ void CatalogueMatchesLegacyMetadata()
     for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Machete})
         CHECK(IsTool(tool) && ItemSortRank(tool) == 0);
     CHECK(ItemSortRank(Item::Fur) == 1 && ItemSortRank(Item::Flowers) == 2 && ItemSortRank(Item::Water) == 3);
-    CHECK(std::string(ItemSource(Item::Timber)) == "Mature trees with Hatchet");
+    CHECK(std::string(ItemSource(Item::Timber)) == "Mature trees, large stumps and fallen logs, with the axe");
     CHECK(std::string(ItemSource(Item::Hatchet)).empty());
     CHECK(ShopBuys(ShopKind::GeneralStore, Item::Stone) && !ShopBuys(ShopKind::GeneralStore, Item::Knife));
     CHECK(ItemFromKey("pasty") == Item::Pasty && ItemFromKey("nope") == Item::Count && ItemFromKey(nullptr) == Item::Count);
@@ -87,19 +87,19 @@ std::string Reseal(const std::string& saved, const std::string& payload)
     return magic + " " + version + " " + std::to_string(payload.size()) + " " + std::to_string(hash) + "\n" + payload;
 }
 
-// Rewrites her needs in a save round trip (warmth full) so long waits don't fail her.
+// Rewrites her needs in a save round trip so long waits don't fail her.
 void Edit(Simulation& sim, double hunger, double energy)
 {
     const std::string saved = sim.Serialize();
     const auto newline = saved.find('\n');
     std::string payload = saved.substr(newline + 1);
     std::istringstream first(payload.substr(0, payload.find('\n')));
-    std::string hour, minutes, oldHunger, oldEnergy, oldWarmth, rest;
-    first >> hour >> minutes >> oldHunger >> oldEnergy >> oldWarmth;
+    std::string hour, minutes, oldHunger, oldEnergy, rest;
+    first >> hour >> minutes >> oldHunger >> oldEnergy;
     std::getline(first, rest);
     std::ostringstream line;
     line.imbue(std::locale::classic());
-    line << hour << ' ' << minutes << ' ' << hunger << ' ' << energy << ' ' << 100 << rest;
+    line << hour << ' ' << minutes << ' ' << hunger << ' ' << energy << rest;
     payload = line.str() + payload.substr(payload.find('\n'));
     OK(sim.Deserialize(Reseal(saved, payload)));
 }

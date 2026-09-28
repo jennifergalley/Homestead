@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Scythe",
+  "description": "English scythe: rusted riveted-back blade on a crooked ash snath with two nibs (original). Pivot = lower nib grip; snath +Z, nibs -Y, blade +X with its edge -Y.",
+  "collision": "none",
+  "triangle_budget": 10000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/scythe.py",
+  "source_sha256": "dedfeb930c12d8cf994c1876d99bc938d887be4844fe198233f9dbc41b400143",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Scythe": {
+      "vertices": 1456,
+      "triangles": 2888,
+      "size_cm": [
+        90.7,
+        23.22,
+        163.29
+      ],
+      "materials": [
+        {
+          "name": "M_Scythe",
+          "textures": {
+            "basecolor": "T_Scythe_basecolor.png",
+            "roughness": "T_Scythe_roughness.png",
+            "metallic": "T_Scythe_metallic.png",
+            "normal": "T_Scythe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Scythe_basecolor.png",
+          "roughness": "T_Scythe_roughness.png",
+          "normal": "T_Scythe_normal.png",
+          "metallic": "T_Scythe_metallic.png",
+          "ao": "T_Scythe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          90,
+          0,
+          0
+        ],
+        "focus": [
+          0.3,
+          0.0,
+          -1.05
+        ]
+      },
+      "fbx": "SM_Scythe.fbx",
+      "sha256": "d8a31c1bbde34d10e4cc4f078e45da3522dae1800395c6c4dedb8d4672f2714c",
+      "preview": "preview_SM_Scythe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Scythe_hero.png",
+          "detail": "beauty_SM_Scythe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          90,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_Scythe_basecolor.png": "2ef8d0d8ec9ef0f45ccc4f1fa45d2880bf7fd4ec0042168e33e799edb15dcdaf",
+    "T_Scythe_roughness.png": "07fac38a507fce1aa63393a9546b8f126531b9b75141dc3776900e6f55563217",
+    "T_Scythe_metallic.png": "919a7224c488ecb614318365a18a7fd1d3053efa23a38ee4109b58e6d893bb18",
+    "T_Scythe_normal.png": "10c9fd55d79586f2dcd2428d44c35f6bb516b7990db95d1c08699e2e51ccf2b3"
+  }
+}
