@@ -1,5 +1,6 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadEstate.h"
+#include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 
 #include <algorithm>
@@ -556,10 +557,12 @@ void AtomicTransactions()
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -3, 0, 0, Home); });
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
     Stock(sim, {{Item::WateringCan, 1}, {Item::Water, 1}, {Item::Stone, 117}});
-    UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
+    OK(sim.FillWater(WaterSource));
+    CHECK(sim.UsedCapacity() == 118);
+    CHECK(sim.Count(Item::Water) == 6);
     Stock(sim, {{Item::Knife, 1}, {Item::WateringCan, 1}, {Item::Branch, 112}});
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.UsedCapacity() == 120);
+    CHECK(sim.UsedCapacity() == 114);
     CHECK(sim.Count(Item::Water) == 6);
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
     Stock(sim, {{Item::Knife, 1}, {Item::Roots, 2}});
@@ -863,7 +866,7 @@ void FireAndStorage()
     UnchangedFailure(sim, [&] { return sim.Transfer(ch, Item::Branch, -1, chest); });
     Edit(sim, [](State& state) {
         state.structures[2].storage.fill(0);
-        state.structures[2].storage[static_cast<int>(Item::Branch)] = 120;
+        state.structures[2].storage[static_cast<int>(Item::Branch)] = ChestCapacity;
     });
     UnchangedFailure(sim, [&] { return sim.Transfer(ch, Item::Stone, 1, chest); });
     Stock(sim, {{Item::Branch, 20}});
@@ -1560,7 +1563,7 @@ void InventoryRoundTrip(const Simulation& sim)
     CHECK(loaded.Serialize() == sim.Serialize());
     CHECK(loaded.UsedCapacity() <= InventoryCapacity);
     for (const auto& piece : loaded.GetState().structures)
-        if (piece.kind == Piece::Chest) CHECK(loaded.ChestUsedCapacity(piece.id) <= InventoryCapacity);
+        if (piece.kind == Piece::Chest) CHECK(loaded.ChestUsedCapacity(piece.id) <= ChestCapacity);
 }
 void WardrobeDefaultsAndCrafting()
 {
@@ -1686,7 +1689,11 @@ void WardrobeStorageAndReach()
     UnchangedFailure(sim, [&] { return sim.RecolorWearable(tunic, 1, outside, sim.GetRevision()); });
     Stock(sim, {{Item::Knife, 1}, {Item::Branch, 119}});
     OK(sim.Transfer(chest, Item::Branch, 119, edge));
-    CHECK(sim.ChestUsedCapacity(chest) == 120);
+    Edit(sim, [chest](State& state) {
+        for (auto& piece : state.structures)
+            if (piece.id == chest) piece.storage[static_cast<int>(Item::Branch)] = ChestCapacity - 1;
+    });
+    CHECK(sim.ChestUsedCapacity(chest) == ChestCapacity);
     UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Knife, 1, edge); });
     OK(sim.UnequipWearable(2, sim.GetRevision()));
     UnchangedFailure(sim, [&] { return sim.MoveWearable(2, chest, Home, sim.GetRevision()); });
@@ -1696,7 +1703,7 @@ void WardrobeStorageAndReach()
     UnchangedFailure(sim, [&] { return sim.Transfer(chest, Item::Branch, -1, edge); });
     OK(sim.EquipWearable(2, sim.GetRevision()));
     OK(sim.MoveWearable(tunic, 0, edge, sim.GetRevision()));
-    CHECK(sim.UsedCapacity() == 120 && sim.ChestUsedCapacity(chest) == 119);
+    CHECK(sim.UsedCapacity() == 120 && sim.ChestUsedCapacity(chest) == ChestCapacity - 1);
     CHECK(sim.GetWearable(tunic)->dye == 2);
     InventoryRoundTrip(sim);
 }
@@ -2072,7 +2079,7 @@ void WardrobeSaveRejection()
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
     }
     State full = sim.GetState();
-    full.structures.back().storage[static_cast<int>(Item::Branch)] = 120;
+    full.structures.back().storage[static_cast<int>(Item::Branch)] = ChestCapacity + 1;
     FixtureLayouts(full);
     CHECK(sim.Deserialize(Encode(full)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
@@ -2833,6 +2840,123 @@ const ResourceNode& PlacedNode(const Simulation& sim, int id)
     return sim.GetState().resources.front();
 }
 
+const Structure& StructureById(const Simulation& sim, int id)
+{
+    for (const auto& piece : sim.GetState().structures) if (piece.id == id) return piece;
+    CHECK(false);
+    return sim.GetState().structures.front();
+}
+
+int StructureIdAt(const Simulation& sim, Piece kind, int x, int y)
+{
+    for (const auto& piece : sim.GetState().structures)
+        if (piece.kind == kind && piece.cellX == x && piece.cellY == y) return piece.id;
+    CHECK(false);
+    return -1;
+}
+
+void DeconstructRefundsAndFoundationRefusal()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    OK(sim.Place(Piece::Foundation, -3, 0, 0, Home));
+    const int floor = StructureIdAt(sim, Piece::Foundation, -3, 0);
+    OK(sim.Place(Piece::Wall, -3, 0, 1, Home));
+    const int wall = StructureIdAt(sim, Piece::Wall, -3, 0);
+    OK(sim.Place(Piece::Roof, -3, 0, 0, Home));
+    OK(sim.Place(Piece::Chest, -3, 0, 0, Home));
+    CHECK(!sim.CheckDeconstruct(floor, Home).ok);
+    CHECK(sim.CheckDeconstruct(floor, Home).message.find("floor first") != std::string::npos);
+    const int branches = sim.Count(Item::Branch);
+    const int canes = sim.Count(Item::BrambleCanes);
+    const double energy = sim.GetState().energy;
+    OK(sim.CheckDeconstruct(wall, Home));
+    OK(sim.Deconstruct(wall, Home));
+    CHECK(sim.Count(Item::Branch) == branches + 3);
+    CHECK(sim.Count(Item::BrambleCanes) == canes + 1);
+    CHECK(Close(sim.GetState().energy, energy - Exertion::DeconstructEnergy));
+    CHECK(std::none_of(sim.GetState().structures.begin(), sim.GetState().structures.end(),
+        [wall](const Structure& piece) { return piece.id == wall; }));
+}
+
+void DeconstructChestContentsAndOverflow()
+{
+    Simulation returned;
+    Stock(returned, {{Item::Branch, 105}, {Item::BrambleCanes, 2}});
+    const Point chestSite = CellCenter(2, 0);
+    OK(returned.Place(Piece::Chest, 2, 0, 0, chestSite));
+    const int chest = StructureIdAt(returned, Piece::Chest, 2, 0);
+    OK(returned.Transfer(chest, Item::Branch, 10, chestSite));
+    OK(returned.Deconstruct(chest, chestSite));
+    CHECK(returned.Count(Item::Branch) == 105);
+    CHECK(returned.Count(Item::BrambleCanes) == 2);
+    CHECK(returned.GetState().worldDrops.empty());
+
+    Simulation overflow;
+    Stock(overflow, {{Item::Branch, 105}, {Item::BrambleCanes, 2}});
+    OK(overflow.Place(Piece::Chest, 2, 0, 0, chestSite));
+    const int fullChest = StructureIdAt(overflow, Piece::Chest, 2, 0);
+    OK(overflow.Transfer(fullChest, Item::Branch, 60, chestSite));
+    OK(overflow.GrantItems(Item::Stone, 80));
+    CHECK(overflow.UsedCapacity() == InventoryCapacity);
+    OK(overflow.Deconstruct(fullChest, chestSite));
+    CHECK(overflow.UsedCapacity() == InventoryCapacity);
+    int dropped = 0;
+    for (const auto& drop : overflow.GetState().worldDrops) dropped += drop.quantity;
+    CHECK(dropped == 67);
+}
+
+void HeritageManorPiecesCannotBeDeconstructed()
+{
+    EstatePlacements placements;
+    placements.bakeVersion = 11;
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), placements));
+    int refused = 0;
+    for (const auto& piece : sim.GetState().structures)
+    {
+        if (!piece.heritage) continue;
+        const auto result = sim.CheckDeconstruct(piece.id, StructureCenter(sim.GetState(), piece));
+        CHECK(!result.ok);
+        CHECK(result.message == "This is part of the old house; it can't be taken down.");
+        ++refused;
+    }
+    CHECK(refused >= Manor::RoomCells * Manor::RoomCells + 3);
+}
+
+void ChestCapacityAndWaterSpace()
+{
+    Simulation chestSim;
+    Stock(chestSim, {{Item::Branch, 5}, {Item::BrambleCanes, 2}});
+    const Point chestSite = CellCenter(3, 0);
+    OK(chestSim.Place(Piece::Chest, 3, 0, 0, chestSite));
+    const int chest = StructureIdAt(chestSim, Piece::Chest, 3, 0);
+    for (int i = 0; i < 10; ++i)
+    {
+        OK(chestSim.GrantItems(Item::Branch, InventoryCapacity));
+        OK(chestSim.Transfer(chest, Item::Branch, InventoryCapacity, chestSite));
+    }
+    CHECK(chestSim.ChestUsedCapacity(chest) == ChestCapacity);
+    OK(chestSim.GrantItems(Item::Branch, 1));
+    CHECK(chestSim.Transfer(chest, Item::Branch, 1, chestSite).code == ResultCode::Capacity);
+
+    Simulation waterSim;
+    OK(waterSim.GrantItems(Item::WateringCan, 1));
+    OK(waterSim.GrantItems(Item::Branch, InventoryCapacity - 1));
+    CHECK(waterSim.UsedCapacity() == InventoryCapacity);
+    OK(waterSim.FillWater(WaterSource));
+    CHECK(waterSim.Count(Item::Water) == 6);
+    CHECK(waterSim.UsedCapacity() == InventoryCapacity);
+}
+
+void BedSleepHourPolicy()
+{
+    CHECK(Close(BedSleepHours(20.0), 10.75));
+    CHECK(Close(BedSleepHours(3.0), 8.0));
+    CHECK(Close(BedSleepHours(12.0), 2.0));
+    CHECK(Close(BedSleepHours(16.5), 1.5));
+}
+
 void OvergrowthTableAndPrompts()
 {
     for (auto kind : {ResourceKind::TallGrass, ResourceKind::Weeds}) CHECK(FindOvergrowth(kind)->tool == ToolKind::Scythe);
@@ -3193,6 +3317,11 @@ int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
     Run("fixed estate new game and save", FixedEstateNewGameAndSave);
+    Run("taking down placed pieces refunds full cost and protects occupied floors", DeconstructRefundsAndFoundationRefusal);
+    Run("taking down chests returns contents and drops overflow", DeconstructChestContentsAndOverflow);
+    Run("heritage manor pieces cannot be taken down", HeritageManorPiecesCannotBeDeconstructed);
+    Run("large chests and water portions do not crowd the pack", ChestCapacityAndWaterSpace);
+    Run("bed sleep hour policy", BedSleepHourPolicy);
     Run("overgrowth tools, tiers and prompts", OvergrowthTableAndPrompts);
     Run("salvage, hafting and tier-gated clearing by stable id", HaftingBootstrapAndClearing);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);

@@ -47,6 +47,8 @@ constexpr double CellSize = 300.0;
 constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
+constexpr int ChestCapacity = 1200;
+constexpr int ContainerCapacity(int containerId) { return containerId > 0 ? ChestCapacity : InventoryCapacity; }
 // 12 is the estate pivot: no warmth in the vitals, estate items, tool tiers, parcels, money and the manor.
 constexpr int SimulationSaveVersion = 12;
 // Version 11 files came from the woodland MVP and the round-1 test builds, whose item stocks
@@ -343,6 +345,7 @@ Point FurnitureOffset(Piece kind);
 Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation);
 Footprint StructureFootprint(const State& state, const Structure& structure);
 bool FootprintsOverlap(const Footprint& a, const Footprint& b);
+double BedSleepHours(double hour);
 
 // Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
 // below Reserve, so exertion alone never collapses her.
@@ -368,6 +371,7 @@ constexpr double WeedEnergy = 0.8;
 constexpr double HarvestCropEnergy = 0.6;
 constexpr double FillWaterEnergy = 0.3;
 constexpr double FuelEnergy = 0.2;
+constexpr double DeconstructEnergy = 1.0;
 }
 
 struct PreparedWorldRegion
@@ -420,6 +424,7 @@ public:
     int FindNearestPlot(Point position, double maxDistance) const;
     int FindNearestStructure(Point position, Piece kind, double maxDistance) const;
     int FindNearestDrop(Point position, double maxDistance) const;
+    int FindDeconstructTarget(Point aim, double maxDistance) const;
 
     Result Harvest(int nodeId, Point player);
     Result Clear(int nodeId, Point player);
@@ -441,6 +446,10 @@ public:
     // the loaded region instead of regenerating chunks (for a live preview).
     Result CheckPlacement(const PlacementTarget& target, Point player, bool quick = false) const;
     Result Place(const PlacementTarget& target, Point player);
+    Result CheckDeconstruct(int structureId, Point player) const;
+    // Take down a placed piece and get its whole build cost back. A chest's contents come with it;
+    // anything that does not fit in the pack is set down beside her.
+    Result Deconstruct(int structureId, Point player);
     // Whether she carries what the piece costs.
     Result CheckBuildCost(Piece kind) const;
     // Estate land (HomesteadParcels.cpp). The seeded woodland has no parcels and is all hers.
