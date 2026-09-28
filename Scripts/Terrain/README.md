@@ -173,3 +173,43 @@ Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the
 
 The tuning parameters are on `MI_EstateOcean`, grouped Waves, Foam, Colour and Data. Bake the
 values you settle on into the defaults in `build_ocean.py`.
+
+## Ground and meadow (`bake_ground.py`, `build_ground.py`, `build_landscape_material.py`)
+
+`bake_ground.py` (about 90 s) reads the heightfield, the paint-layer weights, `estate_layout.json` and
+the tree records in `EstateScenery.bin`, and writes:
+
+- `Saved/Ground/T_EstateGround.png` (2048², over the map like `T_EstateRoadSDF`): R = grass density,
+  G = grass height, B = dryness, A = wear (trodden soil round the manor, the road shoulders, the mill,
+  mine and gateway).
+- `Saved/Ground/T_EstateCanopy.png`: R = tree canopy (the broadleaf and fir records, kinds 0-1, as
+  7 m crowns blurred to a 9 m edge), G = stony soil on steep banks outside the cliff layer.
+- `Content/SurvivalGame/Estate/Runtime/EstateGround.bin`: "HGD1", u16 size (1024), then per cell the
+  most grass anywhere in it (u8) and the surface under it (u8: Soil, Grass, Road, Sand, Rock, Woodland,
+  Moor, Water). The game reads it through `HomesteadEstateGround` for the meadow and footsteps.
+- `Assets/Environment/Ground/T_GrassWind.png`: tiling gust noise.
+- `Saved/Ground/SM_GrassPatch_LOD{0,1,2}.obj`: 2 × 2 m patches of 1100, 423 and 136 grass blades (5500, 1269 and 136 triangles).
+  The LODs are nested by each blade's random rank (all, rank < 0.38, rank < 0.14). UV0 holds the
+  blade's rank bucket (whole part) and its root in the patch (fraction), so the material can find the
+  root; `build_ground.py` imports with full-precision UVs and detects Interchange's V flip.
+
+No grass grows in the manor footprint, within 3.9 m of the river, near the beach, within 140 m of
+the town square, or on the derelict farm's fence line. The farm's field itself is left overgrown.
+
+Then, in the editor with PIE stopped, run `pyfile Scripts\Terrain\build_ground.py` and then
+`pyfile Scripts\Terrain\build_landscape_material.py`. The first imports the data, the meshes and the
+CC0 ground sets (downloaded from Poly Haven to `HOMESTEAD_GROUND_DOWNLOADS`, default
+`Saved/Ground/Downloads`; not kept in git). It also authors `M_EstateGrass` / `MI_EstateGrass`. The
+second rebuilds `M_EstateLandscape` with its ground-finish pass.
+
+At runtime `UHomesteadGrassField` (`Source/SurvivalGame/HomesteadGrassField.*`) instances the patches
+in 6 m chunks within 51 m of the camera. `AHomesteadWorld::Refresh` updates it every 0.25 s. It writes
+three clear circles per patch into per-instance custom data, one for each nearby interactable, world
+drop or plot, and skips patches under building pieces. Inside those circles the sward is grazed to a fifth of its height, with a ragged edge, rather than left bare. Blades near a low game camera, and along its line to the heroine, are grazed too (`MPC_CameraSafeFoliage`), so the camera never looks through a wall of grass. `M_EstateGrass` thins blades by rank with
+distance (`GrassFade`: blades ranked below min(1, (12/d)^1.7) show). It also clears the road's wheel
+tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine (`GrassPush`).
+`HomesteadGrassField.h`'s LOD distances depend on `GrassFade` and the LOD keep fractions, so change
+all three together.
+
+Re-run `bake_ground.py` and `build_ground.py` after changing the heightfield, the layout,
+the paint layers or the scatter (the canopy comes from its trees).

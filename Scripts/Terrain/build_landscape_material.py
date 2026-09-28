@@ -1,7 +1,10 @@
 """Build M_EstateLandscape: a seven-layer weight-blended landscape material. Run in the editor.
 
-Each layer samples BaseColor at two tilings (near detail plus a larger-scale tint that hides repeats),
-Normal and Roughness. Textures come from /Game/SurvivalGame/Estate/Landscape/Textures (CC0 Poly
+Each layer samples BaseColor at two tilings (near detail fading into a larger-scale sample with
+distance, which hides repeats), Normal and Roughness. A ground-finish pass then adds broad colour
+variation, dry grass, trodden soil, leaf litter and moss under the trees, stony soil on steep banks
+and the sward's colour where the 3D meadow grows (T_EstateGround and T_EstateCanopy from
+bake_ground.py; run build_ground.py first). Textures come from /Game/SurvivalGame/Estate/Landscape/Textures (CC0 Poly
 Haven, see docs/asset-credits.md) except where TEXTURES overrides a layer.
 """
 import unreal
@@ -50,6 +53,164 @@ def blend(x, y):
     return b
 
 bc, nm, rg = blend(-300, -400), blend(-300, 0), blend(-300, 400)
+
+# Ground finish, after the layers blend: the meadow ground from bake_ground.py (T_EstateGround: grass
+# density, height, dryness and wear; T_EstateCanopy: tree cover), broad colour variation so no two
+# fields match, trodden soil where she and the carts walk, leaf litter and moss under the trees, stony
+# soil on steep banks, and the sward colour at range where the 3D grass has faded out.
+GROUND = '/Game/SurvivalGame/Estate/Ground'
+FINISH_HLSL = """
+float4 gd = GroundTex;                     // R density, G height, B dryness, A wear (sampled in the graph)
+float canopy = Canopy;
+float dist = D * 0.01;
+float3 n = normalize(NIn);
+float3 col = BC;
+float rough = R;
+
+// Broad variation: 25 m and 110 m blotches of richer and paler green, and warmer, drier swales.
+float v1 = Macro1 - 0.5, v2 = Macro2 - 0.5;
+float grassy = saturate(gd.r * 1.4);
+col *= 1.0 + v1 * 0.34 + v2 * 0.26;
+col = lerp(col, col * float3(1.12, 1.02, 0.78), saturate(v2 * 1.6 + 0.2) * grassy * 0.5);
+
+// Dry grass (south slopes, the moor edges): towards straw.
+col = lerp(col, col * float3(1.35, 1.12, 0.62), gd.b * grassy * 0.55);
+
+// Where 3D blades grow, the ground between them is the sward's shaded base; past their fade it takes
+// on the blades' own colour so the meadow doesn't change colour where the grass mesh ends.
+float3 sward = lerp(SwardNear.rgb, SwardFar.rgb, smoothstep(10.0, 42.0, dist)) * (1.0 + v1 * 0.45 + v2 * 0.3);
+sward = lerp(sward, sward * float3(1.7, 1.25, 0.55), gd.b * 0.7);
+col = lerp(col, sward, gd.r * SwardMix);
+rough = lerp(rough, 0.85, gd.r * 0.6);
+
+// Trodden soil with tufts (grass_path_2): the manor's approach, road shoulders, working sites.
+float wear = saturate(gd.a * 1.25) * (0.8 + 0.4 * Macro1);
+col = lerp(col, WearD * Tints[0].rgb, wear);
+n = normalize(lerp(n, WearN, wear));
+rough = lerp(rough, WearR, wear);
+
+// Leaf litter and moss under the canopy: darker, browner, damp, with moss where it's thickest.
+float moss = saturate((Macro1 - 0.45) * 3.0) * canopy;
+float3 litter = lerp(LitterD * Tints[1].rgb, LitterD * Tints[2].rgb, moss);
+col = lerp(col, litter, canopy * 0.85);
+rough = lerp(rough, 0.72, canopy * 0.6);
+n = normalize(lerp(n, LitterN, canopy * 0.7));
+
+// Stony soil on steep banks that aren't painted cliff (baked from the slope): rocky_trail.
+float steep = Stony;
+col = lerp(col, RockD * Tints[3].rgb, steep * 0.8);
+n = normalize(lerp(n, RockN, steep * 0.8));
+rough = lerp(rough, RockR, steep * 0.8);
+
+NormalOut = n;
+RoughOut = rough;
+#if GROUND_DEBUG
+return float3(steep, wear, canopy);
+#endif
+return col;
+"""
+import os as _os
+if _os.environ.get("GROUND_DEBUG"):
+    FINISH_HLSL = "#define GROUND_DEBUG 1\n" + FINISH_HLSL
+
+
+def ground_finish(bc, nm, rg, y0):
+    def tex(path, x, y, kind, uvs, clamp=False):
+        t = MEL.create_material_expression(mat, unreal.MaterialExpressionTextureSample, x, y)
+        t.set_editor_property('texture', unreal.load_asset(path))
+        t.set_editor_property('sampler_type', kind)
+        t.set_editor_property('sampler_source', unreal.SamplerSourceMode.SSM_CLAMP_WORLD_GROUP_SETTINGS if clamp
+                              else unreal.SamplerSourceMode.SSM_WRAP_WORLD_GROUP_SETTINGS)
+        MEL.connect_material_expressions(uvs, '', t, 'UVs')
+        return t
+
+    ST = unreal.MaterialSamplerType
+    wp = MEL.create_material_expression(mat, unreal.MaterialExpressionWorldPosition, -1600, y0)
+    xy = MEL.create_material_expression(mat, unreal.MaterialExpressionComponentMask, -1500, y0)
+    xy.set_editor_property('r', True); xy.set_editor_property('g', True)
+    MEL.connect_material_expressions(wp, '', xy, '')
+
+    def scaled(metres, x, y, offset=0.0):
+        d = MEL.create_material_expression(mat, unreal.MaterialExpressionDivide, x, y)
+        d.set_editor_property('const_b', metres * 100.0)
+        MEL.connect_material_expressions(xy, '', d, 'A')
+        if not offset:
+            return d
+        a = MEL.create_material_expression(mat, unreal.MaterialExpressionAdd, x + 80, y)
+        a.set_editor_property('const_b', offset)
+        MEL.connect_material_expressions(d, '', a, 'A')
+        return a
+
+    map_uv = MEL.create_material_expression(mat, unreal.MaterialExpressionAdd, -1400, y0 + 60)
+    map_uv.set_editor_property('const_b', 201600.0)
+    MEL.connect_material_expressions(xy, '', map_uv, 'A')
+    map_uv2 = MEL.create_material_expression(mat, unreal.MaterialExpressionDivide, -1320, y0 + 60)
+    map_uv2.set_editor_property('const_b', 403200.0)
+    MEL.connect_material_expressions(map_uv, '', map_uv2, 'A')
+
+    y = y0 + 150
+    ground = tex(f'{GROUND}/T_EstateGround', -1100, y, ST.SAMPLERTYPE_LINEAR_COLOR, map_uv2, True)
+    canopy = tex(f'{GROUND}/T_EstateCanopy', -1100, y + 60, ST.SAMPLERTYPE_LINEAR_COLOR, map_uv2, True)
+    macro1 = tex(f'{GROUND}/T_GrassWind', -1100, y + 120, ST.SAMPLERTYPE_LINEAR_GRAYSCALE, scaled(25.0, -1300, y + 120))
+    macro2 = tex(f'{GROUND}/T_GrassWind', -1100, y + 180, ST.SAMPLERTYPE_LINEAR_GRAYSCALE, scaled(110.0, -1300, y + 180, 0.37))
+    wuv = scaled(3.2, -1300, y + 260)
+    wear_d = tex(f'{GROUND}/T_Ground_Trodden_D', -1100, y + 240, ST.SAMPLERTYPE_COLOR, wuv)
+    wear_n = tex(f'{GROUND}/T_Ground_Trodden_N', -1100, y + 300, ST.SAMPLERTYPE_NORMAL, wuv)
+    wear_r = tex(f'{GROUND}/T_Ground_Trodden_R', -1100, y + 360, ST.SAMPLERTYPE_MASKS, wuv)
+    luv = scaled(4.0, -1300, y + 420)
+    litter_d = tex(texture('WoodlandFloor', 'D').get_path_name(), -1100, y + 420, ST.SAMPLERTYPE_COLOR, luv)
+    litter_n = tex(texture('WoodlandFloor', 'N').get_path_name(), -1100, y + 480, ST.SAMPLERTYPE_NORMAL, luv)
+    ruv = scaled(4.5, -1300, y + 560)
+    rock_d = tex(f'{GROUND}/T_Ground_Stony_D', -1100, y + 540, ST.SAMPLERTYPE_COLOR, ruv)
+    rock_n = tex(f'{GROUND}/T_Ground_Stony_N', -1100, y + 600, ST.SAMPLERTYPE_NORMAL, ruv)
+    rock_r = tex(f'{GROUND}/T_Ground_Stony_R', -1100, y + 660, ST.SAMPLERTYPE_MASKS, ruv)
+    depth = MEL.create_material_expression(mat, unreal.MaterialExpressionPixelDepth, -1100, y + 780)
+
+    def vec(name, value, yy):
+        v = MEL.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -800, yy)
+        v.set_editor_property('parameter_name', name)
+        v.set_editor_property('default_value', unreal.LinearColor(*value, 1.0))
+        v.set_editor_property('group', 'Ground')
+        return v
+
+    def scal(name, value, yy):
+        v = MEL.create_material_expression(mat, unreal.MaterialExpressionScalarParameter, -800, yy)
+        v.set_editor_property('parameter_name', name)
+        v.set_editor_property('default_value', value)
+        v.set_editor_property('group', 'Ground')
+        return v
+
+    sward_near = vec('SwardNear', (0.03, 0.055, 0.018), y + 820)
+    sward_far = vec('SwardFar', (0.036, 0.066, 0.02), y + 880)
+    tints = [vec('TintTrodden', (0.85, 0.8, 0.72), y + 940), vec('TintLitter', (0.4, 0.36, 0.3), y + 1000),
+             vec('TintMoss', (0.42, 0.62, 0.3), y + 1060), vec('TintStony', (0.78, 0.74, 0.68), y + 1120)]
+
+    c = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, -300, y0 + 300)
+    code = FINISH_HLSL.replace('Tints[0]', 'T0').replace('Tints[1]', 'T1').replace('Tints[2]', 'T2').replace('Tints[3]', 'T3')
+    c.set_editor_property('code', code)
+    c.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    c.set_editor_property('description', 'GroundFinish')
+    inputs = [('BC', bc, ''), ('NIn', nm, ''), ('R', rg, ''), ('WP', wp, ''), ('D', depth, ''),
+              ('GroundTex', ground, 'RGBA'), ('Canopy', canopy, 'R'), ('Stony', canopy, 'G'), ('Macro1', macro1, 'R'), ('Macro2', macro2, 'R'),
+              ('WearD', wear_d, 'RGB'), ('WearN', wear_n, 'RGB'), ('WearR', wear_r, 'R'),
+              ('LitterD', litter_d, 'RGB'), ('LitterN', litter_n, 'RGB'),
+              ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),
+              ('SwardNear', sward_near, 'RGB'), ('SwardFar', sward_far, 'RGB'),
+              ('SwardMix', scal('SwardMix', 0.8, y + 1180), ''),
+              ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB')]
+    ins = []
+    for name, *_ in inputs:
+        ci = unreal.CustomInput(); ci.set_editor_property('input_name', name); ins.append(ci)
+    c.set_editor_property('inputs', ins)
+    outs = []
+    for name, kind in (('NormalOut', unreal.CustomMaterialOutputType.CMOT_FLOAT3), ('RoughOut', unreal.CustomMaterialOutputType.CMOT_FLOAT1)):
+        o = unreal.CustomOutput(); o.set_editor_property('output_name', name); o.set_editor_property('output_type', kind); outs.append(o)
+    c.set_editor_property('additional_outputs', outs)
+    for name, src, out in inputs:
+        if not MEL.connect_material_expressions(src, out, c, name):
+            raise RuntimeError(f'GroundFinish: could not wire {name}')
+    return c
+
 coords = {}
 def uv(scale):
     if scale not in coords:
@@ -66,6 +227,14 @@ def sample(layer, slot, scale, x, y, kind):
     MEL.connect_material_expressions(uv(scale), '', t, 'UVs')
     return t
 
+# Near detail fades into the 4.3x macro sample with distance, so the 3-8 m tiling is gone by 30-60 m.
+depth = MEL.create_material_expression(mat, unreal.MaterialExpressionPixelDepth, -1600, -1300)
+far_mix = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, -1400, -1300)
+far_mix.set_editor_property('code', 'return lerp(0.22, 0.85, smoothstep(1200.0, 7000.0, D));')
+far_mix.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+_ci = unreal.CustomInput(); _ci.set_editor_property('input_name', 'D'); far_mix.set_editor_property('inputs', [_ci])
+MEL.connect_material_expressions(depth, '', far_mix, 'D')
+
 y = -900
 colour, rough = {}, {}
 for n in LAYERS:
@@ -73,9 +242,9 @@ for n in LAYERS:
     near = sample(n, 'D', s, -1200, y, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     far = sample(n, 'D', s * 4.3, -1200, y + 60, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     lerp = MEL.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -800, y)
-    lerp.set_editor_property('const_alpha', 0.35)
     MEL.connect_material_expressions(near, 'RGB', lerp, 'A')
     MEL.connect_material_expressions(far, 'RGB', lerp, 'B')
+    MEL.connect_material_expressions(far_mix, '', lerp, 'Alpha')
     tint = MEL.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -650, y)
     tint.set_editor_property('parameter_name', 'Tint_' + n)
     tint.set_editor_property('default_value', unreal.LinearColor(*TINT[n], 1.0))
@@ -139,9 +308,10 @@ else:
 for n in LAYERS:
     MEL.connect_material_expressions(colour[n][0], colour[n][1], bc, 'Layer ' + n)
     MEL.connect_material_expressions(rough[n][0], rough[n][1], rg, 'Layer ' + n)
-MEL.connect_material_property(bc, '', unreal.MaterialProperty.MP_BASE_COLOR)
-MEL.connect_material_property(nm, '', unreal.MaterialProperty.MP_NORMAL)
-MEL.connect_material_property(rg, '', unreal.MaterialProperty.MP_ROUGHNESS)
+finish = ground_finish(bc, nm, rg, y)
+MEL.connect_material_property(finish, '', unreal.MaterialProperty.MP_BASE_COLOR)
+MEL.connect_material_property(finish, 'NormalOut', unreal.MaterialProperty.MP_NORMAL)
+MEL.connect_material_property(finish, 'RoughOut', unreal.MaterialProperty.MP_ROUGHNESS)
 # Runtime grass: the landscape scatters these around the camera wherever the layer is painted.
 GRASS = {
     'Pasture': [('/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_mid_b', 45.0, 0.8, 1.25),
