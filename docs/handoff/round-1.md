@@ -75,9 +75,6 @@ manor and boundary lanes haven't merged yet.
 
 ## Pending doc updates on merge
 
-- Estate boundary lane: the field book gains a Map tab (page 7, `M` opens it directly). Once it's on
-  `main`, update the `FieldBookPages` cycle in skill section 4 "Field book" to 0 Inventory, 1 Craft,
-  2 Build, 7 Map, 3 Guidebook, 6 Appearance (Settings stays outside the cycle). The docs agent does this.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. On the fixed estate
   the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. When it merges,
   update the skill's starter-kit, hotbar and energy notes in section 4 (they still describe the

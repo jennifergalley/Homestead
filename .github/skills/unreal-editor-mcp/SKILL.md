@@ -345,7 +345,8 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 
 - Menu (or Escape) opens the book on **Settings** (page 4), which has no tab bar and isn't in the
   LB/RB cycle. LB/RB cycle the tabs `FieldBookPages` (`HomesteadController.cpp`): 0 Inventory,
-  1 Craft, 2 Build, 3 Guidebook, 6 Appearance, wrapping (`I` opens Inventory directly).
+  1 Craft, 2 Build, 7 Map, 3 Guidebook, 6 Appearance, wrapping (`I` opens Inventory and `M` opens
+  the Map directly).
   Loop LB until `st().bookPage` is the page you want. B closes/backs out.
 - **Settings** is a centred single column: Resume (focused on open), a top row Save | Load latest
   save | Quit game, Game/Sound/Video tabs, then the current tab's list. D-pad Down from Resume
