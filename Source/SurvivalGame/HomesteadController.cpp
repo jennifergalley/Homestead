@@ -2815,6 +2815,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({6, TEXT("Complete credits"), TEXT("See docs/asset-credits.md in the project or packaged build.")});
         Result.Add({7, TEXT("Interaction and footstep sounds"), TEXT("Kenney - Impact Sounds and Interface Sounds - CC0")});
         Result.Add({8, TEXT("Character foundation"), TEXT("MakeHuman Community / MPFB graphical assets - CC0; original outfit and motion.")});
+        Result.Add({9, TEXT("Estate terrain"), TEXT("Reshaped from Environment Agency LIDAR. Contains Environment Agency information \u00A9 Environment Agency and/or database right 2022, licensed under the Open Government Licence v3.0.")});
     }
     return Result;
 }

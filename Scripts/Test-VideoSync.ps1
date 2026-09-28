@@ -10,7 +10,7 @@ if(($Width -eq 1280) -ne ($Height -eq 720)){throw 'Use matching720p or4K dimensi
 if($Packaged) {
     $working=& (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
     $exe=Join-Path $working 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
-    $prefix=''
+    $prefix='/Game/SurvivalGame/Maps/Homestead '
 } else {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $working=$root

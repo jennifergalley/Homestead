@@ -64,7 +64,7 @@ if($Packaged) {
     $packageRoot=$package.packageDirectory
     $executable=$package.executable
     if(($package.configuration -eq 'Shipping') -ne [bool]$ShippingQA){throw 'Shipping automated capture requires explicit -ShippingQA; it is not a Development override.'}
-    $prefix=''
+    $prefix='/Game/SurvivalGame/Maps/Homestead '
     $workingDirectory=$packageRoot
 } else {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot

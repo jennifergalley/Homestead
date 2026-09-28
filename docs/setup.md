@@ -86,7 +86,11 @@ Development tools.
 3. Run `Scripts\Test-Game.ps1` for actual engine input/gameplay/save integration
    checks and rendered captures. The harness uses `Saved\Automation\SmokeSave`
    rather than normal saves; previous reports/images are archived before a run.
-4. Run `Scripts\Start-Game.ps1` for standalone gameplay through the engine.
+4. Run `Scripts\Start-Game.ps1` for standalone gameplay through the engine. It opens the Estate,
+   which is now the game and editor default map. The packaged test and playtest scripts
+   (`Test-Game`, `Playtest-Visual`, `Test-CameraPreferences`, `Test-PreviewSaves`,
+   `Test-VideoSync`) still pass `/Game/SurvivalGame/Maps/Homestead` explicitly, so their woodland
+   suites keep running until each is retargeted to the Estate.
 5. Run `Scripts\Build-Game.ps1 -Package` for a standalone Windows distribution.
    In multi-session rounds only the orchestrator packages (`docs\handoff\README.md`).
    For autonomous work, use `-ArchiveDirectory 'Build\Releases\<candidate>'` to

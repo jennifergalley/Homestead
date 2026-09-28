@@ -112,7 +112,8 @@ if ($Packaged) {
         }
     }
     $output = Join-Path $output 'Packaged'
-    $prefix = ''
+    # The default map is the Estate; these suites still run on the woodland map until each is retargeted.
+    $prefix = '/Game/SurvivalGame/Maps/Homestead '
 } else {
     $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $map = Join-Path $root 'Content\SurvivalGame\Maps\Homestead.umap'
