@@ -270,7 +270,8 @@ materials with no scanned or downloaded geometry or textures: the Billhook (`Scr
 the spring BrambleOvergrowth set (thin bramble, thicket and bank, `Scripts\Blender\Recipes\bramble_overgrowth.py`, built
 with `blackberry_bramble.py`'s plant and atlas with its fruiting switched off), the EstateTimber set (small, large
 and ancient stumps, a fallen log, a giant log and a fallen bough, `Scripts\Blender\Recipes\estate_timber.py`), the
-Pickaxe (`Scripts\Blender\Recipes\pickaxe.py`) and the Scythe (`Scripts\Blender\Recipes\scythe.py`). Their review renders use the same CC0
+Pickaxe (`Scripts\Blender\Recipes\pickaxe.py`), the Scythe (`Scripts\Blender\Recipes\scythe.py`), the restyled
+EstateAxe (`Scripts\Blender\Recipes\estate_axe.py`) and the swan-neck DrawHoe (`Scripts\Blender\Recipes\draw_hoe.py`). Their review renders use the same CC0
 Kloofendal HDRI, which ships with no asset.
 
 ## Estate terrain and ground textures

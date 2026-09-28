@@ -524,11 +524,25 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     // The digging stick's pivot is its upper grip with the point toward -Z; she trail-carries it at
     // the balance point instead, point forward and down, the way a spear or staff is carried.
     const FTransform StickTrail(FQuat(FVector::XAxisVector, PI), FVector(0, 0, -25));
+    // SM_Scythe (scythe.py): pivot at the lower nib's grip, snath +Z, the snath itself 13 cm along +Y
+    // from that grip, blade +X from the heel. In the grip frame the handle runs along +Z (pinky to
+    // index, forward in a hanging hand), +Y is back toward the wrist and +X points out to her right,
+    // so the snath goes along the fist tipped 25 degrees up and 15 degrees in (its trailing end
+    // clears her legs), and the blade reaches out along +X.
+    const FQuat ScytheTurn = FRotationMatrix::MakeFromXZ(FVector(1, 0, 0),
+        FVector(-FMath::Sin(FMath::DegreesToRadians(15.0f)), FMath::Sin(FMath::DegreesToRadians(25.0f)),
+            FMath::Cos(FMath::DegreesToRadians(25.0f)))).ToQuat();
+    const FTransform ScytheTrail(ScytheTurn, -ScytheTurn.RotateVector(FVector(-2, 13, -15)));
     const FHeldToolAsset Assets[] = {
         {Homestead::Item::Knife, TEXT("FlintKnife/SM_FlintKnife"), 30, false, FTransform::Identity},
+        // The estate axe (estate_axe.py) and draw hoe (draw_hoe.py) are authored in the flint hatchet's
+        // and stone hoe's frames, so the felling, strike and tilling clips fit them unchanged; the
+        // flint originals remain as fallbacks.
+        {Homestead::Item::Hatchet, TEXT("EstateAxe/SM_EstateAxe"), 20, false, FTransform::Identity},
         {Homestead::Item::Hatchet, TEXT("FlintHatchet/SM_FlintHatchet"), 20, false, FTransform::Identity},
         // Tools ride nearly level in a relaxed hand, heads a little low. The stone hoe (blade at the
         // far end) is carried out in front from the top of its haft; the digging stick is the fallback.
+        {Homestead::Item::DiggingStick, TEXT("DrawHoe/SM_DrawHoe"), 24, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 24, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
         {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
@@ -537,10 +551,10 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         // The pick shares the hatchet's frame (knob grip pivot, head +Z, point -Y). Carried one-handed
         // she holds it partway up the haft, near its balance, head forward and low.
         {Homestead::Item::Pickaxe, TEXT("Pickaxe/SM_Pickaxe"), 20, false, FTransform(FVector(0, 0, -34))},
-        // The scythe is carried by the snath at its balance below the lower nib, the heel and blade
-        // forward and low with the blade turned out away from her, the snath's top end trailing.
-        {Homestead::Item::Scythe, TEXT("Scythe/SM_Scythe"), 26, false,
-            FTransform(FQuat(FVector::YAxisVector, PI), FVector(0, -16, -30))},
+        // The scythe is carried at the trail by its snath, gripped at the balance 15 cm below the lower
+        // nib: the snath runs through her fist with its top end forward and up, and the blade trails
+        // behind her at knee height, out to her right.
+        {Homestead::Item::Scythe, TEXT("Scythe/SM_Scythe"), RestWristDegrees, false, ScytheTrail},
     };
     for (const FHeldToolAsset& Asset : Assets)
     {
@@ -1706,7 +1720,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         if (!Held) continue;
         Grip = 1;
         const bool StoneHoe = Spec.Tool == Homestead::Item::DiggingStick && Prop->GetStaticMesh()
-            && Prop->GetStaticMesh()->GetName() == TEXT("SM_StoneHoe");
+            && (Prop->GetStaticMesh()->GetName() == TEXT("SM_DrawHoe") || Prop->GetStaticMesh()->GetName() == TEXT("SM_StoneHoe"));
         const float Tuned = Spec.Tool == Homestead::Item::Hatchet ? CVarCarryHatchet.GetValueOnGameThread()
             : Spec.Tool == Homestead::Item::Knife ? CVarCarryKnife.GetValueOnGameThread()
             : StoneHoe ? CVarCarryHoe.GetValueOnGameThread() : -1.0f;
