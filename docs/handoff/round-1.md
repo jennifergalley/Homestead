@@ -63,10 +63,11 @@ manor and boundary lanes haven't merged yet.
   restoring an earlier `SavedViewRotation`. Being fixed on the manor lane.
 
 - **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
-  UBT `ConflictingInstance`): `Build-Game.ps1` now builds the game target with `-WaitMutex`, cooks
-  with `-SkipZenStore`, and waits for UAT (`cdbd249f`); the orchestrator has adopted it. Not yet verified by a full package
-  on `main`; the MVP lane runs the same fix on its branch. Only the orchestrator packages now, so
-  the collisions shouldn't recur within round 1.
+  UBT `ConflictingInstance`): resolved. `Build-Game.ps1` builds the game target with `-WaitMutex`,
+  cooks with `-SkipZenStore`, and waits for UAT (`cdbd249f`). Verified 2026-09-27 17:30 by the MVP
+  lane: `-PackageOnly` packaged successfully (BuildCookRun 200 s, UAT about 6 min) and the packaged
+  smoke, NativeMenu, Hotbar and FullLoop suites passed. The orchestrator has adopted it, and only the
+  orchestrator packages now.
 - **Blender prop import** needs a free editor slot (3-process limit). Props are imported in a
   running editor via `run_python`, not the headless script.
 
