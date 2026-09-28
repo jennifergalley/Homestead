@@ -50,7 +50,13 @@ rules for editors, ports and builds are in section 0 of `.github\skills\unreal-e
 - **Close your editor before `pull`/`rebase`.** It holds `.uasset`/`.umap` files open, and git fails
   with `unable to unlink ... Invalid argument`.
 - **Don't `git stash -u`** while a sub-agent may be writing files in the worktree; it sweeps up
-  their new files. Use `--autostash`, which only stashes tracked changes.
+  their new files. Use `--autostash`, which only stashes tracked changes. If you can't rebase in
+  place because another process is writing there, rebase in a temporary worktree and move your
+  branch to it:
+  `git worktree add E:\Repos\copilot-worktrees\SurvivalGame\tmp-rebase -b tmp-rebase HEAD`, run
+  `git -C <tmp> rebase origin/main`, then in the real worktree `git reset --keep tmp-rebase` (this
+  refuses if your dirty files overlap), and finally `git worktree remove` the temporary one and delete
+  the `tmp-rebase` branch.
 - **Only commit your own assets.** The editor dirties shared maps (`Estate.umap`,
   `__ExternalObjects__`) and probe content (`Content/Trials/Probe/`); leave those out unless your
   lane owns them.

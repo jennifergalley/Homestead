@@ -154,6 +154,11 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 | That World Partition cell isn't loaded in the editor | Load the region first. In game, `GroundHeight()` uses the runtime heightfield everywhere. |
 | `Test-Game.ps1` runs only the default smoke test, or errors "Generated resume requires..." | Switches passed as an array or as empty strings | Use a hashtable splat: `$p=@{Packaged=$true; Hotbar=$true}; .\Scripts\Test-Game.ps1 @p`. |
 | `tap_key` letters type nothing into a text box (for example the Names card); BackSpace works | `HomesteadPlayTools` sends key events through `InputKey`, which produces no character events for Slate text boxes | Use real Win32 keys: bring the editor's main window forward (the Alt `keybd_event` trick, as in `click`), then send `keybd_event` VK codes, with Shift for capitals. |
+| Slate Inspector `Snapshot` returns nothing useful, non-JSON, or refs that don't match last run | It needs `{"ref":"","maxDepth":60}` and a prior `Observe`; output is occasionally malformed; widget refs (`b30`, `b97`...) change between runs | Observe first, retry on non-JSON, and look refs up by name each run rather than hard-coding them. |
+| Clicking a button in a custom Slate panel breaks Tab or typing (Tab runs Slate navigation, keys go to the old row) | `SButton`s take keyboard focus on click | Give such buttons `.IsFocusable(false)`. |
+| UI is double-scaled at 4K but fine in PIE | The engine DPI curve (`bAllowHighDPIInGameMode`) already scales viewport widgets, so an extra height/1080 `SScaleBox` doubles them | Don't add your own resolution scaling. Check real resolutions in a standalone window (section 8), because PIE at editor size hides it. |
+| A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
+| A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
 | A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
@@ -265,7 +270,8 @@ hk release_all; mcp $E StopPIE
   for a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
   until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
   captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
-  failed save. **Packaged Estate runs resume too:** after the first run the build loads its own
+  failed save. Text in a `.sav` (such as the save label) is UTF-16, so search it with
+  `[Text.Encoding]::Unicode`, not as ASCII. **Packaged Estate runs resume too:** after the first run the build loads its own
   estate save (inside the package's `SurvivalGame\Saved\SaveGames`), so the Appearance → Names setup
   only shows on the first run. Move that save aside to see it again. On a resumed game, Enter by the
   hearth opens Cook (the Craft page). Code written for the woodland can still assume woodland heights (estate ground is
@@ -310,6 +316,8 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - **Focus is the nearest interactable within 2.8 m, regardless of facing** (`UpdateFocus`). To target
   a node, get closer to it than to anything else: `walk_to` with `stop_distance_cm` about 45, then
   confirm `nearbyResources[].focused` on your target before pressing the action.
+- `walk_to` reports `arrived` about 150 cm short of the target and stops in doorways; check
+  `location` and walk again, or finish with a short `set_sticks`.
 - Trees block movement, so `walk_to` a tree usually ends `stuck` at the trunk. That's fine if the
   tree is `focused`.
 - Depleted nodes stay focusable with no actions (`cleared: false`, `ready: false`) and can steal focus.
@@ -414,8 +422,8 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   (`Eat 1`, `Drop 1`, `Move to chest N`, ...). X splits in half, S sorts. RT cycles content and
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
 - **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
-  doesn't). The details list requirements. Crafting is **hold A**
-  (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
+  doesn't). The details list requirements. Crafting is **press and hold**; a tap does nothing
+  (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard).
 - **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
   Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
   *last* page (often Inventory), so close it fully (loop Escape until `bookOpen` and `planning`
@@ -720,6 +728,13 @@ Extend it there when play needs a capability; prefer real input over state edits
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
   processes from that folder first (for Jenny's builds, see sections 0 and 7).
+- **UI at real resolutions and DPI (standalone window, not PIE):** launch
+  `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
+  -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720), wait for `MUSIC_TRACK started` in that log
+  plus about 20 s, then dot-source `Scripts\GameWindow.ps1`: `Find-GameWindow -ProcessId <pid>`,
+  `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
+  and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 3-process limit; close it
+  by PID. This isn't packaging, so lanes may run it.
 - **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
