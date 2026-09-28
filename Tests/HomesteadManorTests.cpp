@@ -67,7 +67,7 @@ void SeededStandingRoom()
     Simulation sim = NewEstate();
     const State& state = sim.GetState();
     CHECK(sim.DayNumber() == 1 && std::string(sim.SeasonName()) == "Spring" && state.hour == 6.0);
-    CHECK(state.heroineName == "Eleanor" && state.familyName == "Trelawney" && state.estateName == "Trevennor");
+    CHECK(state.heroineName == "Eleanor" && state.familyName == "Cavendish" && state.estateName == "Trevennor");
     CHECK(sim.EstateName() == "Trevennor");
     CHECK(state.buildings.size() == 1);
     const int room = Manor::HeritageBuildingId(state);

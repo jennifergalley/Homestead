@@ -14,7 +14,7 @@ For testing UI at real resolutions and DPI, which PIE at editor size hides:
     [GameWin]::Capture($h, "$PWD\Saved\ui-4k-names.png")                   # PrintWindow, DPI-aware
 
 PostMessage reaches the game where SetForegroundWindow/SendInput don't (the Copilot app keeps focus),
-and the standalone game counts toward the machine's 3-Unreal-process limit. Close it by PID when done.
+and the standalone game counts toward the machine's 2-Unreal-process limit. Close it by PID when done.
 Contributed by the ruined-manor lane.
 #>
 if (-not ('GameWin' -as [type])) {

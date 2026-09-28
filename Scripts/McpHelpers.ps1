@@ -14,7 +14,8 @@ Functions:
     py <code> [timeout]                    run_python (needs Start-EditorMcp.ps1 -AllowPython); returns output text
     con <command>                          console command in PIE (or the editor world), with the player controller
     shot                                   CaptureEditorImage; returns the PNG path (can fail: "Failed to capture any editor windows")
-    hshot [WxH]                            HighResShot in PIE; returns the new Saved\Screenshots\WindowsEditor PNG path (more reliable)
+    hshot [WxH]                            HighResShot in PIE; returns the new Saved\Screenshots\WindowsEditor PNG path. The 3D view and
+                                           Canvas HUD only: Slate widgets (hotbar, vitals, field book) are missing; use shot for UI
     pie / unpie                            start PIE in the viewport / stop it (then poll st for worldReady)
     quit                                   stop PIE and quit the editor cleanly (releases DLL and .uasset locks)
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)

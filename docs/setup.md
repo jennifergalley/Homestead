@@ -61,7 +61,7 @@ The final heroine pipeline remains a separate feasibility/visual approval step.
 
 **Several agent sessions share this machine.** Read `docs\handoff\README.md` and section 0
 ("Shared-machine rules") of `.github\skills\unreal-editor-mcp\SKILL.md` before building, launching
-an editor or packaging. In short: at most 3 Unreal processes in total, one MCP port per worktree,
+an editor or packaging. In short: at most 2 Unreal processes in total, one MCP port per worktree,
 and close your editor before building or rebasing. Failures and their fixes are in that skill's
 table 0.1.
 
