@@ -73,6 +73,11 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
   Scripts that refuse to run while any Unreal process exists (`Invoke-ShippingQA.ps1`,
   `Test-AuthoringSettings.ps1`) need an idle machine; coordinate through the orchestrator.
+- **Nothing that pops up on Jenny's desktop.** Don't use `startfpschart`/`stopfpschart`: every dump
+  opens an Explorer window on `Saved\Profiling\FPSChartStats\<timestamp>`, and she asked us to stop.
+  For frame times, use `stat unit` / `ProfileGPU` output from the log, or `Playtest-Visual.ps1
+  -PresentationDiagnostics` and csvprofile (section 9). If you really need an FPS chart, set
+  `t.FPSChart.OpenFolderOnDump 0` first (`ChartCreation.cpp`).
 - **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
   `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
   fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
@@ -189,6 +194,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | After `BugItGo` she walks through walls and counters, sinks knee-deep into floors, or, holding W, flies level and goes under the terrain where the road climbs, so "Recovered the character above the generated terrain" fires over and over (looks like missing landscape collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`): flying, no collision | Send `Walk` straight after every `BugItGo`, including in scripted walk drivers. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
+| An Explorer window pops up on Jenny's desktop during a perf run | `startfpschart`/`stopfpschart` opens the `Saved\Profiling\FPSChartStats\<timestamp>` folder on every dump (`t.FPSChart.OpenFolderOnDump`, default on) | Don't use FPS charts; use `stat unit` / `ProfileGPU` log output or csvprofile. If you must, set `t.FPSChart.OpenFolderOnDump 0` first. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
 | `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
 
