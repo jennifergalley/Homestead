@@ -73,6 +73,15 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
   Scripts that refuse to run while any Unreal process exists (`Invoke-ShippingQA.ps1`,
   `Test-AuthoringSettings.ps1`) need an idle machine; coordinate through the orchestrator.
+- **Perf and frame-rate measurements need the machine to yourself** (Jenny, 2026-09-28): only ONE
+  Unreal process (the one you measure) and no UBT/`cl.exe` builds. With several editors and builds
+  running, readings swung about 5x (render thread 20 ms vs 97-118 ms). Before measuring, run
+  `Scripts\Start-PerfWindow.ps1 -Purpose '<what>'` (add `-ProcessId <pid>` for a standalone game you
+  launched). It refuses, naming every other Unreal process and build, unless yours is the only one,
+  and then writes `E:\CopilotScratch\homestead-perf.lock`. While that lock is under 20 minutes old,
+  `Start-EditorMcp.ps1` in other worktrees refuses to launch. Ask owners with `mailbox_send` to close or
+  pause, and run `Scripts\Stop-PerfWindow.ps1` as soon as you're done. Don't build while someone
+  else holds the window.
 - **Nothing that pops up on Jenny's desktop.** Don't use `startfpschart`/`stopfpschart`: every dump
   opens an Explorer window on `Saved\Profiling\FPSChartStats\<timestamp>`, and she asked us to stop.
   For frame times, use `stat unit` / `ProfileGPU` output from the log, or `Playtest-Visual.ps1
@@ -195,6 +204,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | After `BugItGo` she walks through walls and counters, sinks knee-deep into floors, or, holding W, flies level and goes under the terrain where the road climbs, so "Recovered the character above the generated terrain" fires over and over (looks like missing landscape collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`): flying, no collision | Send `Walk` straight after every `BugItGo`, including in scripted walk drivers. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
 | An Explorer window pops up on Jenny's desktop during a perf run | `startfpschart`/`stopfpschart` opens the `Saved\Profiling\FPSChartStats\<timestamp>` folder on every dump (`t.FPSChart.OpenFolderOnDump`, default on) | Don't use FPS charts; use `stat unit` / `ProfileGPU` log output or csvprofile. If you must, set `t.FPSChart.OpenFolderOnDump 0` first. |
+| Frame times swing wildly between runs (for example render thread 20 ms vs 97-118 ms) | Other editors or UBT/`cl.exe` builds were running | Measure only inside a perf window: `Start-PerfWindow.ps1` checks one Unreal process and no builds, and holds off other launches. |
+| `Start-EditorMcp.ps1`: "Perf window held by <worktree>" | Another session is measuring performance (`E:\CopilotScratch\homestead-perf.lock`, under 20 min old) | Wait for its `Stop-PerfWindow.ps1` or for the lock to go stale (20 min). `-Force` overrides; don't use it just to skip the wait. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
 | `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
 
@@ -799,6 +810,8 @@ Extend it there when play needs a capability; prefer real input over state edits
   fix this file.
 - Record game bugs you find while playing as OpenSpec changes in `openspec/changes` (repo
   convention; not GitHub issues). The 2026-09-25 findings live in `fix-editor-playtest-findings`.
+- Measure only inside a perf window (section 0: one Unreal process, no builds, `Start-PerfWindow.ps1`);
+  numbers taken alongside other editors or builds aren't comparable.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
   performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
   -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over
