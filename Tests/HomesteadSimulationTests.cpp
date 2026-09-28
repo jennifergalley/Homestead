@@ -2870,7 +2870,7 @@ void OvergrowthTableAndPrompts()
     const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
     const Point roomCentre = layout.PointOr(Anchor::StandingRoomOrigin, {});
     const Point frontDoor = EstateManorFrontDoor(layout);
-    int overgrowth = 0, salvage = 0, doorway = 0, teases = 0;
+    int overgrowth = 0, salvage = 0, doorway = 0, rearGap = 0, teases = 0;
     double nearestSalvage = 1e9;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
@@ -2887,10 +2887,12 @@ void OvergrowthTableAndPrompts()
         }
         doorway += placement.kind == ResourceKind::BrambleThin && placement.position.x < frontDoor.x
             && std::hypot(placement.position.x - frontDoor.x, placement.position.y - frontDoor.y) < 900.0;
+        rearGap += placement.kind == ResourceKind::BrambleThin && placement.position.x > -24100.0
+            && std::hypot(placement.position.x + 24100.0, placement.position.y + 65150.0) < 400.0;
         if (placement.id == 520001) CHECK(PointInPolygon(manor, placement.position));
         teases += info && info->minTier > ToolTier::Worn;
     }
-    CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && teases >= 4);
+    CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && rearGap >= 2 && teases >= 4);
     CHECK(nearestSalvage < 700.0);
     Simulation estate;
     OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));

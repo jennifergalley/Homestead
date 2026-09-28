@@ -128,11 +128,11 @@ const EstatePlacements& ProvisionalEstatePlacements()
         {
             grow(kind, heading.x * distance - heading.y * side, heading.y * distance + heading.x * side, minTier);
         };
-        // Thin bramble chokes the gap outside the fallen front door, 10.5 m east of the footprint's
-        // west end, so she meets it before the open pasture. The billhook's salvage pile is indoors.
+        // Thin bramble chokes the 3 m gap outside the fallen front door (Y -65600..-65300), so she
+        // meets it before the open pasture. The billhook's salvage pile is indoors.
         const Point frontDoor = EstateManorFrontDoor();
-        for (const Point p : {Point{-200, 0}, Point{-250, -230}, Point{-250, 250}, Point{-450, -80}, Point{-450, 180},
-                 Point{-650, -250}, Point{-700, 120}})
+        for (const Point p : {Point{-100, 0}, Point{-150, -180}, Point{-150, 180}, Point{-300, -90}, Point{-300, 110},
+                 Point{-480, -190}, Point{-480, 170}})
             grow(ResourceKind::BrambleThin, frontDoor.x + p.x - room.x, frontDoor.y + p.y - room.y);
         // The forecourt is a meadow of tall grass with weeds through it.
         for (int row = 0; row < 4; ++row)
@@ -195,6 +195,10 @@ const EstatePlacements& ProvisionalEstatePlacements()
         grow(ResourceKind::WildDaffodils, 900.0, 2500.0);
         along(ResourceKind::WildGarlic, valley, 4600.0, 1400.0);
         along(ResourceKind::WildGarlic, valley, 7000.0, 1000.0);
+        // Appended so earlier ids stay stable: thin bramble outside the rear (north-wall) gap at
+        // (-24100, -65150), flanking salvage pile 520004 so the pile keeps its own focus.
+        for (const Point at : {Point{-24040, -65290}, Point{-24040, -65010}, Point{-23830, -65020}})
+            place(ResourceKind::BrambleThin, at);
         // Salvage (520000+), placed by add-ruined-manor-and-arrival in and around the ruin. Each pile
         // yields the next rusted head she's missing, so the one just outside the standing room's door
         // gives the billhook. Positions use HomesteadManorRuin's frame: u east from the footprint's
