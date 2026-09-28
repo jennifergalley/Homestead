@@ -32,9 +32,10 @@ task changes; `docs\handoff\README.md`):
 | Farm Agent | `f8b77021` | the derelict farm |
 | Ground Agent, then Sleep Agent | `89914e30` | ground, then the sleep change |
 | Trees Agent | `65a2408b` | trees |
-| Woodland Agent | `fd682909` | the MVP woodland biome |
-| Build Speed Agent | `6e131c6a` | build speed |
+| Woodland Agent (app name still "MVP woodland biome") | `fd682909` | the MVP woodland biome |
+| Build Speed Agent (app name still "Estate boundary and minimap") | `6e131c6a` | build speed |
 | Documentation Agent | `a9f10974` (project session `d99bb15c`) | docs; named by Jenny, so kept |
+| Architecture agent | `a1648ae7` (`jennifergalley-cuddly-invention`) | code steward: `docs\architecture.md`, "Code practices", code-convention skills, safe refactors, batch reviews |
 
 Session IDs are the app's project-session IDs: use them with `send_session_message`. The worktree
 folder name is the session's **mailbox address** for urgent `mailbox_send` messages
