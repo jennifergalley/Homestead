@@ -113,14 +113,17 @@ def import_wave_volume():
 
 PRELUDE = """
 float2 pm = P.xy * 0.01;
+// Two bakes of the same shore data: a fine one over the map's coast and a coarser one that reaches
+// 3 km past the map edge onto the outer land ring. The fine one wins wherever it covers, blending
+// over its last 30 m; beyond the far one the sea is open and deep.
 float2 uv = float2((pm.y - Frame.x) / Frame.y, (Frame.z - pm.x) / Frame.w);
-float2 edge = max(abs(pm) - 2016.0, 0.0);
-// Open sea beyond the map and beyond the baked frame (everything inside the map but outside the frame is land).
-float2 edgeUV = max(max(-uv, uv - 1.0), 0.0) * float2(Frame.y, Frame.w);
-float inMap = saturate(1.0 - max(length(edge), length(edgeUV)) / 300.0);
+float2 uvF = float2((pm.y - Far.x) / Far.y, (Far.z - pm.x) / Far.w);
+float2 insideFine = min(uv, 1.0 - uv) * float2(Frame.y, Frame.w);
+float wFine = saturate(min(insideFine.x, insideFine.y) / 30.0);
+float2 edgeF = max(max(-uvF, uvF - 1.0), 0.0) * float2(Far.y, Far.w);
+float inMap = saturate(1.0 - length(edgeF) / 300.0);
 const float TAU = 6.2831853;
 """
-
 
 def swell_code(evaluate_slope):
     lines = ["float swellH = 0; float2 swellG = 0;"]
@@ -152,9 +155,9 @@ float shoreAmp = ShoreW.x * shoreMask * setEnv * smoothstep(8.0, 2.0, depth) * (
 """
 
 VERTEX_CODE = PRELUDE + """
-float4 sb = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv, 4.0);
-float4 sf = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv, 0.0);
-// Past the baked frame the sea is open and deep, so the swell carries on to the horizon unchanged.
+float4 sb = lerp(Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF, 2.5), Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv, 4.0), wFine);
+float4 sf = lerp(Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF, 0.0), Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv, 0.0), wFine);
+// Past the baked frames the sea is open and deep, so the swell carries on to the horizon unchanged.
 float depthB = lerp(32.0, sb.r * sb.r * 32.0, inMap);
 float depth = lerp(32.0, sf.r * sf.r * 32.0, inMap);
 float sd = lerp(512.0, sf.g * sf.g * 512.0, inMap);
@@ -167,28 +170,36 @@ return float3(0.0, 0.0, h * 100.0);
 
 PIXEL_CODE = PRELUDE + """
 float fw = max(max(length(ddx(pm)), length(ddy(pm))), 1e-4);
-float4 sf = Texture2DSample(ShoreTex, ShoreTexSampler, uv);
-float4 sb = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv, 4.0);
+float4 sf = lerp(Texture2DSample(ShoreFarTex, ShoreFarTexSampler, uvF), Texture2DSample(ShoreTex, ShoreTexSampler, uv), wFine);
+float4 sb = lerp(Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF, 2.5), Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv, 4.0), wFine);
 float depth = lerp(32.0, sf.r * sf.r * 32.0, inMap);
 float depthB = lerp(32.0, sb.r * sb.r * 32.0, inMap);
 float sd = lerp(512.0, sf.g * sf.g * 512.0, inMap);
 float expo = sb.b;
 WaterDepth = depth;
-// The authored seabed stops at the map edge (about -22 m), where it meets bottomless water outside.
-// Thicken the water over the last 400 m, scaling absorption and scattering together so the saturated
-// colour stays the same, so both sides reach the same deep blue with no step at the edge.
-DeepFactor = lerp(Edge.x, 1.0, saturate((2016.0 - max(abs(pm.x), abs(pm.y))) / Edge.y));
+// The authored seabed stops at the map edge (about -22 m); past it there is no floor except a thin
+// strip at the foot of the outer ring's coast. Thicken deep water over the last 400 m of the map and
+// beyond, scaling absorption and scattering together so the saturated colour stays the same. Shallow
+// water keeps its true colour, so the shallows under the ring's coast aren't darkened.
+DeepFactor = lerp(1.0, lerp(Edge.x, 1.0, saturate((2016.0 - max(abs(pm.x), abs(pm.y))) / Edge.y)), smoothstep(4.0, 12.0, depth));
 """ + swell_code(True) + """
 float2 g = swellG * saturate((depthB - 1.0) / 5.0);
 """ + SHORE_WAVE + """
-// Shore-wave slope: d(height)/d(phase) times the gradient of the shore distance.
+// Shore-wave slope: d(height)/d(phase) times the gradient of the shore distance, from each bake.
 float2 texel = float2(1.0 / 2048.0, 1.0 / 1024.0);
 float gu1 = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv + float2(texel.x, 0), 0).g;
 float gu0 = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv - float2(texel.x, 0), 0).g;
 float gv1 = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv + float2(0, texel.y), 0).g;
 float gv0 = Texture2DSampleLevel(ShoreTex, ShoreTexSampler, uv - float2(0, texel.y), 0).g;
-float2 gradSd = float2((gv0 * gv0 - gv1 * gv1) * 512.0 / (2.0 * texel.y * Frame.w),
-                       (gu1 * gu1 - gu0 * gu0) * 512.0 / (2.0 * texel.x * Frame.y));
+float2 gradFine = float2((gv0 * gv0 - gv1 * gv1) * 512.0 / (2.0 * texel.y * Frame.w),
+                         (gu1 * gu1 - gu0 * gu0) * 512.0 / (2.0 * texel.x * Frame.y));
+float fu1 = Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF + float2(texel.x, 0), 0).g;
+float fu0 = Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF - float2(texel.x, 0), 0).g;
+float fv1 = Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF + float2(0, texel.y), 0).g;
+float fv0 = Texture2DSampleLevel(ShoreFarTex, ShoreFarTexSampler, uvF - float2(0, texel.y), 0).g;
+float2 gradFar = float2((fv0 * fv0 - fv1 * fv1) * 512.0 / (2.0 * texel.y * Far.w),
+                        (fu1 * fu1 - fu0 * fu0) * 512.0 / (2.0 * texel.x * Far.y));
+float2 gradSd = lerp(gradFar, gradFine, wFine);
 g += shoreAmp * dprof * gradSd / ShoreW.z * inMap;
 
 // Wind sea: deep-water dispersion, spread around the wind direction, faded below pixel size.
@@ -321,11 +332,15 @@ def build_material():
     ST = unreal.MaterialSamplerType
     shore_v = texobj("ShoreData", shore_tex, -1400, -400, ST.SAMPLERTYPE_LINEAR_COLOR)
     shore_p = texobj("ShoreDataPixel", shore_tex, -1400, 200, ST.SAMPLERTYPE_LINEAR_COLOR)
+    far_tex = unreal.load_asset(f"{FOLDER}/T_EstateOceanShoreFar")
+    far_v = texobj("ShoreFarData", far_tex, -1600, -400, ST.SAMPLERTYPE_LINEAR_COLOR)
+    far_p = texobj("ShoreFarDataPixel", far_tex, -1600, 200, ST.SAMPLERTYPE_LINEAR_COLOR)
     ripples = texobj("RippleNormals", ripples_tex, -1400, 400, ST.SAMPLERTYPE_NORMAL)
     foam = texobj("FoamPattern", foam_tex, -1400, 600, ST.SAMPLERTYPE_LINEAR_GRAYSCALE)
     waves = texobj("WindSeaVolume", unreal.load_asset(f"{FOLDER}/VT_OceanWaves"), -1400, 700, ST.SAMPLERTYPE_LINEAR_COLOR)
 
     frame = vector("ShoreFrame", (FRAME["ShoreY0"], FRAME["ShoreSizeY"], FRAME["ShoreX1"], FRAME["ShoreSizeX"]), -1400, -250, "Data")
+    far_frame = vector("ShoreFarFrame", (FRAME["FarY0"], FRAME["FarSizeY"], FRAME["FarX1"], FRAME["FarSizeX"]), -1600, -250, "Data")
     swell = vector("Swell", (0.32, 78.0, 12.0, 0.0), -1400, -100, "Waves")          # height m, wavelength m, heading deg
     wind = vector("WindSea", (0.12, 48.0, 16.0, 30.0), -1400, 0, "Waves")         # slope RMS, patch m, loop s, heading deg
     shore_w = vector("ShoreWaves", (0.24, 9.0, 21.0, 140.0), -1400, 100, "Waves")  # height m, period s, crest spacing m, reach m
@@ -362,10 +377,10 @@ def build_material():
             link(src, out, c, n)
         return c
 
-    vs = custom(VERTEX_CODE, [("P", (wp_v, "")), ("Time", (time, "")), ("ShoreTex", (shore_v, "")),
-                              ("Frame", (frame, "RGBA")), ("Swell", (swell, "RGBA")), ("ShoreW", (shore_w, "RGBA"))], -900, -500)
-    ps = custom(PIXEL_CODE, [("P", (wp_p, "")), ("ViewDir", (cam_v, "")), ("Time", (time, "")), ("ShoreTex", (shore_p, "")),
-                             ("RippleTex", (ripples, "")), ("FoamTex", (foam, "")), ("Frame", (frame, "RGBA")),
+    vs = custom(VERTEX_CODE, [("P", (wp_v, "")), ("Time", (time, "")), ("ShoreTex", (shore_v, "")), ("ShoreFarTex", (far_v, "")),
+                              ("Frame", (frame, "RGBA")), ("Far", (far_frame, "RGBA")), ("Swell", (swell, "RGBA")), ("ShoreW", (shore_w, "RGBA"))], -900, -500)
+    ps = custom(PIXEL_CODE, [("P", (wp_p, "")), ("ViewDir", (cam_v, "")), ("Time", (time, "")), ("ShoreTex", (shore_p, "")), ("ShoreFarTex", (far_p, "")),
+                             ("RippleTex", (ripples, "")), ("FoamTex", (foam, "")), ("Frame", (frame, "RGBA")), ("Far", (far_frame, "RGBA")),
                              ("Swell", (swell, "RGBA")), ("Wind", (wind, "RGBA")), ("ShoreW", (shore_w, "RGBA")),
                              ("Micro", (micro, "RGBA")), ("FoamP", (foam_p, "RGBA")), ("Gust", (gust, "RGBA")), ("WaveVol", (waves, "")), ("Caps", (caps, "RGBA")), ("Edge", (edge_p, "RGBA"))], -900, 100,
                 extra=("FoamAmt", "WaterDepth", "LostSlope", "DeepFactor"))
@@ -468,6 +483,7 @@ def place_sea(mesh, mi):
 def main():
     ocean = os.path.join(REPO, "Assets", "Environment", "Ocean")
     import_texture(os.path.join(REPO, "Saved", "Ocean", "T_EstateOceanShore.png"), "T_EstateOceanShore", "data")
+    import_texture(os.path.join(REPO, "Saved", "Ocean", "T_EstateOceanShoreFar.png"), "T_EstateOceanShoreFar", "data")
     import_texture(os.path.join(ocean, "T_OceanRipples_N.png"), "T_OceanRipples_N", "normal")
     import_texture(os.path.join(ocean, "T_OceanFoam.png"), "T_OceanFoam", "gray")
     import_wave_volume()

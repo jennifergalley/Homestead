@@ -3,9 +3,11 @@
 Outputs:
   Assets/Environment/Ocean/T_OceanRipples_N.png   512^2 tileable capillary/short-wave normal map (FFT)
   Assets/Environment/Ocean/T_OceanFoam.png        512^2 tileable foam pattern (cellular + fBm)
-  Saved/Ocean/T_EstateOceanShore.png              shore data over the sea's bounding box:
+  Saved/Ocean/T_EstateOceanShore.png              shore data over the map sea's bounding box:
                                                     R = sqrt(depth / 32 m), G = sqrt(shore distance / 512 m),
                                                     B = exposure to the open sea (0 sheltered .. 1 open)
+  Saved/Ocean/T_EstateOceanShoreFar.png           the same, coarser, reaching 3 km past the map edge
+                                                    onto the outer land ring (bake_outer_land.py)
   Saved/Ocean/SM_EstateOcean.obj                  the ocean surface mesh (tensor grid: 8 m inside the map
                                                     where the sea can reach, growing to ~60 km outside)
   Saved/Ocean/ocean_bake.json                     the shore texture's world frame, for the material
@@ -19,7 +21,7 @@ import os
 
 import numpy as np
 from PIL import Image
-from scipy.ndimage import distance_transform_edt, gaussian_filter, label, minimum_filter
+from scipy.ndimage import distance_transform_edt, gaussian_filter, label, map_coordinates, minimum_filter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -44,41 +46,97 @@ def connected_to_south(mask):
     return np.isin(lab, keep)
 
 
-def shore_texture(h):
-    sea = connected_to_south(h < 0.0)
-    depth = np.where(sea, -h, 0.0)
-    dist = distance_transform_edt(sea)                     # metres to the nearest dry sample
-    dist = gaussian_filter(dist, 3.0) * sea                 # smooth crest lines for the shore waves
-    exposure = gaussian_filter(sea.astype(np.float32), 140.0)
+PAD = 640              # metres of outer-ring land and sea around the map in the fine shore bake
+FAR_REACH = 3000.0     # metres past the map edge covered by the coarse shore bake
+FAR_STEP = 2.0         # metres per sample of the coarse bake (the texture is ~5 m per texel)
+
+
+def outer_heights():
+    """Sampler for the outer land ring past the map edge (Scripts/Terrain/bake_outer_land.py)."""
+    import sys
+    from scipy.interpolate import RegularGridInterpolator
+    sys.path.insert(0, HERE)
+    from bake_outer_land import ring
+    xs, ys, z = ring()
+    return RegularGridInterpolator((xs, ys), z.astype(np.float32), bounds_error=False, fill_value=None)
+
+
+def heights_grid(h, outer, xs, ys):
+    """Heights in metres on a grid (rows = y east, cols = x north): the landscape inside the map and
+    the outer ring outside it, which is what the player sees."""
+    out = np.empty((len(ys), len(xs)), np.float32)
+    inside_x = np.abs(xs) <= H
+    for r, y in enumerate(ys):
+        row = np.empty(len(xs), np.float32)
+        if abs(y) <= H:
+            row[inside_x] = map_coordinates(h, [np.full(inside_x.sum(), y + H), xs[inside_x] + H], order=1)
+            rest = ~inside_x
+        else:
+            rest = np.ones(len(xs), bool)
+        if rest.any():
+            row[rest] = outer(np.stack([xs[rest], np.full(rest.sum(), y)], -1))
+        out[r] = row
+    return out
+
+
+def shore_fields(hg, step):
+    sea = connected_to_south(hg < 0.0)
+    depth = np.where(sea, -hg, 0.0)
+    dist = distance_transform_edt(sea) * step              # metres to the nearest dry sample
+    dist = gaussian_filter(dist, 3.0 / step) * sea          # smooth crest lines for the shore waves
+    exposure = gaussian_filter(sea.astype(np.float32), 140.0 / step)
     exposure = np.clip((exposure - 0.35) / 0.45, 0.0, 1.0)
+    return sea, depth, dist, exposure
 
-    ys, xs = np.nonzero(sea)                                 # rows = y index, cols = x index
-    margin = 64
-    x0, x1 = 0, min(SIZE - 1, xs.max() + margin)             # south edge .. northernmost water
-    y0, y1 = max(0, ys.min() - margin), min(SIZE - 1, ys.max() + margin)
-    # The texture: u runs east (+Y), v runs south from its northern edge (image top = north).
-    width, height = 2048, 1024
-    sx = x1 - x0
-    sy = y1 - y0
-    u = np.linspace(y0, y1, width)
-    v = np.linspace(x1, x0, height)
-    uu, vv = np.meshgrid(u, v)
-    from scipy.ndimage import map_coordinates
 
+def write_shore_png(name, depth, dist, exposure, uu, vv):
     def resample(a):
         return map_coordinates(a, [uu, vv], order=1, mode="nearest")
-
     r = np.sqrt(np.clip(resample(depth) / 32.0, 0, 1))
     g = np.sqrt(np.clip(resample(dist) / 512.0, 0, 1))
     b = np.clip(resample(exposure), 0, 1)
     img = np.stack([r, g, b, np.ones_like(r)], -1)
-    Image.fromarray(np.round(img * 255).astype(np.uint8), "RGBA").save(os.path.join(SAVED, "T_EstateOceanShore.png"))
+    Image.fromarray(np.round(img * 255).astype(np.uint8), "RGBA").save(os.path.join(SAVED, name))
+
+
+def shore_texture(h):
+    """Two bakes of the shore data (depth, shore distance, exposure), in the same layout:
+    T_EstateOceanShore covers the map's coast at ~1.7 m per texel. T_EstateOceanShoreFar reaches
+    FAR_REACH past the map edge at ~5 m per texel, so the outer ring's coast gets foam and shallows
+    too. Both are baked from the landscape plus the outer ring, so shore distances near the map edge
+    see the land beyond it and the two agree where they overlap."""
+    outer = outer_heights()
+    width, height = 2048, 1024
+    margin = 64
+
+    # Fine bake: 1 m samples over the map plus PAD of ring.
+    axis_m = np.arange(-H - PAD, H + PAD + 1, 1.0)
+    sea_p, depth, dist, exposure = shore_fields(heights_grid(h, outer, axis_m, axis_m), 1.0)
+    sea = sea_p[PAD:PAD + SIZE, PAD:PAD + SIZE]                   # the map's sea, for the mesh
+    ys, xs = np.nonzero(sea)                                       # rows = y index, cols = x index
+    x0, x1 = 0, min(SIZE - 1, xs.max() + margin)                   # south edge .. northernmost water
+    y0, y1 = max(0, ys.min() - margin), min(SIZE - 1, ys.max() + margin)
+    # The texture: u runs east (+Y), v runs south from its northern edge (image top = north).
+    uu, vv = np.meshgrid(np.linspace(y0, y1, width) + PAD, np.linspace(x1, x0, height) + PAD)
+    write_shore_png("T_EstateOceanShore.png", depth, dist, exposure, uu, vv)
     frame = {
         # World frame in metres: u = (Y - ShoreY0) / ShoreSizeY, v = (ShoreX1 - X) / ShoreSizeX.
-        "ShoreY0": float(y0 - H), "ShoreSizeY": float(sy),
-        "ShoreX1": float(x1 - H), "ShoreSizeX": float(sx),
-        "maxDepth": float(depth.max()),
+        "ShoreY0": float(y0 - H), "ShoreSizeY": float(y1 - y0),
+        "ShoreX1": float(x1 - H), "ShoreSizeX": float(x1 - x0),
+        "maxDepth": float(depth[PAD:PAD + SIZE, PAD:PAD + SIZE].max()),
     }
+
+    # Coarse bake: FAR_STEP samples out to FAR_REACH past the map edge.
+    fx = np.arange(-H - FAR_REACH, H + FAR_STEP / 2, FAR_STEP)
+    fy = np.arange(-H - FAR_REACH, H + FAR_REACH + FAR_STEP / 2, FAR_STEP)
+    sea_f, depth_f, dist_f, expo_f = shore_fields(heights_grid(h, outer, fx, fy), FAR_STEP)
+    cols = np.nonzero(sea_f.any(axis=0))[0]
+    top = min(len(fx) - 1, cols.max() + int(margin / FAR_STEP))
+    fx1 = fx[top]
+    uu, vv = np.meshgrid(np.linspace(0, len(fy) - 1, width), np.linspace(top, 0, height))
+    write_shore_png("T_EstateOceanShoreFar.png", depth_f, dist_f, expo_f, uu, vv)
+    frame.update({"FarY0": float(fy[0]), "FarSizeY": float(fy[-1] - fy[0]),
+                  "FarX1": float(fx1), "FarSizeX": float(fx1 - fx[0])})
     return sea, frame
 
 
