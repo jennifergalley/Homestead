@@ -442,7 +442,8 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         if (Entered)
         {
             if (!RenewalCheck(!PC->IsBookOpen() && PC->Focus == AHomesteadController::EFocus::Bed && PC->FocusId == 105
-                && PC->FocusActions().Contains(TEXT("Sleep 8 hours")) && PC->Simulation().IsSheltered(PC->PlayerPoint()),
+                && (PC->FocusActions().Contains(TEXT("Sleep")) || PC->FocusActions().Contains(TEXT("Nap")))
+                && PC->Simulation().IsSheltered(PC->PlayerPoint()),
                 TEXT("Mapped route did not reach actual sheltered bed105."))) return;
             R.ActionHour = PC->State().hour; R.ActionEngine = R.EngineUnpaused;
             Tap(EKeys::Gamepad_FaceButton_Bottom);

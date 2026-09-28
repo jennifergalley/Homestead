@@ -116,12 +116,20 @@ if (-not (Test-Path -LiteralPath $map)) { throw 'Content bootstrap did not produ
 & (Join-Path $PSScriptRoot 'Import-Locomotion.ps1') -EngineRoot $engine -AnimationSet Clearing
 }
 if ($Package) {
+    # A file-based cook (-SkipZenStore): other worktrees' QA scripts stop the shared zenserver.exe, which
+    # broke staging with "Failed to read oplog from Zen ... HTTP NotFound".
+    Remove-Item -LiteralPath (Join-Path $root 'Saved\Cooked\Windows\ue.projectstore') -ErrorAction SilentlyContinue
+    # UAT's own build step can't wait for UBT's machine-wide mutex (-UbtArgs lands inside each -Target),
+    # so it fails with ConflictingInstance whenever another worktree is compiling. Build the game target
+    # here with -WaitMutex and let UAT skip its build.
+    & $build SurvivalGame Win64 Development "-Project=$project" -WaitMutex -NoUBA -NoXGE -NoFASTBuild
+    if ($LASTEXITCODE -ne 0) { throw "Game target build failed ($LASTEXITCODE)." }
     $uat = Join-Path $engine 'Engine\Build\BatchFiles\RunUAT.bat'
     # UAT's own log folder (%APPDATA%\Unreal Engine\AutomationTool\Logs) is shared by every worktree and
     # gets overwritten, so keep this worktree's full packaging output alongside the bootstrap log.
     $packageLog = Join-Path $logDirectory "package-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
     Write-Host "Packaging; full output: $packageLog"
-    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive "-archivedirectory=$archive" "-UbtArgs=-NoUBA -NoXGE -NoFASTBuild" -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
+    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -skipbuild -cook -stage -pak -archive "-archivedirectory=$archive" -AdditionalCookerOptions=-SkipZenStore -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
         Tee-Object -LiteralPath $packageLog
     if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE). See $packageLog and Saved\Logs\UnrealPak.log." }
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive

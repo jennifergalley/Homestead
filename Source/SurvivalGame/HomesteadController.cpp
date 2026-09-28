@@ -1629,7 +1629,13 @@ FString AHomesteadController::FocusActions() const
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
     case EFocus::Drop: return A + TEXT(" Pick up");
-    case EFocus::Bed: return A + TEXT(" Sleep 8 hours");
+    case EFocus::Bed:
+    {
+        const double Hours = BedSleepHours();
+        if (Hours <= 2.0) return A + TEXT(" Nap");
+        const bool bToDawn = FMath::Abs(FMath::Fmod(State().hour + Hours, 24.0) - 6.75) < 0.02;
+        return A + (bToDawn ? TEXT(" Sleep until morning") : TEXT(" Sleep 8 hours"));
+    }
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
         ? Use + TEXT(" Fill Watering Can") : A + TEXT(" Fill carried Watering Can");
