@@ -191,6 +191,9 @@ private:
     static constexpr float CraftCycleSeconds = 1.2f;
     int32 CraftHoldRecipe = INDEX_NONE;
     float CraftHoldElapsed = 0;
+    // The recipe that just finished a cycle, for the square's completion flash.
+    int32 CraftFlashRecipe = INDEX_NONE;
+    double CraftFlashStart = 0;
     int32 CraftBeat = 0;
     ECraftInput CraftInput = ECraftInput::None;
 
@@ -223,6 +226,7 @@ private:
     void CancelVirtualItemDrag();
     bool StartCraftHold(ECraftInput Input);
     void StopCraftHold();
+    float CraftFlash(int32 Recipe) const;
     bool IsHoldingRecipe(int32 Recipe) const;
     void Activate();
     void RunAction(EHomesteadItemAction Action);
