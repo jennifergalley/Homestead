@@ -102,9 +102,7 @@ def main():
     place("Flowers", near[~in_wood], 35, 7, taken)
     place("BerryBush", near[in_wood][40:], 22, 9, taken)
     place("Roots", near[in_wood][80:], 22, 8, taken)
-    reeds = densify(L["river"], 12.0)
-    reeds = reeds[inside(reeds)] + rng.normal(0, 1.0, (inside(reeds).sum(), 2)) + np.array([0, 4.2])
-    place("Reeds", reeds, 18, 10, taken)
+    # Reeds are retired by add-overgrown-estate-clearing; the river banks get no interactive reeds.
     tree_tree = cKDTree(np.array(interactive_trees)) if interactive_trees else None
 
     # ---- decorative scenery -------------------------------------------------------------
