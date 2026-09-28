@@ -162,7 +162,8 @@ def paint_bark(atlas, key, nrng, *, size_m=1.0, style="fissured", base=(0.10, 0.
         color = color * (0.88 + 0.24 * cell_rand)[..., None]
         color = F.lerp(color, plate_color, fresh * 0.85)
         color = F.lerp(color, fissure, crack)
-        ao = 0.7 + 0.3 * (1 - crack)
+        # Keep crack AO light: in Unreal's sun a dark net on every plate reads as cobblestones.
+        ao = 0.85 + 0.15 * (1 - crack)
     if algae:
         a = F.smoothstep(0.5, 0.85, F.noise(shp, nrng, freq=4.0, beta=2.8, aniso=(1.0, 2.0))) * algae
         color = F.lerp(color, (0.07, 0.10, 0.04), a)
