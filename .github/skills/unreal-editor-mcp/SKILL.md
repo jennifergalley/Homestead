@@ -71,8 +71,10 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 - **Jenny's playable builds.** Never retarget or overwrite `Desktop\Homestead.lnk` or anything
   under `E:\Repos\HomesteadMVP\`. The estate build gets its own "Homestead Estate" shortcut. Never
   merge the `mvp-survival` branch with `main`, in either direction.
-- **Saves.** During round 1, lanes never bump `SimulationSaveVersion`; the coordinator bumps it
-  once at integration. PIE saves live in the worktree's `Saved\SaveGames` (Estate in
+- **Saves.** Lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per
+  integration. It's **12** since `0e08e717`: version 11 saves are refused with a reset notice, and
+  versions 7-10 still migrate. If your branch adds anything to the save format, tell the orchestrator
+  before your `[ready]`. PIE saves live in the worktree's `Saved\SaveGames` (Estate in
   `SaveGames\Estate\`). Packaged saves live inside the package at `SurvivalGame\Saved\SaveGames`,
   not in `%LOCALAPPDATA%`.
 - **Git with sub-agents.** Don't `git stash -u` while a sub-agent may be writing files; use
@@ -147,6 +149,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `System.Exception: A conflicting instance of AutomationTool is already running` (in `%LOCALAPPDATA%\UnrealEngine\Programs\AutomationTool\Saved\Logs\ErrorLog.txt`); the script only says "Game packaging failed (1)" | UAT is single-instance machine-wide and another worktree is packaging | `Build-Game.ps1` now passes `-WaitForUATMutex` and waits. For a hand-run `RunUAT.bat`, add it yourself. |
 | `git status` shows dozens of modified `.uasset`s (Audio, heroine animations and materials) after `Build-Game.ps1` | The content bootstrap re-saves generated assets | Restore the ones your change didn't intend (`git checkout -- <paths>`) before committing. `-PackageOnly` skips the bootstrap when content is current. |
 | PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
+| A red on-screen warning in Development builds: "Cached lighting in Lumen ... going to be clipped ... r.EyeAdaptation.CachedLightingPreExposure", in full sun (about EV 13.5) | The cached-lighting pre-exposure range didn't cover bright sun | `DefaultEngine.ini` `[SystemSettings]` sets `r.EyeAdaptation.CachedLightingPreExposure=8` (about EV -4 to 16). If it returns, adjust that value, not the exposure. |
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
 | `NameError: name '__file__' is not defined` in `run_python` | `run_python` executes a code string, not a file | `pyfile <path>` (McpHelpers), or `exec(compile(open(p).read(), p, 'exec'), {'__file__': p, '__name__': '__main__'})`. |
 | Saved actors, but the level still shows a dirty package or a teammate's checkout lacks your new Outliner folder | A new Outliner folder lives in its own `__ExternalObjects__/.../<Map>/...` package | Also save `EditorLoadingAndSavingUtils.get_dirty_map_packages()` and commit that package. |
@@ -169,7 +172,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
 | A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. A 3840x2160 PNG is about 11 MB, over the `view` tool's 10 MB limit: downscale or crop it with PIL before viewing. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
-| After `BugItGo` she walks through walls and counters and sinks knee-deep into floors (looks like missing collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`) | Type `Walk` after `BugItGo`. |
+| After `BugItGo` she walks through walls and counters, sinks knee-deep into floors, or, holding W, flies level and goes under the terrain where the road climbs, so "Recovered the character above the generated terrain" fires over and over (looks like missing landscape collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`): flying, no collision | Send `Walk` straight after every `BugItGo`, including in scripted walk drivers. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
 | `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
@@ -775,6 +778,10 @@ Extend it there when play needs a capability; prefer real input over state edits
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
   processes from that folder first (for Jenny's builds, see sections 0 and 7).
+- **Packaged walk drivers: `Walk` after every `BugItGo`.** `BugItGo` switches on Ghost (flying, no
+  collision), so a driver that then holds W flies her level and under rising ground, and the
+  terrain-recovery toast repeats. It looks like missing landscape collision; three map-lane runs were
+  lost to it (table 0.1).
 - **Keep packaged or standalone test runs off Jenny's saves:** launch with
   `-userdir=E:\CopilotScratch\<session-id>\pkguser -log=<name>.log`, so saves, config and logs go
   under that folder instead of the package's own `Saved\`.

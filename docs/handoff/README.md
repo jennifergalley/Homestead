@@ -175,6 +175,11 @@ starting.
 5. `create_session` can time out creating the worktree (`git command timed out after 300 seconds`)
    and still start the session on a half-checked-out tree. Every lane's first step is to confirm that
    `git status` is clean and `SurvivalGame.uproject` exists; if not, `git reset --hard HEAD`.
+6. **Confirm each spawned session actually started.** A session can be created with its CLI never
+   running: one sat for 25 minutes without a commit. Within a few minutes of spawning, check
+   `get_session` / `get_sessions_status` for `is_running: true` (not only `activity`), and look for
+   commits or new files in its worktree. If it hasn't started, re-send the kickoff or do the work
+   through a sub-agent.
 
 ## End-of-round handoff (docs agent)
 
