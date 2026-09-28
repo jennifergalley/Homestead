@@ -50,8 +50,11 @@ def smoothstep(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def main():
-    os.makedirs(OUT, exist_ok=True)
+def ring():
+    """The ring's grid: axes xs (north) and ys (east) in metres, and heights z[i, j] in metres.
+
+    Other bakes (for example the ocean's shore texture) can sample the land past the map from this.
+    """
     h = load_heights()
     hs = gaussian_filter(h, 24.0)
     xs, ys = axis(), axis()
@@ -84,7 +87,13 @@ def main():
     # Hug the landscape at the seam and fade the far rim down behind the haze.
     z = np.where(d < 1.0, edge - SINK, z)
     z -= 40.0 * smoothstep(0.6 * FAR, FAR, d)
+    return xs, ys, z
 
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    xs, ys, z = ring()
+    X, Y = np.meshgrid(xs, ys, indexing="ij")
     inside = (np.abs(X) < H - OVERLAP - 0.01) & (np.abs(Y) < H - OVERLAP - 0.01)
     nx, ny = X.shape
     cell = np.ones((nx - 1, ny - 1), bool)
