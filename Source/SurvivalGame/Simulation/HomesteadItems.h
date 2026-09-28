@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 // The item catalogue: every item's identity and metadata in one table (HomesteadItems.cpp).
 // Adding an item means one enum value here and one row there, in the same order; the build fails
@@ -38,11 +39,14 @@ struct ItemInfo
     double energy = 0.0;
     const char* source = ""; // Where to find it, for recipe requirements.
     bool hiddenFromNewGames = false;
+    const char* plural = nullptr; // For counts above one; the name when unset ("12 Stone").
 };
 
 // The catalogue row for an item; an "Unknown item" row for values outside the enum.
 const ItemInfo& GetItemInfo(Item item);
 const char* ItemName(Item item);
+// "1 Cornish pasty", "3 Cornish pasties", "12 Stone".
+std::string CountedName(Item item, int quantity);
 const char* ItemKey(Item item);
 // The item with this stable key, or Item::Count.
 Item ItemFromKey(const char* key);

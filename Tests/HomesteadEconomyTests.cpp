@@ -226,7 +226,9 @@ void BuyAndEatAPasty()
     CHECK(sim.GetState().hunger > hunger && sim.GetState().energy > energy);
     CHECK(sim.Count(Item::Pasty) == 0);
     // Three loaves at 50 cents.
-    OK(sim.Buy(store.shop, Item::Bread, 3, false, store.customer));
+    const auto loaves = sim.Buy(store.shop, Item::Bread, 3, false, store.customer);
+    OK(loaves);
+    CHECK(loaves.message == "Bought 3 loaves of bread for $1.50.");
     CHECK(sim.GetState().money == StartingMoney - 100 - 150 && sim.Count(Item::Bread) == 3);
     // Everything she has left, exactly.
     OK(sim.GrantMoney(-sim.GetState().money + 25));

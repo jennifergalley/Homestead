@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "name": "StoreSurfaces",
+  "description": "Seamless 2 m PBR texture tiles for the store shell: granite wall, slate roof, limewash and floorboards.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/store_surfaces.py",
+  "source_sha256": "32d0786dda1fd6fcb94422e32593151eb865adada5d6e6f1309d45124c3ebc76",
+  "provenance": "Original project-authored procedural texture maps; no third-party asset or texture.",
+  "meshes": {
+    "SM_Store_WallGranite": {
+      "vertices": 289,
+      "triangles": 512,
+      "size_cm": [
+        200.0,
+        200.0,
+        0.1
+      ],
+      "materials": [
+        {
+          "name": "M_Store_WallGranite",
+          "textures": {
+            "basecolor": "T_Store_WallGranite_basecolor.png",
+            "roughness": "T_Store_WallGranite_roughness.png",
+            "normal": "T_Store_WallGranite_normal.png",
+            "ao": "T_Store_WallGranite_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "detail_distance": 1.2
+      },
+      "fbx": "SM_Store_WallGranite.fbx",
+      "sha256": "2b2610b5de65a838d2b61dca2216e1350b43dc760dc2b4ddad86e991a518d722"
+    },
+    "SM_Store_SlateRoof": {
+      "vertices": 289,
+      "triangles": 512,
+      "size_cm": [
+        200.0,
+        200.0,
+        0.1
+      ],
+      "materials": [
+        {
+          "name": "M_Store_SlateRoof",
+          "textures": {
+            "basecolor": "T_Store_SlateRoof_basecolor.png",
+            "roughness": "T_Store_SlateRoof_roughness.png",
+            "normal": "T_Store_SlateRoof_normal.png",
+            "ao": "T_Store_SlateRoof_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "detail_distance": 1.2
+      },
+      "fbx": "SM_Store_SlateRoof.fbx",
+      "sha256": "cc9da129a9c9fe0f4411ef06bd326c1254b20adce75e27791c3d0a01a2d597be"
+    },
+    "SM_Store_Limewash": {
+      "vertices": 289,
+      "triangles": 512,
+      "size_cm": [
+        200.0,
+        200.0,
+        0.1
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Limewash",
+          "textures": {
+            "basecolor": "T_Store_Limewash_basecolor.png",
+            "roughness": "T_Store_Limewash_roughness.png",
+            "normal": "T_Store_Limewash_normal.png",
+            "ao": "T_Store_Limewash_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "detail_distance": 1.2
+      },
+      "fbx": "SM_Store_Limewash.fbx",
+      "sha256": "2788be6fc3ba793ce611bfd360de6059b98dda90b9f1638c0f9b22a8a245b4b2"
+    },
+    "SM_Store_Floorboards": {
+      "vertices": 289,
+      "triangles": 512,
+      "size_cm": [
+        200.0,
+        200.0,
+        0.1
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Floorboards",
+          "textures": {
+            "basecolor": "T_Store_Floorboards_basecolor.png",
+            "roughness": "T_Store_Floorboards_roughness.png",
+            "normal": "T_Store_Floorboards_normal.png",
+            "ao": "T_Store_Floorboards_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "detail_distance": 1.2
+      },
+      "fbx": "SM_Store_Floorboards.fbx",
+      "sha256": "004cba5d7a9b5d097297c34e1098f0bc380f77b9e05db41ee781bbf7b88321ba"
+    },
+    "SM_Store_WallAshlar": {
+      "vertices": 289,
+      "triangles": 512,
+      "size_cm": [
+        200.0,
+        200.0,
+        0.1
+      ],
+      "materials": [
+        {
+          "name": "M_Store_WallAshlar",
+          "textures": {
+            "basecolor": "T_Store_WallAshlar_basecolor.png",
+            "roughness": "T_Store_WallAshlar_roughness.png",
+            "normal": "T_Store_WallAshlar_normal.png",
+            "ao": "T_Store_WallAshlar_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "detail_distance": 1.2
+      },
+      "fbx": "SM_Store_WallAshlar.fbx",
+      "sha256": "0580458aa09b1d1788736d41908733a33e8f39a7c401fb5ea824229fa0a86ec6"
+    },
+    "SM_Store_Render": {
+      "vertices": 289,
+      "triangles": 512,
+      "size_cm": [
+        200.0,
+        200.0,
+        0.1
+      ],
+      "materials": [
+        {
+          "name": "M_Store_Render",
+          "textures": {
+            "basecolor": "T_Store_Render_basecolor.png",
+            "roughness": "T_Store_Render_roughness.png",
+            "normal": "T_Store_Render_normal.png",
+            "ao": "T_Store_Render_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "detail_distance": 1.2
+      },
+      "fbx": "SM_Store_Render.fbx",
+      "sha256": "40aa046b50c35e75f20e6aaf04508cab2bc7bec29df80cc84d577300371f1f13"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "tile_m": 2.0,
+    "maps": "basecolor, normal (OpenGL), roughness, AO at 2048\u00b2; seamless on U and V"
+  },
+  "textures": {
+    "T_Store_WallGranite_basecolor.png": "a2cee47575afd912d0d324e261bbc659d4613ee21af6d82b3bddacbaa0f8c8ca",
+    "T_Store_WallGranite_roughness.png": "f8712bf63d96a4ecc192bfaeed75273d7d43bf08a5d4fd45735dccce50d23831",
+    "T_Store_WallGranite_normal.png": "265d7da82167e732811ea84da2b15f29a52329b6d5ad0393a71fd37990ff99b8",
+    "T_Store_WallGranite_ao.png": "73d6c55bd954c66e2bdca74f5b4aaaa98497992525ca7ebb118e339cbcd2b56b",
+    "T_Store_SlateRoof_basecolor.png": "e5f54e696f3765fcadb5be498a133b6b7826732c21551002b7e8c029aca56ac6",
+    "T_Store_SlateRoof_roughness.png": "2a79c92ae5a9f013938d45c8e0b374cc32c792d9f25ece6ccc811db84e829f4a",
+    "T_Store_SlateRoof_normal.png": "ff1c46596f87aff70c4cfe47a2fe60408a316993ed0f37dc6e287c13d5c8f017",
+    "T_Store_SlateRoof_ao.png": "d511d121ceaff51f791736c4ba5003b18bbdd5f62aba0b8d519c495f45fdd70f",
+    "T_Store_Limewash_basecolor.png": "f81935ab79b7d1a6e17256f451dae9328539e1d8ed970ec14bea6f84748b71c8",
+    "T_Store_Limewash_roughness.png": "df9de0e1b898ac8813608544ee535c205e6f5b87bc2e9fbf7ece895359306435",
+    "T_Store_Limewash_normal.png": "6d70ae1af526d094bd3525640221e04def094eb2629f0c2980b852e8a8a56b72",
+    "T_Store_Limewash_ao.png": "31ebed142293023dd0a995c13e642aa735863e3f924dd0bf91519e46218bc145",
+    "T_Store_Floorboards_basecolor.png": "bc24daaa322aeccdaa28b1ceec0e038a356058442b1d6e43981dc46b7ad30544",
+    "T_Store_Floorboards_roughness.png": "9e953947e904137056cceb150bc120f3e7806b893166c4c0c6ea810ea6807601",
+    "T_Store_Floorboards_normal.png": "5b783c28fd4bf0a4c61f2271d9046ed15c8f81076585421bc6cfb4f7ebbd4ff6",
+    "T_Store_Floorboards_ao.png": "2f52eb1ff99a25b832e76dfb285d7acc1381fc8bc1f51df7e3c7a0938b93affc",
+    "T_Store_WallAshlar_basecolor.png": "b158312a1cde73ccd15d1f1669fc4bbc82b3338cce3610f54da0a914047ff891",
+    "T_Store_WallAshlar_roughness.png": "f4e9b924cdf39b10a54dc95776db4142997bd2aaf2b0175792d7fa10d977dab6",
+    "T_Store_WallAshlar_normal.png": "7cde8920947569a0cff66a296006d29bf64b8908c5e50f74830e4ba7f27f4eb9",
+    "T_Store_WallAshlar_ao.png": "534300f5a40f21a956c204ab478222b283d5c9f05543c5b2698a40c07a193f16",
+    "T_Store_Render_basecolor.png": "bef22229d3f45043bcddacb6640b569bef654e5f0456dcd72b1fed53f9dba772",
+    "T_Store_Render_roughness.png": "7e8c93f868c8516eae680d66a7fc8ede6b0c9f10a48ff4ca3526851b784d2993",
+    "T_Store_Render_normal.png": "eedd89707903b4ed40c05a71c1645244dffa3b4cc4e29fa3053d3aae60c4838a",
+    "T_Store_Render_ao.png": "c2c9eb3e10b27349f2272f1e3cc5c4dbbe5828a1d85d918a9db1ef3091f4ce96"
+  }
+}
