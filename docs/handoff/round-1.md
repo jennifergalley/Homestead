@@ -8,7 +8,8 @@ page current; report changes to it rather than editing lane rows yourself.
 
 | Role / lane | Session | Branch | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | MCP port | OpenSpec change |
 | --- | --- | --- | --- | --- | --- |
-| Orchestrator + world/terrain lane (only session that packages) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | 8765 (so the native `unreal` MCP tools reach the orchestrator's editor) | `author-fixed-cornish-estate-map` |
+| Orchestrator (coordinates only; never builds, merges, packages or verifies) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | 8765 (so the native `unreal` MCP tools reach the orchestrator's editor) | `author-fixed-cornish-estate-map` |
+| Integration and builds (only session that packages) | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | `jennifergalley-literate-eureka` | ask the session | none |
 | Docs agent | `d99bb15c-6135-4f9d-b21a-f46b63c3b36f` | `jennifergalley-work-optimizer` | `jennifergalley-stunning-dollop` | none (no editor) | none |
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
@@ -41,7 +42,7 @@ already pushed), then continue and send `[ready]` with a SHA.
 ## Round-1 polish (after Jenny's playtest)
 
 Lanes work from Jenny's playtest notes. Each delivers through "Delivering lane work"; the
-orchestrator merges and packages.
+integration session merges and packages.
 
 | Lane | Session | Tasks |
 | --- | --- | --- |
@@ -94,7 +95,7 @@ comment.
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
-- **Packaging is centralized with the orchestrator.** Lanes deliver through "Delivering lane work"
+- **Packaging is centralized with the integration session** (`e251051b`). Lanes deliver through "Delivering lane work"
   in `docs\handoff\README.md`: verify, native tests, editor compile-check, commit/push, then message
   the orchestrator with branch, SHA, what changed, what was verified and what to try.
 - Jenny's playable builds: see the editor skill, section 0.
@@ -118,13 +119,16 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   UBT `ConflictingInstance`): resolved. `Build-Game.ps1` builds the game target with `-WaitMutex`,
   cooks with `-SkipZenStore`, and waits for UAT (`cdbd249f`). Verified 2026-09-27 17:30 by the MVP
   lane: `-PackageOnly` packaged successfully (BuildCookRun 200 s, UAT about 6 min) and the packaged
-  smoke, NativeMenu, Hotbar and FullLoop suites passed. The orchestrator has adopted it, and only the
-  orchestrator packages now.
+  smoke, NativeMenu, Hotbar and FullLoop suites passed. Only one session packages now (the
+  integration session since 2026-09-28).
 - **Blender prop import** needs a free editor slot (2-process limit). Props are imported in a
   running editor via `run_python`, not the headless script.
 
 ## Decisions during the round
 
+- **Perf measurements get the machine to themselves** (Jenny, 2026-09-28): one Unreal process, no
+  builds. Claim it with `Scripts\Start-PerfWindow.ps1` and release it with `Stop-PerfWindow.ps1`; other
+  worktrees' `Start-EditorMcp.ps1` waits while the lock is fresh.
 - **At most 2 Unreal processes machine-wide** (Jenny, 2026-09-28; it was 3). Each editor commits
   15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
   `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
@@ -136,12 +140,17 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 - Each worktree's editor uses its own MCP port; 8765 and the native `unreal` tools aren't safe to
   assume.
 - Shared-doc findings go through the docs agent (`docs\handoff\README.md`).
-- Packaging is centralized with the orchestrator (Jenny, 2026-09-27): only it runs UAT and packaged
-  tests; lanes implement, push and notify. `mvp-survival` packages its own deliverables to
+- Packaging is centralized (Jenny, 2026-09-27): only one session runs UAT and packaged tests;
+  lanes implement, push and notify. `mvp-survival` packages its own deliverables to
   `E:\Repos\HomesteadMVP\Windows` after telling the orchestrator.
-
-## Pending doc updates on merge
-
+- **The orchestrator only coordinates** (Jenny, 2026-09-28). Hands-on integration moved to a dedicated
+  session, `e251051b` ("Integration Agent", worktree `jennifergalley-literate-eureka`): it merges
+  forwarded `[ready]`s, builds, runs native, packaged, PIE and perf checks, packages, and reports
+  `[integrated] <what> @ <sha>`. Reason: while the orchestrator was busy with hands-on work its turn
+  stayed open, so lanes' messages never reached it. Flow: lane `[ready]` → orchestrator → integration
+  session → `[integrated]` → orchestrator → Jenny. **Open question:** the "Homestead Estate" shortcut
+  still points at `jennifergalley-cautious-pancake\Build\Windows`; the integration session should
+  confirm where it packages to.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. Its "Estate tool route"
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
 

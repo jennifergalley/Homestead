@@ -17,7 +17,8 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
 - Refuses to launch when 2 or more Unreal processes (editors, games, commandlets) are already running on
-  the machine, and lists them with their worktree. -Force overrides.
+  the machine, and lists them with their worktree. It also refuses while another worktree holds a fresh
+  perf window (Start-PerfWindow.ps1). -Force overrides both.
 #>
 [CmdletBinding()]
 param(
@@ -78,6 +79,13 @@ if (Test-McpServer) {
 
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
+
+# Someone else is measuring performance (Start-PerfWindow.ps1): don't add an editor or a build.
+. (Join-Path $PSScriptRoot 'PerfLock.ps1')
+$perfLock = Get-PerfLock
+if ($perfLock -and -not $perfLock.stale -and $perfLock.worktree -ne (Split-Path $root -Leaf) -and -not $Force) {
+    throw "Perf window held by $($perfLock.worktree) since $($perfLock.startedUtc) ($($perfLock.ageMinutes) min; '$($perfLock.purpose)'). Launching an editor would skew its measurement. Wait for Stop-PerfWindow.ps1 or $PerfLockStaleMinutes min, or pass -Force."
+}
 
 # Machine rule: at most 2 Unreal processes in total (editors, packaged games, commandlets). Each editor
 # commits 15-17 GB; with three open the 32 GB machine ran out of RAM and the pagefile grew to 81.5 GB,
