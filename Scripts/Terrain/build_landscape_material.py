@@ -78,7 +78,7 @@ col = lerp(col, col * float3(1.35, 1.12, 0.62), gd.b * grassy * 0.55);
 
 // Where 3D blades grow, the ground between them is the sward's shaded base; past their fade it takes
 // on the blades' own colour so the meadow doesn't change colour where the grass mesh ends.
-float3 sward = lerp(SwardNear.rgb, SwardFar.rgb, smoothstep(10.0, 42.0, dist)) * (1.0 + v1 * 0.3);
+float3 sward = lerp(SwardNear.rgb, SwardFar.rgb, smoothstep(10.0, 42.0, dist)) * (1.0 + v1 * 0.45 + v2 * 0.3);
 sward = lerp(sward, sward * float3(1.7, 1.25, 0.55), gd.b * 0.7);
 col = lerp(col, sward, gd.r * SwardMix);
 rough = lerp(rough, 0.85, gd.r * 0.6);
@@ -180,9 +180,9 @@ def ground_finish(bc, nm, rg, y0):
         v.set_editor_property('group', 'Ground')
         return v
 
-    sward_near = vec('SwardNear', (0.035, 0.065, 0.02), y + 820)
-    sward_far = vec('SwardFar', (0.075, 0.13, 0.04), y + 880)
-    tints = [vec('TintTrodden', (0.85, 0.8, 0.72), y + 940), vec('TintLitter', (0.62, 0.55, 0.42), y + 1000),
+    sward_near = vec('SwardNear', (0.03, 0.055, 0.018), y + 820)
+    sward_far = vec('SwardFar', (0.036, 0.066, 0.02), y + 880)
+    tints = [vec('TintTrodden', (0.85, 0.8, 0.72), y + 940), vec('TintLitter', (0.4, 0.36, 0.3), y + 1000),
              vec('TintMoss', (0.42, 0.62, 0.3), y + 1060), vec('TintStony', (0.78, 0.74, 0.68), y + 1120)]
 
     c = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, -300, y0 + 300)
@@ -196,7 +196,7 @@ def ground_finish(bc, nm, rg, y0):
               ('LitterD', litter_d, 'RGB'), ('LitterN', litter_n, 'RGB'),
               ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),
               ('SwardNear', sward_near, 'RGB'), ('SwardFar', sward_far, 'RGB'),
-              ('SwardMix', scal('SwardMix', 0.55, y + 1180), ''),
+              ('SwardMix', scal('SwardMix', 0.8, y + 1180), ''),
               ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB')]
     ins = []
     for name, *_ in inputs:

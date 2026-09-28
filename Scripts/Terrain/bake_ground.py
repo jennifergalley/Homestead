@@ -264,7 +264,7 @@ def blade_mesh(roots, params, ranks, segments):
     verts, norms, uvs, faces = [], [], [], []
     for (rx, ry), (p0, p1, p2, p3, p4, p5), rank in zip(roots, params, ranks):
         height = 24.0 + 26.0 * p0 ** 1.4                  # 24-50 cm before the ground scales it
-        width = 1.7 + 1.5 * p1                            # cm at the base
+        width = 1.0 + 0.9 * p1                            # cm at the base
         face = p2 * 2 * np.pi                             # blade facing
         lean_dir = face + np.pi / 2 + (p3 - 0.5) * 1.2    # roughly across the face, so it curls naturally
         lean = 0.1 + 0.45 * p4 ** 1.5                     # tip offset as a fraction of height

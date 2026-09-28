@@ -152,12 +152,30 @@ float keep = min(1.0, pow(Fade.x / max(dist, 0.1), Fade.y)) * (1.0 - smoothstep(
 float s = saturate((density * keep - rank) * 12.0);
 float2 cc[3] = {float2(C0, C1), float2(C3, C4), float2(C6, C7)};
 float cr[3] = {C2, C5, C8};
+// Round interactables the sward is grazed short rather than bare, so nothing is hidden and there's
+// no bald patch: blades keep a fifth of their height inside the circle.
+float graze = 1.0;
 [unroll] for (int i = 0; i < 3; i++)
-    if (cr[i] > 0.0) s *= smoothstep(cr[i], cr[i] + 35.0, length(RootW.xy - cc[i]));
+    if (cr[i] > 0.0)
+    {
+        // A ragged, trampled edge rather than a mown circle: the radius wanders by a quarter.
+        float2 o = RootW.xy - cc[i];
+        float ang = atan2(o.y, o.x);
+        float wob = 0.78 + 0.14 * sin(ang * 3.0 + cc[i].x * 0.013) + 0.1 * sin(ang * 7.0 + cc[i].y * 0.021) + 0.12 * frac(rank * 17.3);
+        graze = min(graze, smoothstep(cr[i] * wob - 25.0, cr[i] * wob + 55.0, length(o)));
+    }
 
 // Height from the ground (lush by the river, short on the moor and the trodden edges); far blades
 // widen so they stay a pixel or more across instead of shimmering.
-float hgt = lerp(Shape.x, Shape.y, gd.g) * lerp(1.0, 0.4, onRoad) * (0.85 + 0.3 * frac(rank * 53.7));
+// Camera-safe: blades near the game camera and along its line to the heroine are grazed short, so a
+// low camera never looks through a wall of grass (MPC_CameraSafeFoliage, as the woodland foliage).
+float2 seg = Hero.xy - CamPos.xy;
+float tSeg = saturate(dot(RootW.xy - CamPos.xy, seg) / max(dot(seg, seg), 1.0));
+float dSeg = length(RootW.xy - (CamPos.xy + seg * tSeg));
+float camLow = 1.0 - smoothstep(60.0, 160.0, CamPos.z - RootW.z);      // only when the camera is down in it
+float safe = lerp(1.0, smoothstep(Push.w, Push.w + 45.0, dSeg) * smoothstep(Push.z, Push.z + 45.0, length(RootW.xy - CamPos.xy)), camLow * (1.0 - tSeg * 0.6));
+graze = min(graze, max(safe, 0.0));
+float hgt = lerp(Shape.x, Shape.y, gd.g) * lerp(1.0, 0.4, onRoad) * (0.85 + 0.3 * frac(rank * 53.7)) * lerp(0.22, 1.0, graze);
 float3 v = VtxW - RootW;
 float widen = clamp(pow(max(dist / Shape.z, 1.0), 0.8), 1.0, Shape.w);
 float3 nv = float3(v.xy * widen, v.z * hgt) * s;
@@ -272,15 +290,17 @@ def build_material(v_flip):
     time = node(unreal.MaterialExpressionTime, -1150, -1200)
     hero = node(unreal.MaterialExpressionCollectionParameter, -1150, -1300,
                 collection=unreal.load_asset(MPC), parameter_name="HeroTargetPosition")
+    cam_safe = node(unreal.MaterialExpressionCollectionParameter, -1150, -1400,
+                    collection=unreal.load_asset(MPC), parameter_name="CameraPosition")
     data = [node(unreal.MaterialExpressionPerInstanceCustomData, -1400, -150 + 60 * i, data_index=i) for i in range(9)]
 
     wind = vector("GrassWind", (30.0, 1.0, 28.0, 2.2), -1600, 0)          # heading deg, strength, gust size m, gust speed m/s
     fade = vector("GrassFade", (12.0, 1.7, 42.0, 50.0), -1600, 100)        # full to m, falloff power, edge fade m..m
-    shape = vector("GrassShape", (0.45, 1.0, 10.0, 3.0), -1600, 200)     # height at G=0, at G=1, widen from m, widen max
-    push = vector("GrassPush", (75.0, 32.0, 0.0, 0.0), -1600, 300)        # radius cm, lean cm
+    shape = vector("GrassShape", (0.45, 1.0, 7.0, 4.0), -1600, 200)     # height at G=0, at G=1, widen from m, widen max
+    push = vector("GrassPush", (75.0, 32.0, 95.0, 55.0), -1600, 300)      # radius cm, lean cm, camera clear cm, camera-line clear cm
 
     inputs = [("UV", (uv, "")), ("RootW", (root_world, "")), ("VtxW", (vtx, "")), ("Cam", (cam, "")), ("Time", (time, "")),
-              ("Hero", (hero, "")), ("GroundTex", (ground, "")), ("RoadTex", (road, "")), ("WindTex", (wind_tex, "")),
+              ("Hero", (hero, "")), ("CamPos", (cam_safe, "")), ("GroundTex", (ground, "")), ("RoadTex", (road, "")), ("WindTex", (wind_tex, "")),
               ("Wind", (wind, "RGBA")), ("Fade", (fade, "RGBA")), ("Shape", (shape, "RGBA")), ("Push", (push, "RGBA"))]
     inputs += [(f"C{i}", (d, "")) for i, d in enumerate(data)]
     vs = custom(VERTEX_CODE, inputs, -800, -400, extra=(("Interp", F4),))

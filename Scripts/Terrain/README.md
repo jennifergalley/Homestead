@@ -188,7 +188,7 @@ the tree records in `EstateScenery.bin`, and writes:
   most grass anywhere in it (u8) and the surface under it (u8: Soil, Grass, Road, Sand, Rock, Woodland,
   Moor, Water). The game reads it through `HomesteadEstateGround` for the meadow and footsteps.
 - `Assets/Environment/Ground/T_GrassWind.png`: tiling gust noise.
-- `Saved/Ground/SM_GrassPatch_LOD{0,1,2}.obj`: 2 × 2 m patches of 1100, 423 and 136 grass blades.
+- `Saved/Ground/SM_GrassPatch_LOD{0,1,2}.obj`: 2 × 2 m patches of 1100, 423 and 136 grass blades (5500, 1269 and 136 triangles).
   The LODs are nested by each blade's random rank (all, rank < 0.38, rank < 0.14). UV0 holds the
   blade's rank bucket (whole part) and its root in the patch (fraction), so the material can find the
   root; `build_ground.py` imports with full-precision UVs and detects Interchange's V flip.
@@ -205,7 +205,7 @@ second rebuilds `M_EstateLandscape` with its ground-finish pass.
 At runtime `UHomesteadGrassField` (`Source/SurvivalGame/HomesteadGrassField.*`) instances the patches
 in 6 m chunks within 51 m of the camera. `AHomesteadWorld::Refresh` updates it every 0.25 s. It writes
 three clear circles per patch into per-instance custom data, one for each nearby interactable, world
-drop or plot, and skips patches under building pieces. `M_EstateGrass` thins blades by rank with
+drop or plot, and skips patches under building pieces. Inside those circles the sward is grazed to a fifth of its height, with a ragged edge, rather than left bare. Blades near a low game camera, and along its line to the heroine, are grazed too (`MPC_CameraSafeFoliage`), so the camera never looks through a wall of grass. `M_EstateGrass` thins blades by rank with
 distance (`GrassFade`: blades ranked below min(1, (12/d)^1.7) show). It also clears the road's wheel
 tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine (`GrassPush`).
 `HomesteadGrassField.h`'s LOD distances depend on `GrassFade` and the LOD keep fractions, so change
