@@ -2,8 +2,10 @@
 
 The map is an original parchment-and-ink cartographic rendering: a soft north-west hillshade on
 parchment, faint 10 m contours, a muted sea with an inked, water-lined coast, the river inked in,
-and the road lightened with dark edges. When an orthographic capture of the Estate level is
-available (``--capture``), its colours are folded in so woods and fields read too.
+and the road lightened with dark edges. Woods come from the runtime scatter
+(``Content/SurvivalGame/Estate/Runtime/EstateScenery.bin``): each tree and hazel is stamped as an
+inked crown over a pale woodland wash. When an orthographic capture of the Estate level is
+available (``--capture``), its colours are folded in gently too.
 
 Output (repo-relative by default):
   Assets/Map/T_EstateMap.png   4096x4096 RGB, north up (u = east, v = south)
@@ -55,12 +57,65 @@ def line_mask(points, size, width_px, oversample=2):
     return np.asarray(image.resize((size, size), Image.LANCZOS), dtype=np.float64) / 255.0
 
 
+SCENERY_TREES = {0: 3.6, 1: 2.8}  # EstateSceneryKinds index -> canopy radius in metres at scale 1
+SCENERY_HAZEL = 2
+
+
+def load_scenery(path):
+    """The runtime scatter (HSC1: u32 count, then 20-byte records u8 kind, 3 pad, float X, Y, Yaw,
+    Scale in world cm), as baked by Scripts/Terrain/scatter.py. The game draws these as HISMs at
+    runtime, so an editor-world capture never sees them."""
+    with open(path, "rb") as handle:
+        data = handle.read()
+    if data[:4] != b"HSC1":
+        raise ValueError(f"{path} is not an HSC1 scenery file")
+    count = int(np.frombuffer(data, "<u4", 1, 4)[0])
+    record = np.dtype([("kind", "u1"), ("pad", "u1", 3), ("x", "<f4"), ("y", "<f4"), ("yaw", "<f4"), ("scale", "<f4")])
+    return np.frombuffer(data, record, count, 8)
+
+
+def woods_layers(scenery, size, oversample=2):
+    """A soft woodland wash (from local tree and hazel density) and inked tree stamps."""
+    metres_per_px = 2 * HALF_M / size
+    density = np.zeros((size, size))
+    woody = scenery[np.isin(scenery["kind"], list(SCENERY_TREES) + [SCENERY_HAZEL])]
+    col, row = world_to_px(woody["x"] / 100.0, woody["y"] / 100.0, size)
+    inside = (col >= 0) & (col < size) & (row >= 0) & (row < size)
+    weight = np.where(woody["kind"] == SCENERY_HAZEL, 0.6, 1.0)
+    np.add.at(density, (row[inside].astype(int), col[inside].astype(int)), weight[inside])
+    # Trees per 100 m^2 over a ~12 m neighbourhood; a wood reads from about one tree per 150 m^2.
+    density = ndimage.gaussian_filter(density, 12.0 / metres_per_px) * 100.0 / (metres_per_px ** 2)
+    wash = np.clip((density - 0.35) / 0.5, 0.0, 1.0)
+    wash = ndimage.gaussian_filter(wash, 1.5)
+
+    big = size * oversample
+    canopy = Image.new("L", (big, big), 0)
+    shadow = Image.new("L", (big, big), 0)
+    outline = Image.new("L", (big, big), 0)
+    draw_canopy, draw_shadow, draw_outline = ImageDraw.Draw(canopy), ImageDraw.Draw(shadow), ImageDraw.Draw(outline)
+    order = np.argsort(-woody["x"])  # North first, so southern crowns overlap the ones behind them.
+    for tree in woody[order]:
+        kind = int(tree["kind"])
+        radius_m = SCENERY_TREES.get(kind, 1.8) * float(np.clip(tree["scale"], 0.6, 1.6))
+        x, y = world_to_px(tree["x"] / 100.0, tree["y"] / 100.0, big)
+        r = max(1.2, radius_m / metres_per_px * oversample)
+        s = r * 0.35  # Shadow falls to the south-east, away from the north-west light.
+        draw_shadow.ellipse([x - r + s, y - r + s, x + r + s, y + r + s], fill=255)
+        draw_outline.ellipse([x - r - 1, y - r - 1, x + r + 1, y + r + 1], fill=255)
+        draw_canopy.ellipse([x - r, y - r, x + r, y + r], fill=255 if kind in SCENERY_TREES else 150)
+
+    def down(image):
+        return np.asarray(image.resize((size, size), Image.LANCZOS), dtype=np.float64) / 255.0
+
+    return wash, down(canopy), down(shadow), down(outline)
+
+
 def blend(base, color, alpha):
     alpha = np.clip(alpha, 0.0, 1.0)[..., None]
     return base * (1.0 - alpha) + np.asarray(color, dtype=np.float64) * alpha
 
 
-def bake(heights, layout, size, capture=None, seed=7):
+def bake(heights, layout, size, capture=None, scenery=None, seed=7):
     metres_per_px = 2 * HALF_M / size
     zoom = size / heights.shape[0]
     h = ndimage.zoom(heights, zoom, order=1)[:size, :size]
@@ -108,6 +163,16 @@ def bake(heights, layout, size, capture=None, seed=7):
         edge &= land & (h > 1.0)
         rgb = blend(rgb, [0.45, 0.33, 0.20], edge.astype(np.float64) * strength)
 
+    if scenery is not None:
+        # Woods: a pale green wash where trees stand together, then each crown stamped in ink with
+        # a small south-east shadow, the way hand-drawn estate plans mark trees.
+        wash, canopy, shadow, outline = woods_layers(scenery, size)
+        rgb = blend(rgb, [0.66, 0.69, 0.47], wash * 0.5 * land)
+        rgb = blend(rgb, [0.36, 0.31, 0.21], np.clip(shadow - canopy, 0, 1) * 0.35 * land)
+        crown = np.array([0.50, 0.57, 0.35]) * (0.9 + 0.12 * shade)[..., None] * paper[..., None]
+        rgb = rgb * (1 - (canopy * 0.88 * land)[..., None]) + crown * (canopy * 0.88 * land)[..., None]
+        rgb = blend(rgb, [0.22, 0.21, 0.13], np.clip(outline - canopy, 0, 1) * 0.75 * land)
+
     # Sea: muted blue-green, deepening offshore, with water-lining parallel to the coast.
     depth = np.clip(-h / 22.0, 0.0, 1.0)
     shallow = np.array([0.66, 0.74, 0.70])
@@ -147,6 +212,8 @@ def main():
     parser.add_argument("--heightmap", default=os.path.join(ROOT, "Scripts", "Terrain", "Estate_Heightmap_4033.png"))
     parser.add_argument("--layout", default=os.path.join(ROOT, "Scripts", "Terrain", "estate_layout.json"))
     parser.add_argument("--capture", help="Optional orthographic capture of the Estate level, north up.")
+    parser.add_argument("--scenery", default=os.path.join(ROOT, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin"),
+                        help="Runtime scatter (HSC1) whose trees and hazel are stamped as woods; pass '' to skip.")
     parser.add_argument("--size", type=int, default=4096)
     parser.add_argument("--out", default=os.path.join(ROOT, "Assets", "Map", "T_EstateMap.png"))
     args = parser.parse_args()
@@ -155,7 +222,8 @@ def main():
         layout = json.load(handle)
     heights = load_heights(args.heightmap)
     capture = Image.open(args.capture) if args.capture else None
-    pixels = bake(heights, layout, args.size, capture)
+    scenery = load_scenery(args.scenery) if args.scenery and os.path.exists(args.scenery) else None
+    pixels = bake(heights, layout, args.size, capture, scenery)
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     Image.fromarray(pixels, "RGB").save(args.out, optimize=True)
     info = {
@@ -163,7 +231,7 @@ def main():
         "minY": -HALF_M * 100.0,
         "sizeX": HALF_M * 200.0,
         "sizeY": HALF_M * 200.0,
-        "source": "Estate capture" if capture else "Estate heightmap",
+        "source": ("Estate capture" if capture else "Estate heightmap") + (" + scenery" if scenery is not None else ""),
         "bakedAt": datetime.datetime.now().isoformat(timespec="seconds"),
     }
     with open(os.path.splitext(args.out)[0] + ".json", "w", encoding="utf-8") as handle:

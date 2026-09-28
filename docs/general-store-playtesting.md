@@ -12,8 +12,11 @@ shopkeeper (a stand-in body for now) and the town-square blockout on the Estate 
    E, A or click to see her greeting, then **Continue** to open the shop. The game pauses while it's
    open.
 4. **Sell** tab: pick an item, set the quantity (the Quantity dialog is the field book's), check
-   the total and the purse-after figure, then confirm. The purse shows a green `+` delta.
-5. **Buy** tab: what you sold is now listed under **From Trevennor** at the top. Buy a Cornish
+   the total and the purse-after figure, then confirm. The balance in the shop's header goes up at
+   once. The coin row's green `+` delta lasts about 3 seconds after the trade; the HUD is hidden
+   while the shop is open, so you see it only if you leave straight away.
+5. **Buy** tab: what you sold is now listed under **From Trevennor**, below the shop's own goods
+   (scroll down if it's cut off). Buy a Cornish
    pasty ($1.00), close the shop, and eat it from the hotbar or field book. Hunger and energy rise.
 6. Sleep through the night. After 6 AM the store has sold part of the From Trevennor stock (about
    a third a day).

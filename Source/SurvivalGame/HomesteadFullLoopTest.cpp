@@ -228,7 +228,9 @@ void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
         [this, Before, Item, Quantity]()
         {
             return !Controller->ToastIsError() && Controller->Simulation().Count(Item) == *Before + Quantity;
-        }, 1.3f);
+        }, 2.5f);
+    // The hold completes on its own clock; release as soon as it does so slow frames can't fail or repeat it.
+    Steps.Last().bCompleteWhenReady = true;
     Add(TEXT("Release the completed recipe hold"),
         [this]() { Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
             EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0)); },
@@ -445,6 +447,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueueGrant(Homestead::Item::RustedHoeBlade, 1);
     QueueCraft(Homestead::Recipe::HaftHoe);
     QueueGrant(Homestead::Item::WateringCan, 1);
+    QueueGrant(Homestead::Item::BrambleCanes, 2);
     QueuePlace(Homestead::Piece::Chest, -4, -3);
     const auto StoredTimber = MakeShared<int32>(0);
     Add(TEXT("Approach the early storage chest for surplus timber"),
@@ -795,7 +798,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 });
         if (Rest == 1)
         {
-            Add(TEXT("Cold-night shelter and fire protect the rested heroine"),
+            Add(TEXT("Night shelter and fire surround the rested heroine"),
                 []() {},
                 [this]()
                 {

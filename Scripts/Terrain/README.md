@@ -44,6 +44,11 @@ python Scripts\Terrain\preview_zoom.py game_reshaped_4033.npy overview.png -2016
 argument of `preview_zoom.py` overlays the road, river, estuary, polygons and anchors from the layout
 JSON. Its arguments are `src out xmin xmax ymin ymax step [layout.json]`, in game metres.
 
+**Re-bake the estate map afterwards.** The minimap and Map-tab texture is baked from
+`Estate_Heightmap_4033.png`, `estate_layout.json` and the scenery scatter that `scatter.py` writes
+(`Content\SurvivalGame\Estate\Runtime\EstateScenery.bin`). After re-running `reshape.py` or
+`scatter.py`, re-bake and re-import it: see "Estate map (T_EstateMap)" in `docs\setup.md`.
+
 ## Game frame
 
 - Unreal axes: +X is north and +Y is east, in metres from the map centre. One landscape quad is 1 m.
@@ -99,12 +104,20 @@ The sea is Single Layer Water, not the Water plugin (see the design's decision 3
 parts, all generated here with no external textures. `python Scripts\Terrain\bake_ocean.py waves` re-bakes only the wind-sea volume.
 
 - **Shore data.** `bake_ocean.py` reads `Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16`
-  and writes `Saved/Ocean/T_EstateOceanShore.png` (2048×1024 RGBA): R = √(depth / 32 m),
-  G = √(distance to the shore / 512 m), B = exposure to the open sea (a wide blur of the sea mask).
-  Only water connected to the southern (Atlantic) edge counts. The frame is in
-  `Saved/Ocean/ocean_bake.json`: `u = (Y − ShoreY0) / ShoreSizeY`, `v = (ShoreX1 − X) / ShoreSizeX`,
-  in game metres. The material's `ShoreFrame` parameter holds the same four numbers, so update it
-  when the heightfield changes.
+  and, past the map edge, the outer land ring's heights (`ring()` in `bake_outer_land.py`). It
+  writes two RGBA textures in the same layout: R = √(depth / 32 m), G = √(distance to the shore /
+  512 m), B = exposure to the open sea (a wide blur of the sea mask). Only water connected to the
+  southern (Atlantic) edge counts.
+  - `Saved/Ocean/T_EstateOceanShore.png` (2048×1024) covers the map's coast at about 1.7 m per
+    texel. It's baked with 640 m of ring around the map, so shore distances near the edge see the
+    land beyond it.
+  - `Saved/Ocean/T_EstateOceanShoreFar.png` (2048×1024) reaches 3 km past the map edge at about
+    5 m per texel, so the ring's coast gets the same foam line, shallows and swell fade.
+  The material uses the fine texture wherever it covers (blending over its last 30 m) and the far one
+  outside it. The frames are in `Saved/Ocean/ocean_bake.json`: `u = (Y − ShoreY0) / ShoreSizeY`,
+  `v = (ShoreX1 − X) / ShoreSizeX` in game metres, and likewise `Far*`. The material's `ShoreFrame`
+  and `ShoreFarFrame` parameters hold the same numbers, so re-run `build_ocean.py` after the
+  heightfield or the ring changes.
 - **Mesh.** `SM_EstateOcean` is a tensor grid in world centimetres at the origin. Cells are 8 m
   wherever the ground is below 1.2 m, and they grow ×1.28 per step outside the map out to 60 km on
   every side, so land that reaches the map edge never shows void behind it and the horizon is sea all
@@ -133,7 +146,7 @@ parts, all generated here with no external textures. `python Scripts\Terrain\bak
     throws a sheet of swash foam up the sand that drains into lace, with a thin line that lingers
     at the waterline. Foam lace drifts shoreward on a two-phase flow map.
   - `MapEdgeDeepening`: the authored seabed stops at the map edge (about −22 m) and the water
-    outside has no floor, which showed as a step from teal to navy along the edge. Over the last
+    outside has no floor (except in the shallows along the ring's coast, which keep their colour), which showed as a step from teal to navy along the edge. Over the last
     400 m inside the map, absorption and scattering are scaled up together (×3.5 at the edge),
     which keeps the saturated colour and makes the water read as deep.
   - Colour comes from low scattering and red-first absorption: turquoise over the sand shallows,

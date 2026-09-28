@@ -67,13 +67,17 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 + FMath::Square(Other.position.y - ApproachPoint.y));
             if (Distance < Best) { Best = Distance; Winner = &Other; }
         }
-        FocusableMatureTrees.Add(Node);
+        if (Winner && Winner->id == Node.id) FocusableMatureTrees.Add(Node);
     }
+    // Saplings are billhook overgrowth now, so the default route fells mature trees with the axe;
+    // only the camera-lifecycle route still inspects a sapling's camera-safe canopy.
+    const bool bCameraLifecycle = FParse::Param(FCommandLine::Get(), TEXT("HomesteadCameraLifecycle"));
+    const int32 TreesNeeded = bCameraLifecycle ? 1 : 3;
     const auto CenterChunk = Controller->State().activeChunk;
     for (int32 Y = CenterChunk.y - 6; Y <= CenterChunk.y + 6
-        && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty()); ++Y)
+        && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.Num() < TreesNeeded); ++Y)
         for (int32 X = CenterChunk.x - 6; X <= CenterChunk.x + 6
-            && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty()); ++X)
+            && (FocusableSaplings.Num() < 3 || FocusableMatureTrees.Num() < TreesNeeded); ++X)
         {
             Homestead::Generation::ChunkBaseline Baseline;
             if (Homestead::Generation::GenerateChunk(Controller->State().world, {X, Y}, Baseline)
@@ -82,10 +86,12 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
             {
                 const bool NeedSapling = FocusableSaplings.Num() < 3
                     && Entity.kind == Homestead::Generation::EntityKind::Sapling;
-                const bool NeedMature = FocusableMatureTrees.IsEmpty()
+                const bool NeedMature = FocusableMatureTrees.Num() < TreesNeeded
                     && Entity.kind == Homestead::Generation::EntityKind::ForestTree;
                 if (!NeedSapling && !NeedMature) continue;
                 const bool Known = Saplings.ContainsByPredicate(
+                    [&Entity](const Homestead::ResourceNode& Node) { return Node.key == Entity.key; })
+                    || FocusableMatureTrees.ContainsByPredicate(
                     [&Entity](const Homestead::ResourceNode& Node) { return Node.key == Entity.key; });
                 if (Known) continue;
                 Homestead::ResourceNode Node{};
@@ -97,10 +103,12 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
             }
         }
     if (!Avatar || !Avatar->HasHeroine() || Saplings.Num() < 3
-        || FocusableSaplings.Num() < 3 || FocusableMatureTrees.IsEmpty())
-    { Finish(false, TEXT("Clearing needs the real heroine, three saplings and a mature tree.")); return; }
-    const auto Tree = MakeShared<Homestead::ResourceNode>(FocusableSaplings[0]);
-    const auto MatureTree = MakeShared<Homestead::ResourceNode>(FocusableMatureTrees[0]);
+        || FocusableSaplings.Num() < 3 || FocusableMatureTrees.Num() < TreesNeeded)
+    { Finish(false, TEXT("Clearing needs the real heroine, three saplings and three mature trees.")); return; }
+    const auto Tree = MakeShared<Homestead::ResourceNode>(
+        bCameraLifecycle ? FocusableSaplings[0] : FocusableMatureTrees[0]);
+    const auto MatureTree = MakeShared<Homestead::ResourceNode>(
+        FocusableMatureTrees[bCameraLifecycle ? 0 : 1]);
     auto Probe = MakeShared<FClearProbe>();
     auto Animation = [Avatar]() { return Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()); };
     auto Hidden = [Avatar, Animation]() { return Animation() && Animation()->ActionWeight() < 0.001f
@@ -114,7 +122,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     auto Matches = [this, Probe]() { return MatchesActionState(*Controller, Probe->Expected, Probe->Hour); };
     auto Approach = [this, Avatar, Hidden](TSharedPtr<Homestead::ResourceNode> Node)
     {
-        Add(TEXT("Resolve and approach semantic sapling ") + FString::FromInt(Node->id),
+        Add(TEXT("Resolve and approach semantic resource ") + FString::FromInt(Node->id),
             [this, Avatar, Node]()
             {
                 Teleport(Node->position);
@@ -146,7 +154,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     };
     auto Restore = [this, Hidden, Approach, Tree]()
     {
-        Add(TEXT("Reload the real crafted checkpoint, including unchanged sapling IDs"),
+        Add(TEXT("Reload the real crafted checkpoint, including unchanged resource IDs"),
             [this]() { Tap(EKeys::F9); }, [this, Hidden]() { return !Controller->ToastIsError() && Hidden(); }, 0.8f);
         Approach(Tree);
     };
@@ -451,9 +459,10 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Homestead::ResourceNode OtherTree{};
     Homestead::ResourceNode Branch{};
     double BestPairDistance = TNumericLimits<double>::Max();
-    for (const auto& Candidate : Saplings)
+    for (const auto& Candidate : Controller->State().resources)
     {
-        if (Candidate.id == Tree->id) continue;
+        if (Candidate.kind != Homestead::ResourceKind::ForestTree || Candidate.cleared
+            || Candidate.id == Tree->id || Candidate.id == MatureTree->id) continue;
         for (const auto& Node : Controller->State().resources)
         {
             if (Node.kind != Homestead::ResourceKind::Branches || Node.cleared) continue;
@@ -464,12 +473,12 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         }
     }
     if (!OtherTree.id || !Branch.id || BestPairDistance > 300.0)
-    { Finish(false, TEXT("Default adjacent branch/sapling fixture is missing.")); return; }
-    Add(TEXT("Functional approach between adjacent branch and sapling for actual rapid input"),
+    { Finish(false, TEXT("Default adjacent branch/tree fixture is missing.")); return; }
+    Add(TEXT("Functional approach between adjacent branch and tree for actual rapid input"),
         [this, Branch, OtherTree]() { Teleport({Branch.position.x * 0.6 + OtherTree.position.x * 0.4,
             Branch.position.y * 0.6 + OtherTree.position.y * 0.4}); },
         [this, Branch, Hidden]() { return Controller->IsResourceFocused(Branch.id) && Hidden(); }, 0.7f);
-    Add(TEXT("Rapid mapped E/F/F preserves branch gather, branch clear and sapling yield once, with one pose"),
+    Add(TEXT("Rapid mapped E/F/F preserves branch gather, branch clear and tree yield once, with one pose"),
         [this, Probe, Snapshot, Branch, OtherTree]()
         {
             Snapshot();
@@ -483,13 +492,10 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
                 && Animation()->ClearStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
                 && Animation()->WaterStarts() == Probe->WaterStarts && Avatar->GetHatchet()->IsPresented()
                 && !Avatar->GetWateringTool()->IsPresented();
-        }, 0.55f);
+        }, 1.2f);
+    // Felling commits a frame or two after the press on slow frames; pass as soon as the state agrees.
+    Steps.Last().bCompleteWhenReady = true;
     Restore();
-    Add(TEXT("Sapling harvest A is not permanent clearing and does not swing the hatchet"),
-        [this, Probe, Snapshot, Tree]()
-        { Snapshot(); Probe->Ready = Probe->Expected.Harvest(Tree->id, Controller->PlayerPoint()).ok; Tap(EKeys::E); },
-        [Probe, Animation, Hidden, Matches]()
-        { return Probe->Ready && Matches() && Hidden() && Animation()->ClearStarts() == Probe->Starts; });
     Clear(Tree, EKeys::Gamepad_FaceButton_Left);
     Add(TEXT("Capture restrained clearing swing"), [this]() { Screenshot(TEXT("clearing-swing")); },
         [Avatar, Animation]() { return Animation()->ClearWeight() > 0.99f && Avatar->GetHatchet()->IsPresented(); }, 0.12f);
@@ -526,7 +532,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         [Avatar, Probe, Animation, Matches]() { return Matches() && Animation()->ClearStarts() == Probe->Starts
             && Animation()->WaterStarts() == Probe->WaterStarts && Animation()->GatherStarts() == Probe->GatherStarts
             && !Avatar->GetWateringTool()->IsPresented(); }, 0.12f);
-    Add(TEXT("Natural recovery preserves the depleted zero-yield clear and hides the tool"),
+    Add(TEXT("Natural recovery preserves the felled tree and its single yield and hides the tool"),
         []() {}, [Hidden, Matches]() { return Hidden() && Matches(); }, 2.0f);
     Add(TEXT("Capture recovered clearing"), [this]() { Screenshot(TEXT("clearing-recovered")); }, Hidden);
     Restore(); Approach(MatureTree); Clear(MatureTree, EKeys::F);
@@ -595,7 +601,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Add(TEXT("Load keeps exact cleared IDs/yield but neither held tool nor half swing"),
         [this]() { Tap(EKeys::F9); }, [this, Hidden, Matches]()
         { return !Controller->ToastIsError() && Hidden() && Matches(); }, 0.8f);
-    Add(TEXT("Current empty-context input is not sapling clearing"),
+    Add(TEXT("Current empty-context input is not tree felling"),
         [this, EmptyContext]() { Teleport(EmptyContext); }, Hidden, 0.7f);
     Add(TEXT("Empty-context secondary rejection preserves state and clearing starts"),
         [this, Snapshot]() { Snapshot(); Tap(EKeys::F); },
@@ -603,34 +609,26 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         { return Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
 
     if (bShippingQA) return;
-    const auto Depleted = MakeShared<Homestead::ResourceNode>(FocusableSaplings[1]);
-    const auto Reserved = MakeShared<Homestead::ResourceNode>(FocusableSaplings[2]);
-    Approach(Depleted);
-    Add(TEXT("Deplete another sapling through its actual harvest, before filling pack"),
-        [this, Probe, Snapshot, Depleted]()
-        { Snapshot(); Probe->Ready = Probe->Expected.Harvest(Depleted->id, Controller->PlayerPoint()).ok; Tap(EKeys::E); },
-        [Probe, Hidden, Matches]() { return Probe->Ready && Hidden() && Matches(); });
+    const auto Reserved = MakeShared<Homestead::ResourceNode>(FocusableMatureTrees[2]);
     for (const auto& Node : Controller->State().resources)
     {
-        if (Node.kind == Homestead::ResourceKind::Sapling) continue;
+        // Felling is the transaction under test; fill the pack only from ordinary forage.
+        if (Node.kind == Homestead::ResourceKind::Sapling || Node.kind == Homestead::ResourceKind::ForestTree) continue;
         auto Skip = [this, Node]() { return !Controller->Simulation().CanHarvest(Node.id)
             || Controller->Simulation().UsedCapacity() > Homestead::InventoryCapacity - 10; };
         Add(TEXT("Approach supply for real capacity setup ") + FString::FromInt(Node.id),
-            [this, Node]() { Teleport(Node.position); },
-            [this, Node]() { return Controller->IsResourceFocused(Node.id); }, 0.65f);
+            [this, Avatar, Node]() { Avatar->CancelAction(); Teleport(Node.position); },
+            []() { return true; }, 0.65f);
         Steps.Last().Skip = Skip;
         Add(TEXT("Fill pack through a real mapped harvest"), [this]() { Tap(EKeys::E); },
             [this]() { return !Controller->ToastIsError(); });
-        Steps.Last().Skip = Skip;
+        // Supply that a neighbouring plant out-focuses is skipped; the capacity check below proves the fill.
+        Steps.Last().Skip = [this, Node, Skip]() { return Skip() || !Controller->IsResourceFocused(Node.id); };
     }
     Approach(Reserved);
-    Add(TEXT("Ready sapling capacity rejection has no clear, yield, energy debit or swing"),
+    Add(TEXT("Ready tree capacity rejection has no clear, yield, energy debit or swing"),
         [this, Probe, Snapshot, Reserved]()
         { Snapshot(); Probe->Ready = !Probe->Expected.Clear(Reserved->id, Controller->PlayerPoint()).ok; Tap(EKeys::F); },
         [this, Probe, Animation, Hidden, Matches]()
         { return Probe->Ready && Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
-    Approach(Depleted);
-    Clear(Depleted, EKeys::F);
-    Add(TEXT("Depleted sapling may still clear with a nearly full pack and zero yield"),
-        []() {}, [Hidden, Matches]() { return Hidden() && Matches(); }, 2.2f);
 }

@@ -11,9 +11,13 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
   ('/Game/SurvivalGame/Maps/Homestead') after MCP answers.
 - The first launch after a build can take more than 10 minutes before MCP answers. Raise -TimeoutSeconds
   rather than killing it; watch Saved\Logs\SurvivalGame.log.
-- While it waits, the script answers the editor's "Wait for ZenServer?" dialog with Yes, and before launching
-  it removes a stale Saved\Autosaves\PackageRestoreData.json. Both dialogs otherwise block MCP with no log output.
+- While it waits, the script answers the editor's "Wait for ZenServer?" dialog with Yes, and stops the
+  editor's own `Build.bat -Mode=ValidatePlatforms` child if it's still running after 2 minutes (it queues
+  behind other worktrees' UBT builds and can hold startup for 10+ minutes). Before launching it removes a
+  stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
+- Refuses to launch when 3 or more Unreal processes (editors, games, commandlets) are already running on
+  the machine, and lists them with their worktree. -Force overrides.
 #>
 [CmdletBinding()]
 param(
@@ -24,6 +28,7 @@ param(
     [switch]$AllowPython,
     [switch]$RayTracing,
     [switch]$SkipBuild,
+    [switch]$Force,
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
@@ -70,6 +75,18 @@ if (Test-McpServer) {
 
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
+
+# Machine rule: at most 3 Unreal processes in total (editors, packaged games, commandlets). More have
+# reset the GPU driver and exhausted VRAM for every session. Checked right before launching, so a
+# listing earlier in the same command can't go stale.
+$unreal = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'UnrealEditor%' OR Name LIKE 'SurvivalGame%' OR Name LIKE 'JennysHomestead%'" -ErrorAction SilentlyContinue)
+if ($unreal.Count -ge 3 -and -not $Force) {
+    $list = ($unreal | ForEach-Object {
+        $where = if ($_.CommandLine -match 'copilot-worktrees\\SurvivalGame\\([^\\"]+)') { $Matches[1] } elseif ($_.ExecutablePath -match 'HomesteadMVP') { 'HomesteadMVP' } else { '?' }
+        "  PID $($_.ProcessId) $($_.Name) $([int]($_.WorkingSetSize / 1MB)) MB since $($_.CreationDate.ToString('HH:mm')) ($where)"
+    }) -join "`n"
+    throw "$($unreal.Count) Unreal processes are already running (the machine limit is 3):`n$list`nWait for one to finish, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
+}
 
 # A killed editor leaves Saved\Autosaves\PackageRestoreData.json, and the next launch then stops on a
 # modal "Restore Packages" dialog before MCP starts (it doesn't take synthetic input). Agents don't
@@ -153,6 +170,22 @@ while ((Get-Date) -lt $deadline) {
     }
     if ([HomesteadMcp.EditorDialogs]::AnswerYes([uint32]$process.Id, 'Wait for ZenServer?')) {
         Write-Host 'Answered "Wait for ZenServer?" with Yes (zenserver was restarting for this worktree''s cache).'
+    }
+    # Every editor start runs `Build.bat -Mode=ValidatePlatforms` (TargetPlatformManagerModule.cpp). It's a
+    # single-instance UBT mode, so it queues behind any other worktree's UBT build and can hold startup for
+    # 10+ minutes. It normally takes seconds; stopping a stuck one lets the editor continue (lanes did this
+    # by hand). Only this editor's own child tree is touched.
+    $stuck = @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $($process.Id)" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match 'ValidatePlatforms' -and ((Get-Date) - $_.CreationDate).TotalSeconds -gt 120 })
+    foreach ($child in $stuck) {
+        $tree = @($child.ProcessId)
+        for ($i = 0; $i -lt $tree.Count -and $i -lt 64; $i++) {
+            $tree += @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $($tree[$i])" -ErrorAction SilentlyContinue |
+                ForEach-Object { $_.ProcessId })
+        }
+        [array]::Reverse($tree)
+        foreach ($id in $tree) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
+        Write-Host "Stopped the editor's ValidatePlatforms check (PID $($child.ProcessId), over 2 min; probably waiting on another worktree's UBT build)."
     }
     Start-Sleep -Seconds 3
 }

@@ -476,6 +476,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         },
         [this, Before]() { return !Controller->NativeMenu->HasActiveDialog()
             && Controller->Simulation().Serialize() == *Before; });
+    QueueGrant(Homestead::Item::Billhook, 1);
     Add(TEXT("Controller tabs reach real carried inventory"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::I); },
         [this]()
@@ -483,7 +484,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Controller->BookPage() == 0 && !Controller->UsesGamepad() && Subject
                 && Subject->Subject == EHomesteadMenuSubject::ItemGroup
-                && Subject->Id == static_cast<int>(Homestead::Item::Knife) && Subject->Quantity == 1
+                && Subject->Id == static_cast<int>(Homestead::Item::Billhook) && Subject->Quantity == 1
                 && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("Carried: 1"));
         });
     Add(TEXT("Inventory portrait animates on its own while the simulation is paused"),
@@ -535,8 +536,9 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Enter); Tap(EKeys::Enter); },
         [this, Before]() { const FString Details = Controller->NativeMenu->GetDisplayedDetails();
             return !Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
-                && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 4"))
-                && Details.Contains(TEXT("Fiber: Have")) && Details.Contains(TEXT("Reeds near water")); });
+                && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 2"))
+                && Details.Contains(TEXT("Rusted axe head: Have"))
+                && Details.Contains(TEXT("Salvage piles around the manor")); });
     Capture(TEXT("native-crafting"));
     Add(TEXT("Mapped tab opens purpose-specific building plans"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
@@ -563,7 +565,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { Controller->NativeMenu->FocusLegacySubject(2); },
         [this]() { return Controller->BookPage() == 3
             && Controller->NativeMenu->GetActionCount() == 0
-            && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("reeds")); });
+            && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("salvage piles")); });
     Add(TEXT("Credits has no fabricated Read action"),
         [this]() { Controller->OpenBook(5); },
         [this]() { return Controller->BookPage() == 5
@@ -902,7 +904,7 @@ void AHomesteadSmokeTest::PrepareCraftingChecks()
             auto& State = const_cast<Homestead::State&>(Full.GetState());
             State.inventory.fill(0);
             State.inventoryLayout.clear();
-            for (const auto Pair : {TPair<Homestead::Item, int32>(Homestead::Item::Knife, 1),
+            for (const auto Pair : {TPair<Homestead::Item, int32>(Homestead::Item::Billhook, 1),
                 TPair<Homestead::Item, int32>(Homestead::Item::Hatchet, 1),
                 TPair<Homestead::Item, int32>(Homestead::Item::Timber, 1),
                 TPair<Homestead::Item, int32>(Homestead::Item::Stone, 117)})
@@ -1352,7 +1354,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 && Rows.IndexOfByPredicate([this, Chest](const FHomesteadRow& Row)
                     { return Row.ContainerId == *Chest || Row.CanStore || Row.CanTake; }) == INDEX_NONE
                 && !Controller->MenuInventorySummary().Contains(TEXT("Chest")); });
-    Add(TEXT("Record the compact Branch tile and focus Fiber as a pointer reorder target"),
+    Add(TEXT("Record the compact Branch tile and focus Bramble canes as a pointer reorder target"),
         [this, Branches, DragSource]()
         {
             Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *Branches, 0);
@@ -1360,41 +1362,41 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             if (!Widget) { Finish(false, TEXT("Branch tile geometry is unavailable.")); return; }
             const auto Geometry = Widget->GetCachedGeometry();
             *DragSource = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
-            int32 Fiber = 0;
+            int32 Canes = 0;
             for (const auto& Entry : *Controller->Simulation().GetLayout(0))
-                if (!Entry.wearableId && Entry.item == Homestead::Item::Fiber) { Fiber = Entry.groupId; break; }
-            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Fiber, 0);
+                if (!Entry.wearableId && Entry.item == Homestead::Item::BrambleCanes) { Canes = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Canes, 0);
         },
         [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
-    Add(TEXT("Drag Branch onto Fiber position to reorder without changing quantities"),
+    Add(TEXT("Drag Branch onto the Bramble canes position to reorder without changing quantities"),
         [this, DragSource, DragTarget, PointerDrag]()
         {
             const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
-            if (!Widget) { Finish(false, TEXT("Fiber tile geometry is unavailable.")); return; }
+            if (!Widget) { Finish(false, TEXT("Bramble canes tile geometry is unavailable.")); return; }
             const auto Geometry = Widget->GetCachedGeometry();
             *DragTarget = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
             PointerDrag(*DragSource, *DragTarget);
         },
         [this, BranchTotal]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             if (!Layout || Controller->Simulation().Count(Homestead::Item::Branch) != *BranchTotal) return false;
-            int BranchIndex = -1, FiberIndex = -1;
+            int BranchIndex = -1, CanesIndex = -1;
             for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
             {
                 if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
-                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::BrambleCanes) CanesIndex = Index;
             }
-            return BranchIndex > FiberIndex && !Controller->NativeMenu->IsPointerDraggingItem(); });
+            return BranchIndex > CanesIndex && !Controller->NativeMenu->IsPointerDraggingItem(); });
     Add(TEXT("Sort restores deterministic order after pointer reorder"),
         [this]() { Tap(EKeys::S); },
         [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             if (!Layout) return false;
-            int BranchIndex = -1, FiberIndex = -1;
+            int BranchIndex = -1, CanesIndex = -1;
             for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
             {
                 if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
-                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::BrambleCanes) CanesIndex = Index;
             }
-            return BranchIndex >= 0 && BranchIndex < FiberIndex; });
+            return BranchIndex >= 0 && BranchIndex < CanesIndex; });
     Add(TEXT("Enter picks up the focused Branch tile for virtual drag"),
         [this, Branches]()
         {
@@ -1402,35 +1404,35 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             Tap(EKeys::Enter);
         },
         [this]() { return Controller->NativeMenu->IsVirtualDraggingItem(); });
-    Add(TEXT("Enter drops Branch at focused Fiber using the same reorder authority"),
+    Add(TEXT("Enter drops Branch at focused Bramble canes using the same reorder authority"),
         [this]()
         {
-            int32 Fiber = 0;
+            int32 Canes = 0;
             for (const auto& Entry : *Controller->Simulation().GetLayout(0))
-                if (!Entry.wearableId && Entry.item == Homestead::Item::Fiber) { Fiber = Entry.groupId; break; }
-            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Fiber, 0);
+                if (!Entry.wearableId && Entry.item == Homestead::Item::BrambleCanes) { Canes = Entry.groupId; break; }
+            Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Canes, 0);
             Tap(EKeys::Enter);
         },
         [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             if (!Layout || Controller->NativeMenu->IsVirtualDraggingItem()) return false;
-            int BranchIndex = -1, FiberIndex = -1;
+            int BranchIndex = -1, CanesIndex = -1;
             for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
             {
                 if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
-                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::BrambleCanes) CanesIndex = Index;
             }
-            return BranchIndex > FiberIndex; });
+            return BranchIndex > CanesIndex; });
     Add(TEXT("Sort restores order after virtual drag"),
         [this]() { Tap(EKeys::S); },
         [this]() { const auto* Layout = Controller->Simulation().GetLayout(0);
             if (!Layout) return false;
-            int BranchIndex = -1, FiberIndex = -1;
+            int BranchIndex = -1, CanesIndex = -1;
             for (int Index = 0; Index < static_cast<int>(Layout->size()); ++Index)
             {
                 if ((*Layout)[Index].item == Homestead::Item::Branch) BranchIndex = Index;
-                if ((*Layout)[Index].item == Homestead::Item::Fiber) FiberIndex = Index;
+                if ((*Layout)[Index].item == Homestead::Item::BrambleCanes) CanesIndex = Index;
             }
-            return BranchIndex >= 0 && BranchIndex < FiberIndex; });
+            return BranchIndex >= 0 && BranchIndex < CanesIndex; });
     Add(TEXT("Back cancels virtual drag without closing Inventory or mutating state"),
         [this, Branches, Snapshot]()
         {
@@ -1548,6 +1550,9 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             const auto Geometry = Widget->GetCachedGeometry();
             const FVector2D Position = Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f;
             Slate.SetCursorPos(Position);
+            // A real pointer hovers the tile before clicking; the button only clicks while hovered.
+            Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                EKeys::Invalid, 0, FModifierKeysState()));
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftControl, IE_Pressed, 1));
             TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
             Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
@@ -1833,14 +1838,14 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             for (auto& Piece : State.structures) if (Piece.id == *Chest) { Storage = &Piece; break; }
             if (!Storage) { Finish(false, TEXT("Exact chest disappeared before full-grid fixture.")); return; }
             State.inventory.fill(0);
-            State.inventory[static_cast<int32>(Homestead::Item::Knife)] = 1;
+            State.inventory[static_cast<int32>(Homestead::Item::Billhook)] = 1;
             State.inventory[static_cast<int32>(Homestead::Item::Branch)] = 119;
             State.inventoryLayout.clear();
             Storage->storage.fill(0);
             Storage->storage[static_cast<int32>(Homestead::Item::Stone)] = 120;
             Storage->layout.clear();
             int32 GroupId = State.nextGroupId;
-            State.inventoryLayout.push_back({GroupId++, Homestead::Item::Knife, 1, 0});
+            State.inventoryLayout.push_back({GroupId++, Homestead::Item::Billhook, 1, 0});
             for (int32 Index = 0; Index < 119; ++Index)
             {
                 if (Index == 0) *FullPackGroup = GroupId;
@@ -1974,7 +1979,7 @@ void AHomesteadSmokeTest::PrepareNativeResetChecks()
         [this]() { Tap(EKeys::Down); Tap(EKeys::Enter); },
         [this, Before, World, Incompatible]() { return !Controller->MenuNeedsTestReset()
             && Controller->WorldId != *World && Controller->Simulation().Serialize() != *Before
-            && Controller->Simulation().Count(Homestead::Item::Knife) == 1
+            && Controller->Simulation().UsedCapacity() == 0
             && Controller->State().wearables.size() == 1
             && IFileManager::Get().FileExists(**Incompatible); });
 }
@@ -2035,17 +2040,18 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
                     }
                 }
             *Layered = *Original;
-            while (Layered->Count(Homestead::Item::Fiber) < 14)
+            // Reed fibre and the knife left new games (garments become the dressmaker's, round 3);
+            // garment coverage keeps the old stock and tool as stand-in grants.
+            if (Layered->Count(Homestead::Item::Knife) == 0 && !Layered->GrantItems(Homestead::Item::Knife, 1))
             {
-                bool Gathered = false;
-                for (const auto& Node : Layered->GetState().resources)
-                    if (Node.kind == Homestead::ResourceKind::Reeds && Layered->CanHarvest(Node.id))
-                    { Gathered = Layered->Harvest(Node.id, Node.position).ok; break; }
-                if (!Gathered)
-                {
-                    Finish(false, TEXT("Layered coverage could not gather 14 Fiber through real resource authority."));
-                    return;
-                }
+                Finish(false, TEXT("Layered coverage could not hold the stand-in knife."));
+                return;
+            }
+            if (Layered->Count(Homestead::Item::Fiber) < 14
+                && !Layered->GrantItems(Homestead::Item::Fiber, 14 - Layered->Count(Homestead::Item::Fiber)))
+            {
+                Finish(false, TEXT("Layered coverage could not hold 14 stand-in Fiber."));
+                return;
             }
             if (Ready)
             {
@@ -2268,7 +2274,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             Controller->CloseBook();
             Controller->OpenBook(0);
             for (const auto& Entry : *Controller->Simulation().GetLayout(0))
-                if (!Entry.wearableId && Entry.item == Homestead::Item::Knife && Entry.quantity == 1)
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Billhook && Entry.quantity == 1)
                 {
                     *DropGroup = Entry.groupId;
                     *DropItem = Entry.item;
@@ -2315,9 +2321,9 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             if (Controller->Simulation().Count(*DropItem) != *DropCount - 1
                 || Controller->State().worldDrops.size() != 1) return false;
             const auto Slots = Controller->HotbarSnapshot();
-            const auto* Knife = Slots.FindByPredicate([](const FHomesteadHotbarSlot& Slot)
-                { return Slot.Tool == Homestead::Item::Knife; });
-            if (!Knife || Knife->Available) return false;
+            const auto* Billhook = Slots.FindByPredicate([](const FHomesteadHotbarSlot& Slot)
+                { return Slot.Tool == Homestead::Item::Billhook; });
+            if (!Billhook || Billhook->Available) return false;
             *DropId = Controller->State().worldDrops.front().id;
             return *DropId > 0;
         });
@@ -2422,7 +2428,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
             && Controller->State().worldDrops.empty() && Controller->Landscape
             && !Controller->Landscape->DropVisuals.Contains(*DropId)
             && Controller->HotbarSnapshot().ContainsByPredicate([](const FHomesteadHotbarSlot& Slot)
-                { return Slot.Tool == Homestead::Item::Knife && Slot.Available; }); }, 0.8f);
+                { return Slot.Tool == Homestead::Item::Billhook && Slot.Available; }); }, 0.8f);
     const auto DropWearable = MakeShared<int32>(0);
     const auto DropWearableDye = MakeShared<int32>(0);
     const auto WearablePlayerLocation = MakeShared<FVector>(FVector::ZeroVector);

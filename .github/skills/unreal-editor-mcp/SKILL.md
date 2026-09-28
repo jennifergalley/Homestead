@@ -30,7 +30,9 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
   line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
 - **At most 3 Unreal processes on the machine**, counting editors, packaged games and commandlets
-  (`UnrealEditor-Cmd` imports and bootstraps too). Check before launching:
+  (`UnrealEditor-Cmd` imports and bootstraps too). `Start-EditorMcp.ps1` refuses to launch at 3 and
+  lists who owns them (`-Force` overrides). For other launches (a standalone game, a commandlet), check
+  in the same command, right before starting:
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
   More processes than that have reset the GPU driver and exhausted VRAM, which takes every
   session's editor down.
@@ -104,7 +106,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
-| Editor never shows a window; the log stops at `Build.bat -Mode=ValidatePlatforms` | The AutoSDK platform check waits on another worktree's UBT mutex | Find the editor's `cmd.exe` child (`Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`) and `Stop-Process -Id` it and its children. The editor continues. |
+| Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
 | Every MCP call times out for minutes, but the editor process is still responding | The shared zenserver (`%LOCALAPPDATA%\UnrealEngine\Common\Zen`) stopped answering and the game thread is blocked on it; it recovers by itself (one stall lasted 1009 s: `post recovery finished in 1009.384 seconds`) | Search `Saved\Logs\SurvivalGame.log` for `LogZenServiceInstance` and wait. Don't kill the editor, and never stop `zenserver.exe`. |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
@@ -161,7 +163,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | UI is double-scaled at 4K but fine in PIE | The engine DPI curve (`bAllowHighDPIInGameMode`) already scales viewport widgets, so an extra height/1080 `SScaleBox` doubles them | Don't add your own resolution scaling. Check real resolutions in a standalone window (section 8), because PIE at editor size hides it. |
 | A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
 | A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
-| A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. |
+| A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. A 3840x2160 PNG is about 11 MB, over the `view` tool's 10 MB limit: downscale or crop it with PIL before viewing. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | After `BugItGo` she walks through walls and counters and sinks knee-deep into floors (looks like missing collision) | `UCheatManager::BugItWorker` calls `Ghost()` (`CheatManager.cpp:1074`) | Type `Walk` after `BugItGo`. |
 | Keys posted to the packaged game's console don't type | `WM_CHAR` isn't picked up there | Send a `WM_KEYDOWN` per character: VK = the uppercase letter, `-` 0xBD, `.` 0xBE, space 0x20; backtick (0xC0) opens the console. (`[GameWin]::Key` in `Scripts\GameWindow.ps1`.) |
@@ -247,7 +249,7 @@ clashes between parallel callers.
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
 | `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
-| `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
+| `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px). To click something seen in a `shot` capture, scale capture pixels by client width / capture width and add the window-rect origin: with a 3840-wide client, a 1280x692 capture and the rect at (-12, -12), `x = cap_x * 3 + 12`, `y = cap_y * 3 + 12` |
 
 Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,
 `$McpSlate` (SlateInspector), `$McpPlay` (HomesteadPlayTools), `$McpPython` (HomesteadEditorPython).
@@ -358,6 +360,35 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   non-final swing toasts "N more swings.", the last one clears and toasts the yield. Walking more
   than 1.5 m away resets the count. `HomesteadGive RustedBillhookHead 1` + two Branches lets the
   Craft page's "Haft a billhook" run anywhere.
+- **Estate tool route (new game, verified in PIE on main 17a64854):**
+  - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
+    `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
+    the standing room at about (-25750, -63800). To leave on foot, `walk_to` (-25750, -64300) and
+    then (-25750, -64900).
+  - Salvage piles: 520001 (-25600, -64350), 520002 (-25450, -65250), 520004 (-23950, -65150),
+    520003 (-24600, -66200) and 520005 (-26100, -66100). Search each with `E`/A.
+    - Each search gives the next missing head plus 1 scrap iron, in the order billhook, axe,
+      scythe, pickaxe, hoe. The order follows your search order, not the pile.
+    - `walk_to` steers straight and gets stuck on the ruin walls around 520003 and 520005. For
+      those, `tp` to the pile ±90 cm and check that `focusTitle` is "Salvage pile".
+  - Branch piles (each haft takes 2 Branch; a pile gives about 5): 500001 (-26650, -63400), 500002 (-26950, -64500)
+    and 500003 (-27350, -62900).
+  - Craft (`C`) tiles, left to right: Haft an axe, hoe, scythe, billhook, pickaxe, then the two root
+    dishes and Split firewood. Hold `Gamepad_FaceButton_Bottom` (or `Enter`) about 3 s to haft.
+  - Hafted tools auto-slot to the hotbar: `One` billhook, `Two` axe, `Three` scythe, `Four`
+    pickaxe, `Five` hoe (`hotbarSlot` 0-4).
+  - Worn-tier targets near the manor:
+    - thin bramble 510001 (-26050, -63000);
+    - forecourt tall grass and weeds 510008-510037, around (-26450, -62100);
+    - rubble 510040 (-26550, -65800) and a small rock 510043 (-25150, -66600);
+    - a two-swing sapling 510076 (-30592, -61863);
+    - a three-swing small stump 510086 (-30981, -63104);
+    - a fallen bough 510062 (-24272, -61097).
+  - Iron-tier prompts: thicket 510087 (-28972, -64048), boulder 510095 (-23350, -67000), large
+    stump 510091 (-33451, -62959) and fallen log 510092 (-33729, -59833).
+  - Approach by teleporting 260 cm short of the target, then `walk_to` it with a 10 cm stop.
+    Tapping during the axe's ~3 s recovery is dropped, so wait about 3.5 s between axe swings.
+  - The scythe arc reaches only about 1.6 m ahead ("Step closer to mow.").
 - An action that silently does nothing usually left a reason in `toast` (`toastIsError: true`),
   for example "Not enough pack space." when a felled tree's wood won't fit. Read it before
   debugging the animation.
@@ -745,7 +776,9 @@ Extend it there when play needs a capability; prefer real input over state edits
   under that folder instead of the package's own `Saved\`.
 - **UI at real resolutions and DPI (standalone window, not PIE):** launch
   `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
-  -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720), wait for `MUSIC_TRACK started` in that log
+  -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720; for 4K use `-fullscreen` instead of
+  `-windowed`, since a 4K window doesn't fit the 175%-scaled desktop; `[GameWin]::Capture` works in
+  fullscreen), wait for `MUSIC_TRACK started` in that log
   plus about 20 s, then dot-source `Scripts\GameWindow.ps1`: `Find-GameWindow -ProcessId <pid>`,
   `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
   and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 3-process limit; close it

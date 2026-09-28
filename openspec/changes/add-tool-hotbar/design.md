@@ -23,7 +23,7 @@ The reference review establishes conventions rather than a visual target: Minecr
 
 ### 1. Use references to carried tools, not tool storage
 
-Ten saved slot records hold item enum IDs or Empty; they never hold quantities or ownership. First delivery seeds stable defaults: Knife, Hatchet, Digging Stick, Watering Can, then six empty slots. A slot resolves live against carried inventory. If the tool is absent or chest-stored, the slot renders ghosted and is unusable; it becomes live again when carried.
+Ten saved slot records hold item enum IDs or Empty; they never hold quantities or ownership. A new estate game seeds stable defaults in the order she hafts them (`AHomesteadController::ResetHotbar`): billhook, axe, scythe, pickaxe, hoe, pail, berries, then three empty slots. A slot resolves live against carried inventory. If the tool is absent or chest-stored, the slot renders ghosted and is unusable; it becomes live again when carried.
 
 **Alternative considered:** move tools out of pack capacity into a separate belt. Rejected because it changes survival inventory balance and creates a second ownership system.
 
@@ -39,10 +39,10 @@ Each slot is square with a restrained Pine backing, small upper-corner number, c
 
 E/controller A remains context interaction: gather loose resources/forage, open storage, sleep, cook, and fill/interact where applicable. Left mouse/controller right trigger becomes `UseSelectedTool`, resolving the carried tool and current focus/cell:
 
-- Knife: admitted low-resource clearing role;
-- Hatchet: sapling/tree clear/fell and split-firewood only on an explicit eligible target;
-- Digging Stick: plot weed or forward-cell till;
-- Watering Can: eligible plot water or stream refill.
+- Billhook, scythe and pickaxe: clearing overgrowth of their kind at or above the tool's tier (`add-overgrown-estate-clearing`);
+- Axe (the `Hatchet` item): sapling/tree clear/fell, stumps and fallen timber, and split-firewood only on an explicit eligible target;
+- Hoe (the `DiggingStick` item): plot weed or forward-cell till;
+- Pail (the `WateringCan` item): eligible plot water or stream refill.
 
 Controller passes only existing action requests to Simulation. Success triggers current presentation; failure uses current feedback. A selected tool never broadens interaction range or fabricates a target.
 
