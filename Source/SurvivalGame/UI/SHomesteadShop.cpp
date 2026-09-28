@@ -1,6 +1,7 @@
 #include "SHomesteadShop.h"
 
 #include "SHomesteadIcon.h"
+#include "SHomesteadHudScale.h"
 #include "../HomesteadController.h"
 #include "../HomesteadShopkeeper.h"
 #include "Brushes/SlateColorBrush.h"
@@ -28,8 +29,6 @@ const FLinearColor ShopPanel(0.025f, 0.05f, 0.038f, 0.93f);
 const FLinearColor ShopRow(0.05f, 0.085f, 0.065f, 0.85f);
 const FLinearColor ShopSelected(0.13f, 0.20f, 0.15f, 0.95f);
 const FLinearColor ShopPineInk(0.025f, 0.05f, 0.038f, 1.0f);
-constexpr float LogicalWidth = 1280.0f;
-constexpr float LogicalHeight = 720.0f;
 
 const FButtonStyle& ShopButtonStyle()
 {
@@ -55,7 +54,9 @@ void SHomesteadShop::Construct(const FArguments& Args)
     [
         SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
         [
-            SNew(SBox).WidthOverride(LogicalWidth).HeightOverride(LogicalHeight)
+            SNew(SBox)
+            .WidthOverride_Lambda([]() { return FOptionalSize(static_cast<float>(HomesteadMenus::FullScreenLogicalSize().X)); })
+            .HeightOverride_Lambda([]() { return FOptionalSize(static_cast<float>(HomesteadMenus::FullScreenLogicalSize().Y)); })
             [
                 SAssignNew(Host, SBox)
             ]

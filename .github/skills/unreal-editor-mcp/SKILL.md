@@ -294,7 +294,10 @@ hk release_all; mcp $E StopPIE
   width (`UI/SHomesteadVitals`): bread, bed and coin icons with bars for food and energy and the $
   amount for the purse, with no text labels. The Slate hotbar and vitals wrap themselves in
   `SHomesteadHudScale`, so they follow the Canvas HUD's `UiScale` (1080 lines, clamped 0.4-1.5) and
-  keep their proportion at 4K. Check captures against this; the field book covers it when open.
+  keep their proportion at 4K. The field book and shop screen size themselves with
+  `HomesteadMenus::FullScreenLogicalSize()` (`SHomesteadHudScale.h`): physical size / (1.5 ×
+  `UiScale`), at least 1280×720, so 1280×720 up to 1620p and about 1707×960 at 4K. Check captures
+  against this; the field book covers it when open.
 - **Estate PIE recipe:** the editor opens the Estate at startup (if you've switched away, `load_level`
   it back). For a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
   until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
