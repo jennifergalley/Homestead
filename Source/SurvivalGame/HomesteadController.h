@@ -127,7 +127,13 @@ public:
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
+    // The bed's choices (Homestead::SleepOptions) for her Energy now, and the one the prompt shows:
+    // the default first, or what she picked with the D-pad (Up/Down) while at this bed.
+    std::vector<Homestead::SleepOption> BedSleepOptions() const;
+    int32 BedSleepIndex() const;
     double BedSleepHours() const;
+    // "Sleep until morning (wake 06:45)", "Sleep until rested (wake ~14:30)", "Nap 1 h (wake 23:15)".
+    static FString SleepOptionLabel(const Homestead::SleepOption& Option);
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
@@ -249,6 +255,8 @@ public:
     UFUNCTION(Exec) void HomesteadOpenStore();
     // Console playtest aid: add (or with a negative amount remove) cents from her purse.
     UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
+    // Playtest aid: set her Energy (0-100), e.g. to try dozing off or the bed's "until rested".
+    UFUNCTION(Exec) void HomesteadEnergy(float Energy = 100.0f);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -533,6 +541,11 @@ private:
     // second unless forced).
     void UpdatePlacement(bool bForce);
     Homestead::Result SleepInBed(Homestead::Point Position);
+    // At the bed, Up/Down (D-pad) steps through the sleep choices. False when not at a bed.
+    bool CycleBedChoice(int32 Delta);
+    Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
+    int32 BedChoiceBed = INDEX_NONE;
+    int32 SeenDozes = 0;
     void CycleZoom();
     void QuickSave();
     void QuickLoad();

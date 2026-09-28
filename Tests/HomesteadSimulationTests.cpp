@@ -1404,13 +1404,20 @@ void SleepAndFailure()
     Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.hunger = 80; state.energy = 60; });
     OK(bare.Sleep(8, Home));
     CHECK(!bare.GetState().failed && bare.GetState().energy == 100);
+    // Time awake drains Energy slowly (1.2 points last two hours). Running out doesn't fail her: she
+    // dozes off where she stands for DozeHours at the slower rate, then carries on awake.
     Simulation tired;
     Edit(tired, [](State& state) { state.energy = 1.2; });
+    const double tiredStart = tired.GetState().hour;
     tired.AdvanceGameHours(10, Home);
-    CHECK(tired.GetState().failed);
-    CHECK(tired.GetState().energy == 0);
-    // Time awake drains Energy slowly: 1.2 points last two hours.
-    CHECK(Close(tired.GetState().hour, 8.0));
+    CHECK(!tired.GetState().failed && tired.DozeCount() == 1);
+    CHECK(Close(tired.GetState().hour, tiredStart + 10.0));
+    CHECK(Close(tired.GetState().energy, Exertion::DozeHours * Exertion::DozePerHour - 2.0 * Exertion::AwakePerHour));
+    // A doze that runs out her food still fails her, as any sleep would.
+    Simulation starving;
+    Edit(starving, [](State& state) { state.energy = 0.6; state.hunger = 3.0; });
+    starving.AdvanceGameHours(4, Home);
+    CHECK(starving.GetState().failed && starving.GetState().hunger == 0 && starving.DozeCount() == 1);
 }
 
 void SleepAndFiniteBoundaries()
@@ -2949,12 +2956,36 @@ void ChestCapacityAndWaterSpace()
     CHECK(waterSim.UsedCapacity() == InventoryCapacity);
 }
 
-void BedSleepHourPolicy()
+void SleepOptionPolicy()
 {
-    CHECK(Close(BedSleepHours(20.0), 10.75));
-    CHECK(Close(BedSleepHours(3.0), 8.0));
-    CHECK(Close(BedSleepHours(12.0), 2.0));
-    CHECK(Close(BedSleepHours(16.5), 1.5));
+    // 21:00 with part of her energy left: "until morning" leads and wakes her at 06:45; "until
+    // rested" (40 short, 4 h) and a nap follow.
+    const auto night = SleepOptions(21.0, 60.0);
+    CHECK(night.size() == 3);
+    CHECK(night[0].choice == SleepChoice::UntilMorning && Close(night[0].hours, 9.75) && Close(night[0].wakeHour, 6.75));
+    CHECK(night[1].choice == SleepChoice::UntilRested && Close(night[1].hours, 4.0) && Close(night[1].wakeHour, 1.0));
+    CHECK(night[2].choice == SleepChoice::Nap && Close(night[2].hours, 1.0) && Close(night[2].wakeHour, 22.0));
+    // A night owl going to bed at 05:00 nearly spent sleeps through into the afternoon.
+    const auto owl = SleepOptions(5.0, 5.0);
+    CHECK(owl[0].choice == SleepChoice::UntilRested && Close(owl[0].hours, 9.5) && Close(owl[0].wakeHour, 14.5));
+    // Rested at noon: one short rest, no separate nap.
+    const auto noon = SleepOptions(12.0, 100.0);
+    CHECK(noon.size() == 1 && noon[0].choice == SleepChoice::UntilRested && Close(noon[0].hours, 1.0));
+    // "Until rested" that would wake her near morning is folded into "until morning".
+    const auto late = SleepOptions(22.75, 20.0);
+    CHECK(late.size() == 2 && late[0].choice == SleepChoice::UntilMorning && late[1].choice == SleepChoice::Nap);
+    // Bounds: at most ten hours to rest, an early night from 18:00 runs to morning.
+    CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
+    CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
+    CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
+    // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
+    Simulation owlSim;
+    BuildingStock(owlSim);
+    OK(owlSim.Place(Piece::Bed, -3, 0, 0, Home));
+    Edit(owlSim, [](State& state) { state.hour = 29.0; state.energy = 5.0; state.hunger = 90.0; });
+    OK(owlSim.Sleep(SleepOptions(owlSim.GetState().hour, owlSim.GetState().energy)[0].hours, Home));
+    CHECK(Close(owlSim.GetState().hour, 38.5));
+    CHECK(Close(owlSim.GetState().energy, 100.0) && !owlSim.GetState().failed);
 }
 
 void OvergrowthTableAndPrompts()
@@ -3326,7 +3357,7 @@ int main()
     Run("taking down chests returns contents and drops overflow", DeconstructChestContentsAndOverflow);
     Run("heritage manor pieces cannot be taken down", HeritageManorPiecesCannotBeDeconstructed);
     Run("large chests and water portions do not crowd the pack", ChestCapacityAndWaterSpace);
-    Run("bed sleep hour policy", BedSleepHourPolicy);
+    Run("sleep option policy", SleepOptionPolicy);
     Run("overgrowth tools, tiers and prompts", OvergrowthTableAndPrompts);
     Run("salvage, hafting and tier-gated clearing by stable id", HaftingBootstrapAndClearing);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);

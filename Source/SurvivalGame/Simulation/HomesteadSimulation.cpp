@@ -1028,15 +1028,25 @@ bool FootprintsOverlap(const Footprint& a, const Footprint& b)
         if (std::abs(delta.x * axis.x + delta.y * axis.y) >= radius(a, axis) + radius(b, axis)) return false;
     return true;
 }
-double BedSleepHours(double hour)
+std::vector<SleepOption> SleepOptions(double hour, double energy)
 {
-    constexpr double WakeHour = 6.75;
     double current = std::fmod(hour, 24.0);
     if (current < 0.0) current += 24.0;
-    const bool day = current >= WakeHour - 0.01 && current < 18.0;
-    if (day) return Clamp(std::min(2.0, 18.0 - current), 0.25, 2.0);
-    const double toDawn = std::fmod(WakeHour - current + 48.0, 24.0);
-    return toDawn >= 4.0 ? toDawn : 8.0;
+    const auto wake = [current](double hours) { return std::fmod(current + hours, 24.0); };
+    std::vector<SleepOption> options;
+    const bool evening = current >= 18.0 || current < 5.0;
+    const double toMorning = std::fmod(MorningWakeHour - current + 48.0, 24.0);
+    if (evening && toMorning >= Exertion::NapHours)
+        options.push_back({SleepChoice::UntilMorning, toMorning, MorningWakeHour});
+    const double deficit = Clamp(100.0 - (std::isfinite(energy) ? energy : 0.0), 0.0, 100.0);
+    const double rested = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
+        Exertion::MinRestHours, Exertion::MaxRestHours);
+    if (options.empty() || std::abs(rested - options.front().hours) > 0.75)
+        options.push_back({SleepChoice::UntilRested, rested, wake(rested)});
+    bool shortOffered = false;
+    for (const auto& option : options) shortOffered |= option.hours <= Exertion::NapHours + 0.01;
+    if (!shortOffered) options.push_back({SleepChoice::Nap, Exertion::NapHours, wake(Exertion::NapHours)});
+    return options;
 }
 
 Simulation::Simulation() { NewGame(); }
@@ -2540,12 +2550,12 @@ Result Simulation::SetDayMinutes(double minutes)
     state_.dayMinutes = minutes;
     return Good("Day length updated.");
 }
-void Simulation::Step(double hours, Point player, bool sleeping)
+double Simulation::Step(double hours, Point player, bool sleeping, double recoveryPerHour)
 {
     (void)player;
     const bool rain = IsRaining();
     const double hungerRate = sleeping ? -1.3 : -2.0;
-    const double energyRate = sleeping ? 10.0 : -Exertion::AwakePerHour;
+    const double energyRate = sleeping ? recoveryPerHour : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
     elapsed = std::min(elapsed, state_.hunger / -hungerRate);
@@ -2572,13 +2582,41 @@ void Simulation::Step(double hours, Point player, bool sleeping)
     // Townsfolk buy down her goods in the shops each morning.
     if (std::floor((state_.hour - DayRolloverHour) / 24.0) > std::floor((before - DayRolloverHour) / 24.0))
         SellDownShops();
-    if (state_.hunger <= 1e-10 || state_.energy <= 1e-10)
+    // Only hunger fails her. Energy running out makes her doze off (AdvanceGameHours).
+    if (state_.energy <= 1e-10) state_.energy = 0.0;
+    if (state_.hunger <= 1e-10)
     {
-        if (state_.hunger <= 1e-10) state_.hunger = 0.0;
-        if (state_.energy <= 1e-10) state_.energy = 0.0;
+        state_.hunger = 0.0;
         state_.failed = true;
     }
     if (const int day = static_cast<int>(std::floor((state_.hour - DayRolloverHour) / 24.0)); day > dayBefore) CreepWeeds(day);
+    return elapsed;
+}
+Result Simulation::SetEnergy(double energy)
+{
+    if (state_.failed) return Failed();
+    if (!FiniteRange(energy, 0.0, 100.0)) return Bad("Energy must be between 0 and 100.");
+    state_.energy = energy;
+    ++revision_;
+    return Good("Energy set.");
+}
+double Simulation::DozeOff(Point player)
+{
+    double left = std::min(Exertion::DozeHours, MaxHour - state_.hour);
+    double slept = 0.0;
+    while (left > 1e-12 && !state_.failed)
+    {
+        double step = std::min(left, TimeStep);
+        step = std::min(step, std::floor(state_.hour + 1e-9) + 1.0 - state_.hour);
+        for (const auto& piece : state_.structures)
+            if (piece.kind == Piece::Fire && piece.fuelHours > 0) step = std::min(step, piece.fuelHours);
+        const double done = Step(step, player, true, Exertion::DozePerHour);
+        left -= done;
+        slept += done;
+    }
+    ++dozes_;
+    ++revision_;
+    return slept;
 }
 void Simulation::Advance(double realSeconds, Point player, bool paused)
 {
@@ -2632,8 +2670,9 @@ void Simulation::AdvanceGameHours(double hours, Point player)
         step = std::min(step, nextHour - state_.hour);
         for (const auto& piece : state_.structures)
             if (piece.kind == Piece::Fire && piece.fuelHours > 0) step = std::min(step, piece.fuelHours);
-        Step(step, player, false);
-        hours -= step;
+        hours -= Step(step, player, false);
+        // Worn out: she dozes off where she stands, and the rough sleep counts against the time asked.
+        if (!state_.failed && state_.energy <= 1e-10) hours = std::max(0.0, hours - DozeOff(player));
     }
 }
 void Simulation::SkipToHourOfDay(double hourOfDay)
@@ -2657,8 +2696,8 @@ Result Simulation::Sleep(double hours, Point player)
         step = std::min(step, std::floor(state_.hour + 1e-9) + 1.0 - state_.hour);
         for (const auto& piece : state_.structures)
             if (piece.kind == Piece::Fire && piece.fuelHours > 0) step = std::min(step, piece.fuelHours);
-        Step(step, player, true);
-        hours -= step;
+        const double done = Step(step, player, true);
+        hours -= done;
     }
     if (state_.failed) return Bad("Your rest was interrupted by a critical need. Load your recent checkpoint.");
     return Good("You wake rested. Your garden and fires continued through the night.");
