@@ -152,5 +152,7 @@ Save both actors' packages afterwards: PIE streams spatially loaded actors such 
 from their saved packages, so unsaved edits don't show in play, and `set_course` alone doesn't
 dirty the package (the script calls `modify()` first).
 
+Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the view from the western clifftop: `SLW::Draw` 0.23 ms, depth prepass 0.09 ms, and Lumen water reflections about 0.2 ms. The old one-plane creek-material sea cost 0.10, 0.07 and 0.2 ms. The mesh has about 89k vertices. Read the stable sub-passes: frame times and reflection spikes swing widely when other editors share the GPU.
+
 The tuning parameters are on `MI_EstateOcean`, grouped Waves, Foam, Colour and Data. Bake the
 values you settle on into the defaults in `build_ocean.py`.
