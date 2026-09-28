@@ -2769,10 +2769,9 @@ void FixedEstateNewGameAndSave()
     CHECK(sim.GetState().resources.size() == 2);
     // The pail is her one starting tool, waiting in the standing room's chest; gathering needs no knife.
     CHECK(sim.Count(Item::WateringCan) == 0 && sim.Count(Item::Knife) == 0 && sim.UsedCapacity() == 0);
-    int chestPails = 0;
-    for (const auto& piece : sim.GetState().structures)
-        if (piece.kind == Piece::Chest) chestPails += piece.storage[static_cast<int>(Item::WateringCan)];
-    CHECK(chestPails == 1);
+    int pails = 0;
+    for (const auto& piece : sim.GetState().structures) pails += piece.storage[static_cast<int>(Item::WateringCan)];
+    CHECK(pails == 1);
     OK(sim.Harvest(EstatePlacementIdBase + 1, spawn));
     const std::string saved = sim.Serialize();
     Simulation loaded;

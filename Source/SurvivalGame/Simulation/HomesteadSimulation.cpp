@@ -1084,8 +1084,8 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     candidate.estateName = Manor::DefaultEstateName;
     candidate.journal.push_back(Manor::ArrivalEntry);
     // The pail is her one starting tool, waiting in the standing room's chest; everything else is
-    // hafted from salvage. Test layouts without the room anchor start with no heritage room and
-    // the pail in hand.
+    // hafted from salvage. Test layouts without the room anchor start with no heritage room, so
+    // she carries the pail instead.
     if (!Manor::SeedStandingRoom(candidate, layout))
     {
         candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;

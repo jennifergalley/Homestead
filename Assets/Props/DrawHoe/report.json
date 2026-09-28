@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "DrawHoe",
+  "description": "Salvaged swan-neck draw hoe: rusted iron blade, neck and socket on a new ash haft (original). Pivot = right-hand grip; haft +Z, blade at the -Z end pointing -Y.",
+  "collision": "none",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/draw_hoe.py",
+  "source_sha256": "80c50bf160636de94daba082cfe747bca3869285f31f07dedc6e628f232c0ffe",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_DrawHoe": {
+      "vertices": 3980,
+      "triangles": 7944,
+      "size_cm": [
+        14.26,
+        21.34,
+        128.56
+      ],
+      "materials": [
+        {
+          "name": "M_DrawHoe",
+          "textures": {
+            "basecolor": "T_DrawHoe_basecolor.png",
+            "roughness": "T_DrawHoe_roughness.png",
+            "metallic": "T_DrawHoe_metallic.png",
+            "normal": "T_DrawHoe_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_DrawHoe_basecolor.png",
+          "roughness": "T_DrawHoe_roughness.png",
+          "normal": "T_DrawHoe_normal.png",
+          "metallic": "T_DrawHoe_metallic.png",
+          "ao": "T_DrawHoe_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          -90,
+          70,
+          80
+        ],
+        "focus": [
+          -0.008999999612569809,
+          -0.1510530412197113,
+          -0.7707926630973816
+        ]
+      },
+      "fbx": "SM_DrawHoe.fbx",
+      "sha256": "3549c678215c67753d16f1f75d40440655af2e9133ab0f2a2a189d8bff99bd40",
+      "preview": "preview_SM_DrawHoe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DrawHoe_hero.png",
+          "detail": "beauty_SM_DrawHoe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          -90,
+          70,
+          80
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "attach": {
+    "units": "cm, from the mesh pivot (right-hand grip centre), mesh space",
+    "pivot": "main (right) hand grip centre on the haft, 42 cm below the haft top",
+    "handle_axis": "+Z (haft top); the socket, neck and blade are at the -Z end",
+    "edge_direction": "-Y (blade about 69 degrees from the haft, cutting edge along X)",
+    "left_hand_grip": [
+      0.0,
+      0.0,
+      32.0
+    ],
+    "edge_centre": [
+      -0.9,
+      -19.3,
+      -75.45
+    ],
+    "haft_top": [
+      0.0,
+      0.0,
+      42.0
+    ],
+    "bit_corners": [
+      [
+        -8.1,
+        -19.3,
+        -75.45
+      ],
+      [
+        6.3,
+        -19.3,
+        -75.45
+      ]
+    ],
+    "crook": [
+      -0.9,
+      0.0,
+      -80.0
+    ],
+    "blade_end": [
+      -0.9,
+      -5.5,
+      -86.8
+    ]
+  },
+  "textures": {
+    "T_DrawHoe_basecolor.png": "389ad25bf0fd95908721fe436a77968a5a2ea61386b45b3ea24ab53b18644d4b",
+    "T_DrawHoe_roughness.png": "64bc617916fa6d3d44b005179074bce803429fa061a14aba6bbf75b40cfab77a",
+    "T_DrawHoe_metallic.png": "b61bbbc604bdf129eafca877bb635b2b49dc23bf1b2da473183c4e0e3a8bf208",
+    "T_DrawHoe_normal.png": "5928eb52ae3b39aba2440ab8ea56d7886ecfbad1d24a738feee7970312f5f69c"
+  }
+}

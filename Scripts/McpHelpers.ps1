@@ -20,7 +20,9 @@ Functions:
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
     tp <x> <y> [z]                         move the player pawn (z default 200; she drops to the ground)
     click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
-Variables: $E $S $L $SL $H $PY (toolset names, for your own mcp calls; avoid reusing $e/$s/$l/$h as locals, since names are case-insensitive). Full playbook: .github\skills\unreal-editor-mcp\SKILL.md.
+Variables: $McpEditor $McpScene $McpLogs $McpSlate $McpPlay $McpPython (toolset names for your own mcp calls).
+Short aliases $E $S $L $SL $H $PY are set too, but only if you haven't already defined those names; dot-sourcing
+never overwrites your variables. Full playbook: .github\skills\unreal-editor-mcp\SKILL.md.
 #>
 param([Parameter(Mandatory)][int]$Port)
 
@@ -30,17 +32,24 @@ $script:McpArgsDir = Join-Path $script:McpRoot 'Saved\McpArgs'
 $null = New-Item -ItemType Directory -Force $script:McpArgsDir
 $env:UNREAL_MCP_URL = "http://127.0.0.1:$Port/mcp"
 
-# Toolset names. The helpers use the $script:Ts* copies, so a caller's own $s/$e/$h/$l (PowerShell
-# names are case-insensitive) can't break them; $E, $S, ... are conveniences for interactive calls.
+# Toolset names. The helpers use the $script:Ts* copies, so a caller's own $s/$e/$h/$l can't break
+# them. For your own mcp calls use the $Mcp* names. The short $E/$S/$L/$SL/$H/$PY aliases are set only
+# if the caller hasn't already defined them: PowerShell names are case-insensitive, and dot-sourcing
+# must never overwrite a caller's $s = 'E:\scratch'.
 $script:TsEditor = 'EditorToolset.EditorAppToolset'
 $script:TsPlay = 'homestead_agent.toolset.HomesteadPlayTools'
 $script:TsPython = 'homestead_agent.toolset.HomesteadEditorPython'
-$E = $script:TsEditor
-$S = 'editor_toolset.toolsets.scene.SceneTools'
-$L = 'EditorToolset.LogsToolset'
-$SL = 'SlateInspectorToolset.SlateInspectorToolset'
-$H = $script:TsPlay
-$PY = $script:TsPython
+$McpEditor = $script:TsEditor
+$McpScene = 'editor_toolset.toolsets.scene.SceneTools'
+$McpLogs = 'EditorToolset.LogsToolset'
+$McpSlate = 'SlateInspectorToolset.SlateInspectorToolset'
+$McpPlay = $script:TsPlay
+$McpPython = $script:TsPython
+foreach ($alias in @(@('E', $McpEditor), @('S', $McpScene), @('L', $McpLogs), @('SL', $McpSlate), @('H', $McpPlay), @('PY', $McpPython))) {
+    if (-not (Get-Variable -Name $alias[0] -Scope 0 -ErrorAction SilentlyContinue)) {
+        Set-Variable -Name $alias[0] -Value $alias[1] -Scope 0
+    }
+}
 
 function mcp([string]$ts, [string]$tool, $a = '{}', [int]$timeout = 600) {
     $arguments = if ($a -is [string]) { ConvertFrom-Json $a -AsHashtable } else { $a }
