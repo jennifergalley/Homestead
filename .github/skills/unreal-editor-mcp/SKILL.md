@@ -781,7 +781,9 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Packaged walk drivers: `Walk` after every `BugItGo`.** `BugItGo` switches on Ghost (flying, no
   collision), so a driver that then holds W flies her level and under rising ground, and the
   terrain-recovery toast repeats. It looks like missing landscape collision; three map-lane runs were
-  lost to it (table 0.1).
+  lost to it (table 0.1). `Scripts\Examples\packaged_walkoff.py` is a working reference driver: it
+  launches the package, finds its window by process image, types console commands, and records the
+  walk with ffmpeg ddagrab.
 - **Keep packaged or standalone test runs off Jenny's saves:** launch with
   `-userdir=E:\CopilotScratch\<session-id>\pkguser -log=<name>.log`, so saves, config and logs go
   under that folder instead of the package's own `Saved\`.
