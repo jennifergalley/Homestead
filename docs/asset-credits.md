@@ -83,6 +83,13 @@ same way, from the stone kit's masonry code and procedural materials. They use n
 downloaded geometry or textures. The hearth's crackle loop (`Assets\Audio\Ambience\HearthCrackle.wav`)
 is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it uses no recording.
 
+The Estate ocean (`Content\SurvivalGame\Estate\Water`: `M_EstateOcean`, `MI_EstateOcean`,
+`SM_EstateOcean`, `T_EstateOceanShore`, `T_OceanRipples_N` and `T_OceanFoam`) is project-authored.
+`Scripts\Terrain\bake_ocean.py` generates the mesh and all three textures in numpy: the shore data
+from the estate heightfield, the capillary-ripple normals from an FFT of a synthetic wave spectrum,
+and the foam lace from Worley and fBm noise. The waves themselves are analytic HLSL in the
+material. No scanned, photographed or downloaded texture or mesh is used.
+
 ## Fonts
 
 The title card, the Names step and the display headings use **EB Garamond** (Regular and Italic,
