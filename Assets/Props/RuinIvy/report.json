@@ -3,19 +3,19 @@
   "name": "RuinIvy",
   "description": "Ruined manor detail: dense common-ivy wall mat with woody clinging runners, rootlet fuzz and thousands of alpha-free lobed leaves.",
   "collision": "none",
-  "triangle_budget": 500000,
+  "triangle_budget": 100000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/ruin_ivy.py",
-  "source_sha256": "8d84fa8c7255d4e94d94fa84d9103b6651a5f19d90195f054890026da0cb4de6",
+  "source_sha256": "20ab6804cea59cbaa362547592a6243f279ef7feaf16168b224e6f65ea8940f8",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_RuinIvy": {
-      "vertices": 209454,
-      "triangles": 206397,
+      "vertices": 77894,
+      "triangles": 99216,
       "size_cm": [
-        251.47,
-        82.64,
-        246.26
+        255.01,
+        79.42,
+        245.92
       ],
       "materials": [
         {
@@ -60,7 +60,7 @@
         "eye_distance": 3.0
       },
       "fbx": "SM_RuinIvy.fbx",
-      "sha256": "0762aecef7dcb7a60f960fd6df4ce13e4dbac2badef50d0da4a2ca747a3b03fb",
+      "sha256": "e07f561cc9e21799bdf0be2329fe3d6eec7adc6521dafb2e6c946b0ccbb4fbb4",
       "preview": "preview_SM_RuinIvy.png",
       "beauty": {
         "views": {
@@ -83,16 +83,16 @@
           0,
           0
         ],
-        "ground": "lowest"
+        "ground": "wall-review"
       }
     },
     "SM_RuinIvy_LOD1": {
-      "vertices": 99624,
-      "triangles": 78430,
+      "vertices": 38208,
+      "triangles": 34725,
       "size_cm": [
-        251.26,
-        83.85,
-        245.28
+        254.43,
+        79.11,
+        245.61
       ],
       "materials": [
         {
@@ -138,16 +138,16 @@
         "eye_distance": 3.0
       },
       "fbx": "SM_RuinIvy_LOD1.fbx",
-      "sha256": "ad42eabc026ed9b9b1e58f7b7b742e0bbb530079bda5decf0ffe965dd62a542d",
+      "sha256": "fefc208c6b43581275cdd0e9e5d37dd27aabd5f5ff65fa4657ee906df287f413",
       "preview": "preview_SM_RuinIvy_LOD1.png"
     },
     "SM_RuinIvy_LOD2": {
-      "vertices": 55668,
-      "triangles": 30959,
+      "vertices": 16210,
+      "triangles": 9425,
       "size_cm": [
-        249.92,
-        84.48,
-        245.65
+        253.38,
+        79.39,
+        246.1
       ],
       "materials": [
         {
@@ -193,7 +193,7 @@
         "eye_distance": 3.0
       },
       "fbx": "SM_RuinIvy_LOD2.fbx",
-      "sha256": "b46d1feecddf699e15572e1c2a8feb941371b3dc8f663a4ef6f50519808c0165",
+      "sha256": "73ca9164aec2bee7bbd7ba521c5aabdbd80ac8b337c69fcadcc14aee0ca4d819",
       "preview": "preview_SM_RuinIvy_LOD2.png"
     }
   },
@@ -203,8 +203,9 @@
   "placement": "Place the origin on the top/front edge of a RuinWall run. The mat hangs into Blender -Y / Unreal +Y and negative Z.",
   "foliage": "Leaves are individual alpha-free lobed meshes using a shared non-repacked UV atlas; no masked cards.",
   "textures": {
-    "T_RuinIvy_basecolor.png": "6f4e60bb1d6c51e5e5ab2fd59373cda7b3692a64eda41bf74a717907a9d9ecc9",
-    "T_RuinIvy_roughness.png": "c315df08f199b1dc6b0a27f7b4dc4d37bf1235037d639cd9c1f58d11edc48d8f",
-    "T_RuinIvy_normal.png": "ce7c0018693246e5a7a19058ede9de97c59e92b1a57e5c665c71d5e7552032c8"
-  }
+    "T_RuinIvy_basecolor.png": "86a96af9046421f7ed3fa3b5c05782f603b3b54f98a0b530e3ba5d8d778e6bc1",
+    "T_RuinIvy_roughness.png": "aabbdcc4b86cd52599c358b0e14414a4d1debc431d7fc6e6ce259eac5be72c88",
+    "T_RuinIvy_normal.png": "ee12d2a9dd8bb731e84d2e642c265986719a70ca1ba20fabf2239097d6caaa1f"
+  },
+  "review_wall": "Final RuinIvy beauty renders use a temporary front-facing 2.85 x 0.70 x 2.50 m stone wall mock and ground strip for review only; only SM_RuinIvy and its LODs are exported."
 }
