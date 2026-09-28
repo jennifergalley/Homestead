@@ -60,10 +60,27 @@ integration session merges and packages.
 - Decorative scenery is hidden around every `State.resources` node.
 - The "Homestead Estate" shortcut uses `Homestead.ico`.
 
-**Estate id ranges:** world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved)
-are in the comment at `Simulation\HomesteadEstate.h` ~87. The polish round assigns berry bushes
-540000+ (clearing) and the derelict farm 550000+ (manor); whoever lands first should add them to that
-comment.
+**Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
+the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+
+| Placement ids | Owner |
+| --- | --- |
+| 500000+ | world lane |
+| 510000+ | overgrowth (clearing lane) |
+| 520000+ | salvage piles |
+| 530000+ | town (reserved) |
+| 540000-540043 | berry brambles (clearing lane) |
+| 550000+ | derelict-farm clearables (manor lane) |
+| 560000-569999 | MVP woodland biome interactables (`fd682909`) |
+| 570000-579999 | Coral Island-style clear-out near the manor (clearing lane) |
+
+| Scenery kinds (`EstateSceneryKinds` in `HomesteadWorld.cpp`; `scatter.py` kind bytes must match) | Owner |
+| --- | --- |
+| 13-15: oak, beech, sycamore; 16-18: hawthorn, holly, hazel coppice | trees lane |
+| 19-47 | MVP woodland biome |
+
+The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by `scatter.py` and
+`bake_ground.py` (on its lane branch; not on `main` yet).
 
 **Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
 `build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
