@@ -174,6 +174,10 @@ float depthB = lerp(32.0, sb.r * sb.r * 32.0, inMap);
 float sd = lerp(512.0, sf.g * sf.g * 512.0, inMap);
 float expo = sb.b;
 WaterDepth = depth;
+// The authored seabed stops at the map edge (about -22 m), where it meets bottomless water outside.
+// Thicken the water over the last 400 m, scaling absorption and scattering together so the saturated
+// colour stays the same, so both sides reach the same deep blue with no step at the edge.
+DeepFactor = lerp(Edge.x, 1.0, saturate((2016.0 - max(abs(pm.x), abs(pm.y))) / Edge.y));
 """ + swell_code(True) + """
 float2 g = swellG * saturate((depthB - 1.0) / 5.0);
 """ + SHORE_WAVE + """
@@ -247,7 +251,10 @@ float t1 = lerp(Texture2DSample(FoamTex, FoamTexSampler, (pm - o0) / 6.1).r,
                 Texture2DSample(FoamTex, FoamTexSampler, (pm - o1) / 6.1 + 0.5).r, fw1);
 float t2 = lerp(Texture2DSample(FoamTex, FoamTexSampler, (pm - o0) / 2.3 + 0.37).r,
                 Texture2DSample(FoamTex, FoamTexSampler, (pm - o1) / 2.3 + 0.87).r, fw1);
-float lace = saturate(t1 * 0.65 + t2 * 0.55);
+// A finer octave that drifts with the same flow gives bubbles and holes up close.
+float t3 = lerp(Texture2DSample(FoamTex, FoamTexSampler, (pm - o0 * 1.3) / 0.83 + 0.61).r,
+                Texture2DSample(FoamTex, FoamTexSampler, (pm - o1 * 1.3) / 0.83 + 0.11).r, fw1);
+float lace = saturate(t1 * 0.5 + t2 * 0.42 + t3 * 0.38);
 // Swash: each wave that reaches the beach (f wraps to 0 there) throws a sheet of white water up the
 // sand that thins into lace as it drains; a thin line of bubbles always lingers at the waterline.
 float fresh = exp(-3.0 * f);
@@ -258,7 +265,8 @@ float trail = exp(-5.0 * f) + 0.6 * front;
 // Whitecaps: the most folded crests of the wind sea, more of them in the gusts.
 float whitecap = saturate((caps * gust - Caps.y) * Caps.x);
 float cover = saturate(saturate(swash + linger + breakZone * trail * FoamP.z) * inMap + whitecap);
-FoamAmt = saturate((lace + cover * 1.25 - 1.0) * FoamP.w) * saturate(cover * 2.5);
+// Even a fresh sheet of swash keeps holes in it: coverage only lowers the lace threshold.
+FoamAmt = saturate((lace + cover * 1.0 - 0.95) * FoamP.w) * saturate(cover * 2.5) * lerp(0.75, 1.0, t3);
 // Keep reflections above the horizon: a facet tilted so far that the mirrored view ray points into
 // the sea would pick up black from the reflection trace, so flatten it just enough.
 float3 n = normalize(float3(-g, 1.0));
@@ -323,6 +331,7 @@ def build_material():
     shore_w = vector("ShoreWaves", (0.24, 9.0, 21.0, 140.0), -1400, 100, "Waves")  # height m, period s, crest spacing m, reach m
     micro = vector("Ripples", (0.035, 2.4, 0.03, 0.0), -1400, 300, "Waves")          # slope, tile m, drift per s
     caps = vector("Whitecaps", (1.6, 0.35, 0.0, 0.0), -1400, 250, "Foam")        # strength, threshold
+    edge_p = vector("MapEdgeDeepening", (3.5, 400.0, 0.0, 0.0), -1400, 900, "Colour")  # extinction x at the edge, ramp m
     gust = vector("Gusts", (0.7, 260.0, 1.5, 0.0), -1400, 200, "Waves")            # strength, patch size m, drift m/s
     foam_p = vector("FoamShape", (0.7, 2.8, 0.85, 2.6), -1400, 800, "Foam")        # swash depth, surf depth, surf strength, sharpness
 
@@ -358,8 +367,8 @@ def build_material():
     ps = custom(PIXEL_CODE, [("P", (wp_p, "")), ("ViewDir", (cam_v, "")), ("Time", (time, "")), ("ShoreTex", (shore_p, "")),
                              ("RippleTex", (ripples, "")), ("FoamTex", (foam, "")), ("Frame", (frame, "RGBA")),
                              ("Swell", (swell, "RGBA")), ("Wind", (wind, "RGBA")), ("ShoreW", (shore_w, "RGBA")),
-                             ("Micro", (micro, "RGBA")), ("FoamP", (foam_p, "RGBA")), ("Gust", (gust, "RGBA")), ("WaveVol", (waves, "")), ("Caps", (caps, "RGBA"))], -900, 100,
-                extra=("FoamAmt", "WaterDepth", "LostSlope"))
+                             ("Micro", (micro, "RGBA")), ("FoamP", (foam_p, "RGBA")), ("Gust", (gust, "RGBA")), ("WaveVol", (waves, "")), ("Caps", (caps, "RGBA")), ("Edge", (edge_p, "RGBA"))], -900, 100,
+                extra=("FoamAmt", "WaterDepth", "LostSlope", "DeepFactor"))
 
     # Surface response.
     foam_color = vector("FoamColor", (0.78, 0.8, 0.78, 0), -500, 300, "Foam")
@@ -400,8 +409,12 @@ def build_material():
 
     water = node(unreal.MaterialExpressionSingleLayerWaterMaterialOutput, 400, 900)
     # Per-centimetre coefficients. Absorption takes red first, so sand shallows read turquoise; scattering is kept low so the open Atlantic reads deep blue-green rather than milky teal.
-    link(vector("Scattering", (0.00006, 0.00025, 0.0004, 0), 100, 1100, "Colour"), "", water, "ScatteringCoefficients")
-    link(vector("Absorption", (0.0040, 0.0009, 0.0007, 0), 100, 1200, "Colour"), "", water, "AbsorptionCoefficients")
+    for name, value, pin, y in (("Scattering", (0.00006, 0.00025, 0.0004, 0), "ScatteringCoefficients", 1100),
+                                ("Absorption", (0.0040, 0.0009, 0.0007, 0), "AbsorptionCoefficients", 1200)):
+        scaled = node(unreal.MaterialExpressionMultiply, 250, y)
+        link(vector(name, value, 100, y, "Colour"), "", scaled, "A")
+        link(ps, "DeepFactor", scaled, "B")
+        link(scaled, "", water, pin)
     link(scalar("PhaseG", 0.25, 100, 1300, "Colour"), "", water, "PhaseG")
     link(scalar("ColorScaleBehindWater", 0.9, 100, 1360, "Colour"), "", water, "ColorScaleBehindWater")
 
