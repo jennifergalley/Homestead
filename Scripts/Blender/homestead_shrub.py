@@ -90,12 +90,14 @@ def _rand_unit(rng):
 
 
 def grow_path(rng, env, start, direction, length, step, tropism, outward, wander, stop=1.0,
-              gravity=0.0, origin=None):
+              gravity=0.0, origin=None, bias=None):
     """Branch axis from ``start``. Per metre the heading turns toward UP by ``tropism``, away
     from the crown centre by ``outward`` and wanders smoothly; ``gravity`` pulls long branches
-    down with length. Growth stops at ``length`` or when leaving the envelope (ratio > stop)."""
+    down with length and ``bias`` (a vector, e.g. a prevailing wind) pulls every heading one way.
+    Growth stops at ``length`` or when leaving the envelope (ratio > stop)."""
     p = Vector(start)
     d = Vector(direction).normalized()
+    bias = Vector(bias) if bias else Vector()
     pts = [p.copy()]
     w = _rand_unit(rng)
     s = 0.0
@@ -106,7 +108,7 @@ def grow_path(rng, env, start, direction, length, step, tropism, outward, wander
             o = o.normalized() if o.length > 1e-3 else env.outward(p)
         else:
             o = env.outward(p)
-        d = (d + (UP * tropism + o * outward + w * wander - UP * gravity * s) * step).normalized()
+        d = (d + (UP * tropism + o * outward + w * wander - UP * gravity * s + bias) * step).normalized()
         p = p + d * step
         s += step
         if p.z < 0.012:
@@ -170,13 +172,17 @@ def grow(spec, rng):
         az = rng.uniform(0, math.tau)
         out = env.outward(crown) if (crown.xy - env.c.xy).length > 0.05 else Vector((math.cos(az), math.sin(az), 0))
         horiz = (Vector((math.cos(az), math.sin(az), 0)) * 0.6 + out * 0.4).normalized()
+        if lv0.get("azimuth") is not None:
+            az = math.radians(lv0["azimuth"] + rng.uniform(-1, 1) * lv0.get("azimuth_jitter", 0.0))
+            horiz = Vector((math.cos(az), math.sin(az), 0))
         low = rng.random() < lv0.get("low_frac", 0.0)
         elev = math.radians(rng.uniform(*lv0.get("low_elev" if low else "elev", lv0["elev"])))
         d = horiz * math.cos(elev) + UP * math.sin(elev)
         length = H * rng.uniform(*lv0.get("low_length" if low else "length", lv0["length"]))
         pts = grow_path(rng, env, crown, d, length, step, lv0.get("tropism", 0.3) * (0.4 if low else 1.0),
                         lv0.get("outward", 0.2), lv0.get("wander", 0.5), stop=lv0.get("stop", 0.95),
-                        gravity=lv0.get("gravity", 0.0), origin=crown if spec.get("clumps") else None)
+                        gravity=lv0.get("gravity", 0.0), origin=crown if spec.get("clumps") else None,
+                        bias=spec.get("bias"))
         br = add_branch(0, pts, spec["stem_radius"] * rng.uniform(0.75, 1.2) * (0.7 if low else 1.0), rng.random())
         if br:
             br["origin"] = crown
@@ -215,7 +221,8 @@ def grow(spec, rng):
                 pts = grow_path(rng, env, node, d, length, lv.get("step", step * 0.7), lv.get("tropism", 0.3),
                                 lv.get("outward", 0.3), lv.get("wander", 0.8), stop=lv.get("stop", 1.02),
                                 gravity=lv.get("gravity", 0.0),
-                                origin=par.get("origin") if spec.get("clumps") else None)
+                                origin=par.get("origin") if spec.get("clumps") else None,
+                                bias=spec.get("bias"))
                 r0 = par["radii"][i] * rng.uniform(*lv.get("radius", (0.45, 0.65)))
                 br = add_branch(level, pts, r0, par["phase"] + rng.uniform(0.02, 0.12), parent=par)
                 if br:

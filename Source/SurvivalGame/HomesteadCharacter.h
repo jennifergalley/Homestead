@@ -185,6 +185,15 @@ public:
     // A berry (or piece of root) from the hip pouch to her mouth (MetaHuman only; false otherwise).
     bool PlayEat(bool bBerry);
     UAnimSequence* GetEatAnimation() const { return EatAnimation; }
+    // AN_HeroineMH_CraftHands (homestead_agent.craft_hands): one loop is one craft cycle
+    // (the same length as SHomesteadMenu::CraftCycleSeconds).
+    UAnimSequence* GetCraftAnimation() const { return CraftAnimation; }
+    static constexpr float CraftCycleSeconds = 1.2f;
+    // Where she is in the current craft cycle (0-1) while a recipe is held in the field book, or
+    // while the lab's `LabAction Craft` runs; -1 otherwise.
+    float CraftingPhase() const;
+    void PlayLabCraft(int32 Cycles = 3);
+    static constexpr float CraftPieceScale = 0.42f;
     // AN_HeroineMH_Eat (homestead_agent.eat_berry EVENTS): food in her fingers, then in her mouth.
     static constexpr float EatPick = 19.0f / 30.0f;
     static constexpr float EatBite = 40.0f / 30.0f;
@@ -250,6 +259,11 @@ private:
     // The root or berry cluster in her right hand during a pouch gather.
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedForage;
     UPROPERTY() TObjectPtr<UAnimSequence> EatAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> CraftAnimation;
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> CraftPiece;
+    void UpdateCraftPiece(float Weight);
+    double LabCraftStart = 0;
+    double LabCraftUntil = -1;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> EatenFood;
     bool bEatBerry = true;
     bool bEatFoodInHand = false;

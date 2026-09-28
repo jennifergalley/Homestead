@@ -312,9 +312,11 @@ hk release_all; mcp $E StopPIE
   **new woodland seed**. Once an autosave exists, PIE resumes it (same position/time), so positions
   and node ids persist. The **Estate** map is a fixed world: same layout every time.
 - **HUD layout (Estate, per Jenny):** minimap bottom-right (`MinimapBox(ViewWidth, ViewHeight)`),
-  calendar top-right, key hints top-left, and the vitals stack bottom-left (`UI/SHomesteadVitals`):
-  bread, bed and coin icons with bars for food and energy and the $ amount for the purse, with no text
-  labels. Check captures against this; the field book covers it when open.
+  calendar top-right, key hints top-left, and the vitals stack right under the calendar, the same
+  width (`UI/SHomesteadVitals`): bread, bed and coin icons with bars for food and energy and the $
+  amount for the purse, with no text labels. The Slate hotbar and vitals wrap themselves in
+  `SHomesteadHudScale`, so they follow the Canvas HUD's `UiScale` (1080 lines, clamped 0.4-1.5) and
+  keep their proportion at 4K. Check captures against this; the field book covers it when open.
 - **Estate PIE recipe:** the editor opens the Estate at startup (if you've switched away, `load_level`
   it back). For a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
   until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
@@ -402,7 +404,7 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   non-final swing toasts "N more swings.", the last one clears and toasts the yield. Walking more
   than 1.5 m away resets the count. On the estate, take the Branches from the standing-room chest
   (below). `HomesteadGive RustedBillhookHead 1` + two Branches is only a shortcut for testing
-  "Haft a billhook" elsewhere (for example on the woodland map).
+  "Craft a billhook" elsewhere (for example on the woodland map).
 - **Estate tool route (new game, verified in PIE on main 17a64854):**
   - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
     `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
@@ -436,8 +438,8 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
     can't be opened", move `Saved\SaveGames\Estate\*` aside and restart PIE.
   - Branch piles (each haft takes 2 Branch; a pile gives about 5): 500001 (-26650, -63400), 500002 (-26950, -64500)
     and 500003 (-27350, -62900).
-  - Craft (`C`) tiles, left to right: Haft an axe, hoe, scythe, billhook, pickaxe, then the two root
-    dishes and Split firewood. Hold `Gamepad_FaceButton_Bottom` (or `Enter`) about 3 s to haft.
+  - Craft (`C`) tiles, left to right: Craft an axe, hoe, scythe, billhook, pickaxe, then the two root
+    dishes and Split firewood. Hold `Gamepad_FaceButton_Bottom` (or `Enter`) about 3 s to craft (the recipe ids stay `Recipe::Haft*`; only the labels say "Craft").
   - Hafted tools auto-slot to the hotbar: `One` billhook, `Two` axe, `Three` scythe, `Four`
     pickaxe, `Five` hoe (`hotbarSlot` 0-4).
   - Worn-tier targets near the manor:
@@ -531,6 +533,12 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
 - **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
   doesn't). The details list requirements. Crafting is **press and hold**; a tap does nothing
   (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard).
+  One craft takes a 1.2 s cycle and the hold repeats while materials last. While held, the
+  recipe square fills with white from the bottom (`SHomesteadCraftFill`) and flashes when the item
+  is made. Behind the book she stands head-down, working a branch between her fists
+  (`AN_HeroineMH_CraftHands`, baked by `homestead_agent.craft_hands.build()`; the clip time follows
+  `GetCraftProgress()`). `CaptureEditorImage` takes about 1.5 s, so a single capture rarely lands
+  mid-fill; hold for several cycles and capture a few times.
 - **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
   Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
   *last* page (often Inventory), so close it fully (loop Escape until `bookOpen` and `planning`
@@ -598,7 +606,7 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Water|Chop|Knife|Till|Machete|Fell`,
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Chop|Knife|Till|Machete|Fell`,
   `LabHold Knife|Hatchet|DiggingStick|Pail|Machete|None` (the hand-carry prop for that tool, as
   when it's selected on the hotbar),
   `LabProp Sticks|Stones|Roots|Berries|Reeds|None` (puts that pile on the ground in front of her, the way the
