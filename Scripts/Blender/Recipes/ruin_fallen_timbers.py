@@ -135,12 +135,20 @@ def _beam_mesh(kit, name, points, width, depth, material, seed, roll=0.0, spacin
 def _dark_check(kit, name, center, direction, side, up, length, width, material):
     d, s, u = Vector(direction).normalized(), Vector(side).normalized(), Vector(up).normalized()
     c = Vector(center)
-    verts = [c - d * length / 2 - s * width / 2,
-             c - d * length / 2 + s * width / 2,
-             c + d * length / 2 + s * width / 2,
-             c + d * length / 2 - s * width / 2]
-    verts = [v + u * 0.002 for v in verts]
-    obj = kit.mesh(name, [tuple(v) for v in verts], [(0, 1, 2, 3)], material)
+    # Narrow tapered shake: a V floor, not a black rectangular decal.
+    depth = min(width * 0.45, 0.004)
+    verts = [
+        c - d * length / 2 + u * 0.0015,
+        c - d * length * 0.32 - s * width / 2 + u * 0.0010,
+        c - d * length * 0.32 + s * width / 2 + u * 0.0010,
+        c - s * width * 0.42 - u * depth,
+        c + s * width * 0.42 - u * depth,
+        c + d * length * 0.32 - s * width / 2 + u * 0.0010,
+        c + d * length * 0.32 + s * width / 2 + u * 0.0010,
+        c + d * length / 2 + u * 0.0015,
+    ]
+    faces = [(0, 1, 3), (0, 3, 4), (0, 4, 2), (3, 5, 7), (4, 7, 6), (3, 7, 4)]
+    obj = kit.mesh(name, [tuple(v) for v in verts], faces, material)
     return obj
 
 
@@ -281,7 +289,7 @@ def build(kit):
                    grime=0.18, seed=23.0, relief=1.7)
     iron = m.wrought_iron("M_RuinFallenTimbersOldIronSpike", rust=0.82, wear=0.16, seed=24.0)
     soil = kit.material("M_RuinFallenTimbersContactSoil", (0.055, 0.042, 0.030), roughness=0.98)
-    check_mat = kit.material("M_RuinFallenTimbersDeepChecks", (0.010, 0.007, 0.005), roughness=0.96)
+    check_mat = kit.material("M_RuinFallenTimbersDeepChecks", (0.035, 0.030, 0.024), roughness=0.96)
     for mat in (grey_oak, scorched, char, fresh, soil):
         if hasattr(mat, "node_tree") and mat.node_tree:
             bsdf = next((n for n in mat.node_tree.nodes if n.bl_idname == "ShaderNodeBsdfPrincipled"), None)
@@ -334,12 +342,7 @@ def build(kit):
             s0 = rng.uniform(0.20, 0.78)
             c = start.lerp(end, s0) + up * (spec["depth"] * 0.515) + side * rng.uniform(-spec["width"] * 0.32, spec["width"] * 0.32)
             parts.append(_dark_check(kit, f"{spec['label']}_OpenCheck_{k}", c, dvec, side, up,
-                                     rng.uniform(0.55, 1.45), rng.uniform(0.005, 0.014), check_mat))
-        if i == 0:
-            # A rectangular mortise/peg pocket cut into the weathered beam near one end.
-            mortise_center = start.lerp(end, 0.18) + up * (spec["depth"] * 0.525) + side * (spec["width"] * 0.10)
-            parts.append(_dark_check(kit, "PrincipalPurlin_MortisePocketDark", mortise_center, dvec, side, up,
-                                     0.18, 0.055, check_mat))
+                                     rng.uniform(0.20, 0.80), rng.uniform(0.003, 0.008), check_mat))
 
     # Hand-forged spike, bent and proud of the crossed timber.
     parts.append(_cylinder_between(kit, "OldIronSpikeShank", (0.34, -0.20, 0.330), (0.30, -0.18, 0.145), 0.0085, iron, 10))
