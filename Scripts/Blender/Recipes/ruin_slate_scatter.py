@@ -217,11 +217,11 @@ def build(kit):
     rng = random.Random(SEED)
     m = kit.mats
     slate_mats = [
-        m.slate("M_RuinSlateScatterDelaboleBlueGrey", dark=(0.020, 0.026, 0.032), light=(0.060, 0.074, 0.084),
+        m.slate("M_RuinSlateScatterDelaboleBlueGrey", dark=(0.042, 0.050, 0.060), light=(0.115, 0.135, 0.150),
                 lichen=0.035, moss=0.0, seed=52.0),
-        m.slate("M_RuinSlateScatterDelaboleGreenGrey", dark=(0.022, 0.032, 0.030), light=(0.058, 0.076, 0.070),
+        m.slate("M_RuinSlateScatterDelaboleGreenGrey", dark=(0.044, 0.058, 0.056), light=(0.110, 0.135, 0.126),
                 lichen=0.025, moss=0.0, seed=53.0),
-        m.slate("M_RuinSlateScatterDarkerWetSlate", dark=(0.014, 0.019, 0.024), light=(0.045, 0.055, 0.064),
+        m.slate("M_RuinSlateScatterDarkerWetSlate", dark=(0.030, 0.038, 0.046), light=(0.085, 0.100, 0.112),
                 lichen=0.015, moss=0.0, seed=54.0),
     ]
     soil = m.soil("M_RuinSlateScatterLoamAndSlateDust", damp=(0.060, 0.047, 0.032),

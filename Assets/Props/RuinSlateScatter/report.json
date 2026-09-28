@@ -6,7 +6,7 @@
   "triangle_budget": 200000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/ruin_slate_scatter.py",
-  "source_sha256": "7057eabbecf602edfe75310024ee52b779376e4389c2d58dfca7ccc68348c71e",
+  "source_sha256": "11decea2b2cd666d788829d54b19faf2ba00becaed7c6d8d10ccd96289eb80d3",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_RuinSlateScatter": {
@@ -59,7 +59,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_RuinSlateScatter.fbx",
-      "sha256": "026e06f411781b9a4133521200263194c4fc73d57b8b1e174274a48ec9b65599",
+      "sha256": "00b7cd097f18037d53d42c4f30351cbaf647716ad2ffe6a4855108c94b1a34f7",
       "preview": "preview_SM_RuinSlateScatter.png",
       "beauty": {
         "views": {
@@ -136,7 +136,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_RuinSlateScatter_LOD1.fbx",
-      "sha256": "5704ac66af62e09428a571c5a1042800677197513c873e826dc2766420c89feb",
+      "sha256": "3d9b1425858aa2ab1e3d88f63577ecbaeac27ebcb39bf5b9ed48548057111e12",
       "preview": "preview_SM_RuinSlateScatter_LOD1.png"
     },
     "SM_RuinSlateScatter_LOD2": {
@@ -190,7 +190,7 @@
         "eye_distance": 3.2
       },
       "fbx": "SM_RuinSlateScatter_LOD2.fbx",
-      "sha256": "8b1ef564bc2d5602eb4d2fe06826ae2afbc8ad26161c17f5f00eadcfb48a4b15",
+      "sha256": "47aa1db85c7c866ef9796704d9e5b58f5aceff3c95129d35225345e86807999d",
       "preview": "preview_SM_RuinSlateScatter_LOD2.png"
     }
   },
@@ -200,8 +200,8 @@
   "placement": "The -X side is deliberately thick and should sit against the ruin wall; debris thins toward +X into the room/yard.",
   "collision_note": "No collision: low walkable decoration.",
   "textures": {
-    "T_RuinSlateScatter_basecolor.png": "ee3cdf238e95eb7edd4834c4e2ce1e1d226a26a2e8860e7dcb6e13615865ef41",
-    "T_RuinSlateScatter_roughness.png": "b16ba51fa1cc842ce69249db78c1bacd65d73b70f14ad78b62ee399190156a13",
-    "T_RuinSlateScatter_normal.png": "47b3024ad15db26c4e7771726d84ae43515424b4a5a902dd57d9baf01f2345a5"
+    "T_RuinSlateScatter_basecolor.png": "fccab7511186f6572150379f0a274cb4779450560b5de0c7bd0d477bae927a1d",
+    "T_RuinSlateScatter_roughness.png": "a0d5132d45aebfb2dc06d084438f827a4120e3f3b0a45624716621b0f4fd9df2",
+    "T_RuinSlateScatter_normal.png": "72e60f121c9ec2439a722ee4f34c041e11a455298847a7756aa701ec9595b528"
   }
 }

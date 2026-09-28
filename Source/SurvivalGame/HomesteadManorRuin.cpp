@@ -61,7 +61,40 @@ const FRuinPiece ManorRuinPlan[] = {
     {TEXT("GraniteSpalls"), 2150, 1100, 250, 1.2f},
     {TEXT("GraniteCobbles"), 400, 600, 300, 1.1f},
     {TEXT("GraniteSpalls"), 2700, 900, 10, 1.0f},
+    // Detail: fallen roof timbers in the hall and the west rooms, clear of the paths from the
+    // standing room's door to the front and rear gaps.
+    {TEXT("RuinFallenTimbers"), 2450, 1300, 35},
+    {TEXT("RuinFallenTimbers"), 900, 1350, 110},
+    // Slate slid off the roofs, heaped against the walls (the prop's -X edge is its wall side).
+    {TEXT("RuinSlateScatter"), 1500, 195, 0},
+    {TEXT("RuinSlateScatter"), 2150, 1600, 180},
+    {TEXT("RuinSlateScatter"), 200, 1200, 90},
+    {TEXT("RuinSlateScatter"), 700, -145, 180},
 };
+
+// Ivy hanging from a wall run's broken head. X runs along the host run from its centre; Side +1
+// is the run's +Y face; Z is the head's height there (measured off the ruin_wall_* meshes).
+struct FRuinCling
+{
+    int32 Host;
+    float X;
+    float Side;
+    float Z;
+};
+constexpr float RuinWallHalfThickness = 30.0f;
+const FRuinCling ManorRuinIvy[] = {
+    {1, -175, 1, 560},   // south front, west tall run: faces the sea
+    {2, 190, -1, 388},   // south front, east tall run, over the fallen door
+    {5, -175, 1, 560},   // west gable
+    {10, -175, 1, 305},  // rear wall: faces the forecourt and the road
+    {13, -175, -1, 305}, // rear wall, east
+    {16, -175, 1, 305},  // east gable, inside the hall
+};
+
+bool RuinPieceBlocks(const TCHAR* Mesh)
+{
+    return FCString::Strcmp(Mesh, TEXT("RuinSlateScatter")) != 0 && FCString::Strcmp(Mesh, TEXT("RuinIvy")) != 0;
+}
 }
 
 AHomesteadManorRuin::AHomesteadManorRuin()
@@ -81,7 +114,8 @@ void AHomesteadManorRuin::OnConstruction(const FTransform& Transform)
 void AHomesteadManorRuin::BeginPlay()
 {
     Super::BeginPlay();
-    if (Pieces.IsEmpty()) Rebuild();
+    // Rebuild in play as well; the ivy traces need the streamed level's collision.
+    Rebuild();
 }
 
 UStaticMesh* AHomesteadManorRuin::Mesh(const TCHAR* Name)
@@ -112,22 +146,73 @@ int32 AHomesteadManorRuin::Rebuild()
     }
     const double Ground = Room ? Room->z : GetActorLocation().Z;
     SetActorLocation(FVector(MinX, MinY, Ground));
-    for (const FRuinPiece& Entry : ManorRuinPlan)
-    {
-        UStaticMesh* Asset = Mesh(Entry.Mesh);
-        if (!Asset) continue;
+    auto Place = [this](const TCHAR* MeshName, const FTransform& Relative) -> UStaticMeshComponent* {
+        UStaticMesh* Asset = Mesh(MeshName);
+        if (!Asset) return nullptr;
         UStaticMeshComponent* Piece = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
         Piece->SetupAttachment(GetRootComponent());
         Piece->SetMobility(EComponentMobility::Static);
         Piece->SetStaticMesh(Asset);
-        // V runs north (+X) and U east (+Y); a run's own X axis lies along V at yaw 0.
-        Piece->SetRelativeLocation(FVector(Entry.V, Entry.U, 0.0f));
-        Piece->SetRelativeRotation(FRotator(0.0f, Entry.Yaw, 0.0f));
-        Piece->SetRelativeScale3D(FVector(Entry.Scale));
-        Piece->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
-        Piece->SetCanEverAffectNavigation(true);
+        Piece->SetRelativeTransform(Relative);
+        if (RuinPieceBlocks(MeshName))
+        {
+            Piece->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+            Piece->SetCanEverAffectNavigation(true);
+        }
+        else
+        {
+            Piece->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            Piece->SetCanEverAffectNavigation(false);
+        }
         Piece->RegisterComponent();
         Pieces.Add(Piece);
+        return Piece;
+    };
+    // V runs north (+X) and U east (+Y); a run's own X axis lies along V at yaw 0.
+    auto PlanTransform = [](const FRuinPiece& Entry) {
+        return FTransform(FRotator(0.0f, Entry.Yaw, 0.0f), FVector(Entry.V, Entry.U, 0.0f), FVector(Entry.Scale));
+    };
+    TArray<UStaticMeshComponent*> PlanPieces;
+    for (const FRuinPiece& Entry : ManorRuinPlan) PlanPieces.Add(Place(Entry.Mesh, PlanTransform(Entry)));
+    // The ivy's own +Y is its leafy face, so it turns to face whichever side of the run it hangs on.
+    for (const FRuinCling& Cling : ManorRuinIvy)
+    {
+        const float HeadZ = RunHeadHeight(PlanPieces[Cling.Host], Cling.X, Cling.Side, Cling.Z);
+        const FTransform OnRun(FRotator(0.0f, Cling.Side > 0 ? 0.0f : 180.0f, 0.0f),
+            FVector(Cling.X, Cling.Side * RuinWallHalfThickness, HeadZ));
+        Place(TEXT("RuinIvy"), OnRun * PlanTransform(ManorRuinPlan[Cling.Host]));
     }
     return Pieces.Num();
+}
+
+float AHomesteadManorRuin::RunHeadHeight(UStaticMeshComponent* Run, float X, float Side, float Fallback)
+{
+    if (!Run) return Fallback;
+    // Sample the broken head just inside the face across the ivy's width. Seat the mat on the
+    // lowest sample (a buried top is hidden; a floating one shows), ignoring drops into openings.
+    const FTransform& World = Run->GetComponentTransform();
+    const float FaceY = Side * (RuinWallHalfThickness - 12.0f);
+    // UPrimitiveComponent::LineTraceComponent misses these Nanite runs, so trace the world while
+    // ignoring every other ruin piece and keep only hits on this run.
+    UWorld* Level = Run->GetWorld();
+    if (!Level) return Fallback;
+    FCollisionQueryParams Params(NAME_None, true);
+    for (UStaticMeshComponent* Other : Pieces)
+        if (Other && Other != Run) Params.AddIgnoredComponent(Other);
+    TArray<float, TInlineAllocator<16>> Heights;
+    for (float Offset = -110.0f; Offset <= 110.0f; Offset += 20.0f)
+    {
+        FHitResult Hit;
+        const FVector Start = World.TransformPosition(FVector(X + Offset, FaceY, 1200.0f));
+        const FVector End = World.TransformPosition(FVector(X + Offset, FaceY, -20.0f));
+        if (Level->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params) && Hit.GetComponent() == Run)
+            Heights.Add(World.InverseTransformPosition(Hit.ImpactPoint).Z);
+    }
+    if (Heights.IsEmpty()) return Fallback;
+    float Highest = Heights[0];
+    for (const float Height : Heights) Highest = FMath::Max(Highest, Height);
+    float Seat = Highest;
+    for (const float Height : Heights)
+        if (Height > Highest - 120.0f) Seat = FMath::Min(Seat, Height);
+    return Seat;
 }
