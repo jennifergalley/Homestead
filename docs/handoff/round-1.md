@@ -59,7 +59,9 @@ already pushed), then continue and send `[ready]` with a SHA.
   `Simulation\HomesteadEstate.h` (world 500000+, overgrowth 510000+, ...).
 - The item catalogue: `Simulation\HomesteadItems.{h,cpp}`. Append only; rows must match enum order.
   Serialize edits between lanes.
-- Saves: lanes never bump `SimulationSaveVersion`; the orchestrator bumps once at integration. New
+- Saves: lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per integration.
+  It's **12** since `0e08e717` (version 11 saves are refused with a reset notice; 7-10 still migrate).
+  If your branch adds anything to the save format, tell the orchestrator before your `[ready]`. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
