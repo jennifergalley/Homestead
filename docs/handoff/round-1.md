@@ -26,10 +26,12 @@ folder name is the session's **mailbox address** for urgent `mailbox_send` messa
 ## Lane status
 
 The checkboxes on each lane's branch are the source of truth (`openspec\changes\<change>\tasks.md`).
-On `main` as of 2026-09-27: the Estate World Partition level and fixed-world mode (`d32b58a0`),
-estate water, baked scenery and woodland placements (`cf90fc3e`), the item catalogue (`5ae9509d`),
-money and the general store (`8ecb84a2`, `d5d1f51a`), and parcels (`a94d4f61`). The clearing,
-manor and boundary lanes haven't merged yet.
+
+**Integration build `f2e504c5` (2026-09-27, packaged by the orchestrator).** It merges the store
+(`7a3f0a1b`, `d679b64f`), clearing (`fe0abfe6`), manor (`48494ef7`, `38601898`) and map lanes with
+the world lane's water, scenery and placements. Jenny launches it from the **"Homestead Estate"**
+desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
+`/Game/SurvivalGame/Maps/Estate`. All lanes should rebase onto it.
 
 ## Shared interfaces and rules this round
 
@@ -57,13 +59,17 @@ manor and boundary lanes haven't merged yet.
 
 ## Open blockers and known bugs
 
-- **Estate saves fail on `main`:** `ReadSave` rejects `abs(PlayerLocation.Z) > 5000`, and estate ground
-  sits at Z ≈ 8700-9500. Fixed on the manor lane's branch; lands when it merges.
-- **Cookfire/Hearth cook action broken on `main`:** it calls `FocusLegacySubject`, but craft rows
-  are now `EHomesteadMenuSubject::Recipe`, so the toast "The cookfire recipe could not be
-  selected." appears (`HomesteadController.cpp` ~2111). Owner to be assigned by the orchestrator.
-- **Estate spawn yaw** is overwritten by `ChooseStartingView` and by `SetAppearancePreview(false)`
-  restoring an earlier `SavedViewRotation`. Being fixed on the manor lane.
+- **Ruin material instances lack `bUsedWithNanite`**, so they draw the Default Material in packaged
+  builds. Owner: manor lane.
+- **Woodland packaged suites fail** (Smoke, FullLoop, Hotbar, NativeMenu) on retired resources and
+  tools (Reeds, Knife, ...). Owner: clearing lane, retargeting them to the estate.
+- **Distant landscape vanishes:** no HLOD, and only about ±400 m streams around the pawn. Owner:
+  world lane (orchestrator).
+- **Strike and mow animations** aren't imported yet. Owner: clearing lane.
+
+Resolved in `f2e504c5`: estate saves (the `ReadSave` Z bound) and the cookfire/Hearth
+`FocusLegacySubject` bug. The manor lane's estate spawn-yaw fix is included in its merge, but it
+hasn't been confirmed in the packaged build.
 
 - **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
   UBT `ConflictingInstance`): resolved. `Build-Game.ps1` builds the game target with `-WaitMutex`,

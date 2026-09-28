@@ -40,10 +40,11 @@ AHomesteadController* UHomesteadMapComponent::Owner() const
     return Cast<AHomesteadController>(GetOwner());
 }
 
-FString UHomesteadMapComponent::EstateName(const AHomesteadController&)
+FString UHomesteadMapComponent::EstateName(const AHomesteadController& Controller)
 {
-    // add-ruined-manor-and-arrival replaces this with the name she chose.
-    return TEXT("Trevennor");
+    // The name she chose in the Names step; the placeholder until she has.
+    const std::string& Name = Controller.State().estateName;
+    return Name.empty() ? FString(TEXT("Trevennor")) : FString(UTF8_TO_TCHAR(Name.c_str()));
 }
 
 FBox2D UHomesteadMapComponent::MinimapBox(float ViewWidth)
@@ -85,7 +86,9 @@ void UHomesteadMapComponent::EndPlay(const EEndPlayReason::Type Reason)
 bool UHomesteadMapComponent::IsMinimapVisible() const
 {
     const AHomesteadController* Controller = Owner();
-    return Controller && CurrentFrame.Model.IsValid() && Controller->ShouldShowHotbar() && !Controller->HasNativeMenu();
+    // Hidden with the rest of the HUD, and behind the new-game setup and shop screens.
+    return Controller && CurrentFrame.Model.IsValid() && Controller->ShouldShowHotbar() && !Controller->HasNativeMenu()
+        && !Controller->IsNewGameSetup() && !Controller->IsNamingSetup() && !Controller->IsShopScreenOpen();
 }
 
 void UHomesteadMapComponent::SetRotatesWithCamera(bool bRotate)
@@ -193,7 +196,8 @@ void UHomesteadMapComponent::TrackBoundary()
     }
     CurrentFrame.bInsideEstate = bInside || !bAnyOwned;
     // Menus freeze her; nothing is announced while one is open.
-    if (!bAnyOwned || !Controller->IsWorldReady() || Controller->IsBookOpen() || Controller->HasNativeMenu() || Controller->IsFailed())
+    if (!bAnyOwned || !Controller->IsWorldReady() || Controller->IsBookOpen() || Controller->HasNativeMenu() || Controller->IsFailed()
+        || Controller->IsNewGameSetup() || Controller->IsNamingSetup() || Controller->IsShopScreenOpen())
         return;
     const double Moved = FMath::Sqrt(FMath::Square(CurrentFrame.Player.x - LastPlayer.x) + FMath::Square(CurrentFrame.Player.y - LastPlayer.y));
     LastPlayer = CurrentFrame.Player;

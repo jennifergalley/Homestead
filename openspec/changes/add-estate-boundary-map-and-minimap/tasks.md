@@ -8,14 +8,14 @@
 ## 2. First playable minimap (first delivery)
 
 - [x] 2.1 Add the capture-and-stylise bake (`Scripts\Map\bake_estate_map.py` + `Homestead.ImportEstateMap`), and bake `T_EstateMap` plus its transform from the first Estate terrain (the LIDAR heightmap). The orthographic-capture fold-in (`--capture`) waits for the level's water and dressing
-- [ ] 2.2 Add the `SHomesteadMinimap` overlay: a north-up crop, the player arrow, the dashed owned boundary and landmark glyphs, a protected HUD region, and hiding with the HUD. Verify it at 720p and 4K (verified in PIE on the Estate map at 4K and in the 720p editor -game Hotbar route; packaged 720p/4K check waits on the integration build)
-- [ ] 2.3 Add the boundary-crossing toast with hysteresis, using the estate name. Package, walk off the estate along the road, capture in-game views, commit and push (built; in PIE one "Leaving"/"Entering the Trevennor estate" toast per crossing at the north edge and the road gateway, none while jittering ±1.5 m on the line; packaged walk pending)
+- [x] 2.2 Add the `SHomesteadMinimap` overlay: a north-up crop, the player arrow, the dashed owned boundary and landmark glyphs, a protected HUD region, and hiding with the HUD. Verify it at 720p and 4K (verified in PIE on the Estate map at 4K, and in the packaged integration build f2e504c5 on the Estate map at 720p windowed and 4K fullscreen; hidden during new-game setup, Names and the shop from 9a7d6e16)
+- [ ] 2.3 Add the boundary-crossing toast with hysteresis, using the estate name. Package, walk off the estate along the road, capture in-game views, commit and push (in PIE one "Leaving"/"Entering" toast per crossing at the north edge and the road gateway, none while jittering ±1.5 m on the line; from 9a7d6e16 it uses the name chosen in the Names step, verified in PIE as "Leaving/Entering the Penrose estate". A walk off the estate in a packaged build is still to do)
 
 ## 3. Map tab and settings
 
 - [x] 3.1 Add the field-book Map tab: fitted texture, parcel shading, named landmarks, a you-are-here marker, mouse pan and zoom, and controller stick pan and zoom with landmark focus stepping
 - [x] 3.2 Add the "Minimap rotates with camera" setting with an N marker. Verify both modes in ordinary play
-- [ ] 3.3 Run the native menu navigation tests with the new tab, plus mouse and controller parity checks, and verify no input leaks into the world (the editor -game NativeMenu route passes at 720p with the five Map steps, including no simulation change and LB/RB; real-mouse wheel and drag verified in PIE; packaged run waits on the integration build. Two 4K editor -game runs failed early on unrelated steps under heavy machine load)
+- [ ] 3.3 Run the native menu navigation tests with the new tab, plus mouse and controller parity checks, and verify no input leaks into the world (the editor -game NativeMenu route passes at 720p with the five Map steps, including no simulation change and LB/RB; real-mouse wheel and drag verified in PIE; the Map tab renders correctly in the packaged build f2e504c5 at 720p and 4K, opened with M. The packaged NativeMenu suite still stops before the Map steps on the retired-Knife step that the clearing lane is fixing. Two 4K editor -game runs failed early on unrelated steps under heavy machine load)
 
 ## 4. Acceptance
 
