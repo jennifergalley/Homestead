@@ -1,0 +1,432 @@
+{
+  "schema": 1,
+  "name": "FarmFence",
+  "description": "Modular derelict cleft-oak post-and-rail fence pieces and a broken sagging five-bar field gateway for an overgrown Cornish manor farm enclosure.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/farm_fence.py",
+  "source_sha256": "27acbdaf508351aff1d18b1f328709494b4d511f6cdbf4e4add15804b09886b1",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_FarmFencePost": {
+      "vertices": 687,
+      "triangles": 1170,
+      "size_cm": [
+        14.89,
+        13.47,
+        131.24
+      ],
+      "materials": [
+        {
+          "name": "M_FarmFencePost",
+          "textures": {
+            "basecolor": "T_FarmFencePost_basecolor.png",
+            "roughness": "T_FarmFencePost_roughness.png",
+            "metallic": "T_FarmFencePost_metallic.png",
+            "normal": "T_FarmFencePost_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmFencePost_basecolor.png",
+          "roughness": "T_FarmFencePost_roughness.png",
+          "normal": "T_FarmFencePost_normal.png",
+          "ao": "T_FarmFencePost_ao.png",
+          "metallic": "T_FarmFencePost_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0014588907361030579,
+          -0.022441605776548385,
+          0.6906102679669857
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_FarmFencePost.fbx",
+      "sha256": "f29d879c49cc38670c57534d22db7b29a6168035266979e40f604c39f0a5dc07",
+      "preview": "preview_SM_FarmFencePost.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmFencePost_hero.png",
+          "detail": "beauty_SM_FarmFencePost_detail.png",
+          "eye": "beauty_SM_FarmFencePost_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FarmFencePostSnapped": {
+      "vertices": 1226,
+      "triangles": 2332,
+      "size_cm": [
+        17.93,
+        15.79,
+        49.0
+      ],
+      "materials": [
+        {
+          "name": "M_FarmFencePostSnapped",
+          "textures": {
+            "basecolor": "T_FarmFencePostSnapped_basecolor.png",
+            "roughness": "T_FarmFencePostSnapped_roughness.png",
+            "metallic": "T_FarmFencePostSnapped_metallic.png",
+            "normal": "T_FarmFencePostSnapped_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmFencePostSnapped_basecolor.png",
+          "roughness": "T_FarmFencePostSnapped_roughness.png",
+          "normal": "T_FarmFencePostSnapped_normal.png",
+          "ao": "T_FarmFencePostSnapped_ao.png",
+          "metallic": "T_FarmFencePostSnapped_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0025735534727573395,
+          -0.029251618981361388,
+          0.7810547322034835
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_FarmFencePostSnapped.fbx",
+      "sha256": "fadad448d750d0a37546db0e669060ace69b8aca176f5f376d381c8a8df02bfc",
+      "preview": "preview_SM_FarmFencePostSnapped.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmFencePostSnapped_hero.png",
+          "detail": "beauty_SM_FarmFencePostSnapped_detail.png",
+          "eye": "beauty_SM_FarmFencePostSnapped_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FarmFenceRail": {
+      "vertices": 1052,
+      "triangles": 1908,
+      "size_cm": [
+        290.25,
+        13.17,
+        9.53
+      ],
+      "materials": [
+        {
+          "name": "M_FarmFenceRail",
+          "textures": {
+            "basecolor": "T_FarmFenceRail_basecolor.png",
+            "roughness": "T_FarmFenceRail_roughness.png",
+            "metallic": "T_FarmFenceRail_metallic.png",
+            "normal": "T_FarmFenceRail_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmFenceRail_basecolor.png",
+          "roughness": "T_FarmFenceRail_roughness.png",
+          "normal": "T_FarmFenceRail_normal.png",
+          "ao": "T_FarmFenceRail_ao.png",
+          "metallic": "T_FarmFenceRail_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.2993557333946228,
+          -0.002588726580142975,
+          0.012083891034126285
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.2
+      },
+      "fbx": "SM_FarmFenceRail.fbx",
+      "sha256": "50178fb5f849cd6f519b01e1084c0778799d5898f3288fd6f5e9bf7298007c52",
+      "preview": "preview_SM_FarmFenceRail.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmFenceRail_hero.png",
+          "detail": "beauty_SM_FarmFenceRail_detail.png",
+          "eye": "beauty_SM_FarmFenceRail_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FarmFenceRailBroken": {
+      "vertices": 1036,
+      "triangles": 1900,
+      "size_cm": [
+        176.71,
+        12.12,
+        12.8
+      ],
+      "materials": [
+        {
+          "name": "M_FarmFenceRailBroken",
+          "textures": {
+            "basecolor": "T_FarmFenceRailBroken_basecolor.png",
+            "roughness": "T_FarmFenceRailBroken_roughness.png",
+            "metallic": "T_FarmFenceRailBroken_metallic.png",
+            "normal": "T_FarmFenceRailBroken_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmFenceRailBroken_basecolor.png",
+          "roughness": "T_FarmFenceRailBroken_roughness.png",
+          "normal": "T_FarmFenceRailBroken_normal.png",
+          "ao": "T_FarmFenceRailBroken_ao.png",
+          "metallic": "T_FarmFenceRailBroken_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.5287301194667816,
+          -0.005408955737948418,
+          0.02630644962191582
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.8
+      },
+      "fbx": "SM_FarmFenceRailBroken.fbx",
+      "sha256": "f27f936912f187d3dc7febff42b2dba2b3f4f5402f8879a443db43d4ee8bddca",
+      "preview": "preview_SM_FarmFenceRailBroken.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmFenceRailBroken_hero.png",
+          "detail": "beauty_SM_FarmFenceRailBroken_detail.png",
+          "eye": "beauty_SM_FarmFenceRailBroken_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FarmGateway": {
+      "vertices": 9969,
+      "triangles": 19412,
+      "size_cm": [
+        335.78,
+        139.46,
+        165.52
+      ],
+      "materials": [
+        {
+          "name": "M_FarmGateway",
+          "textures": {
+            "basecolor": "T_FarmGateway_basecolor.png",
+            "roughness": "T_FarmGateway_roughness.png",
+            "metallic": "T_FarmGateway_metallic.png",
+            "normal": "T_FarmGateway_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmGateway_basecolor.png",
+          "roughness": "T_FarmGateway_roughness.png",
+          "normal": "T_FarmGateway_normal.png",
+          "ao": "T_FarmGateway_ao.png",
+          "metallic": "T_FarmGateway_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.45,
+          -0.55,
+          0.62
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_FarmGateway.fbx",
+      "sha256": "192224ae8dfb260869c9707b35a823adcc2451827f772535ea160253309b756d",
+      "preview": "preview_SM_FarmGateway.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmGateway_hero.png",
+          "detail": "beauty_SM_FarmGateway_detail.png",
+          "eye": "beauty_SM_FarmGateway_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Blender (x,y,z) imports as Unreal (x,-y,z); all dimensions below in cm after import.",
+  "slot_heights_cm": [
+    35,
+    70,
+    105
+  ],
+  "rail_axis": "Fence rails and post mortises run along local X.",
+  "gateway": "Hanging post is at local origin; shutting post is at +310 cm X. Gate leaf spans about +18 to +303 cm X before yaw, is swung 25 degrees toward Blender -Y (Unreal +Y) from the hanging post, and the latch/head end is dropped until the stile foot rests on z=0.",
+  "textures": {
+    "T_FarmFencePost_basecolor.png": "439f90a58146b8f87a48081a85f7e71dc24e71ab995e1bab000756e4c75c2c79",
+    "T_FarmFencePost_roughness.png": "a7a326e80b3e19248d681936d3b64cc5ccbbec6bdcbc7e71b363e8a1aac5d5c5",
+    "T_FarmFencePost_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
+    "T_FarmFencePost_normal.png": "17345230addfba0cdda15cdc2aa46c1db20358cf8f5d0124ad2e4a25ec33c040",
+    "T_FarmFencePostSnapped_basecolor.png": "c4f38dbdccf5fb614731e1b0d830f4d8bdf62c94ccebbdcb0273376421b1c5ae",
+    "T_FarmFencePostSnapped_roughness.png": "20d887dd8eb6b836e575a536478a4742bb558c29fa29c6d3311ad07411aac2c4",
+    "T_FarmFencePostSnapped_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
+    "T_FarmFencePostSnapped_normal.png": "e6f12ab6597383ca0386452f95772130c5f069e118863751f4d800ec59152b56",
+    "T_FarmFenceRail_basecolor.png": "0856cb779deed01c5f22690f3356b08b9bd4fdf8db4e35358609a4e33690244a",
+    "T_FarmFenceRail_roughness.png": "12dfdffe50a8df68616876b33df08797463d5b4306f4ecd1eaa66e507660c434",
+    "T_FarmFenceRail_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
+    "T_FarmFenceRail_normal.png": "bb498776db453243f3a01b591dc9e48a8ff02869d99c9d6b8778a71b6a1a1003",
+    "T_FarmFenceRailBroken_basecolor.png": "5eb4d341ff78dc2a9e48ffa26a4a7c28fea0080113263209e32105bc400738a4",
+    "T_FarmFenceRailBroken_roughness.png": "ec8c1822bcda857fdebb9c6cd80445dab2cac16aaa7f01b8e46243956bc84379",
+    "T_FarmFenceRailBroken_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
+    "T_FarmFenceRailBroken_normal.png": "2b498e7cd57d0f7f6363bd76675663d207e6ea9fd7a0d918f7f981ff95cc9184",
+    "T_FarmGateway_basecolor.png": "7a2af6639821167a7688f29da13fc6ceca5d0baea47e887be14dd788bea15861",
+    "T_FarmGateway_roughness.png": "9f58f652f052603050bcc4dc19da32baf3ed16bf1b3f080ed89301d4504f13f9",
+    "T_FarmGateway_metallic.png": "c91b7a5cde9b79a6e1c5f6eebb0be523b0e8f0686ffa9e9451245e596a7b6c50",
+    "T_FarmGateway_normal.png": "e54604b1e5cc208ae7a9c61c90ecc562cf2e5c6e487a7c93774ad5a5e810dca4"
+  }
+}

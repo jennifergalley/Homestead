@@ -51,6 +51,8 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::TownSquare, {-54000.0, 115000.0}, 9109.0, 0.0},
             {Anchor::GeneralStoreDoor, {-54000.0, 117000.0}, 9153.0, 90.0},
             {Anchor::GeneralStoreCounter, {-54000.0, 117600.0}, 9166.0, -90.0},
+            // The derelict farm's broken gate, on its south fence facing the ruin's rear-wall gap.
+            {Anchor::DerelictFarmGate, {-22200.0, -65700.0}, 8720.6, 180.0},
         };
         layout.polygons = {
             {Anchor::EstateBoundary,
@@ -61,6 +63,10 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::ManorFootprint,
                 {{-24100.0, -66500.0}, {-24100.0, -63500.0}, {-25300.0, -63500.0}, {-25300.0, -64100.0},
                  {-25900.0, -64100.0}, {-25900.0, -66500.0}}},
+            // The old walled field 19 m behind the ruin: 60 x 60 m of gentle south-facing pasture
+            // (about 4 degrees, 5.5 m of relief), 25 m or more off the road.
+            {Anchor::DerelictFarm,
+                {{-22200.0, -70500.0}, {-22200.0, -64500.0}, {-16200.0, -64500.0}, {-16200.0, -70500.0}}},
             {std::string(Anchor::ForSaleParcelPrefix) + "Woodland",
                 {{16000.0, -90000.0}, {60000.0, -90000.0}, {60000.0, -25000.0}, {16000.0, -25000.0}}},
             {std::string(Anchor::ForSaleParcelPrefix) + "MoorField",
@@ -219,6 +225,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
         salvage(520003, 300.0, 1300.0);  // In the west rooms, north of the chimney breast.
         salvage(520004, 1350.0, 1950.0); // Outside the gap in the fallen rear wall.
         salvage(520005, 400.0, -200.0);  // Under the collapsed south-west corner, outside.
+        AppendDerelictFarmAndDisrepair(table);
         // Town lane (530000+).
         return table;
     }();

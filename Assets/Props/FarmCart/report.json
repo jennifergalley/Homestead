@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "FarmCart",
+  "description": "Abandoned 1830s-40s Cornish/English two-wheeled farm tip cart with collapsed nearside wheel, listed boarded body, long shafts and rusted iron tyres.",
+  "collision": "convex",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/farm_cart.py",
+  "source_sha256": "9476c442a64aed2d164012b88c8dfd553262973f59ef50c5bc9ea93c2c183e8d",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture. Researched from period English/Cornish butt/tumbril farm cart construction.",
+  "meshes": {
+    "SM_FarmCart": {
+      "vertices": 9310,
+      "triangles": 17488,
+      "size_cm": [
+        418.16,
+        234.51,
+        191.99
+      ],
+      "materials": [
+        {
+          "name": "M_FarmCart",
+          "textures": {
+            "basecolor": "T_FarmCart_basecolor.png",
+            "roughness": "T_FarmCart_roughness.png",
+            "metallic": "T_FarmCart_metallic.png",
+            "normal": "T_FarmCart_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmCart_basecolor.png",
+          "roughness": "T_FarmCart_roughness.png",
+          "normal": "T_FarmCart_normal.png",
+          "ao": "T_FarmCart_ao.png",
+          "metallic": "T_FarmCart_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -12
+        ],
+        "focus": [
+          -0.21915966272354126,
+          -0.2457691252231598,
+          0.8608151197433471
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "detail_distance": 2.05,
+        "eye_distance": 4.4
+      },
+      "fbx": "SM_FarmCart.fbx",
+      "sha256": "10f1f52007b8cabee69970a5bd7f8f3b836cc120ec1588d5b2ae26599a34aad4",
+      "preview": "preview_SM_FarmCart.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmCart_hero.png",
+          "detail": "beauty_SM_FarmCart_detail.png",
+          "eye": "beauty_SM_FarmCart_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -12
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Bottom centre of the settled cart at z=0.",
+  "orientation": "Long axis and horse shafts run along +X; rear/tail is -X. Nearside (-Y in Blender, +Y after Unreal mirror) is collapsed.",
+  "authored_scale_m": {
+    "overall_length_including_shafts": 4.3,
+    "body_length": 2.4,
+    "body_width": 1.4,
+    "wheel_diameter": 1.34
+  },
+  "textures": {
+    "T_FarmCart_basecolor.png": "a3711d24c0eb0cc6a1fdee0271b0cb632297cdc5a617de89a72501895b4c51c4",
+    "T_FarmCart_roughness.png": "0d805438126d382d85d3acdb0be123f99ae15cc67cc455395f5e627dc579e7e8",
+    "T_FarmCart_metallic.png": "364bd96750a01fbe8239f8982afd9e329604479515e5f98ed677a4c506735a28",
+    "T_FarmCart_normal.png": "20fb1eaf2d55791542082a6c7b759335eb29feb59cefccb3fb22df632df3697d"
+  }
+}
