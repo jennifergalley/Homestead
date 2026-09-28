@@ -135,7 +135,7 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 - The Estate is the default editor startup and game map (`b07d4a82`). Packaged woodland test
   scripts pass `/Game/SurvivalGame/Maps/Homestead` explicitly until each suite is retargeted.
 - HUD layout (Jenny): minimap bottom-right, calendar top-right, key hints top-left, and an icon-only
-  vitals stack bottom-left for food, energy and purse (`UI/SHomesteadVitals`).
+  vitals stack under the calendar (top-right) for food, energy and purse (`UI/SHomesteadVitals`).
 - Each worktree's editor uses its own MCP port; 8765 and the native `unreal` tools aren't safe to
   assume.
 - Shared-doc findings go through the docs agent (`docs\handoff\README.md`).
