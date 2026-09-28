@@ -355,6 +355,12 @@ private:
     bool bSprintHeld = false;
     bool bSprintActive = false;
     float SavedCameraDistance = 470;
+    bool bRoomCamera = false;
+    float RoomCameraSwitchTime = 0.0f;
+    float RoomOpenArm = 470.0f;
+    float RoomSetArm = 0.0f;
+    bool bHiddenFromCamera = false;
+    void UpdateRoomCamera(float DeltaSeconds);
     FRotator SavedViewRotation = FRotator::ZeroRotator;
     FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
     TOptional<float> ClearYaw;

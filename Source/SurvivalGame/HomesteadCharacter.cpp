@@ -1130,6 +1130,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     }
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
+    if (!Lab) UpdateRoomCamera(DeltaSeconds);
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
         const FVector CameraPosition = Camera->GetComponentLocation();
@@ -2202,6 +2203,51 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
     Camera->PostProcessSettings.bOverride_AutoExposureBias = true;
     Camera->PostProcessSettings.AutoExposureBias =
         GameController && GameController->Simulation().IsNight() ? 0.5f : 0.0f;
+}
+
+void AHomesteadCharacter::UpdateRoomCamera(float DeltaSeconds)
+{
+    UWorld* World = GetWorld();
+    if (!World || !Camera || bAppearancePreview) return;
+    // Under a roof the full chase arm can't fit: it slams into the ceiling or pins the lens to
+    // the wall behind her. Bring it in and down while she's indoors, and give the outdoor
+    // distance back when she steps out. The short delay stops a lintel toggling it in the door.
+    constexpr float RoomArm = 300.0f;
+    const FVector Head = GetActorLocation() + FVector(0, 0, 60);
+    FHitResult Hit;
+    const FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadRoomCamera), false, this);
+    const bool Roofed = World->LineTraceSingleByChannel(Hit, Head, Head + FVector(0, 0, 400),
+        ECC_Camera, Query);
+    RoomCameraSwitchTime = Roofed != bRoomCamera ? RoomCameraSwitchTime + DeltaSeconds : 0.0f;
+    if (RoomCameraSwitchTime > 0.3f)
+    {
+        RoomCameraSwitchTime = 0.0f;
+        bRoomCamera = Roofed;
+        if (bRoomCamera)
+        {
+            RoomOpenArm = CameraArm->TargetArmLength;
+            RoomSetArm = FMath::Min(RoomOpenArm, RoomArm);
+            CameraArm->TargetArmLength = RoomSetArm;
+        }
+        else if (FMath::IsNearlyEqual(CameraArm->TargetArmLength, RoomSetArm, 1.0f))
+            CameraArm->TargetArmLength = RoomOpenArm;
+    }
+    const FVector Socket = bRoomCamera ? FVector(0, 28, 30) : FVector(0, 45, 55);
+    CameraArm->SocketOffset = FMath::VInterpTo(CameraArm->SocketOffset, Socket, DeltaSeconds, 5.0f);
+    // When a wall pins the arm short, lift the pivot to head height so the lens looks over her
+    // shoulder into the room instead of filling the frame with her back.
+    const float Reach = FVector::Dist(Camera->GetComponentLocation(),
+        CameraArm->GetComponentLocation() + CameraArm->TargetOffset);
+    const float Lift = bRoomCamera ? 75.0f * FMath::Clamp((260.0f - Reach) / 160.0f, 0.0f, 1.0f) : 0.0f;
+    CameraArm->TargetOffset.Z = FMath::FInterpTo(CameraArm->TargetOffset.Z, Lift, DeltaSeconds, 4.0f);
+    // If a wall still pushes the lens right up against her, don't render her from inside.
+    const bool Hide = Reach < (bHiddenFromCamera ? 70.0f : 55.0f);
+    if (Hide != bHiddenFromCamera)
+    {
+        bHiddenFromCamera = Hide;
+        TInlineComponentArray<UPrimitiveComponent*> Parts(this);
+        for (UPrimitiveComponent* Part : Parts) Part->SetOwnerNoSee(Hide);
+    }
 }
 
 void AHomesteadCharacter::RestoreNearClip()
