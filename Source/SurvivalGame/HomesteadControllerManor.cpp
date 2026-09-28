@@ -10,16 +10,10 @@
 #include "Engine/GameViewportClient.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Layout/SBox.h"
-#include "Widgets/Layout/SScaleBox.h"
 
 namespace
 {
 FString FromUtf8(const std::string& Text) { return UTF8_TO_TCHAR(Text.c_str()); }
-float ViewportScale()
-{
-    const FViewport* Viewport = GEngine && GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
-    return Viewport ? FMath::Max(Viewport->GetSizeXY().Y, 720) / 1080.0f : 1.0f;
-}
 }
 
 FString AHomesteadController::CurrentSaveLabel() const
@@ -54,8 +48,8 @@ void AHomesteadController::ShowNames()
             HideNames();
             OpenBook(6);
         });
-    NamesRoot = SNew(SScaleBox).Stretch(EStretch::UserSpecified)
-        .UserSpecifiedScale_Lambda([]() { return FMath::Clamp(ViewportScale(), 0.67f, 2.0f); })
+    // Viewport content is already DPI-scaled by the engine's resolution curve.
+    NamesRoot = SNew(SBox)
         [
             NamesWidget.ToSharedRef()
         ];
