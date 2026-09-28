@@ -95,6 +95,11 @@ comment.
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
+- **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
+  game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
+  or when the orchestrator asks for a playtest build (Jenny, 2026-09-28). Lanes build only the editor
+  module, and only when their C++ changed. Build acceleration (UBA cache, mutex, unity/PCH, faster
+  cooking) is being investigated by the map lane (`6e131c6a`); findings go to the docs agent.
 - **Packaging is centralized with the integration session** (`e251051b`). Lanes deliver through "Delivering lane work"
   in `docs\handoff\README.md`: verify, native tests, editor compile-check, commit/push, then message
   the orchestrator with branch, SHA, what changed, what was verified and what to try.
