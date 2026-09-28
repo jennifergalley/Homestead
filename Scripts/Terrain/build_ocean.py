@@ -251,7 +251,10 @@ float t1 = lerp(Texture2DSample(FoamTex, FoamTexSampler, (pm - o0) / 6.1).r,
                 Texture2DSample(FoamTex, FoamTexSampler, (pm - o1) / 6.1 + 0.5).r, fw1);
 float t2 = lerp(Texture2DSample(FoamTex, FoamTexSampler, (pm - o0) / 2.3 + 0.37).r,
                 Texture2DSample(FoamTex, FoamTexSampler, (pm - o1) / 2.3 + 0.87).r, fw1);
-float lace = saturate(t1 * 0.65 + t2 * 0.55);
+// A finer octave that drifts with the same flow gives bubbles and holes up close.
+float t3 = lerp(Texture2DSample(FoamTex, FoamTexSampler, (pm - o0 * 1.3) / 0.83 + 0.61).r,
+                Texture2DSample(FoamTex, FoamTexSampler, (pm - o1 * 1.3) / 0.83 + 0.11).r, fw1);
+float lace = saturate(t1 * 0.5 + t2 * 0.42 + t3 * 0.38);
 // Swash: each wave that reaches the beach (f wraps to 0 there) throws a sheet of white water up the
 // sand that thins into lace as it drains; a thin line of bubbles always lingers at the waterline.
 float fresh = exp(-3.0 * f);
@@ -262,7 +265,8 @@ float trail = exp(-5.0 * f) + 0.6 * front;
 // Whitecaps: the most folded crests of the wind sea, more of them in the gusts.
 float whitecap = saturate((caps * gust - Caps.y) * Caps.x);
 float cover = saturate(saturate(swash + linger + breakZone * trail * FoamP.z) * inMap + whitecap);
-FoamAmt = saturate((lace + cover * 1.25 - 1.0) * FoamP.w) * saturate(cover * 2.5);
+// Even a fresh sheet of swash keeps holes in it: coverage only lowers the lace threshold.
+FoamAmt = saturate((lace + cover * 1.0 - 0.95) * FoamP.w) * saturate(cover * 2.5) * lerp(0.75, 1.0, t3);
 // Keep reflections above the horizon: a facet tilted so far that the mirrored view ray points into
 // the sea would pick up black from the reflection trace, so flatten it just enough.
 float3 n = normalize(float3(-g, 1.0));
