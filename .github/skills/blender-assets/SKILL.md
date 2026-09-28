@@ -102,6 +102,9 @@ before each pass.
   `.\Scripts\Blender\Get-PolyHavenAsset.ps1 kloofendal_48d_partly_cloudy_puresky -Resolution 2k -Kind hdri`.
 - **Pillow/cushion UV frames.** An "up" vector parallel to the surface normal gives NaN UVs; for top
   stones use up (1, 0, 0).
+- **Nanite props and traces.** Props with Nanite on (`NANITE_PROPS` in `import_props.py`, plus the
+  ruin kit) don't answer `LineTraceComponent`. Code that checks a prop with a component trace must
+  trace the world and test `Hit.GetComponent()` instead (see the editor skill's table 0.1).
 - **SDF parts.** Evaluate only near the surface (`homestead_sdf` does coarse-to-fine) or a skull takes a
   minute. Never smart-project decimated SDF meshes; unwrap each part with `homestead_rocks.unwrap` first.
   Settle every loose part onto the ground (`deer.common.settle`/`lay_flat`); authored layouts float.
@@ -120,7 +123,9 @@ before each pass.
 - **Unreal import.**
   - Import into **your own running editor** (`Scripts\McpHelpers.ps1`, `py`):
     `sys.path.insert(0, r'<repo>\Scripts\Blender'); import import_props; import_props.main(['<Name>'])`
-    (reload with `importlib.util.spec_from_file_location` after editing it). The headless
+    (reload with `importlib.util.spec_from_file_location` after editing it), then save the imported
+    assets: `unreal.EditorAssetLibrary.save_directory('/Game/SurvivalGame/Environment/Props/<Name>', False, True)`
+    with PIE stopped. Reimporting an existing prop is the same call. The headless
     `Import-Props.ps1` runs under `-run=pythonscript`, which lacks `StaticMeshEditorSubsystem`, so its
     meshes get no LODs or collision. It also needs a free Unreal process slot (at most 3 on the
     machine) and must not run while this worktree's editor is open.

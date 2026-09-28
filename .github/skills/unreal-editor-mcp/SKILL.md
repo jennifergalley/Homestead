@@ -53,8 +53,9 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   the packaged build, which has RT on.
 - **Close your editor** before `git pull`/`rebase` (it locks `.uasset` files), before building
   `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
-  `py "unreal.SystemLibrary.quit_editor()"`, not by killing it (killing it leaves a restore dialog;
-  see 0.1).
+  `quit` (McpHelpers) or `.\Scripts\Stop-MyEditor.ps1 -Port <p>`, which closes only this worktree's
+  editor: a clean quit through MCP first, then by PID if it hangs. Never pick an editor by name or
+  window: several worktrees have them open.
 - **The editor opens the Estate by default** (`EditorStartupMap` and `GameDefaultMap` are
   `/Game/SurvivalGame/Maps/Estate` since `b07d4a82`), and that startup is clean, so don't pass `-Map`.
   (An explicit `-Map /Game/SurvivalGame/Maps/Estate` once hung startup for 20 minutes.) For the old
@@ -86,10 +87,10 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
 Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
-pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200
-. .\Scripts\McpHelpers.ps1 -Port $p                             # every later command
+pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
+. .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
-py "unreal.SystemLibrary.quit_editor()"                         # before building, rebasing, or when done
+.\Scripts\Stop-MyEditor.ps1 -Port $p                              # before building, rebasing, or when done (only your editor)
 & 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # compile-check
 .\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 16-19 min
 git status --short                                               # commit only your files, rebase, push
@@ -162,6 +163,9 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Clicking a button in a custom Slate panel breaks Tab or typing (Tab runs Slate navigation, keys go to the old row) | `SButton`s take keyboard focus on click | Give such buttons `.IsFocusable(false)`. |
 | UI is double-scaled at 4K but fine in PIE | The engine DPI curve (`bAllowHighDPIInGameMode`) already scales viewport widgets, so an extra height/1080 `SScaleBox` doubles them | Don't add your own resolution scaling. Check real resolutions in a standalone window (section 8), because PIE at editor size hides it. |
 | A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
+| `LineTraceComponent` never hits a mesh (returns false), even in PIE, though world traces do | `UPrimitiveComponent::LineTraceComponent` doesn't hit **Nanite** static mesh components | Trace the world (`World->LineTraceSingleByChannel`, or `line_trace_single` in Python) with other components ignored, and check `Hit.GetComponent()`. The terrain `ProceduralMeshComponent`s aren't Nanite, so component traces still work on them. |
+| Estate traces return None or captures show missing land right after PIE starts | World Partition is still streaming (about 55 s on the Estate) | Wait about a minute after `worldReady` before tracing or capturing, or take Z from the heightmap (row below). |
+| `FMath::Max(SomeTArray)` doesn't compile | There's no TArray overload | Loop, or use `Algo::MaxElement`. |
 | A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
 | A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. A 3840x2160 PNG is about 11 MB, over the `view` tool's 10 MB limit: downscale or crop it with PIL before viewing. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
@@ -239,7 +243,7 @@ clashes between parallel callers.
 | Helper | Does |
 | --- | --- |
 | `mcp <toolset> <tool> [json] [timeout]` | `call_tool`, raw JSON result |
-| `hk <tool> [json]` | a `HomesteadPlayTools` call, returns its text |
+| `hk <tool> [json]` | a `HomesteadPlayTools` **tool** call by tool name (`hk walk_to '{...}'`, `hk tap_key '{"key":"E"}'`), not a hotkey; returns its text |
 | `st [nearby]` | parsed `get_play_state` |
 | `py <code>` | `run_python` (needs `-AllowPython`), returns the output text |
 | `con <command>` | console command in PIE with the player controller (editor world outside PIE) |

@@ -2569,6 +2569,9 @@ Result Simulation::Deserialize(const std::string& data)
     if (!(header >> magic >> version >> size >> checksum) || magic != "HOMESTEAD") return invalid();
     header >> std::ws;
     if (!header.eof()) return invalid();
+    if (version == RetiredTestSaveVersion) return {false,
+        "This save is from an earlier test build and can't be opened by this one. Start a new game; no save was changed.",
+        ResultCode::UnsupportedVersion, revision_};
     if (version != SimulationSaveVersion && version != FreeBuildingSaveVersion && version != GardenSquareSaveVersion
         && version != LegacySimulationSaveVersion && version != GardenSquareSaveVersion - 1) return {false,
         "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",

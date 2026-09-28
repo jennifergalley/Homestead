@@ -2084,7 +2084,7 @@ void WardrobeSaveRejection()
     FixtureLayouts(dependent);
     CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
-    for (int version : {1, 2, 3, 4, 5, 6, SimulationSaveVersion + 1, 999})
+    for (int version : {1, 2, 3, 4, 5, 6, RetiredTestSaveVersion, SimulationSaveVersion + 1, 999})
     {
         CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
