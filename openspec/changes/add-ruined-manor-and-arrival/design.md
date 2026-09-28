@@ -73,7 +73,7 @@
 - The flow is New game → Appearance (the existing page) → **Names** → Begin.
 - The Names page has three text fields with defaults:
   - First name: "Eleanor".
-  - Surname: "Trelawney".
+  - Surname: "Cavendish" (Jenny changed it from "Trelawney" after the round-1 playtest).
   - Estate: "Trevennor", a Cornish "tre-" farmstead name.
 - Each field is limited to 24 characters and must be non-empty after trimming. There's no
   word filtering.

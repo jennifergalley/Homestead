@@ -127,6 +127,95 @@ def main():
     emit(BRACKEN, under[(pick >= 0.18) & (pick < 0.55)], 0.75, 1.25)
     emit(FERN, under[(pick >= 0.55) & (pick < 0.85)], 0.8, 1.3)
     emit(SHRUB, under[pick >= 0.85], 0.8, 1.2)
+    # Wild woods: after decades of neglect the estate and the country round it have gone back to
+    # oak-and-hazel woodland, leaving the manor's grounds, the drive, the old farm and the fields
+    # open. A two-scale noise field picks the woods; its fringe is a belt of scrub.
+    step = 4.0
+    axis = np.arange(-2000.0, 2000.0, step)
+    gx_, gy_ = np.meshgrid(axis, axis, indexing="ij")
+    field_noise = gaussian_filter(rng.normal(0, 1, gx_.shape), 60.0 / step)
+    field_noise /= field_noise.std()
+    fine_noise = gaussian_filter(rng.normal(0, 1, gx_.shape), 18.0 / step)
+    fine_noise /= fine_noise.std()
+    score = 0.8 * field_noise + 0.35 * fine_noise
+    def kept_open(p, road_clear):
+        # The grounds round the house stay open (the lawns, now rough) with a scrubby edge.
+        s = np.clip((90.0 - np.linalg.norm(p - lm["StandingRoomOrigin"], axis=1)) / 25.0, 0, 3)
+        # The derelict farm (manor lane: X -222..-162 m, Y -705..-645 m) plus a 10 m margin.
+        fx = np.maximum(np.abs(p[:, 0] + 192.0) - 40.0, 0)
+        fy = np.maximum(np.abs(p[:, 1] + 675.0) - 40.0, 0)
+        s += np.clip((6.0 - np.hypot(fx, fy)) / 3.0, 0, 3)
+        # The drive keeps a verge each side, and the river its banks.
+        if road_clear > 0:
+            s += np.clip((road_clear - road.query(p)[0]) / 3.0, 0, 3)
+        s += np.clip((9.0 - river.query(p)[0]) / 3.0, 0, 3)
+        s += np.clip((230.0 - np.linalg.norm(p - town, axis=1)) / 40.0, 0, 3)
+        return s
+    def wood_score(p):
+        i = np.clip(((p[:, 0] + 2000.0) / step).astype(int), 0, len(axis) - 1)
+        j = np.clip(((p[:, 1] + 2000.0) / step).astype(int), 0, len(axis) - 1)
+        # Denser on the estate, where nobody has cut anything for twenty years, and closing in on the
+        # grounds: the woods stand round the house's rough lawns about 90-200 m out.
+        d_house = np.linalg.norm(p - lm["StandingRoomOrigin"], axis=1)
+        return (score[i, j] + np.where(points_in_poly(p, boundary), 0.45, 0.0)
+                + 0.7 * np.exp(-((d_house - 140.0) / 55.0) ** 2) - kept_open(p, 11.0))
+    def woodable(p):
+        ok = sample(W["Pasture"], p[:, 0], p[:, 1]) + sample(W["WoodlandFloor"], p[:, 0], p[:, 1]) > 0.45
+        sv = slope[np.clip(np.round(H - p[:, 0]).astype(int), 0, 4032), np.clip(np.round(H + p[:, 1]).astype(int), 0, 4032)]
+        return p[ok & (sv < 32)]
+    WOOD_AT = 0.55
+    ww = woodable(keep_common(candidates(1 / 32.0), 9, 7))
+    ww = ww[wood_score(ww) > WOOD_AT]
+    # Beyond the estate the woods thin with distance: a stand every so often towards the horizon.
+    out_d = np.linalg.norm(ww - boundary.mean(axis=0), axis=1)
+    ww = ww[points_in_poly(ww, boundary) | (rng.random(len(ww)) < np.clip(1.3 - out_d / 1100.0, 0.18, 1.0))]
+    ww = clear_of_interactive(ww, 6.5)
+    firs = rng.random(len(ww)) < 0.1
+    emit(BROADLEAF, ww[~firs], 1.0, 1.55)
+    emit(FIR, ww[firs], 0.85, 1.2)
+    # Undergrowth under the new woods, thickest on the estate itself.
+    wu = woodable(keep_common(candidates(1 / 7.0, (-1100, 600, -1500, 700)), 3.5, 3))
+    wu = wu[wood_score(wu) > WOOD_AT]
+    wu = clear_of_interactive(wu, 2.0)
+    pick = rng.random(len(wu))
+    emit(HAZEL, wu[pick < 0.14], 0.8, 1.25)
+    emit(BRACKEN, wu[(pick >= 0.14) & (pick < 0.5)], 0.8, 1.35)
+    emit(FERN, wu[(pick >= 0.5) & (pick < 0.75)], 0.85, 1.4)
+    emit(SHRUB, wu[pick >= 0.75], 0.85, 1.35)
+    # The woods' ragged fringe: hazel and thorn scrub with the odd young tree.
+    fringe = woodable(keep_common(candidates(1 / 14.0, (-1100, 600, -1500, 700)), 4, 4))
+    fs = wood_score(fringe)
+    fringe = clear_of_interactive(fringe[(fs > WOOD_AT - 0.22) & (fs <= WOOD_AT)], 2.0)
+    pick = rng.random(len(fringe))
+    emit(SHRUB, fringe[pick < 0.45], 0.8, 1.3)
+    emit(HAZEL, fringe[(pick >= 0.45) & (pick < 0.7)], 0.7, 1.1)
+    emit(BRACKEN, fringe[(pick >= 0.7) & (pick < 0.96)], 0.8, 1.2)
+    emit(BROADLEAF, fringe[pick >= 0.96], 0.55, 0.8)
+    # Overgrown hedges: the estate's boundary hedge and a broken hedge down one side of the drive,
+    # gone to shrubs, hazel and the odd standard tree.
+    hedge = []
+    ring = np.r_[boundary, boundary[:1]]
+    edge = densify(ring, 1.7)
+    centre_b = boundary.mean(axis=0)
+    inward = centre_b - edge
+    inward /= np.linalg.norm(inward, axis=1, keepdims=True)
+    hedge.append(edge + inward * 3.0 + rng.normal(0, 0.5, edge.shape))
+    lane = densify(L["road"], 1.7)
+    lt = np.gradient(lane, axis=0)
+    lt /= np.linalg.norm(lt, axis=1, keepdims=True)
+    ln = np.c_[-lt[:, 1], lt[:, 0]]
+    along = np.arange(len(lane)) * 1.7
+    gaps = (along % 45.0) > 6.0
+    hedge.append((lane + ln * 7.5 + rng.normal(0, 0.4, lane.shape))[gaps])
+    hedge = np.concatenate(hedge)
+    hedge = keep_common(hedge, 5.5, 5)
+    hedge = woodable(hedge)
+    hedge = clear_of_interactive(hedge[kept_open(hedge, 0.0) < 0.3], 2.0)
+    pick = rng.random(len(hedge))
+    emit(SHRUB, hedge[pick < 0.5], 0.9, 1.4)
+    emit(HAZEL, hedge[(pick >= 0.5) & (pick < 0.85)], 0.9, 1.3)
+    emit(BRACKEN, hedge[(pick >= 0.85) & (pick < 0.97)], 0.8, 1.1)
+    emit(BROADLEAF, hedge[pick >= 0.97], 0.9, 1.3)
     # Lone field trees and hedgerow shrubs on the pasture.
     field = clear_of_interactive(by_weight(keep_common(candidates(1 / 2500.0)), "Pasture", 0.6), 10)
     emit(BROADLEAF, field, 1.0, 1.35)

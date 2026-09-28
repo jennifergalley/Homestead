@@ -17,7 +17,7 @@ public:
     UPROPERTY() FVector PlayerLocation = FVector(-1000, 0, 150);
     UPROPERTY() FRotator ViewRotation = FRotator(-15, 0, 0);
     UPROPERTY() int64 SavedAtUtc = 0;
-    // For the save list: "Eleanor Trelawney — Trevennor, Spring 1" (empty for unnamed woodland games).
+    // For the save list: "Eleanor Cavendish — Trevennor, Spring 1" (empty for unnamed woodland games).
     UPROPERTY() FString SaveLabel;
     UPROPERTY() float CameraSensitivity = 1.0f;
     UPROPERTY() bool InvertCameraY = false;

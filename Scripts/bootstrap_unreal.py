@@ -266,7 +266,7 @@ def main():
     creek.set_editor_property("looping", True)
     if not LIB.save_loaded_asset(creek, only_if_is_dirty=False):
         raise RuntimeError("Could not save the creek loop settings.")
-    # The standing-room hearth's crackle, synthesized by Scripts/generate_hearth_crackle.py.
+    # The standing-room hearth's crackle, cut from a CC0 recording by Scripts/prepare_hearth_crackle.py.
     crackle = import_asset("HearthCrackle.wav", "Audio/Ambience", "HearthCrackle",
                            source_root=ROOT / "Assets" / "Audio" / "Ambience")
     crackle.set_editor_property("looping", True)
