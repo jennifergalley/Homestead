@@ -366,7 +366,7 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
     const auto Hunger = MakeShared<double>(0);
     Add(FString::Printf(TEXT("Open pack to eat %s"), UTF8_TO_TCHAR(Homestead::ItemName(Item))),
         [this]() { Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Use the carried inventory view for the selected meal"),
         [this]() { Controller->MenuInventoryView(0); Controller->OpenBook(0); },

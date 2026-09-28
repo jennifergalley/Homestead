@@ -398,7 +398,8 @@ void AHomesteadSmokeTest::Prepare()
         [this]()
         {
             Tap(EKeys::Gamepad_Special_Left);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            // Guidebook back to the pack: Map, Structures, Craft, Pack.
+            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
         },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Menu pauses simulation"),
@@ -417,7 +418,8 @@ void AHomesteadSmokeTest::Prepare()
         [this]()
         {
             Tap(EKeys::Gamepad_Special_Left);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            // Guidebook back to the pack: Map, Structures, Craft, Pack.
+            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
         },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Open the appearance page with the controller"),
