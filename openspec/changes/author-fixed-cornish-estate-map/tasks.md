@@ -16,7 +16,7 @@
 
 ## 3. Biomes and authored resources
 
-- [x] 3.1 Paint the WoodlandFloor, Pasture, Moorland, DuneSand, Beach, CliffRock, DirtRoad and Farmland layers in a landscape material with distance blending. _Seven layers derived by `Scripts/Terrain/weightmaps.py`; Farmland is deferred to round 2 tilling._
+- [x] 3.1 Paint the WoodlandFloor, Pasture, Moorland, DuneSand, Beach, CliffRock, DirtRoad and Farmland layers in a landscape material with distance blending. _Seven layers derived by `Scripts/Terrain/weightmaps.py`; Farmland is deferred to round 2 tilling. Per-layer `Tint_*` vector parameters turn the straw grass scans spring green (`build_landscape_material.py`). Runtime landscape grass (LandscapeGrassOutput) is written but gated off: in 5.8 PIE its grass components stayed empty, so near-camera grass is still to do._
 - [ ] 3.2 Author PCG graphs that scatter the admitted tree, understory, rock and wildflower palette by layer, slope and water distance. Keep decorative grass as runtime PCG or foliage. _Interim: a deterministic Python scatter (`Scripts/Terrain/scatter.py`) bakes ~79k decorative instances into `EstateScenery.bin`, drawn as runtime HISMs. PCG graphs are not authored._
 - [ ] 3.3 Bake interactive trees, rocks and forage into a versioned `DA_EstatePlacements` with stable IDs and minimum tiers. Seed new-game Simulation resources from it. _Interim: 352 world-lane placements (500100+) are baked into `HomesteadEstateWorldPlacements.inc`, bake version 2. No data asset yet._
 - [ ] 3.4 Verify felling, forage and pickup on baked resources, and check that save/reload preserves edits by stable ID across two new games with an identical layout
@@ -24,7 +24,7 @@
 
 ## 4. Integrated acceptance
 
-- [ ] 4.1 Configure World Partition HLOD and foliage culling. Profile a packaged build on Jenny's PC at the target settings along the estate-to-town route, and record the frame times
+- [ ] 4.1 Configure World Partition HLOD and foliage culling. Profile a packaged build on Jenny's PC at the target settings along the estate-to-town route, and record the frame times. _Interim: all 256 landscape streaming proxies are always loaded (`is_spatially_loaded=False`), so distant land no longer vanishes. The packaged Estate loads in 3.5 s. HLOD and a profile are still to do._
 - [ ] 4.2 Bump the save version with a plain incompatible-save reset notice. Retarget the smoke, full-loop, felling and watering tests to the fixed map, and retire the generated-world-only tests
 - [ ] 4.3 Add the OGL attribution to `docs\asset-credits.md` and the in-game credits. Update `docs\setup.md` and the playtest docs
 - [ ] 4.4 Jenny playtests the terrain and layout. Fold her reshaping feedback into the Landscape edit layers and the landmarks
