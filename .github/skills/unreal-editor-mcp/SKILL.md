@@ -378,6 +378,13 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
       scythe, pickaxe, hoe. The order follows your search order, not the pile.
     - `walk_to` steers straight and gets stuck on the ruin walls around 520003 and 520005. For
       those, `tp` to the pile ±90 cm and check that `focusTitle` is "Salvage pile".
+  - The first haft needs no trip outside: the standing-room chest (about 200 cm +X of the
+    spawn; `walk_to` (-25560, -63950)) holds the pail and 4 Branch. Open it with A, pick the
+    Branch tile, then Y > "Take to pack". Then search 520001 and haft the billhook (Craft tile 4,
+    hold Enter about 3 s). On foot, go (-25750, -64900), then (-25650, -65450), then
+    (-25950, -65450), and the focus reads "Thin bramble [RT] Hack with Billhook" in the doorway
+    (verified in PIE on 31810d1d). If PIE opens on Settings with "Saves from earlier test builds
+    can't be opened", move `Saved\SaveGames\Estate\*` aside and restart PIE.
   - Branch piles (each haft takes 2 Branch; a pile gives about 5): 500001 (-26650, -63400), 500002 (-26950, -64500)
     and 500003 (-27350, -62900).
   - Craft (`C`) tiles, left to right: Haft an axe, hoe, scythe, billhook, pickaxe, then the two root
