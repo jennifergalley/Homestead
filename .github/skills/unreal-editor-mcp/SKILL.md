@@ -679,8 +679,11 @@ Dated and short, newest first. Promote anything durable into the sections above.
     drift.
   - `Test-Game.ps1` smoke routes run a plain `-game` process (not UE automation) with
     `-HomesteadSmokeTest`, which selects the legacy heroine.
-  - The Hotbar route's "Held mapped Shift again reaches active grounded sprint" step is flaky
-    after `NewGame`; it passed on rerun.
+  - The Hotbar route is timing-sensitive after `NewGame`. On a loaded machine, steps such as "Held
+    mapped Shift again reaches active grounded sprint", "Uncarried selected tool rejects left
+    click without mutation" (a late selection toast replaces the error toast) and "Controller LB
+    equips the carried Knife in hand" fail intermittently. The untouched 2026-09-27 forest build
+    fails the same way, so rerun, ideally with fewer Unreal processes running.
 
 - 2026-09-25: Assembling and playing the MetaHuman heroine:
   - `build_meta_human` can raise RuntimeError (Control Rig "Cannot break link") even when the log
@@ -840,10 +843,15 @@ Dated and short, newest first. Promote anything durable into the sections above.
   normalised to 100 on load; there is no cold survival any more (failure is Food or Energy 0).
 - Bed (`AHomesteadController::BedSleepHours`): from 18:00 to about 2:45 she sleeps until 6:45
   (first light); from 2:45 to 6:45 a full eight hours; by day a two-hour nap that ends by 18:00.
+  The bed prompt says which ("Sleep until morning", "Sleep 8 hours", "Nap").
   Nights longer than twelve hours are split into two `Sim.Sleep` calls (the simulation's cap).
 - Night floor: `homestead.NightMoonLux` (2.0), `homestead.NightSky` (0.6) and
   `homestead.NightMinExposure` (-2) in `HomesteadWorld.cpp`. PIE with ray tracing off is not a
-  fair judge of night brightness; check the packaged build.
+  fair judge of night brightness; check the packaged build. Packaged night captures without the
+  editor: launch with `-UserDir=<scratch> -ExecCmds="HomesteadMorning 3"` (copy saves into
+  `<scratch>\Saved\SaveGames`), wait about 50 s, and grab the window with `PrintWindow`. The
+  2026-09-27 packaged captures measured mean luma 46 at midnight and 27 at 3 AM against 100 at
+  noon (the old build: 11 and 8).
 - Water weighs nothing and takes no pack space; chests hold 1200 units.
 - Watering pail: `LabAction Fill` (kneel and dip, `pail_fill.py`) and `LabAction Water` (lift,
   take the side with the other hand, tip like a pot, `pail_pour.py`). The event frames in those
