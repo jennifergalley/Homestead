@@ -182,8 +182,8 @@ the tree records in `EstateScenery.bin`, and writes:
 - `Saved/Ground/T_EstateGround.png` (2048², over the map like `T_EstateRoadSDF`): R = grass density,
   G = grass height, B = dryness, A = wear (trodden soil round the manor, the road shoulders, the mill,
   mine and gateway).
-- `Saved/Ground/T_EstateCanopy.png`: R = tree canopy (the broadleaf and fir records, kinds 0-1, as
-  7 m crowns blurred to a 9 m edge), G = stony soil on steep banks outside the cliff layer.
+- `Saved/Ground/T_EstateCanopy.png`: R = tree canopy (every tree kind in `SCENERY_TREES` of
+  `Scripts/Map/bake_estate_map.py`, each at its own crown radius times its scale, with a soft edge), G = stony soil on steep banks outside the cliff layer.
 - `Content/SurvivalGame/Estate/Runtime/EstateGround.bin`: "HGD1", u16 size (1024), then per cell the
   most grass anywhere in it (u8) and the surface under it (u8: Soil, Grass, Road, Sand, Rock, Woodland,
   Moor, Water). The game reads it through `HomesteadEstateGround` for the meadow and footsteps.
