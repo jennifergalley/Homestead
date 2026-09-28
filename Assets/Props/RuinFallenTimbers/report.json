@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "name": "RuinFallenTimbers",
+  "description": "Ruined manor detail: crossed fallen fire-charred oak roof timbers with split ends, checks, char relief and a hand-forged spike.",
+  "collision": "box",
+  "triangle_budget": 150000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/ruin_fallen_timbers.py",
+  "source_sha256": "29255001eba5410d98c314311057c00bf22de22acc02ec633e875708dce62aaf",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RuinFallenTimbers": {
+      "vertices": 15923,
+      "triangles": 28198,
+      "size_cm": [
+        423.9,
+        219.88,
+        36.43
+      ],
+      "materials": [
+        {
+          "name": "M_RuinFallenTimbers",
+          "textures": {
+            "basecolor": "T_RuinFallenTimbers_basecolor.png",
+            "roughness": "T_RuinFallenTimbers_roughness.png",
+            "metallic": "T_RuinFallenTimbers_metallic.png",
+            "normal": "T_RuinFallenTimbers_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinFallenTimbers_basecolor.png",
+          "roughness": "T_RuinFallenTimbers_roughness.png",
+          "normal": "T_RuinFallenTimbers_normal.png",
+          "ao": "T_RuinFallenTimbers_ao.png",
+          "metallic": "T_RuinFallenTimbers_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.23647623538970947,
+          -0.036979961395263675,
+          0.13939154267311096
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6
+      },
+      "fbx": "SM_RuinFallenTimbers.fbx",
+      "sha256": "ab77b3ef42b7eb2e0e37faf78bdf5fa63d58faea453c868308c8a6d6540e00ca",
+      "preview": "preview_SM_RuinFallenTimbers.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RuinFallenTimbers_hero.png",
+          "detail": "beauty_SM_RuinFallenTimbers_detail.png",
+          "eye": "beauty_SM_RuinFallenTimbers_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RuinFallenTimbers_LOD1": {
+      "vertices": 8027,
+      "triangles": 12406,
+      "size_cm": [
+        423.85,
+        219.85,
+        36.22
+      ],
+      "materials": [
+        {
+          "name": "M_RuinFallenTimbers",
+          "textures": {
+            "basecolor": "T_RuinFallenTimbers_basecolor.png",
+            "roughness": "T_RuinFallenTimbers_roughness.png",
+            "metallic": "T_RuinFallenTimbers_metallic.png",
+            "normal": "T_RuinFallenTimbers_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinFallenTimbers_basecolor.png",
+          "roughness": "T_RuinFallenTimbers_roughness.png",
+          "normal": "T_RuinFallenTimbers_normal.png",
+          "ao": "T_RuinFallenTimbers_ao.png",
+          "metallic": "T_RuinFallenTimbers_metallic.png"
+        },
+        "shared_with": "SM_RuinFallenTimbers"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.18,
+          -0.05,
+          0.22
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6
+      },
+      "fbx": "SM_RuinFallenTimbers_LOD1.fbx",
+      "sha256": "cd27475e25060c1f04c8e6da46847d656969d78d0fcf955aa2b31673b764e723",
+      "preview": "preview_SM_RuinFallenTimbers_LOD1.png"
+    },
+    "SM_RuinFallenTimbers_LOD2": {
+      "vertices": 4361,
+      "triangles": 5074,
+      "size_cm": [
+        423.85,
+        219.42,
+        35.99
+      ],
+      "materials": [
+        {
+          "name": "M_RuinFallenTimbers",
+          "textures": {
+            "basecolor": "T_RuinFallenTimbers_basecolor.png",
+            "roughness": "T_RuinFallenTimbers_roughness.png",
+            "metallic": "T_RuinFallenTimbers_metallic.png",
+            "normal": "T_RuinFallenTimbers_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinFallenTimbers_basecolor.png",
+          "roughness": "T_RuinFallenTimbers_roughness.png",
+          "normal": "T_RuinFallenTimbers_normal.png",
+          "ao": "T_RuinFallenTimbers_ao.png",
+          "metallic": "T_RuinFallenTimbers_metallic.png"
+        },
+        "shared_with": "SM_RuinFallenTimbers"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.18,
+          -0.05,
+          0.22
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6
+      },
+      "fbx": "SM_RuinFallenTimbers_LOD2.fbx",
+      "sha256": "bb6b90ab776baa53527ea1102fa67ffe1fa08bbc876e9d153a21eef77e954b6a",
+      "preview": "preview_SM_RuinFallenTimbers_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Ground centre of the settled timber pile at (0, 0, 0).",
+  "placement": "Drop on the manor floor/yard as collapsed roof debris. Longest beam runs roughly X; crossed purlin is raised and visibly rests on it.",
+  "collision_note": "Box collision from the prop importer; authored height stays under 60 cm.",
+  "textures": {
+    "T_RuinFallenTimbers_basecolor.png": "6796e28b1e73d8d50ee98129dcc9b0877e60d6dfb05080772e3f508a468a04c8",
+    "T_RuinFallenTimbers_roughness.png": "eb22f8200e30aad37c0f0d4d53fc37faf63330c58a10d54e52d4dbb77e90de0b",
+    "T_RuinFallenTimbers_metallic.png": "8422e205ff804a853cf48a80ffc275aae983be8b685ac1e979417c8f27771700",
+    "T_RuinFallenTimbers_normal.png": "581a09b32cb74dd792e4c2398b55668d57230ddee027274beec7c6d7fbea4d62"
+  }
+}

@@ -177,6 +177,8 @@ void NamesValidationAndPersistence()
     CHECK(Manor::TrimName("\xC2\xA0Tr\xC3\xA9vose\xC2\xA0") == "Tr\xC3\xA9vose");
     CHECK(Manor::NameLength("Tr\xC3\xA9vose") == 7);
     CHECK(Manor::NameLength("bad\xC3") == -1 && Manor::NameLength("tab\tname") == -1);
+    CHECK(Manor::NameProblem("", "estate name") == "Enter an estate name.");
+    CHECK(Manor::NameProblem("", "surname") == "Enter a surname.");
     Simulation sim = NewEstate();
     CHECK(!sim.SetNames("   ", "Pendarves", "Trevennor"));
     CHECK(!sim.SetNames("Clara", "", "Trevennor"));

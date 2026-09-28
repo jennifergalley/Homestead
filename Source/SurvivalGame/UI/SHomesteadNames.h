@@ -30,7 +30,7 @@ public:
     virtual FReply OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event) override;
     virtual FReply OnKeyChar(const FGeometry& Geometry, const FCharacterEvent& Event) override;
     // For the controller's own input routing and automation: returns true when handled.
-    bool HandleKey(const FKey& Key);
+    bool HandleKey(const FKey& Key, bool bShiftDown = false);
     bool TypeCharacter(TCHAR Character);
 
     FString Value(int32 Field) const { return Values[Field]; }

@@ -119,7 +119,11 @@ std::string NameProblem(const std::string& trimmed, const char* what)
 {
     const int length = NameLength(trimmed);
     if (length < 0) return std::string("Use ordinary letters in the ") + what + ".";
-    if (length == 0) return std::string("Enter a ") + what + ".";
+    if (length == 0)
+    {
+        const bool vowel = what && std::string("aeiouAEIOU").find(what[0]) != std::string::npos;
+        return std::string(vowel ? "Enter an " : "Enter a ") + what + ".";
+    }
     if (length > MaxNameLength)
         return std::string("Keep the ") + what + " to " + std::to_string(MaxNameLength) + " characters.";
     return {};
