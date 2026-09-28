@@ -2737,14 +2737,14 @@ void FixedEstateNewGameAndSave()
     CHECK(PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, spawn));
     CHECK(!PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points,
         layout.PointOr(Anchor::TownSquare, {})));
-    // The standing room is the carved-out corner of the ruin, and the starter forage lies outside it.
+    // The standing room is the carved-out corner of the ruin, and everything but its salvage lies outside it.
     const auto& footprint = layout.FindPolygon(Anchor::ManorFootprint)->points;
     CHECK(!PointInPolygon(footprint, spawn));
     int misplaced = 0;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
         const bool onEstate = PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, placement.position);
-        const bool inRuin = PointInPolygon(footprint, placement.position);
+        const bool inRuin = placement.kind != ResourceKind::SalvagePile && PointInPolygon(footprint, placement.position);
         if (!onEstate || inRuin)
             std::cout << "Placement " << placement.id << " at (" << placement.position.x << ", " << placement.position.y
                 << ") is " << (inRuin ? "inside the ruin footprint" : "off the estate") << ".\n";
@@ -2767,8 +2767,12 @@ void FixedEstateNewGameAndSave()
     CHECK(sim.GetState().resources[0].id == EstatePlacementIdBase + 1);
     OK(sim.SetActiveWorldRegion({spawn.x + 900000, spawn.y}));
     CHECK(sim.GetState().resources.size() == 2);
-    // The pail is her one starting tool; gathering needs no knife.
-    CHECK(sim.Count(Item::WateringCan) == 1 && sim.Count(Item::Knife) == 0 && sim.UsedCapacity() == 1);
+    // The pail is her one starting tool, waiting in the standing room's chest; gathering needs no knife.
+    CHECK(sim.Count(Item::WateringCan) == 0 && sim.Count(Item::Knife) == 0 && sim.UsedCapacity() == 0);
+    int chestPails = 0;
+    for (const auto& piece : sim.GetState().structures)
+        if (piece.kind == Piece::Chest) chestPails += piece.storage[static_cast<int>(Item::WateringCan)];
+    CHECK(chestPails == 1);
     OK(sim.Harvest(EstatePlacementIdBase + 1, spawn));
     const std::string saved = sim.Serialize();
     Simulation loaded;
@@ -2858,25 +2862,34 @@ void OvergrowthTableAndPrompts()
     CHECK(std::string(RecipeRequirements(Recipe::HaftBillhook)) == "2 Branch + 1 Rusted billhook head; by hand, no station");
     CHECK(std::string(ResourceName(ResourceKind::FallenBranch)) == "Fallen bough");
 
-    // Provisional overgrowth and salvage sit on the estate, outside the ruin's footprint.
+    // Overgrowth sits on the estate outside the ruin's footprint; salvage lies in and around the
+    // ruin, never in the standing room, with one pile a few steps from its door.
     const EstateLayout& layout = ProvisionalEstateLayout();
     const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
     const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
     const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
+    const Point roomCentre = layout.PointOr(Anchor::StandingRoomOrigin, {});
     int overgrowth = 0, salvage = 0, doorway = 0, teases = 0;
-    int misplaced = 0;
+    double nearestSalvage = 1e9;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
         if (placement.id < 510000 || placement.id >= 530000) continue;
-        CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
+        const bool isSalvage = placement.kind == ResourceKind::SalvagePile;
+        CHECK(PointInPolygon(boundary, placement.position) && (isSalvage || !PointInPolygon(manor, placement.position)));
         const auto* info = FindOvergrowth(placement.kind);
-        overgrowth += info && placement.kind != ResourceKind::SalvagePile;
-        salvage += placement.kind == ResourceKind::SalvagePile;
+        overgrowth += info && !isSalvage;
+        salvage += isSalvage;
+        if (isSalvage)
+        {
+            CHECK(std::abs(placement.position.x - roomCentre.x) > 300.0 || std::abs(placement.position.y - roomCentre.y) > 300.0);
+            nearestSalvage = std::min(nearestSalvage, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
+        }
         doorway += placement.kind == ResourceKind::BrambleThin
             && std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y) < 1300.0;
         teases += info && info->minTier > ToolTier::Worn;
     }
     CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && teases >= 4);
+    CHECK(nearestSalvage < 700.0);
     Simulation estate;
     OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
 }

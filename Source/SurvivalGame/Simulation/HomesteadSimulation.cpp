@@ -1074,10 +1074,6 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
     candidate.nextWearableId = 2;
     RefreshEquipment(candidate);
-    // The pail is her one starting tool (add-ruined-manor-and-arrival may move it into the
-    // standing room's chest); everything else is hafted from salvage.
-    candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;
-    candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::WateringCan, 1, 0});
     const auto populated = MaterializeEstate(candidate, placements);
     if (!populated) return populated;
     // Round-1 lanes seed their parts from `layout` here, each in its own helper.
@@ -1087,8 +1083,14 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     candidate.familyName = Manor::DefaultFamilyName;
     candidate.estateName = Manor::DefaultEstateName;
     candidate.journal.push_back(Manor::ArrivalEntry);
-    // Test layouts without the room anchor simply start with no heritage room.
-    Manor::SeedStandingRoom(candidate, layout);
+    // The pail is her one starting tool, waiting in the standing room's chest; everything else is
+    // hafted from salvage. Test layouts without the room anchor start with no heritage room and
+    // the pail in hand.
+    if (!Manor::SeedStandingRoom(candidate, layout))
+    {
+        candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;
+        candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::WateringCan, 1, 0});
+    }
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return inventory;
     layout_ = std::make_shared<const EstateLayout>(layout);
