@@ -53,8 +53,10 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
   `py "unreal.SystemLibrary.quit_editor()"`, not by killing it (killing it leaves a restore dialog;
   see 0.1).
-- **Launch without `-Map`** and load big levels after MCP answers:
-  `py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"`.
+- **The editor opens the Estate by default** (`EditorStartupMap` and `GameDefaultMap` are
+  `/Game/SurvivalGame/Maps/Estate` since `b07d4a82`), and that startup is clean, so don't pass `-Map`.
+  (An explicit `-Map /Game/SurvivalGame/Maps/Estate` once hung startup for 20 minutes.) For the old
+  woodland, `load_level('/Game/SurvivalGame/Maps/Homestead')` after MCP answers.
 - **Never stop shared processes.** `zenserver.exe` (the DDC/Zen server on port 8558),
   `UnrealTraceServer.exe`, `ShaderCompileWorker.exe` and other worktrees' `UnrealEditor*`/UBT/UAT
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
@@ -84,7 +86,6 @@ $p = 8768                                                     # your registered 
 Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command
-py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"
 # ...work, StartPIE, hk/st/hshot...
 py "unreal.SystemLibrary.quit_editor()"                         # before building, rebasing, or when done
 & 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # compile-check
@@ -103,8 +104,9 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
-| Editor never shows a window; the log stops at `Build.bat -Mode=ValidatePlatforms` | The AutoSDK platform check waits on another worktree's UBT mutex | Find the editor's `cmd.exe` child (`Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`) and `Stop-Process -Id` it and its children. The editor continues. |
-| MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map during startup | Start without `-Map`, then `load_level` (under 1 s). |
+| Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
+| MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
+| Every MCP call times out for minutes, but the editor process is still responding | The shared zenserver (`%LOCALAPPDATA%\UnrealEngine\Common\Zen`) stopped answering and the game thread is blocked on it; it recovers by itself (one stall lasted 1009 s: `post recovery finished in 1009.384 seconds`) | Search `Saved\Logs\SurvivalGame.log` for `LogZenServiceInstance` and wait. Don't kill the editor, and never stop `zenserver.exe`. |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
 | `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
 | `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
@@ -126,7 +128,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Distant Estate land missing from elevated or far PIE views | PIE streams about 8 landscape proxies (252 m each, roughly ±400 m) around the **pawn**, with no HLOD, and streaming follows the pawn, not the view target | Move or park the pawn (`MOVE_FLYING`) near the camera for distant captures. |
 | `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
-| C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. |
+| C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. An anonymous namespace inside a shared named one (`namespace HomesteadMenus { namespace { Gold } }`) still collides across UI files; use a named inner namespace. Compile-check the game target (`Build.bat SurvivalGame Win64 Development ...`) as well as the editor before sending `[ready]`. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
@@ -186,11 +188,11 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython     
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -SkipBuild # module already built
 ```
 
-- Opens the visible editor on the startup map (`/Game/SurvivalGame/Maps/Homestead`), enables the
+- Opens the visible editor on the startup map (`/Game/SurvivalGame/Maps/Estate`), enables the
   MCP and toolset plugins for this process only, disables background CPU throttling (so PIE runs at
   full speed while another window has focus), turns Live Coding and ray tracing off, and returns
-  once `http://127.0.0.1:<port>/mcp` answers (localhost only). Options: `-Port`, `-Map` (avoid for
-  Estate; see section 0), `-TimeoutSeconds` (default 600; use 1200 after a build), `-RayTracing`,
+  once `http://127.0.0.1:<port>/mcp` answers (localhost only). Options: `-Port`, `-Map` (not needed;
+  see section 0), `-TimeoutSeconds` (default 600; use 1200 after a build), `-RayTracing`,
   `-ExtraPlugins`, `-AllowPython`, `-EngineRoot`.
 - The editor keeps running after the script returns.
 - A fresh worktree has no `Binaries\`; the build step compiles the editor module (2-5 min, longer if
@@ -268,8 +270,12 @@ hk release_all; mcp $E StopPIE
 - On the **Homestead** (woodland) map, every PIE start with no save in this checkout generates a
   **new woodland seed**. Once an autosave exists, PIE resumes it (same position/time), so positions
   and node ids persist. The **Estate** map is a fixed world: same layout every time.
-- **Estate PIE recipe:** `py "unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level('/Game/SurvivalGame/Maps/Estate')"`;
-  for a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
+- **HUD layout (Estate, per Jenny):** minimap bottom-right (`MinimapBox(ViewWidth, ViewHeight)`),
+  calendar top-right, key hints top-left, and the vitals stack bottom-left (`UI/SHomesteadVitals`):
+  bread, bed and coin icons with bars for food and energy and the $ amount for the purse, with no text
+  labels. Check captures against this; the field book covers it when open.
+- **Estate PIE recipe:** the editor opens the Estate at startup (if you've switched away, `load_level`
+  it back). For a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
   until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
   captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
   failed save. Text in a `.sav` (such as the save label) is UTF-16, so search it with

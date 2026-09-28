@@ -6,12 +6,15 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
 - Several worktrees share this PC. Give each editor its own -Port (for example 8766-8799) and set
   $env:UNREAL_MCP_URL = 'http://127.0.0.1:<port>/mcp' for Scripts\editor_mcp.py. The script refuses a
   port that another worktree's editor is serving.
-- Don't pass -Map for the 4 km Estate map: the editor has hung at startup that way. Open it after
-  MCP answers with LevelEditorSubsystem.load_level('/Game/SurvivalGame/Maps/Estate').
+- The editor opens the Estate by default (EditorStartupMap), so -Map isn't needed; an explicit
+  -Map for the Estate once hung startup. Load the old woodland with LevelEditorSubsystem.load_level
+  ('/Game/SurvivalGame/Maps/Homestead') after MCP answers.
 - The first launch after a build can take more than 10 minutes before MCP answers. Raise -TimeoutSeconds
   rather than killing it; watch Saved\Logs\SurvivalGame.log.
-- While it waits, the script answers the editor's "Wait for ZenServer?" dialog with Yes, and before launching
-  it removes a stale Saved\Autosaves\PackageRestoreData.json. Both dialogs otherwise block MCP with no log output.
+- While it waits, the script answers the editor's "Wait for ZenServer?" dialog with Yes, and stops the
+  editor's own `Build.bat -Mode=ValidatePlatforms` child if it's still running after 2 minutes (it queues
+  behind other worktrees' UBT builds and can hold startup for 10+ minutes). Before launching it removes a
+  stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
 #>
 [CmdletBinding()]
@@ -152,6 +155,22 @@ while ((Get-Date) -lt $deadline) {
     }
     if ([HomesteadMcp.EditorDialogs]::AnswerYes([uint32]$process.Id, 'Wait for ZenServer?')) {
         Write-Host 'Answered "Wait for ZenServer?" with Yes (zenserver was restarting for this worktree''s cache).'
+    }
+    # Every editor start runs `Build.bat -Mode=ValidatePlatforms` (TargetPlatformManagerModule.cpp). It's a
+    # single-instance UBT mode, so it queues behind any other worktree's UBT build and can hold startup for
+    # 10+ minutes. It normally takes seconds; stopping a stuck one lets the editor continue (lanes did this
+    # by hand). Only this editor's own child tree is touched.
+    $stuck = @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $($process.Id)" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match 'ValidatePlatforms' -and ((Get-Date) - $_.CreationDate).TotalSeconds -gt 120 })
+    foreach ($child in $stuck) {
+        $tree = @($child.ProcessId)
+        for ($i = 0; $i -lt $tree.Count -and $i -lt 64; $i++) {
+            $tree += @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $($tree[$i])" -ErrorAction SilentlyContinue |
+                ForEach-Object { $_.ProcessId })
+        }
+        [array]::Reverse($tree)
+        foreach ($id in $tree) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
+        Write-Host "Stopped the editor's ValidatePlatforms check (PID $($child.ProcessId), over 2 min; probably waiting on another worktree's UBT build)."
     }
     Start-Sleep -Seconds 3
 }

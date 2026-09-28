@@ -99,7 +99,9 @@ A lane delivers an increment like this:
    so in your `[ready]` rather than silently patching the other lane's code; the orchestrator
    assigns it.
 3. Compile-check the editor module: `Build.bat SurvivalGameEditor Win64 Development
-   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`.
+   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`. If you touched C++,
+   also compile the game target (`Build.bat SurvivalGame Win64 Development ...`): the editor build
+   skips unity merging for files you've changed, so name clashes only show up in the game build.
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
    lane branch. All worktrees share one local repository, so the orchestrator can read unpushed
    lane branches directly.
