@@ -107,7 +107,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map during startup | Start without `-Map`, then `load_level` (under 1 s). |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
 | `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
-| `Video memory has been exhausted` | 3 editors plus the 4 km Estate landscape | Close idle editors; don't run a packaged game next to two editors on Estate. |
+| `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
 | MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
 | Modal "Restore Packages" at startup blocks MCP | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | Delete that file before relaunching; quit with `quit_editor()` next time. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
@@ -126,7 +126,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
-| Estate "Save failed..." / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejects `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on the manor lane's branch (bound by `MaxWorldCoordinate`); until it merges, estate saves fail on `main`. |
+| Estate "Save failed... check disk space and permissions" (misleading text) / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejects `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on the manor lane's branch (bound by `MaxWorldCoordinate`); until it merges, estate saves fail on `main`. |
 | Spawn yaw ignored on Estate | `ChooseStartingView` (fresh terrain) and `SetAppearancePreview(false)` restoring a `SavedViewRotation` captured before spawn both overwrite it | See the manor lane's fix; check `controlYaw` and a capture after the book closes. |
 | "The cookfire recipe could not be selected." | The Fire/Hearth cook action calls `FocusLegacySubject`, but craft rows are now `EHomesteadMenuSubject::Recipe` (`HomesteadController.cpp` ~2111) | Open bug on `main` (round-1 page). |
 | Save strings with non-ASCII characters break the save | The save payload rejects bytes above 127 | Hex-encode free text (the manor lane does this for names). |
@@ -276,7 +276,7 @@ immediately; observe with `get_play_state` and `shot`.
 
 | Tool | Use |
 | --- | --- |
-| `get_play_state(nearby_count, radius_cm)` | JSON: `worldReady`, `bookOpen`, `bookPage`, `selectedRow`, `focusTitle`, `focusActions`, `toast`, `inventory` (units), `hunger/energy/warmth`, `hour`, `location`, `controlYaw`, `speedCmPerSec`, `hotbarSlot`, `walk`, `nearbyResources[]` (`id, kind, x, y, distanceCm, bearingDeg, cleared, ready, focused`) |
+| `get_play_state(nearby_count, radius_cm)` | JSON: `worldReady`, `bookOpen`, `bookPage`, `selectedRow`, `focusTitle`, `focusActions`, `toast`, `inventory` (units), `hunger/energy/warmth`, `hour`, `location`, `controlYaw`, `speedCmPerSec`, `hotbarSlot`, `walk`, `nearbyResources[]` (`id, kind, x, y, distanceCm, bearingDeg, cleared, ready, focused`). The text result is JSON whose `returnValue` is itself a JSON *string*; use `st [nearby]`, or parse `.returnValue` a second time |
 | `tap_key(key)` | Press and release one FKey (`E`, `Tab`, `Escape`, `Two`, `Gamepad_FaceButton_Bottom`, ...) |
 | `hold_key(key, seconds)` | Hold a key/button (crafting, sprint) |
 | `set_sticks(move_x, move_y, look_x, look_y, seconds)` | Hold sticks; move is camera-relative (Y forward), look X turns right |
@@ -301,9 +301,17 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - `nearbyResources` covers only the currently streamed chunks. After walking far, nodes elsewhere
   (for example creek reeds) drop out of the list; walk back toward them to reload.
 - `focusActions` shows the prompt, for example `[A] Gather   [RT] Clear with Knife`,
-  `[RT] Fell with Hatchet`. Use the named button. With keyboard/mouse input last used it reads
-  `[LMB] Fell with Hatchet`; `tap_key LeftMouseButton` works then. The same text floats above her
-  head as the interact cue.
+  `[RT] Fell with Hatchet`. Use the named button. The same text floats above her head as the
+  interact cue.
+- **Stick to one input device per sequence.** The prompts, and which keys act, follow the last
+  device used. After any keyboard `tap_key` (even a hotbar key such as `Three`) they switch to
+  keyboard (`[LMB] Fell with Hatchet`): then `tap_key LeftMouseButton` works, while
+  `Gamepad_RightTrigger`, `Gamepad_RightTriggerAxis` and `E` silently do nothing. After gamepad taps,
+  `Gamepad_FaceButton_Bottom` works and `E` doesn't. To swing from a gamepad sequence, pick the tool
+  with the D-pad or `hotbarSlot` rather than number keys.
+- **Tool swings are refused while she's moving.** Any velocity or acceleration blocks the action
+  in the anim instance, so an action key right after `set_sticks` or `walk_to` is silently dropped.
+  `release_all`, wait until `speedCmPerSec` is 0, then act.
 - Hotbar keys are `One`..`Zero`. The starter kit puts knife, hatchet, stone hoe, pail and
   machete in slots 1-5. Check `hotbarSlot` (0-based) and `focusActions` after selecting.
 - An action that silently does nothing usually left a reason in `toast` (`toastIsError: true`),
@@ -381,7 +389,8 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   item starts a *move*; Y (or F) opens the item's context menu, where D-pad + A picks an action
   (`Eat 1`, `Drop 1`, `Move to chest N`, ...). X splits in half, S sorts. RT cycles content and
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
-- **Craft**: D-pad selects a recipe; details list requirements. Crafting is **hold A**
+- **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
+  doesn't). The details list requirements. Crafting is **hold A**
   (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
 - **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
   Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
@@ -753,8 +762,8 @@ OpenSpec changes, not here.
 - 2026-09-25: Python can't spawn actors into the PIE world. Test through the character's own component stack
   instead.
 - 2026-09-25: Tools like the hatchet are hidden except during their action, so capture a burst about
-  0.5-1.3 s after the action key. Prompts switch to keyboard after `tap_key` of a keyboard key
-  (`[LMB] Fell`); a `Gamepad_RightTriggerAxis` tap then doesn't act. Use `LeftMouseButton`.
+  0.5-1.3 s after the action key. For which keys act after a keyboard or gamepad tap, see
+  "Stick to one input device per sequence" in section 4.
 - 2026-09-25: For a face close-up in PIE, set the `CameraArm` `target_arm_length` (about 90),
   `socket_offset` 0 and `target_offset` (0,0,70) via `run_python`. Restore afterwards (330,
   (0,45,55)).

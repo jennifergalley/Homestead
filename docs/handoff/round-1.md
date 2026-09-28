@@ -89,9 +89,18 @@ manor and boundary lanes haven't merged yet.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. On the fixed estate
   the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. When it merges,
   update the skill's starter-kit, hotbar and energy notes in section 4 (they still describe the
-  woodland kit: knife, hatchet, stone hoe, pail and machete in slots 1-5).
+  woodland kit: knife, hatchet, stone hoe, pail and machete in slots 1-5). Also add the estate tool
+  route the lane uses: salvage pile coordinates (placements 520001-520005), branch piles, the Haft
+  recipe order and the hotbar slot per tool. Ask the lane for the route if it isn't in its change.
+  Its fix for silent no-op swings (an empty scythe arc now says "Step closer to mow.") lands with it.
 
 ## Tooling requests (unassigned)
+
+- `HomesteadPlayTools` additions asked for by the clearing lane:
+  - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and
+    slot the hotbar in one call.
+  - `swing` (or an action tool generally): press the action and return the resulting toast or
+    notification synchronously, so a refused action isn't mistaken for broken input.
 
 - A launch argument for the packaged Development build to set the start hour and take a screenshot
   without typing into the console (for example `-HomesteadStartHour=`), for night-lighting QA
