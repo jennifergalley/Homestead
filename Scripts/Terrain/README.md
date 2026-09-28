@@ -44,6 +44,11 @@ python Scripts\Terrain\preview_zoom.py game_reshaped_4033.npy overview.png -2016
 argument of `preview_zoom.py` overlays the road, river, estuary, polygons and anchors from the layout
 JSON. Its arguments are `src out xmin xmax ymin ymax step [layout.json]`, in game metres.
 
+**Re-bake the estate map afterwards.** The minimap and Map-tab texture is baked from
+`Estate_Heightmap_4033.png`, `estate_layout.json` and the scenery scatter that `scatter.py` writes
+(`Content\SurvivalGame\Estate\Runtime\EstateScenery.bin`). After re-running `reshape.py` or
+`scatter.py`, re-bake and re-import it: see "Estate map (T_EstateMap)" in `docs\setup.md`.
+
 ## Game frame
 
 - Unreal axes: +X is north and +Y is east, in metres from the map centre. One landscape quad is 1 m.

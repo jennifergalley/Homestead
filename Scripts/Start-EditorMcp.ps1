@@ -16,6 +16,8 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
   behind other worktrees' UBT builds and can hold startup for 10+ minutes). Before launching it removes a
   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
+- Refuses to launch when 3 or more Unreal processes (editors, games, commandlets) are already running on
+  the machine, and lists them with their worktree. -Force overrides.
 #>
 [CmdletBinding()]
 param(
@@ -26,6 +28,7 @@ param(
     [switch]$AllowPython,
     [switch]$RayTracing,
     [switch]$SkipBuild,
+    [switch]$Force,
     [int]$TimeoutSeconds = 600
 )
 $ErrorActionPreference = 'Stop'
@@ -72,6 +75,18 @@ if (Test-McpServer) {
 
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
+
+# Machine rule: at most 3 Unreal processes in total (editors, packaged games, commandlets). More have
+# reset the GPU driver and exhausted VRAM for every session. Checked right before launching, so a
+# listing earlier in the same command can't go stale.
+$unreal = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'UnrealEditor%' OR Name LIKE 'SurvivalGame%' OR Name LIKE 'JennysHomestead%'" -ErrorAction SilentlyContinue)
+if ($unreal.Count -ge 3 -and -not $Force) {
+    $list = ($unreal | ForEach-Object {
+        $where = if ($_.CommandLine -match 'copilot-worktrees\\SurvivalGame\\([^\\"]+)') { $Matches[1] } elseif ($_.ExecutablePath -match 'HomesteadMVP') { 'HomesteadMVP' } else { '?' }
+        "  PID $($_.ProcessId) $($_.Name) $([int]($_.WorkingSetSize / 1MB)) MB since $($_.CreationDate.ToString('HH:mm')) ($where)"
+    }) -join "`n"
+    throw "$($unreal.Count) Unreal processes are already running (the machine limit is 3):`n$list`nWait for one to finish, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
+}
 
 # A killed editor leaves Saved\Autosaves\PackageRestoreData.json, and the next launch then stops on a
 # modal "Restore Packages" dialog before MCP starts (it doesn't take synthetic input). Agents don't

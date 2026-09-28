@@ -104,17 +104,21 @@ Development tools.
 
 The HUD minimap and the field book's Map tab share one baked, stylised top-down map:
 `/Game/SurvivalGame/UI/Map/T_EstateMap` plus `DA_EstateMap`, which records the world rectangle
-it covers (the full ±201600 cm estate square, north up). Re-bake it whenever the terrain, water or
-road changes meaningfully (and before a release):
+it covers (the full ±201600 cm estate square, north up). Re-bake it whenever the terrain, water,
+road or scenery changes meaningfully, including after `Scripts\Terrain\scatter.py` re-bakes the
+scenery scatter, and before a release:
 
-1. `python Scripts\Map\bake_estate_map.py` renders `Assets\Map\T_EstateMap.png` (4096², about 1 m
-   per texel) and its transform JSON from `Scripts\Terrain\Estate_Heightmap_4033.png` and
-   `estate_layout.json`: parchment hillshade, 10 m contours, a water-lined inked coast, the river
-   and the lightened road. Pass `--capture <png>` with a north-up orthographic capture of the
-   Estate level to fold its woods and fields in. Make that capture with the editor console
-   command `Homestead.CaptureEstateMap [resolution]` (default 8192) while the Estate level is
-   open: it loads the whole World Partition square and writes a base-colour capture to
-   `Saved\EstateMap\EstateCapture.png`.
+1. `python Scripts\Map\bake_estate_map.py` (about 60 s) renders `Assets\Map\T_EstateMap.png`
+   (4096², about 1 m per texel) and its transform JSON from `Scripts\Terrain\Estate_Heightmap_4033.png`
+   and `estate_layout.json`: parchment hillshade, 10 m contours, a water-lined inked coast, the river
+   and the lightened road. It stamps the woods from the runtime scenery scatter
+   (`Content\SurvivalGame\Estate\Runtime\EstateScenery.bin`, written by `scatter.py`) by default;
+   `--scenery ''` skips them. `--capture <png>` folds in ground colour only from a north-up
+   orthographic capture of the Estate level. The trees are built at runtime
+   (`AHomesteadWorld::BuildEstateScenery`), so an editor-world capture never contains them. Make that
+   capture with the editor console command `Homestead.CaptureEstateMap [resolution]` (default 8192)
+   while the Estate level is open: it loads the whole World Partition square and writes a
+   base-colour capture to `Saved\EstateMap\EstateCapture.png`.
 2. Import it: in the editor run the console command `Homestead.ImportEstateMap`, or headless
    `UnrealEditor-Cmd.exe SurvivalGame.uproject -run=HomesteadImportEstateMap -unattended -nullrhi`.
    It replaces the texture (all mips resident, never streamed) and rewrites `DA_EstateMap`.
