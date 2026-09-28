@@ -2,6 +2,8 @@
 .SYNOPSIS
 Builds and runs the native simulation test suites (CMake + CTest, no Unreal).
 .DESCRIPTION
+cmake and ctest aren't on PATH; this script finds Visual Studio's copies with vswhere
+(<VS>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin). Use the same path to run cmake yourself.
 Debug (the default) keeps assertions but the simulation suite takes about 10 minutes. -Configuration Release
 runs every suite in about 3 minutes; use it for routine checks. To run one suite directly, build it and
 redirect its output to a file (stdout is buffered, so a crash loses unredirected output):

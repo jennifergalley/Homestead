@@ -43,6 +43,12 @@ desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
   aren't loaded.
 - Blender props face -Y in their recipes and import facing +Y, so C++ placement applies
   `LocalYaw - 90` (see the store's `Prop()`).
+- Estate stand-in visuals (`AHomesteadWorld`, `HomesteadWorld.cpp` ~3140-3185): `SalvagePile` shows
+  granite cobbles until the manor lane dresses the piles, and the spring flowers (`Primroses`,
+  `Bluebells`, `WildDaffodils`, `WildGarlic`) show meadow-herb flowers in a grass tuft until each is
+  authored.
+- The standing room's door opens **west** into the ruin's south range. The comment at
+  `HomesteadEstate.cpp` ~99 that says it "faces east onto the forecourt" is stale (clearing lane to fix).
 - Fixed-estate resource persistence: cleared or edited placements are saved as `ResourceEdit`
   entries with chunk (0, 0) and `localId` = the placement id. Placement id ranges per lane are in
   `Simulation\HomesteadEstate.h` (world 500000+, overgrowth 510000+, ...).
@@ -102,7 +108,7 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Tooling requests (unassigned)
 
-- `HomesteadPlayTools` additions asked for by the clearing lane:
+- The `HomesteadPlayTools` additions asked for by the clearing lane:
   - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and
     slot the hotbar in one call.
   - `swing` (or an action tool generally): press the action and return the resulting toast or
