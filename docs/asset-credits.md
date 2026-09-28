@@ -84,10 +84,10 @@ downloaded geometry or textures. The hearth's crackle loop (`Assets\Audio\Ambien
 is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it uses no recording.
 
 The Estate ocean (`Content\SurvivalGame\Estate\Water`: `M_EstateOcean`, `MI_EstateOcean`,
-`SM_EstateOcean`, `T_EstateOceanShore`, `T_OceanRipples_N` and `T_OceanFoam`) is project-authored.
+`SM_EstateOcean`, `T_EstateOceanShore`, `T_OceanRipples_N`, `T_OceanFoam` and `VT_OceanWaves` with its atlas) is project-authored.
 `Scripts\Terrain\bake_ocean.py` generates the mesh and all three textures in numpy: the shore data
 from the estate heightfield, the capillary-ripple normals from an FFT of a synthetic wave spectrum,
-and the foam lace from Worley and fBm noise. The waves themselves are analytic HLSL in the
+the foam lace from Worley and fBm noise, and the looping wind-sea volume from an FFT of a Phillips spectrum. The waves themselves are analytic HLSL in the
 material. No scanned, photographed or downloaded texture or mesh is used.
 
 ## Fonts
