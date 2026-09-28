@@ -22,7 +22,8 @@ local cm, so the material can find the root, sample the ground there and bend th
 Normals lean towards up so the blades light like a lawn rather than a set of flat cards.
 
 Inputs: Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16 and EstateScenery.bin (its trees make
-the canopy mask, so re-run this after scatter.py), Scripts/Terrain/estate_layout.json
+the canopy mask, at the crown radii in SCENERY_TREES of Scripts/Map/bake_estate_map.py, so re-run this
+after scatter.py or a new tree kind), Scripts/Terrain/estate_layout.json
 and the paint-layer weights in HOMESTEAD_TERRAIN_WORK/weights (default E:\\TerrainSource\\work).
 Run from the repo root:
   python Scripts/Terrain/bake_ground.py
@@ -99,22 +100,47 @@ def line_distance(points, shape):
     return distance_transform_edt(mask).astype(np.float32)
 
 
-def canopy_mask(shape):
-    """0-1 cover of tree canopy on the 1 m grid, from the scenery's tree records (kinds 0 and 1:
-    broadleaf and fir; see scatter.py) splatted with their crown size and blurred over about 9 m."""
-    path = os.path.join(REPO, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
+def crown_radii():
+    """EstateSceneryKinds index -> crown radius (m) at scale 1, shared with the estate map bake
+    (SCENERY_TREES in Scripts/Map/bake_estate_map.py), so a tree kind added there shades the ground too."""
+    import importlib.util
+    path = os.path.join(REPO, "Scripts", "Map", "bake_estate_map.py")
+    try:
+        spec = importlib.util.spec_from_file_location("bake_estate_map", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return dict(module.SCENERY_TREES)
+    except Exception as error:  # noqa: BLE001 - fall back to the two original tree kinds
+        print("canopy: could not read SCENERY_TREES from", path, "-", error)
+        return {0: 3.6, 1: 2.8}
+
+
+def canopy_mask(shape, scenery=None):
+    """0-1 cover of tree canopy on the 1 m grid, from the scenery's tree records (every kind in
+    crown_radii(), each at its own crown radius times its scale), with a soft edge of a few metres."""
+    path = scenery or os.path.join(REPO, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
     raw = open(path, "rb").read()
     count = struct.unpack_from("<I", raw, 4)[0]
     rec = np.frombuffer(raw, dtype=np.dtype([("k", "u1"), ("pad", "u1", 3), ("x", "<f4"), ("y", "<f4"), ("yaw", "<f4"), ("s", "<f4")]),
                         count=count, offset=8)
-    trees = rec[rec["k"] <= 1]
-    grid = np.zeros(shape, np.float32)
+    radii = crown_radii()
+    trees = rec[np.isin(rec["k"], list(radii))]
+    r = np.array([radii[int(k)] for k in trees["k"]], np.float32) * np.clip(trees["s"], 0.6, 1.6)
     xi = np.clip(np.round(trees["x"] / 100.0 + H).astype(int), 0, shape[1] - 1)
     yi = np.clip(np.round(trees["y"] / 100.0 + H).astype(int), 0, shape[0] - 1)
-    np.add.at(grid, (yi, xi), (trees["s"] ** 2).astype(np.float32))
-    cover = gaussian_filter(grid, 3.5) * (2 * np.pi * 3.5 ** 2)        # crowns about 7 m across
-    cover = gaussian_filter(np.clip(cover, 0, 1), 3.0)                 # soften to a ~9 m edge
-    print("canopy:", len(trees), "trees,", round(float((cover > 0.5).mean()) * 100, 1), "% of the map under canopy")
+    # Each crown is a Gaussian with sigma 0.8 r, scaled to peak at 1: about half cover at its drip
+    # line. Group crowns by radius (0.5 m bins) so each group is one separable blur.
+    cover = np.zeros(shape, np.float32)
+    bins = np.round(r * 2.0) / 2.0
+    for radius in np.unique(bins):
+        m = bins == radius
+        sigma = max(0.8 * float(radius), 0.8)
+        grid = np.zeros(shape, np.float32)
+        np.add.at(grid, (yi[m], xi[m]), 1.0)
+        cover += gaussian_filter(grid, sigma) * (2 * np.pi * sigma * sigma)
+    cover = gaussian_filter(np.clip(cover, 0, 1), 3.0)                 # soften to a leaf-litter edge
+    kinds = {int(k): int((trees["k"] == k).sum()) for k in np.unique(trees["k"])}
+    print("canopy:", len(trees), "trees", kinds, "-", round(float((cover > 0.5).mean()) * 100, 1), "% of the map under canopy")
     return np.clip(cover * 1.4, 0, 1)
 
 

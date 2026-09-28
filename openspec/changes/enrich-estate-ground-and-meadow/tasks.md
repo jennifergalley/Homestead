@@ -40,7 +40,7 @@
 
 - [ ] 6.1 GPU cost A/B (meadow on/off) at 4K with a single Unreal process (the integration session
   takes it on the package).
-- [ ] 6.2 Re-bake `bake_ground.py` + `build_ground.py` whenever `scatter.py` regenerates
+- [ ] 6.2 (canopy_mask now reads every tree kind and crown radius from `SCENERY_TREES` in Scripts/Map/bake_estate_map.py.) Re-bake `bake_ground.py` + `build_ground.py` whenever `scatter.py` regenerates
   `EstateScenery.bin` (the canopy mask reads its trees) or the heightfield or layout change.
 - [ ] 6.3 Jenny playtests the meadow density and height, the softer steps, and the wet and night looks;
   fold her notes into `MI_EstateGrass` (`GrassShape`, `GrassFade`, `GrassWind`) and the ground-finish parameters.
