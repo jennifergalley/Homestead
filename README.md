@@ -28,7 +28,7 @@ lanes and known issues are in `docs\handoff\round-1.md`; the design and round or
   cents.
 - **Heroine:** a MetaHuman with authored work animations (gathering, felling, tilling, watering,
   eating) and appearance options (hairstyle, hair, skin and eye colour).
-- **Jenny's builds:** the orchestrator packages the estate build to `Build\Windows` in its worktree,
+- **Jenny's builds:** the integration session packages the estate build to `Build\Windows` in its worktree,
   and the **"Homestead Estate"** desktop shortcut launches it. The earlier procedural-woodland
   survival game continues separately as the MVP on the `mvp-survival` branch, packaged to
   `E:\Repos\HomesteadMVP\Windows` (the `Homestead` shortcut). The two lines never merge.
