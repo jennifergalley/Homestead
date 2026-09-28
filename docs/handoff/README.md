@@ -174,6 +174,30 @@ The separate MVP survival line (`mvp-survival`) packages its own build to
 `E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
 starting.
 
+## Playtest builds (schedule)
+
+Jenny's standing preference. A packaged playtest build is on the **"Homestead Estate"** desktop
+shortcut by **7:30 AM every day** (weekends included) and by **4:00 PM on weekdays**, after her work.
+On weekends, also cut one as soon as features she'd notice land.
+
+1. The orchestrator triggers the integration session at about **5:30 AM** and **2:00 PM** (its session
+   automation), and tells lanes a build is being cut.
+2. Lanes close their editors (`Stop-MyEditor.ps1`) until the build is done: packaging needs the
+   process slots.
+3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
+   retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   keeping the Homestead icon. It never touches `Homestead.lnk`.
+4. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
+   orchestrator relays that to Jenny.
+5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+
+Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
+This replaces the old "package after every improvement" step of the Interactive Loop.
+
+**Pause for play:** when Jenny asks to pause feature development so she can use the PC to play, every
+session stops launching editors and builds until she says to resume. Close your editor and end your
+turn (with a wake-up if you need one).
+
 ## Docs agent duties
 
 - Record each report in the canonical place: `.github\skills\unreal-editor-mcp\SKILL.md` (table

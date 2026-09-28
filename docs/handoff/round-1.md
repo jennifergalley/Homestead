@@ -165,6 +165,10 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Decisions during the round
 
+- **Playtest builds on a schedule** (Jenny, 2026-09-28): on the "Homestead Estate" shortcut by 7:30 AM
+  daily and 4:00 PM on weekdays (plus weekend builds when noticeable features land). The orchestrator
+  triggers the integration session at about 5:30 AM and 2:00 PM; lanes close their editors while it
+  packages; `main` stays playable. Details are in `docs\handoff\README.md`, "Playtest builds".
 - **Waiting means ending your turn** (Jenny, 2026-09-28, all sessions): no sleep/poll loops while waiting
   for a slot, the UBT queue, a `[ready]` or a perf window. Schedule a wake-up with
   `save_session_automation`, end the turn, and clear it afterwards (`docs\handoff\README.md`). The
