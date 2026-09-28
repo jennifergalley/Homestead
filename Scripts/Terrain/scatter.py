@@ -140,6 +140,28 @@ def main():
     emit(GRASS_TALL, close[pick < 0.45], 0.8, 1.25)
     emit(GRASS_MID, close[(pick >= 0.45) & (pick < 0.9)], 0.8, 1.3)
     emit(YARROW, close[pick >= 0.9], 0.8, 1.3)
+    # Road verges: tufts along both shoulders of the cart track and a sparse line on its grass crown,
+    # matching the ruts M_EstateLandscape draws from road_ruts.py (tracks at +-0.8 m, shoulders 1 m+).
+    centre = densify(L["road"], 0.8)
+    tang = np.gradient(centre, axis=0)
+    tang /= np.linalg.norm(tang, axis=1, keepdims=True)
+    normal = np.c_[-tang[:, 1], tang[:, 0]]
+    verge = []
+    for side in (-1.0, 1.0):
+        off = rng.uniform(1.2, 2.7, len(centre))
+        keep = rng.random(len(centre)) < 0.85
+        verge.append((centre + normal * (side * off)[:, None] + tang * rng.uniform(-0.4, 0.4, (len(centre), 1)))[keep])
+    crown = centre[rng.random(len(centre)) < 0.12]
+    verge = clear_of_interactive(np.r_[verge[0], verge[1]], 1.0)
+    crown = clear_of_interactive(crown, 1.0)
+    is_wood = sample(W["WoodlandFloor"], verge[:, 0], verge[:, 1]) > 0.35
+    pick = rng.random(len(verge))
+    emit(GRASS_TALL, verge[(pick < 0.4) & ~is_wood], 1.8, 2.6)
+    emit(GRASS_MID, verge[(pick >= 0.4) & (pick < 0.75) & ~is_wood], 2.0, 3.0)
+    emit(YARROW, verge[(pick >= 0.75) & ~is_wood], 0.7, 1.1)
+    emit(FERN, verge[(pick < 0.35) & is_wood], 0.6, 1.0)
+    emit(GRASS_MID, verge[(pick >= 0.35) & is_wood], 1.8, 2.6)
+    emit(GRASS_MID, crown, 1.3, 1.9)
     # Moor: bracken, boulders, erratics and a few tors on the high ground.
     moor = keep_common(candidates(1 / 70.0))
     moor = by_weight(moor, "Moorland", 0.4)
