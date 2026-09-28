@@ -109,12 +109,11 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 ## Pending doc updates on merge
 
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. On the fixed estate
-  the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. When it merges,
-  update the skill's starter-kit, hotbar and energy notes in section 4 (they still describe the
-  woodland kit: knife, hatchet, stone hoe, pail and machete in slots 1-5). Also add the estate tool
-  route the lane uses: salvage pile coordinates (placements 520001-520005), branch piles, the Haft
-  recipe order and the hotbar slot per tool. Ask the lane for the route if it isn't in its change.
-  Its fix for silent no-op swings (an empty scythe arc now says "Step closer to mow.") lands with it.
+  the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. The lane has
+  written the "Estate tool route" bullet into skill section 4 on its branch (`1c7b58a9`); it lands
+  with the orchestrator's next merge. After that, the docs agent checks that section 4's starter-kit,
+  hotbar and energy notes (still the woodland kit: knife, hatchet, stone hoe, pail and machete in
+  slots 1-5) agree with it.
 
 ## Tooling requests (unassigned)
 
