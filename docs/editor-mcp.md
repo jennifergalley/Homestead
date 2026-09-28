@@ -29,7 +29,7 @@ Creator). `-AllowPython` registers an opt-in `run_python` tool that executes arb
 leave it off unless a task needs editor automation beyond Epic's toolsets.
 
 Enabled toolset plugins: `EditorToolset`, `AutomationTestToolset`, `ConfigSettingsToolset`,
-`LiveCodingToolset`, `SlateInspectorToolset`, `PluginToolset`, `AnimationAssistantToolset` and
+`SlateInspectorToolset`, `PluginToolset`, `AnimationAssistantToolset` and
 `PhysicsToolsets`. Other Epic toolsets (PCG, Niagara, UMG, StateTree, MetaHuman, GAS, ...) are in
 `Engine\Plugins\Experimental\Toolsets` and can be added to the list in the script when needed.
 
@@ -57,7 +57,7 @@ Useful starting points:
 | `editor_toolset.toolsets.programmatic.ProgrammaticToolset` | a sandboxed Python script that batches other tool calls |
 | `EditorToolset.LogsToolset` | `GetLogEntries`, verbosity |
 | `AutomationTestToolset.AutomationTestToolset` | discover, run and read automation tests |
-| `LiveCodingToolset.LiveCodingToolset` | compile C++ changes into the running editor |
+| `LiveCodingToolset.LiveCodingToolset` | not enabled for agent editors: Live Coding blocks other worktrees' builds (`-ExtraPlugins LiveCodingToolset` when you're alone on the machine) |
 | `SlateInspectorToolset.SlateInspectorToolset` | snapshot and click/type in editor UI |
 | `homestead_agent.toolset.HomesteadPlayTools` | play the game in PIE: real controller/keyboard input, `walk_to`, play-state readout (project toolset) |
 

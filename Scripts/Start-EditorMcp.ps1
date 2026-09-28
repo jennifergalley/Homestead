@@ -38,12 +38,15 @@ $url = "http://127.0.0.1:$Port/mcp"
 
 # Editor-only plugins shipped with UE 5.8 (Experimental). They are enabled for this editor
 # process only, so the .uproject, commandlets, cooking and packaged builds are unaffected.
+# LiveCodingToolset is left out on purpose: its CompileLiveCoding tool calls
+# ILiveCodingModule::Compile, which switches Live Coding on for the session regardless of the
+# setting (LiveCodingModule.cpp: Compile -> EnableForSession(true)). Pass
+# -ExtraPlugins LiveCodingToolset only when you're alone on the machine.
 $plugins = @(
     'ModelContextProtocol'
     'EditorToolset'
     'AutomationTestToolset'
     'ConfigSettingsToolset'
-    'LiveCodingToolset'
     'SlateInspectorToolset'
     'PluginToolset'
     'AnimationAssistantToolset'
@@ -87,6 +90,28 @@ if ($unreal.Count -ge 3 -and -not $Force) {
     }) -join "`n"
     throw "$($unreal.Count) Unreal processes are already running (the machine limit is 3):`n$list`nWait for one to finish, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
 }
+
+# Belt and braces for the -ini: Live Coding opt-out below: also write it into this worktree's saved
+# per-project settings, so a launch that bypasses this script (a hand-run editor, a -game run) starts
+# with Live Coding off too. One active Live Coding session anywhere blocks every worktree's build,
+# because UBT checks a mutex named after the shared UnrealEditor.exe path (HotReload.cs).
+$userSettings = Join-Path $root 'Saved\Config\WindowsEditor\EditorPerProjectUserSettings.ini'
+$null = New-Item -ItemType Directory -Force (Split-Path $userSettings)
+$lines = [Collections.Generic.List[string]]::new()
+if (Test-Path -LiteralPath $userSettings) { foreach ($l in Get-Content -LiteralPath $userSettings) { $lines.Add($l) } }
+$section = '[/Script/LiveCoding.LiveCodingSettings]'
+$at = $lines.IndexOf($section)
+if ($at -lt 0) {
+    if ($lines.Count -and $lines[$lines.Count - 1] -ne '') { $lines.Add('') }
+    $lines.Add($section); $lines.Add('bEnabled=False')
+} else {
+    $end = $at + 1
+    while ($end -lt $lines.Count -and -not $lines[$end].StartsWith('[')) { $end++ }
+    $key = -1
+    for ($k = $at + 1; $k -lt $end; $k++) { if ($lines[$k] -match '^\s*bEnabled\s*=') { $key = $k } }
+    if ($key -ge 0) { $lines[$key] = 'bEnabled=False' } else { $lines.Insert($at + 1, 'bEnabled=False') }
+}
+Set-Content -LiteralPath $userSettings -Value $lines -Encoding utf8
 
 # A killed editor leaves Saved\Autosaves\PackageRestoreData.json, and the next launch then stops on a
 # modal "Restore Packages" dialog before MCP starts (it doesn't take synthetic input). Agents don't

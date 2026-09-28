@@ -46,11 +46,16 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   Lanes use the shell helpers instead.
   If you do use native tools, confirm the worktree first:
   `print(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))`.
-- **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). An
-  active Live Coding session blocks every other worktree's editor build. For C++ changes, quit the
-  editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when you must judge RT
-  lighting and fewer than three Unreal processes are running. PIE lighting therefore differs from
-  the packaged build, which has RT on.
+- **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). One
+  active Live Coding session anywhere blocks **every** worktree's editor build: UBT checks a mutex
+  named after the shared `UnrealEditor.exe` path, not the project (`HotReload.cs`). The script turns
+  it off two ways (an `-ini:` override on the command line, and `bEnabled=False` written into this
+  worktree's `Saved\Config\WindowsEditor\EditorPerProjectUserSettings.ini` before launch, which
+  also covers hand-launched editors and `-game` runs), and it no longer loads `LiveCodingToolset`,
+  whose `CompileLiveCoding` switches Live Coding on for the session whatever the setting says. For C++
+  changes, quit the editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when
+  you must judge RT lighting and fewer than three Unreal processes are running. PIE lighting
+  therefore differs from the packaged build, which has RT on.
 - **Close your editor** before `git pull`/`rebase` (it locks `.uasset` files), before building
   `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
   `quit` (McpHelpers) or `.\Scripts\Stop-MyEditor.ps1 -Port <p>`, which closes only this worktree's
@@ -106,7 +111,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 
 | Symptom (exact text where known) | Cause | Fix |
 | --- | --- | --- |
-| `Unable to build while Live Coding is active` | Another worktree's editor has Live Coding on (the guard is keyed on any `UnrealEditor.exe`) | Pass `-NoHotReloadFromIDE` to `Build.bat` (both scripts do). Agent editors now start with Live Coding off. |
+| `Unable to build while Live Coding is active` | Some editor on the machine has an active Live Coding session. UBT checks a mutex named after the shared `UnrealEditor.exe` path, so it's any editor, any worktree (a hand-launched editor, one started before the opt-out, or one where `CompileLiveCoding` ran). An editor log shows `LogLiveCoding: Display: Starting LiveCoding` when it starts | Pass `-NoHotReloadFromIDE` to `Build.bat` (the scripts do), which skips the check. To find the culprit, search editors' `Saved\Logs\*.log` for `Starting LiveCoding`. Agent editors now start with Live Coding off (command line plus ini) and without `LiveCodingToolset`. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
@@ -538,7 +543,6 @@ mcp $S get_current_level
 mcp $S load_level '{"level_path":"/Game/SurvivalGame/Maps/Homestead"}'
 mcp $L GetLogEntries '{"category":"","pattern":"LogHomestead|Error","maxEntries":40}'   # pattern is a required regex
 mcp $E CaptureViewport '{"captureTransform":null,"annotations":null,"bShowUI":false}'   # editor camera, not the game
-mcp 'LiveCodingToolset.LiveCodingToolset' CompileLiveCoding    # only works if Live Coding is on; it's off in agent editors (section 0)
 con 'HomesteadMorning 8'                                        # console command with the player controller
 ```
 
@@ -712,7 +716,7 @@ time (`v.std(0)`, scaled ×8); moving leaves light up, still ground stays black.
 | Batch several tool calls in one sandboxed Python script | `editor_toolset.toolsets.programmatic.ProgrammaticToolset` |
 | Output log | `EditorToolset.LogsToolset` |
 | Automation tests | `AutomationTestToolset.AutomationTestToolset` |
-| Compile C++ into the running editor | `LiveCodingToolset.LiveCodingToolset` |
+| Compile C++ into the running editor | Not in agent editors: quit, rebuild, relaunch (Live Coding blocks other worktrees' builds; section 0) |
 | Editor UI: snapshot, click, type (editor chrome only; see Field notes) | `SlateInspectorToolset.SlateInspectorToolset` |
 | Sequencer, Control Rig | `animation_toolset.toolsets.*` |
 | Config sections, plugins, physics assets | `ConfigSettingsToolset.*`, `PluginToolset.*`, `PhysicsToolsets.*` |
@@ -885,7 +889,7 @@ OpenSpec changes, not here.
   generation.
 - 2026-09-27: **Live Coding patch files stay locked** for about 60 s after `quit_editor`. Wait for the
   process to exit, then delete `Binaries\Win64\*patch*` before `Build-Game.ps1 -Package`.
-- 2026-09-25: Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs.
+- 2026-09-25: Live Coding (`LiveCodingToolset` `CompileLiveCoding`) patches function bodies while PIE runs. No longer used by agents: it switches Live Coding on and blocks every other worktree's build (section 0).
   Standalone `-game` runs load the DLL from disk, so do a real build first.
   Live Coding is now off in agent editors (section 0); rebuild instead.
 - 2026-09-26: **Never cache a loaded asset in a function-local `static UStaticMesh*`.** `static M =
