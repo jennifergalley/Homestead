@@ -68,6 +68,19 @@ if (Test-McpServer) {
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 
+# A killed editor leaves Saved\Autosaves\PackageRestoreData.json, and the next launch then stops on a
+# modal "Restore Packages" dialog before MCP starts (it doesn't take synthetic input). Agents don't
+# recover autosaves, so clear it when no editor for this worktree is running.
+$restore = Join-Path $root 'Saved\Autosaves\PackageRestoreData.json'
+if (Test-Path -LiteralPath $restore) {
+    $mine = @(Get-CimInstance Win32_Process -Filter "Name = 'UnrealEditor.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf($project, [StringComparison]::OrdinalIgnoreCase) -ge 0 })
+    if (-not $mine.Count) {
+        Remove-Item -LiteralPath $restore -Force
+        Write-Host 'Removed a stale Saved\Autosaves\PackageRestoreData.json (the last editor was killed); no restore prompt this launch.'
+    }
+}
+
 if (-not $SkipBuild) {
     $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
     & $build SurvivalGameEditor Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild

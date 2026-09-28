@@ -109,7 +109,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
 | `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
 | MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
-| Modal "Restore Packages" at startup blocks MCP | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | Delete that file before relaunching; quit with `quit_editor()` next time. |
+| Modal "Restore Packages" at startup blocks MCP; `Start-EditorMcp.ps1` times out with "MCP did not answer"; Escape doesn't dismiss it | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | `Start-EditorMcp.ps1` now deletes a stale restore file before launching (when this worktree has no editor running). If a dialog is already up: kill that editor, delete `Saved\Autosaves`, relaunch. Quit with `quit_editor()` next time. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`. |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
@@ -117,6 +117,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
 | Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. That call can leave about half the nodes behind (71 → 35), which gives "only one Single Layer Water Material node" / missing-input errors and `get_statistics` vs/ps 0. Loop until `get_num_material_expressions(m) == 0`. |
 | `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
+| A `VolumeTexture` built from Python has the wrong tile size, or property errors | Setting `source2d_texture` resets the tile size to a default (102 for a 1024² atlas); `VolumeTexture` has a single address mode (no `address_x`) and no `blueprint_get_size_x` | Set `source2d_texture` first, then `source2d_tile_size_x/y`. In a Custom node sample it with `Texture3DSample(Vol, VolSampler, uvw)`. |
 | An Estate actor edited from Python looks unchanged in PIE | Spatially loaded World Partition actors stream into PIE from their **saved** external-actor packages (non-spatially-loaded ones such as `EstateSea` show edits live), and Python setters such as `AHomesteadWaterRibbon.set_course()` don't dirty the package | Call `actor.modify()` before editing, then `unreal.EditorLoadingAndSavingUtils.save_packages([actor.get_outermost()], False)` before PIE. |
 | An OBJ imported through Interchange comes in mirrored and invisible from outside | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding | Write y negated and swap face winding (a, c, b). |
 | Distant Estate land missing from elevated or far PIE views | PIE streams about 8 landscape proxies (252 m each, roughly ±400 m) around the **pawn**, with no HLOD, and streaming follows the pawn, not the view target | Move or park the pawn (`MOVE_FLYING`) near the camera for distant captures. |
@@ -235,9 +236,11 @@ clashes between parallel callers.
 | `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
 
-Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
-`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. PowerShell names are case-insensitive, so
-a local `$s`, `$e`, `$l` or `$h` overwrites these; the helpers themselves don't depend on them. Keep session-specific helpers (probes,
+Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,
+`$McpSlate` (SlateInspector), `$McpPlay` (HomesteadPlayTools), `$McpPython` (HomesteadEditorPython).
+The short aliases `$E`, `$S`, `$L`, `$SL`, `$H`, `$PY` used below are set only when you haven't
+already defined those names. PowerShell names are case-insensitive, and dot-sourcing never overwrites
+your own `$s` or `$e`; if you have one, use the `$Mcp*` names instead. Keep session-specific helpers (probes,
 callbacks) in your own files and load them from `py` with `sys.path.insert`.
 
 ## 4. Play the game
