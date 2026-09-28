@@ -38,6 +38,35 @@ Estate"** desktop shortcut: the orchestrator worktree's `Build\Windows` with the
 **Lanes: close your editor and *merge* `origin/main` into your branch** (merge, not rebase, if you've
 already pushed), then continue and send `[ready]` with a SHA.
 
+## Round-1 polish (after Jenny's playtest)
+
+Lanes work from Jenny's playtest notes. Each delivers through "Delivering lane work"; the
+orchestrator merges and packages.
+
+| Lane | Session | Tasks |
+| --- | --- | --- |
+| Clearing | `ce241dd6` | salvage uses the stone-gather animation; rocks stuck to her arm; stick pickup sometimes falls back to the knee animation; meadow herbs show a prompt but no visible plant; "Requires a <tool>" prompts; more berry bushes (ids 540000+) |
+| Store/UI | `5cf73757` | bigger vitals under the calendar; Slate HUD scaling at 4K; the craft slot fills with white as progress; "Haft" renamed "Craft"; a craft animation |
+| Manor | `f8b77021` | the derelict farm (X -222..-162 m, Y -705..-645 m; clearable overgrowth ids 550000+); the estate more trashed and overgrown |
+| Ground | `89914e30` (`jennifergalley-silver-guide`) | landscape textures; a camera-ring grass-blade field (`HomesteadGrassField.*`, `bake_ground.py` → `EstateGround.bin`); softer grass footsteps; woodland floor under the trees |
+| Trees | `65a2408b` (Blender game assets) | new oak, beech, sycamore/ash, hawthorn and holly/hazel meshes under `Content/SurvivalGame/Environment/Trees`, for denser, lusher woods |
+
+**Orchestrator, done at `b5a82e6b`:**
+- The hearth plays a real CC0 recording (`Scripts\prepare_hearth_crackle.py`) at 20% volume,
+  silenced by a sight-line trace whenever a wall is between her and the fire.
+- The default surname is Cavendish.
+- The woods are about 5x denser (`scatter.py`).
+- Decorative scenery is hidden around every `State.resources` node.
+- The "Homestead Estate" shortcut uses `Homestead.ico`.
+
+**Estate id ranges:** world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved)
+are in the comment at `Simulation\HomesteadEstate.h` ~87. The polish round assigns berry bushes
+540000+ (clearing) and the derelict farm 550000+ (manor); whoever lands first should add them to that
+comment.
+
+**Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
+`build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
+
 ## Shared interfaces and rules this round
 
 - Estate anchors and placements: `Source\SurvivalGame\Simulation\HomesteadEstate.cpp`

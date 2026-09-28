@@ -14,6 +14,7 @@
 #include "Components/MeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/AudioComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Sound/SoundWave.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SceneComponent.h"
@@ -574,6 +575,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateFallingTree(DeltaSeconds);
     UpdateHearthFlicker(DeltaSeconds);
+    UpdateHearthSound(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
         FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();
@@ -1162,6 +1164,7 @@ bool AHomesteadWorld::BuildEstateScenery()
         const FEstateSceneryKind& Info = EstateSceneryKinds[Kind];
         const FVector Extent = Batches[Kind]->GetStaticMesh()->GetBounds().BoxExtent;
         EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
+        EstateSceneryTrunkRadius.Add(Info.bTree ? Info.Footprint : 0.0f);
         EstateSceneryHidden.Add(TBitArray<>(false, Transforms[Kind].Num()));
         EstateSceneryTransforms.Add(MoveTemp(Transforms[Kind]));
         Total += EstateSceneryTransforms.Last().Num();
@@ -1181,21 +1184,56 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
         Pieces.Add(Box);
         Signature += FString::Printf(TEXT("%.0f:%.0f:%.0f:%.0f:%.1f;"), Box.center.x, Box.center.y, Box.half.x, Box.half.y, Box.yaw);
     }
+    // Interactables, bucketed by 20 m cell; the cover or trunk reach never spans more than a cell.
+    constexpr double NodeCell = 2000.0;
+    TMap<FIntPoint, TArray<FVector2D>> Nodes;
+    for (const auto& Node : State.resources)
+    {
+        Nodes.FindOrAdd(FIntPoint(FMath::FloorToInt32(Node.position.x / NodeCell), FMath::FloorToInt32(Node.position.y / NodeCell)))
+            .Add(FVector2D(Node.position.x, Node.position.y));
+        Signature += FString::Printf(TEXT("n%d:%.0f:%.0f;"), Node.id, Node.position.x, Node.position.y);
+    }
     if (Signature == EstateSceneryClearSignature) return;
     EstateSceneryClearSignature = MoveTemp(Signature);
     constexpr float Margin = 20.0f;
+    // Clear ground round an interactable: enough to show a berry bush or herb tuft whole.
+    constexpr float NodeCoverClear = 110.0f;
+    constexpr float NodeTrunkClear = 170.0f;
+    auto NearNode = [&Nodes, NodeCell](const FVector& Location, float Reach)
+    {
+        const FIntPoint Cell(FMath::FloorToInt32(Location.X / NodeCell), FMath::FloorToInt32(Location.Y / NodeCell));
+        for (int32 DX = -1; DX <= 1; ++DX)
+            for (int32 DY = -1; DY <= 1; ++DY)
+                if (const TArray<FVector2D>* Found = Nodes.Find(Cell + FIntPoint(DX, DY)))
+                    for (const FVector2D& Node : *Found)
+                        if (FVector2D::DistSquared(Node, FVector2D(Location)) < Reach * Reach) return true;
+        return false;
+    };
     for (int32 Batch = 0; Batch < EstateScenery.Num(); ++Batch)
     {
         const float Radius = EstateSceneryClearRadius[Batch];
-        if (Radius <= 0 || !EstateScenery[Batch]) continue;
+        const float Trunk = EstateSceneryTrunkRadius.IsValidIndex(Batch) ? EstateSceneryTrunkRadius[Batch] : 0.0f;
+        if ((Radius <= 0 && Trunk <= 0) || !EstateScenery[Batch]) continue;
         const TArray<FTransform>& Transforms = EstateSceneryTransforms[Batch];
         TBitArray<>& Hidden = EstateSceneryHidden[Batch];
         bool bChanged = false;
         for (int32 Index = 0; Index < Transforms.Num(); ++Index)
         {
             const FVector Location = Transforms[Index].GetLocation();
-            const float Reach = Radius * Transforms[Index].GetScale3D().X + Margin;
-            bool bUnder = false;
+            const float Scale = Transforms[Index].GetScale3D().X;
+            if (Radius <= 0)
+            {
+                const bool bBlocking = NearNode(Location, NodeTrunkClear + Trunk * Scale);
+                if (Hidden[Index] == bBlocking) continue;
+                Hidden[Index] = bBlocking;
+                FTransform Shown = Transforms[Index];
+                if (bBlocking) Shown.SetScale3D(FVector(0.0001f));
+                EstateScenery[Batch]->UpdateInstanceTransform(Index, Shown, true, false, true);
+                bChanged = true;
+                continue;
+            }
+            const float Reach = Radius * Scale + Margin;
+            bool bUnder = NearNode(Location, NodeCoverClear + Radius * Scale * 0.5f);
             for (const auto& Box : Pieces)
             {
                 const double Near = FMath::Max(Box.half.x, Box.half.y) + Reach;
@@ -3270,6 +3308,35 @@ void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
     }
 }
 
+void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
+{
+    HearthSounds.RemoveAll([](const FHearthSound& Sound) { return !Sound.Audio.IsValid(); });
+    if (HearthSounds.IsEmpty()) return;
+    APlayerController* Controller = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+    if (!Controller) return;
+    FVector Listener, Front, Right;
+    Controller->GetAudioListenerPosition(Listener, Front, Right);
+    for (FHearthSound& Sound : HearthSounds)
+    {
+        bool bHeard = false;
+        // Past the attenuation radius there's nothing to hear, so skip the traces.
+        if (FVector::DistSquared(Listener, Sound.Mouth) < FMath::Square(900.0f))
+        {
+            FCollisionQueryParams Params(SCENE_QUERY_STAT(HearthSound), false);
+            if (APawn* Pawn = Controller->GetPawn()) Params.AddIgnoredActor(Pawn);
+            for (const TWeakObjectPtr<UPrimitiveComponent>& Part : Sound.Ignored)
+                if (Part.IsValid()) Params.AddIgnoredComponent(Part.Get());
+            // Two sight lines (the fire's mouth and the breast above it), so a chair or her own arm
+            // between her and the grate doesn't cut the sound out.
+            bHeard = !GetWorld()->LineTraceTestByChannel(Listener, Sound.Mouth, ECC_Visibility, Params)
+                || !GetWorld()->LineTraceTestByChannel(Listener, Sound.Chimney, ECC_Visibility, Params);
+        }
+        const float Target = bHeard ? 1.0f : 0.0f;
+        Sound.Gate = Sound.Gate < 0.0f ? Target : FMath::FInterpConstantTo(Sound.Gate, Target, DeltaSeconds, 2.5f);
+        Sound.Audio->SetVolumeMultiplier(FMath::Max(HearthCrackleVolume * Sound.Gate, 0.001f));
+    }
+}
+
 void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
     const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid, bool bDeconstruct)
 {
@@ -3387,15 +3454,25 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             Crackle->SetRelativeLocation(Base + Rotation.RotateVector(Fire + FVector(0, 0, 30)));
             Crackle->SetSound(HearthCrackle);
             Crackle->bAutoActivate = false;
+            // A small fire: full within a couple of metres, gone about 7 m away, so it fills its own room only.
             Crackle->bOverrideAttenuation = true;
             Crackle->AttenuationOverrides.bAttenuate = true;
             Crackle->AttenuationOverrides.bSpatialize = true;
-            Crackle->AttenuationOverrides.AttenuationShapeExtents = FVector(250.0f);
-            Crackle->AttenuationOverrides.FalloffDistance = 1600.0f;
-            Crackle->SetVolumeMultiplier(0.55f);
+            Crackle->AttenuationOverrides.DistanceAlgorithm = EAttenuationDistanceModel::NaturalSound;
+            Crackle->AttenuationOverrides.dBAttenuationAtMax = -60.0f;
+            Crackle->AttenuationOverrides.AttenuationShapeExtents = FVector(150.0f);
+            Crackle->AttenuationOverrides.FalloffDistance = 550.0f;
+            Crackle->SetVolumeMultiplier(HearthCrackleVolume);
             Crackle->RegisterComponent();
             Crackle->Play(FMath::FRandRange(0.0f, 20.0f));
             Visual.Components.Add(Crackle);
+            FHearthSound& Sound = HearthSounds.AddDefaulted_GetRef();
+            Sound.Audio = Crackle;
+            Sound.Mouth = Light->GetComponentLocation();
+            Sound.Chimney = Base + Rotation.RotateVector(FVector(0, 45, 130));
+            for (const TObjectPtr<USceneComponent>& Component : Visual.Components)
+                if (UPrimitiveComponent* Primitive = Cast<UPrimitiveComponent>(Component.Get()))
+                    Sound.Ignored.Add(Primitive);
         }
         return;
     }
