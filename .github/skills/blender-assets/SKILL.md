@@ -105,6 +105,13 @@ before each pass.
 - **Nanite props and traces.** Props with Nanite on (`NANITE_PROPS` in `import_props.py`, plus the
   ruin kit) don't answer `LineTraceComponent`. Code that checks a prop with a component trace must
   trace the world and test `Hit.GetComponent()` instead (see the editor skill's table 0.1).
+- **Trees (see `docs\blender-assets.md`, "Trees and woodland shrubs").** Grow them with
+  `homestead_tree.py` from a recipe (`Recipes\oak.py`, `holly.py` and others). Review them with
+  `render_tree_review.py --view eye|close|under|far|lods`, not the prop beauty shots. A cobbled
+  or tiled bark look means a Voronoi crack net that is too regular: use `plated` with `broken`
+  (sycamore). Sparse "sticks" canopies need more clusters per twig and lower `foliage.min_z`.
+  Trees get one capsule (tilted by `axis`); shrubs get `COLLISION = "none"`. Measure perf only
+  inside `Scripts\Start-PerfWindow.ps1`, and never with `startfpschart`.
 - **SDF parts.** Evaluate only near the surface (`homestead_sdf` does coarse-to-fine) or a skull takes a
   minute. Never smart-project decimated SDF meshes; unwrap each part with `homestead_rocks.unwrap` first.
   Settle every loose part onto the ground (`deer.common.settle`/`lay_flat`); authored layouts float.

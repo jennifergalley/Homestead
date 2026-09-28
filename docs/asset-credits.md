@@ -54,7 +54,8 @@ Thimbleberry, BrackenFern, WildStrawberry and GrassYarrowTuft, built with
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
 
-The Cornish woodland trees (`Assets\Props\` Oak, Beech, Sycamore and Hawthorn, imported to
+The Cornish woodland trees and shrubs (`Assets\Props\` Oak, Beech, Sycamore, Hawthorn, Holly and
+HazelCoppice, imported to
 `Content/SurvivalGame/Environment/Trees/<Name>/SM_<Name>`; recipes in `Scripts\Blender\Recipes\`, grown
 by `Scripts\Blender\homestead_tree.py` on top of `homestead_shrub.py` and `homestead_foliage.py`) are
 project-authored: skeletons, bark tubes and leaf cards are generated from code, and every bark column
