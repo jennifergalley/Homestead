@@ -54,15 +54,16 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
     const auto Expected = MakeShared<Homestead::Simulation>();
     Add(TEXT("Close initial Notes"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return !Controller->IsBookOpen(); });
+    QueueGrant(Homestead::Item::Billhook, 1);
     Add(TEXT("Open actual carried inventory with controller"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]()
         {
-            return PackCountsMatch(*Controller) && Controller->Simulation().Count(Homestead::Item::Knife) == 1
+            return PackCountsMatch(*Controller) && Controller->Simulation().Count(Homestead::Item::Billhook) == 1
                 && Controller->BookTitle() == TEXT("Your pack") && Controller->Rows()[0].Action.IsEmpty()
                 && !Controller->BookFooter().Contains(TEXT("A:")) && !Controller->BookFooter().Contains(TEXT("X:"));
         });
     QueueBookCapture(TEXT("book-pack-tool"));
-    Add(TEXT("Carried knife advertises no pack action and pressing A changes no simulation state"),
+    Add(TEXT("Carried billhook advertises no pack action and pressing A changes no simulation state"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->Simulation().Serialize() == *Before; });
     Add(TEXT("Open recipes with no crafting supplies"), [this]() { Tap(EKeys::Gamepad_RightShoulder); },
@@ -82,7 +83,7 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
     Add(TEXT("Unaffordable controller craft rejects without hiding requirements or changing state"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
-            && Controller->Rows()[0].Detail.Contains(TEXT("4 Branch + 3 Stone + 2 Fiber")); });
+            && Controller->Rows()[0].Detail.Contains(UTF8_TO_TCHAR(Homestead::RecipeRequirements(Homestead::Recipe::HaftAxe))); });
     QueueBookCapture(TEXT("book-recipes-missing"));
     Add(TEXT("Keyboard craft has the same rejection and a truthful Enter: craft hint"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Enter); },

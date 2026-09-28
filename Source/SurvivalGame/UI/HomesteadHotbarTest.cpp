@@ -3,7 +3,6 @@
 #include "../HomesteadCharacter.h"
 #include "../HomesteadAnimInstance.h"
 #include "../HomesteadController.h"
-#include "../HomesteadKnife.h"
 #include "../HomesteadSave.h"
 #include "SHomesteadHotbar.h"
 #include "Framework/Application/SlateApplication.h"
@@ -11,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/Events.h"
 
+// The estate kit in hotbar order: 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries.
+// The seeded woodland has no salvage, so a stand-in grant hands her the billhook the knife used to be.
 void AHomesteadSmokeTest::PrepareHotbarChecks()
 {
     using Homestead::Item;
@@ -20,31 +21,41 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     const auto TillX = MakeShared<int32>(0);
     const auto TillY = MakeShared<int32>(0);
     const auto ChestId = MakeShared<int32>(0);
-    const auto KnifeDropId = MakeShared<int32>(0);
-    const auto LowId = MakeShared<int32>(0);
+    const auto BillhookDropId = MakeShared<int32>(0);
     const auto SaplingId = MakeShared<int32>(0);
-    const auto KnifeStarts = MakeShared<uint32>(0);
-    const auto HatchetStarts = MakeShared<uint32>(0);
+    const auto HackStarts = MakeShared<uint32>(0);
+    const auto ClearStarts = MakeShared<uint32>(0);
     const auto OldHairStyle = MakeShared<int32>(-1);
     const auto OldBodyPreset = MakeShared<int32>(-1);
     const auto AirborneEnergy = MakeShared<double>(0);
     const auto ReserveEnergy = MakeShared<double>(0);
     const auto WorkEnergy = MakeShared<double>(0);
     const auto WorkStarts = MakeShared<uint32>(0);
-    Homestead::ResourceNode LowResource;
     Homestead::ResourceNode Sapling;
     for (const auto& Node : Controller->State().resources)
-    {
-        if (!LowResource.id && Node.kind == Homestead::ResourceKind::Branches
-            && !Node.cleared) LowResource = Node;
-        if (!Sapling.id && Node.kind == Homestead::ResourceKind::Sapling
-            && !Node.cleared) Sapling = Node;
-    }
-    if (!LowResource.id || !Sapling.id)
+        if (!Sapling.id && Node.kind == Homestead::ResourceKind::Sapling && !Node.cleared) Sapling = Node;
+    if (!Sapling.id)
     {
         Finish(false, TEXT("Default hotbar resource fixtures are unavailable."));
         return;
     }
+    const auto BillhookShown = [this]()
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+        const auto* Prop = Avatar ? Avatar->GetHeldProp(Item::Billhook) : nullptr;
+        return Prop && Prop->IsVisible();
+    };
+    const auto Anim = [this]() -> const UHomesteadAnimInstance*
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+        return Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    };
+    const auto SaplingCleared = [this, SaplingId]()
+    {
+        const auto Node = std::find_if(Controller->State().resources.begin(), Controller->State().resources.end(),
+            [SaplingId](const auto& Value) { return Value.id == *SaplingId; });
+        return Node != Controller->State().resources.end() && Node->cleared;
+    };
     const auto PointerClick = [this](int32 Index)
     {
         if (!Controller->HotbarWidget.IsValid()) return;
@@ -96,7 +107,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return Controller->ShouldShowHotbar()
             && Controller->HotbarWidget.IsValid(); });
-    Add(TEXT("Default ten-slot references add no capacity, resolve only the carried Knife and pin Berries"),
+    QueueGrant(Item::Billhook, 1);
+    Add(TEXT("Default ten-slot references add no capacity, resolve only the carried Billhook and pin Berries"),
         [this, Capacity]()
         {
             *Capacity = Controller->Simulation().UsedCapacity();
@@ -104,33 +116,47 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, Capacity]()
         {
             const auto Slots = Controller->HotbarSnapshot();
-            return Slots.Num() == 10 && Slots[0].Tool == Item::Knife
+            return Slots.Num() == 10 && Slots[0].Tool == Item::Billhook
                 && Slots[0].Available && Slots[0].Selected
                 && Slots[1].Tool == Item::Hatchet && !Slots[1].Available
-                && Slots[2].Tool == Item::DiggingStick && !Slots[2].Available
-                && Slots[3].Tool == Item::WateringCan && !Slots[3].Available
-                && Slots[4].Tool == Item::Machete && !Slots[4].Available
-                && Slots[5].Tool == Item::Berries && Slots[5].Assigned && Slots[5].Food
-                && !Slots[6].Assigned && !Slots[9].Assigned
+                && Slots[2].Tool == Item::Scythe && !Slots[2].Available
+                && Slots[3].Tool == Item::Pickaxe && !Slots[3].Available
+                && Slots[4].Tool == Item::DiggingStick && !Slots[4].Available
+                && Slots[5].Tool == Item::WateringCan && !Slots[5].Available
+                && Slots[6].Tool == Item::Berries && Slots[6].Assigned && Slots[6].Food
+                && !Slots[7].Assigned && !Slots[9].Assigned
                 && Controller->Simulation().UsedCapacity() == *Capacity;
         });
-    Add(TEXT("Carried selected Knife is presented in the heroine hand"),
+    Add(TEXT("Carried selected Billhook is presented in the heroine hand"),
         []() {},
-        [this]() { return Controller->GetPawn()
-            && Cast<AHomesteadCharacter>(Controller->GetPawn())->GetKnife()->IsPresented(); }, 0.25f);
-    Add(TEXT("Held Knife is hand-bound, noncolliding and plausibly sized"),
+        [this, BillhookShown, Anim]()
+        {
+            if (BillhookShown()) return true;
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            const auto* Prop = Avatar ? Avatar->GetHeldProp(Item::Billhook) : nullptr;
+            const auto* Animation = Anim();
+            Results.Add(FString::Printf(TEXT("BILLHOOK_PRESENT_DIAG prop=%d visible=%d presented=%d selected=%d count=%d action=%.3f eat=%.3f"),
+                Prop != nullptr, Prop && Prop->IsVisible(), static_cast<int32>(Controller->PresentedTool()),
+                static_cast<int32>(Controller->SelectedCarriedTool()), Controller->Simulation().Count(Item::Billhook),
+                Animation ? Animation->ActionWeight() : -1.0f, Animation ? Animation->EatWeight() : -1.0f));
+            return false;
+        }, 0.25f);
+    Add(TEXT("Held Billhook is hand-bound, noncolliding and plausibly sized"),
         []() {},
         [this]()
         {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Knife = Avatar ? Avatar->GetKnife() : nullptr;
-            const float Height = Knife ? Knife->Bounds.BoxExtent.Z * 2 : 0;
-            return Knife && Knife->GetAttachParent() == Avatar->GetMesh()
-                && Knife->GetAttachSocketName() == TEXT("hand_r")
-                && Knife->GetCollisionEnabled() == ECollisionEnabled::NoCollision
-                && !Knife->GetGenerateOverlapEvents()
-                && Knife->GetNumSections() == 3
-                && Height > 12 && Height < 30;
+            const auto* Billhook = Avatar ? Avatar->GetHeldProp(Item::Billhook) : nullptr;
+            const float Length = Billhook ? Billhook->Bounds.BoxExtent.GetMax() * 2 : 0;
+            const bool Passed = Billhook && Billhook->GetAttachParent() == Avatar->GetMesh()
+                && Billhook->GetAttachSocketName() == TEXT("hand_r")
+                && Billhook->GetCollisionEnabled() == ECollisionEnabled::NoCollision
+                && Length > 30 && Length < 90;
+            if (!Passed && Billhook)
+                Results.Add(FString::Printf(TEXT("BILLHOOK_HELD_DIAG parent=%d socket=%s collision=%d length=%.1f"),
+                    Billhook->GetAttachParent() == Avatar->GetMesh(), *Billhook->GetAttachSocketName().ToString(),
+                    static_cast<int32>(Billhook->GetCollisionEnabled()), Length));
+            return Passed;
         });
     Add(TEXT("Capture the original ten-slot gameplay hotbar"),
         [this]() { Screenshot(TEXT("hotbar-gameplay")); },
@@ -173,22 +199,23 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, Revision]() { *Revision = Controller->Simulation().GetRevision(); Tap(EKeys::LeftMouseButton); },
         [this, Revision]() { return Controller->ToastIsError()
             && Controller->Simulation().GetRevision() == *Revision; });
-    Add(TEXT("Duplicate invalid save references sanitize to Empty, gain the missing Machete and Berries and clamp selection"),
+    Add(TEXT("Duplicate invalid save references sanitize to Empty, gain the missing Scythe, Pickaxe and Berries and clamp selection"),
         [this]()
         {
             Controller->SanitizeHotbar({
-                static_cast<int32>(Item::Knife),
-                static_cast<int32>(Item::Knife),
+                static_cast<int32>(Item::Billhook),
+                static_cast<int32>(Item::Billhook),
                 999,
                 static_cast<int32>(Item::WateringCan)}, 99, 0);
         },
         [this]()
         {
             const auto Slots = Controller->HotbarSnapshot();
-            const bool Passed = Slots[0].Tool == Item::Knife && Slots[0].Assigned
-                && Slots[1].Tool == Item::Machete && Slots[1].Assigned
-                && Slots[2].Tool == Item::Berries && Slots[2].Food && !Slots[4].Assigned
+            const bool Passed = Slots[0].Tool == Item::Billhook && Slots[0].Assigned
+                && Slots[1].Tool == Item::Scythe && Slots[1].Assigned
+                && Slots[2].Tool == Item::Pickaxe && Slots[2].Assigned
                 && Slots[3].Tool == Item::WateringCan && Slots[3].Assigned
+                && Slots[4].Tool == Item::Berries && Slots[4].Food && !Slots[5].Assigned
                 && Controller->SelectedHotbarIndex() == 9;
             Controller->ResetHotbar();
             return Passed;
@@ -198,7 +225,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             Homestead::Simulation Supplied = Controller->Simulation();
             auto& State = const_cast<Homestead::State&>(Supplied.GetState());
-            for (const Item Tool : {Item::Hatchet, Item::DiggingStick, Item::WateringCan})
+            for (const Item Tool : {Item::Hatchet, Item::Scythe, Item::Pickaxe, Item::DiggingStick, Item::WateringCan})
             {
                 State.inventory[static_cast<int32>(Tool)] = 1;
                 State.inventoryLayout.push_back({State.nextGroupId++, Tool, 1, 0});
@@ -210,10 +237,10 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             const auto Slots = Controller->HotbarSnapshot();
             return Slots[0].Available && Slots[1].Available && Slots[2].Available
-                && Slots[3].Available
-                && Controller->Simulation().UsedCapacity() == *Capacity + 3;
+                && Slots[3].Available && Slots[4].Available && Slots[5].Available
+                && Controller->Simulation().UsedCapacity() == *Capacity + 5;
         });
-    Add(TEXT("Pointer click selects Digging Stick and consumes the click"),
+    Add(TEXT("Pointer click selects the Scythe and consumes the click"),
         [this, Revision, PointerClick]()
         {
             *Revision = Controller->Simulation().GetRevision();
@@ -221,21 +248,19 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this, Revision]() { return Controller->SelectedHotbarIndex() == 2
             && Controller->Simulation().GetRevision() == *Revision; });
-    Add(TEXT("Pointer hover previews carried Knife without selecting or using it"),
+    Add(TEXT("Pointer hover previews carried Billhook without selecting or using it"),
         [PointerHover]() { PointerHover(0); },
-        [this, Revision]()
+        [this, Revision, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Avatar->GetKnife()->IsPresented()
+            return BillhookShown()
                 && Controller->SelectedHotbarIndex() == 2
                 && Controller->Simulation().GetRevision() == *Revision;
         }, 0.2f);
-    Add(TEXT("Leaving Knife hover restores selected Digging Stick without a ghost prop"),
+    Add(TEXT("Leaving Billhook hover restores the selected Scythe without a ghost prop"),
         [PointerHover]() { PointerHover(2); },
-        [this, Revision]()
+        [this, Revision, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && !Avatar->GetKnife()->IsPresented()
+            return !BillhookShown()
                 && Controller->SelectedHotbarIndex() == 2
                 && Controller->Simulation().GetRevision() == *Revision;
         }, 0.2f);
@@ -245,7 +270,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             Homestead::Simulation Supplied = Controller->Simulation();
             auto& State = const_cast<Homestead::State&>(Supplied.GetState());
             for (const auto Pair : {TPair<Item, int32>(Item::Branch, 5),
-                TPair<Item, int32>(Item::Fiber, 2)})
+                TPair<Item, int32>(Item::BrambleCanes, 2)})
             {
                 State.inventory[static_cast<int32>(Pair.Key)] += Pair.Value;
                 State.inventoryLayout.push_back(
@@ -292,43 +317,39 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this]() { return Controller->Simulation().Count(Item::Hatchet) == 1
             && Controller->HotbarSnapshot()[1].Available; });
-    Add(TEXT("Selected carried Knife is visible before chest storage"),
+    Add(TEXT("Selected carried Billhook is visible before chest storage"),
         [this, PointerLeave]() { PointerLeave(); Tap(EKeys::One); },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->SelectedHotbarIndex() == 0
-                && Avatar->GetKnife()->IsPresented();
+            return Controller->SelectedHotbarIndex() == 0 && BillhookShown();
         }, 0.2f);
-    Add(TEXT("Storing the only Knife removes its live icon and held prop"),
+    Add(TEXT("Storing the only Billhook removes its live icon and held prop"),
         [this, ChestId]()
         {
-            const auto Result = Controller->Sim.Transfer(*ChestId, Item::Knife, 1,
+            const auto Result = Controller->Sim.Transfer(*ChestId, Item::Billhook, 1,
                 Controller->PlayerPoint());
             if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
         },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->SelectedHotbarIndex() == 0
-                && Controller->Simulation().Count(Item::Knife) == 0
+            return Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Count(Item::Billhook) == 0
                 && !Controller->HotbarSnapshot()[0].Available
-                && !Avatar->GetKnife()->IsPresented();
+                && !BillhookShown();
         });
-    Add(TEXT("Retrieving Knife restores its same numbered icon and held prop"),
+    Add(TEXT("Retrieving the Billhook restores its same numbered icon and held prop"),
         [this, ChestId]()
         {
-            const auto Result = Controller->Sim.Transfer(*ChestId, Item::Knife, -1,
+            const auto Result = Controller->Sim.Transfer(*ChestId, Item::Billhook, -1,
                 Controller->PlayerPoint());
             if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
         },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->SelectedHotbarIndex() == 0
-                && Controller->Simulation().Count(Item::Knife) == 1
+            return Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Count(Item::Billhook) == 1
                 && Controller->HotbarSnapshot()[0].Available
-                && Avatar->GetKnife()->IsPresented();
+                && BillhookShown();
         }, 0.2f);
     Add(TEXT("Return to the original selected tool after chest proof"),
         [this]() { Tap(EKeys::Three); },
@@ -365,7 +386,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && !FMath::IsNearlyEqual(
                     Avatar->CameraArm->TargetArmLength, *CameraDistance);
         });
-    Add(TEXT("Controller LB cycles toward Knife without inventory mutation"),
+    Add(TEXT("Controller LB cycles toward the Billhook without inventory mutation"),
         [this, Revision]()
         {
             *Revision = Controller->Simulation().GetRevision();
@@ -373,21 +394,17 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this, Revision]() { return Controller->SelectedHotbarIndex() == 1
             && Controller->Simulation().GetRevision() == *Revision; });
-    Add(TEXT("Controller LB equips the carried Knife in hand"),
+    Add(TEXT("Controller LB equips the carried Billhook in hand"),
         [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->SelectedHotbarIndex() == 0
-                && Avatar->GetKnife()->IsPresented();
+            return Controller->SelectedHotbarIndex() == 0 && BillhookShown();
         }, 0.2f);
-    Add(TEXT("Controller RB clears held Knife on tool switch"),
+    Add(TEXT("Controller RB clears the held Billhook on tool switch"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->SelectedHotbarIndex() == 1
-                && !Avatar->GetKnife()->IsPresented();
+            return Controller->SelectedHotbarIndex() == 1 && !BillhookShown();
         });
     Add(TEXT("Controller RB returns to the previous selected tool"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
@@ -408,150 +425,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     Add(TEXT("Current-version reload restores references and selected slot"),
         [this]() { Tap(EKeys::One); Tap(EKeys::F9); },
         [this]() { return Controller->SelectedHotbarIndex() == 3
-            && Controller->HotbarSnapshot()[3].Tool == Item::WateringCan; });
+            && Controller->HotbarSnapshot()[3].Tool == Item::Pickaxe; });
     Add(TEXT("Settle the loaded pawn before ordinary tool approaches"),
         []() {}, [this]() { return !Controller->bPendingSpawn; }, 0.8f);
-    Add(TEXT("Approach low growth for selected Knife use"),
-        [this, LowResource]() { Teleport(LowResource.position); Tap(EKeys::One); },
-        [this, LowId]()
-        {
-            if (Controller->Focus == AHomesteadController::EFocus::Resource)
-                *LowId = Controller->FocusId;
-            return *LowId > 0 && Controller->SelectedHotbarIndex() == 0;
-        }, 0.7f);
-    Add(TEXT("Left click with carried Knife clears exactly one authoritative low patch"),
-        [this, KnifeStarts, HatchetStarts]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            if (!Animation) { Finish(false, TEXT("Knife animation instance is missing.")); return; }
-            *KnifeStarts = Animation->KnifeCutStarts();
-            *HatchetStarts = Animation->ClearStarts();
-            Tap(EKeys::LeftMouseButton);
-        },
-        [this, LowId]() { const auto Node = std::find_if(
-                Controller->State().resources.begin(), Controller->State().resources.end(),
-                [LowId](const auto& Value) { return Value.id == *LowId; });
-            return Node != Controller->State().resources.end() && Node->cleared; });
-    Add(TEXT("Successful Knife clear presents one distinct short cut with the held prop"),
-        []() {},
-        [this, KnifeStarts, HatchetStarts]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            if (!Avatar || !Animation || !Avatar->GetKnife()->IsPresented()
-                || Animation->KnifeCutStarts() != *KnifeStarts + 1
-                || Animation->ClearStarts() != *HatchetStarts
-                || Animation->KnifeCutWeight() <= 0.3f)
-                return false;
-            return true;
-        }, 0.2f);
-    Add(TEXT("Opening the field book cancels a Knife cut and hides the prop"),
-        [this]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            if (!Animation || Animation->KnifeCutWeight() <= 0.01f)
-            {
-                Finish(false, TEXT("Knife gesture ended before menu cancellation could be exercised."));
-                return;
-            }
-            Tap(EKeys::I);
-        },
-        [this, KnifeStarts]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            const bool Passed = Controller->IsBookOpen() && Avatar && Animation
-                && !Avatar->GetKnife()->IsPresented()
-                && Animation->KnifeCutStarts() == *KnifeStarts + 1;
-            if (!Passed)
-                Results.Add(FString::Printf(
-                    TEXT("KNIFE_CANCEL_DIAG book=%d avatar=%d anim=%d prop_visible=%d cut_starts=%u expected=%u weight=%.3f"),
-                    Controller->IsBookOpen(), Avatar != nullptr, Animation != nullptr,
-                    Avatar && Avatar->GetKnife()->IsPresented(),
-                    Animation ? Animation->KnifeCutStarts() : 0, *KnifeStarts + 1,
-                    Animation ? Animation->KnifeCutWeight() : -1.0f));
-            return Passed;
-        }, 0.3f);
-    Add(TEXT("Closing the book never replays canceled Knife work"),
-        [this]() { Tap(EKeys::Escape); },
-        [this, KnifeStarts]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            return !Controller->IsBookOpen() && Avatar && Animation
-                && Animation->KnifeCutStarts() == *KnifeStarts + 1
-                && Animation->KnifeCutWeight() < 0.01f;
-        }, 0.8f);
-    Add(TEXT("Open Appearance without showing a Knife through the field book"),
-        [this, OldHairStyle, OldBodyPreset]()
-        {
-            *OldHairStyle = Controller->Appearance.MetaHair;
-            *OldBodyPreset = Controller->Appearance.HairColor;
-            Controller->MenuPage(6);
-        },
-        [this]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Controller->IsBookOpen() && Controller->BookPage() == 6
-                && Avatar && !Avatar->GetKnife()->IsPresented();
-        }, 0.25f);
-    Add(TEXT("Appearance rebuild keeps the selected Knife hidden in the book"),
-        [this]()
-        {
-            Controller->MenuSelect(0);
-            Controller->MenuActivate();
-        },
-        [this, OldHairStyle]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const bool Passed = Controller->IsBookOpen() && Controller->BookPage() == 6
-                && Controller->Appearance.MetaHair == (*OldHairStyle + 1) % HomesteadLook::MetaHairCount
-                && Controller->SelectedHotbarIndex() == 0
-                && Avatar && Avatar->IsEquipmentPresentationReady()
-                && !Avatar->GetKnife()->IsPresented();
-            if (!Passed)
-                Results.Add(FString::Printf(TEXT("APPEARANCE_REBIND_DIAG book=%d page=%d style=%d old=%d hotbar=%d ready=%d knife=%d"),
-                    Controller->IsBookOpen(), Controller->BookPage(), Controller->Appearance.HairStyle,
-                    *OldHairStyle, Controller->SelectedHotbarIndex(),
-                    Avatar && Avatar->IsEquipmentPresentationReady(),
-                    Avatar && Avatar->GetKnife()->IsPresented()));
-            return Passed;
-        }, 0.3f);
-    Add(TEXT("Changing hair colour and fitted garments never ghosts the selected Knife"),
-        [this]()
-        {
-            Controller->MenuSelect(1);
-            Controller->MenuActivate();
-        },
-        [this, OldBodyPreset]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Controller->IsBookOpen() && Controller->BookPage() == 6
-                && Controller->Appearance.HairColor == (*OldBodyPreset + 1) % HomesteadLook::HairColorCount
-                && Avatar && Avatar->IsEquipmentPresentationReady()
-                && !Avatar->GetKnife()->IsPresented();
-        }, 0.3f);
-    Add(TEXT("Leaving Appearance rebinds exactly one held Knife without replay"),
-        [this]() { Tap(EKeys::Escape); },
-        [this, KnifeStarts]()
-        {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            return !Controller->IsBookOpen() && Avatar && Animation
-                && Controller->SelectedHotbarIndex() == 0
-                && Avatar->GetKnife()->IsPresented()
-                && Animation->KnifeCutStarts() == *KnifeStarts + 1;
-        }, 0.3f);
-    Add(TEXT("Approach a sapling while Knife remains selected"),
-        [this, Sapling]() { Teleport(Sapling.position); },
+    Add(TEXT("Approach a sapling with the Billhook selected"),
+        [this, Sapling]() { Teleport(Sapling.position); Tap(EKeys::One); },
         [this, SaplingId]()
         {
             if (Controller->Focus == AHomesteadController::EFocus::Resource)
@@ -563,26 +441,140 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Node->kind == Homestead::ResourceKind::Sapling
                 && Controller->SelectedHotbarIndex() == 0;
         }, 0.7f);
-    Add(TEXT("Wrong selected Knife cannot clear the sapling"),
-        [this, Revision]() { *Revision = Controller->Simulation().GetRevision();
-            Tap(EKeys::LeftMouseButton); },
-        [this, Revision, SaplingId, KnifeStarts]() { const auto Node = std::find_if(
-                Controller->State().resources.begin(), Controller->State().resources.end(),
-                [SaplingId](const auto& Value) { return Value.id == *SaplingId; });
+    Add(TEXT("Number two selects the carried Axe, which cannot clear the sapling"),
+        [this, Revision, Anim, HackStarts]()
+        {
+            *Revision = Controller->Simulation().GetRevision();
+            const auto* Animation = Anim();
+            *HackStarts = Animation ? Animation->MacheteStarts() : 0;
+            Tap(EKeys::Two);
+            Tap(EKeys::LeftMouseButton);
+        },
+        [this, Revision, Anim, HackStarts, SaplingCleared]()
+        {
+            const auto* Animation = Anim();
+            return Controller->SelectedHotbarIndex() == 1 && Controller->ToastIsError()
+                && Controller->Simulation().GetRevision() == *Revision && !SaplingCleared()
+                && Animation && Animation->MacheteStarts() == *HackStarts;
+        });
+    Add(TEXT("Number one then left click lands the first of two Billhook swings with the held prop"),
+        [this, Anim, HackStarts, ClearStarts]()
+        {
+            const auto* Animation = Anim();
+            if (!Animation) { Finish(false, TEXT("Billhook animation instance is missing.")); return; }
+            *HackStarts = Animation->MacheteStarts();
+            *ClearStarts = Animation->ClearStarts();
+            Tap(EKeys::One);
+            Tap(EKeys::LeftMouseButton);
+        },
+        [this, Anim, HackStarts, ClearStarts, BillhookShown, SaplingCleared]()
+        {
+            const auto* Animation = Anim();
+            return Controller->SelectedHotbarIndex() == 0 && Animation && BillhookShown()
+                && Animation->MacheteStarts() == *HackStarts + 1
+                && Animation->ClearStarts() == *ClearStarts
+                && Animation->MacheteWeight() > 0.3f
+                && Controller->ToastText.StartsWith(TEXT("1 more swing")) && !SaplingCleared();
+        }, 2.5f);
+    // The blow lands 1.25 s into the hack; move on while the follow-through is still playing.
+    Steps.Last().bCompleteWhenReady = true;
+    Add(TEXT("Opening the field book cancels the Billhook hack; she keeps it in hand"),
+        [this, Anim]()
+        {
+            const auto* Animation = Anim();
+            if (!Animation || Animation->MacheteWeight() <= 0.01f)
+            {
+                Finish(false, TEXT("Billhook hack ended before menu cancellation could be exercised."));
+                return;
+            }
+            Tap(EKeys::I);
+        },
+        [this, Anim, HackStarts, BillhookShown]()
+        {
+            const auto* Animation = Anim();
+            const bool Passed = Controller->IsBookOpen() && Animation && BillhookShown()
+                && Animation->MacheteStarts() == *HackStarts + 1
+                && Animation->MacheteWeight() < 0.01f;
+            if (!Passed)
+                Results.Add(FString::Printf(
+                    TEXT("BILLHOOK_CANCEL_DIAG book=%d anim=%d prop_visible=%d hack_starts=%u expected=%u weight=%.3f"),
+                    Controller->IsBookOpen(), Animation != nullptr, BillhookShown(),
+                    Animation ? Animation->MacheteStarts() : 0, *HackStarts + 1,
+                    Animation ? Animation->MacheteWeight() : -1.0f));
+            return Passed;
+        }, 0.3f);
+    Add(TEXT("Closing the book never replays the canceled Billhook hack"),
+        [this]() { Tap(EKeys::Escape); },
+        [this, Anim, HackStarts]()
+        {
+            const auto* Animation = Anim();
+            return !Controller->IsBookOpen() && Animation
+                && Animation->MacheteStarts() == *HackStarts + 1
+                && Animation->MacheteWeight() < 0.01f;
+        }, 0.8f);
+    Add(TEXT("Open Appearance without showing the Billhook through the field book"),
+        [this, OldHairStyle, OldBodyPreset]()
+        {
+            *OldHairStyle = Controller->Appearance.MetaHair;
+            *OldBodyPreset = Controller->Appearance.HairColor;
+            Controller->MenuPage(6);
+        },
+        [this, BillhookShown]()
+        {
+            return Controller->IsBookOpen() && Controller->BookPage() == 6 && !BillhookShown();
+        }, 0.25f);
+    Add(TEXT("Appearance rebuild keeps the selected Billhook hidden in the book"),
+        [this]()
+        {
+            Controller->MenuSelect(0);
+            Controller->MenuActivate();
+        },
+        [this, OldHairStyle, BillhookShown]()
+        {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            const auto* Animation = Avatar
-                ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            return Controller->ToastIsError()
-                && Controller->Simulation().GetRevision() == *Revision
-                && Node != Controller->State().resources.end() && !Node->cleared
-                && Animation && Animation->KnifeCutStarts() == *KnifeStarts + 1; });
-    Add(TEXT("Number two then left click clears the sapling with the carried Hatchet"),
-        [this]() { Tap(EKeys::Two); Tap(EKeys::LeftMouseButton); },
-        [this, SaplingId]() { const auto Node = std::find_if(
-                Controller->State().resources.begin(), Controller->State().resources.end(),
-                [SaplingId](const auto& Value) { return Value.id == *SaplingId; });
-            return Controller->SelectedHotbarIndex() == 1
-                && Node != Controller->State().resources.end() && Node->cleared; });
+            const bool Passed = Controller->IsBookOpen() && Controller->BookPage() == 6
+                && Controller->Appearance.MetaHair == (*OldHairStyle + 1) % HomesteadLook::MetaHairCount
+                && Controller->SelectedHotbarIndex() == 0
+                && Avatar && Avatar->IsEquipmentPresentationReady()
+                && !BillhookShown();
+            if (!Passed)
+                Results.Add(FString::Printf(TEXT("APPEARANCE_REBIND_DIAG book=%d page=%d style=%d old=%d hotbar=%d ready=%d billhook=%d"),
+                    Controller->IsBookOpen(), Controller->BookPage(), Controller->Appearance.HairStyle,
+                    *OldHairStyle, Controller->SelectedHotbarIndex(),
+                    Avatar && Avatar->IsEquipmentPresentationReady(), BillhookShown()));
+            return Passed;
+        }, 0.3f);
+    Add(TEXT("Changing hair colour and fitted garments never ghosts the selected Billhook"),
+        [this]()
+        {
+            Controller->MenuSelect(1);
+            Controller->MenuActivate();
+        },
+        [this, OldBodyPreset, BillhookShown]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Controller->IsBookOpen() && Controller->BookPage() == 6
+                && Controller->Appearance.HairColor == (*OldBodyPreset + 1) % HomesteadLook::HairColorCount
+                && Avatar && Avatar->IsEquipmentPresentationReady()
+                && !BillhookShown();
+        }, 0.3f);
+    Add(TEXT("Leaving Appearance rebinds exactly one held Billhook without replay"),
+        [this]() { Tap(EKeys::Escape); },
+        [this, Anim, HackStarts, BillhookShown]()
+        {
+            const auto* Animation = Anim();
+            return !Controller->IsBookOpen() && Animation
+                && Controller->SelectedHotbarIndex() == 0 && BillhookShown()
+                && Animation->MacheteStarts() == *HackStarts + 1;
+        }, 0.3f);
+    Add(TEXT("The second Billhook swing clears the sapling"),
+        [this]() { Tap(EKeys::LeftMouseButton); },
+        [this, Anim, HackStarts, SaplingCleared]()
+        {
+            const auto* Animation = Anim();
+            return SaplingCleared() && Animation && Animation->MacheteStarts() >= *HackStarts + 2;
+        }, 2.5f);
+    Steps.Last().bCompleteWhenReady = true;
     Add(TEXT("Find a valid nearby till cell using an authority copy"),
         [this, TillX, TillY]()
         {
@@ -604,15 +596,17 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             if (!Found) Finish(false, TEXT("No valid nearby hotbar till cell exists."));
         },
         [this]() { return !Controller->IsBookOpen(); }, 0.7f);
-    Add(TEXT("Wheel-selected Digging Stick tills the forward cell through left click"),
-        [this]() { Tap(EKeys::Three); Tap(EKeys::LeftMouseButton); },
+    Add(TEXT("Number five selects the Hoe, which tills the forward cell through left click"),
+        [this]() { Tap(EKeys::Five); Tap(EKeys::LeftMouseButton); },
         [this, TillX, TillY]()
         {
-            return Controller->SelectedHotbarIndex() == 2
+            return Controller->SelectedHotbarIndex() == 4
                 && std::any_of(Controller->State().plots.begin(),
                     Controller->State().plots.end(), [TillX, TillY](const auto& Plot)
                     { return Plot.cellX == *TillX && Plot.cellY == *TillY; });
-        });
+        }, 4.0f);
+    // The MetaHuman heroine tills when the hoe bites, partway through its swing.
+    Steps.Last().bCompleteWhenReady = true;
     Add(TEXT("CONTROLLED seeds and water prepare one existing plot for selected-tool proof"),
         [this, TillX, TillY]()
         {
@@ -636,27 +630,29 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, TillX, TillY]() { return std::any_of(
                 Controller->State().plots.begin(), Controller->State().plots.end(),
                 [TillX, TillY](const auto& Plot)
-                { return Plot.cellX == *TillX && Plot.cellY == *TillY && Plot.planted; }); });
+                { return Plot.cellX == *TillX && Plot.cellY == *TillY && Plot.planted; }); }, 4.0f);
+    Steps.Last().bCompleteWhenReady = true;
     Add(TEXT("Controller right trigger with selected Watering Can waters the crop once"),
-        [this]() { Tap(EKeys::Four); Tap(EKeys::Gamepad_RightTrigger); },
+        [this]() { Tap(EKeys::Six); Tap(EKeys::Gamepad_RightTrigger); },
         [this, TillX, TillY]() { const auto Plot = std::find_if(
                 Controller->State().plots.begin(), Controller->State().plots.end(),
                 [TillX, TillY](const auto& Value)
                 { return Value.cellX == *TillX && Value.cellY == *TillY; });
-            return Controller->SelectedHotbarIndex() == 3
-                && Plot != Controller->State().plots.end() && Plot->moisture > 0; });
-    Add(TEXT("CONTROLLED dropping the only Knife removes its icon and held prop"),
-        [this, KnifeDropId]()
+            return Controller->SelectedHotbarIndex() == 5
+                && Plot != Controller->State().plots.end() && Plot->moisture > 0; }, 4.0f);
+    Steps.Last().bCompleteWhenReady = true;
+    Add(TEXT("CONTROLLED dropping the only Billhook removes its icon and held prop"),
+        [this, BillhookDropId]()
         {
             Tap(EKeys::One);
             int32 GroupId = 0;
             for (const auto& Entry : Controller->State().inventoryLayout)
-                if (Entry.item == Item::Knife && Entry.wearableId == 0)
+                if (Entry.item == Item::Billhook && Entry.wearableId == 0)
                     GroupId = Entry.groupId;
             Homestead::Point DropPosition;
             if (!Controller->ResolveDropPoint(DropPosition))
             {
-                Finish(false, TEXT("Controlled Knife drop has no safe placement beside the heroine."));
+                Finish(false, TEXT("Controlled Billhook drop has no safe placement beside the heroine."));
                 return;
             }
             const auto Result = Controller->Sim.DropGroup(GroupId, 1, DropPosition,
@@ -664,33 +660,31 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 Controller->Sim.GetRevision());
             if (!Result || Controller->State().worldDrops.empty())
             {
-                Finish(false, FString(TEXT("Controlled Knife drop failed: "))
+                Finish(false, FString(TEXT("Controlled Billhook drop failed: "))
                     + UTF8_TO_TCHAR(Result.message.c_str()));
                 return;
             }
-            *KnifeDropId = Controller->State().worldDrops.back().id;
+            *BillhookDropId = Controller->State().worldDrops.back().id;
         },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->SelectedHotbarIndex() == 0
-                && Controller->Simulation().Count(Item::Knife) == 0
+            return Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Count(Item::Billhook) == 0
                 && !Controller->HotbarSnapshot()[0].Available
-                && !Avatar->GetKnife()->IsPresented();
+                && !BillhookShown();
         }, 0.2f);
-    Add(TEXT("CONTROLLED pickup restores the same Knife assignment and held prop"),
-        [this, KnifeDropId]()
+    Add(TEXT("CONTROLLED pickup restores the same Billhook assignment and held prop"),
+        [this, BillhookDropId]()
         {
-            const auto Result = Controller->Sim.PickUpDrop(*KnifeDropId,
+            const auto Result = Controller->Sim.PickUpDrop(*BillhookDropId,
                 Controller->PlayerPoint());
-            if (!Result) Finish(false, TEXT("Controlled Knife pickup failed."));
+            if (!Result) Finish(false, TEXT("Controlled Billhook pickup failed."));
         },
-        [this]()
+        [this, BillhookShown]()
         {
-            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
-            return Avatar && Controller->Simulation().Count(Item::Knife) == 1
+            return Controller->Simulation().Count(Item::Billhook) == 1
                 && Controller->HotbarSnapshot()[0].Available
-                && Avatar->GetKnife()->IsPresented();
+                && BillhookShown();
         }, 0.2f);
     Add(TEXT("A new woodland resets world-specific hotbar references safely"),
         [this]() { Controller->NewGame(); },
@@ -698,9 +692,9 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             const auto Slots = Controller->HotbarSnapshot();
             return Controller->IsBookOpen() && Controller->SelectedHotbarIndex() == 0
-                && Slots.Num() == 10 && Slots[0].Tool == Item::Knife
-                && Slots[0].Available && !Slots[1].Available
-                && !Slots[2].Available && !Slots[3].Available;
+                && Slots.Num() == 10 && Slots[0].Tool == Item::Billhook
+                && !Slots[0].Available && !Slots[1].Available
+                && !Slots[2].Available && !Slots[3].Available && Slots[6].Food;
         }, 0.8f);
     Add(TEXT("Close fresh notes and settle before sprint eligibility fixtures"),
         [this]() { Tap(EKeys::Escape); },
@@ -742,7 +736,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Avatar && Avatar->GetVelocity().Size2D() > 60
                 && !Avatar->IsSprinting()
-                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, 180.0f)
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
                 && Controller->State().energy <= *ReserveEnergy
                 && Controller->State().energy > *ReserveEnergy - 0.1;
         }, 0.9f);
@@ -774,10 +768,10 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Avatar && Avatar->IsSprinting()
-                && Avatar->GetVelocity().Size2D() > 200;
+                && Avatar->GetVelocity().Size2D() > Avatar->WalkSpeed() + 30;
         }, 1.3f);
     Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 1); };
-    Add(TEXT("CONTROLLED work presentation stops sprint before the Knife gesture"),
+    Add(TEXT("CONTROLLED work presentation stops sprint before the Billhook hack"),
         [this, WorkEnergy, WorkStarts]()
         {
             auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
@@ -789,9 +783,9 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 return;
             }
             *WorkEnergy = Controller->State().energy;
-            *WorkStarts = Animation->KnifeCutStarts();
+            *WorkStarts = Animation->MacheteStarts();
             const Homestead::Point Player = Controller->PlayerPoint();
-            Avatar->PlayKnifeCut({Player.x + 100, Player.y});
+            Avatar->PlayMacheteHack({Player.x + 100, Player.y}, Item::Billhook);
             Axis(EKeys::Gamepad_LeftY, 0);
         },
         [this, WorkEnergy, WorkStarts]()
@@ -799,12 +793,28 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             const auto* Animation = Avatar
                 ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-            return Avatar && Animation && !Avatar->IsSprinting()
-                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, 180.0f)
-                && Animation->KnifeCutStarts() == *WorkStarts + 1
-                && Animation->KnifeCutWeight() > 0.1f
+            const bool Passed = Avatar && Animation && !Avatar->IsSprinting()
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
+                && Animation->MacheteStarts() == *WorkStarts + 1
+                && Animation->MacheteWeight() > 0.1f
                 && FMath::Abs(Controller->State().energy - *WorkEnergy) < 0.1;
-        }, 0.4f);
+            if (!Passed && Avatar && Animation)
+                Results.Add(FString::Printf(TEXT("WORK_SPRINT_DIAG sprinting=%d max=%.0f walk=%.0f starts=%u expected=%u weight=%.3f energy=%.2f/%.2f"),
+                    Avatar->IsSprinting(), Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed(),
+                    Animation->MacheteStarts(), *WorkStarts + 1, Animation->MacheteWeight(),
+                    Controller->State().energy, *WorkEnergy));
+            return Passed;
+        }, 0.6f);
+    // She stops dead, but the hack only starts once she's settled (the anim refuses it while she
+    // still has momentum), so re-ask until it has begun.
+    Steps.Last().Repeat = [this, WorkStarts]()
+    {
+        auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+        const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+        if (!Avatar || !Animation || Animation->MacheteStarts() != *WorkStarts || Animation->MacheteWeight() > 0.01f) return;
+        const Homestead::Point Player = Controller->PlayerPoint();
+        Avatar->PlayMacheteHack({Player.x + 100, Player.y}, Item::Billhook);
+    };
     Add(TEXT("Cancel the isolated work pose with no queued sprint replay"),
         [this]()
         {
@@ -819,11 +829,13 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
             return Avatar && Animation && !Avatar->IsSprinting()
                 && Animation->ActionWeight() < 0.01f
-                && Animation->KnifeCutStarts() == *WorkStarts + 1;
+                && Animation->MacheteStarts() == *WorkStarts + 1;
         }, 0.3f);
     Add(TEXT("Fresh mapped hold re-enters sprint after completed work"),
         [this]()
         {
+            // Back to the open ground the first sprint crossed, clear of the trees further on.
+            Teleport({-1000, 0});
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
@@ -831,7 +843,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Avatar && Avatar->IsSprinting()
-                && Avatar->GetVelocity().Size2D() > 200;
+                && Avatar->GetVelocity().Size2D() > Avatar->WalkSpeed() + 30;
         }, 1.3f);
     Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 1); };
     Add(TEXT("CONTROLLED airborne movement cancels sprint and its Energy cost"),
@@ -853,7 +865,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Avatar && !Avatar->GetCharacterMovement()->IsMovingOnGround()
                 && !Avatar->IsSprinting()
-                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, 180.0f)
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
                 && FMath::Abs(Controller->State().energy - *AirborneEnergy) < 0.1;
         }, 0.45f);
     Add(TEXT("Release airborne sprint input without queued restart"),

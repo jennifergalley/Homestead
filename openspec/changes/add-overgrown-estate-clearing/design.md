@@ -172,10 +172,16 @@ It shares:
   stand-ins. Overgrowth has no collision yet, so the doorway bramble can't trap her before she has
   a billhook.
 - **Swings**: the billhook uses the machete hack with its own prop; the axe uses the felling clip
-  for stumps and logs, one blow per press; the scythe and pickaxe borrow the hack as labelled
-  stand-ins until their swings are authored (tasks 3.2, 3.3).
-- **Packaged suites** still walking the survival loop (knife, fibre, woodland warmth) were
-  retargeted where cheap, with stand-in salvage grants: clearing, watering, full loop, book
-  clarity and native-menu crafting. The creek suite's knife/reed section is retired. The watering
-  visual playtest's can stage and parts of the native-menu and full-loop suites still assume the
-  old loop and need retargeting to the estate; they haven't been rerun.
+  for stumps and logs, one blow per press; the pickaxe has its own downward strike
+  (`AN_HeroineMH_GroundStrike`) and the scythe its own two-handed mow (`AN_HeroineMH_ScytheMow`).
+- **Woodland suites** (the non-estate Homestead map) were retargeted to the estate kit with
+  labelled stand-in salvage grants, and the non-packaged editor runs pass: Smoke (82 steps),
+  Hotbar (62, now run with the MetaHuman heroine and the billhook in the knife's role),
+  NativeMenu (195; bramble canes replace fibre, a stand-in knife and fibre keep garment
+  coverage), Clearing (195; the default route fells mature trees with the axe because saplings
+  are billhook overgrowth now) and FullLoop (355). The creek suite's knife/reed section is
+  retired. Known gaps: the Clearing suite's `-CameraLifecycle` route still harvests a sapling
+  for produce and hasn't been retargeted; BookClarity fails at its second step because Start now
+  opens Settings (older than this change; only its knife references were retargeted); the
+  watering visual playtest's can stage hasn't been rerun. The mature-tree clear probe checks a
+  fixed 0.45 s pose sample, so a long frame hitch can fail it (seen twice in six runs, on a loaded PC).
