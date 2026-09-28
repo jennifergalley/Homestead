@@ -236,9 +236,11 @@ clashes between parallel callers.
 | `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
 
-Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
-`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. PowerShell names are case-insensitive, so
-a local `$s`, `$e`, `$l` or `$h` overwrites these; the helpers themselves don't depend on them. Keep session-specific helpers (probes,
+Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,
+`$McpSlate` (SlateInspector), `$McpPlay` (HomesteadPlayTools), `$McpPython` (HomesteadEditorPython).
+The short aliases `$E`, `$S`, `$L`, `$SL`, `$H`, `$PY` used below are set only when you haven't
+already defined those names. PowerShell names are case-insensitive, and dot-sourcing never overwrites
+your own `$s` or `$e`; if you have one, use the `$Mcp*` names instead. Keep session-specific helpers (probes,
 callbacks) in your own files and load them from `py` with `sys.path.insert`.
 
 ## 4. Play the game

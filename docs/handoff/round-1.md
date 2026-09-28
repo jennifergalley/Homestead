@@ -14,7 +14,7 @@ page current; report changes to it rather than editing lane rows yourself.
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
 | Ruined manor and arrival | `f8b77021-941d-47e8-8bbd-1e93a632e5e8` | `jennifergalley-ruined-manor-and-arrival` | `jennifergalley-studious-doodle` | 8768 | `add-ruined-manor-and-arrival` |
 | Estate boundary and minimap | `6e131c6a-a333-4f65-a10b-a634a2f04117` | `jennifergalley-estate-boundary-and-minimap` | `jennifergalley-automatic-spork` | 8766 | `add-estate-boundary-map-and-minimap` |
-| Estate ocean and water | `89914e30-d8b6-4605-8635-5735406c97a2` | `jennifergalley-estate-ocean-and-water` | `jennifergalley-silver-guide` | ask the lane | ask the orchestrator |
+| Estate ocean and water | `89914e30-d8b6-4605-8635-5735406c97a2` | `jennifergalley-estate-ocean-and-water` | `jennifergalley-silver-guide` | 8771 | `author-fixed-cornish-estate-map` (task 2.3: ocean, river, pail refill) |
 | MVP survival polish (separate product line; never merge with `main`) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | `mvp-survival` (session branch `jennifergalley-mvp-survival-polish`) | `jennifergalley-probable-barnacle` | 8770 | none |
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
