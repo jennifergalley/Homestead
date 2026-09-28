@@ -211,5 +211,12 @@ tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine
 `HomesteadGrassField.h`'s LOD distances depend on `GrassFade` and the LOD keep fractions, so change
 all three together.
 
+Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
+`AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour
+of the rain and dries over four hours after it. Wet soil, litter and stone darken and gloss (turf
+less), trodden ground holds a sheen of water, and grass blades darken and gloss. The blades' light
+transmission and gust sheen fade out at night so the meadow doesn't glow under the moon
+(`NightTransmission` on `MI_EstateGrass`: 0.3 keeps a little light through the blades so their shaded faces don't go black).
+
 Re-run `bake_ground.py` and `build_ground.py` after changing the heightfield, the layout,
 the paint layers or the scatter (the canopy comes from its trees).
