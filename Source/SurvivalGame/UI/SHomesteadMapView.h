@@ -51,7 +51,8 @@ protected:
 private:
     TWeakObjectPtr<UHomesteadMapComponent> Map;
     TAttribute<bool> UsesGamepad;
-    FVector2D Size = FVector2D(480, 320);
+    // The painted size; the pan and zoom limits follow it.
+    mutable FVector2D Size = FVector2D(480, 320);
     bool bDragging = false;
     FVector2D DragLast = FVector2D::ZeroVector;
     FVector2D DragStart = FVector2D::ZeroVector;
@@ -60,7 +61,7 @@ private:
     double Time = 0;
     FHomesteadMapViewState& State() const;
     HomesteadMap::View MakeView() const;
-    void Clamp();
+    void Clamp() const;
     void EnsureState();
     void Reveal(int32 Index);
 };

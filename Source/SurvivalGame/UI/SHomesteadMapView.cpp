@@ -66,7 +66,7 @@ void SHomesteadMapView::EnsureState()
     Clamp();
 }
 
-void SHomesteadMapView::Clamp()
+void SHomesteadMapView::Clamp() const
 {
     FHomesteadMapViewState& S = State();
     const HomesteadMap::MapTransform T = MvTransformOf(Map.Get());
@@ -267,6 +267,13 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
 {
     HomesteadMapPaint::FPainter Paint(Geometry, Out, LayerId);
     const FVector2D Local = Geometry.GetLocalSize();
+    // Keep the limits in step with what is actually painted, so the sheet never pulls off an edge.
+    if (!Local.Equals(Size, 0.5) && Local.X >= 1 && Local.Y >= 1 && State().bValid)
+    {
+        UE_LOG(LogTemp, Verbose, TEXT("Map view: painted %s, ticked %s"), *Local.ToString(), *Size.ToString());
+        Size = Local;
+        Clamp();
+    }
     Paint.Fill({FVector2D(0, 0), FVector2D(Local.X, 0), Local, FVector2D(0, Local.Y)}, MvBackdrop);
     const UHomesteadMapComponent* Component = Map.Get();
     if (!Component || !Component->Frame().Model.IsValid() || !State().bValid) return Paint.GetLayer();

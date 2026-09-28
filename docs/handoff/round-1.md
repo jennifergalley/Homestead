@@ -8,17 +8,20 @@ page current; report changes to it rather than editing lane rows yourself.
 
 | Role / lane | Session | Branch | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | MCP port | OpenSpec change |
 | --- | --- | --- | --- | --- | --- |
-| Orchestrator + world/terrain lane (only session that packages) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | ask the orchestrator | `author-fixed-cornish-estate-map` |
+| Orchestrator + world/terrain lane (only session that packages) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | 8765 (so the native `unreal` MCP tools reach the orchestrator's editor) | `author-fixed-cornish-estate-map` |
 | Docs agent | `d99bb15c-6135-4f9d-b21a-f46b63c3b36f` | `jennifergalley-work-optimizer` | `jennifergalley-stunning-dollop` | none (no editor) | none |
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
 | Ruined manor and arrival | `f8b77021-941d-47e8-8bbd-1e93a632e5e8` | `jennifergalley-ruined-manor-and-arrival` | `jennifergalley-studious-doodle` | 8768 | `add-ruined-manor-and-arrival` |
 | Estate boundary and minimap | `6e131c6a-a333-4f65-a10b-a634a2f04117` | `jennifergalley-estate-boundary-and-minimap` | `jennifergalley-automatic-spork` | 8766 | `add-estate-boundary-map-and-minimap` |
+| Estate ocean and water | `89914e30-d8b6-4605-8635-5735406c97a2` | `jennifergalley-estate-ocean-and-water` | `jennifergalley-silver-guide` | ask the lane | ask the orchestrator |
 | MVP survival polish (separate product line; never merge with `main`) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | `mvp-survival` (session branch `jennifergalley-mvp-survival-polish`) | `jennifergalley-probable-barnacle` | 8770 | none |
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
 
-Session IDs are the app's project-session IDs: use them with `send_session_message`.
+Session IDs are the app's project-session IDs: use them with `send_session_message`. The worktree
+folder name is the session's **mailbox address** for urgent `mailbox_send` messages
+(`docs\handoff\README.md`).
 
 ## Lane status
 
@@ -63,10 +66,11 @@ manor and boundary lanes haven't merged yet.
   restoring an earlier `SavedViewRotation`. Being fixed on the manor lane.
 
 - **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
-  UBT `ConflictingInstance`): `Build-Game.ps1` now builds the game target with `-WaitMutex`, cooks
-  with `-SkipZenStore`, and waits for UAT (`4ffd2372` and later). Not yet verified by a full package
-  on `main`; the MVP lane runs the same fix on its branch. Only the orchestrator packages now, so
-  the collisions shouldn't recur within round 1.
+  UBT `ConflictingInstance`): resolved. `Build-Game.ps1` builds the game target with `-WaitMutex`,
+  cooks with `-SkipZenStore`, and waits for UAT (`cdbd249f`). Verified 2026-09-27 17:30 by the MVP
+  lane: `-PackageOnly` packaged successfully (BuildCookRun 200 s, UAT about 6 min) and the packaged
+  smoke, NativeMenu, Hotbar and FullLoop suites passed. The orchestrator has adopted it, and only the
+  orchestrator packages now.
 - **Blender prop import** needs a free editor slot (3-process limit). Props are imported in a
   running editor via `run_python`, not the headless script.
 
@@ -85,9 +89,18 @@ manor and boundary lanes haven't merged yet.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. On the fixed estate
   the hotbar starts 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries. When it merges,
   update the skill's starter-kit, hotbar and energy notes in section 4 (they still describe the
-  woodland kit: knife, hatchet, stone hoe, pail and machete in slots 1-5).
+  woodland kit: knife, hatchet, stone hoe, pail and machete in slots 1-5). Also add the estate tool
+  route the lane uses: salvage pile coordinates (placements 520001-520005), branch piles, the Haft
+  recipe order and the hotbar slot per tool. Ask the lane for the route if it isn't in its change.
+  Its fix for silent no-op swings (an empty scythe arc now says "Step closer to mow.") lands with it.
 
 ## Tooling requests (unassigned)
+
+- `HomesteadPlayTools` additions asked for by the clearing lane:
+  - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and
+    slot the hotbar in one call.
+  - `swing` (or an action tool generally): press the action and return the resulting toast or
+    notification synchronously, so a refused action isn't mistaken for broken input.
 
 - A launch argument for the packaged Development build to set the start hour and take a screenshot
   without typing into the console (for example `-HomesteadStartHour=`), for night-lighting QA

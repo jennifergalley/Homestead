@@ -20,7 +20,7 @@ Functions:
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
     tp <x> <y> [z]                         move the player pawn (z default 200; she drops to the ground)
     click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
-Variables: $E $S $L $SL $H $PY (toolset names). Full playbook: .github\skills\unreal-editor-mcp\SKILL.md.
+Variables: $E $S $L $SL $H $PY (toolset names, for your own mcp calls; avoid reusing $e/$s/$l/$h as locals, since names are case-insensitive). Full playbook: .github\skills\unreal-editor-mcp\SKILL.md.
 #>
 param([Parameter(Mandatory)][int]$Port)
 
@@ -30,12 +30,17 @@ $script:McpArgsDir = Join-Path $script:McpRoot 'Saved\McpArgs'
 $null = New-Item -ItemType Directory -Force $script:McpArgsDir
 $env:UNREAL_MCP_URL = "http://127.0.0.1:$Port/mcp"
 
-$E = 'EditorToolset.EditorAppToolset'
+# Toolset names. The helpers use the $script:Ts* copies, so a caller's own $s/$e/$h/$l (PowerShell
+# names are case-insensitive) can't break them; $E, $S, ... are conveniences for interactive calls.
+$script:TsEditor = 'EditorToolset.EditorAppToolset'
+$script:TsPlay = 'homestead_agent.toolset.HomesteadPlayTools'
+$script:TsPython = 'homestead_agent.toolset.HomesteadEditorPython'
+$E = $script:TsEditor
 $S = 'editor_toolset.toolsets.scene.SceneTools'
 $L = 'EditorToolset.LogsToolset'
 $SL = 'SlateInspectorToolset.SlateInspectorToolset'
-$H = 'homestead_agent.toolset.HomesteadPlayTools'
-$PY = 'homestead_agent.toolset.HomesteadEditorPython'
+$H = $script:TsPlay
+$PY = $script:TsPython
 
 function mcp([string]$ts, [string]$tool, $a = '{}', [int]$timeout = 600) {
     $arguments = if ($a -is [string]) { ConvertFrom-Json $a -AsHashtable } else { $a }
@@ -47,15 +52,15 @@ function mcp([string]$ts, [string]$tool, $a = '{}', [int]$timeout = 600) {
     finally { Remove-Item -LiteralPath $file -ErrorAction SilentlyContinue }
 }
 
-function hk([string]$tool, $a = '{}') { (mcp $H $tool $a | Out-String | ConvertFrom-Json).content[0].text }
+function hk([string]$tool, $a = '{}') { (mcp $script:TsPlay $tool $a | Out-String | ConvertFrom-Json).content[0].text }
 
 function st([int]$n = 6) {
-    $o = mcp $H get_play_state "{`"nearby_count`": $n, `"radius_cm`": 4000}" | Out-String
+    $o = mcp $script:TsPlay get_play_state "{`"nearby_count`": $n, `"radius_cm`": 4000}" | Out-String
     (($o | ConvertFrom-Json).content[0].text | ConvertFrom-Json).returnValue | ConvertFrom-Json
 }
 
 function py([string]$code, [int]$timeout = 600) {
-    $o = mcp $PY run_python @{ code = $code } $timeout | Out-String
+    $o = mcp $script:TsPython run_python @{ code = $code } $timeout | Out-String
     try {
         $text = ($o | ConvertFrom-Json).content[0].text
         try { ($text | ConvertFrom-Json).returnValue } catch { $text }
@@ -73,7 +78,7 @@ unreal.SystemLibrary.execute_console_command(w, $(ConvertTo-Json $command), pc)
 }
 
 function shot() {
-    $o = mcp $E CaptureEditorImage | Out-String
+    $o = mcp $script:TsEditor CaptureEditorImage | Out-String
     if ($o -match 'saved to ([^>]+?\.png)') { $Matches[1].Replace('\\\\', '\') } else { $o }
 }
 
@@ -91,7 +96,7 @@ function hshot([string]$res = '1920x1080') {
 }
 
 function pie() {
-    $null = mcp $E StartPIE '{"options":{"bSimulate":false,"playMode":"PlayMode_InViewPort","warmupSeconds":5}}'
+    $null = mcp $script:TsEditor StartPIE '{"options":{"bSimulate":false,"playMode":"PlayMode_InViewPort","warmupSeconds":5}}'
     'PIE requested; StartPIE may report a timeout while it loads. Poll st until worldReady.'
 }
 

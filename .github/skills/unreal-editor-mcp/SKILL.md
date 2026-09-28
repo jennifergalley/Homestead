@@ -39,8 +39,9 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   Pass it as `Start-EditorMcp.ps1 -Port <p>`, then dot-source `Scripts\McpHelpers.ps1 -Port <p>`
   (section 3). The script refuses a port another worktree's editor is serving. Never drive or close
   another session's editor.
-- **The native `unreal` MCP tools are hard-wired to port 8765** (`.github\mcp.json`). In a session
-  whose editor uses another port they talk to someone else's editor. Use the shell helpers instead.
+- **The native `unreal` MCP tools are hard-wired to port 8765** (`.github\mcp.json`). In round 1
+  that's the orchestrator's editor, so in any other session they drive the orchestrator's editor.
+  Lanes use the shell helpers instead.
   If you do use native tools, confirm the worktree first:
   `print(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))`.
 - **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). An
@@ -78,6 +79,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 **Lane quick-start** (one worktree, port `$p` from the round's registry in `docs\handoff\`):
 
 ```powershell
+git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
 Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200
@@ -105,7 +107,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map during startup | Start without `-Map`, then `load_level` (under 1 s). |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
 | `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
-| `Video memory has been exhausted` | 3 editors plus the 4 km Estate landscape | Close idle editors; don't run a packaged game next to two editors on Estate. |
+| `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
 | MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
 | Modal "Restore Packages" at startup blocks MCP | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | Delete that file before relaunching; quit with `quit_editor()` next time. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
@@ -113,13 +115,18 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. |
-| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. |
+| Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset: `MaterialEditingLibrary.delete_all_material_expressions`, then rebuild the graph. That call can leave about half the nodes behind (71 → 35), which gives "only one Single Layer Water Material node" / missing-input errors and `get_statistics` vs/ps 0. Loop until `get_num_material_expressions(m) == 0`. |
+| `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
+| An Estate actor edited from Python looks unchanged in PIE | Spatially loaded World Partition actors stream into PIE from their **saved** external-actor packages (non-spatially-loaded ones such as `EstateSea` show edits live), and Python setters such as `AHomesteadWaterRibbon.set_course()` don't dirty the package | Call `actor.modify()` before editing, then `unreal.EditorLoadingAndSavingUtils.save_packages([actor.get_outermost()], False)` before PIE. |
+| An OBJ imported through Interchange comes in mirrored and invisible from outside | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding | Write y negated and swap face winding (a, c, b). |
+| Distant Estate land missing from elevated or far PIE views | PIE streams about 8 landscape proxies (252 m each, roughly ±400 m) around the **pawn**, with no HLOD, and streaming follows the pawn, not the view target | Move or park the pawn (`MOVE_FLYING`) near the camera for distant captures. |
 | `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
 | C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
-| Estate "Save failed..." / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejects `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on the manor lane's branch (bound by `MaxWorldCoordinate`); until it merges, estate saves fail on `main`. |
+| New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
+| Estate "Save failed... check disk space and permissions" (misleading text) / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejects `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on the manor lane's branch (bound by `MaxWorldCoordinate`); until it merges, estate saves fail on `main`. |
 | Spawn yaw ignored on Estate | `ChooseStartingView` (fresh terrain) and `SetAppearancePreview(false)` restoring a `SavedViewRotation` captured before spawn both overwrite it | See the manor lane's fix; check `controlYaw` and a capture after the book closes. |
 | "The cookfire recipe could not be selected." | The Fire/Hearth cook action calls `FocusLegacySubject`, but craft rows are now `EHomesteadMenuSubject::Recipe` (`HomesteadController.cpp` ~2111) | Open bug on `main` (round-1 page). |
 | Save strings with non-ASCII characters break the save | The save payload rejects bytes above 127 | Hex-encode free text (the manor lane does this for names). |
@@ -223,7 +230,8 @@ clashes between parallel callers.
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px) |
 
 Toolset variables: `$E` EditorAppToolset, `$S` SceneTools, `$L` LogsToolset, `$SL` SlateInspector,
-`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. Keep session-specific helpers (probes,
+`$H` HomesteadPlayTools, `$PY` HomesteadEditorPython. PowerShell names are case-insensitive, so
+a local `$s`, `$e`, `$l` or `$h` overwrites these; the helpers themselves don't depend on them. Keep session-specific helpers (probes,
 callbacks) in your own files and load them from `py` with `sys.path.insert`.
 
 ## 4. Play the game
@@ -246,6 +254,11 @@ hk release_all; mcp $E StopPIE
   captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
   failed save. Code written for the woodland can still assume woodland heights (estate ground is
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
+- **Free-camera PIE stills (Estate):** before PIE, spawn a `CameraActor` in the editor world with
+  `is_spatially_loaded = False` (a spatially loaded one isn't streamed into PIE). In PIE, call
+  `set_view_target_with_blend` on the player controller, and park the pawn near the camera so the
+  land around it streams in (table 0.1). `HomesteadMorning <h>` with `h` earlier than the current
+  hour rolls to the next day, which can re-roll the weather to Rain; restart PIE for comparable day-1 stills.
 - **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
   `I` opens Inventory (page 0), Menu opens Settings (page 4).
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).
@@ -292,6 +305,15 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   used it reads `[LMB] Hack with Billhook`; `tap_key LeftMouseButton` works then. The same text
   floats above her head as the interact cue. `focusTitle` names a missing tool or tier, e.g.
   `Bramble thicket  (needs an iron billhook)`.
+- **Stick to one input device per sequence.** The prompts, and which keys act, follow the last
+  device used. After any keyboard `tap_key` (even a hotbar key such as `Three`) they switch to
+  keyboard (`[LMB] Fell with Axe`): then `tap_key LeftMouseButton` works, while
+  `Gamepad_RightTrigger`, `Gamepad_RightTriggerAxis` and `E` silently do nothing. After gamepad taps,
+  `Gamepad_FaceButton_Bottom` works and `E` doesn't. To swing from a gamepad sequence, pick the tool
+  with the D-pad or `hotbarSlot` rather than number keys.
+- **Tool swings are refused while she's moving.** Any velocity or acceleration blocks the action
+  in the anim instance, so an action key right after `set_sticks` or `walk_to` is silently dropped.
+  `release_all`, wait until `speedCmPerSec` is 0, then act.
 - Hotbar keys are `One`..`Zero`. The default layout is billhook, axe, scythe, pickaxe, hoe, pail
   (slots 1-6) and berries (7); the knife and machete are retired. On the woodland the playtest kit
   grants all six tools; on the fixed estate she hafts them from salvage (a hafted tool is slotted
@@ -375,7 +397,8 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   item starts a *move*; Y (or F) opens the item's context menu, where D-pad + A picks an action
   (`Eat 1`, `Drop 1`, `Move to chest N`, ...). X splits in half, S sorts. RT cycles content and
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
-- **Craft**: D-pad selects a recipe; details list requirements. Crafting is **hold A**
+- **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
+  doesn't). The details list requirements. Crafting is **hold A**
   (`hold_key Gamepad_FaceButton_Bottom 3` crafted once).
 - **Build** (page 2) is a grid of plans, not a list: Right moves from Foundation (row 0) to
   Wall (row 1), and Up/Down jump between row 0 and Chest (row 6). `B` reopens the book on its
@@ -465,8 +488,9 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
   her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
   when she kneels; use them only for a specific close-up, and share the full-body view too.
-- Contact sheets of an action: `hshot` (HighResShot) takes about 3 s per still, so slow the action
-  with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below).
+- Contact sheets of an action: `hshot` (HighResShot) takes about 3-4 s per still, so slow the action
+  with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below). Material
+  `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
 - `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
   worst clearance per carried stick and body part in PIE (negative cm = inside her).
 
@@ -746,8 +770,8 @@ OpenSpec changes, not here.
 - 2026-09-25: Python can't spawn actors into the PIE world. Test through the character's own component stack
   instead.
 - 2026-09-25: Tools like the hatchet are hidden except during their action, so capture a burst about
-  0.5-1.3 s after the action key. Prompts switch to keyboard after `tap_key` of a keyboard key
-  (`[LMB] Fell`); a `Gamepad_RightTriggerAxis` tap then doesn't act. Use `LeftMouseButton`.
+  0.5-1.3 s after the action key. For which keys act after a keyboard or gamepad tap, see
+  "Stick to one input device per sequence" in section 4.
 - 2026-09-25: For a face close-up in PIE, set the `CameraArm` `target_arm_length` (about 90),
   `socket_offset` 0 and `target_offset` (0,0,70) via `run_python`. Restore afterwards (330,
   (0,45,55)).

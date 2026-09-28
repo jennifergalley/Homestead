@@ -62,6 +62,12 @@ next five sessions.
 - **Blockers:** anything that blocks you for more than about 15 minutes, or affects other worktrees
   (shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), goes to the docs agent and the
   orchestrator immediately, with the exact error and what you tried.
+- **Urgent messages reach busy sessions through the mailbox.** `send_session_message` waits until
+  the target's turn ends, which can be hours on autopilot. For blockers, rule changes and
+  stop/rebase requests, also use `mailbox_send` (to a worktree folder name, a branch or `all`). The
+  target sees it after its next tool call. If you're a long-running session and `mailbox_send`
+  isn't among your tools, run `extensions_reload` once. When a mailbox message arrives, act on it
+  before continuing. Details are in `docs/handoff/README.md`.
 - **Before debugging a tool or build failure,** check "Known failures → fixes" (section 0.1 of
   `.github/skills/unreal-editor-mcp/SKILL.md`).
 - **Lanes still maintain their own OpenSpec change** and feature-only docs. Shared docs (skills,
