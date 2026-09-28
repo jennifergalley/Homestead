@@ -6,7 +6,7 @@
   "triangle_budget": 20000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/farm_fence.py",
-  "source_sha256": "27acbdaf508351aff1d18b1f328709494b4d511f6cdbf4e4add15804b09886b1",
+  "source_sha256": "47ca249b59a5fc8837b83613635dfa7601ba730240b8549f3b0d84ecd3090734",
   "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
   "meshes": {
     "SM_FarmFencePost": {
@@ -60,7 +60,7 @@
         ]
       },
       "fbx": "SM_FarmFencePost.fbx",
-      "sha256": "f29d879c49cc38670c57534d22db7b29a6168035266979e40f604c39f0a5dc07",
+      "sha256": "ced1dd354030541ace3155fad53510eb5f968cd58effd47166a9cf872ce8f8a6",
       "preview": "preview_SM_FarmFencePost.png",
       "beauty": {
         "views": {
@@ -137,7 +137,7 @@
         ]
       },
       "fbx": "SM_FarmFencePostSnapped.fbx",
-      "sha256": "fadad448d750d0a37546db0e669060ace69b8aca176f5f376d381c8a8df02bfc",
+      "sha256": "0b64da23a1a33255db23216168318548a0aff21fab304583ed30d4e093259ddd",
       "preview": "preview_SM_FarmFencePostSnapped.png",
       "beauty": {
         "views": {
@@ -215,7 +215,7 @@
         "eye_distance": 2.2
       },
       "fbx": "SM_FarmFenceRail.fbx",
-      "sha256": "50178fb5f849cd6f519b01e1084c0778799d5898f3288fd6f5e9bf7298007c52",
+      "sha256": "202934d6c2bda5171aee74aa4530bf376fe81e70c3c72e2bf5b3777e40547d13",
       "preview": "preview_SM_FarmFenceRail.png",
       "beauty": {
         "views": {
@@ -293,7 +293,7 @@
         "eye_distance": 1.8
       },
       "fbx": "SM_FarmFenceRailBroken.fbx",
-      "sha256": "f27f936912f187d3dc7febff42b2dba2b3f4f5402f8879a443db43d4ee8bddca",
+      "sha256": "201675c648935661200d7304a5c24177f542f74dae7c7c59969e65a1648586a4",
       "preview": "preview_SM_FarmFenceRailBroken.png",
       "beauty": {
         "views": {
@@ -323,9 +323,9 @@
       "vertices": 9969,
       "triangles": 19412,
       "size_cm": [
-        335.78,
-        139.46,
-        165.52
+        369.31,
+        311.07,
+        171.52
       ],
       "materials": [
         {
@@ -371,7 +371,7 @@
         "eye_distance": 4.0
       },
       "fbx": "SM_FarmGateway.fbx",
-      "sha256": "192224ae8dfb260869c9707b35a823adcc2451827f772535ea160253309b756d",
+      "sha256": "adaf3b1a6110c76906169faf16ea9e5832e66ed0a18887f4a707eec6f24a04f1",
       "preview": "preview_SM_FarmGateway.png",
       "beauty": {
         "views": {
@@ -408,25 +408,25 @@
   "rail_axis": "Fence rails and post mortises run along local X.",
   "gateway": "Hanging post is at local origin; shutting post is at +310 cm X. Gate leaf spans about +18 to +303 cm X before yaw, is swung 25 degrees toward Blender -Y (Unreal +Y) from the hanging post, and the latch/head end is dropped until the stile foot rests on z=0.",
   "textures": {
-    "T_FarmFencePost_basecolor.png": "439f90a58146b8f87a48081a85f7e71dc24e71ab995e1bab000756e4c75c2c79",
-    "T_FarmFencePost_roughness.png": "a7a326e80b3e19248d681936d3b64cc5ccbbec6bdcbc7e71b363e8a1aac5d5c5",
+    "T_FarmFencePost_basecolor.png": "8e963e3930153a614a4f3b3604d91cbd195fe05f338c511bdad55eb37b8f3e4b",
+    "T_FarmFencePost_roughness.png": "33b24f0577f3dbd70d5825d3aa11581e3de7c557c64a1f315052f772eb000f1c",
     "T_FarmFencePost_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
-    "T_FarmFencePost_normal.png": "17345230addfba0cdda15cdc2aa46c1db20358cf8f5d0124ad2e4a25ec33c040",
-    "T_FarmFencePostSnapped_basecolor.png": "c4f38dbdccf5fb614731e1b0d830f4d8bdf62c94ccebbdcb0273376421b1c5ae",
-    "T_FarmFencePostSnapped_roughness.png": "20d887dd8eb6b836e575a536478a4742bb558c29fa29c6d3311ad07411aac2c4",
+    "T_FarmFencePost_normal.png": "b583cd334b6be5eafbd460697d9a756586ca92c9c643adf3d9e1b2aae0da4ec8",
+    "T_FarmFencePostSnapped_basecolor.png": "be79301c709764056b50b236cb416d6caf81cf452e8a1a5bdf43119897215e81",
+    "T_FarmFencePostSnapped_roughness.png": "af0935bd22245fcb34c6b84e6dd94bc6b8183e3317aa23a496d4379b58d6ad38",
     "T_FarmFencePostSnapped_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
-    "T_FarmFencePostSnapped_normal.png": "e6f12ab6597383ca0386452f95772130c5f069e118863751f4d800ec59152b56",
-    "T_FarmFenceRail_basecolor.png": "0856cb779deed01c5f22690f3356b08b9bd4fdf8db4e35358609a4e33690244a",
-    "T_FarmFenceRail_roughness.png": "12dfdffe50a8df68616876b33df08797463d5b4306f4ecd1eaa66e507660c434",
+    "T_FarmFencePostSnapped_normal.png": "99e3cd65c22518dbd1b734df215d9be7036b0582a025a4214aa9349feddb4b34",
+    "T_FarmFenceRail_basecolor.png": "6af6770edff7b76404d56a6083f6e3760b980d3425a0a273c87b5cb02651bb3b",
+    "T_FarmFenceRail_roughness.png": "98e7cf8efccde4a95f44c53438c29aea5d31513c7085a38340097f1c0b2084bb",
     "T_FarmFenceRail_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
-    "T_FarmFenceRail_normal.png": "bb498776db453243f3a01b591dc9e48a8ff02869d99c9d6b8778a71b6a1a1003",
-    "T_FarmFenceRailBroken_basecolor.png": "5eb4d341ff78dc2a9e48ffa26a4a7c28fea0080113263209e32105bc400738a4",
-    "T_FarmFenceRailBroken_roughness.png": "ec8c1822bcda857fdebb9c6cd80445dab2cac16aaa7f01b8e46243956bc84379",
+    "T_FarmFenceRail_normal.png": "3b177ee70adc5d48d41a94ef6c97fe0c816746e007292cd48425149fb754accd",
+    "T_FarmFenceRailBroken_basecolor.png": "d1797a349c4b3a3c68b510978415394dd4787076c4d717a1bc06dd0dacf40e89",
+    "T_FarmFenceRailBroken_roughness.png": "f76d98707dc9b06550d8f625655c2dcfa66674373a3ae796317ee6d33f4778f2",
     "T_FarmFenceRailBroken_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
-    "T_FarmFenceRailBroken_normal.png": "2b498e7cd57d0f7f6363bd76675663d207e6ea9fd7a0d918f7f981ff95cc9184",
-    "T_FarmGateway_basecolor.png": "7a2af6639821167a7688f29da13fc6ceca5d0baea47e887be14dd788bea15861",
-    "T_FarmGateway_roughness.png": "9f58f652f052603050bcc4dc19da32baf3ed16bf1b3f080ed89301d4504f13f9",
-    "T_FarmGateway_metallic.png": "c91b7a5cde9b79a6e1c5f6eebb0be523b0e8f0686ffa9e9451245e596a7b6c50",
-    "T_FarmGateway_normal.png": "e54604b1e5cc208ae7a9c61c90ecc562cf2e5c6e487a7c93774ad5a5e810dca4"
+    "T_FarmFenceRailBroken_normal.png": "76b658d077f0e49269cf61a149d62b01e761ccaf32b870c4dea3212b59f64212",
+    "T_FarmGateway_basecolor.png": "c3758b8b3bfb859b86f07809474d4721bd9bb5134207551ce2101030c1abbeaf",
+    "T_FarmGateway_roughness.png": "c25dcbe237490890d45e591054946cd1b9d50648134a5d6c9f8affd976e8dc9e",
+    "T_FarmGateway_metallic.png": "51545c7ea693449e7d23685db26d56d302aa33466115c439395f7a8bf31e5016",
+    "T_FarmGateway_normal.png": "7fd915e6b019788d803edc0641687280e88898a61b9afc03419d4b4cccb53b79"
   }
 }

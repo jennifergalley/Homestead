@@ -266,6 +266,9 @@ void DerelictFarmAndDisrepair()
         gate += std::hypot(placement.position.x - gatePoint.x, placement.position.y - gatePoint.y) < 350.0;
         for (const Point& pile : piles)
             CHECK(std::hypot(placement.position.x - pile.x, placement.position.y - pile.y) > 200.0);
+        // Nothing grows inside the heritage standing room or on its door step.
+        const Point room = layout.PointOr(Anchor::StandingRoomOrigin, {});
+        CHECK(std::hypot(placement.position.x - room.x, placement.position.y - room.y) > 450.0);
         for (size_t j = 0; j < placements.size(); ++j)
             if (j != i)
             {

@@ -17,15 +17,16 @@ Jenny's round-1 playtest (round-1 polish):
   wall, with `Anchor::DerelictFarmGate` on its south fence facing the rear-wall gap):
   - A rotten cleft-oak post-and-rail fence all round: sound, leaning, snapped and missing posts in
     runs; rails in their mortises, dropped at one end, lying in the grass or gone; a broken
-    five-bar gate hanging off one hinge.
+    five-bar gate hanging off one hinge, left swung wide open so the gateway is walkable.
   - The ghost of the old crop rows: slumped ridge-and-furrow patches running downhill, dead
     bolted stalks on the ridges, rows of rotten bean poles, and a rusted plough left mid-furrow.
   - Hopelessly overgrown with the clearing lane's existing clearable kinds (weeds, rank grass,
     bramble, saplings, thickets and two bramble banks), ids 550000+.
 - **Estate disrepair** round the manor and along the drive:
-  - A collapsed lean-to against the ruin's east gable, burst barrels, smashed crates, two
-    rubbish middens, an abandoned tip cart by the field, fallen roof timbers and slipped slate
-    outside the walls, more ivy on the walls, and a toppled old drive fence.
+  - A collapsed lean-to against the ruin's east gable, an abandoned tip cart by the field, fallen
+    roof timbers and slipped slate outside the walls, more ivy on the walls, and a toppled old
+    drive fence. Burst barrels, smashed crates and rubbish middens near the manor are clearable
+    nodes owned by the clearing lane (570000+), which reuses the EstateDebris meshes.
   - About 190 more clearable weeds, brambles, saplings, rank grass, fallen branches and a stump
     round the grounds and along the drive's verges, clear of the drive, the salvage piles, the
     ruin's gaps and the starter forage.

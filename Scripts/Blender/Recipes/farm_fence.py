@@ -280,7 +280,11 @@ def build_broken_rail(kit, mats):
     return kit.join(parts, "SM_FarmFenceRailBroken", pivot="base", unwrap=True, reshade=True, smooth_angle=46)
 
 
-def _gate_transform(local, yaw=math.radians(-25.0), hinge=(0.18, 0.0), drop=0.18):
+# Left swung wide open for years: the dropped head rests in the turf clear of the gateway.
+GATE_YAW_DEG = -102.0
+
+
+def _gate_transform(local, yaw=math.radians(GATE_YAW_DEG), hinge=(0.18, 0.0), drop=0.24):
     x, y, z = local
     c, s = math.cos(yaw), math.sin(yaw)
     # Latch end sags smoothly while the bottom hinge remains engaged.
@@ -352,9 +356,12 @@ def build_gateway(kit, mats):
     # Latch plate on shutting post and dirt rubbed where the head has dragged.
     parts.append(common.box_panel(kit, "FarmGateway_RustedLatchKeeper", (3.02, -0.080, 0.76),
                                   ((1, 0, 0), (0, 0, 1), (0, 1, 0)), (0.050, 0.060, 0.004), mats["rust"]))
+    # Mud scuffed along the arc the head dragged through as it swung open.
     for i in range(14 if not DRAFT else 6):
+        a = math.radians(rng.uniform(-30.0, GATE_YAW_DEG + 4.0))
+        r = rng.uniform(2.55, 3.0)
         parts.append(kit.sphere(f"FarmGateway_DraggedMud_{i}", rng.uniform(0.008, 0.030),
-                                location=(rng.uniform(2.05, 3.05), rng.uniform(-1.28, -0.72), rng.uniform(0.004, 0.016)),
+                                location=(0.18 + r * math.cos(a), r * math.sin(a), rng.uniform(0.004, 0.016)),
                                 material=mats["soil"], segments=8, rings=4, scale=(1.4, 0.8, 0.14)))
     # Keep the authored origin at the base centre of the hanging post, not the overall gate bbox.
     obj = kit.join(parts, "SM_FarmGateway", pivot=None, unwrap=True, reshade=True, smooth_angle=45)

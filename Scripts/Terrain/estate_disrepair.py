@@ -30,21 +30,17 @@ FARM_GATE = (-222.0, -657.0)
 KEEP = [(-256.0, -643.5, 2.5), (-254.5, -652.5, 2.5), (-239.5, -651.5, 3.0), (-246.0, -662.0, 2.5),
         (-261.0, -661.0, 2.5), (-266.5, -634.0, 2.5), (-269.5, -645.0, 2.5), (-273.5, -629.0, 2.5),
         (-271.5, -626.0, 2.5), (-275.5, -641.0, 2.5), (-287.5, -623.0, 2.5), (-291.5, -656.0, 2.5),
-        (-259.0, -654.5, 3.5), (-241.0, -651.5, 3.0), FARM_GATE + (4.0,)]
+        (-259.0, -654.5, 3.5), (-241.0, -651.5, 3.0), FARM_GATE + (4.0,),
+        # The heritage standing room (Anchor::StandingRoomOrigin, about 6 x 6 m) and its door step.
+        (-256.0, -638.0, 5.0), (-257.5, -645.5, 3.0)]
 
 # Set dressing (metres, yaw degrees, scale, blocks movement). The lean-to stands against the ruin's
 # east gable, north of the standing room; its wall side is its local -X.
 DEBRIS = [
     ("EstateDebris", "SM_CollapsedLeanTo", -247.0, -633.9, 90.0, 1.0, True),
-    ("EstateDebris", "SM_BrokenBarrel", -243.2, -631.4, 205.0, 1.0, True),
-    ("EstateDebris", "SM_BrokenCrate", -250.6, -632.2, 130.0, 1.0, True),
-    ("EstateDebris", "SM_RubbishHeap", -236.6, -637.6, 25.0, 1.0, False),
-    ("EstateDebris", "SM_RubbishHeap", -247.0, -669.2, 250.0, 0.9, False),
-    ("EstateDebris", "SM_BrokenBarrel", -252.8, -668.4, 70.0, 0.95, True),
-    ("EstateDebris", "SM_BrokenCrate", -243.4, -668.0, 330.0, 1.0, True),
-    ("EstateDebris", "SM_BrokenBarrel", -262.4, -632.6, 300.0, 1.0, True),
+    # Barrels, crates and rubbish heaps are clearable nodes owned by the clearing lane (560000+),
+    # which reuses the EstateDebris meshes; only structural dressing stays static here.
     ("FarmCart", "SM_FarmCart", -226.5, -649.0, 128.0, 1.0, True),
-    ("EstateDebris", "SM_BrokenCrate", -228.4, -646.2, 15.0, 1.0, True),
     ("RuinFallenTimbers", "SM_RuinFallenTimbers", -236.0, -641.5, 75.0, 0.9, True),
     ("RuinSlateScatter", "SM_RuinSlateScatter", -238.4, -644.0, 180.0, 1.0, False),
 ]
