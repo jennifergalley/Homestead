@@ -84,7 +84,7 @@ downloaded geometry or textures. The hearth's crackle loop (`Assets\Audio\Ambien
 is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it uses no recording.
 
 RuinFallenTimbers (`Scripts\Blender\Recipes\ruin_fallen_timbers.py`) is project-authored procedural charred/weathered oak roof-timber debris with adzed beam geometry, split fibre, alligator-char relief, an iron spike and procedural materials.
-RuinSlateScatter (`Scripts\Blender\Recipes\ruin_slate_scatter.py`) is project-authored procedural Delabole-style slate-roof debris with thick split-cleavage slate geometry, nail holes, rust staining, moss/soil pockets and procedural materials.
+RuinSlateScatter (`Scripts\Blender\Recipes\ruin_slate_scatter.py`) is project-authored procedural Delabole-style slate-roof debris with thick split-cleavage slate geometry, nail holes, subdued soil/moss pockets and procedural materials.
 RuinIvy (`Scripts\Blender\Recipes\ruin_ivy.py`) is project-authored procedural common-ivy wall mat geometry with woody clinging stems, rootlets, alpha-free lobed leaves on a shared UV atlas and procedural plant materials.
 
 ## Fonts

@@ -83,7 +83,7 @@ def _polyline(points, spacing):
     return out
 
 
-def _beam_mesh(kit, name, points, width, depth, material, seed, roll=0.0, spacing=0.050):
+def _beam_mesh(kit, name, points, width, depth, material, seed, roll=0.0, spacing=0.050, jagged_last=False):
     rng = random.Random(seed)
     pts = _polyline(points, spacing if not DRAFT else spacing * 2.0)
     lengths = [0.0]
@@ -105,7 +105,10 @@ def _beam_mesh(kit, name, points, width, depth, material, seed, roll=0.0, spacin
             for phase, amp, freq in ((0.20, 0.010, 7.0), (2.65, 0.008, 5.0), (4.55, 0.006, 9.0)):
                 if abs(math.atan2(math.sin(angle - phase), math.cos(angle - phase))) < 0.085:
                     groove -= amp * (0.45 + 0.55 * math.sin(lengths[i] * freq + seed))
-            row.append(tuple(p + side * (x + groove * math.copysign(1.0, x or 1.0)) + up * z))
+            end_jag = 0.0
+            if jagged_last and i == len(pts) - 1:
+                end_jag = rng.uniform(-0.075, 0.025)
+            row.append(tuple(p + t * end_jag + side * (x + groove * math.copysign(1.0, x or 1.0)) + up * z))
             crow.append((x, z, lengths[i]))
         rows.append(row)
         coords.append(crow)
@@ -218,26 +221,68 @@ def _settle(objects):
         obj.location.z -= lo
 
 
+def _hewn_oak_material(kit):
+    g = kit.mats.Graph("M_RuinFallenTimbersStraightWeatheredOak")
+    p = g.coord()
+    x, y, z = g.separate(p)
+    long_vec = g.combine(g.math("MULTIPLY", x, 18.0), g.math("MULTIPLY", y, 18.0),
+                         g.math("MULTIPLY", z, 2.0))
+    fibre = g.noise(long_vec, scale=8.0, detail=9.0, roughness=0.58).outputs["Fac"]
+    facet = g.noise(g.combine(g.math("MULTIPLY", x, 8.0), g.math("MULTIPLY", y, 8.0),
+                              g.math("MULTIPLY", z, 0.45)), scale=7.0, detail=3.0,
+                    roughness=0.55).outputs["Fac"]
+    checks = g.voronoi(g.combine(g.math("MULTIPLY", x, 0.9), g.math("MULTIPLY", y, 0.9),
+                                 g.math("MULTIPLY", z, 0.18)), scale=34.0,
+                       feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    crack = g.remap(checks, 0.0, 0.010, 0.65, 0.0)
+    tone = g.math("ADD", g.math("MULTIPLY", fibre, 0.78), g.math("MULTIPLY", facet, 0.08))
+    color = g.ramp(tone, [(0.20, (0.060, 0.054, 0.044)), (0.62, (0.155, 0.145, 0.120)),
+                          (0.92, (0.215, 0.198, 0.162))])
+    color = g.mix(color, (0.018, 0.014, 0.010), crack)
+    grime = g.noise(p, scale=28.0, detail=5.0, roughness=0.7).outputs["Fac"]
+    color = g.mix(color, (0.045, 0.038, 0.030), g.remap(grime, 0.58, 0.78, 0.0, 0.28))
+    g.set("Base Color", color)
+    g.set("Roughness", 0.94)
+    height = g.math("SUBTRACT", g.math("ADD", g.math("MULTIPLY", fibre, 0.45),
+                                       g.math("MULTIPLY", facet, 0.08)),
+                    g.math("MULTIPLY", crack, 0.60))
+    g.set("Normal", g.bump(height, strength=0.45, distance=0.0015))
+    return g.mat
+
+
+def _alligator_char_material(kit):
+    g = kit.mats.Graph("M_RuinFallenTimbersBlockyAlligatorChar")
+    p = g.coord()
+    x, y, z = g.separate(p)
+    cells = g.voronoi(g.combine(g.math("MULTIPLY", x, 1.0), g.math("MULTIPLY", y, 1.0),
+                                g.math("MULTIPLY", z, 0.35)), scale=95.0,
+                      feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    crack = g.remap(cells, 0.0, 0.045, 1.0, 0.0)
+    block = g.noise(p, scale=34.0, detail=4.0, roughness=0.62).outputs["Fac"]
+    coal = g.mix((0.006, 0.005, 0.004), (0.040, 0.036, 0.032), g.remap(block, 0.35, 0.72))
+    coal = g.mix(coal, (0.002, 0.002, 0.002), crack)
+    g.set("Base Color", coal)
+    g.set("Roughness", g.remap(block, 0.25, 0.75, 0.68, 0.92))
+    height = g.math("SUBTRACT", g.math("MULTIPLY", block, 0.35), g.math("MULTIPLY", crack, 0.95))
+    g.set("Normal", g.bump(height, strength=0.95, distance=0.004))
+    return g.mat
+
+
 def build(kit):
     rng = random.Random(SEED)
     m = kit.mats
-    grey_oak = m.aged_wood("M_RuinFallenTimbersRainSilveredOak", light=(0.132, 0.122, 0.100),
-                            dark=(0.032, 0.028, 0.022), roughness=0.95, saw=0.12, grime=0.74, seed=21.0)
+    grey_oak = _hewn_oak_material(kit)
     scorched = m.wood("M_RuinFallenTimbersScorchedGradientOak", light=(0.20, 0.135, 0.078),
                       dark=(0.050, 0.033, 0.022), grain=0.75, roughness=0.88, weathering=0.32,
                       grime=0.65, seed=22.0, char_above=0.18, char_band=0.13, soot_band=0.30, relief=2.2)
-    char = m.wood("M_RuinFallenTimbersAlligatorChar", light=(0.050, 0.046, 0.040),
-                  dark=(0.006, 0.005, 0.004), grain=0.65, roughness=0.84, weathering=0.0,
-                  grime=0.35, seed=25.0, char_above=0.0, char_band=0.05, soot_band=0.08, relief=2.8)
+    char = _alligator_char_material(kit)
     fresh = m.wood("M_RuinFallenTimbersTornFibre", light=(0.31, 0.235, 0.145),
                    dark=(0.095, 0.058, 0.030), grain=0.55, roughness=0.86, weathering=0.30,
                    grime=0.18, seed=23.0, relief=1.7)
     iron = m.wrought_iron("M_RuinFallenTimbersOldIronSpike", rust=0.82, wear=0.16, seed=24.0)
-    moss = kit.material("M_RuinFallenTimbersGroundMoss", (0.034, 0.060, 0.022), roughness=0.96)
     soil = kit.material("M_RuinFallenTimbersContactSoil", (0.055, 0.042, 0.030), roughness=0.98)
     check_mat = kit.material("M_RuinFallenTimbersDeepChecks", (0.010, 0.007, 0.005), roughness=0.96)
-    leaf_mat = kit.material("M_RuinFallenTimbersDeadLeaves", (0.115, 0.065, 0.026), roughness=0.90)
-    for mat in (grey_oak, scorched, char, fresh, soil, moss, leaf_mat):
+    for mat in (grey_oak, scorched, char, fresh, soil):
         if hasattr(mat, "node_tree") and mat.node_tree:
             bsdf = next((n for n in mat.node_tree.nodes if n.bl_idname == "ShaderNodeBsdfPrincipled"), None)
             if bsdf and "Subsurface Weight" in bsdf.inputs:
@@ -255,14 +300,14 @@ def build(kit):
     for i, spec in enumerate(beams):
         start, mid, end = Vector(spec["start"]), Vector(spec["mid"]), Vector(spec["end"])
         d = (end - start).normalized()
-        char_len = 0.48 if i < 2 else 0.34
+        char_len = 0.24 if i < 2 else 0.20
         a, b = start + d * char_len, end - d * char_len
         parts.append(_beam_mesh(kit, f"{spec['label']}_SilveredCore", [tuple(a), tuple(mid), tuple(b)],
                                 spec["width"], spec["depth"], grey_oak, SEED + i, spec["roll"]))
         for suffix, inner, outer, sign in (("A", a, start, -1), ("B", b, end, 1)):
             parts.append(_beam_mesh(kit, f"{spec['label']}_ScorchedEnd_{suffix}", [tuple(inner), tuple(outer)],
                                     spec["width"] * 1.015, spec["depth"] * 1.02, scorched,
-                                    SEED + 40 + i * 3 + sign, spec["roll"], spacing=0.038))
+                                    SEED + 40 + i * 3 + sign, spec["roll"], spacing=0.038, jagged_last=True))
             t, side, up = _frame((outer - inner), spec["roll"])
             _char_tiles(kit, parts, f"{spec['label']}_{suffix}", outer, t, side, up,
                         spec["width"] * 0.96, spec["depth"] * 0.92, char, SEED + 80 + i * 9 + sign)
@@ -270,7 +315,7 @@ def build(kit):
         snap = end if i != 1 else start
         out_dir = (end - start).normalized() * (1 if i != 1 else -1)
         _, side, up = _frame(out_dir, spec["roll"])
-        for k in range(12 if (not DRAFT and i == 0) else 7):
+        for k in range(18 if (not DRAFT and i == 0) else 10):
             off = side * rng.uniform(-spec["width"] * 0.40, spec["width"] * 0.40) + up * rng.uniform(-spec["depth"] * 0.35, spec["depth"] * 0.36)
             mat = fresh if rng.random() < 0.62 else char
             parts.append(_splinter(kit, f"{spec['label']}_TornBundle_{k}", snap + off, out_dir, side, up,
@@ -285,6 +330,11 @@ def build(kit):
             c = start.lerp(end, s0) + up * (spec["depth"] * 0.515) + side * rng.uniform(-spec["width"] * 0.32, spec["width"] * 0.32)
             parts.append(_dark_check(kit, f"{spec['label']}_OpenCheck_{k}", c, dvec, side, up,
                                      rng.uniform(0.42, 1.20), rng.uniform(0.004, 0.010), check_mat))
+        if i == 0:
+            # A rectangular mortise/peg pocket cut into the weathered beam near one end.
+            mortise_center = start.lerp(end, 0.18) + up * (spec["depth"] * 0.525) + side * (spec["width"] * 0.10)
+            parts.append(_dark_check(kit, "PrincipalPurlin_MortisePocketDark", mortise_center, dvec, side, up,
+                                     0.18, 0.055, check_mat))
 
     # Hand-forged spike, bent and proud of the crossed timber.
     parts.append(_cylinder_between(kit, "OldIronSpikeShank", (0.34, -0.20, 0.330), (0.30, -0.18, 0.145), 0.0085, iron, 10))
@@ -292,6 +342,9 @@ def build(kit):
                         material=iron, sides=12, bevel=0.004)
     head.rotation_euler = (math.radians(4), math.radians(-13), math.radians(18))
     parts.append(head)
+    parts.append(_cylinder_between(kit, "BentIronSpikeTwo", (-0.56, 0.08, 0.275), (-0.48, 0.13, 0.120), 0.0065, iron, 8))
+    parts.append(kit.cylinder("BentIronSpikeTwoHead", 0.020, 0.008, location=(-0.565, 0.075, 0.286),
+                              material=iron, sides=10, bevel=0.0025))
 
     # Dirt, lichen and leaf litter exactly where the timbers touch the wet ground.
     for i in range(34 if not DRAFT else 12):
@@ -299,13 +352,16 @@ def build(kit):
         y = rng.uniform(-1.05, 1.03)
         if rng.random() < 0.70 and abs(y) > 0.78:
             continue
-        mat = moss if rng.random() < 0.45 else soil
-        parts.append(kit.sphere(f"ContactMossSoil_{i}", rng.uniform(0.012, 0.040), location=(x, y, rng.uniform(0.004, 0.025)),
-                                material=mat, segments=8, rings=4, scale=(1.0, 0.75, 0.16)))
-    for i in range(18 if not DRAFT else 6):
-        parts.append(_leaf_litter(kit, f"LeafLitter_{i}", (rng.uniform(-1.8, 1.8), rng.uniform(-0.95, 0.95),
-                                                           rng.uniform(0.004, 0.028)), rng.uniform(0, math.tau),
-                                      rng.uniform(0.65, 1.25), leaf_mat))
+        parts.append(kit.sphere(f"ContactCharSoil_{i}", rng.uniform(0.008, 0.030), location=(x, y, rng.uniform(0.004, 0.020)),
+                                material=soil if rng.random() < 0.65 else char, segments=8, rings=4, scale=(1.0, 0.75, 0.16)))
+    for i in range(26 if not DRAFT else 8):
+        mat = char if rng.random() < 0.55 else fresh
+        parts.append(_splinter(kit, f"GroundWoodCharFlake_{i}", (rng.uniform(-1.8, 1.8), rng.uniform(-0.95, 0.95),
+                                                                 rng.uniform(0.006, 0.024)),
+                               Vector((rng.uniform(-1, 1), rng.uniform(-1, 1), 0.05)),
+                               Vector((0, 1, 0)), Vector((0, 0, 1)),
+                               rng.uniform(0.010, 0.035), rng.uniform(0.003, 0.010),
+                               rng.uniform(0.045, 0.15), mat, SEED + 500 + i))
 
     _settle(parts)
     obj = kit.join(parts, "SM_RuinFallenTimbers", unwrap=True, reshade=True, smooth_angle=48)

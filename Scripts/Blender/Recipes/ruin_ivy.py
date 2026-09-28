@@ -19,6 +19,7 @@ import random
 from pathlib import Path
 import sys
 
+import bpy
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -143,12 +144,12 @@ def _rootlets(kit, parts, rng, base, along, count, material, phase):
 
 def _make_mats(kit):
     m = kit.mats
-    leaf_dark = m.leaf_pcoord("M_RuinIvyDarkGlossLeaves", color=(0.024, 0.060, 0.018),
-                              vein=(0.085, 0.125, 0.050), tip=(0.036, 0.082, 0.023),
-                              roughness=0.52, translucency=0.16, rugose=0.82, serrate_dark=0.14)
+    leaf_dark = m.leaf_pcoord("M_RuinIvyDarkGlossLeaves", color=(0.020, 0.052, 0.017),
+                              vein=(0.075, 0.110, 0.048), tip=(0.033, 0.072, 0.023),
+                              roughness=0.40, translucency=0.14, rugose=0.72, serrate_dark=0.12)
     leaf_young = m.leaf_pcoord("M_RuinIvyYoungNewLeaves", color=(0.055, 0.112, 0.032),
                                vein=(0.120, 0.160, 0.064), tip=(0.080, 0.145, 0.044),
-                               roughness=0.50, translucency=0.26, rugose=0.60, serrate_dark=0.06)
+                               roughness=0.38, translucency=0.24, rugose=0.54, serrate_dark=0.05)
     stem = m.bark("M_RuinIvyWoodyFlattenedStems", light=(0.125, 0.096, 0.064),
                   dark=(0.040, 0.030, 0.020), scale=0.45, roughness=0.86, lichen=0.22)
     root = m.bark("M_RuinIvyAdventitiousRootFuzz", light=(0.112, 0.086, 0.055),
@@ -162,7 +163,7 @@ def build(kit):
     parts = []
 
     # Flattened woody scaffold: many branching runners pressed against the wall face.
-    main_count = 36 if not DRAFT else 16
+    main_count = 10 if not DRAFT else 4
     for v in range(main_count):
         x0 = rng.uniform(-1.04, 1.04)
         z0 = rng.uniform(-0.08, -0.42)
@@ -192,39 +193,56 @@ def build(kit):
             parts.append(_tube(kit, f"SideBranch_{v:02d}_{b}", branch,
                                [r0 * 0.50, r0 * 0.36, r0 * 0.22], stem, 6, STEM_RECT))
 
-    # Dense shingled wall leaves: thousands, clinging close to the face with ragged coverage.
+    # Dense shingled wall leaves, but in natural clumps rather than a uniform curtain.
     leaf_index = 0
-    cols, rows = ((74, 58) if not DRAFT else (42, 34))
-    for row in range(rows):
-        z = -0.10 - 1.86 * row / max(1, rows - 1)
-        lower = row / max(1, rows - 1)
-        for col in range(cols):
-            x = -1.22 + 2.44 * (col + 0.5 + rng.uniform(-0.38, 0.38)) / cols
-            edge = abs(x) / 1.22
-            top_thin = max(0.0, 0.30 - lower) / 0.30
-            ragged = rng.random() < (0.05 + 0.22 * edge + 0.28 * top_thin)
-            if ragged:
+    clumps = []
+    clump_count = 42 if not DRAFT else 18
+    for c in range(clump_count):
+        top = rng.uniform(-0.02, -0.45)
+        drop = rng.choice([rng.uniform(0.30, 0.85), rng.uniform(0.45, 1.10), rng.uniform(1.15, 1.95)])
+        clumps.append((rng.uniform(-1.05, 1.05), top, min(-0.18, top - drop), rng.uniform(0.10, 0.28)))
+    for ci, (cx, z_top, z_bottom, width) in enumerate(clumps):
+        leaf_slots = (170 if not DRAFT else 62) if z_bottom > -1.15 else (245 if not DRAFT else 88)
+        side_bias = rng.uniform(-0.18, 0.18)
+        for j in range(leaf_slots):
+            t = rng.random()
+            # Shingled growth: denser lower half, but some upper bare stone remains.
+            z = z_top + (z_bottom - z_top) * (t ** rng.uniform(0.80, 1.25))
+            lower = min(1.0, max(0.0, -z / 2.0))
+            spread = width * (0.45 + 0.95 * math.sin(math.pi * min(1.0, t)))
+            x = cx + side_bias * t + rng.gauss(0.0, spread)
+            if abs(x) > 1.20 or rng.random() < 0.10 * abs(x):
                 continue
-            # Heavier/darker lower coverage and damp side clusters.
-            if rng.random() > (0.90 + 0.10 * lower - 0.10 * edge):
-                continue
-            y = rng.uniform(-0.110, -0.205) - 0.020 * lower
-            origin = (x, y, z + rng.uniform(-0.020, 0.020))
-            normal = (Vector((rng.uniform(-0.08, 0.08), -1.0, rng.uniform(-0.10, 0.10)))).normalized()
-            tip = Vector((rng.uniform(-0.32, 0.32), rng.uniform(-0.07, -0.02), -1.0 + rng.uniform(-0.20, 0.18))).normalized()
-            young = (lower < 0.22 and rng.random() < 0.28) or rng.random() < 0.045
-            size = rng.uniform(0.060, 0.122) * (0.86 if young else 1.0)
-            parts.append(_leaf(kit, f"IvyLeafFace_{leaf_index:04d}", origin, normal, tip, size,
+            y = rng.uniform(-0.090, -0.190) - 0.010 * lower
+            normal = Vector((rng.uniform(-0.18, 0.18), -1.0, rng.uniform(0.04, 0.24))).normalized()
+            # Most blades face outward and slightly upward toward the light; a minority droop.
+            tip = Vector((rng.uniform(-0.55, 0.55), rng.uniform(-0.10, 0.08),
+                          rng.uniform(0.15, 0.80) if rng.random() < 0.70 else rng.uniform(-0.60, 0.12))).normalized()
+            young = (j > leaf_slots * 0.72 and rng.random() < 0.35) or rng.random() < 0.055
+            size = rng.uniform(0.036, 0.095) if rng.random() < 0.72 else rng.uniform(0.070, 0.112)
+            parts.append(_leaf(kit, f"IvyLeafFace_{leaf_index:04d}", (x, y, z + rng.uniform(-0.018, 0.018)),
+                               normal, tip, size * (0.82 if young else 1.0),
                                leaf_young if young else leaf_dark, SEED + leaf_index,
                                LEAF_YOUNG if young else LEAF_DARK, young))
             leaf_index += 1
+        # A branching runner inside each clump, hugging the wall and visibly joining leaves.
+        runner = []
+        steps = 5
+        for k in range(steps):
+            t = k / (steps - 1)
+            runner.append(Vector((cx + side_bias * t + 0.04 * math.sin(t * 5 + ci),
+                                  rng.uniform(-0.042, -0.070),
+                                  z_top + (z_bottom - z_top) * t)))
+        parts.append(_tube(kit, f"ClumpRunner_{ci:02d}", runner,
+                           [0.0045 * (1 - 0.45 * k / (steps - 1)) for k in range(steps)], stem, 6, STEM_RECT))
+        _rootlets(kit, parts, rng, runner[0], runner[-1] - runner[0], 7 if not DRAFT else 3, root, 100 + ci)
 
     # Mound spilling over the wall head/top course (+Y over the 56 cm wall top).
-    top_leaves = 900 if not DRAFT else 260
+    top_leaves = 980 if not DRAFT else 310
     for i in range(top_leaves):
         x = rng.uniform(-1.14, 1.14)
-        y = rng.uniform(0.010, 0.540)
-        z = rng.uniform(0.000, 0.140) - 0.035 * abs(x)
+        y = rng.uniform(-0.020, 0.540)
+        z = rng.uniform(-0.018, 0.145) - 0.030 * abs(x)
         normal = (Vector((rng.uniform(-0.12, 0.12), rng.uniform(-0.18, 0.18), 1.0))).normalized()
         tip = Vector((rng.uniform(-0.6, 0.6), rng.uniform(0.1, 1.0), rng.uniform(-0.2, 0.25))).normalized()
         young = rng.random() < 0.30
@@ -258,3 +276,13 @@ def build(kit):
         meshes.append(kit.finalize(lod, pivot=None, unwrap=False, reshade=True, smooth_angle=68))
     print("HOMESTEAD_LODS", [rocks.triangles(o) for o in meshes], "leaves", leaf_index)
     return meshes
+
+
+def after_bake(kit, obj):
+    if obj.name != "SM_RuinIvy" or "BeautyWallMock" in bpy.data.objects:
+        return
+    stone = kit.mats.granite("M_RuinIvyBeautyWallMockGranite", grain=0.003, scale=0.50, patina=0.75,
+                             lichen=0.50, moss=0.25, soil=0.45, seed=71.0)
+    wall = kit.box("BeautyWallMock", (2.75, 0.56, 2.18), location=(0.0, 0.245, -1.09),
+                   material=stone, bevel=0.012, bevel_segments=2)
+    wall.hide_select = True

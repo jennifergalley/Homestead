@@ -129,7 +129,7 @@ def _slate(kit, name, loc, yaw, width, length, thickness, whole, material, seed,
         faces.append((top_center_i, top_ring[i], top_ring[j]))
 
     # Real side thickness with split laminae: several stepped side quads through the 6-10 mm edge.
-    side_layers = 4 if not DRAFT else 2
+    side_layers = 5 if not DRAFT else 3
     side_indices = []
     for layer in range(side_layers + 1):
         t = layer / side_layers
@@ -182,6 +182,22 @@ def _ground_mesh(kit, name, rng, material):
     return obj
 
 
+def _soil_patch(kit, name, loc, radius, material, seed):
+    rng = random.Random(seed)
+    n = 14
+    verts = [(loc[0], loc[1], loc[2] + 0.004)]
+    for i in range(n):
+        a = math.tau * i / n
+        r = radius * rng.uniform(0.45, 1.05)
+        # Broken feathered outline, edges dipping below the placement plane.
+        edge_z = loc[2] - rng.uniform(0.003, 0.012)
+        verts.append((loc[0] + math.cos(a) * r * rng.uniform(0.8, 1.4),
+                      loc[1] + math.sin(a) * r * rng.uniform(0.55, 1.05),
+                      edge_z))
+    faces = [(0, i, 1 + (i % n)) for i in range(1, n + 1)]
+    return kit.mesh(name, verts, faces, material)
+
+
 def _leaf(kit, name, loc, yaw, scale, material):
     pts = [(-0.040, 0.000), (-0.018, 0.030), (0.006, 0.045), (0.030, 0.026),
            (0.044, -0.004), (0.015, -0.030), (-0.014, -0.038), (-0.036, -0.020)]
@@ -201,49 +217,57 @@ def build(kit):
     rng = random.Random(SEED)
     m = kit.mats
     slate_mats = [
-        m.slate("M_RuinSlateScatterDelaboleBlueGrey", dark=(0.032, 0.040, 0.046), light=(0.105, 0.118, 0.124),
-                lichen=0.46, moss=0.18, seed=52.0),
-        m.slate("M_RuinSlateScatterDelaboleGreenGrey", dark=(0.034, 0.046, 0.043), light=(0.105, 0.125, 0.112),
-                lichen=0.40, moss=0.24, seed=53.0),
-        m.slate("M_RuinSlateScatterDarkerWetSlate", dark=(0.018, 0.026, 0.032), light=(0.075, 0.088, 0.096),
-                lichen=0.22, moss=0.30, seed=54.0),
+        m.slate("M_RuinSlateScatterDelaboleBlueGrey", dark=(0.020, 0.026, 0.032), light=(0.060, 0.074, 0.084),
+                lichen=0.035, moss=0.0, seed=52.0),
+        m.slate("M_RuinSlateScatterDelaboleGreenGrey", dark=(0.022, 0.032, 0.030), light=(0.058, 0.076, 0.070),
+                lichen=0.025, moss=0.0, seed=53.0),
+        m.slate("M_RuinSlateScatterDarkerWetSlate", dark=(0.014, 0.019, 0.024), light=(0.045, 0.055, 0.064),
+                lichen=0.015, moss=0.0, seed=54.0),
     ]
     soil = m.soil("M_RuinSlateScatterLoamAndSlateDust", damp=(0.060, 0.047, 0.032),
                   dry=(0.160, 0.135, 0.092), seed=19.0)
-    moss = kit.material("M_RuinSlateScatterGapMoss", (0.035, 0.068, 0.024), roughness=0.96)
-    rust = kit.material("M_RuinSlateScatterRustStain", (0.092, 0.038, 0.014), roughness=0.94)
+    moss = kit.material("M_RuinSlateScatterGapMoss", (0.030, 0.040, 0.028), roughness=0.96)
     hole = kit.material("M_RuinSlateScatterNailHoleDark", (0.005, 0.004, 0.003), roughness=0.99)
-    leaf_mat = kit.material("M_RuinSlateScatterOakLeafLitter", (0.070, 0.043, 0.018), roughness=0.92)
 
-    parts = [_ground_mesh(kit, "SoilMossReliefUnderSlate", rng, soil)]
-    for i in range(26 if not DRAFT else 9):
-        x = rng.uniform(-1.38, 0.85)
-        y = rng.uniform(-0.90, 0.90)
+    parts = []
+    for i in range(14 if not DRAFT else 5):
+        x = rng.uniform(-1.32, 0.20)
+        y = rng.uniform(-0.82, 0.82)
         wall = max(0.0, 1.0 - (x + 1.38) / 2.38)
-        z = 0.004 + rng.uniform(0.0, 0.055 * wall)
-        mat = moss if rng.random() < 0.60 else soil
-        parts.append(kit.sphere(f"GapMossSoil_{i:02d}", rng.uniform(0.018, 0.060), location=(x, y, z),
-                                material=mat, segments=8, rings=4, scale=(1.0, 0.75, 0.12)))
+        z = -0.006 + rng.uniform(0.0, 0.025 * wall)
+        mat = moss if rng.random() < 0.35 else soil
+        parts.append(_soil_patch(kit, f"GapMossSoil_{i:02d}", (x, y, z), rng.uniform(0.035, 0.115), mat, SEED + 900 + i))
 
-    total = 175 if not DRAFT else 70
-    whole_target = 24 if not DRAFT else 10
+    total = 520 if not DRAFT else 240
+    whole_target = 10 if not DRAFT else 4
     for i in range(total):
-        # Bias x toward the wall side, then stack with more layers there.
-        u = rng.random() ** 1.75
-        x = -1.34 + u * 2.55
+        # Bias hard into a wall-side talus fan; only a tail of fragments reaches +X.
+        if rng.random() < 0.90:
+            u = rng.random() ** 2.2
+            x = -1.40 + u * 1.90
+        else:
+            x = rng.uniform(0.10, 1.05)
         wall = max(0.0, 1.0 - (x + 1.34) / 2.55)
-        y_span = 0.88 - 0.18 * wall
+        y_span = 0.92 - 0.20 * wall
         y = rng.uniform(-y_span, y_span)
-        layers = int(2 + 7 * wall + rng.random() * 3 * wall)
+        layers = int(2 + 11 * wall + rng.random() * 4 * wall)
         layer = rng.randrange(max(1, layers))
-        z = 0.010 + layer * rng.uniform(0.014, 0.025) + wall * rng.uniform(0.0, 0.055)
+        z = 0.007 + layer * rng.uniform(0.007, 0.014) + wall * rng.uniform(0.004, 0.035)
         whole = i < whole_target and rng.random() < 0.82
-        width = rng.uniform(0.20, 0.30) if whole else rng.uniform(0.09, 0.30)
-        length = rng.uniform(0.40, 0.56) if whole else rng.uniform(0.16, 0.48)
-        thickness = rng.uniform(0.006, 0.010)
-        yaw = rng.uniform(-math.pi, math.pi)
-        pitch = rng.uniform(-0.10, 0.10) + wall * rng.uniform(-0.08, 0.10)
-        roll = rng.uniform(-0.18, 0.18)
+        width = rng.uniform(0.18, 0.23) if whole else rng.uniform(0.060, 0.24)
+        length = rng.uniform(0.28, 0.34) if whole else rng.uniform(0.10, 0.34)
+        thickness = rng.uniform(0.008, 0.014)
+        yaw = rng.uniform(-0.45, 0.45) if wall > 0.45 else rng.uniform(-math.pi, math.pi)
+        pitch = rng.uniform(-0.08, 0.08) + wall * rng.uniform(-0.02, 0.16)
+        roll = rng.uniform(-0.12, 0.12)
+        if i < (42 if not DRAFT else 18):
+            # Steeper wall-side slates leaning into the missing wall plane at -X.
+            x = rng.uniform(-1.42, -1.20)
+            y = rng.uniform(-0.72, 0.72)
+            z = rng.uniform(0.018, 0.105)
+            yaw = rng.uniform(-0.35, 0.35)
+            pitch = rng.uniform(0.30, 0.58)
+            roll = rng.uniform(-0.10, 0.10)
         mat = rng.choice(slate_mats)
         parts.append(_slate(kit, f"Slate_{i:03d}", (x, y, z), yaw, width, length, thickness,
                             whole, mat, SEED + i, pitch, roll))
@@ -253,19 +277,6 @@ def build(kit):
                 local = (sx * width + rng.uniform(-0.006, 0.006), head_y + rng.uniform(-0.012, 0.012))
                 parts.append(_disc(kit, f"NailHole_{i:03d}_{j}", (x, y, z), yaw, pitch, roll,
                                    local, thickness + 0.002, rng.uniform(0.009, 0.013), hole))
-                if rng.random() < 0.58:
-                    parts.append(_disc(kit, f"RustBloom_{i:03d}_{j}", (x, y, z), yaw, pitch, roll,
-                                       (local[0] + rng.uniform(-0.010, 0.018), local[1] - rng.uniform(0.010, 0.045)),
-                                       thickness + 0.003, rng.uniform(0.014, 0.030), rust,
-                                       squash=(rng.uniform(1.2, 2.4), rng.uniform(0.34, 0.85))))
-
-    for i in range(50 if not DRAFT else 15):
-        x = rng.uniform(-1.35, 1.15)
-        y = rng.uniform(-0.85, 0.85)
-        wall = max(0.0, 1.0 - (x + 1.34) / 2.55)
-        z = rng.uniform(0.004, 0.045 + wall * 0.08)
-        parts.append(_leaf(kit, f"LeafLitter_{i:02d}", (x, y, z), rng.uniform(0, math.tau),
-                           rng.uniform(0.45, 1.15), leaf_mat))
 
     _settle(parts)
     obj = kit.join(parts, "SM_RuinSlateScatter", unwrap=True, reshade=True, smooth_angle=56)
