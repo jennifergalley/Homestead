@@ -8,7 +8,7 @@ page current; report changes to it rather than editing lane rows yourself.
 
 | Role / lane | Session | Branch | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | MCP port | OpenSpec change |
 | --- | --- | --- | --- | --- | --- |
-| Orchestrator + world/terrain lane (only session that packages) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | ask the orchestrator | `author-fixed-cornish-estate-map` |
+| Orchestrator + world/terrain lane (only session that packages) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | 8765 (so the native `unreal` MCP tools reach the orchestrator's editor) | `author-fixed-cornish-estate-map` |
 | Docs agent | `d99bb15c-6135-4f9d-b21a-f46b63c3b36f` | `jennifergalley-work-optimizer` | `jennifergalley-stunning-dollop` | none (no editor) | none |
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
@@ -64,7 +64,7 @@ manor and boundary lanes haven't merged yet.
 
 - **Packaging with several worktrees** (Zen `Failed to launch ZenServer` / `Failed to read oplog`,
   UBT `ConflictingInstance`): `Build-Game.ps1` now builds the game target with `-WaitMutex`, cooks
-  with `-SkipZenStore`, and waits for UAT (`4ffd2372` and later). Not yet verified by a full package
+  with `-SkipZenStore`, and waits for UAT (`cdbd249f`); the orchestrator has adopted it. Not yet verified by a full package
   on `main`; the MVP lane runs the same fix on its branch. Only the orchestrator packages now, so
   the collisions shouldn't recur within round 1.
 - **Blender prop import** needs a free editor slot (3-process limit). Props are imported in a

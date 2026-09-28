@@ -39,8 +39,9 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   Pass it as `Start-EditorMcp.ps1 -Port <p>`, then dot-source `Scripts\McpHelpers.ps1 -Port <p>`
   (section 3). The script refuses a port another worktree's editor is serving. Never drive or close
   another session's editor.
-- **The native `unreal` MCP tools are hard-wired to port 8765** (`.github\mcp.json`). In a session
-  whose editor uses another port they talk to someone else's editor. Use the shell helpers instead.
+- **The native `unreal` MCP tools are hard-wired to port 8765** (`.github\mcp.json`). In round 1
+  that's the orchestrator's editor, so in any other session they drive the orchestrator's editor.
+  Lanes use the shell helpers instead.
   If you do use native tools, confirm the worktree first:
   `print(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))`.
 - **Live Coding and ray tracing are off in agent editors** (`Start-EditorMcp.ps1` defaults). An
