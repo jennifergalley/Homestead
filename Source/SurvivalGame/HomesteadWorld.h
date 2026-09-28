@@ -232,6 +232,19 @@ private:
     TArray<TWeakObjectPtr<class UPointLightComponent>> HearthLights;
     float HearthFlickerTime = 0.0f;
     void UpdateHearthFlicker(float DeltaSeconds);
+    // A hearth's crackle is heard only with a clear line from the listener to the fire: walls between
+    // them (even the room's own wall with her standing just outside it) silence it.
+    struct FHearthSound
+    {
+        TWeakObjectPtr<class UAudioComponent> Audio;
+        FVector Mouth = FVector::ZeroVector;
+        FVector Chimney = FVector::ZeroVector;
+        TArray<TWeakObjectPtr<UPrimitiveComponent>> Ignored;
+        float Gate = -1.0f;
+    };
+    static constexpr float HearthCrackleVolume = 0.2f;
+    TArray<FHearthSound> HearthSounds;
+    void UpdateHearthSound(float DeltaSeconds);
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()
@@ -277,10 +290,13 @@ private:
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none
-    // pokes through a floor or wall; it comes back if the piece is taken down.
+    // pokes through a floor or wall; it comes back if the piece is taken down. Low cover and trees
+    // are also cleared off every interactable (berry bush, herb, bramble, salvage), so each one stands
+    // in the open where she can see and reach it.
     void ClearEstateSceneryUnderPieces(const Homestead::State& State);
     TArray<TArray<FTransform>> EstateSceneryTransforms;
-    TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden.
+    TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden under pieces.
+    TArray<float> EstateSceneryTrunkRadius; // Trees only: the trunk footprint kept clear of interactables.
     TArray<TBitArray<>> EstateSceneryHidden;
     // The near meadow round the camera on the fixed estate (HomesteadGrassField).
     UPROPERTY() TObjectPtr<class UHomesteadGrassField> EstateGrass;

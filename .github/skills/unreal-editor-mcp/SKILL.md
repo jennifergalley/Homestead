@@ -29,8 +29,11 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   compile-check with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then message
   the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
   line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
-- **At most 3 Unreal processes on the machine**, counting editors, packaged games and commandlets
-  (`UnrealEditor-Cmd` imports and bootstraps too). `Start-EditorMcp.ps1` refuses to launch at 3 and
+- **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
+  packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
+  15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
+  81.5 GB and filled the drive. **Close your editor as soon as a verification pass is done**
+  (`Stop-MyEditor.ps1`). `Start-EditorMcp.ps1` refuses to launch at 2 and
   lists who owns them (`-Force` overrides). For other launches (a standalone game, a commandlet), check
   in the same command, right before starting:
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
@@ -54,7 +57,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   also covers hand-launched editors and `-game` runs), and it no longer loads `LiveCodingToolset`,
   whose `CompileLiveCoding` switches Live Coding on for the session whatever the setting says. For C++
   changes, quit the editor, rebuild and relaunch. `-RayTracing` turns RT back on; use it only when
-  you must judge RT lighting and fewer than three Unreal processes are running. PIE lighting
+  you must judge RT lighting and no other Unreal process is running. PIE lighting
   therefore differs from the packaged build, which has RT on.
 - **Close your editor** before `git pull`/`rebase` (it locks `.uasset` files), before building
   `SurvivalGameEditor` (it locks the DLLs), and when you finish. Quit cleanly with
@@ -93,7 +96,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 ```powershell
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
-Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 3? then:
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 2? (Start-EditorMcp checks too)
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
@@ -113,13 +116,15 @@ Search this table for the error text before debugging. Add a row when you solve 
 | --- | --- | --- |
 | `Unable to build while Live Coding is active` | Some editor on the machine has an active Live Coding session. UBT checks a mutex named after the shared `UnrealEditor.exe` path, so it's any editor, any worktree (a hand-launched editor, one started before the opt-out, or one where `CompileLiveCoding` ran). An editor log shows `LogLiveCoding: Display: Starting LiveCoding` when it starts | Pass `-NoHotReloadFromIDE` to `Build.bat` (the scripts do), which skips the check. To find the culprit, search editors' `Saved\Logs\*.log` for `Starting LiveCoding`. Agent editors now start with Live Coding off (command line plus ini) and without `LiveCodingToolset`. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
+| An editor build (`Build.bat SurvivalGameEditor ... -WaitMutex`) sits silent for many minutes | It's queued behind other worktrees' UBT builds (the mutex is machine-wide). With 4 lanes building at once, one build waited about 50 minutes (3265 s in total) | Expect it and don't kill the waiting UBT: a killed build rejoins the back of the queue. Check who's building with `Get-CimInstance Win32_Process -Filter "Name='dotnet.exe'"` (UnrealBuildTool in the command line) before assuming a hang. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
 | Every MCP call times out for minutes, but the editor process is still responding | The shared zenserver (`%LOCALAPPDATA%\UnrealEngine\Common\Zen`) stopped answering and the game thread is blocked on it; it recovers by itself (one stall lasted 1009 s: `post recovery finished in 1009.384 seconds`) | Search `Saved\Logs\SurvivalGame.log` for `LogZenServiceInstance` and wait. Don't kill the editor, and never stop `zenserver.exe`. |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
-| `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 3 Unreal processes. |
-| `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Close idle editors; don't run a packaged game next to two editors on Estate. |
+| `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 2 Unreal processes. |
+| `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Keep to the 2-process limit, and close idle editors. |
+| C: fills up, and the machine is sluggish with 3 editors open | Each editor commits 15-17 GB of private memory. With three open, only 0.7 GB of RAM was free and the system-managed `C:\pagefile.sys` grew to 81.5 GB. It doesn't shrink until a reboot | At most 2 Unreal processes (`Start-EditorMcp.ps1` enforces it). Close editors as soon as you're done. If C: is already full, ask Jenny to reboot to shrink the pagefile. |
 | MCP answers, but with another worktree's map, actors or code | Two editors on 8765, or native `unreal` tools pointing at 8765 | Use your own `-Port` and `McpHelpers.ps1`; check `unreal.Paths.project_dir()`. |
 | Modal "Restore Packages" at startup blocks MCP; `Start-EditorMcp.ps1` times out with "MCP did not answer"; Escape doesn't dismiss it | The editor was killed; `Saved\Autosaves\PackageRestoreData.json` remains | `Start-EditorMcp.ps1` now deletes a stale restore file before launching (when this worktree has no editor running). If a dialog is already up: kill that editor, delete `Saved\Autosaves`, relaunch. Quit with `quit_editor()` next time. |
 | Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
@@ -799,7 +804,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
   script builds the game target with `-WaitMutex`, waits for UAT (`-WaitForUATMutex`) behind other worktrees, and cooks without the shared Zen store (`-SkipZenStore`). Each Unreal step counts
-  toward the 3-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
+  toward the 2-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
   `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
@@ -820,7 +825,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   fullscreen), wait for `MUSIC_TRACK started` in that log
   plus about 20 s, then dot-source `Scripts\GameWindow.ps1`: `Find-GameWindow -ProcessId <pid>`,
   `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
-  and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 3-process limit; close it
+  and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 2-process limit; close it
   by PID. This isn't packaging, so lanes may run it.
 - **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).

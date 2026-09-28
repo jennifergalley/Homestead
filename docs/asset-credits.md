@@ -81,7 +81,8 @@ The manor's standing-room hearth (`Assets\Props\StoneHearth`, `Recipes\stone_hea
 RuinChimney, `Recipes\ruin_*.py` and `Recipes\stone_building\ruin.py`) are project-authored the
 same way, from the stone kit's masonry code and procedural materials. They use no scanned or
 downloaded geometry or textures. The hearth's crackle loop (`Assets\Audio\Ambience\HearthCrackle.wav`)
-is synthesized from seeded noise by `Scripts\generate_hearth_crackle.py`; it uses no recording.
+is cut by `Scripts\prepare_hearth_crackle.py` from "Fireplace Sound loop" by PagDev (OpenGameArt, CC0,
+https://opengameart.org/content/fireplace-sound-loop).
 
 RuinFallenTimbers (`Scripts\Blender\Recipes\ruin_fallen_timbers.py`) is project-authored procedural charred/weathered oak roof-timber debris with adzed beam geometry, split fibre, irregular char and rotten end treatment, hand-forged nails and procedural materials.
 RuinSlateScatter (`Scripts\Blender\Recipes\ruin_slate_scatter.py`) is project-authored procedural Delabole-style slate-roof debris with thick split-cleavage slate geometry, nail holes, subdued soil/moss pockets and procedural materials.

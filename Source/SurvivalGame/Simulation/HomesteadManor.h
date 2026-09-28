@@ -15,7 +15,7 @@ namespace Manor
 {
 // Placeholders until Jenny chooses the real ones.
 constexpr const char* DefaultHeroineName = "Eleanor";
-constexpr const char* DefaultFamilyName = "Trelawney";
+constexpr const char* DefaultFamilyName = "Cavendish";
 constexpr const char* DefaultEstateName = "Trevennor";
 constexpr int ArrivalYear = 1851;
 // Characters (Unicode code points), after trimming.
@@ -50,7 +50,7 @@ int HeritageBuildingId(const State& state);
 bool BlockedByManor(const State& state, const EstateLayout& layout, const PlacementTarget& target,
     const Footprint& area);
 
-// "Eleanor Trelawney — Trevennor, Spring 1" (an empty string for unnamed woodland games).
+// "Eleanor Cavendish — Trevennor, Spring 1" (an empty string for unnamed woodland games).
 std::string SaveLabel(const State& state, const char* season, int day);
 
 // Journal entries: the arrival note is written when she first comes home.

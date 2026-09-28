@@ -127,7 +127,7 @@ before each pass.
     assets: `unreal.EditorAssetLibrary.save_directory('/Game/SurvivalGame/Environment/Props/<Name>', False, True)`
     with PIE stopped. Reimporting an existing prop is the same call. The headless
     `Import-Props.ps1` runs under `-run=pythonscript`, which lacks `StaticMeshEditorSubsystem`, so its
-    meshes get no LODs or collision. It also needs a free Unreal process slot (at most 3 on the
+    meshes get no LODs or collision. It also needs a free Unreal process slot (at most 2 on the
     machine) and must not run while this worktree's editor is open.
   - `import_props.py` picks the parent material itself: `M_PropTextured` for baked props,
     `M_PropFoliage` when the report has a `wind` block, and `M_PropGranite` for rocks. It flips the
