@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "RuinSlateScatter",
+  "description": "Ruined manor detail: stacked grey-green/blue-grey Delabole slate roof debris, thick against the -X wall side.",
+  "collision": "none",
+  "triangle_budget": 200000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/ruin_slate_scatter.py",
+  "source_sha256": "4ad3b1182f337aef855c6ed120c5b97de4dfc88245d6bfbc918ecefa5ed0355e",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RuinSlateScatter": {
+      "vertices": 24986,
+      "triangles": 37662,
+      "size_cm": [
+        328.08,
+        218.56,
+        27.72
+      ],
+      "materials": [
+        {
+          "name": "M_RuinSlateScatter",
+          "textures": {
+            "basecolor": "T_RuinSlateScatter_basecolor.png",
+            "roughness": "T_RuinSlateScatter_roughness.png",
+            "normal": "T_RuinSlateScatter_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinSlateScatter_basecolor.png",
+          "roughness": "T_RuinSlateScatter_roughness.png",
+          "normal": "T_RuinSlateScatter_normal.png",
+          "ao": "T_RuinSlateScatter_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.3895771384239197,
+          -0.09028476238250732,
+          0.11032250672578811
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_RuinSlateScatter.fbx",
+      "sha256": "9709009df765461d7b471bbfaa2b019accc8b0377ff2c0df2979b5f1e8afa997",
+      "preview": "preview_SM_RuinSlateScatter.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RuinSlateScatter_hero.png",
+          "detail": "beauty_SM_RuinSlateScatter_detail.png",
+          "eye": "beauty_SM_RuinSlateScatter_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RuinSlateScatter_LOD1": {
+      "vertices": 13537,
+      "triangles": 15818,
+      "size_cm": [
+        328.09,
+        218.56,
+        27.74
+      ],
+      "materials": [
+        {
+          "name": "M_RuinSlateScatter",
+          "textures": {
+            "basecolor": "T_RuinSlateScatter_basecolor.png",
+            "roughness": "T_RuinSlateScatter_roughness.png",
+            "normal": "T_RuinSlateScatter_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinSlateScatter_basecolor.png",
+          "roughness": "T_RuinSlateScatter_roughness.png",
+          "normal": "T_RuinSlateScatter_normal.png",
+          "ao": "T_RuinSlateScatter_ao.png"
+        },
+        "shared_with": "SM_RuinSlateScatter"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.55,
+          -0.06,
+          0.15
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_RuinSlateScatter_LOD1.fbx",
+      "sha256": "c22478f0dc91f7e686921ece7df90ece967e21a611fa16b274034c2e55db4aed",
+      "preview": "preview_SM_RuinSlateScatter_LOD1.png"
+    },
+    "SM_RuinSlateScatter_LOD2": {
+      "vertices": 6683,
+      "triangles": 6402,
+      "size_cm": [
+        328.1,
+        218.85,
+        27.66
+      ],
+      "materials": [
+        {
+          "name": "M_RuinSlateScatter",
+          "textures": {
+            "basecolor": "T_RuinSlateScatter_basecolor.png",
+            "roughness": "T_RuinSlateScatter_roughness.png",
+            "normal": "T_RuinSlateScatter_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RuinSlateScatter_basecolor.png",
+          "roughness": "T_RuinSlateScatter_roughness.png",
+          "normal": "T_RuinSlateScatter_normal.png",
+          "ao": "T_RuinSlateScatter_ao.png"
+        },
+        "shared_with": "SM_RuinSlateScatter"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.55,
+          -0.06,
+          0.15
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_RuinSlateScatter_LOD2.fbx",
+      "sha256": "d3d6af08f42b5e7d3d60ba71d517e82cf57d696eef2a4efdf0f0eb3b57dd796e",
+      "preview": "preview_SM_RuinSlateScatter_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Ground centre of the scatter at (0, 0, 0).",
+  "placement": "The -X side is deliberately thick and should sit against the ruin wall; debris thins toward +X into the room/yard.",
+  "collision_note": "No collision: low walkable decoration.",
+  "textures": {
+    "T_RuinSlateScatter_basecolor.png": "a057ecc53656c79c4e71751924c90740ac29958fd4b29c258041a87e142f3545",
+    "T_RuinSlateScatter_roughness.png": "ae2366dff246e95b358bebc2f6acf0a163f7989c61d375d8325ca3223c508a07",
+    "T_RuinSlateScatter_normal.png": "c33b37ad4aac080624af543ab7134cf44f933c2184f2a9810be83259cbb004b0"
+  }
+}
