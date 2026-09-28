@@ -21,6 +21,7 @@
 ## 3. Ruin detail and acceptance
 
 - [ ] 3.1 Add the detail pass: window openings with lintels, quoins, fallen timbers, slate scatter, lichen and soot, and ivy and bramble cling. Check its silhouette from the road approach and the cove in ordinary play
-- [ ] 3.2 Run the whole new-game flow with mouse and controller, name save/reload, footprint rejection, and 720p/4K checks
-  - Done: the flow with the controller and with the keyboard and mouse (1.2, 2.1), the save label, and footprint rejection (1.3). In standalone 1280x720 and 3840x2160 windows with real keyboard input, the Names panel, its two-line hints and the arrival card fit and read cleanly; at 4K the panel is scaled once, by the engine's DPI curve. Still to do: reload a named save in game.
+- [x] 3.2 Run the whole new-game flow with mouse and controller, name save/reload, footprint rejection, and 720p/4K checks
+  - Done: the flow with the controller and with the keyboard and mouse (1.2, 2.1), the save label, and footprint rejection (1.3). In standalone 1280x720 and 3840x2160 windows with real keyboard input, the Names panel, its two-line hints and the arrival card fit and read cleanly; at 4K the panel is scaled once, by the engine's DPI curve.
+  - Named save/reload: a standalone new game with the estate typed as "Polgrean" saved the label "Eleanor Trelawney — Polgrean, Spring 1". Relaunching resumed that save in the standing room on Spring day 1, with no setup screens. The store's "From {Estate}" header now reads `Simulation::EstateName()`, but I haven't seen it on screen: the console store command didn't open in the slow standalone run.
 - [ ] 3.3 Jenny playtests the arrival. Collect her default names, the year and her ruin feedback, and fold them in
