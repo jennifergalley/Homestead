@@ -16,6 +16,11 @@ namespace
 FString FromUtf8(const std::string& Text) { return UTF8_TO_TCHAR(Text.c_str()); }
 }
 
+FString AHomesteadController::EstateName() const
+{
+    return FromUtf8(Sim.EstateName());
+}
+
 FString AHomesteadController::CurrentSaveLabel() const
 {
     return FromUtf8(Homestead::Manor::SaveLabel(State(), Sim.SeasonName(), Sim.DayNumber()));
