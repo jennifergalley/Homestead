@@ -82,7 +82,8 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 - **Give your editor its own MCP port** (`Start-EditorMcp.ps1 -Port 87xx`) and set
   `$env:UNREAL_MCP_URL` to match. Port 8765 and the native `unreal` MCP tools may belong to another
   worktree's editor.
-- Close your editor before `git pull`/`rebase`, and before building your editor module.
+- Close your editor before `git pull`/`rebase`, and before building your editor module
+  (`Scripts\Stop-MyEditor.ps1` closes only this worktree's editor).
 - Never retarget or overwrite `Desktop\Homestead.lnk` or anything under `E:\Repos\HomesteadMVP\`.
   Never merge `mvp-survival` with `main`.
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
