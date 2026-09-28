@@ -20,7 +20,7 @@
 - [ ] 3.2 Author PCG graphs that scatter the admitted tree, understory, rock and wildflower palette by layer, slope and water distance. Keep decorative grass as runtime PCG or foliage. _Interim: a deterministic Python scatter (`Scripts/Terrain/scatter.py`) bakes ~79k decorative instances into `EstateScenery.bin`, drawn as runtime HISMs. PCG graphs are not authored._
 - [ ] 3.3 Bake interactive trees, rocks and forage into a versioned `DA_EstatePlacements` with stable IDs and minimum tiers. Seed new-game Simulation resources from it. _Interim: 352 world-lane placements (500100+) are baked into `HomesteadEstateWorldPlacements.inc`, bake version 2. No data asset yet._
 - [ ] 3.4 Verify felling, forage and pickup on baked resources, and check that save/reload preserves edits by stable ID across two new games with an identical layout
-- [ ] 3.5 Add the lake, dunes and beach, and the moorland and tors at first-pass quality
+- [ ] 3.5 Add the lake, dunes and beach, and the moorland and tors at first-pass quality. _Interim: the map no longer reads as a raised plateau. `Scripts/Terrain/bake_outer_land.py` bakes a 70 km outer ring mesh that meets the Landscape edge 0.6 m below it and eases into a noisy ~110 m upland inland (the sea edges stay under the water). `build_outer_land.py` imports it as `SM_EstateOuterLand` (no Nanite, no collision), builds `M_EstateOuterLand` (world-aligned pasture, moor and rock, plus a hedged-field patchwork from 150 m out) and places the always-loaded `EstateOuterLand` actor. Run the builder with `exec(compile(...), {'__file__': p})`._
 
 ## 4. Integrated acceptance
 
