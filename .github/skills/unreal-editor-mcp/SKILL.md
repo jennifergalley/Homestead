@@ -157,6 +157,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
+| On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it with `click` on its X (scale capture coordinates to window pixels; see the helper table). |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
@@ -486,7 +487,7 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   `Gamepad_FaceButton_Right`). `HomesteadMorning <hour>` (pass the player controller) only moves
   the clock, so it costs no energy; night playtests are too dark to judge.
 - `HomesteadGive <Item> [count]` (console, pass the player controller) adds to the pack by item
-  name, spaces optional: `HomesteadGive Berries 10`, `HomesteadGive RoastedRoots 3`. The toast
+  name (the display name: `Branch`, not `Branches`; `RustedAxeHead`, `RustedBillhookHead`), spaces optional: `HomesteadGive Berries 10`, `HomesteadGive RoastedRoots 3`. The toast
   says what was added or why not (full pack, unknown name).
 - Energy: work costs it (gather 0.5, fell 4, till 2, overgrowth 0.3-6 by kind and tier, build 1.5; the full tables
   are `Homestead::Exertion` and `HomesteadOvergrowth.cpp`), time awake drains only 0.6/game hour.
@@ -555,7 +556,9 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
 - **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
   doesn't). The details list requirements. Crafting is **press and hold**; a tap does nothing
-  (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard).
+  (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard). A craft takes about 1 s, so capture right after `hold_key` to see the slot's white fill.
+  The recipe list doesn't refresh its counts while the book stays open after a console `HomesteadGive`;
+  close it and reopen with `C`.
   One craft takes a 1.2 s cycle and the hold repeats while materials last. While held, the
   recipe square fills with white from the bottom (`SHomesteadCraftFill`) and flashes when the item
   is made. Behind the book she stands head-down, working a branch between her fists
