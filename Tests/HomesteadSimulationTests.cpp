@@ -3018,6 +3018,22 @@ void OvergrowthTableAndPrompts()
     }
     CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && rearGap >= 2 && teases >= 4);
     CHECK(nearestSalvage < 700.0);
+    // Pickable blackberry brambles (540000+): plenty of them, two within sight of the front door,
+    // none in the ruin, and none crowding another placement.
+    int berries = 0, berriesByDoor = 0;
+    const auto& all = ProvisionalEstatePlacements().placements;
+    for (const auto& placement : all)
+    {
+        if (placement.id < 540000 || placement.id >= 550000) continue;
+        CHECK(placement.kind == ResourceKind::BerryBush);
+        CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
+        ++berries;
+        berriesByDoor += std::hypot(placement.position.x - frontDoor.x, placement.position.y - frontDoor.y) < 2000.0;
+        for (const auto& other : all)
+            if (other.id != placement.id)
+                CHECK(std::hypot(other.position.x - placement.position.x, other.position.y - placement.position.y) >= 300.0);
+    }
+    CHECK(berries >= 36 && berriesByDoor >= 2);
     Simulation estate;
     OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
 }
