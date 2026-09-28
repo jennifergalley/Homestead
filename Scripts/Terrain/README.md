@@ -96,7 +96,7 @@ Later hand edits go on Landscape Edit Layers in the editor, so re-importing this
 ## Ocean and river (`bake_ocean.py`, `build_ocean.py`, `place_water.py`)
 
 The sea is Single Layer Water, not the Water plugin (see the design's decision 3). It has three
-parts, all generated here with no external textures:
+parts, all generated here with no external textures. `python Scripts\Terrain\bake_ocean.py waves` re-bakes only the wind-sea volume.
 
 - **Shore data.** `bake_ocean.py` reads `Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16`
   and writes `Saved/Ocean/T_EstateOceanShore.png` (2048×1024 RGBA): R = √(depth / 32 m),
@@ -116,12 +116,20 @@ parts, all generated here with no external textures:
   - `Swell`: four long swells (78 m and shorter, 0.32 m) from the south-south-west move the
     vertices with world position offset. They follow deep-water dispersion (each wavelength travels
     at its own speed) and die away in water shallower than about 6 m, so the beaches never clip.
-  - `WindSea`: 28 short-crested wind waves from 11 m down to 0.55 m, widely spread about the wind,
-    with random amplitudes. `Gusts` adds drifting patches of rougher and glassier water (cat's paws).
-    `Ripples` adds two rotated layers of the tiling capillary normal map. Waves shorter than a pixel
-    fade out and their slope moves into roughness, so the distant sea softens into glitter instead
-    of shimmering.
-  - `ShoreWaves`: crests that follow the baked shore distance and roll in every 9 s. Each one
+  - `WindSea`: the wind sea comes from `VT_OceanWaves`, a 128×128×64 volume texture baked by
+    `bake_ocean.py` (`T_OceanWaves.png`, an 8×8 atlas of frames). It's a 48 m patch of a
+    Phillips-spectrum FFT ocean for a 5.5 m/s breeze, with each frequency rounded so the patch loops
+    seamlessly every 16 s. It stores slope, height and a whitecap mask from where the choppy
+    surface folds. The material samples three copies at unrelated scales and headings, each with
+    its clock scaled by 1/√scale so dispersion stays right, so neither the tile nor the loop shows.
+    `Whitecaps` turns the folded crests into foam, with more of them in the gusts. `Gusts` adds
+    drifting patches of rougher and glassier water (cat's paws). `Ripples` adds two faint rotated
+    layers of the tiling capillary normal map. Detail finer than a pixel is averaged away by the
+    mips, and its slope variance moves into roughness, so the distant sea softens into glitter
+    instead of shimmering.
+    Volume-texture import: `build_ocean.import_wave_volume()` imports the atlas, then sets it as
+    the `VolumeTexture`'s `source2d_texture` before setting the tile sizes to 128. Setting the
+    source resets the tile size to a default (102 for a 1024² atlas).  - `ShoreWaves`: crests that follow the baked shore distance and roll in every 9 s. Each one
     throws a sheet of swash foam up the sand that drains into lace, with a thin line that lingers
     at the waterline. Foam lace drifts shoreward on a two-phase flow map.
   - Colour comes from low scattering and red-first absorption: turquoise over the sand shallows,

@@ -5,12 +5,13 @@ then, with the Estate level loaded and PIE stopped:
   pyfile Scripts/Terrain/build_ocean.py            (McpHelpers)
 Re-running re-authors the material graph in place and re-imports the textures and mesh.
 
-The ocean is Single Layer Water. Its surface is analytic: a few long swells displace the mesh (world
-position offset) and every pixel re-evaluates those swells plus about twenty wind waves with deep-water
-dispersion (each wavelength travels at its own speed), a panning capillary-ripple map, and shore waves
-whose crests follow the baked shore-distance field and break into foam over the shallows. Waves that
-are too short for a pixel to resolve are faded out and their slope variance is moved into roughness,
-so the sea far away turns into a soft sun glitter instead of shimmering.
+The ocean is Single Layer Water. A few long analytic swells displace the mesh (world position offset)
+and every pixel re-evaluates them. On top of that it samples a wind sea from a baked FFT ocean patch
+that loops in time. There are three layers at unrelated scales, so the sea evolves with deep-water
+dispersion and never slides. A capillary-ripple map and shore waves are added last; the shore-wave
+crests follow the baked shore-distance field and break into foam over the shallows. Detail too fine
+for a pixel to resolve is averaged away and its slope variance is moved into roughness, so the sea
+far away turns into a soft sun glitter instead of shimmering.
 """
 import json
 import math
@@ -29,7 +30,6 @@ FRAME = json.load(open(os.path.join(REPO, "Saved", "Ocean", "ocean_bake.json")))
 # Long swell components shared by the vertex (displacement) and pixel (normal) evaluation:
 # (wavelength factor, direction offset in degrees, amplitude factor, phase).
 SWELLS = [(1.0, 0.0, 0.55, 0.0), (0.73, 13.0, 0.36, 1.7), (0.56, -9.0, 0.24, 4.1), (0.43, 24.0, 0.16, 2.6)]
-WIND_WAVES = 28
 
 
 def import_texture(source, name, kind):
@@ -86,6 +86,26 @@ def import_mesh():
         mesh.set_material(i, unreal.load_asset(f"{FOLDER}/M_EstateOcean") or unreal.load_asset("/Engine/EngineMaterials/DefaultMaterial"))
     LIB.save_loaded_asset(mesh, False)
     return mesh
+def import_wave_volume():
+    """T_OceanWaves.png (8x8 atlas of 128^2 frames) -> VT_OceanWaves, a 128x128x64 volume texture."""
+    atlas = import_texture(os.path.join(REPO, "Assets", "Environment", "Ocean", "T_OceanWaves.png"), "T_OceanWavesAtlas", "data")
+    atlas.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
+    atlas.set_editor_property("never_stream", True)
+    LIB.save_loaded_asset(atlas, False)
+    path = f"{FOLDER}/VT_OceanWaves"
+    vol = unreal.load_asset(path) if LIB.does_asset_exist(path) else None
+    if vol is None:
+        vol = TOOLS.create_asset("VT_OceanWaves", FOLDER, unreal.VolumeTexture, unreal.VolumeTextureFactory())
+    vol.set_editor_property("srgb", False)
+    vol.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
+    vol.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_WORLD)
+    # Setting the source picks a default tile size (102 for a 1024^2 atlas), so set the tile size after it.
+    vol.set_editor_property("source2d_texture", atlas)
+    vol.set_editor_property("source2d_tile_size_x", 128)
+    vol.set_editor_property("source2d_tile_size_y", 128)
+    LIB.save_loaded_asset(vol, False)
+    print("VT_OceanWaves from", vol.get_editor_property("source2d_texture").get_name(), "tile", vol.get_editor_property("source2d_tile_size_x"))
+    return vol
 
 
 # ---------------------------------------------------------------------------------------------
@@ -174,34 +194,46 @@ float gustM = Texture2DSampleLevel(FoamTex, FoamTexSampler, pm / (Gust.y * 0.37)
 float gust = lerp(1.0, saturate(0.25 + 1.5 * (gustN * 0.7 + gustM * 0.3)), Gust.x);
 float chop = lerp(0.35, 1.0, saturate(depth / 1.5)) * lerp(0.45, 1.0, expo) * gust;
 float lost = 0.0;
-[unroll] for (int i = 0; i < WAVES; i++)
+float caps = 0.0;
+// Three layers of the looping FFT patch at unrelated scales and headings, so neither the 48 m tile
+// nor the 16 s loop shows. Scaling a patch by s keeps its slopes; its clock runs 1/sqrt(s) as fast,
+// which keeps deep-water dispersion right. Stored slopes decode to an RMS of 0.25.
+[unroll] for (int i = 0; i < 3; i++)
 {
-    float fi = (float)i;
-    float h1 = frac(sin(fi * 12.9898 + 1.3) * 43758.5453);
-    float h2 = frac(sin(fi * 78.233 + 0.7) * 12543.1234);
-    float h3 = frac(sin(fi * 39.3467 + 2.1) * 24634.6345);
-    float lam = Wind.y * pow(Wind.z / Wind.y, (fi + (h3 - 0.5) * 0.8) / (WAVES - 1.0));
-    float k = TAU / lam;
-    // Short-crested sea: a wide directional spread, and the odd component running across the wind.
-    float spread = (h1 - 0.5) * (80.0 + 40.0 * fi / WAVES) + (h3 > 0.85 ? 70.0 : 0.0);
-    float ang = radians(Wind.w + spread);
-    float2 d = float2(cos(ang), sin(ang));
-    float fade = saturate(lam / (fw * 6.0) - 0.5);
-    float s = Wind.x * chop * (0.55 + 0.9 * frac(h2 * 7.31));
-    lost += s * s * 0.5 * (1.0 - fade * fade);
-    float th = k * dot(d, pm) - sqrt(9.81 * k) * Time + h2 * TAU;
-    g += s * fade * d * cos(th);
+    float s = i == 0 ? 1.0 : (i == 1 ? 0.37 : 2.7);
+    float off = i == 0 ? 0.0 : (i == 1 ? 41.0 : -23.0);
+    float amp = i == 0 ? 0.62 : (i == 1 ? 0.5 : 0.45);
+    float a = radians(Wind.w + off);
+    float2 d = float2(cos(a), sin(a));
+    float2 e = float2(-d.y, d.x);
+    float tileM = Wind.y * s;
+    float3 uvw = float3(dot(pm, d) / tileM + 0.31 * i, dot(pm, e) / tileM + 0.17 * i,
+                        frac(Time / (Wind.z * sqrt(s)) + 0.29 * i));
+    float4 w = Texture3DSample(WaveVol, WaveVolSampler, uvw);
+    float2 sl = (w.rg * 2.0 - 1.0) * 4.0 * Wind.x * amp * chop;
+    g += sl.x * d + sl.y * e;
+    // Variance the mip chain has averaged away (about 4.7 equal octaves between the patch's peak and
+    // its finest wave) goes to roughness instead.
+    float lostFrac = saturate(log2(fw * 2.0 / (0.75 * s)) / 4.7);
+    float v = Wind.x * amp * chop;
+    lost += v * v * lostFrac;
+    caps += w.b * amp * (1.0 - lostFrac);
 }
-
-// Capillary ripples from the tiling map, turned to the wind and drifting with it.
-float wa = radians(Wind.w);
-float2x2 rot = float2x2(cos(wa), sin(wa), -sin(wa), cos(wa));
-float2 q = mul(rot, pm);
-float3 r1 = Texture2DSample(RippleTex, RippleTexSampler, q / Micro.y + float2(Time * Micro.z, 0.0)).xyz * 2.0 - 1.0;
-float3 r2 = Texture2DSample(RippleTex, RippleTexSampler, q.yx / (Micro.y * 0.37) + float2(Time * Micro.z * 1.6, Time * 0.013)).xyz * 2.0 - 1.0;
-float2 rs = (r1.xy / max(r1.z, 0.2) + r2.xy / max(r2.z, 0.2)) * 0.5 * Micro.x * chop;
-g += mul(rs, rot);
-
+// Capillary ripples from the tiling map: two layers at unrelated angles and scales so their tiles
+// never line up into a grid, drifting downwind. Kept faint; the FFT patch carries the real waves.
+float2 rs = 0;
+[unroll] for (int j = 0; j < 2; j++)
+{
+    float ra = radians(Wind.w + (j == 0 ? 17.0 : -61.0));
+    float2 rd = float2(cos(ra), sin(ra));
+    float2 re = float2(-rd.y, rd.x);
+    float rt = Micro.y * (j == 0 ? 1.0 : 0.43);
+    float2 ruv = float2(dot(pm, rd), dot(pm, re)) / rt + float2(Time * Micro.z * (j == 0 ? 1.0 : 1.6) / Micro.y * 2.4, 0.37 * j);
+    float3 r = Texture2DSample(RippleTex, RippleTexSampler, ruv).xyz * 2.0 - 1.0;
+    float2 rsl = r.xy / max(r.z, 0.2);
+    rs += (rsl.x * rd + rsl.y * re) * 0.5;
+}
+g += rs * Micro.x * chop;
 LostSlope = sqrt(lost);
 
 // Foam lace drifts shoreward with the wash: a two-phase flow map keeps the offsets bounded.
@@ -223,7 +255,9 @@ float swash = smoothstep(FoamP.x * (0.35 + 0.65 * fresh), 0.0, depth) * (0.25 + 
 float linger = 0.4 * smoothstep(0.18, 0.0, depth);
 float breakZone = smoothstep(FoamP.y, 0.8, depth) * saturate(1.0 - sd / ShoreW.w) * expo * setEnv;
 float trail = exp(-5.0 * f) + 0.6 * front;
-float cover = saturate(swash + linger + breakZone * trail * FoamP.z) * inMap;
+// Whitecaps: the most folded crests of the wind sea, more of them in the gusts.
+float whitecap = saturate((caps * gust - Caps.y) * Caps.x);
+float cover = saturate(saturate(swash + linger + breakZone * trail * FoamP.z) * inMap + whitecap);
 FoamAmt = saturate((lace + cover * 1.25 - 1.0) * FoamP.w) * saturate(cover * 2.5);
 // Keep reflections above the horizon: a facet tilted so far that the mirrored view ray points into
 // the sea would pick up black from the reflection trace, so flatten it just enough.
@@ -234,7 +268,7 @@ float3 n = normalize(float3(-g, 1.0));
     if (rv.z < 0.03) n = normalize(float3(n.xy * 0.6, n.z));
 }
 return n;
-""".replace("WAVES", str(WIND_WAVES))
+"""
 
 
 def build_material():
@@ -281,12 +315,14 @@ def build_material():
     shore_p = texobj("ShoreDataPixel", shore_tex, -1400, 200, ST.SAMPLERTYPE_LINEAR_COLOR)
     ripples = texobj("RippleNormals", ripples_tex, -1400, 400, ST.SAMPLERTYPE_NORMAL)
     foam = texobj("FoamPattern", foam_tex, -1400, 600, ST.SAMPLERTYPE_LINEAR_GRAYSCALE)
+    waves = texobj("WindSeaVolume", unreal.load_asset(f"{FOLDER}/VT_OceanWaves"), -1400, 700, ST.SAMPLERTYPE_LINEAR_COLOR)
 
     frame = vector("ShoreFrame", (FRAME["ShoreY0"], FRAME["ShoreSizeY"], FRAME["ShoreX1"], FRAME["ShoreSizeX"]), -1400, -250, "Data")
     swell = vector("Swell", (0.32, 78.0, 12.0, 0.0), -1400, -100, "Waves")          # height m, wavelength m, heading deg
-    wind = vector("WindSea", (0.05, 11.0, 0.55, -38.0), -1400, 0, "Waves")        # slope, longest m, shortest m, heading deg
+    wind = vector("WindSea", (0.12, 48.0, 16.0, 30.0), -1400, 0, "Waves")         # slope RMS, patch m, loop s, heading deg
     shore_w = vector("ShoreWaves", (0.24, 9.0, 21.0, 140.0), -1400, 100, "Waves")  # height m, period s, crest spacing m, reach m
-    micro = vector("Ripples", (0.08, 2.4, 0.03, 0.0), -1400, 300, "Waves")          # slope, tile m, drift per s
+    micro = vector("Ripples", (0.035, 2.4, 0.03, 0.0), -1400, 300, "Waves")          # slope, tile m, drift per s
+    caps = vector("Whitecaps", (1.6, 0.35, 0.0, 0.0), -1400, 250, "Foam")        # strength, threshold
     gust = vector("Gusts", (0.7, 260.0, 1.5, 0.0), -1400, 200, "Waves")            # strength, patch size m, drift m/s
     foam_p = vector("FoamShape", (0.7, 2.8, 0.85, 2.6), -1400, 800, "Foam")        # swash depth, surf depth, surf strength, sharpness
 
@@ -322,7 +358,7 @@ def build_material():
     ps = custom(PIXEL_CODE, [("P", (wp_p, "")), ("ViewDir", (cam_v, "")), ("Time", (time, "")), ("ShoreTex", (shore_p, "")),
                              ("RippleTex", (ripples, "")), ("FoamTex", (foam, "")), ("Frame", (frame, "RGBA")),
                              ("Swell", (swell, "RGBA")), ("Wind", (wind, "RGBA")), ("ShoreW", (shore_w, "RGBA")),
-                             ("Micro", (micro, "RGBA")), ("FoamP", (foam_p, "RGBA")), ("Gust", (gust, "RGBA"))], -900, 100,
+                             ("Micro", (micro, "RGBA")), ("FoamP", (foam_p, "RGBA")), ("Gust", (gust, "RGBA")), ("WaveVol", (waves, "")), ("Caps", (caps, "RGBA"))], -900, 100,
                 extra=("FoamAmt", "WaterDepth", "LostSlope"))
 
     # Surface response.
@@ -421,6 +457,7 @@ def main():
     import_texture(os.path.join(REPO, "Saved", "Ocean", "T_EstateOceanShore.png"), "T_EstateOceanShore", "data")
     import_texture(os.path.join(ocean, "T_OceanRipples_N.png"), "T_OceanRipples_N", "normal")
     import_texture(os.path.join(ocean, "T_OceanFoam.png"), "T_OceanFoam", "gray")
+    import_wave_volume()
     material = build_material()
     mi = build_instance(material)
     mesh = import_mesh()

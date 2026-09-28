@@ -196,9 +196,80 @@ def tileable_foam(n=512, seed=11):
     Image.fromarray(np.round(foam * 255).astype(np.uint8), "L").save(os.path.join(ASSETS, "T_OceanFoam.png"))
 
 
+def wave_volume(n=128, frames=64, tile=48.0, period=16.0, wind=5.5, seed=23):
+    """A time-looping patch of wind sea: slopes of a Phillips-spectrum FFT ocean, one tile per frame.
+
+    Every angular frequency is rounded to a multiple of 2*pi/period, so frame `frames` equals frame 0
+    and the patch loops seamlessly in time as well as space. Written as an 8x8 atlas of 128^2 frames
+    (row-major, frame 0 top-left) for Unreal's volume texture:
+      R, G = slope along +U (downwind) and +V, scaled so that (2*c - 1) has an RMS of 0.25
+      B    = whitecap potential from the folding (Jacobian) of the choppy surface, 0..1
+      A    = height, scaled like the slopes
+    """
+    g = 9.81
+    rng = np.random.default_rng(seed)
+    k1 = 2 * np.pi * np.fft.fftfreq(n, d=tile / n)
+    kx, ky = np.meshgrid(k1, k1)                      # kx along U (columns), ky along V (rows)
+    k = np.hypot(kx, ky)
+    k[0, 0] = 1e-6
+    lw = wind * wind / g
+    cosw = kx / k
+    phillips = np.exp(-1.0 / (k * lw) ** 2) / k ** 4 * np.abs(cosw) ** 2
+    phillips *= np.where(cosw < 0, 0.07, 1.0)             # little energy running against the wind
+    phillips *= np.exp(-(k * 0.08) ** 2)                  # nothing shorter than ~0.5 m
+    phillips[0, 0] = 0
+    h0 = (rng.standard_normal((n, n)) + 1j * rng.standard_normal((n, n))) * np.sqrt(phillips / 2)
+    h0m = np.conj(h0[(-np.arange(n)) % n][:, (-np.arange(n)) % n])
+    hk0 = h0 + h0m                                        # a physical slope RMS for the Jacobian
+    s0 = np.sqrt(np.mean(np.real(np.fft.ifft2(1j * kx * hk0)) ** 2 + np.real(np.fft.ifft2(1j * ky * hk0)) ** 2))
+    h0 *= 0.13 / s0
+    h0m *= 0.13 / s0
+    w0 = 2 * np.pi / period
+    omega = np.round(np.sqrt(g * k) / w0) * w0
+    ik = 1j / k
+    slopes, caps, heights = [], [], []
+    for f in range(frames):
+        t = period * f / frames
+        hk = h0 * np.exp(1j * omega * t) + h0m * np.exp(-1j * omega * t)
+        sx = np.real(np.fft.ifft2(1j * kx * hk))
+        sy = np.real(np.fft.ifft2(1j * ky * hk))
+        # Choppy displacement D = -i k/|k| h; its Jacobian goes below zero where crests fold.
+        dxx = np.real(np.fft.ifft2(kx * kx / k * hk))
+        dyy = np.real(np.fft.ifft2(ky * ky / k * hk))
+        dxy = np.real(np.fft.ifft2(kx * ky / k * hk))
+        slopes.append((sx, sy))
+        caps.append((dxx, dyy, dxy))
+        heights.append(np.real(np.fft.ifft2(hk)))
+    rms = np.sqrt(np.mean([np.mean(sx ** 2 + sy ** 2) for sx, sy in slopes]))
+    hrms = np.sqrt(np.mean([np.mean(h ** 2) for h in heights]))
+    dscale = 0.25 / rms                                  # decoded slope RMS 0.25 (clipped at 4 sigma)
+    jac = [(1 - dxx * 0.9) * (1 - dyy * 0.9) - (dxy * 0.9) ** 2 for dxx, dyy, dxy in caps]
+    allj = np.concatenate([j.ravel() for j in jac])
+    jthr, jlo = np.percentile(allj, 5.0), np.percentile(allj, 0.3)   # the most folded 5% can whitecap
+    side = int(np.ceil(np.sqrt(frames)))
+    atlas = np.zeros((side * n, side * n, 4), np.float32)
+    for f in range(frames):
+        sx, sy = slopes[f]
+        cap = np.clip((jthr - jac[f]) / (jthr - jlo), 0, 1) ** 1.5
+        tile_img = np.stack([sx * dscale * 0.5 + 0.5, sy * dscale * 0.5 + 0.5, cap,
+                             heights[f] / hrms * 0.125 + 0.5], -1)
+        r, c = divmod(f, side)
+        atlas[r * n:(r + 1) * n, c * n:(c + 1) * n] = tile_img
+    img = np.round(np.clip(atlas, 0, 1) * 255).astype(np.uint8)
+    Image.fromarray(img, "RGBA").save(os.path.join(ASSETS, "T_OceanWaves.png"))
+    meta = {"tile_m": tile, "period_s": period, "frames": frames, "size": n, "wind_ms": wind,
+            "slope_rms": float(rms), "height_rms_m": float(hrms)}
+    json.dump(meta, open(os.path.join(SAVED, "ocean_waves.json"), "w"), indent=2)
+    print("wave volume", meta)
+
+
 def main():
     os.makedirs(ASSETS, exist_ok=True)
     os.makedirs(SAVED, exist_ok=True)
+    import sys
+    if sys.argv[1:] == ["waves"]:
+        wave_volume()
+        return
     h = load_heights()
     sea, frame = shore_texture(h)
     verts, faces = ocean_mesh(h, sea)
@@ -207,6 +278,7 @@ def main():
     json.dump(frame, open(os.path.join(SAVED, "ocean_bake.json"), "w"), indent=2)
     tileable_ripples()
     tileable_foam()
+    wave_volume()
     print(json.dumps(frame, indent=2))
 
 
