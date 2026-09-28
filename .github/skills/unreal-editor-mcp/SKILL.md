@@ -335,8 +335,8 @@ hk release_all; mcp $E StopPIE
   keep their proportion at 4K. Check captures against this; the field book covers it when open.
 - **Estate PIE recipe:** the editor opens the Estate at startup (if you've switched away, `load_level`
   it back). For a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
-  until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
-  captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
+  until `worldReady`; with an agent editor it starts straight in the standing room (`homestead.SkipNewGameSetup`; see the tool
+  route), otherwise close the Appearance/Names book (B or Escape; check `bookOpen`) before captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
   failed save. Text in a `.sav` (such as the save label) is UTF-16, so search it with
   `[Text.Encoding]::Unicode`, not as ASCII. **Packaged Estate runs resume too:** after the first run the build loads its own
   estate save (inside the package's `SurvivalGame\Saved\SaveGames`), so the Appearance → Names setup
@@ -425,9 +425,13 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   (below). `HomesteadGive RustedBillhookHead 1` + two Branches is only a shortcut for testing
   "Craft a billhook" elsewhere (for example on the woodland map).
 - **Estate tool route (new game, verified in PIE on main 17a64854):**
-  - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
-    `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
-    the standing room at about (-25750, -63800). To leave on foot, `walk_to` (-25750, -64300) and
+  - Setup: agent editors (`Start-EditorMcp.ps1` passes `-HomesteadSkipNewGameSetup`, so
+    `homestead.SkipNewGameSetup` is 1) start a new Estate game with the default names, Eleanor Cavendish of
+    Trevennor, without the Appearance and "Who comes home?" steps. To test those steps, run
+    `homestead.SkipNewGameSetup 0` before starting PIE. Then PIE opens Appearance:
+    `Gamepad_FaceButton_Right` closes it and shows Names; press `Gamepad_DPad_Down` three times to reach
+    Begin, then `Gamepad_FaceButton_Bottom`. The switch is off in packaged builds and normal play.
+    She stands in the standing room at about (-25750, -63800). To leave on foot, `walk_to` (-25750, -64300) and
     then (-25750, -64900).
   - Salvage piles: 520001 (-25600, -64350), 520002 (-25450, -65250), 520004 (-23950, -65150),
     520003 (-24600, -66200) and 520005 (-26100, -66100). Search each with `E`/A.

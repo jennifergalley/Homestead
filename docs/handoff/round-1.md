@@ -9,7 +9,7 @@ page current; report changes to it rather than editing lane rows yourself.
 | Role / lane | Session | Branch | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | MCP port | OpenSpec change |
 | --- | --- | --- | --- | --- | --- |
 | Orchestrator (coordinates only; never builds, merges, packages or verifies) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | 8765 (so the native `unreal` MCP tools reach the orchestrator's editor) | `author-fixed-cornish-estate-map` |
-| Integration and builds (only session that packages) | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | `jennifergalley-literate-eureka` | ask the session | none |
+| Integration and builds (only session that packages) | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-integration-and-builds` | `jennifergalley-literate-eureka` | 8775 | none |
 | Docs agent | `d99bb15c-6135-4f9d-b21a-f46b63c3b36f` | `jennifergalley-work-optimizer` | `jennifergalley-stunning-dollop` | none (no editor) | none |
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
@@ -159,6 +159,9 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
   `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
 - Agent editors start with Live Coding and ray tracing off (`bedbb9b8`, `50f9c64c`).
+- Agent editors skip the new-game setup (`homestead.SkipNewGameSetup`, passed by `Start-EditorMcp.ps1`):
+  new Estate games use the default names (Eleanor Cavendish, Trevennor). Set it to 0 in the console
+  to test the Appearance and "Who comes home?" steps; packaged builds and normal play are unaffected.
 - The Estate is the default editor startup and game map (`b07d4a82`). Packaged woodland test
   scripts pass `/Game/SurvivalGame/Maps/Homestead` explicitly until each suite is retargeted.
 - HUD layout (Jenny): minimap bottom-right, calendar top-right, key hints top-left, and an icon-only
@@ -174,9 +177,11 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   forwarded `[ready]`s, builds, runs native, packaged, PIE and perf checks, packages, and reports
   `[integrated] <what> @ <sha>`. Reason: while the orchestrator was busy with hands-on work its turn
   stayed open, so lanes' messages never reached it. Flow: lane `[ready]` → orchestrator → integration
-  session → `[integrated]` → orchestrator → Jenny. **Open question:** the "Homestead Estate" shortcut
-  still points at `jennifergalley-cautious-pancake\Build\Windows`; the integration session should
-  confirm where it packages to.
+  session → `[integrated]` → orchestrator → Jenny. **Packaging target:** the integration session packages into its own worktree
+  (`jennifergalley-literate-eureka\Build\Windows`). At the end of the round, when the orchestrator
+  says so, it retargets the "Homestead Estate" shortcut to that build's `JennysHomesteadGame.exe`, keeping
+  the Homestead icon. Until then the shortcut stays on `jennifergalley-cautious-pancake`, and
+  `Homestead.lnk` is never touched.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. Its "Estate tool route"
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
 
