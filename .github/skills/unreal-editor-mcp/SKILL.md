@@ -148,6 +148,9 @@ Search this table for the error text before debugging. Add a row when you solve 
 | ctest reports `HomesteadSimulationTests` failed or timed out | The Debug build takes about 10 min | `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min). Redirect a single test exe's output to a file; stdout is buffered. |
 | `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 | That World Partition cell isn't loaded in the editor | Load the region first. In game, `GroundHeight()` uses the runtime heightfield everywhere. |
 | `Test-Game.ps1` runs only the default smoke test, or errors "Generated resume requires..." | Switches passed as an array or as empty strings | Use a hashtable splat: `$p=@{Packaged=$true; Hotbar=$true}; .\Scripts\Test-Game.ps1 @p`. |
+| `tap_key` letters type nothing into a text box (for example the Names card); BackSpace works | `HomesteadPlayTools` sends key events through `InputKey`, which produces no character events for Slate text boxes | Use real Win32 keys: bring the editor's main window forward (the Alt `keybd_event` trick, as in `click`), then send `keybd_event` VK codes, with Shift for capitals. |
+| A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. |
+| A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
 | `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
 
@@ -255,7 +258,10 @@ hk release_all; mcp $E StopPIE
   for a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
   until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
   captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
-  failed save. Code written for the woodland can still assume woodland heights (estate ground is
+  failed save. **Packaged Estate runs resume too:** after the first run the build loads its own
+  estate save (inside the package's `SurvivalGame\Saved\SaveGames`), so the Appearance → Names setup
+  only shows on the first run. Move that save aside to see it again. On a resumed game, Enter by the
+  hearth opens Cook (the Craft page). Code written for the woodland can still assume woodland heights (estate ground is
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **Free-camera PIE stills (Estate):** before PIE, spawn a `CameraActor` in the editor world with
   `is_spatially_loaded = False` (a spatially loaded one isn't streamed into PIE). In PIE, call
