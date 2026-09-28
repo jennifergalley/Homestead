@@ -3698,6 +3698,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
     bool Incompatible = false;
+    TArray<FString> IncompatiblePaths;
     for (const auto& Slot : Slots)
     {
         for (const FString& Suffix : { FString(), FString(TEXT(".bak")) })
@@ -3709,6 +3710,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             {
                 Incompatible |= bReadIncompatible;
                 Corrupt |= !bReadIncompatible;
+                if (bReadIncompatible) IncompatiblePaths.Add(Path);
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
                 continue;
             }
@@ -3739,6 +3741,16 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 GEngine->GameViewport->ViewModeIndex, static_cast<int32>(GEngine->GameViewport->EngineShowFlags.ShaderComplexity));
         Notify(Corrupt ? TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.") : TEXT("Welcome back to your homestead."), Corrupt);
         return true;
+    }
+    if (bEstateMap && Incompatible && !Corrupt && !RecoveryOnly && !bHasPlayableSession)
+    {
+        // Saves from earlier test builds are set aside (never deleted) and a new game begins, rather
+        // than holding her on a reset page.
+        const FString Retired = FPaths::Combine(SaveRoute.Directory, TEXT("Retired"));
+        for (const FString& Path : IncompatiblePaths)
+            IFileManager::Get().Move(*FPaths::Combine(Retired, FPaths::GetCleanFilename(Path)), *Path, true, true);
+        Notify(TEXT("Saves from earlier test builds can't be opened by this one, so a new game begins. The old files are kept in the Retired folder."), false);
+        return false;
     }
     if (Corrupt || Incompatible)
     {
