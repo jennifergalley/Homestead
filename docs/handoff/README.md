@@ -43,6 +43,8 @@ mid-turn**, usually within seconds.
   session that starts in that worktree or branch.
 - The mailbox doesn't replace `send_session_message`; send both for anything that must not be
   lost. The session registry and the handoff docs still use the app session ids.
+- It cleans up after itself: every live session deletes messages (delivered, undelivered and
+  pending) and dead sessions' folders older than 7 days, at startup and every 6 hours.
 
 Use the mailbox for blockers, rule changes, "stop" or "rebase now" requests, and replies to them.
 Keep routine reports on `send_session_message`.
