@@ -32,7 +32,7 @@ if ($Packaged) {
     $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
     $working = $package.packageDirectory
     $exe = $package.executable
-    $prefix = ''
+    $prefix = '/Game/SurvivalGame/Maps/Homestead '
 } else {
     $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $working = $root

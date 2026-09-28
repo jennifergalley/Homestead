@@ -4,7 +4,7 @@
 
 - [x] 1.1 Download EA LIDAR Composite DTM 1 m tiles for the St Agnes, Trevaunance and Chapel Porth coast. Record tile IDs, URLs and verified OGL attribution wording. Keep raw tiles out of git
 - [x] 1.2 Clip, reshape and export a 4033² 16-bit heightmap via `Scripts\Terrain`, a QGIS/GDAL script plus a README with the exact commands and Z scale. Verify the size against the 5.8 Landscape guide. _Done with numpy/scipy/rasterio scripts rather than QGIS; see `Scripts/Terrain/README.md`._
-- [ ] 1.3 Create the World Partition `Estate` level, import the Landscape, and set it as the game and editor default map. Verify walkable slopes, the cove and cliffs in ordinary play. _Level and Landscape exist (257 WP proxies, 7 paint layers); the default-map switch waits for integration and the walk is unverified._
+- [ ] 1.3 Create the World Partition `Estate` level, import the Landscape, and set it as the game and editor default map. Verify walkable slopes, the cove and cliffs in ordinary play. _Level and Landscape exist (257 WP proxies, 7 paint layers). `GameDefaultMap` and `EditorStartupMap` are now the Estate, and `Start-Game.ps1` opens it; the packaged test scripts pin the woodland map until their suites are retargeted. The walk is unverified._
 
 ## 2. First playable walk (first delivery)
 
@@ -26,5 +26,5 @@
 
 - [ ] 4.1 Configure World Partition HLOD and foliage culling. Profile a packaged build on Jenny's PC at the target settings along the estate-to-town route, and record the frame times. _Interim: all 256 landscape streaming proxies are always loaded (`is_spatially_loaded=False`), so distant land no longer vanishes. The packaged Estate loads in 3.5 s. HLOD and a profile are still to do._
 - [ ] 4.2 Bump the save version with a plain incompatible-save reset notice. Retarget the smoke, full-loop, felling and watering tests to the fixed map, and retire the generated-world-only tests
-- [ ] 4.3 Add the OGL attribution to `docs\asset-credits.md` and the in-game credits. Update `docs\setup.md` and the playtest docs
+- [ ] 4.3 Add the OGL attribution to `docs\asset-credits.md` and the in-game credits. Update `docs\setup.md` and the playtest docs. _The attribution is in `docs\asset-credits.md` and on the field book's Credits page ("Estate terrain"); `docs\setup.md` covers the new default map. Playtest docs still to update._
 - [ ] 4.4 Jenny playtests the terrain and layout. Fold her reshaping feedback into the Landscape edit layers and the landmarks

@@ -17,7 +17,7 @@ if($Packaged) {
     }
     $working=$package.packageDirectory
     $executable=$package.executable
-    $prefix=''
+    $prefix='/Game/SurvivalGame/Maps/Homestead '
 } else {
     $engine=& (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
     $executable=Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor.exe'
