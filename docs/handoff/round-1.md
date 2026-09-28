@@ -214,6 +214,14 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. Its "Estate tool route"
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
 
+## Pending doc updates on merge
+
+- Architecture agent (`77d4cee7`, not on `main` yet): when `docs/architecture.md` and the
+  `homestead-code-conventions` skill land, point the C++ rows of the editor skill's table 0.1 (unity
+  clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
+  runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
+  section, keeping each row's Symptom column. The docs agent does this.
+
 ## Tooling requests (unassigned)
 
 - The `HomesteadPlayTools` additions asked for by the clearing lane:
