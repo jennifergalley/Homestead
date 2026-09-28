@@ -382,8 +382,21 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
     520003 (-24600, -66200) and 520005 (-26100, -66100). Search each with `E`/A.
     - Each search gives the next missing head plus 1 scrap iron, in the order billhook, axe,
       scythe, pickaxe, hoe. The order follows your search order, not the pile.
-    - `walk_to` steers straight and gets stuck on the ruin walls around 520003 and 520005. For
-      those, `tp` to the pile ±90 cm and check that `focusTitle` is "Salvage pile".
+    - **All five are reachable on foot** (checked with `walk_to` waypoints and a capsule-swept
+      reachability grid). Walk these waypoints in order (world cm), then check `focusTitle` is
+      "Salvage pile":
+      - 520001: (-25725, -63950) → (-25725, -64150) → (-25580, -64300)
+      - 520002: (-25600, -65400) → (-25450, -65250)
+      - 520003: (-25225, -64150) → (-24650, -65075) (the cross-wall gap) → (-24650, -66100)
+      - 520004: (-24300, -64400) → (-24300, -65050) (the rear gap) → (-23950, -65100)
+      - 520005: (-25650, -66000) → (-25650, -65450) (it snags briefly on the door rubble at about
+        y -65590 but gets through) → (-26100, -65450) → (-26100, -66000)
+    - A straight `walk_to` to 520003 or 520005 gets stuck on the ruin walls; use the waypoints.
+    - **Close the field book before walking.** A by the hearth opens the Cook page, and `walk_to`
+      then reports `stuck` without moving.
+    - If `walk_to` doesn't move her after a Python `set_actor_location` teleport indoors (she stays
+      frozen at the teleport Z), set the movement mode back to `MOVE_WALKING` and teleport again about
+      60 cm higher.
   - The first haft needs no trip outside: the standing-room chest (about 200 cm +X of the
     spawn; `walk_to` (-25560, -63950)) holds the pail and 4 Branch. Open it with A, pick the
     Branch tile, then Y > "Take to pack". Then search 520001 and haft the billhook (Craft tile 4,
