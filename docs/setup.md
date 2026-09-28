@@ -92,7 +92,7 @@ Development tools.
    `Test-VideoSync`) still pass `/Game/SurvivalGame/Maps/Homestead` explicitly, so their woodland
    suites keep running until each is retargeted to the Estate.
 5. Run `Scripts\Build-Game.ps1 -Package` for a standalone Windows distribution.
-   In multi-session rounds only the orchestrator packages (`docs\handoff\README.md`).
+   In multi-session rounds only the integration session packages (`docs\handoff\README.md`).
    For autonomous work, use `-ArchiveDirectory 'Build\Releases\<candidate>'` to
    preserve the known-good player build. Test it with `Test-Game.ps1 -Packaged
    -PackageDirectory 'Build\Releases\<candidate>' -OutputDirectory

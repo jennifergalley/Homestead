@@ -23,12 +23,13 @@ outcomes, not diaries. Fix or remove advice that proves wrong instead of adding 
 Several agent sessions (one worktree each, under `E:\Repos\copilot-worktrees\SurvivalGame\`)
 build, run editors and package on one PC with one RTX 5080 at the same time.
 
-- **Only the orchestrator packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
-  BuildCookRun`) and packaged-game tests run only in the orchestrator's worktree (registry in
-  `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests,
-  compile-check with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then message
-  the orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The separate `mvp-survival`
-  line packages its own deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+- **Only the integration session packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
+  BuildCookRun`) and packaged-game tests run only in the integration session's worktree (registry in
+  `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
+  with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then send `[ready]` to the
+  orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The orchestrator only
+  coordinates and never builds. The separate `mvp-survival` line packages its own deliverables to
+  `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
 - **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
   packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
   15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
@@ -119,7 +120,7 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -Timeo
 .\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 16-19 min
 git status --short                                               # commit only your files, rebase, push
 # then send_session_message the orchestrator: branch + SHA, what changed, what you verified, what to try.
-# Don't package: only the orchestrator runs Build-Game.ps1 -Package.
+# Don't package: only the integration session runs Build-Game.ps1 -Package.
 ```
 
 ### 0.1 Known failures → fixes
@@ -789,7 +790,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   character lab has its own sun (`LabSun <hour>`, default 10).
 - Jenny likes to watch you work. Prefer `PlayMode_InEditorFloating` with the PIE window brought to
   the front (section 5) over hidden in-viewport PIE.
-- If Jenny has the packaged game open from `Build\Windows` when the orchestrator needs to repackage,
+- If Jenny has the packaged game open from `Build\Windows` when the integration session needs to repackage,
   close it (`Stop-Process -Id <pid>` on the `SurvivalGame` processes) and build in place. She's only messing
   around in it for now and would rather get the newest build. Don't build to a side folder.
 - Homestead's world is generated at play time. The unplayed map shows little or nothing in the
@@ -829,7 +830,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   CMake suite (Simulation, WorldGeneration, RegionalGeneration, Parcel, Economy, ...) in about
   3 min; Debug takes about 10. For one suite, build its target and run
   `Build\Native\Release\<Suite>.exe *> <log>`; stdout is buffered, so a crash loses unredirected output.
-- **Package (orchestrator only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
+- **Package (integration session only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
   this worktree's generated content is already current. UAT is single-instance machine-wide; the
@@ -857,7 +858,7 @@ Extend it there when play needs a capability; prefer real input over state edits
   `[GameWin]::Key/Char` (PostMessage input, which works where SetForegroundWindow/SendInput don't)
   and `[GameWin]::Capture` (DPI-aware PrintWindow). It counts toward the 2-process limit; close it
   by PID. This isn't packaging, so lanes may run it.
-- **Packaged smoke and route tests (orchestrator only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
+- **Packaged smoke and route tests (integration session only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
   the MetaHuman heroine yourself (field notes).
