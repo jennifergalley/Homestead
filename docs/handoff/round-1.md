@@ -125,6 +125,9 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Decisions during the round
 
+- **Perf measurements get the machine to themselves** (Jenny, 2026-09-28): one Unreal process, no
+  builds. Claim it with `Scripts\Start-PerfWindow.ps1` and release it with `Stop-PerfWindow.ps1`; other
+  worktrees' `Start-EditorMcp.ps1` waits while the lock is fresh.
 - **At most 2 Unreal processes machine-wide** (Jenny, 2026-09-28; it was 3). Each editor commits
   15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
   `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
