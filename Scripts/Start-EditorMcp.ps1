@@ -6,8 +6,9 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
 - Several worktrees share this PC. Give each editor its own -Port (for example 8766-8799) and set
   $env:UNREAL_MCP_URL = 'http://127.0.0.1:<port>/mcp' for Scripts\editor_mcp.py. The script refuses a
   port that another worktree's editor is serving.
-- Don't pass -Map for the 4 km Estate map: the editor has hung at startup that way. Open it after
-  MCP answers with LevelEditorSubsystem.load_level('/Game/SurvivalGame/Maps/Estate').
+- The editor opens the Estate by default (EditorStartupMap), so -Map isn't needed; an explicit
+  -Map for the Estate once hung startup. Load the old woodland with LevelEditorSubsystem.load_level
+  ('/Game/SurvivalGame/Maps/Homestead') after MCP answers.
 - The first launch after a build can take more than 10 minutes before MCP answers. Raise -TimeoutSeconds
   rather than killing it; watch Saved\Logs\SurvivalGame.log.
 - While it waits, the script answers the editor's "Wait for ZenServer?" dialog with Yes, and before launching
