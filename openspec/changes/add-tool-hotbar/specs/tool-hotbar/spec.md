@@ -9,9 +9,10 @@ Provides a familiar, persistent ten-slot toolbelt for rapid mouse, keyboard, poi
 ### Requirement: Gameplay shows a ten-slot toolbelt
 Ordinary gameplay SHALL show ten bottom-center slots labeled `1` through `9` and `0`. Each slot SHALL reference a carried tool without adding inventory capacity or duplicating the item. The selected slot SHALL remain unmistakable without obscuring its icon or number.
 
-#### Scenario: Start with the knife
-- **WHEN** a new homestead begins with only the starter knife
-- **THEN** the knife appears in its stable slot, unowned tool slots are empty, and the bar does not increase carried capacity
+#### Scenario: Start with the estate tools
+- **WHEN** a new estate game begins
+- **THEN** the toolbelt seeds slots `1`-`7` in the order she hafts them: billhook, axe, scythe, pickaxe, hoe, pail, then berries
+- **AND** slots whose tools she hasn't hafted or carried yet show as unavailable, remaining slots are empty, and the bar does not increase carried capacity
 
 #### Scenario: Store a referenced tool
 - **WHEN** a slotted tool is moved from the pack into a chest
@@ -43,8 +44,8 @@ Gameplay LB/RB SHALL cycle toolbelt selection with the same wrap behavior. While
 ### Requirement: Selected tools drive authoritative primary use
 Left mouse and controller right trigger SHALL request primary use of the selected carried tool against the current valid target. Tool selection or presentation MUST NOT grant items, change world state, expand range, or bypass authoritative requirements.
 
-#### Scenario: Fell with selected hatchet
-- **WHEN** a carried Hatchet slot is selected and a valid tree is targeted
+#### Scenario: Fell with the selected axe
+- **WHEN** a carried axe slot is selected and a valid tree is targeted
 - **THEN** primary tool use requests the existing authoritative clear/fell action once and its normal presentation follows only on success
 
 #### Scenario: Use an unavailable slot

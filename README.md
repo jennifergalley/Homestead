@@ -13,28 +13,31 @@ see `docs\blender-assets.md`.
 
 ## Current state
 
-This is a **playable homestead prototype**, not the finished game. It has three
-complete adult character presets, long waves/bob/ponytail, two cosmetic outfits,
-skin/hair/iris/tunic colors, and a saved, orbitable Look preview. It includes
-foraging, tool crafting, modular shelter, storage, roots and regrowing berry crops,
-watering/weeding, basic cooking, day/night needs, sleep, and checkpoint recovery.
+This is a **playable prototype** of the cozy-estate direction, not the finished game. It's in
+round 1, "Walk your estate": the round's lanes are integrated on `main` and being polished. Status,
+lanes and known issues are in `docs\handoff\round-1.md`; the design and round order are in
+`openspec\changes\pivot-to-cozy-estate-life-sim\design.md`.
 
-The current human preview is `inventory-drop-v18`, backed by the sealed
-`drop-02-shipping` candidate. It combines compact Inventory, exact-world-Chest
-storage, and persistent Drop after final Shipping 720p, 4K, full-loop,
-active-window, fresh-process resume, and QA-off normal-startup checks. The prior
-`crafting-v17` selection remains embedded as rollback. See
-`docs\world-drop-baseline.md` for controls and exact evidence.
+- **The Estate is the default map** (`/Game/SurvivalGame/Maps/Estate`): a fixed 4 km World
+  Partition landscape built from real Environment Agency LIDAR of the St Agnes coast
+  (`Scripts\Terrain\README.md`), with sea, river and scenery.
+- **What you can do there:** arrive at the ruined manor's standing room (bed, hearth, chest) and
+  name your family and estate; clear overgrowth with tiered tools you salvage and haft (billhook,
+  axe, scythe, pickaxe, hoe; the pail comes too); see your estate boundary on the minimap and the
+  field book's Map tab; walk to town and buy and sell at the general store with money in dollars and
+  cents.
+- **Heroine:** a MetaHuman with authored work animations (gathering, felling, tilling, watering,
+  eating) and appearance options (hairstyle, hair, skin and eye colour).
+- **Jenny's builds:** the orchestrator packages the estate build to `Build\Windows` in its worktree,
+  and the **"Homestead Estate"** desktop shortcut launches it. The earlier procedural-woodland
+  survival game continues separately as the MVP on the `mvp-survival` branch, packaged to
+  `E:\Repos\HomesteadMVP\Windows` (the `Homestead` shortcut). The two lines never merge.
+- The old woodland map (`/Game/SurvivalGame/Maps/Homestead`) is still in the project: packaged test
+  suites that haven't been retargeted to the estate run there.
 
-Unreal 5.8.2 is installed at `E:\Program Files\UE_5.8`. The native editor module,
-content bootstrap, and initial engine gameplay smoke scenario now run successfully.
-A standalone Windows technical build has also been produced at
-`Build\Windows\SurvivalGame.exe`; keep the entire `Build\Windows` directory together.
-That preserved original package passed the complete homestead and recovery route at
-native 3840x2160, averaging about 59 FPS on the target PC.
-Use its build receipt when comparing newer source changes. Controls are exercised
-through real engine input events; physical-controller feel and listening review
-remain human checks. See `docs\setup.md` for precise verification limits.
+Unreal 5.8.2 is installed at `E:\Program Files\UE_5.8`. Several agent sessions share this PC;
+read `docs\handoff\README.md` and `docs\setup.md` before building. The `Preview.cmd`/`Play.cmd`
+candidate workflow below dates from the survival prototype.
 
 ## Build and run
 
