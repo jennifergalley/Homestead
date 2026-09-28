@@ -12,7 +12,7 @@ LAYERS = ['Pasture', 'WoodlandFloor', 'Moorland', 'DuneSand', 'Beach', 'CliffRoc
 TILING = {'Pasture': 3.0, 'WoodlandFloor': 4.0, 'Moorland': 5.0, 'DuneSand': 6.0, 'Beach': 5.0, 'CliffRock': 8.0, 'DirtRoad': 3.0}
 # Linear multipliers on each layer's base colour. The CC0 grass scans are dry straw; spring Cornish
 # pasture is lush green, and the moor is heather and olive rather than hay.
-TINT = {'Pasture': (0.46, 0.74, 0.38), 'WoodlandFloor': (0.85, 0.95, 0.7), 'Moorland': (0.78, 0.72, 0.62),
+TINT = {'Pasture': (0.46, 0.74, 0.38), 'WoodlandFloor': (0.55, 0.74, 0.42), 'Moorland': (0.56, 0.58, 0.42),
         'DuneSand': (1.0, 1.0, 1.0), 'Beach': (1.0, 1.0, 1.0), 'CliffRock': (0.8, 0.8, 0.8), 'DirtRoad': (0.9, 0.85, 0.8)}
 TEXTURES = {
     # The admitted woodland grass-ground set reads greener than any Poly Haven meadow.
@@ -67,6 +67,7 @@ def sample(layer, slot, scale, x, y, kind):
     return t
 
 y = -900
+colour, rough = {}, {}
 for n in LAYERS:
     s = TILING[n]
     near = sample(n, 'D', s, -1200, y, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
@@ -81,10 +82,63 @@ for n in LAYERS:
     mul = MEL.create_material_expression(mat, unreal.MaterialExpressionMultiply, -500, y)
     MEL.connect_material_expressions(lerp, '', mul, 'A')
     MEL.connect_material_expressions(tint, 'RGB', mul, 'B')
-    MEL.connect_material_expressions(mul, '', bc, 'Layer ' + n)
+    colour[n] = (mul, '')
     MEL.connect_material_expressions(sample(n, 'N', s, -1000, y + 120, unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL), 'RGB', nm, 'Layer ' + n)
-    MEL.connect_material_expressions(sample(n, 'R', s, -1000, y + 180, unreal.MaterialSamplerType.SAMPLERTYPE_MASKS), 'R', rg, 'Layer ' + n)
+    rough[n] = (sample(n, 'R', s, -1000, y + 180, unreal.MaterialSamplerType.SAMPLERTYPE_MASKS), 'R')
     y += 260
+
+# Cart ruts on the estate road: two dark wheel tracks, a grass crown between them and grass creeping
+# over the shoulders, drawn from the road's signed-distance texture (Scripts/Terrain/road_ruts.py).
+ROAD_SDF = '/Game/SurvivalGame/Estate/Landscape/Textures/T_EstateRoadSDF'
+RUTS_HLSL = '''
+float d = (Sdf - 0.5) * 8.0;
+float ad = abs(d);
+float crown = 1.0 - smoothstep(0.30, 0.50, ad);
+float rut = exp(-pow((ad - 0.78) / 0.17, 2.0));
+float shoulder = smoothstep(0.98, 1.45, ad);
+float3 track = Dirt * lerp(1.0, 0.55, rut);
+float grass = max(crown * 0.85, shoulder * 0.9) * (1.0 - rut);
+RoughOut = lerp(Rough, Rough * 0.72, rut);
+return lerp(track, Grass, grass);
+'''
+sdf_tex = unreal.load_asset(ROAD_SDF)
+if sdf_tex:
+    wp = MEL.create_material_expression(mat, unreal.MaterialExpressionWorldPosition, -1600, y)
+    uvx = MEL.create_material_expression(mat, unreal.MaterialExpressionComponentMask, -1450, y)
+    uvx.set_editor_property('r', True); uvx.set_editor_property('g', True)
+    MEL.connect_material_expressions(wp, '', uvx, '')
+    add = MEL.create_material_expression(mat, unreal.MaterialExpressionAdd, -1350, y)
+    add.set_editor_property('const_b', 201600.0)
+    MEL.connect_material_expressions(uvx, '', add, 'A')
+    div = MEL.create_material_expression(mat, unreal.MaterialExpressionDivide, -1250, y)
+    div.set_editor_property('const_b', 403200.0)
+    MEL.connect_material_expressions(add, '', div, 'A')
+    sdf = MEL.create_material_expression(mat, unreal.MaterialExpressionTextureSample, -1100, y)
+    sdf.set_editor_property('texture', sdf_tex)
+    sdf.set_editor_property('sampler_type', unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_GRAYSCALE)
+    sdf.set_editor_property('sampler_source', unreal.SamplerSourceMode.SSM_CLAMP_WORLD_GROUP_SETTINGS)
+    MEL.connect_material_expressions(div, '', sdf, 'UVs')
+    ruts = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, -350, y)
+    ruts.set_editor_property('code', RUTS_HLSL)
+    ruts.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    ins = []
+    for name in ('Dirt', 'Grass', 'Rough', 'Sdf'):
+        ci = unreal.CustomInput(); ci.set_editor_property('input_name', name); ins.append(ci)
+    ruts.set_editor_property('inputs', ins)
+    extra = unreal.CustomOutput(); extra.set_editor_property('output_name', 'RoughOut')
+    extra.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    ruts.set_editor_property('additional_outputs', [extra])
+    MEL.connect_material_expressions(colour['DirtRoad'][0], '', ruts, 'Dirt')
+    MEL.connect_material_expressions(colour['Pasture'][0], '', ruts, 'Grass')
+    MEL.connect_material_expressions(rough['DirtRoad'][0], 'R', ruts, 'Rough')
+    MEL.connect_material_expressions(sdf, 'R', ruts, 'Sdf')
+    colour['DirtRoad'] = (ruts, '')
+    rough['DirtRoad'] = (ruts, 'RoughOut')
+else:
+    print('No', ROAD_SDF, '- import Scripts/Terrain/T_EstateRoadSDF.png first; road drawn without ruts')
+for n in LAYERS:
+    MEL.connect_material_expressions(colour[n][0], colour[n][1], bc, 'Layer ' + n)
+    MEL.connect_material_expressions(rough[n][0], rough[n][1], rg, 'Layer ' + n)
 MEL.connect_material_property(bc, '', unreal.MaterialProperty.MP_BASE_COLOR)
 MEL.connect_material_property(nm, '', unreal.MaterialProperty.MP_NORMAL)
 MEL.connect_material_property(rg, '', unreal.MaterialProperty.MP_ROUGHNESS)
