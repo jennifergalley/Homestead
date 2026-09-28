@@ -92,3 +92,57 @@ Later hand edits go on Landscape Edit Layers in the editor, so re-importing this
     Z = 0.
 - The elevation range after reshaping is −22.6 m to 191.7 m. The top is St Agnes Beacon, on the
   north-west moor.
+
+## Ocean and river (`bake_ocean.py`, `build_ocean.py`, `place_water.py`)
+
+The sea is Single Layer Water, not the Water plugin (see the design's decision 3). It has three
+parts, all generated here with no external textures:
+
+- **Shore data.** `bake_ocean.py` reads `Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16`
+  and writes `Saved/Ocean/T_EstateOceanShore.png` (2048×1024 RGBA): R = √(depth / 32 m),
+  G = √(distance to the shore / 512 m), B = exposure to the open sea (a wide blur of the sea mask).
+  Only water connected to the southern (Atlantic) edge counts. The frame is in
+  `Saved/Ocean/ocean_bake.json`: `u = (Y − ShoreY0) / ShoreSizeY`, `v = (ShoreX1 − X) / ShoreSizeX`,
+  in game metres. The material's `ShoreFrame` parameter holds the same four numbers, so update it
+  when the heightfield changes.
+- **Mesh.** `SM_EstateOcean` is a tensor grid in world centimetres at the origin. Cells are 8 m
+  wherever the ground is below 1.2 m, and they grow ×1.28 per step outside the map out to 60 km to the
+  south, west and east, so the horizon is sea. Everything south of the map is sea, including off
+  headlands that reach the edge. It's about 89k vertices, without collision, Nanite, lightmap UVs or
+  a distance field. Interchange's OBJ reader maps OBJ (x, y, z) to Unreal (x, −y, z), so the bake
+  writes y negated and swaps the face winding.
+- **Material.** `M_EstateOcean` / `MI_EstateOcean` evaluate the waves analytically in two Custom
+  HLSL nodes, in world metres (never mesh UVs), so nothing stretches with the mesh:
+  - `Swell`: four long swells (78 m and shorter, 0.32 m) from the south-south-west move the
+    vertices with world position offset. They follow deep-water dispersion (each wavelength travels
+    at its own speed) and die away in water shallower than about 6 m, so the beaches never clip.
+  - `WindSea`: 28 short-crested wind waves from 11 m down to 0.55 m, widely spread about the wind,
+    with random amplitudes. `Gusts` adds drifting patches of rougher and glassier water (cat's paws).
+    `Ripples` adds two rotated layers of the tiling capillary normal map. Waves shorter than a pixel
+    fade out and their slope moves into roughness, so the distant sea softens into glitter instead
+    of shimmering.
+  - `ShoreWaves`: crests that follow the baked shore distance and roll in every 9 s. Each one
+    throws a sheet of swash foam up the sand that drains into lace, with a thin line that lingers
+    at the waterline. Foam lace drifts shoreward on a two-phase flow map.
+  - Colour comes from low scattering and red-first absorption: turquoise over the sand shallows,
+    deep blue-green offshore. Facets are flattened just enough to keep every reflection above the
+    horizon, because a reflection ray into the sea returns black.
+
+Rebuild after changing the heightfield, and after changing any of the scripts:
+
+```powershell
+python Scripts\Terrain\bake_ocean.py            # ~45 s -> Saved\Ocean\*, Assets\Environment\Ocean\*.png
+```
+
+Then, in the editor with the Estate level loaded and PIE stopped, run `pyfile
+Scripts\Terrain\build_ocean.py` (McpHelpers). It imports the three textures and the mesh, re-authors
+the material graph in place and points `EstateSea` at the result. `place_water.py` updates
+`EstateSea` and `EstateRiver` in place (their external actor files keep their names). The river ends
+where its surface meets the cove beach (the stream soaks into the sand), so the ribbon and its
+`HomesteadWater` pail-refill tag never lie over salt water. The sea is tagged `HomesteadSea` only.
+Save both actors' packages afterwards: PIE streams spatially loaded actors such as `EstateRiver`
+from their saved packages, so unsaved edits don't show in play, and `set_course` alone doesn't
+dirty the package (the script calls `modify()` first).
+
+The tuning parameters are on `MI_EstateOcean`, grouped Waves, Foam, Colour and Data. Bake the
+values you settle on into the defaults in `build_ocean.py`.
