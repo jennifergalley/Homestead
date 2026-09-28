@@ -365,8 +365,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   and selected). Check `hotbarSlot` (0-based) and `focusActions` after selecting.
 - Overgrowth (add-overgrown-estate-clearing): stumps, rocks and thickets take several swings; each
   non-final swing toasts "N more swings.", the last one clears and toasts the yield. Walking more
-  than 1.5 m away resets the count. `HomesteadGive RustedBillhookHead 1` + two Branches lets the
-  Craft page's "Haft a billhook" run anywhere.
+  than 1.5 m away resets the count. On the estate, take the Branches from the standing-room chest
+  (below). `HomesteadGive RustedBillhookHead 1` + two Branches is only a shortcut for testing
+  "Haft a billhook" elsewhere (for example on the woodland map).
 - **Estate tool route (new game, verified in PIE on main 17a64854):**
   - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
     `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
