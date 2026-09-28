@@ -17,7 +17,8 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
 - Refuses to launch when 2 or more Unreal processes (editors, games, commandlets) are already running on
-  the machine, and lists them with their worktree. -Force overrides.
+  the machine, and lists them with their worktree. It also refuses while another worktree holds a fresh
+  perf window (Start-PerfWindow.ps1). -Force overrides both.
 #>
 [CmdletBinding()]
 param(
@@ -79,6 +80,13 @@ if (Test-McpServer) {
 $engine = & (Join-Path $PSScriptRoot 'Resolve-Engine.ps1') -EngineRoot $EngineRoot
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 
+# Someone else is measuring performance (Start-PerfWindow.ps1): don't add an editor or a build.
+. (Join-Path $PSScriptRoot 'PerfLock.ps1')
+$perfLock = Get-PerfLock
+if ($perfLock -and -not $perfLock.stale -and $perfLock.worktree -ne (Split-Path $root -Leaf) -and -not $Force) {
+    throw "Perf window held by $($perfLock.worktree) since $($perfLock.startedUtc) ($($perfLock.ageMinutes) min; '$($perfLock.purpose)'). Launching an editor would skew its measurement. Schedule a wake-up with save_session_automation and end your turn (don't loop); the lock goes stale after $PerfLockStaleMinutes min. -Force overrides."
+}
+
 # Machine rule: at most 2 Unreal processes in total (editors, packaged games, commandlets). Each editor
 # commits 15-17 GB; with three open the 32 GB machine ran out of RAM and the pagefile grew to 81.5 GB,
 # filling C: (it doesn't shrink until a reboot). Earlier, more processes reset the GPU driver. Checked right before launching, so a
@@ -89,7 +97,7 @@ if ($unreal.Count -ge 2 -and -not $Force) {
         $where = if ($_.CommandLine -match 'copilot-worktrees\\SurvivalGame\\([^\\"]+)') { $Matches[1] } elseif ($_.ExecutablePath -match 'HomesteadMVP') { 'HomesteadMVP' } else { '?' }
         "  PID $($_.ProcessId) $($_.Name) $([int]($_.WorkingSetSize / 1MB)) MB since $($_.CreationDate.ToString('HH:mm')) ($where)"
     }) -join "`n"
-    throw "$($unreal.Count) Unreal processes are already running (the machine limit is 2):`n$list`nWait for one to finish, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
+    throw "$($unreal.Count) Unreal processes are already running (the machine limit is 2):`n$list`nDon't retry in a loop: schedule a wake-up with save_session_automation (about 5 min) and end your turn, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
 }
 
 # Belt and braces for the -ini: Live Coding opt-out below: also write it into this worktree's saved
@@ -148,6 +156,9 @@ $arguments += @(
     # Blender and other sessions write under Assets\ constantly; the "source content changed, import?"
     # toast covers captures. Agents import explicitly (import_props.py), so don't watch for changes.
     '-ini:EditorPerProjectUserSettings:[/Script/UnrealEd.EditorLoadingSavingSettings]:bMonitorContentDirectories=False'
+    # New Estate games in agent PIE start with the default names instead of stopping on the Appearance
+    # and "Who comes home?" steps. `homestead.SkipNewGameSetup 0` in the console brings them back.
+    '-HomesteadSkipNewGameSetup'
     '-nosplash'
 ) + @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 # Several agent editors share one GPU. Building ray-tracing pipelines in all of them at once has

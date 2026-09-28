@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "name": "Sycamore",
+  "description": "Mature sycamore, about 15 m tall with a broad dense 15 m dome on a stout plated bole; painted palmate leaf-cluster canopy, four LODs, trunk capsule.",
+  "collision": "capsule",
+  "triangle_budget": 90000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/sycamore.py",
+  "source_sha256": "e14159ca54d9f390374595ab36db41305cad3340a4cf961e2b06d912955e1703",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Sycamore": {
+      "vertices": 58289,
+      "triangles": 69064,
+      "size_cm": [
+        1403.47,
+        1645.81,
+        1603.76
+      ],
+      "materials": [
+        {
+          "name": "M_SM_SycamoreBark",
+          "textures": {
+            "basecolor": "T_SycamoreBark_basecolor.png",
+            "normal": "T_SycamoreBark_normal.png",
+            "roughness": "T_SycamoreBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_SycamoreLeaves",
+          "textures": {
+            "basecolor": "T_SycamoreLeaves_basecolor.png",
+            "normal": "T_SycamoreLeaves_normal.png",
+            "roughness": "T_SycamoreLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.006510098930448294,
+          -0.006245672702789307,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Sycamore.fbx",
+      "sha256": "78e6771363e5f763548a59be22c713516a97953e75db2ce4d6d8119f4738c55b",
+      "preview": "preview_SM_Sycamore.png"
+    },
+    "SM_Sycamore_LOD1": {
+      "vertices": 6547,
+      "triangles": 10158,
+      "size_cm": [
+        1397.58,
+        1599.72,
+        1620.82
+      ],
+      "materials": [
+        {
+          "name": "M_SM_SycamoreBark",
+          "textures": {
+            "basecolor": "T_SycamoreBark_basecolor.png",
+            "normal": "T_SycamoreBark_normal.png",
+            "roughness": "T_SycamoreBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_SycamoreLeaves",
+          "textures": {
+            "basecolor": "T_SycamoreLeaves_basecolor.png",
+            "normal": "T_SycamoreLeaves_normal.png",
+            "roughness": "T_SycamoreLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.006510098930448294,
+          -0.006245672702789307,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Sycamore_LOD1.fbx",
+      "sha256": "d76c3f6322a79e67450f02ed916988c3fe729afbaa997c623856a2dcc8bf2c16",
+      "preview": "preview_SM_Sycamore_LOD1.png"
+    },
+    "SM_Sycamore_LOD2": {
+      "vertices": 1261,
+      "triangles": 1730,
+      "size_cm": [
+        1573.36,
+        1803.63,
+        1619.57
+      ],
+      "materials": [
+        {
+          "name": "M_SM_SycamoreBark",
+          "textures": {
+            "basecolor": "T_SycamoreBark_basecolor.png",
+            "normal": "T_SycamoreBark_normal.png",
+            "roughness": "T_SycamoreBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_SycamoreLeaves",
+          "textures": {
+            "basecolor": "T_SycamoreLeaves_basecolor.png",
+            "normal": "T_SycamoreLeaves_normal.png",
+            "roughness": "T_SycamoreLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.006510098930448294,
+          -0.006245672702789307,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Sycamore_LOD2.fbx",
+      "sha256": "7fb4bf767a79ee2bea3ceb674ccb318d4cbd7a2db9605c87b86c719e9ca86c3a",
+      "preview": "preview_SM_Sycamore_LOD2.png"
+    },
+    "SM_Sycamore_LOD3": {
+      "vertices": 303,
+      "triangles": 346,
+      "size_cm": [
+        1780.11,
+        2073.17,
+        1662.37
+      ],
+      "materials": [
+        {
+          "name": "M_SM_SycamoreBark",
+          "textures": {
+            "basecolor": "T_SycamoreBark_basecolor.png",
+            "normal": "T_SycamoreBark_normal.png",
+            "roughness": "T_SycamoreBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_SycamoreLeaves",
+          "textures": {
+            "basecolor": "T_SycamoreLeaves_basecolor.png",
+            "normal": "T_SycamoreLeaves_normal.png",
+            "roughness": "T_SycamoreLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.006510098930448294,
+          -0.006245672702789307,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Sycamore_LOD3.fbx",
+      "sha256": "544d46bf8cf6fd683ecde1e6f89c7c01591fd0a70ca9a9e7a1ae2e9dad1c1f73",
+      "preview": "preview_SM_Sycamore_LOD3.png"
+    }
+  },
+  "warnings": [],
+  "blocking": true,
+  "unreal_folder": "Trees",
+  "nanite": true,
+  "tree": {
+    "height_m": 15.0,
+    "crown_m": [
+      15.2,
+      14.4
+    ],
+    "ground_line_cm": 30.0,
+    "note": "Pivot is the bottom of a 30 cm skirt under the trunk flare; the ground line is 30 cm up."
+  },
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / tree height",
+    "G": "per-branch random phase",
+    "B": "leaf flutter 0 at card base -> 1 at tip, 0 on wood",
+    "A": "1",
+    "strength": 13.0,
+    "flutter": 1.0
+  },
+  "material_notes": "Slot 0 M_SycamoreBark: tiling plated bark T_SycamoreBark_* (0.9 m square). Slot 1 M_SycamoreLeaves: palmate leaf-cluster atlas T_SycamoreLeaves_* (basecolor alpha = mask, clip 0.5; roughness R rough, G translucency, B AO; normal OpenGL). Two-sided foliage, masked.",
+  "capsule": {
+    "center_cm": [
+      9.3,
+      5.0,
+      199.7
+    ],
+    "radius_cm": 31.9,
+    "length_cm": 276.3,
+    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork."
+  },
+  "textures": {
+    "T_SycamoreBark_basecolor.png": "dd8f1b07f7d6905ef265c4a578148a4cd58a6f7626742908d0460a8852368d08",
+    "T_SycamoreBark_normal.png": "4496fd53c5392917d253d5822ae6aa709c62b9f9edc206fc4854d797cefbd3f2",
+    "T_SycamoreBark_roughness.png": "51306ae36a155c44e72fd1331bb657c317ff9080903d0a7b89e876eab0e27ad7",
+    "T_SycamoreLeaves_basecolor.png": "5d6521cf68dd78af2e22d1a132f9d13f815c8db1c69fa30d1b099c3286295ab8",
+    "T_SycamoreLeaves_normal.png": "4d319463ab147d4962289cb2f8e14ba6b734e52621b537659cb37210abffcc92",
+    "T_SycamoreLeaves_roughness.png": "d3a6b440aa6642273e3be795123dded146013b5a62d175e2e9ecbfaad04c7f9f"
+  }
+}

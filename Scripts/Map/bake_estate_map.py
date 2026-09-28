@@ -57,7 +57,7 @@ def line_mask(points, size, width_px, oversample=2):
     return np.asarray(image.resize((size, size), Image.LANCZOS), dtype=np.float64) / 255.0
 
 
-SCENERY_TREES = {0: 3.6, 1: 2.8}  # EstateSceneryKinds index -> canopy radius in metres at scale 1
+SCENERY_TREES = {0: 3.6, 1: 2.8, 13: 8.3, 14: 7.2, 15: 7.4}  # EstateSceneryKinds index -> canopy radius in metres at scale 1
 SCENERY_HAZEL = 2
 
 
