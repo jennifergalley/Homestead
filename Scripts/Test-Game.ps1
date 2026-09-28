@@ -126,6 +126,10 @@ if ($ShippingQA -and (-not $Packaged -or -not $OutputDirectory -or $Weeding -or 
     throw 'Shipping QA requires a packaged route and explicit fresh output; injected weeding fixtures are not admitted.'
 }
 $null = New-Item -ItemType Directory -Path $output -Force
+# Every run starts from an empty save sandbox: saves left by an older build can't load after an
+# item or save-format change, and LoadLatest then reports "An unreadable save was skipped".
+$sandboxSaves = Join-Path $output 'SmokeSave'
+if (Test-Path -LiteralPath $sandboxSaves) { Remove-Item -LiteralPath $sandboxSaves -Recurse -Force }
 if ($Weeding) { & (Join-Path $PSScriptRoot 'Initialize-TestWorldFixture.ps1') -SourceSave $FixtureSave -OutputDirectory $output }
 $report = Join-Path $output 'smoke-result.txt'
 $captures = @('clearing.png', 'field-book.png', 'first-foundation.png', 'heroine-long.png', 'heroine-bob.png', 'heroine-colors.png', 'heroine-ponytail.png')
