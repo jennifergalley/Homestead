@@ -20,7 +20,10 @@
 
 ## 3. Ruin detail and acceptance
 
-- [ ] 3.1 Add the detail pass: window openings with lintels, quoins, fallen timbers, slate scatter, lichen and soot, and ivy and bramble cling. Check its silhouette from the road approach and the cove in ordinary play
+- [x] 3.1 Add the detail pass: window openings with lintels, quoins, fallen timbers, slate scatter, lichen and soot, and ivy and bramble cling. Check its silhouette from the road approach and the cove in ordinary play
+  - New props from Blender recipes: RuinFallenTimbers (charred roof timbers), RuinSlateScatter (fallen roof slates) and RuinIvy (wall cling). `AHomesteadManorRuin` places them through the ruin. At BeginPlay each ivy clump traces its host wall run and sits on the broken top. The window openings, lintels, quoins, lichen and soot come from the existing wall-run recipes; the pass added no new geometry for them. There is no bramble cling on the walls yet; ivy is the only cling.
+  - Silhouette checked in PIE on the Estate: from the north-east road approach, from the south-east, and from two cove-direction views.
+  - Known weaknesses: the char on the timbers is the weakest material, and the ivy clumps repeat in an even rhythm.
 - [x] 3.2 Run the whole new-game flow with mouse and controller, name save/reload, footprint rejection, and 720p/4K checks
   - Done: the flow with the controller and with the keyboard and mouse (1.2, 2.1), the save label, and footprint rejection (1.3). In standalone 1280x720 and 3840x2160 windows with real keyboard input, the Names panel, its two-line hints and the arrival card fit and read cleanly; at 4K the panel is scaled once, by the engine's DPI curve.
   - Named save/reload: a standalone new game with the estate typed as "Polgrean" saved the label "Eleanor Trelawney — Polgrean, Spring 1". Relaunching resumed that save in the standing room on Spring day 1, with no setup screens. The store's "From {Estate}" header now reads `Simulation::EstateName()`, but I haven't seen it on screen: the console store command didn't open in the slow standalone run.
