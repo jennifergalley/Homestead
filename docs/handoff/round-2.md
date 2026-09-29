@@ -322,11 +322,13 @@ requirement.
   content is finished yet.
 - **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
   starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
-- **Road-to-town forage** — **Seasons / forage lane** (`fd682909`), coordinating with **Water**: add
-  pickable berries and herbs along the road to town, including the Water bridge approach. Pending;
-  placement ids are claimed before use.
-- **Field-book road label** — **Water Agent** (`89914e30`), in the next lake/map bake: remove the
-  `"Dirt road"` label while keeping the road drawn. Pending; not shipped.
+- **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
+  road to town, including the bridge approach. The ID range is reserved; implementation remains
+  pending the narrow public-road-corridor proof and bridge coordinate sync.
+- **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
+  is removed on Water's branch (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a
+  lake-PIE map screenshot. It is **pushed but not delivered/shipped**: it rides with the
+  editor-verified lake `[ready]`.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
