@@ -96,7 +96,8 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   and clear the automation when it's no longer needed. Waiting on a build or command you started
   yourself is fine through the tool's own completion notification (async shell / `initial_wait`).
 - **At most 2 Unreal processes on the machine** in total: editors, packaged games and commandlets
-  all count. `Start-EditorMcp.ps1` refuses a third; check other launches with
+  all count, and one of the two is reserved for the integration session, so the other lanes share one
+  slot. `Start-EditorMcp.ps1` enforces both; check other launches with
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*`. Each editor commits 15-17 GB, and three
   filled RAM and grew the pagefile on C: to 81.5 GB. **Close your editor as soon as a verification
   pass is done.**

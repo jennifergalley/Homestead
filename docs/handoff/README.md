@@ -45,8 +45,8 @@ a blocking wait keeps its turn open, so queued `send_session_message`s never arr
 
 Waiting on a build or command the session itself started is fine through the tool's own completion
 notification (async shells / `initial_wait`); a sleep loop isn't. For an editor slot, check
-`Get-Process UnrealEditor*` once, and if 2 Unreal processes are running, schedule a wake-up about 5
-minutes out and end the turn. The orchestrator uses the same pattern: it checks in every 30 minutes
+`Get-Process UnrealEditor*` once: one slot is reserved for the integration session, so if another
+lane's Unreal process is already running, schedule a wake-up about 5 minutes out and end the turn. The orchestrator uses the same pattern: it checks in every 30 minutes
 through its own session automation.
 
 ## Reaching a busy session fast: the mailbox
@@ -237,7 +237,8 @@ turn (with a wake-up if you need one).
    Send findings and blockers to the docs agent `<id>`. Your MCP port is `<p>`. Don't package:
    deliver through 'Delivering lane work' and message me when an increment is ready."
 4. Point lanes at the shared-machine rules (editor skill, section 0), especially the **2-Unreal-process
-   limit**: with several lanes, editors take turns. Lanes close their editor as soon as a verification
+   limit**, with one slot reserved for the integration session and the other shared by all lanes, one
+   at a time (`Start-EditorMcp.ps1` enforces it). With several lanes, editors take turns. Lanes close their editor as soon as a verification
    pass is done. Perf measurements need the machine to themselves (one Unreal process, no builds):
    claim it with `Scripts\Start-PerfWindow.ps1`, which holds off other launches until
    `Stop-PerfWindow.ps1`.
